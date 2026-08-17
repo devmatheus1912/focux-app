@@ -14,6 +14,7 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../providers/alunos_provider.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 import 'package:focux_app/core/utils/friendly_error.dart';

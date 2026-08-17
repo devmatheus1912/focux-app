@@ -6,6 +6,9 @@ void main() {
   test('alunos list cumpre contrato Tier S+', () {
     final screen = readScreenSourceBundle('lib/features/alunos/screens/alunos_list_screen.dart');
     expect(screen, anyOf(contains('fxScreenA11yScope'), contains('Semantics(')));
+    expect(screen, contains('AlunosLayout'));
+    expect(screen, contains('FocuxHubTypography'));
     expect(screen, isNot(contains('CircularProgressIndicator')));
+    expect(screen, isNot(contains('FxGlowSurface')));
   });
 }

@@ -14,7 +14,6 @@ extension AlunosListScreenFilters on _AlunosListScreenState {
         final chrome = ShellChrome.forDark(isDark);
         final ink = chrome.ink;
         final mute = chrome.mute;
-        final line = chrome.line;
         final primary = Theme.of(ctx).colorScheme.primary;
         final linkColor = BrandPalette.sectionLink(primary, dark: isDark);
 
@@ -31,67 +30,61 @@ extension AlunosListScreenFilters on _AlunosListScreenState {
               onTap();
               Navigator.pop(ctx);
             },
-            borderRadius: BorderRadius.circular(18),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-              decoration: BoxDecoration(
-                color:
-                    selected
-                        ? primary.withValues(alpha: isDark ? 0.2 : 0.08)
-                        : Colors.transparent,
-                borderRadius: BorderRadius.circular(18),
-                border: Border.all(
-                  color:
-                      selected
-                          ? primary.withValues(alpha: 0.35)
-                          : line.withValues(alpha: 0.75),
-                ),
+            borderRadius: BorderRadius.circular(TokensStrip.rCard),
+            child: DecoratedBox(
+              decoration: fxStripCardDecoration(
+                ctx,
+                accent: selected ? primary : null,
+                radius: TokensStrip.rCard,
+                glowStrength: selected ? 0.06 : 0.03,
               ),
-              child: Row(
-                children: [
-                  Container(
-                    width: 34,
-                    height: 34,
-                    decoration: BoxDecoration(
-                      color:
-                          selected
-                              ? primary
-                              : primary.withValues(alpha: isDark ? 0.18 : 0.08),
-                      shape: BoxShape.circle,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 12,
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(
+                        color:
+                            selected
+                                ? primary.withValues(alpha: isDark ? 0.22 : 0.12)
+                                : primary.withValues(alpha: isDark ? 0.14 : 0.08),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        selected ? Icons.check_rounded : icon,
+                        color: selected ? primary : linkColor,
+                        size: 17,
+                      ),
                     ),
-                    child: Icon(
-                      selected ? Icons.check_rounded : icon,
-                      color: selected ? Colors.white : primary,
-                      size: 18,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          title,
-                          style: AppTypography.inter(
-                            color: ink,
-                            fontSize: TokensStrip.fontBody,
-                            fontWeight: FontWeight.w800,
-                            height: 1.2,
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            title,
+                            style: FocuxHubTypography.sectionTitle(
+                              ctx,
+                              color: ink,
+                            ).copyWith(fontSize: TokensStrip.fontBody),
                           ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          subtitle,
-                          style: AppTypography.inter(
-                            color: mute,
-                            fontSize: TokensStrip.fontBodySm,
-                            height: 1.25,
+                          const SizedBox(height: 2),
+                          Text(
+                            subtitle,
+                            style: FocuxHubTypography.bodyMuted(
+                              color: mute,
+                            ).copyWith(height: 1.25),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           );
@@ -114,12 +107,12 @@ extension AlunosListScreenFilters on _AlunosListScreenState {
                       Expanded(
                         child: Text(
                           'Organizar alunos',
-                          style: AppTypography.inter(
+                          style: FocuxHubTypography.pageTitle(
+                            ctx,
                             color: ink,
+                          ).copyWith(
                             fontSize: TokensStrip.fontH2,
                             fontWeight: TokensStrip.weightH2,
-                            letterSpacing: TokensStrip.trackingH2,
-                            height: 1.2,
                           ),
                         ),
                       ),
@@ -145,11 +138,7 @@ extension AlunosListScreenFilters on _AlunosListScreenState {
                   const SizedBox(height: 4),
                   Text(
                     'Escolha como a lista deve aparecer agora.',
-                    style: AppTypography.inter(
-                      color: mute,
-                      fontSize: TokensStrip.fontBodySm,
-                      height: 1.35,
-                    ),
+                    style: FocuxHubTypography.bodyMuted(color: mute),
                   ),
                   const SizedBox(height: TokensStrip.s4),
                   option(
@@ -199,11 +188,10 @@ extension AlunosListScreenFilters on _AlunosListScreenState {
                   const SizedBox(height: 18),
                   Text(
                     'Atalhos de foco',
-                    style: AppTypography.inter(
+                    style: FocuxHubTypography.eyebrow(
+                      ctx,
                       color: ink,
-                      fontSize: TokensStrip.fontBodySm,
                       fontWeight: FontWeight.w800,
-                      height: 1.2,
                     ),
                   ),
                   const SizedBox(height: 10),

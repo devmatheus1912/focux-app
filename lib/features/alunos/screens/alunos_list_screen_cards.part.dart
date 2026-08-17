@@ -18,53 +18,35 @@ class _FxChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    final action = BrandPalette.sectionAction(primary, dark: isDark);
-    final bg =
-        isSelected
-            ? primary
-            : (isDark
-                ? Colors.white.withValues(alpha: 0.055)
-                : Colors.white.withValues(alpha: 0.78));
-    final color =
-        isSelected
-            ? Colors.white
-            : (isDark ? EagleTokens.darkInk : TokensStrip.textPrimary);
-    final border =
-        isSelected
-            ? Border.all(color: action.withValues(alpha: isDark ? 0.45 : 0.28))
-            : Border.all(
-              color:
-                  isDark
-                      ? Colors.white.withValues(alpha: 0.09)
-                      : TokensStrip.borderDefault,
-            );
+    final chipBg = dashboardPrioritiesChipBackground(primary, isDark: isDark);
+    final chipFg = dashboardPrioritiesChipForeground(primary, isDark: isDark);
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
 
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(999),
+      borderRadius: BorderRadius.circular(TokensStrip.rPill),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 160),
         curve: Curves.easeOutCubic,
-        padding: const EdgeInsets.fromLTRB(12, 6, 8, 6),
+        padding: const EdgeInsets.fromLTRB(12, 7, 8, 7),
         decoration: BoxDecoration(
-          color: bg,
-          borderRadius: BorderRadius.circular(999),
-          border: border,
-          boxShadow: [
-            if (isSelected && !isDark)
-              BoxShadow(
-                color: primary.withValues(alpha: 0.18),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-                spreadRadius: -6,
-              ),
-            if (isSelected && isDark)
-              BoxShadow(
-                color: action.withValues(alpha: 0.28),
-                blurRadius: 12,
-                spreadRadius: -2,
-              ),
-          ],
+          color:
+              isSelected
+                  ? chipBg
+                  : (isDark
+                      ? Colors.white.withValues(alpha: 0.05)
+                      : BrandPalette.soft(primary, dark: false)),
+          borderRadius: BorderRadius.circular(TokensStrip.rPill),
+          border:
+              isSelected
+                  ? null
+                  : Border.all(
+                    color:
+                        isDark
+                            ? Colors.white.withValues(alpha: 0.07)
+                            : primary.withValues(alpha: 0.08),
+                  ),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -72,13 +54,9 @@ class _FxChip extends StatelessWidget {
           children: [
             Text(
               label,
-              style: AppTypography.inter(
-                color: color,
-                fontSize: 12.5,
-                fontWeight: FontWeight.w800,
-                letterSpacing: 0,
-                height: 1.15,
-              ),
+              style: dashboardChipLabelStyle(
+                isSelected ? chipFg : ink,
+              ).copyWith(fontSize: 12, fontWeight: FontWeight.w800),
             ),
             const SizedBox(width: 6),
             Container(
@@ -87,26 +65,18 @@ class _FxChip extends StatelessWidget {
               decoration: BoxDecoration(
                 color:
                     isSelected
-                        ? Colors.white
+                        ? chipFg.withValues(alpha: isDark ? 0.14 : 0.18)
                         : (isDark
                             ? Colors.white.withValues(alpha: 0.08)
-                            : TokensStrip.pageBg),
-                borderRadius: BorderRadius.circular(999),
+                            : Colors.white.withValues(alpha: 0.72)),
+                borderRadius: BorderRadius.circular(TokensStrip.rPill),
               ),
               alignment: Alignment.center,
               child: Text(
                 '$count',
-                style: AppTypography.inter(
-                  color:
-                      isSelected
-                          ? primary
-                          : (isDark
-                              ? EagleTokens.darkInkMute
-                              : TokensStrip.textSecondary),
-                  fontSize: 10.5,
-                  fontWeight: FontWeight.w900,
-                  height: 1.15,
-                ),
+                style: dashboardChipLabelStyle(
+                  isSelected ? chipFg : mute,
+                ).copyWith(fontSize: 10.5, fontWeight: FontWeight.w900),
               ),
             ),
           ],
@@ -131,38 +101,35 @@ class _SheetShortcutChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
+    final chipBg = dashboardPrioritiesChipBackground(primary, isDark: isDark);
+    final chipFg = dashboardPrioritiesChipForeground(primary, isDark: isDark);
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
 
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(999),
-      child: Container(
+      borderRadius: BorderRadius.circular(TokensStrip.rPill),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 160),
         padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 8),
         decoration: BoxDecoration(
           color:
               selected
-                  ? primary
+                  ? chipBg
                   : (isDark
-                      ? Colors.white.withValues(alpha: 0.06)
-                      : TokensStrip.cardBg),
-          borderRadius: BorderRadius.circular(999),
-          border: Border.all(
-            color:
-                selected
-                    ? primary
-                    : (isDark
-                        ? EagleTokens.darkLine
-                        : TokensStrip.borderDefault),
-          ),
+                      ? Colors.white.withValues(alpha: 0.05)
+                      : BrandPalette.soft(primary, dark: false)),
+          borderRadius: BorderRadius.circular(TokensStrip.rPill),
+          border:
+              selected
+                  ? null
+                  : Border.all(color: line.withValues(alpha: 0.75)),
         ),
         child: Text(
           label,
-          style: AppTypography.inter(
-            color: selected ? Colors.white : ink,
-            fontSize: TokensStrip.fontBodySm,
-            fontWeight: FontWeight.w800,
-            height: 1.1,
-          ),
+          style: dashboardChipLabelStyle(
+            selected ? chipFg : ink,
+          ).copyWith(fontSize: TokensStrip.fontBodySm, fontWeight: FontWeight.w800),
         ),
       ),
     );

@@ -22,49 +22,58 @@ class _SectionCard extends StatelessWidget {
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final accent = BrandPalette.sectionAccent(primary, dark: isDark);
 
-    return Container(
-      padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 16, 16, 18),
-      decoration: fxListCardDecoration(context, accent: primary),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 34,
-                height: 34,
-                decoration: BoxDecoration(
-                  color: accent.withValues(alpha: isDark ? 0.18 : 0.10),
-                  borderRadius: BorderRadius.circular(12),
+    return DecoratedBox(
+      decoration: fxStripCardDecoration(
+        context,
+        accent: primary,
+        radius: TokensStrip.rCard,
+        glowStrength: 0.03,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 16, 16, 18),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: accent.withValues(alpha: isDark ? 0.16 : 0.10),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(icon, color: accent, size: 17),
                 ),
-                child: Icon(icon, color: accent, size: 18),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: TextStyle(
-                        color: ink,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w900,
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: FocuxHubTypography.sectionTitle(
+                          context,
+                          color: ink,
+                        ).copyWith(fontSize: TokensStrip.fontBody),
                       ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      subtitle,
-                      style: TextStyle(color: mute, fontSize: 12, height: 1.25),
-                    ),
-                  ],
+                      const SizedBox(height: 2),
+                      Text(
+                        subtitle,
+                        style: FocuxHubTypography.bodyMuted(
+                          color: mute,
+                          height: 1.25,
+                        ).copyWith(fontSize: TokensStrip.fontBodySm),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: TokensStrip.s4),
-          ...children,
-        ],
+              ],
+            ),
+            const SizedBox(height: TokensStrip.s4),
+            ...children,
+          ],
+        ),
       ),
     );
   }
@@ -158,25 +167,10 @@ class _ProgressStep extends StatelessWidget {
     final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
 
     return Container(
-      height: 5,
+      height: 4,
       decoration: BoxDecoration(
         color: done ? action : line.withValues(alpha: isDark ? 0.7 : 0.75),
-        borderRadius: BorderRadius.circular(999),
-        boxShadow:
-            done
-                ? [
-                  BoxShadow(
-                    color: action.withValues(alpha: isDark ? 0.55 : 0.42),
-                    blurRadius: 10,
-                    spreadRadius: 0,
-                  ),
-                  BoxShadow(
-                    color: Colors.white.withValues(alpha: isDark ? 0.18 : 0.32),
-                    blurRadius: 6,
-                    spreadRadius: -2,
-                  ),
-                ]
-                : null,
+        borderRadius: BorderRadius.circular(TokensStrip.rPill),
       ),
     );
   }
@@ -327,47 +321,40 @@ class _OptionChip extends StatelessWidget {
 
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(999),
+      borderRadius: BorderRadius.circular(TokensStrip.rPill),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 160),
         curve: Curves.easeOutCubic,
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+        padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 9),
         decoration: BoxDecoration(
           color:
               selected
-                  ? action.withValues(alpha: isDark ? 0.22 : 0.12)
+                  ? action.withValues(alpha: isDark ? 0.18 : 0.11)
                   : (isDark
                       ? Colors.white.withValues(alpha: 0.05)
-                      : TokensStrip.pageBg),
-          borderRadius: BorderRadius.circular(999),
+                      : BrandPalette.soft(primary, dark: false)),
+          borderRadius: BorderRadius.circular(TokensStrip.rPill),
           border: Border.all(
-            color: selected ? action.withValues(alpha: 0.58) : line,
-            width: selected ? 1.4 : 1.0,
+            color:
+                selected
+                    ? action.withValues(alpha: 0.42)
+                    : line.withValues(alpha: 0.85),
           ),
-          boxShadow:
-              selected
-                  ? [
-                    BoxShadow(
-                      color: action.withValues(alpha: isDark ? 0.28 : 0.18),
-                      blurRadius: 12,
-                      spreadRadius: -2,
-                    ),
-                  ]
-                  : null,
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             if (selected) ...[
-              Icon(Icons.check_rounded, size: 15, color: action),
+              Icon(Icons.check_rounded, size: 14, color: action),
               const SizedBox(width: 5),
             ],
             Text(
               label,
-              style: TextStyle(
-                color: selected ? action : ink,
-                fontSize: 12.5,
-                fontWeight: selected ? FontWeight.w900 : FontWeight.w700,
+              style: FocuxHubTypography.chip(
+                selected ? action : ink,
+              ).copyWith(
+                fontSize: 12,
+                fontWeight: selected ? FontWeight.w800 : FontWeight.w700,
               ),
             ),
           ],
@@ -590,96 +577,87 @@ class _BottomSubmitBar extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             if (!canSubmit) ...[
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 9,
-                ),
+              DecoratedBox(
                 decoration: BoxDecoration(
-                  color: primary.withValues(alpha: isDark ? 0.10 : 0.05),
-                  borderRadius: BorderRadius.circular(999),
+                  color: primary.withValues(alpha: isDark ? 0.08 : 0.05),
+                  borderRadius: BorderRadius.circular(TokensStrip.rPill),
                 ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.info_outline_rounded, size: 14, color: mute),
-                    const SizedBox(width: 7),
-                    Flexible(
-                      child: Text(
-                        helper,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: mute,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 10,
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.info_outline_rounded, size: 14, color: mute),
+                      const SizedBox(width: 7),
+                      Flexible(
+                        child: Text(
+                          helper,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: FocuxHubTypography.bodyMuted(
+                            color: mute,
+                            fontWeight: FontWeight.w700,
+                          ).copyWith(fontSize: 12),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ] else ...[
               Text(
                 helper,
                 textAlign: TextAlign.center,
-                style: TextStyle(color: mute, fontSize: 11, height: 1.2),
+                style: FocuxHubTypography.bodyMuted(color: mute).copyWith(
+                  fontSize: 11,
+                ),
               ),
-              const SizedBox(height: 7),
+              const SizedBox(height: 8),
               SizedBox(
                 width: double.infinity,
-                height: 52,
+                height: 48,
                 child: Material(
-                  color: Colors.transparent,
+                  color: primary,
+                  elevation: isDark ? 2 : 1,
+                  shadowColor: primary.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(TokensStrip.rCard),
                   child: InkWell(
                     onTap: onSubmit,
-                    borderRadius: BorderRadius.circular(17),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 180),
-                      curve: Curves.easeOutCubic,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: primary,
-                        borderRadius: BorderRadius.circular(17),
-                        border: Border.all(color: primary),
-                        boxShadow: [
-                          BoxShadow(
-                            color: primary.withValues(alpha: 0.18),
-                            blurRadius: 22,
-                            offset: const Offset(0, 10),
-                          ),
-                        ],
-                      ),
-                      child:
-                          loading
-                              ? const SizedBox(
+                    borderRadius: BorderRadius.circular(TokensStrip.rCard),
+                    child:
+                        loading
+                            ? const Center(
+                              child: SizedBox(
                                 width: 22,
                                 height: 22,
                                 child: FxLoading(
                                   strokeWidth: 2.5,
                                   color: Colors.white,
                                 ),
-                              )
-                              : const Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    Icons.person_add_alt_1_rounded,
-                                    size: 19,
-                                    color: Colors.white,
-                                  ),
-                                  SizedBox(width: 8),
-                                  Text(
-                                    'Cadastrar aluno',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w800,
-                                    ),
-                                  ),
-                                ],
                               ),
-                    ),
+                            )
+                            : const Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.person_add_alt_1_rounded,
+                                  size: 18,
+                                  color: Colors.white,
+                                ),
+                                SizedBox(width: 8),
+                                Text(
+                                  'Cadastrar aluno',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                              ],
+                            ),
                   ),
                 ),
               ),

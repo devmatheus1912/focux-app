@@ -25,10 +25,10 @@ extension AlunosListScreenHeader on _AlunosListScreenState {
                           // Header (Alunos + Botão Adicionar)
                           Padding(
                             padding: const EdgeInsets.fromLTRB(
-                              TokensStrip.s5,
-                              14,
-                              20,
-                              14,
+                              TokensStrip.s4,
+                              TokensStrip.s3,
+                              TokensStrip.s4,
+                              TokensStrip.s2,
                             ),
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.center,
@@ -42,22 +42,27 @@ extension AlunosListScreenHeader on _AlunosListScreenState {
                                             : 'Limpar filtro',
                                     child: InkWell(
                                       onTap: _handleHeaderBack,
-                                      borderRadius: BorderRadius.circular(22),
+                                      borderRadius: BorderRadius.circular(
+                                        AlunosLayout.headerChromeSize / 2,
+                                      ),
                                       child: Container(
-                                        width: 40,
-                                        height: 40,
+                                        width: AlunosLayout.headerChromeSize,
+                                        height: AlunosLayout.headerChromeSize,
                                         decoration: chrome.headerAction(
-                                          radius: 20,
+                                          radius:
+                                              AlunosLayout.headerChromeSize / 2,
                                         ),
                                         child: Icon(
                                           Icons.arrow_back_ios_new_rounded,
-                                          size: 18,
+                                          size: 16,
                                           color: ink,
                                         ),
                                       ),
                                     ),
                                   ),
-                                  const SizedBox(width: 8),
+                                  const SizedBox(
+                                    width: AlunosLayout.headerChromeGap,
+                                  ),
                                 ],
                                 Expanded(
                                   child: Column(
@@ -66,8 +71,8 @@ extension AlunosListScreenHeader on _AlunosListScreenState {
                                     children: [
                                       Text(
                                         headerOps,
-                                        style: AppTypography.inter(
-                                          fontSize: TokensStrip.fontBodySm,
+                                        style: FocuxHubTypography.eyebrow(
+                                          context,
                                           color:
                                               _modoSelecao
                                                   ? BrandPalette.sectionAction(
@@ -77,10 +82,10 @@ extension AlunosListScreenHeader on _AlunosListScreenState {
                                                   : mute,
                                           fontWeight:
                                               _modoSelecao
-                                                  ? FontWeight.w600
-                                                  : FontWeight.w500,
-                                          letterSpacing: _modoSelecao ? 1.2 : 0,
-                                          height: 1.2,
+                                                  ? FontWeight.w700
+                                                  : FontWeight.w600,
+                                          letterSpacing:
+                                              _modoSelecao ? 0.08 : 0.04,
                                         ),
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
@@ -88,12 +93,12 @@ extension AlunosListScreenHeader on _AlunosListScreenState {
                                       const SizedBox(height: 2),
                                       Text(
                                         'Alunos',
-                                        style: AppTypography.inter(
-                                          fontSize: TokensStrip.fontH1,
+                                        style: FocuxHubTypography.pageTitle(
+                                          context,
                                           color: ink,
-                                          fontWeight: TokensStrip.weightH1,
-                                          letterSpacing: TokensStrip.trackingH1,
-                                          height: 1.15,
+                                        ).copyWith(
+                                          fontWeight: FontWeight.w800,
+                                          height: 1.12,
                                         ),
                                       ),
                                       if (freshnessLabel != null) ...[
@@ -102,11 +107,10 @@ extension AlunosListScreenHeader on _AlunosListScreenState {
                                           freshnessLabel,
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
-                                          style: AppTypography.inter(
-                                            fontSize: 11.5,
-                                            fontWeight: FontWeight.w600,
+                                          style: FocuxHubTypography.bodyMuted(
                                             color: mute,
-                                          ),
+                                            fontWeight: FontWeight.w600,
+                                          ).copyWith(fontSize: 11),
                                         ),
                                       ],
                                     ],
@@ -115,58 +119,73 @@ extension AlunosListScreenHeader on _AlunosListScreenState {
                                 if (_modoSelecao) ...[
                                   InkWell(
                                     onTap: _toggleModoSelecao,
-                                    borderRadius: BorderRadius.circular(44),
+                                    borderRadius: BorderRadius.circular(
+                                      AlunosLayout.headerChromeSize / 2,
+                                    ),
                                     child: Container(
-                                      width: 44,
-                                      height: 44,
+                                      width: AlunosLayout.headerChromeSize,
+                                      height: AlunosLayout.headerChromeSize,
                                       decoration: chrome.headerAction(
-                                        radius: 22,
+                                        radius:
+                                            AlunosLayout.headerChromeSize / 2,
                                       ),
                                       child: Icon(
                                         Icons.close,
-                                        size: 22,
+                                        size: 20,
                                         color: ink,
                                       ),
                                     ),
                                   ),
                                 ] else ...[
-                                  const ShellThemeToggle(size: 40),
-                                  const SizedBox(width: 8),
+                                  const ShellThemeToggle(
+                                    size: AlunosLayout.headerChromeSize,
+                                  ),
+                                  const SizedBox(
+                                    width: AlunosLayout.headerChromeGap,
+                                  ),
                                   InkWell(
                                     onTap: _toggleModoSelecao,
-                                    borderRadius: BorderRadius.circular(44),
+                                    borderRadius: BorderRadius.circular(
+                                      AlunosLayout.headerChromeSize / 2,
+                                    ),
                                     child: Container(
-                                      width: 44,
-                                      height: 44,
+                                      width: AlunosLayout.headerChromeSize,
+                                      height: AlunosLayout.headerChromeSize,
                                       decoration: chrome.headerAction(
-                                        radius: 22,
+                                        radius:
+                                            AlunosLayout.headerChromeSize / 2,
                                       ),
                                       child: Icon(
                                         Icons.checklist_rounded,
-                                        size: 22,
+                                        size: 20,
                                         color: ink,
                                       ),
                                     ),
                                   ),
-                                  const SizedBox(width: 10),
-                                  FxGlowSurface(
-                                    color: primary,
-                                    enabled: true,
-                                    intensity: 0.9,
-                                    borderRadius: 44,
-                                    child: FxSpringButton(
-                                      onTap: _adicionarAluno,
-                                      child: Container(
-                                        width: 44,
-                                        height: 44,
-                                        decoration: BoxDecoration(
-                                          color: primary,
-                                          shape: BoxShape.circle,
-                                        ),
-                                        child: const Icon(
-                                          Icons.add,
-                                          size: 24,
-                                          color: Colors.white,
+                                  const SizedBox(
+                                    width: AlunosLayout.headerChromeGap,
+                                  ),
+                                  Semantics(
+                                    button: true,
+                                    label: 'Adicionar aluno',
+                                    child: Material(
+                                      color: primary,
+                                      elevation: isDark ? 3 : 1,
+                                      shadowColor: primary.withValues(
+                                        alpha: isDark ? 0.35 : 0.18,
+                                      ),
+                                      shape: const CircleBorder(),
+                                      child: InkWell(
+                                        onTap: _adicionarAluno,
+                                        customBorder: const CircleBorder(),
+                                        child: SizedBox(
+                                          width: AlunosLayout.headerChromeSize,
+                                          height: AlunosLayout.headerChromeSize,
+                                          child: const Icon(
+                                            Icons.add_rounded,
+                                            size: 22,
+                                            color: Colors.white,
+                                          ),
                                         ),
                                       ),
                                     ),
