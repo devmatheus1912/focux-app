@@ -6,6 +6,9 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 
 import '../../../core/router/safe_navigation.dart';
+import '../../../core/theme/shell_chrome.dart';
+import '../../../core/utils/friendly_error.dart';
+import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/feedback_helper.dart';
@@ -188,7 +191,11 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
         final message =
             e is IaOperationalException
                 ? e.message
-                : 'Não consegui falar com a IA agora. Tente novamente em alguns segundos.';
+                : friendlyError(
+                  e,
+                  fallback:
+                      'Não consegui falar com a IA agora. Tente novamente em alguns segundos.',
+                );
         setState(() => _erro = message);
         await IaQuotaUpgrade.handleError(context, ref, e);
       }
@@ -206,6 +213,7 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
     return fxScreenA11yScope(
       label: 'Progressão de Carga',
@@ -281,35 +289,11 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
                 if (_loading) const IaProgressaoLoadingSkeleton(),
                 if (_erro != null) ...[
                   const SizedBox(height: TokensStrip.s4),
-                  Container(
-                    decoration: fxListCardDecoration(context, accent: primary),
-                    clipBehavior: Clip.antiAlias,
-                    child: Padding(
-                      padding: const EdgeInsets.all(14),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Row(
-                            children: [
-                              Icon(Icons.wifi_off_rounded, size: 18),
-                              SizedBox(width: 8),
-                              Text(
-                                'IA indisponível',
-                                style: TextStyle(fontWeight: FontWeight.w700),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          Text(_erro!),
-                          const SizedBox(height: 12),
-                          OutlinedButton.icon(
-                            onPressed: _loading ? null : _gerar,
-                            icon: const Icon(Icons.refresh),
-                            label: const Text('Tentar novamente'),
-                          ),
-                        ],
-                      ),
-                    ),
+                  FxErrorState(
+                    chromeOnDark: chrome.isDark,
+                    primary: primary,
+                    message: _erro!,
+                    onRetry: _gerar,
                   ),
                 ],
                 if (_resultado != null) ...[

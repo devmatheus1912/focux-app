@@ -27,9 +27,13 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../../alunos/providers/aluno_detail_providers.dart';
 import '../data/chat_repository.dart';
 import '../data/chat_text_formatter.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_empty_state.dart';
+import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/skeleton_loader.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
 import '../widgets/conversation_message_widgets.dart';
@@ -102,7 +106,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
   bool _recordingAudio = false;
   bool _composerHasText = false;
   bool _loadingOlder = false;
-  bool _loadFailed = false;
+  Object? _loadError;
   bool _hasMoreMessages = false;
   bool _initialDraftChecked = false;
   int? _alunoId;
@@ -185,16 +189,16 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
           ..addAll(msgs);
         _nextBeforeId = page.nextBeforeId;
         _hasMoreMessages = page.hasMore;
-        _loadFailed = false;
+        _loadError = null;
         _loading = false;
       });
       _dedupeInitialDraft();
       await _markRead();
       _scrollToBottom(animated: false);
-    } catch (_) {
+    } catch (e) {
       if (mounted) {
         setState(() {
-          _loadFailed = true;
+          _loadError = e;
           _loading = false;
         });
       }
@@ -333,7 +337,8 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final chrome = ShellChrome.of(context);
+    final isDark = chrome.isDark;
     final primary = Theme.of(context).colorScheme.primary;
     final primarySoft = BrandPalette.soft(primary, dark: isDark);
     final brand =
@@ -432,26 +437,33 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                 Expanded(
                   child:
                       _loading
-                          ? Center(child: FxLoading(color: primary))
-                          : _loadFailed
-                          ? ConversationErrorState(
-                            isDark: isDark,
-                            accentColor: primary,
+                          ? const Padding(
+                            padding: EdgeInsets.all(TokensStrip.s4),
+                            child: SkeletonList(count: 6),
+                          )
+                          : _loadError != null
+                          ? FxErrorState(
+                            chromeOnDark: isDark,
+                            primary: primary,
+                            message: friendlyError(
+                              _loadError!,
+                              fallback:
+                                  'Não foi possível carregar a conversa. Verifique a conexão e tente novamente.',
+                            ),
                             onRetry: () {
                               setState(() {
                                 _loading = true;
-                                _loadFailed = false;
+                                _loadError = null;
                               });
                               unawaited(_loadHistorico());
                             },
                           )
                           : _msgs.isEmpty
-                          ? ConversationEmptyState(
-                            isDark: isDark,
-                            accentColor: primary,
+                          ? const FxEmptyState(
+                            icon: 'message-circle',
                             title: 'Comece uma conversa',
                             subtitle:
-                                'Fotos, videos, audios e ajustes do treino vao aparecer aqui em tempo real.',
+                                'Fotos, vídeos, áudios e ajustes do treino vão aparecer aqui em tempo real.',
                           )
                           : ListView.builder(
                             controller: _scroll,

@@ -4,6 +4,8 @@ import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/widgets/fx_empty_state.dart';
+import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/ia_safety_disclaimer.dart';
 import '../../../features/auth/providers/auth_provider.dart';
@@ -31,14 +33,23 @@ class _IaChatScreenState extends ConsumerState<IaChatScreen> {
   final _ctrl = TextEditingController();
   final _scroll = ScrollController();
   bool _loading = false;
+  Object? _threadError;
+  String? _pendingRetry;
 
-  Future<void> _enviar() async {
-    final text = _ctrl.text.trim();
+  Future<void> _enviar({String? overrideText}) async {
+    final text = (overrideText ?? _ctrl.text).trim();
     if (text.isEmpty || _loading) return;
     if (!await IaQuotaUpgrade.guardBeforeRequest(context, ref)) return;
-    _ctrl.clear();
+    if (overrideText == null) _ctrl.clear();
+    final hadPriorMessages = _msgs.isNotEmpty;
     setState(() {
-      _msgs.add(_IaMsg(texto: text, isUser: true));
+      _threadError = null;
+      _pendingRetry = null;
+      if (overrideText == null) {
+        _msgs.add(_IaMsg(texto: text, isUser: true));
+      } else if (_msgs.isEmpty || !_msgs.last.isUser) {
+        _msgs.add(_IaMsg(texto: text, isUser: true));
+      }
       _loading = true;
     });
     _scrollToBottom();
@@ -51,14 +62,27 @@ class _IaChatScreenState extends ConsumerState<IaChatScreen> {
       }
     } catch (e) {
       if (mounted) {
-        setState(
-          () => _msgs.add(
-            _IaMsg(
-              texto: e is IaOperationalException ? e.message : friendlyError(e),
-              isUser: false,
+        if (hadPriorMessages) {
+          setState(
+            () => _msgs.add(
+              _IaMsg(
+                texto:
+                    e is IaOperationalException
+                        ? e.message
+                        : friendlyError(e),
+                isUser: false,
+              ),
             ),
-          ),
-        );
+          );
+        } else {
+          setState(() {
+            if (_msgs.isNotEmpty && _msgs.last.isUser) {
+              _msgs.removeLast();
+            }
+            _threadError = e;
+            _pendingRetry = text;
+          });
+        }
         await IaQuotaUpgrade.handleError(context, ref, e);
       }
     } finally {
@@ -83,6 +107,7 @@ class _IaChatScreenState extends ConsumerState<IaChatScreen> {
   @override
   Widget build(BuildContext context) {
     final chrome = ShellChrome.of(context);
+    final primary = Theme.of(context).colorScheme.primary;
     return fxScreenA11yScope(
       label: 'Assistente IA',
       child: FxShellScaffold(
@@ -96,17 +121,38 @@ class _IaChatScreenState extends ConsumerState<IaChatScreen> {
           children: [
             Expanded(
               child:
-                  _msgs.isEmpty
-                      ? Column(
+                  _threadError != null
+                      ? FxErrorState(
+                        chromeOnDark: chrome.isDark,
+                        primary: primary,
+                        message: friendlyError(
+                          _threadError!,
+                          fallback:
+                              'Não consegui falar com a IA agora. Tente novamente.',
+                        ),
+                        onRetry: () {
+                          final retry = _pendingRetry;
+                          setState(() {
+                            _threadError = null;
+                            _pendingRetry = null;
+                          });
+                          if (retry != null) {
+                            _enviar(overrideText: retry);
+                          }
+                        },
+                      )
+                      : _msgs.isEmpty
+                      ? const Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text(
-                            'Pergunte ao seu assistente de fitness!',
-                            style: TextStyle(color: chrome.mute),
-                            textAlign: TextAlign.center,
+                          FxEmptyState(
+                            icon: 'spark',
+                            title: 'Comece uma conversa',
+                            subtitle:
+                                'Pergunte ao seu assistente de fitness sobre treino, dieta ou negócio.',
                           ),
-                          const SizedBox(height: 16),
-                          const IaSafetyDisclaimer(),
+                          SizedBox(height: 8),
+                          IaSafetyDisclaimer(),
                         ],
                       )
                       : ListView.builder(
@@ -158,7 +204,8 @@ class _IaChatScreenState extends ConsumerState<IaChatScreen> {
                         },
                       ),
             ),
-            if (_msgs.isNotEmpty) const IaSafetyDisclaimer(compact: true),
+            if (_msgs.isNotEmpty && _threadError == null)
+              const IaSafetyDisclaimer(compact: true),
             const Divider(height: 1),
             Padding(
               padding: EdgeInsets.only(
@@ -188,7 +235,7 @@ class _IaChatScreenState extends ConsumerState<IaChatScreen> {
                   const SizedBox(width: 8),
                   IconButton.filled(
                     icon: const Icon(Icons.send),
-                    onPressed: _loading ? null : _enviar,
+                    onPressed: _loading ? null : () => _enviar(),
                   ),
                 ],
               ),

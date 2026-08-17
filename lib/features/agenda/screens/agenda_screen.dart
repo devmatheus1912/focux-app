@@ -19,6 +19,7 @@ import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
+import 'package:focux_app/core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/fx_motion.dart';
 import 'package:focux_app/core/widgets/fx_shell_scaffold.dart';
 

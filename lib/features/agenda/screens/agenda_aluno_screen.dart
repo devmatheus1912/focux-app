@@ -2,12 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../core/config/env.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/utils/friendly_error.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/agenda_repository.dart';
-import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/fx_empty_state.dart';
+import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/skeleton_loader.dart';
 import 'package:focux_app/core/widgets/fx_motion.dart';
 import 'package:focux_app/core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
@@ -22,6 +25,7 @@ class AgendaAlunoScreen extends ConsumerStatefulWidget {
 class _AgendaAlunoScreenState extends ConsumerState<AgendaAlunoScreen> {
   List<Agendamento> _ags = [];
   bool _loading = true;
+  Object? _erro;
 
   @override
   void initState() {
@@ -30,7 +34,10 @@ class _AgendaAlunoScreenState extends ConsumerState<AgendaAlunoScreen> {
   }
 
   Future<void> _load() async {
-    setState(() => _loading = true);
+    setState(() {
+      _loading = true;
+      _erro = null;
+    });
     try {
       final r =
           await AgendaRepository(
@@ -44,8 +51,10 @@ class _AgendaAlunoScreenState extends ConsumerState<AgendaAlunoScreen> {
       }
     } catch (e) {
       if (mounted) {
-        setState(() => _loading = false);
-        FeedbackHelper.showError(context, friendlyError(e));
+        setState(() {
+          _loading = false;
+          _erro = e;
+        });
       }
     }
   }
@@ -101,47 +110,65 @@ class _AgendaAlunoScreenState extends ConsumerState<AgendaAlunoScreen> {
   }
 
   @override
-  Widget build(BuildContext context) => fxScreenA11yScope(
-    label: 'Minha Agenda',
-    child: FxShellScaffold(
-      useMesh: true,
-      extendBody: true,
-      appBar: FxShellAppBar(
-        title: 'Minha Agenda',
-        subtitle: 'Seus próximos compromissos',
-        actions: [
-          IconButton(
-            tooltip: 'Exportar iCal',
-            icon: const Icon(Icons.calendar_month_outlined),
-            onPressed: _copyIcalLink,
-          ),
-        ],
-      ),
-      body: RefreshIndicator(
-        onRefresh: _load,
-        child:
+  Widget build(BuildContext context) {
+    final chrome = ShellChrome.of(context);
+    final primary = Theme.of(context).colorScheme.primary;
+    return fxScreenA11yScope(
+      label: 'Minha Agenda',
+      child: FxShellScaffold(
+        useMesh: true,
+        extendBody: true,
+        appBar: FxShellAppBar(
+          title: 'Minha Agenda',
+          subtitle: 'Seus próximos compromissos',
+          actions: [
+            IconButton(
+              tooltip: 'Exportar iCal',
+              icon: const Icon(Icons.calendar_month_outlined),
+              onPressed: _copyIcalLink,
+            ),
+          ],
+        ),
+        body:
             _loading
-                ? const Center(child: FxLoading())
-                : _ags.isEmpty
-                ? ListView(
-                  children: const [
-                    Padding(
-                      padding: EdgeInsets.all(32),
-                      child: Center(
-                        child: Text('Nenhum agendamento encontrado.'),
-                      ),
-                    ),
-                  ],
+                ? const Padding(
+                  padding: EdgeInsets.all(TokensStrip.s4),
+                  child: SkeletonList(count: 4),
                 )
-                : ListView.builder(
-                  padding: const EdgeInsets.all(TokensStrip.s4),
-                  itemCount: _ags.length,
-                  itemBuilder:
-                      (_, i) => _AgCard(ag: _ags[i], onConfirmar: _confirmar),
+                : _erro != null
+                ? FxErrorState(
+                  chromeOnDark: chrome.isDark,
+                  primary: primary,
+                  message: friendlyError(_erro!),
+                  onRetry: _load,
+                )
+                : RefreshIndicator(
+                  onRefresh: _load,
+                  child:
+                      _ags.isEmpty
+                          ? ListView(
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            children: const [
+                              SizedBox(height: 72),
+                              FxEmptyState(
+                                icon: 'calendar',
+                                title: 'Nenhum agendamento',
+                                subtitle:
+                                    'Quando seu personal marcar uma sessão, ela aparece aqui.',
+                              ),
+                            ],
+                          )
+                          : ListView.builder(
+                            padding: const EdgeInsets.all(TokensStrip.s4),
+                            itemCount: _ags.length,
+                            itemBuilder:
+                                (_, i) =>
+                                    _AgCard(ag: _ags[i], onConfirmar: _confirmar),
+                          ),
                 ),
       ),
-    ),
-  );
+    );
+  }
 }
 
 class _AgCard extends StatelessWidget {

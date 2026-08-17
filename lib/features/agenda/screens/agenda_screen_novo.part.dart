@@ -97,7 +97,10 @@ class _NovoAgendamentoScreenState extends ConsumerState<NovoAgendamentoScreen> {
       if (mounted) safePopOrGo(context, '/agenda');
     } catch (e) {
       if (mounted) {
-        FeedbackHelper.showError(context, 'Erro ao agendar. Tente novamente.');
+        FeedbackHelper.showError(
+          context,
+          friendlyError(e, fallback: 'Erro ao agendar. Tente novamente.'),
+        );
       }
     }
     if (mounted) setState(() => _saving = false);
@@ -117,7 +120,9 @@ class _NovoAgendamentoScreenState extends ConsumerState<NovoAgendamentoScreen> {
     final line = chrome.lineStrong;
     final enabled = _canSave && !_saving;
 
-    return FxShellScaffold(
+    return fxScreenA11yScope(
+      label: 'Novo agendamento',
+      child: FxShellScaffold(
       useMesh: true,
       safeArea: false,
       appBar: FxShellAppBar(
@@ -160,15 +165,20 @@ class _NovoAgendamentoScreenState extends ConsumerState<NovoAgendamentoScreen> {
                         .when(
                           loading:
                               () => const Padding(
-                                padding: EdgeInsets.symmetric(vertical: 8),
-                                child: LinearProgressIndicator(),
+                                padding: EdgeInsets.symmetric(vertical: 12),
+                                child: Center(child: FxLoading(size: 22)),
                               ),
                           error:
-                              (e, _) => Text(
-                                'Não foi possível carregar alunos.',
-                                style: TextStyle(
-                                  color: Theme.of(context).colorScheme.error,
+                              (e, _) => FxErrorState(
+                                chromeOnDark: chrome.isDark,
+                                primary: primary,
+                                message: friendlyError(
+                                  e,
+                                  fallback:
+                                      'Não foi possível carregar alunos.',
                                 ),
+                                onRetry:
+                                    () => ref.invalidate(alunosProvider),
                               ),
                           data:
                               (alunos) => _AgendaAlunoButton(
@@ -242,6 +252,7 @@ class _NovoAgendamentoScreenState extends ConsumerState<NovoAgendamentoScreen> {
             ],
           ),
         ),
+      ),
       ),
     );
   }
