@@ -20,20 +20,25 @@ O app se conecta ao `focux-backend`, usa JWT para sessao, aplica rotas por perfi
 | Branch | `main` |
 | API | Backend Focux (Railway) — URL configuravel no app |
 | Site legal/marketing | [focuxpersonal.com](https://focuxpersonal.com) |
-| Testes | suite em `test/` (~970 casos) |
+| Testes | suite em `test/` (~350 arquivos / ~970 casos) |
+| Padrao visual | Home Personal como referencia 10/10 |
 
 ### Destaques recentes
 
-- **Home / Command Center** do personal com modo foco, next-actions e hubs densificados.
-- **Aluno 360**: Operacao, Evolucao e Ferramentas (aderencia, timeline, copiloto, recovery, risco financeiro).
+- **Home / Command Center** como fonte da verdade visual e de UX (modo foco, next-actions, quiet chrome, sticky).
+- **Hubs com BFF `/home`**: first paint em um GET (agenda, alunos, financeiro, perfil, IA, leads, chat, habitos, loja, paywall, picker de treino, etc.).
+- **Aluno Home SSOT** + **Aluno 360** (Operacao, Evolucao, Ferramentas) alinhados ao padrao Home.
+- **Perfil** elevado ao padrao Home: strip header, sticky Hoje, Operacao/Conta quiet colapsaveis, freshness e telemetria.
+- **FeatureGate** reusa cache da Home (sem GET extra de `/planos/me` no caminho quente).
 - **Sessao**: logout limpa tokens, caches locais e leftovers de entitlement; web nao persiste JWT em storage persistente.
 - **TLS**: builds de loja exigem certificate pinning da API (Dio + WebSocket/STOMP).
-- **Design system** em `docs/DESIGN_SYSTEM.md` e `docs/CODING_STANDARDS.md`.
+- **Design system**: tokens Strip / Liquid Glass em `lib/core/theme` (+ docs de produto quando presentes no repo).
 - **Repo enxuto**: `scripts/`, `android/gradle.properties` e l10n gerados sao locais (gitignored); use os `.example`.
 
 ### Areas em evolucao
 
 - IAP com contas pagas App Store / Play (verify + notificacoes de lifecycle);
+- NFS-e real em producao (fora do escopo atual de loja);
 - E2E / smoke de rotas criticas;
 - iOS apos base Android consolidada;
 - habitos, recorrencia e ofertas enterprise;
