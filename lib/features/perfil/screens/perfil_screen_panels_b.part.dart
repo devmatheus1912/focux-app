@@ -309,6 +309,7 @@ class _ProfessionalDataPanel extends StatelessWidget {
   final Color actionInk;
   final Color mute;
   final bool isDark;
+  final bool profileComplete;
   final VoidCallback onEdit;
 
   const _ProfessionalDataPanel({
@@ -317,11 +318,21 @@ class _ProfessionalDataPanel extends StatelessWidget {
     required this.actionInk,
     required this.mute,
     required this.isDark,
+    required this.profileComplete,
     required this.onEdit,
   });
 
   @override
   Widget build(BuildContext context) {
+    if (profileComplete) {
+      return _ProfessionalDataCompleteStrip(
+        accent: accent,
+        actionInk: actionInk,
+        isDark: isDark,
+        onEdit: onEdit,
+      );
+    }
+
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
 
     return PerfilCardSection(
@@ -464,6 +475,74 @@ class _ProfessionalDataPanel extends StatelessWidget {
   }
 }
 
+class _ProfessionalDataCompleteStrip extends StatelessWidget {
+  const _ProfessionalDataCompleteStrip({
+    required this.accent,
+    required this.actionInk,
+    required this.isDark,
+    required this.onEdit,
+  });
+
+  final Color accent;
+  final Color actionInk;
+  final bool isDark;
+  final VoidCallback onEdit;
+
+  @override
+  Widget build(BuildContext context) {
+    final chrome = ShellChrome.forDark(isDark);
+    final ink = chrome.ink;
+    final mute = chrome.mute;
+
+    return Semantics(
+      button: true,
+      label: 'Cadastro completo. Editar dados profissionais',
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            HapticFeedback.selectionClick();
+            onEdit();
+          },
+          borderRadius: BorderRadius.circular(TokensStrip.rCard),
+          child: Ink(
+            decoration: fxStripCardDecoration(
+              context,
+              accent: accent,
+              radius: TokensStrip.rCard,
+              glowStrength: 0.03,
+            ),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(14, 12, 10, 12),
+              child: Row(
+                children: [
+                  Icon(Icons.check_circle_outline, size: 18, color: accent),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      'Cadastro completo',
+                      style: FocuxHubTypography.sectionTitle(
+                        context,
+                        color: ink,
+                      ).copyWith(fontSize: TokensStrip.fontBody),
+                    ),
+                  ),
+                  Text(
+                    'Editar',
+                    style: FocuxHubTypography.chip(actionInk),
+                  ),
+                  const SizedBox(width: 2),
+                  Icon(Icons.chevron_right_rounded, size: 20, color: mute),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _ProfessionalFactRow extends StatelessWidget {
   const _ProfessionalFactRow({
     required this.icon,
@@ -525,26 +604,6 @@ class _ProfessionalFactRow extends StatelessWidget {
       ),
     );
   }
-}
-
-class _ProfileTexturePainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final gridPaint =
-        Paint()
-          ..color = Colors.white.withValues(alpha: 0.032)
-          ..strokeWidth = 0.5;
-    const step = 34.0;
-    for (double x = 0; x < size.width; x += step) {
-      canvas.drawLine(Offset(x, 0), Offset(x, size.height), gridPaint);
-    }
-    for (double y = 0; y < size.height; y += step) {
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), gridPaint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 void _showDeleteAccountDialog(

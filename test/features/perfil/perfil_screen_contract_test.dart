@@ -36,7 +36,8 @@ void main() {
     expect(find.textContaining('Marca'), findsWidgets);
     expect(find.text('Prontidão comercial'), findsOneWidget);
     expect(find.text('Marca e vitrine'), findsOneWidget);
-    expect(find.text('Copiar'), findsOneWidget);
+    expect(find.byIcon(Icons.copy_rounded), findsOneWidget);
+    expect(find.text('Compartilhar'), findsOneWidget);
     expect(find.text('Completar cadastro'), findsOneWidget);
     expect(find.text('WhatsApp pendente'), findsOneWidget);
 
@@ -82,6 +83,8 @@ void main() {
     expect(find.text('Hoje'), findsOneWidget);
     expect(find.text('Copiloto IA'), findsNothing);
     expect(find.text('Meus alunos'), findsOneWidget);
+    expect(find.text('Cadastro completo'), findsOneWidget);
+    expect(find.text('Compartilhar'), findsOneWidget);
   });
 }
 

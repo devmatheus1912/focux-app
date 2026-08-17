@@ -167,7 +167,6 @@ class _PerfilPublicLinkCard extends StatelessWidget {
     required this.mute,
     required this.isDark,
     required this.onOpenEditor,
-    this.compact = false,
   });
 
   final String? slug;
@@ -176,7 +175,6 @@ class _PerfilPublicLinkCard extends StatelessWidget {
   final Color mute;
   final bool isDark;
   final VoidCallback onOpenEditor;
-  final bool compact;
 
   @override
   Widget build(BuildContext context) {
@@ -243,7 +241,7 @@ class _PerfilPublicLinkCard extends StatelessWidget {
                 Semantics(
                   button: true,
                   label: 'Copiar link $displayLabel',
-                  child: TextButton.icon(
+                  child: IconButton(
                     onPressed: () {
                       HapticFeedback.selectionClick();
                       copyLandingLink(
@@ -254,117 +252,90 @@ class _PerfilPublicLinkCard extends StatelessWidget {
                         reserveBottom: 96,
                       );
                     },
-                    style: TextButton.styleFrom(
-                      foregroundColor: actionInk,
-                      minimumSize: const Size(48, 48),
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                    tooltip: 'Copiar link',
+                    icon: Icon(Icons.copy_rounded, size: 18, color: actionInk),
+                    constraints: const BoxConstraints(
+                      minWidth: 48,
+                      minHeight: 48,
                     ),
-                    icon: const Icon(Icons.copy_rounded, size: 18),
-                    label: const Text('Copiar'),
                   ),
                 ),
               ],
             ),
           ),
+          const SizedBox(height: TokensStrip.s3),
+          Semantics(
+            button: true,
+            label: 'Compartilhar link da vitrine',
+            child: FxLiquidPrimaryButton(
+              icon: Icons.ios_share_rounded,
+              label: 'Compartilhar',
+              onPressed: () {
+                HapticFeedback.selectionClick();
+                unawaited(
+                  AnalyticsService.instance.track(
+                    ProductEvents.perfilShareTapped,
+                  ),
+                );
+                copyLandingLink(
+                  context,
+                  url: copyUrl,
+                  successMessage:
+                      'Link pronto para compartilhar no Instagram ou WhatsApp.',
+                  reserveBottom: 96,
+                );
+              },
+            ),
+          ),
           const SizedBox(height: TokensStrip.s2),
           Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Expanded(
-                child: Semantics(
-                  button: true,
-                  label: 'Ver vitrine ao vivo',
-                  child: OutlinedButton.icon(
+              Semantics(
+                button: true,
+                label: 'Ver vitrine ao vivo',
+                child: TextButton(
                   onPressed: () {
                     HapticFeedback.selectionClick();
                     openLandingLink(context, url: copyUrl);
                   },
-                  icon: const Icon(Icons.open_in_new_rounded, size: 16),
-                  label: const Text('Ver ao vivo'),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: actionInk,
-                    side: BorderSide(color: accent.withValues(alpha: 0.35)),
-                    minimumSize: const Size(44, 44),
-                    padding: const EdgeInsets.symmetric(vertical: 10),
+                  style: TextButton.styleFrom(
+                    foregroundColor: mute,
+                    minimumSize: const Size(48, 40),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
                   ),
-                ),
+                  child: const Text('Ver ao vivo'),
                 ),
               ),
-              const SizedBox(width: TokensStrip.s2),
-              Expanded(
-                child: Semantics(
-                  button: true,
-                  label: 'Compartilhar link da vitrine',
-                  child: FilledButton.icon(
+              Text(
+                '·',
+                style: TokensStrip.bodyMuted(color: mute).copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              Semantics(
+                button: true,
+                label: 'Personalizar página da vitrine',
+                child: TextButton(
                   onPressed: () {
                     HapticFeedback.selectionClick();
-                    unawaited(
-                      AnalyticsService.instance.track(
-                        ProductEvents.perfilShareTapped,
-                      ),
-                    );
-                    copyLandingLink(
-                      context,
-                      url: copyUrl,
-                      successMessage:
-                          'Link pronto para compartilhar no Instagram ou WhatsApp.',
-                      reserveBottom: 96,
-                    );
+                    onOpenEditor();
                   },
-                  icon: const Icon(Icons.ios_share_rounded, size: 16),
-                  label: const Text('Compartilhar'),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: accent,
-                    foregroundColor: Colors.white,
-                    minimumSize: const Size(44, 44),
-                    padding: const EdgeInsets.symmetric(vertical: 10),
+                  style: TextButton.styleFrom(
+                    foregroundColor: mute,
+                    minimumSize: const Size(48, 40),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
                   ),
-                ),
+                  child: const Text('Personalizar'),
                 ),
               ),
             ],
           ),
-          if (!compact) ...[
-            Align(
-              alignment: Alignment.centerRight,
-              child: Semantics(
-                button: true,
-                label: 'Personalizar página da vitrine',
-                child: TextButton(
-                onPressed: () {
-                  HapticFeedback.selectionClick();
-                  onOpenEditor();
-                },
-                style: TextButton.styleFrom(
-                  foregroundColor: actionInk,
-                  minimumSize: const Size(48, 40),
-                ),
-                child: const Text('Personalizar página'),
-              ),
-              ),
-            ),
-          ] else
-            Align(
-              alignment: Alignment.centerRight,
-              child: Semantics(
-                button: true,
-                label: 'Personalizar página da vitrine',
-                child: TextButton(
-                onPressed: () {
-                  HapticFeedback.selectionClick();
-                  onOpenEditor();
-                },
-                style: TextButton.styleFrom(
-                  foregroundColor: actionInk,
-                  minimumSize: const Size(48, 36),
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                ),
-                child: const Text('Personalizar página'),
-              ),
-              ),
-            ),
         ],
       ),
     );
   }
 }
+

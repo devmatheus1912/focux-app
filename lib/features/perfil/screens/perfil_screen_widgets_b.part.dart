@@ -3,11 +3,15 @@ part of 'perfil_screen.dart';
 class _HeroMarcaChip extends StatelessWidget {
   const _HeroMarcaChip({
     required this.score,
+    required this.accent,
+    required this.actionInk,
     required this.onTap,
     this.onShowHint,
   });
 
   final int score;
+  final Color accent;
+  final Color actionInk;
   final VoidCallback onTap;
   final VoidCallback? onShowHint;
 
@@ -29,13 +33,13 @@ class _HeroMarcaChip extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.14),
+                color: accent.withValues(alpha: 0.10),
                 borderRadius: BorderRadius.circular(TokensStrip.rPill),
-                border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+                border: Border.all(color: accent.withValues(alpha: 0.22)),
               ),
               child: Text(
                 'Marca $score%',
-                style: TokensStrip.bodyMuted(color: Colors.white).copyWith(
+                style: TokensStrip.bodyMuted(color: actionInk).copyWith(
                   fontWeight: FontWeight.w800,
                 ),
               ),
@@ -49,17 +53,19 @@ class _HeroMarcaChip extends StatelessWidget {
 
 class _PlanPill extends StatelessWidget {
   final String label;
+  final Color accent;
 
-  const _PlanPill({required this.label});
+  const _PlanPill({required this.label, required this.accent});
 
   @override
   Widget build(BuildContext context) {
+    final chrome = ShellChrome.of(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.14),
+        color: accent.withValues(alpha: chrome.isDark ? 0.14 : 0.08),
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.16)),
+        border: Border.all(color: accent.withValues(alpha: 0.22)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -84,15 +90,19 @@ class _HeroAction extends StatelessWidget {
   final IconData icon;
   final VoidCallback onTap;
   final String semanticsLabel;
+  final double size;
 
   const _HeroAction({
     required this.icon,
     required this.onTap,
     required this.semanticsLabel,
+    this.size = 36,
   });
 
   @override
   Widget build(BuildContext context) {
+    final chrome = ShellChrome.of(context);
+    final radius = size / 2;
     return Semantics(
       button: true,
       label: semanticsLabel,
@@ -100,16 +110,12 @@ class _HeroAction extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(38),
+          borderRadius: BorderRadius.circular(radius),
           child: Container(
-            width: 38,
-            height: 38,
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.14),
-              shape: BoxShape.circle,
-              border: Border.all(color: Colors.white.withValues(alpha: 0.16)),
-            ),
-            child: Icon(icon, color: Colors.white, size: 18),
+            width: size,
+            height: size,
+            decoration: chrome.headerAction(radius: radius),
+            child: Icon(icon, color: chrome.ink, size: size * 0.48),
           ),
         ),
       ),
@@ -140,7 +146,7 @@ class _Avatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final size = compact ? 64.0 : 82.0;
+    final size = compact ? 46.0 : 82.0;
     return Semantics(
       button: true,
       label: semanticsLabel,

@@ -10,7 +10,6 @@ class PerfilMarcaVitrineSection extends StatelessWidget {
     required this.isDark,
     required this.accent,
     required this.actionInk,
-    required this.onEditBrand,
     this.brandPreview,
     this.brandPalette,
     required this.publicLink,
@@ -20,7 +19,6 @@ class PerfilMarcaVitrineSection extends StatelessWidget {
   final bool isDark;
   final Color accent;
   final Color actionInk;
-  final VoidCallback onEditBrand;
   final Widget? brandPreview;
   final Widget? brandPalette;
   final Widget publicLink;
@@ -33,8 +31,6 @@ class PerfilMarcaVitrineSection extends StatelessWidget {
           profileComplete
               ? 'Link e compartilhamento da vitrine.'
               : 'Link para divulgar e preview do aluno.',
-      trailingLabel: 'Editar',
-      onTrailingTap: onEditBrand,
       isDark: isDark,
       accent: accent,
       actionInk: actionInk,
