@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/brand/focux_microcopy.dart';
-import '../../../core/theme/design_tokens.dart';
-import '../../../core/theme/focux_hub_typography.dart';
-import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_error_state.dart';
 
+/// Home error state — thin alias of canonical [FxErrorState].
 class DashboardErrorState extends StatelessWidget {
   final bool chromeOnDark;
   final Color primary;
@@ -21,61 +19,11 @@ class DashboardErrorState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ink = chromeOnDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final mute =
-        chromeOnDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 40),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 56,
-              height: 56,
-              decoration: BoxDecoration(
-                color: EagleTokens.bad.withValues(
-                  alpha: chromeOnDark ? 0.18 : 0.08,
-                ),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: const Icon(
-                Icons.cloud_off_rounded,
-                color: EagleTokens.bad,
-                size: 26,
-              ),
-            ),
-            const SizedBox(height: 18),
-            Text(
-              FocuxMicrocopy.algoSaiuDoAr,
-              style: FocuxHubTypography.pageTitle(context, color: ink),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: FocuxHubTypography.bodyMuted(color: mute),
-            ),
-            const SizedBox(height: 20),
-            OutlinedButton.icon(
-              onPressed: onRetry,
-              icon: const Icon(Icons.refresh_rounded, size: 18),
-              label: const Text(FocuxMicrocopy.tentarNovamente),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: primary,
-                side: BorderSide(color: primary.withValues(alpha: 0.3)),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 12,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
+    return FxErrorState(
+      chromeOnDark: chromeOnDark,
+      primary: primary,
+      message: message,
+      onRetry: onRetry,
     );
   }
 }

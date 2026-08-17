@@ -23,6 +23,8 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/skeleton_loader.dart';
+import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../constants/alunos_list_filters.dart';
 import '../utils/aluno360_operacao_logic.dart';

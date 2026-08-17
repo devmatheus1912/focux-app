@@ -1,3 +1,5 @@
+import '../../../core/ux/fx_hub_freshness.dart';
+
 /// Microcopy do hub personal — títulos e CTAs recorrentes.
 abstract final class DashboardMicrocopy {
   DashboardMicrocopy._();
@@ -11,15 +13,7 @@ abstract final class DashboardMicrocopy {
   static const verTudo = 'Ver tudo';
   static const painelAtualizado = 'Painel atualizado';
 
-  static String atualizadoHa(Duration age) {
-    final secs = age.inSeconds;
-    if (secs < 15) return 'Atualizado agora';
-    if (secs < 60) return 'Atualizado há ${secs}s';
-    final mins = age.inMinutes;
-    if (mins < 60) return 'Atualizado há ${mins}min';
-    final hours = age.inHours;
-    return 'Atualizado há ${hours}h';
-  }
+  static String atualizadoHa(Duration age) => FxHubFreshness.atualizadoHa(age);
 
   static const scrollPeekHint = 'Deslize horizontalmente para ver mais';
   static const precisaDeAtencao = 'Precisa de atenção';

@@ -678,14 +678,17 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
                 ),
               ),
           error:
-              (e, _) => _AlunosErrorState(
-                isDark: isDark,
-                primary: primary,
-                message: friendlyError(e),
-                onRetry: () {
-                  ref.invalidate(alunosProvider);
-                  ref.invalidate(alunosStatsProvider);
-                },
+              (e, _) => SafeArea(
+                child: FxErrorState(
+                  chromeOnDark: isDark,
+                  primary: primary,
+                  title: FocuxMicrocopy.erroAoCarregarAlunos,
+                  message: friendlyError(e),
+                  onRetry: () {
+                    ref.invalidate(alunosProvider);
+                    ref.invalidate(alunosStatsProvider);
+                  },
+                ),
               ),
           data: (alunos) {
             final stats = statsAsync.valueOrNull;
@@ -1175,7 +1178,6 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
                               hasQuery: _query.trim().isNotEmpty,
                               hasActiveFilter: _hasActiveFilter,
                               filtroLabel: _filtroLabel(_filtro),
-                              isDark: isDark,
                               onAdd: _adicionarAluno,
                               onClear:
                                   _query.trim().isEmpty

@@ -173,7 +173,6 @@ class _EmptyAlunosState extends StatelessWidget {
   final bool hasQuery;
   final bool hasActiveFilter;
   final String filtroLabel;
-  final bool isDark;
   final VoidCallback? onClear;
   final VoidCallback? onClearFilter;
   final VoidCallback? onAdd;
@@ -182,7 +181,6 @@ class _EmptyAlunosState extends StatelessWidget {
     required this.hasQuery,
     this.hasActiveFilter = false,
     this.filtroLabel = '',
-    required this.isDark,
     this.onClear,
     this.onClearFilter,
     this.onAdd,
@@ -190,9 +188,6 @@ class _EmptyAlunosState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-    final primary = Theme.of(context).colorScheme.primary;
     final filteredEmpty = hasActiveFilter && !hasQuery;
 
     final title =
@@ -207,82 +202,22 @@ class _EmptyAlunosState extends StatelessWidget {
             : filteredEmpty
             ? 'Não há alunos $filtroLabel no momento. Limpe o filtro ou mude a visualização.'
             : 'Adicione o primeiro aluno para montar treinos e acompanhar a evolução.';
-    final icon =
-        hasQuery
-            ? Icons.search_off_rounded
-            : filteredEmpty
-            ? Icons.filter_alt_off_rounded
-            : Icons.group_add_rounded;
+    final icon = hasQuery || filteredEmpty ? 'search' : 'users';
 
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 54,
-              height: 54,
-              decoration: BoxDecoration(
-                color: primary.withValues(alpha: isDark ? 0.18 : 0.08),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, color: primary, size: 24),
-            ),
-            const SizedBox(height: 14),
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: AppTypography.inter(
-                color: ink,
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
-                letterSpacing: -0.4,
-              ),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              subtitle,
-              textAlign: TextAlign.center,
-              style: TextStyle(color: mute, fontSize: 13, height: 1.35),
-            ),
-            if (onClearFilter != null) ...[
-              const SizedBox(height: TokensStrip.s4),
-              OutlinedButton(
-                onPressed: onClearFilter,
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: primary,
-                  side: BorderSide(color: primary.withValues(alpha: 0.35)),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                ),
-                child: const Text('Limpar filtro'),
-              ),
-            ] else if (onClear != null) ...[
-              const SizedBox(height: TokensStrip.s4),
-              OutlinedButton(
-                onPressed: onClear,
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: primary,
-                  side: BorderSide(color: primary.withValues(alpha: 0.35)),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                ),
-                child: const Text('Limpar busca'),
-              ),
-            ] else if (onAdd != null) ...[
-              const SizedBox(height: 20),
-              FxLiquidPrimaryButton(
-                label: 'Adicionar aluno',
-                icon: Icons.person_add_rounded,
-                onPressed: onAdd,
-              ),
-            ],
-          ],
-        ),
-      ),
+    FxEmptyAction? action;
+    if (onClearFilter != null) {
+      action = FxEmptyAction(label: 'Limpar filtro', onTap: onClearFilter!);
+    } else if (onClear != null) {
+      action = FxEmptyAction(label: 'Limpar busca', onTap: onClear!);
+    } else if (onAdd != null) {
+      action = FxEmptyAction(label: 'Adicionar aluno', onTap: onAdd!);
+    }
+
+    return FxEmptyState(
+      icon: icon,
+      title: title,
+      subtitle: subtitle,
+      action: action,
     );
   }
 }
