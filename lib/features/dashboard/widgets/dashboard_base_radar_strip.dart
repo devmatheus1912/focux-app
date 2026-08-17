@@ -21,12 +21,14 @@ class DashboardBaseRadarStrip extends StatelessWidget {
     required this.scores,
     this.initiallyExpanded = true,
     this.limit,
+    this.quietChrome = false,
   });
 
   final bool isDark;
   final List<AlunoScoreResumo> scores;
   final bool initiallyExpanded;
   final int? limit;
+  final bool quietChrome;
 
   @override
   Widget build(BuildContext context) {
@@ -47,6 +49,7 @@ class DashboardBaseRadarStrip extends StatelessWidget {
           '${items.length} aluno${items.length == 1 ? '' : 's'} · ${DashboardMicrocopy.toqueParaVer}',
       isDark: isDark,
       initiallyExpanded: initiallyExpanded,
+      quietChrome: quietChrome,
       child: DashboardHorizontalScrollPeek(
         showPeek: items.length > 1,
         child: SingleChildScrollView(

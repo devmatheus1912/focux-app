@@ -26,6 +26,7 @@ class DashboardCollapsibleToolsSection extends ConsumerWidget {
     required this.shortcutAspectRatio,
     this.hideFeaturedTools = false,
     this.homePlanoFeatures,
+    this.quietChrome = false,
   });
 
   final bool isDark;
@@ -33,6 +34,8 @@ class DashboardCollapsibleToolsSection extends ConsumerWidget {
   /// Modo foco: só header que abre o catálogo (sem grid featured).
   final bool hideFeaturedTools;
   final PlanoFeatures? homePlanoFeatures;
+  /// Home secundária: chrome alinhado aos collapsibles quiet.
+  final bool quietChrome;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -94,14 +97,14 @@ class DashboardCollapsibleToolsSection extends ConsumerWidget {
                 onTap: openCatalog,
                 borderRadius: BorderRadius.circular(TokensStrip.rCard),
                 child: Ink(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 13,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: quietChrome ? 12 : 14,
+                    vertical: quietChrome ? 10 : 13,
                   ),
                   decoration: fxStripCardDecoration(
                     context,
                     radius: TokensStrip.rCard,
-                    glowStrength: 0.06,
+                    glowStrength: quietChrome ? 0.03 : 0.06,
                   ),
                   child: Row(
                     children: [
@@ -111,10 +114,17 @@ class DashboardCollapsibleToolsSection extends ConsumerWidget {
                           children: [
                             Text(
                               DashboardMicrocopy.maisFerramentas,
-                              style: FocuxHubTypography.sectionTitle(
-                                context,
-                                color: heading,
-                              ),
+                              style:
+                                  quietChrome
+                                      ? FocuxHubTypography.bodyMuted(
+                                        color: heading,
+                                        fontWeight: FontWeight.w700,
+                                        height: 1.25,
+                                      )
+                                      : FocuxHubTypography.sectionTitle(
+                                        context,
+                                        color: heading,
+                                      ),
                             ),
                             const SizedBox(height: 2),
                             Text(
@@ -129,7 +139,7 @@ class DashboardCollapsibleToolsSection extends ConsumerWidget {
                       ),
                       Icon(
                         Icons.chevron_right_rounded,
-                        size: 22,
+                        size: quietChrome ? 20 : 22,
                         color: link,
                       ),
                     ],

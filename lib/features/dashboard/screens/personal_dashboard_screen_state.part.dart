@@ -7,7 +7,9 @@ class _PersonalDashboardScreenState
   double _homeScrollOffset = 0;
   late final ScrollController _homeScrollController;
   final GlobalKey _commandPanelKey = GlobalKey();
+  final GlobalKey _toolsSectionKey = GlobalKey();
   bool _prioritiesPanelOffscreen = false;
+  bool _toolsBlocksSticky = false;
   int _attentionSectionResetToken = 0;
   String? _lastTrackedLocation;
   VoidCallback? _routeListener;
@@ -199,27 +201,56 @@ class _PersonalDashboardScreenState
       return;
     }
     _homeScrollOffset = offset;
-    _measureCommandPanelOffscreen();
+    _measureStickyVisibility();
   }
 
-  /// Mede se o painel de próximas ações saiu da viewport — dita quando o CTA
-  /// "Ver prioridades" aparece flutuando acima do dock.
-  void _measureCommandPanelOffscreen() {
-    final box =
+  /// Painel off-screen + tools na faixa do chip → liga/desliga sticky.
+  void _measureStickyVisibility() {
+    final panelBox =
         _commandPanelKey.currentContext?.findRenderObject() as RenderBox?;
-    if (box == null || !box.attached || !box.hasSize) return;
-    final panelBottom = box.localToGlobal(Offset.zero).dy + box.size.height;
-    final headerReserve = MediaQuery.of(context).padding.top + 48;
-    final offscreen = dashboardPanelIsOffscreen(
-      panelBottom: panelBottom,
-      headerReserve: headerReserve,
-      currentlyOffscreen: _prioritiesPanelOffscreen,
-    );
+    var panelOffscreen = _prioritiesPanelOffscreen;
+    if (panelBox != null && panelBox.attached && panelBox.hasSize) {
+      final panelBottom =
+          panelBox.localToGlobal(Offset.zero).dy + panelBox.size.height;
+      final headerReserve = MediaQuery.of(context).padding.top + 48;
+      panelOffscreen = dashboardPanelIsOffscreen(
+        panelBottom: panelBottom,
+        headerReserve: headerReserve,
+        currentlyOffscreen: _prioritiesPanelOffscreen,
+      );
+    }
+
+    var toolsBlocked = _toolsBlocksSticky;
+    final toolsBox =
+        _toolsSectionKey.currentContext?.findRenderObject() as RenderBox?;
+    if (toolsBox != null && toolsBox.attached && toolsBox.hasSize) {
+      final media = MediaQuery.of(context);
+      final toolsTop = toolsBox.localToGlobal(Offset.zero).dy;
+      final stickyBand =
+          DashboardLayout.prioritiesOverlayReserve +
+          DashboardLayout.bottomDockClearance +
+          media.padding.bottom +
+          56;
+      toolsBlocked = dashboardToolsBlocksSticky(
+        toolsTopGlobal: toolsTop,
+        viewportHeight: media.size.height,
+        stickyBandFromBottom: stickyBand,
+        currentlyBlocked: _toolsBlocksSticky,
+      );
+    } else {
+      toolsBlocked = false;
+    }
+
     if (dashboardScrollVisualStateChanged(
       previousPanelOffscreen: _prioritiesPanelOffscreen,
-      newPanelOffscreen: offscreen,
+      newPanelOffscreen: panelOffscreen,
+      previousToolsBlocked: _toolsBlocksSticky,
+      newToolsBlocked: toolsBlocked,
     )) {
-      setState(() => _prioritiesPanelOffscreen = offscreen);
+      setState(() {
+        _prioritiesPanelOffscreen = panelOffscreen;
+        _toolsBlocksSticky = toolsBlocked;
+      });
     }
   }
 

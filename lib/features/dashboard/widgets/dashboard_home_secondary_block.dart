@@ -41,6 +41,7 @@ class DashboardHomeSecondaryBlock extends StatelessWidget {
     this.topAderencia = const [],
     this.alunosScore = const [],
     this.homePlanoFeatures,
+    this.toolsSectionKey,
   });
 
   final DashboardHomeFocusRules focusRules;
@@ -64,6 +65,7 @@ class DashboardHomeSecondaryBlock extends StatelessWidget {
   final List<DashboardAderenciaTopItem> topAderencia;
   final List<AlunoScoreResumo> alunosScore;
   final PlanoFeatures? homePlanoFeatures;
+  final GlobalKey? toolsSectionKey;
 
   @override
   Widget build(BuildContext context) {
@@ -77,13 +79,11 @@ class DashboardHomeSecondaryBlock extends StatelessWidget {
       children: [
         if (alunosScore.isNotEmpty) ...[
           SizedBox(height: DashboardLayout.sliverSectionGap),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: TokensStrip.s4),
-            child: DashboardBaseRadarStrip(
-              isDark: isDark,
-              scores: alunosScore,
-              initiallyExpanded: !focusRules.focusMode,
-            ),
+          DashboardBaseRadarStrip(
+            isDark: isDark,
+            scores: alunosScore,
+            initiallyExpanded: !focusRules.collapseRadar,
+            quietChrome: true,
           ),
         ],
         SizedBox(height: DashboardLayout.sliverSectionGap),
@@ -95,6 +95,7 @@ class DashboardHomeSecondaryBlock extends StatelessWidget {
                   : DashboardMicrocopy.treinosRankingHint,
           isDark: isDark,
           initiallyExpanded: !focusRules.collapseAderencia,
+          quietChrome: true,
           headerActionLabel: showRelatorio ? 'Relatório' : null,
           onHeaderAction: showRelatorio ? onOpenRelatorio : null,
           child: DashboardAderenciaSemanaWidget(
@@ -116,6 +117,7 @@ class DashboardHomeSecondaryBlock extends StatelessWidget {
                   : 'R\$ 0 recebido · meta do mês',
           isDark: isDark,
           initiallyExpanded: !focusRules.collapseFinance,
+          quietChrome: true,
           child: dashboardEntryMotion(
             context: context,
             fade: heroFade,
@@ -138,12 +140,16 @@ class DashboardHomeSecondaryBlock extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: TokensStrip.s3),
-        DashboardCollapsibleToolsSection(
-          isDark: isDark,
-          shortcutAspectRatio: shortcutAspectRatio,
-          hideFeaturedTools: focusRules.hideFeaturedTools,
-          homePlanoFeatures: homePlanoFeatures,
+        const SizedBox(height: TokensStrip.s2),
+        KeyedSubtree(
+          key: toolsSectionKey,
+          child: DashboardCollapsibleToolsSection(
+            isDark: isDark,
+            shortcutAspectRatio: shortcutAspectRatio,
+            hideFeaturedTools: focusRules.hideFeaturedTools,
+            homePlanoFeatures: homePlanoFeatures,
+            quietChrome: true,
+          ),
         ),
       ],
     );

@@ -164,12 +164,13 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                   goPersonalShellTab(context, '/alunos?filtro=risco');
                 }
 
-                // Sticky só depois do painel de próximas ações sair da tela
-                // (medido via GlobalKey) — um único CTA no viewport.
+                // Sticky: painel off-screen, com prioridades, e tools fora da
+                // faixa do chip (não cobre catálogo / grid).
                 final showStickyPrioritiesAction =
                     dashboardShowsStickyPrioritiesAction(
                       panelOffscreen: _prioritiesPanelOffscreen,
                       showPrioritiesLink: showPrioritiesLink,
+                      toolsBlocksSticky: _toolsBlocksSticky,
                     );
                 final stickyCommandActionsLabel =
                     showStickyPrioritiesAction
@@ -298,6 +299,7 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                                 topAderencia: home.topAderencia,
                                 alunosScore: home.commandCenter.alunosScore,
                                 homePlanoFeatures: home.planoFeatures,
+                                toolsSectionKey: _toolsSectionKey,
                                 onOpenRelatorio:
                                     () =>
                                         context.push('/relatorios/global'),

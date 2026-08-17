@@ -8,11 +8,28 @@ const double dashboardScrollOffsetEpsilon = 2;
 bool dashboardShowsFloatingPrioritiesChip(double offset) => false;
 
 /// Sticky só quando o painel de próximas ações saiu da viewport (medido via
-/// GlobalKey em runtime) e ainda há prioridades extras para ver.
+/// GlobalKey em runtime), ainda há prioridades extras, e o bloco de tools
+/// não está na faixa do chip (evita cobrir «Mais ferramentas» / catálogo).
 bool dashboardShowsStickyPrioritiesAction({
   required bool panelOffscreen,
   required bool showPrioritiesLink,
-}) => panelOffscreen && showPrioritiesLink;
+  bool toolsBlocksSticky = false,
+}) => panelOffscreen && showPrioritiesLink && !toolsBlocksSticky;
+
+/// Tools entraram na faixa inferior (sticky + dock) — some o overlay.
+bool dashboardToolsBlocksSticky({
+  required double toolsTopGlobal,
+  required double viewportHeight,
+  required double stickyBandFromBottom,
+  required bool currentlyBlocked,
+  double hysteresis = 28,
+}) {
+  final threshold = viewportHeight - stickyBandFromBottom;
+  if (currentlyBlocked) {
+    return toolsTopGlobal < threshold + hysteresis;
+  }
+  return toolsTopGlobal < threshold;
+}
 
 /// Inline «Mais prioridades» some quando o overlay sticky já cobre o CTA.
 bool dashboardShowsInlinePrioritiesLink({
@@ -38,9 +55,12 @@ bool dashboardScrollOffsetMeaningfullyChanged(
   double newOffset,
 ) => (newOffset - previousOffset).abs() >= dashboardScrollOffsetEpsilon;
 
-/// Só vale a pena reconstruir a árvore quando a visibilidade do painel
-/// realmente muda (evita rebuilds a cada pixel de scroll).
+/// Só vale a pena reconstruir a árvore quando a visibilidade sticky muda.
 bool dashboardScrollVisualStateChanged({
   required bool previousPanelOffscreen,
   required bool newPanelOffscreen,
-}) => previousPanelOffscreen != newPanelOffscreen;
+  bool previousToolsBlocked = false,
+  bool newToolsBlocked = false,
+}) =>
+    previousPanelOffscreen != newPanelOffscreen ||
+    previousToolsBlocked != newToolsBlocked;

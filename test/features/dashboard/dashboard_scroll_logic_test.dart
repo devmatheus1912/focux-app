@@ -30,6 +30,46 @@ void main() {
         ),
         isTrue,
       );
+      expect(
+        dashboardShowsStickyPrioritiesAction(
+          panelOffscreen: true,
+          showPrioritiesLink: true,
+          toolsBlocksSticky: true,
+        ),
+        isFalse,
+      );
+    });
+  });
+
+  group('dashboardToolsBlocksSticky', () {
+    test('blocks when tools enter the bottom sticky band', () {
+      expect(
+        dashboardToolsBlocksSticky(
+          toolsTopGlobal: 500,
+          viewportHeight: 800,
+          stickyBandFromBottom: 200,
+          currentlyBlocked: false,
+        ),
+        isTrue,
+      );
+      expect(
+        dashboardToolsBlocksSticky(
+          toolsTopGlobal: 650,
+          viewportHeight: 800,
+          stickyBandFromBottom: 200,
+          currentlyBlocked: false,
+        ),
+        isFalse,
+      );
+      expect(
+        dashboardToolsBlocksSticky(
+          toolsTopGlobal: 620,
+          viewportHeight: 800,
+          stickyBandFromBottom: 200,
+          currentlyBlocked: true,
+        ),
+        isTrue,
+      );
     });
   });
 
@@ -63,7 +103,7 @@ void main() {
   });
 
   group('dashboardScrollVisualStateChanged', () {
-    test('changes only when panel visibility flips', () {
+    test('changes only when sticky inputs flip', () {
       expect(
         dashboardScrollVisualStateChanged(
           previousPanelOffscreen: false,
@@ -75,6 +115,15 @@ void main() {
         dashboardScrollVisualStateChanged(
           previousPanelOffscreen: false,
           newPanelOffscreen: true,
+        ),
+        isTrue,
+      );
+      expect(
+        dashboardScrollVisualStateChanged(
+          previousPanelOffscreen: true,
+          newPanelOffscreen: true,
+          previousToolsBlocked: false,
+          newToolsBlocked: true,
         ),
         isTrue,
       );

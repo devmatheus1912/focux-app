@@ -23,6 +23,7 @@ class DashboardCollapsibleSection extends StatefulWidget {
     this.collapsedActionLabel,
     this.onCollapsedAction,
     this.collapsedPreview,
+    this.quietChrome = false,
   });
 
   final String title;
@@ -36,6 +37,8 @@ class DashboardCollapsibleSection extends StatefulWidget {
   final String? collapsedActionLabel;
   final VoidCallback? onCollapsedAction;
   final String? collapsedPreview;
+  /// Home secundária: menos glow/padding para não competir com o fold.
+  final bool quietChrome;
 
   @override
   State<DashboardCollapsibleSection> createState() =>
@@ -93,11 +96,11 @@ class _DashboardCollapsibleSectionState
         widget.onCollapsedAction != null;
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(
+      padding: EdgeInsets.fromLTRB(
         TokensStrip.s4,
         0,
         TokensStrip.s4,
-        TokensStrip.s3,
+        widget.quietChrome ? TokensStrip.s2 : TokensStrip.s3,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -117,14 +120,14 @@ class _DashboardCollapsibleSectionState
                 onTap: _onHeaderTap,
                 borderRadius: BorderRadius.circular(TokensStrip.rCard),
                 child: Ink(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 13,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: widget.quietChrome ? 12 : 14,
+                    vertical: widget.quietChrome ? 10 : 13,
                   ),
                   decoration: fxStripCardDecoration(
                     context,
                     radius: TokensStrip.rCard,
-                    glowStrength: 0.08,
+                    glowStrength: widget.quietChrome ? 0.03 : 0.08,
                   ),
                   child: Row(
                     children: [
@@ -134,10 +137,17 @@ class _DashboardCollapsibleSectionState
                           children: [
                             Text(
                               widget.title,
-                              style: FocuxHubTypography.sectionTitle(
-                                context,
-                                color: heading,
-                              ),
+                              style:
+                                  widget.quietChrome
+                                      ? FocuxHubTypography.bodyMuted(
+                                        color: heading,
+                                        fontWeight: FontWeight.w700,
+                                        height: 1.25,
+                                      )
+                                      : FocuxHubTypography.sectionTitle(
+                                        context,
+                                        color: heading,
+                                      ),
                             ),
                             if (!_expanded) ...[
                               const SizedBox(height: 2),
@@ -215,12 +225,12 @@ class _DashboardCollapsibleSectionState
                           child: Padding(
                             padding: const EdgeInsets.all(6),
                             child: Icon(
-                                _expanded
-                                    ? Icons.expand_less_rounded
-                                    : Icons.expand_more_rounded,
-                                size: 22,
-                                color: link,
-                              ),
+                              _expanded
+                                  ? Icons.expand_less_rounded
+                                  : Icons.expand_more_rounded,
+                              size: widget.quietChrome ? 20 : 22,
+                              color: link,
+                            ),
                           ),
                         ),
                       ),
@@ -237,7 +247,9 @@ class _DashboardCollapsibleSectionState
             child:
                 _expanded
                     ? Padding(
-                      padding: const EdgeInsets.only(top: 10),
+                      padding: EdgeInsets.only(
+                        top: widget.quietChrome ? 8 : 10,
+                      ),
                       child: widget.child,
                     )
                     : const SizedBox(width: double.infinity),
