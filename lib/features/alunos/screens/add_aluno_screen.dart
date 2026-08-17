@@ -72,6 +72,8 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
     return name.split(RegExp(r'\s+')).first;
   }
 
+  bool _entryStarted = false;
+
   @override
   void initState() {
     super.initState();
@@ -84,7 +86,6 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
       begin: const Offset(0, 0.035),
       end: Offset.zero,
     ).animate(CurvedAnimation(parent: _entryCtrl, curve: Curves.easeOutCubic));
-    _entryCtrl.forward();
 
     _nomeCtrl.addListener(_refreshSubmitState);
     _emailCtrl.addListener(_refreshSubmitState);
@@ -98,6 +99,18 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
     final nome = widget.initialNome?.trim();
     if (nome != null && nome.isNotEmpty) {
       _nomeCtrl.text = nome;
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_entryStarted) return;
+    _entryStarted = true;
+    if (TokensStrip.prefersReducedMotion(context)) {
+      _entryCtrl.value = 1.0;
+    } else {
+      _entryCtrl.forward();
     }
   }
 

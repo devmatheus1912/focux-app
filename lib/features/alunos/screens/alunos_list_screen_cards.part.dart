@@ -23,9 +23,16 @@ class _FxChip extends StatelessWidget {
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
 
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(TokensStrip.rPill),
+    return Semantics(
+      button: true,
+      selected: isSelected,
+      label: '$label, $count alunos',
+      child: InkWell(
+        onTap: () {
+          HapticFeedback.selectionClick();
+          onTap();
+        },
+        borderRadius: BorderRadius.circular(TokensStrip.rPill),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 160),
         curve: Curves.easeOutCubic,
@@ -81,6 +88,7 @@ class _FxChip extends StatelessWidget {
             ),
           ],
         ),
+      ),
       ),
     );
   }

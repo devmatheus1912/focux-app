@@ -33,8 +33,7 @@ extension AlunosListScreenBody on _AlunosListScreenState {
                   !_modoSelecao &&
                   _filtro == AlunoFiltro.todos &&
                   (contatoCount > 0 || riscoCount > 0);
-              final listBottomGap =
-                  FocuxPlatform.isCompact(context) ? 28.0 : 36.0;
+              final listBottomGap = AlunosLayout.listBottomGap(context);
 
               return SafeArea(
                 bottom: false,
@@ -63,7 +62,12 @@ extension AlunosListScreenBody on _AlunosListScreenState {
                         _filtro == AlunoFiltro.todos &&
                         contatoCount > 0)
                       Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                        padding: const EdgeInsets.fromLTRB(
+                          AlunosLayout.screenPadding,
+                          0,
+                          AlunosLayout.screenPadding,
+                          8,
+                        ),
                         child: _AlunosTriageBanner(
                           count: contatoCount,
                           isDark: isDark,
@@ -80,7 +84,12 @@ extension AlunosListScreenBody on _AlunosListScreenState {
                         _filtro == AlunoFiltro.todos &&
                         riscoCount > 0)
                       Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                        padding: const EdgeInsets.fromLTRB(
+                          AlunosLayout.screenPadding,
+                          0,
+                          AlunosLayout.screenPadding,
+                          8,
+                        ),
                         child: _AlunosTriageBanner(
                           count: riscoCount,
                           isDark: isDark,
@@ -122,8 +131,8 @@ extension AlunosListScreenBody on _AlunosListScreenState {
                                 },
                                 child: ListView.separated(
                                   padding: EdgeInsets.only(
-                                    left: 16,
-                                    right: 16,
+                                    left: AlunosLayout.screenPadding,
+                                    right: AlunosLayout.screenPadding,
                                     top: 8,
                                     bottom: listBottomGap,
                                   ),
@@ -165,7 +174,10 @@ extension AlunosListScreenBody on _AlunosListScreenState {
 
                     // Bottom action bar (seleção)
                     AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
+                      duration:
+                          TokensStrip.prefersReducedMotion(context)
+                              ? Duration.zero
+                              : const Duration(milliseconds: 200),
                       height:
                           (_modoSelecao && _selecionados.isNotEmpty) ? null : 0,
                       child:

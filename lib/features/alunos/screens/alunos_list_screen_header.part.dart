@@ -143,22 +143,26 @@ extension AlunosListScreenHeader on _AlunosListScreenState {
                                   const SizedBox(
                                     width: AlunosLayout.headerChromeGap,
                                   ),
-                                  InkWell(
-                                    onTap: _toggleModoSelecao,
-                                    borderRadius: BorderRadius.circular(
-                                      AlunosLayout.headerChromeSize / 2,
-                                    ),
-                                    child: Container(
-                                      width: AlunosLayout.headerChromeSize,
-                                      height: AlunosLayout.headerChromeSize,
-                                      decoration: chrome.headerAction(
-                                        radius:
-                                            AlunosLayout.headerChromeSize / 2,
+                                  Semantics(
+                                    button: true,
+                                    label: 'Selecionar alunos',
+                                    child: InkWell(
+                                      onTap: _toggleModoSelecao,
+                                      borderRadius: BorderRadius.circular(
+                                        AlunosLayout.headerChromeSize / 2,
                                       ),
-                                      child: Icon(
-                                        Icons.checklist_rounded,
-                                        size: 20,
-                                        color: ink,
+                                      child: Container(
+                                        width: AlunosLayout.headerChromeSize,
+                                        height: AlunosLayout.headerChromeSize,
+                                        decoration: chrome.headerAction(
+                                          radius:
+                                              AlunosLayout.headerChromeSize / 2,
+                                        ),
+                                        child: Icon(
+                                          Icons.checklist_rounded,
+                                          size: 20,
+                                          color: ink,
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -197,20 +201,19 @@ extension AlunosListScreenHeader on _AlunosListScreenState {
 
                           // Search Bar
                           Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 6,
-                            ),
+                            padding: AlunosLayout.searchBarOuterPadding,
                             child: AnimatedContainer(
                               duration: const Duration(milliseconds: 180),
                               curve: Curves.easeOutCubic,
-                              padding: const EdgeInsets.fromLTRB(13, 3, 8, 3),
+                              padding: AlunosLayout.searchBarPadding,
                               decoration: BoxDecoration(
                                 color:
                                     isDark
                                         ? EagleTokens.darkCard
                                         : Colors.white.withValues(alpha: 0.86),
-                                borderRadius: BorderRadius.circular(17),
+                                borderRadius: BorderRadius.circular(
+                                  AlunosLayout.searchBarRadius,
+                                ),
                                 border: Border.all(
                                   color:
                                       _searchFocusNode.hasFocus
@@ -253,34 +256,39 @@ extension AlunosListScreenHeader on _AlunosListScreenState {
                                   ),
                                   const SizedBox(width: 10),
                                   Expanded(
-                                    child: TextField(
-                                      controller: _searchController,
-                                      focusNode: _searchFocusNode,
-                                      onChanged: (value) {
-                                        setState(() => _query = value);
-                                      },
-                                      textInputAction: TextInputAction.search,
-                                      cursorColor: primary,
-                                      style: AppTypography.inter(
-                                        fontSize: TokensStrip.fontBody,
-                                        color: ink,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                      decoration: InputDecoration(
-                                        isDense: true,
-                                        contentPadding:
-                                            const EdgeInsets.symmetric(
-                                              vertical: 10,
-                                            ),
-                                        hintText: 'Buscar por nome ou objetivo',
-                                        hintStyle: AppTypography.inter(
+                                    child: Semantics(
+                                      label: 'Buscar aluno por nome ou objetivo',
+                                      textField: true,
+                                      child: TextField(
+                                        controller: _searchController,
+                                        focusNode: _searchFocusNode,
+                                        onChanged: (value) {
+                                          setState(() => _query = value);
+                                        },
+                                        textInputAction: TextInputAction.search,
+                                        cursorColor: primary,
+                                        style: AppTypography.inter(
                                           fontSize: TokensStrip.fontBody,
-                                          color: mute,
+                                          color: ink,
                                           fontWeight: FontWeight.w500,
                                         ),
-                                        border: InputBorder.none,
-                                        enabledBorder: InputBorder.none,
-                                        focusedBorder: InputBorder.none,
+                                        decoration: InputDecoration(
+                                          isDense: true,
+                                          contentPadding:
+                                              const EdgeInsets.symmetric(
+                                                vertical: 10,
+                                              ),
+                                          hintText:
+                                              'Buscar por nome ou objetivo',
+                                          hintStyle: AppTypography.inter(
+                                            fontSize: TokensStrip.fontBody,
+                                            color: mute,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                          border: InputBorder.none,
+                                          enabledBorder: InputBorder.none,
+                                          focusedBorder: InputBorder.none,
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -363,12 +371,7 @@ extension AlunosListScreenHeader on _AlunosListScreenState {
 
                           // Filter Chips
                           Padding(
-                            padding: const EdgeInsets.fromLTRB(
-                              TokensStrip.s4,
-                              4,
-                              16,
-                              10,
-                            ),
+                            padding: AlunosLayout.filterRowPadding,
                             child: FxHorizontalScrollPeek(
                               showPeek: true,
                               child: SingleChildScrollView(

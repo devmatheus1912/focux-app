@@ -22,8 +22,7 @@ void main() {
     expect(screen, contains('mensalidadesPagasMessage'));
     expect(screen, contains('FxHorizontalScrollPeek'));
     expect(screen, contains('fx_horizontal_scroll_peek.dart'));
-    expect(screen, contains("statusText = 'Risco alto'"));
-    expect(screen, contains("statusText = 'Inadimplente'"));
+    expect(screen, contains('alunoListStatusBadge'));
     expect(screen, contains("label: 'Ativo'"));
     expect(screen, contains("label: 'Inativo'"));
     expect(screen, contains("label: 'Bloqueado'"));
@@ -31,10 +30,11 @@ void main() {
     expect(screen, contains('Lista compacta'));
     expect(screen, contains('AlunoListPreferencesStore'));
     expect(screen, contains('maskEmailForList'));
-    expect(screen, contains('alunoRiscoAltoBadgeColors'));
     expect(screen, contains('alunoListSecondaryInk'));
-    expect(screen, contains('AlunosLayout'));
-    expect(screen, contains('_AlunoStatusPill'));
+    expect(screen, contains('AlunosLoadingScaffold'));
+    expect(screen, contains('AlunosErrorScaffold'));
+    expect(screen, contains('FxContentWidthLimiter'));
+    expect(screen, contains('ProductEvents.alunosViewed'));
     expect(screen, contains("part 'alunos_list_screen_state.part.dart'"));
     expect(screen, contains("part 'alunos_list_screen_filters.part.dart'"));
     expect(screen, contains("part 'alunos_list_screen_header.part.dart'"));

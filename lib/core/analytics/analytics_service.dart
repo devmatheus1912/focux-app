@@ -132,6 +132,7 @@ class ProductEvents {
   static const homeHelpOpened = 'home_help_opened';
 
   static const alunosAddTapped = 'alunos_add_tapped';
+  static const alunosViewed = 'alunos_viewed';
   static const leadCreatedOrOpened = 'lead_created_or_opened';
   static const alertaRiscoOpened = 'alerta_risco_opened';
   static const dunningMarkedRecovered = 'dunning_marked_recovered';

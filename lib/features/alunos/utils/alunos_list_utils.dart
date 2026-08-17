@@ -70,3 +70,37 @@ String adherenceActivityLabel({
   }
   return alunoWeeklyCheckinsLabel(weeklyCheckins);
 }
+
+/// Badge de status do card — lógica fora da UI.
+({String label, Color fill, Color foreground}) alunoListStatusBadge(
+  Aluno aluno,
+  bool isDark,
+) {
+  if (aluno.statusFinanceiro == 'INADIMPLENTE' || aluno.inadimplente) {
+    return (
+      label: 'Inadimplente',
+      fill: EagleTokens.badSoft,
+      foreground: EagleTokens.bad,
+    );
+  }
+  if (aluno.status == 'INATIVO') {
+    return (
+      label: 'Inativo',
+      fill: EagleTokens.warnSoft,
+      foreground: EagleTokens.warn,
+    );
+  }
+  if (aluno.emRisco) {
+    final riscoColors = alunoRiscoAltoBadgeColors(isDark);
+    return (
+      label: 'Risco alto',
+      fill: riscoColors.$2,
+      foreground: riscoColors.$1,
+    );
+  }
+  return (
+    label: 'Ativo',
+    fill: EagleTokens.goodSoft,
+    foreground: EagleTokens.good,
+  );
+}

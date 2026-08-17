@@ -241,6 +241,29 @@ extension AlunosListScreenFilters on _AlunosListScreenState {
                       ),
                     ],
                   ),
+                  const SizedBox(height: 16),
+                  Semantics(
+                    button: true,
+                    label: 'Ajuda da lista de alunos',
+                    child: TextButton.icon(
+                      onPressed: () {
+                        Navigator.pop(ctx);
+                        showAlunosListHelpSheet(context);
+                      },
+                      icon: Icon(
+                        Icons.help_outline_rounded,
+                        size: 18,
+                        color: linkColor,
+                      ),
+                      label: Text(
+                        'Como usar a lista',
+                        style: TextStyle(
+                          color: linkColor,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),

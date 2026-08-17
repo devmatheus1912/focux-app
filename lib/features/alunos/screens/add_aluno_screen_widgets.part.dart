@@ -625,7 +625,7 @@ class _BottomSubmitBar extends StatelessWidget {
                   shadowColor: primary.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(TokensStrip.rCard),
                   child: InkWell(
-                    onTap: onSubmit,
+                    onTap: loading ? null : onSubmit,
                     borderRadius: BorderRadius.circular(TokensStrip.rCard),
                     child:
                         loading

@@ -53,20 +53,16 @@ class _AlunosTriageBanner extends StatelessWidget {
                   children: [
                     Text(
                       title,
-                      style: AppTypography.inter(
-                        fontSize: TokensStrip.fontBodySm,
-                        fontWeight: FontWeight.w700,
+                      style: FocuxHubTypography.sectionTitle(
+                        context,
                         color: ink,
-                        height: 1.25,
-                      ),
+                      ).copyWith(fontSize: TokensStrip.fontBodySm),
                     ),
                     Text(
                       subtitle,
-                      style: AppTypography.inter(
-                        fontSize: 11.5,
+                      style: FocuxHubTypography.bodyMuted(
                         color: mute,
-                        height: 1.3,
-                      ),
+                      ).copyWith(fontSize: 11.5, height: 1.3),
                     ),
                   ],
                 ),

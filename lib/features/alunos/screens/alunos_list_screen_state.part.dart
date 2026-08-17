@@ -20,6 +20,16 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
       if (mounted) setState(() {});
     });
     _loadListPreferences();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      AnalyticsService.instance.track(
+        ProductEvents.alunosViewed,
+        props: {
+          'filtro': _filtro.name,
+          'compact': _listaCompacta,
+        },
+      );
+    });
   }
 
   Future<void> _loadListPreferences() async {
@@ -101,9 +111,10 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
   Future<void> _excluirSelecionados() async {
     final total = _selecionados.length;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final confirmar = await showModalBottomSheet<bool>(
+    final confirmar = await     showModalBottomSheet<bool>(
       context: context,
       backgroundColor: Colors.transparent,
+      showDragHandle: true,
       barrierColor: Colors.black.withValues(alpha: 0.34),
       builder: (_) => _ExcluirAlunosSheet(count: total, isDark: isDark),
     );
@@ -119,7 +130,15 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
     }
     if (mounted) {
       invalidateAlunosCaches(ref);
-      FeedbackHelper.showSuccess(context, _deletedMessage(sucesso));
+      if (sucesso < total) {
+        FeedbackHelper.showError(
+          context,
+          '${total - sucesso} de $total não puderam ser excluídos.',
+        );
+      }
+      if (sucesso > 0) {
+        FeedbackHelper.showSuccess(context, _deletedMessage(sucesso));
+      }
       setState(() {
         _modoSelecao = false;
         _selecionados.clear();
@@ -185,6 +204,7 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
     showModalBottomSheet<void>(
       context: context,
       backgroundColor: Colors.transparent,
+      showDragHandle: true,
       barrierColor: Colors.black.withValues(alpha: 0.34),
       isScrollControlled: true,
       useSafeArea: true,
@@ -391,8 +411,6 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
         setState(() => _fetchedAt = DateTime.now());
       }
     });
-    final isDark = ShellChrome.of(context).isDark;
-    final primary = Theme.of(context).colorScheme.primary;
 
     return fxScreenA11yScope(
       label: 'Lista de alunos',
@@ -405,30 +423,14 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
         child: Scaffold(
           backgroundColor: Colors.transparent,
           body: homeAsync.when(
-            loading:
-                () => const SafeArea(
-                  child: Padding(
-                    padding: EdgeInsets.fromLTRB(
-                      TokensStrip.s4,
-                      86,
-                      TokensStrip.s4,
-                      0,
-                    ),
-                    child: SkeletonList(count: 6),
-                  ),
-                ),
+            loading: () => const AlunosLoadingScaffold(),
             error:
-                (e, _) => SafeArea(
-                  child: FxErrorState(
-                    chromeOnDark: isDark,
-                    primary: primary,
-                    title: FocuxMicrocopy.erroAoCarregarAlunos,
-                    message: friendlyError(e),
-                    onRetry: () => invalidateAlunosCaches(ref),
-                  ),
+                (e, _) => AlunosErrorScaffold(
+                  error: e,
+                  onRetry: () => invalidateAlunosCaches(ref),
                 ),
             data: (home) {
-              return _buildAlunosHomeData(home);
+              return FxContentWidthLimiter(child: _buildAlunosHomeData(home));
             },
           ),
         ),
