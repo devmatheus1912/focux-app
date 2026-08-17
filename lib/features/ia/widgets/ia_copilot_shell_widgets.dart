@@ -77,12 +77,14 @@ class IaCopilotHeaderStatus extends StatelessWidget {
     required this.brand,
     required this.line,
     required this.ink,
+    this.quotaLabel = 'Pronto',
   });
 
   final bool dark;
   final Color brand;
   final Color line;
   final Color ink;
+  final String quotaLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -99,7 +101,7 @@ class IaCopilotHeaderStatus extends StatelessWidget {
           ),
           const SizedBox(width: 7),
           Text(
-            'Pronto',
+            quotaLabel,
             style: TextStyle(
               color: ink,
               fontSize: 12,

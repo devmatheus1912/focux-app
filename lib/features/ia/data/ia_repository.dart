@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
 import '../../subscription/models/subscription_plan.dart';
 import '../models/ia_copilot_proxima_acao.dart';
+import '../models/ia_copiloto_home.dart';
 import '../models/ia_progressao_carga_result.dart';
 import '../models/progressao_sugestao.dart';
 
@@ -192,6 +193,15 @@ class IaRepository {
   }
 
   // ── Copiloto ──────────────────────────────────────────────────────────────
+
+  Future<IaCopilotoHomeBundle> copilotoHome() async {
+    return _withIaErrorContext(() async {
+      final r = await _dio.get('/api/ia/copiloto/home');
+      return IaCopilotoHomeBundle.fromJson(
+        Map<String, dynamic>.from(r.data as Map),
+      );
+    });
+  }
 
   Future<Map<String, dynamic>> resumoSemanal() async {
     return _withIaErrorContext(() async {

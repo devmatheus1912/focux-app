@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/aluno_repository.dart';
+import '../../ia/providers/ia_copilot_providers.dart';
 
 final alunoRepositoryProvider = Provider<AlunoRepository>(
   (ref) => AlunoRepository(ref.read(apiClientProvider)),
@@ -35,8 +36,10 @@ final alunoMeProvider = FutureProvider<Aluno>((ref) async {
 
 void invalidateAlunosCaches(WidgetRef ref) {
   ref.invalidate(alunosHomeProvider);
+  ref.invalidate(iaCopilotoHomeProvider);
 }
 
 void invalidateAlunosCachesRef(Ref ref) {
   ref.invalidate(alunosHomeProvider);
+  ref.invalidate(iaCopilotoHomeProvider);
 }

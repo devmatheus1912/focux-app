@@ -90,6 +90,11 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
   }
 
   @override
-  @override
   Widget build(BuildContext context) => buildIaCopilotoBody(context);
+
+  String _quotaHeaderLabel(PlanoFeatures? features) {
+    if (features == null) return 'Pronto';
+    if (features.iaQuotaEsgotada) return 'Cota esgotada';
+    return '${features.iaRestantes} restantes';
+  }
 }

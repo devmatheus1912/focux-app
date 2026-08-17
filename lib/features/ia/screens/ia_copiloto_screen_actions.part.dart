@@ -2,7 +2,17 @@ part of 'ia_copiloto_screen.dart';
 
 extension IaCopilotScreenActions on _IaCopilotoScreenState {
   Future<void> _selecionarAluno() async {
-    final alunos = await ref.read(alunosProvider.future);
+    final List<IaCopilotoAlunoResumo> alunos;
+    try {
+      alunos = (await ref.read(iaCopilotoHomeProvider.future)).alunosResumo;
+    } catch (e) {
+      if (!mounted) return;
+      FeedbackHelper.showError(
+        context,
+        friendlyError(e, fallback: 'Não foi possível carregar os alunos.'),
+      );
+      return;
+    }
     if (!mounted) return;
     if (alunos.isEmpty) {
       FeedbackHelper.showError(
@@ -358,6 +368,7 @@ extension IaCopilotScreenActions on _IaCopilotoScreenState {
       _proximaAcao = await ref.read(
         proximaAcaoProvider(_selectedAlunoId!).future,
       );
+      ref.invalidate(iaCopilotoHomeProvider);
       stopwatch.stop();
       if (mounted) {
         setState(() {
@@ -384,6 +395,7 @@ extension IaCopilotScreenActions on _IaCopilotoScreenState {
           _gerando = false;
           _erro = e;
         });
+        ref.invalidate(iaCopilotoHomeProvider);
         await IaQuotaUpgrade.handleError(context, ref, e);
       }
     }

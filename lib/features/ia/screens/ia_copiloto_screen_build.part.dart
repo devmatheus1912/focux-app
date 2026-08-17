@@ -13,6 +13,16 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
     final line = chrome.line;
     final brand = dark ? primaryAccent : primary;
     final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
+    final homeAsync = ref.watch(iaCopilotoHomeProvider);
+    final home = homeAsync.valueOrNull;
+    final planoFromHome = home?.planoFeatures;
+    if (planoFromHome != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        ref.read(planoFeaturesProvider.notifier).seedFromHome(planoFromHome);
+      });
+    }
+    final quotaLabel = _quotaHeaderLabel(planoFromHome);
 
     return fxScreenA11yScope(
       label: 'Copiloto',
@@ -33,6 +43,7 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
                 brand: brand,
                 line: line,
                 ink: ink,
+                quotaLabel: quotaLabel,
               ),
             ],
           ),
@@ -62,13 +73,26 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
                       16,
                       12,
                     ),
-                    child: IaCopilotStudentSelector(
-                      alunoNome: _selectedAlunoNome,
-                      brand: brand,
-                      ink: ink,
-                      mute: mute,
-                      onTap: _selecionarAluno,
-                    ),
+                    child:
+                        homeAsync.hasError
+                            ? FxErrorState(
+                              chromeOnDark: dark,
+                              primary: brand,
+                              message: friendlyError(
+                                homeAsync.error!,
+                                fallback:
+                                    'Não foi possível carregar alunos e cota.',
+                              ),
+                              onRetry:
+                                  () => ref.invalidate(iaCopilotoHomeProvider),
+                            )
+                            : IaCopilotStudentSelector(
+                              alunoNome: _selectedAlunoNome,
+                              brand: brand,
+                              ink: ink,
+                              mute: mute,
+                              onTap: _selecionarAluno,
+                            ),
                   ),
 
                   // Mode selector

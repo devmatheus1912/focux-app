@@ -114,6 +114,7 @@ void main() {
     final ia = readScreenSourceBundle(
       'lib/features/ia/screens/ia_copiloto_screen.dart',
     );
+    expect(ia, contains('iaCopilotoHomeProvider'));
     expect(ia, contains('insightsProvider'));
     expect(ia, contains('.when('));
   });

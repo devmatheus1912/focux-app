@@ -24,6 +24,7 @@ void main() {
     expect(screen, contains('FxEmptyState'));
     expect(screen, contains('IaCopilotSafetyNote'));
     expect(screen, contains('FxHubFreshness.fromFetchedAt'));
+    expect(screen, contains('iaCopilotoHomeProvider'));
     expect(screen, contains("retryLabel:"));
   });
 }
