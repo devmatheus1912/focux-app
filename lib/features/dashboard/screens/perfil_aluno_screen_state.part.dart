@@ -601,13 +601,18 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
           ],
         ),
         body: async.when(
-          loading: () => const FxLoading(),
+          loading:
+              () => const Padding(
+                padding: EdgeInsets.all(TokensStrip.s4),
+                child: SkeletonList(count: 6),
+              ),
           error:
-              (e, _) => Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(TokensStrip.s5),
-                  child: Text(friendlyError(e), textAlign: TextAlign.center),
-                ),
+              (e, _) => FxErrorState(
+                chromeOnDark: isDark,
+                primary: primary,
+                message: friendlyError(e),
+                title: FocuxMicrocopy.naoFoiPossivelCarregar,
+                onRetry: () => ref.invalidate(alunoMeProvider),
               ),
           data: (aluno) {
             _loadIfNeeded(aluno);
@@ -895,15 +900,39 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
                         medidasAsync.when(
                           loading:
                               () => const Padding(
-                                padding: EdgeInsets.symmetric(vertical: 12),
-                                child: FxLoading(),
+                                padding: EdgeInsets.symmetric(vertical: 4),
+                                child: SkeletonList(count: 3),
                               ),
                           error:
                               (e, _) => Padding(
                                 padding: const EdgeInsets.only(bottom: 8),
-                                child: Text(
-                                  'Não foi possível carregar sua evolução: $e',
-                                  style: TextStyle(color: mute, height: 1.4),
+                                child: Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  children: [
+                                    Text(
+                                      'Não foi possível carregar sua evolução. ${friendlyError(e)}',
+                                      style: TextStyle(color: mute, height: 1.4),
+                                    ),
+                                    const SizedBox(height: 10),
+                                    OutlinedButton.icon(
+                                      onPressed:
+                                          () => ref.invalidate(
+                                            minhasMedidasProvider,
+                                          ),
+                                      icon: const Icon(
+                                        Icons.refresh_rounded,
+                                        size: 18,
+                                      ),
+                                      label: const Text(
+                                        FocuxMicrocopy.tentarNovamente,
+                                      ),
+                                      style: OutlinedButton.styleFrom(
+                                        foregroundColor: primary,
+                                        minimumSize: const Size(48, 48),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                           data: (medidas) {

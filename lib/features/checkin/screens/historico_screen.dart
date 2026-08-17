@@ -2,16 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/brand/focux_microcopy.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../../core/widgets/fx_empty_state.dart';
+import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_icon.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../data/checkin_repository.dart';
 import '../providers/checkin_provider.dart';
-import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/skeleton_loader.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 
@@ -32,16 +34,18 @@ class HistoricoCheckinScreen extends ConsumerWidget {
           onBack: () => safePopOrGo(context, '/checkin/treinos'),
         ),
         body: historicoAsync.when(
-          loading: () => const FxLoading(),
+          loading:
+              () => const Padding(
+                padding: EdgeInsets.all(TokensStrip.s4),
+                child: SkeletonList(count: 6),
+              ),
           error:
-              (e, _) => FxEmptyState(
-                icon: 'alert-triangle',
-                title: 'Erro ao carregar',
-                subtitle: friendlyError(e),
-                action: FxEmptyAction(
-                  label: 'Tentar novamente',
-                  onTap: () => ref.invalidate(historicoCheckinProvider),
-                ),
+              (e, _) => FxErrorState(
+                chromeOnDark: isDark,
+                primary: Theme.of(context).colorScheme.primary,
+                message: friendlyError(e),
+                title: FocuxMicrocopy.naoFoiPossivelCarregar,
+                onRetry: () => ref.invalidate(historicoCheckinProvider),
               ),
           data:
               (historico) =>

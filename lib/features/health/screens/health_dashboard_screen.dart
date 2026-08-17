@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../core/api/api_client.dart';
+import '../../../core/brand/focux_microcopy.dart';
 import '../../../core/health/health_service.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
-import '../../../core/widgets/fx_loading.dart';
-import '../../../core/widgets/fx_motion.dart';
+import '../../../core/widgets/fx_empty_state.dart';
+import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/skeleton_loader.dart';
 import '../../../core/health/home_widget_service.dart';
 import '../data/health_repository.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
@@ -105,10 +107,12 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
           _loading = false;
         });
       }
-    } catch (_) {
+    } catch (e) {
       if (mounted) {
         setState(() {
           _loading = false;
+          // Só troca a tela por erro quando ainda não há dados em tela.
+          if (_summary == null) _erro = friendlyError(e);
         });
       }
     }
@@ -129,79 +133,35 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
         ),
         body:
             _loading
-                ? const Center(child: FxLoading())
+                ? const Padding(
+                  padding: EdgeInsets.all(TokensStrip.s4),
+                  child: SkeletonList(count: 5),
+                )
                 : _erro != null
-                ? _buildErrorPrompt(primary, _erro!)
+                ? FxErrorState(
+                  chromeOnDark: isDark,
+                  primary: primary,
+                  message: _erro!,
+                  title: FocuxMicrocopy.naoFoiPossivelCarregar,
+                  onRetry: () {
+                    setState(() => _erro = null);
+                    _checkAuth();
+                  },
+                )
                 : !_authorized
-                ? _buildAuthPrompt(primary)
+                ? _buildAuthPrompt()
                 : _buildDashboard(isDark, primary),
       ),
     );
   }
 
-  Widget _buildErrorPrompt(Color primary, String message) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.error_outline, size: 48, color: primary),
-            const SizedBox(height: 16),
-            Text(message, textAlign: TextAlign.center),
-            const SizedBox(height: 24),
-            FxLiquidPrimaryButton(
-              label: 'Tentar novamente',
-              icon: Icons.refresh_rounded,
-              onPressed: () {
-                setState(() => _erro = null);
-                _checkAuth();
-              },
-              expand: false,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildAuthPrompt(Color primary) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(TokensStrip.s5),
-              decoration: BoxDecoration(
-                color: primary.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(Icons.favorite, size: 64, color: primary),
-            ),
-            const SizedBox(height: TokensStrip.s5),
-            const Text(
-              'Conecte seu Apple Health\nou Google Fit',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              'Sincronize passos, frequência cardíaca, calorias e sono para acompanhar sua saúde.',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 15, color: TokensStrip.textSecondary),
-            ),
-            const SizedBox(height: 32),
-            FxLiquidPrimaryButton(
-              label: 'Conectar',
-              icon: Icons.sync_rounded,
-              onPressed: _requestAccess,
-              expand: false,
-            ),
-          ],
-        ),
-      ),
+  Widget _buildAuthPrompt() {
+    return FxEmptyState(
+      icon: 'spark',
+      title: 'Conecte seu Apple Health ou Google Fit',
+      subtitle:
+          'Sincronize passos, frequência cardíaca, calorias e sono para acompanhar sua saúde.',
+      action: FxEmptyAction(label: 'Conectar', onTap: _requestAccess),
     );
   }
 

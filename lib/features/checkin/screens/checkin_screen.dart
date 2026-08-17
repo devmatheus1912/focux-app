@@ -8,7 +8,7 @@ import '../../../core/router/safe_navigation.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/shell_chrome.dart';
-import '../../../core/widgets/fx_empty_state.dart';
+import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../data/checkin_repository.dart';
 import '../providers/checkin_provider.dart';
@@ -449,30 +449,31 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
     }
 
     if (_loadError != null) {
-      return Scaffold(
-        backgroundColor: Colors.transparent,
-        body: SafeArea(
-          child: Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                FxEmptyState(
-                  icon: 'alert-triangle',
-                  title: 'Não foi possível iniciar',
-                  subtitle: _loadError!,
-                  action: FxEmptyAction(
-                    label: 'Tentar novamente',
-                    onTap: _iniciar,
+      return fxScreenA11yScope(
+        label: 'Checkin',
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          body: SafeArea(
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  FxErrorState(
+                    chromeOnDark: dark,
+                    primary: brand,
+                    title: 'Não foi possível iniciar',
+                    message: _loadError!,
+                    onRetry: _iniciar,
                   ),
-                ),
-                TextButton(
-                  onPressed: () => safePopOrGo(context, '/checkin/treinos'),
-                  child: Text(
-                    'Voltar aos treinos',
-                    style: TextStyle(color: mute),
+                  TextButton(
+                    onPressed: () => safePopOrGo(context, '/checkin/treinos'),
+                    child: Text(
+                      'Voltar aos treinos',
+                      style: TextStyle(color: mute),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

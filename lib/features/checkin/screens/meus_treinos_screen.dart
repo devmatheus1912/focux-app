@@ -2,15 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/brand/focux_microcopy.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/widgets/fx_async_body.dart';
+import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_motion.dart';
+import '../../../core/widgets/skeleton_loader.dart';
 import '../data/checkin_repository.dart';
 import '../providers/checkin_provider.dart';
-import 'package:focux_app/core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 
 part 'meus_treinos_screen_state.part.dart';
@@ -42,33 +45,25 @@ class MeusTreinosScreen extends ConsumerWidget {
         ),
         body: SafeArea(
           bottom: false,
-          child: treinosAsync.when(
-            loading: () => Center(child: FxLoading(color: primary)),
-            error:
-                (e, _) => _TrainingEmptyState(
-                  title: 'Nao foi possivel carregar',
-                  message: 'Toque para tentar novamente.',
-                  icon: Icons.wifi_off_rounded,
-                  isDark: isDark,
-                  onTap: () => ref.invalidate(meusTreinosProvider),
-                ),
-            data: (treinos) {
-              if (treinos.isEmpty) {
-                return Column(
-                  children: [
-                    const Spacer(),
-                    _TrainingEmptyState(
-                      title: 'Nenhum treino atribuido',
-                      message:
-                          'Assim que seu personal liberar um treino, ele aparece aqui com execucao guiada.',
-                      icon: Icons.fitness_center_outlined,
-                      isDark: isDark,
-                    ),
-                    const Spacer(flex: 2),
-                  ],
-                );
-              }
-
+          child: FxAsyncBody<List<ExecucaoTreino>>(
+            value: treinosAsync,
+            onRetry: () => ref.invalidate(meusTreinosProvider),
+            chromeOnDark: isDark,
+            primary: primary,
+            errorTitle: FocuxMicrocopy.naoFoiPossivelCarregar,
+            skeleton: const _TrainingSkeleton(),
+            isEmpty: (treinos) => treinos.isEmpty,
+            empty: FxEmptyState(
+              icon: 'dumbbell',
+              title: 'Nenhum treino atribuído',
+              subtitle:
+                  'Assim que seu personal liberar um treino, ele aparece aqui com execução guiada.',
+              action: FxEmptyAction(
+                label: 'Atualizar',
+                onTap: () => ref.invalidate(meusTreinosProvider),
+              ),
+            ),
+            builder: (context, treinos) {
               final ativos =
                   treinos
                       .where((t) => t.status.toUpperCase() != 'CONCLUIDO')

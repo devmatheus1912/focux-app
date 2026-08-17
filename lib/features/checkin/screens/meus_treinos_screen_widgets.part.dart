@@ -1,5 +1,27 @@
 part of 'meus_treinos_screen.dart';
 
+/// Loading placeholder que espelha hero + cards do plano.
+class _TrainingSkeleton extends StatelessWidget {
+  const _TrainingSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Padding(
+      padding: EdgeInsets.fromLTRB(TokensStrip.s5, 8, 20, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SkeletonLoader(height: 132, borderRadius: 24),
+          SizedBox(height: 18),
+          SkeletonLoader(height: 150, borderRadius: TokensStrip.rCard),
+          SizedBox(height: 12),
+          SkeletonLoader(height: 150, borderRadius: TokensStrip.rCard),
+        ],
+      ),
+    );
+  }
+}
+
 
 class _TrainingHero extends StatelessWidget {
   final int ativos;
@@ -698,69 +720,6 @@ class _PlanMeta extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class _TrainingEmptyState extends StatelessWidget {
-  final String title;
-  final String message;
-  final IconData icon;
-  final bool isDark;
-  final VoidCallback? onTap;
-
-  const _TrainingEmptyState({
-    required this.title,
-    required this.message,
-    required this.icon,
-    required this.isDark,
-    this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final primary = Theme.of(context).colorScheme.primary;
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-
-    return Center(
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(24),
-        child: Padding(
-          padding: const EdgeInsets.all(TokensStrip.s5),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 72,
-                height: 72,
-                decoration: BoxDecoration(
-                  color: BrandPalette.soft(primary, dark: isDark),
-                  borderRadius: BorderRadius.circular(24),
-                ),
-                child: Icon(icon, color: primary, size: 32),
-              ),
-              const SizedBox(height: TokensStrip.s4),
-              Text(
-                title,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: ink,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                message,
-                textAlign: TextAlign.center,
-                style: TextStyle(color: mute, height: 1.45),
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }
