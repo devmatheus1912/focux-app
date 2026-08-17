@@ -364,6 +364,7 @@ extension IaCopilotScreenActions on _IaCopilotoScreenState {
           _gerando = false;
           _gerado = true;
           _geracaoMs = stopwatch.elapsedMilliseconds;
+          _fetchedAt = DateTime.now();
         });
       }
     } catch (e) {
@@ -421,9 +422,8 @@ extension IaCopilotScreenActions on _IaCopilotoScreenState {
       final repo = IaRepository(ref.read(apiClientProvider));
       final acaoAtual =
           _proximaAcao ?? await repo.proximaAcao(_selectedAlunoId!);
-      final textoAcao = acaoAtual.displayText == 'Sem detalhe'
-          ? ''
-          : acaoAtual.displayText;
+      final textoAcao =
+          acaoAtual.displayText == 'Sem detalhe' ? '' : acaoAtual.displayText;
       final motivo = acaoAtual.motivo;
       final draft = await _confirmarCriarTarefa(
         textoAcao.isEmpty ? 'Revisar aluno no Copiloto' : textoAcao,

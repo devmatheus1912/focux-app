@@ -14,6 +14,11 @@ class FxErrorState extends StatelessWidget {
   final String? title;
   final IconData icon;
 
+  /// Overrides the retry CTA when the recovery path is not a plain retry
+  /// (e.g. plan upgrade on quota errors).
+  final String? retryLabel;
+  final IconData retryIcon;
+
   const FxErrorState({
     super.key,
     required this.chromeOnDark,
@@ -22,6 +27,8 @@ class FxErrorState extends StatelessWidget {
     required this.onRetry,
     this.title,
     this.icon = Icons.cloud_off_rounded,
+    this.retryLabel,
+    this.retryIcon = Icons.refresh_rounded,
   });
 
   @override
@@ -65,8 +72,8 @@ class FxErrorState extends StatelessWidget {
             const SizedBox(height: 20),
             OutlinedButton.icon(
               onPressed: onRetry,
-              icon: const Icon(Icons.refresh_rounded, size: 18),
-              label: const Text(FocuxMicrocopy.tentarNovamente),
+              icon: Icon(retryIcon, size: 18),
+              label: Text(retryLabel ?? FocuxMicrocopy.tentarNovamente),
               style: OutlinedButton.styleFrom(
                 foregroundColor: primary,
                 side: BorderSide(color: primary.withValues(alpha: 0.3)),

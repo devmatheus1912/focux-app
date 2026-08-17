@@ -10,6 +10,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
   String? _selectedAlunoNome;
   // BUG-21: tempo real de geração
   int _geracaoMs = 0;
+  DateTime? _fetchedAt;
   IaCopilotProximaAcao? _proximaAcao;
   bool _tarefaCriada = false;
   bool _tarefaPersistida = false;

@@ -12,6 +12,7 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
     final mute = chrome.mute;
     final line = chrome.line;
     final brand = dark ? primaryAccent : primary;
+    final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
 
     return fxScreenA11yScope(
       label: 'Copiloto',
@@ -182,43 +183,21 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
                         16,
                         16,
                       ),
-                      child: Container(
-                        padding: const EdgeInsets.all(14),
-                        decoration: BoxDecoration(
-                          color:
-                              dark
-                                  ? EagleTokens.darkBg.withValues(alpha: 0.2)
-                                  : EagleTokens.iaError.withValues(alpha: 0.08),
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: EagleTokens.iaError.withValues(alpha: 0.2)),
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(
-                              Icons.error_outline,
-                              color: EagleTokens.iaError,
-                              size: 20,
-                            ),
-                            SizedBox(width: TokensStrip.s3),
-                            Expanded(
-                              child: Text(
-                                _erroIaTexto(_erro!),
-                                style: TextStyle(color: ink, fontSize: 13),
-                              ),
-                            ),
-                            TextButton(
-                              onPressed:
-                                  _erroSugereUpgrade(_erro!)
-                                      ? _mostrarUpgradePorErro
-                                      : _gerar,
-                              child: Text(
-                                _erroSugereUpgrade(_erro!)
-                                    ? 'Fazer upgrade'
-                                    : 'Tentar',
-                              ),
-                            ),
-                          ],
-                        ),
+                      child: FxErrorState(
+                        chromeOnDark: dark,
+                        primary: brand,
+                        message: _erroIaTexto(_erro!),
+                        icon: Icons.error_outline_rounded,
+                        onRetry:
+                            _erroSugereUpgrade(_erro!)
+                                ? _mostrarUpgradePorErro
+                                : _gerar,
+                        retryLabel:
+                            _erroSugereUpgrade(_erro!) ? 'Fazer upgrade' : null,
+                        retryIcon:
+                            _erroSugereUpgrade(_erro!)
+                                ? Icons.workspace_premium_rounded
+                                : Icons.refresh_rounded,
                       ),
                     ),
                   ] else if (_gerado) ...[
@@ -254,46 +233,15 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
                                   16,
                                   16,
                                 ),
-                                child: Container(
-                                  padding: const EdgeInsets.all(14),
-                                  decoration: BoxDecoration(
-                                    color:
-                                        dark
-                                            ? EagleTokens.darkBg.withValues(alpha: 0.2)
-                                            : EagleTokens.iaError.withValues(alpha: 0.08),
-                                    borderRadius: BorderRadius.circular(14),
-                                    border: Border.all(
-                                      color: EagleTokens.iaError.withValues(alpha: 0.2),
-                                    ),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      const Icon(
-                                        Icons.error_outline,
-                                        color: EagleTokens.iaError,
-                                        size: 20,
+                                child: FxErrorState(
+                                  chromeOnDark: dark,
+                                  primary: brand,
+                                  message: _erroIaTexto(e),
+                                  icon: Icons.error_outline_rounded,
+                                  onRetry:
+                                      () => ref.invalidate(
+                                        insightsProvider(query),
                                       ),
-                                      SizedBox(width: TokensStrip.s3),
-                                      Expanded(
-                                        child: Text(
-                                          _erroIaTexto(e),
-                                          style: TextStyle(
-                                            color: ink,
-                                            fontSize: 13,
-                                          ),
-                                        ),
-                                      ),
-                                      TextButton(
-                                        onPressed:
-                                            () => ref.invalidate(
-                                              insightsProvider(query),
-                                            ),
-                                        child: const Text(
-                                          FocuxMicrocopy.tentarNovamente,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
                                 ),
                               ),
                           data: (insights) {
@@ -310,34 +258,14 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
                                   16,
                                   16,
                                 ),
-                                child: Container(
-                                  padding: const EdgeInsets.all(18),
-                                  decoration: fxListCardDecoration(
-                                    context,
-                                    accent: primary,
-                                    radius: 18,
-                                  ),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'Sem insights no momento',
-                                        style: TextStyle(
-                                          color: ink,
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                      SizedBox(height: TokensStrip.s2),
-                                      Text(
-                                        'Adicione mais treinos e check-ins para que a IA gere recomendações personalizadas.',
-                                        style: TextStyle(
-                                          color: mute,
-                                          fontSize: 12,
-                                        ),
-                                      ),
-                                    ],
+                                child: FxEmptyState(
+                                  icon: 'spark',
+                                  title: 'Sem insights no momento',
+                                  subtitle:
+                                      'Adicione mais treinos e check-ins para que a IA gere recomendações personalizadas.',
+                                  action: FxEmptyAction(
+                                    label: 'Gerar novamente',
+                                    onTap: _gerar,
                                   ),
                                 ),
                               );
@@ -445,7 +373,9 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
                                         mute: mute,
                                         chipBg:
                                             dark
-                                                ? Colors.white.withValues(alpha: 0.06)
+                                                ? Colors.white.withValues(
+                                                  alpha: 0.06,
+                                                )
                                                 : TokensStrip.borderDefault,
                                       );
                                     }),
@@ -476,16 +406,34 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
                           Icon(Icons.auto_awesome, size: 16, color: brand),
                           SizedBox(width: TokensStrip.s2),
                           Expanded(
-                            child: Text(
-                              _resultNote,
-                              style: TextStyle(
-                                fontSize: 13,
-                                color:
-                                    dark
-                                        ? EagleTokens.darkInk
-                                        : EagleTokens.inkSoft,
-                                height: 1.45,
-                              ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  _resultNote,
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color:
+                                        dark
+                                            ? EagleTokens.darkInk
+                                            : EagleTokens.inkSoft,
+                                    height: 1.45,
+                                  ),
+                                ),
+                                if (freshnessLabel != null) ...[
+                                  SizedBox(height: TokensStrip.s2),
+                                  Text(
+                                    freshnessLabel,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      fontSize: 11.5,
+                                      fontWeight: FontWeight.w600,
+                                      color: mute,
+                                    ),
+                                  ),
+                                ],
+                              ],
                             ),
                           ),
                         ],

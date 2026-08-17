@@ -13,4 +13,17 @@ void main() {
     expect(screen, anyOf(contains('FxLoading'), contains('SkeletonLoader'), contains('SkeletonList'), contains('DashboardShimmer'), contains('Shimmer'), contains('IaCopilotInsightsLoading'), contains('_loading')));
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(16));
   });
+
+  test('ia copiloto usa estados canônicos e mantém o disclaimer', () {
+    final screen = readScreenSourceBundle(
+      'lib/features/ia/screens/ia_copiloto_screen.dart',
+    );
+
+    expect(screen, contains('fxScreenA11yScope'));
+    expect(screen, contains('FxErrorState'));
+    expect(screen, contains('FxEmptyState'));
+    expect(screen, contains('IaCopilotSafetyNote'));
+    expect(screen, contains('FxHubFreshness.fromFetchedAt'));
+    expect(screen, contains("retryLabel:"));
+  });
 }

@@ -5,6 +5,7 @@ class _TreinosHeader extends StatelessWidget {
   final int? alunoId;
   final String? alunoNome;
   final bool isDark;
+  final String? freshnessLabel;
   final VoidCallback? onBack;
 
   const _TreinosHeader({
@@ -12,6 +13,7 @@ class _TreinosHeader extends StatelessWidget {
     required this.alunoId,
     required this.alunoNome,
     required this.isDark,
+    required this.freshnessLabel,
     required this.onBack,
   });
 
@@ -79,6 +81,19 @@ class _TreinosHeader extends StatelessWidget {
                     letterSpacing: 0,
                   ),
                 ),
+                if (freshnessLabel != null && freshnessLabel!.isNotEmpty) ...[
+                  SizedBox(height: TokensStrip.s1),
+                  Text(
+                    freshnessLabel!,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTypography.inter(
+                      fontSize: 11.5,
+                      color: chrome.mute,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
               ],
             ),
           ),

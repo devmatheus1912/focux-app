@@ -5,6 +5,7 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
   final Set<int> _selectedIds = <int>{};
   String _query = '';
   bool _selectionMode = false;
+  DateTime? _fetchedAt;
 
   @override
   void dispose() {
@@ -52,6 +53,13 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
     setState(() {
       _selectionMode = false;
       _selectedIds.clear();
+    });
+  }
+
+  void _clearQuery() {
+    setState(() {
+      _query = '';
+      _searchController.clear();
     });
   }
 
@@ -217,19 +225,22 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
 
   @override
   Widget build(BuildContext context) {
-    final treinosAsync =
+    final treinosSource =
         widget.alunoId == null
-            ? ref.watch(treinosProvider)
-            : ref.watch(treinosDoAlunoProvider(widget.alunoId!));
+            ? treinosProvider
+            : treinosDoAlunoProvider(widget.alunoId!);
+    final treinosAsync = ref.watch(treinosSource);
+    ref.listen<AsyncValue<List<Treino>>>(treinosSource, (_, next) {
+      if (!next.isLoading && next.hasValue) {
+        setState(() => _fetchedAt = DateTime.now());
+      }
+    });
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
+    final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
 
     Future<void> refresh() async {
-      if (widget.alunoId == null) {
-        ref.invalidate(treinosProvider);
-      } else {
-        ref.invalidate(treinosDoAlunoProvider(widget.alunoId!));
-      }
+      ref.invalidate(treinosSource);
     }
 
     Future<void> createWorkout() async {
@@ -245,206 +256,214 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
       }
     }
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: SafeArea(
-        bottom: false,
-        child: treinosAsync.when(
-          loading:
-              () => const Padding(
-                padding: EdgeInsets.fromLTRB(TokensStrip.s5, 86, 20, 0),
-                child: SkeletonList(count: 5),
-              ),
-          error:
-              (e, _) => _TreinosErrorState(
-                isDark: isDark,
-                primary: primary,
-                message: friendlyError(e),
-                onRetry: refresh,
-              ),
-          data: (treinos) {
-            final filteredTreinos = treinos.where(_matchesQuery).toList();
-            final selectedTreinos =
-                treinos
-                    .where((treino) => _selectedIds.contains(treino.id))
-                    .toList();
-            final singlePlan = treinos.length == 1;
+    return fxScreenA11yScope(
+      label: widget.alunoId == null ? 'Treinos' : 'Treinos do aluno',
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: SafeArea(
+          bottom: false,
+          child: treinosAsync.when(
+            loading:
+                () => const Padding(
+                  padding: EdgeInsets.fromLTRB(TokensStrip.s5, 86, 20, 0),
+                  child: SkeletonList(count: 5),
+                ),
+            error:
+                (e, _) => FxErrorState(
+                  chromeOnDark: isDark,
+                  primary: primary,
+                  message: friendlyError(e),
+                  onRetry: refresh,
+                ),
+            data: (treinos) {
+              final filteredTreinos = treinos.where(_matchesQuery).toList();
+              final selectedTreinos =
+                  treinos
+                      .where((treino) => _selectedIds.contains(treino.id))
+                      .toList();
+              final singlePlan = treinos.length == 1;
 
-            return RefreshIndicator(
-              color: primary,
-              onRefresh: refresh,
-              child: CustomScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                slivers: [
-                  SliverToBoxAdapter(
-                    child: _TreinosHeader(
-                      treinos: treinos,
-                      alunoId: widget.alunoId,
-                      alunoNome: widget.alunoNome,
-                      isDark: isDark,
-                      onBack:
-                          widget.alunoId == null
-                              ? null
-                              : () => safePopOrGo(
-                                context,
-                                '/alunos/${widget.alunoId}',
-                              ),
-                    ),
-                  ),
-                  if (treinos.isEmpty)
-                    SliverFillRemaining(
-                      hasScrollBody: false,
-                      child: _EmptyState(
-                        isDark: isDark,
-                        primary: primary,
+              return RefreshIndicator(
+                color: primary,
+                onRefresh: refresh,
+                child: CustomScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  slivers: [
+                    SliverToBoxAdapter(
+                      child: _TreinosHeader(
+                        treinos: treinos,
+                        alunoId: widget.alunoId,
                         alunoNome: widget.alunoNome,
-                        onCreate: createWorkout,
-                      ),
-                    )
-                  else ...[
-                    SliverToBoxAdapter(
-                      child: Padding(
-                        padding: EdgeInsets.fromLTRB(
-                          TokensStrip.s5,
-                          0,
-                          20,
-                          singlePlan ? 12 : 16,
-                        ),
-                        child: _TreinosCommandCard(
-                          treinos: treinos,
-                          isDark: isDark,
-                          primary: primary,
-                          compact: treinos.length <= 2,
-                          onCreate: createWorkout,
-                        ),
+                        isDark: isDark,
+                        freshnessLabel: freshnessLabel,
+                        onBack:
+                            widget.alunoId == null
+                                ? null
+                                : () => safePopOrGo(
+                                  context,
+                                  '/alunos/${widget.alunoId}',
+                                ),
                       ),
                     ),
-                    SliverToBoxAdapter(
-                      child: Padding(
-                        padding: EdgeInsets.fromLTRB(
-                          TokensStrip.s5,
-                          0,
-                          20,
-                          singlePlan ? 12 : 14,
-                        ),
-                        child: _LibraryControls(
-                          controller: _searchController,
-                          query: _query,
-                          selectedCount: _selectedIds.length,
-                          selectionMode: _selectionMode,
-                          isDark: isDark,
-                          primary: primary,
-                          onQueryChanged:
-                              (value) => setState(() => _query = value),
-                          onClearQuery:
-                              () => setState(() {
-                                _query = '';
-                                _searchController.clear();
-                              }),
-                          onSelectAll:
-                              filteredTreinos.isEmpty
-                                  ? null
-                                  : () {
-                                    setState(() {
-                                      _selectionMode = true;
-                                      _selectedIds
-                                        ..clear()
-                                        ..addAll(
-                                          filteredTreinos.map(
-                                            (treino) => treino.id,
-                                          ),
-                                        );
-                                    });
-                                  },
-                          onCancelSelection: _clearSelection,
-                          onDeleteSelected:
-                              selectedTreinos.isEmpty
-                                  ? null
-                                  : () => _deleteTreinos(selectedTreinos),
-                        ),
-                      ),
-                    ),
-                    SliverToBoxAdapter(
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(
-                          TokensStrip.s5,
-                          0,
-                          20,
-                          12,
-                        ),
-                        child: _SectionHeader(
-                          title:
-                              widget.alunoId == null
-                                  ? 'Biblioteca ativa'
-                                  : 'Plano do aluno',
-                          action:
-                              _query.trim().isEmpty
-                                  ? '${treinos.length} ${treinos.length == 1 ? 'plano' : 'planos'}'
-                                  : '${filteredTreinos.length} de ${treinos.length}',
-                          isDark: isDark,
-                        ),
-                      ),
-                    ),
-                    if (filteredTreinos.isEmpty)
+                    if (treinos.isEmpty)
                       SliverFillRemaining(
                         hasScrollBody: false,
-                        child: _NoResultsState(
-                          isDark: isDark,
-                          primary: primary,
-                          onClear:
-                              () => setState(() {
-                                _query = '';
-                                _searchController.clear();
-                              }),
+                        child: FxEmptyState(
+                          icon: 'dumbbell',
+                          title: TreinosListLabels.emptyTitle(
+                            alunoNome: widget.alunoNome,
+                          ),
+                          subtitle: TreinosListLabels.emptySubtitle(
+                            alunoNome: widget.alunoNome,
+                          ),
+                          action: FxEmptyAction(
+                            label: 'Criar treino',
+                            onTap: createWorkout,
+                          ),
                         ),
                       )
-                    else
-                      SliverPadding(
-                        padding: const EdgeInsets.fromLTRB(
-                          TokensStrip.s5,
-                          0,
-                          20,
-                          104,
-                        ),
-                        sliver: SliverList.separated(
-                          itemCount: filteredTreinos.length,
-                          separatorBuilder:
-                              (_, __) => SizedBox(height: TokensStrip.s3),
-                          itemBuilder:
-                              (context, i) => FxStaggerItem(
-                                index: i,
-                                child: _TreinoCard(
-                                  treino: filteredTreinos[i],
-                                  index: i,
-                                  isDark: isDark,
-                                  primary: primary,
-                                  alunoId: widget.alunoId,
-                                  alunoNome: widget.alunoNome,
-                                  selectionMode: _selectionMode,
-                                  selected: _selectedIds.contains(
-                                    filteredTreinos[i].id,
-                                  ),
-                                  onToggleSelection:
-                                      () => _toggleSelection(
-                                        filteredTreinos[i].id,
-                                      ),
-                                  onStartSelection:
-                                      () => _startSelection(
-                                        filteredTreinos[i].id,
-                                      ),
-                                  onActions:
-                                      () => _openTreinoActions(
-                                        filteredTreinos[i],
-                                      ),
-                                ),
-                              ),
+                    else ...[
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: EdgeInsets.fromLTRB(
+                            TokensStrip.s5,
+                            0,
+                            20,
+                            singlePlan ? 12 : 16,
+                          ),
+                          child: _TreinosCommandCard(
+                            treinos: treinos,
+                            isDark: isDark,
+                            primary: primary,
+                            compact: treinos.length <= 2,
+                            onCreate: createWorkout,
+                          ),
                         ),
                       ),
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: EdgeInsets.fromLTRB(
+                            TokensStrip.s5,
+                            0,
+                            20,
+                            singlePlan ? 12 : 14,
+                          ),
+                          child: _LibraryControls(
+                            controller: _searchController,
+                            query: _query,
+                            selectedCount: _selectedIds.length,
+                            selectionMode: _selectionMode,
+                            isDark: isDark,
+                            primary: primary,
+                            onQueryChanged:
+                                (value) => setState(() => _query = value),
+                            onClearQuery: _clearQuery,
+                            onSelectAll:
+                                filteredTreinos.isEmpty
+                                    ? null
+                                    : () {
+                                      setState(() {
+                                        _selectionMode = true;
+                                        _selectedIds
+                                          ..clear()
+                                          ..addAll(
+                                            filteredTreinos.map(
+                                              (treino) => treino.id,
+                                            ),
+                                          );
+                                      });
+                                    },
+                            onCancelSelection: _clearSelection,
+                            onDeleteSelected:
+                                selectedTreinos.isEmpty
+                                    ? null
+                                    : () => _deleteTreinos(selectedTreinos),
+                          ),
+                        ),
+                      ),
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(
+                            TokensStrip.s5,
+                            0,
+                            20,
+                            12,
+                          ),
+                          child: _SectionHeader(
+                            title:
+                                widget.alunoId == null
+                                    ? 'Biblioteca ativa'
+                                    : 'Plano do aluno',
+                            action:
+                                _query.trim().isEmpty
+                                    ? '${treinos.length} ${treinos.length == 1 ? 'plano' : 'planos'}'
+                                    : '${filteredTreinos.length} de ${treinos.length}',
+                            isDark: isDark,
+                          ),
+                        ),
+                      ),
+                      if (filteredTreinos.isEmpty)
+                        SliverFillRemaining(
+                          hasScrollBody: false,
+                          child: FxEmptyState(
+                            icon: 'search',
+                            title: 'Nada encontrado',
+                            subtitle:
+                                'Ajuste a busca para encontrar outro treino da biblioteca.',
+                            action: FxEmptyAction(
+                              label: 'Limpar busca',
+                              onTap: _clearQuery,
+                            ),
+                          ),
+                        )
+                      else
+                        SliverPadding(
+                          padding: const EdgeInsets.fromLTRB(
+                            TokensStrip.s5,
+                            0,
+                            20,
+                            104,
+                          ),
+                          sliver: SliverList.separated(
+                            itemCount: filteredTreinos.length,
+                            separatorBuilder:
+                                (_, __) => SizedBox(height: TokensStrip.s3),
+                            itemBuilder:
+                                (context, i) => FxStaggerItem(
+                                  index: i,
+                                  child: _TreinoCard(
+                                    treino: filteredTreinos[i],
+                                    index: i,
+                                    isDark: isDark,
+                                    primary: primary,
+                                    alunoId: widget.alunoId,
+                                    alunoNome: widget.alunoNome,
+                                    selectionMode: _selectionMode,
+                                    selected: _selectedIds.contains(
+                                      filteredTreinos[i].id,
+                                    ),
+                                    onToggleSelection:
+                                        () => _toggleSelection(
+                                          filteredTreinos[i].id,
+                                        ),
+                                    onStartSelection:
+                                        () => _startSelection(
+                                          filteredTreinos[i].id,
+                                        ),
+                                    onActions:
+                                        () => _openTreinoActions(
+                                          filteredTreinos[i],
+                                        ),
+                                  ),
+                                ),
+                          ),
+                        ),
+                    ],
                   ],
-                ],
-              ),
-            );
-          },
+                ),
+              );
+            },
+          ),
         ),
       ),
     );

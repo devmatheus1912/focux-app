@@ -13,4 +13,29 @@ void main() {
     expect(TreinosListLabels.templateCount(1), '1 template');
     expect(TreinosListLabels.templateCount(4), '4 templates');
   });
+
+  group('empty state copy', () {
+    test('uses library wording without aluno context', () {
+      expect(TreinosListLabels.emptyTitle(), 'Sua biblioteca começa aqui');
+      expect(TreinosListLabels.emptySubtitle(), contains('plano base'));
+    });
+
+    test('uses aluno first name when a student is in context', () {
+      expect(
+        TreinosListLabels.emptyTitle(alunoNome: '  Ana Paula Souza '),
+        'Nenhum treino atribuído',
+      );
+      expect(
+        TreinosListLabels.emptySubtitle(alunoNome: '  Ana Paula Souza '),
+        'Atribua um plano a Ana ou crie um treino e vincule ao perfil.',
+      );
+    });
+
+    test('falls back to library wording for blank aluno name', () {
+      expect(
+        TreinosListLabels.emptyTitle(alunoNome: '   '),
+        'Sua biblioteca começa aqui',
+      );
+    });
+  });
 }

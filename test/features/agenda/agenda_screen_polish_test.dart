@@ -13,4 +13,17 @@ void main() {
     expect(screen, anyOf(contains('FxLoading'), contains('SkeletonLoader'), contains('SkeletonList'), contains('DashboardShimmer'), contains('Shimmer'), contains('IaCopilotInsightsLoading'), contains('_loading')));
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(16));
   });
+
+  test('agenda usa estados canônicos da Home', () {
+    final screen = readScreenSourceBundle(
+      'lib/features/agenda/screens/agenda_screen.dart',
+    );
+
+    expect(screen, contains('fxScreenA11yScope'));
+    expect(screen, contains('FxErrorState'));
+    expect(screen, contains('FxEmptyState'));
+    expect(screen, contains('SkeletonList'));
+    expect(screen, contains('FxHubFreshness.fromFetchedAt'));
+    expect(screen, isNot(contains('class _AgendaEmptyState')));
+  });
 }
