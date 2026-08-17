@@ -5,7 +5,8 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
-import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_empty_state.dart';
+import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -23,6 +24,7 @@ class _NpsDashboardScreenState extends ConsumerState<NpsDashboardScreen> {
   NpsResumo? _resumo;
   List<NpsItem> _recentes = [];
   bool _loading = true;
+  String? _erro;
 
   @override
   void initState() {
@@ -31,7 +33,10 @@ class _NpsDashboardScreenState extends ConsumerState<NpsDashboardScreen> {
   }
 
   Future<void> _load() async {
-    setState(() => _loading = true);
+    setState(() {
+      _loading = true;
+      _erro = null;
+    });
     try {
       final repo = NpsRepository(ref.read(apiClientProvider));
       final resumo = await repo.resumo();
@@ -45,8 +50,10 @@ class _NpsDashboardScreenState extends ConsumerState<NpsDashboardScreen> {
       }
     } catch (e) {
       if (mounted) {
-        setState(() => _loading = false);
-        FeedbackHelper.showError(context, friendlyError(e));
+        setState(() {
+          _loading = false;
+          _erro = friendlyError(e);
+        });
       }
     }
   }
@@ -76,6 +83,13 @@ class _NpsDashboardScreenState extends ConsumerState<NpsDashboardScreen> {
         body:
             _loading
                 ? const Center(child: FxLoading())
+                : _erro != null
+                ? FxErrorState(
+                  chromeOnDark: isDark,
+                  primary: primary,
+                  message: _erro!,
+                  onRetry: _load,
+                )
                 : RefreshIndicator(
                   onRefresh: _load,
                   child: ListView(
@@ -134,6 +148,13 @@ class _NpsDashboardScreenState extends ConsumerState<NpsDashboardScreen> {
                         style: TextStyle(fontWeight: FontWeight.w600),
                       ),
                       const SizedBox(height: 8),
+                      if (_recentes.isEmpty)
+                        const FxEmptyState(
+                          icon: 'star',
+                          title: 'Nenhuma resposta ainda',
+                          subtitle:
+                              'Assim que seus alunos responderem à pesquisa, o feedback aparece aqui.',
+                        ),
                       ..._recentes.map((n) {
                         if (n.score <= 6) {
                           return _detratorCard(n, isDark: isDark);

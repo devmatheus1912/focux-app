@@ -11,7 +11,8 @@ import '../data/lead_repository.dart';
 import '../../planos/providers/plano_features_provider.dart';
 import '../../subscription/models/subscription_plan.dart';
 import '../../../core/utils/friendly_error.dart';
-import '../../../core/widgets/feedback_helper.dart';
+import 'package:focux_app/core/widgets/fx_empty_state.dart';
+import 'package:focux_app/core/widgets/fx_error_state.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 
@@ -25,6 +26,7 @@ class LeadsListScreen extends ConsumerStatefulWidget {
 class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
   List<Lead> _leads = [];
   bool _loading = true;
+  String? _erro;
   String? _filtroStatus;
 
   @override
@@ -34,7 +36,10 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
   }
 
   Future<void> _load() async {
-    setState(() => _loading = true);
+    setState(() {
+      _loading = true;
+      _erro = null;
+    });
     try {
       final repo = LeadRepository(ref.read(apiClientProvider));
       final leads = await repo.listar(status: _filtroStatus);
@@ -46,10 +51,17 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
       }
     } catch (e) {
       if (mounted) {
-        setState(() => _loading = false);
-        FeedbackHelper.showError(context, friendlyError(e));
+        setState(() {
+          _loading = false;
+          _erro = friendlyError(e);
+        });
       }
     }
+  }
+
+  Future<void> _novoLead() async {
+    await context.push('/leads/novo');
+    _load();
   }
 
   @override
@@ -116,10 +128,7 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
             ],
           ),
           child: FloatingActionButton.extended(
-            onPressed: () async {
-              await context.push('/leads/novo');
-              _load();
-            },
+            onPressed: _novoLead,
             backgroundColor: Colors.transparent,
             elevation: 0,
             icon: const Icon(Icons.person_add, color: Colors.white),
@@ -171,36 +180,22 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
               child:
                   _loading
                       ? Center(child: FxLoading(color: primary))
+                      : _erro != null
+                      ? FxErrorState(
+                        chromeOnDark: isDark,
+                        primary: primary,
+                        message: _erro!,
+                        onRetry: _load,
+                      )
                       : _leads.isEmpty
-                      ? Center(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Container(
-                              width: 56,
-                              height: 56,
-                              decoration: BoxDecoration(
-                                color: primary.withValues(alpha: 0.1),
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon(
-                                Icons.person_search,
-                                color: primary,
-                                size: 28,
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            Text(
-                              'Nenhum lead cadastrado',
-                              style: TextStyle(
-                                color:
-                                    isDark
-                                        ? EagleTokens.darkInkMute
-                                        : TokensStrip.textSecondary,
-                                fontSize: 14,
-                              ),
-                            ),
-                          ],
+                      ? FxEmptyState(
+                        icon: 'users',
+                        title: 'Nenhum lead cadastrado',
+                        subtitle:
+                            'Cadastre o primeiro lead para começar a acompanhar o funil.',
+                        action: FxEmptyAction(
+                          label: 'Novo lead',
+                          onTap: _novoLead,
                         ),
                       )
                       : SingleChildScrollView(

@@ -7,6 +7,7 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -28,6 +29,7 @@ class _DunningOpsScreenState extends ConsumerState<DunningOpsScreen> {
   DunningSnapshot? _snapshot;
   List<DunningFalha> _falhas = [];
   bool _loading = true;
+  String? _erro;
   int? _marcandoId;
 
   @override
@@ -37,7 +39,10 @@ class _DunningOpsScreenState extends ConsumerState<DunningOpsScreen> {
   }
 
   Future<void> _carregar() async {
-    setState(() => _loading = true);
+    setState(() {
+      _loading = true;
+      _erro = null;
+    });
     try {
       final repo = ref.read(dunningRepositoryProvider);
       final results = await Future.wait([repo.me(), repo.falhas()]);
@@ -49,8 +54,10 @@ class _DunningOpsScreenState extends ConsumerState<DunningOpsScreen> {
       });
     } catch (e) {
       if (!mounted) return;
-      setState(() => _loading = false);
-      FeedbackHelper.showError(context, friendlyError(e));
+      setState(() {
+        _loading = false;
+        _erro = friendlyError(e);
+      });
     }
   }
 
@@ -72,6 +79,7 @@ class _DunningOpsScreenState extends ConsumerState<DunningOpsScreen> {
   @override
   Widget build(BuildContext context) {
     final snap = _snapshot;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
 
     return fxScreenA11yScope(
@@ -86,6 +94,13 @@ class _DunningOpsScreenState extends ConsumerState<DunningOpsScreen> {
         body:
             _loading
                 ? const Center(child: FxLoading())
+                : _erro != null
+                ? FxErrorState(
+                  chromeOnDark: isDark,
+                  primary: primary,
+                  message: _erro!,
+                  onRetry: _carregar,
+                )
                 : RefreshIndicator(
                   onRefresh: _carregar,
                   child: ListView(

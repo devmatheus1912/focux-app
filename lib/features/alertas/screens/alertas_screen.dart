@@ -8,6 +8,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/alertas_repository.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_empty_state.dart';
+import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_motion.dart';
@@ -27,6 +29,7 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
   List<AlertaRisco> _alertas = [];
   AlertasConfiguracao? _config;
   bool _loading = true;
+  String? _erro;
   int? _filtroScoreMin;
 
   @override
@@ -36,7 +39,10 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
   }
 
   Future<void> _load() async {
-    setState(() => _loading = true);
+    setState(() {
+      _loading = true;
+      _erro = null;
+    });
     try {
       final repo = AlertasRepository(ref.read(apiClientProvider));
       final results = await Future.wait([
@@ -52,8 +58,10 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
       }
     } catch (e) {
       if (mounted) {
-        setState(() => _loading = false);
-        FeedbackHelper.showError(context, friendlyError(e));
+        setState(() {
+          _loading = false;
+          _erro = friendlyError(e);
+        });
       }
     }
   }
@@ -274,6 +282,15 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
             children: [
               if (_loading)
                 const Expanded(child: FxLoading())
+              else if (_erro != null)
+                Expanded(
+                  child: FxErrorState(
+                    chromeOnDark: isDark,
+                    primary: brand,
+                    message: _erro!,
+                    onRetry: _load,
+                  ),
+                )
               else ...[
                 // Config strip
                 if (_config != null)
@@ -467,12 +484,26 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
                 Expanded(
                   child:
                       _filtrados.isEmpty
-                          ? const Center(
-                            child: Text(
-                              'Nenhum alerta encontrado',
-                              style: TextStyle(fontSize: 16),
-                            ),
-                          )
+                          ? (_filtroScoreMin != null
+                              ? FxEmptyState(
+                                icon: 'search',
+                                title: 'Nenhum alerta neste filtro',
+                                subtitle:
+                                    'Nenhum aluno bate o score selecionado. Volte para "Todos" para ver a base inteira.',
+                                action: FxEmptyAction(
+                                  label: 'Limpar filtro',
+                                  onTap:
+                                      () => setState(
+                                        () => _filtroScoreMin = null,
+                                      ),
+                                ),
+                              )
+                              : const FxEmptyState(
+                                icon: 'circle-check',
+                                title: 'Nenhum aluno em risco',
+                                subtitle:
+                                    'Sua base está saudável. Avisamos aqui quando alguém começar a esfriar.',
+                              ))
                           : ListView.builder(
                             padding: const EdgeInsets.fromLTRB(
                               TokensStrip.s4,

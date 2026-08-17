@@ -6,8 +6,8 @@ import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
-import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_empty_state.dart';
+import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -28,6 +28,7 @@ class WinbackScreen extends ConsumerStatefulWidget {
 class _WinbackScreenState extends ConsumerState<WinbackScreen> {
   List<WinbackLogEntry> _entries = [];
   bool _loading = true;
+  String? _erro;
 
   @override
   void initState() {
@@ -36,7 +37,10 @@ class _WinbackScreenState extends ConsumerState<WinbackScreen> {
   }
 
   Future<void> _carregar() async {
-    setState(() => _loading = true);
+    setState(() {
+      _loading = true;
+      _erro = null;
+    });
     try {
       final entries = await ref.read(winbackRepositoryProvider).log();
       if (!mounted) return;
@@ -46,8 +50,10 @@ class _WinbackScreenState extends ConsumerState<WinbackScreen> {
       });
     } catch (e) {
       if (!mounted) return;
-      setState(() => _loading = false);
-      FeedbackHelper.showError(context, friendlyError(e));
+      setState(() {
+        _loading = false;
+        _erro = friendlyError(e);
+      });
     }
   }
 
@@ -62,6 +68,7 @@ class _WinbackScreenState extends ConsumerState<WinbackScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
     final mute = fxScreenMute(context);
 
@@ -77,6 +84,13 @@ class _WinbackScreenState extends ConsumerState<WinbackScreen> {
         body:
             _loading
                 ? Center(child: FxLoading(color: primary))
+                : _erro != null
+                ? FxErrorState(
+                  chromeOnDark: isDark,
+                  primary: primary,
+                  message: _erro!,
+                  onRetry: _carregar,
+                )
                 : RefreshIndicator(
                   color: primary,
                   onRefresh: _carregar,

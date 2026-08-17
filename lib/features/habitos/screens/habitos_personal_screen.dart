@@ -6,6 +6,7 @@ import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/feature_gate.dart';
 import '../../../core/widgets/fx_empty_state.dart';
+import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../features/auth/providers/auth_provider.dart';
@@ -165,6 +166,9 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
+
     return FeatureGate(
       featureName: 'Habit Coaching',
       requiredPlan: SubscriptionPlan.PREMIUM,
@@ -187,14 +191,11 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
             _loading
                 ? const Center(child: FxLoading())
                 : _error != null
-                ? FxEmptyState(
-                  icon: 'alert-triangle',
-                  title: 'Erro ao carregar',
-                  subtitle: _error,
-                  action: FxEmptyAction(
-                    label: 'Tentar novamente',
-                    onTap: _carregar,
-                  ),
+                ? FxErrorState(
+                  chromeOnDark: isDark,
+                  primary: primary,
+                  message: _error!,
+                  onRetry: _carregar,
                 )
                 : RefreshIndicator(
                   onRefresh: _carregar,
@@ -206,7 +207,16 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
                         subtitulo: 'Aplica para todos os seus alunos',
                       ),
                       if (_habitos.isEmpty)
-                        const _EmptyHabitos()
+                        FxEmptyState(
+                          icon: 'circle-check',
+                          title: 'Nenhum hábito cadastrado',
+                          subtitle:
+                              'Hábitos diários (água, sono, refeições) aumentam aderência e reduzem churn.',
+                          action: FxEmptyAction(
+                            label: 'Novo hábito',
+                            onTap: _novoHabito,
+                          ),
+                        )
                       else
                         ..._habitos.map(
                           (h) => FxSatelliteListTile(
@@ -214,7 +224,7 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
                             titleCase: false,
                             leading: Icon(
                               Icons.fitness_center_rounded,
-                              color: Theme.of(context).colorScheme.primary,
+                              color: primary,
                             ),
                             subtitle: Text(
                               h.descricao ?? 'Meta semanal: ${h.metaSemanal}x',
@@ -234,13 +244,11 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
                         subtitulo: 'Aderência dos seus alunos aos hábitos',
                       ),
                       if (_compliance.isEmpty)
-                        FxSatelliteListTile(
+                        const FxEmptyState(
+                          icon: 'trend',
                           title: 'Sem dados ainda',
-                          titleCase: false,
-                          leading: Icon(Icons.info_outline_rounded),
-                          subtitle: Text(
-                            'Cadastre hábitos e os alunos vão começar a marcar.',
-                          ),
+                          subtitle:
+                              'Cadastre hábitos e os alunos vão começar a marcar.',
                         )
                       else
                         ..._compliance.map((c) => _ComplianceTile(item: c)),
@@ -276,33 +284,6 @@ class _SectionHeader extends StatelessWidget {
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: Theme.of(context).colorScheme.outline,
             ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _EmptyHabitos extends StatelessWidget {
-  const _EmptyHabitos();
-
-  @override
-  Widget build(BuildContext context) {
-    return FxSatellitePanel(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        children: [
-          const Icon(Icons.checklist_outlined, size: 40),
-          const SizedBox(height: 8),
-          Text(
-            'Nenhum hábito cadastrado',
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'Hábitos diários (água, sono, refeições) aumentam aderência em 25-40% e reduzem churn (HAVIT, Everfit benchmark 2026).',
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodySmall,
           ),
         ],
       ),

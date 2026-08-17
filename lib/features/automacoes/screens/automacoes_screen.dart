@@ -14,6 +14,8 @@ import '../../../core/widgets/feedback_helper.dart';
 
 import '../../../core/widgets/fx_empty_state.dart';
 
+import '../../../core/widgets/fx_error_state.dart';
+
 import '../../../core/widgets/fx_loading.dart';
 
 import '../../../core/widgets/fx_motion.dart';
@@ -123,17 +125,11 @@ class _AutomacoesScreenState extends ConsumerState<AutomacoesScreen> {
             _loading
                 ? const Center(child: FxLoading())
                 : _error != null
-                ? FxEmptyState(
-                  icon: 'alert-triangle',
-
-                  title: 'Erro ao carregar',
-
-                  subtitle: _error,
-
-                  action: FxEmptyAction(
-                    label: 'Tentar novamente',
-                    onTap: _load,
-                  ),
+                ? FxErrorState(
+                  chromeOnDark: Theme.of(context).brightness == Brightness.dark,
+                  primary: scheme.primary,
+                  message: _error!,
+                  onRetry: _load,
                 )
                 : RefreshIndicator(
                   onRefresh: _load,

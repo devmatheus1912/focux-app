@@ -41,76 +41,14 @@ class _FinanceiroDashboardScreenState
   @override
   Widget build(BuildContext context) {
     if (_loading) {
-      return const Center(
-        child: SizedBox(
-          width: 28,
-          height: 28,
-          child: FxLoading(strokeWidth: 2.5),
-        ),
-      );
+      return const FxLoading();
     }
     if (_data == null) {
-      final isDarkErr = Theme.of(context).brightness == Brightness.dark;
-      final inkErr = isDarkErr ? EagleTokens.darkInk : TokensStrip.textPrimary;
-      final muteErr =
-          isDarkErr ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-      final primaryErr = Theme.of(context).colorScheme.primary;
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 40),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 52,
-                height: 52,
-                decoration: BoxDecoration(
-                  color: EagleTokens.bad.withValues(
-                    alpha: isDarkErr ? 0.18 : 0.08,
-                  ),
-                  borderRadius: BorderRadius.circular(18),
-                ),
-                child: const Icon(
-                  Icons.cloud_off_rounded,
-                  color: EagleTokens.bad,
-                  size: 24,
-                ),
-              ),
-              const SizedBox(height: 14),
-              Text(
-                'Erro ao carregar',
-                style: AppTypography.inter(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  color: inkErr,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                _erro ?? 'Verifique sua conexão e tente novamente.',
-                textAlign: TextAlign.center,
-                style: TextStyle(color: muteErr, fontSize: 13, height: 1.35),
-              ),
-              const SizedBox(height: TokensStrip.s4),
-              OutlinedButton.icon(
-                onPressed: _load,
-                icon: const Icon(Icons.refresh_rounded, size: 18),
-                label: const Text(FocuxMicrocopy.tentarNovamente),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: primaryErr,
-                  side: BorderSide(color: primaryErr.withValues(alpha: 0.3)),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 12,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
+      return DashboardErrorState(
+        chromeOnDark: Theme.of(context).brightness == Brightness.dark,
+        primary: Theme.of(context).colorScheme.primary,
+        message: _erro ?? 'Verifique sua conexão e tente novamente.',
+        onRetry: _load,
       );
     }
 

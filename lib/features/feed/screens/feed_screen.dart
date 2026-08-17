@@ -13,6 +13,7 @@ import '../data/feed_repository.dart';
 import '../widgets/feed_comments_sheet.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:focux_app/core/widgets/fx_empty_state.dart';
+import 'package:focux_app/core/widgets/fx_error_state.dart';
 import 'package:focux_app/core/widgets/fx_motion.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
@@ -33,6 +34,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
   final Map<int, int> _comentariosLocais = {};
   List<FeedPost> _posts = [];
   bool _loading = true;
+  String? _erro;
 
   @override
   void initState() {
@@ -41,7 +43,10 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
   }
 
   Future<void> _load() async {
-    setState(() => _loading = true);
+    setState(() {
+      _loading = true;
+      _erro = null;
+    });
     try {
       final posts =
           await FeedRepository(ref.read(apiClientProvider)).listarPersonal();
@@ -56,8 +61,10 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
       });
     } catch (e) {
       if (mounted) {
-        setState(() => _loading = false);
-        FeedbackHelper.showError(context, friendlyError(e));
+        setState(() {
+          _loading = false;
+          _erro = friendlyError(e);
+        });
       }
     }
   }
@@ -478,6 +485,13 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
           child:
               _loading
                   ? Center(child: FxLoading(color: primary))
+                  : _erro != null
+                  ? FxErrorState(
+                    chromeOnDark: isDark,
+                    primary: primary,
+                    message: _erro!,
+                    onRetry: _load,
+                  )
                   : _posts.isEmpty
                   ? FxEmptyState(
                     icon: 'rss',

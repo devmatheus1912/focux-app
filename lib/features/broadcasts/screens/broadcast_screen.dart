@@ -8,6 +8,8 @@ import 'package:focux_app/core/widgets/fx_motion.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/broadcast_repository.dart';
 import '../../../core/widgets/fx_loading.dart';
+import 'package:focux_app/core/widgets/fx_empty_state.dart';
+import 'package:focux_app/core/widgets/fx_error_state.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -211,12 +213,20 @@ class _BroadcastScreenState extends ConsumerState<BroadcastScreen> {
                         child: FxLoading(),
                       ),
                   error:
-                      (e, _) =>
-                          _StateCard(text: 'Erro ao carregar historico: $e'),
+                      (e, _) => FxErrorState(
+                        chromeOnDark: isDark,
+                        primary: brand,
+                        message: friendlyError(e),
+                        onRetry:
+                            () => ref.invalidate(_broadcastHistoricoProvider),
+                      ),
                   data: (lista) {
                     if (lista.isEmpty) {
-                      return const _StateCard(
-                        text: 'Nenhum broadcast enviado ainda.',
+                      return const FxEmptyState(
+                        icon: 'message-circle',
+                        title: 'Nenhum broadcast enviado',
+                        subtitle:
+                            'Escreva a primeira mensagem acima para avisar sua base de uma vez.',
                       );
                     }
                     return Column(
@@ -445,27 +455,5 @@ class _BroadcastCard extends StatelessWidget {
     final hora = dt.hour.toString().padLeft(2, '0');
     final min = dt.minute.toString().padLeft(2, '0');
     return '$dia/$mes · $hora:$min';
-  }
-}
-
-class _StateCard extends StatelessWidget {
-  const _StateCard({required this.text});
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Container(
-      padding: const EdgeInsets.all(TokensStrip.s4),
-      decoration: fxListCardDecoration(context, radius: 18),
-      child: Text(
-        text,
-        textAlign: TextAlign.center,
-        style: TextStyle(
-          color: isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
-        ),
-      ),
-    );
   }
 }

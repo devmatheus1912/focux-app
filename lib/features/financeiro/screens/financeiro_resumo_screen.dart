@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/design_tokens.dart';
-import '../../../core/brand/focux_microcopy.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/widgets/fx_empty_state.dart';
+import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -148,116 +149,24 @@ class _FinanceiroResumoScreenState
             Expanded(
               child:
                   _loading
-                      ? _buildLoading(isDark)
+                      ? const FxLoading()
                       : _erro != null
-                      ? _buildError(isDark, ink, mute, primary)
+                      ? FxErrorState(
+                        chromeOnDark: isDark,
+                        primary: primary,
+                        message: _erro!,
+                        onRetry: _carregar,
+                      )
                       : _resumo == null
-                      ? _buildEmpty(isDark, ink, mute, primary)
+                      ? const FxEmptyState(
+                        icon: 'coin',
+                        title: 'Sem dados para exibir',
+                        subtitle: 'Nenhuma mensalidade neste período.',
+                      )
                       : _buildContent(isDark, ink, mute, primary),
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildLoading(bool isDark) {
-    return const Center(
-      child: SizedBox(
-        width: 28,
-        height: 28,
-        child: FxLoading(strokeWidth: 2.5),
-      ),
-    );
-  }
-
-  Widget _buildError(bool isDark, Color ink, Color mute, Color primary) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 40),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 52,
-              height: 52,
-              decoration: BoxDecoration(
-                color: EagleTokens.bad.withValues(alpha: isDark ? 0.18 : 0.08),
-                borderRadius: BorderRadius.circular(18),
-              ),
-              child: const Icon(
-                Icons.cloud_off_rounded,
-                color: EagleTokens.bad,
-                size: 24,
-              ),
-            ),
-            const SizedBox(height: 14),
-            Text(
-              'Erro ao carregar resumo',
-              style: AppTypography.inter(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: ink,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'Verifique sua conexão e tente novamente.',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: mute, fontSize: 13, height: 1.35),
-            ),
-            const SizedBox(height: TokensStrip.s4),
-            OutlinedButton.icon(
-              onPressed: _carregar,
-              icon: const Icon(Icons.refresh_rounded, size: 18),
-              label: const Text(FocuxMicrocopy.tentarNovamente),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: primary,
-                side: BorderSide(color: primary.withValues(alpha: 0.3)),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 12,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildEmpty(bool isDark, Color ink, Color mute, Color primary) {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 52,
-            height: 52,
-            decoration: BoxDecoration(
-              color: primary.withValues(alpha: isDark ? 0.15 : 0.08),
-              borderRadius: BorderRadius.circular(18),
-            ),
-            child: Icon(Icons.analytics_rounded, color: primary, size: 24),
-          ),
-          const SizedBox(height: 14),
-          Text(
-            'Sem dados para exibir',
-            style: AppTypography.inter(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-              color: ink,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'Nenhuma mensalidade neste período.',
-            style: TextStyle(color: mute, fontSize: 13),
-          ),
-        ],
       ),
     );
   }

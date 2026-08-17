@@ -280,7 +280,7 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
         ),
         body:
             _isSearching && _searchResults != null
-                ? _buildSearchResults(isDark, primary, ink, mute)
+                ? _buildSearchResults(isDark, ink, mute)
                 : _isSearching
                 ? Center(
                   child: Column(
@@ -303,16 +303,12 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
                       chatInboxProvider,
                       isDark,
                       primary,
-                      ink,
-                      mute,
                     ),
                     _buildInboxTab(
                       ref.watch(chatInboxUnreadProvider),
                       chatInboxUnreadProvider,
                       isDark,
                       primary,
-                      ink,
-                      mute,
                       emptyMsg: 'Nenhuma mensagem não lida',
                     ),
                     _buildInboxTab(
@@ -320,8 +316,6 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
                       chatInboxArchivedProvider,
                       isDark,
                       primary,
-                      ink,
-                      mute,
                       emptyMsg: 'Nenhuma conversa arquivada',
                       isArchived: true,
                     ),
@@ -331,22 +325,12 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
     );
   }
 
-  Widget _buildSearchResults(
-    bool isDark,
-    Color primary,
-    Color ink,
-    Color mute,
-  ) {
+  Widget _buildSearchResults(bool isDark, Color ink, Color mute) {
     if (_searchResults!.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.search_off, size: 48, color: mute),
-            const SizedBox(height: 12),
-            Text('Nenhum resultado encontrado', style: TextStyle(color: mute)),
-          ],
-        ),
+      return const FxEmptyState(
+        icon: 'search',
+        title: 'Nenhum resultado encontrado',
+        subtitle: 'Tente outro termo ou revise a grafia.',
       );
     }
     return ListView.separated(
@@ -399,33 +383,35 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
     AsyncValue<List<ChatInboxItem>> async,
     FutureProvider<List<ChatInboxItem>> provider,
     bool isDark,
-    Color primary,
-    Color ink,
-    Color mute, {
+    Color primary, {
     String emptyMsg = 'Nenhuma conversa ainda',
     bool isArchived = false,
   }) {
     return async.when(
       loading: () => Center(child: FxLoading(color: primary)),
       error:
-          (e, _) => _InboxState(
-            icon: Icons.wifi_off_rounded,
-            title: 'Não foi possível carregar',
+          (e, _) => FxErrorState(
+            chromeOnDark: isDark,
+            primary: primary,
             message: friendlyError(e),
-            color: mute,
-            onTap: () => ref.invalidate(provider),
+            onRetry: () => ref.invalidate(provider),
           ),
       data: (items) {
         if (items.isEmpty) {
-          return _InboxState(
-            icon:
-                isArchived ? Icons.archive_outlined : Icons.chat_bubble_outline,
+          return FxEmptyState(
+            icon: isArchived ? 'article' : 'chat',
             title: emptyMsg,
-            message:
+            subtitle:
                 isArchived
                     ? 'Arraste conversas para a esquerda para arquivar.'
-                    : 'Toque no botao de escrever para escolher um aluno.',
-            color: mute,
+                    : 'Escolha um aluno para começar uma conversa.',
+            action:
+                isArchived
+                    ? null
+                    : FxEmptyAction(
+                      label: 'Nova conversa',
+                      onTap: _showAlunoPicker,
+                    ),
           );
         }
         return RefreshIndicator(

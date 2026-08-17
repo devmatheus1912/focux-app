@@ -90,15 +90,11 @@ class _AlunoPickerSheetState extends ConsumerState<_AlunoPickerSheet> {
                   child: async.when(
                     loading: () => Center(child: FxLoading(color: primary)),
                     error:
-                        (e, _) => Center(
-                          child: Padding(
-                            padding: const EdgeInsets.all(TokensStrip.s5),
-                            child: Text(
-                              friendlyError(e),
-                              textAlign: TextAlign.center,
-                              style: TextStyle(color: mute),
-                            ),
-                          ),
+                        (e, _) => FxErrorState(
+                          chromeOnDark: isDark,
+                          primary: primary,
+                          message: friendlyError(e),
+                          onRetry: () => ref.invalidate(alunosProvider),
                         ),
                     data: (alunos) {
                       final q = _query.toLowerCase();
@@ -113,11 +109,16 @@ class _AlunoPickerSheetState extends ConsumerState<_AlunoPickerSheet> {
                                   )
                                   .toList();
                       if (filtered.isEmpty) {
-                        return Center(
-                          child: Text(
-                            'Nenhum aluno encontrado',
-                            style: TextStyle(color: mute),
-                          ),
+                        return FxEmptyState(
+                          icon: q.isEmpty ? 'users' : 'search',
+                          title:
+                              q.isEmpty
+                                  ? 'Nenhum aluno cadastrado'
+                                  : 'Nenhum aluno encontrado',
+                          subtitle:
+                              q.isEmpty
+                                  ? 'Cadastre um aluno para poder conversar por aqui.'
+                                  : 'Tente outro nome ou e-mail.',
                         );
                       }
                       return ListView.separated(
@@ -289,58 +290,6 @@ class _SearchResultTile extends StatelessWidget {
         ),
       ),
     );
-  }
-}
-
-class _InboxState extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String message;
-  final Color color;
-  final VoidCallback? onTap;
-
-  const _InboxState({
-    required this.icon,
-    required this.title,
-    required this.message,
-    required this.color,
-    this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final ink = fxScreenInk(context);
-    final mute = fxScreenMute(context);
-    final card = ShellSurface(
-      radius: 18,
-      padding: const EdgeInsets.all(20),
-      onTap: onTap,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 44, color: color),
-          const SizedBox(height: 12),
-          Text(
-            title,
-            style: TextStyle(color: ink, fontWeight: FontWeight.w700),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            message,
-            textAlign: TextAlign.center,
-            style: TextStyle(color: mute),
-          ),
-          if (onTap != null) ...[
-            const SizedBox(height: 12),
-            Text(
-              'Toque para tentar novamente',
-              style: TextStyle(color: mute, fontSize: 12),
-            ),
-          ],
-        ],
-      ),
-    );
-    return Center(child: card);
   }
 }
 
