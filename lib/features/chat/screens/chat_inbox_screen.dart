@@ -25,21 +25,29 @@ import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 part 'chat_inbox_screen_state.part.dart';
 part 'chat_inbox_screen_widgets.part.dart';
 
+final chatInboxHomeProvider = FutureProvider<ChatInboxHomeBundle>((ref) async {
+  return ChatRepository(ref.read(apiClientProvider)).inboxHome();
+});
+
 final chatInboxProvider = FutureProvider<List<ChatInboxItem>>((ref) async {
-  return ChatRepository(ref.read(apiClientProvider)).inbox();
+  return (await ref.watch(chatInboxHomeProvider.future)).inbox;
 });
 
 final chatInboxUnreadProvider = FutureProvider<List<ChatInboxItem>>((
   ref,
 ) async {
-  return ChatRepository(ref.read(apiClientProvider)).inboxUnread();
+  return (await ref.watch(chatInboxHomeProvider.future)).unread;
 });
 
 final chatInboxArchivedProvider = FutureProvider<List<ChatInboxItem>>((
   ref,
 ) async {
-  return ChatRepository(ref.read(apiClientProvider)).inboxArchived();
+  return (await ref.watch(chatInboxHomeProvider.future)).archived;
 });
+
+void invalidateChatInboxCaches(WidgetRef ref) {
+  ref.invalidate(chatInboxHomeProvider);
+}
 
 class ChatInboxScreen extends ConsumerStatefulWidget {
   const ChatInboxScreen({super.key});

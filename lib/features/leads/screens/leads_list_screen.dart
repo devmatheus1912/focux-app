@@ -6,8 +6,8 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../features/auth/providers/auth_provider.dart';
 import '../data/lead_repository.dart';
+import '../providers/leads_provider.dart';
 import '../../planos/providers/plano_features_provider.dart';
 import '../../subscription/models/subscription_plan.dart';
 import '../../../core/utils/friendly_error.dart';
@@ -35,14 +35,19 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
     _load();
   }
 
-  Future<void> _load() async {
+  Future<void> _load({bool force = false}) async {
     setState(() {
       _loading = true;
       _erro = null;
     });
     try {
-      final repo = LeadRepository(ref.read(apiClientProvider));
-      final leads = await repo.listar(status: _filtroStatus);
+      if (force) invalidateLeadsCaches(ref);
+      final home = await ref.read(leadsHomeProvider.future);
+      var leads = home.leads;
+      if (_filtroStatus != null && _filtroStatus!.isNotEmpty) {
+        final status = _filtroStatus!.toUpperCase();
+        leads = leads.where((l) => l.status == status).toList();
+      }
       if (mounted) {
         setState(() {
           _leads = leads;
@@ -61,7 +66,7 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
 
   Future<void> _novoLead() async {
     await context.push('/leads/novo');
-    _load();
+    _load(force: true);
   }
 
   @override
@@ -74,7 +79,7 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
     final ativoLeads = _leads.where((lead) => lead.status == 'ATIVO').toList();
     Future<void> openLead(Lead lead) async {
       await context.push('/leads/${lead.id}', extra: lead);
-      _load();
+      _load(force: true);
     }
 
     final plano = ref.watch(planoFeaturesProvider).valueOrNull;
@@ -100,7 +105,7 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
               tooltip: 'Visão Kanban',
               onPressed: () async {
                 await context.push('/leads/kanban');
-                _load();
+                _load(force: true);
               },
             ),
             IconButton(
@@ -111,7 +116,7 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
                         ? EagleTokens.darkInkMute
                         : TokensStrip.textSecondary,
               ),
-              onPressed: _load,
+              onPressed: () => _load(force: true),
             ),
           ],
         ),
@@ -185,7 +190,7 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
                         chromeOnDark: isDark,
                         primary: primary,
                         message: _erro!,
-                        onRetry: _load,
+                        onRetry: () => _load(force: true),
                       )
                       : _leads.isEmpty
                       ? FxEmptyState(

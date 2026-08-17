@@ -109,9 +109,7 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
         await repo.conversationAction(alunoId, 'clear');
       }
       _clearSelection();
-      ref.invalidate(chatInboxProvider);
-      ref.invalidate(chatInboxUnreadProvider);
-      ref.invalidate(chatInboxArchivedProvider);
+      invalidateChatInboxCaches(ref);
       if (!mounted) return;
       FeedbackHelper.showInfo(
         context,
@@ -129,9 +127,7 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
       await ChatRepository(
         ref.read(apiClientProvider),
       ).conversationAction(alunoId, action);
-      ref.invalidate(chatInboxProvider);
-      ref.invalidate(chatInboxUnreadProvider);
-      ref.invalidate(chatInboxArchivedProvider);
+      invalidateChatInboxCaches(ref);
       if (mounted) {
         final labels = {
           'pin': 'Fixada',
@@ -300,20 +296,17 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
                   children: [
                     _buildInboxTab(
                       ref.watch(chatInboxProvider),
-                      chatInboxProvider,
                       isDark,
                       primary,
                     ),
                     _buildInboxTab(
                       ref.watch(chatInboxUnreadProvider),
-                      chatInboxUnreadProvider,
                       isDark,
                       primary,
                       emptyMsg: 'Nenhuma mensagem não lida',
                     ),
                     _buildInboxTab(
                       ref.watch(chatInboxArchivedProvider),
-                      chatInboxArchivedProvider,
                       isDark,
                       primary,
                       emptyMsg: 'Nenhuma conversa arquivada',
@@ -381,7 +374,6 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
 
   Widget _buildInboxTab(
     AsyncValue<List<ChatInboxItem>> async,
-    FutureProvider<List<ChatInboxItem>> provider,
     bool isDark,
     Color primary, {
     String emptyMsg = 'Nenhuma conversa ainda',
@@ -394,7 +386,7 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
             chromeOnDark: isDark,
             primary: primary,
             message: friendlyError(e),
-            onRetry: () => ref.invalidate(provider),
+            onRetry: () => invalidateChatInboxCaches(ref),
           ),
       data: (items) {
         if (items.isEmpty) {
@@ -416,7 +408,7 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
         }
         return RefreshIndicator(
           color: primary,
-          onRefresh: () async => ref.invalidate(provider),
+          onRefresh: () async => invalidateChatInboxCaches(ref),
           child: ListView.separated(
             padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 8, 16, 110),
             itemCount: items.length,

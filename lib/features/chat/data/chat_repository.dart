@@ -223,6 +223,12 @@ class ChatRepository {
         .toList();
   }
 
+  /// BFF tipado — first paint da inbox (inbox + unread + archived).
+  Future<ChatInboxHomeBundle> inboxHome() async {
+    final r = await _dio.get('/api/chat/inbox/home');
+    return ChatInboxHomeBundle.fromJson(r.data as Map<String, dynamic>);
+  }
+
   Future<ChatMsg> enviar(
     int alunoId,
     String conteudo,
@@ -429,5 +435,29 @@ class ChatRepository {
   String _clientMessageId() {
     final now = DateTime.now().microsecondsSinceEpoch;
     return 'app-$now-${identityHashCode(this)}';
+  }
+}
+
+class ChatInboxHomeBundle {
+  final List<ChatInboxItem> inbox;
+  final List<ChatInboxItem> unread;
+  final List<ChatInboxItem> archived;
+
+  ChatInboxHomeBundle({
+    required this.inbox,
+    required this.unread,
+    required this.archived,
+  });
+
+  factory ChatInboxHomeBundle.fromJson(Map<String, dynamic> j) {
+    List<ChatInboxItem> parse(String key) =>
+        ((j[key] as List?) ?? const [])
+            .map((e) => ChatInboxItem.fromJson(e as Map<String, dynamic>))
+            .toList();
+    return ChatInboxHomeBundle(
+      inbox: parse('inbox'),
+      unread: parse('unread'),
+      archived: parse('archived'),
+    );
   }
 }

@@ -89,6 +89,12 @@ class LeadRepository {
         .toList();
   }
 
+  /// BFF tipado — first paint do Funil de Leads (mesmo SSOT de [listar]).
+  Future<LeadsHomeBundle> getHome() async {
+    final r = await _dio.get('/api/leads/home');
+    return LeadsHomeBundle.fromJson(r.data as Map<String, dynamic>);
+  }
+
   Future<Lead> criar({
     required String nome,
     String? telefone,
@@ -144,5 +150,20 @@ class LeadRepository {
       data: {'tipo': tipo, 'descricao': descricao},
     );
     return LeadInteracao.fromJson(r.data as Map<String, dynamic>);
+  }
+}
+
+class LeadsHomeBundle {
+  final List<Lead> leads;
+
+  LeadsHomeBundle({required this.leads});
+
+  factory LeadsHomeBundle.fromJson(Map<String, dynamic> j) {
+    return LeadsHomeBundle(
+      leads:
+          ((j['leads'] as List?) ?? const [])
+              .map((e) => Lead.fromJson(e as Map<String, dynamic>))
+              .toList(),
+    );
   }
 }
