@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../../core/brand/focux_brand_copy.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/hero_teal.dart';
+import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/motion_preferences.dart';
 import '../../../core/widgets/focux_brand_tagline.dart';
 import '../../../core/widgets/focux_official_logo.dart';
@@ -198,13 +199,13 @@ class _LoadingRail extends StatelessWidget {
           Text(
             FocuxBrandCopy.splashLoading.toUpperCase(),
             style: AppTypography.inter(
-              color: primary.withValues(alpha: 0.88),
+              color: primary.withValues(alpha: 0.72),
               fontSize: 10.5,
               fontWeight: FontWeight.w600,
-              letterSpacing: 4.6,
+              letterSpacing: 3.8,
             ),
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 12),
           LayoutBuilder(
             builder: (context, constraints) {
               final width = math.min(constraints.maxWidth, 280.0);
@@ -212,16 +213,16 @@ class _LoadingRail extends StatelessWidget {
 
               return SizedBox(
                 width: width,
-                height: 4,
+                height: 3.5,
                 child: Stack(
                   alignment: Alignment.centerLeft,
                   children: [
                     DecoratedBox(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(99),
-                        color: heroTealSurface(0.08),
+                        color: heroTealSurface(0.06),
                         border: Border.all(
-                          color: primary.withValues(alpha: 0.22),
+                          color: primary.withValues(alpha: 0.14),
                         ),
                       ),
                       child: const SizedBox.expand(),
@@ -231,10 +232,14 @@ class _LoadingRail extends StatelessWidget {
                         duration: const Duration(milliseconds: 120),
                         curve: Curves.easeOut,
                         width: fillWidth,
-                        height: 4,
+                        height: 3.5,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(99),
                           color: primary,
+                          boxShadow: TokensStrip.coloredDepthGlow(
+                            primary,
+                            strength: 0.22,
+                          ),
                         ),
                       ),
                   ],

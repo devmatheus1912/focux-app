@@ -79,17 +79,16 @@ class _OnboardingHeader extends StatelessWidget {
               child: InkWell(
                 onTap: onSkip,
                 borderRadius: BorderRadius.circular(99),
-                child: Container(
+                child: Ink(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 14,
                     vertical: 10,
                   ),
-                  decoration: BoxDecoration(
-                    color: heroTealSurface(0.04),
-                    borderRadius: BorderRadius.circular(99),
-                    border: Border.all(
-                      color: heroTealInk().withValues(alpha: 0.12),
-                    ),
+                  decoration: TokensStrip.glassPanel(
+                    dark: true,
+                    radius: 99,
+                    accent: Theme.of(context).colorScheme.primary,
+                    elevationLevel: 3,
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -97,7 +96,7 @@ class _OnboardingHeader extends StatelessWidget {
                       Text(
                         FocuxBrandCopy.onboardingSkip,
                         style: AppTypography.inter(
-                          color: heroTealInk().withValues(alpha: 0.70),
+                          color: heroTealInk().withValues(alpha: 0.78),
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
                         ),
@@ -149,16 +148,16 @@ class _OnboardingFooter extends StatelessWidget {
       children: [
         if (socialProofLine != null)
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 4),
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, TokensStrip.s2),
             child: _OnboardingSocialProof(
               primary: primary,
               line: socialProofLine!,
             ),
           )
         else
-          const SizedBox(height: 4),
+          const SizedBox(height: TokensStrip.s2),
         Padding(
-          padding: const EdgeInsets.only(top: 4, bottom: 10),
+          padding: const EdgeInsets.only(top: TokensStrip.s2, bottom: TokensStrip.s3),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: List.generate(
@@ -284,7 +283,7 @@ class _OBPageWidget extends StatelessWidget {
                   alignment: Alignment.center,
                   child: _buildHero(),
                 ),
-                if (pageIndex == 0) ...[
+                if (pageIndex == 0 && !compact) ...[
                   SizedBox(height: compact ? 4 : 8),
                   Transform.translate(
                     offset: Offset(0, subtitleSlide.value * 0.5),
@@ -297,7 +296,7 @@ class _OBPageWidget extends StatelessWidget {
                     ),
                   ),
                 ],
-                SizedBox(height: pageIndex == 0 ? (compact ? 8 : 12) : 14),
+                SizedBox(height: pageIndex == 0 ? (compact ? 8 : TokensStrip.s3) : 14),
                 Transform.translate(
                   offset: Offset(0, titleSlide.value),
                   child: Opacity(
@@ -452,9 +451,9 @@ class _OnboardingSocialProof extends StatelessWidget {
         width: double.infinity,
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
         decoration: BoxDecoration(
-          color: heroTealSurface(0.04),
+          color: heroTealSurface(0.03),
           borderRadius: BorderRadius.circular(99),
-          border: Border.all(color: heroTealSurface(0.10)),
+          border: Border.all(color: heroTealSurface(0.06)),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -540,11 +539,11 @@ class _MetricChipWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 3),
-      padding: const EdgeInsets.symmetric(vertical: 9, horizontal: 4),
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
       decoration: BoxDecoration(
-        color: heroTealSurface(0.04),
+        color: heroTealSurface(0.03),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: heroTealSurface(0.08)),
+        border: Border.all(color: heroTealSurface(0.06)),
       ),
       child: Column(
         children: [

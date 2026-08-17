@@ -61,6 +61,6 @@ void main() {
     );
 
     expect(padding.bottom, greaterThanOrEqualTo(44));
-    expect(padding.left, 22);
+    expect(padding.left, 24);
   });
 }

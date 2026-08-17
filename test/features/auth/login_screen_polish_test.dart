@@ -21,6 +21,8 @@ void main() {
     // Lockup de marca compartilhado — largura única para Personal e Aluno.
     expect(screen, contains('AuthLoginBrandHeader'));
     expect(shell, contains('AuthFormEntrance'));
+    expect(shell, contains('coloredDepthGlow'));
+    expect(shell, contains('glassPanel'));
     expect(screen, contains('authScrollPadding'));
     expect(
       readScreenSourceBundle('lib/features/auth/utils/auth_layout.dart'),

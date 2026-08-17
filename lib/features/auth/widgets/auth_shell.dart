@@ -286,13 +286,10 @@ class AuthRoleToggle extends StatelessWidget {
                 color: selected ? null : Colors.transparent,
                 boxShadow:
                     selected
-                        ? [
-                          BoxShadow(
-                            color: primary.withValues(alpha: 0.28),
-                            blurRadius: 10,
-                            offset: const Offset(0, 3),
-                          ),
-                        ]
+                        ? TokensStrip.coloredDepthGlow(
+                          primary,
+                          strength: 0.18,
+                        )
                         : null,
               ),
               child: Text(
@@ -340,7 +337,7 @@ class AuthGlassCard extends StatelessWidget {
     super.key,
     required this.child,
     this.padding = const EdgeInsets.symmetric(horizontal: 20, vertical: 22),
-    this.radius = 22,
+    this.radius = 20,
   });
 
   final Widget child;
@@ -350,22 +347,20 @@ class AuthGlassCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
+    // Paridade Home: strip soft (glow ~0.12), sem neon.
     return ClipRRect(
       borderRadius: BorderRadius.circular(radius),
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
         child: Container(
           padding: padding,
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.1),
+            color: TokensStrip.glassFill(dark: true, opacity: 0.90),
             borderRadius: BorderRadius.circular(radius),
-            border: Border.all(color: EagleTokens.glassBorder),
+            border: Border.all(color: primary.withValues(alpha: 0.14)),
             boxShadow: [
-              BoxShadow(
-                color: primary.withValues(alpha: 0.08),
-                blurRadius: 24,
-                offset: const Offset(0, 8),
-              ),
+              ...TokensStrip.elevation(8, dark: true, accent: primary),
+              ...TokensStrip.coloredDepthGlow(primary, strength: 0.12),
             ],
           ),
           child: child,
@@ -457,11 +452,11 @@ class AuthField extends StatelessWidget {
             ),
             enabledBorder: FxInputDeco.outlineBorder(
               borderRadius: BorderRadius.circular(14),
-              borderSide: BorderSide(color: primary.withValues(alpha: 0.28)),
+              borderSide: BorderSide(color: primary.withValues(alpha: 0.18)),
             ),
             focusedBorder: FxInputDeco.outlineBorder(
               borderRadius: BorderRadius.circular(14),
-              borderSide: BorderSide(color: primary, width: 1.5),
+              borderSide: BorderSide(color: primary, width: 1.35),
             ),
             errorBorder: FxInputDeco.outlineBorder(
               borderRadius: BorderRadius.circular(14),
@@ -558,14 +553,10 @@ class _AuthPrimaryButtonState extends State<AuthPrimaryButton>
                       : BrandPalette.deep(primary),
                 ],
               ),
-              boxShadow: [
-                if (!widget.isLoading)
-                  BoxShadow(
-                    color: primary.withValues(alpha: 0.25),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  ),
-              ],
+              boxShadow:
+                  widget.isLoading
+                      ? null
+                      : TokensStrip.coloredDepthGlow(primary, strength: 0.18),
             ),
             child: Center(
               child:
@@ -620,23 +611,30 @@ class AuthSecondaryButton extends StatelessWidget {
       child: OutlinedButton(
         onPressed: onPressed,
         style: OutlinedButton.styleFrom(
-          side: BorderSide(color: EagleTokens.glassBorder),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
+          side: BorderSide(
+            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.45),
           ),
-          backgroundColor: EagleTokens.glassFill,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(TokensStrip.rButton),
+          ),
+          backgroundColor: TokensStrip.glassFill(dark: true, opacity: 0.55),
+          foregroundColor: Colors.white,
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             if (icon != null) ...[
-              Icon(icon, size: 17, color: Colors.white),
+              Icon(
+                icon,
+                size: 17,
+                color: Theme.of(context).colorScheme.primary,
+              ),
               const SizedBox(width: 8),
             ],
             Text(
               label,
-              style: const TextStyle(
-                color: Colors.white,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.primary,
                 fontSize: 15,
                 fontWeight: FontWeight.w700,
               ),
@@ -660,25 +658,37 @@ class AuthBackButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final icon = Container(
-      width: 38,
-      height: 38,
-      decoration: BoxDecoration(
-        color: EagleTokens.glassFill,
-        shape: BoxShape.circle,
-        border: Border.all(color: EagleTokens.glassBorder),
-      ),
-      child: const Icon(
-        Icons.chevron_left_rounded,
-        color: Colors.white,
-        size: 22,
+    final primary = Theme.of(context).colorScheme.primary;
+    // Soft chrome = mesmo espírito do ShellHeaderIconButton da Home.
+    final icon = Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        customBorder: const CircleBorder(),
+        child: Ink(
+          width: 38,
+          height: 38,
+          decoration: TokensStrip.glassPanel(
+            dark: true,
+            radius: 19,
+            accent: primary,
+            elevationLevel: 4,
+          ),
+          child: Center(
+            child: Icon(
+              Icons.chevron_left_rounded,
+              color: Colors.white.withValues(alpha: 0.92),
+              size: 22,
+            ),
+          ),
+        ),
       ),
     );
 
     final button = Semantics(
       button: true,
       label: 'Voltar',
-      child: GestureDetector(onTap: onTap, child: icon),
+      child: icon,
     );
 
     if (!showLabel) {

@@ -48,11 +48,11 @@ class _OnboardingScreenState extends State<OnboardingScreen>
 
   bool _motionConfigured = false;
 
-  /// Telas ≤720px de altura útil — esconde metric chips no slide 1.
+  /// Telas ≤760px de altura útil — esconde metric chips / hook (hero budget Home).
   static bool _isCompactLayout(BuildContext context) {
     final height = MediaQuery.sizeOf(context).height;
     final padding = MediaQuery.paddingOf(context);
-    return (height - padding.top - padding.bottom) < 720;
+    return (height - padding.top - padding.bottom) < 760;
   }
 
   static const _pageIconsPersonal = [

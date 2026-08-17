@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/tokens_strip.dart';
+
 /// Lockup padrão nas telas de formulário auth (login, register, esqueci, reset).
 const double kAuthFormLogoWidth = 118.0;
 
@@ -14,9 +16,9 @@ double authLogoWidthFor(BuildContext context, {bool withTagline = false}) {
 /// Padding de scroll com safe-area inferior + folga para home indicator / teclado.
 EdgeInsets authScrollPadding(
   BuildContext context, {
-  double horizontal = 22,
-  double top = 48,
-  double bottomExtra = 20,
+  double horizontal = TokensStrip.s5,
+  double top = 40,
+  double bottomExtra = TokensStrip.s5,
 }) {
   final viewBottom = MediaQuery.viewPaddingOf(context).bottom;
   final keyboard = MediaQuery.viewInsetsOf(context).bottom;
@@ -24,6 +26,6 @@ EdgeInsets authScrollPadding(
     horizontal,
     top,
     horizontal,
-    bottomExtra + viewBottom + (keyboard > 0 ? 12 : 0),
+    bottomExtra + viewBottom + (keyboard > 0 ? TokensStrip.s3 : 0),
   );
 }

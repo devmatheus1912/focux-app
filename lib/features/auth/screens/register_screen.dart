@@ -341,7 +341,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                             style: AppTypography.inter(
                               fontSize: 12.5,
                               fontWeight: FontWeight.w700,
-                              color: heroTealInk(),
+                              color: primary,
                             ),
                           ),
                         ),
@@ -358,7 +358,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         fontWeight: FontWeight.w500,
                       ),
                     ),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 12),
                     AuthField(
                       label: 'Senha',
                       controller: _passwordController,
