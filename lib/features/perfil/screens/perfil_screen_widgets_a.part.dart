@@ -106,11 +106,11 @@ class _PerfilBody extends StatelessWidget {
                 slideOffset: 18,
                 duration: const Duration(milliseconds: 480),
                 child: Container(
-                  margin: const EdgeInsets.fromLTRB(0, 0, 0, 8),
+                  margin: const EdgeInsets.fromLTRB(0, 0, 0, 10),
                   decoration: BoxDecoration(
                     borderRadius: const BorderRadius.only(
-                      bottomLeft: Radius.circular(28),
-                      bottomRight: Radius.circular(28),
+                      bottomLeft: Radius.circular(24),
+                      bottomRight: Radius.circular(24),
                     ),
                     gradient: LinearGradient(
                       begin: Alignment.topLeft,

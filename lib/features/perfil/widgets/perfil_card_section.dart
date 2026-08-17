@@ -4,8 +4,9 @@ import 'package:flutter/services.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 
-/// Card de seção do hub Perfil (título + subtítulo + trailing opcional).
+/// Card de seção do hub Perfil — mesma superfície strip da Home.
 class PerfilCardSection extends StatelessWidget {
   const PerfilCardSection({
     super.key,
@@ -37,18 +38,20 @@ class PerfilCardSection extends StatelessWidget {
     final ink = chrome.ink;
     final mute = chrome.mute;
     final a11yTitle = subtitle == null ? title : '$title. $subtitle';
+    final pad = quiet ? 12.0 : 14.0;
 
     return Semantics(
       container: true,
       label: a11yTitle,
       child: Container(
-        decoration: chrome.panel(
-          radius: 16,
+        decoration: fxStripCardDecoration(
+          context,
           accent: quiet ? null : accent,
-          elevationLevel: quiet ? 2 : 3,
+          radius: TokensStrip.rCard,
+          glowStrength: quiet ? 0.03 : 0.06,
         ),
         child: Padding(
-          padding: const EdgeInsets.all(TokensStrip.s4),
+          padding: EdgeInsets.all(pad),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -67,7 +70,7 @@ class PerfilCardSection extends StatelessWidget {
                           ),
                         ),
                         if (subtitle != null) ...[
-                          const SizedBox(height: TokensStrip.s1),
+                          const SizedBox(height: 3),
                           Text(
                             subtitle!,
                             style: FocuxHubTypography.bodyMuted(color: mute),
@@ -88,19 +91,10 @@ class PerfilCardSection extends StatelessWidget {
                             onTrailingTap!();
                           },
                           borderRadius: BorderRadius.circular(999),
-                          child: Container(
+                          child: Padding(
                             padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
+                              horizontal: 8,
                               vertical: 6,
-                            ),
-                            decoration: BoxDecoration(
-                              color: accent.withValues(
-                                alpha: isDark ? 0.16 : 0.10,
-                              ),
-                              borderRadius: BorderRadius.circular(999),
-                              border: Border.all(
-                                color: accent.withValues(alpha: 0.22),
-                              ),
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
@@ -123,7 +117,7 @@ class PerfilCardSection extends StatelessWidget {
                     ),
                 ],
               ),
-              const SizedBox(height: 14),
+              SizedBox(height: quiet ? 10 : 12),
               child,
             ],
           ),

@@ -43,13 +43,13 @@ class PerfilStickyBar extends StatelessWidget {
         decoration: BoxDecoration(
           color: chrome.sheetFill.withValues(alpha: isDark ? 0.96 : 0.98),
           border: Border(
-            top: BorderSide(color: chrome.line.withValues(alpha: 0.7)),
+            top: BorderSide(color: chrome.line.withValues(alpha: 0.55)),
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: isDark ? 0.28 : 0.08),
-              blurRadius: 18,
-              offset: const Offset(0, -6),
+              color: Colors.black.withValues(alpha: isDark ? 0.22 : 0.06),
+              blurRadius: 14,
+              offset: const Offset(0, -4),
             ),
           ],
         ),
@@ -70,21 +70,15 @@ class PerfilStickyBar extends StatelessWidget {
                     child: Semantics(
                       button: true,
                       label: 'Meus alunos',
-                      child: OutlinedButton.icon(
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: actionInk,
-                          side: BorderSide(
-                            color: accent.withValues(alpha: 0.45),
-                          ),
-                          minimumSize: const Size(0, 48),
-                        ),
+                      child: FxLiquidSecondaryButton(
+                        expand: true,
+                        icon: Icons.groups_2_outlined,
+                        label: 'Meus alunos',
                         onPressed: () {
                           HapticFeedback.selectionClick();
                           _track('alunos');
                           goPersonalShellTab(context, '/alunos');
                         },
-                        icon: const Icon(Icons.groups_2_outlined, size: 18),
-                        label: const Text('Meus alunos'),
                       ),
                     ),
                   ),
@@ -94,31 +88,27 @@ class PerfilStickyBar extends StatelessWidget {
                       button: true,
                       label:
                           profileComplete ? 'Abrir Hoje' : 'Completar perfil',
-                      child:
-                          profileComplete
-                              ? FxLiquidPrimaryButton(
-                                expand: true,
-                                icon: Icons.today_outlined,
-                                label: 'Hoje',
-                                onPressed: () {
-                                  HapticFeedback.selectionClick();
-                                  _track('hoje');
-                                  goPersonalShellTab(
-                                    context,
-                                    '/dashboard/personal',
-                                  );
-                                },
-                              )
-                              : FxLiquidPrimaryButton(
-                                expand: true,
-                                icon: Icons.checklist_rtl_rounded,
-                                label: 'Completar perfil',
-                                onPressed: () {
-                                  HapticFeedback.selectionClick();
-                                  _track('completar');
-                                  context.push('/identidade-visual');
-                                },
-                              ),
+                      child: FxLiquidPrimaryButton(
+                        expand: true,
+                        icon:
+                            profileComplete
+                                ? Icons.today_outlined
+                                : Icons.checklist_rtl_rounded,
+                        label: profileComplete ? 'Hoje' : 'Completar perfil',
+                        onPressed: () {
+                          HapticFeedback.selectionClick();
+                          if (profileComplete) {
+                            _track('hoje');
+                            goPersonalShellTab(
+                              context,
+                              '/dashboard/personal',
+                            );
+                            return;
+                          }
+                          _track('completar');
+                          context.push('/identidade-visual');
+                        },
+                      ),
                     ),
                   ),
                 ],

@@ -211,14 +211,19 @@ class _PerfilPublicLinkCard extends StatelessWidget {
         children: [
           Container(
             width: double.infinity,
-            constraints: const BoxConstraints(minHeight: 48),
+            constraints: const BoxConstraints(minHeight: 46),
             padding: const EdgeInsets.only(left: 12),
             decoration: BoxDecoration(
               color: (isDark ? EagleTokens.darkCard : Colors.white).withValues(
-                alpha: isDark ? 0.92 : 0.96,
+                alpha: isDark ? 0.72 : 0.92,
               ),
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: accent.withValues(alpha: 0.18)),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color:
+                    isDark
+                        ? Colors.white.withValues(alpha: 0.08)
+                        : accent.withValues(alpha: 0.14),
+              ),
             ),
             child: Row(
               children: [

@@ -330,47 +330,106 @@ class _ProfessionalDataPanel extends StatelessWidget {
       isDark: isDark,
       accent: accent,
       actionInk: actionInk,
+      quiet: true,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Semantics(
             label: 'Dados profissionais. ${summary.lines.join('. ')}',
-            child: Wrap(
-              spacing: TokensStrip.s2,
-              runSpacing: TokensStrip.s2,
-              children: [
-                for (final line in summary.lines)
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 7,
-                    ),
-                    decoration: BoxDecoration(
-                      color:
-                          isDark
-                              ? Colors.white.withValues(alpha: 0.06)
-                              : TokensStrip.borderDefault.withValues(
-                                alpha: 0.65,
-                              ),
-                      borderRadius: BorderRadius.circular(TokensStrip.rPill),
-                      border:
-                          line.toLowerCase().contains('pendente')
-                              ? Border.all(
-                                color: accent.withValues(alpha: 0.35),
-                              )
-                              : null,
-                    ),
-                    child: Text(
-                      line,
-                      style: TokensStrip.bodyMuted(
-                        color:
-                            line.toLowerCase().contains('pendente')
-                                ? actionInk
-                                : ink,
-                      ).copyWith(fontWeight: FontWeight.w700),
-                    ),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final dual = constraints.maxWidth >= 320;
+                final entries = <(IconData, String)>[
+                  (
+                    Icons.phone_outlined,
+                    summary.lines.isNotEmpty ? summary.lines[0] : '—',
                   ),
-              ],
+                  (
+                    Icons.badge_outlined,
+                    summary.lines.length > 1 ? summary.lines[1] : '—',
+                  ),
+                  (
+                    Icons.fitness_center_outlined,
+                    summary.lines.length > 2 ? summary.lines[2] : '—',
+                  ),
+                  (
+                    Icons.alternate_email_rounded,
+                    summary.lines.length > 3 ? summary.lines[3] : '—',
+                  ),
+                ];
+                if (!dual) {
+                  return Column(
+                    children: [
+                      for (var i = 0; i < entries.length; i++) ...[
+                        if (i > 0) const SizedBox(height: TokensStrip.s2),
+                        _ProfessionalFactRow(
+                          icon: entries[i].$1,
+                          text: entries[i].$2,
+                          accent: accent,
+                          actionInk: actionInk,
+                          ink: ink,
+                          isDark: isDark,
+                        ),
+                      ],
+                    ],
+                  );
+                }
+                return Column(
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _ProfessionalFactRow(
+                            icon: entries[0].$1,
+                            text: entries[0].$2,
+                            accent: accent,
+                            actionInk: actionInk,
+                            ink: ink,
+                            isDark: isDark,
+                          ),
+                        ),
+                        const SizedBox(width: TokensStrip.s2),
+                        Expanded(
+                          child: _ProfessionalFactRow(
+                            icon: entries[1].$1,
+                            text: entries[1].$2,
+                            accent: accent,
+                            actionInk: actionInk,
+                            ink: ink,
+                            isDark: isDark,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: TokensStrip.s2),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _ProfessionalFactRow(
+                            icon: entries[2].$1,
+                            text: entries[2].$2,
+                            accent: accent,
+                            actionInk: actionInk,
+                            ink: ink,
+                            isDark: isDark,
+                          ),
+                        ),
+                        const SizedBox(width: TokensStrip.s2),
+                        Expanded(
+                          child: _ProfessionalFactRow(
+                            icon: entries[3].$1,
+                            text: entries[3].$2,
+                            accent: accent,
+                            actionInk: actionInk,
+                            ink: ink,
+                            isDark: isDark,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                );
+              },
             ),
           ),
           if (summary.missingPhone) ...[
@@ -399,6 +458,69 @@ class _ProfessionalDataPanel extends StatelessWidget {
                 onEdit();
               },
             ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ProfessionalFactRow extends StatelessWidget {
+  const _ProfessionalFactRow({
+    required this.icon,
+    required this.text,
+    required this.accent,
+    required this.actionInk,
+    required this.ink,
+    required this.isDark,
+  });
+
+  final IconData icon;
+  final String text;
+  final Color accent;
+  final Color actionInk;
+  final Color ink;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    final pending = text.toLowerCase().contains('pendente');
+    return Container(
+      constraints: const BoxConstraints(minHeight: 40),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        color:
+            isDark
+                ? Colors.white.withValues(alpha: 0.045)
+                : TokensStrip.borderDefault.withValues(alpha: 0.45),
+        borderRadius: BorderRadius.circular(12),
+        border:
+            pending
+                ? Border.all(color: accent.withValues(alpha: 0.30))
+                : Border.all(
+                  color:
+                      isDark
+                          ? Colors.white.withValues(alpha: 0.06)
+                          : TokensStrip.borderDefault,
+                ),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            icon,
+            size: 15,
+            color: pending ? actionInk : accent.withValues(alpha: 0.85),
+          ),
+          const SizedBox(width: 7),
+          Expanded(
+            child: Text(
+              text,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TokensStrip.bodyMuted(
+                color: pending ? actionInk : ink,
+              ).copyWith(fontWeight: FontWeight.w700, height: 1.15),
+            ),
+          ),
         ],
       ),
     );
