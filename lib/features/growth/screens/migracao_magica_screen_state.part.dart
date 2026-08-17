@@ -68,9 +68,10 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
   }
 
   Widget _buildContent(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final chrome = ShellChrome.of(context);
+    final isDark = chrome.isDark;
+    final ink = chrome.ink;
+    final mute = chrome.mute;
     final brand = Theme.of(context).colorScheme.primary;
     final brandDeep = BrandPalette.deep(brand);
     final brandSoft = BrandPalette.soft(brand, dark: isDark);
@@ -83,19 +84,21 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
         if (didPop) return;
         await _handleBack();
       },
-      child: FxShellScaffold(
-        useMesh: true,
-        appBar: FxShellAppBar(title: 'Migração Focux', onBack: _handleBack),
-        body: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(
-            TokensStrip.s4,
-            TokensStrip.s2,
-            TokensStrip.s4,
-            TokensStrip.s6,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
+      child: fxScreenA11yScope(
+        label: 'Migração Focux — importar alunos',
+        child: FxShellScaffold(
+          useMesh: true,
+          appBar: FxShellAppBar(title: 'Migração Focux', onBack: _handleBack),
+          body: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(
+              TokensStrip.s4,
+              TokensStrip.s2,
+              TokensStrip.s4,
+              TokensStrip.s6,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
               _stagger(
                 context,
                 index: 0,
@@ -564,6 +567,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
             ],
           ),
         ),
+        ),
       ),
     );
   }
@@ -582,31 +586,13 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
         context,
         key: key,
         index: 4,
-        child: Padding(
-          padding: const EdgeInsets.only(top: TokensStrip.s4),
-          child: Container(
-            padding: const EdgeInsets.all(TokensStrip.s4),
-            decoration: fxListCardDecoration(context),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(Icons.search_off_rounded, color: mute, size: 28),
-                const SizedBox(height: 10),
-                Text(
-                  'Nenhum aluno identificado',
-                  style: AppTypography.inter(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w800,
-                    color: ink,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  'Revise o texto colado e tente novamente com mais linhas ou campos visíveis.',
-                  style: TextStyle(color: mute, height: 1.45),
-                ),
-              ],
-            ),
+        child: const Padding(
+          padding: EdgeInsets.only(top: TokensStrip.s4),
+          child: FxEmptyState(
+            icon: 'search',
+            title: 'Nenhum aluno identificado',
+            subtitle:
+                'Revise o texto colado e tente novamente com mais linhas ou campos visíveis.',
           ),
         ),
       );

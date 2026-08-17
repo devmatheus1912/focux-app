@@ -6,11 +6,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/analytics/analytics_service.dart';
-import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_motion.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../features/planos/paywall/paywall_catalog.dart';
 import '../../../features/planos/paywall/paywall_components.dart';
@@ -91,12 +94,15 @@ class _CancelSaveScreenState extends ConsumerState<CancelSaveScreen> {
         _oferta = oferta;
         _carregandoOferta = false;
       });
-    } catch (_) {
+    } catch (e) {
       if (!mounted) return;
       setState(() {
         _carregandoOferta = false;
-        _erroOferta =
-            'Não foi possível carregar a alternativa agora. Tente de novo.';
+        _erroOferta = friendlyError(
+          e,
+          fallback:
+              'Não foi possível carregar a alternativa agora. Tente de novo.',
+        );
       });
     }
   }
@@ -142,7 +148,11 @@ class _CancelSaveScreenState extends ConsumerState<CancelSaveScreen> {
       if (!mounted) return;
       FeedbackHelper.showError(
         context,
-        'Não foi possível concluir agora. Tente novamente em instantes.',
+        friendlyError(
+          e,
+          fallback:
+              'Não foi possível concluir agora. Tente novamente em instantes.',
+        ),
       );
     } finally {
       if (mounted) setState(() => _enviando = false);
@@ -189,9 +199,10 @@ class _CancelSaveScreenState extends ConsumerState<CancelSaveScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final chrome = ShellChrome.of(context);
+    final isDark = chrome.isDark;
+    final ink = chrome.ink;
+    final mute = chrome.mute;
     final primary = theme.colorScheme.primary;
     final secondary = PaywallCatalog.readableSecondary(
       ink,
@@ -199,86 +210,93 @@ class _CancelSaveScreenState extends ConsumerState<CancelSaveScreen> {
       isDark: isDark,
     );
 
-    return FxShellScaffold(
-      useMesh: true,
-      appBar: FxShellAppBar(
-        title: 'Antes de cancelar…',
-        onBack:
-            () => context.canPop() ? context.pop() : context.go('/assinatura'),
-      ),
-      body: ListView(
-        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-        padding: EdgeInsets.fromLTRB(
-          20,
-          8,
-          20,
-          32 + MediaQuery.viewInsetsOf(context).bottom,
+    return fxScreenA11yScope(
+      label: 'Antes de cancelar a assinatura',
+      child: FxShellScaffold(
+        useMesh: true,
+        appBar: FxShellAppBar(
+          title: 'Antes de cancelar…',
+          onBack:
+              () => context.canPop() ? context.pop() : context.go('/assinatura'),
         ),
-        children: [
-          Text(
-            'Que pena que você quer ir embora.',
-            style: TokensStrip.h2(color: ink),
+        body: ListView(
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          padding: EdgeInsets.fromLTRB(
+            TokensStrip.s5,
+            TokensStrip.s2,
+            TokensStrip.s5,
+            TokensStrip.s6 + MediaQuery.viewInsetsOf(context).bottom,
           ),
-          const SizedBox(height: 8),
-          Text(
-            'Selecione um motivo — mostramos uma alternativa personalizada aqui embaixo.',
-            style: TokensStrip.bodyMuted(
-              color: secondary,
-            ).copyWith(fontSize: TokensStrip.fontBodySm, height: 1.45),
-          ),
-          const SizedBox(height: 20),
-          for (final m in _motivos) ...[
-            _MotivoTile(
-              motivo: m,
-              selected: _motivoSelecionado == m.codigo,
-              ink: ink,
-              mute: mute,
-              primary: primary,
-              isDark: isDark,
-              onTap: () => _selecionarMotivo(m.codigo),
+          children: [
+            Text(
+              'Que pena que você quer ir embora.',
+              style: TokensStrip.h2(color: ink),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: TokensStrip.s2),
+            Text(
+              'Selecione um motivo — mostramos uma alternativa personalizada aqui embaixo.',
+              style: TokensStrip.bodyMuted(
+                color: secondary,
+              ).copyWith(fontSize: TokensStrip.fontBodySm, height: 1.45),
+            ),
+            const SizedBox(height: TokensStrip.s5),
+            for (final m in _motivos) ...[
+              _MotivoTile(
+                motivo: m,
+                selected: _motivoSelecionado == m.codigo,
+                ink: ink,
+                mute: mute,
+                primary: primary,
+                isDark: isDark,
+                onTap: () => _selecionarMotivo(m.codigo),
+              ),
+              const SizedBox(height: TokensStrip.s2),
+            ],
+            const SizedBox(height: TokensStrip.s2),
+            AnimatedSwitcher(
+              duration:
+                  TokensStrip.prefersReducedMotion(context)
+                      ? Duration.zero
+                      : const Duration(milliseconds: 220),
+              switchInCurve: Curves.easeOutCubic,
+              switchOutCurve: Curves.easeInCubic,
+              child:
+                  _carregandoOferta
+                      ? const Padding(
+                        key: ValueKey('loading'),
+                        padding: EdgeInsets.symmetric(vertical: 24),
+                        child: Center(child: FxLoading()),
+                      )
+                      : _erroOferta != null
+                      ? Padding(
+                        key: const ValueKey('error'),
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        child: FxErrorState(
+                          chromeOnDark: isDark,
+                          primary: primary,
+                          message: _erroOferta!,
+                          title: 'Alternativa indisponível',
+                          onRetry:
+                              () => _selecionarMotivo(_motivoSelecionado!),
+                        ),
+                      )
+                      : _oferta != null
+                      ? _OfertaCard(
+                        key: ValueKey(_oferta!.tipo),
+                        oferta: _oferta!,
+                        enviando: _enviando,
+                        ink: ink,
+                        mute: mute,
+                        primary: primary,
+                        isDark: isDark,
+                        onAceitar: () => _responder(true),
+                        onRecusar: () => _responder(false),
+                        onFeedback: (txt) => _feedback = txt,
+                      )
+                      : const SizedBox.shrink(key: ValueKey('empty')),
+            ),
           ],
-          const SizedBox(height: 8),
-          AnimatedSwitcher(
-            duration:
-                TokensStrip.prefersReducedMotion(context)
-                    ? Duration.zero
-                    : const Duration(milliseconds: 220),
-            switchInCurve: Curves.easeOutCubic,
-            switchOutCurve: Curves.easeInCubic,
-            child:
-                _carregandoOferta
-                    ? const Padding(
-                      key: ValueKey('loading'),
-                      padding: EdgeInsets.symmetric(vertical: 24),
-                      child: Center(child: FxLoading()),
-                    )
-                    : _erroOferta != null
-                    ? _ErroOfertaPanel(
-                      key: const ValueKey('error'),
-                      message: _erroOferta!,
-                      ink: ink,
-                      mute: mute,
-                      isDark: isDark,
-                      onRetry: () => _selecionarMotivo(_motivoSelecionado!),
-                    )
-                    : _oferta != null
-                    ? _OfertaCard(
-                      key: ValueKey(_oferta!.tipo),
-                      oferta: _oferta!,
-                      enviando: _enviando,
-                      ink: ink,
-                      mute: mute,
-                      primary: primary,
-                      isDark: isDark,
-                      onAceitar: () => _responder(true),
-                      onRecusar: () => _responder(false),
-                      onFeedback: (txt) => _feedback = txt,
-                    )
-                    : const SizedBox.shrink(key: ValueKey('empty')),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -357,48 +375,6 @@ class _MotivoTile extends StatelessWidget {
             ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _ErroOfertaPanel extends StatelessWidget {
-  const _ErroOfertaPanel({
-    super.key,
-    required this.message,
-    required this.ink,
-    required this.mute,
-    required this.isDark,
-    required this.onRetry,
-  });
-
-  final String message;
-  final Color ink;
-  final Color mute;
-  final bool isDark;
-  final VoidCallback onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    return PaywallInsetPanel(
-      accent: PaywallCatalog.warning,
-      isDark: isDark,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            message,
-            style: TokensStrip.body(color: ink).copyWith(fontSize: 14),
-          ),
-          const SizedBox(height: 10),
-          Align(
-            alignment: Alignment.centerRight,
-            child: TextButton(
-              onPressed: onRetry,
-              child: const Text('Tentar de novo'),
-            ),
-          ),
-        ],
       ),
     );
   }

@@ -7,14 +7,18 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/shell_chrome.dart';
+import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_empty_state.dart';
+import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
-import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/skeleton_loader.dart';
 import '../../../features/alunos/constants/aluno_360_layout.dart';
 import '../../../features/alunos/utils/satellite_screen_utils.dart';
-import '../../../features/alunos/widgets/aluno360_action_empty_panel.dart';
 import '../../../features/alunos/widgets/aluno_avatar.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/ia_repository.dart';
@@ -42,70 +46,62 @@ class _ProgressaoAceitarScreenState
     final args = ProgressaoAceitarRouteArgs.resolve(context);
     final sugestoesAsync = ref.watch(progressaoSugestoesProvider(args.alunoId));
     final firstName = satelliteFirstName(args.alunoNome, fallback: 'aluno');
+    final chrome = ShellChrome.of(context);
+    final primary = Theme.of(context).colorScheme.primary;
 
-    return FxShellScaffold(
-      useMesh: true,
-      appBar: FxShellAppBar(
-        title: 'Sugestões pendentes',
-        subtitle: args.alunoNome,
-        onBack: () => safePopOrGo(context, args.returnTo ?? '/ia/copiloto'),
-        actions: [
-          Semantics(
-            button: true,
-            label: 'Atualizar sugestões pendentes',
-            child: IconButton(
-              icon: const Icon(Icons.refresh),
-              onPressed:
-                  _actingOnId == null
-                      ? () => ref.invalidate(
-                        progressaoSugestoesProvider(args.alunoId),
-                      )
-                      : null,
+    return fxScreenA11yScope(
+      label: 'Sugestões pendentes de progressão',
+      child: FxShellScaffold(
+        useMesh: true,
+        appBar: FxShellAppBar(
+          title: 'Sugestões pendentes',
+          subtitle: args.alunoNome,
+          onBack: () => safePopOrGo(context, args.returnTo ?? '/ia/copiloto'),
+          actions: [
+            Semantics(
+              button: true,
+              label: 'Atualizar sugestões pendentes',
+              child: IconButton(
+                icon: const Icon(Icons.refresh),
+                onPressed:
+                    _actingOnId == null
+                        ? () => ref.invalidate(
+                          progressaoSugestoesProvider(args.alunoId),
+                        )
+                        : null,
+              ),
             ),
-          ),
-        ],
-      ),
-      body: sugestoesAsync.when(
-        loading: () => const FxLoading(),
-        error:
-            (e, _) => satelliteEmptyBody(
-              child: Aluno360ActionEmptyPanel(
-                icon: Icons.error_outline_rounded,
+          ],
+        ),
+        body: sugestoesAsync.when(
+          loading: () => const SkeletonList(count: 4),
+          error:
+              (e, _) => FxErrorState(
+                chromeOnDark: chrome.isDark,
+                primary: primary,
                 title: 'Não carregou as sugestões',
-                subtitle:
-                    'Tente novamente. Se o problema continuar, volte ao aluno e gere uma nova progressão.',
-                primaryLabel: 'Tentar novamente',
-                primaryIcon: Icons.refresh,
-                onPrimary:
+                message: friendlyError(
+                  e,
+                  fallback:
+                      'Tente novamente. Se o problema continuar, volte ao aluno e gere uma nova progressão.',
+                ),
+                onRetry:
                     () => ref.invalidate(
                       progressaoSugestoesProvider(args.alunoId),
                     ),
-                secondaryActions: [
-                  if (args.alunoId != null)
-                    Aluno360SecondaryAction(
-                      label: 'Voltar ao Aluno 360',
-                      icon: Icons.person_outline,
-                      onTap:
-                          () => safePopOrGo(
-                            context,
-                            args.returnTo ?? '/alunos/${args.alunoId}',
-                          ),
-                    ),
-                ],
               ),
-            ),
-        data: (lista) {
-          if (lista.isEmpty) {
-            return satelliteEmptyBody(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+          data: (lista) {
+            if (lista.isEmpty) {
+              return ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.symmetric(vertical: TokensStrip.s4),
                 children: [
                   if (_successBanner != null) ...[
                     _SuccessBanner(message: _successBanner!),
-                    const SizedBox(height: TokensStrip.s4),
+                    const SizedBox(height: TokensStrip.s2),
                   ],
-                  Aluno360ActionEmptyPanel(
-                    icon: Icons.check_circle_outline,
+                  FxEmptyState(
+                    icon: 'circle-check',
                     title:
                         _successBanner != null
                             ? 'Tudo em dia'
@@ -116,146 +112,154 @@ class _ProgressaoAceitarScreenState
                             : _successBanner != null
                             ? 'A carga foi registrada. Gere uma nova progressão quando quiser atualizar o plano.'
                             : 'Gere uma progressão com IA para $firstName e volte aqui para revisar antes de aplicar no treino.',
-                    primaryLabel:
-                        args.alunoId == null ? null : 'Gerar progressão com IA',
-                    primaryIcon:
-                        args.alunoId == null ? null : Icons.auto_awesome,
-                    onPrimary:
+                    action:
                         args.alunoId == null
                             ? null
-                            : () => context.push(
-                              '/alunos/${args.alunoId}/ia/progressao',
-                              extra: args.alunoNome ?? 'Aluno',
+                            : FxEmptyAction(
+                              label: 'Gerar progressão com IA',
+                              onTap:
+                                  () => context.push(
+                                    '/alunos/${args.alunoId}/ia/progressao',
+                                    extra: args.alunoNome ?? 'Aluno',
+                                  ),
                             ),
-                    showPrimary: args.alunoId != null,
-                    secondaryActions: [
-                      if (args.alunoId != null)
-                        Aluno360SecondaryAction(
-                          label: 'Voltar ao Aluno 360',
-                          icon: Icons.arrow_back_rounded,
-                          onTap:
-                              () => safePopOrGo(
-                                context,
-                                args.returnTo ?? '/alunos/${args.alunoId}',
-                              ),
-                        ),
-                    ],
                   ),
-                ],
-              ),
-            );
-          }
-
-          return Aluno360Layout.operacaoContentWidthLimiter(
-            child: ListView.builder(
-              padding: const EdgeInsets.all(TokensStrip.s4),
-              itemCount: lista.length,
-              itemBuilder: (_, i) {
-                final sugestao = lista[i];
-                final busy = _actingOnId == sugestao.id;
-                return IaProgressaoCardEntrance(
-                  index: i,
-                  child: Padding(
-                    padding: const EdgeInsets.only(bottom: 14),
-                    child: IaProgressaoExerciseCard(
-                      exercicio: sugestao.exercicio,
-                      cargaAtual: sugestao.cargaAtual,
-                      cargaSugerida: sugestao.cargaSugerida,
-                      justificativa: sugestao.justificativa,
-                      deltaLabel: sugestao.deltaLabel,
-                      padding: const EdgeInsets.all(TokensStrip.s4),
-                      header: Row(
-                        children: [
-                          AlunoAvatar(
-                            name:
-                                sugestao.alunoNome ?? args.alunoNome ?? 'Aluno',
-                            photoUrl: args.alunoFotoUrl,
-                            variant: AlunoAvatarVariant.strip,
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              sugestao.alunoNome ?? args.alunoNome ?? 'Aluno',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w700,
-                                fontSize: 15,
-                              ),
+                  if (args.alunoId != null)
+                    Center(
+                      child: TextButton.icon(
+                        onPressed:
+                            () => safePopOrGo(
+                              context,
+                              args.returnTo ?? '/alunos/${args.alunoId}',
                             ),
-                          ),
-                        ],
-                      ),
-                      footerActions: Row(
-                        children: [
-                          Expanded(
-                            child: Semantics(
-                              button: true,
-                              label:
-                                  'Rejeitar sugestão de ${sugestao.exercicio}',
-                              child: OutlinedButton.icon(
-                                onPressed:
-                                    busy
-                                        ? null
-                                        : () =>
-                                            _confirmarRejeicao(args, sugestao),
-                                icon:
-                                    busy
-                                        ? const FxLoading(
-                                          size: 18,
-                                          strokeWidth: 2,
-                                        )
-                                        : const Icon(
-                                          Icons.close_rounded,
-                                          size: 18,
-                                        ),
-                                label: const Text('Rejeitar'),
-                                style: OutlinedButton.styleFrom(
-                                  foregroundColor: EagleTokens.bad,
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Semantics(
-                              button: true,
-                              label:
-                                  'Aceitar sugestão de ${sugestao.exercicio} e aplicar no treino',
-                              child: FilledButton.icon(
-                                onPressed:
-                                    busy
-                                        ? null
-                                        : () => _acao(
-                                          args,
-                                          sugestao,
-                                          aceitar: true,
-                                        ),
-                                icon:
-                                    busy
-                                        ? const FxLoading(
-                                          size: 18,
-                                          strokeWidth: 2,
-                                          color: Colors.white,
-                                        )
-                                        : const Icon(
-                                          Icons.check_rounded,
-                                          size: 18,
-                                        ),
-                                label: const Text('Aceitar'),
-                                style: FilledButton.styleFrom(
-                                  backgroundColor: EagleTokens.good,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
+                        icon: const Icon(Icons.arrow_back_rounded, size: 18),
+                        label: const Text('Voltar ao Aluno 360'),
                       ),
                     ),
-                  ),
-                );
-              },
-            ),
-          );
-        },
+                ],
+              );
+            }
+
+            return Aluno360Layout.operacaoContentWidthLimiter(
+              child: ListView.builder(
+                padding: const EdgeInsets.all(TokensStrip.s4),
+                itemCount: lista.length,
+                itemBuilder: (_, i) {
+                  final sugestao = lista[i];
+                  final busy = _actingOnId == sugestao.id;
+                  return IaProgressaoCardEntrance(
+                    index: i,
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 14),
+                      child: IaProgressaoExerciseCard(
+                        exercicio: sugestao.exercicio,
+                        cargaAtual: sugestao.cargaAtual,
+                        cargaSugerida: sugestao.cargaSugerida,
+                        justificativa: sugestao.justificativa,
+                        deltaLabel: sugestao.deltaLabel,
+                        padding: const EdgeInsets.all(TokensStrip.s4),
+                        header: Row(
+                          children: [
+                            AlunoAvatar(
+                              name:
+                                  sugestao.alunoNome ??
+                                  args.alunoNome ??
+                                  'Aluno',
+                              photoUrl: args.alunoFotoUrl,
+                              variant: AlunoAvatarVariant.strip,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                sugestao.alunoNome ??
+                                    args.alunoNome ??
+                                    'Aluno',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 15,
+                                  color: chrome.ink,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        footerActions: Row(
+                          children: [
+                            Expanded(
+                              child: Semantics(
+                                button: true,
+                                label:
+                                    'Rejeitar sugestão de ${sugestao.exercicio}',
+                                child: OutlinedButton.icon(
+                                  onPressed:
+                                      busy
+                                          ? null
+                                          : () => _confirmarRejeicao(
+                                            args,
+                                            sugestao,
+                                          ),
+                                  icon:
+                                      busy
+                                          ? const FxLoading(
+                                            size: 18,
+                                            strokeWidth: 2,
+                                          )
+                                          : const Icon(
+                                            Icons.close_rounded,
+                                            size: 18,
+                                          ),
+                                  label: const Text('Rejeitar'),
+                                  style: OutlinedButton.styleFrom(
+                                    foregroundColor: EagleTokens.bad,
+                                    minimumSize: const Size(48, 48),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Semantics(
+                                button: true,
+                                label:
+                                    'Aceitar sugestão de ${sugestao.exercicio} e aplicar no treino',
+                                child: FilledButton.icon(
+                                  onPressed:
+                                      busy
+                                          ? null
+                                          : () => _acao(
+                                            args,
+                                            sugestao,
+                                            aceitar: true,
+                                          ),
+                                  icon:
+                                      busy
+                                          ? const FxLoading(
+                                            size: 18,
+                                            strokeWidth: 2,
+                                            color: Colors.white,
+                                          )
+                                          : const Icon(
+                                            Icons.check_rounded,
+                                            size: 18,
+                                          ),
+                                  label: const Text('Aceitar'),
+                                  style: FilledButton.styleFrom(
+                                    backgroundColor: EagleTokens.good,
+                                    minimumSize: const Size(48, 48),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            );
+          },
+        ),
       ),
     );
   }

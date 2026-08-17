@@ -3,15 +3,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focux_app/core/widgets/fx_motion.dart';
 
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
-import '../../../core/widgets/fx_empty_state.dart';
-import '../../../core/widgets/fx_input_deco.dart';
-import '../../../core/widgets/fx_loading.dart';
-import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_empty_state.dart';
+import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_input_deco.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/skeleton_loader.dart';
 import '../../auth/providers/auth_provider.dart';
-import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 import '../data/rbac_repository.dart';
 import '../models/permissao_rbac.dart';
 
@@ -29,6 +31,7 @@ class RbacScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final permissoesAsync = ref.watch(permissoesRbacProvider);
+    final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
 
     return fxScreenA11yScope(
@@ -39,26 +42,31 @@ class RbacScreen extends ConsumerWidget {
           title: 'Controle de Acessos',
           subtitle: 'Permissões operacionais do personal',
           actions: [
-            IconButton(
-              icon: const Icon(Icons.add_rounded),
-              tooltip: 'Conceder permissão',
-              onPressed: () => _showConcederPermissao(context, ref),
+            Semantics(
+              button: true,
+              label: 'Conceder permissão',
+              child: IconButton(
+                icon: const Icon(Icons.add_rounded),
+                tooltip: 'Conceder permissão',
+                onPressed: () => _showConcederPermissao(context, ref),
+              ),
             ),
           ],
         ),
         body: permissoesAsync.when(
-          loading: () => const Center(child: FxLoading()),
+          loading: () => const SkeletonList(count: 5),
           error:
-              (e, _) => Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(TokensStrip.s5),
-                  child: Text(friendlyError(e), textAlign: TextAlign.center),
-                ),
+              (e, _) => FxErrorState(
+                chromeOnDark: chrome.isDark,
+                primary: primary,
+                message: friendlyError(e),
+                onRetry: () => ref.invalidate(permissoesRbacProvider),
+                title: 'Não carregamos as permissões',
               ),
           data: (permissoes) {
             if (permissoes.isEmpty) {
               return FxEmptyState(
-                icon: 'shield',
+                icon: 'users',
                 title: 'Nenhuma permissão configurada',
                 subtitle:
                     'Defina níveis de acesso por recurso (Alunos, Financeiro, Treinos…).',
@@ -83,25 +91,33 @@ class RbacScreen extends ConsumerWidget {
                               ? EagleTokens.bad.withValues(alpha: 0.1)
                               : primary.withValues(alpha: 0.1),
                       child: Icon(
-                        p.nivel == 'ADMIN'
-                            ? Icons.security
-                            : Icons.vpn_key,
-                        color:
-                            p.nivel == 'ADMIN' ? EagleTokens.bad : primary,
+                        p.nivel == 'ADMIN' ? Icons.security : Icons.vpn_key,
+                        color: p.nivel == 'ADMIN' ? EagleTokens.bad : primary,
                       ),
                     ),
                     title: Text(
                       p.recurso,
-                      style: const TextStyle(fontWeight: FontWeight.w700),
-                    ),
-                    subtitle: Text('Nível: ${p.nivel}'),
-                    trailing: IconButton(
-                      icon: const Icon(
-                        Icons.delete_outline,
-                        color: EagleTokens.bad,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        color: chrome.ink,
                       ),
-                      tooltip: 'Revogar permissão',
-                      onPressed: () => _revogarPermissao(context, ref, p.recurso),
+                    ),
+                    subtitle: Text(
+                      'Nível: ${p.nivel}',
+                      style: TextStyle(color: chrome.mute),
+                    ),
+                    trailing: Semantics(
+                      button: true,
+                      label: 'Revogar permissão de ${p.recurso}',
+                      child: IconButton(
+                        icon: const Icon(
+                          Icons.delete_outline,
+                          color: EagleTokens.bad,
+                        ),
+                        tooltip: 'Revogar permissão',
+                        onPressed:
+                            () => _revogarPermissao(context, ref, p.recurso),
+                      ),
                     ),
                   ),
                 );
@@ -140,10 +156,10 @@ class RbacScreen extends ConsumerWidget {
           builder: (ctx, setState) {
             return Padding(
               padding: EdgeInsets.fromLTRB(
-                16,
-                20,
-                16,
-                MediaQuery.of(ctx).viewInsets.bottom + 20,
+                TokensStrip.s4,
+                TokensStrip.s5,
+                TokensStrip.s4,
+                MediaQuery.of(ctx).viewInsets.bottom + TokensStrip.s5,
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,

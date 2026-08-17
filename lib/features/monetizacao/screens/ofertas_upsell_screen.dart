@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../features/auth/providers/auth_provider.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
-import '../../../core/widgets/fx_loading.dart';
-import '../../../core/widgets/fx_shell_scaffold.dart';
-import '../data/upsell_repository.dart';
+import '../../../core/widgets/fx_empty_state.dart';
+import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/skeleton_loader.dart';
+import '../../../features/auth/providers/auth_provider.dart';
+import '../data/upsell_repository.dart';
 
 final upsellRepositoryProvider = Provider(
   (ref) => UpsellRepository(ref.read(apiClientProvider)),
@@ -47,6 +50,10 @@ class _OfertasUpsellScreenState extends ConsumerState<OfertasUpsellScreen> {
   }
 
   Future<void> _load() async {
+    setState(() {
+      _loading = true;
+      _erro = null;
+    });
     try {
       final list = await ref.read(upsellRepositoryProvider).listarOfertas();
       if (mounted) {
@@ -88,9 +95,12 @@ class _OfertasUpsellScreenState extends ConsumerState<OfertasUpsellScreen> {
       if (mounted) {
         FeedbackHelper.showSuccess(context, 'Oferta criada');
       }
-    } catch (_) {
+    } catch (e) {
       if (mounted) {
-        FeedbackHelper.showError(context, 'Erro ao criar oferta');
+        FeedbackHelper.showError(
+          context,
+          friendlyError(e, fallback: 'Erro ao criar oferta'),
+        );
       }
     } finally {
       if (mounted) setState(() => _saving = false);
@@ -99,38 +109,44 @@ class _OfertasUpsellScreenState extends ConsumerState<OfertasUpsellScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final chrome = ShellChrome.of(context);
+    final primary = Theme.of(context).colorScheme.primary;
+
     return fxScreenA11yScope(
       label: 'Ofertas para alunos',
       child: FxShellScaffold(
+        useMesh: true,
         appBar: FxShellAppBar(title: 'Ofertas para alunos'),
         body:
             _loading
-                ? const Center(child: FxLoading())
+                ? const SkeletonList(count: 5)
                 : _erro != null
-                ? Center(child: Text(_erro!, textAlign: TextAlign.center))
+                ? FxErrorState(
+                  chromeOnDark: chrome.isDark,
+                  primary: primary,
+                  message: _erro!,
+                  onRetry: _load,
+                  title: 'Não carregamos as ofertas',
+                )
                 : ListView(
                   padding: const EdgeInsets.all(TokensStrip.s4),
                   children: [
                     Text(
                       'Ofertas disparam automaticamente quando o aluno conclui uma trilha.',
-                      style: TextStyle(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.onSurface.withValues(alpha: 0.7),
-                      ),
+                      style: TextStyle(color: chrome.mute, height: 1.4),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: TokensStrip.s4),
                     TextField(
                       controller: _titulo,
                       decoration: const InputDecoration(labelText: 'Título'),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: TokensStrip.s2),
                     TextField(
                       controller: _descricao,
                       decoration: const InputDecoration(labelText: 'Descrição'),
                       maxLines: 2,
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: TokensStrip.s2),
                     TextField(
                       controller: _valor,
                       keyboardType: TextInputType.number,
@@ -138,7 +154,7 @@ class _OfertasUpsellScreenState extends ConsumerState<OfertasUpsellScreen> {
                         labelText: 'Valor (R\$)',
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: TokensStrip.s2),
                     DropdownButtonFormField<String>(
                       initialValue: _tipoGatilho,
                       decoration: const InputDecoration(labelText: 'Gatilho'),
@@ -160,25 +176,39 @@ class _OfertasUpsellScreenState extends ConsumerState<OfertasUpsellScreen> {
                         if (v != null) setState(() => _tipoGatilho = v);
                       },
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: TokensStrip.s3),
                     FilledButton(
                       onPressed: _saving ? null : _criar,
+                      style: FilledButton.styleFrom(
+                        minimumSize: const Size(48, 48),
+                      ),
                       child: Text(_saving ? 'Salvando…' : 'Criar oferta'),
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: TokensStrip.s5),
                     Text(
                       'Ativas (${_ofertas.length})',
-                      style: const TextStyle(fontWeight: FontWeight.w700),
-                    ),
-                    const SizedBox(height: 8),
-                    ..._ofertas.map(
-                      (o) => FxSatelliteListTile(
-                        title: o.titulo,
-                        subtitle: Text(
-                          'R\$ ${o.valor.toStringAsFixed(2)} · ${o.tipoGatilho}',
-                        ),
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        color: chrome.ink,
                       ),
                     ),
+                    const SizedBox(height: TokensStrip.s2),
+                    if (_ofertas.isEmpty)
+                      const FxEmptyState(
+                        icon: 'spark',
+                        title: 'Nenhuma oferta ativa',
+                        subtitle:
+                            'Crie a primeira oferta acima. Ela aparece para o aluno no gatilho escolhido.',
+                      )
+                    else
+                      ..._ofertas.map(
+                        (o) => FxSatelliteListTile(
+                          title: o.titulo,
+                          subtitle: Text(
+                            'R\$ ${o.valor.toStringAsFixed(2)} · ${o.tipoGatilho}',
+                          ),
+                        ),
+                      ),
                   ],
                 ),
       ),
