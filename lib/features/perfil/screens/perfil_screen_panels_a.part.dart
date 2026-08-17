@@ -288,8 +288,11 @@ class _PerfilPublicLinkCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: TokensStrip.s2),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+          Wrap(
+            alignment: WrapAlignment.center,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 4,
+            runSpacing: 0,
             children: [
               Semantics(
                 button: true,

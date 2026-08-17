@@ -220,13 +220,19 @@ class _PerfilBody extends StatelessWidget {
                                     children: [
                                       Row(
                                         children: [
-                                          _PlanPill(
-                                            label: perfilPlanPillLabel(
-                                              perfil.plano,
+                                          Flexible(
+                                            child: FittedBox(
+                                              fit: BoxFit.scaleDown,
+                                              alignment: Alignment.centerLeft,
+                                              child: _PlanPill(
+                                                label: perfilPlanPillLabel(
+                                                  perfil.plano,
+                                                ),
+                                                accent: accent,
+                                              ),
                                             ),
-                                            accent: accent,
                                           ),
-                                          const Spacer(),
+                                          const SizedBox(width: 8),
                                           _HeroMarcaChip(
                                             score: profileScore,
                                             accent: accent,
@@ -412,32 +418,48 @@ class _PerfilBody extends StatelessWidget {
                         const SizedBox(height: TokensStrip.s3),
                         FxStaggerItem(
                           index: 5,
-                          child: PerfilOperacaoSection(
+                          child: PerfilQuietCollapsible(
+                            title: 'Operação',
+                            collapsedHint: 'Plano, carteira e crescimento.',
+                            collapsedPreview:
+                                readiness.isPixDone
+                                    ? 'PIX ok · Gerenciar plano'
+                                    : 'Configurar PIX · plano e loja',
                             isDark: isDark,
-                            accent: accent,
-                            actionInk: actionInk,
-                            mute: mute,
-                            line: line,
-                            pixDone: readiness.isPixDone,
+                            child: PerfilOperacaoSection(
+                              isDark: isDark,
+                              accent: accent,
+                              actionInk: actionInk,
+                              mute: mute,
+                              line: line,
+                              pixDone: readiness.isPixDone,
+                            ),
                           ),
                         ),
                         const SizedBox(height: TokensStrip.s3),
                         FxStaggerItem(
                           index: 6,
-                          child: PerfilContaSegurancaSection(
+                          child: PerfilQuietCollapsible(
+                            title: 'Conta e segurança',
+                            collapsedHint:
+                                'Documentos legais, sessão e exclusão LGPD.',
+                            collapsedPreview: 'Termos · sair · excluir',
                             isDark: isDark,
-                            accent: accent,
-                            actionInk: actionInk,
-                            mute: mute,
-                            line: line,
-                            onLogout: () {
-                              onLogout();
-                            },
-                            onDeleteAccount:
-                                () => _showDeleteAccountDialog(
-                                  context,
-                                  onSessionCleared: onLogout,
-                                ),
+                            child: PerfilContaSegurancaSection(
+                              isDark: isDark,
+                              accent: accent,
+                              actionInk: actionInk,
+                              mute: mute,
+                              line: line,
+                              onLogout: () {
+                                onLogout();
+                              },
+                              onDeleteAccount:
+                                  () => _showDeleteAccountDialog(
+                                    context,
+                                    onSessionCleared: onLogout,
+                                  ),
+                            ),
                           ),
                         ),
                         if (kDebugMode) ...[

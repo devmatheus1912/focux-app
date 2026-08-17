@@ -37,6 +37,7 @@ import '../widgets/perfil_card_section.dart';
 import '../widgets/perfil_conta_seguranca_section.dart';
 import '../widgets/perfil_marca_vitrine_section.dart';
 import '../widgets/perfil_operacao_section.dart';
+import '../widgets/perfil_quiet_collapsible.dart';
 import '../widgets/perfil_sticky_bar.dart';
 import '../widgets/perfil_loading_scaffold.dart';
 import '../widgets/perfil_error_scaffold.dart';

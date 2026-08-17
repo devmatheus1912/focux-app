@@ -41,19 +41,23 @@ void main() {
     expect(find.text('Completar cadastro'), findsOneWidget);
     expect(find.text('WhatsApp pendente'), findsOneWidget);
 
+    expect(find.text('Operação'), findsOneWidget);
     await tester.scrollUntilVisible(
-      find.text('Carteira e PIX'),
-      420,
+      find.text('Operação'),
+      240,
       scrollable: find.byType(Scrollable).first,
     );
     await tester.pump();
+    await tester.tap(find.text('Operação'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
 
-    expect(find.text('Operação'), findsOneWidget);
+    expect(find.text('Carteira e PIX'), findsOneWidget);
     expect(find.text('Meus alunos'), findsOneWidget);
     // Fixture incompleto (WhatsApp pendente) → sticky pede completar, não Copiloto/Hoje.
     expect(find.text('Completar perfil'), findsOneWidget);
     expect(find.text('Copiloto IA'), findsNothing);
-    // Conta quiet + debug fora do card LGPD.
+    // Conta quiet colapsada + debug fora do card LGPD.
     expect(find.text('Conta e segurança'), findsOneWidget);
   });
 
