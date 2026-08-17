@@ -5,23 +5,22 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/router/safe_navigation.dart';
-import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/shell_chrome.dart';
+import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_empty_state.dart';
+import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_motion.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/skeleton_loader.dart';
 import '../data/exercicio_repository.dart';
 import '../data/exercicio_taxonomy_labels.dart';
 import '../providers/exercicios_provider.dart';
 import 'widgets/exercicios_batch_actions.dart';
 import 'widgets/exercicios_filter_bar.dart';
 import 'widgets/exercicios_list_view.dart';
-import '../../../core/widgets/fx_motion.dart';
-import '../../../core/widgets/fx_error_state.dart';
-import '../../../core/widgets/fx_loading.dart';
-import '../../../core/widgets/fx_shell_scaffold.dart';
-import 'package:focux_app/core/widgets/feedback_helper.dart';
-
-// Legacy editorial import contract still lives in repository/tests:
-import '../../../core/theme/tokens_strip.dart';
-import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 
 // "Aprovar editorialmente", "Notas editoriais padrao",
 // previewMidias(midias), importarMidias(midias).
@@ -295,8 +294,10 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
   @override
   Widget build(BuildContext context) {
     final asyncList = ref.watch(exerciciosProvider);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final chrome = ShellChrome.of(context);
+    final isDark = chrome.isDark;
+    final mute = chrome.mute;
+    final primary = Theme.of(context).colorScheme.primary;
 
     return fxScreenA11yScope(
       label: 'Exercicios',
@@ -379,17 +380,49 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
               ),
               Expanded(
                 child: asyncList.when(
-                  loading: () => const FxLoading(),
+                  loading: () => const SkeletonList(count: 6),
                   error:
                       (e, _) => FxErrorState(
                         chromeOnDark: isDark,
-                        primary: Theme.of(context).colorScheme.primary,
+                        primary: primary,
                         message: friendlyError(e),
                         onRetry: _refresh,
-                        title: 'Nao conseguimos carregar os exercicios',
+                        title: 'Não conseguimos carregar os exercícios',
                       ),
                   data: (exercicios) {
                     final filtered = _applyFilter(exercicios);
+                    if (exercicios.isEmpty) {
+                      return FxEmptyState(
+                        icon: 'dumbbell',
+                        title: 'Sua biblioteca está vazia',
+                        subtitle:
+                            'Carregue a biblioteca curada ou cadastre o primeiro exercício.',
+                        action: FxEmptyAction(
+                          label: 'Carregar biblioteca',
+                          onTap: () async {
+                            final imported = await context.push<bool>(
+                              '/exercicios/biblioteca-wizard',
+                            );
+                            if (imported == true) _refresh();
+                          },
+                        ),
+                      );
+                    }
+                    if (filtered.isEmpty) {
+                      return FxEmptyState(
+                        icon: 'search',
+                        title: 'Nenhum exercício encontrado',
+                        subtitle:
+                            'Ajuste os filtros ou a busca para ver outros exercícios.',
+                        action: FxEmptyAction(
+                          label: 'Limpar filtros',
+                          onTap:
+                              () => setState(
+                                () => _filter = const ExerciciosUiFilter(),
+                              ),
+                        ),
+                      );
+                    }
                     return Column(
                       children: [
                         Padding(

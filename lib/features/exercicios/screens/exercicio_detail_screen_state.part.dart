@@ -111,9 +111,10 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
   Widget build(BuildContext context) {
     final exercicioAsync = ref.watch(exercicioProvider(widget.exercicioId));
 
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final chrome = ShellChrome.of(context);
+    final isDark = chrome.isDark;
+    final ink = chrome.ink;
+    final mute = chrome.mute;
     final primary = Theme.of(context).colorScheme.primary;
 
     return fxScreenA11yScope(
@@ -147,7 +148,7 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
         body: SafeArea(
           bottom: false,
           child: exercicioAsync.when(
-            loading: () => Center(child: FxLoading(color: primary)),
+            loading: () => const SkeletonList(count: 5),
             error:
                 (e, _) => FxErrorState(
                   chromeOnDark: isDark,
@@ -156,7 +157,7 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
                   onRetry:
                       () =>
                           ref.invalidate(exercicioProvider(widget.exercicioId)),
-                  title: 'Nao conseguimos carregar o exercicio',
+                  title: 'Não conseguimos carregar o exercício',
                 ),
             data:
                 (ex) => SingleChildScrollView(

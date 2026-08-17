@@ -14,9 +14,9 @@ class _StickyCreateBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final chrome = ShellChrome.of(context);
     final bg =
-        isDark
+        chrome.isDark
             ? EagleTokens.darkBg.withValues(alpha: 0.44)
             : Colors.white.withValues(alpha: 0.46);
     final enabled = canSubmit && !loading;
@@ -37,7 +37,7 @@ class _StickyCreateBar extends StatelessWidget {
                 border: Border(
                   top: BorderSide(
                     color:
-                        isDark
+                        chrome.isDark
                             ? Colors.white.withValues(alpha: 0.08)
                             : Colors.white.withValues(alpha: 0.58),
                   ),
@@ -45,7 +45,7 @@ class _StickyCreateBar extends StatelessWidget {
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withValues(
-                      alpha: isDark ? 0.18 : 0.035,
+                      alpha: chrome.isDark ? 0.18 : 0.035,
                     ),
                     blurRadius: 22,
                     offset: const Offset(0, -12),
@@ -466,40 +466,6 @@ class _LevelSelector extends StatelessWidget {
           ),
         );
       }),
-    );
-  }
-}
-
-class _ErrorNotice extends StatelessWidget {
-  final String message;
-
-  const _ErrorNotice({required this.message});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      decoration: BoxDecoration(
-        color: EagleTokens.bad.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: EagleTokens.bad.withValues(alpha: 0.25)),
-      ),
-      child: Row(
-        children: [
-          const Icon(Icons.error_outline, color: EagleTokens.bad, size: 18),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              message,
-              style: AppTypography.inter(
-                color: EagleTokens.bad,
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

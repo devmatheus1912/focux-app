@@ -44,7 +44,7 @@ extension AddExercicioToTreinoScreenActionsB
       if (mounted) {
         HapticFeedback.lightImpact();
         setState(() {
-          _error = 'Erro ao adicionar exercício.';
+        _error = friendlyError(e, fallback: 'Erro ao adicionar exercício.');
         });
       }
     } finally {
@@ -97,10 +97,10 @@ extension AddExercicioToTreinoScreenActionsB
         context,
         '$nome adicionado. Escolha o próximo.',
       );
-    } catch (_) {
+    } catch (e) {
       if (mounted) {
         setState(() {
-          _error = 'Erro ao adicionar exercício.';
+          _error = friendlyError(e, fallback: 'Erro ao adicionar exercício.');
           _loading = false;
         });
       }
@@ -142,10 +142,10 @@ extension AddExercicioToTreinoScreenActionsB
           '${exercicio.nomeDisplay} adicionado.',
         );
       }
-    } catch (_) {
+    } catch (e) {
       if (mounted) {
         setState(() {
-          _error = 'Erro ao adicionar exercício.';
+          _error = friendlyError(e, fallback: 'Erro ao adicionar exercício.');
         });
       }
     } finally {
@@ -565,25 +565,29 @@ extension AddExercicioToTreinoScreenActionsB
             ],
             if (showFilterEmpty) ...[
               const SizedBox(height: 16),
-              _BuscarFilterEmptyState(
+              FxEmptyState(
+                icon: 'search',
                 title: buscarTabEmptyTitle(
                   filter: _pickerFilter,
                   query: _buscaQuery,
                 ),
-                message: buscarTabEmptyMessage(filter: _pickerFilter),
-                isDark: isDark,
-                primary: primary,
-                onClearFilters:
-                    () => setState(() {
-                      _pickerFilter = const ExercisePickerFilter();
-                      _buscaCtrl.clear();
-                    }),
-                onBrowseLibrary:
-                    () => _openExercisePicker(
-                      allExercicios,
-                      alreadyInTreinoIds: alreadyInTreinoIds,
-                    ),
-                showBrowseLibrary: _pickerFilter.somenteFavoritos,
+                subtitle: buscarTabEmptyMessage(filter: _pickerFilter),
+                action: FxEmptyAction(
+                  label:
+                      _pickerFilter.somenteFavoritos
+                          ? 'Ver biblioteca completa'
+                          : 'Limpar filtros e busca',
+                  onTap:
+                      _pickerFilter.somenteFavoritos
+                          ? () => _openExercisePicker(
+                            allExercicios,
+                            alreadyInTreinoIds: alreadyInTreinoIds,
+                          )
+                          : () => setState(() {
+                            _pickerFilter = const ExercisePickerFilter();
+                            _buscaCtrl.clear();
+                          }),
+                ),
               ),
             ],
             if (!showFilterEmpty && curatedSuggestions.isNotEmpty) ...[

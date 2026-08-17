@@ -72,8 +72,16 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
           );
       ref.invalidate(exerciciosFilteredProvider);
       if (mounted) context.pop(true);
-    } catch (_) {
-      setState(() => _error = 'Erro ao cadastrar exercício.');
+    } catch (e) {
+      if (mounted) {
+        setState(
+          () =>
+              _error = friendlyError(
+                e,
+                fallback: 'Erro ao cadastrar exercício.',
+              ),
+        );
+      }
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -98,10 +106,13 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final chrome = ShellChrome.of(context);
+    final primary = Theme.of(context).colorScheme.primary;
     final bottom = MediaQuery.paddingOf(context).bottom;
 
-    return FxShellScaffold(
+    return fxScreenA11yScope(
+      label: 'Novo exercício',
+      child: FxShellScaffold(
       useMesh: true,
       appBar: FxShellAppBar(
         title: 'Novo Exercício',
@@ -296,22 +307,12 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
                       ),
                       if (_error != null) ...[
                         const SizedBox(height: 12),
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: EagleTokens.bad.withValues(alpha: 0.08),
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(
-                              color: EagleTokens.bad.withValues(alpha: 0.2),
-                            ),
-                          ),
-                          child: Text(
-                            _error!,
-                            style: const TextStyle(
-                              color: EagleTokens.bad,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
+                        FxErrorState(
+                          chromeOnDark: chrome.isDark,
+                          primary: primary,
+                          title: 'Não foi possível cadastrar',
+                          message: _error!,
+                          onRetry: _submit,
                         ),
                       ],
                     ],
@@ -324,18 +325,11 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
       ),
       bottomNavigationBar: DecoratedBox(
         decoration: BoxDecoration(
-          color: isDark ? EagleTokens.darkBg : TokensStrip.pageBg,
-          border: Border(
-            top: BorderSide(
-              color:
-                  isDark
-                      ? EagleTokens.darkLine
-                      : TokensStrip.borderDefault.withValues(alpha: 0.54),
-            ),
-          ),
+          color: chrome.isDark ? EagleTokens.darkBg : TokensStrip.pageBg,
+          border: Border(top: BorderSide(color: chrome.line)),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.08),
+              color: Colors.black.withValues(alpha: chrome.isDark ? 0.3 : 0.08),
               blurRadius: 22,
               offset: const Offset(0, -10),
             ),
@@ -357,6 +351,7 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
             ),
           ),
         ),
+      ),
       ),
     );
   }

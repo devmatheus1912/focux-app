@@ -7,11 +7,14 @@ import 'package:video_player/video_player.dart';
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/utils/pt_br_display.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_bottom_sheet.dart';
+import '../../../core/widgets/fx_empty_state.dart';
+import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_motion.dart';
@@ -146,9 +149,10 @@ class _AddExercicioToTreinoScreenState
     final exerciciosAsync = ref.watch(exerciciosProvider);
     final treinoAsync = ref.watch(treinoProvider(widget.treinoId));
     final alreadyInTreinoIds = _treinoExercicioIds(treinoAsync);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final chrome = ShellChrome.of(context);
+    final isDark = chrome.isDark;
     final primary = Theme.of(context).colorScheme.primary;
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final ink = chrome.ink;
 
     return fxScreenA11yScope(
       label: 'Adicionar exercício',
@@ -206,31 +210,46 @@ class _AddExercicioToTreinoScreenState
                       child: SkeletonList(count: 4),
                     ),
                 error:
-                    (e, _) => _ExercicioErrorState(
-                      isDark: isDark,
+                    (e, _) => FxErrorState(
+                      chromeOnDark: isDark,
                       primary: primary,
+                      title: 'Não conseguimos carregar os exercícios',
+                      message: friendlyError(e),
                       onRetry: () => ref.invalidate(exerciciosProvider),
                     ),
                 data:
                     (exercicios) {
                       if (exercicios.isEmpty) {
-                        return _EmptyBibliotecaState(
-                          loading: _seedingBiblioteca,
-                          isDark: isDark,
-                          primary: primary,
-                          onImport: () async {
-                            setState(() => _seedingBiblioteca = true);
-                            try {
-                              await ref
-                                  .read(exercicioRepositoryProvider)
-                                  .importarSeedPremiumV1();
-                              ref.invalidate(exerciciosProvider);
-                            } finally {
-                              if (mounted) {
-                                setState(() => _seedingBiblioteca = false);
+                        if (_seedingBiblioteca) {
+                          return const SkeletonList(count: 4);
+                        }
+                        return FxEmptyState(
+                          icon: 'dumbbell',
+                          title: 'Biblioteca padrão pronta para usar',
+                          subtitle:
+                              'Importe ~190 exercícios curados (supino, agachamento, remada...) com vídeos padrão. Depois você personaliza com os seus.',
+                          action: FxEmptyAction(
+                            label: 'Importar biblioteca',
+                            onTap: () async {
+                              setState(() => _seedingBiblioteca = true);
+                              try {
+                                await ref
+                                    .read(exercicioRepositoryProvider)
+                                    .importarSeedPremiumV1();
+                                ref.invalidate(exerciciosProvider);
+                              } catch (e) {
+                                if (!context.mounted) return;
+                                FeedbackHelper.showError(
+                                  context,
+                                  friendlyError(e),
+                                );
+                              } finally {
+                                if (mounted) {
+                                  setState(() => _seedingBiblioteca = false);
+                                }
                               }
-                            }
-                          },
+                            },
+                          ),
                         );
                       }
 

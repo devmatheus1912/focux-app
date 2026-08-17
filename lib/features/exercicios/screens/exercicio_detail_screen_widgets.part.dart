@@ -37,12 +37,12 @@ class _CompactPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
       decoration: BoxDecoration(
-        color: primary.withValues(alpha: isDark ? 0.18 : 0.08),
+        color: primary.withValues(alpha: chrome.isDark ? 0.18 : 0.08),
         borderRadius: BorderRadius.circular(999),
         border: Border.all(color: primary.withValues(alpha: 0.10)),
       ),
@@ -54,7 +54,7 @@ class _CompactPill extends StatelessWidget {
           Text(
             label,
             style: TextStyle(
-              color: isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
+              color: chrome.ink,
               fontSize: 12,
               fontWeight: FontWeight.w800,
             ),
@@ -97,9 +97,9 @@ class _SimpleInfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final chrome = ShellChrome.of(context);
+    final ink = chrome.ink;
+    final mute = chrome.mute;
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: fxListCardDecoration(context),
@@ -223,8 +223,7 @@ class _CleanExpansion extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final ink = ShellChrome.of(context).ink;
     return Container(
       decoration: fxListCardDecoration(context),
       child: Theme(
@@ -260,10 +259,10 @@ class _PrescriptionReadinessPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final ink = chrome.ink;
+    final mute = chrome.mute;
     final color = _trustColor(exercicio, primary);
 
     return Container(
@@ -353,10 +352,7 @@ class _ReadinessCheck extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fallback =
-        Theme.of(context).brightness == Brightness.dark
-            ? EagleTokens.darkInkMute
-            : TokensStrip.textSecondary;
+    final fallback = ShellChrome.of(context).mute;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
       decoration: BoxDecoration(
@@ -500,9 +496,9 @@ class _EditorialReviewPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final chrome = ShellChrome.of(context);
+    final ink = chrome.ink;
+    final mute = chrome.mute;
     final color = switch (status) {
       'APPROVED' => EagleTokens.good,
       'REJECTED' => EagleTokens.bad,
@@ -640,8 +636,7 @@ class _GuidanceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final ink = ShellChrome.of(context).ink;
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: fxListCardDecoration(context, accent: color),
@@ -691,9 +686,9 @@ class _MediaMetadataPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final chrome = ShellChrome.of(context);
+    final ink = chrome.ink;
+    final mute = chrome.mute;
     final licensed = licenseStatus == 'LICENSED';
     final primary = Theme.of(context).colorScheme.primary;
     return Container(
@@ -820,38 +815,11 @@ class _VideoPlayerState extends State<_VideoPlayer> {
   @override
   Widget build(BuildContext context) {
     if (_failed) {
-      return Container(
-        height: 180,
-        padding: const EdgeInsets.all(18),
-        decoration: fxListCardDecoration(
-          context,
-          accent: Theme.of(context).colorScheme.primary,
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.video_file_rounded,
-              color: Theme.of(context).colorScheme.primary,
-              size: 34,
-            ),
-            const SizedBox(height: 10),
-            const Text(
-              'Video enviado, mas a previa ainda nao ficou disponivel.',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontWeight: FontWeight.w800),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'Tente abrir novamente em instantes. Se persistir, use MP4 H.264.',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                fontSize: 12.5,
-              ),
-            ),
-          ],
-        ),
+      return const FxEmptyState(
+        icon: 'alert-triangle',
+        title: 'Prévia indisponível',
+        subtitle:
+            'Vídeo enviado, mas a prévia ainda não ficou disponível. Tente abrir novamente em instantes.',
       );
     }
     if (!_ready) {
@@ -917,10 +885,10 @@ class _OwnVideoPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final ink = chrome.ink;
+    final mute = chrome.mute;
 
     return Container(
       padding: const EdgeInsets.all(14),

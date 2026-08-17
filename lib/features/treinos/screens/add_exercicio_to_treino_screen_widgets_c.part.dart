@@ -213,17 +213,29 @@ class _ExercisePickerSheetState extends State<_ExercisePickerSheet> {
                   Expanded(
                     child:
                         filtered.isEmpty
-                            ? _PickerSheetEmptyState(
-                              query: _query,
-                              isDark: isDark,
-                              primary: primary,
-                              onClear: () {
-                                _searchCtrl.clear();
-                                setState(() {
-                                  _query = '';
-                                  _highlightQuery = '';
-                                });
-                              },
+                            ? FxEmptyState(
+                              icon: 'search',
+                              title:
+                                  _query.trim().isNotEmpty
+                                      ? 'Nada encontrado para "${_query.trim()}"'
+                                      : 'Nenhum exercício nesta lista',
+                              subtitle:
+                                  _query.trim().isNotEmpty
+                                      ? 'Tente outro termo ou limpe a busca.'
+                                      : 'Ajuste os filtros na tela anterior.',
+                              action:
+                                  _query.trim().isNotEmpty
+                                      ? FxEmptyAction(
+                                        label: 'Limpar busca',
+                                        onTap: () {
+                                          _searchCtrl.clear();
+                                          setState(() {
+                                            _query = '';
+                                            _highlightQuery = '';
+                                          });
+                                        },
+                                      )
+                                      : null,
                             )
                             : ListView.separated(
                               controller: scrollController,
@@ -273,72 +285,6 @@ class _ExercisePickerSheetState extends State<_ExercisePickerSheet> {
           ),
         );
       },
-    );
-  }
-}
-
-class _PickerSheetEmptyState extends StatelessWidget {
-  const _PickerSheetEmptyState({
-    required this.query,
-    required this.isDark,
-    required this.primary,
-    required this.onClear,
-  });
-
-  final String query;
-  final bool isDark;
-  final Color primary;
-  final VoidCallback onClear;
-
-  @override
-  Widget build(BuildContext context) {
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-    final hasQuery = query.trim().isNotEmpty;
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.search_off_rounded,
-              color: primary.withValues(alpha: 0.75),
-              size: 40,
-            ),
-            const SizedBox(height: 12),
-            Text(
-              hasQuery
-                  ? 'Nada encontrado para "${query.trim()}"'
-                  : 'Nenhum exercício nesta lista',
-              textAlign: TextAlign.center,
-              style: AppTypography.inter(
-                fontSize: 15,
-                fontWeight: FontWeight.w900,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              hasQuery
-                  ? 'Tente outro termo ou limpe a busca.'
-                  : 'Ajuste os filtros na tela anterior.',
-              textAlign: TextAlign.center,
-              style: AppTypography.inter(
-                color: mute,
-                fontSize: 13,
-                height: 1.35,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            if (hasQuery) ...[
-              const SizedBox(height: 14),
-              FilledButton.tonal(
-                onPressed: onClear,
-                child: const Text('Limpar busca'),
-              ),
-            ],
-          ],
-        ),
-      ),
     );
   }
 }
@@ -696,89 +642,6 @@ class _ModeHint extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-// ──────────────────────────────────────────────
-// Premium composed error state for exercise loading
-// ──────────────────────────────────────────────
-class _ExercicioErrorState extends StatelessWidget {
-  final bool isDark;
-  final Color primary;
-  final VoidCallback onRetry;
-
-  const _ExercicioErrorState({
-    required this.isDark,
-    required this.primary,
-    required this.onRetry,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 54,
-              height: 54,
-              decoration: BoxDecoration(
-                color: EagleTokens.bad.withValues(alpha: isDark ? 0.18 : 0.08),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.fitness_center_rounded,
-                color: EagleTokens.bad,
-                size: 24,
-              ),
-            ),
-            const SizedBox(height: 14),
-            Text(
-              'Erro ao carregar exercícios',
-              textAlign: TextAlign.center,
-              style: AppTypography.inter(
-                color: ink,
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                letterSpacing: -0.3,
-              ),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              'Verifique sua conexão e tente novamente.',
-              textAlign: TextAlign.center,
-              style: AppTypography.inter(
-                color: mute,
-                fontSize: 13,
-                height: 1.35,
-              ),
-            ),
-            const SizedBox(height: 18),
-            OutlinedButton.icon(
-              onPressed: onRetry,
-              icon: const Icon(Icons.refresh_rounded, size: 18),
-              label: const Text('Tentar novamente'),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: primary,
-                side: BorderSide(color: primary.withValues(alpha: 0.35)),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(999),
-                ),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 10,
-                ),
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

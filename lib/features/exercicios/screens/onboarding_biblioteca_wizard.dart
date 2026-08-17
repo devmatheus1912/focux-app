@@ -3,16 +3,19 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/analytics/analytics_service.dart';
+import '../../../core/theme/shell_chrome.dart';
+import '../../../core/utils/friendly_error.dart';
+import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_motion.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/skeleton_loader.dart';
 import '../data/enums.dart';
 import '../providers/exercicios_provider.dart';
 import 'widgets/wizard_step_confirmacao.dart';
 import 'widgets/wizard_step_espacos.dart';
-import 'widgets/wizard_step_loading.dart';
 import 'widgets/wizard_step_modalidades.dart';
-import '../../../core/utils/friendly_error.dart';
-import '../../../core/widgets/feedback_helper.dart';
-import '../../../core/widgets/fx_motion.dart';
-import '../../../core/widgets/fx_shell_scaffold.dart';
 
 class OnboardingBibliotecaWizard extends ConsumerStatefulWidget {
   const OnboardingBibliotecaWizard({super.key});
@@ -53,8 +56,14 @@ class _OnboardingBibliotecaWizardState
   }
 
   void _next() {
-    if (_step == 0 && _modalidades.isEmpty) return;
-    if (_step == 1 && _espacos.isEmpty) return;
+    if (_step == 0 && _modalidades.isEmpty) {
+      FeedbackHelper.showWarn(context, 'Escolha pelo menos uma modalidade.');
+      return;
+    }
+    if (_step == 1 && _espacos.isEmpty) {
+      FeedbackHelper.showWarn(context, 'Escolha pelo menos um espaço.');
+      return;
+    }
     setState(() {
       if (_step == 1) {
         _previewFuture = ref
@@ -104,65 +113,78 @@ class _OnboardingBibliotecaWizardState
         (_step == 0 && _modalidades.isNotEmpty) ||
         (_step == 1 && _espacos.isNotEmpty);
 
-    return FxShellScaffold(
-      useMesh: true,
-      appBar: FxShellAppBar(
-        title: 'Biblioteca curada',
-        subtitle: 'Monte sua base de exercícios em minutos',
-        leading: IconButton(
-          icon: const Icon(Icons.close_rounded),
-          tooltip: 'Pular configuração',
-          onPressed:
-              _importing
-                  ? null
-                  : () {
-                    AnalyticsService.instance.track('wizard_skipped');
-                    context.pop(false);
-                  },
+    return fxScreenA11yScope(
+      label: 'Biblioteca curada',
+      child: FxShellScaffold(
+        useMesh: true,
+        appBar: FxShellAppBar(
+          title: 'Biblioteca curada',
+          subtitle: 'Monte sua base de exercícios em minutos',
+          leading: IconButton(
+            icon: const Icon(Icons.close_rounded),
+            tooltip: 'Pular configuração',
+            onPressed:
+                _importing
+                    ? null
+                    : () {
+                      AnalyticsService.instance.track('wizard_skipped');
+                      context.pop(false);
+                    },
+          ),
         ),
-      ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            children: [
-              LinearProgressIndicator(value: (_step + 1) / 4),
-              const SizedBox(height: 24),
-              Expanded(child: _content()),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  if (_step > 0 && _step < 3)
-                    TextButton(
-                      onPressed:
-                          _importing ? null : () => setState(() => _step -= 1),
-                      child: const Text('Voltar'),
-                    ),
-                  const Spacer(),
-                  if (_step < 2)
-                    FxLiquidPrimaryButton(
-                      label: 'Continuar',
-                      onPressed: canGoNext ? _next : null,
-                      expand: false,
-                    ),
-                  if (_step == 2)
-                    FxLiquidPrimaryButton(
-                      label: 'Carregar biblioteca',
-                      icon: Icons.download_rounded,
-                      onPressed: _importing ? null : _importar,
-                      loading: _importing,
-                      expand: false,
-                    ),
-                ],
-              ),
-            ],
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              children: [
+                LinearProgressIndicator(value: (_step + 1) / 4),
+                const SizedBox(height: 24),
+                Expanded(child: _content()),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    if (_step > 0 && _step < 3)
+                      TextButton(
+                        onPressed:
+                            _importing ? null : () => setState(() => _step -= 1),
+                        child: const Text('Voltar'),
+                      ),
+                    const Spacer(),
+                    if (_step < 2)
+                      FxLiquidPrimaryButton(
+                        label: 'Continuar',
+                        onPressed: canGoNext ? _next : null,
+                        expand: false,
+                      ),
+                    if (_step == 2)
+                      FxLiquidPrimaryButton(
+                        label: 'Carregar biblioteca',
+                        icon: Icons.download_rounded,
+                        onPressed: _importing ? null : _importar,
+                        loading: _importing,
+                        expand: false,
+                      ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
+  void _retryPreview() {
+    setState(() {
+      _previewFuture = ref
+          .read(exercicioRepositoryProvider)
+          .previewCuratedV2(modalidades: _modalidades, espacos: _espacos);
+    });
+  }
+
   Widget _content() {
+    final chrome = ShellChrome.of(context);
+    final primary = Theme.of(context).colorScheme.primary;
     return switch (_step) {
       0 => WizardStepModalidades(
         selecionadas: _modalidades,
@@ -171,14 +193,27 @@ class _OnboardingBibliotecaWizardState
       1 => WizardStepEspacos(selecionados: _espacos, onToggle: _toggleEspaco),
       2 => FutureBuilder<Map<String, dynamic>>(
         future: _previewFuture,
-        builder:
-            (context, snapshot) => WizardStepConfirmacao(
-              modalidades: _modalidades,
-              espacos: _espacos,
-              preview: snapshot,
-            ),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const SkeletonList(count: 3);
+          }
+          if (snapshot.hasError) {
+            return FxErrorState(
+              chromeOnDark: chrome.isDark,
+              primary: primary,
+              title: 'Não conseguimos calcular a biblioteca',
+              message: friendlyError(snapshot.error!),
+              onRetry: _retryPreview,
+            );
+          }
+          return WizardStepConfirmacao(
+            modalidades: _modalidades,
+            espacos: _espacos,
+            preview: snapshot,
+          );
+        },
       ),
-      _ => const WizardStepLoading(),
+      _ => const SkeletonList(count: 4),
     };
   }
 }

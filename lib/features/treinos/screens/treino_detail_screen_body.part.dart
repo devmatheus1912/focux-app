@@ -607,22 +607,27 @@ class _TreinoDetailBody extends StatelessWidget {
         if (treino.exercicios.isEmpty)
           SliverFillRemaining(
             hasScrollBody: false,
-            child: _EmptyExercisesState(
-              isDark: isDark,
-              primary: primary,
-              onAdd: () {
-                HapticFeedback.mediumImpact();
-                context
-                    .push<bool>(
-                      '/treinos/$treinoId/exercicios/add',
-                      extra: alunoId == null ? null : {'alunoId': alunoId},
-                    )
-                    .then((added) {
-                      if (added == true) {
-                        ref.invalidate(treinoProvider(treinoId));
-                      }
-                    });
-              },
+            child: FxEmptyState(
+              icon: 'dumbbell',
+              title: 'Nenhum exercício ainda',
+              subtitle:
+                  'Adicione exercícios da biblioteca curada para montar este treino.',
+              action: FxEmptyAction(
+                label: 'Adicionar exercício',
+                onTap: () {
+                  HapticFeedback.mediumImpact();
+                  context
+                      .push<bool>(
+                        '/treinos/$treinoId/exercicios/add',
+                        extra: alunoId == null ? null : {'alunoId': alunoId},
+                      )
+                      .then((added) {
+                        if (added == true) {
+                          ref.invalidate(treinoProvider(treinoId));
+                        }
+                      });
+                },
+              ),
             ),
           )
         else

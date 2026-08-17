@@ -10,7 +10,6 @@ import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_icon.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
-import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -26,6 +25,8 @@ import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../dashboard/utils/dashboard_readability.dart';
 import '../../../core/theme/shell_chrome.dart';
+import '../../../core/widgets/fx_empty_state.dart';
+import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 
 part 'treino_detail_screen_body.part.dart';
@@ -147,12 +148,23 @@ class TreinoDetailScreen extends ConsumerWidget {
                   ),
                 ),
             error:
-                (e, _) => _DetailErrorState(
-                  isDark: isDark,
-                  primary: primary,
-                  message: friendlyError(e),
-                  onRetry: () => ref.invalidate(treinoProvider(treinoId)),
-                  onBack: () => _popTreinoDetail(context, alunoId: alunoId),
+                (e, _) => SafeArea(
+                  child: Stack(
+                    children: [
+                      FxErrorState(
+                        chromeOnDark: isDark,
+                        primary: primary,
+                        title: 'Não conseguimos carregar o treino',
+                        message: friendlyError(e),
+                        onRetry: () => ref.invalidate(treinoProvider(treinoId)),
+                      ),
+                      Positioned(
+                        top: 8,
+                        left: TokensStrip.s5 - 4,
+                        child: _TreinoDetailBackButton(alunoId: alunoId),
+                      ),
+                    ],
+                  ),
                 ),
             data:
                 (treino) => _TreinoDetailBody(

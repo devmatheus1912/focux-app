@@ -89,18 +89,9 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen>
         );
       }
     } catch (e) {
-      String msg = 'Erro ao criar treino.';
-      if (e is DioException) {
-        final data = e.response?.data;
-        final serverMsg =
-            data is Map
-                ? data['mensagem'] ?? data['message'] ?? data['erro']
-                : null;
-        if (serverMsg != null) msg = serverMsg.toString();
-      }
       if (mounted) {
         setState(() {
-          _error = msg;
+          _error = friendlyError(e, fallback: 'Erro ao criar treino.');
         });
       }
     } finally {
@@ -125,7 +116,8 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen>
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final chrome = ShellChrome.of(context);
+    final isDark = chrome.isDark;
     final primary = Theme.of(context).colorScheme.primary;
     final canSubmit = _nomeCtrl.text.trim().isNotEmpty && !_loading;
     final previewTitle =
@@ -141,7 +133,9 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen>
             ? 'Nível em aberto'
             : _niveisLabel[_niveis.indexOf(_nivel!)];
 
-    return FxShellScaffold(
+    return fxScreenA11yScope(
+      label: widget.alunoId == null ? 'Novo treino' : 'Treino vinculado',
+      child: FxShellScaffold(
       useMesh: true,
       appBar: FxShellAppBar(
         title: widget.alunoId == null ? 'Novo Treino' : 'Treino vinculado',
@@ -254,7 +248,13 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen>
                         ),
                         if (_error != null) ...[
                           const SizedBox(height: TokensStrip.s4),
-                          _ErrorNotice(message: _error!),
+                          FxErrorState(
+                            chromeOnDark: isDark,
+                            primary: primary,
+                            title: 'Não foi possível criar o treino',
+                            message: _error!,
+                            onRetry: _submit,
+                          ),
                         ],
                       ],
                     ),
@@ -264,6 +264,7 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen>
             ),
           ],
         ),
+      ),
       ),
     );
   }

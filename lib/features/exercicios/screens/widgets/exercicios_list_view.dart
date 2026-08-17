@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/widgets/fx_empty_state.dart';
 import '../../data/exercicio_repository.dart';
 import 'exercicio_card.dart';
 
@@ -26,11 +27,10 @@ class ExerciciosListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (exercicios.isEmpty) {
-      return const Center(
-        child: Padding(
-          padding: EdgeInsets.all(24),
-          child: Text('Nenhum exercicio encontrado.'),
-        ),
+      return const FxEmptyState(
+        icon: 'search',
+        title: 'Nenhum exercício encontrado',
+        subtitle: 'Ajuste os filtros ou cadastre um novo exercício.',
       );
     }
     return ListView.separated(
