@@ -33,7 +33,8 @@ void main() {
     expect(screen, contains('maskEmailForList'));
     expect(screen, contains('alunoRiscoAltoBadgeColors'));
     expect(screen, contains('alunoListSecondaryInk'));
-    expect(screen, contains('AlunoAvatar'));
+    expect(screen, contains('AlunosLayout'));
+    expect(screen, contains('_AlunoStatusPill'));
     expect(screen, contains("part 'alunos_list_screen_state.part.dart'"));
     expect(screen, contains("part 'alunos_list_screen_filters.part.dart'"));
     expect(screen, contains("part 'alunos_list_screen_header.part.dart'"));

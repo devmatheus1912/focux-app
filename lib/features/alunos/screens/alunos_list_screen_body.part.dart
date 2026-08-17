@@ -129,7 +129,12 @@ extension AlunosListScreenBody on _AlunosListScreenState {
                                   ),
                                   itemCount: filtrados.length,
                                   separatorBuilder:
-                                      (_, __) => const SizedBox(height: 10),
+                                      (_, __) => SizedBox(
+                                        height:
+                                            _listaCompacta
+                                                ? AlunosLayout.listItemGapCompact
+                                                : AlunosLayout.listItemGap,
+                                      ),
                                   itemBuilder: (context, i) {
                                     final a = filtrados[i];
                                     return FxStaggerItem(

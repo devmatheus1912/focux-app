@@ -1,5 +1,46 @@
 part of 'alunos_list_screen.dart';
 
+/// Badge de status quiet — paridade Home/Perfil [`_HeroMetaPill`]: fill soft, sem borda.
+class _AlunoStatusPill extends StatelessWidget {
+  const _AlunoStatusPill({
+    required this.label,
+    required this.fill,
+    required this.foreground,
+    this.compact = false,
+  });
+
+  final String label;
+  final Color fill;
+  final Color foreground;
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: compact ? 6 : 8,
+        vertical: compact ? 2 : 3,
+      ),
+      decoration: BoxDecoration(
+        color: fill,
+        borderRadius: BorderRadius.circular(TokensStrip.rPill),
+      ),
+      child: Text(
+        label,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: AppTypography.inter(
+          color: foreground,
+          fontSize: compact ? 9.5 : 10,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 0.12,
+          height: 1.1,
+        ),
+      ),
+    );
+  }
+}
+
 class _AlunoCardFX extends ConsumerStatefulWidget {
   final Aluno aluno;
   final bool modoSelecao;
@@ -60,7 +101,14 @@ class _AlunoCardFXState extends ConsumerState<_AlunoCardFX> {
     final mute = chrome.mute;
     final secondaryInk = alunoListSecondaryInk(isDark);
     final line = chrome.line;
-    final cardPadding = widget.compact ? 10.0 : 14.0;
+    final cardPadding =
+        widget.compact
+            ? AlunosLayout.cardPaddingCompact
+            : AlunosLayout.cardPadding;
+    final avatarGap =
+        widget.compact
+            ? AlunosLayout.cardAvatarGapCompact
+            : AlunosLayout.cardAvatarGap;
 
     final aluno = widget.aluno;
     final displayName = fxTitleCaseName(aluno.nome);
@@ -162,8 +210,12 @@ class _AlunoCardFXState extends ConsumerState<_AlunoCardFX> {
               name: displayName,
               photoUrl: aluno.fotoUrl,
               fallbackColor: avatarColor,
+              variant:
+                  widget.compact
+                      ? AlunoAvatarVariant.strip
+                      : AlunoAvatarVariant.list,
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: avatarGap),
 
             // Middle Column
             Expanded(
@@ -192,40 +244,12 @@ class _AlunoCardFXState extends ConsumerState<_AlunoCardFX> {
                         widget.activeFiltro,
                         triageContextActive: widget.triageContextActive,
                       )) ...[
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 3,
-                          ),
-                          decoration: BoxDecoration(
-                            color: statusBg,
-                            borderRadius: BorderRadius.circular(999),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Container(
-                                width: 5,
-                                height: 5,
-                                decoration: BoxDecoration(
-                                  color: statusColor,
-                                  shape: BoxShape.circle,
-                                ),
-                              ),
-                              const SizedBox(width: 5),
-                              Text(
-                                statusText,
-                                style: AppTypography.inter(
-                                  color: statusColor,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w700,
-                                  letterSpacing: 0.15,
-                                  height: 1.1,
-                                ),
-                              ),
-                            ],
-                          ),
+                        SizedBox(width: widget.compact ? 6 : 8),
+                        _AlunoStatusPill(
+                          label: statusText,
+                          fill: statusBg,
+                          foreground: statusColor,
+                          compact: widget.compact,
                         ),
                       ],
                     ],
@@ -256,12 +280,12 @@ class _AlunoCardFXState extends ConsumerState<_AlunoCardFX> {
                     ),
                   ],
 
-                  SizedBox(height: widget.compact ? 6 : 8),
+                  SizedBox(height: widget.compact ? 4 : 8),
                   Row(
                     children: [
                       Container(
-                        width: 6,
-                        height: 6,
+                        width: widget.compact ? 5 : 6,
+                        height: widget.compact ? 5 : 6,
                         decoration: BoxDecoration(
                           color: aderColor,
                           shape: BoxShape.circle,
@@ -271,7 +295,7 @@ class _AlunoCardFXState extends ConsumerState<_AlunoCardFX> {
                       Text(
                         aderenciaPercent == null ? '—' : '$aderenciaPercent%',
                         style: AppTypography.mono(
-                          fontSize: 12.5,
+                          fontSize: widget.compact ? 11.5 : 12.5,
                           fontWeight:
                               hasTreinoRecente
                                   ? FontWeight.w700
@@ -280,13 +304,15 @@ class _AlunoCardFXState extends ConsumerState<_AlunoCardFX> {
                           height: 1.1,
                         ),
                       ),
-                      if (!widget.compact && adherenceLabel.isNotEmpty) ...[
+                      if (adherenceLabel.isNotEmpty) ...[
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 6),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: widget.compact ? 4 : 6,
+                          ),
                           child: Text(
                             '·',
                             style: AppTypography.inter(
-                              fontSize: 11,
+                              fontSize: widget.compact ? 10 : 11,
                               color: secondaryInk.withValues(alpha: 0.85),
                               height: 1.1,
                             ),
@@ -296,7 +322,7 @@ class _AlunoCardFXState extends ConsumerState<_AlunoCardFX> {
                           child: Text(
                             adherenceLabel,
                             style: AppTypography.inter(
-                              fontSize: 11,
+                              fontSize: widget.compact ? 10 : 11,
                               color: secondaryInk,
                               height: 1.1,
                             ),
@@ -322,6 +348,19 @@ class _AlunoCardFXState extends ConsumerState<_AlunoCardFX> {
                 primary: primary,
                 isDark: isDark,
                 mute: mute,
+              )
+            else if (widget.compact)
+              Semantics(
+                label: 'Abrir ficha de $displayName',
+                button: true,
+                child: Tooltip(
+                  message: 'Ver detalhes',
+                  child: Icon(
+                    Icons.chevron_right_rounded,
+                    size: 18,
+                    color: secondaryInk.withValues(alpha: 0.9),
+                  ),
+                ),
               )
             else
               Column(
