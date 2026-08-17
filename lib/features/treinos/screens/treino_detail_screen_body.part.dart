@@ -201,7 +201,7 @@ class _TreinoDetailBody extends StatelessWidget {
           if (selected == null) return;
           await repo.atribuirAluno(treinoId, selected);
           ref.invalidate(treinoProvider(treinoId));
-          ref.invalidate(treinosProvider);
+          invalidateTreinosCaches(ref);
           ref.invalidate(treinosDoAlunoProvider(selected));
           if (context.mounted) {
             FeedbackHelper.showSuccess(context, 'Treino atribuído ao aluno.');
@@ -227,7 +227,7 @@ class _TreinoDetailBody extends StatelessWidget {
           );
           if (selected == null) return;
           await repo.clonarParaAluno(treinoId, selected);
-          ref.invalidate(treinosProvider);
+          invalidateTreinosCaches(ref);
           ref.invalidate(treinosDoAlunoProvider(selected));
           if (context.mounted) {
             FeedbackHelper.showSuccess(
@@ -244,7 +244,7 @@ class _TreinoDetailBody extends StatelessWidget {
       case 'duplicate':
         try {
           await repo.duplicar(treinoId);
-          ref.invalidate(treinosProvider);
+          invalidateTreinosCaches(ref);
           if (context.mounted) {
             FeedbackHelper.showSuccess(
               context,
@@ -282,7 +282,7 @@ class _TreinoDetailBody extends StatelessWidget {
         HapticFeedback.mediumImpact();
         try {
           await repo.excluirTreino(treinoId);
-          ref.invalidate(treinosProvider);
+          invalidateTreinosCaches(ref);
           if (context.mounted) {
             FeedbackHelper.showSuccess(context, 'Treino excluído.');
             context.pop(true);

@@ -90,20 +90,17 @@ class _TreinoCard extends StatelessWidget {
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
-    final hasExercises = treino.exercicios.isNotEmpty;
-    final series = treino.exercicios.fold<int>(
-      0,
-      (sum, item) => sum + item.series,
-    );
+    final hasExercises = treino.pronto;
+    final series = treino.seriesTotal;
     final estimatedMinutes =
-        hasExercises ? (treino.exercicios.length * 5).clamp(12, 90) : 0;
+        hasExercises ? (treino.exerciciosCount * 5).clamp(12, 90) : 0;
     final displayName = displayWorkoutName(treino.nome);
     final cardSemantics =
         selectionMode
             ? selected
                 ? 'Desmarcar $displayName'
                 : 'Selecionar $displayName'
-            : '$displayName, ${treino.exercicios.length} exercícios, '
+            : '$displayName, ${treino.exerciciosCount} exercícios, '
                 'toque para abrir, segure para selecionar';
 
     return Semantics(
@@ -260,7 +257,7 @@ class _TreinoCard extends StatelessWidget {
                     child: _PlanPill(
                       icon: Icons.list_alt_rounded,
                       value:
-                          '${treino.exercicios.length} exerc${treino.exercicios.length == 1 ? '.' : 's.'}',
+                          '${treino.exerciciosCount} exerc${treino.exerciciosCount == 1 ? '.' : 's.'}',
                       isDark: isDark,
                       color: primary,
                     ),

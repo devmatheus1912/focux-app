@@ -52,6 +52,8 @@ class Treino {
   final String? nivel;
   final bool isTemplate;
   final List<TreinoExercicioItem> exercicios;
+  final int? _exerciciosCount;
+  final int? _seriesTotal;
 
   Treino({
     required this.id,
@@ -61,7 +63,18 @@ class Treino {
     this.nivel,
     this.isTemplate = false,
     required this.exercicios,
-  });
+    int? exerciciosCount,
+    int? seriesTotal,
+  }) : _exerciciosCount = exerciciosCount,
+       _seriesTotal = seriesTotal;
+
+  int get exerciciosCount => _exerciciosCount ?? exercicios.length;
+
+  int get seriesTotal =>
+      _seriesTotal ??
+      exercicios.fold<int>(0, (sum, item) => sum + item.series);
+
+  bool get pronto => exerciciosCount > 0;
 
   factory Treino.fromJson(Map<String, dynamic> json) => Treino(
     id: json['id'] as int,
@@ -74,6 +87,61 @@ class Treino {
         ((json['exercicios'] as List<dynamic>?) ?? [])
             .map((e) => TreinoExercicioItem.fromJson(e as Map<String, dynamic>))
             .toList(),
+    exerciciosCount: json['exerciciosCount'] as int?,
+    seriesTotal: json['seriesTotal'] as int?,
+  );
+
+  factory Treino.fromHomeItemJson(Map<String, dynamic> json) => Treino(
+    id: (json['id'] as num).toInt(),
+    nome: json['nome'] as String,
+    descricao: json['descricao'] as String?,
+    objetivo: json['objetivo'] as String?,
+    nivel: json['nivel'] as String?,
+    isTemplate: json['isTemplate'] as bool? ?? false,
+    exercicios: const [],
+    exerciciosCount: (json['exerciciosCount'] as num?)?.toInt() ?? 0,
+    seriesTotal: (json['seriesTotal'] as num?)?.toInt() ?? 0,
+  );
+}
+
+class TreinosHomeResumo {
+  final int totalPlanos;
+  final int prontos;
+  final int emMontagem;
+  final int templates;
+  final int totalExercicios;
+
+  const TreinosHomeResumo({
+    required this.totalPlanos,
+    required this.prontos,
+    required this.emMontagem,
+    required this.templates,
+    required this.totalExercicios,
+  });
+
+  factory TreinosHomeResumo.fromJson(Map<String, dynamic> j) => TreinosHomeResumo(
+    totalPlanos: (j['totalPlanos'] as num?)?.toInt() ?? 0,
+    prontos: (j['prontos'] as num?)?.toInt() ?? 0,
+    emMontagem: (j['emMontagem'] as num?)?.toInt() ?? 0,
+    templates: (j['templates'] as num?)?.toInt() ?? 0,
+    totalExercicios: (j['totalExercicios'] as num?)?.toInt() ?? 0,
+  );
+}
+
+class TreinosHomeBundle {
+  final List<Treino> treinos;
+  final TreinosHomeResumo resumo;
+
+  const TreinosHomeBundle({required this.treinos, required this.resumo});
+
+  factory TreinosHomeBundle.fromJson(Map<String, dynamic> j) => TreinosHomeBundle(
+    treinos:
+        ((j['treinos'] as List?) ?? const [])
+            .map((e) => Treino.fromHomeItemJson(e as Map<String, dynamic>))
+            .toList(),
+    resumo: TreinosHomeResumo.fromJson(
+      (j['resumo'] as Map<String, dynamic>?) ?? const {},
+    ),
   );
 }
 
@@ -87,6 +155,12 @@ class TreinoRepository {
     return (response.data as List<dynamic>)
         .map((e) => Treino.fromJson(e as Map<String, dynamic>))
         .toList();
+  }
+
+  /// BFF tipado — first paint da biblioteca (slim + resumo, sem N+1).
+  Future<TreinosHomeBundle> getHome() async {
+    final response = await _dio.get('/api/treinos/home');
+    return TreinosHomeBundle.fromJson(response.data as Map<String, dynamic>);
   }
 
   Future<Treino> buscar(int id) async {

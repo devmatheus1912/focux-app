@@ -6,8 +6,12 @@ final treinoRepositoryProvider = Provider<TreinoRepository>(
   (ref) => TreinoRepository(ref.read(apiClientProvider)),
 );
 
+final treinosHomeProvider = FutureProvider<TreinosHomeBundle>((ref) async {
+  return ref.watch(treinoRepositoryProvider).getHome();
+});
+
 final treinosProvider = FutureProvider<List<Treino>>((ref) async {
-  return ref.watch(treinoRepositoryProvider).listar();
+  return (await ref.watch(treinosHomeProvider.future)).treinos;
 });
 
 final treinosDoAlunoProvider = FutureProvider.family<List<Treino>, int>((
@@ -20,3 +24,7 @@ final treinosDoAlunoProvider = FutureProvider.family<List<Treino>, int>((
 final treinoProvider = FutureProvider.family<Treino, int>((ref, id) async {
   return ref.watch(treinoRepositoryProvider).buscar(id);
 });
+
+void invalidateTreinosCaches(WidgetRef ref) {
+  ref.invalidate(treinosHomeProvider);
+}

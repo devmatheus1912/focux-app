@@ -21,7 +21,7 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
       treino.objetivo,
       treino.descricao,
       treino.nivel,
-      '${treino.exercicios.length} exercicios',
+      '${treino.exerciciosCount} exercicios',
       treino.isTemplate ? 'template base' : null,
     ].whereType<String>().any((value) => value.toLowerCase().contains(query));
   }
@@ -79,7 +79,7 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
       await ref
           .read(treinoRepositoryProvider)
           .atribuirAluno(treino.id, selected);
-      ref.invalidate(treinosProvider);
+      invalidateTreinosCaches(ref);
       ref.invalidate(treinosDoAlunoProvider(selected));
       if (!mounted) return;
       FeedbackHelper.showSuccess(context, 'Treino atribuído ao aluno.');
@@ -95,7 +95,7 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
   Future<void> _duplicateTreino(Treino treino) async {
     try {
       await ref.read(treinoRepositoryProvider).duplicar(treino.id);
-      ref.invalidate(treinosProvider);
+      invalidateTreinosCaches(ref);
       if (!mounted) return;
       FeedbackHelper.showSuccess(context, 'Treino duplicado.');
     } catch (e) {
@@ -123,7 +123,7 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
       await ref
           .read(treinoRepositoryProvider)
           .clonarParaAluno(treino.id, selected);
-      ref.invalidate(treinosProvider);
+      invalidateTreinosCaches(ref);
       ref.invalidate(treinosDoAlunoProvider(selected));
       if (!mounted) return;
       FeedbackHelper.showSuccess(
@@ -205,7 +205,7 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
       }
       _clearSelection();
       if (widget.alunoId == null) {
-        ref.invalidate(treinosProvider);
+        invalidateTreinosCaches(ref);
       } else {
         ref.invalidate(treinosDoAlunoProvider(widget.alunoId!));
       }
@@ -240,7 +240,11 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
     final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
 
     Future<void> refresh() async {
-      ref.invalidate(treinosSource);
+      if (widget.alunoId == null) {
+        invalidateTreinosCaches(ref);
+      } else {
+        ref.invalidate(treinosDoAlunoProvider(widget.alunoId!));
+      }
     }
 
     Future<void> createWorkout() async {

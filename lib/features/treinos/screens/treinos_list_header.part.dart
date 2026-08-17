@@ -23,7 +23,7 @@ class _TreinosHeader extends StatelessWidget {
     final ink = chrome.ink;
     final primary = Theme.of(context).colorScheme.primary;
     final kickerColor = BrandPalette.sectionLink(primary, dark: isDark);
-    final ready = treinos.where((t) => t.exercicios.isNotEmpty).length;
+    final ready = treinos.where((t) => t.pronto).length;
     final showBack = onBack != null;
     final planLabel = treinos.length == 1 ? 'plano' : 'planos';
 
@@ -146,9 +146,9 @@ class _TreinosCommandCard extends StatelessWidget {
     final heroPrimary = BrandPalette.softened(primary, amount: 0.06);
     final totalExercises = treinos.fold<int>(
       0,
-      (sum, treino) => sum + treino.exercicios.length,
+      (sum, treino) => sum + treino.exerciciosCount,
     );
-    final ready = treinos.where((t) => t.exercicios.isNotEmpty).length;
+    final ready = treinos.where((t) => t.pronto).length;
     final templates = treinos.where((t) => t.isTemplate).length;
     final assembling = treinos.length - ready;
     final ultraCompact = compact;

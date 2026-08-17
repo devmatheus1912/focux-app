@@ -75,7 +75,7 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen>
             .atribuirAluno(treino.id, widget.alunoId!);
         ref.invalidate(treinosDoAlunoProvider(widget.alunoId!));
       }
-      ref.invalidate(treinosProvider);
+      invalidateTreinosCaches(ref);
       ref.invalidate(treinoProvider(treino.id));
       if (mounted) {
         HapticFeedback.heavyImpact();
