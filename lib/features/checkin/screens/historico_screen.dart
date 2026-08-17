@@ -4,18 +4,19 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/brand/focux_microcopy.dart';
 import '../../../core/router/safe_navigation.dart';
-import '../../../core/utils/friendly_error.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/shell_chrome.dart';
+import '../../../core/theme/tokens_strip.dart';
+import '../../../core/utils/friendly_error.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_icon.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/skeleton_loader.dart';
 import '../data/checkin_repository.dart';
 import '../providers/checkin_provider.dart';
-import '../../../core/widgets/skeleton_loader.dart';
-import '../../../core/theme/tokens_strip.dart';
-import '../../../core/widgets/fx_screen_a11y.dart';
 
 class HistoricoCheckinScreen extends ConsumerWidget {
   const HistoricoCheckinScreen({super.key});
@@ -93,6 +94,7 @@ class _HistoricoCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
+    final chrome = ShellChrome.forDark(isDark);
     final concluido = entry.status == 'CONCLUIDO';
     final iconName = concluido ? 'circle-check' : 'calendar';
     final iconColor = concluido ? EagleTokens.good : EagleTokens.warn;
@@ -100,8 +102,6 @@ class _HistoricoCard extends StatelessWidget {
         concluido
             ? EagleTokens.good.withValues(alpha: 0.12)
             : EagleTokens.warn.withValues(alpha: 0.12);
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
 
     var dateLabel = '';
     if (entry.iniciadoEm != null) {
@@ -115,10 +115,7 @@ class _HistoricoCard extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      decoration: fxListCardDecoration(
-        context,
-        accent: concluido ? primary : null,
-      ),
+      decoration: chrome.listCard(primary: concluido ? primary : null),
       child: Row(
         children: [
           FxIcon(name: iconName, size: 22, color: iconColor),
@@ -130,7 +127,7 @@ class _HistoricoCard extends StatelessWidget {
                 Text(
                   entry.treinoNome,
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    color: ink,
+                    color: chrome.ink,
                     fontWeight: FontWeight.w700,
                   ),
                   maxLines: 1,
@@ -142,7 +139,7 @@ class _HistoricoCard extends StatelessWidget {
                     dateLabel,
                     style: Theme.of(
                       context,
-                    ).textTheme.bodySmall?.copyWith(color: mute),
+                    ).textTheme.bodySmall?.copyWith(color: chrome.mute),
                   ),
                 ],
               ],

@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/brand/focux_microcopy.dart';
+import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
-import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/skeleton_loader.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../data/feedback_video_repository.dart';
-import '../../../core/widgets/fx_screen_a11y.dart';
 
 class FeedbackAlunoScreen extends ConsumerStatefulWidget {
   const FeedbackAlunoScreen({super.key});
@@ -107,9 +110,14 @@ class _FeedbackAlunoScreenState extends ConsumerState<FeedbackAlunoScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
+    final chrome = ShellChrome.forDark(isDark);
+
     return fxScreenA11yScope(
       label: 'Form check',
       child: FxShellScaffold(
+        useMesh: true,
         appBar: FxShellAppBar(
           title: 'Form check',
           subtitle: 'Análise IA da sua execução',
@@ -122,14 +130,17 @@ class _FeedbackAlunoScreenState extends ConsumerState<FeedbackAlunoScreen> {
         ),
         body:
             _loading
-                ? const Center(child: FxLoading())
+                ? const Padding(
+                  padding: EdgeInsets.all(TokensStrip.s4),
+                  child: SkeletonList(count: 4),
+                )
                 : _erro != null
                 ? FxErrorState(
-                  chromeOnDark: Theme.of(context).brightness == Brightness.dark,
-                  primary: Theme.of(context).colorScheme.primary,
+                  chromeOnDark: isDark,
+                  primary: primary,
                   message: _erro!,
                   onRetry: _load,
-                  title: 'Não conseguimos carregar seus vídeos',
+                  title: FocuxMicrocopy.naoFoiPossivelCarregar,
                 )
                 : RefreshIndicator(
                   onRefresh: _load,
@@ -138,6 +149,7 @@ class _FeedbackAlunoScreenState extends ConsumerState<FeedbackAlunoScreen> {
                           ? ListView(
                             physics: const AlwaysScrollableScrollPhysics(),
                             children: const [
+                              SizedBox(height: 48),
                               FxEmptyState(
                                 icon: 'spark',
                                 title: 'Nenhum vídeo enviado ainda',
@@ -159,15 +171,19 @@ class _FeedbackAlunoScreenState extends ConsumerState<FeedbackAlunoScreen> {
                                       .map((e) => e.nome)
                                       .firstOrNull ??
                                   'Exercício #${f.exercicioId}';
-                              final primary =
-                                  Theme.of(context).colorScheme.primary;
-                              return FxSatellitePanel(
-                                accent: primary,
-                                padding: EdgeInsets.zero,
+                              return Container(
+                                decoration: chrome.listCard(primary: primary),
                                 child: ExpansionTile(
-                                  title: Text(exNome),
+                                  title: Text(
+                                    exNome,
+                                    style: TextStyle(
+                                      color: chrome.ink,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
                                   subtitle: Text(
                                     '${f.statusAnalise ?? 'PENDENTE'} · ${f.criadoEm.toLocal().toString().substring(0, 16)}',
+                                    style: TextStyle(color: chrome.mute),
                                   ),
                                   leading:
                                       f.aiScore != null
@@ -178,8 +194,15 @@ class _FeedbackAlunoScreenState extends ConsumerState<FeedbackAlunoScreen> {
                                             foregroundColor: Colors.white,
                                             child: Text('${f.aiScore}'),
                                           )
-                                          : const CircleAvatar(
-                                            child: Icon(Icons.hourglass_empty),
+                                          : CircleAvatar(
+                                            backgroundColor: BrandPalette.soft(
+                                              primary,
+                                              dark: isDark,
+                                            ),
+                                            child: Icon(
+                                              Icons.hourglass_empty,
+                                              color: primary,
+                                            ),
                                           ),
                                   children: [
                                     if (f.aiAnalise != null &&
@@ -188,7 +211,10 @@ class _FeedbackAlunoScreenState extends ConsumerState<FeedbackAlunoScreen> {
                                         padding: const EdgeInsets.all(16),
                                         child: Text(
                                           f.aiAnalise!,
-                                          style: const TextStyle(height: 1.4),
+                                          style: TextStyle(
+                                            height: 1.4,
+                                            color: chrome.ink,
+                                          ),
                                         ),
                                       ),
                                     if (f.comentario.isNotEmpty)
@@ -201,9 +227,7 @@ class _FeedbackAlunoScreenState extends ConsumerState<FeedbackAlunoScreen> {
                                         ),
                                         child: Text(
                                           'Sua nota: ${f.comentario}',
-                                          style: TextStyle(
-                                            color: Theme.of(context).hintColor,
-                                          ),
+                                          style: TextStyle(color: chrome.mute),
                                         ),
                                       ),
                                   ],

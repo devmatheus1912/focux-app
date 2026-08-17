@@ -173,8 +173,9 @@ class _TrainingPlanCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final chrome = ShellChrome.forDark(isDark);
+    final ink = chrome.ink;
+    final mute = chrome.mute;
     final done = treino.exercicios.where((e) => e.concluido).length;
     final progress =
         treino.exercicios.isEmpty ? 0.0 : done / treino.exercicios.length;
@@ -201,9 +202,8 @@ class _TrainingPlanCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(TokensStrip.rCard),
       child: Container(
         padding: const EdgeInsets.all(TokensStrip.s4),
-        decoration: fxListCardDecoration(
-          context,
-          accent: concluido ? EagleTokens.good : primary,
+        decoration: chrome.listCard(
+          primary: concluido ? EagleTokens.good : primary,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -359,8 +359,9 @@ void _showTrainingPendingSheet({
   required bool isDark,
 }) {
   final primary = Theme.of(context).colorScheme.primary;
-  final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-  final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+  final chrome = ShellChrome.forDark(isDark);
+  final ink = chrome.ink;
+  final mute = chrome.mute;
 
   showModalBottomSheet<void>(
     context: context,
@@ -373,7 +374,7 @@ void _showTrainingPendingSheet({
           child: ClipRRect(
             borderRadius: BorderRadius.circular(TokensStrip.rXl),
             child: DecoratedBox(
-              decoration: fxListCardDecoration(sheetContext, accent: primary),
+              decoration: chrome.listCard(primary: primary),
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(22, 12, 22, 22),
                 child: Column(
@@ -427,10 +428,7 @@ void _showTrainingPendingSheet({
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.all(TokensStrip.s4),
-                      decoration: fxListCardDecoration(
-                        sheetContext,
-                        accent: primary,
-                      ),
+                      decoration: chrome.panel(accent: primary),
                       child: Text(
                         'Seu personal ja reservou este treino. Assim que os exercicios forem liberados, o botao Iniciar aparece com registro de series, videos e feedback.',
                         style: TextStyle(
@@ -474,13 +472,14 @@ class _TrainingReadinessSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final chrome = ShellChrome.forDark(isDark);
+    final ink = chrome.ink;
+    final mute = chrome.mute;
     final hasExercises = totalExercicios > 0;
 
     return Container(
       padding: const EdgeInsets.all(TokensStrip.s4),
-      decoration: fxListCardDecoration(context, accent: primary),
+      decoration: chrome.listCard(primary: primary),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -583,12 +582,13 @@ class _ReadinessMarker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final chrome = ShellChrome.forDark(isDark);
+    final ink = chrome.ink;
+    final mute = chrome.mute;
 
     return Container(
       padding: const EdgeInsets.all(10),
-      decoration: fxListCardDecoration(context, accent: color),
+      decoration: chrome.listCard(primary: color),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

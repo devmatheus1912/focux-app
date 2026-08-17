@@ -575,9 +575,10 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
     final async = ref.watch(alunoMeProvider);
     final medidasAsync = ref.watch(minhasMedidasProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final chrome = ShellChrome.forDark(isDark);
+    final ink = chrome.ink;
+    final line = chrome.line;
+    final mute = chrome.mute;
 
     return fxScreenA11yScope(
       label: 'Meu perfil',
@@ -904,36 +905,13 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
                                 child: SkeletonList(count: 3),
                               ),
                           error:
-                              (e, _) => Padding(
-                                padding: const EdgeInsets.only(bottom: 8),
-                                child: Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.stretch,
-                                  children: [
-                                    Text(
-                                      'Não foi possível carregar sua evolução. ${friendlyError(e)}',
-                                      style: TextStyle(color: mute, height: 1.4),
-                                    ),
-                                    const SizedBox(height: 10),
-                                    OutlinedButton.icon(
-                                      onPressed:
-                                          () => ref.invalidate(
-                                            minhasMedidasProvider,
-                                          ),
-                                      icon: const Icon(
-                                        Icons.refresh_rounded,
-                                        size: 18,
-                                      ),
-                                      label: const Text(
-                                        FocuxMicrocopy.tentarNovamente,
-                                      ),
-                                      style: OutlinedButton.styleFrom(
-                                        foregroundColor: primary,
-                                        minimumSize: const Size(48, 48),
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                              (e, _) => FxErrorState(
+                                chromeOnDark: isDark,
+                                primary: primary,
+                                title: FocuxMicrocopy.naoFoiPossivelCarregar,
+                                message: friendlyError(e),
+                                onRetry:
+                                    () => ref.invalidate(minhasMedidasProvider),
                               ),
                           data: (medidas) {
                             final ultima =
@@ -990,26 +968,14 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
                                 ],
                                 const SizedBox(height: 12),
                                 if (medidas.isEmpty)
-                                  Container(
-                                    padding: const EdgeInsets.all(
-                                      TokensStrip.s4,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color:
-                                          isDark
-                                              ? Colors.white.withValues(
-                                                alpha: 0.04,
-                                              )
-                                              : BrandPalette.softer(primary),
-                                      borderRadius: BorderRadius.circular(18),
-                                    ),
-                                    child: Text(
-                                      'Seu histórico corporal ainda está vazio. Registrar a primeira medida melhora acompanhamento, ajuste de carga e conversa com o personal.',
-                                      style: TextStyle(
-                                        color: mute,
-                                        fontSize: 13,
-                                        height: 1.5,
-                                      ),
+                                  FxEmptyState(
+                                    icon: 'chart',
+                                    title: 'Histórico corporal vazio',
+                                    subtitle:
+                                        'Registrar a primeira medida melhora acompanhamento, ajuste de carga e conversa com o personal.',
+                                    action: FxEmptyAction(
+                                      label: 'Registrar medida',
+                                      onTap: _registrarMedida,
                                     ),
                                   )
                                 else ...[

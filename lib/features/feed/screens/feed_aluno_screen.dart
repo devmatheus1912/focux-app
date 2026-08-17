@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/brand/focux_microcopy.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/utils/fx_utils.dart';
 
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../alunos/providers/alunos_provider.dart';
 import '../data/feed_repository.dart';
 import '../widgets/feed_comments_sheet.dart';
 import '../../../core/widgets/fx_empty_state.dart';
+import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
-import 'package:focux_app/core/widgets/fx_loading.dart';
+import '../../../core/widgets/skeleton_loader.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
 import '../../../core/theme/tokens_strip.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
@@ -28,6 +31,7 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
   final Map<int, int> _comentariosLocais = {};
   List<FeedPost> _posts = [];
   bool _loading = true;
+  String? _erro;
 
   @override
   void initState() {
@@ -36,7 +40,10 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
   }
 
   Future<void> _load() async {
-    setState(() => _loading = true);
+    setState(() {
+      _loading = true;
+      _erro = null;
+    });
     try {
       final posts =
           await FeedRepository(ref.read(apiClientProvider)).listarAluno();
@@ -51,8 +58,10 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
       });
     } catch (e) {
       if (mounted) {
-        setState(() => _loading = false);
-        FeedbackHelper.showError(context, friendlyError(e));
+        setState(() {
+          _loading = false;
+          _erro = friendlyError(e);
+        });
       }
     }
   }
@@ -124,6 +133,7 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final chrome = ShellChrome.forDark(isDark);
     final primary = Theme.of(context).colorScheme.primary;
     return fxScreenA11yScope(
       label: 'Feed Aluno',
@@ -133,7 +143,18 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
         body: SafeArea(
           child:
               _loading
-                  ? Center(child: FxLoading(color: primary))
+                  ? const Padding(
+                    padding: EdgeInsets.all(TokensStrip.s4),
+                    child: SkeletonList(count: 4),
+                  )
+                  : _erro != null
+                  ? FxErrorState(
+                    chromeOnDark: isDark,
+                    primary: primary,
+                    title: FocuxMicrocopy.naoFoiPossivelCarregar,
+                    message: _erro!,
+                    onRetry: _load,
+                  )
                   : _posts.isEmpty
                   ? const FxEmptyState(
                     icon: 'file-text',
@@ -159,10 +180,7 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
                             child: Text(
                               'Feed',
                               style: TextStyle(
-                                color:
-                                    isDark
-                                        ? EagleTokens.darkInk
-                                        : TokensStrip.textPrimary,
+                                color: chrome.ink,
                                 fontSize: 28,
                                 fontWeight: FontWeight.w900,
                                 letterSpacing: -0.5,
@@ -180,9 +198,8 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
 
                         return Container(
                           margin: const EdgeInsets.only(bottom: 12),
-                          decoration: fxListCardDecoration(
-                            context,
-                            accent: p.fixado ? primary : null,
+                          decoration: chrome.listCard(
+                            primary: p.fixado ? primary : null,
                           ),
                           child: Padding(
                             padding: const EdgeInsets.all(TokensStrip.s4),
@@ -210,9 +227,10 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
                                     Expanded(
                                       child: Text(
                                         p.titulo,
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                           fontSize: 16,
                                           fontWeight: FontWeight.w700,
+                                          color: chrome.ink,
                                         ),
                                       ),
                                     ),
@@ -223,7 +241,10 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
                                 const SizedBox(height: 8),
                                 Text(
                                   p.conteudo,
-                                  style: const TextStyle(fontSize: 14),
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: chrome.ink,
+                                  ),
                                 ),
                                 if (mUrl != null && mUrl.isNotEmpty) ...[
                                   const SizedBox(height: 12),

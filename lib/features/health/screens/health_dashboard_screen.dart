@@ -4,16 +4,17 @@ import '../../../core/api/api_client.dart';
 import '../../../core/brand/focux_microcopy.dart';
 import '../../../core/health/health_service.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../core/health/home_widget_service.dart';
 import '../data/health_repository.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
-import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 
 /// Screen showing synced Apple Health / Google Fit data.
 ///
@@ -168,6 +169,7 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
   Widget _buildDashboard(bool isDark, Color primary) {
     final s = _summary!;
     final recovery = _recovery ?? RecoverySnapshot.fromSummary(s);
+    final chrome = ShellChrome.forDark(isDark);
     return RefreshIndicator(
       onRefresh: _loadData,
       child: ListView(
@@ -225,7 +227,7 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w700,
-              color: isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
+              color: chrome.ink,
             ),
           ),
           const SizedBox(height: TokensStrip.s4),
@@ -321,9 +323,10 @@ class _MetricCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final chrome = ShellChrome.forDark(isDark);
     return Container(
       padding: const EdgeInsets.all(20),
-      decoration: fxListCardDecoration(context, accent: color),
+      decoration: chrome.listCard(primary: color),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -341,13 +344,13 @@ class _MetricCard extends StatelessWidget {
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.w700,
-              color: isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
+              color: chrome.ink,
             ),
           ),
           const SizedBox(height: 4),
           Text(
             label,
-            style: TextStyle(fontSize: 13, color: TokensStrip.textSecondary),
+            style: TextStyle(fontSize: 13, color: chrome.mute),
           ),
         ],
       ),

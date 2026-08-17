@@ -13,6 +13,7 @@ import '../../../core/widgets/fx_motion.dart';
 import '../data/checkin_repository.dart';
 import '../providers/checkin_provider.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_empty_state.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/fx_celebration_overlay.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -518,57 +519,69 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
                   onBack: () => safePopOrGo(context, '/checkin/treinos'),
                 ),
               ),
-              SliverPadding(
-                padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 14, 16, 8),
-                sliver: SliverList.separated(
-                  itemCount: exercicios.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 12),
-                  itemBuilder: (ctx, i) {
-                    final item = exercicios[i];
-                    return CheckinSerieCard(
-                      ee: item,
-                      index: i + 1,
-                      total: exercicios.length,
-                      dark: dark,
-                      brand: brand,
-                      ink: ink,
-                      mute: mute,
-                      line: line,
-                      feedback: item.feedback,
-                      onFeedback: (value) => _setFeedback(item, value),
-                      onMarcar: (s) => _marcar(item, s),
-                      onSerieDetalhada:
-                          (numero, serie) => _registrarSerieDetalhada(
-                            item,
-                            numero: numero,
-                            serie: serie,
-                          ),
-                    );
-                  },
-                ),
-              ),
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 2, 16, 16),
-                  child: CheckinLiveCoachingCard(
-                    brand: brand,
-                    brandDeep: brandDeep,
-                    dark: dark,
-                    onApply: () {
-                      FeedbackHelper.showSuccess(
-                        context,
-                        'Sugestao registrada para a proxima serie.',
-                      );
-                    },
-                    onSkip: () {
-                      FeedbackHelper.showSuccess(
-                        context,
-                        'Sugestao ignorada neste exercicio.',
+              if (exercicios.isEmpty)
+                const SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: FxEmptyState(
+                    icon: 'dumbbell',
+                    title: 'Treino sem exercícios',
+                    subtitle:
+                        'Seu personal ainda não liberou a lista de exercícios deste treino.',
+                  ),
+                )
+              else
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 14, 16, 8),
+                  sliver: SliverList.separated(
+                    itemCount: exercicios.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 12),
+                    itemBuilder: (ctx, i) {
+                      final item = exercicios[i];
+                      return CheckinSerieCard(
+                        ee: item,
+                        index: i + 1,
+                        total: exercicios.length,
+                        dark: dark,
+                        brand: brand,
+                        ink: ink,
+                        mute: mute,
+                        line: line,
+                        feedback: item.feedback,
+                        onFeedback: (value) => _setFeedback(item, value),
+                        onMarcar: (s) => _marcar(item, s),
+                        onSerieDetalhada:
+                            (numero, serie) => _registrarSerieDetalhada(
+                              item,
+                              numero: numero,
+                              serie: serie,
+                            ),
                       );
                     },
                   ),
                 ),
-              ),
+              if (exercicios.isNotEmpty)
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 2, 16, 16),
+                    child: CheckinLiveCoachingCard(
+                      brand: brand,
+                      brandDeep: brandDeep,
+                      dark: dark,
+                      onApply: () {
+                        FeedbackHelper.showSuccess(
+                          context,
+                          'Sugestao registrada para a proxima serie.',
+                        );
+                      },
+                      onSkip: () {
+                        FeedbackHelper.showSuccess(
+                          context,
+                          'Sugestao ignorada neste exercicio.',
+                        );
+                      },
+                    ),
+                  ),
+                ),
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(

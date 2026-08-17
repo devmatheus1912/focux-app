@@ -6,27 +6,46 @@ import '../../../core/brand/focux_microcopy.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/shell_chrome.dart';
+import '../../../core/theme/tokens_strip.dart';
+import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/fx_async_body.dart';
 import '../../../core/widgets/fx_empty_state.dart';
-import '../../../core/widgets/fx_shell_scaffold.dart';
-import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_motion.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../data/checkin_repository.dart';
 import '../providers/checkin_provider.dart';
-import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 
 part 'meus_treinos_screen_state.part.dart';
 part 'meus_treinos_screen_widgets.part.dart';
 
-class MeusTreinosScreen extends ConsumerWidget {
+class MeusTreinosScreen extends ConsumerStatefulWidget {
   const MeusTreinosScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<MeusTreinosScreen> createState() => _MeusTreinosScreenState();
+}
+
+class _MeusTreinosScreenState extends ConsumerState<MeusTreinosScreen> {
+  DateTime? _fetchedAt;
+
+  @override
+  Widget build(BuildContext context) {
     final treinosAsync = ref.watch(meusTreinosProvider);
+    ref.listen<AsyncValue<List<ExecucaoTreino>>>(meusTreinosProvider, (
+      _,
+      next,
+    ) {
+      if (!next.isLoading && next.hasValue) {
+        setState(() => _fetchedAt = DateTime.now());
+      }
+    });
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final chrome = ShellChrome.forDark(isDark);
     final primary = Theme.of(context).colorScheme.primary;
+    final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
 
     return fxScreenA11yScope(
       label: 'Sua rotina',
@@ -34,12 +53,12 @@ class MeusTreinosScreen extends ConsumerWidget {
         useMesh: true,
         appBar: FxShellAppBar(
           title: 'Sua rotina',
-          subtitle: 'TREINOS',
+          subtitle: freshnessLabel ?? 'TREINOS',
           onBack: () => safePopOrGo(context, '/dashboard/aluno'),
           actions: [
             IconButton(
               onPressed: () => ref.invalidate(meusTreinosProvider),
-              icon: Icon(Icons.refresh_rounded, color: fxScreenMute(context)),
+              icon: Icon(Icons.refresh_rounded, color: chrome.mute),
             ),
           ],
         ),

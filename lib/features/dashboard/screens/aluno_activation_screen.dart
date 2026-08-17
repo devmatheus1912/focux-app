@@ -4,17 +4,20 @@ import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/brand/focux_brand_copy.dart';
+import '../../../core/brand/focux_microcopy.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
-import '../../../core/utils/friendly_error.dart';
-import '../../../core/widgets/fx_shell_scaffold.dart';
-import '../../alunos/data/aluno_repository.dart';
-import '../providers/dashboard_provider.dart';
-import '../../../core/theme/tokens_strip.dart';
 import '../../../core/theme/focux_hub_typography.dart';
+import '../../../core/theme/shell_chrome.dart';
+import '../../../core/theme/tokens_strip.dart';
+import '../../../core/utils/friendly_error.dart';
+import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../alunos/data/aluno_repository.dart';
+import '../providers/dashboard_provider.dart';
 
 class AlunoActivationScreen extends ConsumerWidget {
   const AlunoActivationScreen({super.key});
@@ -46,6 +49,8 @@ class AlunoActivationScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final chrome = ShellChrome.forDark(isDark);
+    final primary = Theme.of(context).colorScheme.primary;
     final homeAsync = ref.watch(alunoDashboardHomeProvider);
 
     return fxScreenA11yScope(
@@ -75,54 +80,12 @@ class AlunoActivationScreen extends ConsumerWidget {
         body: homeAsync.when(
           loading: () => const FxLoading(),
           error:
-              (e, _) => Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(32),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        width: 64,
-                        height: 64,
-                        decoration: BoxDecoration(
-                          color: EagleTokens.bad.withValues(alpha: 0.08),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: const Icon(
-                          Icons.error_outline_rounded,
-                          color: EagleTokens.bad,
-                          size: 32,
-                        ),
-                      ),
-                      const SizedBox(height: TokensStrip.s4),
-                      Text(
-                        friendlyError(e),
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w500,
-                          color:
-                              isDark
-                                  ? EagleTokens.darkInk
-                                  : TokensStrip.textPrimary,
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      FxLiquidPrimaryButton(
-                        expand: false,
-                        icon: Icons.refresh_rounded,
-                        label: 'Tentar novamente',
-                        onPressed:
-                            () => ref.invalidate(alunoDashboardHomeProvider),
-                      ),
-                      const SizedBox(height: 8),
-                      TextButton(
-                        onPressed: () => context.go('/dashboard/aluno'),
-                        child: const Text('Ir para o dashboard'),
-                      ),
-                    ],
-                  ),
-                ),
+              (e, _) => FxErrorState(
+                chromeOnDark: isDark,
+                primary: primary,
+                title: FocuxMicrocopy.naoFoiPossivelCarregar,
+                message: friendlyError(e),
+                onRetry: () => ref.invalidate(alunoDashboardHomeProvider),
               ),
           data: (home) {
             final aluno = home.aluno;
@@ -273,10 +236,7 @@ class AlunoActivationScreen extends ConsumerWidget {
                   const SizedBox(height: TokensStrip.s4),
                   Container(
                     padding: const EdgeInsets.all(18),
-                    decoration: fxListCardDecoration(
-                      context,
-                      accent: Theme.of(context).colorScheme.primary,
-                    ),
+                    decoration: chrome.listCard(primary: primary),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -285,10 +245,7 @@ class AlunoActivationScreen extends ConsumerWidget {
                               ? FocuxBrandCopy.alunoActivationReadyTitle
                               : 'Proximo melhor passo',
                           style: TextStyle(
-                            color:
-                                isDark
-                                    ? EagleTokens.darkInkMute
-                                    : TokensStrip.textSecondary,
+                            color: chrome.mute,
                             fontSize: 12,
                             fontWeight: FontWeight.w700,
                           ),
@@ -300,10 +257,7 @@ class AlunoActivationScreen extends ConsumerWidget {
                               : nextStep.title,
                           style: FocuxHubTypography.pageTitle(
                             context,
-                            color:
-                                isDark
-                                    ? EagleTokens.darkInk
-                                    : TokensStrip.textPrimary,
+                            color: chrome.ink,
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -312,10 +266,7 @@ class AlunoActivationScreen extends ConsumerWidget {
                               ? 'Voce pode seguir para a home e usar o app normalmente.'
                               : nextStep.description,
                           style: TextStyle(
-                            color:
-                                isDark
-                                    ? EagleTokens.darkInkMute
-                                    : TokensStrip.textSecondary,
+                            color: chrome.mute,
                             height: 1.45,
                           ),
                         ),
@@ -352,7 +303,7 @@ class AlunoActivationScreen extends ConsumerWidget {
                       padding: const EdgeInsets.only(bottom: 10),
                       child: _ActivationStepCard(
                         step: step,
-                        isDark: isDark,
+                        chrome: chrome,
                         onTap: () async {
                           await _markSeen(aluno.id);
                           if (context.mounted) {
@@ -392,24 +343,23 @@ class _ActivationStep {
 
 class _ActivationStepCard extends StatelessWidget {
   final _ActivationStep step;
-  final bool isDark;
+  final ShellPalette chrome;
   final VoidCallback onTap;
 
   const _ActivationStepCard({
     required this.step,
-    required this.isDark,
+    required this.chrome,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final isDark = chrome.isDark;
 
     return Container(
       padding: const EdgeInsets.all(TokensStrip.s4),
-      decoration: fxListCardDecoration(context, accent: primary),
+      decoration: chrome.listCard(primary: primary),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -436,7 +386,7 @@ class _ActivationStepCard extends StatelessWidget {
                 Text(
                   step.title,
                   style: TextStyle(
-                    color: ink,
+                    color: chrome.ink,
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
                   ),
@@ -444,7 +394,11 @@ class _ActivationStepCard extends StatelessWidget {
                 const SizedBox(height: 6),
                 Text(
                   step.description,
-                  style: TextStyle(color: mute, fontSize: 12.5, height: 1.45),
+                  style: TextStyle(
+                    color: chrome.mute,
+                    fontSize: 12.5,
+                    height: 1.45,
+                  ),
                 ),
               ],
             ),

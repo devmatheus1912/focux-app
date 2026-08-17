@@ -18,9 +18,10 @@ class _SectionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
+    final chrome = ShellChrome.forDark(isDark);
     return Container(
       padding: const EdgeInsets.all(TokensStrip.s4),
-      decoration: fxListCardDecoration(context, accent: primary),
+      decoration: chrome.listCard(primary: primary),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -31,8 +32,7 @@ class _SectionCard extends StatelessWidget {
                 child: Text(
                   title,
                   style: TextStyle(
-                    color:
-                        isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
+                    color: chrome.ink,
                     fontSize: 16,
                     fontWeight: FontWeight.w800,
                   ),
@@ -45,8 +45,7 @@ class _SectionCard extends StatelessWidget {
           Text(
             subtitle,
             style: TextStyle(
-              color:
-                  isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
+              color: chrome.mute,
               fontSize: 12.5,
               height: 1.4,
             ),
@@ -119,18 +118,10 @@ class _MetricHighlightCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
+    final chrome = ShellChrome.forDark(isDark);
     return Container(
       padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color:
-            isDark
-                ? Colors.white.withValues(alpha: 0.04)
-                : BrandPalette.softer(primary),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: isDark ? EagleTokens.darkLine : TokensStrip.borderDefault,
-        ),
-      ),
+      decoration: chrome.panel(accent: primary, radius: 20),
       child: Row(
         children: [
           Container(
@@ -151,10 +142,7 @@ class _MetricHighlightCard extends StatelessWidget {
                 Text(
                   label,
                   style: TextStyle(
-                    color:
-                        isDark
-                            ? EagleTokens.darkInkMute
-                            : TokensStrip.textSecondary,
+                    color: chrome.mute,
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                   ),
@@ -163,8 +151,7 @@ class _MetricHighlightCard extends StatelessWidget {
                 Text(
                   value,
                   style: TextStyle(
-                    color:
-                        isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
+                    color: chrome.ink,
                     fontSize: 17,
                     fontWeight: FontWeight.w800,
                   ),
@@ -175,10 +162,7 @@ class _MetricHighlightCard extends StatelessWidget {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    color:
-                        isDark
-                            ? EagleTokens.darkInkMute
-                            : TokensStrip.textSecondary,
+                    color: chrome.mute,
                     fontSize: 11.5,
                     height: 1.35,
                   ),

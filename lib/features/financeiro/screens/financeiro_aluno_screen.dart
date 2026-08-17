@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/design_tokens.dart';
-import '../../../core/brand/focux_microcopy.dart';
-import '../../../core/utils/friendly_error.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focux_app/core/widgets/fx_empty_state.dart';
+import 'package:focux_app/core/widgets/fx_error_state.dart';
+import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
+import 'package:focux_app/core/widgets/fx_shell_scaffold.dart';
+import 'package:focux_app/core/widgets/skeleton_loader.dart';
+
+import '../../../core/brand/focux_microcopy.dart';
+import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/shell_chrome.dart';
+import '../../../core/theme/tokens_strip.dart';
+import '../../../core/utils/friendly_error.dart';
 import '../../../features/alunos/utils/satellite_screen_utils.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/financeiro_repository.dart';
-import 'package:focux_app/core/widgets/fx_loading.dart';
-import 'package:focux_app/core/widgets/fx_shell_scaffold.dart';
-import '../../../core/theme/tokens_strip.dart';
-import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 
 class FinanceiroAlunoScreen extends ConsumerStatefulWidget {
   const FinanceiroAlunoScreen({super.key});
@@ -84,7 +88,6 @@ class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
   }
 
   String _formatarMes(String mesReferencia) {
-    // mesReferencia format: "2026-04-01"
     try {
       final parts = mesReferencia.split('-');
       if (parts.length < 2) return mesReferencia;
@@ -100,8 +103,6 @@ class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final primary = Theme.of(context).colorScheme.primary;
 
     return fxScreenA11yScope(
@@ -119,17 +120,33 @@ class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
         ),
         body:
             _loading
-                ? const Center(
-                  child: SizedBox(
-                    width: 28,
-                    height: 28,
-                    child: FxLoading(strokeWidth: 2.5),
-                  ),
+                ? const Padding(
+                  padding: EdgeInsets.all(TokensStrip.s4),
+                  child: SkeletonList(count: 5),
                 )
                 : _erro != null
-                ? _buildError(isDark, ink, mute, primary)
+                ? FxErrorState(
+                  chromeOnDark: isDark,
+                  primary: primary,
+                  title: FocuxMicrocopy.naoFoiPossivelCarregar,
+                  message: _erro!,
+                  onRetry: _carregar,
+                )
                 : _mensalidades.isEmpty
-                ? _buildEmpty(isDark, ink, mute, primary)
+                ? RefreshIndicator(
+                  onRefresh: _carregar,
+                  child: ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    children: const [
+                      SizedBox(height: 72),
+                      FxEmptyState(
+                        icon: 'coin',
+                        title: 'Nenhuma mensalidade',
+                        subtitle: 'Suas cobranças aparecerão aqui.',
+                      ),
+                    ],
+                  ),
+                )
                 : RefreshIndicator(
                   onRefresh: _carregar,
                   child: ListView.builder(
@@ -152,97 +169,6 @@ class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
       ),
     );
   }
-
-  Widget _buildError(bool isDark, Color ink, Color mute, Color primary) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 40),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 52,
-              height: 52,
-              decoration: BoxDecoration(
-                color: EagleTokens.bad.withValues(alpha: isDark ? 0.18 : 0.08),
-                borderRadius: BorderRadius.circular(18),
-              ),
-              child: const Icon(
-                Icons.cloud_off_rounded,
-                color: EagleTokens.bad,
-                size: 24,
-              ),
-            ),
-            const SizedBox(height: 14),
-            Text(
-              'Erro ao carregar',
-              style: AppTypography.inter(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: ink,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              _erro ?? '',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: mute, fontSize: 13, height: 1.35),
-            ),
-            const SizedBox(height: TokensStrip.s4),
-            OutlinedButton.icon(
-              onPressed: _carregar,
-              icon: const Icon(Icons.refresh_rounded, size: 18),
-              label: const Text(FocuxMicrocopy.tentarNovamente),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: primary,
-                side: BorderSide(color: primary.withValues(alpha: 0.3)),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 12,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildEmpty(bool isDark, Color ink, Color mute, Color primary) {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 52,
-            height: 52,
-            decoration: BoxDecoration(
-              color: primary.withValues(alpha: isDark ? 0.15 : 0.08),
-              borderRadius: BorderRadius.circular(18),
-            ),
-            child: Icon(Icons.receipt_long_rounded, color: primary, size: 24),
-          ),
-          const SizedBox(height: 14),
-          Text(
-            'Nenhuma mensalidade',
-            style: AppTypography.inter(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-              color: ink,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'Suas cobranças aparecerão aqui.',
-            style: TextStyle(color: mute, fontSize: 13),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 class _MensalidadeCard extends StatelessWidget {
@@ -260,19 +186,13 @@ class _MensalidadeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final card = isDark ? EagleTokens.darkCard : TokensStrip.cardBg;
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
+    final chrome = ShellChrome.forDark(isDark);
     final sColor = statusColor(m.status);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: card,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: line),
-      ),
+      decoration: chrome.listCard(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -284,7 +204,7 @@ class _MensalidadeCard extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w800,
-                    color: ink,
+                    color: chrome.ink,
                     letterSpacing: -0.15,
                   ),
                 ),
@@ -294,7 +214,7 @@ class _MensalidadeCard extends StatelessWidget {
                 style: AppTypography.mono(
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
-                  color: ink,
+                  color: chrome.ink,
                 ),
               ),
             ],
