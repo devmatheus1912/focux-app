@@ -6,18 +6,10 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
-import '../../../features/auth/providers/auth_provider.dart';
-import '../../../features/perfil/data/perfil_repository.dart';
-import '../data/pacote_repository.dart';
-import '../widgets/pacotes_storefront_widgets.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
-
-final _pacoteRepoProvider = Provider(
-  (ref) => PacoteRepository(ref.read(apiClientProvider)),
-);
-final _perfilRepoProvider = Provider(
-  (ref) => PerfilRepository(ref.read(apiClientProvider)),
-);
+import '../data/pacote_repository.dart';
+import '../providers/pacotes_provider.dart';
+import '../widgets/pacotes_storefront_widgets.dart';
 
 class PacotesScreen extends ConsumerStatefulWidget {
   const PacotesScreen({super.key});
@@ -38,24 +30,18 @@ class _PacotesScreenState extends ConsumerState<PacotesScreen> {
     _carregar();
   }
 
-  Future<void> _carregar() async {
+  Future<void> _carregar({bool force = false}) async {
     setState(() {
       _loading = true;
       _erro = null;
     });
     try {
-      final repo = ref.read(_pacoteRepoProvider);
-      final perfilRepo = ref.read(_perfilRepoProvider);
-      final lista = await repo.listar();
-      String? slug;
-      try {
-        final perfil = await perfilRepo.buscar();
-        slug = perfil.slug;
-      } catch (_) {}
+      if (force) invalidatePacotesCaches(ref);
+      final home = await ref.read(pacotesHomeProvider.future);
       if (!mounted) return;
       setState(() {
-        _pacotes = lista;
-        _slug = slug;
+        _pacotes = home.pacotes;
+        _slug = home.perfil?.slug;
         _loading = false;
       });
     } catch (e) {
@@ -72,22 +58,22 @@ class _PacotesScreenState extends ConsumerState<PacotesScreen> {
     HapticFeedback.selectionClick();
     final created = await showNovoPacoteSheet(
       context,
-      repo: ref.read(_pacoteRepoProvider),
+      repo: ref.read(pacoteRepositoryProvider),
     );
     if (!mounted || !created) return;
     FeedbackHelper.showSuccess(context, 'Plano criado!');
-    await _carregar();
+    await _carregar(force: true);
   }
 
   Future<void> _desativar(Pacote pacote) async {
     final ok = await confirmDesativarPacote(context, pacote.titulo);
     if (!ok || !mounted) return;
     try {
-      await ref.read(_pacoteRepoProvider).desativar(pacote.id);
+      await ref.read(pacoteRepositoryProvider).desativar(pacote.id);
       if (!mounted) return;
       HapticFeedback.mediumImpact();
       FeedbackHelper.showSuccess(context, 'Plano desativado.');
-      await _carregar();
+      await _carregar(force: true);
     } catch (e) {
       if (!mounted) return;
       FeedbackHelper.showError(context, friendlyError(e));
@@ -126,9 +112,12 @@ class _PacotesScreenState extends ConsumerState<PacotesScreen> {
             _loading
                 ? const PacotesStorefrontSkeleton()
                 : _erro != null
-                ? PacotesLoadErrorState(message: _erro, onRetry: _carregar)
+                ? PacotesLoadErrorState(
+                  message: _erro,
+                  onRetry: () => _carregar(force: true),
+                )
                 : RefreshIndicator(
-                  onRefresh: _carregar,
+                  onRefresh: () => _carregar(force: true),
                   child: ListView(
                     padding: const EdgeInsets.fromLTRB(
                       TokensStrip.s4,

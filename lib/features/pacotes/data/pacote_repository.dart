@@ -40,6 +40,39 @@ class Pacote {
   );
 }
 
+class PacotesHomePerfil {
+  final String? slug;
+  final String? nome;
+
+  const PacotesHomePerfil({this.slug, this.nome});
+
+  factory PacotesHomePerfil.fromJson(Map<String, dynamic> j) => PacotesHomePerfil(
+    slug: j['slug'] as String?,
+    nome: j['nome'] as String?,
+  );
+}
+
+class PacotesHomeBundle {
+  final List<Pacote> pacotes;
+  final PacotesHomePerfil? perfil;
+
+  const PacotesHomeBundle({required this.pacotes, this.perfil});
+
+  factory PacotesHomeBundle.fromJson(Map<String, dynamic> j) {
+    final perfilJson = j['perfil'];
+    return PacotesHomeBundle(
+      pacotes:
+          ((j['pacotes'] as List?) ?? const [])
+              .map((e) => Pacote.fromJson(e as Map<String, dynamic>))
+              .toList(),
+      perfil:
+          perfilJson is Map<String, dynamic>
+              ? PacotesHomePerfil.fromJson(perfilJson)
+              : null,
+    );
+  }
+}
+
 class PacoteRepository {
   final Dio _dio;
   PacoteRepository(ApiClient c) : _dio = c.dio;
@@ -49,6 +82,12 @@ class PacoteRepository {
     return (r.data as List<dynamic>)
         .map((e) => Pacote.fromJson(e as Map<String, dynamic>))
         .toList();
+  }
+
+  /// BFF tipado — first paint da tela Planos (lista + slug da vitrine).
+  Future<PacotesHomeBundle> getHome() async {
+    final r = await _dio.get('/api/pacotes/home');
+    return PacotesHomeBundle.fromJson(r.data as Map<String, dynamic>);
   }
 
   Future<Pacote> criar({

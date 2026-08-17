@@ -20,6 +20,7 @@ import '../../../core/theme/theme_provider.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../dashboard/data/dashboard_repository.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
+import '../../pacotes/providers/pacotes_provider.dart';
 import '../data/perfil_repository.dart';
 import '../providers/perfil_provider.dart';
 import '../utils/brand_slogan_display.dart';
@@ -82,6 +83,7 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
       ref.invalidate(perfilProvider);
       ref.invalidate(dashboardHomeProvider);
       ref.invalidate(dashboardProvider);
+      invalidatePacotesCaches(ref);
 
       if (!mounted) return;
       FeedbackHelper.showSuccess(context, 'Foto atualizada com sucesso.');
@@ -104,6 +106,7 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
       ref.invalidate(perfilProvider);
       ref.invalidate(dashboardHomeProvider);
       ref.invalidate(dashboardProvider);
+      invalidatePacotesCaches(ref);
       if (!mounted) return;
       FeedbackHelper.showSuccess(
         context,
