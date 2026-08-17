@@ -78,7 +78,7 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
     HapticFeedback.selectionClick();
     final criado = await context.push<bool>('/alunos/novo');
     if (criado == true) {
-      ref.invalidate(alunosProvider);
+      invalidateAlunosCaches(ref);
     }
   }
 
@@ -113,7 +113,7 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
       } catch (_) {}
     }
     if (mounted) {
-      ref.invalidate(alunosProvider);
+      invalidateAlunosCaches(ref);
       FeedbackHelper.showSuccess(context, _deletedMessage(sucesso));
       setState(() {
         _modoSelecao = false;
@@ -133,7 +133,7 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
             data: {'alunoIds': _selecionados.toList()},
           );
       if (mounted) {
-        ref.invalidate(alunosProvider);
+        invalidateAlunosCaches(ref);
         FeedbackHelper.showSuccess(
           context,
           mensalidadesPagasMessage(_selecionados.length),
@@ -156,8 +156,7 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
     try {
       await repo.atualizarStatusLote(_selecionados.toList(), novoStatus);
       if (mounted) {
-        ref.invalidate(alunosProvider);
-        ref.invalidate(alunosStatsProvider);
+        invalidateAlunosCaches(ref);
         FeedbackHelper.showSuccess(
           context,
           alunosAtualizadosMessage(_selecionados.length),
@@ -642,17 +641,12 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final alunosAsync = ref.watch(alunosProvider);
-    final statsAsync = ref.watch(alunosStatsProvider);
-    final configAsync = ref.watch(alertasConfigProvider);
+    final homeAsync = ref.watch(alunosHomeProvider);
     final chrome = ShellChrome.of(context);
     final isDark = chrome.isDark;
     final primary = Theme.of(context).colorScheme.primary;
     final ink = chrome.ink;
     final mute = chrome.mute;
-    final diasLimite =
-        configAsync.valueOrNull?.diasSemTreino ??
-        AlunoFollowUpStore.diasSemTreinoLimite;
 
     return fxScreenA11yScope(
       label: 'Lista de alunos',
@@ -664,7 +658,7 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
         },
         child: Scaffold(
         backgroundColor: Colors.transparent,
-        body: alunosAsync.when(
+        body: homeAsync.when(
           loading:
               () => const SafeArea(
                 child: Padding(
@@ -684,45 +678,25 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
                   primary: primary,
                   title: FocuxMicrocopy.erroAoCarregarAlunos,
                   message: friendlyError(e),
-                  onRetry: () {
-                    ref.invalidate(alunosProvider);
-                    ref.invalidate(alunosStatsProvider);
-                  },
+                  onRetry: () => invalidateAlunosCaches(ref),
                 ),
               ),
-          data: (alunos) {
-            final stats = statsAsync.valueOrNull;
+          data: (home) {
+            final alunos = home.alunos;
+            final stats = home.stats;
+            final diasLimite = home.alertasConfig.diasSemTreino;
             final filtrados = _filtrarAlunos(
               alunos,
               diasSemTreinoLimite: diasLimite,
             );
-            final ativosCount =
-                stats?.totalAtivos ??
-                alunos
-                    .where(
-                      (a) =>
-                          a.status == 'ATIVO' &&
-                          a.statusFinanceiro != 'INADIMPLENTE',
-                    )
-                    .length;
-            final inadCount =
-                stats?.totalInadimplentes ??
-                alunos
-                    .where(
-                      (a) =>
-                          a.statusFinanceiro == 'INADIMPLENTE' ||
-                          a.inadimplente,
-                    )
-                    .length;
-            final riscoCount =
-                stats?.totalRiscoAlto ?? alunos.where((a) => a.emRisco).length;
+            final ativosCount = stats.totalAtivos;
+            final inadCount = stats.totalInadimplentes;
+            final riscoCount = stats.totalRiscoAlto;
             final contatoCount = _contatoHojeCount(
               alunos,
               diasSemTreinoLimite: diasLimite,
             );
-            final novosCount =
-                stats?.totalConvites ??
-                alunos.where((a) => a.senhaProvisoria != null).length;
+            final novosCount = stats.totalConvites;
             final headerOps =
                 _modoSelecao
                     ? _selectionSummary()
@@ -1195,8 +1169,7 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
                             )
                             : RefreshIndicator(
                               onRefresh: () async {
-                                ref.invalidate(alunosProvider);
-                                ref.invalidate(alunosStatsProvider);
+                                invalidateAlunosCaches(ref);
                                 ref.invalidate(alertasConfigProvider);
                               },
                               child: ListView.separated(

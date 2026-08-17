@@ -16,7 +16,6 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/aluno_repository.dart';
 import '../providers/aluno_detail_providers.dart';
-import '../providers/aluno_followup_provider.dart';
 import '../providers/alunos_provider.dart';
 
 class EditarAlunoScreen extends ConsumerStatefulWidget {
@@ -83,8 +82,7 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen> {
         'tipoConsultoria': _tipoConsultoria ?? 'ONLINE',
       });
       if (!mounted) return;
-      ref.invalidate(alunosProvider);
-      ref.invalidate(alunosStatsProvider);
+      invalidateAlunosCaches(ref);
       await invalidateAluno360Providers(ref, widget.aluno.id);
       if (!mounted) return;
       HapticFeedback.heavyImpact();

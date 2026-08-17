@@ -6,12 +6,13 @@ import '../data/aluno_repository.dart';
 import 'aluno_detail_providers.dart';
 import 'alunos_provider.dart';
 
+/// Config dedicada — 360 e outras telas não devem forçar o BFF da lista.
 final alertasConfigProvider = FutureProvider<AlertasConfiguracao>((ref) async {
   return AlertasRepository(ref.read(apiClientProvider)).getConfiguracao();
 });
 
 final alunosStatsProvider = FutureProvider<AlunosStats>((ref) async {
-  return ref.read(alunoRepositoryProvider).buscarStats();
+  return (await ref.watch(alunosHomeProvider.future)).stats;
 });
 
 class AlunoFollowUpActions {
@@ -63,8 +64,7 @@ class AlunoFollowUpActions {
   }
 
   void _invalidate(int alunoId) {
-    _ref.invalidate(alunosProvider);
-    _ref.invalidate(alunosStatsProvider);
+    invalidateAlunosCachesRef(_ref);
     _ref.invalidate(alunoProvider(alunoId));
     _ref.invalidate(aluno360Provider(alunoId));
   }

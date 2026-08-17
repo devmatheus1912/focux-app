@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
+import '../../alertas/data/alertas_repository.dart';
 import '../../exercicios/data/enums.dart';
 import '../../health/data/health_repository.dart';
 
@@ -518,6 +519,12 @@ class AlunoRepository {
     return list.map((e) => Aluno.fromJson(e as Map<String, dynamic>)).toList();
   }
 
+  /// BFF tipado — first paint da lista (alunos + stats + alertas config).
+  Future<AlunosHomeBundle> getHome() async {
+    final response = await _dio.get('/api/alunos/home');
+    return AlunosHomeBundle.fromJson(response.data as Map<String, dynamic>);
+  }
+
   Future<AlunosStats> buscarStats() async {
     final response = await _dio.get('/api/alunos/stats');
     return AlunosStats.fromJson(response.data as Map<String, dynamic>);
@@ -722,4 +729,30 @@ class AlunoRepository {
       },
     );
   }
+}
+
+class AlunosHomeBundle {
+  final List<Aluno> alunos;
+  final AlunosStats stats;
+  final AlertasConfiguracao alertasConfig;
+
+  const AlunosHomeBundle({
+    required this.alunos,
+    required this.stats,
+    required this.alertasConfig,
+  });
+
+  factory AlunosHomeBundle.fromJson(Map<String, dynamic> j) => AlunosHomeBundle(
+    alunos:
+        ((j['alunos'] as List?) ?? const [])
+            .map((e) => Aluno.fromJson(e as Map<String, dynamic>))
+            .toList(),
+    stats: AlunosStats.fromJson(
+      (j['stats'] as Map<String, dynamic>?) ?? const {},
+    ),
+    alertasConfig: AlertasConfiguracao.fromJson(
+      (j['alertasConfig'] as Map<String, dynamic>?) ??
+          const {'diasSemTreino': 7, 'aderenciaMinima': 50},
+    ),
+  );
 }

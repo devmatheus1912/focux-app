@@ -6,8 +6,12 @@ final alunoRepositoryProvider = Provider<AlunoRepository>(
   (ref) => AlunoRepository(ref.read(apiClientProvider)),
 );
 
+final alunosHomeProvider = FutureProvider<AlunosHomeBundle>((ref) async {
+  return ref.read(alunoRepositoryProvider).getHome();
+});
+
 final alunosProvider = FutureProvider<List<Aluno>>((ref) async {
-  return ref.read(alunoRepositoryProvider).listar();
+  return (await ref.watch(alunosHomeProvider.future)).alunos;
 });
 
 final alunoProvider = FutureProvider.family<Aluno, int>((ref, id) async {
@@ -28,3 +32,11 @@ final alunoAutonomiaResumoProvider =
 final alunoMeProvider = FutureProvider<Aluno>((ref) async {
   return ref.read(alunoRepositoryProvider).me();
 });
+
+void invalidateAlunosCaches(WidgetRef ref) {
+  ref.invalidate(alunosHomeProvider);
+}
+
+void invalidateAlunosCachesRef(Ref ref) {
+  ref.invalidate(alunosHomeProvider);
+}

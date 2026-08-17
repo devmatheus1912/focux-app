@@ -112,7 +112,7 @@ class _AcoesMassaScreenState extends ConsumerState<AcoesMassaScreen> {
       }
     }
     if (mounted) {
-      ref.invalidate(alunosProvider);
+      invalidateAlunosCaches(ref);
       if (falha > 0) {
         FeedbackHelper.showError(
           context,
@@ -165,7 +165,7 @@ class _AcoesMassaScreenState extends ConsumerState<AcoesMassaScreen> {
       }
     }
     if (mounted) {
-      ref.invalidate(alunosProvider);
+      invalidateAlunosCaches(ref);
       if (falha > 0) {
         FeedbackHelper.showError(
           context,
