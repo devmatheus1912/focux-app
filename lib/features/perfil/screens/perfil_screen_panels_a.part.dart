@@ -166,6 +166,7 @@ class _PerfilPublicLinkCard extends StatelessWidget {
     required this.actionInk,
     required this.mute,
     required this.isDark,
+    required this.profileComplete,
     required this.onOpenEditor,
   });
 
@@ -174,6 +175,7 @@ class _PerfilPublicLinkCard extends StatelessWidget {
   final Color actionInk;
   final Color mute;
   final bool isDark;
+  final bool profileComplete;
   final VoidCallback onOpenEditor;
 
   @override
@@ -207,34 +209,48 @@ class _PerfilPublicLinkCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Container(
-            width: double.infinity,
-            constraints: const BoxConstraints(minHeight: 46),
-            padding: const EdgeInsets.only(left: 12),
+          DecoratedBox(
             decoration: BoxDecoration(
-              color: (isDark ? EagleTokens.darkCard : Colors.white).withValues(
-                alpha: isDark ? 0.72 : 0.92,
-              ),
+              color:
+                  profileComplete
+                      ? (isDark
+                          ? Colors.white.withValues(alpha: 0.04)
+                          : accent.withValues(alpha: 0.05))
+                      : (isDark
+                          ? EagleTokens.darkCard
+                          : Colors.white).withValues(
+                        alpha: isDark ? 0.72 : 0.92,
+                      ),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color:
-                    isDark
-                        ? Colors.white.withValues(alpha: 0.08)
-                        : accent.withValues(alpha: 0.14),
+                    profileComplete
+                        ? (isDark
+                            ? Colors.white.withValues(alpha: 0.06)
+                            : accent.withValues(alpha: 0.1))
+                        : (isDark
+                            ? Colors.white.withValues(alpha: 0.08)
+                            : accent.withValues(alpha: 0.14)),
               ),
             ),
             child: Row(
               children: [
-                Icon(Icons.link_rounded, size: 18, color: actionInk),
+                Padding(
+                  padding: const EdgeInsets.only(left: 12),
+                  child: Icon(Icons.link_rounded, size: 18, color: actionInk),
+                ),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: Text(
-                    displayLabel,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TokensStrip.body(color: ink).copyWith(
-                      fontWeight: FontWeight.w800,
-                      fontSize: TokensStrip.fontBodySm + 0.5,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    child: Text(
+                      displayLabel,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TokensStrip.body(color: ink).copyWith(
+                        fontWeight: FontWeight.w800,
+                        fontSize: TokensStrip.fontBodySm + 0.5,
+                      ),
                     ),
                   ),
                 ),
@@ -263,13 +279,79 @@ class _PerfilPublicLinkCard extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: TokensStrip.s3),
+          if (profileComplete) ...[
+            const SizedBox(height: TokensStrip.s2),
+            _PerfilVitrineQuietActions(
+              mute: mute,
+              copyUrl: copyUrl,
+              onOpenEditor: onOpenEditor,
+              includeShare: true,
+            ),
+          ] else ...[
+            const SizedBox(height: TokensStrip.s3),
+            Semantics(
+              button: true,
+              label: 'Compartilhar link da vitrine',
+              child: FxLiquidPrimaryButton(
+                icon: Icons.ios_share_rounded,
+                label: 'Compartilhar',
+                onPressed: () {
+                  HapticFeedback.selectionClick();
+                  unawaited(
+                    AnalyticsService.instance.track(
+                      ProductEvents.perfilShareTapped,
+                    ),
+                  );
+                  copyLandingLink(
+                    context,
+                    url: copyUrl,
+                    successMessage:
+                        'Link pronto para compartilhar no Instagram ou WhatsApp.',
+                    reserveBottom: 96,
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: TokensStrip.s2),
+            _PerfilVitrineQuietActions(
+              mute: mute,
+              copyUrl: copyUrl,
+              onOpenEditor: onOpenEditor,
+              includeShare: false,
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _PerfilVitrineQuietActions extends StatelessWidget {
+  const _PerfilVitrineQuietActions({
+    required this.mute,
+    required this.copyUrl,
+    required this.onOpenEditor,
+    this.includeShare = true,
+  });
+
+  final Color mute;
+  final String copyUrl;
+  final VoidCallback onOpenEditor;
+  final bool includeShare;
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      alignment: includeShare ? WrapAlignment.start : WrapAlignment.center,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      spacing: 4,
+      runSpacing: 0,
+      children: [
+        if (includeShare) ...[
           Semantics(
             button: true,
             label: 'Compartilhar link da vitrine',
-            child: FxLiquidPrimaryButton(
-              icon: Icons.ios_share_rounded,
-              label: 'Compartilhar',
+            child: TextButton.icon(
               onPressed: () {
                 HapticFeedback.selectionClick();
                 unawaited(
@@ -285,59 +367,64 @@ class _PerfilPublicLinkCard extends StatelessWidget {
                   reserveBottom: 96,
                 );
               },
+              style: TextButton.styleFrom(
+                foregroundColor: mute,
+                minimumSize: const Size(48, 40),
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+              ),
+              icon: const Icon(Icons.ios_share_rounded, size: 16),
+              label: const Text('Compartilhar'),
             ),
           ),
-          const SizedBox(height: TokensStrip.s2),
-          Wrap(
-            alignment: WrapAlignment.center,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            spacing: 4,
-            runSpacing: 0,
-            children: [
-              Semantics(
-                button: true,
-                label: 'Ver vitrine ao vivo',
-                child: TextButton(
-                  onPressed: () {
-                    HapticFeedback.selectionClick();
-                    openLandingLink(context, url: copyUrl);
-                  },
-                  style: TextButton.styleFrom(
-                    foregroundColor: mute,
-                    minimumSize: const Size(48, 40),
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                  ),
-                  child: const Text('Ver ao vivo'),
-                ),
-              ),
-              Text(
-                '·',
-                style: TokensStrip.bodyMuted(color: mute).copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              Semantics(
-                button: true,
-                label: 'Personalizar página da vitrine',
-                child: TextButton(
-                  onPressed: () {
-                    HapticFeedback.selectionClick();
-                    onOpenEditor();
-                  },
-                  style: TextButton.styleFrom(
-                    foregroundColor: mute,
-                    minimumSize: const Size(48, 40),
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                  ),
-                  child: const Text('Personalizar'),
-                ),
-              ),
-            ],
+          Text(
+            '·',
+            style: TokensStrip.bodyMuted(color: mute).copyWith(
+              fontWeight: FontWeight.w700,
+            ),
           ),
         ],
-      ),
+        Semantics(
+          button: true,
+          label: 'Ver vitrine ao vivo',
+          child: TextButton(
+            onPressed: () {
+              HapticFeedback.selectionClick();
+              openLandingLink(context, url: copyUrl);
+            },
+            style: TextButton.styleFrom(
+              foregroundColor: mute,
+              minimumSize: const Size(48, 40),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+            ),
+            child: const Text('Ver ao vivo'),
+          ),
+        ),
+        Text(
+          '·',
+          style: TokensStrip.bodyMuted(color: mute).copyWith(
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        Semantics(
+          button: true,
+          label: 'Personalizar página da vitrine',
+          child: TextButton(
+            onPressed: () {
+              HapticFeedback.selectionClick();
+              onOpenEditor();
+            },
+            style: TextButton.styleFrom(
+              foregroundColor: mute,
+              minimumSize: const Size(48, 40),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+            ),
+            child: const Text('Personalizar'),
+          ),
+        ),
+      ],
     );
   }
 }

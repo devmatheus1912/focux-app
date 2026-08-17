@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:focux_app/core/widgets/fx_motion.dart';
 import 'package:focux_app/features/dashboard/data/dashboard_repository.dart';
 import 'package:focux_app/features/dashboard/providers/dashboard_provider.dart';
 import 'package:focux_app/features/dashboard/utils/dashboard_home_client_cache.dart';
@@ -40,6 +41,7 @@ void main() {
     expect(find.text('Compartilhar'), findsOneWidget);
     expect(find.text('Completar cadastro'), findsOneWidget);
     expect(find.text('WhatsApp pendente'), findsOneWidget);
+    expect(find.textContaining('alunos'), findsWidgets);
 
     expect(find.text('Operação'), findsOneWidget);
     await tester.scrollUntilVisible(
@@ -53,9 +55,17 @@ void main() {
     await tester.pump(const Duration(milliseconds: 400));
 
     expect(find.text('Carteira e PIX'), findsOneWidget);
-    expect(find.text('Meus alunos'), findsOneWidget);
-    // Fixture incompleto (WhatsApp pendente) → sticky pede completar, não Copiloto/Hoje.
+
+    await tester.scrollUntilVisible(
+      find.text('Conta e segurança'),
+      240,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
     expect(find.text('Completar'), findsOneWidget);
+    expect(find.text('Meus alunos'), findsNothing);
     expect(find.text('Copiloto IA'), findsNothing);
     // Conta quiet colapsada + debug fora do card LGPD.
     expect(find.text('Conta e segurança'), findsOneWidget);
@@ -84,11 +94,22 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 800));
 
+    expect(find.textContaining('alunos'), findsWidgets);
+    expect(find.text('Cadastro completo'), findsNothing);
+
+    await tester.scrollUntilVisible(
+      find.text('Operação'),
+      240,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
     expect(find.text('Hoje'), findsOneWidget);
+    expect(find.text('Meus alunos'), findsNothing);
     expect(find.text('Copiloto IA'), findsNothing);
-    expect(find.text('Meus alunos'), findsOneWidget);
-    expect(find.text('Cadastro completo'), findsOneWidget);
     expect(find.text('Compartilhar'), findsOneWidget);
+    expect(find.byType(FxLiquidPrimaryButton), findsNothing);
   });
 }
 
@@ -107,7 +128,7 @@ final _perfilCompletoFixture = PerfilPersonal(
   descricaoProfissional: 'Especializado em biomecanica.',
   especialidades: 'Hipertrofia',
   instagram: '@qacoach',
-  logoUrl: 'https://cdn.example.com/logo.png',
+  logoUrl: 'https://cdn.example.com/qa-coach.png',
 );
 
 final _perfilFixture = PerfilPersonal(

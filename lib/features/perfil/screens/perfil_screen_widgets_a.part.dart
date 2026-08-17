@@ -1,6 +1,6 @@
 part of 'perfil_screen.dart';
 
-class _PerfilBody extends StatelessWidget {
+class _PerfilBody extends StatefulWidget {
   final PerfilPersonal perfil;
   final DashboardData dashboard;
   final bool uploadingPhoto;
@@ -28,7 +28,38 @@ class _PerfilBody extends StatelessWidget {
   });
 
   @override
+  State<_PerfilBody> createState() => _PerfilBodyState();
+}
+
+class _PerfilBodyState extends State<_PerfilBody> {
+  bool _stickyVisible = false;
+
+  bool _onScroll(ScrollNotification notification) {
+    if (notification is! ScrollUpdateNotification &&
+        notification is! ScrollMetricsNotification) {
+      return false;
+    }
+    final show =
+        notification.metrics.pixels > PerfilLayout.stickyRevealScrollOffset;
+    if (show != _stickyVisible) {
+      setState(() => _stickyVisible = show);
+    }
+    return false;
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final perfil = widget.perfil;
+    final dashboard = widget.dashboard;
+    final uploadingPhoto = widget.uploadingPhoto;
+    final loadingMetrics = widget.loadingMetrics;
+    final freshnessLabel = widget.freshnessLabel;
+    final onRefresh = widget.onRefresh;
+    final onPickPhoto = widget.onPickPhoto;
+    final onEditPerfil = widget.onEditPerfil;
+    final onLogout = widget.onLogout;
+    final onOpenLandingEditor = widget.onOpenLandingEditor;
+    final onChecklistAction = widget.onChecklistAction;
     final theme = Theme.of(context);
     final chrome = ShellChrome.of(context);
     final isDark = chrome.isDark;
@@ -74,7 +105,7 @@ class _PerfilBody extends StatelessWidget {
             ? '—'
             : '${dashboard.totalAlunos} alunos · ${dashboard.alunosAtivos} ativos';
     final usingDefaultBrand = _usesDefaultPalette(primaryColor, secondaryColor);
-    // Sticky quiet: chip Hoje + atalho alunos (paridade Home overlay).
+    // Sticky chip — só após scroll (paridade Home overlay).
     const scrollBottomPad = PerfilLayout.stickyOverlayReserve;
     const chromeSize = PerfilLayout.headerChromeSize;
     const chromeGap = PerfilLayout.headerChromeGap;
@@ -90,6 +121,8 @@ class _PerfilBody extends StatelessWidget {
             child: RefreshIndicator(
               color: accent,
               onRefresh: onRefresh,
+              child: NotificationListener<ScrollNotification>(
+              onNotification: _onScroll,
               child: CustomScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 slivers: [
@@ -144,7 +177,7 @@ class _PerfilBody extends StatelessWidget {
                                     if (freshnessLabel != null) ...[
                                       const SizedBox(height: 2),
                                       Text(
-                                        freshnessLabel!,
+                                        freshnessLabel,
                                         textAlign: TextAlign.center,
                                         style: FocuxHubTypography.bodyMuted(
                                           color: mute,
@@ -179,9 +212,9 @@ class _PerfilBody extends StatelessWidget {
                         child: DecoratedBox(
                           decoration: fxStripCardDecoration(
                             context,
-                            accent: accent,
+                            accent: profileComplete ? null : accent,
                             radius: TokensStrip.rCard,
-                            glowStrength: 0.04,
+                            glowStrength: profileComplete ? 0.03 : 0.04,
                           ),
                           child: Padding(
                             padding: const EdgeInsets.fromLTRB(12, 11, 10, 11),
@@ -385,6 +418,7 @@ class _PerfilBody extends StatelessWidget {
                               actionInk: actionInk,
                               mute: mute,
                               isDark: isDark,
+                              profileComplete: profileComplete,
                               onOpenEditor: () {
                                 HapticFeedback.selectionClick();
                                 onOpenLandingEditor();
@@ -392,19 +426,21 @@ class _PerfilBody extends StatelessWidget {
                             ),
                           ),
                         ),
-                        const SizedBox(height: PerfilLayout.sectionGapPrimary),
-                        FxStaggerItem(
-                          index: 4,
-                          child: _ProfessionalDataPanel(
-                            summary: professionalSummary,
-                            accent: accent,
-                            actionInk: actionInk,
-                            mute: mute,
-                            isDark: isDark,
-                            profileComplete: profileComplete,
-                            onEdit: onEditPerfil,
+                        if (!profileComplete) ...[
+                          const SizedBox(height: PerfilLayout.sectionGapPrimary),
+                          FxStaggerItem(
+                            index: 4,
+                            child: _ProfessionalDataPanel(
+                              summary: professionalSummary,
+                              accent: accent,
+                              actionInk: actionInk,
+                              mute: mute,
+                              isDark: isDark,
+                              profileComplete: profileComplete,
+                              onEdit: onEditPerfil,
+                            ),
                           ),
-                        ),
+                        ],
                         const SizedBox(height: PerfilLayout.sectionGapQuiet),
                         FxStaggerItem(
                           index: 5,
@@ -473,6 +509,7 @@ class _PerfilBody extends StatelessWidget {
               ),
             ),
           ),
+          ),
           Positioned(
             left: 0,
             right: 0,
@@ -485,9 +522,9 @@ class _PerfilBody extends StatelessWidget {
                 duration: const Duration(milliseconds: 380),
                 child: PerfilStickyBar(
                   accent: accent,
-                  actionInk: actionInk,
                   isDark: isDark,
                   profileComplete: profileComplete,
+                  visible: _stickyVisible,
                 ),
               ),
             ),

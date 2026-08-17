@@ -4,8 +4,11 @@ import '../../../core/theme/tokens_strip.dart';
 abstract final class PerfilLayout {
   PerfilLayout._();
 
-  /// Chip flutuante + folga (menor que a Home: sem dock duplicado).
-  static const double stickyOverlayReserve = 72;
+/// Chip flutuante — paridade Home; aparece após scroll.
+  static const double stickyRevealScrollOffset = 120;
+
+  /// Só o chip (sem barra).
+  static const double stickyOverlayReserve = 56;
 
   static const double stickyBottomInset = 8;
 

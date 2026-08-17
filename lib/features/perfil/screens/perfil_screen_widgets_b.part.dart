@@ -147,6 +147,19 @@ class _Avatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final size = compact ? 46.0 : 82.0;
+    final inner = size - 5;
+    Widget avatarContent() {
+      return Text(
+        _initials(nome),
+        style: TextStyle(
+          fontSize:
+              compact ? TokensStrip.fontH2 : TokensStrip.fontH1 - 5,
+          fontWeight: FontWeight.w900,
+          color: primaryColor,
+        ),
+      );
+    }
+
     return Semantics(
       button: true,
       label: semanticsLabel,
@@ -176,24 +189,19 @@ class _Avatar extends StatelessWidget {
                 ),
                 child: CircleAvatar(
                   backgroundColor: Colors.white,
-                  backgroundImage:
-                      logoUrl != null && logoUrl!.isNotEmpty
-                          ? NetworkImage(logoUrl!)
-                          : null,
                   child:
-                      logoUrl == null || logoUrl!.isEmpty
-                          ? Text(
-                            _initials(nome),
-                            style: TextStyle(
-                              fontSize:
-                                  compact
-                                      ? TokensStrip.fontH2
-                                      : TokensStrip.fontH1 - 5,
-                              fontWeight: FontWeight.w900,
-                              color: primaryColor,
+                      logoUrl != null && logoUrl!.isNotEmpty
+                          ? ClipOval(
+                            child: Image.network(
+                              logoUrl!,
+                              width: inner,
+                              height: inner,
+                              fit: BoxFit.cover,
+                              errorBuilder:
+                                  (_, __, ___) => avatarContent(),
                             ),
                           )
-                          : null,
+                          : avatarContent(),
                 ),
               ),
             ),
