@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feature_gate.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
-import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/skeleton_loader.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../subscription/models/subscription_plan.dart';
 import '../data/equipe_repository.dart';
@@ -100,6 +101,7 @@ class _EquipeScreenState extends ConsumerState<EquipeScreen> {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final chrome = ShellChrome.of(context);
 
     return FeatureGate(
       featureName: 'Equipe',
@@ -108,6 +110,7 @@ class _EquipeScreenState extends ConsumerState<EquipeScreen> {
       child: fxScreenA11yScope(
         label: 'Equipe',
         child: FxShellScaffold(
+          useMesh: true,
           appBar: const FxShellAppBar(
             title: 'Equipe',
             subtitle: 'Assistentes e permissões',
@@ -123,11 +126,10 @@ class _EquipeScreenState extends ConsumerState<EquipeScreen> {
           ),
           body:
               _loading
-                  ? const Center(child: FxLoading())
+                  ? const SkeletonList(count: 5)
                   : _error != null
                   ? FxErrorState(
-                    chromeOnDark:
-                        Theme.of(context).brightness == Brightness.dark,
+                    chromeOnDark: chrome.isDark,
                     primary: scheme.primary,
                     message: _error!,
                     onRetry: _load,

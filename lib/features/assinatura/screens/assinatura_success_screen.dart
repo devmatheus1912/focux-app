@@ -33,25 +33,33 @@ class AssinaturaSuccessScreen extends StatelessWidget {
     return fxScreenA11yScope(
       label: 'Assinatura confirmada',
       child: FxShellScaffold(
+        useMesh: true,
         body: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(TokensStrip.s6),
             child: Column(
               children: [
                 const SizedBox(height: TokensStrip.s3),
-                const SizedBox(
-                  height: 160,
-                  width: 160,
-                  child: RiveAnimation.asset(
-                    'assets/animations/confetti_success.riv',
-                    fit: BoxFit.contain,
+                Semantics(
+                  image: true,
+                  label: 'Confirmação da assinatura',
+                  child: const SizedBox(
+                    height: 160,
+                    width: 160,
+                    child: RiveAnimation.asset(
+                      'assets/animations/confetti_success.riv',
+                      fit: BoxFit.contain,
+                    ),
                   ),
                 ),
                 const SizedBox(height: TokensStrip.s2),
-                Text(
-                  'Bem-vindo ao ${plan.apiName}!',
-                  textAlign: TextAlign.center,
-                  style: TokensStrip.h1(color: ink).copyWith(fontSize: 26),
+                Semantics(
+                  header: true,
+                  child: Text(
+                    'Bem-vindo ao ${plan.apiName}!',
+                    textAlign: TextAlign.center,
+                    style: TokensStrip.h1(color: ink).copyWith(fontSize: 26),
+                  ),
                 ),
                 const SizedBox(height: TokensStrip.s2),
                 Text(
@@ -60,27 +68,30 @@ class AssinaturaSuccessScreen extends StatelessWidget {
                 ),
                 if (transactionId != null && transactionId!.isNotEmpty) ...[
                   const SizedBox(height: TokensStrip.s4),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(TokensStrip.s4),
-                    decoration: chrome.listCard(),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'ID da transação',
-                          style: TokensStrip.bodyMuted(color: mute),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          transactionId!,
-                          style: TextStyle(
-                            color: ink,
-                            fontFamily: 'monospace',
-                            fontSize: 12,
+                  Semantics(
+                    label: 'ID da transação $transactionId',
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(TokensStrip.s4),
+                      decoration: chrome.listCard(),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'ID da transação',
+                            style: TokensStrip.bodyMuted(color: mute),
                           ),
-                        ),
-                      ],
+                          const SizedBox(height: 4),
+                          Text(
+                            transactionId!,
+                            style: TextStyle(
+                              color: ink,
+                              fontFamily: 'monospace',
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ],
@@ -93,9 +104,12 @@ class AssinaturaSuccessScreen extends StatelessWidget {
                 const SizedBox(height: TokensStrip.s5),
                 Align(
                   alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Próximos passos',
-                    style: TokensStrip.h2(color: ink).copyWith(fontSize: 17),
+                  child: Semantics(
+                    header: true,
+                    child: Text(
+                      'Próximos passos',
+                      style: TokensStrip.h2(color: ink).copyWith(fontSize: 17),
+                    ),
                   ),
                 ),
                 const SizedBox(height: TokensStrip.s3),

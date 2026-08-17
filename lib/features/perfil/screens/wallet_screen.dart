@@ -4,13 +4,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/utils/pt_br_display.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_input_deco.dart';
-import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -133,10 +134,7 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                   'Você alterou dados da carteira. Se sair agora, as mudanças não serão salvas.',
                   style: TextStyle(
                     height: 1.45,
-                    color:
-                        Theme.of(ctx).brightness == Brightness.dark
-                            ? EagleTokens.darkInkMute
-                            : TokensStrip.textSecondary,
+                    color: ShellChrome.of(ctx).mute,
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -241,6 +239,7 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
   @override
   Widget build(BuildContext context) {
     final perfilAsync = ref.watch(perfilProvider);
+    final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
 
     return PopScope(
@@ -255,10 +254,10 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
           useMesh: true,
           appBar: FxShellAppBar(title: 'Carteira e PIX', onBack: _handleBack),
           body: perfilAsync.when(
-            loading: () => const FxLoading(),
+            loading: () => const SkeletonList(count: 5),
             error:
                 (e, _) => FxErrorState(
-                  chromeOnDark: Theme.of(context).brightness == Brightness.dark,
+                  chromeOnDark: chrome.isDark,
                   primary: primary,
                   message: friendlyError(e),
                   onRetry: () => ref.invalidate(perfilProvider),
@@ -348,8 +347,7 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                                                 style: TextStyle(
                                                   color:
                                                       _tipoChavePix == null
-                                                          ? TokensStrip
-                                                              .textSecondary
+                                                          ? chrome.mute
                                                           : Theme.of(context)
                                                               .colorScheme
                                                               .onSurface,
@@ -359,7 +357,7 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                                             ),
                                             Icon(
                                               Icons.expand_more_rounded,
-                                              color: TokensStrip.textSecondary,
+                                              color: chrome.mute,
                                             ),
                                           ],
                                         ),

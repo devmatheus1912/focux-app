@@ -26,9 +26,10 @@ class _PerfilBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-    final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
+    final chrome = ShellChrome.of(context);
+    final isDark = chrome.isDark;
+    final mute = chrome.mute;
+    final line = chrome.line;
     final themePrimary = theme.colorScheme.primary;
 
     final primaryColor = _parseColor(
@@ -96,207 +97,213 @@ class _PerfilBody extends StatelessWidget {
                 slideOffset: 18,
                 duration: const Duration(milliseconds: 480),
                 child: Container(
-                margin: const EdgeInsets.fromLTRB(0, 0, 0, 8),
-                decoration: BoxDecoration(
-                  borderRadius: const BorderRadius.only(
-                    bottomLeft: Radius.circular(28),
-                    bottomRight: Radius.circular(28),
-                  ),
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    transform: const GradientRotation(160 * math.pi / 180),
-                    colors:
-                        isDark
-                            ? [TokensStrip.primaryHover, EagleTokens.brandDeep]
-                            : [heroPrimary, heroSecondary],
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: heroPrimary.withValues(
-                        alpha: isDark ? 0.22 : 0.24,
-                      ),
-                      blurRadius: 28,
-                      offset: const Offset(0, 14),
-                      spreadRadius: -8,
+                  margin: const EdgeInsets.fromLTRB(0, 0, 0, 8),
+                  decoration: BoxDecoration(
+                    borderRadius: const BorderRadius.only(
+                      bottomLeft: Radius.circular(28),
+                      bottomRight: Radius.circular(28),
                     ),
-                  ],
-                ),
-                child: Stack(
-                  children: [
-                    Positioned.fill(
-                      child: IgnorePointer(
-                        child: CustomPaint(painter: _ProfileTexturePainter()),
-                      ),
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      transform: const GradientRotation(160 * math.pi / 180),
+                      colors:
+                          isDark
+                              ? [
+                                TokensStrip.primaryHover,
+                                EagleTokens.brandDeep,
+                              ]
+                              : [heroPrimary, heroSecondary],
                     ),
-                    Column(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(18, 10, 18, 0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              _HeroAction(
-                                icon: Icons.arrow_back_ios_new,
-                                semanticsLabel: 'Voltar',
-                                onTap:
-                                    () => safePopOrGo(
+                    boxShadow: [
+                      BoxShadow(
+                        color: heroPrimary.withValues(
+                          alpha: isDark ? 0.22 : 0.24,
+                        ),
+                        blurRadius: 28,
+                        offset: const Offset(0, 14),
+                        spreadRadius: -8,
+                      ),
+                    ],
+                  ),
+                  child: Stack(
+                    children: [
+                      Positioned.fill(
+                        child: IgnorePointer(
+                          child: CustomPaint(painter: _ProfileTexturePainter()),
+                        ),
+                      ),
+                      Column(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(18, 10, 18, 0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                _HeroAction(
+                                  icon: Icons.arrow_back_ios_new,
+                                  semanticsLabel: 'Voltar',
+                                  onTap:
+                                      () => safePopOrGo(
+                                        context,
+                                        '/dashboard/personal',
+                                      ),
+                                ),
+                                Semantics(
+                                  header: true,
+                                  label: 'Perfil',
+                                  child: Text(
+                                    'Perfil',
+                                    style: FocuxHubTypography.eyebrow(
                                       context,
-                                      '/dashboard/personal',
+                                      color: Colors.white,
                                     ),
-                              ),
-                              Semantics(
-                                header: true,
-                                label: 'Perfil',
-                                child: Text(
-                                  'Perfil',
-                                  style: FocuxHubTypography.eyebrow(
-                                    context,
-                                    color: Colors.white,
                                   ),
                                 ),
-                              ),
-                              const SizedBox(width: 6),
-                              Consumer(
-                                builder: (context, ref, _) {
-                                  final themeDark =
-                                      Theme.of(context).brightness ==
-                                      Brightness.dark;
-                                  return _HeroAction(
-                                    icon:
-                                        themeDark
-                                            ? Icons.wb_sunny_outlined
-                                            : Icons.dark_mode_outlined,
-                                    semanticsLabel:
-                                        themeDark
-                                            ? 'Ativar tema claro'
-                                            : 'Ativar tema escuro',
-                                    onTap:
-                                        () =>
-                                            ref
-                                                .read(
-                                                  themeModeProvider.notifier,
-                                                )
-                                                .toggle(),
-                                  );
-                                },
-                              ),
-                              const SizedBox(width: 6),
-                              _HeroAction(
-                                icon: Icons.edit_outlined,
-                                semanticsLabel: 'Editar perfil',
-                                onTap: onEditPerfil,
-                              ),
-                            ],
+                                const SizedBox(width: 6),
+                                Consumer(
+                                  builder: (context, ref, _) {
+                                    final themeDark =
+                                        Theme.of(context).brightness ==
+                                        Brightness.dark;
+                                    return _HeroAction(
+                                      icon:
+                                          themeDark
+                                              ? Icons.wb_sunny_outlined
+                                              : Icons.dark_mode_outlined,
+                                      semanticsLabel:
+                                          themeDark
+                                              ? 'Ativar tema claro'
+                                              : 'Ativar tema escuro',
+                                      onTap:
+                                          () =>
+                                              ref
+                                                  .read(
+                                                    themeModeProvider.notifier,
+                                                  )
+                                                  .toggle(),
+                                    );
+                                  },
+                                ),
+                                const SizedBox(width: 6),
+                                _HeroAction(
+                                  icon: Icons.edit_outlined,
+                                  semanticsLabel: 'Editar perfil',
+                                  onTap: onEditPerfil,
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: TokensStrip.s2),
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(
-                            TokensStrip.s4,
-                            0,
-                            TokensStrip.s4,
-                            TokensStrip.s3,
-                          ),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              _Avatar(
-                                nome: perfil.nome,
-                                logoUrl: perfil.logoUrl ?? dashboard.logoUrl,
-                                primaryColor: primaryColor,
-                                onTap: onPickPhoto,
-                                loading: uploadingPhoto,
-                                compact: true,
-                                showEditBadge: false,
-                                semanticsLabel:
-                                    uploadingPhoto
-                                        ? 'Enviando foto do perfil'
-                                        : 'Alterar foto do perfil',
-                              ),
-                              const SizedBox(width: TokensStrip.s3),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        _PlanPill(
-                                          label: perfilPlanPillLabel(
-                                            perfil.plano,
+                          const SizedBox(height: TokensStrip.s2),
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(
+                              TokensStrip.s4,
+                              0,
+                              TokensStrip.s4,
+                              TokensStrip.s3,
+                            ),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                _Avatar(
+                                  nome: perfil.nome,
+                                  logoUrl: perfil.logoUrl ?? dashboard.logoUrl,
+                                  primaryColor: primaryColor,
+                                  onTap: onPickPhoto,
+                                  loading: uploadingPhoto,
+                                  compact: true,
+                                  showEditBadge: false,
+                                  semanticsLabel:
+                                      uploadingPhoto
+                                          ? 'Enviando foto do perfil'
+                                          : 'Alterar foto do perfil',
+                                ),
+                                const SizedBox(width: TokensStrip.s3),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          _PlanPill(
+                                            label: perfilPlanPillLabel(
+                                              perfil.plano,
+                                            ),
                                           ),
+                                          const Spacer(),
+                                          _HeroMarcaChip(
+                                            score: profileScore,
+                                            onTap: () {
+                                              HapticFeedback.selectionClick();
+                                              if (!profileComplete) {
+                                                // Prontidão está logo abaixo.
+                                                return;
+                                              }
+                                              context.push(
+                                                '/identidade-visual',
+                                              );
+                                            },
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 6),
+                                      Text(
+                                        perfil.nome,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: FocuxHubTypography.pageTitle(
+                                          context,
+                                          color: Colors.white,
                                         ),
-                                        const Spacer(),
-                                        _HeroMarcaChip(
-                                          score: profileScore,
+                                      ),
+                                      const SizedBox(height: 3),
+                                      Text(
+                                        _buildSubtitle(perfil),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: FocuxHubTypography.bodyMuted(
+                                          color: Colors.white.withValues(
+                                            alpha: 0.86,
+                                          ),
+                                          height: 1.2,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Semantics(
+                                        button: true,
+                                        label: '$alunosLabel. Abrir alunos',
+                                        child: InkWell(
                                           onTap: () {
                                             HapticFeedback.selectionClick();
-                                            if (!profileComplete) {
-                                              // Prontidão está logo abaixo.
-                                              return;
-                                            }
-                                            context.push('/identidade-visual');
+                                            goPersonalShellTab(
+                                              context,
+                                              '/alunos',
+                                            );
                                           },
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 6),
-                                    Text(
-                                      perfil.nome,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: FocuxHubTypography.pageTitle(
-                                        context,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 3),
-                                    Text(
-                                      _buildSubtitle(perfil),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: FocuxHubTypography.bodyMuted(
-                                        color: Colors.white.withValues(
-                                          alpha: 0.86,
-                                        ),
-                                        height: 1.2,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Semantics(
-                                      button: true,
-                                      label: '$alunosLabel. Abrir alunos',
-                                      child: InkWell(
-                                        onTap: () {
-                                          HapticFeedback.selectionClick();
-                                          goPersonalShellTab(
-                                            context,
-                                            '/alunos',
-                                          );
-                                        },
-                                        child: Text(
-                                          alunosLabel,
-                                          style: TokensStrip.bodyMuted(
-                                            color: Colors.white.withValues(
-                                              alpha: 0.78,
+                                          child: Text(
+                                            alunosLabel,
+                                            style: TokensStrip.bodyMuted(
+                                              color: Colors.white.withValues(
+                                                alpha: 0.78,
+                                              ),
+                                            ).copyWith(
+                                              fontWeight: FontWeight.w600,
                                             ),
-                                          ).copyWith(
-                                            fontWeight: FontWeight.w600,
                                           ),
                                         ),
                                       ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ],
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-              ),
               ),
             ),
             SliverPadding(
@@ -309,25 +316,25 @@ class _PerfilBody extends StatelessWidget {
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
                   Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        if (!profileComplete) ...[
-                          FxStaggerItem(
-                            index: 2,
-                            child: _CompletenessCard(
-                              score: profileScore,
-                              accent: accent,
-                              isDark: isDark,
-                              items: readiness.items,
-                              nextStep: readiness.nextStep,
-                              onChecklistAction: onChecklistAction,
-                            ),
-                          ),
-                          const SizedBox(height: TokensStrip.s3),
-                        ],
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      if (!profileComplete) ...[
                         FxStaggerItem(
-                          index: 3,
-                          child: PerfilMarcaVitrineSection(
+                          index: 2,
+                          child: _CompletenessCard(
+                            score: profileScore,
+                            accent: accent,
+                            isDark: isDark,
+                            items: readiness.items,
+                            nextStep: readiness.nextStep,
+                            onChecklistAction: onChecklistAction,
+                          ),
+                        ),
+                        const SizedBox(height: TokensStrip.s3),
+                      ],
+                      FxStaggerItem(
+                        index: 3,
+                        child: PerfilMarcaVitrineSection(
                           profileComplete: profileComplete,
                           isDark: isDark,
                           accent: accent,
@@ -381,11 +388,11 @@ class _PerfilBody extends StatelessWidget {
                             },
                           ),
                         ),
-                        ),
-                        const SizedBox(height: TokensStrip.s3),
-                        FxStaggerItem(
-                          index: 4,
-                          child: _ProfessionalDataPanel(
+                      ),
+                      const SizedBox(height: TokensStrip.s3),
+                      FxStaggerItem(
+                        index: 4,
+                        child: _ProfessionalDataPanel(
                           summary: professionalSummary,
                           accent: accent,
                           actionInk: actionInk,
@@ -393,11 +400,11 @@ class _PerfilBody extends StatelessWidget {
                           isDark: isDark,
                           onEdit: onEditPerfil,
                         ),
-                        ),
-                        const SizedBox(height: TokensStrip.s3),
-                        FxStaggerItem(
-                          index: 5,
-                          child: PerfilOperacaoSection(
+                      ),
+                      const SizedBox(height: TokensStrip.s3),
+                      FxStaggerItem(
+                        index: 5,
+                        child: PerfilOperacaoSection(
                           isDark: isDark,
                           accent: accent,
                           actionInk: actionInk,
@@ -405,11 +412,11 @@ class _PerfilBody extends StatelessWidget {
                           line: line,
                           pixDone: readiness.isPixDone,
                         ),
-                        ),
-                        const SizedBox(height: TokensStrip.s3),
-                        FxStaggerItem(
-                          index: 6,
-                          child: PerfilContaSegurancaSection(
+                      ),
+                      const SizedBox(height: TokensStrip.s3),
+                      FxStaggerItem(
+                        index: 6,
+                        child: PerfilContaSegurancaSection(
                           isDark: isDark,
                           accent: accent,
                           actionInk: actionInk,
@@ -433,9 +440,9 @@ class _PerfilBody extends StatelessWidget {
                                   )
                                   : null,
                         ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
+                  ),
                 ]),
               ),
             ),

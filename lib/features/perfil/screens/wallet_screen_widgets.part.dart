@@ -13,9 +13,9 @@ class _WalletSectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final chrome = ShellChrome.of(context);
+    final ink = chrome.ink;
+    final mute = chrome.mute;
 
     return Semantics(
       container: true,
@@ -58,11 +58,11 @@ class _PixTipoBottomSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
-    final surface = isDark ? EagleTokens.darkCard : TokensStrip.cardBg;
+    final ink = chrome.ink;
+    final line = chrome.line;
+    final surface = chrome.sheetFill;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 0, TokensStrip.s4, 16),
@@ -177,15 +177,34 @@ class _ResumoMensalCardState extends ConsumerState<_ResumoMensalCard> {
   Widget build(BuildContext context) {
     if (_loading) return const _ResumoMensalSkeleton();
     if (_error != null) {
-      return _ResumoMensalError(message: _error!, onRetry: _load);
+      return FxErrorState(
+        chromeOnDark: ShellChrome.of(context).isDark,
+        primary: Theme.of(context).colorScheme.primary,
+        message: _error!,
+        onRetry: _load,
+        title: 'Não conseguimos carregar o resumo',
+      );
     }
-    if (_resumo == null) return const SizedBox.shrink();
+    final resumo = _resumo;
+    if (resumo == null ||
+        (resumo.totalPrevisto == 0 &&
+            resumo.totalRecebido == 0 &&
+            resumo.inadimplentes == 0)) {
+      return FxEmptyState(
+        icon: 'pix',
+        title: 'Nenhum movimento neste mês',
+        subtitle: 'Quando houver cobranças, o resumo aparece aqui.',
+        action: FxEmptyAction(
+          label: 'Ver financeiro',
+          onTap: () => context.push('/financeiro'),
+        ),
+      );
+    }
 
     final primary = Theme.of(context).colorScheme.primary;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-    final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
-    final resumo = _resumo!;
+    final chrome = ShellChrome.of(context);
+    final mute = chrome.mute;
+    final line = chrome.line;
     final inadimplentes = resumo.inadimplentes;
     final percentRecebido =
         resumo.totalPrevisto <= 0
@@ -318,43 +337,6 @@ class _ResumoMensalSkeleton extends StatelessWidget {
   }
 }
 
-class _ResumoMensalError extends StatelessWidget {
-  const _ResumoMensalError({required this.message, required this.onRetry});
-
-  final String message;
-  final VoidCallback onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    final mute =
-        Theme.of(context).brightness == Brightness.dark
-            ? EagleTokens.darkInkMute
-            : TokensStrip.textSecondary;
-
-    return Container(
-      padding: const EdgeInsets.all(TokensStrip.s4),
-      decoration: fxListCardDecoration(context),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Resumo do mês',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
-          ),
-          const SizedBox(height: 8),
-          Text(message, style: TextStyle(color: mute, height: 1.4)),
-          const SizedBox(height: 12),
-          TextButton.icon(
-            onPressed: onRetry,
-            icon: const Icon(Icons.refresh_rounded, size: 18),
-            label: const Text('Tentar novamente'),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _Stat extends StatelessWidget {
   final String label;
   final String valor;
@@ -369,10 +351,7 @@ class _Stat extends StatelessWidget {
       children: [
         Text(
           label,
-          style: const TextStyle(
-            fontSize: 12,
-            color: TokensStrip.textSecondary,
-          ),
+          style: TextStyle(fontSize: 12, color: ShellChrome.of(context).mute),
         ),
         const SizedBox(height: 2),
         FittedBox(

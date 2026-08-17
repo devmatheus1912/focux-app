@@ -11,6 +11,7 @@ import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/br_phone.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_motion.dart';
@@ -150,10 +151,10 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final chrome = ShellChrome.of(context);
+    final isDark = chrome.isDark;
     final primary = Theme.of(context).colorScheme.primary;
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-    final chrome = ShellChrome.forDark(isDark);
+    final mute = chrome.mute;
 
     return fxScreenA11yScope(
       label: 'Editar Perfil',
@@ -168,8 +169,7 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
           color: Colors.transparent,
           child: Container(
             decoration: BoxDecoration(
-              color: (isDark ? EagleTokens.darkCard : TokensStrip.cardBg)
-                  .withValues(alpha: 0.96),
+              color: chrome.cardFill,
               border: Border(top: BorderSide(color: chrome.line)),
             ),
             padding: const EdgeInsets.fromLTRB(
@@ -428,14 +428,13 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
                       ),
                     ),
                     if (_error != null) ...[
-                      const SizedBox(height: 12),
-                      Semantics(
-                        liveRegion: true,
-                        label: _error!,
-                        child: Text(
-                          _error!,
-                          style: const TextStyle(color: EagleTokens.bad),
-                        ),
+                      const SizedBox(height: TokensStrip.s3),
+                      FxErrorState(
+                        chromeOnDark: chrome.isDark,
+                        primary: primary,
+                        message: _error!,
+                        onRetry: _submit,
+                        title: 'Não foi possível salvar',
                       ),
                     ],
                   ],
@@ -465,9 +464,9 @@ class _SectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final chrome = ShellChrome.of(context);
+    final ink = chrome.ink;
+    final mute = chrome.mute;
     final a11y = showHint ? '$title. $_hintCopy' : title;
 
     return Semantics(
