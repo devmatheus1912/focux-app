@@ -8,6 +8,7 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -25,6 +26,7 @@ class RecorrenciaScreen extends ConsumerStatefulWidget {
 class _RecorrenciaScreenState extends ConsumerState<RecorrenciaScreen> {
   List<RecorrenciaAssinatura> _items = [];
   bool _loading = true;
+  String? _erro;
 
   @override
   void initState() {
@@ -33,7 +35,10 @@ class _RecorrenciaScreenState extends ConsumerState<RecorrenciaScreen> {
   }
 
   Future<void> _load() async {
-    setState(() => _loading = true);
+    setState(() {
+      _loading = true;
+      _erro = null;
+    });
     try {
       final items =
           await RecorrenciaRepository(ref.read(apiClientProvider)).listar();
@@ -44,7 +49,12 @@ class _RecorrenciaScreenState extends ConsumerState<RecorrenciaScreen> {
         });
       }
     } catch (e) {
-      if (mounted) setState(() => _loading = false);
+      if (mounted) {
+        setState(() {
+          _loading = false;
+          _erro = friendlyError(e);
+        });
+      }
     }
   }
 
@@ -127,6 +137,7 @@ class _RecorrenciaScreenState extends ConsumerState<RecorrenciaScreen> {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return fxScreenA11yScope(
       label: 'Recorrência MP',
       child: FxShellScaffold(
@@ -144,6 +155,13 @@ class _RecorrenciaScreenState extends ConsumerState<RecorrenciaScreen> {
         body:
             _loading
                 ? const Center(child: FxLoading())
+                : _erro != null
+                ? FxErrorState(
+                  chromeOnDark: isDark,
+                  primary: primary,
+                  message: _erro!,
+                  onRetry: _load,
+                )
                 : RefreshIndicator(
                   onRefresh: _load,
                   child:
@@ -152,7 +170,7 @@ class _RecorrenciaScreenState extends ConsumerState<RecorrenciaScreen> {
                             children: const [
                               SizedBox(height: 48),
                               FxEmptyState(
-                                icon: 'credit-card',
+                                icon: 'coin',
                                 title: 'Nenhuma assinatura ainda',
                                 subtitle:
                                     'Crie a primeira recorrência para cobrar seus alunos via Mercado Pago.',

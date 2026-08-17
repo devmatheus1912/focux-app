@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/lead_repository.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -40,6 +41,7 @@ class _LeadsKanbanScreenState extends ConsumerState<LeadsKanbanScreen> {
   Map<String, List<Lead>> _cols = {for (final c in _kCols) c: []};
   bool _loading = true;
   bool _showIntro = false;
+  String? _erro;
 
   @override
   void initState() {
@@ -64,7 +66,10 @@ class _LeadsKanbanScreenState extends ConsumerState<LeadsKanbanScreen> {
   }
 
   Future<void> _load() async {
-    setState(() => _loading = true);
+    setState(() {
+      _loading = true;
+      _erro = null;
+    });
     try {
       final leads = await LeadRepository(ref.read(apiClientProvider)).listar();
       final Map<String, List<Lead>> cols = {for (final c in _kCols) c: []};
@@ -80,8 +85,10 @@ class _LeadsKanbanScreenState extends ConsumerState<LeadsKanbanScreen> {
       }
     } catch (e) {
       if (mounted) {
-        setState(() => _loading = false);
-        FeedbackHelper.showError(context, friendlyError(e));
+        setState(() {
+          _loading = false;
+          _erro = friendlyError(e);
+        });
       }
     }
   }
@@ -234,6 +241,15 @@ class _LeadsKanbanScreenState extends ConsumerState<LeadsKanbanScreen> {
 
               if (_loading)
                 const Expanded(child: FxLoading())
+              else if (_erro != null)
+                Expanded(
+                  child: FxErrorState(
+                    chromeOnDark: isDark,
+                    primary: brand,
+                    message: _erro!,
+                    onRetry: _load,
+                  ),
+                )
               else ...[
                 // Summary row
                 Padding(

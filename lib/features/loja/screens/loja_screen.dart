@@ -9,8 +9,10 @@ import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feature_gate.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_empty_state.dart';
+import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_motion.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../pacotes/data/pacote_repository.dart';
@@ -158,39 +160,43 @@ class _LojaScreenState extends ConsumerState<LojaScreen>
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return FeatureGate(
-      featureName: 'Loja Digital',
-      requiredPlan: SubscriptionPlan.ENTERPRISE_PRO,
-      capability: 'lojaDigital',
-      child: FxShellScaffold(
-        appBar: const FxShellAppBar(
-          title: 'Loja digital',
-          subtitle: 'Vitrine de pacotes e pedidos PIX',
-        ),
-        body: _loading
-            ? const Center(child: FxLoading())
-            : _error != null
-            ? FxEmptyState(
-                icon: 'alert-triangle',
-                title: 'Não foi possível carregar',
-                subtitle: _error,
-                action: FxEmptyAction(label: 'Tentar novamente', onTap: _load),
-              )
-            : Column(
-                children: [
-                  TabBar(
-                    controller: _tabs,
-                    tabs: const [Tab(text: 'Vitrine'), Tab(text: 'Pedidos')],
-                  ),
-                  Expanded(
-                    child: TabBarView(
+    return fxScreenA11yScope(
+      label: 'Loja digital',
+      child: FeatureGate(
+        featureName: 'Loja Digital',
+        requiredPlan: SubscriptionPlan.ENTERPRISE_PRO,
+        capability: 'lojaDigital',
+        child: FxShellScaffold(
+          appBar: const FxShellAppBar(
+            title: 'Loja digital',
+            subtitle: 'Vitrine de pacotes e pedidos PIX',
+          ),
+          body: _loading
+              ? const Center(child: FxLoading())
+              : _error != null
+              ? FxErrorState(
+                  chromeOnDark: isDark,
+                  primary: scheme.primary,
+                  message: _error!,
+                  onRetry: _load,
+                )
+              : Column(
+                  children: [
+                    TabBar(
                       controller: _tabs,
-                      children: [_buildVitrine(scheme), _buildPedidos(scheme)],
+                      tabs: const [Tab(text: 'Vitrine'), Tab(text: 'Pedidos')],
                     ),
-                  ),
-                ],
-              ),
+                    Expanded(
+                      child: TabBarView(
+                        controller: _tabs,
+                        children: [_buildVitrine(scheme), _buildPedidos(scheme)],
+                      ),
+                    ),
+                  ],
+                ),
+        ),
       ),
     );
   }

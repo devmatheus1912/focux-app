@@ -10,6 +10,7 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_celebration_overlay.dart';
+import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/feature_gate.dart';
@@ -636,7 +637,12 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
                   title: 'Editor da landing',
                   onBack: () => context.pop(),
                 ),
-                body: Center(child: Text(friendlyError(e))),
+                body: FxErrorState(
+                  chromeOnDark: Theme.of(context).brightness == Brightness.dark,
+                  primary: Theme.of(context).colorScheme.primary,
+                  message: friendlyError(e),
+                  onRetry: () => ref.invalidate(perfilProvider),
+                ),
               ),
           data: (perfil) {
             if (!_c.loaded) {

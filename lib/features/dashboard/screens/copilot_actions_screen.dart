@@ -7,7 +7,9 @@ import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_dock.dart';
+import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../data/command_center_data.dart';
@@ -99,16 +101,13 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
             ),
             Expanded(
               child: actionsAsync.when(
-                loading:
-                    () => const Center(child: FxLoading()),
+                loading: () => const Center(child: FxLoading()),
                 error:
-                    (_, __) => _IaActionsEmpty(
-                      title: 'Não foi possível carregar',
-                      subtitle: 'Puxe para atualizar ou tente novamente.',
-                      ink: ink,
-                      mute: mute,
-                      brand: brand,
-                      onRefresh: _refresh,
+                    (e, _) => FxErrorState(
+                      chromeOnDark: dark,
+                      primary: brand,
+                      message: friendlyError(e),
+                      onRetry: _refresh,
                     ),
                 data: (actions) {
                   final copilot =
@@ -701,49 +700,6 @@ class _TextAction extends StatelessWidget {
             fontWeight: FontWeight.w900,
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _IaActionsEmpty extends StatelessWidget {
-  const _IaActionsEmpty({
-    required this.title,
-    required this.subtitle,
-    required this.ink,
-    required this.mute,
-    required this.brand,
-    required this.onRefresh,
-  });
-
-  final String title;
-  final String subtitle;
-  final Color ink;
-  final Color mute;
-  final Color brand;
-  final Future<void> Function() onRefresh;
-
-  @override
-  Widget build(BuildContext context) {
-    return RefreshIndicator(
-      onRefresh: onRefresh,
-      child: ListView(
-        padding: const EdgeInsets.fromLTRB(
-          TokensStrip.s4,
-          TokensStrip.s4,
-          TokensStrip.s4,
-          120,
-        ),
-        children: [
-          _IaActionsEmptyCard(
-            title: title,
-            subtitle: subtitle,
-            ink: ink,
-            mute: mute,
-            brand: brand,
-            onRefresh: onRefresh,
-          ),
-        ],
       ),
     );
   }

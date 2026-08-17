@@ -25,40 +25,21 @@ class _PacoteTag extends StatelessWidget {
   }
 }
 
-/// Estado de erro com retry.
+/// Estado de erro com retry — delega ao canônico [FxErrorState].
 class PacotesLoadErrorState extends StatelessWidget {
-  const PacotesLoadErrorState({super.key, required this.onRetry});
+  const PacotesLoadErrorState({super.key, required this.onRetry, this.message});
 
   final VoidCallback onRetry;
+  final String? message;
 
   @override
   Widget build(BuildContext context) {
-    final mute = fxScreenMute(context);
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(TokensStrip.s5),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.cloud_off_outlined, size: 40, color: mute),
-            const SizedBox(height: TokensStrip.s3),
-            Text(
-              'Não foi possível carregar seus planos.',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: fxScreenInk(context),
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            const SizedBox(height: TokensStrip.s4),
-            FxLiquidPrimaryButton(
-              label: 'Tentar novamente',
-              expand: false,
-              onPressed: onRetry,
-            ),
-          ],
-        ),
-      ),
+    return FxErrorState(
+      chromeOnDark: Theme.of(context).brightness == Brightness.dark,
+      primary: Theme.of(context).colorScheme.primary,
+      title: 'Não foi possível carregar seus planos',
+      message: message ?? 'Verifique sua conexão e tente novamente.',
+      onRetry: onRetry,
     );
   }
 }

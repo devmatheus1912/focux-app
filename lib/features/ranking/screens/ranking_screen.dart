@@ -7,6 +7,7 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
@@ -53,7 +54,18 @@ class RankingScreen extends ConsumerWidget {
               onRefresh: () async => ref.invalidate(rankingProvider),
               child: ListView(
                 padding: const EdgeInsets.all(TokensStrip.s4),
+                physics: const AlwaysScrollableScrollPhysics(),
                 children: [
+                  if (ranking.isEmpty)
+                    const Padding(
+                      padding: EdgeInsets.only(top: 48),
+                      child: FxEmptyState(
+                        icon: 'star',
+                        title: 'Ranking ainda sem dados',
+                        subtitle:
+                            'A classificação do mês aparece aqui quando houver personais com alunos ativos.',
+                      ),
+                    ),
                   // Pódio
                   if (top3.isNotEmpty) ...[
                     Text('Pódio do Mês', style: theme.textTheme.titleMedium),
@@ -89,7 +101,9 @@ class RankingScreen extends ConsumerWidget {
                       decoration: BoxDecoration(
                         color: EagleTokens.goldSoft,
                         borderRadius: BorderRadius.circular(TokensStrip.rCard),
-                        border: Border.all(color: EagleTokens.rankingGoldBorder),
+                        border: Border.all(
+                          color: EagleTokens.rankingGoldBorder,
+                        ),
                       ),
                       child: Row(
                         children: [

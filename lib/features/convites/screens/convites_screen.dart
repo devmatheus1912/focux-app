@@ -10,6 +10,7 @@ import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/theme/shell_chrome.dart';
+import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_glass_surface.dart';
 import '../../../core/widgets/fx_motion.dart';
@@ -70,7 +71,13 @@ class _ConvitesScreenState extends ConsumerState<ConvitesScreen> {
       HapticFeedback.lightImpact();
     } catch (e) {
       if (!mounted) return;
-      setState(() => _error = 'Erro ao gerar convite. Tente novamente.');
+      setState(
+        () =>
+            _error = friendlyError(
+              e,
+              fallback: 'Não conseguimos gerar o convite. Tente novamente.',
+            ),
+      );
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -142,7 +149,13 @@ class _ConvitesScreenState extends ConsumerState<ConvitesScreen> {
                 ),
                 if (_error != null) ...[
                   const SizedBox(height: 14),
-                  Text(_error!, style: const TextStyle(color: EagleTokens.bad)),
+                  Semantics(
+                    liveRegion: true,
+                    child: Text(
+                      _error!,
+                      style: const TextStyle(color: EagleTokens.bad),
+                    ),
+                  ),
                 ],
                 if (_convite != null) ...[
                   const SizedBox(height: 20),

@@ -5,6 +5,8 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_empty_state.dart';
+import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -23,6 +25,7 @@ class _GrupoAulasPersonalScreenState
     extends ConsumerState<GrupoAulasPersonalScreen> {
   List<GrupoAula> _aulas = [];
   bool _loading = true;
+  String? _erro;
 
   String _fmt(DateTime d) =>
       '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')} '
@@ -35,7 +38,10 @@ class _GrupoAulasPersonalScreenState
   }
 
   Future<void> _load() async {
-    setState(() => _loading = true);
+    setState(() {
+      _loading = true;
+      _erro = null;
+    });
     try {
       final aulas =
           await GrupoAulaRepository(
@@ -48,7 +54,12 @@ class _GrupoAulasPersonalScreenState
         });
       }
     } catch (e) {
-      if (mounted) setState(() => _loading = false);
+      if (mounted) {
+        setState(() {
+          _loading = false;
+          _erro = friendlyError(e);
+        });
+      }
     }
   }
 
@@ -94,6 +105,7 @@ class _GrupoAulasPersonalScreenState
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return fxScreenA11yScope(
       label: 'Aulas em grupo',
       child: FxShellScaffold(
@@ -101,24 +113,40 @@ class _GrupoAulasPersonalScreenState
           title: 'Aulas em grupo',
           onBack: () => context.pop(),
         ),
-        floatingActionButton: FloatingActionButton.extended(
-          onPressed: _criar,
-          icon: const Icon(Icons.add),
-          label: const Text('Nova aula'),
-        ),
+        floatingActionButton:
+            _erro != null
+                ? null
+                : FloatingActionButton.extended(
+                  onPressed: _criar,
+                  icon: const Icon(Icons.add),
+                  label: const Text('Nova aula'),
+                ),
         body:
             _loading
                 ? const Center(child: FxLoading())
+                : _erro != null
+                ? FxErrorState(
+                  chromeOnDark: isDark,
+                  primary: Theme.of(context).colorScheme.primary,
+                  message: _erro!,
+                  onRetry: _load,
+                )
                 : RefreshIndicator(
                   onRefresh: _load,
                   child:
                       _aulas.isEmpty
                           ? ListView(
-                            children: const [
-                              SizedBox(height: 120),
-                              Center(
-                                child: Text(
-                                  'Nenhuma aula criada ainda. Toque em + para começar.',
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            children: [
+                              const SizedBox(height: 72),
+                              FxEmptyState(
+                                icon: 'calendar',
+                                title: 'Nenhuma aula criada ainda',
+                                subtitle:
+                                    'Crie uma aula em grupo para abrir vagas aos seus alunos.',
+                                action: FxEmptyAction(
+                                  label: 'Nova aula',
+                                  onTap: _criar,
                                 ),
                               ),
                             ],

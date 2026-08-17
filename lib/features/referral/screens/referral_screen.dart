@@ -7,6 +7,7 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../data/referral_repository.dart';
@@ -35,6 +36,10 @@ class _ReferralScreenState extends ConsumerState<ReferralScreen> {
   }
 
   Future<void> _load() async {
+    setState(() {
+      _loading = true;
+      _erro = null;
+    });
     try {
       final info = await ref.read(referralRepositoryProvider).getInfo();
       if (mounted) {
@@ -74,6 +79,7 @@ class _ReferralScreenState extends ConsumerState<ReferralScreen> {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return fxScreenA11yScope(
       label: 'Indique e ganhe',
       child: FxShellScaffold(
@@ -82,7 +88,12 @@ class _ReferralScreenState extends ConsumerState<ReferralScreen> {
             _loading
                 ? const Center(child: FxLoading())
                 : _erro != null
-                ? Center(child: Text(_erro!, textAlign: TextAlign.center))
+                ? FxErrorState(
+                  chromeOnDark: isDark,
+                  primary: primary,
+                  message: _erro!,
+                  onRetry: _load,
+                )
                 : Padding(
                   padding: const EdgeInsets.all(TokensStrip.s5),
                   child: Column(

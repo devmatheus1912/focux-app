@@ -6,10 +6,13 @@ import 'package:go_router/go_router.dart';
 import '../../../core/config/env.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
+import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/feature_gate.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../subscription/models/subscription_plan.dart';
 import '../data/white_label_repository.dart';
@@ -89,7 +92,7 @@ class _WhiteLabelSettingsScreenState
   Widget build(BuildContext context) {
     final configAsync = ref.watch(whiteLabelConfigProvider);
 
-    return FeatureGate(
+    final gated = FeatureGate(
       featureName: 'Marca própria',
       requiredPlan: SubscriptionPlan.ENTERPRISE,
       capability: 'whiteLabel',
@@ -106,11 +109,11 @@ class _WhiteLabelSettingsScreenState
           child: configAsync.when(
             loading: () => const Center(child: FxLoading()),
             error:
-                (_, __) => Center(
-                  child: Text(
-                    'Recurso disponível no plano Enterprise',
-                    style: TextStyle(color: EagleTokens.inkMute),
-                  ),
+                (e, _) => FxErrorState(
+                  chromeOnDark: Theme.of(context).brightness == Brightness.dark,
+                  primary: Theme.of(context).colorScheme.primary,
+                  message: friendlyError(e),
+                  onRetry: () => ref.invalidate(whiteLabelConfigProvider),
                 ),
             data: (config) {
               _apply(config);
@@ -297,6 +300,8 @@ class _WhiteLabelSettingsScreenState
         ),
       ),
     );
+
+    return fxScreenA11yScope(label: 'Marca própria', child: gated);
   }
 
   Widget _sectionTitle(String text) => Padding(

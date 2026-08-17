@@ -12,6 +12,7 @@ import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../features/auth/providers/auth_provider.dart';
@@ -176,8 +177,34 @@ class _IdentidadeVisualScreenState
       _applyPerfil(perfil);
     }
 
+    if (perfil == null) {
+      return fxScreenA11yScope(
+        label: 'Identidade Visual',
+        child: FxShellScaffold(
+          useMesh: true,
+          appBar: FxShellAppBar(
+            title: widget.isSetup ? 'Configurar meu app' : 'Identidade Visual',
+            onBack:
+                widget.isSetup
+                    ? null
+                    : () => safePopOrGo(context, '/dashboard/personal'),
+            leading: widget.isSetup ? const SizedBox(width: 8) : null,
+          ),
+          body:
+              perfilAsync.hasError
+                  ? FxErrorState(
+                    chromeOnDark: ShellChrome.of(context).isDark,
+                    primary: Theme.of(context).colorScheme.primary,
+                    message: friendlyError(perfilAsync.error!),
+                    onRetry: () => ref.invalidate(perfilProvider),
+                  )
+                  : const Center(child: FxLoading()),
+        ),
+      );
+    }
+
     final chrome = ShellChrome.of(context);
-    final plano = perfil?.plano ?? 'FREE';
+    final plano = perfil.plano;
     final planUpper = plano.toUpperCase();
     final isEnterprise =
         planUpper == 'ENTERPRISE' || planUpper == 'ENTERPRISE_PRO';
@@ -186,7 +213,7 @@ class _IdentidadeVisualScreenState
       'ENTERPRISE',
       'ENTERPRISE_PRO',
     ].contains(planUpper);
-    final nomePersonal = perfil?.nome ?? '';
+    final nomePersonal = perfil.nome;
 
     return fxScreenA11yScope(
       label: 'Identidade Visual',

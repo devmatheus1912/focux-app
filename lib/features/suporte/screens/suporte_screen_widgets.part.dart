@@ -628,27 +628,22 @@ class _MeusTicketsTabState extends ConsumerState<_MeusTicketsTab> {
   }
 
   Widget _buildContent(BuildContext context) {
-    if (_loading) return const FxLoading();
+    if (_loading) return const Center(child: FxLoading());
     if (_erro != null) {
-      return Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(
-              'Erro ao carregar tickets',
-              style: TextStyle(color: EagleTokens.suporteError),
-            ),
-            const SizedBox(height: 8),
-            OutlinedButton(
-              onPressed: _load,
-              child: const Text('Tentar novamente'),
-            ),
-          ],
-        ),
+      return FxErrorState(
+        chromeOnDark: Theme.of(context).brightness == Brightness.dark,
+        primary: Theme.of(context).colorScheme.primary,
+        title: 'Não foi possível carregar seus tickets',
+        message: _erro!,
+        onRetry: _load,
       );
     }
     if (_tickets.isEmpty) {
-      return const Center(child: Text('Nenhum ticket aberto.'));
+      return const FxEmptyState(
+        icon: 'help',
+        title: 'Nenhum ticket aberto',
+        subtitle: 'Abra um ticket quando precisar falar com o suporte Focux.',
+      );
     }
     return RefreshIndicator(
       onRefresh: _load,

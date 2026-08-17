@@ -29,7 +29,7 @@ class PacotesScreen extends ConsumerStatefulWidget {
 class _PacotesScreenState extends ConsumerState<PacotesScreen> {
   List<Pacote> _pacotes = [];
   bool _loading = true;
-  bool _loadFailed = false;
+  String? _erro;
   String? _slug;
 
   @override
@@ -41,7 +41,7 @@ class _PacotesScreenState extends ConsumerState<PacotesScreen> {
   Future<void> _carregar() async {
     setState(() {
       _loading = true;
-      _loadFailed = false;
+      _erro = null;
     });
     try {
       final repo = ref.read(_pacoteRepoProvider);
@@ -58,11 +58,11 @@ class _PacotesScreenState extends ConsumerState<PacotesScreen> {
         _slug = slug;
         _loading = false;
       });
-    } catch (_) {
+    } catch (e) {
       if (mounted) {
         setState(() {
           _loading = false;
-          _loadFailed = true;
+          _erro = friendlyError(e);
         });
       }
     }
@@ -115,7 +115,7 @@ class _PacotesScreenState extends ConsumerState<PacotesScreen> {
           ],
         ),
         floatingActionButton:
-            _loading || _loadFailed || _pacotes.isEmpty
+            _loading || _erro != null || _pacotes.isEmpty
                 ? null
                 : FloatingActionButton.extended(
                   onPressed: _novoPacote,
@@ -125,8 +125,8 @@ class _PacotesScreenState extends ConsumerState<PacotesScreen> {
         body:
             _loading
                 ? const PacotesStorefrontSkeleton()
-                : _loadFailed
-                ? PacotesLoadErrorState(onRetry: _carregar)
+                : _erro != null
+                ? PacotesLoadErrorState(message: _erro, onRetry: _carregar)
                 : RefreshIndicator(
                   onRefresh: _carregar,
                   child: ListView(

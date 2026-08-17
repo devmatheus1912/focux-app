@@ -9,6 +9,8 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/lead_repository.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_empty_state.dart';
+import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/fx_motion.dart';
@@ -56,6 +58,7 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
   List<LeadInteracao> _interacoes = [];
   bool _loadingLead = false;
   bool _loadingInteracoes = true;
+  String? _erroLead;
 
   Lead get _activeLead {
     final lead = _lead;
@@ -77,7 +80,10 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
   }
 
   Future<void> _carregarLead() async {
-    setState(() => _loadingLead = true);
+    setState(() {
+      _loadingLead = true;
+      _erroLead = null;
+    });
     try {
       final lead = await LeadRepository(
         ref.read(apiClientProvider),
@@ -91,8 +97,10 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
       }
     } catch (e) {
       if (mounted) {
-        setState(() => _loadingLead = false);
-        FeedbackHelper.showError(context, friendlyError(e));
+        setState(() {
+          _loadingLead = false;
+          _erroLead = friendlyError(e);
+        });
       }
     }
   }
@@ -383,7 +391,17 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
             title: 'Lead',
             onBack: () => safePopOrGo(context, '/leads'),
           ),
-          body: const Center(child: FxLoading()),
+          body:
+              _loadingLead
+                  ? const Center(child: FxLoading())
+                  : FxErrorState(
+                    chromeOnDark:
+                        Theme.of(context).brightness == Brightness.dark,
+                    primary: Theme.of(context).colorScheme.primary,
+                    message:
+                        _erroLead ?? 'Não encontramos os dados deste lead.',
+                    onRetry: _carregarLead,
+                  ),
         ),
       );
     }
@@ -643,12 +661,11 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
             else if (_interacoes.isEmpty)
               Container(
                 decoration: fxListCardDecoration(context),
-                child: const Padding(
-                  padding: EdgeInsets.all(TokensStrip.s4),
-                  child: Text(
-                    'Nenhuma interação registrada.',
-                    style: TextStyle(color: TokensStrip.textSecondary),
-                  ),
+                child: const FxEmptyState(
+                  icon: 'chat',
+                  title: 'Nenhuma interação registrada',
+                  subtitle:
+                      'Registre ligações, mensagens e visitas para não perder o histórico.',
                 ),
               )
             else

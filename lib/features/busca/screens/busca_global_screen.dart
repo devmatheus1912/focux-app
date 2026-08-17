@@ -4,6 +4,9 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/widgets/fx_empty_state.dart';
+import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/loading_shimmer.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -238,98 +241,109 @@ class _BuscaGlobalScreenState extends ConsumerState<BuscaGlobalScreen> {
     final filter = ref.watch(buscaFilterProvider);
 
     final chrome = ShellChrome.of(context);
-    return FxShellScaffold(
-      useMesh: true,
-      extendBody: true,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        title: Semantics(
-          textField: true,
-          label: 'Campo de busca global',
-          child: TextField(
-            controller: _ctrl,
-            autofocus: true,
-            style: TextStyle(fontSize: 16, color: chrome.ink),
-            decoration: InputDecoration(
-              hintText: 'Buscar alunos, treinos, cobranças...',
-              border: InputBorder.none,
-              hintStyle: TextStyle(color: chrome.mute),
+    return fxScreenA11yScope(
+      label: 'Busca global',
+      child: FxShellScaffold(
+        useMesh: true,
+        extendBody: true,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          scrolledUnderElevation: 0,
+          title: Semantics(
+            textField: true,
+            label: 'Campo de busca global',
+            child: TextField(
+              controller: _ctrl,
+              autofocus: true,
+              style: TextStyle(fontSize: 16, color: chrome.ink),
+              decoration: InputDecoration(
+                hintText: 'Buscar alunos, treinos, cobranças...',
+                border: InputBorder.none,
+                hintStyle: TextStyle(color: chrome.mute),
+              ),
+              onChanged: (v) => ref.read(buscaQueryProvider.notifier).state = v,
             ),
-            onChanged: (v) => ref.read(buscaQueryProvider.notifier).state = v,
           ),
+          actions: [
+            if (query.isNotEmpty)
+              IconButton(
+                icon: const Icon(Icons.clear),
+                tooltip: 'Limpar busca',
+                onPressed: () {
+                  _ctrl.clear();
+                  ref.read(buscaQueryProvider.notifier).state = '';
+                },
+              ),
+          ],
         ),
-        actions: [
-          if (query.isNotEmpty)
-            IconButton(
-              icon: const Icon(Icons.clear),
-              tooltip: 'Limpar busca',
-              onPressed: () {
-                _ctrl.clear();
-                ref.read(buscaQueryProvider.notifier).state = '';
-              },
-            ),
-        ],
-      ),
-      body: Column(
-        children: [
-          _buildFilterChips(),
-          const SizedBox(height: 8),
-          Expanded(
-            child: resultAsync.when(
-              loading:
-                  () => const ShimmerListLoading(itemCount: 6, itemHeight: 64),
-              error:
-                  (e, _) => Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(TokensStrip.s5),
-                      child: Text(
-                        friendlyError(e),
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(color: EagleTokens.bad),
-                      ),
+        body: Column(
+          children: [
+            _buildFilterChips(),
+            const SizedBox(height: 8),
+            Expanded(
+              child: resultAsync.when(
+                loading:
+                    () =>
+                        const ShimmerListLoading(itemCount: 6, itemHeight: 64),
+                error:
+                    (e, _) => FxErrorState(
+                      chromeOnDark: chrome.isDark,
+                      primary: Theme.of(context).colorScheme.primary,
+                      message: friendlyError(e),
+                      onRetry: () => ref.invalidate(buscaResultadoProvider),
                     ),
-                  ),
-              data: (result) {
-                if (query.trim().length < 2) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                data: (result) {
+                  if (query.trim().length < 2) {
+                    return const FxEmptyState(
+                      icon: 'search',
+                      title: 'Digite ao menos 2 caracteres',
+                      subtitle: 'Busque por alunos, treinos ou cobranças.',
+                    );
+                  }
+                  if (result == null || result.isEmpty) {
+                    return FxEmptyState(
+                      icon: 'search',
+                      title: 'Nenhum resultado para "$query"',
+                      subtitle:
+                          'Tente outro nome, apelido ou trecho do treino.',
+                    );
+                  }
+                  if (filter != BuscaTipo.todos) {
+                    final items = _filterByTipo(result, filter);
+                    if (items.isEmpty) {
+                      return FxEmptyState(
+                        icon: 'search',
+                        title: 'Nenhum resultado em ${filter.label}',
+                        subtitle:
+                            'Troque o filtro para ver os outros resultados.',
+                      );
+                    }
+                    return ListView(
                       children: [
-                        Icon(Icons.search, size: 64, color: chrome.mute),
-                        const SizedBox(height: TokensStrip.s4),
-                        Text(
-                          'Digite ao menos 2 caracteres',
-                          style: TextStyle(color: TokensStrip.textSecondary),
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(
+                            TokensStrip.s4,
+                            12,
+                            16,
+                            4,
+                          ),
+                          child: Text(
+                            '${items.length} resultado${items.length > 1 ? 's' : ''} em ${filter.label}',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: TokensStrip.textSecondary,
+                            ),
+                          ),
                         ),
-                      ],
-                    ),
-                  );
-                }
-                if (result == null || result.isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.search_off, size: 64, color: chrome.mute),
-                        const SizedBox(height: TokensStrip.s4),
-                        Text(
-                          'Nenhum resultado para "$query"',
-                          style: TextStyle(color: TokensStrip.textSecondary),
+                        ...items.map(
+                          (item) => _BuscaItemTile(
+                            item: item,
+                            onTap: () => _abrirItem(item),
+                          ),
                         ),
+                        const SizedBox(height: 32),
                       ],
-                    ),
-                  );
-                }
-                if (filter != BuscaTipo.todos) {
-                  final items = _filterByTipo(result, filter);
-                  if (items.isEmpty) {
-                    return Center(
-                      child: Text(
-                        'Nenhum resultado em ${filter.label}',
-                        style: TextStyle(color: TokensStrip.textSecondary),
-                      ),
                     );
                   }
                   return ListView(
@@ -337,55 +351,29 @@ class _BuscaGlobalScreenState extends ConsumerState<BuscaGlobalScreen> {
                       Padding(
                         padding: const EdgeInsets.fromLTRB(
                           TokensStrip.s4,
-                          12,
+                          8,
                           16,
-                          4,
+                          0,
                         ),
                         child: Text(
-                          '${items.length} resultado${items.length > 1 ? 's' : ''} em ${filter.label}',
+                          '${result.totalCount} resultado${result.totalCount > 1 ? 's' : ''}',
                           style: TextStyle(
                             fontSize: 13,
                             color: TokensStrip.textSecondary,
                           ),
                         ),
                       ),
-                      ...items.map(
-                        (item) => _BuscaItemTile(
-                          item: item,
-                          onTap: () => _abrirItem(item),
-                        ),
-                      ),
+                      _buildSection('ALUNOS', result.alunos),
+                      _buildSection('TREINOS', result.treinos),
+                      _buildSection('COBRANÇAS', result.cobrancas),
                       const SizedBox(height: 32),
                     ],
                   );
-                }
-                return ListView(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(
-                        TokensStrip.s4,
-                        8,
-                        16,
-                        0,
-                      ),
-                      child: Text(
-                        '${result.totalCount} resultado${result.totalCount > 1 ? 's' : ''}',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: TokensStrip.textSecondary,
-                        ),
-                      ),
-                    ),
-                    _buildSection('ALUNOS', result.alunos),
-                    _buildSection('TREINOS', result.treinos),
-                    _buildSection('COBRANÇAS', result.cobrancas),
-                    const SizedBox(height: 32),
-                  ],
-                );
-              },
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

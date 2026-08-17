@@ -4,6 +4,7 @@ import '../../../core/router/safe_navigation.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/brand_palette.dart';
+import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -68,17 +69,13 @@ class QualidadeOperacionalScreen extends ConsumerWidget {
           onBack: () => safePopOrGo(context, '/dashboard/personal'),
         ),
         body: asyncData.when(
-          loading: () => const FxLoading(),
+          loading: () => const Center(child: FxLoading()),
           error:
-              (e, _) => Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(TokensStrip.s5),
-                  child: Text(
-                    friendlyError(e),
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(color: EagleTokens.bad),
-                  ),
-                ),
+              (e, _) => FxErrorState(
+                chromeOnDark: isDark,
+                primary: Theme.of(context).colorScheme.primary,
+                message: friendlyError(e),
+                onRetry: () => ref.invalidate(qualidadeProvider),
               ),
           data: (data) => _QualidadeBody(data: data, isDark: isDark),
         ),
@@ -519,10 +516,7 @@ class _MetricCompareCard extends StatelessWidget {
               const SizedBox(width: 10),
               Text(
                 title,
-                style: FocuxHubTypography.sectionTitle(
-                  context,
-                  color: ink,
-                ),
+                style: FocuxHubTypography.sectionTitle(context, color: ink),
               ),
               const Spacer(),
               Container(

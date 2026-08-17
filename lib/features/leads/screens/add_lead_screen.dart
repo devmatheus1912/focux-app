@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_motion.dart';
@@ -61,7 +62,10 @@ class _AddLeadScreenState extends ConsumerState<AddLeadScreen> {
                 : 'Recurso disponível no Premium.',
           );
         } else {
-          FeedbackHelper.showError(context, 'Erro ao salvar lead');
+          FeedbackHelper.showError(
+            context,
+            friendlyError(e, fallback: 'Não conseguimos salvar o lead.'),
+          );
         }
       }
     }
