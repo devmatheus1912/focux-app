@@ -4,8 +4,11 @@ import '../../../core/providers/personal_brand_provider.dart';
 import '../../alunos/data/aluno_repository.dart';
 import '../../chat/data/chat_repository.dart';
 import '../../checkin/data/checkin_repository.dart';
+import '../../coach/data/coach_proativo_repository.dart';
 import '../../evolucao/data/evolucao_repository.dart';
 import '../../financeiro/data/financeiro_repository.dart';
+import '../../health/data/health_repository.dart';
+import '../../monetizacao/data/upsell_repository.dart';
 import '../../onboarding/data/onboarding_status_data.dart';
 import '../../planos/data/planos_repository.dart';
 import '../utils/dashboard_day_focus.dart';
@@ -318,6 +321,10 @@ class AlunoDashboardHomeBundle {
   final List<MedidaCorporal> medidas;
   final AlunoDashboardChatResumo chat;
   final int notificacoesNaoLidas;
+  final List<CoachMensagem> coachMensagens;
+  final List<AlunoOferta> upsellPendentes;
+  final bool npsDeveResponder;
+  final RecoverySnapshot? recovery;
   final DateTime fetchedAt;
 
   AlunoDashboardHomeBundle({
@@ -328,6 +335,10 @@ class AlunoDashboardHomeBundle {
     required this.medidas,
     required this.chat,
     required this.notificacoesNaoLidas,
+    this.coachMensagens = const [],
+    this.upsellPendentes = const [],
+    this.npsDeveResponder = false,
+    this.recovery,
     DateTime? fetchedAt,
   }) : fetchedAt = fetchedAt ?? DateTime.now();
 
@@ -340,6 +351,15 @@ class AlunoDashboardHomeBundle {
         (raw as List? ?? const [])
             .map((e) => MedidaCorporal.fromJson(e as Map<String, dynamic>))
             .toList();
+    List<CoachMensagem> parseCoach(dynamic raw) =>
+        (raw as List? ?? const [])
+            .map((e) => CoachMensagem.fromJson(e as Map<String, dynamic>))
+            .toList();
+    List<AlunoOferta> parseUpsell(dynamic raw) =>
+        (raw as List? ?? const [])
+            .map((e) => AlunoOferta.fromJson(e as Map<String, dynamic>))
+            .toList();
+    final recoveryRaw = json['recovery'];
 
     return AlunoDashboardHomeBundle(
       aluno: Aluno.fromJson(json['aluno'] as Map<String, dynamic>),
@@ -354,6 +374,15 @@ class AlunoDashboardHomeBundle {
       ),
       notificacoesNaoLidas:
           (json['notificacoesNaoLidas'] as num?)?.toInt() ?? 0,
+      coachMensagens: parseCoach(json['coachMensagens']),
+      upsellPendentes: parseUpsell(json['upsellPendentes']),
+      npsDeveResponder: json['npsDeveResponder'] as bool? ?? false,
+      recovery:
+          recoveryRaw is Map
+              ? RecoverySnapshot.fromJson(
+                Map<String, dynamic>.from(recoveryRaw),
+              )
+              : null,
     );
   }
 }

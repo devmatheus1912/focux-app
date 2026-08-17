@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/focux_hub_typography.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/brand_palette.dart';

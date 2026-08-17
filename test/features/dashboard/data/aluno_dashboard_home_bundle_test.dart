@@ -44,6 +44,37 @@ Map<String, dynamic> _payload() => {
     'naoLidasDoPersonal': 2,
   },
   'notificacoesNaoLidas': 4,
+  'coachMensagens': [
+    {
+      'id': 21,
+      'tipo': 'INATIVIDADE',
+      'mensagem': 'Bora treinar hoje?',
+      'criadoEm': '2026-08-16T08:00:00',
+      'lido': false,
+    },
+  ],
+  'upsellPendentes': [
+    {
+      'alunoOfertaId': 5,
+      'ofertaId': 9,
+      'titulo': 'Consultoria extra',
+      'descricao': 'Uma sessão avulsa',
+      'valor': 150.0,
+      'status': 'PENDENTE',
+    },
+  ],
+  'npsDeveResponder': true,
+  'recovery': {
+    'dataReferencia': '2026-08-16',
+    'steps': 8200,
+    'caloriesBurned': 410.0,
+    'avgHeartRate': 62.0,
+    'sleepHours': 7.5,
+    'recoveryScore': 78,
+    'recoveryLabel': 'Pronto',
+    'recoveryHint': 'Boa noite de sono',
+    'sincronizadoEm': '2026-08-16T07:10:00',
+  },
 };
 
 void main() {
@@ -61,6 +92,12 @@ void main() {
       expect(bundle.medidas.first.peso, 62.5);
       expect(bundle.chat.naoLidasDoPersonal, 2);
       expect(bundle.notificacoesNaoLidas, 4);
+      expect(bundle.coachMensagens, hasLength(1));
+      expect(bundle.coachMensagens.first.mensagem, 'Bora treinar hoje?');
+      expect(bundle.upsellPendentes.single.titulo, 'Consultoria extra');
+      expect(bundle.npsDeveResponder, isTrue);
+      expect(bundle.recovery?.recoveryScore, 78);
+      expect(bundle.recovery?.recoveryLabel, 'Pronto');
     });
 
     test('tolerates missing optional blocks', () {
@@ -70,7 +107,11 @@ void main() {
         ..remove('historico')
         ..remove('medidas')
         ..remove('chat')
-        ..remove('notificacoesNaoLidas');
+        ..remove('notificacoesNaoLidas')
+        ..remove('coachMensagens')
+        ..remove('upsellPendentes')
+        ..remove('npsDeveResponder')
+        ..remove('recovery');
 
       final bundle = AlunoDashboardHomeBundle.fromJson(json);
 
@@ -80,6 +121,10 @@ void main() {
       expect(bundle.medidas, isEmpty);
       expect(bundle.chat.possuiMensagemDoAluno, isFalse);
       expect(bundle.notificacoesNaoLidas, 0);
+      expect(bundle.coachMensagens, isEmpty);
+      expect(bundle.upsellPendentes, isEmpty);
+      expect(bundle.npsDeveResponder, isFalse);
+      expect(bundle.recovery, isNull);
     });
   });
 

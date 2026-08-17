@@ -41,6 +41,9 @@ import '../../../core/widgets/fx_premium_entrance.dart';
 export '../constants/alunos_list_filters.dart';
 
 part 'alunos_list_screen_state.part.dart';
+part 'alunos_list_screen_filters.part.dart';
+part 'alunos_list_screen_header.part.dart';
+part 'alunos_list_screen_body.part.dart';
 part 'alunos_list_screen_cards.part.dart';
 part 'alunos_list_screen_actions.part.dart';
 

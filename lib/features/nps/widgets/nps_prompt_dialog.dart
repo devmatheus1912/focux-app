@@ -6,10 +6,15 @@ import '../data/nps_repository.dart';
 import '../../auth/providers/auth_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-Future<void> showNpsPromptIfNeeded(BuildContext context, WidgetRef ref) async {
+Future<void> showNpsPromptIfNeeded(
+  BuildContext context,
+  WidgetRef ref, {
+  bool? deveResponder,
+}) async {
+  if (deveResponder == false) return;
   try {
     final repo = NpsRepository(ref.read(apiClientProvider));
-    final deve = await repo.deveResponder();
+    final deve = deveResponder ?? await repo.deveResponder();
     if (!deve || !context.mounted) return;
     await showDialog<void>(
       context: context,

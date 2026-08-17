@@ -57,7 +57,12 @@ class CoachScreen extends ConsumerWidget {
                         child: ListView(
                           padding: const EdgeInsets.all(TokensStrip.s4),
                           physics: const AlwaysScrollableScrollPhysics(),
-                          children: [CoachProativoCard(isDark: isDark)],
+                          children: [
+                            CoachProativoCard(
+                              isDark: isDark,
+                              mensagens: msgs,
+                            ),
+                          ],
                         ),
                       ),
         ),

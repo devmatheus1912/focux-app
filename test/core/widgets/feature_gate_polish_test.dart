@@ -72,6 +72,13 @@ void main() {
     expect(gate, contains('DashboardHomeClientCache.getIfFresh'));
     expect(gate, contains('seedFromHome'));
     expect(gate, contains('addPostFrameCallback'));
+
+    final provider = File(
+      'lib/features/planos/providers/plano_features_provider.dart',
+    ).readAsStringSync();
+    expect(provider, contains('DashboardHomeClientCache.getIfFresh'));
+    expect(provider, contains('_applyFreshHomeCacheIfAny'));
+    expect(provider, contains('_refreshIfBootstrapStillCurrent'));
   });
 
   testWidgets(

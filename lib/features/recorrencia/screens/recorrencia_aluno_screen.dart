@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
@@ -25,6 +26,7 @@ class _RecorrenciaAlunoScreenState
   RecorrenciaAssinatura? _assinatura;
   bool _loading = true;
   String? _erro;
+  DateTime? _fetchedAt;
 
   @override
   void initState() {
@@ -44,6 +46,7 @@ class _RecorrenciaAlunoScreenState
         setState(() {
           _assinatura = a;
           _loading = false;
+          _fetchedAt = DateTime.now();
         });
       }
     } catch (e) {
@@ -60,11 +63,13 @@ class _RecorrenciaAlunoScreenState
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
     return fxScreenA11yScope(
       label: 'Minha assinatura',
       child: FxShellScaffold(
         appBar: FxShellAppBar(
           title: 'Minha assinatura',
+          subtitle: freshnessLabel,
           onBack: () => context.pop(),
         ),
         body:

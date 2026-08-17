@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../financeiro/data/financeiro_repository.dart';
+import '../../onboarding/data/onboarding_status_data.dart';
 import '../../onboarding/screens/setup_onboarding_widget.dart';
 import '../../subscription/widgets/dashboard_activation_cta.dart';
 import '../../subscription/widgets/plan_usage_banner.dart';
@@ -52,6 +53,7 @@ List<Widget> buildDashboardHomePrimarySlivers({
   required VoidCallback onReviewAttention,
   required bool onboardingIncomplete,
   required bool primeiroTreinoCriado,
+  OnboardingStatusData? onboardingFromHome,
   bool prioritiesChipVisible = false,
   String? pulseEmptyHint,
   int? notificacoesNaoLidasOverride,
@@ -76,15 +78,17 @@ List<Widget> buildDashboardHomePrimarySlivers({
       const SliverToBoxAdapter(child: TrialCountdownBanner()),
       const SliverToBoxAdapter(child: PlanUsageBanner()),
       if (onboardingIncomplete)
-        const SliverToBoxAdapter(
+        SliverToBoxAdapter(
           child: Padding(
-            padding: EdgeInsets.fromLTRB(
+            padding: const EdgeInsets.fromLTRB(
               TokensStrip.s4,
               4,
               TokensStrip.s4,
               0,
             ),
-            child: SetupOnboardingWidget(),
+            child: SetupOnboardingWidget(
+              statusFromHome: onboardingFromHome,
+            ),
           ),
         )
       else

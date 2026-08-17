@@ -35,6 +35,9 @@ void main() {
     expect(screen, contains('alunoListSecondaryInk'));
     expect(screen, contains('AlunoAvatar'));
     expect(screen, contains("part 'alunos_list_screen_state.part.dart'"));
+    expect(screen, contains("part 'alunos_list_screen_filters.part.dart'"));
+    expect(screen, contains("part 'alunos_list_screen_header.part.dart'"));
+    expect(screen, contains("part 'alunos_list_screen_body.part.dart'"));
     expect(screen, contains("part 'alunos_list_screen_cards.part.dart'"));
     expect(screen, isNot(contains("aluno.email.toLowerCase()")));
     expect(screen, contains('isScrollControlled: true'));

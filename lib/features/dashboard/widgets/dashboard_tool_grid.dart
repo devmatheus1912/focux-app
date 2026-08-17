@@ -12,7 +12,6 @@ import '../utils/dashboard_a11y.dart';
 import '../utils/dashboard_entry_motion.dart';
 import '../utils/dashboard_haptic.dart';
 import '../utils/dashboard_readability.dart';
-import '../../../core/theme/focux_hub_typography.dart';
 import '../utils/dashboard_tool_groups.dart';
 
 class DashboardExpandableToolGroups extends ConsumerStatefulWidget {

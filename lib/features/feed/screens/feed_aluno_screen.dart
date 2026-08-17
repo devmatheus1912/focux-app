@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/brand/focux_microcopy.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/utils/fx_utils.dart';
+import '../../../core/ux/fx_hub_freshness.dart';
 
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
@@ -32,6 +33,7 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
   List<FeedPost> _posts = [];
   bool _loading = true;
   String? _erro;
+  DateTime? _fetchedAt;
 
   @override
   void initState() {
@@ -55,6 +57,7 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
           _comentariosLocais[p.id] = p.totalComentarios;
         }
         _loading = false;
+        _fetchedAt = DateTime.now();
       });
     } catch (e) {
       if (mounted) {
@@ -135,11 +138,16 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final chrome = ShellChrome.forDark(isDark);
     final primary = Theme.of(context).colorScheme.primary;
+    final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
     return fxScreenA11yScope(
       label: 'Feed Aluno',
       child: FxShellScaffold(
         useMesh: true,
         extendBody: true,
+        appBar: FxShellAppBar(
+          title: 'Feed',
+          subtitle: freshnessLabel,
+        ),
         body: SafeArea(
           child:
               _loading
@@ -172,23 +180,9 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
                         16,
                         110,
                       ),
-                      itemCount: _posts.length + 1,
+                      itemCount: _posts.length,
                       itemBuilder: (_, i) {
-                        if (i == 0) {
-                          return Padding(
-                            padding: const EdgeInsets.fromLTRB(4, 0, 4, 18),
-                            child: Text(
-                              'Feed',
-                              style: TextStyle(
-                                color: chrome.ink,
-                                fontSize: 28,
-                                fontWeight: FontWeight.w900,
-                                letterSpacing: -0.5,
-                              ),
-                            ),
-                          );
-                        }
-                        final p = _posts[i - 1];
+                        final p = _posts[i];
                         final mUrl = p.midiaUrl ?? p.imagemUrl;
                         final badgeColor = _feedBadgeColor(p.tipoPost, primary);
                         final curtidas =

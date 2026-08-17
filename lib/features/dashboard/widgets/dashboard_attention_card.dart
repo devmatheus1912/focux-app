@@ -8,7 +8,6 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../constants/dashboard_layout.dart';
 import '../utils/dashboard_a11y.dart';
 import '../utils/dashboard_readability.dart';
-import '../../../core/theme/focux_hub_typography.dart';
 
 class DashboardAttentionCard extends StatelessWidget {
   const DashboardAttentionCard({

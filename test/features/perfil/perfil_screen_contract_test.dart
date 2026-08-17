@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/dashboard/data/dashboard_repository.dart';
 import 'package:focux_app/features/dashboard/providers/dashboard_provider.dart';
+import 'package:focux_app/features/dashboard/utils/dashboard_home_client_cache.dart';
 import 'package:focux_app/features/perfil/data/perfil_repository.dart';
 import 'package:focux_app/features/perfil/providers/perfil_provider.dart';
 import 'package:focux_app/features/perfil/screens/perfil_screen.dart';
@@ -11,10 +12,12 @@ void main() {
   testWidgets('perfil personal renders compact hub for the coach', (
     tester,
   ) async {
+    DashboardHomeClientCache.clear();
     tester.view.physicalSize = const Size(390, 1200);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
+    addTearDown(DashboardHomeClientCache.clear);
 
     await tester.pumpWidget(
       ProviderScope(
@@ -46,7 +49,8 @@ void main() {
 
     expect(find.text('Operação'), findsOneWidget);
     expect(find.text('Meus alunos'), findsOneWidget);
-    expect(find.text('Copiloto IA'), findsOneWidget);
+    // Fixture incompleto (WhatsApp pendente) → sticky pede completar, não Copiloto.
+    expect(find.text('Completar perfil'), findsOneWidget);
   });
 }
 

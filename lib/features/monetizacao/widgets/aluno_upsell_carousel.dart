@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../../dashboard/providers/dashboard_provider.dart';
 import '../data/upsell_repository.dart';
 
 final _alunoUpsellProvider = FutureProvider.autoDispose<List<AlunoOferta>>((
@@ -14,51 +15,59 @@ final _alunoUpsellProvider = FutureProvider.autoDispose<List<AlunoOferta>>((
 
 /// Ofertas pendentes do personal — exibidas no dashboard do aluno.
 class AlunoUpsellCarousel extends ConsumerWidget {
-  const AlunoUpsellCarousel({super.key});
+  const AlunoUpsellCarousel({super.key, this.ofertas});
+
+  final List<AlunoOferta>? ofertas;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final provided = ofertas;
+    if (provided != null) {
+      return _body(context, ref, provided);
+    }
     final async = ref.watch(_alunoUpsellProvider);
     return async.when(
-      data: (ofertas) {
-        if (ofertas.isEmpty) return const SizedBox.shrink();
-        final primary = Theme.of(context).colorScheme.primary;
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: Text(
-                'Ofertas do seu personal',
-                style: TextStyle(
-                  fontWeight: FontWeight.w800,
-                  fontSize: 15,
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
-              ),
-            ),
-            SizedBox(
-              height: 148,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                itemCount: ofertas.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 10),
-                itemBuilder: (context, i) {
-                  final o = ofertas[i];
-                  return _OfertaCard(
-                    oferta: o,
-                    primary: primary,
-                    onAccept: () => _responder(context, ref, o, 'ACEITO'),
-                    onDecline: () => _responder(context, ref, o, 'RECUSADO'),
-                  );
-                },
-              ),
-            ),
-          ],
-        );
-      },
+      data: (items) => _body(context, ref, items),
       loading: () => const SizedBox.shrink(),
       error: (_, __) => const SizedBox.shrink(),
+    );
+  }
+
+  Widget _body(BuildContext context, WidgetRef ref, List<AlunoOferta> ofertas) {
+    if (ofertas.isEmpty) return const SizedBox.shrink();
+    final primary = Theme.of(context).colorScheme.primary;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(bottom: 8),
+          child: Text(
+            'Ofertas do seu personal',
+            style: TextStyle(
+              fontWeight: FontWeight.w800,
+              fontSize: 15,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
+          ),
+        ),
+        SizedBox(
+          height: 148,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: ofertas.length,
+            separatorBuilder: (_, __) => const SizedBox(width: 10),
+            itemBuilder: (context, i) {
+              final o = ofertas[i];
+              return _OfertaCard(
+                oferta: o,
+                primary: primary,
+                onAccept: () => _responder(context, ref, o, 'ACEITO'),
+                onDecline: () => _responder(context, ref, o, 'RECUSADO'),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 
@@ -77,6 +86,7 @@ class AlunoUpsellCarousel extends ConsumerWidget {
         props: {'ofertaId': oferta.ofertaId, 'resposta': resposta},
       );
       ref.invalidate(_alunoUpsellProvider);
+      ref.invalidate(alunoDashboardHomeProvider);
       if (context.mounted) {
         FeedbackHelper.showSuccess(
           context,

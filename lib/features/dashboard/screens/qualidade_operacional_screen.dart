@@ -5,6 +5,7 @@ import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/brand_palette.dart';
+import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -31,6 +32,9 @@ class QualidadeOperacionalData {
     required this.score,
     required this.recomendacao,
   });
+
+  /// Sem base (ticket/retenção zerados) — ainda não há operação para comparar.
+  bool get isEmpty => ticketPessoal <= 0 && retencaoPessoal <= 0;
 
   factory QualidadeOperacionalData.fromJson(Map<String, dynamic> j) =>
       QualidadeOperacionalData(
@@ -125,7 +129,17 @@ class _QualidadeOperacionalScreenState
                 message: friendlyError(e),
                 onRetry: () => ref.invalidate(qualidadeProvider),
               ),
-          data: (data) => _QualidadeBody(data: data, isDark: isDark),
+          data: (data) {
+            if (data.isEmpty) {
+              return const FxEmptyState(
+                icon: 'bar-chart-2',
+                title: 'Sem dados ainda',
+                subtitle:
+                    'Cadastre alunos e registre mensalidades para ver o índice de qualidade da operação.',
+              );
+            }
+            return _QualidadeBody(data: data, isDark: isDark);
+          },
         ),
       ),
     );

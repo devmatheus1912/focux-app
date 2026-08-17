@@ -67,9 +67,36 @@ class EventoEngajamento {
       );
 }
 
+/// BFF `GET /api/alunos/{id}/evolucao/home` — medidas + recordes.
+class EvolucaoHomeBundle {
+  final List<MedidaCorporal> medidas;
+  final List<RecordePessoal> recordes;
+
+  const EvolucaoHomeBundle({required this.medidas, required this.recordes});
+
+  factory EvolucaoHomeBundle.fromJson(Map<String, dynamic> j) {
+    return EvolucaoHomeBundle(
+      medidas:
+          ((j['medidas'] as List?) ?? const [])
+              .map((e) => MedidaCorporal.fromJson(e as Map<String, dynamic>))
+              .toList(),
+      recordes:
+          ((j['recordes'] as List?) ?? const [])
+              .map((e) => RecordePessoal.fromJson(e as Map<String, dynamic>))
+              .toList(),
+    );
+  }
+}
+
 class EvolucaoRepository {
   final Dio _dio;
   EvolucaoRepository(ApiClient c) : _dio = c.dio;
+
+  /// First paint da tela Evolução — um round-trip (medidas + recordes).
+  Future<EvolucaoHomeBundle> getHome(int alunoId) async {
+    final r = await _dio.get('/api/alunos/$alunoId/evolucao/home');
+    return EvolucaoHomeBundle.fromJson(r.data as Map<String, dynamic>);
+  }
 
   Future<List<MedidaCorporal>> listarMinhasMedidas() async {
     final r = await _dio.get('/api/aluno/medidas');

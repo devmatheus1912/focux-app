@@ -32,9 +32,9 @@ void main() {
   });
 
   test('Env uses dynamic public URLs not hardcoded focux.app in screens', () {
-    final landingEditor =
-        File('lib/features/perfil/screens/landing_editor_screen.dart')
-            .readAsStringSync();
+    final landingEditor = readScreenSourceBundle(
+      'lib/features/perfil/screens/landing_editor_screen.dart',
+    );
     final landingLinks =
         File('lib/features/perfil/screens/landing_editor_links_tab.dart')
             .readAsStringSync();

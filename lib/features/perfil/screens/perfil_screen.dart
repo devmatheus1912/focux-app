@@ -20,6 +20,8 @@ import '../../../core/theme/theme_provider.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../dashboard/data/dashboard_repository.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
+import '../../dashboard/utils/dashboard_home_client_cache.dart';
+import '../../planos/providers/plano_features_provider.dart';
 import '../../pacotes/providers/pacotes_provider.dart';
 import '../data/perfil_repository.dart';
 import '../providers/perfil_provider.dart';
@@ -162,7 +164,20 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
   @override
   Widget build(BuildContext context) {
     final perfilAsync = ref.watch(perfilProvider);
-    final dashboardAsync = ref.watch(dashboardProvider);
+    // Landing Completa / gates usam planoFeaturesProvider (seed do cache home
+    // abaixo). Dashboard home aqui NÃO é só planoFeatures: a faixa do hero
+    // precisa de totalAlunos + alunosAtivos. Preferimos cache fresco; só
+    // disparamos GET /api/dashboard/home em cache miss.
+    final cachedHome = DashboardHomeClientCache.getIfFresh();
+    final cachedPersonal = cachedHome?.personal;
+    final cachedPlano = cachedHome?.planoFeatures;
+    if (cachedPlano != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!context.mounted) return;
+        if (ref.read(planoFeaturesProvider).valueOrNull != null) return;
+        ref.read(planoFeaturesProvider.notifier).seedFromHome(cachedPlano);
+      });
+    }
 
     return fxScreenA11yScope(
       label: 'Perfil',
@@ -173,71 +188,88 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
               error: error,
               onRetry: () => ref.invalidate(perfilProvider),
             ),
-        data:
-            (perfil) => dashboardAsync.when(
-              loading:
-                  () => _PerfilBody(
-                    perfil: perfil,
-                    dashboard: DashboardData(
-                      totalAlunos: 0,
-                      alunosAtivos: 0,
-                      planoAtual: perfil.plano,
-                      limiteAlunos: 0,
-                      nomePersonal: perfil.nome,
-                      logoUrl: perfil.logoUrl,
-                      corPrimaria: perfil.corPrimaria,
-                      corSecundaria: perfil.corSecundaria,
-                      descricaoProfissional: perfil.descricaoProfissional,
-                      instagram: perfil.instagram,
-                    ),
-                    uploadingPhoto: _uploadingPhoto,
-                    loadingMetrics: true,
-                    onPickPhoto: _pickAndUploadPhoto,
-                    onEditPerfil: () => _openEditPerfil(perfil),
-                    onLogout: _logout,
-                    onOpenLandingEditor:
-                        () => openLandingEditorOrUpgrade(context, ref),
-                    onChecklistAction:
-                        (action) => _handleChecklistAction(action, perfil),
+        data: (perfil) {
+          if (cachedPersonal != null) {
+            return _PerfilBody(
+              perfil: perfil,
+              dashboard: cachedPersonal,
+              uploadingPhoto: _uploadingPhoto,
+              onPickPhoto: _pickAndUploadPhoto,
+              onEditPerfil: () => _openEditPerfil(perfil),
+              onLogout: _logout,
+              onOpenLandingEditor:
+                  () => openLandingEditorOrUpgrade(context, ref),
+              onChecklistAction:
+                  (action) => _handleChecklistAction(action, perfil),
+            );
+          }
+
+          final dashboardAsync = ref.watch(dashboardProvider);
+          return dashboardAsync.when(
+            loading:
+                () => _PerfilBody(
+                  perfil: perfil,
+                  dashboard: DashboardData(
+                    totalAlunos: 0,
+                    alunosAtivos: 0,
+                    planoAtual: perfil.plano,
+                    limiteAlunos: 0,
+                    nomePersonal: perfil.nome,
+                    logoUrl: perfil.logoUrl,
+                    corPrimaria: perfil.corPrimaria,
+                    corSecundaria: perfil.corSecundaria,
+                    descricaoProfissional: perfil.descricaoProfissional,
+                    instagram: perfil.instagram,
                   ),
-              error:
-                  (_, __) => _PerfilBody(
-                    perfil: perfil,
-                    dashboard: DashboardData(
-                      totalAlunos: 0,
-                      alunosAtivos: 0,
-                      planoAtual: perfil.plano,
-                      limiteAlunos: 0,
-                      nomePersonal: perfil.nome,
-                      logoUrl: perfil.logoUrl,
-                      corPrimaria: perfil.corPrimaria,
-                      corSecundaria: perfil.corSecundaria,
-                      descricaoProfissional: perfil.descricaoProfissional,
-                      instagram: perfil.instagram,
-                    ),
-                    uploadingPhoto: _uploadingPhoto,
-                    onPickPhoto: _pickAndUploadPhoto,
-                    onEditPerfil: () => _openEditPerfil(perfil),
-                    onLogout: _logout,
-                    onOpenLandingEditor:
-                        () => openLandingEditorOrUpgrade(context, ref),
-                    onChecklistAction:
-                        (action) => _handleChecklistAction(action, perfil),
+                  uploadingPhoto: _uploadingPhoto,
+                  loadingMetrics: true,
+                  onPickPhoto: _pickAndUploadPhoto,
+                  onEditPerfil: () => _openEditPerfil(perfil),
+                  onLogout: _logout,
+                  onOpenLandingEditor:
+                      () => openLandingEditorOrUpgrade(context, ref),
+                  onChecklistAction:
+                      (action) => _handleChecklistAction(action, perfil),
+                ),
+            error:
+                (_, __) => _PerfilBody(
+                  perfil: perfil,
+                  dashboard: DashboardData(
+                    totalAlunos: 0,
+                    alunosAtivos: 0,
+                    planoAtual: perfil.plano,
+                    limiteAlunos: 0,
+                    nomePersonal: perfil.nome,
+                    logoUrl: perfil.logoUrl,
+                    corPrimaria: perfil.corPrimaria,
+                    corSecundaria: perfil.corSecundaria,
+                    descricaoProfissional: perfil.descricaoProfissional,
+                    instagram: perfil.instagram,
                   ),
-              data:
-                  (dashboard) => _PerfilBody(
-                    perfil: perfil,
-                    dashboard: dashboard,
-                    uploadingPhoto: _uploadingPhoto,
-                    onPickPhoto: _pickAndUploadPhoto,
-                    onEditPerfil: () => _openEditPerfil(perfil),
-                    onLogout: _logout,
-                    onOpenLandingEditor:
-                        () => openLandingEditorOrUpgrade(context, ref),
-                    onChecklistAction:
-                        (action) => _handleChecklistAction(action, perfil),
-                  ),
-            ),
+                  uploadingPhoto: _uploadingPhoto,
+                  onPickPhoto: _pickAndUploadPhoto,
+                  onEditPerfil: () => _openEditPerfil(perfil),
+                  onLogout: _logout,
+                  onOpenLandingEditor:
+                      () => openLandingEditorOrUpgrade(context, ref),
+                  onChecklistAction:
+                      (action) => _handleChecklistAction(action, perfil),
+                ),
+            data:
+                (dashboard) => _PerfilBody(
+                  perfil: perfil,
+                  dashboard: dashboard,
+                  uploadingPhoto: _uploadingPhoto,
+                  onPickPhoto: _pickAndUploadPhoto,
+                  onEditPerfil: () => _openEditPerfil(perfil),
+                  onLogout: _logout,
+                  onOpenLandingEditor:
+                      () => openLandingEditorOrUpgrade(context, ref),
+                  onChecklistAction:
+                      (action) => _handleChecklistAction(action, perfil),
+                ),
+          );
+        },
       ),
     );
   }

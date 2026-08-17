@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/storage/secure_storage.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../../dashboard/utils/dashboard_home_client_cache.dart';
 import '../data/planos_repository.dart';
 
 final planosRepositoryProvider = Provider<PlanosRepository>(
@@ -15,9 +16,10 @@ final _planosRepositoryProvider = planosRepositoryProvider;
 
 /// Server-side feature flags do plano atual.
 ///
-/// Stale-while-revalidate: se existir snapshot local, o gate usa esse dado
-/// imediatamente e atualiza em segundo plano. Assim uma oscilacao de rede nao
-/// derruba usuario pagante em uma tela de bloqueio falsa.
+/// Se [DashboardHomeClientCache] já tem `planoFeatures` fresco (TTL 90s),
+/// [PlanoFeaturesNotifier.bootstrap] usa esse snapshot e não chama
+/// GET `/api/planos/me`. Sem Home cache, aplica stale-while-revalidate no
+/// snapshot local de [PlanosRepository] (gate imediato + refresh em fundo).
 final planoFeaturesProvider = StateNotifierProvider<
   PlanoFeaturesNotifier,
   AsyncValue<PlanoFeatures>
@@ -31,10 +33,27 @@ class PlanoFeaturesNotifier extends StateNotifier<AsyncValue<PlanoFeatures>> {
   final PlanosRepository _repo;
   bool _refreshing = false;
 
+  /// Bumps on [seedFromHome] so an in-flight bootstrap `/planos/me` cannot
+  /// overwrite a fresher Home BFF snapshot.
+  int _generation = 0;
+
   PlanoFeaturesNotifier(this._repo) : super(const AsyncLoading());
 
+  bool _applyFreshHomeCacheIfAny() {
+    final fromHome = DashboardHomeClientCache.getIfFresh()?.planoFeatures;
+    if (fromHome == null) return false;
+    seedFromHome(fromHome);
+    return true;
+  }
+
   Future<void> bootstrap() async {
+    if (_applyFreshHomeCacheIfAny()) return;
+
+    final gen = _generation;
     final cached = await _repo.loadCachedPlanoFeatures();
+    if (_generation != gen) return;
+    if (_applyFreshHomeCacheIfAny()) return;
+
     if (cached != null &&
         PlanosRepository.isEntitlementsCacheFresh(cached.cacheSavedAt)) {
       state = AsyncData(cached.normalizeForTier());
@@ -47,11 +66,20 @@ class PlanoFeaturesNotifier extends StateNotifier<AsyncValue<PlanoFeatures>> {
           },
         ),
       );
-      unawaited(refresh());
+      unawaited(_refreshIfBootstrapStillCurrent(gen));
       return;
     }
 
-    await refresh(forceLoading: true);
+    await _refreshIfBootstrapStillCurrent(gen, forceLoading: true);
+  }
+
+  Future<void> _refreshIfBootstrapStillCurrent(
+    int gen, {
+    bool forceLoading = false,
+  }) async {
+    if (_generation != gen) return;
+    if (_applyFreshHomeCacheIfAny()) return;
+    await refresh(forceLoading: forceLoading);
   }
 
   Future<void> refresh({
@@ -60,6 +88,7 @@ class PlanoFeaturesNotifier extends StateNotifier<AsyncValue<PlanoFeatures>> {
   }) async {
     if (_refreshing) return;
     _refreshing = true;
+    final gen = _generation;
     final previous = state.valueOrNull;
     if (forceLoading || previous == null) {
       state = const AsyncLoading();
@@ -70,8 +99,10 @@ class PlanoFeaturesNotifier extends StateNotifier<AsyncValue<PlanoFeatures>> {
           reconcileFirst
               ? await _repo.reconcilePlanoFeatures()
               : await _fetchWithRetry();
+      if (_generation != gen) return;
       state = AsyncData(fresh.normalizeForTier());
     } catch (error) {
+      if (_generation != gen) return;
       if (previous != null &&
           PlanosRepository.canUseStaleEntitlementsOnError(
             previous.cacheSavedAt,
@@ -90,6 +121,7 @@ class PlanoFeaturesNotifier extends StateNotifier<AsyncValue<PlanoFeatures>> {
         );
       } else {
         final forAluno = await _isAlunoSession();
+        if (_generation != gen) return;
         final fallback =
             (forAluno
                     ? PlanoFeatures.optimisticAluno
@@ -141,6 +173,7 @@ class PlanoFeaturesNotifier extends StateNotifier<AsyncValue<PlanoFeatures>> {
 
   /// Seed imediato a partir do BFF `/home` (mesmo shape de `/planos/me`).
   void seedFromHome(PlanoFeatures features) {
+    _generation++;
     state = AsyncData(features.normalizeForTier());
   }
 }

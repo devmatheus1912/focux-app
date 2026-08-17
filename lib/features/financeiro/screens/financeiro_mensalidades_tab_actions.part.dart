@@ -397,7 +397,16 @@ extension FinanceiroMensalidadesTabActions on _FinanceiroMensalidadesTabState {
                     carregando
                         ? const SizedBox(height: 80, child: FxLoading())
                         : erro != null
-                        ? Text(erro!)
+                        ? Text(
+                          erro!,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: EagleTokens.bad,
+                            fontSize: 13,
+                            height: 1.35,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        )
                         : Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [

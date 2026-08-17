@@ -128,6 +128,8 @@ void main() {
     expect(screen, contains('checkinsTrend'));
     expect(screen, contains('showDashboardToolsCatalogSheet'));
     expect(screen, contains('alunoFromAlertaResumo'));
+    expect(screen, contains('if (onboardingFromHome != null)'));
+    expect(screen, contains('statusFromHome: onboardingFromHome'));
 
     final semanticsCount = 'Semantics('.allMatches(screen).length;
     expect(semanticsCount, greaterThanOrEqualTo(10));

@@ -4,13 +4,16 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../data/onboarding_status_data.dart';
 import '../data/setup_steps_catalog.dart';
 import '../providers/onboarding_provider.dart';
 import '../../perfil/providers/perfil_provider.dart';
 import '../widgets/setup_step_widgets.dart';
 
 class SetupOnboardingWidget extends ConsumerWidget {
-  const SetupOnboardingWidget({super.key});
+  const SetupOnboardingWidget({super.key, this.statusFromHome});
+
+  final OnboardingStatusData? statusFromHome;
 
   Future<void> _openStep(
     BuildContext context,
@@ -35,7 +38,10 @@ class SetupOnboardingWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final statusAsync = ref.watch(onboardingStatusProvider);
+    final statusAsync =
+        statusFromHome != null
+            ? AsyncValue<OnboardingStatusData>.data(statusFromHome!)
+            : ref.watch(onboardingStatusProvider);
     final primary = Theme.of(context).colorScheme.primary;
     final mute =
         Theme.of(context).brightness == Brightness.dark

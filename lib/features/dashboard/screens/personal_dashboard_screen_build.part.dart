@@ -115,20 +115,23 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                 }
 
                 final onboardingFromHome = home.onboardingResumo;
-                final onboardingAsync = ref.watch(onboardingStatusProvider);
-                final onboardingIncomplete =
-                    onboardingFromHome != null
-                        ? !onboardingFromHome.ativacaoCompleta
-                        : onboardingAsync.maybeWhen(
-                          data: (s) => !s.ativacaoCompleta,
-                          orElse: () => false,
-                        );
-                final primeiroTreinoCriado =
-                    onboardingFromHome?.primeiroTreinoCriado ??
-                    onboardingAsync.maybeWhen(
-                      data: (s) => s.primeiroTreinoCriado,
-                      orElse: () => false,
-                    );
+                late final bool onboardingIncomplete;
+                late final bool primeiroTreinoCriado;
+                if (onboardingFromHome != null) {
+                  onboardingIncomplete = !onboardingFromHome.ativacaoCompleta;
+                  primeiroTreinoCriado =
+                      onboardingFromHome.primeiroTreinoCriado;
+                } else {
+                  final onboardingAsync = ref.watch(onboardingStatusProvider);
+                  onboardingIncomplete = onboardingAsync.maybeWhen(
+                    data: (s) => !s.ativacaoCompleta,
+                    orElse: () => false,
+                  );
+                  primeiroTreinoCriado = onboardingAsync.maybeWhen(
+                    data: (s) => s.primeiroTreinoCriado,
+                    orElse: () => false,
+                  );
+                }
                 if (_focusPreferenceLoaded &&
                     !_autoFocusApplied &&
                     !_sessionFocusTouched) {
@@ -237,7 +240,8 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                                 _attentionSectionResetToken,
                             onReviewAttention: openAttentionReview,
                             onboardingIncomplete: onboardingIncomplete,
-                            primeiroTreinoCriado: primeiroTreinoCriado ?? false,
+                            primeiroTreinoCriado: primeiroTreinoCriado,
+                            onboardingFromHome: onboardingFromHome,
                             prioritiesChipVisible: showStickyPrioritiesAction,
                             pulseEmptyHint: home.pulse?.emptyHint,
                             notificacoesNaoLidasOverride:

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/ux/fx_hub_freshness.dart';
 
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -36,11 +37,26 @@ class _BroadcastScreenState extends ConsumerState<BroadcastScreen> {
   final _mensagemCtrl = TextEditingController();
   String _publicoAlvo = 'TODOS';
   bool _enviando = false;
+  DateTime? _fetchedAt;
+  ProviderSubscription<AsyncValue<List<Broadcast>>>? _freshnessSub;
 
   static const _publicos = ['TODOS', 'ONLINE', 'PRESENCIAL', 'HIBRIDO'];
 
   @override
+  void initState() {
+    super.initState();
+    _freshnessSub = ref.listenManual(_broadcastHistoricoProvider, (_, next) {
+      if (!next.hasValue || next.isLoading || next.hasError) return;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        setState(() => _fetchedAt = DateTime.now());
+      });
+    }, fireImmediately: true);
+  }
+
+  @override
   void dispose() {
+    _freshnessSub?.close();
     _tituloCtrl.dispose();
     _mensagemCtrl.dispose();
     super.dispose();
@@ -82,45 +98,23 @@ class _BroadcastScreenState extends ConsumerState<BroadcastScreen> {
     final ink = chrome.ink;
     final mute = chrome.mute;
     final brand = Theme.of(context).colorScheme.primary;
+    final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
 
     return fxScreenA11yScope(
       label: 'Broadcast',
       child: FxShellScaffold(
         useMesh: true,
         safeArea: false,
+        appBar: FxShellAppBar(
+          title: 'Broadcasts',
+          subtitle: freshnessLabel ?? 'Central de mensageria',
+        ),
         body: SafeArea(
           child: RefreshIndicator(
             onRefresh: () async => ref.invalidate(_broadcastHistoricoProvider),
             child: ListView(
               padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 10, 16, 28),
               children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(4, 0, 4, 18),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'CENTRAL DE MENSAGERIA',
-                        style: TextStyle(
-                          color: brand,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: 1.0,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Broadcasts',
-                        style: TextStyle(
-                          color: ink,
-                          fontSize: 26,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: -0.4,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
                 Container(
                   padding: const EdgeInsets.all(18),
                   decoration: fxListCardDecoration(

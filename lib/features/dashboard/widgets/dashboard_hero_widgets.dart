@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/theme/focux_hub_typography.dart';
 
 import '../utils/dashboard_readability.dart';
 

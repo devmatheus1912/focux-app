@@ -6,7 +6,6 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../data/depoimento_repository.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_empty_state.dart';
-import '../../../core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/fx_motion.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
@@ -60,9 +59,7 @@ class _State extends ConsumerState<DepoimentoAlunoScreen> {
           subtitle: 'Conte como foi sua experiência',
         ),
         body:
-            _enviando
-                ? const Center(child: FxLoading())
-                : _enviado
+            _enviado
                 ? FxEmptyState(
                   icon: 'circle-check',
                   title: 'Depoimento enviado!',
@@ -94,7 +91,10 @@ class _State extends ConsumerState<DepoimentoAlunoScreen> {
                           children: List.generate(
                             5,
                             (i) => GestureDetector(
-                              onTap: () => setState(() => _nota = i + 1),
+                              onTap:
+                                  _enviando
+                                      ? null
+                                      : () => setState(() => _nota = i + 1),
                               child: Padding(
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 8,
@@ -123,6 +123,7 @@ class _State extends ConsumerState<DepoimentoAlunoScreen> {
                           controller: _textoCtrl,
                           maxLines: 5,
                           maxLength: 500,
+                          enabled: !_enviando,
                           decoration: const InputDecoration(
                             hintText:
                                 'Conte como foi sua experiência com seu personal trainer...',

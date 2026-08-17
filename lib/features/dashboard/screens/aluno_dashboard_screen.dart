@@ -12,6 +12,7 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_hub_header.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -46,15 +47,7 @@ class AlunoDashboardScreen extends ConsumerStatefulWidget {
 }
 
 class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      showNpsPromptIfNeeded(context, ref);
-      ref.invalidate(alunoRecoveryProvider);
-    });
-  }
+  var _npsPrompted = false;
 
   @override
   Widget build(BuildContext context) {
@@ -109,6 +102,13 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
               ),
           data: (home) {
             MeusTreinosMemCache.save(home.treinos);
+            if (home.npsDeveResponder && !_npsPrompted) {
+              _npsPrompted = true;
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (!mounted) return;
+                showNpsPromptIfNeeded(context, ref, deveResponder: true);
+              });
+            }
             final experience = buildAlunoHomeExperience(
               aluno: home.aluno,
               medidas: home.medidas,
@@ -140,11 +140,14 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
                       isDark: isDark,
                     ),
                     const SizedBox(height: 12),
-                    AlunoRecoveryCard(isDark: isDark),
+                    AlunoRecoveryCard(isDark: isDark, snapshot: home.recovery),
                     const SizedBox(height: 12),
-                    CoachProativoCard(isDark: isDark),
+                    CoachProativoCard(
+                      isDark: isDark,
+                      mensagens: home.coachMensagens,
+                    ),
                     const SizedBox(height: 12),
-                    const AlunoUpsellCarousel(),
+                    AlunoUpsellCarousel(ofertas: home.upsellPendentes),
                     const SizedBox(height: 12),
                     _AlunoHeroCard(
                       aluno: home.aluno,
@@ -152,7 +155,22 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
                       isDark: isDark,
                     ),
                     const SizedBox(height: 12),
-                    const ProgressoSemanalWidget(),
+                    if (home.treinos.isEmpty && home.historico.isEmpty)
+                      FxEmptyState(
+                        icon: 'dumbbell',
+                        title: 'Nenhum treino ainda',
+                        subtitle:
+                            'Quando houver treinos ou check-ins, o progresso aparece aqui.',
+                        action: FxEmptyAction(
+                          label: 'Ver treinos',
+                          onTap: () => context.push('/checkin/treinos'),
+                        ),
+                      )
+                    else
+                      ProgressoSemanalWidget(
+                        treinos: home.treinos,
+                        historico: home.historico,
+                      ),
                     const SizedBox(height: TokensStrip.s4),
                     _PerformanceEvolutionCard(
                       historicoAsync: AsyncValue.data(home.historico),

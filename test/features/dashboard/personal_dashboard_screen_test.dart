@@ -144,7 +144,9 @@ void main() {
           overrides: [
             dashboardHomeProvider.overrideWith((ref) async => home),
             onboardingStatusProvider.overrideWith(
-              (ref) async => home.onboardingResumo!,
+              (ref) async => throw StateError(
+                'Home BFF already sent onboardingResumo',
+              ),
             ),
             planoFeaturesProvider.overrideWith((ref) {
               final notifier = PlanoFeaturesNotifier(
