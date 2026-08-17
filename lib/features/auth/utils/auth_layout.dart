@@ -14,18 +14,24 @@ double authLogoWidthFor(BuildContext context, {bool withTagline = false}) {
 }
 
 /// Padding de scroll com safe-area inferior + folga para home indicator / teclado.
+///
+/// [ensureFooter]: reserva extra no fim (rodapé legal / link secundário)
+/// para não cortar no home indicator nem sumir atrás do teclado.
 EdgeInsets authScrollPadding(
   BuildContext context, {
   double horizontal = TokensStrip.s5,
   double top = 40,
   double bottomExtra = TokensStrip.s5,
+  bool ensureFooter = false,
 }) {
   final viewBottom = MediaQuery.viewPaddingOf(context).bottom;
   final keyboard = MediaQuery.viewInsetsOf(context).bottom;
+  final keyboardReserve = keyboard > 0 ? TokensStrip.s5 : 0.0;
+  final footerReserve = ensureFooter ? TokensStrip.s5 : 0.0;
   return EdgeInsets.fromLTRB(
     horizontal,
     top,
     horizontal,
-    bottomExtra + viewBottom + (keyboard > 0 ? TokensStrip.s3 : 0),
+    bottomExtra + viewBottom + keyboardReserve + footerReserve,
   );
 }

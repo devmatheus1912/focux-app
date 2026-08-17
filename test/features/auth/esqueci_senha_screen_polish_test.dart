@@ -18,6 +18,8 @@ void main() {
     // Toggle de papel + barra sticky (marca sempre no viewport).
     expect(screen, contains('AuthRoleToggle'));
     expect(screen, contains('AuthStickyRoleBar'));
+    expect(screen, contains('ensureFooter: true'));
+    expect(screen, contains('Spacer'));
     expect(screen, contains('AuthFormEntrance'));
 
     // Papel é lido da query e propagado de volta ao login.

@@ -255,8 +255,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     padding: authScrollPadding(
                       context,
                       top: TokensStrip.s3,
-                      bottomExtra: 28,
+                      bottomExtra: TokensStrip.s5,
+                      ensureFooter: true,
                     ),
+                    keyboardDismissBehavior:
+                        ScrollViewKeyboardDismissBehavior.onDrag,
                     child: Form(
                       key: _formKey,
                       child: AuthFormEntrance(
@@ -453,46 +456,49 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       dark: true,
                       onPressed: _loadingGoogle ? null : _submitGoogle,
                     ),
-                    const SizedBox(height: 14),
-                    Center(
-                      child: Text.rich(
-                        TextSpan(
-                          style: AppTypography.inter(
-                            color: heroTealSurface(0.78),
-                            fontSize: 11.5,
-                            height: 1.5,
+                    const SizedBox(height: TokensStrip.s4),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: TokensStrip.s2),
+                      child: Center(
+                        child: Text.rich(
+                          TextSpan(
+                            style: AppTypography.inter(
+                              color: heroTealSurface(0.78),
+                              fontSize: 11.5,
+                              height: 1.45,
+                            ),
+                            children: [
+                              const TextSpan(
+                                text: 'Ao criar, você concorda com os ',
+                              ),
+                              TextSpan(
+                                text: 'Termos de uso',
+                                style: TextStyle(
+                                  color: primary,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                                recognizer:
+                                    TapGestureRecognizer()
+                                      ..onTap = () => FocuxLegal.openTerms(),
+                              ),
+                              const TextSpan(text: ' e a '),
+                              TextSpan(
+                                text: 'Política de privacidade',
+                                style: TextStyle(
+                                  color: primary,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                                recognizer:
+                                    TapGestureRecognizer()
+                                      ..onTap =
+                                          () => FocuxLegal.openPrivacy(),
+                              ),
+                              const TextSpan(text: '.'),
+                            ],
                           ),
-                          children: [
-                            const TextSpan(
-                              text: 'Ao criar, você concorda com os ',
-                            ),
-                            TextSpan(
-                              text: 'Termos de uso',
-                              style: TextStyle(
-                                color: primary,
-                                fontWeight: FontWeight.w700,
-                              ),
-                              recognizer:
-                                  TapGestureRecognizer()
-                                    ..onTap =
-                                        () => FocuxLegal.openTerms(),
-                            ),
-                            const TextSpan(text: ' e a '),
-                            TextSpan(
-                              text: 'Política de privacidade',
-                              style: TextStyle(
-                                color: primary,
-                                fontWeight: FontWeight.w700,
-                              ),
-                              recognizer:
-                                  TapGestureRecognizer()
-                                    ..onTap =
-                                        () => FocuxLegal.openPrivacy(),
-                            ),
-                            const TextSpan(text: '.'),
-                          ],
+                          textAlign: TextAlign.center,
+                          softWrap: true,
                         ),
-                        textAlign: TextAlign.center,
                       ),
                     ),
                           ],

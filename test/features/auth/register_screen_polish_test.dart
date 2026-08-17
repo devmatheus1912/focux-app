@@ -24,7 +24,7 @@ void main() {
       lessThan(screen.indexOf('onboardingExistingAccountCta')),
     );
     expect(screen, contains('AuthStickyRoleBar'));
-    expect(screen, contains('authScrollPadding'));
+    expect(screen, contains('ensureFooter: true'));
     expect(screen, contains('AuthFormEntrance'));
     expect(screen, contains('dark: true'));
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(8));

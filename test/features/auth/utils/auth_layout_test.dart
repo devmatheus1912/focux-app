@@ -63,4 +63,60 @@ void main() {
     expect(padding.bottom, greaterThanOrEqualTo(44));
     expect(padding.left, 24);
   });
+
+  testWidgets('authScrollPadding reserva teclado e rodapé legal', (
+    tester,
+  ) async {
+    late EdgeInsets base;
+    late EdgeInsets withFooter;
+    late EdgeInsets withKeyboard;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(
+            size: Size(390, 840),
+            viewPadding: EdgeInsets.only(bottom: 24),
+            viewInsets: EdgeInsets.zero,
+          ),
+          child: Builder(
+            builder: (context) {
+              base = authScrollPadding(context, bottomExtra: 20);
+              withFooter = authScrollPadding(
+                context,
+                bottomExtra: 20,
+                ensureFooter: true,
+              );
+              return const SizedBox.shrink();
+            },
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(
+            size: Size(390, 840),
+            viewPadding: EdgeInsets.only(bottom: 24),
+            viewInsets: EdgeInsets.only(bottom: 280),
+          ),
+          child: Builder(
+            builder: (context) {
+              withKeyboard = authScrollPadding(
+                context,
+                bottomExtra: 20,
+                ensureFooter: true,
+              );
+              return const SizedBox.shrink();
+            },
+          ),
+        ),
+      ),
+    );
+
+    expect(withFooter.bottom, greaterThan(base.bottom));
+    expect(withKeyboard.bottom, greaterThan(withFooter.bottom));
+  });
 }

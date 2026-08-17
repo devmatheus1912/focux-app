@@ -198,18 +198,27 @@ class _EsqueciSenhaScreenState extends ConsumerState<EsqueciSenhaScreen> {
                   ),
                 ),
                 Expanded(
-                  child: SingleChildScrollView(
-                    padding: authScrollPadding(
-                      context,
-                      top: TokensStrip.s3,
-                      bottomExtra: 24,
-                    ),
-                    child: Form(
-                      key: _formKey,
-                      child: AuthFormEntrance(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final scrollPad = authScrollPadding(
+                        context,
+                        top: TokensStrip.s3,
+                        bottomExtra: TokensStrip.s4,
+                        ensureFooter: true,
+                      );
+                      final minBody = (constraints.maxHeight -
+                              scrollPad.vertical)
+                          .clamp(0.0, constraints.maxHeight);
+                      return SingleChildScrollView(
+                        padding: scrollPad,
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(minHeight: minBody),
+                          child: Form(
+                            key: _formKey,
+                            child: AuthFormEntrance(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
                     Text(
                       'Recuperar senha',
                       style: AppTypography.inter(
@@ -232,7 +241,7 @@ class _EsqueciSenhaScreenState extends ConsumerState<EsqueciSenhaScreen> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 32),
+                    const SizedBox(height: TokensStrip.s5),
                     AuthRoleToggle(
                       isAluno: _isAluno,
                       onPersonalTap: () {
@@ -264,7 +273,7 @@ class _EsqueciSenhaScreenState extends ConsumerState<EsqueciSenhaScreen> {
                         return null;
                       },
                     ),
-                    const SizedBox(height: TokensStrip.s5),
+                    const SizedBox(height: TokensStrip.s4),
                     if (_emailDeliveryAvailable == false) ...[
                       AuthOperationalNotice(
                         icon: Icons.mark_email_unread_outlined,
@@ -317,19 +326,24 @@ class _EsqueciSenhaScreenState extends ConsumerState<EsqueciSenhaScreen> {
                       loading: _loading,
                       onPressed: _loading ? null : _submit,
                     ),
-                    const SizedBox(height: 20),
-                      Center(
-                        child: AuthTextLink(
-                          text: 'Lembrei a senha · ',
-                          actionText: 'Voltar ao login',
-                          onTap: () => context.go(_loginPath),
-                          fontSize: 13,
-                        ),
-                      ),
-                          ],
-                        ),
+                    const Spacer(),
+                    const SizedBox(height: TokensStrip.s5),
+                    Center(
+                      child: AuthTextLink(
+                        text: 'Lembrei a senha · ',
+                        actionText: 'Voltar ao login',
+                        onTap: () => context.go(_loginPath),
+                        fontSize: 13,
+                        textColor: heroTealSurface(0.78),
                       ),
                     ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 ),
               ],
