@@ -3,10 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/widgets/fx_empty_state.dart';
+import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
-import '../../../core/widgets/fx_motion.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/relatorio_repository.dart';
 import '../../../core/widgets/fx_loading.dart';
@@ -83,9 +85,19 @@ class _RelatorioGlobalScreenState extends ConsumerState<RelatorioGlobalScreen> {
               _loading
                   ? const FxLoading()
                   : _erro != null
-                  ? _ErrorState(message: _erro!, onRetry: _load)
+                  ? FxErrorState(
+                    chromeOnDark: ShellChrome.of(context).isDark,
+                    primary: Theme.of(context).colorScheme.primary,
+                    message: _erro!,
+                    onRetry: _load,
+                  )
                   : _dados == null
-                  ? const SizedBox.shrink()
+                  ? const FxEmptyState(
+                    icon: 'bar-chart-2',
+                    title: 'Sem relatório ainda',
+                    subtitle:
+                        'Quando houver treinos na base, o panorama global aparece aqui.',
+                  )
                   : _ReportContent(dados: _dados!, onRefresh: _load),
         ),
       ),
@@ -166,7 +178,11 @@ class _ReportContent extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             if (dados.maisComprometidos.isEmpty)
-              _EmptyList(text: 'Ainda nao ha treinos concluidos no periodo.')
+              const FxEmptyState(
+                icon: 'users',
+                title: 'Ainda não há treinos concluídos',
+                subtitle: 'O ranking aparece quando os alunos concluírem treinos.',
+              )
             else
               ...dados.maisComprometidos
                   .take(5)
@@ -189,7 +205,11 @@ class _ReportContent extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             if (dados.menosComprometidos.isEmpty)
-              _EmptyList(text: 'Nenhum aluno em risco neste recorte.')
+              const FxEmptyState(
+                icon: 'activity',
+                title: 'Nenhum aluno em risco',
+                subtitle: 'Ninguém precisa de atenção extra neste recorte.',
+              )
             else
               ...dados.menosComprometidos
                   .take(5)
@@ -214,7 +234,8 @@ class _HeroCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final chrome = ShellChrome.of(context);
+    final isDark = chrome.isDark;
     final primary = Theme.of(context).colorScheme.primary;
     final aderencia = dados.aderenciaMediaGeral.clamp(0, 100).toDouble();
     final status =
@@ -361,7 +382,7 @@ class _MetricTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final chrome = ShellChrome.of(context);
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: fxListCardDecoration(context, accent: tone, radius: 18),
@@ -386,10 +407,7 @@ class _MetricTile extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    color:
-                        isDark
-                            ? EagleTokens.darkInkMute
-                            : TokensStrip.textSecondary,
+                    color: chrome.mute,
                     fontSize: 11.5,
                     fontWeight: FontWeight.w700,
                   ),
@@ -400,8 +418,7 @@ class _MetricTile extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    color:
-                        isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
+                    color: chrome.ink,
                     fontSize: 18,
                     fontWeight: FontWeight.w900,
                   ),
@@ -430,7 +447,7 @@ class _SectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final chrome = ShellChrome.of(context);
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -451,7 +468,7 @@ class _SectionHeader extends StatelessWidget {
               Text(
                 title,
                 style: TextStyle(
-                  color: isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
+                  color: chrome.ink,
                   fontSize: 17,
                   fontWeight: FontWeight.w900,
                 ),
@@ -460,10 +477,7 @@ class _SectionHeader extends StatelessWidget {
               Text(
                 subtitle,
                 style: TextStyle(
-                  color:
-                      isDark
-                          ? EagleTokens.darkInkMute
-                          : TokensStrip.textSecondary,
+                  color: chrome.mute,
                   fontSize: 12.5,
                 ),
               ),
@@ -495,7 +509,8 @@ class _AlunoRankCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final chrome = ShellChrome.of(context);
+    final isDark = chrome.isDark;
     final aderencia = _aderencia.clamp(0, 100).toDouble();
     final tone =
         tipo == _TipoRank.top
@@ -522,10 +537,7 @@ class _AlunoRankCard extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          color:
-                              isDark
-                                  ? EagleTokens.darkInk
-                                  : TokensStrip.textPrimary,
+                          color: chrome.ink,
                           fontWeight: FontWeight.w900,
                           fontSize: 15.5,
                         ),
@@ -538,10 +550,7 @@ class _AlunoRankCard extends StatelessWidget {
                 Text(
                   '${aluno.treinosConcluidos} de ${aluno.totalTreinos} treinos concluidos',
                   style: TextStyle(
-                    color:
-                        isDark
-                            ? EagleTokens.darkInkMute
-                            : TokensStrip.textSecondary,
+                    color: chrome.mute,
                     fontSize: 12.5,
                     fontWeight: FontWeight.w600,
                   ),
@@ -552,10 +561,7 @@ class _AlunoRankCard extends StatelessWidget {
                   child: LinearProgressIndicator(
                     value: aderencia / 100,
                     minHeight: 6,
-                    backgroundColor:
-                        isDark
-                            ? EagleTokens.darkLine
-                            : TokensStrip.borderDefault,
+                    backgroundColor: chrome.line,
                     valueColor: AlwaysStoppedAnimation(tone),
                   ),
                 ),
@@ -567,10 +573,7 @@ class _AlunoRankCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      color:
-                          isDark
-                              ? EagleTokens.darkInkMute
-                              : TokensStrip.textSecondary,
+                      color: chrome.mute,
                       fontSize: 11.5,
                     ),
                   ),
@@ -652,85 +655,6 @@ class _PercentBadge extends StatelessWidget {
           color: tone,
           fontSize: 12,
           fontWeight: FontWeight.w900,
-        ),
-      ),
-    );
-  }
-}
-
-class _EmptyList extends StatelessWidget {
-  final String text;
-
-  const _EmptyList({required this.text});
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: fxListCardDecoration(context, radius: 18),
-      child: Text(
-        text,
-        textAlign: TextAlign.center,
-        style: TextStyle(
-          color: isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
-          fontWeight: FontWeight.w700,
-        ),
-      ),
-    );
-  }
-}
-
-class _ErrorState extends StatelessWidget {
-  final String message;
-  final VoidCallback onRetry;
-
-  const _ErrorState({required this.message, required this.onRetry});
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(TokensStrip.s5),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.error_outline_rounded,
-              size: 46,
-              color: Theme.of(context).colorScheme.error,
-            ),
-            const SizedBox(height: 12),
-            Text(
-              'Nao foi possivel carregar o relatorio.',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
-                fontWeight: FontWeight.w900,
-                fontSize: 16,
-              ),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color:
-                    isDark
-                        ? EagleTokens.darkInkMute
-                        : TokensStrip.textSecondary,
-                fontSize: 12.5,
-              ),
-            ),
-            const SizedBox(height: 14),
-            FxLiquidPrimaryButton(
-              label: 'Tentar novamente',
-              icon: Icons.refresh_rounded,
-              expand: false,
-              onPressed: onRetry,
-            ),
-          ],
         ),
       ),
     );

@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../core/api/media_upload_service.dart';
-import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/galeria_repository.dart';
+import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/feedback_helper.dart';
-import 'package:focux_app/core/widgets/fx_motion.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -116,7 +116,7 @@ class _State extends ConsumerState<GaleriaScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final chrome = ShellChrome.of(context);
     return fxScreenA11yScope(
       label: 'Galeria',
       child: FxShellScaffold(
@@ -143,43 +143,20 @@ class _State extends ConsumerState<GaleriaScreen> {
                 ? const FxLoading()
                 : _erro != null
                 ? FxErrorState(
-                  chromeOnDark: isDark,
+                  chromeOnDark: chrome.isDark,
                   primary: Theme.of(context).colorScheme.primary,
                   message: _erro!,
                   onRetry: _load,
                   title: 'Não conseguimos carregar a galeria',
                 )
                 : _fotos.isEmpty
-                ? Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.photo_library_outlined,
-                        size: 64,
-                        color:
-                            isDark
-                                ? EagleTokens.darkInkMute
-                                : TokensStrip.textSecondary,
-                      ),
-                      const SizedBox(height: TokensStrip.s4),
-                      Text(
-                        'Nenhuma foto ainda.',
-                        style: TextStyle(
-                          color:
-                              isDark
-                                  ? EagleTokens.darkInkMute
-                                  : TokensStrip.textSecondary,
-                        ),
-                      ),
-                      const SizedBox(height: TokensStrip.s4),
-                      FxLiquidPrimaryButton(
-                        icon: Icons.add_photo_alternate_outlined,
-                        label: 'Adicionar foto',
-                        expand: false,
-                        onPressed: _add,
-                      ),
-                    ],
+                ? FxEmptyState(
+                  icon: 'image',
+                  title: 'Nenhuma foto ainda',
+                  subtitle: 'Adicione até 9 fotos para o seu perfil público.',
+                  action: FxEmptyAction(
+                    label: 'Adicionar foto',
+                    onTap: _add,
                   ),
                 )
                 : GridView.builder(

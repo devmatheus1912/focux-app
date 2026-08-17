@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/shell_chrome.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/alertas_repository.dart';
 import '../../../core/router/safe_navigation.dart';
+import '../../../core/widgets/fx_empty_state.dart';
+import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -64,7 +67,8 @@ class _AlertaDetalheScreenState extends ConsumerState<AlertaDetalheScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final chrome = ShellChrome.of(context);
+    final primary = Theme.of(context).colorScheme.primary;
 
     return fxScreenA11yScope(
       label: 'Análise — ${widget.alunoNome}',
@@ -81,34 +85,19 @@ class _AlertaDetalheScreenState extends ConsumerState<AlertaDetalheScreen> {
             _loading
                 ? const FxLoading()
                 : _erro != null
-                ? Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(TokensStrip.s5),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.error_outline,
-                          size: 48,
-                          color: theme.colorScheme.error,
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          'Erro ao carregar: $_erro',
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 12),
-                        FxLiquidPrimaryButton(
-                          label: 'Tentar novamente',
-                          expand: false,
-                          onPressed: _load,
-                        ),
-                      ],
-                    ),
-                  ),
+                ? FxErrorState(
+                  chromeOnDark: chrome.isDark,
+                  primary: primary,
+                  message: _erro!,
+                  onRetry: _load,
                 )
                 : _detalhe == null
-                ? const SizedBox.shrink()
+                ? const FxEmptyState(
+                  icon: 'activity',
+                  title: 'Sem dados deste alerta',
+                  subtitle:
+                      'Não encontramos o detalhe deste aluno agora. Tente atualizar.',
+                )
                 : _Body(
                   detalhe: _detalhe!,
                   alunoId: widget.alunoId,
@@ -196,7 +185,7 @@ class _CardUltimoTreino extends StatelessWidget {
                   Text(
                     'Último Treino',
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      color: TokensStrip.textSecondary,
+                      color: ShellChrome.of(context).mute,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -206,7 +195,7 @@ class _CardUltimoTreino extends StatelessWidget {
                       fontWeight: FontWeight.w600,
                       color:
                           ultimoTreino == null
-                              ? TokensStrip.textSecondary
+                              ? ShellChrome.of(context).mute
                               : null,
                     ),
                   ),
@@ -247,7 +236,7 @@ class _CardCheckIns extends StatelessWidget {
                 Text(
                   'Check-ins (30d)',
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    color: TokensStrip.textSecondary,
+                    color: ShellChrome.of(context).mute,
                   ),
                 ),
                 const Spacer(),
@@ -311,7 +300,7 @@ class _CardFinanceiro extends StatelessWidget {
                 Text(
                   'Situação Financeira',
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    color: TokensStrip.textSecondary,
+                    color: ShellChrome.of(context).mute,
                   ),
                 ),
                 const SizedBox(height: 6),

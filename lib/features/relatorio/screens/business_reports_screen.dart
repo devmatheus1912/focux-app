@@ -4,8 +4,11 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_empty_state.dart';
+import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../features/auth/providers/auth_provider.dart';
@@ -27,6 +30,7 @@ class BusinessReportsScreen extends ConsumerStatefulWidget {
 class _BusinessReportsScreenState extends ConsumerState<BusinessReportsScreen> {
   BusinessSnapshot? _snapshot;
   bool _loading = true;
+  String? _erro;
 
   @override
   void initState() {
@@ -35,7 +39,10 @@ class _BusinessReportsScreenState extends ConsumerState<BusinessReportsScreen> {
   }
 
   Future<void> _carregar() async {
-    setState(() => _loading = true);
+    setState(() {
+      _loading = true;
+      _erro = null;
+    });
     try {
       final s = await ref.read(_repoProvider).snapshot();
       if (!mounted) return;
@@ -43,13 +50,21 @@ class _BusinessReportsScreenState extends ConsumerState<BusinessReportsScreen> {
         _snapshot = s;
         _loading = false;
       });
-    } catch (_) {
-      if (mounted) setState(() => _loading = false);
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _loading = false;
+          _erro = friendlyError(e);
+        });
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final chrome = ShellChrome.of(context);
+    final primary = Theme.of(context).colorScheme.primary;
+
     return fxScreenA11yScope(
       label: 'Relatório de Negócio',
       child: FxShellScaffold(
@@ -62,11 +77,18 @@ class _BusinessReportsScreenState extends ConsumerState<BusinessReportsScreen> {
         body:
             _loading
                 ? const Center(child: FxLoading())
+                : _erro != null
+                ? FxErrorState(
+                  chromeOnDark: chrome.isDark,
+                  primary: primary,
+                  message: _erro!,
+                  onRetry: _carregar,
+                )
                 : _snapshot == null
                 ? FxEmptyState(
                   icon: 'bar-chart-2',
-                  title: 'Não foi possível carregar o relatório',
-                  subtitle: 'Verifique sua conexão e tente novamente.',
+                  title: 'Sem dados do relatório',
+                  subtitle: 'Ainda não há métricas de negócio para exibir.',
                   action: FxEmptyAction(
                     label: 'Tentar novamente',
                     onTap: _carregar,

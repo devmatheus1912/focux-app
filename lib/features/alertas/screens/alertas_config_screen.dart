@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/shell_chrome.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/alertas_repository.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_motion.dart';
@@ -83,6 +85,7 @@ class _AlertasConfigScreenState extends ConsumerState<AlertasConfigScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final primary = theme.colorScheme.primary;
+    final chrome = ShellChrome.of(context);
 
     return fxScreenA11yScope(
       label: 'Configurar Alertas',
@@ -96,31 +99,11 @@ class _AlertasConfigScreenState extends ConsumerState<AlertasConfigScreen> {
             _loading
                 ? const FxLoading()
                 : _erro != null
-                ? Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(TokensStrip.s5),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.error_outline,
-                          size: 48,
-                          color: theme.colorScheme.error,
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          'Erro ao carregar: $_erro',
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 12),
-                        FxLiquidPrimaryButton(
-                          label: 'Tentar novamente',
-                          expand: false,
-                          onPressed: _load,
-                        ),
-                      ],
-                    ),
-                  ),
+                ? FxErrorState(
+                  chromeOnDark: chrome.isDark,
+                  primary: primary,
+                  message: _erro!,
+                  onRetry: _load,
                 )
                 : Padding(
                   padding: const EdgeInsets.all(20),
@@ -174,7 +157,7 @@ class _AlertasConfigScreenState extends ConsumerState<AlertasConfigScreen> {
                               Text(
                                 'Alerta quando o aluno não treina por X dias consecutivos',
                                 style: theme.textTheme.bodySmall?.copyWith(
-                                  color: TokensStrip.textSecondary,
+                                  color: chrome.mute,
                                 ),
                               ),
                               Slider(
@@ -195,13 +178,13 @@ class _AlertasConfigScreenState extends ConsumerState<AlertasConfigScreen> {
                                   Text(
                                     '1 dia',
                                     style: theme.textTheme.bodySmall?.copyWith(
-                                      color: TokensStrip.textSecondary,
+                                      color: chrome.mute,
                                     ),
                                   ),
                                   Text(
                                     '30 dias',
                                     style: theme.textTheme.bodySmall?.copyWith(
-                                      color: TokensStrip.textSecondary,
+                                      color: chrome.mute,
                                     ),
                                   ),
                                 ],
@@ -260,7 +243,7 @@ class _AlertasConfigScreenState extends ConsumerState<AlertasConfigScreen> {
                               Text(
                                 'Alerta quando a taxa de aderência cair abaixo deste valor',
                                 style: theme.textTheme.bodySmall?.copyWith(
-                                  color: TokensStrip.textSecondary,
+                                  color: chrome.mute,
                                 ),
                               ),
                               Slider(
@@ -282,13 +265,13 @@ class _AlertasConfigScreenState extends ConsumerState<AlertasConfigScreen> {
                                   Text(
                                     '10%',
                                     style: theme.textTheme.bodySmall?.copyWith(
-                                      color: TokensStrip.textSecondary,
+                                      color: chrome.mute,
                                     ),
                                   ),
                                   Text(
                                     '90%',
                                     style: theme.textTheme.bodySmall?.copyWith(
-                                      color: TokensStrip.textSecondary,
+                                      color: chrome.mute,
                                     ),
                                   ),
                                 ],

@@ -7,6 +7,7 @@ import '../../../core/utils/fx_utils.dart';
 import '../../../core/api/media_upload_service.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/feed_repository.dart';
@@ -454,7 +455,8 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final chrome = ShellChrome.of(context);
+    final isDark = chrome.isDark;
     final primary = Theme.of(context).colorScheme.primary;
     final primaryDeep = BrandPalette.deep(primary);
     return fxScreenA11yScope(
@@ -525,10 +527,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                                   child: Text(
                                     'Feed',
                                     style: TextStyle(
-                                      color:
-                                          isDark
-                                              ? EagleTokens.darkInk
-                                              : TokensStrip.textPrimary,
+                                      color: chrome.ink,
                                       fontSize: 28,
                                       fontWeight: FontWeight.w900,
                                       letterSpacing: -0.5,

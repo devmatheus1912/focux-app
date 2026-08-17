@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/utils/friendly_error.dart';
@@ -79,7 +80,7 @@ class _DunningOpsScreenState extends ConsumerState<DunningOpsScreen> {
   @override
   Widget build(BuildContext context) {
     final snap = _snapshot;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
 
     return fxScreenA11yScope(
@@ -96,7 +97,7 @@ class _DunningOpsScreenState extends ConsumerState<DunningOpsScreen> {
                 ? const Center(child: FxLoading())
                 : _erro != null
                 ? FxErrorState(
-                  chromeOnDark: isDark,
+                  chromeOnDark: chrome.isDark,
                   primary: primary,
                   message: _erro!,
                   onRetry: _carregar,
@@ -116,13 +117,13 @@ class _DunningOpsScreenState extends ConsumerState<DunningOpsScreen> {
                                 style: AppTypography.inter(
                                   fontWeight: FontWeight.w800,
                                   fontSize: 16,
-                                  color: fxScreenInk(context),
+                                  color: chrome.ink,
                                 ),
                               ),
                               const SizedBox(height: 6),
                               Text(
                                 '${snap.abertas} falhas em aberto · ${snap.recuperadas} recuperadas de ${snap.total}',
-                                style: TextStyle(color: fxScreenMute(context)),
+                                style: TextStyle(color: chrome.mute),
                               ),
                             ],
                           ),

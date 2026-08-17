@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_empty_state.dart';
@@ -71,11 +72,13 @@ class _NpsDashboardScreenState extends ConsumerState<NpsDashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isDark = chrome.isDark;
     return fxScreenA11yScope(
       label: 'NPS & Satisfação',
       child: FxShellScaffold(
+        useMesh: true,
         appBar: FxShellAppBar(
           title: 'NPS & Satisfação',
           onBack: () => context.pop(),
@@ -85,7 +88,7 @@ class _NpsDashboardScreenState extends ConsumerState<NpsDashboardScreen> {
                 ? const Center(child: FxLoading())
                 : _erro != null
                 ? FxErrorState(
-                  chromeOnDark: isDark,
+                  chromeOnDark: chrome.isDark,
                   primary: primary,
                   message: _erro!,
                   onRetry: _load,
@@ -220,9 +223,7 @@ class _NpsDashboardScreenState extends ConsumerState<NpsDashboardScreen> {
                       'Detrator · ${n.criadoEm}',
                       style: TextStyle(
                         fontSize: 12,
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.onSurface.withValues(alpha: 0.65),
+                        color: ShellChrome.of(context).mute,
                       ),
                     ),
                   ],

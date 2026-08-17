@@ -35,14 +35,13 @@ class _PostAuthorHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final name =
         post.autorNome?.trim().isNotEmpty == true
             ? post.autorNome!.trim()
             : 'Personal';
     final avatarUrl = post.autorAvatarUrl?.trim();
     final hasAvatar = avatarUrl != null && avatarUrl.isNotEmpty;
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final mute = ShellChrome.of(context).mute;
 
     return Row(
       children: [

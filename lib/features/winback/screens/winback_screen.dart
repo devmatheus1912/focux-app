@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_empty_state.dart';
@@ -68,9 +69,9 @@ class _WinbackScreenState extends ConsumerState<WinbackScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
-    final mute = fxScreenMute(context);
+    final mute = chrome.mute;
 
     return fxScreenA11yScope(
       label: 'Win-back automático',
@@ -86,7 +87,7 @@ class _WinbackScreenState extends ConsumerState<WinbackScreen> {
                 ? Center(child: FxLoading(color: primary))
                 : _erro != null
                 ? FxErrorState(
-                  chromeOnDark: isDark,
+                  chromeOnDark: chrome.isDark,
                   primary: primary,
                   message: _erro!,
                   onRetry: _carregar,
@@ -113,7 +114,7 @@ class _WinbackScreenState extends ConsumerState<WinbackScreen> {
                               style: AppTypography.inter(
                                 fontWeight: FontWeight.w800,
                                 fontSize: 18,
-                                color: fxScreenInk(context),
+                                color: chrome.ink,
                               ),
                             ),
                             const SizedBox(height: 8),
@@ -138,7 +139,7 @@ class _WinbackScreenState extends ConsumerState<WinbackScreen> {
                         style: AppTypography.inter(
                           fontWeight: FontWeight.w700,
                           fontSize: 14,
-                          color: fxScreenInk(context),
+                          color: chrome.ink,
                         ),
                       ),
                       const SizedBox(height: 10),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 
 import '../../../core/utils/friendly_error.dart';
@@ -19,6 +20,7 @@ import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_motion.dart';
 
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
 
 import '../../auth/providers/auth_provider.dart';
 
@@ -169,21 +171,27 @@ class _DesafiosScreenState extends ConsumerState<DesafiosScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final chrome = ShellChrome.of(context);
+
     final scheme = Theme.of(context).colorScheme;
 
-    return FeatureGate(
-      featureName: 'Desafios',
+    return fxScreenA11yScope(
+      label: 'Desafios',
+      child: FeatureGate(
+        featureName: 'Desafios',
 
-      requiredPlan: SubscriptionPlan.ENTERPRISE,
+        requiredPlan: SubscriptionPlan.ENTERPRISE,
 
-      capability: 'comunidadeGrupos',
+        capability: 'comunidadeGrupos',
 
-      child: FxShellScaffold(
-        appBar: const FxShellAppBar(
-          title: 'Desafios',
+        child: FxShellScaffold(
+          useMesh: true,
 
-          subtitle: 'Ranking e metas da comunidade',
-        ),
+          appBar: const FxShellAppBar(
+            title: 'Desafios',
+
+            subtitle: 'Ranking e metas da comunidade',
+          ),
 
         floatingActionButton: Semantics(
           label: 'Criar novo desafio',
@@ -204,7 +212,7 @@ class _DesafiosScreenState extends ConsumerState<DesafiosScreen> {
                 ? const Center(child: FxLoading())
                 : _error != null
                 ? FxErrorState(
-                  chromeOnDark: Theme.of(context).brightness == Brightness.dark,
+                  chromeOnDark: chrome.isDark,
                   primary: scheme.primary,
                   message: _error!,
                   onRetry: _load,
@@ -268,6 +276,7 @@ class _DesafiosScreenState extends ConsumerState<DesafiosScreen> {
                     },
                   ),
                 ),
+        ),
       ),
     );
   }

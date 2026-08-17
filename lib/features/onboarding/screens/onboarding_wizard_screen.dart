@@ -3,9 +3,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/widgets/fx_empty_state.dart';
+import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/skeleton_loader.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../data/onboarding_repository.dart';
 import '../widgets/setup_step_widgets.dart';
@@ -34,7 +38,10 @@ class _OnboardingWizardScreenState
   }
 
   Future<void> _load() async {
-    setState(() => _loading = true);
+    setState(() {
+      _loading = true;
+      _erro = null;
+    });
     try {
       final w =
           await OnboardingRepository(ref.read(apiClientProvider)).wizard();
@@ -76,10 +83,13 @@ class _OnboardingWizardScreenState
   @override
   Widget build(BuildContext context) {
     final wizard = _wizard;
+    final chrome = ShellChrome.of(context);
+    final primary = Theme.of(context).colorScheme.primary;
 
     return fxScreenA11yScope(
       label: 'Setup D0',
       child: FxShellScaffold(
+        useMesh: true,
         appBar: FxShellAppBar(
           title: 'Setup D0',
           subtitle: 'Primeira vitória em 10 min',
@@ -87,25 +97,22 @@ class _OnboardingWizardScreenState
         ),
         body:
             _loading
-                ? const SetupWizardSkeleton()
+                ? const SkeletonList(count: 5)
+                : _erro != null
+                ? FxErrorState(
+                  chromeOnDark: chrome.isDark,
+                  primary: primary,
+                  message: _erro!,
+                  onRetry: _load,
+                )
                 : wizard == null
-                ? Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(TokensStrip.s5),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          _erro ?? 'Não foi possível carregar o setup.',
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: TokensStrip.s4),
-                        SetupWizardCta(
-                          label: 'Tentar novamente',
-                          onPressed: _load,
-                        ),
-                      ],
-                    ),
+                ? FxEmptyState(
+                  icon: 'spark',
+                  title: 'Setup ainda não disponível',
+                  subtitle: 'Não encontramos os passos iniciais agora.',
+                  action: FxEmptyAction(
+                    label: 'Tentar novamente',
+                    onTap: _load,
                   ),
                 )
                 : RefreshIndicator(

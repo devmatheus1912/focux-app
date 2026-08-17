@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/depoimento_repository.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_empty_state.dart';
+import '../../../core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/fx_motion.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
@@ -46,7 +49,7 @@ class _State extends ConsumerState<DepoimentoAlunoScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final chrome = ShellChrome.of(context);
     return fxScreenA11yScope(
       label: 'Deixar Depoimento',
       child: FxShellScaffold(
@@ -57,42 +60,16 @@ class _State extends ConsumerState<DepoimentoAlunoScreen> {
           subtitle: 'Conte como foi sua experiência',
         ),
         body:
-            _enviado
-                ? Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(32),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.check_circle_outline,
-                          color: EagleTokens.good,
-                          size: 72,
-                        ),
-                        const SizedBox(height: TokensStrip.s4),
-                        Text(
-                          'Depoimento enviado!',
-                          style: Theme.of(context).textTheme.headlineSmall
-                              ?.copyWith(fontWeight: FontWeight.w700),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Aguardando aprovação do seu personal.',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color:
-                                isDark
-                                    ? EagleTokens.darkInkMute
-                                    : TokensStrip.textSecondary,
-                          ),
-                        ),
-                        const SizedBox(height: 32),
-                        OutlinedButton(
-                          onPressed: () => Navigator.of(context).pop(),
-                          child: const Text('Voltar'),
-                        ),
-                      ],
-                    ),
+            _enviando
+                ? const Center(child: FxLoading())
+                : _enviado
+                ? FxEmptyState(
+                  icon: 'circle-check',
+                  title: 'Depoimento enviado!',
+                  subtitle: 'Aguardando aprovação do seu personal.',
+                  action: FxEmptyAction(
+                    label: 'Voltar',
+                    onTap: () => Navigator.of(context).pop(),
                   ),
                 )
                 : SingleChildScrollView(
@@ -108,10 +85,7 @@ class _State extends ConsumerState<DepoimentoAlunoScreen> {
                             fontSize: 11,
                             fontWeight: FontWeight.w700,
                             letterSpacing: 1.2,
-                            color:
-                                isDark
-                                    ? EagleTokens.darkInkMute
-                                    : TokensStrip.textSecondary,
+                            color: chrome.mute,
                           ),
                         ),
                         const SizedBox(height: TokensStrip.s4),
@@ -141,10 +115,7 @@ class _State extends ConsumerState<DepoimentoAlunoScreen> {
                             fontSize: 11,
                             fontWeight: FontWeight.w700,
                             letterSpacing: 1.2,
-                            color:
-                                isDark
-                                    ? EagleTokens.darkInkMute
-                                    : TokensStrip.textSecondary,
+                            color: chrome.mute,
                           ),
                         ),
                         const SizedBox(height: 8),

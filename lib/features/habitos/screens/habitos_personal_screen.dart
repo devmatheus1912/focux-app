@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/feature_gate.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../../features/subscription/models/subscription_plan.dart';
@@ -166,18 +168,21 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
 
-    return FeatureGate(
-      featureName: 'Habit Coaching',
-      requiredPlan: SubscriptionPlan.PREMIUM,
-      capability: 'habitCoaching',
-      child: FxShellScaffold(
-        appBar: const FxShellAppBar(
-          title: 'Hábitos & Compliance',
-          subtitle: 'Coaching diário e aderência',
-        ),
+    return fxScreenA11yScope(
+      label: 'Hábitos & Compliance',
+      child: FeatureGate(
+        featureName: 'Habit Coaching',
+        requiredPlan: SubscriptionPlan.PREMIUM,
+        capability: 'habitCoaching',
+        child: FxShellScaffold(
+          useMesh: true,
+          appBar: const FxShellAppBar(
+            title: 'Hábitos & Compliance',
+            subtitle: 'Coaching diário e aderência',
+          ),
         floatingActionButton: Semantics(
           label: 'Novo hábito',
           button: true,
@@ -192,7 +197,7 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
                 ? const Center(child: FxLoading())
                 : _error != null
                 ? FxErrorState(
-                  chromeOnDark: isDark,
+                  chromeOnDark: chrome.isDark,
                   primary: primary,
                   message: _error!,
                   onRetry: _carregar,
@@ -256,6 +261,7 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
                     ],
                   ),
                 ),
+        ),
       ),
     );
   }

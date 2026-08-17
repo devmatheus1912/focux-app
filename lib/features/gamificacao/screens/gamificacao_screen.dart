@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
@@ -12,6 +13,7 @@ import '../data/gamificacao_repository.dart';
 import '../models/gamificacao_badge_tile.dart';
 import '../providers/gamificacao_provider.dart';
 import 'package:focux_app/core/widgets/fx_rive_player.dart';
+import 'package:focux_app/core/widgets/fx_empty_state.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
 import '../../dashboard/widgets/dashboard_error_state.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
@@ -26,9 +28,10 @@ class GamificacaoScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final dark = Theme.of(context).brightness == Brightness.dark;
-    final ink = dark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final mute = dark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final chrome = ShellChrome.of(context);
+    final dark = chrome.isDark;
+    final ink = chrome.ink;
+    final mute = chrome.mute;
     final brand = Theme.of(context).colorScheme.primary;
     final async = ref.watch(gamificacaoProvider);
 
@@ -63,18 +66,27 @@ class GamificacaoScreen extends ConsumerWidget {
                     ],
                   ),
                 ),
-            data:
-                (data) => RefreshIndicator(
-                  color: brand,
-                  onRefresh: () => _refresh(ref),
-                  child: _GamificacaoBody(
-                    data: data,
-                    dark: dark,
-                    ink: ink,
-                    mute: mute,
-                    brand: brand,
-                  ),
+            data: (data) {
+              if (data.totalTreinos == 0 && data.badges.isEmpty) {
+                return const FxEmptyState(
+                  icon: 'spark',
+                  title: 'Sua evolução começa no treino',
+                  subtitle:
+                      'Conquistas e sequência aparecem aqui depois do primeiro treino.',
+                );
+              }
+              return RefreshIndicator(
+                color: brand,
+                onRefresh: () => _refresh(ref),
+                child: _GamificacaoBody(
+                  data: data,
+                  dark: dark,
+                  ink: ink,
+                  mute: mute,
+                  brand: brand,
                 ),
+              );
+            },
           ),
         ),
       ),

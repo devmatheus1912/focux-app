@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/utils/fx_utils.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -213,10 +214,11 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-    final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
+    final chrome = ShellChrome.of(context);
+    final isDark = chrome.isDark;
+    final ink = chrome.ink;
+    final mute = chrome.mute;
+    final line = chrome.line;
     final brand = Theme.of(context).colorScheme.primary;
     final brandDeep = BrandPalette.deep(brand);
 

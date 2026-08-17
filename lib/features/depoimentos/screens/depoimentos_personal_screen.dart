@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/depoimento_repository.dart';
 import '../../../core/widgets/fx_empty_state.dart';
@@ -68,7 +69,7 @@ class _State extends ConsumerState<DepoimentosPersonalScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
     return fxScreenA11yScope(
       label: 'Depoimentos',
@@ -90,7 +91,7 @@ class _State extends ConsumerState<DepoimentosPersonalScreen> {
                 ? const Center(child: FxLoading())
                 : _erro != null
                 ? FxErrorState(
-                  chromeOnDark: isDark,
+                  chromeOnDark: chrome.isDark,
                   primary: primary,
                   message: _erro!,
                   onRetry: _load,
@@ -111,17 +112,7 @@ class _State extends ConsumerState<DepoimentosPersonalScreen> {
                     final d = _items![i];
                     return Container(
                       padding: const EdgeInsets.all(14),
-                      decoration: BoxDecoration(
-                        color:
-                            isDark ? EagleTokens.darkCard : TokensStrip.cardBg,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color:
-                              isDark
-                                  ? EagleTokens.darkLine
-                                  : TokensStrip.borderDefault,
-                        ),
-                      ),
+                      decoration: chrome.listCard(primary: primary),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -158,10 +149,7 @@ class _State extends ConsumerState<DepoimentosPersonalScreen> {
                                       d.nomeAluno,
                                       style: TextStyle(
                                         fontWeight: FontWeight.w600,
-                                        color:
-                                            isDark
-                                                ? EagleTokens.darkInk
-                                                : TokensStrip.textPrimary,
+                                        color: chrome.ink,
                                       ),
                                     ),
                                     Row(
@@ -213,10 +201,7 @@ class _State extends ConsumerState<DepoimentosPersonalScreen> {
                           Text(
                             d.texto,
                             style: TextStyle(
-                              color:
-                                  isDark
-                                      ? EagleTokens.darkInkMute
-                                      : TokensStrip.textSecondary,
+                              color: chrome.mute,
                               fontSize: 13,
                               height: 1.5,
                             ),

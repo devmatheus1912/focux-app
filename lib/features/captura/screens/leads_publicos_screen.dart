@@ -3,10 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/utils/fx_utils.dart';
-import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_empty_state.dart';
+import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -29,6 +30,7 @@ class LeadsPublicosScreen extends ConsumerStatefulWidget {
 class _LeadsPublicosScreenState extends ConsumerState<LeadsPublicosScreen> {
   List<SubmissaoCaptura> _leads = [];
   bool _loading = true;
+  String? _erro;
 
   @override
   void initState() {
@@ -37,7 +39,10 @@ class _LeadsPublicosScreenState extends ConsumerState<LeadsPublicosScreen> {
   }
 
   Future<void> _carregar() async {
-    setState(() => _loading = true);
+    setState(() {
+      _loading = true;
+      _erro = null;
+    });
     try {
       final lista = await ref.read(_repoProvider).meus();
       if (!mounted) return;
@@ -47,13 +52,18 @@ class _LeadsPublicosScreenState extends ConsumerState<LeadsPublicosScreen> {
       });
     } catch (e) {
       if (!mounted) return;
-      setState(() => _loading = false);
-      FeedbackHelper.showError(context, friendlyError(e));
+      setState(() {
+        _loading = false;
+        _erro = friendlyError(e);
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final chrome = ShellChrome.of(context);
+    final primary = Theme.of(context).colorScheme.primary;
+
     return fxScreenA11yScope(
       label: 'Leads do link público',
       child: FxShellScaffold(
@@ -63,7 +73,7 @@ class _LeadsPublicosScreenState extends ConsumerState<LeadsPublicosScreen> {
           subtitle: 'Contatos captados pela sua página',
         ),
         floatingActionButton:
-            _leads.isEmpty || _loading
+            _leads.isEmpty || _loading || _erro != null
                 ? null
                 : FloatingActionButton.extended(
                   onPressed: () => context.push('/alunos/novo'),
@@ -73,6 +83,13 @@ class _LeadsPublicosScreenState extends ConsumerState<LeadsPublicosScreen> {
         body:
             _loading
                 ? const Center(child: FxLoading())
+                : _erro != null
+                ? FxErrorState(
+                  chromeOnDark: chrome.isDark,
+                  primary: primary,
+                  message: _erro!,
+                  onRetry: _carregar,
+                )
                 : RefreshIndicator(
                   onRefresh: _carregar,
                   child:

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/design_tokens.dart';
-
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 
 import '../../../core/utils/friendly_error.dart';
@@ -21,6 +21,7 @@ import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_motion.dart';
 
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
 
 import '../../auth/providers/auth_provider.dart';
 
@@ -105,28 +106,34 @@ class _AutomacoesScreenState extends ConsumerState<AutomacoesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final chrome = ShellChrome.of(context);
+
     final scheme = Theme.of(context).colorScheme;
 
-    return FeatureGate(
-      featureName: 'Automações',
+    return fxScreenA11yScope(
+      label: 'Automações',
+      child: FeatureGate(
+        featureName: 'Automações',
 
-      requiredPlan: SubscriptionPlan.ENTERPRISE,
+        requiredPlan: SubscriptionPlan.ENTERPRISE,
 
-      capability: 'automacoes',
+        capability: 'automacoes',
 
-      child: FxShellScaffold(
-        appBar: const FxShellAppBar(
-          title: 'Automações',
+        child: FxShellScaffold(
+          useMesh: true,
 
-          subtitle: 'Templates e fluxos ativos',
-        ),
+          appBar: const FxShellAppBar(
+            title: 'Automações',
+
+            subtitle: 'Templates e fluxos ativos',
+          ),
 
         body:
             _loading
                 ? const Center(child: FxLoading())
                 : _error != null
                 ? FxErrorState(
-                  chromeOnDark: Theme.of(context).brightness == Brightness.dark,
+                  chromeOnDark: chrome.isDark,
                   primary: scheme.primary,
                   message: _error!,
                   onRetry: _load,
@@ -247,6 +254,7 @@ class _AutomacoesScreenState extends ConsumerState<AutomacoesScreen> {
                     ],
                   ),
                 ),
+        ),
       ),
     );
   }

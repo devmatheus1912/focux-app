@@ -13,8 +13,10 @@ import '../../../core/widgets/fx_motion.dart';
 import '../../../features/alunos/utils/alunos_list_utils.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
 import '../data/retencao_repository.dart';
 
 final retencaoRepositoryProvider = Provider(
@@ -103,89 +105,97 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
     final saudavel =
         _scores.where((s) => s.riscoChurn.toUpperCase() == 'BAIXO').length;
 
-    return FxShellScaffold(
-      useMesh: true,
-      appBar: FxShellAppBar(
-        title: 'Saúde da base',
-        subtitle: 'Score de retenção por aluno',
-        onBack: () => safePopOrGo(context, '/dashboard/personal'),
-      ),
-      body:
-          _loading
-              ? Center(child: FxLoading(color: primary))
-              : _error != null
-              ? _ChurnErrorState(message: _error!, onRetry: _load)
-              : RefreshIndicator(
-                color: primary,
-                onRefresh: _load,
-                child:
-                    sorted.isEmpty
-                        ? ListView(
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          children: const [
-                            SizedBox(height: 48),
-                            FxEmptyState(
-                              icon: 'activity',
-                              title: 'Scores em breve',
-                              subtitle:
-                                  'A rotina calcula os scores aos domingos. '
-                                  'Cadastre alunos e aguarde a primeira leitura.',
-                            ),
-                          ],
-                        )
-                        : CustomScrollView(
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          slivers: [
-                            SliverToBoxAdapter(
-                              child: Padding(
+    return fxScreenA11yScope(
+      label: 'Saúde da base',
+      child: FxShellScaffold(
+        useMesh: true,
+        appBar: FxShellAppBar(
+          title: 'Saúde da base',
+          subtitle: 'Score de retenção por aluno',
+          onBack: () => safePopOrGo(context, '/dashboard/personal'),
+        ),
+        body:
+            _loading
+                ? Center(child: FxLoading(color: primary))
+                : _error != null
+                ? FxErrorState(
+                  chromeOnDark: chrome.isDark,
+                  primary: primary,
+                  message: _error!,
+                  onRetry: _load,
+                )
+                : RefreshIndicator(
+                  color: primary,
+                  onRefresh: _load,
+                  child:
+                      sorted.isEmpty
+                          ? ListView(
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            children: const [
+                              SizedBox(height: 48),
+                              FxEmptyState(
+                                icon: 'activity',
+                                title: 'Scores em breve',
+                                subtitle:
+                                    'A rotina calcula os scores aos domingos. '
+                                    'Cadastre alunos e aguarde a primeira leitura.',
+                              ),
+                            ],
+                          )
+                          : CustomScrollView(
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            slivers: [
+                              SliverToBoxAdapter(
+                                child: Padding(
+                                  padding: const EdgeInsets.fromLTRB(
+                                    TokensStrip.s4,
+                                    8,
+                                    TokensStrip.s4,
+                                    14,
+                                  ),
+                                  child: _ChurnSummaryStrip(
+                                    alto: alto,
+                                    medio: medio,
+                                    saudavel: saudavel,
+                                    isDark: isDark,
+                                    primary: primary,
+                                  ),
+                                ),
+                              ),
+                              SliverPadding(
                                 padding: const EdgeInsets.fromLTRB(
                                   TokensStrip.s4,
-                                  8,
+                                  0,
                                   TokensStrip.s4,
-                                  14,
+                                  24,
                                 ),
-                                child: _ChurnSummaryStrip(
-                                  alto: alto,
-                                  medio: medio,
-                                  saudavel: saudavel,
-                                  isDark: isDark,
-                                  primary: primary,
+                                sliver: SliverList.separated(
+                                  itemCount: sorted.length,
+                                  separatorBuilder:
+                                      (_, __) => const SizedBox(height: 10),
+                                  itemBuilder: (context, index) {
+                                    final score = sorted[index];
+                                    return FxStaggerItem(
+                                      index: index,
+                                      child: _ChurnScoreCard(
+                                        score: score,
+                                        isDark: isDark,
+                                        primary: primary,
+                                        onTap: () {
+                                          HapticFeedback.selectionClick();
+                                          context.push(
+                                            '/alunos/${score.alunoId}',
+                                          );
+                                        },
+                                      ),
+                                    );
+                                  },
                                 ),
                               ),
-                            ),
-                            SliverPadding(
-                              padding: const EdgeInsets.fromLTRB(
-                                TokensStrip.s4,
-                                0,
-                                TokensStrip.s4,
-                                24,
-                              ),
-                              sliver: SliverList.separated(
-                                itemCount: sorted.length,
-                                separatorBuilder:
-                                    (_, __) => const SizedBox(height: 10),
-                                itemBuilder: (context, index) {
-                                  final score = sorted[index];
-                                  return FxStaggerItem(
-                                    index: index,
-                                    child: _ChurnScoreCard(
-                                      score: score,
-                                      isDark: isDark,
-                                      primary: primary,
-                                      onTap: () {
-                                        HapticFeedback.selectionClick();
-                                        context.push(
-                                          '/alunos/${score.alunoId}',
-                                        );
-                                      },
-                                    ),
-                                  );
-                                },
-                              ),
-                            ),
-                          ],
-                        ),
-              ),
+                            ],
+                          ),
+                ),
+      ),
     );
   }
 }
@@ -441,69 +451,6 @@ class _ChurnScoreCard extends StatelessWidget {
               Icon(Icons.chevron_right_rounded, size: 20, color: mute),
             ],
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ChurnErrorState extends StatelessWidget {
-  final String message;
-  final VoidCallback onRetry;
-
-  const _ChurnErrorState({required this.message, required this.onRetry});
-
-  @override
-  Widget build(BuildContext context) {
-    final ink = fxScreenInk(context);
-    final mute = fxScreenMute(context);
-    final primary = Theme.of(context).colorScheme.primary;
-
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(TokensStrip.s5),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 56,
-              height: 56,
-              decoration: BoxDecoration(
-                color: EagleTokens.badSoft,
-                borderRadius: BorderRadius.circular(18),
-              ),
-              child: const Icon(
-                Icons.cloud_off_rounded,
-                color: EagleTokens.bad,
-                size: 26,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Não foi possível carregar',
-              style: AppTypography.inter(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                color: ink,
-              ),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: TextStyle(color: mute, fontSize: 13, height: 1.35),
-            ),
-            const SizedBox(height: 18),
-            FilledButton.icon(
-              onPressed: onRetry,
-              icon: const Icon(Icons.refresh_rounded, size: 18),
-              label: const Text('Tentar novamente'),
-              style: FilledButton.styleFrom(
-                backgroundColor: primary,
-                foregroundColor: Colors.white,
-              ),
-            ),
-          ],
         ),
       ),
     );

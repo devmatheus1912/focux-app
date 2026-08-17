@@ -13,6 +13,8 @@ import '../providers/analytics_provider.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../dashboard/widgets/dashboard_error_state.dart';
+import '../../../core/widgets/fx_empty_state.dart';
+import '../../../core/widgets/skeleton_loader.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 
 part 'analytics_screen_widgets.part.dart';
@@ -38,7 +40,7 @@ class AnalyticsScreen extends ConsumerWidget {
         ),
         body: FxContentWidthLimiter(
           child: async.when(
-            loading: () => Center(child: FxLoading(color: primary)),
+            loading: () => const SkeletonList(count: 6),
             error:
                 (e, _) => DashboardErrorState(
                   chromeOnDark: chrome.isDark,
@@ -46,13 +48,22 @@ class AnalyticsScreen extends ConsumerWidget {
                   message: friendlyError(e),
                   onRetry: () => ref.invalidate(analyticsDashboardProvider),
                 ),
-            data:
-                (data) => RefreshIndicator(
-                  color: primary,
-                  onRefresh:
-                      () async => ref.invalidate(analyticsDashboardProvider),
-                  child: _AnalyticsBody(data: data, dark: dark),
-                ),
+            data: (data) {
+              if (data.totalAlunos == 0) {
+                return const FxEmptyState(
+                  icon: 'bar-chart-2',
+                  title: 'Sem dados ainda',
+                  subtitle:
+                      'Cadastre alunos para ver analytics operacional da base.',
+                );
+              }
+              return RefreshIndicator(
+                color: primary,
+                onRefresh:
+                    () async => ref.invalidate(analyticsDashboardProvider),
+                child: _AnalyticsBody(data: data, dark: dark),
+              );
+            },
           ),
         ),
       ),

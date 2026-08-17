@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/utils/friendly_error.dart';
 
-import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:focux_app/core/widgets/fx_motion.dart';
 import '../../../features/auth/providers/auth_provider.dart';
@@ -77,9 +77,10 @@ class _BroadcastScreenState extends ConsumerState<BroadcastScreen> {
   @override
   Widget build(BuildContext context) {
     final historicoAsync = ref.watch(_broadcastHistoricoProvider);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final chrome = ShellChrome.of(context);
+    final isDark = chrome.isDark;
+    final ink = chrome.ink;
+    final mute = chrome.mute;
     final brand = Theme.of(context).colorScheme.primary;
 
     return fxScreenA11yScope(
@@ -267,9 +268,10 @@ class _DesignField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-    final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
+    final chrome = ShellChrome.of(context);
+    final isDark = chrome.isDark;
+    final mute = chrome.mute;
+    final line = chrome.line;
     final fill =
         isDark ? Colors.white.withValues(alpha: 0.05) : TokensStrip.pageBg;
     return Column(
@@ -329,10 +331,11 @@ class _AudienceChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final chrome = ShellChrome.of(context);
+    final isDark = chrome.isDark;
     final brand = Theme.of(context).colorScheme.primary;
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-    final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
+    final mute = chrome.mute;
+    final line = chrome.line;
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(10),
@@ -381,9 +384,10 @@ class _BroadcastCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final chrome = ShellChrome.of(context);
+    final isDark = chrome.isDark;
+    final ink = chrome.ink;
+    final mute = chrome.mute;
     final brand = Theme.of(context).colorScheme.primary;
     final publico = broadcast.tipoConsultoriaAlvo ?? 'TODOS';
     return Container(
