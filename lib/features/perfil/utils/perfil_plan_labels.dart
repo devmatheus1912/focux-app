@@ -6,7 +6,7 @@ String perfilPlanSectionLabel(String apiPlano) {
   return PlanEntitlements.displayPlanName(subscriptionPlanFromApi(apiPlano));
 }
 
-/// Texto curto no pill do hero (ex.: PLANO PRO).
+/// Texto curto no pill do hero (ex.: Pro).
 String perfilPlanPillLabel(String apiPlano) {
   return switch (subscriptionPlanFromApi(apiPlano)) {
     SubscriptionPlan.ENTERPRISE_PRO => 'PRO',

@@ -1,5 +1,49 @@
 part of 'perfil_screen.dart';
 
+/// Pill compacto do hero — paridade Home [`_HeroPill`]: fill soft, sem borda.
+class _HeroMetaPill extends StatelessWidget {
+  const _HeroMetaPill({
+    required this.label,
+    required this.fill,
+    required this.foreground,
+    this.leading,
+  });
+
+  final String label;
+  final Color fill;
+  final Color foreground;
+  final Widget? leading;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
+      decoration: BoxDecoration(
+        color: fill,
+        borderRadius: BorderRadius.circular(TokensStrip.rPill),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (leading != null) ...[leading!, const SizedBox(width: 5)],
+          Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: foreground,
+              fontSize: 11,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0.12,
+              height: 1.1,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _HeroMarcaChip extends StatelessWidget {
   const _HeroMarcaChip({
     required this.score,
@@ -17,6 +61,16 @@ class _HeroMarcaChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final chrome = ShellChrome.of(context);
+    final isDark = chrome.isDark;
+    final complete = score >= 100;
+    final fill =
+        complete
+            ? EagleTokens.semanticGoodSoft(isDark: isDark)
+            : BrandPalette.soft(accent, dark: isDark);
+    final foreground =
+        complete ? EagleTokens.semanticGood(isDark: isDark) : actionInk;
+
     return Semantics(
       button: true,
       label:
@@ -30,19 +84,14 @@ class _HeroMarcaChip extends StatelessWidget {
           child: Tooltip(
             message:
                 'Como calculamos: foto, CREF, especialidade, bio, Instagram, paleta e PIX.',
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              decoration: BoxDecoration(
-                color: accent.withValues(alpha: 0.10),
-                borderRadius: BorderRadius.circular(TokensStrip.rPill),
-                border: Border.all(color: accent.withValues(alpha: 0.22)),
-              ),
-              child: Text(
-                'Marca $score%',
-                style: TokensStrip.bodyMuted(color: actionInk).copyWith(
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
+            child: _HeroMetaPill(
+              label: 'Marca $score%',
+              fill: fill,
+              foreground: foreground,
+              leading:
+                  complete
+                      ? Icon(Icons.check_rounded, size: 12, color: foreground)
+                      : null,
             ),
           ),
         ),
@@ -53,35 +102,42 @@ class _HeroMarcaChip extends StatelessWidget {
 
 class _PlanPill extends StatelessWidget {
   final String label;
-  final Color accent;
 
-  const _PlanPill({required this.label, required this.accent});
+  const _PlanPill({required this.label});
+
+  String _displayLabel() => switch (label) {
+    'PRO' => 'Pro',
+    'ENTERPRISE' => 'Enterprise',
+    'FREE' => 'Grátis',
+    _ => label,
+  };
 
   @override
   Widget build(BuildContext context) {
     final chrome = ShellChrome.of(context);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(
-        color: accent.withValues(alpha: chrome.isDark ? 0.14 : 0.08),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: accent.withValues(alpha: 0.22)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(Icons.star_rounded, color: EagleTokens.gold, size: 13),
-          const SizedBox(width: 5),
-          Text(
-            'PLANO $label',
-            style: TokensStrip.bodyMuted(color: EagleTokens.gold).copyWith(
-              fontWeight: FontWeight.w900,
-              letterSpacing: 0.35,
-              fontSize: TokensStrip.fontBodySm - 2,
-            ),
-          ),
-        ],
-      ),
+    final isDark = chrome.isDark;
+    final isPremium = label != 'FREE';
+    final fill =
+        isPremium
+            ? (isDark
+                ? EagleTokens.gold.withValues(alpha: 0.16)
+                : EagleTokens.goldSoft)
+            : (isDark
+                ? Colors.white.withValues(alpha: 0.06)
+                : chrome.line.withValues(alpha: 0.28));
+    final foreground =
+        isPremium
+            ? (isDark ? EagleTokens.gold : const Color(0xFF9A6B12))
+            : chrome.mute;
+
+    return _HeroMetaPill(
+      label: _displayLabel(),
+      fill: fill,
+      foreground: foreground,
+      leading:
+          isPremium
+              ? Icon(Icons.star_rounded, size: 12, color: foreground)
+              : null,
     );
   }
 }

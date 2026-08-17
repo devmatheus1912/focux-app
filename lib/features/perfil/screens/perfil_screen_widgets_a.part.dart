@@ -251,7 +251,6 @@ class _PerfilBodyState extends State<_PerfilBody> {
                                                 label: perfilPlanPillLabel(
                                                   perfil.plano,
                                                 ),
-                                                accent: accent,
                                               ),
                                             ),
                                           ),
