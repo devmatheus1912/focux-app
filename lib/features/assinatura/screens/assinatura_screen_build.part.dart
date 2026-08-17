@@ -3,11 +3,12 @@ part of 'assinatura_screen.dart';
 extension AssinaturaScreenBuild on _AssinaturaScreenState {
   Widget buildAssinaturaScreen(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-    final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
-    final primary = theme.colorScheme.primary;
+    final chrome = ShellChrome.of(context);
+    final isDark = chrome.isDark;
+    final ink = chrome.ink;
+    final mute = chrome.mute;
+    final line = chrome.line;
+    final primary = BrandPalette.softened(theme.colorScheme.primary);
 
     final perfil = ref.watch(perfilProvider).valueOrNull;
     final currentPlan = subscriptionPlanFromApi(perfil?.plano);
@@ -193,27 +194,12 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
           title: 'Planos',
           onBack: () => safePopOrGo(context, '/dashboard/personal'),
         ),
-        body: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.shield_outlined, size: 48, color: primary),
-              const SizedBox(height: 16),
-              Text(
-                'Dispositivo não seguro',
-                textAlign: TextAlign.center,
-                style: TokensStrip.h2(color: ink),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                'Detectamos risco de jailbreak ou modo desenvolvedor. '
-                'Por sua segurança, pagamentos estão desativados neste aparelho.',
-                textAlign: TextAlign.center,
-                style: TokensStrip.bodyMuted(color: mute),
-              ),
-            ],
-          ),
+        body: const FxEmptyState(
+          icon: 'alert-triangle',
+          title: 'Dispositivo não seguro',
+          subtitle:
+              'Detectamos risco de jailbreak ou modo desenvolvedor. '
+              'Por sua segurança, pagamentos estão desativados neste aparelho.',
         ),
       );
     }
@@ -300,10 +286,27 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
               chromeOnDark: isDark,
               primary: primary,
               message: friendlyError(error),
-              onRetry: () => ref.invalidate(planosProvider),
+              onRetry: () {
+                ref.invalidate(planosProvider);
+                ref.invalidate(paywallVitrineProvider);
+              },
               title: 'Não foi possível carregar os planos',
             ),
         data: (planosList) {
+          if (planosList.isEmpty) {
+            return FxEmptyState(
+              icon: 'dollar-sign',
+              title: 'Nenhum plano disponível',
+              subtitle: 'Tente novamente em instantes.',
+              action: FxEmptyAction(
+                label: 'Tentar de novo',
+                onTap: () {
+                  ref.invalidate(planosProvider);
+                  ref.invalidate(paywallVitrineProvider);
+                },
+              ),
+            );
+          }
           return buildPaywallPlansScroll(
             planosList: planosList,
             currentPlan: currentPlan,

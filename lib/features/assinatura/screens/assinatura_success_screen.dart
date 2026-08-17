@@ -3,12 +3,14 @@ import 'package:go_router/go_router.dart';
 import 'package:rive/rive.dart';
 
 import '../../../core/brand/focux_microcopy.dart';
+import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../planos/paywall/paywall_catalog.dart';
 import '../../subscription/models/subscription_plan.dart';
-import '../../../core/widgets/fx_screen_a11y.dart';
 
 /// Confirmação pós-compra com próximos passos educativos.
 class AssinaturaSuccessScreen extends StatelessWidget {
@@ -23,20 +25,21 @@ class AssinaturaSuccessScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final accent = PaywallCatalog.accentForPlan(plan);
-    final ink = EagleTokens.darkInk;
-    final mute = EagleTokens.darkInkMute;
+    final chrome = ShellChrome.of(context);
+    final accent = BrandPalette.softened(PaywallCatalog.accentForPlan(plan));
+    final ink = chrome.ink;
+    final mute = chrome.mute;
 
     return fxScreenA11yScope(
-      label: 'Assinatura Success',
+      label: 'Assinatura confirmada',
       child: FxShellScaffold(
         body: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.all(TokensStrip.s6),
             child: Column(
               children: [
-                const SizedBox(height: 12),
-                SizedBox(
+                const SizedBox(height: TokensStrip.s3),
+                const SizedBox(
                   height: 160,
                   width: 160,
                   child: RiveAnimation.asset(
@@ -44,27 +47,23 @@ class AssinaturaSuccessScreen extends StatelessWidget {
                     fit: BoxFit.contain,
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: TokensStrip.s2),
                 Text(
                   'Bem-vindo ao ${plan.apiName}!',
                   textAlign: TextAlign.center,
                   style: TokensStrip.h1(color: ink).copyWith(fontSize: 26),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: TokensStrip.s2),
                 Text(
                   'Sua assinatura está ativa.',
                   style: TokensStrip.bodyMuted(color: mute),
                 ),
                 if (transactionId != null && transactionId!.isNotEmpty) ...[
-                  const SizedBox(height: 16),
+                  const SizedBox(height: TokensStrip.s4),
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: EagleTokens.darkCard,
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: EagleTokens.darkLine),
-                    ),
+                    padding: const EdgeInsets.all(TokensStrip.s4),
+                    decoration: chrome.listCard(),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -85,13 +84,13 @@ class AssinaturaSuccessScreen extends StatelessWidget {
                     ),
                   ),
                 ],
-                const SizedBox(height: 12),
+                const SizedBox(height: TokensStrip.s3),
                 Text(
                   'Você receberá a confirmação no e-mail cadastrado.',
                   textAlign: TextAlign.center,
                   style: TokensStrip.bodyMuted(color: mute),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: TokensStrip.s5),
                 Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
@@ -99,10 +98,10 @@ class AssinaturaSuccessScreen extends StatelessWidget {
                     style: TokensStrip.h2(color: ink).copyWith(fontSize: 17),
                   ),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: TokensStrip.s3),
                 ..._nextSteps(plan).map(
                   (step) => Padding(
-                    padding: const EdgeInsets.only(bottom: 10),
+                    padding: const EdgeInsets.only(bottom: TokensStrip.s3),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -111,7 +110,7 @@ class AssinaturaSuccessScreen extends StatelessWidget {
                           size: 18,
                           color: accent,
                         ),
-                        const SizedBox(width: 10),
+                        const SizedBox(width: TokensStrip.s3),
                         Expanded(
                           child: Text(
                             step,
@@ -123,19 +122,23 @@ class AssinaturaSuccessScreen extends StatelessWidget {
                   ),
                 ),
                 const Spacer(),
-                FilledButton(
-                  onPressed: () => context.go('/dashboard/personal'),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: accent,
-                    foregroundColor: EagleTokens.inkDeep,
-                    minimumSize: const Size.fromHeight(52),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
+                Semantics(
+                  button: true,
+                  label: 'Começar agora no dashboard',
+                  child: FilledButton(
+                    onPressed: () => context.go('/dashboard/personal'),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: accent,
+                      foregroundColor: EagleTokens.inkDeep,
+                      minimumSize: const Size.fromHeight(52),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(TokensStrip.rMd),
+                      ),
                     ),
-                  ),
-                  child: const Text(
-                    'Começar agora',
-                    style: TextStyle(fontWeight: FontWeight.w900),
+                    child: const Text(
+                      'Começar agora',
+                      style: TextStyle(fontWeight: FontWeight.w900),
+                    ),
                   ),
                 ),
               ],

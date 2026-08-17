@@ -31,10 +31,16 @@ extension AssinaturaScreenBuildBody on _AssinaturaScreenState {
             .toList();
 
     if (paid.isEmpty) {
-      return Center(
-        child: Text(
-          'Nenhum plano pago disponível no momento.',
-          style: TextStyle(color: mute),
+      return FxEmptyState(
+        icon: 'dollar-sign',
+        title: 'Nenhum plano pago disponível',
+        subtitle: 'Tente atualizar em instantes.',
+        action: FxEmptyAction(
+          label: 'Atualizar',
+          onTap: () {
+            ref.invalidate(planosProvider);
+            ref.invalidate(paywallVitrineProvider);
+          },
         ),
       );
     }
