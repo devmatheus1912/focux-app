@@ -30,7 +30,16 @@ extension AlunosListScreenHeader on _AlunosListScreenState {
               TokensStrip.s4,
               TokensStrip.s2,
             ),
-            child: Row(
+            child: DecoratedBox(
+              decoration: fxStripCardDecoration(
+                context,
+                accent: primary,
+                radius: TokensStrip.rCard,
+                glowStrength: _modoSelecao ? 0.02 : 0.04,
+              ),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(12, 11, 10, 11),
+                child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 if (showHeaderBack) ...[
@@ -129,8 +138,13 @@ extension AlunosListScreenHeader on _AlunosListScreenState {
                     ),
                   ),
                 ] else ...[
-                  const ShellThemeToggle(size: AlunosLayout.headerChromeSize),
-                  const SizedBox(width: AlunosLayout.headerChromeGap),
+                  if (!AlunosLayout.isCompactChrome(
+                        MediaQuery.sizeOf(context).width,
+                      ) &&
+                      !showHeaderBack) ...[
+                    const ShellThemeToggle(size: AlunosLayout.headerChromeSize),
+                    const SizedBox(width: AlunosLayout.headerChromeGap),
+                  ],
                   ShellHeaderIconButton(
                     icon: 'help',
                     size: AlunosLayout.headerChromeSize,
@@ -188,166 +202,188 @@ extension AlunosListScreenHeader on _AlunosListScreenState {
                   ),
                 ],
               ],
+                ),
+              ),
             ),
           ),
 
-          // Search Bar
+          if (!_modoSelecao) ...[
           Padding(
             padding: AlunosLayout.searchBarOuterPadding,
-            child: AnimatedContainer(
-              duration:
-                  TokensStrip.prefersReducedMotion(context)
-                      ? Duration.zero
-                      : const Duration(milliseconds: 180),
-              curve: Curves.easeOutCubic,
-              padding: AlunosLayout.searchBarPadding,
-              decoration: BoxDecoration(
-                color:
-                    isDark
-                        ? EagleTokens.darkCard
-                        : Colors.white.withValues(alpha: 0.86),
-                borderRadius: BorderRadius.circular(
-                  AlunosLayout.searchBarRadius,
-                ),
-                border: Border.all(
-                  color:
-                      _searchFocusNode.hasFocus
-                          ? primary.withValues(alpha: 0.32)
-                          : (isDark
-                              ? EagleTokens.darkLine
-                              : TokensStrip.borderDefault),
-                  width: _searchFocusNode.hasFocus ? 1.2 : 1,
-                ),
-                boxShadow: [
-                  if (_searchFocusNode.hasFocus && !isDark)
-                    BoxShadow(
-                      color: primary.withValues(alpha: 0.08),
-                      blurRadius: 18,
-                      offset: const Offset(0, 8),
-                      spreadRadius: -12,
-                    ),
-                ],
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    width: 26,
-                    height: 26,
-                    decoration: BoxDecoration(
-                      color:
-                          _searchFocusNode.hasFocus
-                              ? primary.withValues(alpha: 0.08)
-                              : Colors.transparent,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.search_rounded,
-                      size: 18,
-                      color: _searchFocusNode.hasFocus ? primary : mute,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Semantics(
-                      label: context.alunosL10n.alunosSearchA11y,
-                      textField: true,
-                      child: TextField(
-                        controller: _searchController,
-                        focusNode: _searchFocusNode,
-                        onChanged: _onSearchChanged,
-                        textInputAction: TextInputAction.search,
-                        cursorColor: primary,
-                        style: AppTypography.inter(
-                          fontSize: TokensStrip.fontBody,
-                          color: ink,
-                          fontWeight: FontWeight.w500,
-                        ),
-                        decoration: InputDecoration(
-                          isDense: true,
-                          contentPadding: const EdgeInsets.symmetric(
-                            vertical: 10,
+            child: Stack(
+              children: [
+                Positioned.fill(
+                  child: ListenableBuilder(
+                    listenable: _searchFocusNode,
+                    builder: (context, _) {
+                      final focused = _searchFocusNode.hasFocus;
+                      return AnimatedContainer(
+                        duration:
+                            TokensStrip.prefersReducedMotion(context)
+                                ? Duration.zero
+                                : const Duration(milliseconds: 180),
+                        curve: Curves.easeOutCubic,
+                        decoration: BoxDecoration(
+                          color:
+                              isDark
+                                  ? EagleTokens.darkCard
+                                  : Colors.white.withValues(alpha: 0.86),
+                          borderRadius: BorderRadius.circular(
+                            AlunosLayout.searchBarRadius,
                           ),
-                          hintText: context.alunosL10n.alunosSearchHint,
-                          hintStyle: AppTypography.inter(
-                            fontSize: TokensStrip.fontBody,
-                            color: mute,
-                            fontWeight: FontWeight.w500,
+                          border: Border.all(
+                            color:
+                                focused
+                                    ? primary.withValues(alpha: 0.32)
+                                    : (isDark
+                                        ? EagleTokens.darkLine
+                                        : TokensStrip.borderDefault),
+                            width: focused ? 1.2 : 1,
                           ),
-                          border: InputBorder.none,
-                          enabledBorder: InputBorder.none,
-                          focusedBorder: InputBorder.none,
-                        ),
-                      ),
-                    ),
-                  ),
-                  if (_query.isNotEmpty)
-                    InkWell(
-                      onTap: () {
-                        _searchController.clear();
-                        _onSearchChanged('');
-                      },
-                      borderRadius: BorderRadius.circular(999),
-                      child: Padding(
-                        padding: const EdgeInsets.all(6),
-                        child: Icon(Icons.close, size: 18, color: mute),
-                      ),
-                    )
-                  else
-                    Tooltip(
-                      message: 'Organizar lista',
-                      child: InkWell(
-                        onTap: _showListOptions,
-                        borderRadius: BorderRadius.circular(999),
-                        child: Container(
-                          width: 34,
-                          height: 34,
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            color: primary.withValues(
-                              alpha: isDark ? 0.14 : 0.07,
-                            ),
-                            shape: BoxShape.circle,
-                          ),
-                          child: Stack(
-                            clipBehavior: Clip.none,
-                            children: [
-                              Icon(
-                                Icons.tune_rounded,
-                                size: 18,
-                                color: primary,
+                          boxShadow: [
+                            if (focused && !isDark)
+                              BoxShadow(
+                                color: primary.withValues(alpha: 0.08),
+                                blurRadius: 18,
+                                offset: const Offset(0, 8),
+                                spreadRadius: -12,
                               ),
-                              if (_ordenacao != AlunoOrdenacao.prioridade ||
-                                  _filtro != AlunoFiltro.todos)
-                                Positioned(
-                                  right: -2,
-                                  top: -2,
-                                  child: Container(
-                                    width: 7,
-                                    height: 7,
-                                    decoration: BoxDecoration(
-                                      color: primary,
-                                      shape: BoxShape.circle,
-                                      border: Border.all(
-                                        color:
-                                            isDark
-                                                ? EagleTokens.darkCard
-                                                : TokensStrip.cardBg,
-                                        width: 1.5,
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                Padding(
+                  padding: AlunosLayout.searchBarPadding,
+                  child: Row(
+                    children: [
+                      ListenableBuilder(
+                        listenable: _searchFocusNode,
+                        builder: (context, _) {
+                          final focused = _searchFocusNode.hasFocus;
+                          return Container(
+                            width: 26,
+                            height: 26,
+                            decoration: BoxDecoration(
+                              color:
+                                  focused
+                                      ? primary.withValues(alpha: 0.08)
+                                      : Colors.transparent,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.search_rounded,
+                              size: 18,
+                              color: focused ? primary : mute,
+                            ),
+                          );
+                        },
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Semantics(
+                          label: context.alunosL10n.alunosSearchA11y,
+                          child: TextField(
+                            controller: _searchController,
+                            focusNode: _searchFocusNode,
+                            onChanged: _onSearchChanged,
+                            onSubmitted: (_) => _searchFocusNode.unfocus(),
+                            onTapOutside: (_) => _searchFocusNode.unfocus(),
+                            textInputAction: TextInputAction.search,
+                            cursorColor: primary,
+                            style: AppTypography.inter(
+                              fontSize: TokensStrip.fontBody,
+                              color: ink,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            decoration: InputDecoration(
+                              isDense: true,
+                              contentPadding: const EdgeInsets.symmetric(
+                                vertical: 10,
+                              ),
+                              hintText: context.alunosL10n.alunosSearchHint,
+                              hintStyle: AppTypography.inter(
+                                fontSize: TokensStrip.fontBody,
+                                color: mute,
+                                fontWeight: FontWeight.w500,
+                              ),
+                              border: InputBorder.none,
+                              enabledBorder: InputBorder.none,
+                              focusedBorder: InputBorder.none,
+                            ),
+                          ),
+                        ),
+                      ),
+                      if (_query.isNotEmpty)
+                        InkWell(
+                          onTap: () {
+                            _searchController.clear();
+                            _onSearchChanged('');
+                          },
+                          borderRadius: BorderRadius.circular(999),
+                          child: Padding(
+                            padding: const EdgeInsets.all(6),
+                            child: Icon(Icons.close, size: 18, color: mute),
+                          ),
+                        )
+                      else
+                        Tooltip(
+                          message: AlunosMicrocopy.organizeTooltip,
+                          child: InkWell(
+                            onTap: _showListOptions,
+                            borderRadius: BorderRadius.circular(999),
+                            child: Container(
+                              width: 34,
+                              height: 34,
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                color: primary.withValues(
+                                  alpha: isDark ? 0.14 : 0.07,
+                                ),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Stack(
+                                clipBehavior: Clip.none,
+                                children: [
+                                  Icon(
+                                    Icons.tune_rounded,
+                                    size: 18,
+                                    color: primary,
+                                  ),
+                                  if (_ordenacao != AlunoOrdenacao.prioridade ||
+                                      _filtro != AlunoFiltro.todos)
+                                    Positioned(
+                                      right: -2,
+                                      top: -2,
+                                      child: Container(
+                                        width: 7,
+                                        height: 7,
+                                        decoration: BoxDecoration(
+                                          color: primary,
+                                          shape: BoxShape.circle,
+                                          border: Border.all(
+                                            color:
+                                                isDark
+                                                    ? EagleTokens.darkCard
+                                                    : TokensStrip.cardBg,
+                                            width: 1.5,
+                                          ),
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                ),
-                            ],
+                                ],
+                              ),
+                            ),
                           ),
                         ),
-                      ),
-                    ),
-                ],
-              ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
 
-          // Filter Chips
           Padding(
             padding: AlunosLayout.filterRowPadding,
             child: FxHorizontalScrollPeek(
@@ -405,6 +441,7 @@ extension AlunosListScreenHeader on _AlunosListScreenState {
               ),
             ),
           ),
+          ],
         ],
       ),
     );

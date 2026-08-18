@@ -20,10 +20,19 @@ extension AlunosListScreenBody on _AlunosListScreenState {
               final riscoCount = stats.totalRiscoAlto;
               final contatoCount = stats.totalContatoHoje;
               final novosCount = stats.totalConvites;
-              final showTriageBanner =
-                  !_modoSelecao &&
-                  _filtro == AlunoFiltro.todos &&
-                  contatoCount > 0;
+              final showTriageBanner = showAlunosContatoBanner(
+                modoSelecao: _modoSelecao,
+                filtro: _filtro,
+                contatoCount: contatoCount,
+                totalCount: stats.total,
+              );
+              final showRiscoBanner = showAlunosRiscoBanner(
+                modoSelecao: _modoSelecao,
+                filtro: _filtro,
+                riscoCount: riscoCount,
+                totalCount: stats.total,
+                contatoBannerVisible: showTriageBanner,
+              );
               final headerOps =
                   _modoSelecao ? _selectionSummary() : null;
               final showHeaderBack = !_modoSelecao && _hasActiveFilter;
@@ -79,9 +88,7 @@ extension AlunosListScreenBody on _AlunosListScreenState {
                           onTap: () => _setFiltro(AlunoFiltro.contatoHoje),
                         ),
                       )
-                    else if (!_modoSelecao &&
-                        _filtro == AlunoFiltro.todos &&
-                        riscoCount > 0)
+                    else if (showRiscoBanner)
                       Padding(
                         padding: const EdgeInsets.fromLTRB(
                           AlunosLayout.screenPadding,

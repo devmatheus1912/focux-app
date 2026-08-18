@@ -28,6 +28,7 @@ import '../widgets/aluno_list_card.dart';
 import '../widgets/alunos_error_scaffold.dart';
 import '../utils/alunos_l10n.dart';
 import '../utils/alunos_home_client_cache.dart';
+import '../utils/alunos_list_utils.dart';
 import '../utils/alunos_microcopy.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../planos/providers/plano_features_provider.dart';

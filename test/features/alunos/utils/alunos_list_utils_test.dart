@@ -146,4 +146,107 @@ void main() {
       expect(alunoWeeklyCheckinsLabel(0), isEmpty);
     });
   });
+
+  group('showAlunosContatoBanner', () {
+    test('mostra quando só parte da base precisa de contato', () {
+      expect(
+        showAlunosContatoBanner(
+          modoSelecao: false,
+          filtro: AlunoFiltro.todos,
+          contatoCount: 3,
+          totalCount: 8,
+        ),
+        isTrue,
+      );
+    });
+
+    test('esconde quando 100% da lista é o foco', () {
+      expect(
+        showAlunosContatoBanner(
+          modoSelecao: false,
+          filtro: AlunoFiltro.todos,
+          contatoCount: 8,
+          totalCount: 8,
+        ),
+        isFalse,
+      );
+    });
+
+    test('esconde em seleção e fora de todos', () {
+      expect(
+        showAlunosContatoBanner(
+          modoSelecao: true,
+          filtro: AlunoFiltro.todos,
+          contatoCount: 3,
+          totalCount: 8,
+        ),
+        isFalse,
+      );
+      expect(
+        showAlunosContatoBanner(
+          modoSelecao: false,
+          filtro: AlunoFiltro.contatoHoje,
+          contatoCount: 3,
+          totalCount: 8,
+        ),
+        isFalse,
+      );
+    });
+  });
+
+  group('showAlunosRiscoBanner', () {
+    test('some se o banner de contato já está no ar', () {
+      expect(
+        showAlunosRiscoBanner(
+          modoSelecao: false,
+          filtro: AlunoFiltro.todos,
+          riscoCount: 2,
+          totalCount: 8,
+          contatoBannerVisible: true,
+        ),
+        isFalse,
+      );
+    });
+
+    test('esconde quando risco cobre a base inteira', () {
+      expect(
+        showAlunosRiscoBanner(
+          modoSelecao: false,
+          filtro: AlunoFiltro.todos,
+          riscoCount: 8,
+          totalCount: 8,
+          contatoBannerVisible: false,
+        ),
+        isFalse,
+      );
+    });
+  });
+
+  group('showAlunosBulkPayCta', () {
+    test('some se ninguém está em atraso', () {
+      expect(
+        showAlunosBulkPayCta([
+          Aluno(id: 1, nome: 'Ana', email: 'a@test.com', status: 'ATIVO'),
+        ]),
+        isFalse,
+      );
+    });
+
+    test('mostra se algum selecionado está inadimplente', () {
+      expect(
+        showAlunosBulkPayCta([
+          Aluno(id: 1, nome: 'Ana', email: 'a@test.com', status: 'ATIVO'),
+          Aluno(
+            id: 2,
+            nome: 'Bia',
+            email: 'b@test.com',
+            status: 'ATIVO',
+            inadimplente: true,
+            statusFinanceiro: 'INADIMPLENTE',
+          ),
+        ]),
+        isTrue,
+      );
+    });
+  });
 }

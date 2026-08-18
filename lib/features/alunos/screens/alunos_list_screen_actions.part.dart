@@ -68,7 +68,7 @@ class _AlunosTriageBanner extends StatelessWidget {
                 ),
               ),
               Text(
-                'Ver lista',
+                AlunosMicrocopy.focarAgora,
                 style: AppTypography.inter(
                   fontSize: TokensStrip.fontBodySm,
                   fontWeight: FontWeight.w700,
@@ -92,6 +92,7 @@ class _AlunosTriageBanner extends StatelessWidget {
 class _AlunosBulkActionsSheet extends StatefulWidget {
   final int count;
   final bool isDark;
+  final bool mostrarMarcarPago;
   final VoidCallback onMarcarPagos;
   final void Function(String status) onAtualizarStatus;
   final VoidCallback onExcluir;
@@ -99,6 +100,7 @@ class _AlunosBulkActionsSheet extends StatefulWidget {
   const _AlunosBulkActionsSheet({
     required this.count,
     required this.isDark,
+    required this.mostrarMarcarPago,
     required this.onMarcarPagos,
     required this.onAtualizarStatus,
     required this.onExcluir,
@@ -168,24 +170,26 @@ class _AlunosBulkActionsSheetState extends State<_AlunosBulkActionsSheet> {
                 ),
               ),
               const SizedBox(height: 18),
-              Semantics(
-                button: true,
-                label: 'Marcar mensalidade como paga',
-                child: SizedBox(
-                  height: AlunosLayout.touchTarget,
-                  child: FilledButton.icon(
-                    onPressed: widget.onMarcarPagos,
-                    icon: const Icon(Icons.payments_rounded, size: 18),
-                    label: const Text('Marcar mensalidade como paga'),
-                    style: FilledButton.styleFrom(
-                      backgroundColor: primary,
-                      foregroundColor: Colors.white,
-                      shape: const StadiumBorder(),
+              if (widget.mostrarMarcarPago) ...[
+                Semantics(
+                  button: true,
+                  label: 'Marcar mensalidade como paga',
+                  child: SizedBox(
+                    height: AlunosLayout.touchTarget,
+                    child: FilledButton.icon(
+                      onPressed: widget.onMarcarPagos,
+                      icon: const Icon(Icons.payments_rounded, size: 18),
+                      label: const Text('Marcar mensalidade como paga'),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: primary,
+                        foregroundColor: Colors.white,
+                        shape: const StadiumBorder(),
+                      ),
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 20),
+                const SizedBox(height: 20),
+              ],
               Text(
                 'Atualizar status',
                 style: FocuxHubTypography.eyebrow(
@@ -218,16 +222,31 @@ class _AlunosBulkActionsSheetState extends State<_AlunosBulkActionsSheet> {
               const SizedBox(height: 14),
               SizedBox(
                 height: AlunosLayout.touchTarget,
-                child: OutlinedButton.icon(
-                  onPressed: () => widget.onAtualizarStatus(_statusSelecionado),
-                  icon: const Icon(Icons.check_rounded, size: 18),
-                  label: const Text('Aplicar status'),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: primary,
-                    side: BorderSide(color: primary.withValues(alpha: 0.28)),
-                    shape: const StadiumBorder(),
-                  ),
-                ),
+                child: widget.mostrarMarcarPago
+                    ? OutlinedButton.icon(
+                        onPressed:
+                            () => widget.onAtualizarStatus(_statusSelecionado),
+                        icon: const Icon(Icons.check_rounded, size: 18),
+                        label: const Text('Aplicar status'),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: primary,
+                          side: BorderSide(
+                            color: primary.withValues(alpha: 0.28),
+                          ),
+                          shape: const StadiumBorder(),
+                        ),
+                      )
+                    : FilledButton.icon(
+                        onPressed:
+                            () => widget.onAtualizarStatus(_statusSelecionado),
+                        icon: const Icon(Icons.check_rounded, size: 18),
+                        label: const Text('Aplicar status'),
+                        style: FilledButton.styleFrom(
+                          backgroundColor: primary,
+                          foregroundColor: Colors.white,
+                          shape: const StadiumBorder(),
+                        ),
+                      ),
               ),
               const SizedBox(height: 10),
               Semantics(

@@ -21,9 +21,6 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
   void initState() {
     super.initState();
     _filtro = widget.initialFiltro;
-    _searchFocusNode.addListener(() {
-      if (mounted) setState(() {});
-    });
     _loadListPreferences();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
@@ -209,8 +206,9 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
   Future<void> _excluirSelecionados() async {
     final total = _selecionados.length;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final confirmar = await     showModalBottomSheet<bool>(
+    final confirmar = await showModalBottomSheet<bool>(
       context: context,
+      useRootNavigator: true,
       backgroundColor: Colors.transparent,
       showDragHandle: true,
       barrierColor: Colors.black.withValues(alpha: 0.34),
@@ -303,8 +301,17 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
     );
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final qtd = _selecionados.length;
+    final home = ref.read(alunosHomeProvider).valueOrNull;
+    final alunos = <Aluno>[
+      ...?home?.alunos,
+      ...ref.read(alunosHomeTailProvider).alunos,
+    ];
+    final mostrarMarcarPago = showAlunosBulkPayCta(
+      alunos.where((a) => _selecionados.contains(a.id)),
+    );
     showModalBottomSheet<void>(
       context: context,
+      useRootNavigator: true,
       backgroundColor: Colors.transparent,
       showDragHandle: true,
       barrierColor: Colors.black.withValues(alpha: 0.34),
@@ -314,6 +321,7 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
           (sheetContext) => _AlunosBulkActionsSheet(
             count: qtd,
             isDark: isDark,
+            mostrarMarcarPago: mostrarMarcarPago,
             onMarcarPagos: () {
               Navigator.pop(sheetContext);
               _marcarPagosSelecionados();

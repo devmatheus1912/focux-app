@@ -31,6 +31,43 @@ Color alunoListSecondaryInk(bool isDark) =>
   };
 }
 
+/// Pagar em lote só se algum selecionado está em atraso.
+bool alunoListIsOverdue(Aluno aluno) =>
+    aluno.inadimplente || aluno.statusFinanceiro == 'INADIMPLENTE';
+
+bool showAlunosBulkPayCta(Iterable<Aluno> selected) =>
+    selected.any(alunoListIsOverdue);
+
+/// Banner de contato — some se a base inteira já é o foco (eco do chip).
+bool showAlunosContatoBanner({
+  required bool modoSelecao,
+  required AlunoFiltro filtro,
+  required int contatoCount,
+  required int totalCount,
+}) {
+  if (modoSelecao) return false;
+  if (filtro != AlunoFiltro.todos) return false;
+  if (contatoCount <= 0) return false;
+  if (totalCount > 0 && contatoCount >= totalCount) return false;
+  return true;
+}
+
+/// Banner de risco — só se o de contato não estiver no ar e não for 100% da lista.
+bool showAlunosRiscoBanner({
+  required bool modoSelecao,
+  required AlunoFiltro filtro,
+  required int riscoCount,
+  required int totalCount,
+  required bool contatoBannerVisible,
+}) {
+  if (contatoBannerVisible) return false;
+  if (modoSelecao) return false;
+  if (filtro != AlunoFiltro.todos) return false;
+  if (riscoCount <= 0) return false;
+  if (totalCount > 0 && riscoCount >= totalCount) return false;
+  return true;
+}
+
 /// Returns true if the status badge should be shown on the card.
 bool shouldShowAlunoListBadge(
   String statusText,

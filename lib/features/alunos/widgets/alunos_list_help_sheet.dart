@@ -8,6 +8,7 @@ import '../../../core/theme/shell_chrome.dart';
 Future<void> showAlunosListHelpSheet(BuildContext context) {
   return showModalBottomSheet<void>(
     context: context,
+    useRootNavigator: true,
     useSafeArea: true,
     isScrollControlled: true,
     showDragHandle: true,
@@ -61,7 +62,7 @@ Future<void> showAlunosListHelpSheet(BuildContext context) {
                 const SizedBox(height: 16),
                 tip(
                   'Contato hoje',
-                  'Alunos em risco, inadimplentes ou sem treino recente aparecem no topo e no banner.',
+                  'Chip na lista. Banner só aparece quando parte da base precisa de contato — não quando todos precisam.',
                 ),
                 tip(
                   'Filtros e busca',

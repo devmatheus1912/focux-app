@@ -6,6 +6,7 @@ extension AlunosListScreenFilters on _AlunosListScreenState {
     AnalyticsService.instance.track(ProductEvents.alunosOrganizeOpened);
     await showModalBottomSheet<void>(
       context: context,
+      useRootNavigator: true,
       useSafeArea: true,
       isScrollControlled: true,
       showDragHandle: true,
@@ -91,7 +92,7 @@ extension AlunosListScreenFilters on _AlunosListScreenState {
           );
         }
 
-        final sheetMaxHeight = MediaQuery.sizeOf(ctx).height * 0.72;
+        final sheetMaxHeight = MediaQuery.sizeOf(ctx).height * 0.56;
 
         return DecoratedBox(
           decoration: chrome.bottomSheet(),
@@ -122,7 +123,9 @@ extension AlunosListScreenFilters on _AlunosListScreenState {
                           setState(() {
                             _filtro = AlunoFiltro.todos;
                             _ordenacao = AlunoOrdenacao.prioridade;
+                            _listaCompacta = true;
                           });
+                          AlunoListPreferencesStore.saveCompact(true);
                           _syncHomeQuery();
                           Navigator.pop(ctx);
                         },
@@ -169,73 +172,76 @@ extension AlunosListScreenFilters on _AlunosListScreenState {
                     onTap: () => _setOrdenacao(AlunoOrdenacao.semFoto),
                   ),
                   const SizedBox(height: 8),
-                  option(
-                    title: 'Lista compacta',
-                    subtitle:
-                        'Menos ruído: oculta e-mail na lista e reduz o card.',
-                    icon: Icons.density_small_rounded,
-                    selected: _listaCompacta,
+                  InkWell(
                     onTap: () async {
+                      HapticFeedback.selectionClick();
                       final next = !_listaCompacta;
                       setState(() => _listaCompacta = next);
                       await AlunoListPreferencesStore.saveCompact(next);
+                      if (ctx.mounted) Navigator.pop(ctx);
                     },
-                  ),
-                  const SizedBox(height: 18),
-                  Text(
-                    'Atalhos de foco',
-                    style: FocuxHubTypography.eyebrow(
-                      ctx,
-                      color: ink,
-                      fontWeight: FontWeight.w800,
+                    borderRadius: BorderRadius.circular(TokensStrip.rCard),
+                    child: DecoratedBox(
+                      decoration: fxStripCardDecoration(
+                        ctx,
+                        accent: _listaCompacta ? primary : null,
+                        radius: TokensStrip.rCard,
+                        glowStrength: _listaCompacta ? 0.06 : 0.03,
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 10,
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 32,
+                              height: 32,
+                              decoration: BoxDecoration(
+                                color: primary.withValues(
+                                  alpha: isDark ? 0.22 : 0.12,
+                                ),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                Icons.density_small_rounded,
+                                color: linkColor,
+                                size: 17,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Lista compacta',
+                                    style: FocuxHubTypography.sectionTitle(
+                                      ctx,
+                                      color: ink,
+                                    ).copyWith(fontSize: TokensStrip.fontBody),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    AlunosMicrocopy.densitySubtitle,
+                                    style: FocuxHubTypography.bodyMuted(
+                                      color: mute,
+                                    ).copyWith(height: 1.25),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            IgnorePointer(
+                              child: Switch.adaptive(
+                                value: _listaCompacta,
+                                onChanged: (_) {},
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 10),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      _SheetShortcutChip(
-                        label: 'Contato hoje',
-                        selected: _filtro == AlunoFiltro.contatoHoje,
-                        onTap: () {
-                          _setFiltro(AlunoFiltro.contatoHoje);
-                          Navigator.pop(ctx);
-                        },
-                      ),
-                      _SheetShortcutChip(
-                        label: 'Risco alto',
-                        selected: _filtro == AlunoFiltro.risco,
-                        onTap: () {
-                          _setFiltro(AlunoFiltro.risco);
-                          Navigator.pop(ctx);
-                        },
-                      ),
-                      _SheetShortcutChip(
-                        label: 'Em atraso',
-                        selected: _filtro == AlunoFiltro.inadimplentes,
-                        onTap: () {
-                          _setFiltro(AlunoFiltro.inadimplentes);
-                          Navigator.pop(ctx);
-                        },
-                      ),
-                      _SheetShortcutChip(
-                        label: 'Convites',
-                        selected: _filtro == AlunoFiltro.novos,
-                        onTap: () {
-                          _setFiltro(AlunoFiltro.novos);
-                          Navigator.pop(ctx);
-                        },
-                      ),
-                      _SheetShortcutChip(
-                        label: 'Todos',
-                        selected: _filtro == AlunoFiltro.todos,
-                        onTap: () {
-                          _setFiltro(AlunoFiltro.todos);
-                          Navigator.pop(ctx);
-                        },
-                      ),
-                    ],
                   ),
                   const SizedBox(height: 16),
                   Semantics(

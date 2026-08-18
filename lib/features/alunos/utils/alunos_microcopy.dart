@@ -10,6 +10,10 @@ abstract final class AlunosMicrocopy {
   static const backHoje = 'Voltar para Hoje';
   static const clearFilter = 'Limpar filtro';
   static const organizeTooltip = 'Organizar lista';
+  static const focarAgora = 'Focar agora';
+  static const densityTitle = 'Lista compacta';
+  static const densitySubtitle =
+      'Menos ruído: oculta e-mail na lista e reduz o card.';
   static const semTreinoRegistrado = 'Sem treino registrado';
   static const aderenciaIndisponivel = 'Aderência indisponível';
 }

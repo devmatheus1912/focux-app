@@ -9,7 +9,13 @@ abstract final class AlunosLayout {
 
   static const double headerChromeSize = 36;
 
-  static const double headerChromeGap = 8;
+  /// Paridade Home `_chromeGap`.
+  static const double headerChromeGap = 3;
+
+  /// Home some busca abaixo de 360; aqui some o toggle de tema.
+  static const double compactChromeWidth = 360;
+
+  static bool isCompactChrome(double width) => width < compactChromeWidth;
 
   static const double touchTarget = 48;
 

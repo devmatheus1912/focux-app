@@ -29,6 +29,11 @@ void main() {
     expect(screen, contains("label: 'Bloqueado'"));
     expect(screen, contains('_SheetShortcutChip'));
     expect(screen, contains('Lista compacta'));
+    expect(screen, contains('useRootNavigator: true'));
+    expect(screen, isNot(contains('Atalhos de foco')));
+    expect(screen, contains('showAlunosBulkPayCta'));
+    expect(screen, contains('ListenableBuilder'));
+    expect(screen, isNot(contains('_searchFocusNode.addListener')));
     expect(screen, contains('AlunoListPreferencesStore'));
     expect(
       screen,
