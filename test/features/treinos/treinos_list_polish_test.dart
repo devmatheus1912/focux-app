@@ -37,5 +37,7 @@ void main() {
     expect(screen, isNot(contains('Operações da biblioteca')));
     expect(screen, isNot(contains('LinearProgressIndicator')));
     expect(screen, isNot(contains('exerciciosCount * 5')));
+    expect(screen, contains('TreinosListLabels.prettyField'));
+    expect(screen, isNot(contains('_ptLabel(')));
   });
 }

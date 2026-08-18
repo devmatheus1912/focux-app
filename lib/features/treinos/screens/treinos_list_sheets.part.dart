@@ -589,7 +589,9 @@ class _AssignWorkoutSheetState extends State<_AssignWorkoutSheet> {
                                       Text(
                                         aluno.objetivo?.trim().isNotEmpty ==
                                                 true
-                                            ? _ptLabel(aluno.objetivo!.trim())
+                                            ? TreinosListLabels.prettyField(
+                                              aluno.objetivo!.trim(),
+                                            )
                                             : 'Objetivo não definido',
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
