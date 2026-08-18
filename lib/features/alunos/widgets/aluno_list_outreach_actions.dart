@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/brand_palette.dart';
-import '../../../core/theme/design_tokens.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../constants/alunos_layout.dart';
 import '../data/aluno_contact_utils.dart';
@@ -35,12 +34,13 @@ class AlunoListOutreachActions extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final action = BrandPalette.sectionAction(primary, dark: isDark);
     final primaryContact = hasWhatsapp
         ? _AlunoQuickActionIcon(
           compact: compact,
           icon: Icons.chat_rounded,
           tooltip: 'WhatsApp',
-          color: EagleTokens.whatsapp,
+          color: action,
           onTap:
               () => openAlunoWhatsappOutreach(
                 context,
@@ -53,7 +53,7 @@ class AlunoListOutreachActions extends ConsumerWidget {
           compact: compact,
           icon: Icons.forum_outlined,
           tooltip: 'Chat in-app',
-          color: BrandPalette.sectionAction(primary, dark: isDark),
+          color: action,
           onTap:
               () => context.push('/alunos/$alunoId/chat', extra: displayName),
         );
@@ -68,7 +68,7 @@ class AlunoListOutreachActions extends ConsumerWidget {
             compact: compact,
             icon: Icons.forum_outlined,
             tooltip: 'Chat in-app',
-            color: BrandPalette.sectionAction(primary, dark: isDark),
+            color: action,
             onTap:
                 () => context.push('/alunos/$alunoId/chat', extra: displayName),
           ),
@@ -93,7 +93,7 @@ class AlunoListOutreachActions extends ConsumerWidget {
           compact: compact,
           icon: Icons.check_circle_outline_rounded,
           tooltip: 'Contato feito',
-          color: EagleTokens.good,
+          color: action,
           onTap: () async {
             await ref
                 .read(alunoFollowUpActionsProvider)

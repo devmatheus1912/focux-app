@@ -119,6 +119,21 @@ void main() {
     expect(find.byTooltip('Adiar 24h'), findsNothing);
     expect(find.byTooltip('Chat in-app'), findsNothing);
     expect(find.text('Risco alto'), findsNothing);
+
+    Color iconColor(String tooltip) {
+      return tester
+          .widget<Icon>(
+            find.descendant(
+              of: find.byTooltip(tooltip),
+              matching: find.byType(Icon),
+            ),
+          )
+          .color!;
+    }
+
+    expect(iconColor('WhatsApp'), isNot(EagleTokens.whatsapp));
+    expect(iconColor('Contato feito'), isNot(EagleTokens.good));
+    expect(iconColor('WhatsApp'), iconColor('Contato feito'));
   });
 
   testWidgets('compact convite nao mostra 0% nem risco', (tester) async {
