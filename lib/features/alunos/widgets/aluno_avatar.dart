@@ -45,7 +45,7 @@ class AlunoAvatar extends StatelessWidget {
         fallbackColor ??
         (variant == AlunoAvatarVariant.hero
             ? alunoAvatarHeroFallbackColor(name)
-            : alunoAvatarFallbackColor(name, isDark, primary: primary));
+            : alunoAvatarFallbackColor(primary: primary));
     final initials = fxInitials(name);
 
     return Semantics(

@@ -91,20 +91,9 @@ String prettyAlunoObjective(String? value) {
   };
 }
 
-Color alunoAvatarFallbackColor(String name, bool isDark, {Color? primary}) {
-  final base = primary ?? BrandPalette.defaultPrimary;
-  final hsl = HSLColor.fromColor(base);
-  final sat = (hsl.saturation * 0.92).clamp(0.52, 0.78);
-  final lights =
-      isDark
-          ? const [0.44, 0.38, 0.50, 0.34]
-          : const [0.34, 0.28, 0.38, 0.24];
-  final hash =
-      name.isEmpty ? 0 : name.codeUnits.fold<int>(0, (sum, unit) => sum + unit);
-  return hsl
-      .withSaturation(sat)
-      .withLightness(lights[hash % lights.length])
-      .toColor();
+/// Fill único da marca — paridade com [DashboardHeaderProfileAvatar].
+Color alunoAvatarFallbackColor({Color? primary}) {
+  return primary ?? BrandPalette.defaultPrimary;
 }
 
 /// Vivid fallback on teal hero — harmonized tints that sit on the gradient.

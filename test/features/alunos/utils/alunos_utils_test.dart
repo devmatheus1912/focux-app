@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:focux_app/core/theme/brand_palette.dart';
 import 'package:focux_app/features/alunos/data/aluno_repository.dart';
 import 'package:focux_app/features/alunos/utils/aluno_display_utils.dart';
 import 'package:focux_app/features/alunos/utils/aluno_hero_signal.dart';
@@ -20,15 +21,15 @@ void main() {
 
     test('hero fallback avoids teal palette', () {
       final hero = alunoAvatarHeroFallbackColor('Beatriz');
-      final list = alunoAvatarFallbackColor('Beatriz', false);
+      final list = alunoAvatarFallbackColor();
       expect(hero, isNot(equals(list)));
     });
 
-    test('lista usa teals profundos da marca, nao mint', () {
-      final a = alunoAvatarFallbackColor('Beatriz Carvalho', false);
-      final b = alunoAvatarFallbackColor('Guilherme', false);
-      expect(HSLColor.fromColor(a).lightness, lessThan(0.42));
-      expect(HSLColor.fromColor(b).lightness, lessThan(0.42));
+    test('lista usa a mesma cor da marca pra qualquer nome', () {
+      expect(
+        alunoAvatarFallbackColor(),
+        alunoAvatarFallbackColor(primary: BrandPalette.defaultPrimary),
+      );
     });
   });
 
