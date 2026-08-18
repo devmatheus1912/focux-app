@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import '../../../core/brand/focux_brand_copy.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_system_chrome.dart';
 import '../../../core/theme/hero_teal.dart';
 import '../../../core/theme/theme_provider.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
@@ -47,14 +48,17 @@ class AuthShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CinematicMeshBackground(
-      forceDark: forceDark,
-      showCenterGlow: showCenterGlow,
-      showCornerGlow: showCornerGlow,
-      flatBackground: flatBackground,
-      showGrid: showGrid,
-      animateGridIn: animateGridIn,
-      child: SafeArea(child: child),
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: FocuxSystemChrome.dark,
+      child: CinematicMeshBackground(
+        forceDark: forceDark,
+        showCenterGlow: showCenterGlow,
+        showCornerGlow: showCornerGlow,
+        flatBackground: flatBackground,
+        showGrid: showGrid,
+        animateGridIn: animateGridIn,
+        child: SafeArea(child: child),
+      ),
     );
   }
 }
@@ -286,10 +290,7 @@ class AuthRoleToggle extends StatelessWidget {
                 color: selected ? null : Colors.transparent,
                 boxShadow:
                     selected
-                        ? TokensStrip.coloredDepthGlow(
-                          primary,
-                          strength: 0.18,
-                        )
+                        ? TokensStrip.coloredDepthGlow(primary, strength: 0.18)
                         : null,
               ),
               child: Text(
@@ -438,11 +439,7 @@ class AuthField extends StatelessWidget {
             prefixIcon:
                 icon == null
                     ? null
-                    : Icon(
-                      icon,
-                      color: heroTealSurface(0.78),
-                      size: 18,
-                    ),
+                    : Icon(icon, color: heroTealSurface(0.78), size: 18),
             suffixIcon: suffix,
             filled: true,
             fillColor: EagleTokens.glassFill,
@@ -612,7 +609,9 @@ class AuthSecondaryButton extends StatelessWidget {
         onPressed: onPressed,
         style: OutlinedButton.styleFrom(
           side: BorderSide(
-            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.45),
+            color: Theme.of(
+              context,
+            ).colorScheme.primary.withValues(alpha: 0.45),
           ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(TokensStrip.rButton),
@@ -685,11 +684,7 @@ class AuthBackButton extends StatelessWidget {
       ),
     );
 
-    final button = Semantics(
-      button: true,
-      label: 'Voltar',
-      child: icon,
-    );
+    final button = Semantics(button: true, label: 'Voltar', child: icon);
 
     if (!showLabel) {
       return button;

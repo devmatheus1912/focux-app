@@ -12,6 +12,7 @@ import '../../alunos/utils/alunos_home_prefetch.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/auth_shell.dart';
 import '../widgets/cinematic_splash_scene.dart';
+import '../../../core/theme/focux_system_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 
@@ -181,20 +182,17 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     return fxScreenA11yScope(
       label: 'Focux',
       child: AnnotatedRegion<SystemUiOverlayStyle>(
-        value: const SystemUiOverlayStyle(
-          statusBarColor: Colors.transparent,
-          statusBarIconBrightness: Brightness.light,
-          statusBarBrightness: Brightness.dark,
-        ),
+        value: FocuxSystemChrome.dark,
         child: Scaffold(
           backgroundColor: TokensStrip.cinematicBg,
+          extendBody: true,
           body: AuthShell(
             forceDark: true,
-            flatBackground: true,
-            showGrid: false,
+            flatBackground: false,
+            showGrid: true,
             animateGridIn: false,
             showCenterGlow: false,
-            showCornerGlow: false,
+            showCornerGlow: true,
             child: AnimatedBuilder(
               animation: Listenable.merge([
                 _ambientCtrl,

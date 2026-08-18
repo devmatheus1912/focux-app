@@ -7,6 +7,7 @@ import '../../../core/api/api_client.dart';
 import '../../../core/brand/brand_pulse.dart';
 import '../../../core/brand/focux_brand_copy.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_system_chrome.dart';
 import '../../../core/theme/hero_teal.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/motion_preferences.dart';
@@ -236,11 +237,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       child: MediaQuery(
         data: MediaQuery.of(context).copyWith(textScaler: textScaler),
         child: AnnotatedRegion<SystemUiOverlayStyle>(
-          value: const SystemUiOverlayStyle(
-            statusBarColor: fxTransparent,
-            statusBarIconBrightness: Brightness.light,
-            statusBarBrightness: Brightness.dark,
-          ),
+          value: FocuxSystemChrome.dark,
           child: Scaffold(
             body: Stack(
             fit: StackFit.expand,

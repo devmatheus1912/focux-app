@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
 import '../platform/focux_platform.dart';
+import '../theme/focux_system_chrome.dart';
 import '../widgets/cinematic_mesh_background.dart';
 import '../widgets/fx_dock.dart';
 import '../widgets/mesh_scope.dart';
@@ -20,14 +21,7 @@ class AlunoShell extends StatelessWidget {
     final dockClearance = bottomInset + (compact ? 88.0 : 98.0);
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
-        statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
-        statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
-        systemNavigationBarColor: Colors.transparent,
-        systemNavigationBarIconBrightness:
-            isDark ? Brightness.light : Brightness.dark,
-      ),
+      value: FocuxSystemChrome.forDark(isDark),
       child: Scaffold(
         extendBody: true,
         backgroundColor: Colors.transparent,

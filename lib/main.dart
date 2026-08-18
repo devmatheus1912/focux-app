@@ -21,6 +21,7 @@ import 'core/router/app_router.dart';
 import 'core/storage/secure_storage.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/design_tokens.dart';
+import 'core/theme/focux_system_chrome.dart';
 import 'core/theme/theme_provider.dart';
 import 'features/auth/providers/auth_provider.dart';
 import 'features/perfil/data/perfil_repository.dart';
@@ -37,13 +38,8 @@ void main() {
       TlsCertificatePinning.installGlobalOverrides();
       await HomeWidgetService.init();
 
-      SystemChrome.setSystemUIOverlayStyle(
-        const SystemUiOverlayStyle(
-          statusBarColor: Colors.transparent,
-          statusBarIconBrightness: Brightness.light,
-          statusBarBrightness: Brightness.dark,
-        ),
-      );
+      await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+      SystemChrome.setSystemUIOverlayStyle(FocuxSystemChrome.dark);
 
       // ignore: unused_local_variable
       bool crashlyticsReady = false;
@@ -260,11 +256,12 @@ class _FocuxAppState extends ConsumerState<FocuxApp> {
     final hideFocux = ref.watch(hideFocuxBrandingProvider);
     final appDisplayName = ref.watch(appDisplayNameProvider);
     final personalName = ref.watch(personalNameProvider);
-    final appTitle = hideFocux
-        ? ((appDisplayName != null && appDisplayName.trim().isNotEmpty)
-            ? appDisplayName.trim()
-            : (personalName ?? 'Meu Personal'))
-        : 'Focux';
+    final appTitle =
+        hideFocux
+            ? ((appDisplayName != null && appDisplayName.trim().isNotEmpty)
+                ? appDisplayName.trim()
+                : (personalName ?? 'Meu Personal'))
+            : 'Focux';
 
     return MaterialApp.router(
       title: appTitle,
@@ -299,9 +296,7 @@ class _FocuxAppState extends ConsumerState<FocuxApp> {
         );
         return MediaQuery(
           data: mq.copyWith(textScaler: scaler),
-          child: FxConnectivityBanner(
-            child: child ?? const SizedBox.shrink(),
-          ),
+          child: FxConnectivityBanner(child: child ?? const SizedBox.shrink()),
         );
       },
     );

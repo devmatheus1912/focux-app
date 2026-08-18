@@ -2,14 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
+import '../theme/focux_system_chrome.dart';
 import 'cinematic_mesh_background.dart';
 import 'mesh_scope.dart';
 
 /// Routes that keep their own immersive / marketing background.
-const _immersiveRoutePrefixes = [
-  '/treino-presencial/',
-  '/promo-enterprise',
-];
+const _immersiveRoutePrefixes = ['/treino-presencial/', '/promo-enterprise'];
 
 bool _fxRouteUsesImmersiveChrome(String path) {
   for (final prefix in _immersiveRoutePrefixes) {
@@ -34,14 +32,7 @@ class FxRouteChrome extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
-        statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
-        statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
-        systemNavigationBarColor: Colors.transparent,
-        systemNavigationBarIconBrightness:
-            isDark ? Brightness.light : Brightness.dark,
-      ),
+      value: FocuxSystemChrome.forDark(isDark),
       child: CinematicMeshBackground(
         showCenterGlow: false,
         showCornerGlow: true,

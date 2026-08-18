@@ -65,54 +65,52 @@ class CinematicSplashScene extends StatelessWidget {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(24, 12, 24, 36),
-                  child: Column(
-                    children: [
-                      SizedBox(height: size.height * (compact ? 0.22 : 0.22)),
-                      Opacity(
-                        opacity: entryT,
-                        child: Transform.translate(
-                          offset: Offset(
-                            0,
-                            reduceMotion
-                                ? 0
-                                : (1 - entryT) * (compact ? 8 : 12),
-                          ),
-                          child: _SplashHeroMark(
-                            phase: phase,
-                            entry: entry.value,
-                            reduceMotion: reduceMotion,
-                            iconOnlyT: iconOnlyT,
-                            lockupT: lockupT,
-                            compact: compact,
-                          ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  TokensStrip.s5,
+                  TokensStrip.s3,
+                  TokensStrip.s5,
+                  TokensStrip.s6,
+                ),
+                child: Column(
+                  children: [
+                    SizedBox(height: size.height * (compact ? 0.22 : 0.22)),
+                    Opacity(
+                      opacity: entryT,
+                      child: Transform.translate(
+                        offset: Offset(
+                          0,
+                          reduceMotion ? 0 : (1 - entryT) * (compact ? 8 : 12),
+                        ),
+                        child: _SplashHeroMark(
+                          phase: phase,
+                          entry: entry.value,
+                          reduceMotion: reduceMotion,
+                          iconOnlyT: iconOnlyT,
+                          lockupT: lockupT,
+                          compact: compact,
                         ),
                       ),
-                      SizedBox(height: compact ? 10 : 18),
-                      Opacity(
-                        opacity: taglineT,
-                        child: FocuxBrandTagline(
-                          center: true,
-                          fontSize: compact ? 12.5 : 14,
-                        ),
+                    ),
+                    SizedBox(height: compact ? TokensStrip.s3 : TokensStrip.s4),
+                    Opacity(
+                      opacity: taglineT,
+                      child: FocuxBrandTagline(
+                        center: true,
+                        fontSize: compact ? 12.5 : 14,
                       ),
-                      const Spacer(),
-                      Opacity(
-                        opacity:
-                            reduceMotion
-                                ? 1
-                                : Curves.easeOut.transform(
-                                  ((entry.value - 0.12) / 0.40).clamp(0.0, 1.0),
-                                ),
-                        child: _LoadingRail(
-                          progress: progress,
-                          primary: primary,
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                    const Spacer(),
+                    Opacity(
+                      opacity:
+                          reduceMotion
+                              ? 1
+                              : Curves.easeOut.transform(
+                                ((entry.value - 0.12) / 0.40).clamp(0.0, 1.0),
+                              ),
+                      child: _LoadingRail(progress: progress, primary: primary),
+                    ),
+                  ],
                 ),
               ),
             ],
