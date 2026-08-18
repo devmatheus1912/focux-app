@@ -78,13 +78,15 @@ class AlunosHomeTailNotifier extends StateNotifier<AlunosHomeTailState> {
 
 final alunosHomeTailProvider =
     StateNotifierProvider<AlunosHomeTailNotifier, AlunosHomeTailState>(
-      (ref) => AlunosHomeTailNotifier(),
+      (ref) {
+        ref.watch(alunosHomeQueryProvider);
+        return AlunosHomeTailNotifier();
+      },
     );
 
 final alunosHomeProvider = FutureProvider<AlunosHomeBundle>((ref) async {
   ref.onDispose(AlunosHomeClientCache.clear);
   final query = ref.watch(alunosHomeQueryProvider);
-  ref.read(alunosHomeTailProvider.notifier).clear();
   final cached = AlunosHomeClientCache.getIfFresh(query);
   if (cached != null) return cached;
   final fresh = await ref.read(alunoRepositoryProvider).getHome(
