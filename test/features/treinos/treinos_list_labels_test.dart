@@ -12,6 +12,10 @@ void main() {
     expect(TreinosListLabels.readyCount(2), '2 prontos');
     expect(TreinosListLabels.templateCount(1), '1 template');
     expect(TreinosListLabels.templateCount(4), '4 templates');
+    expect(
+      TreinosListLabels.libraryCaption(prontos: 2, exercises: 10),
+      '2 prontos · 10 exercícios',
+    );
   });
 
   group('empty state copy', () {

@@ -66,16 +66,7 @@ class _TreinoCard extends StatelessWidget {
     }
   }
 
-  Color get _nivelColor {
-    switch (treino.nivel?.toUpperCase()) {
-      case 'AVANCADO':
-        return EagleTokens.bad;
-      case 'INTERMEDIARIO':
-        return EagleTokens.warn;
-      default:
-        return EagleTokens.good;
-    }
-  }
+  Color get _nivelColor => primary;
 
   String get _nivelLabel {
     final nivel = treino.nivel?.trim();
@@ -89,7 +80,6 @@ class _TreinoCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-    final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
     final hasExercises = treino.pronto;
     final series = treino.seriesTotal;
     final estimatedMinutes =
@@ -212,39 +202,20 @@ class _TreinoCard extends StatelessWidget {
                     Semantics(
                       button: true,
                       label: 'Ações do treino',
-                      child: InkWell(
-                        onTap: onActions,
-                        borderRadius: BorderRadius.circular(999),
-                        child: Container(
-                          height: 34,
-                          padding: const EdgeInsets.symmetric(horizontal: 10),
-                          decoration: BoxDecoration(
-                            color:
-                                isDark
-                                    ? EagleTokens.darkBg
-                                    : TokensStrip.borderDefault,
-                            borderRadius: BorderRadius.circular(999),
-                            border: Border.all(color: line),
+                      child: IconButton(
+                        onPressed: onActions,
+                        tooltip: 'Ações do treino',
+                        style: IconButton.styleFrom(
+                          minimumSize: const Size(
+                            TreinosLayout.touchTarget,
+                            TreinosLayout.touchTarget,
                           ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                'Ações',
-                                style: AppTypography.inter(
-                                  color: mute,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w800,
-                                ),
-                              ),
-                              SizedBox(width: TokensStrip.s1),
-                              Icon(
-                                Icons.keyboard_arrow_down_rounded,
-                                color: mute,
-                                size: 16,
-                              ),
-                            ],
-                          ),
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                        icon: Icon(
+                          Icons.more_horiz_rounded,
+                          color: mute,
+                          size: 22,
                         ),
                       ),
                     ),
@@ -268,7 +239,7 @@ class _TreinoCard extends StatelessWidget {
                       icon: Icons.repeat_rounded,
                       value: hasExercises ? '$series séries' : 'em montagem',
                       isDark: isDark,
-                      color: hasExercises ? primary : EagleTokens.warn,
+                      color: primary,
                     ),
                   ),
                   SizedBox(width: TokensStrip.s2),
@@ -297,10 +268,8 @@ class _TreinoCard extends StatelessWidget {
                                 : TokensStrip.borderDefault,
                         valueColor: AlwaysStoppedAnimation(
                           hasExercises
-                              ? EagleTokens.good.withValues(
-                                alpha: isDark ? 0.5 : 0.35,
-                              )
-                              : EagleTokens.warn,
+                              ? primary.withValues(alpha: isDark ? 0.7 : 0.85)
+                              : primary.withValues(alpha: 0.35),
                         ),
                       ),
                     ),
@@ -313,7 +282,7 @@ class _TreinoCard extends StatelessWidget {
                         Icon(
                           Icons.check_circle_rounded,
                           size: 13,
-                          color: EagleTokens.good.withValues(
+                          color: primary.withValues(
                             alpha: isDark ? 0.7 : 0.55,
                           ),
                         ),
@@ -332,7 +301,7 @@ class _TreinoCard extends StatelessWidget {
                     Text(
                       'finalizar',
                       style: AppTypography.inter(
-                        color: EagleTokens.warn,
+                        color: primary,
                         fontSize: 11.5,
                         fontWeight: FontWeight.w800,
                       ),

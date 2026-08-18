@@ -72,6 +72,7 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
         backgroundColor: Colors.transparent,
         barrierColor: Colors.black.withValues(alpha: 0.34),
         isScrollControlled: true,
+        useRootNavigator: true,
         builder: (_) => _AssignWorkoutSheet(alunos: alunos),
       );
       if (selected == null) return;
@@ -116,6 +117,7 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
         backgroundColor: Colors.transparent,
         barrierColor: Colors.black.withValues(alpha: 0.34),
         isScrollControlled: true,
+        useRootNavigator: true,
         builder: (_) => _AssignWorkoutSheet(alunos: alunos),
       );
       if (selected == null) return;
@@ -145,6 +147,7 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
       backgroundColor: Colors.transparent,
       barrierColor: Colors.black.withValues(alpha: 0.34),
       isScrollControlled: true,
+      useRootNavigator: true,
       builder:
           (_) => _TreinoActionsSheet(
             treino: treino,
@@ -184,6 +187,7 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
     final confirmed = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
+      useRootNavigator: true,
       backgroundColor: Colors.transparent,
       builder:
           (context) => _DeleteWorkoutSheet(
@@ -295,11 +299,12 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
                   slivers: [
                     SliverToBoxAdapter(
                       child: _TreinosHeader(
-                        treinos: treinos,
                         alunoId: widget.alunoId,
                         alunoNome: widget.alunoNome,
                         isDark: isDark,
                         freshnessLabel: freshnessLabel,
+                        selectionMode: _selectionMode,
+                        selectedCount: _selectedIds.length,
                         onBack:
                             widget.alunoId == null
                                 ? null
@@ -307,6 +312,24 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
                                   context,
                                   '/alunos/${widget.alunoId}',
                                 ),
+                        onHelp: () => showTreinosListHelpSheet(context),
+                        onCreate: createWorkout,
+                        onSelectAll:
+                            filteredTreinos.isEmpty
+                                ? null
+                                : () {
+                                  setState(() {
+                                    _selectionMode = true;
+                                    _selectedIds
+                                      ..clear()
+                                      ..addAll(
+                                        filteredTreinos.map(
+                                          (treino) => treino.id,
+                                        ),
+                                      );
+                                  });
+                                },
+                        onCancelSelection: _clearSelection,
                       ),
                     ),
                     if (treinos.isEmpty)
@@ -330,54 +353,20 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
                       SliverToBoxAdapter(
                         child: Padding(
                           padding: EdgeInsets.fromLTRB(
-                            TokensStrip.s5,
+                            TreinosLayout.screenPadding,
                             0,
-                            20,
-                            singlePlan ? 12 : 16,
-                          ),
-                          child: _TreinosCommandCard(
-                            treinos: treinos,
-                            isDark: isDark,
-                            primary: primary,
-                            compact: treinos.length <= 2,
-                            onCreate: createWorkout,
-                          ),
-                        ),
-                      ),
-                      SliverToBoxAdapter(
-                        child: Padding(
-                          padding: EdgeInsets.fromLTRB(
-                            TokensStrip.s5,
-                            0,
-                            20,
+                            TreinosLayout.screenPadding,
                             singlePlan ? 12 : 14,
                           ),
                           child: _LibraryControls(
                             controller: _searchController,
                             query: _query,
-                            selectedCount: _selectedIds.length,
                             selectionMode: _selectionMode,
                             isDark: isDark,
                             primary: primary,
                             onQueryChanged:
                                 (value) => setState(() => _query = value),
                             onClearQuery: _clearQuery,
-                            onSelectAll:
-                                filteredTreinos.isEmpty
-                                    ? null
-                                    : () {
-                                      setState(() {
-                                        _selectionMode = true;
-                                        _selectedIds
-                                          ..clear()
-                                          ..addAll(
-                                            filteredTreinos.map(
-                                              (treino) => treino.id,
-                                            ),
-                                          );
-                                      });
-                                    },
-                            onCancelSelection: _clearSelection,
                             onDeleteSelected:
                                 selectedTreinos.isEmpty
                                     ? null
@@ -385,22 +374,30 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
                           ),
                         ),
                       ),
+                      if (!_selectionMode)
                       SliverToBoxAdapter(
                         child: Padding(
                           padding: const EdgeInsets.fromLTRB(
-                            TokensStrip.s5,
+                            TreinosLayout.screenPadding,
                             0,
-                            20,
+                            TreinosLayout.screenPadding,
                             12,
                           ),
                           child: _SectionHeader(
                             title:
                                 widget.alunoId == null
-                                    ? 'Biblioteca ativa'
+                                    ? 'Biblioteca'
                                     : 'Plano do aluno',
                             action:
                                 _query.trim().isEmpty
-                                    ? '${treinos.length} ${treinos.length == 1 ? 'plano' : 'planos'}'
+                                    ? TreinosListLabels.libraryCaption(
+                                      prontos:
+                                          treinos.where((t) => t.pronto).length,
+                                      exercises: treinos.fold<int>(
+                                        0,
+                                        (sum, t) => sum + t.exerciciosCount,
+                                      ),
+                                    )
                                     : '${filteredTreinos.length} de ${treinos.length}',
                             isDark: isDark,
                           ),
@@ -423,9 +420,9 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
                       else
                         SliverPadding(
                           padding: const EdgeInsets.fromLTRB(
-                            TokensStrip.s5,
+                            TreinosLayout.screenPadding,
                             0,
-                            20,
+                            TreinosLayout.screenPadding,
                             104,
                           ),
                           sliver: SliverList.separated(

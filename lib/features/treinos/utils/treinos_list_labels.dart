@@ -13,6 +13,11 @@ abstract final class TreinosListLabels {
   static String templateCount(int count) =>
       count == 1 ? '1 template' : '$count templates';
 
+  static String libraryCaption({
+    required int prontos,
+    required int exercises,
+  }) => '${readyCount(prontos)} · $exercises exercícios';
+
   static String emptyTitle({String? alunoNome}) =>
       _firstName(alunoNome) == null
           ? 'Sua biblioteca começa aqui'

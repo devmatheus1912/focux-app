@@ -29,7 +29,11 @@ void main() {
     expect(screen, contains('control_point_duplicate_rounded'));
     expect(screen, contains('assignment_ind_rounded'));
     expect(screen, contains('displayWorkoutName(treino.nome)'));
-    expect(screen, contains('TreinosListLabels.readyPlans'));
+    expect(screen, contains('TreinosListLabels.libraryCaption'));
     expect(screen, contains('segure para selecionar'));
+    expect(screen, contains('showTreinosListHelpSheet'));
+    expect(screen, contains('useRootNavigator: true'));
+    expect(screen, isNot(contains('Biblioteca sob controle')));
+    expect(screen, isNot(contains('Operações da biblioteca')));
   });
 }
