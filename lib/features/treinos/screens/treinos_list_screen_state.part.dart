@@ -3,12 +3,21 @@ part of 'treinos_list_screen.dart';
 class _TreinosListViewState extends ConsumerState<_TreinosListView> {
   final TextEditingController _searchController = TextEditingController();
   final Set<int> _selectedIds = <int>{};
+  final DateTime _openedAt = DateTime.now();
+  Timer? _searchDebounce;
   String _query = '';
   bool _selectionMode = false;
+  bool _viewTracked = false;
+  bool _ttvTracked = false;
   DateTime? _fetchedAt;
+
+  Map<String, Object?> get _analyticsScope => {
+    'scope': widget.alunoId == null ? 'library' : 'aluno',
+  };
 
   @override
   void dispose() {
+    _searchDebounce?.cancel();
     _searchController.dispose();
     super.dispose();
   }
@@ -59,10 +68,28 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
   }
 
   void _clearQuery() {
-    setState(() {
-      _query = '';
-      _searchController.clear();
+    _searchController.clear();
+    _onQueryChanged('');
+  }
+
+  void _onQueryChanged(String value) {
+    setState(() => _query = value);
+    _searchDebounce?.cancel();
+    _searchDebounce = Timer(const Duration(milliseconds: 350), () {
+      if (!mounted) return;
+      AnalyticsService.instance.track(
+        ProductEvents.treinosSearchUsed,
+        props: {..._analyticsScope, 'has_query': _query.trim().isNotEmpty},
+      );
     });
+  }
+
+  Future<void> _openHelp() {
+    AnalyticsService.instance.track(
+      ProductEvents.treinosHelpOpened,
+      props: _analyticsScope,
+    );
+    return showTreinosListHelpSheet(context);
   }
 
   Future<void> _assignTreino(Treino treino) async {
@@ -86,6 +113,10 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
       ref.invalidate(treinosDoAlunoProvider(selected));
       if (!mounted) return;
       FeedbackHelper.showSuccess(context, 'Treino atribuído ao aluno.');
+      AnalyticsService.instance.track(
+        ProductEvents.treinosAssigned,
+        props: _analyticsScope,
+      );
     } catch (e) {
       if (!mounted) return;
       FeedbackHelper.showError(
@@ -101,6 +132,10 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
       invalidateTreinosCaches(ref);
       if (!mounted) return;
       FeedbackHelper.showSuccess(context, 'Treino duplicado.');
+      AnalyticsService.instance.track(
+        ProductEvents.treinosDuplicated,
+        props: _analyticsScope,
+      );
     } catch (e) {
       if (!mounted) return;
       FeedbackHelper.showError(
@@ -134,6 +169,10 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
         context,
         'Cópia dedicada criada para o aluno.',
       );
+      AnalyticsService.instance.track(
+        ProductEvents.treinosCloned,
+        props: _analyticsScope,
+      );
     } catch (e) {
       if (!mounted) return;
       FeedbackHelper.showError(
@@ -144,6 +183,10 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
   }
 
   Future<void> _openTreinoActions(Treino treino) async {
+    AnalyticsService.instance.track(
+      ProductEvents.treinosActionOpened,
+      props: _analyticsScope,
+    );
     final action = await showModalBottomSheet<_TreinoAction>(
       context: context,
       backgroundColor: Colors.transparent,
@@ -178,12 +221,15 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
         await _duplicateTreino(treino);
         break;
       case _TreinoAction.delete:
-        await _deleteTreinos([treino]);
+        await _deleteTreinos([treino], source: 'card');
         break;
     }
   }
 
-  Future<void> _deleteTreinos(List<Treino> treinos) async {
+  Future<void> _deleteTreinos(
+    List<Treino> treinos, {
+    required String source,
+  }) async {
     if (treinos.isEmpty) return;
     final count = treinos.length;
     final confirmed = await showModalBottomSheet<bool>(
@@ -221,6 +267,15 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
         context,
         count == 1 ? 'Treino removido.' : '$count treinos removidos.',
       );
+      AnalyticsService.instance.track(
+        ProductEvents.treinosDeleted,
+        props: {
+          ..._analyticsScope,
+          'count': count,
+          'unlink': widget.alunoId != null,
+          'source': source,
+        },
+      );
     } catch (e) {
       if (!mounted) return;
       FeedbackHelper.showError(
@@ -246,7 +301,13 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
     final primary = Theme.of(context).colorScheme.primary;
     final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
 
-    Future<void> refresh() async {
+    Future<void> refresh({bool track = true}) async {
+      if (track) {
+        AnalyticsService.instance.track(
+          ProductEvents.treinosRefreshed,
+          props: _analyticsScope,
+        );
+      }
       if (widget.alunoId == null) {
         invalidateTreinosCaches(ref);
       } else {
@@ -255,6 +316,10 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
     }
 
     Future<void> createWorkout() async {
+      AnalyticsService.instance.track(
+        ProductEvents.treinosCreateTapped,
+        props: _analyticsScope,
+      );
       final criado = await context.push<bool>(
         '/treinos/novo',
         extra:
@@ -263,7 +328,7 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
                 : {'alunoId': widget.alunoId, 'alunoNome': widget.alunoNome},
       );
       if (criado == true) {
-        await refresh();
+        await refresh(track: false);
       }
     }
 
@@ -287,6 +352,32 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
                   onRetry: refresh,
                 ),
             data: (treinos) {
+              if (!_viewTracked) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (!mounted || _viewTracked) return;
+                  _viewTracked = true;
+                  AnalyticsService.instance.track(
+                    ProductEvents.treinosViewed,
+                    props: {
+                      ..._analyticsScope,
+                      'count': treinos.length,
+                      'prontos': treinos.where((t) => t.pronto).length,
+                    },
+                  );
+                  if (!_ttvTracked) {
+                    _ttvTracked = true;
+                    AnalyticsService.instance.track(
+                      ProductEvents.treinosTtv,
+                      props: {
+                        ..._analyticsScope,
+                        'ms':
+                            DateTime.now().difference(_openedAt).inMilliseconds,
+                        'count': treinos.length,
+                      },
+                    );
+                  }
+                });
+              }
               final filteredTreinos = treinos.where(_matchesQuery).toList();
               final selectedTreinos =
                   treinos
@@ -318,7 +409,7 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
                                         context,
                                         '/alunos/${widget.alunoId}',
                                       ),
-                              onHelp: () => showTreinosListHelpSheet(context),
+                              onHelp: _openHelp,
                               onCreate: createWorkout,
                               onSelectAll:
                                   filteredTreinos.isEmpty
@@ -370,9 +461,7 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
                                     query: _query,
                                     isDark: isDark,
                                     primary: primary,
-                                    onQueryChanged:
-                                        (value) =>
-                                            setState(() => _query = value),
+                                    onQueryChanged: _onQueryChanged,
                                     onClearQuery: _clearQuery,
                                   ),
                                 ),
@@ -492,7 +581,16 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
                           });
                         }
                       },
-                      onDelete: () => _deleteTreinos(selectedTreinos),
+                      onDelete: () {
+                        AnalyticsService.instance.track(
+                          ProductEvents.treinosBulkOpened,
+                          props: {
+                            ..._analyticsScope,
+                            'count': selectedTreinos.length,
+                          },
+                        );
+                        _deleteTreinos(selectedTreinos, source: 'bulk');
+                      },
                     ),
                 ],
               );

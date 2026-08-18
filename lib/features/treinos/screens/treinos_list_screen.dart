@@ -1,7 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+
+import '../../../core/analytics/analytics_service.dart';
 
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';

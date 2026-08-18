@@ -49,5 +49,17 @@ void main() {
     expect(screen, isNot(contains('exerciciosCount * 5')));
     expect(screen, contains('TreinosListLabels.prettyField'));
     expect(screen, isNot(contains('_ptLabel(')));
+    expect(screen, contains('ProductEvents.treinosViewed'));
+    expect(screen, contains('ProductEvents.treinosTtv'));
+    expect(screen, contains('ProductEvents.treinosRefreshed'));
+    expect(screen, contains('ProductEvents.treinosSearchUsed'));
+    expect(screen, contains('ProductEvents.treinosHelpOpened'));
+    expect(screen, contains('ProductEvents.treinosCreateTapped'));
+    expect(screen, contains('ProductEvents.treinosActionOpened'));
+    expect(screen, contains('ProductEvents.treinosAssigned'));
+    expect(screen, contains('ProductEvents.treinosCloned'));
+    expect(screen, contains('ProductEvents.treinosDuplicated'));
+    expect(screen, contains('ProductEvents.treinosBulkOpened'));
+    expect(screen, contains('ProductEvents.treinosDeleted'));
   });
 }
