@@ -8,7 +8,7 @@ final alunoRepositoryProvider = Provider<AlunoRepository>(
 );
 
 final alunosHomeProvider = FutureProvider<AlunosHomeBundle>((ref) async {
-  return ref.read(alunoRepositoryProvider).getHome();
+  return ref.read(alunoRepositoryProvider).getHomeAll();
 });
 
 final alunosProvider = FutureProvider<List<Aluno>>((ref) async {

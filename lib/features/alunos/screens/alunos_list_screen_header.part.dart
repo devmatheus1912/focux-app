@@ -92,7 +92,7 @@ extension AlunosListScreenHeader on _AlunosListScreenState {
                                       ),
                                       const SizedBox(height: 2),
                                       Text(
-                                        'Alunos',
+                                        context.alunosL10n.alunosTitle,
                                         style: FocuxHubTypography.pageTitle(
                                           context,
                                           color: ink,
@@ -257,7 +257,7 @@ extension AlunosListScreenHeader on _AlunosListScreenState {
                                   const SizedBox(width: 10),
                                   Expanded(
                                     child: Semantics(
-                                      label: 'Buscar aluno por nome ou objetivo',
+                                      label: context.alunosL10n.alunosSearchA11y,
                                       textField: true,
                                       child: TextField(
                                         controller: _searchController,
@@ -278,8 +278,7 @@ extension AlunosListScreenHeader on _AlunosListScreenState {
                                               const EdgeInsets.symmetric(
                                                 vertical: 10,
                                               ),
-                                          hintText:
-                                              'Buscar por nome ou objetivo',
+                                          hintText: context.alunosL10n.alunosSearchHint,
                                           hintStyle: AppTypography.inter(
                                             fontSize: TokensStrip.fontBody,
                                             color: mute,
@@ -379,7 +378,7 @@ extension AlunosListScreenHeader on _AlunosListScreenState {
                                 child: Row(
                                   children: [
                                     _FxChip(
-                                      label: 'Todos',
+                                      label: context.alunosL10n.alunosFilterAll,
                                       count: alunos.length,
                                       isSelected: _filtro == AlunoFiltro.todos,
                                       isDark: isDark,
@@ -390,7 +389,7 @@ extension AlunosListScreenHeader on _AlunosListScreenState {
                                     ),
                                     const SizedBox(width: 8),
                                     _FxChip(
-                                      label: 'Contato hoje',
+                                      label: context.alunosL10n.alunosFilterContactToday,
                                       count: contatoCount,
                                       isSelected:
                                           _filtro == AlunoFiltro.contatoHoje,
@@ -404,7 +403,7 @@ extension AlunosListScreenHeader on _AlunosListScreenState {
                                     ),
                                     const SizedBox(width: 8),
                                     _FxChip(
-                                      label: 'Ativos',
+                                      label: context.alunosL10n.alunosFilterActive,
                                       count: ativosCount,
                                       isSelected: _filtro == AlunoFiltro.ativos,
                                       isDark: isDark,

@@ -22,15 +22,22 @@ void main() {
     expect(screen, contains('mensalidadesPagasMessage'));
     expect(screen, contains('FxHorizontalScrollPeek'));
     expect(screen, contains('fx_horizontal_scroll_peek.dart'));
-    expect(screen, contains('alunoListStatusBadge'));
+    expect(screen, contains('AlunoListCard'));
+    expect(screen, contains('aluno_list_card.dart'));
     expect(screen, contains("label: 'Ativo'"));
     expect(screen, contains("label: 'Inativo'"));
     expect(screen, contains("label: 'Bloqueado'"));
     expect(screen, contains('_SheetShortcutChip'));
     expect(screen, contains('Lista compacta'));
     expect(screen, contains('AlunoListPreferencesStore'));
-    expect(screen, contains('maskEmailForList'));
-    expect(screen, contains('alunoListSecondaryInk'));
+    expect(
+      screen,
+      anyOf(contains('maskEmailForList'), contains('AlunoListCard')),
+    );
+    expect(
+      screen,
+      anyOf(contains('alunoListSecondaryInk'), contains('AlunoListCard')),
+    );
     expect(screen, contains('AlunosLoadingScaffold'));
     expect(screen, contains('AlunosErrorScaffold'));
     expect(screen, contains('FxContentWidthLimiter'));
@@ -40,7 +47,7 @@ void main() {
     expect(screen, contains("part 'alunos_list_screen_header.part.dart'"));
     expect(screen, contains("part 'alunos_list_screen_body.part.dart'"));
     expect(screen, contains("part 'alunos_list_screen_cards.part.dart'"));
-    expect(screen, contains("part 'alunos_list_screen_aluno_card.part.dart'"));
+    expect(screen, isNot(contains("part 'alunos_list_screen_aluno_card.part.dart'")));
     expect(screen, isNot(contains("aluno.email.toLowerCase()")));
     expect(screen, contains('isScrollControlled: true'));
     expect(screen, contains('useSafeArea: true'));

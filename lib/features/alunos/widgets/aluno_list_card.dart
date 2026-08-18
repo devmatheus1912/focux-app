@@ -1,8 +1,25 @@
-part of 'alunos_list_screen.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/shell_chrome.dart';
+import '../../../core/theme/tokens_strip.dart';
+import '../../../core/utils/fx_utils.dart';
+import '../constants/alunos_layout.dart';
+import '../constants/alunos_list_filters.dart';
+import '../data/aluno_contact_utils.dart';
+import '../data/aluno_followup_store.dart';
+import '../data/aluno_repository.dart';
+import '../utils/aluno_display_utils.dart';
+import '../utils/alunos_list_utils.dart';
+import 'aluno_avatar.dart';
+import 'aluno_list_outreach_actions.dart';
 
 /// Badge de status quiet — paridade Home/Perfil [`_HeroMetaPill`]: fill soft, sem borda.
-class _AlunoStatusPill extends StatelessWidget {
-  const _AlunoStatusPill({
+class AlunoStatusPill extends StatelessWidget {
+  const AlunoStatusPill({
+    super.key,
     required this.label,
     required this.fill,
     required this.foreground,
@@ -41,7 +58,7 @@ class _AlunoStatusPill extends StatelessWidget {
   }
 }
 
-class _AlunoCardFX extends ConsumerWidget {
+class AlunoListCard extends ConsumerWidget {
   final Aluno aluno;
   final bool modoSelecao;
   final bool isSelected;
@@ -52,7 +69,8 @@ class _AlunoCardFX extends ConsumerWidget {
   final int diasSemTreinoLimite;
   final bool compact;
 
-  const _AlunoCardFX({
+  const AlunoListCard({
+    super.key,
     required this.aluno,
     this.modoSelecao = false,
     this.isSelected = false,
@@ -185,7 +203,7 @@ class _AlunoCardFX extends ConsumerWidget {
                           triageContextActive: triageContextActive,
                         )) ...[
                           SizedBox(width: compact ? 6 : 8),
-                          _AlunoStatusPill(
+                          AlunoStatusPill(
                             label: statusText,
                             fill: status.fill,
                             foreground: status.foreground,
@@ -276,7 +294,7 @@ class _AlunoCardFX extends ConsumerWidget {
                 ),
               ),
               if (needsOutreach)
-                _AlunoOutreachActions(
+                AlunoListOutreachActions(
                   alunoId: aluno.id,
                   displayName: displayName,
                   whatsappNumber: whatsappNumber,

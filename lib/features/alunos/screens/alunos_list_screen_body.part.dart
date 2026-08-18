@@ -148,7 +148,7 @@ extension AlunosListScreenBody on _AlunosListScreenState {
                                     final a = filtrados[i];
                                     return FxStaggerItem(
                                       index: i,
-                                      child: _AlunoCardFX(
+                                      child: AlunoListCard(
                                         aluno: a,
                                         modoSelecao: _modoSelecao,
                                         isSelected: _selecionados.contains(

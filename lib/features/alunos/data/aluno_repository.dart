@@ -521,9 +521,31 @@ class AlunoRepository {
   }
 
   /// BFF tipado — first paint da lista (alunos + stats + alertas config).
-  Future<AlunosHomeBundle> getHome() async {
-    final response = await _dio.get('/api/alunos/home');
+  Future<AlunosHomeBundle> getHome({int page = 0, int size = 200}) async {
+    final response = await _dio.get(
+      '/api/alunos/home',
+      queryParameters: {'page': page, 'size': size},
+    );
     return AlunosHomeBundle.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  /// Carrega todas as páginas do BFF (paginação BE, merge client-side).
+  Future<AlunosHomeBundle> getHomeAll({int pageSize = 200}) async {
+    var page = 0;
+    late AlunosHomeBundle merged;
+    var first = true;
+    while (true) {
+      final chunk = await getHome(page: page, size: pageSize);
+      if (first) {
+        merged = chunk;
+        first = false;
+      } else {
+        merged = merged.appendAlunos(chunk);
+      }
+      if (!chunk.page.hasNext) break;
+      page++;
+    }
+    return merged;
   }
 
   Future<AlunosStats> buscarStats() async {
@@ -740,6 +762,41 @@ class AlunoRepository {
   }
 }
 
+class AlunosHomePageMeta {
+  const AlunosHomePageMeta({
+    required this.page,
+    required this.size,
+    required this.totalElements,
+    required this.totalPages,
+    required this.hasNext,
+  });
+
+  final int page;
+  final int size;
+  final int totalElements;
+  final int totalPages;
+  final bool hasNext;
+
+  factory AlunosHomePageMeta.fromJson(Map<String, dynamic>? j) {
+    if (j == null || j.isEmpty) {
+      return const AlunosHomePageMeta(
+        page: 0,
+        size: 0,
+        totalElements: 0,
+        totalPages: 0,
+        hasNext: false,
+      );
+    }
+    return AlunosHomePageMeta(
+      page: (j['page'] as num?)?.toInt() ?? 0,
+      size: (j['size'] as num?)?.toInt() ?? 0,
+      totalElements: (j['totalElements'] as num?)?.toInt() ?? 0,
+      totalPages: (j['totalPages'] as num?)?.toInt() ?? 0,
+      hasNext: j['hasNext'] as bool? ?? false,
+    );
+  }
+}
+
 class AlunosHomeBundle {
   static const fallbackDiasSemTreino = 7;
   static const fallbackAderenciaMinima = 50;
@@ -747,12 +804,33 @@ class AlunosHomeBundle {
   final List<Aluno> alunos;
   final AlunosStats stats;
   final AlertasConfiguracao alertasConfig;
+  final AlunosHomePageMeta page;
 
   const AlunosHomeBundle({
     required this.alunos,
     required this.stats,
     required this.alertasConfig,
+    this.page = const AlunosHomePageMeta(
+      page: 0,
+      size: 0,
+      totalElements: 0,
+      totalPages: 0,
+      hasNext: false,
+    ),
   });
+
+  AlunosHomeBundle appendAlunos(AlunosHomeBundle next) => AlunosHomeBundle(
+    alunos: [...alunos, ...next.alunos],
+    stats: stats,
+    alertasConfig: alertasConfig,
+    page: AlunosHomePageMeta(
+      page: next.page.page,
+      size: next.page.size,
+      totalElements: next.page.totalElements,
+      totalPages: next.page.totalPages,
+      hasNext: next.page.hasNext,
+    ),
+  );
 
   factory AlunosHomeBundle.fromJson(Map<String, dynamic> j) => AlunosHomeBundle(
     alunos:
@@ -769,6 +847,7 @@ class AlunosHomeBundle {
             'aderenciaMinima': fallbackAderenciaMinima,
           },
     ),
+    page: AlunosHomePageMeta.fromJson(j['page'] as Map<String, dynamic>?),
   );
 }
 
