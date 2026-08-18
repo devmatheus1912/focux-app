@@ -131,16 +131,17 @@ class _AlunosBulkActionsSheetState extends State<_AlunosBulkActionsSheet> {
         14,
         0,
         14,
-        math.max(12, MediaQuery.paddingOf(context).bottom + 8),
+        math.max(12, MediaQuery.paddingOf(context).bottom + 10),
       ),
       child: Container(
         constraints: BoxConstraints(maxHeight: maxHeight),
-        decoration: BoxDecoration(
-          color: widget.isDark ? EagleTokens.darkCard : Colors.white,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+        padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
+        decoration: fxStripCardDecoration(
+          context,
+          radius: 28,
+          glowStrength: widget.isDark ? 0.10 : 0.16,
         ),
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -149,48 +150,49 @@ class _AlunosBulkActionsSheetState extends State<_AlunosBulkActionsSheet> {
                 child: Container(
                   width: 42,
                   height: 4,
+                  margin: const EdgeInsets.only(bottom: 14),
                   decoration: BoxDecoration(
-                    color: line,
+                    color: line.withValues(alpha: 0.9),
                     borderRadius: BorderRadius.circular(999),
+                  ),
+                ),
+              ),
+              Semantics(
+                header: true,
+                child: Text(
+                  alunosSelectionTitle(widget.count),
+                  style: FocuxHubTypography.sectionTitle(
+                    context,
+                    color: ink,
                   ),
                 ),
               ),
               const SizedBox(height: 18),
               Semantics(
-                header: true,
-                child: Text(
-                  alunosSelectionTitle(widget.count),
-                  style: AppTypography.inter(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                    color: ink,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Semantics(
                 button: true,
                 label: 'Marcar mensalidade como paga',
                 child: SizedBox(
-                  height: 48,
+                  height: AlunosLayout.touchTarget,
                   child: FilledButton.icon(
                     onPressed: widget.onMarcarPagos,
-                    icon: const Icon(Icons.attach_money_rounded, size: 18),
+                    icon: const Icon(Icons.payments_rounded, size: 18),
                     label: const Text('Marcar mensalidade como paga'),
                     style: FilledButton.styleFrom(
                       backgroundColor: primary,
                       foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
+                      shape: const StadiumBorder(),
                     ),
                   ),
                 ),
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: 20),
               Text(
                 'Atualizar status',
-                style: TextStyle(color: ink, fontWeight: FontWeight.w600),
+                style: FocuxHubTypography.eyebrow(
+                  context,
+                  color: ink,
+                  fontWeight: FontWeight.w700,
+                ).copyWith(fontSize: TokensStrip.fontBodySm),
               ),
               const SizedBox(height: 10),
               Wrap(
@@ -213,23 +215,37 @@ class _AlunosBulkActionsSheetState extends State<_AlunosBulkActionsSheet> {
                     ),
                 ],
               ),
-              const SizedBox(height: 12),
-              OutlinedButton.icon(
-                onPressed: () => widget.onAtualizarStatus(_statusSelecionado),
-                icon: const Icon(Icons.update_rounded, size: 18),
-                label: const Text('Aplicar status'),
+              const SizedBox(height: 14),
+              SizedBox(
+                height: AlunosLayout.touchTarget,
+                child: OutlinedButton.icon(
+                  onPressed: () => widget.onAtualizarStatus(_statusSelecionado),
+                  icon: const Icon(Icons.check_rounded, size: 18),
+                  label: const Text('Aplicar status'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: primary,
+                    side: BorderSide(color: primary.withValues(alpha: 0.28)),
+                    shape: const StadiumBorder(),
+                  ),
+                ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 10),
               Semantics(
                 button: true,
                 label: 'Excluir alunos selecionados',
-                child: OutlinedButton.icon(
-                  onPressed: widget.onExcluir,
-                  icon: const Icon(Icons.delete_outline_rounded, size: 18),
-                  label: const Text('Excluir selecionados'),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: EagleTokens.bad,
-                    side: const BorderSide(color: EagleTokens.bad),
+                child: SizedBox(
+                  height: AlunosLayout.touchTarget,
+                  child: OutlinedButton.icon(
+                    onPressed: widget.onExcluir,
+                    icon: const Icon(Icons.delete_outline_rounded, size: 18),
+                    label: const Text('Excluir selecionados'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: EagleTokens.bad,
+                      side: BorderSide(
+                        color: EagleTokens.bad.withValues(alpha: 0.45),
+                      ),
+                      shape: const StadiumBorder(),
+                    ),
                   ),
                 ),
               ),

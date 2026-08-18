@@ -355,6 +355,7 @@ extension AlunosListScreenHeader on _AlunosListScreenState {
               showStartPeek: true,
               child: SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
+                clipBehavior: Clip.hardEdge,
                 child: Row(
                   children: [
                     _alunosFilterChip(

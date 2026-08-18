@@ -11,6 +11,7 @@ void main() {
     expect(screen, contains('FocuxHubTypography'));
     expect(screen, contains('_alunosFilterChip'));
     expect(screen, contains('showStartPeek'));
+    expect(screen, contains('StadiumBorder'));
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(screen, isNot(contains('FxGlowSurface')));
   });

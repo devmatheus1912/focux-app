@@ -24,6 +24,7 @@ void main() {
     final peek =
         File('lib/core/widgets/fx_horizontal_scroll_peek.dart').readAsStringSync();
     expect(peek, contains('FxHorizontalScrollPeek'));
+    expect(peek, contains('lightMeshC'));
   });
 
   test('section headers use shared layout tokens', () {

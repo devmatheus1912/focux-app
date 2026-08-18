@@ -200,7 +200,7 @@ extension AlunosListScreenBody on _AlunosListScreenState {
                               ),
                     ),
 
-                    // Bottom action bar (seleção)
+                    // Bottom action bar (seleção) — pills Home, mesmo raio.
                     AnimatedContainer(
                       duration:
                           TokensStrip.prefersReducedMotion(context)
@@ -216,8 +216,8 @@ extension AlunosListScreenBody on _AlunosListScreenState {
                                   padding: const EdgeInsets.fromLTRB(
                                     TokensStrip.s4,
                                     8,
-                                    16,
-                                    12,
+                                    TokensStrip.s4,
+                                    AlunosLayout.bulkBarPaddingBottom,
                                   ),
                                   child: Row(
                                     children: [
@@ -235,8 +235,11 @@ extension AlunosListScreenBody on _AlunosListScreenState {
                                               }
                                             });
                                           },
-                                          icon: const Icon(
-                                            Icons.select_all,
+                                          icon: Icon(
+                                            _selecionados.length ==
+                                                    filtrados.length
+                                                ? Icons.deselect_rounded
+                                                : Icons.done_all_rounded,
                                             size: 18,
                                           ),
                                           label: Text(
@@ -244,27 +247,31 @@ extension AlunosListScreenBody on _AlunosListScreenState {
                                                     filtrados.length
                                                 ? 'Desmarcar todos'
                                                 : 'Selecionar todos',
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
                                           ),
                                           style: OutlinedButton.styleFrom(
+                                            minimumSize: const Size(
+                                              AlunosLayout.touchTarget,
+                                              AlunosLayout.touchTarget,
+                                            ),
                                             side: BorderSide(
                                               color:
                                                   isDark
                                                       ? EagleTokens.darkLine
-                                                      : TokensStrip
-                                                          .borderDefault,
+                                                      : primary.withValues(
+                                                        alpha: 0.18,
+                                                      ),
                                             ),
                                             foregroundColor: ink,
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(12),
-                                            ),
+                                            shape: const StadiumBorder(),
                                             padding: const EdgeInsets.symmetric(
-                                              vertical: 12,
+                                              horizontal: 14,
                                             ),
                                           ),
                                         ),
                                       ),
-                                      const SizedBox(width: 12),
+                                      const SizedBox(width: 10),
                                       Expanded(
                                         child: ElevatedButton.icon(
                                           onPressed: _showBulkActionsSheet,
@@ -274,16 +281,19 @@ extension AlunosListScreenBody on _AlunosListScreenState {
                                           ),
                                           label: Text(
                                             'Ações (${_selecionados.length})',
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
                                           ),
                                           style: ElevatedButton.styleFrom(
+                                            minimumSize: const Size(
+                                              AlunosLayout.touchTarget,
+                                              AlunosLayout.touchTarget,
+                                            ),
                                             backgroundColor: primary,
                                             foregroundColor: Colors.white,
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(12),
-                                            ),
+                                            shape: const StadiumBorder(),
                                             padding: const EdgeInsets.symmetric(
-                                              vertical: 12,
+                                              horizontal: 14,
                                             ),
                                             elevation: 0,
                                           ),
