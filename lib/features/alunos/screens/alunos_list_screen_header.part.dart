@@ -414,7 +414,7 @@ extension AlunosListScreenHeader on _AlunosListScreenState {
                                     ),
                                     const SizedBox(width: 8),
                                     _FxChip(
-                                      label: 'Inadimplentes',
+                                      label: context.alunosL10n.alunosFilterOverdue,
                                       count: inadCount,
                                       isSelected:
                                           _filtro == AlunoFiltro.inadimplentes,
@@ -428,7 +428,7 @@ extension AlunosListScreenHeader on _AlunosListScreenState {
                                     ),
                                     const SizedBox(width: 8),
                                     _FxChip(
-                                      label: 'Risco alto',
+                                      label: context.alunosL10n.alunosFilterHighRisk,
                                       count: riscoCount,
                                       isSelected: _filtro == AlunoFiltro.risco,
                                       isDark: isDark,
@@ -439,7 +439,7 @@ extension AlunosListScreenHeader on _AlunosListScreenState {
                                     ),
                                     const SizedBox(width: 8),
                                     _FxChip(
-                                      label: 'Convites',
+                                      label: context.alunosL10n.alunosFilterInvites,
                                       count: novosCount,
                                       isSelected: _filtro == AlunoFiltro.novos,
                                       isDark: isDark,

@@ -6,7 +6,6 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:dio/dio.dart';
@@ -25,6 +24,7 @@ import 'core/theme/design_tokens.dart';
 import 'core/theme/theme_provider.dart';
 import 'features/auth/providers/auth_provider.dart';
 import 'features/perfil/data/perfil_repository.dart';
+import 'l10n/app_localizations.dart';
 
 void main() {
   // ── runZonedGuarded: captura TODOS os erros async nao tratados ──
@@ -281,11 +281,7 @@ class _FocuxAppState extends ConsumerState<FocuxApp> {
         Locale('en', 'US'),
         Locale('es', 'ES'),
       ],
-      localizationsDelegates: const [
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
+      localizationsDelegates: S.localizationsDelegates,
       // Acessibilidade: respeita escala do sistema, mas evita explosões
       // de layout em escalas absurdas (>1.6) — mantém WCAG AA sem
       // quebrar telas densas como dashboard/treinos.
