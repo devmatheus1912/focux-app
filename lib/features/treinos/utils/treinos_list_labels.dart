@@ -18,6 +18,35 @@ abstract final class TreinosListLabels {
     required int exercises,
   }) => '${readyCount(prontos)} · $exercises exercícios';
 
+  static String selectionCount(int count) =>
+      count == 1 ? '1 selecionado' : '$count selecionados';
+
+  static String deleteTitle({required bool unlinkOnly, required int count}) {
+    if (unlinkOnly) {
+      return count == 1 ? 'Desvincular treino?' : 'Desvincular treinos?';
+    }
+    return count == 1 ? 'Remover da biblioteca?' : 'Remover treinos?';
+  }
+
+  static String deleteBody({
+    required bool unlinkOnly,
+    required int count,
+    String? name,
+  }) {
+    final subject = name ?? '$count treinos selecionados';
+    if (unlinkOnly) {
+      return count == 1
+          ? '$subject sai do aluno, mas continua na sua biblioteca.'
+          : '$subject saem destes alunos, mas continuam na sua biblioteca.';
+    }
+    return count == 1
+        ? '$subject sai da biblioteca. Históricos já concluídos continuam preservados.'
+        : '$subject saem da biblioteca. Históricos já concluídos continuam preservados.';
+  }
+
+  static String deleteConfirmLabel({required bool unlinkOnly}) =>
+      unlinkOnly ? 'Desvincular' : 'Remover';
+
   static String prettyField(String raw) {
     final value = raw.trim();
     if (value.isEmpty) return value;

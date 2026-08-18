@@ -33,6 +33,16 @@ void main() {
     expect(screen, contains('segure para selecionar'));
     expect(screen, contains('showTreinosListHelpSheet'));
     expect(screen, contains('useRootNavigator: true'));
+    expect(screen, contains('_TreinosBulkBar'));
+    expect(screen, contains('Selecionar todos'));
+    expect(screen, contains('TreinosListLabels.deleteTitle'));
+    expect(screen, contains('Escolha uma ação.'));
+    expect(screen, isNot(contains('Ações em lote')));
+    expect(screen, isNot(contains('Abra, atribua ou replique este plano')));
+    expect(
+      screen,
+      isNot(contains('Histórico e execuções antigas não são apagados')),
+    );
     expect(screen, isNot(contains('Biblioteca sob controle')));
     expect(screen, isNot(contains('Operações da biblioteca')));
     expect(screen, isNot(contains('LinearProgressIndicator')));

@@ -56,7 +56,10 @@ Future<void> showTreinosListHelpSheet(BuildContext context) {
                 const SizedBox(height: 6),
                 Text(
                   'Crie um plano base, abra com um toque e atribua quando precisar.',
-                  style: FocuxHubTypography.bodyMuted(color: mute, height: 1.35),
+                  style: FocuxHubTypography.bodyMuted(
+                    color: mute,
+                    height: 1.35,
+                  ),
                 ),
                 const SizedBox(height: 16),
                 tip(
@@ -69,7 +72,7 @@ Future<void> showTreinosListHelpSheet(BuildContext context) {
                 ),
                 tip(
                   'Seleção',
-                  'Segure um card ou use o checklist. A busca some até você sair da seleção.',
+                  'Segure um card ou use o checklist. A busca some e as ações sobem para a barra de baixo.',
                 ),
                 Align(
                   alignment: Alignment.centerRight,

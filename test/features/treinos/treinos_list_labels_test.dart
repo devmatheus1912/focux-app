@@ -59,4 +59,22 @@ void main() {
       );
     });
   });
+
+  test('selection and delete copy stay honest', () {
+    expect(TreinosListLabels.selectionCount(1), '1 selecionado');
+    expect(TreinosListLabels.selectionCount(2), '2 selecionados');
+    expect(
+      TreinosListLabels.deleteTitle(unlinkOnly: false, count: 2),
+      'Remover treinos?',
+    );
+    expect(
+      TreinosListLabels.deleteBody(unlinkOnly: false, count: 2, name: null),
+      '2 treinos selecionados saem da biblioteca. Históricos já concluídos continuam preservados.',
+    );
+    expect(TreinosListLabels.deleteConfirmLabel(unlinkOnly: false), 'Remover');
+    expect(
+      TreinosListLabels.deleteConfirmLabel(unlinkOnly: true),
+      'Desvincular',
+    );
+  });
 }

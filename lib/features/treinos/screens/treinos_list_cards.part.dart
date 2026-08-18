@@ -53,6 +53,7 @@ class _TreinoCard extends StatelessWidget {
     return Semantics(
       label: cardSemantics,
       button: true,
+      selected: selectionMode && selected,
       child: InkWell(
         onTap:
             selectionMode
@@ -76,6 +77,23 @@ class _TreinoCard extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              if (selectionMode) ...[
+                AnimatedSwitcher(
+                  duration:
+                      TokensStrip.prefersReducedMotion(context)
+                          ? Duration.zero
+                          : const Duration(milliseconds: 150),
+                  child: Icon(
+                    selected
+                        ? Icons.check_circle_rounded
+                        : Icons.radio_button_unchecked,
+                    key: ValueKey(selected),
+                    color: selected ? primary : mute,
+                    size: 22,
+                  ),
+                ),
+                const SizedBox(width: 10),
+              ],
               Container(
                 width: 44,
                 height: 44,
@@ -153,18 +171,7 @@ class _TreinoCard extends StatelessWidget {
                   ],
                 ),
               ),
-              if (selectionMode)
-                Semantics(
-                  label: selected ? 'Desmarcar treino' : 'Marcar treino',
-                  child: Icon(
-                    selected
-                        ? Icons.check_circle_rounded
-                        : Icons.radio_button_unchecked,
-                    color: selected ? primary : mute,
-                    size: 22,
-                  ),
-                )
-              else
+              if (!selectionMode)
                 Semantics(
                   button: true,
                   label: 'Ações do treino',
@@ -178,11 +185,7 @@ class _TreinoCard extends StatelessWidget {
                       ),
                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
-                    icon: Icon(
-                      Icons.more_horiz_rounded,
-                      color: mute,
-                      size: 22,
-                    ),
+                    icon: Icon(Icons.more_horiz_rounded, color: mute, size: 22),
                   ),
                 ),
             ],

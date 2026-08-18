@@ -94,7 +94,7 @@ class _TreinosHeader extends StatelessWidget {
                   children: [
                     if (selectionMode) ...[
                       Text(
-                        '$selectedCount selecionado${selectedCount == 1 ? '' : 's'}',
+                        TreinosListLabels.selectionCount(selectedCount),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: FocuxHubTypography.eyebrow(
@@ -226,66 +226,24 @@ class _LibraryControls extends StatelessWidget {
   const _LibraryControls({
     required this.controller,
     required this.query,
-    required this.selectionMode,
     required this.isDark,
     required this.primary,
     required this.onQueryChanged,
     required this.onClearQuery,
-    required this.onDeleteSelected,
   });
 
   final TextEditingController controller;
   final String query;
-  final bool selectionMode;
   final bool isDark;
   final Color primary;
   final ValueChanged<String> onQueryChanged;
   final VoidCallback onClearQuery;
-  final VoidCallback? onDeleteSelected;
 
   @override
   Widget build(BuildContext context) {
     final chrome = ShellChrome.forDark(isDark);
     final ink = chrome.ink;
     final mute = chrome.mute;
-
-    if (selectionMode) {
-      return DecoratedBox(
-        decoration: fxStripCardDecoration(
-          context,
-          accent: primary,
-          radius: TokensStrip.rCard,
-          glowStrength: 0.03,
-        ),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(12, 10, 10, 10),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  'Ações em lote',
-                  style: FocuxHubTypography.cardTitle(color: ink),
-                ),
-              ),
-              OutlinedButton.icon(
-                onPressed: onDeleteSelected,
-                icon: const Icon(Icons.delete_outline_rounded, size: 17),
-                label: const Text('Excluir'),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: EagleTokens.bad,
-                  side: const BorderSide(color: EagleTokens.bad),
-                  minimumSize: const Size(0, 40),
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
 
     return DecoratedBox(
       decoration: fxStripCardDecoration(
@@ -302,9 +260,9 @@ class _LibraryControls extends StatelessWidget {
             onChanged: onQueryChanged,
             controller: controller,
             textInputAction: TextInputAction.search,
-            style: FocuxHubTypography.cardTitle(color: ink).copyWith(
-              fontSize: 13,
-            ),
+            style: FocuxHubTypography.cardTitle(
+              color: ink,
+            ).copyWith(fontSize: 13),
             decoration: InputDecoration(
               isDense: true,
               hintText: 'Buscar treino, objetivo ou nível',
@@ -365,6 +323,103 @@ class _SectionHeader extends StatelessWidget {
           ).copyWith(fontSize: 12),
         ),
       ],
+    );
+  }
+}
+
+class _TreinosBulkBar extends StatelessWidget {
+  const _TreinosBulkBar({
+    required this.allSelected,
+    required this.isDark,
+    required this.onToggleAll,
+    required this.onDelete,
+  });
+
+  final bool allSelected;
+  final bool isDark;
+  final VoidCallback onToggleAll;
+  final VoidCallback onDelete;
+
+  @override
+  Widget build(BuildContext context) {
+    final chrome = ShellChrome.forDark(isDark);
+    final primary = Theme.of(context).colorScheme.primary;
+    final reduceMotion = TokensStrip.prefersReducedMotion(context);
+
+    return AnimatedPadding(
+      duration:
+          reduceMotion ? Duration.zero : const Duration(milliseconds: 200),
+      padding: const EdgeInsets.fromLTRB(
+        TreinosLayout.screenPadding,
+        8,
+        TreinosLayout.screenPadding,
+        TreinosLayout.bulkBarPaddingBottom,
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Semantics(
+              button: true,
+              label: allSelected ? 'Desmarcar todos' : 'Selecionar todos',
+              child: OutlinedButton.icon(
+                onPressed: onToggleAll,
+                icon: Icon(
+                  allSelected ? Icons.deselect_rounded : Icons.done_all_rounded,
+                  size: 18,
+                ),
+                label: Text(
+                  allSelected ? 'Desmarcar todos' : 'Selecionar todos',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size(
+                    TreinosLayout.touchTarget,
+                    TreinosLayout.touchTarget,
+                  ),
+                  side: BorderSide(
+                    color:
+                        isDark
+                            ? EagleTokens.darkLine
+                            : primary.withValues(alpha: 0.18),
+                  ),
+                  foregroundColor: chrome.ink,
+                  shape: const StadiumBorder(),
+                  padding: const EdgeInsets.symmetric(horizontal: 14),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Semantics(
+              button: true,
+              label: 'Excluir treinos selecionados',
+              child: OutlinedButton.icon(
+                onPressed: onDelete,
+                icon: const Icon(Icons.delete_outline_rounded, size: 18),
+                label: const Text(
+                  'Excluir',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size(
+                    TreinosLayout.touchTarget,
+                    TreinosLayout.touchTarget,
+                  ),
+                  foregroundColor: EagleTokens.bad,
+                  side: BorderSide(
+                    color: EagleTokens.bad.withValues(alpha: 0.45),
+                  ),
+                  shape: const StadiumBorder(),
+                  padding: const EdgeInsets.symmetric(horizontal: 14),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
