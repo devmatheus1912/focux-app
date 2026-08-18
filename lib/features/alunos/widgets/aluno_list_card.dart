@@ -118,19 +118,15 @@ class AlunoListCard extends ConsumerWidget {
       aluno: aluno,
       weeklyCheckins: weeklyCheckins,
     );
-    final showOpsLine = shouldShowAlunoListOpsLine(
+    final opsText = alunoListOpsText(
       adherenceLabel: adherenceLabel,
       triageContextActive: triageContextActive,
       aderenciaPercent: aderenciaPercent,
+      filtro: activeFiltro,
     );
-    final opsText =
-        adherenceLabel.isNotEmpty
-            ? adherenceLabel
-            : (aderenciaPercent == null ? '—' : '$aderenciaPercent%');
-    final hasTreinoRecente =
-        (aluno.diasSemTreino ?? 1) == 0 ||
-        weeklyCheckins > 0 ||
-        (aderenciaPercent ?? 0) > 0;
+    final showOpsLine = opsText.isNotEmpty;
+    final opsIsDays = adherenceLabel.isNotEmpty;
+    final meaningfulPercent = alunoListHasMeaningfulPercent(aderenciaPercent);
     final needsOutreach =
         !modoSelecao && activeFiltro == AlunoFiltro.contatoHoje;
     final whatsappNumber = (aluno.whatsapp ?? '').replaceAll(RegExp(r'\D'), '');
@@ -147,9 +143,11 @@ class AlunoListCard extends ConsumerWidget {
       compact: compact,
     );
     final aderenciaLabel =
-        aderenciaPercent == null
-            ? 'aderência indisponível'
-            : '$aderenciaPercent%';
+        opsText.isNotEmpty
+            ? opsText
+            : (meaningfulPercent
+                ? '$aderenciaPercent%'
+                : 'aderência indisponível');
 
     return Semantics(
       button: true,
@@ -264,72 +262,71 @@ class AlunoListCard extends ConsumerWidget {
                           ),
                         ],
                         if (showOpsLine) ...[
-                          SizedBox(height: compact ? 4 : 8),
+                          SizedBox(height: compact ? 4 : 6),
                           Row(
                             children: [
                               Container(
                                 width: compact ? 5 : 6,
                                 height: compact ? 5 : 6,
                                 decoration: BoxDecoration(
-                                  color: aderColor,
+                                  color:
+                                      opsIsDays
+                                          ? (isDark
+                                              ? EagleTokens.warnAccentSoft
+                                              : EagleTokens.warnDeep)
+                                          : aderColor,
                                   shape: BoxShape.circle,
                                 ),
                               ),
                               const SizedBox(width: 5),
-                              if (!compact && aderenciaPercent != null) ...[
+                              if (!compact &&
+                                  meaningfulPercent &&
+                                  opsIsDays) ...[
                                 Text(
                                   '$aderenciaPercent%',
                                   style: AppTypography.mono(
                                     fontSize: 12.5,
-                                    fontWeight:
-                                        hasTreinoRecente
-                                            ? FontWeight.w700
-                                            : FontWeight.w500,
-                                    color:
-                                        hasTreinoRecente
-                                            ? aderColor
-                                            : secondaryInk,
+                                    fontWeight: FontWeight.w700,
+                                    color: aderColor,
                                     height: 1.1,
                                   ),
                                 ),
-                                if (adherenceLabel.isNotEmpty)
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 6,
-                                    ),
-                                    child: Text(
-                                      '·',
-                                      style: AppTypography.inter(
-                                        fontSize: 11,
-                                        color: secondaryInk.withValues(
-                                          alpha: 0.85,
-                                        ),
-                                        height: 1.1,
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 6,
+                                  ),
+                                  child: Text(
+                                    '·',
+                                    style: AppTypography.inter(
+                                      fontSize: 11,
+                                      color: secondaryInk.withValues(
+                                        alpha: 0.85,
                                       ),
+                                      height: 1.1,
                                     ),
                                   ),
+                                ),
                               ],
                               Flexible(
                                 child: Text(
-                                  compact
-                                      ? opsText
-                                      : (adherenceLabel.isNotEmpty
-                                          ? adherenceLabel
-                                          : (aderenciaPercent == null
-                                              ? '—'
-                                              : '')),
-                                  style: AppTypography.mono(
-                                    fontSize: compact ? 11.5 : 12.5,
-                                    fontWeight:
-                                        hasTreinoRecente
-                                            ? FontWeight.w700
-                                            : FontWeight.w500,
-                                    color:
-                                        hasTreinoRecente
-                                            ? aderColor
-                                            : secondaryInk,
-                                    height: 1.1,
-                                  ),
+                                  opsText,
+                                  style:
+                                      opsIsDays
+                                          ? AppTypography.inter(
+                                            fontSize: compact ? 11 : 12,
+                                            fontWeight: FontWeight.w600,
+                                            color:
+                                                isDark
+                                                    ? EagleTokens.warnAccentSoft
+                                                    : EagleTokens.warnDeep,
+                                            height: 1.15,
+                                          )
+                                          : AppTypography.mono(
+                                            fontSize: compact ? 11.5 : 12.5,
+                                            fontWeight: FontWeight.w700,
+                                            color: aderColor,
+                                            height: 1.1,
+                                          ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -355,12 +352,15 @@ class AlunoListCard extends ConsumerWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        _AdherenceRail(
-                          value: (aderenciaPercent ?? 0).toDouble(),
-                          color: aderColor,
-                          line: line,
-                          isEmpty: !hasTreinoRecente,
-                        ),
+                        if (meaningfulPercent)
+                          _AdherenceRail(
+                            value: aderenciaPercent!.toDouble(),
+                            color: aderColor,
+                            line: line,
+                            isEmpty: false,
+                          )
+                        else
+                          const SizedBox(height: 3),
                         const SizedBox(height: 6),
                         ExcludeSemantics(
                           child: Icon(

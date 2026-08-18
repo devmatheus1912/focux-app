@@ -29,8 +29,10 @@ extension AlunosListScreenBody on _AlunosListScreenState {
               final showHeaderBack = !_modoSelecao && _hasActiveFilter;
               final headerBackFromDashboard = _hasDeepLinkFiltro(context);
               final triageContextActive =
-                  showTriageBanner ||
                   _filtro == AlunoFiltro.contatoHoje ||
+                  (_filtro == AlunoFiltro.todos &&
+                      (contatoCount > 0 ||
+                          (stats.total > 0 && riscoCount >= stats.total))) ||
                   (_filtro == AlunoFiltro.ativos &&
                       ativosCount > 0 &&
                       riscoCount >= ativosCount);
@@ -60,9 +62,7 @@ extension AlunosListScreenBody on _AlunosListScreenState {
                       mute: mute,
                     ),
 
-                    if (!_modoSelecao &&
-                        _filtro == AlunoFiltro.todos &&
-                        contatoCount > 0)
+                    if (showTriageBanner)
                       Padding(
                         padding: const EdgeInsets.fromLTRB(
                           AlunosLayout.screenPadding,

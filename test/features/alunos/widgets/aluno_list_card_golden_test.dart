@@ -120,4 +120,29 @@ void main() {
     expect(find.byTooltip('Chat in-app'), findsNothing);
     expect(find.text('Risco alto'), findsNothing);
   });
+
+  testWidgets('compact convite nao mostra 0% nem risco', (tester) async {
+    await tester.pumpWidget(
+      cardHarness(
+        isDark: false,
+        compact: true,
+        filtro: AlunoFiltro.novos,
+        overrideAluno: Aluno(
+          id: 7,
+          nome: 'Beatriz Carvalho',
+          email: 'beatriz@test.com',
+          status: 'ATIVO',
+          objetivo: 'Hipertrofia',
+          aderenciaPercent: 0,
+          diasSemTreino: 0,
+          emRisco: true,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Beatriz Carvalho'), findsOneWidget);
+    expect(find.text('0%'), findsNothing);
+    expect(find.text('Risco alto'), findsNothing);
+  });
 }

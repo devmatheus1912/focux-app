@@ -106,6 +106,29 @@ void main() {
       );
     });
 
+    test('esconde 0% mesmo fora da triagem', () {
+      expect(
+        shouldShowAlunoListOpsLine(
+          adherenceLabel: '',
+          triageContextActive: false,
+          aderenciaPercent: 0,
+        ),
+        isFalse,
+      );
+    });
+
+    test('esconde percentual em convites', () {
+      expect(
+        alunoListOpsText(
+          adherenceLabel: '',
+          triageContextActive: false,
+          aderenciaPercent: 72,
+          filtro: AlunoFiltro.novos,
+        ),
+        isEmpty,
+      );
+    });
+
     test('mostra percentual fora da triagem', () {
       expect(
         shouldShowAlunoListOpsLine(

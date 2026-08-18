@@ -72,16 +72,35 @@ String adherenceActivityLabel({
   return alunoWeeklyCheckinsLabel(weeklyCheckins);
 }
 
-/// Sinal operacional no card: dias sem treino sempre; % só fora da triagem.
+bool alunoListHasMeaningfulPercent(int? aderenciaPercent) =>
+    aderenciaPercent != null && aderenciaPercent > 0;
+
+/// Sinal operacional no card — paridade Home: número real ou dias; nunca 0%.
+String alunoListOpsText({
+  required String adherenceLabel,
+  required bool triageContextActive,
+  required int? aderenciaPercent,
+  AlunoFiltro filtro = AlunoFiltro.todos,
+}) {
+  if (adherenceLabel.isNotEmpty) return adherenceLabel;
+  if (filtro == AlunoFiltro.novos) return '';
+  if (triageContextActive) return '';
+  if (!alunoListHasMeaningfulPercent(aderenciaPercent)) return '';
+  return '$aderenciaPercent%';
+}
+
 bool shouldShowAlunoListOpsLine({
   required String adherenceLabel,
   required bool triageContextActive,
   required int? aderenciaPercent,
-}) {
-  if (adherenceLabel.isNotEmpty) return true;
-  if (triageContextActive) return false;
-  return aderenciaPercent != null;
-}
+  AlunoFiltro filtro = AlunoFiltro.todos,
+}) =>
+    alunoListOpsText(
+      adherenceLabel: adherenceLabel,
+      triageContextActive: triageContextActive,
+      aderenciaPercent: aderenciaPercent,
+      filtro: filtro,
+    ).isNotEmpty;
 
 /// Badge de status do card — lógica fora da UI.
 ({String label, Color fill, Color foreground}) alunoListStatusBadge(
