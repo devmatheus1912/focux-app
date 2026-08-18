@@ -25,16 +25,15 @@ extension AlunosListScreenBody on _AlunosListScreenState {
                   _filtro == AlunoFiltro.todos &&
                   contatoCount > 0;
               final headerOps =
-                  _modoSelecao
-                      ? _selectionSummary()
-                      : (showTriageBanner
-                          ? null
-                          : (novosCount > 0
-                              ? '$novosCount convites'
-                              : null));
+                  _modoSelecao ? _selectionSummary() : null;
               final showHeaderBack = !_modoSelecao && _hasActiveFilter;
               final headerBackFromDashboard = _hasDeepLinkFiltro(context);
-              final triageContextActive = showTriageBanner || contatoCount > 0;
+              final triageContextActive =
+                  showTriageBanner ||
+                  _filtro == AlunoFiltro.contatoHoje ||
+                  (_filtro == AlunoFiltro.ativos &&
+                      ativosCount > 0 &&
+                      riscoCount >= ativosCount);
               final listBottomGap = AlunosLayout.listBottomGap(context);
               final tail = ref.watch(alunosHomeTailProvider);
 

@@ -90,6 +90,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 80));
 
     expect(find.text('Alunos'), findsWidgets);
+    expect(find.text('Em atraso'), findsOneWidget);
     expect(find.bySemanticsLabel(AlunosMicrocopy.screenA11y), findsOneWidget);
     expect(find.byTooltip(AlunosMicrocopy.helpA11y), findsOneWidget);
   });

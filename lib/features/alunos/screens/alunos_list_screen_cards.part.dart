@@ -61,6 +61,9 @@ class _FxChip extends StatelessWidget {
           children: [
             Text(
               label,
+              softWrap: false,
+              maxLines: 1,
+              overflow: TextOverflow.clip,
               style: dashboardChipLabelStyle(
                 isSelected ? chipFg : ink,
               ).copyWith(fontSize: 12, fontWeight: FontWeight.w800),
@@ -167,16 +170,16 @@ class _EmptyAlunosState extends StatelessWidget {
 
     final title =
         hasQuery
-            ? 'Nenhum aluno encontrado'
+            ? context.alunosL10n.alunosEmptySearch
             : filteredEmpty
             ? 'Nenhum aluno neste filtro'
-            : 'Nenhum aluno cadastrado';
+            : context.alunosL10n.alunosEmptyNone;
     final subtitle =
         hasQuery
-            ? 'Tente buscar por outro nome, objetivo ou e-mail.'
+            ? context.alunosL10n.alunosEmptySearchSubtitle
             : filteredEmpty
             ? 'Não há alunos $filtroLabel no momento. Limpe o filtro ou mude a visualização.'
-            : 'Adicione o primeiro aluno para montar treinos e acompanhar a evolução.';
+            : context.alunosL10n.alunosEmptyNoneSubtitle;
     final icon = hasQuery || filteredEmpty ? 'search' : 'users';
 
     FxEmptyAction? action;

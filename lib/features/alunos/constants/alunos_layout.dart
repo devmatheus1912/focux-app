@@ -31,9 +31,12 @@ abstract final class AlunosLayout {
   static const EdgeInsets filterRowPadding = EdgeInsets.fromLTRB(
     screenPadding,
     4,
-    screenPadding,
+    0,
     10,
   );
+
+  /// Folga no fim da row para o último chip não ficar sob o fade.
+  static const double filterRowEndInset = 28;
 
   static const double cardPadding = 14;
 

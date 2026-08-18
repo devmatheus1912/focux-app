@@ -30,6 +30,20 @@ void main() {
       );
     });
 
+    test('oculta Risco alto em convites', () {
+      expect(
+        shouldShowAlunoListBadge('Risco alto', AlunoFiltro.novos),
+        isFalse,
+      );
+    });
+
+    test('oculta Risco alto em contato hoje', () {
+      expect(
+        shouldShowAlunoListBadge('Risco alto', AlunoFiltro.contatoHoje),
+        isFalse,
+      );
+    });
+
     test('mostra Inadimplente fora do filtro inadimplentes', () {
       expect(
         shouldShowAlunoListBadge('Inadimplente', AlunoFiltro.todos),
@@ -66,6 +80,41 @@ void main() {
         true,
       );
       expect(badge.label, 'Risco alto');
+    });
+  });
+
+  group('shouldShowAlunoListOpsLine', () {
+    test('mostra dias sem treino mesmo em triagem', () {
+      expect(
+        shouldShowAlunoListOpsLine(
+          adherenceLabel: '12d s/ treino',
+          triageContextActive: true,
+          aderenciaPercent: 0,
+        ),
+        isTrue,
+      );
+    });
+
+    test('esconde percentual vazio em triagem', () {
+      expect(
+        shouldShowAlunoListOpsLine(
+          adherenceLabel: '',
+          triageContextActive: true,
+          aderenciaPercent: 0,
+        ),
+        isFalse,
+      );
+    });
+
+    test('mostra percentual fora da triagem', () {
+      expect(
+        shouldShowAlunoListOpsLine(
+          adherenceLabel: '',
+          triageContextActive: false,
+          aderenciaPercent: 72,
+        ),
+        isTrue,
+      );
     });
   });
 

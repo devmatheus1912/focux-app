@@ -107,7 +107,7 @@
   "alunosFilterAll": "Todos",
   "alunosFilterContactToday": "Contato hoje",
   "alunosFilterActive": "Ativos",
-  "alunosFilterOverdue": "Inadimplentes",
+  "alunosFilterOverdue": "Em atraso",
   "alunosFilterHighRisk": "Risco alto",
   "alunosFilterInvites": "Convites",
   "alunosAddStudent": "Adicionar aluno",
@@ -115,7 +115,7 @@
   "alunosEmptyNone": "Nenhum aluno cadastrado",
   "alunosEmptyNoneSubtitle": "Adicione o primeiro aluno para montar treinos e acompanhar a evolução.",
   "alunosEmptySearch": "Nenhum aluno encontrado",
-  "alunosEmptySearchSubtitle": "Tente buscar por outro nome, objetivo ou e-mail.",
+  "alunosEmptySearchSubtitle": "Tente buscar por outro nome ou objetivo.",
   "alunosHelpTitle": "Lista de alunos",
   "alunosHelpIntro": "Priorize contato, filtre por status e abra a ficha com um toque.",
   "alunosHelpLink": "Como usar a lista"

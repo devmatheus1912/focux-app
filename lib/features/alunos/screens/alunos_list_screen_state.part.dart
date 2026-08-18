@@ -13,6 +13,9 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
   bool _ignoredDeepLinkFiltro = false;
   bool _listaCompacta = true;
   DateTime? _fetchedAt;
+  final Map<AlunoFiltro, GlobalKey> _chipKeys = {
+    for (final filtro in AlunoFiltro.values) filtro: GlobalKey(),
+  };
 
   @override
   void initState() {
@@ -25,6 +28,7 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       _syncHomeQuery();
+      _scrollChipIntoView(_filtro);
       _maybeOpenHelpFromDeepLink();
       AnalyticsService.instance.track(
         ProductEvents.alunosViewed,
@@ -50,6 +54,7 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
         _ignoredDeepLinkFiltro = false;
       });
       _syncHomeQuery();
+      _scrollChipIntoView(_filtro);
     }
   }
 
@@ -70,6 +75,7 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
       _ignoredDeepLinkFiltro = true;
     });
     _syncHomeQuery();
+    _scrollChipIntoView(_filtro);
 
     if (!fromDashboard) return;
 
@@ -119,12 +125,26 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
   void _setFiltro(AlunoFiltro filtro, {bool track = true}) {
     setState(() => _filtro = filtro);
     _syncHomeQuery();
+    _scrollChipIntoView(filtro);
     if (track) {
       AnalyticsService.instance.track(
         ProductEvents.alunosFilterChanged,
         props: {'filtro': filtro.name},
       );
     }
+  }
+
+  void _scrollChipIntoView(AlunoFiltro filtro) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final ctx = _chipKeys[filtro]?.currentContext;
+      if (ctx == null || !ctx.mounted) return;
+      Scrollable.ensureVisible(
+        ctx,
+        alignment: 0.12,
+        duration: const Duration(milliseconds: 220),
+        curve: Curves.easeOutCubic,
+      );
+    });
   }
 
   void _setOrdenacao(AlunoOrdenacao ordenacao) {
@@ -316,7 +336,7 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
     AlunoFiltro.todos => 'todos',
     AlunoFiltro.contatoHoje => 'precisando de contato hoje',
     AlunoFiltro.ativos => 'ativos',
-    AlunoFiltro.inadimplentes => 'inadimplentes',
+    AlunoFiltro.inadimplentes => 'em atraso',
     AlunoFiltro.risco => 'em risco',
     AlunoFiltro.novos => 'convites pendentes',
   };

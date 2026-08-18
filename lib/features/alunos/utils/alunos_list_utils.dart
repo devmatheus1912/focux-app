@@ -39,9 +39,10 @@ bool shouldShowAlunoListBadge(
 }) {
   if (statusText == 'Ativo') return false;
   if (statusText == 'Risco alto') {
-    if (activeFiltro == AlunoFiltro.risco) return false;
-    if (activeFiltro == AlunoFiltro.contatoHoje) return false;
-    if (activeFiltro == AlunoFiltro.todos && triageContextActive) {
+    if (triageContextActive) return false;
+    if (activeFiltro == AlunoFiltro.risco ||
+        activeFiltro == AlunoFiltro.contatoHoje ||
+        activeFiltro == AlunoFiltro.novos) {
       return false;
     }
   }
@@ -69,6 +70,17 @@ String adherenceActivityLabel({
     return '${dias}d s/ treino';
   }
   return alunoWeeklyCheckinsLabel(weeklyCheckins);
+}
+
+/// Sinal operacional no card: dias sem treino sempre; % só fora da triagem.
+bool shouldShowAlunoListOpsLine({
+  required String adherenceLabel,
+  required bool triageContextActive,
+  required int? aderenciaPercent,
+}) {
+  if (adherenceLabel.isNotEmpty) return true;
+  if (triageContextActive) return false;
+  return aderenciaPercent != null;
 }
 
 /// Badge de status do card — lógica fora da UI.

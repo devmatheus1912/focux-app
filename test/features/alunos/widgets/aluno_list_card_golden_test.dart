@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import 'package:focux_app/core/theme/design_tokens.dart';
 import 'package:focux_app/core/theme/tokens_strip.dart';
+import 'package:focux_app/features/alunos/constants/alunos_list_filters.dart';
 import 'package:focux_app/features/alunos/data/aluno_repository.dart';
 import 'package:focux_app/features/alunos/widgets/aluno_list_card.dart';
 
@@ -26,7 +27,12 @@ void main() {
     emRisco: true,
   );
 
-  Widget cardHarness({required bool isDark, bool compact = false}) {
+  Widget cardHarness({
+    required bool isDark,
+    bool compact = false,
+    AlunoFiltro filtro = AlunoFiltro.todos,
+    Aluno? overrideAluno,
+  }) {
     return ProviderScope(
       child: MaterialApp(
         theme: ThemeData(
@@ -45,8 +51,9 @@ void main() {
             body: Padding(
               padding: const EdgeInsets.all(16),
               child: AlunoListCard(
-                aluno: aluno,
+                aluno: overrideAluno ?? aluno,
                 compact: compact,
+                activeFiltro: filtro,
               ),
             ),
           ),
@@ -80,5 +87,37 @@ void main() {
       find.byType(AlunoListCard),
       matchesGoldenFile('goldens/aluno_list_card_compact_390_dark.png'),
     );
+  });
+
+  testWidgets('compact contato hoje mostra 2 ações e o nome inteiro', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      cardHarness(
+        isDark: false,
+        compact: true,
+        filtro: AlunoFiltro.contatoHoje,
+        overrideAluno: Aluno(
+          id: 7,
+          nome: 'Beatriz Carvalho',
+          email: 'beatriz@test.com',
+          status: 'ATIVO',
+          objetivo: 'Hipertrofia',
+          aderenciaPercent: 40,
+          diasSemTreino: 12,
+          emRisco: true,
+          whatsapp: '11999999999',
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Beatriz Carvalho'), findsOneWidget);
+    expect(find.textContaining('12d s/ treino'), findsOneWidget);
+    expect(find.byTooltip('WhatsApp'), findsOneWidget);
+    expect(find.byTooltip('Contato feito'), findsOneWidget);
+    expect(find.byTooltip('Adiar 24h'), findsNothing);
+    expect(find.byTooltip('Chat in-app'), findsNothing);
+    expect(find.text('Risco alto'), findsNothing);
   });
 }

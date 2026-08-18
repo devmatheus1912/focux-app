@@ -9,6 +9,8 @@ void main() {
     expect(screen, contains('AlunosLoadingScaffold'));
     expect(screen, contains('AlunosErrorScaffold'));
     expect(screen, contains('FocuxHubTypography'));
+    expect(screen, contains('_alunosFilterChip'));
+    expect(screen, contains('showStartPeek'));
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(screen, isNot(contains('FxGlowSurface')));
   });

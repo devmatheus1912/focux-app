@@ -115,7 +115,7 @@
   "alunosEmptyNone": "Ningún alumno registrado",
   "alunosEmptyNoneSubtitle": "Agrega el primer alumno para armar entrenamientos y seguir la evolución.",
   "alunosEmptySearch": "Ningún alumno encontrado",
-  "alunosEmptySearchSubtitle": "Prueba con otro nombre, objetivo o correo.",
+  "alunosEmptySearchSubtitle": "Prueba con otro nombre u objetivo.",
   "alunosHelpTitle": "Lista de alumnos",
   "alunosHelpIntro": "Prioriza el contacto, filtra por estado y abre la ficha con un toque.",
   "alunosHelpLink": "Cómo usar la lista"

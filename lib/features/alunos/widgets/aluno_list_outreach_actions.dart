@@ -20,6 +20,7 @@ class AlunoListOutreachActions extends ConsumerWidget {
     required this.primary,
     required this.isDark,
     required this.mute,
+    this.compact = false,
   });
 
   final int alunoId;
@@ -30,52 +31,66 @@ class AlunoListOutreachActions extends ConsumerWidget {
   final Color primary;
   final bool isDark;
   final Color mute;
+  final bool compact;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        _AlunoQuickActionIcon(
-          compact: true,
+    final primaryContact = hasWhatsapp
+        ? _AlunoQuickActionIcon(
+          compact: compact,
+          icon: Icons.chat_rounded,
+          tooltip: 'WhatsApp',
+          color: EagleTokens.whatsapp,
+          onTap:
+              () => openAlunoWhatsappOutreach(
+                context,
+                displayName: displayName,
+                whatsappNumber: whatsappNumber,
+                emRisco: emRisco,
+              ),
+        )
+        : _AlunoQuickActionIcon(
+          compact: compact,
           icon: Icons.forum_outlined,
           tooltip: 'Chat in-app',
           color: BrandPalette.sectionAction(primary, dark: isDark),
           onTap:
               () => context.push('/alunos/$alunoId/chat', extra: displayName),
-        ),
-        if (hasWhatsapp) ...[
+        );
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        primaryContact,
+        if (!compact && hasWhatsapp) ...[
           const SizedBox(width: 3),
           _AlunoQuickActionIcon(
-            compact: true,
-            icon: Icons.chat_rounded,
-            tooltip: 'WhatsApp',
-            color: EagleTokens.whatsapp,
+            compact: compact,
+            icon: Icons.forum_outlined,
+            tooltip: 'Chat in-app',
+            color: BrandPalette.sectionAction(primary, dark: isDark),
             onTap:
-                () => openAlunoWhatsappOutreach(
-                  context,
-                  displayName: displayName,
-                  whatsappNumber: whatsappNumber,
-                  emRisco: emRisco,
-                ),
+                () => context.push('/alunos/$alunoId/chat', extra: displayName),
+          ),
+        ],
+        if (!compact) ...[
+          const SizedBox(width: 3),
+          _AlunoQuickActionIcon(
+            compact: compact,
+            icon: Icons.snooze_rounded,
+            tooltip: 'Adiar 24h',
+            color: mute,
+            onTap: () async {
+              await ref.read(alunoFollowUpActionsProvider).snooze(alunoId);
+              if (context.mounted) {
+                FeedbackHelper.showSuccess(context, 'Lembrete adiado por 24h');
+              }
+            },
           ),
         ],
         const SizedBox(width: 3),
         _AlunoQuickActionIcon(
-          compact: true,
-          icon: Icons.snooze_rounded,
-          tooltip: 'Adiar 24h',
-          color: mute,
-          onTap: () async {
-            await ref.read(alunoFollowUpActionsProvider).snooze(alunoId);
-            if (context.mounted) {
-              FeedbackHelper.showSuccess(context, 'Lembrete adiado por 24h');
-            }
-          },
-        ),
-        const SizedBox(width: 3),
-        _AlunoQuickActionIcon(
-          compact: true,
+          compact: compact,
           icon: Icons.check_circle_outline_rounded,
           tooltip: 'Contato feito',
           color: EagleTokens.good,
@@ -110,26 +125,32 @@ class _AlunoQuickActionIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final size = compact ? AlunosLayout.touchTarget : AlunosLayout.touchTarget;
-    final iconSize = compact ? 18.0 : 20.0;
+    final visual = compact ? 36.0 : 40.0;
+    final iconSize = compact ? 17.0 : 20.0;
 
     return Semantics(
       label: tooltip,
       button: true,
       child: Tooltip(
         message: tooltip,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(999),
-          child: Container(
-            width: size,
-            height: size,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: compact ? 0.1 : 0.12),
-              shape: BoxShape.circle,
+        child: SizedBox(
+          width: AlunosLayout.touchTarget,
+          height: AlunosLayout.touchTarget,
+          child: InkWell(
+            onTap: onTap,
+            customBorder: const CircleBorder(),
+            child: Center(
+              child: Container(
+                width: visual,
+                height: visual,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: compact ? 0.1 : 0.12),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(icon, size: iconSize, color: color),
+              ),
             ),
-            child: Icon(icon, size: iconSize, color: color),
           ),
         ),
       ),

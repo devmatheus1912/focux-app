@@ -212,7 +212,7 @@ extension AlunosListScreenFilters on _AlunosListScreenState {
                         },
                       ),
                       _SheetShortcutChip(
-                        label: 'Inadimplentes',
+                        label: 'Em atraso',
                         selected: _filtro == AlunoFiltro.inadimplentes,
                         onTap: () {
                           _setFiltro(AlunoFiltro.inadimplentes);

@@ -95,7 +95,9 @@ class AlunoListCard extends ConsumerWidget {
     final cardPadding =
         compact ? AlunosLayout.cardPaddingCompact : AlunosLayout.cardPadding;
     final avatarGap =
-        compact ? AlunosLayout.cardAvatarGapCompact : AlunosLayout.cardAvatarGap;
+        compact
+            ? AlunosLayout.cardAvatarGapCompact
+            : AlunosLayout.cardAvatarGap;
 
     final displayName = fxTitleCaseName(aluno.nome);
     final objetivo = prettyAlunoObjective(aluno.objetivo);
@@ -116,6 +118,15 @@ class AlunoListCard extends ConsumerWidget {
       aluno: aluno,
       weeklyCheckins: weeklyCheckins,
     );
+    final showOpsLine = shouldShowAlunoListOpsLine(
+      adherenceLabel: adherenceLabel,
+      triageContextActive: triageContextActive,
+      aderenciaPercent: aderenciaPercent,
+    );
+    final opsText =
+        adherenceLabel.isNotEmpty
+            ? adherenceLabel
+            : (aderenciaPercent == null ? '—' : '$aderenciaPercent%');
     final hasTreinoRecente =
         (aluno.diasSemTreino ?? 1) == 0 ||
         weeklyCheckins > 0 ||
@@ -124,8 +135,21 @@ class AlunoListCard extends ConsumerWidget {
         !modoSelecao && activeFiltro == AlunoFiltro.contatoHoje;
     final whatsappNumber = (aluno.whatsapp ?? '').replaceAll(RegExp(r'\D'), '');
     final hasWhatsapp = whatsappNumber.isNotEmpty;
+    final outreach = AlunoListOutreachActions(
+      alunoId: aluno.id,
+      displayName: displayName,
+      whatsappNumber: whatsappNumber,
+      hasWhatsapp: hasWhatsapp,
+      emRisco: aluno.emRisco,
+      primary: primary,
+      isDark: isDark,
+      mute: mute,
+      compact: compact,
+    );
     final aderenciaLabel =
-        aderenciaPercent == null ? 'aderência indisponível' : '$aderenciaPercent%';
+        aderenciaPercent == null
+            ? 'aderência indisponível'
+            : '$aderenciaPercent%';
 
     return Semantics(
       button: true,
@@ -135,9 +159,7 @@ class AlunoListCard extends ConsumerWidget {
           '${adherenceLabel.isEmpty ? '' : ', $adherenceLabel'}',
       child: InkWell(
         onTap:
-            modoSelecao
-                ? onToggle
-                : () => context.push('/alunos/${aluno.id}'),
+            modoSelecao ? onToggle : () => context.push('/alunos/${aluno.id}'),
         onLongPress: onLongPress,
         borderRadius: BorderRadius.circular(TokensStrip.rCard),
         child: AnimatedContainer(
@@ -148,193 +170,216 @@ class AlunoListCard extends ConsumerWidget {
             primary: primary,
             radius: TokensStrip.rCard,
           ),
-          child: Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              if (modoSelecao) ...[
-                AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 150),
-                  child: Icon(
-                    isSelected
-                        ? Icons.check_circle
-                        : Icons.radio_button_unchecked,
-                    key: ValueKey(isSelected),
-                    color:
+              Row(
+                children: [
+                  if (modoSelecao) ...[
+                    AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 150),
+                      child: Icon(
                         isSelected
-                            ? primary
-                            : (isDark
-                                ? EagleTokens.darkInkMute
-                                : TokensStrip.textSecondary),
-                    size: 22,
+                            ? Icons.check_circle
+                            : Icons.radio_button_unchecked,
+                        key: ValueKey(isSelected),
+                        color:
+                            isSelected
+                                ? primary
+                                : (isDark
+                                    ? EagleTokens.darkInkMute
+                                    : TokensStrip.textSecondary),
+                        size: 22,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                  ],
+                  AlunoAvatar(
+                    name: displayName,
+                    photoUrl: aluno.fotoUrl,
+                    fallbackColor: avatarColor,
+                    variant:
+                        compact
+                            ? AlunoAvatarVariant.strip
+                            : AlunoAvatarVariant.list,
                   ),
-                ),
-                const SizedBox(width: 10),
-              ],
-              AlunoAvatar(
-                name: displayName,
-                photoUrl: aluno.fotoUrl,
-                fallbackColor: avatarColor,
-                variant:
-                    compact
-                        ? AlunoAvatarVariant.strip
-                        : AlunoAvatarVariant.list,
-              ),
-              SizedBox(width: avatarGap),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
+                  SizedBox(width: avatarGap),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Flexible(
-                          child: Text(
-                            displayName,
-                            style: AppTypography.inter(
-                              fontSize: TokensStrip.fontBody,
-                              fontWeight: FontWeight.w700,
-                              color: ink,
-                              letterSpacing: -0.15,
-                              height: 1.2,
+                        Row(
+                          children: [
+                            Flexible(
+                              child: Text(
+                                displayName,
+                                style: AppTypography.inter(
+                                  fontSize: TokensStrip.fontBody,
+                                  fontWeight: FontWeight.w700,
+                                  color: ink,
+                                  letterSpacing: -0.15,
+                                  height: 1.2,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
+                            if (shouldShowAlunoListBadge(
+                              statusText,
+                              activeFiltro,
+                              triageContextActive: triageContextActive,
+                            )) ...[
+                              SizedBox(width: compact ? 6 : 8),
+                              AlunoStatusPill(
+                                label: statusText,
+                                fill: status.fill,
+                                foreground: status.foreground,
+                                compact: compact,
+                              ),
+                            ],
+                          ],
+                        ),
+                        if (!compact) ...[
+                          const SizedBox(height: 2),
+                          Text(
+                            '$objetivo · ${maskEmailForList(aluno.email)}',
+                            style: AppTypography.inter(
+                              fontSize: TokensStrip.fontBodySm,
+                              color: secondaryInk,
+                              height: 1.25,
+                            ),
+                            maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
-                        ),
-                        if (shouldShowAlunoListBadge(
-                          statusText,
-                          activeFiltro,
-                          triageContextActive: triageContextActive,
-                        )) ...[
-                          SizedBox(width: compact ? 6 : 8),
-                          AlunoStatusPill(
-                            label: statusText,
-                            fill: status.fill,
-                            foreground: status.foreground,
-                            compact: compact,
+                        ] else ...[
+                          const SizedBox(height: 2),
+                          Text(
+                            objetivo,
+                            style: AppTypography.inter(
+                              fontSize: TokensStrip.fontBodySm,
+                              color: secondaryInk,
+                              height: 1.25,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                        if (showOpsLine) ...[
+                          SizedBox(height: compact ? 4 : 8),
+                          Row(
+                            children: [
+                              Container(
+                                width: compact ? 5 : 6,
+                                height: compact ? 5 : 6,
+                                decoration: BoxDecoration(
+                                  color: aderColor,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                              const SizedBox(width: 5),
+                              if (!compact && aderenciaPercent != null) ...[
+                                Text(
+                                  '$aderenciaPercent%',
+                                  style: AppTypography.mono(
+                                    fontSize: 12.5,
+                                    fontWeight:
+                                        hasTreinoRecente
+                                            ? FontWeight.w700
+                                            : FontWeight.w500,
+                                    color:
+                                        hasTreinoRecente
+                                            ? aderColor
+                                            : secondaryInk,
+                                    height: 1.1,
+                                  ),
+                                ),
+                                if (adherenceLabel.isNotEmpty)
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 6,
+                                    ),
+                                    child: Text(
+                                      '·',
+                                      style: AppTypography.inter(
+                                        fontSize: 11,
+                                        color: secondaryInk.withValues(
+                                          alpha: 0.85,
+                                        ),
+                                        height: 1.1,
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                              Flexible(
+                                child: Text(
+                                  compact
+                                      ? opsText
+                                      : (adherenceLabel.isNotEmpty
+                                          ? adherenceLabel
+                                          : (aderenciaPercent == null
+                                              ? '—'
+                                              : '')),
+                                  style: AppTypography.mono(
+                                    fontSize: compact ? 11.5 : 12.5,
+                                    fontWeight:
+                                        hasTreinoRecente
+                                            ? FontWeight.w700
+                                            : FontWeight.w500,
+                                    color:
+                                        hasTreinoRecente
+                                            ? aderColor
+                                            : secondaryInk,
+                                    height: 1.1,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ],
                     ),
-                    if (!compact) ...[
-                      const SizedBox(height: 2),
-                      Text(
-                        '$objetivo · ${maskEmailForList(aluno.email)}',
-                        style: AppTypography.inter(
-                          fontSize: TokensStrip.fontBodySm,
-                          color: secondaryInk,
-                          height: 1.25,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ] else ...[
-                      const SizedBox(height: 2),
-                      Text(
-                        objetivo,
-                        style: AppTypography.inter(
-                          fontSize: TokensStrip.fontBodySm,
-                          color: secondaryInk,
-                          height: 1.25,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                    if (!triageContextActive) ...[
-                    SizedBox(height: compact ? 4 : 8),
-                    Row(
-                      children: [
-                        Container(
-                          width: compact ? 5 : 6,
-                          height: compact ? 5 : 6,
-                          decoration: BoxDecoration(
-                            color: aderColor,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        const SizedBox(width: 5),
-                        Text(
-                          aderenciaPercent == null ? '—' : '$aderenciaPercent%',
-                          style: AppTypography.mono(
-                            fontSize: compact ? 11.5 : 12.5,
-                            fontWeight:
-                                hasTreinoRecente
-                                    ? FontWeight.w700
-                                    : FontWeight.w500,
-                            color: hasTreinoRecente ? aderColor : secondaryInk,
-                            height: 1.1,
-                          ),
-                        ),
-                        if (adherenceLabel.isNotEmpty) ...[
-                          Padding(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: compact ? 4 : 6,
-                            ),
-                            child: Text(
-                              '·',
-                              style: AppTypography.inter(
-                                fontSize: compact ? 10 : 11,
-                                color: secondaryInk.withValues(alpha: 0.85),
-                                height: 1.1,
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            child: Text(
-                              adherenceLabel,
-                              style: AppTypography.inter(
-                                fontSize: compact ? 10 : 11,
-                                color: secondaryInk,
-                                height: 1.1,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                    ],
-                  ],
-                ),
-              ),
-              if (needsOutreach)
-                AlunoListOutreachActions(
-                  alunoId: aluno.id,
-                  displayName: displayName,
-                  whatsappNumber: whatsappNumber,
-                  hasWhatsapp: hasWhatsapp,
-                  emRisco: aluno.emRisco,
-                  primary: primary,
-                  isDark: isDark,
-                  mute: mute,
-                )
-              else if (compact || triageContextActive)
-                ExcludeSemantics(
-                  child: Icon(
-                    Icons.chevron_right_rounded,
-                    size: 18,
-                    color: secondaryInk.withValues(alpha: 0.9),
                   ),
-                )
-              else
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    _AdherenceRail(
-                      value: (aderenciaPercent ?? 0).toDouble(),
-                      color: aderColor,
-                      line: line,
-                      isEmpty: !hasTreinoRecente,
-                    ),
-                    const SizedBox(height: 6),
+                  if (needsOutreach && !compact)
+                    outreach
+                  else if (!needsOutreach && (compact || triageContextActive))
                     ExcludeSemantics(
                       child: Icon(
                         Icons.chevron_right_rounded,
                         size: 18,
                         color: secondaryInk.withValues(alpha: 0.9),
                       ),
+                    )
+                  else if (!needsOutreach)
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        _AdherenceRail(
+                          value: (aderenciaPercent ?? 0).toDouble(),
+                          color: aderColor,
+                          line: line,
+                          isEmpty: !hasTreinoRecente,
+                        ),
+                        const SizedBox(height: 6),
+                        ExcludeSemantics(
+                          child: Icon(
+                            Icons.chevron_right_rounded,
+                            size: 18,
+                            color: secondaryInk.withValues(alpha: 0.9),
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
+                ],
+              ),
+              if (needsOutreach && compact)
+                Padding(
+                  padding: const EdgeInsets.only(top: 2),
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: outreach,
+                  ),
                 ),
             ],
           ),
