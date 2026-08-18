@@ -23,6 +23,13 @@ void main() {
       final list = alunoAvatarFallbackColor('Beatriz', false);
       expect(hero, isNot(equals(list)));
     });
+
+    test('lista usa teals profundos da marca, nao mint', () {
+      final a = alunoAvatarFallbackColor('Beatriz Carvalho', false);
+      final b = alunoAvatarFallbackColor('Guilherme', false);
+      expect(HSLColor.fromColor(a).lightness, lessThan(0.42));
+      expect(HSLColor.fromColor(b).lightness, lessThan(0.42));
+    });
   });
 
   group('sanitizeOutreachGenderTerms', () {
