@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -8,7 +9,6 @@ import '../../../core/analytics/analytics_service.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
-import '../data/aluno_contact_utils.dart';
 import '../data/aluno_list_preferences_store.dart';
 import '../data/aluno_repository.dart';
 import '../providers/alunos_provider.dart';
@@ -27,6 +27,11 @@ import '../constants/alunos_list_filters.dart';
 import '../widgets/aluno_list_card.dart';
 import '../widgets/alunos_error_scaffold.dart';
 import '../utils/alunos_l10n.dart';
+import '../utils/alunos_home_client_cache.dart';
+import '../utils/alunos_microcopy.dart';
+import '../../../core/widgets/fx_loading.dart';
+import '../../planos/providers/plano_features_provider.dart';
+import '../../subscription/widgets/upgrade_prompt_sheet.dart';
 import '../widgets/alunos_list_help_sheet.dart';
 import '../widgets/alunos_loading_scaffold.dart';
 import '../../../core/widgets/fx_empty_state.dart';

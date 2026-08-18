@@ -20,12 +20,26 @@ void main() {
         'totalInadimplentes': 0,
         'totalRiscoAlto': 0,
         'totalConvites': 0,
+        'totalContatoHoje': 1,
       },
       'alertasConfig': {'diasSemTreino': 7, 'aderenciaMinima': 50},
+      'planoFeatures': {
+        'plano': 'PREMIUM',
+        'features': {
+          'financeiro': true,
+          'agenda': true,
+          'relatorios': true,
+          'whiteLabel': false,
+          'iaCopiloto': true,
+          'migracaoFoto': false,
+        },
+      },
     });
     expect(bundle.alunos, hasLength(1));
     expect(bundle.alunos.first.nome, 'Ana');
     expect(bundle.stats.totalAtivos, 1);
+    expect(bundle.stats.totalContatoHoje, 1);
     expect(bundle.alertasConfig.diasSemTreino, 7);
+    expect(bundle.planoFeatures, isNotNull);
   });
 }

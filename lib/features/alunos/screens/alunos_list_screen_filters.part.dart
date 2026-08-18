@@ -3,6 +3,7 @@ part of 'alunos_list_screen.dart';
 extension AlunosListScreenFilters on _AlunosListScreenState {
   Future<void> _showListOptions() async {
     HapticFeedback.selectionClick();
+    AnalyticsService.instance.track(ProductEvents.alunosOrganizeOpened);
     await showModalBottomSheet<void>(
       context: context,
       useSafeArea: true,
@@ -122,6 +123,7 @@ extension AlunosListScreenFilters on _AlunosListScreenState {
                             _filtro = AlunoFiltro.todos;
                             _ordenacao = AlunoOrdenacao.prioridade;
                           });
+                          _syncHomeQuery();
                           Navigator.pop(ctx);
                         },
                         style: TextButton.styleFrom(
@@ -147,10 +149,7 @@ extension AlunosListScreenFilters on _AlunosListScreenState {
                         'Risco, inadimplência e convites aparecem primeiro.',
                     icon: Icons.priority_high_rounded,
                     selected: _ordenacao == AlunoOrdenacao.prioridade,
-                    onTap:
-                        () => setState(
-                          () => _ordenacao = AlunoOrdenacao.prioridade,
-                        ),
+                    onTap: () => _setOrdenacao(AlunoOrdenacao.prioridade),
                   ),
                   const SizedBox(height: 8),
                   option(
@@ -158,8 +157,7 @@ extension AlunosListScreenFilters on _AlunosListScreenState {
                     subtitle: 'Lista alfabética para encontrar alunos rápido.',
                     icon: Icons.sort_by_alpha_rounded,
                     selected: _ordenacao == AlunoOrdenacao.nome,
-                    onTap:
-                        () => setState(() => _ordenacao = AlunoOrdenacao.nome),
+                    onTap: () => _setOrdenacao(AlunoOrdenacao.nome),
                   ),
                   const SizedBox(height: 8),
                   option(
@@ -168,9 +166,7 @@ extension AlunosListScreenFilters on _AlunosListScreenState {
                         'Ajuda a completar perfis que ainda parecem genéricos.',
                     icon: Icons.no_photography_outlined,
                     selected: _ordenacao == AlunoOrdenacao.semFoto,
-                    onTap:
-                        () =>
-                            setState(() => _ordenacao = AlunoOrdenacao.semFoto),
+                    onTap: () => _setOrdenacao(AlunoOrdenacao.semFoto),
                   ),
                   const SizedBox(height: 8),
                   option(
@@ -203,7 +199,7 @@ extension AlunosListScreenFilters on _AlunosListScreenState {
                         label: 'Contato hoje',
                         selected: _filtro == AlunoFiltro.contatoHoje,
                         onTap: () {
-                          setState(() => _filtro = AlunoFiltro.contatoHoje);
+                          _setFiltro(AlunoFiltro.contatoHoje);
                           Navigator.pop(ctx);
                         },
                       ),
@@ -211,7 +207,7 @@ extension AlunosListScreenFilters on _AlunosListScreenState {
                         label: 'Risco alto',
                         selected: _filtro == AlunoFiltro.risco,
                         onTap: () {
-                          setState(() => _filtro = AlunoFiltro.risco);
+                          _setFiltro(AlunoFiltro.risco);
                           Navigator.pop(ctx);
                         },
                       ),
@@ -219,7 +215,7 @@ extension AlunosListScreenFilters on _AlunosListScreenState {
                         label: 'Inadimplentes',
                         selected: _filtro == AlunoFiltro.inadimplentes,
                         onTap: () {
-                          setState(() => _filtro = AlunoFiltro.inadimplentes);
+                          _setFiltro(AlunoFiltro.inadimplentes);
                           Navigator.pop(ctx);
                         },
                       ),
@@ -227,7 +223,7 @@ extension AlunosListScreenFilters on _AlunosListScreenState {
                         label: 'Convites',
                         selected: _filtro == AlunoFiltro.novos,
                         onTap: () {
-                          setState(() => _filtro = AlunoFiltro.novos);
+                          _setFiltro(AlunoFiltro.novos);
                           Navigator.pop(ctx);
                         },
                       ),
@@ -235,7 +231,7 @@ extension AlunosListScreenFilters on _AlunosListScreenState {
                         label: 'Todos',
                         selected: _filtro == AlunoFiltro.todos,
                         onTap: () {
-                          setState(() => _filtro = AlunoFiltro.todos);
+                          _setFiltro(AlunoFiltro.todos);
                           Navigator.pop(ctx);
                         },
                       ),
@@ -248,7 +244,7 @@ extension AlunosListScreenFilters on _AlunosListScreenState {
                     child: TextButton.icon(
                       onPressed: () {
                         Navigator.pop(ctx);
-                        showAlunosListHelpSheet(context);
+                        _openHelp();
                       },
                       icon: Icon(
                         Icons.help_outline_rounded,

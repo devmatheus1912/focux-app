@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
+import '../../planos/data/planos_repository.dart';
 import '../../alertas/data/alertas_repository.dart';
 import '../../exercicios/data/enums.dart';
 import '../../evolucao/data/evolucao_repository.dart';
@@ -135,6 +136,7 @@ class AlunosStats {
   final int totalInadimplentes;
   final int totalRiscoAlto;
   final int totalConvites;
+  final int totalContatoHoje;
 
   const AlunosStats({
     required this.total,
@@ -142,6 +144,7 @@ class AlunosStats {
     required this.totalInadimplentes,
     required this.totalRiscoAlto,
     required this.totalConvites,
+    this.totalContatoHoje = 0,
   });
 
   factory AlunosStats.fromJson(Map<String, dynamic> json) => AlunosStats(
@@ -150,6 +153,7 @@ class AlunosStats {
     totalInadimplentes: (json['totalInadimplentes'] as num?)?.toInt() ?? 0,
     totalRiscoAlto: (json['totalRiscoAlto'] as num?)?.toInt() ?? 0,
     totalConvites: (json['totalConvites'] as num?)?.toInt() ?? 0,
+    totalContatoHoje: (json['totalContatoHoje'] as num?)?.toInt() ?? 0,
   );
 }
 
@@ -521,31 +525,24 @@ class AlunoRepository {
   }
 
   /// BFF tipado — first paint da lista (alunos + stats + alertas config).
-  Future<AlunosHomeBundle> getHome({int page = 0, int size = 200}) async {
+  Future<AlunosHomeBundle> getHome({
+    int page = 0,
+    int size = 40,
+    String q = '',
+    String filtro = 'todos',
+    String ordenacao = 'prioridade',
+  }) async {
     final response = await _dio.get(
       '/api/alunos/home',
-      queryParameters: {'page': page, 'size': size},
+      queryParameters: {
+        'page': page,
+        'size': size,
+        if (q.trim().isNotEmpty) 'q': q.trim(),
+        'filtro': filtro,
+        'ordenacao': ordenacao,
+      },
     );
     return AlunosHomeBundle.fromJson(response.data as Map<String, dynamic>);
-  }
-
-  /// Carrega todas as páginas do BFF (paginação BE, merge client-side).
-  Future<AlunosHomeBundle> getHomeAll({int pageSize = 200}) async {
-    var page = 0;
-    late AlunosHomeBundle merged;
-    var first = true;
-    while (true) {
-      final chunk = await getHome(page: page, size: pageSize);
-      if (first) {
-        merged = chunk;
-        first = false;
-      } else {
-        merged = merged.appendAlunos(chunk);
-      }
-      if (!chunk.page.hasNext) break;
-      page++;
-    }
-    return merged;
   }
 
   Future<AlunosStats> buscarStats() async {
@@ -805,6 +802,7 @@ class AlunosHomeBundle {
   final AlunosStats stats;
   final AlertasConfiguracao alertasConfig;
   final AlunosHomePageMeta page;
+  final PlanoFeatures? planoFeatures;
 
   const AlunosHomeBundle({
     required this.alunos,
@@ -817,6 +815,7 @@ class AlunosHomeBundle {
       totalPages: 0,
       hasNext: false,
     ),
+    this.planoFeatures,
   });
 
   AlunosHomeBundle appendAlunos(AlunosHomeBundle next) => AlunosHomeBundle(
@@ -830,25 +829,33 @@ class AlunosHomeBundle {
       totalPages: next.page.totalPages,
       hasNext: next.page.hasNext,
     ),
+    planoFeatures: planoFeatures ?? next.planoFeatures,
   );
 
-  factory AlunosHomeBundle.fromJson(Map<String, dynamic> j) => AlunosHomeBundle(
-    alunos:
-        ((j['alunos'] as List?) ?? const [])
-            .map((e) => Aluno.fromJson(e as Map<String, dynamic>))
-            .toList(),
-    stats: AlunosStats.fromJson(
-      (j['stats'] as Map<String, dynamic>?) ?? const {},
-    ),
-    alertasConfig: AlertasConfiguracao.fromJson(
-      (j['alertasConfig'] as Map<String, dynamic>?) ??
-          const {
-            'diasSemTreino': fallbackDiasSemTreino,
-            'aderenciaMinima': fallbackAderenciaMinima,
-          },
-    ),
-    page: AlunosHomePageMeta.fromJson(j['page'] as Map<String, dynamic>?),
-  );
+  factory AlunosHomeBundle.fromJson(Map<String, dynamic> j) {
+    final planoRaw = j['planoFeatures'];
+    return AlunosHomeBundle(
+      alunos:
+          ((j['alunos'] as List?) ?? const [])
+              .map((e) => Aluno.fromJson(e as Map<String, dynamic>))
+              .toList(),
+      stats: AlunosStats.fromJson(
+        (j['stats'] as Map<String, dynamic>?) ?? const {},
+      ),
+      alertasConfig: AlertasConfiguracao.fromJson(
+        (j['alertasConfig'] as Map<String, dynamic>?) ??
+            const {
+              'diasSemTreino': fallbackDiasSemTreino,
+              'aderenciaMinima': fallbackAderenciaMinima,
+            },
+      ),
+      page: AlunosHomePageMeta.fromJson(j['page'] as Map<String, dynamic>?),
+      planoFeatures:
+          planoRaw is Map<String, dynamic>
+              ? PlanoFeatures.fromJson(planoRaw)
+              : null,
+    );
+  }
 }
 
 /// BFF `GET /api/aluno/perfil/home` — perfil + medidas em um round-trip.

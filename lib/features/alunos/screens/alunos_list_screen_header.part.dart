@@ -2,13 +2,13 @@ part of 'alunos_list_screen.dart';
 
 extension AlunosListScreenHeader on _AlunosListScreenState {
   Widget _buildAlunosListHeader({
-    required List<Aluno> alunos,
+    required int totalCount,
     required int contatoCount,
     required int ativosCount,
     required int inadCount,
     required int riscoCount,
     required int novosCount,
-    required String headerOps,
+    required String? headerOps,
     required bool showHeaderBack,
     required bool headerBackFromDashboard,
     required String? freshnessLabel,
@@ -69,6 +69,8 @@ extension AlunosListScreenHeader on _AlunosListScreenState {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
+                                      if (headerOps != null &&
+                                          headerOps.isNotEmpty) ...[
                                       Text(
                                         headerOps,
                                         style: FocuxHubTypography.eyebrow(
@@ -91,6 +93,7 @@ extension AlunosListScreenHeader on _AlunosListScreenState {
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                       const SizedBox(height: 2),
+                                      ],
                                       Text(
                                         context.alunosL10n.alunosTitle,
                                         style: FocuxHubTypography.pageTitle(
@@ -103,7 +106,9 @@ extension AlunosListScreenHeader on _AlunosListScreenState {
                                       ),
                                       if (freshnessLabel != null) ...[
                                         const SizedBox(height: 3),
-                                        Text(
+                                        Semantics(
+                                          liveRegion: true,
+                                          child: Text(
                                           freshnessLabel,
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
@@ -111,6 +116,7 @@ extension AlunosListScreenHeader on _AlunosListScreenState {
                                             color: mute,
                                             fontWeight: FontWeight.w600,
                                           ).copyWith(fontSize: 11),
+                                        ),
                                         ),
                                       ],
                                     ],
@@ -143,9 +149,18 @@ extension AlunosListScreenHeader on _AlunosListScreenState {
                                   const SizedBox(
                                     width: AlunosLayout.headerChromeGap,
                                   ),
+                                  ShellHeaderIconButton(
+                                    icon: 'help',
+                                    size: AlunosLayout.headerChromeSize,
+                                    tooltip: AlunosMicrocopy.helpA11y,
+                                    onTap: _openHelp,
+                                  ),
+                                  const SizedBox(
+                                    width: AlunosLayout.headerChromeGap,
+                                  ),
                                   Semantics(
                                     button: true,
-                                    label: 'Selecionar alunos',
+                                    label: AlunosMicrocopy.selectA11y,
                                     child: InkWell(
                                       onTap: _toggleModoSelecao,
                                       borderRadius: BorderRadius.circular(
@@ -171,7 +186,7 @@ extension AlunosListScreenHeader on _AlunosListScreenState {
                                   ),
                                   Semantics(
                                     button: true,
-                                    label: 'Adicionar aluno',
+                                    label: AlunosMicrocopy.addA11y,
                                     child: Material(
                                       color: primary,
                                       elevation: isDark ? 3 : 1,
@@ -203,7 +218,10 @@ extension AlunosListScreenHeader on _AlunosListScreenState {
                           Padding(
                             padding: AlunosLayout.searchBarOuterPadding,
                             child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 180),
+                              duration:
+                                  TokensStrip.prefersReducedMotion(context)
+                                      ? Duration.zero
+                                      : const Duration(milliseconds: 180),
                               curve: Curves.easeOutCubic,
                               padding: AlunosLayout.searchBarPadding,
                               decoration: BoxDecoration(
@@ -262,9 +280,7 @@ extension AlunosListScreenHeader on _AlunosListScreenState {
                                       child: TextField(
                                         controller: _searchController,
                                         focusNode: _searchFocusNode,
-                                        onChanged: (value) {
-                                          setState(() => _query = value);
-                                        },
+                                        onChanged: _onSearchChanged,
                                         textInputAction: TextInputAction.search,
                                         cursorColor: primary,
                                         style: AppTypography.inter(
@@ -295,7 +311,7 @@ extension AlunosListScreenHeader on _AlunosListScreenState {
                                     InkWell(
                                       onTap: () {
                                         _searchController.clear();
-                                        setState(() => _query = '');
+                                        _onSearchChanged('');
                                       },
                                       borderRadius: BorderRadius.circular(999),
                                       child: Padding(
@@ -379,13 +395,10 @@ extension AlunosListScreenHeader on _AlunosListScreenState {
                                   children: [
                                     _FxChip(
                                       label: context.alunosL10n.alunosFilterAll,
-                                      count: alunos.length,
+                                      count: totalCount,
                                       isSelected: _filtro == AlunoFiltro.todos,
                                       isDark: isDark,
-                                      onTap:
-                                          () => setState(
-                                            () => _filtro = AlunoFiltro.todos,
-                                          ),
+                                      onTap: () => _setFiltro(AlunoFiltro.todos),
                                     ),
                                     const SizedBox(width: 8),
                                     _FxChip(
@@ -394,12 +407,7 @@ extension AlunosListScreenHeader on _AlunosListScreenState {
                                       isSelected:
                                           _filtro == AlunoFiltro.contatoHoje,
                                       isDark: isDark,
-                                      onTap:
-                                          () => setState(
-                                            () =>
-                                                _filtro =
-                                                    AlunoFiltro.contatoHoje,
-                                          ),
+                                      onTap: () => _setFiltro(AlunoFiltro.contatoHoje),
                                     ),
                                     const SizedBox(width: 8),
                                     _FxChip(
@@ -407,10 +415,7 @@ extension AlunosListScreenHeader on _AlunosListScreenState {
                                       count: ativosCount,
                                       isSelected: _filtro == AlunoFiltro.ativos,
                                       isDark: isDark,
-                                      onTap:
-                                          () => setState(
-                                            () => _filtro = AlunoFiltro.ativos,
-                                          ),
+                                      onTap: () => _setFiltro(AlunoFiltro.ativos),
                                     ),
                                     const SizedBox(width: 8),
                                     _FxChip(
@@ -419,12 +424,7 @@ extension AlunosListScreenHeader on _AlunosListScreenState {
                                       isSelected:
                                           _filtro == AlunoFiltro.inadimplentes,
                                       isDark: isDark,
-                                      onTap:
-                                          () => setState(
-                                            () =>
-                                                _filtro =
-                                                    AlunoFiltro.inadimplentes,
-                                          ),
+                                      onTap: () => _setFiltro(AlunoFiltro.inadimplentes),
                                     ),
                                     const SizedBox(width: 8),
                                     _FxChip(
@@ -432,10 +432,7 @@ extension AlunosListScreenHeader on _AlunosListScreenState {
                                       count: riscoCount,
                                       isSelected: _filtro == AlunoFiltro.risco,
                                       isDark: isDark,
-                                      onTap:
-                                          () => setState(
-                                            () => _filtro = AlunoFiltro.risco,
-                                          ),
+                                      onTap: () => _setFiltro(AlunoFiltro.risco),
                                     ),
                                     const SizedBox(width: 8),
                                     _FxChip(
@@ -443,10 +440,7 @@ extension AlunosListScreenHeader on _AlunosListScreenState {
                                       count: novosCount,
                                       isSelected: _filtro == AlunoFiltro.novos,
                                       isDark: isDark,
-                                      onTap:
-                                          () => setState(
-                                            () => _filtro = AlunoFiltro.novos,
-                                          ),
+                                      onTap: () => _setFiltro(AlunoFiltro.novos),
                                     ),
                                   ],
                                 ),

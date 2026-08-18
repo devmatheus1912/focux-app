@@ -12,6 +12,7 @@ import '../data/aluno_contact_utils.dart';
 import '../data/aluno_followup_store.dart';
 import '../data/aluno_repository.dart';
 import '../utils/aluno_display_utils.dart';
+import '../utils/alunos_list_sparkline_logic.dart';
 import '../utils/alunos_list_utils.dart';
 import 'aluno_avatar.dart';
 import 'aluno_list_outreach_actions.dart';
@@ -101,8 +102,12 @@ class AlunoListCard extends ConsumerWidget {
     final status = alunoListStatusBadge(aluno, isDark);
     final statusText = status.label;
     final avatarColor = alunoAvatarFallbackColor(displayName, isDark);
-    final aderenciaPercent = aluno.aderenciaPercent;
-    const weeklyCheckins = 0;
+    final sparkline = alunosListSparklineMetrics(
+      points: const [],
+      cachedAderenciaPercent: aluno.aderenciaPercent,
+    );
+    final aderenciaPercent = sparkline.aderenciaPercent;
+    final weeklyCheckins = sparkline.weeklyCheckins;
     final aderColor = EagleTokens.aderenciaColor(
       (aderenciaPercent ?? 0).toDouble(),
       isDark: isDark,
@@ -116,11 +121,7 @@ class AlunoListCard extends ConsumerWidget {
         weeklyCheckins > 0 ||
         (aderenciaPercent ?? 0) > 0;
     final needsOutreach =
-        !modoSelecao &&
-        alunoPrecisaContatoHoje(
-          aluno,
-          diasSemTreinoLimite: diasSemTreinoLimite,
-        );
+        !modoSelecao && activeFiltro == AlunoFiltro.contatoHoje;
     final whatsappNumber = (aluno.whatsapp ?? '').replaceAll(RegExp(r'\D'), '');
     final hasWhatsapp = whatsappNumber.isNotEmpty;
     final aderenciaLabel =
@@ -237,6 +238,7 @@ class AlunoListCard extends ConsumerWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
                     ],
+                    if (!triageContextActive) ...[
                     SizedBox(height: compact ? 4 : 8),
                     Row(
                       children: [
@@ -290,6 +292,7 @@ class AlunoListCard extends ConsumerWidget {
                         ],
                       ],
                     ),
+                    ],
                   ],
                 ),
               ),
@@ -304,7 +307,7 @@ class AlunoListCard extends ConsumerWidget {
                   isDark: isDark,
                   mute: mute,
                 )
-              else if (compact)
+              else if (compact || triageContextActive)
                 ExcludeSemantics(
                   child: Icon(
                     Icons.chevron_right_rounded,

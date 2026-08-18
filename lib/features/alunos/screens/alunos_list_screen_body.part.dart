@@ -8,32 +8,35 @@ extension AlunosListScreenBody on _AlunosListScreenState {
               final ink = chrome.ink;
               final mute = chrome.mute;
               final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
-              final alunos = home.alunos;
+              final alunos = [
+                ...home.alunos,
+                ...ref.watch(alunosHomeTailProvider).alunos,
+              ];
               final stats = home.stats;
               final diasLimite = home.alertasConfig.diasSemTreino;
-              final filtrados = _filtrarAlunos(
-                alunos,
-                diasSemTreinoLimite: diasLimite,
-              );
+              final filtrados = alunos;
               final ativosCount = stats.totalAtivos;
               final inadCount = stats.totalInadimplentes;
               final riscoCount = stats.totalRiscoAlto;
-              final contatoCount = _contatoHojeCount(
-                alunos,
-                diasSemTreinoLimite: diasLimite,
-              );
+              final contatoCount = stats.totalContatoHoje;
               final novosCount = stats.totalConvites;
+              final showTriageBanner =
+                  !_modoSelecao &&
+                  _filtro == AlunoFiltro.todos &&
+                  contatoCount > 0;
               final headerOps =
                   _modoSelecao
                       ? _selectionSummary()
-                      : '$contatoCount contato · $riscoCount risco · $novosCount convites';
+                      : (showTriageBanner
+                          ? null
+                          : (novosCount > 0
+                              ? '$novosCount convites'
+                              : null));
               final showHeaderBack = !_modoSelecao && _hasActiveFilter;
               final headerBackFromDashboard = _hasDeepLinkFiltro(context);
-              final triageContextActive =
-                  !_modoSelecao &&
-                  _filtro == AlunoFiltro.todos &&
-                  (contatoCount > 0 || riscoCount > 0);
+              final triageContextActive = showTriageBanner || contatoCount > 0;
               final listBottomGap = AlunosLayout.listBottomGap(context);
+              final tail = ref.watch(alunosHomeTailProvider);
 
               return SafeArea(
                 bottom: false,
@@ -41,7 +44,7 @@ extension AlunosListScreenBody on _AlunosListScreenState {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     _buildAlunosListHeader(
-                      alunos: alunos,
+                      totalCount: stats.total,
                       contatoCount: contatoCount,
                       ativosCount: ativosCount,
                       inadCount: inadCount,
@@ -74,10 +77,7 @@ extension AlunosListScreenBody on _AlunosListScreenState {
                           title: '$contatoCount precisam de contato hoje',
                           subtitle:
                               'Risco, inadimplência ou $diasLimite+ dias sem treino',
-                          onTap:
-                              () => setState(
-                                () => _filtro = AlunoFiltro.contatoHoje,
-                              ),
+                          onTap: () => _setFiltro(AlunoFiltro.contatoHoje),
                         ),
                       )
                     else if (!_modoSelecao &&
@@ -97,8 +97,7 @@ extension AlunosListScreenBody on _AlunosListScreenState {
                               '$riscoCount aluno${riscoCount == 1 ? '' : 's'} em risco',
                           subtitle:
                               'Priorize contato e retomada de treino hoje',
-                          onTap:
-                              () => setState(() => _filtro = AlunoFiltro.risco),
+                          onTap: () => _setFiltro(AlunoFiltro.risco),
                         ),
                       ),
 
@@ -116,27 +115,44 @@ extension AlunosListScreenBody on _AlunosListScreenState {
                                         ? null
                                         : () {
                                           _searchController.clear();
-                                          setState(() => _query = '');
+                                          _onSearchChanged('');
                                         },
                                 onClearFilter:
                                     _hasActiveFilter
-                                        ? () => setState(
-                                          () => _filtro = AlunoFiltro.todos,
-                                        )
+                                        ? () => _setFiltro(AlunoFiltro.todos)
                                         : null,
                               )
                               : RefreshIndicator(
-                                onRefresh: () async {
-                                  invalidateAlunosCaches(ref);
-                                },
-                                child: ListView.separated(
+                                onRefresh: _refreshHome,
+                                child: NotificationListener<ScrollNotification>(
+                                  onNotification: (n) {
+                                    if (n.metrics.extentAfter < 480 &&
+                                        tail.hasNext &&
+                                        !tail.loading) {
+                                      ref
+                                          .read(alunosHomeTailProvider.notifier)
+                                          .loadMore(
+                                            query: ref.read(
+                                              alunosHomeQueryProvider,
+                                            ),
+                                            repo: ref.read(
+                                              alunoRepositoryProvider,
+                                            ),
+                                          );
+                                    }
+                                    return false;
+                                  },
+                                  child: ListView.separated(
+                                  physics:
+                                      const AlwaysScrollableScrollPhysics(),
                                   padding: EdgeInsets.only(
                                     left: AlunosLayout.screenPadding,
                                     right: AlunosLayout.screenPadding,
                                     top: 8,
                                     bottom: listBottomGap,
                                   ),
-                                  itemCount: filtrados.length,
+                                  itemCount:
+                                      filtrados.length + (tail.hasNext ? 1 : 0),
                                   separatorBuilder:
                                       (_, __) => SizedBox(
                                         height:
@@ -145,6 +161,18 @@ extension AlunosListScreenBody on _AlunosListScreenState {
                                                 : AlunosLayout.listItemGap,
                                       ),
                                   itemBuilder: (context, i) {
+                                    if (i >= filtrados.length) {
+                                      return Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 16,
+                                        ),
+                                        child: FxLoading.sectionShimmer(
+                                          context,
+                                          height: 22,
+                                          showHeader: false,
+                                        ),
+                                      );
+                                    }
                                     final a = filtrados[i];
                                     return FxStaggerItem(
                                       index: i,
@@ -168,6 +196,7 @@ extension AlunosListScreenBody on _AlunosListScreenState {
                                       ),
                                     );
                                   },
+                                ),
                                 ),
                               ),
                     ),

@@ -8,8 +8,10 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
   String _query = '';
+  Timer? _searchDebounce;
+  bool _helpDeepLinkApplied = false;
   bool _ignoredDeepLinkFiltro = false;
-  bool _listaCompacta = false;
+  bool _listaCompacta = true;
   DateTime? _fetchedAt;
 
   @override
@@ -22,6 +24,8 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
     _loadListPreferences();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
+      _syncHomeQuery();
+      _maybeOpenHelpFromDeepLink();
       AnalyticsService.instance.track(
         ProductEvents.alunosViewed,
         props: {
@@ -45,6 +49,7 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
         _filtro = widget.initialFiltro;
         _ignoredDeepLinkFiltro = false;
       });
+      _syncHomeQuery();
     }
   }
 
@@ -64,6 +69,7 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
       _filtro = AlunoFiltro.todos;
       _ignoredDeepLinkFiltro = true;
     });
+    _syncHomeQuery();
 
     if (!fromDashboard) return;
 
@@ -72,6 +78,7 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
 
   @override
   void dispose() {
+    _searchDebounce?.cancel();
     _searchController.dispose();
     _searchFocusNode.dispose();
     super.dispose();
@@ -87,6 +94,18 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
 
   Future<void> _adicionarAluno() async {
     HapticFeedback.selectionClick();
+    final home = ref.read(alunosHomeProvider).valueOrNull;
+    final plano = home?.planoFeatures ?? ref.read(planoFeaturesProvider).valueOrNull;
+    final limite = plano?.limiteAlunos;
+    final total = home?.stats.total ?? 0;
+    if (limite != null && limite > 0 && total >= limite) {
+      await UpgradePromptSheet.show(
+        context: context,
+        featureName: 'Mais vagas de alunos',
+        capability: 'alunos',
+      );
+      return;
+    }
     AnalyticsService.instance.track(
       ProductEvents.alunosAddTapped,
       props: {'feature': 'alunos'},
@@ -94,6 +113,65 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
     final criado = await context.push<bool>('/alunos/novo');
     if (criado == true) {
       invalidateAlunosCaches(ref);
+    }
+  }
+
+  void _setFiltro(AlunoFiltro filtro, {bool track = true}) {
+    setState(() => _filtro = filtro);
+    _syncHomeQuery();
+    if (track) {
+      AnalyticsService.instance.track(
+        ProductEvents.alunosFilterChanged,
+        props: {'filtro': filtro.name},
+      );
+    }
+  }
+
+  void _setOrdenacao(AlunoOrdenacao ordenacao) {
+    setState(() => _ordenacao = ordenacao);
+    _syncHomeQuery();
+  }
+
+  void _syncHomeQuery() {
+    ref.read(alunosHomeQueryProvider.notifier).state = AlunosHomeQuery(
+      q: _query,
+      filtro: _filtro,
+      ordenacao: _ordenacao,
+    );
+  }
+
+  void _onSearchChanged(String value) {
+    setState(() => _query = value);
+    _searchDebounce?.cancel();
+    _searchDebounce = Timer(const Duration(milliseconds: 350), () {
+      if (!mounted) return;
+      _syncHomeQuery();
+      AnalyticsService.instance.track(ProductEvents.alunosSearchUsed);
+    });
+  }
+
+  void _maybeOpenHelpFromDeepLink() {
+    if (_helpDeepLinkApplied) return;
+    final sheet = GoRouterState.of(context).uri.queryParameters['sheet'];
+    if (sheet != 'help') return;
+    _helpDeepLinkApplied = true;
+    showAlunosListHelpSheet(context);
+    AnalyticsService.instance.track(ProductEvents.alunosHelpOpened);
+  }
+
+  Future<void> _openHelp() async {
+    HapticFeedback.selectionClick();
+    AnalyticsService.instance.track(ProductEvents.alunosHelpOpened);
+    await showAlunosListHelpSheet(context);
+  }
+
+  Future<void> _refreshHome() async {
+    AlunosHomeClientCache.clear();
+    invalidateAlunosCaches(ref);
+    await ref.read(alunosHomeProvider.future);
+    AnalyticsService.instance.track(ProductEvents.alunosRefreshed);
+    if (mounted) {
+      FeedbackHelper.showSuccess(context, AlunosMicrocopy.painelAtualizado);
     }
   }
 
@@ -199,6 +277,10 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
 
   void _showBulkActionsSheet() {
     if (_selecionados.isEmpty) return;
+    AnalyticsService.instance.track(
+      ProductEvents.alunosBulkOpened,
+      props: {'count': _selecionados.length},
+    );
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final qtd = _selecionados.length;
     showModalBottomSheet<void>(
@@ -228,62 +310,6 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
     );
   }
 
-  List<Aluno> _filtrarAlunos(
-    List<Aluno> todos, {
-    required int diasSemTreinoLimite,
-  }) {
-    final porStatus = switch (_filtro) {
-      AlunoFiltro.todos => todos,
-      AlunoFiltro.contatoHoje =>
-        todos
-            .where(
-              (a) => alunoPrecisaContatoHoje(
-                a,
-                diasSemTreinoLimite: diasSemTreinoLimite,
-              ),
-            )
-            .toList(),
-      AlunoFiltro.ativos =>
-        todos
-            .where(
-              (a) =>
-                  a.status == 'ATIVO' && a.statusFinanceiro != 'INADIMPLENTE',
-            )
-            .toList(),
-      AlunoFiltro.inadimplentes =>
-        todos
-            .where(
-              (a) => a.statusFinanceiro == 'INADIMPLENTE' || a.inadimplente,
-            )
-            .toList(),
-      AlunoFiltro.risco => todos.where((a) => a.emRisco).toList(),
-      AlunoFiltro.novos =>
-        todos.where((a) => a.senhaProvisoria != null).toList(),
-    };
-
-    final busca = _fold(_query.trim());
-    if (busca.isEmpty) {
-      return _ordenarAlunos(
-        porStatus,
-        diasSemTreinoLimite: diasSemTreinoLimite,
-      );
-    }
-
-    final encontrados =
-        porStatus.where((a) {
-          final alvo = _fold(
-            '${a.nome} ${a.email} ${a.objetivo ?? ''} ${a.statusFinanceiro} '
-            '${a.telefone ?? ''} ${a.whatsapp ?? ''}',
-          );
-          return alvo.contains(busca);
-        }).toList();
-
-    return _ordenarAlunos(
-      encontrados,
-      diasSemTreinoLimite: diasSemTreinoLimite,
-    );
-  }
-
   bool get _hasActiveFilter => _filtro != AlunoFiltro.todos;
 
   String _filtroLabel(AlunoFiltro filtro) => switch (filtro) {
@@ -294,100 +320,6 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
     AlunoFiltro.risco => 'em risco',
     AlunoFiltro.novos => 'convites pendentes',
   };
-
-  int _contatoHojeCount(
-    List<Aluno> alunos, {
-    required int diasSemTreinoLimite,
-  }) {
-    return alunos
-        .where(
-          (a) => alunoPrecisaContatoHoje(
-            a,
-            diasSemTreinoLimite: diasSemTreinoLimite,
-          ),
-        )
-        .length;
-  }
-
-  List<Aluno> _ordenarAlunos(
-    List<Aluno> alunos, {
-    required int diasSemTreinoLimite,
-  }) {
-    final ordenados = List<Aluno>.from(alunos);
-    switch (_ordenacao) {
-      case AlunoOrdenacao.prioridade:
-        ordenados.sort((a, b) {
-          final scoreA = _priorityScore(
-            a,
-            diasSemTreinoLimite: diasSemTreinoLimite,
-          );
-          final scoreB = _priorityScore(
-            b,
-            diasSemTreinoLimite: diasSemTreinoLimite,
-          );
-          final score = scoreB.compareTo(scoreA);
-          if (score != 0) return score;
-          final diasA = a.diasSemTreino ?? 0;
-          final diasB = b.diasSemTreino ?? 0;
-          final diasCmp = diasB.compareTo(diasA);
-          if (diasCmp != 0) return diasCmp;
-          final aderA = a.aderenciaPercent ?? 100;
-          final aderB = b.aderenciaPercent ?? 100;
-          final aderCmp = aderA.compareTo(aderB);
-          if (aderCmp != 0) return aderCmp;
-          return _fold(a.nome).compareTo(_fold(b.nome));
-        });
-      case AlunoOrdenacao.nome:
-        ordenados.sort((a, b) => _fold(a.nome).compareTo(_fold(b.nome)));
-      case AlunoOrdenacao.semFoto:
-        ordenados.sort((a, b) {
-          final photo = _hasPhoto(
-            a,
-          ).toString().compareTo(_hasPhoto(b).toString());
-          if (photo != 0) return photo;
-          return _fold(a.nome).compareTo(_fold(b.nome));
-        });
-    }
-    return ordenados;
-  }
-
-  int _priorityScore(Aluno aluno, {required int diasSemTreinoLimite}) {
-    var score = 0;
-    score += alunoContatoPriorityBoost(
-      aluno,
-      diasSemTreinoLimite: diasSemTreinoLimite,
-    );
-    if (aluno.statusFinanceiro == 'INADIMPLENTE' || aluno.inadimplente) {
-      score += 8;
-    }
-    if (aluno.emRisco) score += 6;
-    final dias = aluno.diasSemTreino ?? 0;
-    if (dias >= 7) {
-      score += 4;
-    } else if (dias >= diasSemTreinoLimite) {
-      score += 2;
-    }
-    final aderencia = aluno.aderenciaPercent;
-    if (aderencia != null && aderencia < 40) score += 2;
-    if (aluno.senhaProvisoria != null) score += 3;
-    if (!_hasPhoto(aluno)) score += 1;
-    return score;
-  }
-
-  bool _hasPhoto(Aluno aluno) {
-    return aluno.fotoUrl != null && aluno.fotoUrl!.trim().isNotEmpty;
-  }
-
-  static String _fold(String value) {
-    return value
-        .toLowerCase()
-        .replaceAll(RegExp('[áàâãä]'), 'a')
-        .replaceAll(RegExp('[éèêë]'), 'e')
-        .replaceAll(RegExp('[íìîï]'), 'i')
-        .replaceAll(RegExp('[óòôõö]'), 'o')
-        .replaceAll(RegExp('[úùûü]'), 'u')
-        .replaceAll('ç', 'c');
-  }
 
   static String _plural(int count, String singular, String plural) {
     return '$count ${count == 1 ? singular : plural}';
@@ -407,13 +339,14 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
   Widget build(BuildContext context) {
     final homeAsync = ref.watch(alunosHomeProvider);
     ref.listen<AsyncValue<AlunosHomeBundle>>(alunosHomeProvider, (_, next) {
-      if (!next.isLoading && next.hasValue) {
-        setState(() => _fetchedAt = DateTime.now());
-      }
+      next.whenData((home) {
+        ref.read(alunosHomeTailProvider.notifier).reset(home.page);
+        setState(() => _fetchedAt = AlunosHomeClientCache.fetchedAt ?? DateTime.now());
+      });
     });
 
     return fxScreenA11yScope(
-      label: 'Lista de alunos',
+      label: AlunosMicrocopy.screenA11y,
       child: PopScope(
         canPop: !_hasActiveFilter,
         onPopInvokedWithResult: (didPop, result) {

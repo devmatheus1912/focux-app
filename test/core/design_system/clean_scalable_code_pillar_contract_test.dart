@@ -75,12 +75,13 @@ void main() {
     final screen = File(
       'lib/features/alunos/screens/alunos_list_screen.dart',
     ).readAsStringSync();
-    final cards = File(
-      'lib/features/alunos/screens/alunos_list_screen_aluno_card.part.dart',
+    final card = File(
+      'lib/features/alunos/widgets/aluno_list_card.dart',
     ).readAsStringSync();
-    expect(screen, contains('alunos_list_sparkline_logic.dart'));
-    expect(cards, contains('alunosListSparklineMetrics'));
-    expect(cards, isNot(contains('List<Map<String, dynamic>>')));
+    expect(screen, contains('aluno_list_card.dart'));
+    expect(card, contains('alunos_list_sparkline_logic.dart'));
+    expect(card, contains('alunosListSparklineMetrics'));
+    expect(card, isNot(contains('List<Map<String, dynamic>>')));
   });
 
   test('coding standards document clean code principles', () {

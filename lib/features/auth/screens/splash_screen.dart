@@ -8,6 +8,7 @@ import '../../alunos/providers/alunos_provider.dart';
 import '../../perfil/providers/perfil_provider.dart';
 import '../../exercicios/services/biblioteca_bootstrap.dart';
 import '../../dashboard/utils/dashboard_home_prefetch.dart';
+import '../../alunos/utils/alunos_home_prefetch.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/auth_shell.dart';
 import '../widgets/cinematic_splash_scene.dart';
@@ -149,6 +150,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
 
     try {
       prefetchPersonalDashboardHome(ref);
+      prefetchAlunosHome(ref);
       final perfil = await ref.read(perfilProvider.future);
       if (!mounted) return '/dashboard/personal';
       BibliotecaBootstrap.ensureReadyWithContainer(

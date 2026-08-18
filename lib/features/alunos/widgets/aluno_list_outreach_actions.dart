@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../constants/alunos_layout.dart';
 import '../data/aluno_contact_utils.dart';
 import '../providers/aluno_followup_provider.dart';
 
@@ -109,8 +110,8 @@ class _AlunoQuickActionIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final size = compact ? 24.0 : 28.0;
-    final iconSize = compact ? 14.0 : 15.0;
+    final size = compact ? AlunosLayout.touchTarget : AlunosLayout.touchTarget;
+    final iconSize = compact ? 18.0 : 20.0;
 
     return Semantics(
       label: tooltip,

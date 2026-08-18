@@ -65,7 +65,7 @@ Future<void> showAlunosListHelpSheet(BuildContext context) {
                 ),
                 tip(
                   'Filtros e busca',
-                  'Use os chips para focar a base. A busca considera nome, objetivo e e-mail.',
+                  'Use os chips para focar a base. A busca considera nome e objetivo.',
                 ),
                 tip(
                   'Lista compacta',

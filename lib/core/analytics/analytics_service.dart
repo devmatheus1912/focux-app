@@ -133,6 +133,12 @@ class ProductEvents {
 
   static const alunosAddTapped = 'alunos_add_tapped';
   static const alunosViewed = 'alunos_viewed';
+  static const alunosFilterChanged = 'alunos_filter_changed';
+  static const alunosSearchUsed = 'alunos_search_used';
+  static const alunosHelpOpened = 'alunos_help_opened';
+  static const alunosRefreshed = 'alunos_refreshed';
+  static const alunosOrganizeOpened = 'alunos_organize_opened';
+  static const alunosBulkOpened = 'alunos_bulk_opened';
   static const leadCreatedOrOpened = 'lead_created_or_opened';
   static const alertaRiscoOpened = 'alerta_risco_opened';
   static const dunningMarkedRecovered = 'dunning_marked_recovered';

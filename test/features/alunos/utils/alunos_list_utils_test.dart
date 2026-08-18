@@ -70,20 +70,8 @@ void main() {
   });
 
   group('adherenceActivityLabel', () {
-    test('prioriza dias sem treino', () {
-      expect(
-        adherenceActivityLabel(
-          aluno: Aluno(
-            id: 3,
-            nome: 'Carla',
-            email: 'c@test.com',
-            status: 'ATIVO',
-            diasSemTreino: 4,
-          ),
-          weeklyCheckins: 2,
-        ),
-        '4d s/ treino',
-      );
+    test('some o rótulo quando não há treinos na semana', () {
+      expect(alunoWeeklyCheckinsLabel(0), isEmpty);
     });
   });
 }

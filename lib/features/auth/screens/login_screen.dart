@@ -16,6 +16,7 @@ import '../../../core/widgets/fx_motion.dart';
 import '../../../features/perfil/providers/perfil_provider.dart';
 import '../../../features/subscription/models/subscription_plan.dart';
 import '../../dashboard/utils/dashboard_home_prefetch.dart';
+import '../../alunos/utils/alunos_home_prefetch.dart';
 import '../providers/auth_provider.dart';
 import '../utils/auth_error_messages.dart';
 import '../utils/post_login_redirect.dart';
@@ -252,6 +253,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       invalidateSessionUserCaches(ref);
       ref.invalidate(perfilProvider);
       prefetchPersonalDashboardHome(ref);
+      prefetchAlunosHome(ref);
       final perfil = await ref.read(perfilProvider.future);
       final plan = subscriptionPlanFromApi(perfil.plano);
       final trialActive =

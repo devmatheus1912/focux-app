@@ -11,6 +11,8 @@ abstract final class AlunosLayout {
 
   static const double headerChromeGap = 8;
 
+  static const double touchTarget = 48;
+
   static const double sectionGap = TokensStrip.s3;
 
   static const double chipGlowStrength = 0.04;
@@ -44,6 +46,10 @@ abstract final class AlunosLayout {
   static const double listItemGap = 10;
 
   static const double listItemGapCompact = 8;
+
+  static const double listGapTop = TokensStrip.s2;
+
+  static const double bulkBarPaddingBottom = 12;
 
   static const double listBottomGapComfort = 36;
 

@@ -56,7 +56,7 @@ bool shouldShowAlunoListBadge(
 }
 
 String alunoWeeklyCheckinsLabel(int weeklyCheckins) {
-  if (weeklyCheckins <= 0) return 's/ treinos';
+  if (weeklyCheckins <= 0) return '';
   return '$weeklyCheckins ${weeklyCheckins == 1 ? 'treino' : 'treinos'}';
 }
 
