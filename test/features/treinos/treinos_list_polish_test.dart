@@ -35,5 +35,7 @@ void main() {
     expect(screen, contains('useRootNavigator: true'));
     expect(screen, isNot(contains('Biblioteca sob controle')));
     expect(screen, isNot(contains('Operações da biblioteca')));
+    expect(screen, isNot(contains('LinearProgressIndicator')));
+    expect(screen, isNot(contains('exerciciosCount * 5')));
   });
 }

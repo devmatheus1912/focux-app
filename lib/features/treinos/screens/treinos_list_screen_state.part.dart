@@ -434,7 +434,6 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
                                   index: i,
                                   child: _TreinoCard(
                                     treino: filteredTreinos[i],
-                                    index: i,
                                     isDark: isDark,
                                     primary: primary,
                                     alunoId: widget.alunoId,

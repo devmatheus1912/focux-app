@@ -18,6 +18,49 @@ abstract final class TreinosListLabels {
     required int exercises,
   }) => '${readyCount(prontos)} · $exercises exercícios';
 
+  static String prettyField(String raw) {
+    final value = raw.trim();
+    if (value.isEmpty) return value;
+    final normalized = value
+        .toUpperCase()
+        .replaceAll('Á', 'A')
+        .replaceAll('Ã', 'A')
+        .replaceAll('Â', 'A')
+        .replaceAll('É', 'E')
+        .replaceAll('Í', 'I')
+        .replaceAll('Ó', 'O')
+        .replaceAll('Õ', 'O')
+        .replaceAll('Ú', 'U')
+        .replaceAll('Ç', 'C');
+    const labels = {
+      'FORCA': 'Força',
+      'HIPERTROFIA': 'Hipertrofia',
+      'EMAGRECIMENTO': 'Emagrecimento',
+      'CONDICIONAMENTO': 'Condicionamento',
+      'MOBILIDADE': 'Mobilidade',
+      'INICIANTE': 'Iniciante',
+      'INTERMEDIARIO': 'Intermediário',
+      'AVANCADO': 'Avançado',
+    };
+    return labels[normalized] ??
+        '${value[0].toUpperCase()}${value.substring(1).toLowerCase()}';
+  }
+
+  static String cardMeta({
+    required bool pronto,
+    required int exercises,
+    required int series,
+    required String? nivel,
+  }) {
+    if (!pronto) return 'Em montagem';
+    final nivelLabel = prettyField(
+      (nivel ?? '').trim().isEmpty ? 'Iniciante' : nivel!.trim(),
+    );
+    final ex = exercises == 1 ? '1 exercício' : '$exercises exercícios';
+    final ser = series == 1 ? '1 série' : '$series séries';
+    return '$ex · $ser · $nivelLabel';
+  }
+
   static String emptyTitle({String? alunoNome}) =>
       _firstName(alunoNome) == null
           ? 'Sua biblioteca começa aqui'

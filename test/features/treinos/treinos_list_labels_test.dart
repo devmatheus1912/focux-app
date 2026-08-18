@@ -12,9 +12,26 @@ void main() {
     expect(TreinosListLabels.readyCount(2), '2 prontos');
     expect(TreinosListLabels.templateCount(1), '1 template');
     expect(TreinosListLabels.templateCount(4), '4 templates');
+  });
+
+  test('cardMeta is honest: counts or em montagem, never fake duration', () {
     expect(
-      TreinosListLabels.libraryCaption(prontos: 2, exercises: 10),
-      '2 prontos · 10 exercícios',
+      TreinosListLabels.cardMeta(
+        pronto: true,
+        exercises: 7,
+        series: 26,
+        nivel: 'INTERMEDIARIO',
+      ),
+      '7 exercícios · 26 séries · Intermediário',
+    );
+    expect(
+      TreinosListLabels.cardMeta(
+        pronto: false,
+        exercises: 0,
+        series: 0,
+        nivel: null,
+      ),
+      'Em montagem',
     );
   });
 
