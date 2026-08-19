@@ -152,7 +152,7 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
               Semantics(
                 button: true,
                 selected: _tipoSerie == option.$1,
-                label: option.$2,
+                label: 'Tipo de série: ${option.$2}',
                 child: Material(
                   color: fxTransparent,
                   child: InkWell(
@@ -163,8 +163,8 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
                     borderRadius: BorderRadius.circular(TokensStrip.rCard),
                     child: Ink(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 8,
+                        horizontal: 14,
+                        vertical: 10,
                       ),
                       decoration: BoxDecoration(
                         color:
@@ -236,16 +236,6 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
                 title: 'Editar prescrição',
                 subtitle: widget.item.exercicio.nomeDisplay,
                 isDark: widget.isDark,
-              ),
-              SizedBox(height: TokensStrip.s4),
-              TreinoPrescriptionVideoBlock(
-                treinoId: widget.treinoId,
-                exercicio: widget.item.exercicio,
-                isDark: widget.isDark,
-                busy: _saving,
-                onBusyChanged: (busy) {
-                  if (mounted) setState(() => _videoBusy = busy);
-                },
               ),
               SizedBox(height: TokensStrip.s4),
               pair(
@@ -352,6 +342,16 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
                   label: 'Observações',
                   hint: 'Cadência, pausa, execução…',
                 ),
+              ),
+              SizedBox(height: TokensStrip.s4),
+              TreinoPrescriptionVideoBlock(
+                treinoId: widget.treinoId,
+                exercicio: widget.item.exercicio,
+                isDark: widget.isDark,
+                busy: _saving,
+                onBusyChanged: (busy) {
+                  if (mounted) setState(() => _videoBusy = busy);
+                },
               ),
               SizedBox(height: TokensStrip.s4),
               FilledButton(

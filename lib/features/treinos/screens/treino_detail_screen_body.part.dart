@@ -113,8 +113,8 @@ class _TreinoDetailBody extends StatelessWidget {
               SizedBox(height: TokensStrip.s4),
               TreinoSheetChromeHeader(
                 icon: Icons.fitness_center_rounded,
-                title: _displayWorkoutName(treino.nome),
-                subtitle: 'Escolha uma ação.',
+                title: 'Ações do treino',
+                subtitle: _displayWorkoutName(treino.nome),
                 isDark: isDark,
               ),
               const SizedBox(height: TokensStrip.s4),

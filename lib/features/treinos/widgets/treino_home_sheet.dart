@@ -70,40 +70,48 @@ class TreinoSheetChromeHeader extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          width: 38,
-          height: 38,
-          decoration: BoxDecoration(
-            color: BrandPalette.soft(primary, dark: isDark),
-            borderRadius: BorderRadius.circular(15),
+        ExcludeSemantics(
+          child: Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              color: BrandPalette.soft(primary, dark: isDark),
+              borderRadius: BorderRadius.circular(15),
+            ),
+            child: Icon(icon, color: primary, size: 18),
           ),
-          child: Icon(icon, color: primary, size: 18),
         ),
         SizedBox(width: TokensStrip.s3),
         Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TokensStrip.h2(
-                  color: primary,
-                  fontFamily: Theme.of(context).textTheme.bodyLarge?.fontFamily,
+          child: Semantics(
+            header: true,
+            label: '$title. $subtitle',
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TokensStrip.h2(
+                    color: primary,
+                    fontFamily:
+                        Theme.of(context).textTheme.bodyLarge?.fontFamily,
+                  ),
                 ),
-              ),
-              SizedBox(height: TokensStrip.s1),
-              Text(
-                subtitle,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: FocuxHubTypography.bodyMuted(
-                  color: chrome.mute,
-                  fontWeight: FontWeight.w600,
+                SizedBox(height: TokensStrip.s1),
+                Text(
+                  subtitle,
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                  style: FocuxHubTypography.bodyMuted(
+                    color: chrome.mute,
+                    fontWeight: FontWeight.w600,
+                    height: 1.3,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
         IconButton(

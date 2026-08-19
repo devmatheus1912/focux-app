@@ -23,6 +23,7 @@ class ExerciseVideoUploadStrip extends StatelessWidget {
     required this.onUpload,
     required this.onRemove,
     this.dense = false,
+    this.emptySubtitle,
   });
 
   final Exercicio exercicio;
@@ -33,6 +34,9 @@ class ExerciseVideoUploadStrip extends StatelessWidget {
   final VoidCallback onUpload;
   final VoidCallback onRemove;
   final bool dense;
+
+  /// Copy do estado vazio. Se nulo, usa o teaser da biblioteca.
+  final String? emptySubtitle;
 
   @override
   Widget build(BuildContext context) {
@@ -92,9 +96,10 @@ class ExerciseVideoUploadStrip extends StatelessWidget {
             ? 'Prévia, troca ou remoção a qualquer momento.'
             : hasLibraryDemo
             ? 'Assista à demo ou envie sua gravação.'
-            : kBibliotecaLibraryVideosStandby
-            ? 'Envie sua demonstração. A demo oficial Focux chega em breve.'
-            : 'Envie sua demonstração antes de prescrever.';
+            : (emptySubtitle ??
+                (kBibliotecaLibraryVideosStandby
+                    ? 'Envie sua demonstração. A demo oficial Focux chega em breve.'
+                    : 'Envie sua demonstração antes de prescrever.'));
 
     final uploadLabel = hasPersonalVideo ? 'Trocar vídeo' : 'Enviar vídeo';
 
@@ -109,7 +114,7 @@ class ExerciseVideoUploadStrip extends StatelessWidget {
         label:
             mediaLoading
                 ? 'Enviando vídeo, aguarde. Não feche o app.'
-                : statusTitle,
+                : '$statusTitle. $statusSubtitle',
         child: Container(
           padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
           decoration: decoration,
@@ -179,7 +184,7 @@ class ExerciseVideoUploadStrip extends StatelessWidget {
       label:
           mediaLoading
               ? 'Enviando vídeo, aguarde. Não feche o app.'
-              : statusTitle,
+              : '$statusTitle. $statusSubtitle',
       child: Container(
         padding: const EdgeInsets.fromLTRB(12, 10, 8, 10),
         decoration: decoration,

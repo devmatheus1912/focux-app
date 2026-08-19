@@ -264,6 +264,7 @@ class _TreinoExerciseReorderListState
 class _DetailActionTile extends StatelessWidget {
   final IconData icon;
   final String label;
+  final String? semanticsContext;
   final Color? color;
   final bool showChevron;
   final VoidCallback onTap;
@@ -271,6 +272,7 @@ class _DetailActionTile extends StatelessWidget {
   const _DetailActionTile({
     required this.icon,
     required this.label,
+    this.semanticsContext,
     this.color,
     this.showChevron = false,
     required this.onTap,
@@ -282,10 +284,14 @@ class _DetailActionTile extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
     final tint = color ?? primary;
+    final spoken =
+        semanticsContext == null || semanticsContext!.trim().isEmpty
+            ? label
+            : '$label. $semanticsContext';
 
     return Semantics(
       button: true,
-      label: label,
+      label: spoken,
       child: InkWell(
         onTap: () {
           HapticFeedback.selectionClick();

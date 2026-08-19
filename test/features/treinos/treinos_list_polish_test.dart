@@ -36,7 +36,7 @@ void main() {
     expect(screen, contains('_TreinosBulkBar'));
     expect(screen, contains('Selecionar todos'));
     expect(screen, contains('TreinosListLabels.deleteTitle'));
-    expect(screen, contains('Escolha uma ação.'));
+    expect(screen, contains('Ações do treino'));
     expect(screen, contains('TreinoHomeSheetSurface'));
     expect(screen, contains('TreinoSheetChromeHeader'));
     expect(screen, contains('treino_home_sheet.dart'));

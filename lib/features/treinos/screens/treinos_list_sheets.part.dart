@@ -209,8 +209,8 @@ class _TreinoActionsSheet extends StatelessWidget {
           SizedBox(height: TokensStrip.s4),
           TreinoSheetChromeHeader(
             icon: Icons.fitness_center_rounded,
-            title: displayName,
-            subtitle: 'Escolha uma ação.',
+            title: 'Ações do treino',
+            subtitle: displayName,
             isDark: isDark,
           ),
           const SizedBox(height: TokensStrip.s4),

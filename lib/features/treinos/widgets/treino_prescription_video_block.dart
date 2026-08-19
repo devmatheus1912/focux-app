@@ -407,6 +407,7 @@ class _TreinoPrescriptionVideoBlockState
           primary: primary,
           mediaLoading: locked,
           dense: true,
+          emptySubtitle: 'Filme a execução para o aluno ver neste treino.',
           onPreview: _preview,
           onUpload: _upload,
           onRemove: _remove,

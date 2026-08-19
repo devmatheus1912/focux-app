@@ -43,78 +43,84 @@ class _ExercicioRow extends StatelessWidget {
               color: fxTransparent,
               child: InkWell(
                 onTap: onEditPrescription,
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                    TreinosLayout.exerciseRowPadH,
-                    TreinosLayout.exerciseRowPadV,
-                    TokensStrip.s2,
-                    TreinosLayout.exerciseRowPadV,
-                  ),
-                  child: Row(
-                    children: [
-                      Semantics(
-                        label:
-                            'Segure para reordenar ${te.exercicio.nomeDisplay}',
-                        child: Icon(
-                          Icons.drag_indicator_rounded,
-                          size: 18,
-                          color: mute.withValues(alpha: 0.72),
-                        ),
-                      ),
-                      SizedBox(
-                        width: 18,
-                        child: Text(
-                          '$index',
-                          textAlign: TextAlign.center,
-                          style: FocuxHubTypography.metric(
-                            color: mute,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
+                child: Semantics(
+                  button: true,
+                  label:
+                      '${te.exercicio.nomeDisplay}. $prescription'
+                      '${hasNote ? '. $note' : ''}. Editar prescrição.',
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      TreinosLayout.exerciseRowPadH,
+                      TreinosLayout.exerciseRowPadV,
+                      TokensStrip.s2,
+                      TreinosLayout.exerciseRowPadV,
+                    ),
+                    child: Row(
+                      children: [
+                        Semantics(
+                          label:
+                              'Segure para reordenar ${te.exercicio.nomeDisplay}',
+                          child: Icon(
+                            Icons.drag_indicator_rounded,
+                            size: 18,
+                            color: mute.withValues(alpha: 0.72),
                           ),
                         ),
-                      ),
-                      SizedBox(width: TokensStrip.s2),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              te.exercicio.nomeDisplay,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: FocuxHubTypography.cardTitle(color: ink),
+                        SizedBox(
+                          width: 18,
+                          child: Text(
+                            '$index',
+                            textAlign: TextAlign.center,
+                            style: FocuxHubTypography.metric(
+                              color: mute,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
                             ),
-                            if (hasNote) ...[
-                              const SizedBox(height: 1),
-                              Text(
-                                note,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: FocuxHubTypography.bodyMuted(
-                                  color: mute,
-                                  fontWeight: FontWeight.w600,
-                                ).copyWith(fontSize: 11),
-                              ),
-                            ],
-                          ],
-                        ),
-                      ),
-                      SizedBox(width: TokensStrip.s2),
-                      ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 148),
-                        child: Text(
-                          prescription,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          textAlign: TextAlign.end,
-                          style: FocuxHubTypography.metric(
-                            color: mute,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
                           ),
                         ),
-                      ),
-                    ],
+                        SizedBox(width: TokensStrip.s2),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                te.exercicio.nomeDisplay,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: FocuxHubTypography.cardTitle(color: ink),
+                              ),
+                              if (hasNote) ...[
+                                const SizedBox(height: 1),
+                                Text(
+                                  note,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: FocuxHubTypography.bodyMuted(
+                                    color: mute,
+                                    fontWeight: FontWeight.w600,
+                                  ).copyWith(fontSize: 11),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                        SizedBox(width: TokensStrip.s2),
+                        ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 148),
+                          child: Text(
+                            prescription,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.end,
+                            style: FocuxHubTypography.metric(
+                              color: mute,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -122,9 +128,9 @@ class _ExercicioRow extends StatelessWidget {
           ),
           Semantics(
             button: true,
-            label: 'Ações do exercício',
+            label: 'Ações de ${te.exercicio.nomeDisplay}',
             child: IconButton(
-              tooltip: 'Ações do exercício',
+              tooltip: 'Ações de ${te.exercicio.nomeDisplay}',
               onPressed: () async {
                 HapticFeedback.selectionClick();
                 AnalyticsService.instance.track(
@@ -172,28 +178,32 @@ class _ExerciseActionsSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final chrome = ShellChrome.forDark(isDark);
     final primary = Theme.of(context).colorScheme.primary;
-    final maxHeight = MediaQuery.sizeOf(context).height * 0.82;
+    final maxHeight = MediaQuery.sizeOf(context).height * 0.72;
     final actions = <_DetailActionTile>[
       _DetailActionTile(
         icon: Icons.edit_note_rounded,
         label: 'Editar prescrição',
+        semanticsContext: title,
         showChevron: true,
         onTap: () => Navigator.pop(context, 'edit'),
       ),
       _DetailActionTile(
         icon: Icons.copy_rounded,
         label: 'Duplicar item',
+        semanticsContext: title,
         onTap: () => Navigator.pop(context, 'duplicate'),
       ),
       _DetailActionTile(
         icon: Icons.swap_horiz_rounded,
         label: 'Substituir exercício',
+        semanticsContext: title,
         showChevron: true,
         onTap: () => Navigator.pop(context, 'substitute'),
       ),
       _DetailActionTile(
         icon: Icons.remove_circle_outline_rounded,
         label: 'Remover do treino',
+        semanticsContext: title,
         color: EagleTokens.bad,
         onTap: () => Navigator.pop(context, 'remove'),
       ),
@@ -219,8 +229,8 @@ class _ExerciseActionsSheet extends StatelessWidget {
           SizedBox(height: TokensStrip.s4),
           TreinoSheetChromeHeader(
             icon: Icons.fitness_center_rounded,
-            title: title,
-            subtitle: 'Escolha uma ação.',
+            title: 'Ações do exercício',
+            subtitle: title,
             isDark: isDark,
           ),
           const SizedBox(height: TokensStrip.s4),
