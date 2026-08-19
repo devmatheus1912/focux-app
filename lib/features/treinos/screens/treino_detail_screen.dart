@@ -13,7 +13,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../alunos/data/aluno_repository.dart';
 import '../../alunos/providers/alunos_provider.dart';
-import '../../exercicios/data/exercicio_repository.dart';
 import '../../exercicios/screens/widgets/substituir_exercicio_bottom_sheet.dart';
 import '../data/treino_repository.dart';
 import '../providers/treinos_provider.dart';
@@ -40,8 +39,6 @@ part 'treino_detail_screen_states.part.dart';
 
 String _workoutContextLabel(Treino treino, String? alunoNome) =>
     treinoDetailContextLabel(treino, alunoNome);
-
-String _formatLoadKg(double? value) => formatTreinoLoadKg(value);
 
 String _displayWorkoutName(String raw) => displayWorkoutName(raw);
 

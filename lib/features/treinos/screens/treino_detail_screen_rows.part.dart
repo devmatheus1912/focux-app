@@ -4,7 +4,6 @@ class _ExercicioRow extends StatelessWidget {
   final TreinoExercicioItem te;
   final int index;
   final bool isDark;
-  final Color primary;
   final bool isLast;
   final VoidCallback onDuplicate;
   final VoidCallback onSubstitute;
@@ -15,7 +14,6 @@ class _ExercicioRow extends StatelessWidget {
     required this.te,
     required this.index,
     required this.isDark,
-    required this.primary,
     required this.isLast,
     required this.onDuplicate,
     required this.onSubstitute,
@@ -29,103 +27,93 @@ class _ExercicioRow extends StatelessWidget {
     final ink = chrome.ink;
     final mute = chrome.mute;
     final line = chrome.line;
-    final isAdvanced = te.tipoSerie != 'NORMAL';
-    final trustColor = _trustColor(te.exercicio, primary);
+    final note = te.observacoes?.trim();
+    final hasNote = note != null && note.isNotEmpty;
+    final prescription = treinoDetailExerciseLine(te);
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(10, 12, 4, 12),
       decoration: BoxDecoration(
         border:
             isLast ? null : Border(bottom: BorderSide(color: line, width: 0.5)),
       ),
       child: Row(
         children: [
-          Semantics(
-            label: 'Segure para reordenar ${te.exercicio.nomeDisplay}',
-            child: Padding(
-              padding: const EdgeInsets.only(right: 4),
-              child: Icon(
-                Icons.drag_indicator_rounded,
-                size: 20,
-                color: mute.withValues(alpha: 0.72),
-              ),
-            ),
-          ),
-          SizedBox(
-            width: 22,
-            child: Text(
-              '$index',
-              textAlign: TextAlign.center,
-              style: FocuxHubTypography.metric(
-                color: mute,
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-          const SizedBox(width: 10),
           Expanded(
             child: Material(
               color: fxTransparent,
               child: InkWell(
                 onTap: onEditPrescription,
-                borderRadius: BorderRadius.circular(12),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 2),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  padding: const EdgeInsets.fromLTRB(
+                    TreinosLayout.exerciseRowPadH,
+                    TreinosLayout.exerciseRowPadV,
+                    TokensStrip.s2,
+                    TreinosLayout.exerciseRowPadV,
+                  ),
+                  child: Row(
                     children: [
-                      Text(
-                        te.exercicio.nomeDisplay,
-                        style: FocuxHubTypography.cardTitle(color: ink),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '${te.series}×${te.repeticoes} · ${_formatLoadKg(te.cargaKg)} · ${te.descansoSegundos ?? 60}s',
-                        style: FocuxHubTypography.metric(
-                          color: mute,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
+                      Semantics(
+                        label:
+                            'Segure para reordenar ${te.exercicio.nomeDisplay}',
+                        child: Icon(
+                          Icons.drag_indicator_rounded,
+                          size: 18,
+                          color: mute.withValues(alpha: 0.72),
                         ),
                       ),
-                      if (isAdvanced ||
-                          te.exercicio.showMediaBadgeInWorkoutList ||
-                          te.observacoes?.trim().isNotEmpty == true) ...[
-                        const SizedBox(height: 8),
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 6,
+                      SizedBox(
+                        width: 18,
+                        child: Text(
+                          '$index',
+                          textAlign: TextAlign.center,
+                          style: FocuxHubTypography.metric(
+                            color: mute,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: TokensStrip.s2),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            if (te.exercicio.showMediaBadgeInWorkoutList)
-                              _ExerciseMeta(
-                                icon: _trustIcon(te.exercicio),
-                                text: te.exercicio.mediaTrustLabel,
-                                color: trustColor,
+                            Text(
+                              te.exercicio.nomeDisplay,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: FocuxHubTypography.cardTitle(color: ink),
+                            ),
+                            if (hasNote) ...[
+                              const SizedBox(height: 1),
+                              Text(
+                                note,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: FocuxHubTypography.bodyMuted(
+                                  color: mute,
+                                  fontWeight: FontWeight.w600,
+                                ).copyWith(fontSize: 11),
                               ),
-                            if (isAdvanced)
-                              _ExerciseMeta(
-                                icon:
-                                    te.tipoSerie == 'SUPERSET'
-                                        ? Icons.link_rounded
-                                        : Icons.trending_down_rounded,
-                                text:
-                                    te.tipoSerie == 'SUPERSET'
-                                        ? 'superset ${te.grupoSuperset ?? '-'}'
-                                        : 'drop set',
-                                color:
-                                    te.tipoSerie == 'SUPERSET'
-                                        ? primary
-                                        : EagleTokens.warn,
-                              ),
-                            if (te.observacoes?.trim().isNotEmpty == true)
-                              _ExerciseMeta(
-                                icon: Icons.notes_rounded,
-                                text: te.observacoes!.trim(),
-                                color: mute,
-                              ),
+                            ],
                           ],
                         ),
-                      ],
+                      ),
+                      SizedBox(width: TokensStrip.s2),
+                      ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 148),
+                        child: Text(
+                          prescription,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.end,
+                          style: FocuxHubTypography.metric(
+                            color: mute,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -158,68 +146,18 @@ class _ExercicioRow extends StatelessWidget {
               },
               style: IconButton.styleFrom(
                 minimumSize: const Size(
-                  TreinosLayout.touchTarget,
+                  TreinosLayout.headerChromeSize,
                   TreinosLayout.touchTarget,
                 ),
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                visualDensity: VisualDensity.compact,
+                padding: EdgeInsets.zero,
               ),
-              icon: Icon(Icons.more_horiz_rounded, color: mute, size: 22),
+              icon: Icon(Icons.more_horiz_rounded, color: mute, size: 20),
             ),
           ),
         ],
       ),
-    );
-  }
-}
-
-Color _trustColor(Exercicio exercicio, Color primary) {
-  return switch (exercicio.mediaTrustLevel) {
-    'READY' => exercicio.isPersonalUpload ? primary : EagleTokens.good,
-    'NO_VIDEO' => EagleTokens.bad,
-    _ => EagleTokens.warn,
-  };
-}
-
-IconData _trustIcon(Exercicio exercicio) {
-  return switch (exercicio.mediaTrustLevel) {
-    'READY' =>
-      exercicio.isPersonalUpload
-          ? Icons.workspace_premium_rounded
-          : Icons.verified_rounded,
-    'NO_VIDEO' => Icons.videocam_off_outlined,
-    _ => Icons.rate_review_outlined,
-  };
-}
-
-class _ExerciseMeta extends StatelessWidget {
-  final IconData? icon;
-  final String text;
-  final Color color;
-
-  const _ExerciseMeta({this.icon, required this.text, required this.color});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        if (icon != null) ...[
-          Icon(icon, size: 12, color: color),
-          const SizedBox(width: 3),
-        ],
-        ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 180),
-          child: Text(
-            text,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: FocuxHubTypography.bodyMuted(
-              color: color,
-              fontWeight: FontWeight.w700,
-            ).copyWith(fontSize: 11.5),
-          ),
-        ),
-      ],
     );
   }
 }

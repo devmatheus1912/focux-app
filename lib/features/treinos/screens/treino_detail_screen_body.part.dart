@@ -468,7 +468,7 @@ class _TreinoDetailBody extends StatelessWidget {
                   TokensStrip.s5,
                   TokensStrip.s3,
                   TokensStrip.s5,
-                  TokensStrip.s3,
+                  TokensStrip.s2,
                 ),
                 child: Row(
                   children: [

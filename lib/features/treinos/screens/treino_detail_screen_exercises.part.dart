@@ -133,7 +133,6 @@ class _TreinoExerciseReorderListState
           te: te,
           index: _localIndexInGroup(_items, index),
           isDark: widget.isDark,
-          primary: widget.primary,
           isLast: isLastInGroup,
           onEditPrescription: () => widget.onEditPrescription(te),
           onDuplicate: () async {
@@ -200,7 +199,7 @@ class _TreinoExerciseReorderListState
               children: [
                 if (showHeader)
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(4, 8, 4, 12),
+                    padding: const EdgeInsets.fromLTRB(4, 6, 4, 6),
                     child: Row(
                       children: [
                         Container(
@@ -234,7 +233,9 @@ class _TreinoExerciseReorderListState
                     ),
                   ),
                 Container(
-                  margin: EdgeInsets.only(bottom: isLastInGroup ? 14 : 0),
+                  margin: EdgeInsets.only(
+                    bottom: isLastInGroup ? TreinosLayout.exerciseGroupGap : 0,
+                  ),
                   decoration: fxListCardDecoration(
                     context,
                     accent: widget.primary,

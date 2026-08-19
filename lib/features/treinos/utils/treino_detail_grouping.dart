@@ -63,3 +63,18 @@ String treinoDetailMetaLine(List<TreinoExercicioItem> items) {
   final grp = groups == 1 ? '1 grupo' : '$groups grupos';
   return '$ex · $ser · $grp';
 }
+
+/// Prescrição numa linha — o que o personal precisa escanear.
+String treinoDetailExerciseLine(TreinoExercicioItem te) {
+  final parts = <String>['${te.series}×${te.repeticoes}'];
+  final load = formatTreinoLoadKg(te.cargaKg);
+  if (load != '—') parts.add(load);
+  parts.add('${te.descansoSegundos ?? 60}s');
+  if (te.tipoSerie == 'SUPERSET') {
+    final grupo = te.grupoSuperset;
+    parts.add(grupo == null ? 'SS' : 'SS$grupo');
+  } else if (te.tipoSerie == 'DROPSET') {
+    parts.add('drop');
+  }
+  return parts.join(' · ');
+}

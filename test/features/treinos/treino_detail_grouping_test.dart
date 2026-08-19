@@ -98,4 +98,43 @@ void main() {
       '3 exercícios · 9 séries · 2 grupos',
     );
   });
+
+  test('exercise line keeps prescription scannable without empty load', () {
+    expect(
+      treinoDetailExerciseLine(
+        _item(id: 1, nome: 'Supino', grupo: GrupoMuscular.peito),
+      ),
+      '3×10 · 60s',
+    );
+    expect(
+      treinoDetailExerciseLine(
+        TreinoExercicioItem(
+          id: 2,
+          exercicio: Exercicio(id: 2, nome: 'Remada'),
+          series: 4,
+          repeticoes: '8-10',
+          cargaKg: 40,
+          descansoSegundos: 90,
+          ordem: 1,
+          tipoSerie: 'SUPERSET',
+          grupoSuperset: 1,
+        ),
+      ),
+      '4×8-10 · 40kg · 90s · SS1',
+    );
+    expect(
+      treinoDetailExerciseLine(
+        TreinoExercicioItem(
+          id: 3,
+          exercicio: Exercicio(id: 3, nome: 'Rosca'),
+          series: 3,
+          repeticoes: '12',
+          descansoSegundos: 45,
+          ordem: 2,
+          tipoSerie: 'DROPSET',
+        ),
+      ),
+      '3×12 · 45s · drop',
+    );
+  });
 }
