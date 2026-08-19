@@ -53,8 +53,8 @@ void main() {
     expect(screen, contains('ProductEvents.treinoDetailRefreshed'));
     expect(screen, contains("source: 'empty'"));
     expect(screen, contains('TreinosLayout.touchTarget'));
-    expect(screen, contains('fxStripCardDecoration'));
-    expect(screen, contains('TokensStrip.h2'));
+    expect(screen, contains('TreinoHomeSheetSurface'));
+    expect(screen, contains('treino_home_sheet.dart'));
     expect(screen, contains('FxInputDeco.outlineBorder'));
     expect(screen, isNot(contains('ChoiceChip')));
     expect(screen, isNot(contains('DropdownButtonFormField')));
@@ -65,7 +65,7 @@ void main() {
     expect(screen, contains('treino_detail_grouping.dart'));
     expect(screen, contains('treinoDetailMetaLine'));
     expect(screen, contains('treinoDetailExerciseLine'));
-    expect(screen, contains('_TreinoSheetChromeHeader'));
+    expect(screen, contains('TreinoSheetChromeHeader'));
     expect(screen, isNot(contains('durationMin')));
     expect(screen, isNot(contains('* 3.5')));
     expect(screen, isNot(contains('_GridTexturePainter')));

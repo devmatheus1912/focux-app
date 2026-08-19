@@ -35,118 +35,107 @@ class _DeleteWorkoutSheet extends StatelessWidget {
       unlinkOnly: unlinkOnly,
     );
 
-    return SafeArea(
-      top: false,
-      child: Padding(
-        padding: EdgeInsets.only(
-          left: 14,
-          right: 14,
-          bottom: 14 + MediaQuery.of(context).viewInsets.bottom,
-        ),
-        child: Container(
-          padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 10, 20, 18),
-          decoration: chrome.bottomSheet(radius: 28),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+    return TreinoHomeSheetSurface(
+      isDark: isDark,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Center(
+            child: Container(
+              width: 42,
+              height: 4,
+              decoration: BoxDecoration(
+                color: line,
+                borderRadius: BorderRadius.circular(999),
+              ),
+            ),
+          ),
+          SizedBox(height: TokensStrip.s4),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Center(
-                child: Container(
-                  width: 42,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: line,
-                    borderRadius: BorderRadius.circular(999),
-                  ),
+              Container(
+                width: 46,
+                height: 46,
+                decoration: BoxDecoration(
+                  color: dangerSoft,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Icon(
+                  unlinkOnly
+                      ? Icons.link_off_rounded
+                      : Icons.delete_outline_rounded,
+                  color: EagleTokens.bad,
+                  size: 23,
                 ),
               ),
-              SizedBox(height: TokensStrip.s4),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    width: 46,
-                    height: 46,
-                    decoration: BoxDecoration(
-                      color: dangerSoft,
-                      borderRadius: BorderRadius.circular(16),
+              SizedBox(width: TokensStrip.s3),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: FocuxHubTypography.pageTitle(
+                        context,
+                        color: ink,
+                      ).copyWith(fontWeight: FontWeight.w800, height: 1.15),
                     ),
-                    child: Icon(
-                      unlinkOnly
-                          ? Icons.link_off_rounded
-                          : Icons.delete_outline_rounded,
-                      color: EagleTokens.bad,
-                      size: 23,
+                    SizedBox(height: TokensStrip.s2),
+                    Text(
+                      body,
+                      style: FocuxHubTypography.bodyMuted(
+                        color: mute,
+                        fontWeight: FontWeight.w600,
+                        height: 1.35,
+                      ),
                     ),
-                  ),
-                  SizedBox(width: TokensStrip.s3),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          title,
-                          style: FocuxHubTypography.pageTitle(
-                            context,
-                            color: ink,
-                          ).copyWith(fontWeight: FontWeight.w800, height: 1.15),
-                        ),
-                        SizedBox(height: TokensStrip.s2),
-                        Text(
-                          body,
-                          style: FocuxHubTypography.bodyMuted(
-                            color: mute,
-                            fontWeight: FontWeight.w600,
-                            height: 1.35,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: TokensStrip.s4),
-              SizedBox(
-                height: TreinosLayout.touchTarget,
-                child: FilledButton(
-                  onPressed: () {
-                    HapticFeedback.mediumImpact();
-                    Navigator.of(context).pop(true);
-                  },
-                  style: FilledButton.styleFrom(
-                    backgroundColor: EagleTokens.bad,
-                    foregroundColor: Colors.white,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                  ),
-                  child: Text(
-                    actionLabel,
-                    style: const TextStyle(fontWeight: FontWeight.w800),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 8),
-              SizedBox(
-                height: TreinosLayout.touchTarget,
-                child: TextButton(
-                  onPressed: () => Navigator.of(context).pop(false),
-                  style: TextButton.styleFrom(
-                    foregroundColor: mute,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                  ),
-                  child: const Text(
-                    'Cancelar',
-                    style: TextStyle(fontWeight: FontWeight.w700),
-                  ),
+                  ],
                 ),
               ),
             ],
           ),
-        ),
+          SizedBox(height: TokensStrip.s4),
+          SizedBox(
+            height: TreinosLayout.touchTarget,
+            child: FilledButton(
+              onPressed: () {
+                HapticFeedback.mediumImpact();
+                Navigator.of(context).pop(true);
+              },
+              style: FilledButton.styleFrom(
+                backgroundColor: EagleTokens.bad,
+                foregroundColor: Colors.white,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+              child: Text(
+                actionLabel,
+                style: const TextStyle(fontWeight: FontWeight.w800),
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          SizedBox(
+            height: TreinosLayout.touchTarget,
+            child: TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              style: TextButton.styleFrom(
+                foregroundColor: mute,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+              ),
+              child: const Text(
+                'Cancelar',
+                style: TextStyle(fontWeight: FontWeight.w700),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -165,7 +154,6 @@ class _TreinoActionsSheet extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
     final chrome = ShellChrome.forDark(isDark);
-    final bottom = MediaQuery.of(context).padding.bottom;
     final maxHeight = MediaQuery.sizeOf(context).height * 0.82;
     final displayName = displayWorkoutName(treino.nome);
     final actions = <_TreinoActionTile>[
@@ -201,100 +189,57 @@ class _TreinoActionsSheet extends StatelessWidget {
       ),
     ];
 
-    return SafeArea(
-      top: false,
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(12, 0, 12, 12 + bottom),
-        child: Container(
-          constraints: BoxConstraints(maxHeight: maxHeight),
-          padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
-          decoration: chrome.bottomSheet(radius: 28),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Center(
-                child: Container(
-                  width: 42,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: chrome.mute.withValues(alpha: 0.26),
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                ),
+    return TreinoHomeSheetSurface(
+      isDark: isDark,
+      maxHeight: maxHeight,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Center(
+            child: Container(
+              width: 42,
+              height: 4,
+              decoration: BoxDecoration(
+                color: chrome.mute.withValues(alpha: 0.26),
+                borderRadius: BorderRadius.circular(999),
               ),
-              SizedBox(height: TokensStrip.s4),
-              Row(
-                children: [
-                  Container(
-                    width: 42,
-                    height: 42,
-                    decoration: BoxDecoration(
-                      color: BrandPalette.soft(primary, dark: isDark),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Icon(
-                      Icons.fitness_center_rounded,
-                      color: primary,
-                      size: 20,
-                    ),
-                  ),
-                  SizedBox(width: TokensStrip.s3),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          displayName,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: FocuxHubTypography.pageTitle(
-                            context,
-                            color: chrome.ink,
-                          ).copyWith(fontWeight: FontWeight.w800, height: 1.15),
-                        ),
-                        SizedBox(height: TokensStrip.s1),
-                        Text(
-                          'Escolha uma ação.',
-                          style: FocuxHubTypography.bodyMuted(
-                            color: chrome.mute,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: TokensStrip.s4),
-              Flexible(
-                child: SingleChildScrollView(
-                  physics: const BouncingScrollPhysics(),
-                  child: DecoratedBox(
-                    decoration: fxListCardDecoration(context, accent: primary),
-                    child: Material(
-                      color: Colors.transparent,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          for (var i = 0; i < actions.length; i++) ...[
-                            if (i > 0)
-                              Divider(
-                                height: 1,
-                                thickness: 1,
-                                color: chrome.line.withValues(alpha: 0.7),
-                              ),
-                            actions[i],
-                          ],
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
-        ),
+          SizedBox(height: TokensStrip.s4),
+          TreinoSheetChromeHeader(
+            icon: Icons.fitness_center_rounded,
+            title: displayName,
+            subtitle: 'Escolha uma ação.',
+            isDark: isDark,
+          ),
+          const SizedBox(height: TokensStrip.s4),
+          Flexible(
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              child: DecoratedBox(
+                decoration: fxListCardDecoration(context, accent: primary),
+                child: Material(
+                  color: Colors.transparent,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      for (var i = 0; i < actions.length; i++) ...[
+                        if (i > 0)
+                          Divider(
+                            height: 1,
+                            thickness: 1,
+                            color: chrome.line.withValues(alpha: 0.7),
+                          ),
+                        actions[i],
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -394,256 +339,207 @@ class _AssignWorkoutSheetState extends State<_AssignWorkoutSheet> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
     final chrome = ShellChrome.forDark(isDark);
-    final bottom = MediaQuery.of(context).padding.bottom;
 
-    return SafeArea(
-      top: false,
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(12, 0, 12, 12 + bottom),
-        child: Container(
-          padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
-          decoration: chrome.bottomSheet(radius: 28),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 42,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: chrome.mute.withValues(alpha: 0.26),
-                  borderRadius: BorderRadius.circular(999),
+    return TreinoHomeSheetSurface(
+      isDark: isDark,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 42,
+            height: 4,
+            decoration: BoxDecoration(
+              color: chrome.mute.withValues(alpha: 0.26),
+              borderRadius: BorderRadius.circular(999),
+            ),
+          ),
+          SizedBox(height: TokensStrip.s4),
+          TreinoSheetChromeHeader(
+            icon: Icons.person_add_alt_1_rounded,
+            title: 'Atribuir treino',
+            subtitle:
+                widget.alunos.isEmpty
+                    ? 'Cadastre um aluno antes.'
+                    : 'Escolha quem recebe este plano.',
+            isDark: isDark,
+          ),
+          const SizedBox(height: TokensStrip.s4),
+          if (widget.alunos.isEmpty)
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: isDark ? heroTealSurface(0.04) : TokensStrip.cardBg,
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(color: chrome.line),
+              ),
+              child: Text(
+                'Adicione um aluno para atribuir treinos direto da biblioteca.',
+                style: AppTypography.inter(
+                  color: chrome.mute,
+                  fontSize: 13,
+                  height: 1.35,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
-              SizedBox(height: TokensStrip.s4),
-              Row(
-                children: [
-                  Container(
-                    width: 42,
-                    height: 42,
-                    decoration: BoxDecoration(
-                      color: BrandPalette.soft(primary, dark: isDark),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Icon(
-                      Icons.person_add_alt_1_rounded,
-                      color: primary,
-                      size: 20,
-                    ),
-                  ),
-                  SizedBox(width: TokensStrip.s3),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Atribuir treino',
-                          style: AppTypography.inter(
-                            color: chrome.ink,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                        SizedBox(height: TokensStrip.s1),
-                        Text(
-                          widget.alunos.isEmpty
-                              ? 'Cadastre um aluno antes.'
-                              : 'Escolha quem recebe este plano.',
-                          style: AppTypography.inter(
-                            color: chrome.mute,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: TokensStrip.s4),
-              if (widget.alunos.isEmpty)
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: isDark ? heroTealSurface(0.04) : TokensStrip.cardBg,
-                    borderRadius: BorderRadius.circular(18),
-                    border: Border.all(color: chrome.line),
-                  ),
-                  child: Text(
-                    'Adicione um aluno para atribuir treinos direto da biblioteca.',
-                    style: AppTypography.inter(
-                      color: chrome.mute,
-                      fontSize: 13,
-                      height: 1.35,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                )
-              else
-                Flexible(
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxHeight: 300),
-                    child: ListView.separated(
-                      shrinkWrap: true,
-                      itemCount: widget.alunos.length,
-                      separatorBuilder:
-                          (_, __) => SizedBox(height: TokensStrip.s2),
-                      itemBuilder: (context, index) {
-                        final aluno = widget.alunos[index];
-                        final selected = selectedAlunoId == aluno.id;
-                        final initials =
-                            aluno.nome.trim().isEmpty
-                                ? '?'
-                                : aluno.nome
-                                    .trim()
-                                    .split(RegExp(r'\s+'))
-                                    .take(2)
-                                    .map((part) => part[0].toUpperCase())
-                                    .join();
+            )
+          else
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxHeight: 300),
+              child: ListView.separated(
+                shrinkWrap: true,
+                itemCount: widget.alunos.length,
+                separatorBuilder: (_, __) => SizedBox(height: TokensStrip.s2),
+                itemBuilder: (context, index) {
+                  final aluno = widget.alunos[index];
+                  final selected = selectedAlunoId == aluno.id;
+                  final initials =
+                      aluno.nome.trim().isEmpty
+                          ? '?'
+                          : aluno.nome
+                              .trim()
+                              .split(RegExp(r'\s+'))
+                              .take(2)
+                              .map((part) => part[0].toUpperCase())
+                              .join();
 
-                        return InkWell(
-                          onTap: () {
-                            HapticFeedback.selectionClick();
-                            setState(() => selectedAlunoId = aluno.id);
-                          },
-                          borderRadius: BorderRadius.circular(18),
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 160),
-                            padding: const EdgeInsets.all(12),
+                  return InkWell(
+                    onTap: () {
+                      HapticFeedback.selectionClick();
+                      setState(() => selectedAlunoId = aluno.id);
+                    },
+                    borderRadius: BorderRadius.circular(18),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 160),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color:
+                            selected
+                                ? BrandPalette.soft(primary, dark: isDark)
+                                : isDark
+                                ? heroTealSurface(0.03)
+                                : heroTealInk(),
+                        borderRadius: BorderRadius.circular(18),
+                        border: Border.all(
+                          color:
+                              selected
+                                  ? primary.withValues(alpha: 0.30)
+                                  : chrome.line,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 38,
+                            height: 38,
+                            alignment: Alignment.center,
                             decoration: BoxDecoration(
-                              color:
-                                  selected
-                                      ? BrandPalette.soft(primary, dark: isDark)
-                                      : isDark
-                                      ? heroTealSurface(0.03)
-                                      : heroTealInk(),
-                              borderRadius: BorderRadius.circular(18),
-                              border: Border.all(
-                                color:
-                                    selected
-                                        ? primary.withValues(alpha: 0.30)
-                                        : chrome.line,
+                              color: selected ? primary : chrome.line,
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            child: Text(
+                              initials,
+                              style: AppTypography.inter(
+                                color: selected ? heroTealInk() : chrome.ink,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w800,
                               ),
                             ),
-                            child: Row(
+                          ),
+                          SizedBox(width: TokensStrip.s3),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Container(
-                                  width: 38,
-                                  height: 38,
-                                  alignment: Alignment.center,
-                                  decoration: BoxDecoration(
-                                    color: selected ? primary : chrome.line,
-                                    borderRadius: BorderRadius.circular(14),
-                                  ),
-                                  child: Text(
-                                    initials,
-                                    style: AppTypography.inter(
-                                      color:
-                                          selected ? heroTealInk() : chrome.ink,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w800,
-                                    ),
+                                Text(
+                                  aluno.nome,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: AppTypography.inter(
+                                    color: chrome.ink,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w800,
                                   ),
                                 ),
-                                SizedBox(width: TokensStrip.s3),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        aluno.nome,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: AppTypography.inter(
-                                          color: chrome.ink,
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w800,
-                                        ),
-                                      ),
-                                      SizedBox(height: TokensStrip.s1),
-                                      Text(
-                                        aluno.objetivo?.trim().isNotEmpty ==
-                                                true
-                                            ? TreinosListLabels.prettyField(
-                                              aluno.objetivo!.trim(),
-                                            )
-                                            : 'Objetivo não definido',
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: AppTypography.inter(
-                                          color: chrome.mute,
-                                          fontSize: 11.5,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                    ],
+                                SizedBox(height: TokensStrip.s1),
+                                Text(
+                                  aluno.objetivo?.trim().isNotEmpty == true
+                                      ? TreinosListLabels.prettyField(
+                                        aluno.objetivo!.trim(),
+                                      )
+                                      : 'Objetivo não definido',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: AppTypography.inter(
+                                    color: chrome.mute,
+                                    fontSize: 11.5,
+                                    fontWeight: FontWeight.w600,
                                   ),
-                                ),
-                                Icon(
-                                  selected
-                                      ? Icons.check_circle_rounded
-                                      : Icons.radio_button_unchecked_rounded,
-                                  color:
-                                      selected
-                                          ? primary
-                                          : chrome.mute.withValues(alpha: 0.7),
-                                  size: 20,
                                 ),
                               ],
                             ),
                           ),
-                        );
-                      },
+                          Icon(
+                            selected
+                                ? Icons.check_circle_rounded
+                                : Icons.radio_button_unchecked_rounded,
+                            color:
+                                selected
+                                    ? primary
+                                    : chrome.mute.withValues(alpha: 0.7),
+                            size: 20,
+                          ),
+                        ],
+                      ),
                     ),
+                  );
+                },
+              ),
+            ),
+          const SizedBox(height: TokensStrip.s4),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: chrome.ink,
+                    side: BorderSide(color: chrome.line),
+                    minimumSize: const Size(0, 46),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                  child: Text(
+                    'Cancelar',
+                    style: AppTypography.inter(fontWeight: FontWeight.w800),
                   ),
                 ),
-              const SizedBox(height: TokensStrip.s4),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () => Navigator.pop(context),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: chrome.ink,
-                        side: BorderSide(color: chrome.line),
-                        minimumSize: const Size(0, 46),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                      ),
-                      child: Text(
-                        'Cancelar',
-                        style: AppTypography.inter(fontWeight: FontWeight.w800),
-                      ),
+              ),
+              SizedBox(width: TokensStrip.s3),
+              Expanded(
+                child: FilledButton(
+                  onPressed:
+                      selectedAlunoId == null
+                          ? null
+                          : () => Navigator.pop(context, selectedAlunoId),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: primary,
+                    foregroundColor: heroTealInk(),
+                    minimumSize: const Size(0, 46),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
                     ),
                   ),
-                  SizedBox(width: TokensStrip.s3),
-                  Expanded(
-                    child: FilledButton(
-                      onPressed:
-                          selectedAlunoId == null
-                              ? null
-                              : () => Navigator.pop(context, selectedAlunoId),
-                      style: FilledButton.styleFrom(
-                        backgroundColor: primary,
-                        foregroundColor: heroTealInk(),
-                        minimumSize: const Size(0, 46),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                      ),
-                      child: Text(
-                        'Atribuir',
-                        style: AppTypography.inter(fontWeight: FontWeight.w800),
-                      ),
-                    ),
+                  child: Text(
+                    'Atribuir',
+                    style: AppTypography.inter(fontWeight: FontWeight.w800),
                   ),
-                ],
+                ),
               ),
             ],
           ),
-        ),
+        ],
       ),
     );
   }

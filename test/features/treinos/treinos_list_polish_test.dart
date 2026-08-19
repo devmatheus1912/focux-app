@@ -24,7 +24,7 @@ void main() {
 
     expect(screen, contains('isScrollControlled: true'));
     expect(screen, contains('SingleChildScrollView'));
-    expect(screen, contains('BoxConstraints(maxHeight: maxHeight)'));
+    expect(screen, contains('maxHeight: maxHeight'));
     expect(screen, contains('Atribuir a um aluno'));
     expect(screen, contains('control_point_duplicate_rounded'));
     expect(screen, contains('assignment_ind_rounded'));
@@ -37,6 +37,10 @@ void main() {
     expect(screen, contains('Selecionar todos'));
     expect(screen, contains('TreinosListLabels.deleteTitle'));
     expect(screen, contains('Escolha uma ação.'));
+    expect(screen, contains('TreinoHomeSheetSurface'));
+    expect(screen, contains('TreinoSheetChromeHeader'));
+    expect(screen, contains('treino_home_sheet.dart'));
+    expect(screen, contains('ConstrainedBox('));
     expect(screen, isNot(contains('Ações em lote')));
     expect(screen, isNot(contains('Abra, atribua ou replique este plano')));
     expect(

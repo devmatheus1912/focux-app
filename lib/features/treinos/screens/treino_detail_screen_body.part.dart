@@ -56,7 +56,6 @@ class _TreinoDetailBody extends StatelessWidget {
         final chrome = ShellChrome.forDark(isDark);
         final primary = Theme.of(sheetContext).colorScheme.primary;
         final maxHeight = MediaQuery.sizeOf(sheetContext).height * 0.82;
-        final bottom = MediaQuery.of(sheetContext).padding.bottom;
         final actions = <_DetailActionTile>[
           _DetailActionTile(
             icon: Icons.add_rounded,
@@ -94,70 +93,60 @@ class _TreinoDetailBody extends StatelessWidget {
           ),
         ];
 
-        return SafeArea(
-          top: false,
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(14, 0, 14, 12 + bottom),
-            child: Container(
-              constraints: BoxConstraints(maxHeight: maxHeight),
-              padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
-              decoration: _treinoHomeSheetDecoration(
-                sheetContext,
+        return TreinoHomeSheetSurface(
+          isDark: isDark,
+          maxHeight: maxHeight,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Center(
+                child: Container(
+                  width: 42,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: chrome.line,
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                ),
+              ),
+              SizedBox(height: TokensStrip.s4),
+              TreinoSheetChromeHeader(
+                icon: Icons.fitness_center_rounded,
+                title: _displayWorkoutName(treino.nome),
+                subtitle: 'Escolha uma ação.',
                 isDark: isDark,
               ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Center(
-                    child: Container(
-                      width: 42,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: chrome.line,
-                        borderRadius: BorderRadius.circular(999),
+              const SizedBox(height: TokensStrip.s4),
+              Flexible(
+                child: SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  child: DecoratedBox(
+                    decoration: fxListCardDecoration(
+                      sheetContext,
+                      accent: primary,
+                    ),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          for (var i = 0; i < actions.length; i++) ...[
+                            if (i > 0)
+                              Divider(
+                                height: 1,
+                                thickness: 1,
+                                color: chrome.line.withValues(alpha: 0.7),
+                              ),
+                            actions[i],
+                          ],
+                        ],
                       ),
                     ),
                   ),
-                  SizedBox(height: TokensStrip.s4),
-                  _TreinoSheetChromeHeader(
-                    icon: Icons.fitness_center_rounded,
-                    title: _displayWorkoutName(treino.nome),
-                    subtitle: 'Escolha uma ação.',
-                    isDark: isDark,
-                  ),
-                  const SizedBox(height: TokensStrip.s4),
-                  Flexible(
-                    child: SingleChildScrollView(
-                      physics: const BouncingScrollPhysics(),
-                      child: DecoratedBox(
-                        decoration: fxListCardDecoration(
-                          sheetContext,
-                          accent: primary,
-                        ),
-                        child: Material(
-                          color: Colors.transparent,
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              for (var i = 0; i < actions.length; i++) ...[
-                                if (i > 0)
-                                  Divider(
-                                    height: 1,
-                                    thickness: 1,
-                                    color: chrome.line.withValues(alpha: 0.7),
-                                  ),
-                                actions[i],
-                              ],
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+                ),
               ),
-            ),
+            ],
           ),
         );
       },

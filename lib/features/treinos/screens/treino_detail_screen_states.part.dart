@@ -198,7 +198,6 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
     final chrome = ShellChrome.forDark(widget.isDark);
-    final bottom = MediaQuery.viewInsetsOf(context).bottom;
 
     Widget pair(Widget left, Widget right) {
       return Row(
@@ -211,177 +210,165 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
       );
     }
 
-    return SafeArea(
-      top: false,
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(14, 0, 14, 12 + bottom),
-        child: Container(
-          padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
-          decoration: _treinoHomeSheetDecoration(
-            context,
-            isDark: widget.isDark,
-          ),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Center(
-                  child: Container(
-                    width: 42,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: chrome.line,
-                      borderRadius: BorderRadius.circular(999),
-                    ),
-                  ),
+    return TreinoHomeSheetSurface(
+      isDark: widget.isDark,
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Center(
+              child: Container(
+                width: 42,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: chrome.line,
+                  borderRadius: BorderRadius.circular(999),
                 ),
-                SizedBox(height: TokensStrip.s4),
-                _TreinoSheetChromeHeader(
-                  icon: Icons.edit_note_rounded,
-                  title: 'Editar prescrição',
-                  subtitle: widget.item.exercicio.nomeDisplay,
-                  isDark: widget.isDark,
-                ),
-                SizedBox(height: TokensStrip.s4),
-                pair(
-                  TextField(
-                    controller: _seriesCtrl,
-                    keyboardType: TextInputType.number,
-                    textInputAction: TextInputAction.next,
-                    inputFormatters: [
-                      FilteringTextInputFormatter.digitsOnly,
-                      LengthLimitingTextInputFormatter(2),
-                    ],
-                    style: FocuxHubTypography.body(color: chrome.ink),
-                    decoration: _decoration(context, label: 'Séries'),
-                  ),
-                  TextField(
-                    controller: _repCtrl,
-                    textInputAction: TextInputAction.next,
-                    inputFormatters: [
-                      FilteringTextInputFormatter.allow(RegExp(r'[0-9\-xX/ ]')),
-                    ],
-                    style: FocuxHubTypography.body(color: chrome.ink),
-                    decoration: _decoration(
-                      context,
-                      label: 'Repetições',
-                      hint: '10-12',
-                    ),
-                  ),
-                ),
-                SizedBox(height: TokensStrip.s3),
-                pair(
-                  TextField(
-                    controller: _descansoCtrl,
-                    keyboardType: TextInputType.number,
-                    textInputAction: TextInputAction.next,
-                    inputFormatters: [
-                      FilteringTextInputFormatter.digitsOnly,
-                      LengthLimitingTextInputFormatter(3),
-                    ],
-                    style: FocuxHubTypography.body(color: chrome.ink),
-                    decoration: _decoration(context, label: 'Descanso (s)'),
-                  ),
-                  TextField(
-                    controller: _cargaCtrl,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    textInputAction: TextInputAction.next,
-                    inputFormatters: [
-                      FilteringTextInputFormatter.allow(
-                        RegExp(r'^\d+[.,]?\d{0,2}'),
-                      ),
-                    ],
-                    style: FocuxHubTypography.body(color: chrome.ink),
-                    decoration: _decoration(
-                      context,
-                      label: 'Carga (kg)',
-                      hint: 'Opcional',
-                    ),
-                  ),
-                ),
-                SizedBox(height: TokensStrip.s4),
-                _tipoSerieChips(
-                  primary: primary,
-                  mute: chrome.mute,
-                  isDark: widget.isDark,
-                ),
-                if (_tipoSerie == 'SUPERSET') ...[
-                  SizedBox(height: TokensStrip.s3),
-                  TextField(
-                    controller: _supersetCtrl,
-                    keyboardType: TextInputType.number,
-                    textInputAction: TextInputAction.next,
-                    inputFormatters: [
-                      FilteringTextInputFormatter.digitsOnly,
-                      LengthLimitingTextInputFormatter(2),
-                    ],
-                    style: FocuxHubTypography.body(color: chrome.ink),
-                    decoration: _decoration(
-                      context,
-                      label: 'Grupo superset',
-                      hint: 'Mesmo número = juntos',
-                    ),
-                  ),
-                ],
-                if (_tipoSerie == 'DROPSET') ...[
-                  SizedBox(height: TokensStrip.s2),
-                  Text(
-                    'Anote a queda de carga nas observações.',
-                    style: FocuxHubTypography.bodyMuted(
-                      color: chrome.mute,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-                SizedBox(height: TokensStrip.s3),
-                TextField(
-                  controller: _obsCtrl,
-                  minLines: 1,
-                  maxLines: 3,
-                  textInputAction: TextInputAction.done,
-                  style: FocuxHubTypography.body(color: chrome.ink),
-                  decoration: _decoration(
-                    context,
-                    label: 'Observações',
-                    hint: 'Cadência, pausa, execução…',
-                  ),
-                ),
-                SizedBox(height: TokensStrip.s4),
-                FilledButton(
-                  onPressed:
-                      _saving
-                          ? null
-                          : () {
-                            HapticFeedback.mediumImpact();
-                            _save();
-                          },
-                  style: FilledButton.styleFrom(
-                    minimumSize: const Size.fromHeight(
-                      TreinosLayout.touchTarget,
-                    ),
-                    backgroundColor: primary,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                  ),
-                  child:
-                      _saving
-                          ? const FxLoading(
-                            size: 22,
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          )
-                          : const Text(
-                            'Salvar prescrição',
-                            style: TextStyle(fontWeight: FontWeight.w800),
-                          ),
-                ),
-              ],
+              ),
             ),
-          ),
+            SizedBox(height: TokensStrip.s4),
+            TreinoSheetChromeHeader(
+              icon: Icons.edit_note_rounded,
+              title: 'Editar prescrição',
+              subtitle: widget.item.exercicio.nomeDisplay,
+              isDark: widget.isDark,
+            ),
+            SizedBox(height: TokensStrip.s4),
+            pair(
+              TextField(
+                controller: _seriesCtrl,
+                keyboardType: TextInputType.number,
+                textInputAction: TextInputAction.next,
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                  LengthLimitingTextInputFormatter(2),
+                ],
+                style: FocuxHubTypography.body(color: chrome.ink),
+                decoration: _decoration(context, label: 'Séries'),
+              ),
+              TextField(
+                controller: _repCtrl,
+                textInputAction: TextInputAction.next,
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r'[0-9\-xX/ ]')),
+                ],
+                style: FocuxHubTypography.body(color: chrome.ink),
+                decoration: _decoration(
+                  context,
+                  label: 'Repetições',
+                  hint: '10-12',
+                ),
+              ),
+            ),
+            SizedBox(height: TokensStrip.s3),
+            pair(
+              TextField(
+                controller: _descansoCtrl,
+                keyboardType: TextInputType.number,
+                textInputAction: TextInputAction.next,
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                  LengthLimitingTextInputFormatter(3),
+                ],
+                style: FocuxHubTypography.body(color: chrome.ink),
+                decoration: _decoration(context, label: 'Descanso (s)'),
+              ),
+              TextField(
+                controller: _cargaCtrl,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                textInputAction: TextInputAction.next,
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(
+                    RegExp(r'^\d+[.,]?\d{0,2}'),
+                  ),
+                ],
+                style: FocuxHubTypography.body(color: chrome.ink),
+                decoration: _decoration(
+                  context,
+                  label: 'Carga (kg)',
+                  hint: 'Opcional',
+                ),
+              ),
+            ),
+            SizedBox(height: TokensStrip.s4),
+            _tipoSerieChips(
+              primary: primary,
+              mute: chrome.mute,
+              isDark: widget.isDark,
+            ),
+            if (_tipoSerie == 'SUPERSET') ...[
+              SizedBox(height: TokensStrip.s3),
+              TextField(
+                controller: _supersetCtrl,
+                keyboardType: TextInputType.number,
+                textInputAction: TextInputAction.next,
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                  LengthLimitingTextInputFormatter(2),
+                ],
+                style: FocuxHubTypography.body(color: chrome.ink),
+                decoration: _decoration(
+                  context,
+                  label: 'Grupo superset',
+                  hint: 'Mesmo número = juntos',
+                ),
+              ),
+            ],
+            if (_tipoSerie == 'DROPSET') ...[
+              SizedBox(height: TokensStrip.s2),
+              Text(
+                'Anote a queda de carga nas observações.',
+                style: FocuxHubTypography.bodyMuted(
+                  color: chrome.mute,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+            SizedBox(height: TokensStrip.s3),
+            TextField(
+              controller: _obsCtrl,
+              minLines: 1,
+              maxLines: 3,
+              textInputAction: TextInputAction.done,
+              style: FocuxHubTypography.body(color: chrome.ink),
+              decoration: _decoration(
+                context,
+                label: 'Observações',
+                hint: 'Cadência, pausa, execução…',
+              ),
+            ),
+            SizedBox(height: TokensStrip.s4),
+            FilledButton(
+              onPressed:
+                  _saving
+                      ? null
+                      : () {
+                        HapticFeedback.mediumImpact();
+                        _save();
+                      },
+              style: FilledButton.styleFrom(
+                minimumSize: const Size.fromHeight(TreinosLayout.touchTarget),
+                backgroundColor: primary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+              child:
+                  _saving
+                      ? const FxLoading(
+                        size: 22,
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      )
+                      : const Text(
+                        'Salvar prescrição',
+                        style: TextStyle(fontWeight: FontWeight.w800),
+                      ),
+            ),
+          ],
         ),
       ),
     );

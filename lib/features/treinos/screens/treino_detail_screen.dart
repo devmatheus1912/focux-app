@@ -30,6 +30,7 @@ import '../../../core/widgets/fx_screen_a11y.dart';
 import '../constants/treinos_layout.dart';
 import '../utils/treino_detail_grouping.dart';
 import '../widgets/treino_detail_help_sheet.dart';
+import '../widgets/treino_home_sheet.dart';
 
 part 'treino_detail_screen_body.part.dart';
 part 'treino_detail_screen_exercises.part.dart';
@@ -41,17 +42,6 @@ String _workoutContextLabel(Treino treino, String? alunoNome) =>
     treinoDetailContextLabel(treino, alunoNome);
 
 String _displayWorkoutName(String raw) => displayWorkoutName(raw);
-
-BoxDecoration _treinoHomeSheetDecoration(
-  BuildContext context, {
-  required bool isDark,
-}) {
-  return fxStripCardDecoration(
-    context,
-    radius: 28,
-    glowStrength: isDark ? 0.10 : 0.16,
-  );
-}
 
 String _workoutGroupLabel(TreinoExercicioItem te) => treinoDetailGroupLabel(te);
 

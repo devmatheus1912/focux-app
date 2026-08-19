@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../../../core/platform/focux_platform.dart';
@@ -22,6 +24,18 @@ abstract final class TreinosLayout {
   static const double listBottomGapComfort = 36;
   static const double listBottomGapCompact = 28;
   static const double bulkBarPaddingBottom = 12;
+
+  static EdgeInsets homeSheetPadding(BuildContext context) {
+    final media = MediaQuery.of(context);
+    final dock = media.viewPadding.bottom;
+    final keyboard = media.viewInsets.bottom;
+    return EdgeInsets.fromLTRB(
+      14,
+      0,
+      14,
+      math.max(12, math.max(dock + 10, keyboard + 12)),
+    );
+  }
 
   static double listBottomGap(BuildContext context) =>
       FocuxPlatform.isCompact(context)
