@@ -101,7 +101,10 @@ class _TreinoDetailBody extends StatelessWidget {
             child: Container(
               constraints: BoxConstraints(maxHeight: maxHeight),
               padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
-              decoration: chrome.bottomSheet(radius: 28),
+              decoration: _treinoHomeSheetDecoration(
+                sheetContext,
+                isDark: isDark,
+              ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,

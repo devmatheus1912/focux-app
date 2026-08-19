@@ -24,7 +24,7 @@ class _RemoveExerciseSheet extends StatelessWidget {
         ),
         child: Container(
           padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 10, 20, 18),
-          decoration: chrome.bottomSheet(radius: 28),
+          decoration: _treinoHomeSheetDecoration(context, isDark: isDark),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -153,7 +153,7 @@ class _DeleteTrainingSheet extends StatelessWidget {
         ),
         child: Container(
           padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 10, 20, 18),
-          decoration: chrome.bottomSheet(radius: 28),
+          decoration: _treinoHomeSheetDecoration(context, isDark: isDark),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,

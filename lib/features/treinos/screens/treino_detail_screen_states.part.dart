@@ -89,11 +89,37 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
     required String label,
     String? hint,
   }) {
-    return FxInputDeco.build(
-      context,
-      label,
-      hint: hint,
-    ).copyWith(floatingLabelBehavior: FloatingLabelBehavior.always);
+    final chrome = ShellChrome.forDark(widget.isDark);
+    final primary = Theme.of(context).colorScheme.primary;
+    final fill = widget.isDark ? EagleTokens.darkCardHi : TokensStrip.pageBg;
+    final radius = BorderRadius.circular(14);
+    return InputDecoration(
+      labelText: label,
+      hintText: hint,
+      isDense: true,
+      filled: true,
+      fillColor: fill,
+      labelStyle: FocuxHubTypography.bodyMuted(
+        color: chrome.mute,
+        fontWeight: FontWeight.w600,
+      ),
+      hintStyle: FocuxHubTypography.bodyMuted(
+        color: chrome.mute.withValues(alpha: 0.45),
+      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      border: FxInputDeco.outlineBorder(
+        borderRadius: radius,
+        borderSide: BorderSide(color: chrome.line),
+      ),
+      enabledBorder: FxInputDeco.outlineBorder(
+        borderRadius: radius,
+        borderSide: BorderSide(color: chrome.line),
+      ),
+      focusedBorder: FxInputDeco.outlineBorder(
+        borderRadius: radius,
+        borderSide: BorderSide(color: primary, width: 1.6),
+      ),
+    );
   }
 
   Widget _tipoSerieChips({
@@ -126,24 +152,40 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
                 button: true,
                 selected: _tipoSerie == option.$1,
                 label: option.$2,
-                child: ChoiceChip(
-                  selected: _tipoSerie == option.$1,
-                  showCheckmark: false,
-                  label: Text(option.$2),
-                  labelStyle: FocuxHubTypography.cardTitle(
-                    color: _tipoSerie == option.$1 ? Colors.white : primary,
-                  ),
-                  selectedColor: primary,
-                  backgroundColor: BrandPalette.soft(primary, dark: isDark),
-                  side: BorderSide(
-                    color: primary.withValues(
-                      alpha: _tipoSerie == option.$1 ? 0 : 0.22,
+                child: Material(
+                  color: fxTransparent,
+                  child: InkWell(
+                    onTap:
+                        _saving
+                            ? null
+                            : () => setState(() => _tipoSerie = option.$1),
+                    borderRadius: BorderRadius.circular(TokensStrip.rCard),
+                    child: Ink(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        color:
+                            _tipoSerie == option.$1
+                                ? primary
+                                : BrandPalette.soft(primary, dark: isDark),
+                        borderRadius: BorderRadius.circular(TokensStrip.rCard),
+                        border: Border.all(
+                          color: primary.withValues(
+                            alpha: _tipoSerie == option.$1 ? 0 : 0.18,
+                          ),
+                        ),
+                      ),
+                      child: Text(
+                        option.$2,
+                        style: FocuxHubTypography.cardTitle(
+                          color:
+                              _tipoSerie == option.$1 ? Colors.white : primary,
+                        ),
+                      ),
                     ),
                   ),
-                  onSelected:
-                      _saving
-                          ? null
-                          : (_) => setState(() => _tipoSerie = option.$1),
                 ),
               ),
           ],
@@ -175,7 +217,10 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
         padding: EdgeInsets.fromLTRB(14, 0, 14, 12 + bottom),
         child: Container(
           padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
-          decoration: chrome.bottomSheet(radius: 28),
+          decoration: _treinoHomeSheetDecoration(
+            context,
+            isDark: widget.isDark,
+          ),
           child: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -294,8 +339,8 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
                 SizedBox(height: TokensStrip.s3),
                 TextField(
                   controller: _obsCtrl,
-                  minLines: 2,
-                  maxLines: 4,
+                  minLines: 1,
+                  maxLines: 3,
                   textInputAction: TextInputAction.done,
                   style: FocuxHubTypography.body(color: chrome.ink),
                   decoration: _decoration(

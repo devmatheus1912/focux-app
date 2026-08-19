@@ -42,6 +42,17 @@ String _workoutContextLabel(Treino treino, String? alunoNome) =>
 
 String _displayWorkoutName(String raw) => displayWorkoutName(raw);
 
+BoxDecoration _treinoHomeSheetDecoration(
+  BuildContext context, {
+  required bool isDark,
+}) {
+  return fxStripCardDecoration(
+    context,
+    radius: 28,
+    glowStrength: isDark ? 0.10 : 0.16,
+  );
+}
+
 String _workoutGroupLabel(TreinoExercicioItem te) => treinoDetailGroupLabel(te);
 
 bool _showsExerciseGroupHeader(List<TreinoExercicioItem> items, int index) =>

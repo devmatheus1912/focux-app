@@ -300,9 +300,9 @@ class _TreinoSheetChromeHeader extends StatelessWidget {
                 title,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: FocuxHubTypography.sectionTitle(
-                  context,
-                  color: chrome.ink,
+                style: TokensStrip.h2(
+                  color: primary,
+                  fontFamily: Theme.of(context).textTheme.bodyLarge?.fontFamily,
                 ),
               ),
               SizedBox(height: TokensStrip.s1),
@@ -432,7 +432,7 @@ class _AssignWorkoutSheetState extends State<_AssignWorkoutSheet> {
         padding: EdgeInsets.fromLTRB(12, 0, 12, 12 + bottom),
         child: Container(
           padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
-          decoration: chrome.bottomSheet(radius: 28),
+          decoration: _treinoHomeSheetDecoration(context, isDark: isDark),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [

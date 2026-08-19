@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 
 Future<void> showTreinoDetailHelpSheet(BuildContext context) {
   return showModalBottomSheet<void>(
@@ -42,7 +43,11 @@ Future<void> showTreinoDetailHelpSheet(BuildContext context) {
       return Padding(
         padding: const EdgeInsets.fromLTRB(14, 0, 14, 12),
         child: DecoratedBox(
-          decoration: chrome.bottomSheet(),
+          decoration: fxStripCardDecoration(
+            ctx,
+            radius: 28,
+            glowStrength: isDark ? 0.10 : 0.16,
+          ),
           child: Padding(
             padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
             child: Column(
