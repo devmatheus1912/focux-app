@@ -151,6 +151,10 @@ class ProductEvents {
   static const treinosDuplicated = 'treinos_duplicated';
   static const treinosBulkOpened = 'treinos_bulk_opened';
   static const treinosDeleted = 'treinos_deleted';
+  static const treinoDetailViewed = 'treino_detail_viewed';
+  static const treinoDetailAddTapped = 'treino_detail_add_tapped';
+  static const treinoDetailMenuOpened = 'treino_detail_menu_opened';
+  static const treinoExerciseMenuOpened = 'treino_exercise_menu_opened';
   static const leadCreatedOrOpened = 'lead_created_or_opened';
   static const alertaRiscoOpened = 'alerta_risco_opened';
   static const dunningMarkedRecovered = 'dunning_marked_recovered';

@@ -8,76 +8,73 @@ class _RemoveExerciseSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-    final border =
+    final chrome = ShellChrome.forDark(isDark);
+    final dangerSoft =
         isDark
-            ? heroTealSurface(0.08)
-            : TokensStrip.borderDefault.withValues(alpha: 0.9);
-    final dangerFill = EagleTokens.badSoft;
+            ? EagleTokens.bad.withValues(alpha: 0.16)
+            : EagleTokens.badSoft.withValues(alpha: 0.88);
 
     return SafeArea(
       top: false,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+        padding: EdgeInsets.only(
+          left: 14,
+          right: 14,
+          bottom: 14 + MediaQuery.of(context).viewInsets.bottom,
+        ),
         child: Container(
-          padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
-          decoration: fxListCardDecoration(context),
+          padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 10, 20, 18),
+          decoration: chrome.bottomSheet(radius: 28),
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Center(
                 child: Container(
                   width: 42,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: border,
-                    borderRadius: BorderRadius.circular(99),
+                    color: chrome.line,
+                    borderRadius: BorderRadius.circular(999),
                   ),
                 ),
               ),
-              const SizedBox(height: 18),
+              SizedBox(height: TokensStrip.s4),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
-                    width: 44,
-                    height: 44,
+                    width: 46,
+                    height: 46,
                     decoration: BoxDecoration(
-                      color: EagleTokens.bad.withValues(
-                        alpha: isDark ? 0.16 : 0.10,
-                      ),
+                      color: dangerSoft,
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: const Icon(
                       Icons.remove_circle_outline_rounded,
                       color: EagleTokens.bad,
-                      size: 22,
+                      size: 23,
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  SizedBox(width: TokensStrip.s3),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           'Remover exercício?',
-                          style: AppTypography.inter(
-                            color: ink,
-                            fontSize: 20,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: 0,
-                          ),
+                          style: FocuxHubTypography.pageTitle(
+                            context,
+                            color: chrome.ink,
+                          ).copyWith(fontWeight: FontWeight.w800, height: 1.15),
                         ),
-                        const SizedBox(height: 5),
+                        SizedBox(height: TokensStrip.s2),
                         Text(
-                          '$title sai apenas deste treino. O exercício continua disponível na biblioteca.',
-                          style: AppTypography.inter(
-                            color: mute,
-                            fontSize: 13,
-                            height: 1.38,
-                            fontWeight: FontWeight.w500,
+                          '$title sai apenas deste treino. O exercício continua na biblioteca.',
+                          style: FocuxHubTypography.bodyMuted(
+                            color: chrome.mute,
+                            fontWeight: FontWeight.w600,
+                            height: 1.35,
                           ),
                         ),
                       ],
@@ -85,49 +82,44 @@ class _RemoveExerciseSheet extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 18),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () => Navigator.pop(context, false),
-                      style: OutlinedButton.styleFrom(
-                        minimumSize: const Size.fromHeight(48),
-                        foregroundColor: ink,
-                        side: BorderSide(color: border),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                      ),
-                      child: Text(
-                        'Cancelar',
-                        style: AppTypography.inter(fontWeight: FontWeight.w800),
-                      ),
+              SizedBox(height: TokensStrip.s4),
+              SizedBox(
+                height: TreinosLayout.touchTarget,
+                child: FilledButton(
+                  onPressed: () {
+                    HapticFeedback.mediumImpact();
+                    Navigator.of(context).pop(true);
+                  },
+                  style: FilledButton.styleFrom(
+                    backgroundColor: EagleTokens.bad,
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
                     ),
                   ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: FilledButton(
-                      onPressed: () => Navigator.pop(context, true),
-                      style: FilledButton.styleFrom(
-                        minimumSize: const Size.fromHeight(48),
-                        backgroundColor: dangerFill,
-                        foregroundColor: heroTealInk(),
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                      ),
-                      child: Text(
-                        'Remover',
-                        style: AppTypography.inter(
-                          fontWeight: FontWeight.w800,
-                          color: heroTealInk(),
-                        ),
-                      ),
+                  child: const Text(
+                    'Remover',
+                    style: TextStyle(fontWeight: FontWeight.w800),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              SizedBox(
+                height: TreinosLayout.touchTarget,
+                child: TextButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  style: TextButton.styleFrom(
+                    foregroundColor: chrome.mute,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
                     ),
                   ),
-                ],
+                  child: const Text(
+                    'Cancelar',
+                    style: TextStyle(fontWeight: FontWeight.w700),
+                  ),
+                ),
               ),
             ],
           ),
@@ -145,75 +137,73 @@ class _DeleteTrainingSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final primary = Theme.of(context).colorScheme.primary;
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-    final border =
+    final chrome = ShellChrome.forDark(isDark);
+    final dangerSoft =
         isDark
-            ? heroTealSurface(0.08)
-            : TokensStrip.borderDefault.withValues(alpha: 0.9);
-    final softBad = EagleTokens.bad.withValues(alpha: isDark ? 0.18 : 0.1);
+            ? EagleTokens.bad.withValues(alpha: 0.16)
+            : EagleTokens.badSoft.withValues(alpha: 0.88);
 
     return SafeArea(
       top: false,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+        padding: EdgeInsets.only(
+          left: 14,
+          right: 14,
+          bottom: 14 + MediaQuery.of(context).viewInsets.bottom,
+        ),
         child: Container(
-          padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
-          decoration: fxListCardDecoration(context, accent: primary),
+          padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 10, 20, 18),
+          decoration: chrome.bottomSheet(radius: 28),
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Center(
                 child: Container(
                   width: 42,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: border,
-                    borderRadius: BorderRadius.circular(99),
+                    color: chrome.line,
+                    borderRadius: BorderRadius.circular(999),
                   ),
                 ),
               ),
-              const SizedBox(height: 18),
+              SizedBox(height: TokensStrip.s4),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
-                    width: 42,
-                    height: 42,
+                    width: 46,
+                    height: 46,
                     decoration: BoxDecoration(
-                      color: softBad,
+                      color: dangerSoft,
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: const Icon(
                       Icons.delete_outline_rounded,
                       color: EagleTokens.bad,
-                      size: 21,
+                      size: 23,
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  SizedBox(width: TokensStrip.s3),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Remover treino?',
-                          style: AppTypography.inter(
-                            color: ink,
-                            fontSize: 20,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: 0,
-                          ),
+                          'Excluir treino?',
+                          style: FocuxHubTypography.pageTitle(
+                            context,
+                            color: chrome.ink,
+                          ).copyWith(fontWeight: FontWeight.w800, height: 1.15),
                         ),
-                        const SizedBox(height: 5),
+                        SizedBox(height: TokensStrip.s2),
                         Text(
                           '$title sai da biblioteca. Históricos já concluídos continuam preservados.',
-                          style: AppTypography.inter(
-                            color: mute,
-                            fontSize: 13,
-                            height: 1.38,
-                            fontWeight: FontWeight.w500,
+                          style: FocuxHubTypography.bodyMuted(
+                            color: chrome.mute,
+                            fontWeight: FontWeight.w600,
+                            height: 1.35,
                           ),
                         ),
                       ],
@@ -221,81 +211,44 @@ class _DeleteTrainingSheet extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: TokensStrip.s4),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color:
-                      isDark
-                          ? heroTealSurface(0.05)
-                          : EagleTokens.brandSoft.withValues(alpha: 0.42),
-                  borderRadius: BorderRadius.circular(18),
-                  border: Border.all(color: border),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.history_rounded,
-                      color: isDark ? EagleTokens.darkInkMute : primary,
-                      size: 18,
+              SizedBox(height: TokensStrip.s4),
+              SizedBox(
+                height: TreinosLayout.touchTarget,
+                child: FilledButton(
+                  onPressed: () {
+                    HapticFeedback.mediumImpact();
+                    Navigator.of(context).pop(true);
+                  },
+                  style: FilledButton.styleFrom(
+                    backgroundColor: EagleTokens.bad,
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
                     ),
-                    const SizedBox(width: 9),
-                    Expanded(
-                      child: Text(
-                        'Execuções antigas e dados de alunos não serão apagados.',
-                        style: AppTypography.inter(
-                          color: mute,
-                          fontSize: 12.5,
-                          height: 1.25,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ],
+                  ),
+                  child: const Text(
+                    'Excluir',
+                    style: TextStyle(fontWeight: FontWeight.w800),
+                  ),
                 ),
               ),
-              const SizedBox(height: 18),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () => Navigator.pop(context, false),
-                      style: OutlinedButton.styleFrom(
-                        minimumSize: const Size.fromHeight(48),
-                        foregroundColor: ink,
-                        side: BorderSide(color: border),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        textStyle: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                      child: const Text('Cancelar'),
+              const SizedBox(height: 8),
+              SizedBox(
+                height: TreinosLayout.touchTarget,
+                child: TextButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  style: TextButton.styleFrom(
+                    foregroundColor: chrome.mute,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
                     ),
                   ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: FilledButton(
-                      onPressed: () => Navigator.pop(context, true),
-                      style: FilledButton.styleFrom(
-                        minimumSize: const Size.fromHeight(48),
-                        backgroundColor: EagleTokens.bad,
-                        foregroundColor: heroTealInk(),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        textStyle: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                      child: const Text('Remover'),
-                    ),
+                  child: const Text(
+                    'Cancelar',
+                    style: TextStyle(fontWeight: FontWeight.w700),
                   ),
-                ],
+                ),
               ),
             ],
           ),
@@ -303,27 +256,4 @@ class _DeleteTrainingSheet extends StatelessWidget {
       ),
     );
   }
-}
-
-class _GridTexturePainter extends CustomPainter {
-  const _GridTexturePainter();
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint =
-        Paint()
-          ..color = heroTealSurface(0.06)
-          ..strokeWidth = 0.5
-          ..style = PaintingStyle.stroke;
-
-    for (double x = 0; x <= size.width; x += 26) {
-      canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
-    }
-    for (double y = 0; y <= size.height; y += 26) {
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

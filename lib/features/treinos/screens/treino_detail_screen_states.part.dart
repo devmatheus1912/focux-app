@@ -103,9 +103,7 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    final ink = widget.isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final mute =
-        widget.isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final chrome = ShellChrome.forDark(widget.isDark);
     final bottom = MediaQuery.viewInsetsOf(context).bottom;
 
     return SafeArea(
@@ -114,7 +112,7 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
         padding: EdgeInsets.fromLTRB(12, 0, 12, 12 + bottom),
         child: Container(
           padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
-          decoration: fxListCardDecoration(context, accent: primary),
+          decoration: chrome.bottomSheet(radius: 28),
           child: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -125,26 +123,24 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
                     width: 42,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: mute.withValues(alpha: 0.35),
-                      borderRadius: BorderRadius.circular(99),
+                      color: chrome.mute.withValues(alpha: 0.26),
+                      borderRadius: BorderRadius.circular(999),
                     ),
                   ),
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: TokensStrip.s4),
                 Text(
                   'Editar prescrição',
-                  style: AppTypography.inter(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w900,
-                    color: ink,
-                  ),
+                  style: FocuxHubTypography.pageTitle(
+                    context,
+                    color: chrome.ink,
+                  ).copyWith(fontWeight: FontWeight.w800, height: 1.15),
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: TokensStrip.s1),
                 Text(
                   widget.item.exercicio.nomeDisplay,
-                  style: AppTypography.inter(
-                    color: mute,
-                    fontSize: 12.5,
+                  style: FocuxHubTypography.bodyMuted(
+                    color: chrome.mute,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -229,7 +225,9 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
                 FilledButton(
                   onPressed: _saving ? null : _save,
                   style: FilledButton.styleFrom(
-                    minimumSize: const Size.fromHeight(48),
+                    minimumSize: const Size.fromHeight(
+                      TreinosLayout.touchTarget,
+                    ),
                     backgroundColor: primary,
                   ),
                   child:

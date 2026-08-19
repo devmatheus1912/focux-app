@@ -28,6 +28,7 @@ import '../../../core/theme/shell_chrome.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
+import '../constants/treinos_layout.dart';
 
 part 'treino_detail_screen_body.part.dart';
 part 'treino_detail_screen_exercises.part.dart';
@@ -167,13 +168,24 @@ class TreinoDetailScreen extends ConsumerWidget {
                   ),
                 ),
             data:
-                (treino) => _TreinoDetailBody(
-                  treino: treino,
-                  treinoId: treinoId,
-                  alunoId: alunoId,
-                  alunoNome: alunoNome,
-                  isDark: isDark,
-                  ref: ref,
+                (treino) => _TrackOnce(
+                  onFirst: () {
+                    AnalyticsService.instance.track(
+                      ProductEvents.treinoDetailViewed,
+                      props: {
+                        'id': treinoId,
+                        'exercicios': treino.exercicios.length,
+                      },
+                    );
+                  },
+                  child: _TreinoDetailBody(
+                    treino: treino,
+                    treinoId: treinoId,
+                    alunoId: alunoId,
+                    alunoNome: alunoNome,
+                    isDark: isDark,
+                    ref: ref,
+                  ),
                 ),
           ),
         ),
@@ -188,4 +200,40 @@ void _popTreinoDetail(BuildContext context, {int? alunoId}) {
     return;
   }
   safePopOrGo(context, '/treinos');
+}
+
+Future<T?> _showTreinoSheet<T>({
+  required BuildContext context,
+  required WidgetBuilder builder,
+  bool isScrollControlled = true,
+}) {
+  return showModalBottomSheet<T>(
+    context: context,
+    useRootNavigator: true,
+    isScrollControlled: isScrollControlled,
+    backgroundColor: fxTransparent,
+    barrierColor: heroScrim(0.34),
+    builder: builder,
+  );
+}
+
+class _TrackOnce extends StatefulWidget {
+  const _TrackOnce({required this.onFirst, required this.child});
+
+  final VoidCallback onFirst;
+  final Widget child;
+
+  @override
+  State<_TrackOnce> createState() => _TrackOnceState();
+}
+
+class _TrackOnceState extends State<_TrackOnce> {
+  @override
+  void initState() {
+    super.initState();
+    widget.onFirst();
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
 }

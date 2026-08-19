@@ -6,7 +6,6 @@ class _TreinoExerciseReorderList extends StatefulWidget {
   final int? alunoId;
   final bool isDark;
   final Color primary;
-  final Color primarySoft;
   final TreinoRepository repo;
   final WidgetRef ref;
   final Future<void> Function(TreinoExercicioItem item) onEditPrescription;
@@ -17,7 +16,6 @@ class _TreinoExerciseReorderList extends StatefulWidget {
     required this.alunoId,
     required this.isDark,
     required this.primary,
-    required this.primarySoft,
     required this.repo,
     required this.ref,
     required this.onEditPrescription,
@@ -76,10 +74,8 @@ class _TreinoExerciseReorderListState
   }
 
   Future<void> _removeExercise(TreinoExercicioItem te) async {
-    final confirm = await showModalBottomSheet<bool>(
+    final confirm = await _showTreinoSheet<bool>(
       context: context,
-      backgroundColor: fxTransparent,
-      barrierColor: heroScrim(0.34),
       builder:
           (ctx) => _RemoveExerciseSheet(
             title: te.exercicio.nomeDisplay,
@@ -87,6 +83,7 @@ class _TreinoExerciseReorderListState
           ),
     );
     if (confirm != true || !mounted) return;
+    HapticFeedback.mediumImpact();
     try {
       await widget.repo.removerExercicio(widget.treinoId, te.id);
       widget.ref.invalidate(treinoProvider(widget.treinoId));
@@ -109,7 +106,8 @@ class _TreinoExerciseReorderListState
         return AnimatedBuilder(
           animation: animation,
           builder: (context, child) {
-            final t = Curves.easeOut.transform(animation.value);
+            final reduce = TokensStrip.prefersReducedMotion(context);
+            final t = reduce ? 0.0 : Curves.easeOut.transform(animation.value);
             return Material(
               elevation: 6 * t,
               color: fxTransparent,
@@ -136,7 +134,6 @@ class _TreinoExerciseReorderListState
           index: _localIndexInGroup(_items, index),
           isDark: widget.isDark,
           primary: widget.primary,
-          primarySoft: widget.primarySoft,
           isLast: isLastInGroup,
           onEditPrescription: () => widget.onEditPrescription(te),
           onDuplicate: () async {
@@ -153,9 +150,8 @@ class _TreinoExerciseReorderListState
             }
           },
           onSubstitute: () async {
-            await showModalBottomSheet(
+            await _showTreinoSheet<void>(
               context: context,
-              isScrollControlled: true,
               builder:
                   (_) => SubstituirExercicioBottomSheet(
                     alvo: te.exercicio,
@@ -218,17 +214,17 @@ class _TreinoExerciseReorderListState
                         const SizedBox(width: 9),
                         Text(
                           groupLabel,
-                          style: AppTypography.inter(
+                          style: FocuxHubTypography.eyebrow(
+                            context,
                             color: mute,
-                            fontSize: 11,
                             fontWeight: FontWeight.w700,
                             letterSpacing: 1.3,
-                          ),
+                          ).copyWith(fontSize: 11),
                         ),
                         const Spacer(),
                         Text(
                           '$groupCount ex.',
-                          style: AppTypography.mono(
+                          style: FocuxHubTypography.metric(
                             color: mute,
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
@@ -264,84 +260,70 @@ class _TreinoExerciseReorderListState
   }
 }
 
-class _MenuActionTile extends StatelessWidget {
+class _DetailActionTile extends StatelessWidget {
   final IconData icon;
   final String label;
   final Color? color;
+  final bool showChevron;
   final VoidCallback onTap;
 
-  const _MenuActionTile({
+  const _DetailActionTile({
     required this.icon,
     required this.label,
     this.color,
+    this.showChevron = false,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
+    final chrome = ShellChrome.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final ink =
-        color ?? (isDark ? EagleTokens.darkInk : TokensStrip.textPrimary);
-    final border =
-        isDark
-            ? heroTealSurface(0.06)
-            : TokensStrip.borderDefault.withValues(alpha: 0.95);
-    final iconFill =
-        color == null
-            ? (isDark
-                ? heroTealSurface(0.05)
-                : EagleTokens.brandSofter)
-            : EagleTokens.bad.withValues(alpha: isDark ? 0.16 : 0.10);
+    final primary = Theme.of(context).colorScheme.primary;
+    final tint = color ?? primary;
 
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+    return Semantics(
+      button: true,
+      label: label,
       child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(18),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
-          decoration: BoxDecoration(
-            color:
-                isDark
-                    ? heroTealSurface(0.035)
-                    : TokensStrip.cardBg,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: border),
-            boxShadow:
-                isDark
-                    ? null
-                    : [
-                      BoxShadow(
-                        color: heroScrim(0.018),
-                        blurRadius: 18,
-                        offset: const Offset(0, 10),
-                      ),
-                    ],
+        onTap: () {
+          HapticFeedback.selectionClick();
+          onTap();
+        },
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(
+            minHeight: TreinosLayout.touchTarget,
           ),
-          child: Row(
-            children: [
-              Container(
-                width: 34,
-                height: 34,
-                decoration: BoxDecoration(
-                  color: iconFill,
-                  borderRadius: BorderRadius.circular(13),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            child: Row(
+              children: [
+                Container(
+                  width: 34,
+                  height: 34,
+                  decoration: BoxDecoration(
+                    color: BrandPalette.soft(tint, dark: isDark),
+                    borderRadius: BorderRadius.circular(13),
+                  ),
+                  child: Icon(icon, color: tint, size: 18),
                 ),
-                child: Icon(icon, color: ink, size: 18),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  label,
-                  style: AppTypography.inter(
-                    color: ink,
-                    fontSize: 13.8,
-                    fontWeight: FontWeight.w800,
+                SizedBox(width: TokensStrip.s3),
+                Expanded(
+                  child: Text(
+                    label,
+                    style: FocuxHubTypography.cardTitle(
+                      color: color ?? chrome.ink,
+                    ),
                   ),
                 ),
-              ),
-              Icon(Icons.chevron_right_rounded, color: ink, size: 18),
-            ],
+                if (showChevron)
+                  Icon(
+                    Icons.chevron_right_rounded,
+                    color: chrome.mute,
+                    size: 18,
+                  ),
+              ],
+            ),
           ),
         ),
       ),
@@ -370,46 +352,38 @@ class _AssignWorkoutSheetState extends State<_AssignWorkoutSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final bottom = MediaQuery.of(context).padding.bottom;
+    final isDark = widget.isDark;
     final primary = Theme.of(context).colorScheme.primary;
-    final ink = widget.isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final mute =
-        widget.isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-    final border =
-        widget.isDark
-            ? heroTealSurface(0.08)
-            : TokensStrip.borderDefault.withValues(alpha: 0.95);
+    final chrome = ShellChrome.forDark(isDark);
+    final bottom = MediaQuery.of(context).padding.bottom;
 
     return SafeArea(
       top: false,
       child: Padding(
-        padding: EdgeInsets.fromLTRB(12, 0, 12, math.max(10, bottom + 8)),
+        padding: EdgeInsets.fromLTRB(12, 0, 12, 12 + bottom),
         child: Container(
           padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
-          decoration: fxListCardDecoration(context),
+          decoration: chrome.bottomSheet(radius: 28),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                width: 36,
+                width: 42,
                 height: 4,
-                margin: const EdgeInsets.only(bottom: 16),
                 decoration: BoxDecoration(
-                  color:
-                      widget.isDark
-                          ? heroTealSurface(0.16)
-                          : TokensStrip.borderDefault,
-                  borderRadius: BorderRadius.circular(99),
+                  color: chrome.mute.withValues(alpha: 0.26),
+                  borderRadius: BorderRadius.circular(999),
                 ),
               ),
+              SizedBox(height: TokensStrip.s4),
               Row(
                 children: [
                   Container(
-                    width: 40,
-                    height: 40,
+                    width: 42,
+                    height: 42,
                     decoration: BoxDecoration(
-                      color: EagleTokens.brandSofter,
-                      borderRadius: BorderRadius.circular(15),
+                      color: BrandPalette.soft(primary, dark: isDark),
+                      borderRadius: BorderRadius.circular(16),
                     ),
                     child: Icon(
                       Icons.person_add_alt_1_rounded,
@@ -417,27 +391,25 @@ class _AssignWorkoutSheetState extends State<_AssignWorkoutSheet> {
                       size: 20,
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  SizedBox(width: TokensStrip.s3),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           'Atribuir treino',
-                          style: AppTypography.inter(
-                            color: ink,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w800,
-                          ),
+                          style: FocuxHubTypography.pageTitle(
+                            context,
+                            color: chrome.ink,
+                          ).copyWith(fontWeight: FontWeight.w800, height: 1.15),
                         ),
-                        const SizedBox(height: 3),
+                        SizedBox(height: TokensStrip.s1),
                         Text(
                           widget.alunos.isEmpty
-                              ? 'Nenhum aluno cadastrado.'
+                              ? 'Cadastre um aluno antes.'
                               : 'Escolha quem recebe este plano.',
-                          style: AppTypography.inter(
-                            color: mute,
-                            fontSize: 12,
+                          style: FocuxHubTypography.bodyMuted(
+                            color: chrome.mute,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -452,20 +424,16 @@ class _AssignWorkoutSheetState extends State<_AssignWorkoutSheet> {
                   width: double.infinity,
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color:
-                        widget.isDark
-                            ? heroTealSurface(0.04)
-                            : TokensStrip.cardBg,
+                    color: isDark ? heroTealSurface(0.04) : TokensStrip.cardBg,
                     borderRadius: BorderRadius.circular(18),
-                    border: Border.all(color: border),
+                    border: Border.all(color: chrome.line),
                   ),
                   child: Text(
                     'Cadastre um aluno antes de atribuir este treino.',
-                    style: AppTypography.inter(
-                      color: mute,
-                      fontSize: 13,
-                      height: 1.35,
+                    style: FocuxHubTypography.bodyMuted(
+                      color: chrome.mute,
                       fontWeight: FontWeight.w600,
+                      height: 1.35,
                     ),
                   ),
                 )
@@ -476,7 +444,8 @@ class _AssignWorkoutSheetState extends State<_AssignWorkoutSheet> {
                     child: ListView.separated(
                       shrinkWrap: true,
                       itemCount: widget.alunos.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 8),
+                      separatorBuilder:
+                          (_, __) => SizedBox(height: TokensStrip.s2),
                       itemBuilder: (context, index) {
                         final aluno = widget.alunos[index];
                         final selected = selectedAlunoId == aluno.id;
@@ -502,16 +471,16 @@ class _AssignWorkoutSheetState extends State<_AssignWorkoutSheet> {
                             decoration: BoxDecoration(
                               color:
                                   selected
-                                      ? EagleTokens.brandSofter
-                                      : widget.isDark
+                                      ? BrandPalette.soft(primary, dark: isDark)
+                                      : isDark
                                       ? heroTealSurface(0.03)
                                       : heroTealInk(),
                               borderRadius: BorderRadius.circular(18),
                               border: Border.all(
                                 color:
                                     selected
-                                        ? primary.withValues(alpha: 0.28)
-                                        : border,
+                                        ? primary.withValues(alpha: 0.30)
+                                        : chrome.line,
                               ),
                             ),
                             child: Row(
@@ -519,24 +488,20 @@ class _AssignWorkoutSheetState extends State<_AssignWorkoutSheet> {
                                 Container(
                                   width: 38,
                                   height: 38,
+                                  alignment: Alignment.center,
                                   decoration: BoxDecoration(
-                                    color:
-                                        selected
-                                            ? primary
-                                            : EagleTokens.brandSofter,
+                                    color: selected ? primary : chrome.line,
                                     borderRadius: BorderRadius.circular(14),
                                   ),
-                                  alignment: Alignment.center,
                                   child: Text(
                                     initials,
-                                    style: AppTypography.inter(
-                                      color: selected ? heroTealInk() : primary,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w800,
+                                    style: FocuxHubTypography.cardTitle(
+                                      color:
+                                          selected ? heroTealInk() : chrome.ink,
                                     ),
                                   ),
                                 ),
-                                const SizedBox(width: 12),
+                                SizedBox(width: TokensStrip.s3),
                                 Expanded(
                                   child: Column(
                                     crossAxisAlignment:
@@ -546,13 +511,11 @@ class _AssignWorkoutSheetState extends State<_AssignWorkoutSheet> {
                                         aluno.nome,
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
-                                        style: AppTypography.inter(
-                                          color: ink,
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w800,
+                                        style: FocuxHubTypography.cardTitle(
+                                          color: chrome.ink,
                                         ),
                                       ),
-                                      const SizedBox(height: 3),
+                                      SizedBox(height: TokensStrip.s1),
                                       Text(
                                         aluno.objetivo?.trim().isNotEmpty ==
                                                 true
@@ -560,9 +523,8 @@ class _AssignWorkoutSheetState extends State<_AssignWorkoutSheet> {
                                             : 'Objetivo não definido',
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
-                                        style: AppTypography.inter(
-                                          color: mute,
-                                          fontSize: 11.5,
+                                        style: FocuxHubTypography.bodyMuted(
+                                          color: chrome.mute,
                                           fontWeight: FontWeight.w600,
                                         ),
                                       ),
@@ -576,7 +538,7 @@ class _AssignWorkoutSheetState extends State<_AssignWorkoutSheet> {
                                   color:
                                       selected
                                           ? primary
-                                          : mute.withValues(alpha: 0.7),
+                                          : chrome.mute.withValues(alpha: 0.7),
                                   size: 20,
                                 ),
                               ],
@@ -594,21 +556,20 @@ class _AssignWorkoutSheetState extends State<_AssignWorkoutSheet> {
                     child: OutlinedButton(
                       onPressed: () => Navigator.pop(context),
                       style: OutlinedButton.styleFrom(
-                        minimumSize: const Size.fromHeight(46),
-                        side: BorderSide(color: border),
+                        foregroundColor: chrome.ink,
+                        side: BorderSide(color: chrome.line),
+                        minimumSize: const Size(0, TreinosLayout.touchTarget),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
                         ),
-                        foregroundColor: ink,
-                        textStyle: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w800,
-                        ),
                       ),
-                      child: const Text('Cancelar'),
+                      child: const Text(
+                        'Cancelar',
+                        style: TextStyle(fontWeight: FontWeight.w800),
+                      ),
                     ),
                   ),
-                  const SizedBox(width: 10),
+                  SizedBox(width: TokensStrip.s3),
                   Expanded(
                     child: FilledButton(
                       onPressed:
@@ -616,20 +577,17 @@ class _AssignWorkoutSheetState extends State<_AssignWorkoutSheet> {
                               ? null
                               : () => Navigator.pop(context, selectedAlunoId),
                       style: FilledButton.styleFrom(
-                        minimumSize: const Size.fromHeight(46),
                         backgroundColor: primary,
-                        disabledBackgroundColor: primary.withValues(
-                          alpha: 0.28,
-                        ),
+                        foregroundColor: heroTealInk(),
+                        minimumSize: const Size(0, TreinosLayout.touchTarget),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
                         ),
-                        textStyle: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w900,
-                        ),
                       ),
-                      child: const Text('Atribuir'),
+                      child: const Text(
+                        'Atribuir',
+                        style: TextStyle(fontWeight: FontWeight.w800),
+                      ),
                     ),
                   ),
                 ],
@@ -643,138 +601,24 @@ class _AssignWorkoutSheetState extends State<_AssignWorkoutSheet> {
 }
 
 class _TreinoHeroActions extends StatelessWidget {
-  final Color primary;
   final VoidCallback onAdd;
-  final VoidCallback onMenu;
 
-  const _TreinoHeroActions({
-    required this.primary,
-    required this.onAdd,
-    required this.onMenu,
-  });
+  const _TreinoHeroActions({required this.onAdd});
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return Row(
-      children: [
-        Expanded(
-          child: Material(
-            color: fxTransparent,
-            child: InkWell(
-              onTap: onAdd,
-              borderRadius: BorderRadius.circular(18),
-              child: Ink(
-                height: 48,
-                decoration: BoxDecoration(
-                  color: isDark ? EagleTokens.darkCard : TokensStrip.cardBg,
-                  borderRadius: BorderRadius.circular(18),
-                  border: Border.all(
-                    color: primary.withValues(alpha: isDark ? 0.22 : 0.14),
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: primary.withValues(alpha: isDark ? 0.10 : 0.12),
-                      blurRadius: 22,
-                      offset: const Offset(0, 10),
-                      spreadRadius: -8,
-                    ),
-                  ],
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.add_rounded, color: primary, size: 19),
-                    const SizedBox(width: 6),
-                    Text(
-                      'Adicionar exercício',
-                      style: AppTypography.inter(
-                        color: primary,
-                        fontSize: 13.5,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+    return Semantics(
+      button: true,
+      label: 'Adicionar exercício',
+      child: FilledButton.icon(
+        onPressed: onAdd,
+        icon: const Icon(Icons.add_rounded, size: 20),
+        label: const Text('Adicionar exercício'),
+        style: FilledButton.styleFrom(
+          minimumSize: const Size.fromHeight(TreinosLayout.touchTarget),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
           ),
-        ),
-        const SizedBox(width: 10),
-        Material(
-          color: fxTransparent,
-          child: InkWell(
-            onTap: onMenu,
-            borderRadius: BorderRadius.circular(18),
-            child: Ink(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color:
-                    isDark
-                        ? heroTealSurface(0.08)
-                        : TokensStrip.cardBg,
-                borderRadius: BorderRadius.circular(18),
-                border: Border.all(
-                  color: primary.withValues(alpha: isDark ? 0.18 : 0.12),
-                ),
-              ),
-              child: Icon(
-                Icons.more_horiz_rounded,
-                color: isDark ? heroTealInk() : primary,
-                size: 20,
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _HeroMetricChip extends StatelessWidget {
-  final String label;
-  final String value;
-
-  const _HeroMetricChip({required this.label, required this.value});
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-        decoration: BoxDecoration(
-          color: heroTealSurface(0.10),
-          borderRadius: BorderRadius.circular(15),
-          border: Border.all(color: heroTealSurface(0.12)),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: AppTypography.inter(
-                color: heroTealSurface(0.62),
-                fontSize: 9.5,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              value,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: AppTypography.mono(
-                color: heroTealInk(),
-                fontSize: 12.5,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 0,
-              ),
-            ),
-          ],
         ),
       ),
     );

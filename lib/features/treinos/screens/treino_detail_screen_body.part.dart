@@ -12,8 +12,8 @@ class _TreinoDetailBackButton extends StatelessWidget {
     return IconButton(
       onPressed: () => _popTreinoDetail(context, alunoId: alunoId),
       icon: Container(
-        width: 38,
-        height: 38,
+        width: TreinosLayout.headerChromeSize,
+        height: TreinosLayout.headerChromeSize,
         decoration: chrome.headerAction(radius: 12),
         child: Center(
           child: FxIcon(name: 'arrow-left', size: 18, color: chrome.ink),
@@ -40,75 +40,114 @@ class _TreinoDetailBody extends StatelessWidget {
   });
 
   Future<void> _openMenu(BuildContext context) async {
-    final action = await showModalBottomSheet<String>(
+    AnalyticsService.instance.track(
+      ProductEvents.treinoDetailMenuOpened,
+      props: {'id': treinoId},
+    );
+    final action = await _showTreinoSheet<String>(
       context: context,
-      backgroundColor: fxTransparent,
-      barrierColor: heroScrim(0.34),
-      isScrollControlled: true,
       builder: (sheetContext) {
-        final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-        final mute =
-            isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+        final chrome = ShellChrome.forDark(isDark);
+        final primary = Theme.of(sheetContext).colorScheme.primary;
         final maxHeight = MediaQuery.sizeOf(sheetContext).height * 0.82;
+        final bottom = MediaQuery.of(sheetContext).padding.bottom;
+        final actions = <_DetailActionTile>[
+          _DetailActionTile(
+            icon: Icons.add_rounded,
+            label: 'Adicionar exercício',
+            showChevron: true,
+            onTap: () => Navigator.pop(sheetContext, 'add'),
+          ),
+          _DetailActionTile(
+            icon: Icons.person_add_alt_1_rounded,
+            label: 'Atribuir a aluno',
+            showChevron: true,
+            onTap: () => Navigator.pop(sheetContext, 'assign'),
+          ),
+          _DetailActionTile(
+            icon: Icons.assignment_ind_rounded,
+            label: 'Copiar para aluno',
+            showChevron: true,
+            onTap: () => Navigator.pop(sheetContext, 'clone'),
+          ),
+          _DetailActionTile(
+            icon: Icons.control_point_duplicate_rounded,
+            label: 'Duplicar treino',
+            onTap: () => Navigator.pop(sheetContext, 'duplicate'),
+          ),
+          _DetailActionTile(
+            icon: Icons.bookmark_border_rounded,
+            label: 'Salvar como template',
+            onTap: () => Navigator.pop(sheetContext, 'template'),
+          ),
+          _DetailActionTile(
+            icon: Icons.delete_outline_rounded,
+            label: 'Excluir treino',
+            color: EagleTokens.bad,
+            onTap: () => Navigator.pop(sheetContext, 'delete'),
+          ),
+        ];
 
         return SafeArea(
           top: false,
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+            padding: EdgeInsets.fromLTRB(12, 0, 12, 12 + bottom),
             child: Container(
               constraints: BoxConstraints(maxHeight: maxHeight),
               padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
-              decoration: fxListCardDecoration(context),
+              decoration: chrome.bottomSheet(radius: 28),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Container(
-                    width: 44,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: mute.withValues(alpha: 0.35),
-                      borderRadius: BorderRadius.circular(999),
+                  Center(
+                    child: Container(
+                      width: 42,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: chrome.mute.withValues(alpha: 0.26),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 18),
+                  SizedBox(height: TokensStrip.s4),
                   Row(
                     children: [
                       Container(
                         width: 42,
                         height: 42,
                         decoration: BoxDecoration(
-                          color:
-                              isDark
-                                  ? heroTealSurface(0.06)
-                                  : EagleTokens.brandSofter,
+                          color: BrandPalette.soft(primary, dark: isDark),
                           borderRadius: BorderRadius.circular(16),
                         ),
                         child: Icon(
-                          Icons.tune_rounded,
-                          color: Theme.of(context).colorScheme.primary,
+                          Icons.fitness_center_rounded,
+                          color: primary,
                           size: 20,
                         ),
                       ),
-                      const SizedBox(width: 12),
+                      SizedBox(width: TokensStrip.s3),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Opções do treino',
-                              style: AppTypography.inter(
-                                color: ink,
-                                fontSize: 19,
+                              _displayWorkoutName(treino.nome),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: FocuxHubTypography.pageTitle(
+                                sheetContext,
+                                color: chrome.ink,
+                              ).copyWith(
                                 fontWeight: FontWeight.w800,
-                                letterSpacing: 0,
+                                height: 1.15,
                               ),
                             ),
-                            const SizedBox(height: 2),
+                            SizedBox(height: TokensStrip.s1),
                             Text(
-                              'Atribua, duplique ou salve como modelo.',
-                              style: AppTypography.inter(
-                                color: mute,
-                                fontSize: 12.5,
+                              'Escolha uma ação.',
+                              style: FocuxHubTypography.bodyMuted(
+                                color: chrome.mute,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -121,43 +160,28 @@ class _TreinoDetailBody extends StatelessWidget {
                   Flexible(
                     child: SingleChildScrollView(
                       physics: const BouncingScrollPhysics(),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          _MenuActionTile(
-                            icon: Icons.add_circle_outline,
-                            label: 'Adicionar exercício',
-                            onTap: () => Navigator.pop(sheetContext, 'add'),
+                      child: DecoratedBox(
+                        decoration: fxListCardDecoration(
+                          sheetContext,
+                          accent: primary,
+                        ),
+                        child: Material(
+                          color: Colors.transparent,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              for (var i = 0; i < actions.length; i++) ...[
+                                if (i > 0)
+                                  Divider(
+                                    height: 1,
+                                    thickness: 1,
+                                    color: chrome.line.withValues(alpha: 0.7),
+                                  ),
+                                actions[i],
+                              ],
+                            ],
                           ),
-                          _MenuActionTile(
-                            icon: Icons.person_add_alt_1_outlined,
-                            label: 'Atribuir a aluno',
-                            onTap: () => Navigator.pop(sheetContext, 'assign'),
-                          ),
-                          _MenuActionTile(
-                            icon: Icons.content_copy_rounded,
-                            label: 'Copiar para aluno',
-                            onTap: () => Navigator.pop(sheetContext, 'clone'),
-                          ),
-                          _MenuActionTile(
-                            icon: Icons.copy_outlined,
-                            label: 'Duplicar treino',
-                            onTap:
-                                () => Navigator.pop(sheetContext, 'duplicate'),
-                          ),
-                          _MenuActionTile(
-                            icon: Icons.bookmark_border,
-                            label: 'Salvar como template',
-                            onTap:
-                                () => Navigator.pop(sheetContext, 'template'),
-                          ),
-                          _MenuActionTile(
-                            icon: Icons.delete_outline,
-                            label: 'Excluir treino',
-                            color: EagleTokens.bad,
-                            onTap: () => Navigator.pop(sheetContext, 'delete'),
-                          ),
-                        ],
+                        ),
                       ),
                     ),
                   ),
@@ -177,6 +201,10 @@ class _TreinoDetailBody extends StatelessWidget {
 
     switch (action) {
       case 'add':
+        AnalyticsService.instance.track(
+          ProductEvents.treinoDetailAddTapped,
+          props: {'source': 'menu', 'id': treinoId},
+        );
         final added = await context.push<bool>(
           '/treinos/$treinoId/exercicios/add',
           extra: alunoId == null ? null : {'alunoId': alunoId},
@@ -189,17 +217,18 @@ class _TreinoDetailBody extends StatelessWidget {
         try {
           final alunos = await ref.read(alunosProvider.future);
           if (!context.mounted) return;
-          final selected = await showModalBottomSheet<int>(
+          final selected = await _showTreinoSheet<int>(
             context: context,
-            backgroundColor: fxTransparent,
-            barrierColor: heroScrim(0.34),
-            isScrollControlled: true,
             builder:
                 (dialogContext) =>
                     _AssignWorkoutSheet(alunos: alunos, isDark: isDark),
           );
           if (selected == null) return;
           await repo.atribuirAluno(treinoId, selected);
+          AnalyticsService.instance.track(
+            ProductEvents.treinosAssigned,
+            props: {'source': 'detail', 'id': treinoId},
+          );
           ref.invalidate(treinoProvider(treinoId));
           invalidateTreinosCaches(ref);
           ref.invalidate(treinosDoAlunoProvider(selected));
@@ -216,17 +245,18 @@ class _TreinoDetailBody extends StatelessWidget {
         try {
           final alunos = await ref.read(alunosProvider.future);
           if (!context.mounted) return;
-          final selected = await showModalBottomSheet<int>(
+          final selected = await _showTreinoSheet<int>(
             context: context,
-            backgroundColor: fxTransparent,
-            barrierColor: heroScrim(0.34),
-            isScrollControlled: true,
             builder:
                 (dialogContext) =>
                     _AssignWorkoutSheet(alunos: alunos, isDark: isDark),
           );
           if (selected == null) return;
           await repo.clonarParaAluno(treinoId, selected);
+          AnalyticsService.instance.track(
+            ProductEvents.treinosCloned,
+            props: {'source': 'detail', 'id': treinoId},
+          );
           invalidateTreinosCaches(ref);
           ref.invalidate(treinosDoAlunoProvider(selected));
           if (context.mounted) {
@@ -244,6 +274,10 @@ class _TreinoDetailBody extends StatelessWidget {
       case 'duplicate':
         try {
           await repo.duplicar(treinoId);
+          AnalyticsService.instance.track(
+            ProductEvents.treinosDuplicated,
+            props: {'source': 'detail', 'id': treinoId},
+          );
           invalidateTreinosCaches(ref);
           if (context.mounted) {
             FeedbackHelper.showSuccess(
@@ -270,10 +304,8 @@ class _TreinoDetailBody extends StatelessWidget {
         }
         break;
       case 'delete':
-        final confirm = await showModalBottomSheet<bool>(
+        final confirm = await _showTreinoSheet<bool>(
           context: context,
-          backgroundColor: fxTransparent,
-          barrierColor: heroScrim(0.34),
           builder:
               (dialogContext) =>
                   _DeleteTrainingSheet(title: treino.nome, isDark: isDark),
@@ -282,6 +314,10 @@ class _TreinoDetailBody extends StatelessWidget {
         HapticFeedback.mediumImpact();
         try {
           await repo.excluirTreino(treinoId);
+          AnalyticsService.instance.track(
+            ProductEvents.treinosDeleted,
+            props: {'source': 'detail', 'id': treinoId},
+          );
           invalidateTreinosCaches(ref);
           if (context.mounted) {
             FeedbackHelper.showSuccess(context, 'Treino excluído.');
@@ -300,44 +336,28 @@ class _TreinoDetailBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final repo = ref.read(treinoRepositoryProvider);
     final primary = Theme.of(context).colorScheme.primary;
-    final heroPrimary = BrandPalette.softened(primary, amount: 0.06);
-    final heroDeep = BrandPalette.deep(heroPrimary);
+    final chrome = ShellChrome.forDark(isDark);
     final contextLabel = _workoutContextLabel(treino, alunoNome);
     final displayName = _displayWorkoutName(treino.nome);
-    final primarySoft = BrandPalette.soft(primary, dark: isDark);
     final orderedExercises = [...treino.exercicios]
       ..sort((a, b) => a.ordem.compareTo(b.ordem));
 
-    // Group by muscle taxonomy (consistent labels)
     final grouped = <String, List<TreinoExercicioItem>>{};
     for (final te in orderedExercises) {
-      final group = _workoutGroupLabel(te);
-      grouped.putIfAbsent(group, () => []).add(te);
+      grouped.putIfAbsent(_workoutGroupLabel(te), () => []).add(te);
     }
     final durationMin = math.max(4, (treino.exercicios.length * 3.5).round());
-    double volumeKg = 0;
-    for (final te in treino.exercicios) {
-      final reps =
-          int.tryParse(te.repeticoes.split('x').last.trim()) ??
-          int.tryParse(te.repeticoes) ??
-          0;
-      volumeKg += te.series * reps * (te.cargaKg ?? 0);
-    }
-    final hasLoadVolume = volumeKg > 0;
-    final volumeLabel =
-        hasLoadVolume
-            ? '${(volumeKg / 1000).toStringAsFixed(1)}t'
-            : '${grouped.keys.length}';
-    final topInset = MediaQuery.paddingOf(context).top + kToolbarHeight + 6;
-    final expandedHeight = topInset + 132;
+    final exerciseCount = treino.exercicios.length;
+    final metaLine = [
+      '$exerciseCount exercício${exerciseCount == 1 ? '' : 's'}',
+      '~${durationMin}min',
+      '${grouped.keys.length} grupo${grouped.keys.length == 1 ? '' : 's'}',
+    ].join(' · ');
 
     Future<void> openEditPrescription(TreinoExercicioItem item) async {
       HapticFeedback.selectionClick();
-      final saved = await showModalBottomSheet<bool>(
+      final saved = await _showTreinoSheet<bool>(
         context: context,
-        isScrollControlled: true,
-        backgroundColor: fxTransparent,
-        barrierColor: heroScrim(0.34),
         builder:
             (_) => _EditPrescriptionSheet(
               treinoId: treinoId,
@@ -353,252 +373,133 @@ class _TreinoDetailBody extends StatelessWidget {
       }
     }
 
+    Future<void> openAdd({String source = 'cta'}) async {
+      HapticFeedback.mediumImpact();
+      AnalyticsService.instance.track(
+        ProductEvents.treinoDetailAddTapped,
+        props: {'source': source, 'id': treinoId},
+      );
+      final added = await context.push<bool>(
+        '/treinos/$treinoId/exercicios/add',
+        extra: alunoId == null ? null : {'alunoId': alunoId},
+      );
+      if (added == true) {
+        ref.invalidate(treinoProvider(treinoId));
+      }
+    }
+
     return CustomScrollView(
       slivers: [
-        // Hero AppBar
         SliverAppBar(
-          expandedHeight: expandedHeight,
           pinned: true,
           automaticallyImplyLeading: false,
-          backgroundColor: isDark ? EagleTokens.darkBg : heroDeep,
+          backgroundColor: fxTransparent,
           surfaceTintColor: fxTransparent,
           elevation: 0,
           scrolledUnderElevation: 0,
-          leadingWidth: 48,
-          iconTheme: IconThemeData(color: heroTealInk()),
+          leadingWidth: 52,
           leading: Padding(
             padding: const EdgeInsets.only(left: 4),
             child: _TreinoDetailBackButton(alunoId: alunoId),
           ),
-          flexibleSpace: FlexibleSpaceBar(
-            collapseMode: CollapseMode.pin,
-            background: Stack(
-              fit: StackFit.expand,
-              children: [
-                Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      transform: const GradientRotation(160 * math.pi / 180),
-                      colors: [heroPrimary, heroDeep],
-                      stops: const [0.0, 1.0],
-                    ),
+          actions: [
+            Padding(
+              padding: const EdgeInsets.only(right: TokensStrip.s3),
+              child: IconButton(
+                tooltip: 'Opções do treino',
+                onPressed: () => _openMenu(context),
+                icon: Container(
+                  width: TreinosLayout.headerChromeSize,
+                  height: TreinosLayout.headerChromeSize,
+                  decoration: chrome.headerAction(radius: 12),
+                  child: Icon(
+                    Icons.more_horiz_rounded,
+                    size: 18,
+                    color: chrome.ink,
                   ),
                 ),
-                CustomPaint(painter: const _GridTexturePainter()),
-                Padding(
-                  padding: EdgeInsets.fromLTRB(
-                    TokensStrip.s5,
-                    topInset,
-                    20,
-                    20,
+              ),
+            ),
+          ],
+        ),
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(
+              TokensStrip.s5,
+              TokensStrip.s2,
+              TokensStrip.s5,
+              TokensStrip.s3,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  contextLabel,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: FocuxHubTypography.eyebrow(
+                    context,
+                    color: chrome.mute,
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Container(
-                            width: 64,
-                            height: 64,
-                            padding: const EdgeInsets.all(5),
-                            decoration: BoxDecoration(
-                              color: heroTealSurface(0.1),
-                              borderRadius: BorderRadius.circular(22),
-                              border: Border.all(
-                                color: heroTealSurface(0.12),
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: heroScrim(0.14),
-                                  blurRadius: 24,
-                                  offset: const Offset(0, 12),
-                                ),
-                              ],
-                            ),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(17),
-                                gradient: LinearGradient(
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                  colors: [
-                                    heroTealSurface(0.18),
-                                    heroTealSurface(0.05),
-                                  ],
-                                ),
-                              ),
-                              child: Icon(
-                                Icons.fitness_center_rounded,
-                                size: 29,
-                                color: heroTealSurface(0.92),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 14),
-                          Expanded(
-                            child: Padding(
-                              padding: const EdgeInsets.only(bottom: 4),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    contextLabel,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: AppTypography.inter(
-                                      color: heroTealInk().withValues(
-                                        alpha: 0.68,
-                                      ),
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w700,
-                                      letterSpacing: 0,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    displayName,
-                                    style: AppTypography.inter(
-                                      color: heroTealInk(),
-                                      fontSize: 22,
-                                      fontWeight: FontWeight.w800,
-                                      letterSpacing: 0,
-                                      height: 1.02,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    '${treino.exercicios.length} exercício${treino.exercicios.length == 1 ? '' : 's'}',
-                                    style: AppTypography.mono(
-                                      color: heroTealInk().withValues(
-                                        alpha: 0.72,
-                                      ),
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 14),
-                      Row(
-                        children: [
-                          _HeroMetricChip(
-                            label: 'Duração est.',
-                            value: '~${durationMin}min',
-                          ),
-                          const SizedBox(width: 8),
-                          _HeroMetricChip(
-                            label: 'Exercícios',
-                            value: '${treino.exercicios.length}',
-                          ),
-                          const SizedBox(width: 8),
-                          _HeroMetricChip(
-                            label: hasLoadVolume ? 'Volume' : 'Grupos',
-                            value: volumeLabel,
-                          ),
-                        ],
-                      ),
-                    ],
+                ),
+                SizedBox(height: TokensStrip.s1),
+                Text(
+                  displayName,
+                  style: FocuxHubTypography.pageTitle(
+                    context,
+                    color: chrome.ink,
+                  ),
+                ),
+                SizedBox(height: TokensStrip.s2),
+                Text(
+                  metaLine,
+                  style: FocuxHubTypography.bodyMuted(
+                    color: chrome.mute,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ],
             ),
           ),
         ),
-
         SliverToBoxAdapter(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 14, 20, 6),
-            child: _TreinoHeroActions(
-              primary: primary,
-              onAdd: () {
-                HapticFeedback.mediumImpact();
-                context
-                    .push<bool>(
-                      '/treinos/$treinoId/exercicios/add',
-                      extra: alunoId == null ? null : {'alunoId': alunoId},
-                    )
-                    .then((added) {
-                      if (added == true) {
-                        ref.invalidate(treinoProvider(treinoId));
-                      }
-                    });
-              },
-              onMenu: () => _openMenu(context),
+            padding: const EdgeInsets.fromLTRB(
+              TokensStrip.s5,
+              TokensStrip.s2,
+              TokensStrip.s5,
+              TokensStrip.s3,
             ),
+            child: _TreinoHeroActions(onAdd: openAdd),
           ),
         ),
-
         SliverToBoxAdapter(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 14, 20, 12),
+            padding: const EdgeInsets.fromLTRB(
+              TokensStrip.s5,
+              TokensStrip.s3,
+              TokensStrip.s5,
+              TokensStrip.s3,
+            ),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  'Exercícios',
-                  style: AppTypography.inter(
-                    fontSize: 21,
-                    fontWeight: FontWeight.w800,
-                    color:
-                        isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
-                    letterSpacing: 0,
+                Expanded(
+                  child: Text(
+                    'Exercícios',
+                    style: FocuxHubTypography.sectionTitle(
+                      context,
+                      color: chrome.ink,
+                    ),
                   ),
                 ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color:
-                            isDark
-                                ? heroTealSurface(0.06)
-                                : EagleTokens.brandSofter,
-                        borderRadius: BorderRadius.circular(999),
-                        border: Border.all(
-                          color:
-                              isDark
-                                  ? heroTealSurface(0.08)
-                                  : primary.withValues(alpha: 0.08),
-                        ),
-                      ),
-                      child: Text(
-                        '${treino.exercicios.length} ${treino.exercicios.length == 1 ? 'exercício' : 'exercícios'}',
-                        style: AppTypography.inter(
-                          color: primary,
-                          fontSize: 11.5,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 0,
-                        ),
-                      ),
+                if (exerciseCount > 1)
+                  Text(
+                    'Segure para reordenar',
+                    style: FocuxHubTypography.bodyMuted(
+                      color: chrome.mute,
+                      fontWeight: FontWeight.w600,
                     ),
-                    if (treino.exercicios.length > 1) ...[
-                      const SizedBox(height: 6),
-                      Text(
-                        'Segure e arraste para reordenar',
-                        style: AppTypography.inter(
-                          color:
-                              isDark
-                                  ? EagleTokens.darkInkMute
-                                  : TokensStrip.textSecondary,
-                          fontSize: 10.5,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
+                  ),
               ],
             ),
           ),
@@ -614,19 +515,7 @@ class _TreinoDetailBody extends StatelessWidget {
                   'Adicione exercícios da biblioteca curada para montar este treino.',
               action: FxEmptyAction(
                 label: 'Adicionar exercício',
-                onTap: () {
-                  HapticFeedback.mediumImpact();
-                  context
-                      .push<bool>(
-                        '/treinos/$treinoId/exercicios/add',
-                        extra: alunoId == null ? null : {'alunoId': alunoId},
-                      )
-                      .then((added) {
-                        if (added == true) {
-                          ref.invalidate(treinoProvider(treinoId));
-                        }
-                      });
-                },
+                onTap: () => openAdd(source: 'empty'),
               ),
             ),
           )
@@ -637,7 +526,6 @@ class _TreinoDetailBody extends StatelessWidget {
             alunoId: alunoId,
             isDark: isDark,
             primary: primary,
-            primarySoft: primarySoft,
             repo: repo,
             ref: ref,
             onEditPrescription: openEditPrescription,
