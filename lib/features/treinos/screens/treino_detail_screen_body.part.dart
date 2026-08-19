@@ -361,9 +361,7 @@ class _TreinoDetailBody extends StatelessWidget {
                   padding: const EdgeInsets.only(
                     right: TreinosLayout.headerChromeGap,
                   ),
-                  child: ShellHeaderIconButton(
-                    icon: 'help',
-                    size: TreinosLayout.headerChromeSize,
+                  child: FxHelpIconButton(
                     tooltip: 'Como montar este treino',
                     onTap: onHelp,
                   ),

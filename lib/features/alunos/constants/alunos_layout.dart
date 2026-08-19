@@ -2,22 +2,23 @@ import 'package:flutter/material.dart';
 
 import '../../../core/platform/focux_platform.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_help.dart';
 
 /// Tokens de layout do hub Alunos — paridade Home / Perfil.
 abstract final class AlunosLayout {
   AlunosLayout._();
 
-  static const double headerChromeSize = 36;
+  static const double headerChromeSize = FxHelpChrome.iconSize;
 
   /// Paridade Home `_chromeGap`.
-  static const double headerChromeGap = 3;
+  static const double headerChromeGap = FxHelpChrome.gap;
 
   /// Home some busca abaixo de 360; aqui some o toggle de tema.
   static const double compactChromeWidth = 360;
 
   static bool isCompactChrome(double width) => width < compactChromeWidth;
 
-  static const double touchTarget = 48;
+  static const double touchTarget = FxHelpChrome.touchTarget;
 
   static const double sectionGap = TokensStrip.s3;
 

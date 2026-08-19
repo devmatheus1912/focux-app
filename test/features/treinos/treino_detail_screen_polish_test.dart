@@ -67,6 +67,7 @@ void main() {
     expect(screen, isNot(contains('ChoiceChip')));
     expect(screen, isNot(contains('DropdownButtonFormField')));
     expect(screen, contains('FxHubFreshness.fromFetchedAt'));
+    expect(screen, contains('FxHelpIconButton'));
     expect(screen, contains('showTreinoDetailHelpSheet'));
     expect(screen, contains('RefreshIndicator'));
     expect(screen, contains('FxContentWidthLimiter'));
@@ -85,7 +86,7 @@ void main() {
       File(
         'lib/features/treinos/widgets/treino_detail_help_sheet.dart',
       ).readAsStringSync(),
-      contains('TreinoHelpSheetFrame'),
+      contains('showFxHelpSheet'),
     );
     expect(screen, isNot(contains('durationMin')));
     expect(screen, isNot(contains('* 3.5')));

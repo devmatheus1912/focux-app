@@ -53,8 +53,12 @@ extension AlunosListScreenFilters on _AlunosListScreenState {
                       decoration: BoxDecoration(
                         color:
                             selected
-                                ? primary.withValues(alpha: isDark ? 0.22 : 0.12)
-                                : primary.withValues(alpha: isDark ? 0.14 : 0.08),
+                                ? primary.withValues(
+                                  alpha: isDark ? 0.22 : 0.12,
+                                )
+                                : primary.withValues(
+                                  alpha: isDark ? 0.14 : 0.08,
+                                ),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
@@ -252,8 +256,8 @@ extension AlunosListScreenFilters on _AlunosListScreenState {
                         Navigator.pop(ctx);
                         _openHelp();
                       },
-                      icon: Icon(
-                        Icons.help_outline_rounded,
+                      icon: FxIcon(
+                        name: FxHelpChrome.iconName,
                         size: 18,
                         color: linkColor,
                       ),
@@ -274,5 +278,4 @@ extension AlunosListScreenFilters on _AlunosListScreenState {
       },
     );
   }
-
 }

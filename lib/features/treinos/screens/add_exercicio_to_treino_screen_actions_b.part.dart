@@ -44,7 +44,7 @@ extension AddExercicioToTreinoScreenActionsB
       if (mounted) {
         HapticFeedback.lightImpact();
         setState(() {
-        _error = friendlyError(e, fallback: 'Erro ao adicionar exercício.');
+          _error = friendlyError(e, fallback: 'Erro ao adicionar exercício.');
         });
       }
     } finally {
@@ -224,8 +224,9 @@ extension AddExercicioToTreinoScreenActionsB
   }
 
   Future<Exercicio?> _freshExercicio(int exercicioId) async {
-    final home =
-        await ref.read(treinoPickerHomeProvider(widget.treinoId).future);
+    final home = await ref.read(
+      treinoPickerHomeProvider(widget.treinoId).future,
+    );
     for (final exercicio in home.exercicios) {
       if (exercicio.id == exercicioId) return exercicio;
     }
@@ -516,9 +517,11 @@ extension AddExercicioToTreinoScreenActionsB
                 primary: primary,
                 mediaLoading: _mediaLoading,
                 dense: true,
+                quietCta: true,
                 onPreview: _previewSelectedExerciseVideo,
                 onUpload: _uploadSelectedExerciseVideo,
                 onRemove: _removeSelectedExerciseVideo,
+                footer: ExerciseVideoSpecTips(isDark: isDark, embedded: true),
               ),
               const SizedBox(height: 10),
             ],

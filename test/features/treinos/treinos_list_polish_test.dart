@@ -31,12 +31,13 @@ void main() {
     expect(screen, contains('displayWorkoutName(treino.nome)'));
     expect(screen, contains('TreinosListLabels.libraryCaption'));
     expect(screen, contains('segure para selecionar'));
+    expect(screen, contains('FxHelpIconButton'));
     expect(screen, contains('showTreinosListHelpSheet'));
     expect(
       File(
         'lib/features/treinos/widgets/treinos_list_help_sheet.dart',
       ).readAsStringSync(),
-      contains('TreinoHelpSheetFrame'),
+      contains('showFxHelpSheet'),
     );
     expect(screen, contains('useRootNavigator: true'));
     expect(screen, contains('_TreinosBulkBar'));

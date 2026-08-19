@@ -106,9 +106,10 @@ void main() {
     expect(screen, contains('0.40'));
     expect(screen, contains('maxVisibleNextActions'));
     expect(screen, contains('modoFoco'));
-    final shortcutsFile = File(
-      'lib/features/dashboard/data/dashboard_tool_shortcuts.dart',
-    ).readAsStringSync();
+    final shortcutsFile =
+        File(
+          'lib/features/dashboard/data/dashboard_tool_shortcuts.dart',
+        ).readAsStringSync();
     expect(shortcutsFile, isNot(contains('roiQuickLinks')));
     expect(shortcutsFile, isNot(contains("label: 'Preços'")));
     expect(shortcutsFile, contains("label: 'Marca própria'"));
@@ -119,7 +120,8 @@ void main() {
     expect(screen, contains('featuredTools'));
     expect(screen, contains('verCatalogoCompleto'));
     expect(screen, contains('omitSecondarySections'));
-    expect(screen, contains('DashboardHomeHeader'));
+    expect(screen, contains('FxHelpIconButton'));
+    expect(screen, contains('FxHelpChrome.iconSize'));
     expect(screen, contains('DashboardAttentionRail'));
     expect(screen, contains('checkinsPulseLabel'));
     expect(screen, contains('utilityOnly'));

@@ -52,7 +52,10 @@ void main() {
     expect(screen, contains("part 'alunos_list_screen_header.part.dart'"));
     expect(screen, contains("part 'alunos_list_screen_body.part.dart'"));
     expect(screen, contains("part 'alunos_list_screen_cards.part.dart'"));
-    expect(screen, isNot(contains("part 'alunos_list_screen_aluno_card.part.dart'")));
+    expect(
+      screen,
+      isNot(contains("part 'alunos_list_screen_aluno_card.part.dart'")),
+    );
     expect(screen, isNot(contains("aluno.email.toLowerCase()")));
     expect(screen, contains('isScrollControlled: true'));
     expect(screen, contains('useSafeArea: true'));
@@ -61,5 +64,13 @@ void main() {
     expect(screen, isNot(contains('DropdownButtonFormField')));
     expect(screen, contains('home.alertasConfig'));
     expect(screen, isNot(contains('alertasConfigProvider')));
+    expect(screen, contains('FxHelpIconButton'));
+    expect(screen, contains('showAlunosListHelpSheet'));
+    expect(
+      File(
+        'lib/features/alunos/widgets/alunos_list_help_sheet.dart',
+      ).readAsStringSync(),
+      allOf(contains('showFxHelpSheet'), isNot(contains('Entendi'))),
+    );
   });
 }

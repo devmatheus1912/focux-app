@@ -4,19 +4,20 @@ import 'package:flutter/material.dart';
 
 import '../../../core/platform/focux_platform.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_help.dart';
 
 /// Chrome da lista de treinos — paridade Home / Alunos.
 abstract final class TreinosLayout {
   TreinosLayout._();
 
-  static const double headerChromeSize = 36;
-  static const double headerChromeGap = 3;
+  static const double headerChromeSize = FxHelpChrome.iconSize;
+  static const double headerChromeGap = FxHelpChrome.gap;
   static const double compactChromeWidth = 360;
 
   static bool isCompactChrome(double width) => width < compactChromeWidth;
 
   static const double screenPadding = TokensStrip.s4;
-  static const double touchTarget = 48;
+  static const double touchTarget = FxHelpChrome.touchTarget;
   static const double listItemGap = 10;
   static const double exerciseRowPadH = 8;
   static const double exerciseRowPadV = 8;

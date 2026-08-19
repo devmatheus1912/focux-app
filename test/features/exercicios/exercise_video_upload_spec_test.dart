@@ -51,7 +51,7 @@ void main() {
     expect(blob, contains('45 segundos'));
   });
 
-  testWidgets('Como filmar começa recolhido e abre no tap', (tester) async {
+  testWidgets('Como filmar abre a sheet no ? da Home', (tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(body: ExerciseVideoSpecTips(isDark: false)),
@@ -62,10 +62,11 @@ void main() {
     expect(find.textContaining('1080 × 1920'), findsOneWidget);
     expect(find.text('Celular em pé (9:16)'), findsNothing);
 
-    await tester.tap(find.text('Como filmar'));
+    await tester.tap(find.byTooltip('Como filmar'));
     await tester.pumpAndSettle();
 
     expect(find.text('Celular em pé (9:16)'), findsOneWidget);
     expect(find.textContaining('Full HD vertical'), findsOneWidget);
+    expect(find.text('Entendi'), findsNothing);
   });
 }

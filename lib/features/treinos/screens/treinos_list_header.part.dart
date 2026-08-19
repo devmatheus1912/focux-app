@@ -158,9 +158,7 @@ class _TreinosHeader extends StatelessWidget {
                   const ShellThemeToggle(size: TreinosLayout.headerChromeSize),
                   const SizedBox(width: TreinosLayout.headerChromeGap),
                 ],
-                ShellHeaderIconButton(
-                  icon: 'help',
-                  size: TreinosLayout.headerChromeSize,
+                FxHelpIconButton(
                   tooltip: 'Como usar a biblioteca',
                   onTap: onHelp,
                 ),

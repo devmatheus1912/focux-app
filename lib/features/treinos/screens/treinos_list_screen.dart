@@ -17,6 +17,7 @@ import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/utils/pt_br_display.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
+import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_icon.dart';

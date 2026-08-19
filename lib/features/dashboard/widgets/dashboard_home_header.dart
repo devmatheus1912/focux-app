@@ -4,6 +4,7 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/fx_utils.dart';
+import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../notificacoes/widgets/notificacao_badge_button.dart';
 import '../constants/dashboard_layout.dart';
@@ -37,8 +38,8 @@ class DashboardHomeHeader extends StatelessWidget {
   final VoidCallback? onHelp;
   final String? freshnessLabel;
 
-  static const double _chrome = 36;
-  static const double _chromeGap = 3;
+  static const double _chrome = FxHelpChrome.iconSize;
+  static const double _chromeGap = FxHelpChrome.gap;
 
   @override
   Widget build(BuildContext context) {
@@ -125,10 +126,7 @@ class DashboardHomeHeader extends StatelessWidget {
                       style: dashboardPageTitleStyle(
                         context,
                         color: ink,
-                      ).copyWith(
-                        fontWeight: FontWeight.w800,
-                        height: 1.12,
-                      ),
+                      ).copyWith(fontWeight: FontWeight.w800, height: 1.12),
                     ),
                     const SizedBox(height: 2),
                     Semantics(
@@ -140,10 +138,7 @@ class DashboardHomeHeader extends StatelessWidget {
                         style: dashboardCardSubtitleStyle(
                           context,
                           isDark: isDark,
-                        ).copyWith(
-                          color: mute,
-                          height: 1.2,
-                        ),
+                        ).copyWith(color: mute, height: 1.2),
                       ),
                     ),
                   ],
@@ -192,8 +187,7 @@ class _HeaderChromeCluster extends StatelessWidget {
           const SizedBox(width: gap),
         ],
         if (onHelp != null) ...[
-          ShellHeaderIconButton(
-            icon: 'help',
+          FxHelpIconButton(
             size: size,
             tooltip: DashboardMicrocopy.helpHomeOpen,
             onTap: onHelp!,

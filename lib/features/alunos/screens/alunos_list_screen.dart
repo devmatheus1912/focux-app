@@ -12,6 +12,8 @@ import '../../../core/ux/fx_hub_freshness.dart';
 import '../data/aluno_list_preferences_store.dart';
 import '../data/aluno_repository.dart';
 import '../providers/alunos_provider.dart';
+import '../../../core/widgets/fx_help.dart';
+import '../../../core/widgets/fx_icon.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../../core/theme/brand_palette.dart';
