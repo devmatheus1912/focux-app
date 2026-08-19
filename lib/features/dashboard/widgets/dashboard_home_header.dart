@@ -146,7 +146,7 @@ class DashboardHomeHeader extends StatelessWidget {
               ),
               const SizedBox(width: 4),
               _HeaderChromeCluster(
-                // <360: 3 ícones — busca cai (catálogo/tools cobrem).
+                // <360: busca cai (catálogo/tools cobrem).
                 onQuickSearch: compactChrome ? null : onQuickSearch,
                 onHelp: onHelp,
                 notificacoesCountOverride: notificacoesCountOverride,
@@ -194,8 +194,6 @@ class _HeaderChromeCluster extends StatelessWidget {
           ),
           const SizedBox(width: gap),
         ],
-        const ShellThemeToggle(size: size),
-        const SizedBox(width: gap),
         NotificacaoBadgeButton(
           size: size,
           countOverride: notificacoesCountOverride,

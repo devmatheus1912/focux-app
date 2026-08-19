@@ -17,11 +17,13 @@ void main() {
     expect(screen, contains('PerfilProfessionalSummary'));
     expect(screen, contains('PerfilQuietCollapsible'));
     expect(screen, contains('PerfilStickyBar'));
+    expect(screen, contains('PerfilAppearanceSection'));
     expect(screen, contains('PerfilOperacaoSection'));
     expect(screen, contains('PerfilContaSegurancaSection'));
     expect(screen, contains('if (!profileComplete)'));
     expect(screen, isNot(contains('_PerfilGrowthSection')));
     expect(screen, contains('Conta e segurança'));
+    expect(screen, isNot(contains('ShellThemeToggle')));
     expect(screen, isNot(contains('_PerfilBottomActions')));
     expect(screen, isNot(contains('Conta e plano')));
     expect(screen, isNot(contains('Nao informado')));

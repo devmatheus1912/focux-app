@@ -150,8 +150,6 @@ class Aluno360HeaderToolbar extends StatelessWidget {
               color: ink.withValues(alpha: 0.45),
             ),
           ),
-        const ShellThemeToggle(size: 38),
-        const SizedBox(width: 8),
       ],
     );
   }

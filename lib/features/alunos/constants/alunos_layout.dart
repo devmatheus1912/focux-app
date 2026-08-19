@@ -13,11 +13,6 @@ abstract final class AlunosLayout {
   /// Paridade Home `_chromeGap`.
   static const double headerChromeGap = FxHelpChrome.gap;
 
-  /// Home some busca abaixo de 360; aqui some o toggle de tema.
-  static const double compactChromeWidth = 360;
-
-  static bool isCompactChrome(double width) => width < compactChromeWidth;
-
   static const double touchTarget = FxHelpChrome.touchTarget;
 
   static const double sectionGap = TokensStrip.s3;

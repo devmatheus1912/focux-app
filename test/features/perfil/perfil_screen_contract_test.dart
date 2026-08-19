@@ -43,6 +43,14 @@ void main() {
     expect(find.text('WhatsApp pendente'), findsOneWidget);
     expect(find.textContaining('alunos'), findsWidgets);
 
+    await tester.scrollUntilVisible(
+      find.text('Aparência'),
+      240,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pump();
+    expect(find.text('Aparência'), findsOneWidget);
+    expect(find.text('Sistema'), findsOneWidget);
     expect(find.text('Operação'), findsOneWidget);
     await tester.scrollUntilVisible(
       find.text('Operação'),

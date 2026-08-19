@@ -65,6 +65,7 @@ void main() {
     expect(screen, contains('home.alertasConfig'));
     expect(screen, isNot(contains('alertasConfigProvider')));
     expect(screen, contains('FxHelpIconButton'));
+    expect(screen, isNot(contains('ShellThemeToggle')));
     expect(screen, contains('showAlunosListHelpSheet'));
     expect(
       File(

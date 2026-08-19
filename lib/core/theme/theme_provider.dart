@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'design_tokens.dart';
 
-const _themePrefKey = 'focux_theme_mode';
+const _themePrefKey = 'focux_appearance_mode';
 
 final themeModeProvider = StateNotifierProvider<ThemeModeController, ThemeMode>(
   (ref) => ThemeModeController(),
@@ -20,11 +20,14 @@ final hideFocuxBrandingProvider = StateProvider<bool>((ref) => false);
 
 final appDisplayNameProvider = StateProvider<String?>((ref) => null);
 
-/// Persists light/dark choice. Defaults to dark to match login/cinematic chrome.
+/// Aparência do app. Padrão = modo do celular ([ThemeMode.system]).
 class ThemeModeController extends StateNotifier<ThemeMode> {
-  ThemeModeController() : super(ThemeMode.dark) {
-    _restore();
+  ThemeModeController() : super(ThemeMode.system) {
+    ready = _restore();
   }
+
+  @visibleForTesting
+  late final Future<void> ready;
 
   Future<void> _restore() async {
     try {
@@ -33,13 +36,9 @@ class ThemeModeController extends StateNotifier<ThemeMode> {
       if (raw == null) return;
       state = ThemeMode.values.firstWhere(
         (mode) => mode.name == raw,
-        orElse: () => ThemeMode.dark,
+        orElse: () => ThemeMode.system,
       );
     } catch (_) {}
-  }
-
-  Future<void> toggle() async {
-    await setMode(state == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark);
   }
 
   Future<void> setMode(ThemeMode mode) async {

@@ -32,6 +32,7 @@ void main() {
     expect(screen, contains('TreinosListLabels.libraryCaption'));
     expect(screen, contains('segure para selecionar'));
     expect(screen, contains('FxHelpIconButton'));
+    expect(screen, isNot(contains('ShellThemeToggle')));
     expect(screen, contains('showTreinosListHelpSheet'));
     expect(
       File(

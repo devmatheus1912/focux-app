@@ -141,15 +141,6 @@ extension AlunosListScreenHeader on _AlunosListScreenState {
                         ),
                       ),
                     ] else ...[
-                      if (!AlunosLayout.isCompactChrome(
-                            MediaQuery.sizeOf(context).width,
-                          ) &&
-                          !showHeaderBack) ...[
-                        const ShellThemeToggle(
-                          size: AlunosLayout.headerChromeSize,
-                        ),
-                        const SizedBox(width: AlunosLayout.headerChromeGap),
-                      ],
                       FxHelpIconButton(
                         tooltip: AlunosMicrocopy.helpA11y,
                         onTap: _openHelp,

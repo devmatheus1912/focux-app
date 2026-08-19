@@ -121,6 +121,7 @@ void main() {
     expect(screen, contains('verCatalogoCompleto'));
     expect(screen, contains('omitSecondarySections'));
     expect(screen, contains('FxHelpIconButton'));
+    expect(screen, isNot(contains('ShellThemeToggle')));
     expect(screen, contains('FxHelpChrome.iconSize'));
     expect(screen, contains('DashboardAttentionRail'));
     expect(screen, contains('checkinsPulseLabel'));

@@ -12,9 +12,6 @@ abstract final class TreinosLayout {
 
   static const double headerChromeSize = FxHelpChrome.iconSize;
   static const double headerChromeGap = FxHelpChrome.gap;
-  static const double compactChromeWidth = 360;
-
-  static bool isCompactChrome(double width) => width < compactChromeWidth;
 
   static const double screenPadding = TokensStrip.s4;
   static const double touchTarget = FxHelpChrome.touchTarget;

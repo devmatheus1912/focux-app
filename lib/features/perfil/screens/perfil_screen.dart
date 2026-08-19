@@ -32,6 +32,7 @@ import '../utils/perfil_readiness.dart';
 import '../../subscription/utils/landing_editor_access.dart';
 import '../constants/perfil_layout.dart';
 import '../widgets/landing_editor_widgets.dart';
+import '../widgets/perfil_appearance_section.dart';
 import '../widgets/perfil_card_section.dart';
 import '../widgets/perfil_conta_seguranca_section.dart';
 import '../widgets/perfil_marca_vitrine_section.dart';
@@ -69,9 +70,7 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
     ref.invalidate(dashboardHomeProvider);
     ref.invalidate(dashboardProvider);
     invalidatePacotesCaches(ref);
-    unawaited(
-      AnalyticsService.instance.track(ProductEvents.perfilRefreshed),
-    );
+    unawaited(AnalyticsService.instance.track(ProductEvents.perfilRefreshed));
     setState(() => _fetchedAt = DateTime.now());
   }
 

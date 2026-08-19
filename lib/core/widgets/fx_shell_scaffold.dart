@@ -164,11 +164,7 @@ class FxShellAppBar extends StatelessWidget implements PreferredSizeWidget {
                   ),
                 ],
               ),
-      actions: [
-        ...?actions,
-        const ShellThemeToggle(size: 38),
-        const SizedBox(width: 8),
-      ],
+      actions: [...?actions],
     );
   }
 }
@@ -241,10 +237,7 @@ Widget fxListTileCardShell({
       selected: selected,
     ),
     clipBehavior: clipBehavior,
-    child: Material(
-      color: Colors.transparent,
-      child: child,
-    ),
+    child: Material(color: Colors.transparent, child: child),
   );
 }
 
@@ -357,6 +350,7 @@ BoxDecoration fxStripCardDecoration(
   Color? accent,
   double radius = TokensStrip.rCard,
   double glowStrength = 0.44,
+
   /// Lead P0 — borda e glow mais fortes (Home / sheet).
   bool emphasize = false,
 }) {
@@ -368,21 +362,16 @@ BoxDecoration fxStripCardDecoration(
       return BoxDecoration(
         color: TokensStrip.glassFill(dark: true, opacity: 0.96),
         borderRadius: BorderRadius.circular(radius),
-        border: Border.all(
-          color: primary.withValues(alpha: 0.38),
-          width: 1.35,
-        ),
+        border: Border.all(color: primary.withValues(alpha: 0.38), width: 1.35),
         boxShadow: [
           ...TokensStrip.elevation(10, dark: true, accent: primary),
           ...TokensStrip.coloredDepthGlow(primary, strength: 0.36),
         ],
       );
     }
-    return ShellChrome.of(context).panel(
-      radius: radius,
-      accent: primary,
-      elevationLevel: 8,
-    );
+    return ShellChrome.of(
+      context,
+    ).panel(radius: radius, accent: primary, elevationLevel: 8);
   }
 
   return BoxDecoration(

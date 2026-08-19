@@ -135,8 +135,7 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
 
   Future<void> _copyIcalLink() async {
     try {
-      final info =
-          await ref.read(agendaRepositoryProvider).icalToken();
+      final info = await ref.read(agendaRepositoryProvider).icalToken();
       final fullUrl = _resolveAbsoluteApiUrl(info.url);
       await Clipboard.setData(ClipboardData(text: fullUrl));
       if (mounted) {
@@ -287,7 +286,6 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                           ),
                           onPressed: _copyIcalLink,
                         ),
-                        const ShellThemeToggle(size: 36),
                         const SizedBox(width: 6),
                         Flexible(
                           child: FittedBox(

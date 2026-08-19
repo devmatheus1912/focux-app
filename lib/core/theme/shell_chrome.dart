@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../widgets/fx_icon.dart';
 import 'design_tokens.dart';
-import 'theme_provider.dart';
 import 'tokens_strip.dart';
 
 /// Dual-theme Liquid Glass surface system for shell tabs over cinematic mesh.
@@ -13,8 +11,7 @@ class ShellPalette {
   final bool isDark;
 
   Color get ink => isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-  Color get mute =>
-      isDark ? EagleTokens.darkInkMute : const Color(0xFF374151);
+  Color get mute => isDark ? EagleTokens.darkInkMute : const Color(0xFF374151);
   Color get line => isDark ? EagleTokens.darkLine : EagleTokens.lineSoft;
   Color get lineStrong => isDark ? EagleTokens.glassBorder : EagleTokens.line;
 
@@ -127,25 +124,6 @@ abstract class ShellChrome {
       ShellPalette(Theme.of(context).brightness == Brightness.dark);
 
   static ShellPalette forDark(bool isDark) => ShellPalette(isDark);
-}
-
-/// Moon/sun toggle — TOKENS STRIP header chrome.
-class ShellThemeToggle extends ConsumerWidget {
-  const ShellThemeToggle({super.key, this.size = 40});
-
-  final double size;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final chrome = ShellChrome.of(context);
-    final icon = chrome.isDark ? 'sun' : 'moon';
-
-    return ShellHeaderIconButton(
-      icon: icon,
-      size: size,
-      onTap: () => ref.read(themeModeProvider.notifier).toggle(),
-    );
-  }
 }
 
 /// Circular header control — strip card (light) / glass (dark).

@@ -34,9 +34,6 @@ class _TreinosHeader extends StatelessWidget {
     final mute = chrome.mute;
     final primary = Theme.of(context).colorScheme.primary;
     final showBack = onBack != null;
-    final compactChrome = TreinosLayout.isCompactChrome(
-      MediaQuery.sizeOf(context).width,
-    );
     final title =
         alunoId == null
             ? 'Treinos'
@@ -154,10 +151,6 @@ class _TreinosHeader extends StatelessWidget {
                   ),
                 )
               else ...[
-                if (!compactChrome && !showBack) ...[
-                  const ShellThemeToggle(size: TreinosLayout.headerChromeSize),
-                  const SizedBox(width: TreinosLayout.headerChromeGap),
-                ],
                 FxHelpIconButton(
                   tooltip: 'Como usar a biblioteca',
                   onTap: onHelp,
