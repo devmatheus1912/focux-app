@@ -31,6 +31,7 @@ import '../constants/treinos_layout.dart';
 import '../utils/treino_detail_grouping.dart';
 import '../widgets/treino_detail_help_sheet.dart';
 import '../widgets/treino_home_sheet.dart';
+import '../widgets/treino_prescription_video_block.dart';
 
 part 'treino_detail_screen_body.part.dart';
 part 'treino_detail_screen_exercises.part.dart';

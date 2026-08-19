@@ -61,7 +61,11 @@ Future<void> showTreinoDetailHelpSheet(BuildContext context) {
             ),
             tip(
               'Prescrição',
-              'Toque no exercício para séries, reps, carga e observações.',
+              'Toque no exercício para séries, reps, carga e o seu vídeo de execução.',
+            ),
+            tip(
+              'Vídeo',
+              'Filme na vertical 1080×1920 (mínimo 720×1280), 10 a 45 s, MP4 ou MOV até 120 MB. O aluno vê a mesma gravação.',
             ),
             tip(
               'Reordenar',

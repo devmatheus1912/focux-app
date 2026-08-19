@@ -66,6 +66,8 @@ void main() {
     expect(screen, contains('treinoDetailMetaLine'));
     expect(screen, contains('treinoDetailExerciseLine'));
     expect(screen, contains('TreinoSheetChromeHeader'));
+    expect(screen, contains('TreinoPrescriptionVideoBlock'));
+    expect(screen, contains('treino_prescription_video_block.dart'));
     expect(screen, isNot(contains('durationMin')));
     expect(screen, isNot(contains('* 3.5')));
     expect(screen, isNot(contains('_GridTexturePainter')));
