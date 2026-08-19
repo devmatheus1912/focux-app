@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../support/screen_source_bundle.dart';
@@ -69,6 +71,13 @@ void main() {
     expect(screen, contains('TreinoSheetChromeHeader'));
     expect(screen, contains('TreinoPrescriptionVideoBlock'));
     expect(screen, contains('treino_prescription_video_block.dart'));
+    expect(screen, contains('height * 0.82'));
+    expect(
+      File(
+        'lib/features/treinos/widgets/treino_detail_help_sheet.dart',
+      ).readAsStringSync(),
+      contains('TreinoHelpSheetFrame'),
+    );
     expect(screen, isNot(contains('durationMin')));
     expect(screen, isNot(contains('* 3.5')));
     expect(screen, isNot(contains('_GridTexturePainter')));

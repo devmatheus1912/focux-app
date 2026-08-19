@@ -13,11 +13,13 @@ class ExerciseVideoSpecTips extends StatefulWidget {
     required this.isDark,
     this.compact = false,
     this.initiallyExpanded = false,
+    this.embedded = false,
   });
 
   final bool isDark;
   final bool compact;
   final bool initiallyExpanded;
+  final bool embedded;
 
   @override
   State<ExerciseVideoSpecTips> createState() => _ExerciseVideoSpecTipsState();
@@ -61,6 +63,109 @@ class _ExerciseVideoSpecTipsState extends State<ExerciseVideoSpecTips> {
         widget.compact
             ? ExerciseVideoUploadSpec.tips.take(2).toList()
             : ExerciseVideoUploadSpec.tips;
+    final pad =
+        widget.embedded
+            ? const EdgeInsets.fromLTRB(2, 4, 0, 2)
+            : const EdgeInsets.fromLTRB(14, 10, 10, 10);
+    final bodyPad =
+        widget.embedded
+            ? const EdgeInsets.fromLTRB(2, 0, 2, 8)
+            : const EdgeInsets.fromLTRB(14, 0, 14, 12);
+
+    final body = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: _toggle,
+            borderRadius: BorderRadius.circular(TokensStrip.rCard),
+            child: Semantics(
+              button: true,
+              label:
+                  _expanded
+                      ? 'Recolher como filmar'
+                      : 'Expandir como filmar. $_summary',
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(minHeight: 48),
+                child: Padding(
+                  padding: pad,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Como filmar',
+                              style: FocuxHubTypography.sectionTitle(
+                                context,
+                                color: primary,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              _summary,
+                              style: FocuxHubTypography.bodyMuted(
+                                color: chrome.mute,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Icon(
+                        _expanded
+                            ? Icons.expand_less_rounded
+                            : Icons.expand_more_rounded,
+                        color: chrome.mute,
+                        size: 22,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+        AnimatedSize(
+          duration:
+              reduceMotion ? Duration.zero : const Duration(milliseconds: 220),
+          curve: Curves.easeOutCubic,
+          alignment: Alignment.topCenter,
+          child:
+              _expanded
+                  ? Padding(
+                    padding: bodyPad,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        for (final tip in tips) ...[
+                          Text(
+                            tip.title,
+                            style: FocuxHubTypography.cardTitle(
+                              color: chrome.ink,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            tip.body,
+                            style: FocuxHubTypography.bodyMuted(
+                              color: chrome.mute,
+                              height: 1.35,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          if (tip != tips.last)
+                            SizedBox(height: TokensStrip.s2),
+                        ],
+                      ],
+                    ),
+                  )
+                  : const SizedBox.shrink(),
+        ),
+      ],
+    );
 
     return Semantics(
       container: true,
@@ -68,105 +173,13 @@ class _ExerciseVideoSpecTipsState extends State<ExerciseVideoSpecTips> {
           _expanded
               ? 'Como filmar, detalhes abertos. $_summary.'
               : 'Como filmar, recolhido. $_summary.',
-      child: Container(
-        decoration: fxListCardDecoration(context, accent: primary),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: _toggle,
-                borderRadius: BorderRadius.circular(TokensStrip.rCard),
-                child: Semantics(
-                  button: true,
-                  label:
-                      _expanded
-                          ? 'Recolher como filmar'
-                          : 'Expandir como filmar. $_summary',
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(minHeight: 48),
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(14, 10, 10, 10),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Como filmar',
-                                  style: FocuxHubTypography.sectionTitle(
-                                    context,
-                                    color: primary,
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  _summary,
-                                  style: FocuxHubTypography.bodyMuted(
-                                    color: chrome.mute,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Icon(
-                            _expanded
-                                ? Icons.expand_less_rounded
-                                : Icons.expand_more_rounded,
-                            color: chrome.mute,
-                            size: 22,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
+      child:
+          widget.embedded
+              ? body
+              : Container(
+                decoration: fxListCardDecoration(context, accent: primary),
+                child: body,
               ),
-            ),
-            AnimatedSize(
-              duration:
-                  reduceMotion
-                      ? Duration.zero
-                      : const Duration(milliseconds: 220),
-              curve: Curves.easeOutCubic,
-              alignment: Alignment.topCenter,
-              child:
-                  _expanded
-                      ? Padding(
-                        padding: const EdgeInsets.fromLTRB(14, 0, 14, 12),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            for (final tip in tips) ...[
-                              Text(
-                                tip.title,
-                                style: FocuxHubTypography.cardTitle(
-                                  color: chrome.ink,
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                tip.body,
-                                style: FocuxHubTypography.bodyMuted(
-                                  color: chrome.mute,
-                                  height: 1.35,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              if (tip != tips.last)
-                                SizedBox(height: TokensStrip.s2),
-                            ],
-                          ],
-                        ),
-                      )
-                      : const SizedBox.shrink(),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

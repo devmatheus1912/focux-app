@@ -124,3 +124,84 @@ class TreinoSheetChromeHeader extends StatelessWidget {
     );
   }
 }
+
+class TreinoHelpSheetFrame extends StatelessWidget {
+  const TreinoHelpSheetFrame({
+    super.key,
+    required this.isDark,
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.tips,
+  });
+
+  final bool isDark;
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final List<(String, String)> tips;
+
+  @override
+  Widget build(BuildContext context) {
+    final chrome = ShellChrome.forDark(isDark);
+    final maxHeight = MediaQuery.sizeOf(context).height * 0.72;
+
+    return TreinoHomeSheetSurface(
+      isDark: isDark,
+      maxHeight: maxHeight,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Center(
+            child: Container(
+              width: 42,
+              height: 4,
+              decoration: BoxDecoration(
+                color: chrome.line,
+                borderRadius: BorderRadius.circular(999),
+              ),
+            ),
+          ),
+          SizedBox(height: TokensStrip.s4),
+          TreinoSheetChromeHeader(
+            icon: icon,
+            title: title,
+            subtitle: subtitle,
+            isDark: isDark,
+          ),
+          SizedBox(height: TokensStrip.s4),
+          Flexible(
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  for (final tip in tips) ...[
+                    Text(
+                      tip.$1,
+                      style: FocuxHubTypography.sectionTitle(
+                        context,
+                        color: chrome.ink,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      tip.$2,
+                      style: FocuxHubTypography.bodyMuted(
+                        color: chrome.mute,
+                        height: 1.35,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    if (tip != tips.last) SizedBox(height: TokensStrip.s3),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

@@ -32,6 +32,12 @@ void main() {
     expect(screen, contains('TreinosListLabels.libraryCaption'));
     expect(screen, contains('segure para selecionar'));
     expect(screen, contains('showTreinosListHelpSheet'));
+    expect(
+      File(
+        'lib/features/treinos/widgets/treinos_list_help_sheet.dart',
+      ).readAsStringSync(),
+      contains('TreinoHelpSheetFrame'),
+    );
     expect(screen, contains('useRootNavigator: true'));
     expect(screen, contains('_TreinosBulkBar'));
     expect(screen, contains('Selecionar todos'));

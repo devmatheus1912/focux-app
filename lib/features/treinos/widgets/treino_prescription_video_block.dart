@@ -398,23 +398,18 @@ class _TreinoPrescriptionVideoBlockState
     final primary = Theme.of(context).colorScheme.primary;
     final locked = widget.busy || _mediaLoading;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        ExerciseVideoUploadStrip(
-          exercicio: _exercicio,
-          isDark: widget.isDark,
-          primary: primary,
-          mediaLoading: locked,
-          dense: true,
-          emptySubtitle: 'Filme a execução para o aluno ver neste treino.',
-          onPreview: _preview,
-          onUpload: _upload,
-          onRemove: _remove,
-        ),
-        SizedBox(height: TokensStrip.s3),
-        ExerciseVideoSpecTips(isDark: widget.isDark),
-      ],
+    return ExerciseVideoUploadStrip(
+      exercicio: _exercicio,
+      isDark: widget.isDark,
+      primary: primary,
+      mediaLoading: locked,
+      dense: true,
+      quietCta: true,
+      emptySubtitle: 'Filme a execução para o aluno ver neste treino.',
+      onPreview: _preview,
+      onUpload: _upload,
+      onRemove: _remove,
+      footer: ExerciseVideoSpecTips(isDark: widget.isDark, embedded: true),
     );
   }
 }

@@ -23,7 +23,9 @@ class ExerciseVideoUploadStrip extends StatelessWidget {
     required this.onUpload,
     required this.onRemove,
     this.dense = false,
+    this.quietCta = false,
     this.emptySubtitle,
+    this.footer,
   });
 
   final Exercicio exercicio;
@@ -34,9 +36,11 @@ class ExerciseVideoUploadStrip extends StatelessWidget {
   final VoidCallback onUpload;
   final VoidCallback onRemove;
   final bool dense;
+  final bool quietCta;
 
   /// Copy do estado vazio. Se nulo, usa o teaser da biblioteca.
   final String? emptySubtitle;
+  final Widget? footer;
 
   @override
   Widget build(BuildContext context) {
@@ -169,10 +173,12 @@ class ExerciseVideoUploadStrip extends StatelessWidget {
                 hasPersonalVideo: hasPersonalVideo,
                 canPreview: canPreview,
                 uploadLabel: uploadLabel,
+                quietCta: quietCta,
                 onPreview: onPreview,
                 onUpload: onUpload,
                 onRemove: onRemove,
               ),
+              if (footer != null) ...[const SizedBox(height: 8), footer!],
             ],
           ),
         ),
@@ -305,6 +311,7 @@ class _DenseActions extends StatelessWidget {
     required this.onPreview,
     required this.onUpload,
     required this.onRemove,
+    this.quietCta = false,
   });
 
   final Color primary;
@@ -313,6 +320,7 @@ class _DenseActions extends StatelessWidget {
   final bool hasPersonalVideo;
   final bool canPreview;
   final String uploadLabel;
+  final bool quietCta;
   final VoidCallback onPreview;
   final VoidCallback onUpload;
   final VoidCallback onRemove;
@@ -356,7 +364,7 @@ class _DenseActions extends StatelessWidget {
           OutlinedButton(
             onPressed: onPreview,
             style: OutlinedButton.styleFrom(
-              minimumSize: const Size.fromHeight(40),
+              minimumSize: const Size.fromHeight(48),
               foregroundColor: primary,
               side: BorderSide(color: primary.withValues(alpha: 0.35)),
             ),
@@ -364,11 +372,21 @@ class _DenseActions extends StatelessWidget {
           ),
         if (canPreview && !mediaLoading) const SizedBox(height: 8),
         if (!mediaLoading)
-          FxLiquidPrimaryButton(
-            label: uploadLabel,
-            onPressed: onUpload,
-            expand: true,
-          ),
+          quietCta
+              ? OutlinedButton(
+                onPressed: onUpload,
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size.fromHeight(48),
+                  foregroundColor: primary,
+                  side: BorderSide(color: primary.withValues(alpha: 0.45)),
+                ),
+                child: Text(uploadLabel),
+              )
+              : FxLiquidPrimaryButton(
+                label: uploadLabel,
+                onPressed: onUpload,
+                expand: true,
+              ),
         if (hasPersonalVideo) ...[
           const SizedBox(height: 4),
           Align(
