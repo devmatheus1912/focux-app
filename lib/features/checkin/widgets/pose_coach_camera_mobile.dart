@@ -7,7 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_mlkit_pose_detection/google_mlkit_pose_detection.dart';
 
+import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_home_sheet.dart';
 
 Future<void> openPoseCameraCoach(
   BuildContext context, {
@@ -23,10 +25,8 @@ Future<void> openPoseCameraCoach(
     return;
   }
 
-  await showModalBottomSheet<void>(
-    context: context,
-    isScrollControlled: true,
-    backgroundColor: Colors.transparent,
+  await showFxHomeSheet<void>(
+    context,
     builder:
         (ctx) => _CameraCoachSheet(
           exerciseName: exerciseName,
@@ -174,44 +174,29 @@ class _CameraCoachSheetState extends State<_CameraCoachSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return DraggableScrollableSheet(
-      initialChildSize: 0.72,
-      minChildSize: 0.45,
-      maxChildSize: 0.92,
-      builder:
-          (_, scroll) => Container(
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-            ),
-            padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
+    return FxHomeSheetSurface(
+      isDark: isDark,
+      expand: true,
+      maxHeight:
+          MediaQuery.sizeOf(context).height *
+          FxHomeSheetChrome.expandHeightFactor,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          FxHomeSheetHandle(isDark: isDark),
+          SizedBox(height: TokensStrip.s4),
+          FxHomeSheetHeader(
+            isDark: isDark,
+            title: 'MediaPipe · ${widget.exerciseName}',
+            subtitle: _status,
+            leading: Icon(Icons.videocam_outlined, color: primary, size: 18),
+          ),
+          const SizedBox(height: 14),
+          Expanded(
             child: ListView(
-              controller: scroll,
               children: [
-                Center(
-                  child: Container(
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: Colors.black12,
-                      borderRadius: BorderRadius.circular(99),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 14),
-                Text(
-                  'MediaPipe · ${widget.exerciseName}',
-                  style: const TextStyle(
-                    fontSize: 17,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  _status,
-                  style: const TextStyle(color: Colors.black54, height: 1.35),
-                ),
-                const SizedBox(height: 14),
                 ClipRRect(
                   borderRadius: BorderRadius.circular(20),
                   child: SizedBox(
@@ -230,6 +215,8 @@ class _CameraCoachSheetState extends State<_CameraCoachSheet> {
               ],
             ),
           ),
+        ],
+      ),
     );
   }
 }

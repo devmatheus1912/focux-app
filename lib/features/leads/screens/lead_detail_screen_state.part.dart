@@ -217,112 +217,120 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
     String tipo = 'WHATSAPP';
     final descCtrl = TextEditingController();
 
-    await showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder:
-          (ctx) => StatefulBuilder(
-            builder:
-                (ctx, setS) => Padding(
-                  padding: EdgeInsets.only(
-                    left: 16,
-                    right: 16,
-                    top: 16,
-                    bottom: MediaQuery.of(ctx).viewInsets.bottom + 16,
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        'Nova Interação',
-                        style: Theme.of(ctx).textTheme.titleMedium,
+    await showFxHomeSheet(
+      context,
+      builder: (ctx) {
+        final isDark = Theme.of(ctx).brightness == Brightness.dark;
+        final primary = Theme.of(ctx).colorScheme.primary;
+        return StatefulBuilder(
+          builder:
+              (ctx, setS) => FxHomeSheetSurface(
+                isDark: isDark,
+                maxHeight:
+                    MediaQuery.sizeOf(ctx).height *
+                    FxHomeSheetChrome.maxHeightFactor,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    FxHomeSheetHandle(isDark: isDark),
+                    SizedBox(height: TokensStrip.s4),
+                    FxHomeSheetHeader(
+                      isDark: isDark,
+                      title: 'Nova Interação',
+                      subtitle: 'Registre o contato com este lead.',
+                      leading: Icon(
+                        Icons.chat_bubble_outline_rounded,
+                        color: primary,
+                        size: 18,
                       ),
-                      const SizedBox(height: TokensStrip.s4),
-                      DropdownButtonFormField<String>(
-                        initialValue: tipo,
-                        decoration: InputDecoration(
-                          labelText: 'Tipo',
-                          border: FxInputDeco.outlineBorder(
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                          prefixIcon: Icon(Icons.category),
+                    ),
+                    SizedBox(height: TokensStrip.s3),
+                    DropdownButtonFormField<String>(
+                      initialValue: tipo,
+                      decoration: InputDecoration(
+                        labelText: 'Tipo',
+                        border: FxInputDeco.outlineBorder(
+                          borderRadius: BorderRadius.circular(14),
                         ),
-                        items:
-                            _tiposInteracao
-                                .map(
-                                  (t) => DropdownMenuItem(
-                                    value: t,
-                                    child: Row(
-                                      children: [
-                                        Icon(
-                                          _tipoIcons[t] ?? Icons.note,
-                                          size: 18,
-                                        ),
-                                        const SizedBox(width: 8),
-                                        Text(t),
-                                      ],
-                                    ),
+                        prefixIcon: Icon(Icons.category),
+                      ),
+                      items:
+                          _tiposInteracao
+                              .map(
+                                (t) => DropdownMenuItem(
+                                  value: t,
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        _tipoIcons[t] ?? Icons.note,
+                                        size: 18,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(t),
+                                    ],
                                   ),
-                                )
-                                .toList(),
-                        onChanged: (v) {
-                          if (v != null) setS(() => tipo = v);
+                                ),
+                              )
+                              .toList(),
+                      onChanged: (v) {
+                        if (v != null) setS(() => tipo = v);
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: descCtrl,
+                      decoration: InputDecoration(
+                        labelText: 'Descrição *',
+                        border: FxInputDeco.outlineBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        alignLabelWithHint: true,
+                      ),
+                      maxLines: 3,
+                    ),
+                    const SizedBox(height: TokensStrip.s4),
+                    SizedBox(
+                      width: double.infinity,
+                      child: FxLiquidPrimaryButton(
+                        icon: Icons.save,
+                        label: 'Salvar',
+                        onPressed: () async {
+                          final desc = descCtrl.text.trim();
+                          if (desc.isEmpty) {
+                            FeedbackHelper.showError(
+                              ctx,
+                              'Informe a descrição',
+                            );
+                            return;
+                          }
+                          Navigator.pop(ctx);
+                          try {
+                            await LeadRepository(
+                              ref.read(apiClientProvider),
+                            ).adicionarInteracao(_activeLead.id, tipo, desc);
+                            await _carregarInteracoes();
+                            if (mounted) {
+                              FeedbackHelper.showSuccess(
+                                context,
+                                'Interação registrada!',
+                              );
+                            }
+                          } catch (e) {
+                            if (mounted) {
+                              FeedbackHelper.showError(
+                                context,
+                                friendlyError(e),
+                              );
+                            }
+                          }
                         },
                       ),
-                      const SizedBox(height: 12),
-                      TextField(
-                        controller: descCtrl,
-                        decoration: InputDecoration(
-                          labelText: 'Descrição *',
-                          border: FxInputDeco.outlineBorder(
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                          alignLabelWithHint: true,
-                        ),
-                        maxLines: 3,
-                      ),
-                      const SizedBox(height: TokensStrip.s4),
-                      SizedBox(
-                        width: double.infinity,
-                        child: FxLiquidPrimaryButton(
-                          icon: Icons.save,
-                          label: 'Salvar',
-                          onPressed: () async {
-                            final desc = descCtrl.text.trim();
-                            if (desc.isEmpty) {
-                              FeedbackHelper.showError(
-                                ctx,
-                                'Informe a descrição',
-                              );
-                              return;
-                            }
-                            Navigator.pop(ctx);
-                            try {
-                              await LeadRepository(
-                                ref.read(apiClientProvider),
-                              ).adicionarInteracao(_activeLead.id, tipo, desc);
-                              await _carregarInteracoes();
-                              if (mounted) {
-                                FeedbackHelper.showSuccess(
-                                  context,
-                                  'Interação registrada!',
-                                );
-                              }
-                            } catch (e) {
-                              if (mounted) {
-                                FeedbackHelper.showError(
-                                  context,
-                                  friendlyError(e),
-                                );
-                              }
-                            }
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-          ),
+              ),
+        );
+      },
     );
     descCtrl.dispose();
   }

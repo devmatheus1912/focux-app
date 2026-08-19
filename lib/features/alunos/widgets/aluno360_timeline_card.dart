@@ -6,6 +6,7 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../constants/aluno_360_layout.dart';
@@ -278,14 +279,8 @@ class Aluno360TimelineCard extends StatelessWidget {
   }
 
   void _showFullTimeline(BuildContext context, Color primary) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      showDragHandle: true,
-      backgroundColor: Colors.transparent,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-      ),
+    showFxHomeSheet<void>(
+      context,
       builder:
           (ctx) => Aluno360TimelineFullSheet(
             aluno: aluno,
@@ -330,7 +325,6 @@ void showTimeline360BodySheet(
   required bool isDark,
 }) {
   final ink = fxScreenInk(context);
-  final mute = fxScreenMute(context);
   final link = item.deepLink;
   final title = timeline360SheetTitle(
     kind: item.kind,
@@ -341,109 +335,78 @@ void showTimeline360BodySheet(
     accent,
     isDark: isDark,
   );
-  showModalBottomSheet(
-    context: context,
-    isScrollControlled: true,
-    showDragHandle: true,
-    backgroundColor: Colors.transparent,
-    builder:
-        (ctx) => Aluno360TimelineSheetEntrance(
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(
-              16,
-              12 + MediaQuery.paddingOf(ctx).top,
-              16,
-              16 + MediaQuery.paddingOf(ctx).bottom,
+  showFxHomeSheet<void>(
+    context,
+    builder: (ctx) {
+      final maxHeight =
+          MediaQuery.sizeOf(ctx).height * FxHomeSheetChrome.maxHeightFactor;
+      return FxHomeSheetSurface(
+        isDark: isDark,
+        maxHeight: maxHeight,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            FxHomeSheetHandle(isDark: isDark),
+            SizedBox(height: TokensStrip.s4),
+            FxHomeSheetHeader(
+              isDark: isDark,
+              title: title,
+              subtitle: formatTimeline360Date(item.at),
+              leading: Icon(item.icon, color: item.color, size: 18),
             ),
-            child: ShellSurface(
-              radius: 24,
-              padding: const EdgeInsets.fromLTRB(18, 18, 18, 20),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxHeight: MediaQuery.sizeOf(ctx).height * 0.72,
-                ),
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Semantics(
-                        header: true,
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                title,
-                                style: Aluno360Layout.sectionTitleStyle(
-                                  context,
-                                  ink,
-                                ),
-                              ),
-                            ),
-                            IconButton(
-                              tooltip: 'Fechar',
-                              onPressed: () => Navigator.of(ctx).pop(),
-                              icon: Icon(Icons.close_rounded, color: mute),
-                              constraints: const BoxConstraints(
-                                minWidth: 44,
-                                minHeight: 44,
-                              ),
-                            ),
-                          ],
-                        ),
+            SizedBox(height: TokensStrip.s3),
+            Flexible(
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      item.body,
+                      style: Aluno360Layout.captionStyle(context).copyWith(
+                        color: ink,
+                        fontSize: 14,
+                        height: 1.45,
+                        fontWeight: FontWeight.w500,
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        formatTimeline360Date(item.at),
-                        style: Aluno360Layout.timelineMetaStyle(context),
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        item.body,
-                        style: Aluno360Layout.captionStyle(context).copyWith(
-                          color: ink,
-                          fontSize: 14,
-                          height: 1.45,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      if (link != null && link.isNotEmpty) ...[
-                        const SizedBox(height: 16),
-                        SizedBox(
-                          width: double.infinity,
-                          child: OutlinedButton.icon(
-                            onPressed: () {
-                              Navigator.of(ctx).pop();
-                              ctx.push(link);
-                            },
-                            icon: Icon(
-                              item.kind == 'Chat'
-                                  ? Icons.chat_bubble_outline
-                                  : Icons.open_in_new_rounded,
-                              size: 18,
-                            ),
-                            label: Text(
-                              item.kind == 'Chat'
-                                  ? 'Abrir chat'
-                                  : 'Abrir destino',
-                            ),
-                            style: Aluno360Layout.operacaoOutlinedButtonStyle(
-                              context,
-                              accent,
-                            ).copyWith(
-                              foregroundColor: WidgetStatePropertyAll(
-                                linkColor,
-                              ),
-                            ),
+                    ),
+                    if (link != null && link.isNotEmpty) ...[
+                      const SizedBox(height: 16),
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton.icon(
+                          onPressed: () {
+                            Navigator.of(ctx).pop();
+                            ctx.push(link);
+                          },
+                          icon: Icon(
+                            item.kind == 'Chat'
+                                ? Icons.chat_bubble_outline
+                                : Icons.open_in_new_rounded,
+                            size: 18,
+                          ),
+                          label: Text(
+                            item.kind == 'Chat'
+                                ? 'Abrir chat'
+                                : 'Abrir destino',
+                          ),
+                          style: Aluno360Layout.operacaoOutlinedButtonStyle(
+                            context,
+                            accent,
+                          ).copyWith(
+                            foregroundColor: WidgetStatePropertyAll(linkColor),
                           ),
                         ),
-                      ],
+                      ),
                     ],
-                  ),
+                  ],
                 ),
               ),
             ),
-          ),
+          ],
         ),
+      );
+    },
   );
 }
 

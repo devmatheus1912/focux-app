@@ -80,12 +80,8 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
   }
 
   void _abrirComentarios(int postId) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-      ),
+    showFxHomeSheet<void>(
+      context,
       builder:
           (ctx) => FeedCommentsSheet(
             postId: postId,
@@ -98,13 +94,23 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
   }
 
   void _abrirFormulario() {
-    showModalBottomSheet<bool>(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (ctx) => _FeedComposerSheet(ref: ref),
+    showFxHomeSheet<bool>(
+      context,
+      builder: (ctx) {
+        final isDark = Theme.of(ctx).brightness == Brightness.dark;
+        return FxHomeSheetSurface(
+          isDark: isDark,
+          maxHeight:
+              MediaQuery.sizeOf(ctx).height * FxHomeSheetChrome.maxHeightFactor,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              FxHomeSheetHandle(isDark: isDark),
+              _FeedComposerSheet(ref: ref),
+            ],
+          ),
+        );
+      },
     ).then((created) async {
       if (created != true || !mounted) return;
       await _load();

@@ -30,6 +30,7 @@ import '../widgets/ia_copilot_shell_widgets.dart';
 import '../models/ia_copilot_proxima_acao.dart';
 import '../models/ia_copiloto_home.dart';
 import '../widgets/ia_copilot_insight_widgets.dart';
+import 'package:focux_app/core/widgets/fx_home_sheet.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 part 'ia_copiloto_screen_actions.part.dart';
 part 'ia_copiloto_screen_state.part.dart';

@@ -9,6 +9,7 @@ import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -148,28 +149,35 @@ class RbacScreen extends ConsumerWidget {
     var recursoSelecionado = permissoesRbacRecursos.first;
     var nivelSelecionado = permissoesRbacNiveis.first;
 
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
+    showFxHomeSheet<void>(
+      context,
       builder: (ctx) {
+        final isDark = Theme.of(ctx).brightness == Brightness.dark;
+        final primary = Theme.of(ctx).colorScheme.primary;
         return StatefulBuilder(
           builder: (ctx, setState) {
-            return Padding(
-              padding: EdgeInsets.fromLTRB(
-                TokensStrip.s4,
-                TokensStrip.s5,
-                TokensStrip.s4,
-                MediaQuery.of(ctx).viewInsets.bottom + TokensStrip.s5,
-              ),
+            return FxHomeSheetSurface(
+              isDark: isDark,
+              maxHeight:
+                  MediaQuery.sizeOf(ctx).height *
+                  FxHomeSheetChrome.maxHeightFactor,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Text(
-                    'Conceder permissão',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+                  FxHomeSheetHandle(isDark: isDark),
+                  SizedBox(height: TokensStrip.s4),
+                  FxHomeSheetHeader(
+                    isDark: isDark,
+                    title: 'Conceder permissão',
+                    subtitle: 'Escolha o recurso e o nível de acesso.',
+                    leading: Icon(
+                      Icons.vpn_key_outlined,
+                      color: primary,
+                      size: 18,
+                    ),
                   ),
-                  const SizedBox(height: TokensStrip.s4),
+                  SizedBox(height: TokensStrip.s3),
                   DropdownButtonFormField<String>(
                     initialValue: recursoSelecionado,
                     decoration: FxInputDeco.build(context, 'Recurso'),
@@ -179,25 +187,21 @@ class RbacScreen extends ConsumerWidget {
                               (r) => DropdownMenuItem(value: r, child: Text(r)),
                             )
                             .toList(),
-                    onChanged:
-                        (v) => setState(() => recursoSelecionado = v!),
+                    onChanged: (v) => setState(() => recursoSelecionado = v!),
                   ),
-                  const SizedBox(height: TokensStrip.s4),
+                  SizedBox(height: TokensStrip.s4),
                   DropdownButtonFormField<String>(
                     initialValue: nivelSelecionado,
                     decoration: FxInputDeco.build(context, 'Nível'),
                     items:
                         permissoesRbacNiveis
                             .map(
-                              (n) => DropdownMenuItem(
-                                value: n,
-                                child: Text(n),
-                              ),
+                              (n) => DropdownMenuItem(value: n, child: Text(n)),
                             )
                             .toList(),
                     onChanged: (v) => setState(() => nivelSelecionado = v!),
                   ),
-                  const SizedBox(height: TokensStrip.s5),
+                  SizedBox(height: TokensStrip.s5),
                   FxLiquidPrimaryButton(
                     label: 'Salvar',
                     onPressed: () async {

@@ -10,6 +10,7 @@ import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
@@ -74,13 +75,8 @@ class _FeedbackAlunoScreenState extends ConsumerState<FeedbackAlunoScreen> {
       return;
     }
 
-    final result = await showModalBottomSheet<_FormResult>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
+    final result = await showFxHomeSheet<_FormResult>(
+      context,
       builder: (_) => _EnviarFormSheet(exercicios: _exercicios),
     );
     if (result == null) return;
@@ -302,38 +298,27 @@ class _EnviarFormSheetState extends State<_EnviarFormSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom,
-      ),
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
+    return FxHomeSheetSurface(
+      isDark: isDark,
+      maxHeight:
+          MediaQuery.sizeOf(context).height * FxHomeSheetChrome.maxHeightFactor,
       child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              width: 40,
-              height: 4,
-              margin: const EdgeInsets.only(bottom: 16),
-              decoration: BoxDecoration(
-                color: Theme.of(context).hintColor.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(2),
-              ),
+            FxHomeSheetHandle(isDark: isDark),
+            SizedBox(height: TokensStrip.s4),
+            FxHomeSheetHeader(
+              isDark: isDark,
+              title: 'Enviar vídeo para análise',
+              subtitle:
+                  'A IA da Focux retorna pontos positivos, correções e score em segundos.',
+              leading: Icon(Icons.videocam_outlined, color: primary, size: 18),
             ),
-            const Text(
-              'Enviar vídeo para análise',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'A IA da Focux retorna pontos positivos, correções e score em segundos.',
-              style: TextStyle(
-                color: Theme.of(context).hintColor,
-                fontSize: 13,
-              ),
-            ),
-            const SizedBox(height: 20),
+            SizedBox(height: TokensStrip.s3),
             DropdownButtonFormField<int>(
               initialValue: _exercicioId,
               isExpanded: true,

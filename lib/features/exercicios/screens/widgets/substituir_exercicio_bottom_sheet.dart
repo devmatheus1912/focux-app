@@ -4,8 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/design_tokens.dart';
 import '../../../../core/theme/tokens_strip.dart';
+import '../../../../core/widgets/fx_home_sheet.dart';
 import '../../../../core/widgets/fx_loading.dart';
-import '../../../../core/widgets/fx_shell_scaffold.dart';
 import '../../data/enums.dart';
 import '../../data/exercicio_repository.dart';
 import '../../data/exercicio_taxonomy_labels.dart';
@@ -33,163 +33,120 @@ class SubstituirExercicioBottomSheet extends ConsumerWidget {
     final asyncList = ref.watch(exerciciosProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
 
-    return DraggableScrollableSheet(
-      initialChildSize: 0.72,
-      minChildSize: 0.42,
-      maxChildSize: 0.92,
-      expand: false,
-      builder: (context, scrollController) {
-        return SafeArea(
-          top: false,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(10, 0, 10, 8),
-            child: Container(
-              decoration: fxListCardDecoration(context, accent: primary),
-              child: asyncList.when(
-                loading:
-                    () => Padding(
-                      padding: const EdgeInsets.fromLTRB(18, 20, 18, 18),
-                      child: FxLoading.sectionShimmer(context, height: 180),
+    return FxHomeSheetSurface(
+      isDark: isDark,
+      expand: true,
+      maxHeight:
+          MediaQuery.sizeOf(context).height *
+          FxHomeSheetChrome.expandHeightFactor,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          FxHomeSheetHandle(isDark: isDark),
+          SizedBox(height: TokensStrip.s4),
+          FxHomeSheetHeader(
+            isDark: isDark,
+            title: 'Trocar por similar',
+            subtitle: 'Substituindo ${alvo.nomeDisplay}',
+            leading: Icon(Icons.swap_horiz_rounded, color: primary, size: 18),
+          ),
+          Expanded(
+            child: asyncList.when(
+              loading:
+                  () => Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: FxLoading.sectionShimmer(context, height: 180),
+                  ),
+              error:
+                  (_, __) => Center(
+                    child: Text(
+                      'Não foi possível buscar alternativas.',
+                      style: AppTypography.inter(color: mute),
                     ),
-                error:
-                    (_, __) => SizedBox(
-                      height: 220,
-                      child: Center(
-                        child: Text(
-                          'Não foi possível buscar alternativas.',
-                          style: AppTypography.inter(color: mute),
-                        ),
-                      ),
-                    ),
-                data: (todos) {
-                  final alternativas = SubstituicaoEngine()
-                      .encontrarAlternativas(
-                        alvo: alvo,
-                        candidatos: todos,
-                        equipamentosAluno: equipamentosAluno,
-                      );
+                  ),
+              data: (todos) {
+                final alternativas = SubstituicaoEngine().encontrarAlternativas(
+                  alvo: alvo,
+                  candidatos: todos,
+                  equipamentosAluno: equipamentosAluno,
+                );
 
-                  return Column(
-                    children: [
-                      const SizedBox(height: 10),
-                      Container(
-                        width: 36,
-                        height: 4,
-                        decoration: BoxDecoration(
-                          color: mute.withValues(alpha: 0.35),
-                          borderRadius: BorderRadius.circular(999),
-                        ),
-                      ),
+                return Column(
+                  children: [
+                    if (alternativas.isNotEmpty)
                       Padding(
-                        padding: const EdgeInsets.fromLTRB(18, 16, 18, 12),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Trocar por similar',
-                              style: AppTypography.inter(
-                                color: ink,
-                                fontSize: 18,
-                                fontWeight: FontWeight.w900,
-                              ),
+                        padding: const EdgeInsets.only(bottom: 8, top: 4),
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            '${alternativas.length} opções por padrão de movimento e equipamento',
+                            style: AppTypography.inter(
+                              color: primary,
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w700,
                             ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'Substituindo ${alvo.nomeDisplay}',
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: AppTypography.inter(
-                                color: mute,
-                                fontSize: 12.5,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            if (alternativas.isNotEmpty) ...[
-                              const SizedBox(height: 6),
-                              Text(
-                                '${alternativas.length} opções por padrão de movimento e equipamento',
-                                style: AppTypography.inter(
-                                  color: primary,
-                                  fontSize: 11.5,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ],
-                          ],
-                        ),
-                      ),
-                      Expanded(
-                        child:
-                            alternativas.isEmpty
-                                ? Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 18,
-                                  ),
-                                  child: _EmptyState(
-                                    onCriarNovo:
-                                        onCriarNovo == null
-                                            ? null
-                                            : () {
-                                              Navigator.of(context).pop();
-                                              onCriarNovo!();
-                                            },
-                                  ),
-                                )
-                                : ListView.separated(
-                                  controller: scrollController,
-                                  padding: const EdgeInsets.fromLTRB(
-                                    14,
-                                    0,
-                                    14,
-                                    16,
-                                  ),
-                                  itemCount: alternativas.length,
-                                  separatorBuilder:
-                                      (_, __) => const SizedBox(height: 8),
-                                  itemBuilder: (context, index) {
-                                    final item = alternativas[index];
-                                    return _AlternativaTile(
-                                      item: item,
-                                      primary: primary,
-                                      isDark: isDark,
-                                      onTap: () {
-                                        HapticFeedback.selectionClick();
-                                        Navigator.of(context).pop();
-                                        onEscolher(item.exercicio);
-                                      },
-                                    );
-                                  },
-                                ),
-                      ),
-                      if (alternativas.isNotEmpty && onCriarNovo != null)
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
-                          child: OutlinedButton.icon(
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                              onCriarNovo!();
-                            },
-                            style: OutlinedButton.styleFrom(
-                              minimumSize: const Size.fromHeight(46),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(14),
-                              ),
-                            ),
-                            icon: const Icon(Icons.add_rounded, size: 18),
-                            label: const Text('Criar exercício personalizado'),
                           ),
                         ),
-                    ],
-                  );
-                },
-              ),
+                      ),
+                    Expanded(
+                      child:
+                          alternativas.isEmpty
+                              ? _EmptyState(
+                                onCriarNovo:
+                                    onCriarNovo == null
+                                        ? null
+                                        : () {
+                                          Navigator.of(context).pop();
+                                          onCriarNovo!();
+                                        },
+                              )
+                              : ListView.separated(
+                                padding: const EdgeInsets.only(bottom: 8),
+                                itemCount: alternativas.length,
+                                separatorBuilder:
+                                    (_, __) => const SizedBox(height: 8),
+                                itemBuilder: (context, index) {
+                                  final item = alternativas[index];
+                                  return _AlternativaTile(
+                                    item: item,
+                                    primary: primary,
+                                    isDark: isDark,
+                                    onTap: () {
+                                      HapticFeedback.selectionClick();
+                                      Navigator.of(context).pop();
+                                      onEscolher(item.exercicio);
+                                    },
+                                  );
+                                },
+                              ),
+                    ),
+                    if (alternativas.isNotEmpty && onCriarNovo != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8),
+                        child: OutlinedButton.icon(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                            onCriarNovo!();
+                          },
+                          style: OutlinedButton.styleFrom(
+                            minimumSize: const Size.fromHeight(46),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                          ),
+                          icon: const Icon(Icons.add_rounded, size: 18),
+                          label: const Text('Criar exercício personalizado'),
+                        ),
+                      ),
+                  ],
+                );
+              },
             ),
           ),
-        );
-      },
+        ],
+      ),
     );
   }
 }

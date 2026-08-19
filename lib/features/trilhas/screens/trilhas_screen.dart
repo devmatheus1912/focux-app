@@ -8,6 +8,7 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -90,101 +91,100 @@ class TrilhasScreen extends ConsumerWidget {
     final descCtrl = TextEditingController();
     String metaTipo = 'TREINOS';
 
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder:
-          (ctx) => StatefulBuilder(
-            builder: (ctx, setState) {
-              return Padding(
-                padding: EdgeInsets.fromLTRB(
-                  16,
-                  20,
-                  16,
-                  MediaQuery.of(ctx).viewInsets.bottom + 20,
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Nova Trilha',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
+    showFxHomeSheet(
+      context,
+      builder: (ctx) {
+        final isDark = Theme.of(ctx).brightness == Brightness.dark;
+        final primary = Theme.of(ctx).colorScheme.primary;
+        return StatefulBuilder(
+          builder: (ctx, setState) {
+            return FxHomeSheetSurface(
+              isDark: isDark,
+              maxHeight:
+                  MediaQuery.sizeOf(ctx).height *
+                  FxHomeSheetChrome.maxHeightFactor,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  FxHomeSheetHandle(isDark: isDark),
+                  SizedBox(height: TokensStrip.s4),
+                  FxHomeSheetHeader(
+                    isDark: isDark,
+                    title: 'Nova Trilha',
+                    subtitle: 'Defina o título e o tipo de meta.',
+                    leading: Icon(
+                      Icons.flag_outlined,
+                      color: primary,
+                      size: 18,
+                    ),
+                  ),
+                  SizedBox(height: TokensStrip.s3),
+                  TextField(
+                    controller: tituloCtrl,
+                    decoration: FxInputDeco.build(context, 'Título da trilha'),
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: descCtrl,
+                    decoration: FxInputDeco.build(
+                      context,
+                      'Descrição (opcional)',
+                    ),
+                    maxLines: 2,
+                  ),
+                  const SizedBox(height: 12),
+                  DropdownButtonFormField<String>(
+                    initialValue: metaTipo,
+                    decoration: FxInputDeco.build(context, 'Tipo de meta'),
+                    items: const [
+                      DropdownMenuItem(
+                        value: 'TREINOS',
+                        child: Text('Número de treinos'),
                       ),
-                    ),
-                    const SizedBox(height: TokensStrip.s4),
-                    TextField(
-                      controller: tituloCtrl,
-                      decoration: FxInputDeco.build(
-                        context,
-                        'Título da trilha',
+                      DropdownMenuItem(
+                        value: 'PESO',
+                        child: Text('Meta de peso'),
                       ),
-                    ),
-                    const SizedBox(height: 12),
-                    TextField(
-                      controller: descCtrl,
-                      decoration: FxInputDeco.build(
-                        context,
-                        'Descrição (opcional)',
+                      DropdownMenuItem(
+                        value: 'MEDIDA',
+                        child: Text('Meta de medida'),
                       ),
-                      maxLines: 2,
-                    ),
-                    const SizedBox(height: 12),
-                    DropdownButtonFormField<String>(
-                      initialValue: metaTipo,
-                      decoration: FxInputDeco.build(context, 'Tipo de meta'),
-                      items: const [
-                        DropdownMenuItem(
-                          value: 'TREINOS',
-                          child: Text('Número de treinos'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'PESO',
-                          child: Text('Meta de peso'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'MEDIDA',
-                          child: Text('Meta de medida'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'CUSTOMIZADO',
-                          child: Text('Customizado'),
-                        ),
-                      ],
-                      onChanged: (v) => setState(() => metaTipo = v!),
-                    ),
-                    const SizedBox(height: 20),
-                    FxLiquidPrimaryButton(
-                      label: 'Criar Trilha',
-                      onPressed: () async {
-                        if (tituloCtrl.text.trim().isEmpty) return;
-                        await ref
-                            .read(trilhasRepositoryProvider)
-                            .criarTrilha(
-                              NovaTrilhaRequest(
-                                alunoId: alunoId,
-                                titulo: tituloCtrl.text.trim(),
-                                descricao:
-                                    descCtrl.text.trim().isEmpty
-                                        ? null
-                                        : descCtrl.text.trim(),
-                                metaTipo: metaTipo,
-                              ),
-                            );
-                        ref.invalidate(trilhasAlunoProvider(alunoId));
-                        if (ctx.mounted) Navigator.pop(ctx);
-                      },
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
+                      DropdownMenuItem(
+                        value: 'CUSTOMIZADO',
+                        child: Text('Customizado'),
+                      ),
+                    ],
+                    onChanged: (v) => setState(() => metaTipo = v!),
+                  ),
+                  const SizedBox(height: 20),
+                  FxLiquidPrimaryButton(
+                    label: 'Criar Trilha',
+                    onPressed: () async {
+                      if (tituloCtrl.text.trim().isEmpty) return;
+                      await ref
+                          .read(trilhasRepositoryProvider)
+                          .criarTrilha(
+                            NovaTrilhaRequest(
+                              alunoId: alunoId,
+                              titulo: tituloCtrl.text.trim(),
+                              descricao:
+                                  descCtrl.text.trim().isEmpty
+                                      ? null
+                                      : descCtrl.text.trim(),
+                              metaTipo: metaTipo,
+                            ),
+                          );
+                      ref.invalidate(trilhasAlunoProvider(alunoId));
+                      if (ctx.mounted) Navigator.pop(ctx);
+                    },
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }

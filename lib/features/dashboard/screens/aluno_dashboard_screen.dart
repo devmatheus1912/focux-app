@@ -11,6 +11,7 @@ import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_hub_header.dart';
@@ -135,10 +136,7 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
                       quietChrome: true,
                     ),
                     const SizedBox(height: 12),
-                    _TodayFocusCard(
-                      experience: experience,
-                      isDark: isDark,
-                    ),
+                    _TodayFocusCard(experience: experience, isDark: isDark),
                     const SizedBox(height: 12),
                     AlunoRecoveryCard(isDark: isDark, snapshot: home.recovery),
                     const SizedBox(height: 12),

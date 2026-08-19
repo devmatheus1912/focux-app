@@ -28,72 +28,28 @@ class _AgendaEventSheet extends StatelessWidget {
       namesRoute: true,
       explicitChildNodes: true,
       label: 'Detalhes do atendimento, $title, ${agendamento.alunoNome}',
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 10, 20, 20),
-        decoration: _agendaSheetDecoration(context),
+      child: FxHomeSheetSurface(
+        isDark: chrome.isDark,
+        maxHeight:
+            MediaQuery.sizeOf(context).height *
+            FxHomeSheetChrome.maxHeightFactor,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _agendaSheetHandle(context),
-            const SizedBox(height: 18),
-            Row(
-              children: [
-                Container(
-                  width: 42,
-                  height: 42,
-                  decoration: BoxDecoration(
-                    color: primary.withValues(
-                      alpha: chrome.isDark ? 0.22 : 0.12,
-                    ),
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  alignment: Alignment.center,
-                  child: Icon(
-                    Icons.event_note_outlined,
-                    size: 20,
-                    color: primary,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: AppTypography.inter(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w800,
-                          color: chrome.ink,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        agendamento.alunoNome,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: AppTypography.inter(
-                          fontSize: 12,
-                          color: chrome.mute,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Semantics(
-                  button: true,
-                  label: 'Fechar detalhes do atendimento',
-                  child: IconButton(
-                    onPressed: () => Navigator.pop(context),
-                    icon: Icon(Icons.close_rounded, color: chrome.ink),
-                  ),
-                ),
-              ],
+            FxHomeSheetHandle(isDark: chrome.isDark),
+            SizedBox(height: TokensStrip.s4),
+            FxHomeSheetHeader(
+              isDark: chrome.isDark,
+              title: title,
+              subtitle: agendamento.alunoNome,
+              leading: Icon(
+                Icons.event_note_outlined,
+                color: primary,
+                size: 18,
+              ),
             ),
-            const SizedBox(height: 18),
+            SizedBox(height: TokensStrip.s3),
             Row(
               children: [
                 Expanded(child: _AgendaInfoTile(label: 'Data', value: date)),

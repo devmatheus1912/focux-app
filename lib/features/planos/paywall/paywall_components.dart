@@ -4,7 +4,6 @@ import 'package:shimmer/shimmer.dart';
 
 import '../../../core/legal/focux_legal.dart';
 import '../../../core/theme/design_tokens.dart';
-import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../assinatura/data/plano.dart';
 import '../../subscription/models/subscription_plan.dart';
@@ -13,6 +12,7 @@ import '../../subscription/store_subscription_policy.dart';
 import '../../subscription/widgets/upgrade_prompt_sheet.dart';
 import '../../subscription/subscription_products.dart';
 import '../../../core/widgets/fx_glass_surface.dart';
+import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_motion.dart';
 import 'paywall_catalog.dart';

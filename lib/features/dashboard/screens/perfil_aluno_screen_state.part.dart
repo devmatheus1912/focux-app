@@ -237,10 +237,13 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
 
     setState(() => _deleting = true);
     try {
-      await ref.read(apiClientProvider).dio.delete(
-        '/api/lgpd/me/delete',
-        data: {'senha': senha, 'confirmacao': confirmacao},
-      );
+      await ref
+          .read(apiClientProvider)
+          .dio
+          .delete(
+            '/api/lgpd/me/delete',
+            data: {'senha': senha, 'confirmacao': confirmacao},
+          );
       await ref.read(authProvider.notifier).logout();
       if (!mounted) return;
       FeedbackHelper.showSuccess(context, 'Conta excluida com sucesso.');
@@ -357,10 +360,8 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
     bool saving = false;
     bool uploading = false;
 
-    await showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
+    await showFxHomeSheet<void>(
+      context,
       builder: (ctx) {
         return StatefulBuilder(
           builder: (ctx, setModalState) {
@@ -431,136 +432,117 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
               }
             }
 
-            return Padding(
-              padding: EdgeInsets.only(
-                left: 16,
-                right: 16,
-                top: 16,
-                bottom: MediaQuery.of(ctx).viewInsets.bottom + 16,
-              ),
-              child: Container(
-                padding: const EdgeInsets.all(18),
-                decoration: BoxDecoration(
-                  color: Theme.of(ctx).colorScheme.surface,
-                  borderRadius: BorderRadius.circular(28),
-                ),
-                child: SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Center(
-                        child: Container(
-                          width: 42,
-                          height: 4,
-                          decoration: BoxDecoration(
-                            color: TokensStrip.borderDefault,
-                            borderRadius: BorderRadius.circular(999),
+            return FxHomeSheetSurface(
+              isDark: Theme.of(ctx).brightness == Brightness.dark,
+              maxHeight:
+                  MediaQuery.sizeOf(ctx).height *
+                  FxHomeSheetChrome.maxHeightFactor,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    FxHomeSheetHandle(
+                      isDark: Theme.of(ctx).brightness == Brightness.dark,
+                    ),
+                    SizedBox(height: TokensStrip.s4),
+                    FxHomeSheetHeader(
+                      isDark: Theme.of(ctx).brightness == Brightness.dark,
+                      title: 'Registrar progresso',
+                      subtitle:
+                          'Atualize peso, medidas e uma foto opcional para acompanhar sua evolucao sem depender do personal.',
+                      leading: Icon(
+                        Icons.monitor_weight_outlined,
+                        color: Theme.of(ctx).colorScheme.primary,
+                        size: 18,
+                      ),
+                    ),
+                    const SizedBox(height: TokensStrip.s4),
+                    _Field(
+                      controller: dataCtrl,
+                      label: 'Data AAAA-MM-DD',
+                      icon: Icons.calendar_today_outlined,
+                    ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _Field(
+                            controller: pesoCtrl,
+                            label: 'Peso kg',
+                            icon: Icons.monitor_weight_outlined,
+                            keyboardType: TextInputType.number,
                           ),
                         ),
-                      ),
-                      const SizedBox(height: TokensStrip.s4),
-                      Text(
-                        'Registrar progresso',
-                        style: Theme.of(ctx).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        'Atualize peso, medidas e uma foto opcional para acompanhar sua evolucao sem depender do personal.',
-                        style: Theme.of(ctx).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(ctx).colorScheme.onSurfaceVariant,
-                          height: 1.4,
-                        ),
-                      ),
-                      const SizedBox(height: TokensStrip.s4),
-                      _Field(
-                        controller: dataCtrl,
-                        label: 'Data AAAA-MM-DD',
-                        icon: Icons.calendar_today_outlined,
-                      ),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _Field(
-                              controller: pesoCtrl,
-                              label: 'Peso kg',
-                              icon: Icons.monitor_weight_outlined,
-                              keyboardType: TextInputType.number,
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: _Field(
-                              controller: cinturaCtrl,
-                              label: 'Cintura cm',
-                              icon: Icons.straighten_outlined,
-                              keyboardType: TextInputType.number,
-                            ),
-                          ),
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _Field(
-                              controller: quadrilCtrl,
-                              label: 'Quadril cm',
-                              icon: Icons.straighten_outlined,
-                              keyboardType: TextInputType.number,
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: _Field(
-                              controller: bracoCtrl,
-                              label: 'Braco cm',
-                              icon: Icons.fitness_center,
-                              keyboardType: TextInputType.number,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-                      OutlinedButton.icon(
-                        onPressed: uploading ? null : selecionarFoto,
-                        icon:
-                            uploading
-                                ? const SizedBox(
-                                  width: 16,
-                                  height: 16,
-                                  child: FxLoading(strokeWidth: 2),
-                                )
-                                : const Icon(Icons.add_a_photo_outlined),
-                        label: Text(
-                          fotoUrl == null
-                              ? 'Adicionar foto de progresso'
-                              : 'Foto de progresso pronta',
-                        ),
-                      ),
-                      if (fotoUrl != null) ...[
-                        const SizedBox(height: 12),
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(18),
-                          child: AspectRatio(
-                            aspectRatio: 1.15,
-                            child: Image.network(fotoUrl!, fit: BoxFit.cover),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: _Field(
+                            controller: cinturaCtrl,
+                            label: 'Cintura cm',
+                            icon: Icons.straighten_outlined,
+                            keyboardType: TextInputType.number,
                           ),
                         ),
                       ],
-                      const SizedBox(height: 18),
-                      SizedBox(
-                        width: double.infinity,
-                        child: FxLiquidPrimaryButton(
-                          loading: saving,
-                          icon: Icons.check_circle_outline,
-                          label: 'Salvar medida',
-                          onPressed: saving ? null : salvar,
+                    ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _Field(
+                            controller: quadrilCtrl,
+                            label: 'Quadril cm',
+                            icon: Icons.straighten_outlined,
+                            keyboardType: TextInputType.number,
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: _Field(
+                            controller: bracoCtrl,
+                            label: 'Braco cm',
+                            icon: Icons.fitness_center,
+                            keyboardType: TextInputType.number,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    OutlinedButton.icon(
+                      onPressed: uploading ? null : selecionarFoto,
+                      icon:
+                          uploading
+                              ? const SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: FxLoading(strokeWidth: 2),
+                              )
+                              : const Icon(Icons.add_a_photo_outlined),
+                      label: Text(
+                        fotoUrl == null
+                            ? 'Adicionar foto de progresso'
+                            : 'Foto de progresso pronta',
+                      ),
+                    ),
+                    if (fotoUrl != null) ...[
+                      const SizedBox(height: 12),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(18),
+                        child: AspectRatio(
+                          aspectRatio: 1.15,
+                          child: Image.network(fotoUrl!, fit: BoxFit.cover),
                         ),
                       ),
                     ],
-                  ),
+                    const SizedBox(height: 18),
+                    SizedBox(
+                      width: double.infinity,
+                      child: FxLiquidPrimaryButton(
+                        loading: saving,
+                        icon: Icons.check_circle_outline,
+                        label: 'Salvar medida',
+                        onPressed: saving ? null : salvar,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             );
@@ -1138,4 +1120,3 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
     );
   }
 }
-

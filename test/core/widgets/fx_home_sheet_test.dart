@@ -51,4 +51,40 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(FxHomeSheetSurface), findsNothing);
   });
+
+  testWidgets('FxHomeSheetScaffold mostra título e fecha', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Builder(
+            builder:
+                (context) => TextButton(
+                  onPressed:
+                      () => showFxHomeSheet<void>(
+                        context,
+                        builder:
+                            (ctx) => FxHomeSheetScaffold(
+                              isDark: false,
+                              title: 'Filtrar alertas',
+                              subtitle: 'Mostre só o nível de risco.',
+                              leading: const Icon(Icons.filter_list_rounded),
+                              scroll: false,
+                              child: const Text('Todos'),
+                            ),
+                      ),
+                  child: const Text('abrir'),
+                ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('abrir'));
+    await tester.pumpAndSettle();
+    expect(find.text('Filtrar alertas'), findsOneWidget);
+    expect(find.text('Todos'), findsOneWidget);
+    await tester.tap(find.byTooltip('Fechar'));
+    await tester.pumpAndSettle();
+    expect(find.byType(FxHomeSheetScaffold), findsNothing);
+  });
 }

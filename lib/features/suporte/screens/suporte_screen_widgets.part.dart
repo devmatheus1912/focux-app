@@ -434,119 +434,121 @@ class _NovoTicketSheetState extends ConsumerState<_NovoTicketSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final bottom = MediaQuery.of(context).viewInsets.bottom;
-    return SingleChildScrollView(
-      padding: EdgeInsets.fromLTRB(TokensStrip.s4, 16, 16, 16 + bottom),
-      child: Form(
-        key: _formKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              children: [
-                const Expanded(
-                  child: Text(
-                    'Abrir ticket',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
+    return FxHomeSheetSurface(
+      isDark: isDark,
+      maxHeight:
+          MediaQuery.sizeOf(context).height * FxHomeSheetChrome.maxHeightFactor,
+      child: SingleChildScrollView(
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              FxHomeSheetHandle(isDark: isDark),
+              SizedBox(height: TokensStrip.s4),
+              FxHomeSheetHeader(
+                isDark: isDark,
+                title: 'Abrir ticket',
+                subtitle: 'Descreva o problema para o suporte Focux.',
+                leading: Icon(
+                  Icons.support_agent_rounded,
+                  color: primary,
+                  size: 18,
+                ),
+              ),
+              SizedBox(height: TokensStrip.s3),
+              TextFormField(
+                controller: _tituloCtrl,
+                decoration: InputDecoration(
+                  labelText: 'Titulo *',
+                  border: FxInputDeco.outlineBorder(
+                    borderRadius: BorderRadius.circular(14),
                   ),
+                  prefixIcon: Icon(Icons.title_rounded),
                 ),
-                IconButton(
-                  tooltip: 'Fechar',
-                  onPressed: () => Navigator.of(context).pop(),
-                  icon: const Icon(Icons.close_rounded),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            TextFormField(
-              controller: _tituloCtrl,
-              decoration: InputDecoration(
-                labelText: 'Titulo *',
-                border: FxInputDeco.outlineBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                prefixIcon: Icon(Icons.title_rounded),
+                validator:
+                    (v) =>
+                        v == null || v.trim().isEmpty
+                            ? 'Informe um titulo'
+                            : null,
               ),
-              validator:
-                  (v) =>
-                      v == null || v.trim().isEmpty
-                          ? 'Informe um titulo'
-                          : null,
-            ),
-            const SizedBox(height: 12),
-            TextFormField(
-              controller: _descricaoCtrl,
-              decoration: InputDecoration(
-                labelText: 'Descricao *',
-                border: FxInputDeco.outlineBorder(
-                  borderRadius: BorderRadius.circular(14),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _descricaoCtrl,
+                decoration: InputDecoration(
+                  labelText: 'Descricao *',
+                  border: FxInputDeco.outlineBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  prefixIcon: Icon(Icons.description_outlined),
+                  alignLabelWithHint: true,
                 ),
-                prefixIcon: Icon(Icons.description_outlined),
-                alignLabelWithHint: true,
+                maxLines: 4,
+                validator:
+                    (v) =>
+                        v == null || v.trim().isEmpty
+                            ? 'Descreva o problema'
+                            : null,
               ),
-              maxLines: 4,
-              validator:
-                  (v) =>
-                      v == null || v.trim().isEmpty
-                          ? 'Descreva o problema'
-                          : null,
-            ),
-            const SizedBox(height: 12),
-            DropdownButtonFormField<String>(
-              initialValue: _severidade,
-              decoration: InputDecoration(
-                labelText: 'Severidade *',
-                border: FxInputDeco.outlineBorder(
-                  borderRadius: BorderRadius.circular(14),
+              const SizedBox(height: 12),
+              DropdownButtonFormField<String>(
+                initialValue: _severidade,
+                decoration: InputDecoration(
+                  labelText: 'Severidade *',
+                  border: FxInputDeco.outlineBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  prefixIcon: Icon(Icons.warning_amber_rounded),
                 ),
-                prefixIcon: Icon(Icons.warning_amber_rounded),
-              ),
-              items:
-                  _severidades
-                      .map(
-                        (s) => DropdownMenuItem(
-                          value: s,
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.circle,
-                                size: 10,
-                                color:
-                                    _severidadeColors[s] ??
-                                    TokensStrip.textSecondary,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(s),
-                            ],
+                items:
+                    _severidades
+                        .map(
+                          (s) => DropdownMenuItem(
+                            value: s,
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.circle,
+                                  size: 10,
+                                  color:
+                                      _severidadeColors[s] ??
+                                      TokensStrip.textSecondary,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(s),
+                              ],
+                            ),
                           ),
-                        ),
-                      )
-                      .toList(),
-              onChanged: (v) {
-                if (v != null) setState(() => _severidade = v);
-              },
-            ),
-            const SizedBox(height: 12),
-            TextFormField(
-              controller: _classeCtrl,
-              decoration: InputDecoration(
-                labelText: 'Classe afetada',
-                border: FxInputDeco.outlineBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                prefixIcon: Icon(Icons.code_rounded),
-                hintText: 'Ex: TreinoService',
+                        )
+                        .toList(),
+                onChanged: (v) {
+                  if (v != null) setState(() => _severidade = v);
+                },
               ),
-            ),
-            const SizedBox(height: 18),
-            FxLiquidPrimaryButton(
-              label: 'Enviar ticket',
-              icon: Icons.send_rounded,
-              loading: _enviando,
-              onPressed: _enviando ? null : _enviarTicket,
-            ),
-          ],
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _classeCtrl,
+                decoration: InputDecoration(
+                  labelText: 'Classe afetada',
+                  border: FxInputDeco.outlineBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  prefixIcon: Icon(Icons.code_rounded),
+                  hintText: 'Ex: TreinoService',
+                ),
+              ),
+              const SizedBox(height: 18),
+              FxLiquidPrimaryButton(
+                label: 'Enviar ticket',
+                icon: Icons.send_rounded,
+                loading: _enviando,
+                onPressed: _enviando ? null : _enviarTicket,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -597,33 +599,32 @@ class _MeusTicketsTabState extends ConsumerState<_MeusTicketsTab> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 14, 8, 8),
-          child: Row(
-            children: [
-              const Expanded(
-                child: Text(
-                  'Meus tickets',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
-                ),
-              ),
-              IconButton(
-                tooltip: 'Atualizar',
-                onPressed: _load,
-                icon: const Icon(Icons.refresh_rounded),
-              ),
-              IconButton(
-                tooltip: 'Fechar',
-                onPressed: () => Navigator.of(context).pop(),
-                icon: const Icon(Icons.close_rounded),
-              ),
-            ],
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
+    return FxHomeSheetSurface(
+      isDark: isDark,
+      expand: true,
+      maxHeight:
+          MediaQuery.sizeOf(context).height *
+          FxHomeSheetChrome.expandHeightFactor,
+      child: Column(
+        children: [
+          FxHomeSheetHandle(isDark: isDark),
+          SizedBox(height: TokensStrip.s4),
+          FxHomeSheetHeader(
+            isDark: isDark,
+            title: 'Meus tickets',
+            subtitle: 'Acompanhe o que você já abriu com o suporte.',
+            leading: Icon(
+              Icons.confirmation_number_outlined,
+              color: primary,
+              size: 18,
+            ),
           ),
-        ),
-        Expanded(child: _buildContent(context)),
-      ],
+          SizedBox(height: TokensStrip.s3),
+          Expanded(child: _buildContent(context)),
+        ],
+      ),
     );
   }
 

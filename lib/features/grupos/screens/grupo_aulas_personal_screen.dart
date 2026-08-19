@@ -8,6 +8,7 @@ import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -67,13 +68,8 @@ class _GrupoAulasPersonalScreenState
   }
 
   Future<void> _criar() async {
-    final result = await showModalBottomSheet<_NovaAulaResult>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
+    final result = await showFxHomeSheet<_NovaAulaResult>(
+      context,
       builder: (_) => const _NovaAulaSheet(),
     );
     if (result == null) return;
@@ -307,30 +303,26 @@ class _NovaAulaSheetState extends State<_NovaAulaSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom,
-      ),
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
+    return FxHomeSheetSurface(
+      isDark: isDark,
+      maxHeight:
+          MediaQuery.sizeOf(context).height * FxHomeSheetChrome.maxHeightFactor,
       child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              width: 40,
-              height: 4,
-              margin: const EdgeInsets.only(bottom: 16),
-              decoration: BoxDecoration(
-                color: Theme.of(context).hintColor.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(2),
-              ),
+            FxHomeSheetHandle(isDark: isDark),
+            SizedBox(height: TokensStrip.s4),
+            FxHomeSheetHeader(
+              isDark: isDark,
+              title: 'Nova aula em grupo',
+              subtitle: 'Defina horário, capacidade e local.',
+              leading: Icon(Icons.groups_outlined, color: primary, size: 18),
             ),
-            const Text(
-              'Nova aula em grupo',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
-            ),
-            const SizedBox(height: 16),
+            SizedBox(height: TokensStrip.s3),
             TextField(
               controller: _titulo,
               decoration: const InputDecoration(

@@ -11,6 +11,7 @@ import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import 'package:focux_app/core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -83,12 +84,8 @@ class _PlanoAlimentarDetailScreenState
   }
 
   void _abrirNovaRefeicao() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
+    showFxHomeSheet(
+      context,
       builder:
           (_) => _NovaRefeicaoSheet(
             alunoId: widget.alunoId,
@@ -539,19 +536,30 @@ class _NovaRefeicaoSheetState extends ConsumerState<_NovaRefeicaoSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final bottom = MediaQuery.of(context).viewInsets.bottom;
-    return Padding(
-      padding: EdgeInsets.fromLTRB(TokensStrip.s4, 20, 16, bottom + 20),
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
+    return FxHomeSheetSurface(
+      isDark: isDark,
+      maxHeight:
+          MediaQuery.sizeOf(context).height * FxHomeSheetChrome.maxHeightFactor,
       child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
-              'Nova Refeição',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+            FxHomeSheetHandle(isDark: isDark),
+            SizedBox(height: TokensStrip.s4),
+            FxHomeSheetHeader(
+              isDark: isDark,
+              title: 'Nova Refeição',
+              subtitle: 'Adicione horário, macros e alimentos.',
+              leading: Icon(
+                Icons.restaurant_outlined,
+                color: primary,
+                size: 18,
+              ),
             ),
-            const SizedBox(height: TokensStrip.s4),
+            SizedBox(height: TokensStrip.s3),
             _field(_nome, 'Nome da refeição *'),
             _field(_horario, 'Horário (ex: 07:30)'),
             _num(_cal, 'Calorias (kcal)'),

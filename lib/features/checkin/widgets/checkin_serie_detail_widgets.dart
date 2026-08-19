@@ -5,6 +5,7 @@ import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
@@ -89,203 +90,175 @@ class _CheckinSerieDetailSheetState extends State<CheckinSerieDetailSheet> {
     final mute = chrome.mute;
     final line = chrome.line;
 
-    return AnimatedPadding(
-      duration: const Duration(milliseconds: 180),
-      curve: Curves.easeOut,
-      padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 8, 16, 16),
-        child: ShellSurface(
-          radius: 28,
-          padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
+    return FxHomeSheetSurface(
+      isDark: dark,
+      maxHeight:
+          MediaQuery.sizeOf(context).height * FxHomeSheetChrome.maxHeightFactor,
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            FxHomeSheetHandle(isDark: dark),
+            SizedBox(height: TokensStrip.s4),
+            FxHomeSheetHeader(
+              isDark: dark,
+              title: widget.title,
+              leading: Icon(
+                Icons.fitness_center_rounded,
+                color: brand,
+                size: 18,
+              ),
+            ),
+            const SizedBox(height: 14),
+            Row(
               children: [
-                Center(
-                  child: Container(
-                    width: 42,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: line,
-                      borderRadius: BorderRadius.circular(999),
+                Expanded(
+                  child: CheckinSerieField(
+                    controller: _cargaController,
+                    label: 'Carga',
+                    suffix: 'kg',
+                    icon: Icons.scale_rounded,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
                     ),
-                  ),
-                ),
-                const SizedBox(height: TokensStrip.s4),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        widget.title,
-                        style: TextStyle(
-                          color: ink,
-                          fontSize: 20,
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-                    ),
-                    IconButton(
-                      tooltip: 'Fechar',
-                      icon: Icon(Icons.close_rounded, color: mute),
-                      onPressed: () => Navigator.pop(context),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 14),
-                Row(
-                  children: [
-                    Expanded(
-                      child: CheckinSerieField(
-                        controller: _cargaController,
-                        label: 'Carga',
-                        suffix: 'kg',
-                        icon: Icons.scale_rounded,
-                        keyboardType: const TextInputType.numberWithOptions(
-                          decimal: true,
-                        ),
-                        inputFormatters: [
-                          FilteringTextInputFormatter.allow(RegExp(r'[0-9,.]')),
-                        ],
-                        ink: ink,
-                        mute: mute,
-                        line: line,
-                        dark: dark,
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: CheckinSerieField(
-                        controller: _repsController,
-                        label: 'Reps',
-                        suffix: 'x',
-                        icon: Icons.repeat_rounded,
-                        keyboardType: TextInputType.text,
-                        ink: ink,
-                        mute: mute,
-                        line: line,
-                        dark: dark,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: TokensStrip.s4),
-                Text(
-                  'Sensacao',
-                  style: TextStyle(
-                    color: mute,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    CheckinFeedbackChip(
-                      label: 'Facil',
-                      selected: _feedback == 'FACIL',
-                      color: brand,
-                      onTap: () => _toggleFeedback('FACIL'),
-                    ),
-                    CheckinFeedbackChip(
-                      label: 'Ok',
-                      selected: _feedback == 'OK',
-                      color: brand,
-                      onTap: () => _toggleFeedback('OK'),
-                    ),
-                    CheckinFeedbackChip(
-                      label: 'Dificil',
-                      selected: _feedback == 'DIFICIL',
-                      color: brand,
-                      onTap: () => _toggleFeedback('DIFICIL'),
-                    ),
-                    CheckinFeedbackChip(
-                      label: 'Dor',
-                      selected: _feedback == 'DOR',
-                      color: EagleTokens.bad,
-                      onTap: () => _toggleFeedback('DOR'),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: TokensStrip.s4),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: fxListCardDecoration(context),
-                  child: Column(
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              'RPE ${_useRpe ? _rpe : "-"}',
-                              style: TextStyle(
-                                color: ink,
-                                fontWeight: FontWeight.w900,
-                              ),
-                            ),
-                          ),
-                          Switch.adaptive(
-                            value: _useRpe,
-                            activeTrackColor: brand,
-                            onChanged:
-                                (value) => setState(() => _useRpe = value),
-                          ),
-                        ],
-                      ),
-                      Slider(
-                        value: _rpe.toDouble(),
-                        min: 1,
-                        max: 10,
-                        divisions: 9,
-                        activeColor: brand,
-                        label: 'RPE $_rpe',
-                        onChanged:
-                            _useRpe
-                                ? (value) =>
-                                    setState(() => _rpe = value.round())
-                                : null,
-                      ),
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'[0-9,.]')),
                     ],
+                    ink: ink,
+                    mute: mute,
+                    line: line,
+                    dark: dark,
                   ),
                 ),
-                const SizedBox(height: 10),
-                SwitchListTile.adaptive(
-                  contentPadding: EdgeInsets.zero,
-                  activeTrackColor: EagleTokens.bad,
-                  value: _dor,
-                  onChanged:
-                      (value) => setState(() {
-                        _dor = value;
-                        if (value) {
-                          _feedback = 'DOR';
-                          _useRpe = true;
-                          _rpe = _rpe < 8 ? 8 : _rpe;
-                        }
-                      }),
-                  title: Text(
-                    'Senti dor nesta serie',
-                    style: TextStyle(color: ink, fontWeight: FontWeight.w800),
-                  ),
-                  subtitle: Text(
-                    'Marca alerta para o personal acompanhar.',
-                    style: TextStyle(color: mute, fontSize: 12),
-                  ),
-                ),
-                const SizedBox(height: 14),
-                SizedBox(
-                  width: double.infinity,
-                  child: FxLiquidPrimaryButton(
-                    label: 'Salvar serie',
-                    icon: Icons.check_rounded,
-                    onPressed: _submit,
+                const SizedBox(width: 10),
+                Expanded(
+                  child: CheckinSerieField(
+                    controller: _repsController,
+                    label: 'Reps',
+                    suffix: 'x',
+                    icon: Icons.repeat_rounded,
+                    keyboardType: TextInputType.text,
+                    ink: ink,
+                    mute: mute,
+                    line: line,
+                    dark: dark,
                   ),
                 ),
               ],
             ),
-          ),
+            const SizedBox(height: TokensStrip.s4),
+            Text(
+              'Sensacao',
+              style: TextStyle(
+                color: mute,
+                fontSize: 12,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                CheckinFeedbackChip(
+                  label: 'Facil',
+                  selected: _feedback == 'FACIL',
+                  color: brand,
+                  onTap: () => _toggleFeedback('FACIL'),
+                ),
+                CheckinFeedbackChip(
+                  label: 'Ok',
+                  selected: _feedback == 'OK',
+                  color: brand,
+                  onTap: () => _toggleFeedback('OK'),
+                ),
+                CheckinFeedbackChip(
+                  label: 'Dificil',
+                  selected: _feedback == 'DIFICIL',
+                  color: brand,
+                  onTap: () => _toggleFeedback('DIFICIL'),
+                ),
+                CheckinFeedbackChip(
+                  label: 'Dor',
+                  selected: _feedback == 'DOR',
+                  color: EagleTokens.bad,
+                  onTap: () => _toggleFeedback('DOR'),
+                ),
+              ],
+            ),
+            const SizedBox(height: TokensStrip.s4),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: fxListCardDecoration(context),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'RPE ${_useRpe ? _rpe : "-"}',
+                          style: TextStyle(
+                            color: ink,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ),
+                      Switch.adaptive(
+                        value: _useRpe,
+                        activeTrackColor: brand,
+                        onChanged: (value) => setState(() => _useRpe = value),
+                      ),
+                    ],
+                  ),
+                  Slider(
+                    value: _rpe.toDouble(),
+                    min: 1,
+                    max: 10,
+                    divisions: 9,
+                    activeColor: brand,
+                    label: 'RPE $_rpe',
+                    onChanged:
+                        _useRpe
+                            ? (value) => setState(() => _rpe = value.round())
+                            : null,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 10),
+            SwitchListTile.adaptive(
+              contentPadding: EdgeInsets.zero,
+              activeTrackColor: EagleTokens.bad,
+              value: _dor,
+              onChanged:
+                  (value) => setState(() {
+                    _dor = value;
+                    if (value) {
+                      _feedback = 'DOR';
+                      _useRpe = true;
+                      _rpe = _rpe < 8 ? 8 : _rpe;
+                    }
+                  }),
+              title: Text(
+                'Senti dor nesta serie',
+                style: TextStyle(color: ink, fontWeight: FontWeight.w800),
+              ),
+              subtitle: Text(
+                'Marca alerta para o personal acompanhar.',
+                style: TextStyle(color: mute, fontSize: 12),
+              ),
+            ),
+            const SizedBox(height: 14),
+            SizedBox(
+              width: double.infinity,
+              child: FxLiquidPrimaryButton(
+                label: 'Salvar serie',
+                icon: Icons.check_rounded,
+                onPressed: _submit,
+              ),
+            ),
+          ],
         ),
       ),
     );

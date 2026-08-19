@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:focux_app/core/widgets/fx_home_sheet.dart';
 import 'package:focux_app/features/alunos/widgets/aluno360_timeline_card.dart';
 
 const _longChatBodies = [
@@ -10,7 +11,9 @@ const _longChatBodies = [
 ];
 
 void main() {
-  testWidgets('body sheet shows chat title without duplication', (tester) async {
+  testWidgets('body sheet shows chat title without duplication', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Builder(
@@ -25,7 +28,8 @@ void main() {
                         at: null,
                         kind: 'Chat',
                         title: 'Chat · Personal',
-                        body: 'Como foi seu último treino? Me manda carga e repetições.',
+                        body:
+                            'Como foi seu último treino? Me manda carga e repetições.',
                         meta: 'PERSONAL',
                         priority: 'P3',
                         icon: Icons.chat_bubble_outline,
@@ -51,6 +55,7 @@ void main() {
     expect(find.text('Chat · Personal'), findsOneWidget);
     expect(find.textContaining('Chat · Chat'), findsNothing);
     expect(find.text('Abrir chat'), findsOneWidget);
+    expect(find.byType(FxHomeSheetSurface), findsOneWidget);
   });
 
   testWidgets('history sheet closes before body sheet opens', (tester) async {
@@ -119,6 +124,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(DraggableScrollableSheet), findsNothing);
+    expect(find.byType(FxHomeSheetSurface), findsOneWidget);
     expect(find.text('Abrir chat'), findsOneWidget);
   });
 }

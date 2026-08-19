@@ -9,6 +9,7 @@ import '../../../core/utils/friendly_error.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../data/checkin_repository.dart';
 import '../providers/checkin_provider.dart';
@@ -137,11 +138,8 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
     if (_execucao == null) return;
     final total = ee.series ?? numero;
     final safeNumero = numero.clamp(1, total).toInt();
-    final payload = await showModalBottomSheet<CheckinSeriePayload>(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      backgroundColor: Colors.transparent,
+    final payload = await showFxHomeSheet<CheckinSeriePayload>(
+      context,
       builder:
           (context) => CheckinSerieDetailSheet(
             title: 'Serie $safeNumero',
@@ -567,7 +565,12 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
               if (exercicios.isNotEmpty)
                 SliverToBoxAdapter(
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 2, 16, 16),
+                    padding: const EdgeInsets.fromLTRB(
+                      TokensStrip.s4,
+                      2,
+                      16,
+                      16,
+                    ),
                     child: CheckinLiveCoachingCard(
                       brand: brand,
                       brandDeep: brandDeep,

@@ -1,4 +1,3 @@
-
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../support/screen_source_bundle.dart';
@@ -17,9 +16,9 @@ void main() {
     expect(screen, contains('FxShellScaffold'));
     expect(screen, contains('loadingLabel: \'Agendando…\''));
     expect(screen, contains('FxInputDeco.outlineBorder'));
-    expect(screen, contains('_agendaSheetDecoration'));
-    expect(screen, contains('chrome.sheetFill'));
-    expect(screen, contains('useSafeArea: true'));
+    expect(screen, contains('showFxHomeSheet'));
+    expect(screen, contains('FxHomeSheetSurface'));
+    expect(screen, contains('FxHomeSheetHeader'));
     expect(screen, contains('Semantics('));
     expect(screen, contains('explicitChildNodes: true'));
     expect(screen, isNot(contains('ListTile(')));

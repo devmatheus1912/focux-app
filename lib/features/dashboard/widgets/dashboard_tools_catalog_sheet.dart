@@ -22,37 +22,14 @@ Future<void> showDashboardToolsCatalogSheet(
 }) {
   return showFxHomeSheet<void>(
     context,
-    builder: (sheetContext) {
-      return Padding(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.viewInsetsOf(sheetContext).bottom,
+    builder:
+        (sheetContext) => DashboardToolsCatalogSheet(
+          parentContext: context,
+          parentRef: ref,
+          isDark: isDark,
+          shortcutAspectRatio: shortcutAspectRatio,
+          homePlanoFeatures: homePlanoFeatures,
         ),
-        child: DraggableScrollableSheet(
-          initialChildSize: 0.58,
-          minChildSize: 0.40,
-          maxChildSize: 0.96,
-          snap: true,
-          snapSizes: const [0.40, 0.58, 0.96],
-          builder:
-              (_, scrollController) => TweenAnimationBuilder<double>(
-                tween: Tween(begin: 0, end: 1),
-                duration: const Duration(milliseconds: 220),
-                curve: Curves.easeOutCubic,
-                builder:
-                    (context, value, child) =>
-                        Opacity(opacity: value, child: child),
-                child: DashboardToolsCatalogSheet(
-                  parentContext: context,
-                  parentRef: ref,
-                  isDark: isDark,
-                  shortcutAspectRatio: shortcutAspectRatio,
-                  scrollController: scrollController,
-                  homePlanoFeatures: homePlanoFeatures,
-                ),
-              ),
-        ),
-      );
-    },
   );
 }
 
@@ -63,7 +40,6 @@ class DashboardToolsCatalogSheet extends StatefulWidget {
     required this.parentRef,
     required this.isDark,
     required this.shortcutAspectRatio,
-    this.scrollController,
     this.homePlanoFeatures,
   });
 
@@ -71,7 +47,6 @@ class DashboardToolsCatalogSheet extends StatefulWidget {
   final WidgetRef parentRef;
   final bool isDark;
   final double shortcutAspectRatio;
-  final ScrollController? scrollController;
   final PlanoFeatures? homePlanoFeatures;
 
   @override
@@ -93,44 +68,30 @@ class _DashboardToolsCatalogSheetState
       _searchQuery,
     );
     final groups = groupDashboardToolShortcuts(shortcuts);
-    final media = MediaQuery.of(context);
-    final sheetColor =
-        widget.isDark
-            ? Color.lerp(EagleTokens.darkCard, EagleTokens.darkCardHi, 0.35)!
-            : Theme.of(context).colorScheme.surface;
+    final primary = Theme.of(context).colorScheme.primary;
     final searchFill =
         widget.isDark ? EagleTokens.darkCardHi : TokensStrip.pageBg;
+    final maxHeight =
+        MediaQuery.sizeOf(context).height *
+        FxHomeSheetChrome.expandHeightFactor;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: sheetColor,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-      ),
+    return FxHomeSheetSurface(
+      isDark: widget.isDark,
+      maxHeight: maxHeight,
+      expand: true,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const SizedBox(height: 10),
           FxHomeSheetHandle(isDark: widget.isDark),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 14, 8, 8),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    DashboardMicrocopy.catalogoCompleto,
-                    style: FocuxHubTypography.sectionTitle(context, color: ink),
-                  ),
-                ),
-                IconButton(
-                  tooltip: 'Fechar',
-                  onPressed: () => Navigator.of(context).pop(),
-                  icon: Icon(Icons.close_rounded, color: mute),
-                ),
-              ],
-            ),
+          SizedBox(height: TokensStrip.s4),
+          FxHomeSheetHeader(
+            isDark: widget.isDark,
+            title: DashboardMicrocopy.catalogoCompleto,
+            subtitle: DashboardMicrocopy.buscarFerramenta,
+            leading: Icon(Icons.apps_rounded, color: primary, size: 18),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+            padding: const EdgeInsets.only(top: 8, bottom: 12),
             child: Semantics(
               textField: true,
               label: DashboardMicrocopy.buscarFerramenta,
@@ -162,13 +123,7 @@ class _DashboardToolsCatalogSheetState
           ),
           Expanded(
             child: ListView(
-              controller: widget.scrollController,
-              padding: EdgeInsets.fromLTRB(
-                16,
-                0,
-                16,
-                16 + media.viewPadding.bottom,
-              ),
+              padding: EdgeInsets.zero,
               children: [
                 if (groups.isEmpty)
                   Padding(

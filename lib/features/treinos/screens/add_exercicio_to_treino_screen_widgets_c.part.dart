@@ -81,8 +81,6 @@ class _ExercisePickerSheetState extends State<_ExercisePickerSheet> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
     final normalized = _query.trim().toLowerCase();
     final filtered = sortExerciciosForPicker(
@@ -98,193 +96,139 @@ class _ExercisePickerSheetState extends State<_ExercisePickerSheet> {
       alreadyInTreinoIds: widget.alreadyInTreinoIds,
     );
 
-    return DraggableScrollableSheet(
-      initialChildSize: 0.82,
-      minChildSize: 0.45,
-      maxChildSize: 0.92,
-      expand: false,
-      builder: (context, scrollController) {
-        final keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
-        return SafeArea(
-          top: false,
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(10, 0, 10, 8 + keyboardInset),
-            child: Container(
-              padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 10, 16, 16),
-              decoration: fxListCardDecoration(context, accent: primary),
-              child: Column(
-                children: [
-                  Container(
-                    width: 36,
-                    height: 4,
-                    margin: const EdgeInsets.only(bottom: 16),
-                    decoration: BoxDecoration(
-                      color:
-                          isDark
-                              ? Colors.white.withValues(alpha: 0.16)
-                              : TokensStrip.borderDefault,
-                      borderRadius: BorderRadius.circular(999),
-                    ),
-                  ),
-                  Row(
-                    children: [
-                      Container(
-                        width: 42,
-                        height: 42,
-                        decoration: BoxDecoration(
-                          color: EagleTokens.brandSofter,
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Icon(
-                          Icons.fitness_center_rounded,
-                          color: primary,
-                        ),
+    final maxHeight =
+        MediaQuery.sizeOf(context).height *
+        FxHomeSheetChrome.expandHeightFactor;
+
+    return FxHomeSheetSurface(
+      isDark: isDark,
+      maxHeight: maxHeight,
+      expand: true,
+      child: Column(
+        children: [
+          FxHomeSheetHandle(isDark: isDark),
+          SizedBox(height: TokensStrip.s4),
+          FxHomeSheetHeader(
+            isDark: isDark,
+            title: 'Biblioteca de exercícios',
+            subtitle: '${filtered.length} de ${_exercicios.length} disponíveis',
+            leading: Icon(
+              Icons.fitness_center_rounded,
+              color: primary,
+              size: 18,
+            ),
+          ),
+          const SizedBox(height: 14),
+          TextField(
+            controller: _searchCtrl,
+            autofocus: widget.initialQuery.isEmpty,
+            textInputAction: TextInputAction.search,
+            decoration: InputDecoration(
+              hintText: 'Buscar por nome, músculo ou equipamento',
+              prefixIcon: Icon(Icons.search_rounded, color: primary),
+              suffixIcon:
+                  _searchCtrl.text.isEmpty
+                      ? null
+                      : IconButton(
+                        onPressed: () {
+                          _searchCtrl.clear();
+                          setState(() {
+                            _query = '';
+                            _highlightQuery = '';
+                          });
+                        },
+                        icon: const Icon(Icons.close_rounded),
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Biblioteca de exercícios',
-                              style: AppTypography.inter(
-                                color: ink,
-                                fontSize: 18,
-                                fontWeight: FontWeight.w900,
-                              ),
-                            ),
-                            const SizedBox(height: 3),
-                            Text(
-                              '${filtered.length} de ${_exercicios.length} disponíveis',
-                              style: AppTypography.inter(
-                                color: mute,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 14),
-                  TextField(
-                    controller: _searchCtrl,
-                    autofocus: widget.initialQuery.isEmpty,
-                    textInputAction: TextInputAction.search,
-                    decoration: InputDecoration(
-                      hintText: 'Buscar por nome, músculo ou equipamento',
-                      prefixIcon: Icon(Icons.search_rounded, color: primary),
-                      suffixIcon:
-                          _searchCtrl.text.isEmpty
-                              ? null
-                              : IconButton(
-                                onPressed: () {
+              filled: true,
+              fillColor: isDark ? EagleTokens.darkCardHi : TokensStrip.cardBg,
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 14,
+                vertical: 14,
+              ),
+              border: FxInputDeco.outlineBorder(
+                borderRadius: BorderRadius.circular(18),
+                borderSide: BorderSide(color: line),
+              ),
+              enabledBorder: FxInputDeco.outlineBorder(
+                borderRadius: BorderRadius.circular(18),
+                borderSide: BorderSide(color: line),
+              ),
+              focusedBorder: FxInputDeco.outlineBorder(
+                borderRadius: BorderRadius.circular(18),
+                borderSide: BorderSide(color: primary, width: 1.4),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Expanded(
+            child:
+                filtered.isEmpty
+                    ? FxEmptyState(
+                      icon: 'search',
+                      title:
+                          _query.trim().isNotEmpty
+                              ? 'Nada encontrado para "${_query.trim()}"'
+                              : 'Nenhum exercício nesta lista',
+                      subtitle:
+                          _query.trim().isNotEmpty
+                              ? 'Tente outro termo ou limpe a busca.'
+                              : 'Ajuste os filtros na tela anterior.',
+                      action:
+                          _query.trim().isNotEmpty
+                              ? FxEmptyAction(
+                                label: 'Limpar busca',
+                                onTap: () {
                                   _searchCtrl.clear();
                                   setState(() {
                                     _query = '';
                                     _highlightQuery = '';
                                   });
                                 },
-                                icon: const Icon(Icons.close_rounded),
-                              ),
-                      filled: true,
-                      fillColor:
-                          isDark ? EagleTokens.darkCardHi : TokensStrip.cardBg,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 14,
-                      ),
-                      border: FxInputDeco.outlineBorder(
-                        borderRadius: BorderRadius.circular(18),
-                        borderSide: BorderSide(color: line),
-                      ),
-                      enabledBorder: FxInputDeco.outlineBorder(
-                        borderRadius: BorderRadius.circular(18),
-                        borderSide: BorderSide(color: line),
-                      ),
-                      focusedBorder: FxInputDeco.outlineBorder(
-                        borderRadius: BorderRadius.circular(18),
-                        borderSide: BorderSide(color: primary, width: 1.4),
-                      ),
+                              )
+                              : null,
+                    )
+                    : ListView.separated(
+                      keyboardDismissBehavior:
+                          ScrollViewKeyboardDismissBehavior.onDrag,
+                      padding: const EdgeInsets.only(bottom: 8),
+                      itemCount: filtered.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 8),
+                      itemBuilder: (context, index) {
+                        final exercicio = _resolve(filtered[index]);
+                        final selected = widget.selected?.id == exercicio.id;
+                        return _ExercisePickerTile(
+                          exercicio: exercicio,
+                          selected: selected,
+                          alreadyInTreino: widget.alreadyInTreinoIds.contains(
+                            exercicio.id,
+                          ),
+                          highlightQuery: _highlightQuery,
+                          primary: primary,
+                          isDark: isDark,
+                          uploadEnabled:
+                              widget.onUploadVideo != null &&
+                              !_uploadingInSheet,
+                          onTap: () {
+                            HapticFeedback.selectionClick();
+                            Navigator.pop(context, exercicio);
+                          },
+                          onPreviewThumb:
+                              canPreviewExerciseMedia(exercicio)
+                                  ? () => showExerciseMediaPreview(
+                                    context,
+                                    exercicio: exercicio,
+                                  )
+                                  : null,
+                          onUploadVideo:
+                              widget.onUploadVideo == null
+                                  ? null
+                                  : () => _handleUpload(exercicio),
+                        );
+                      },
                     ),
-                  ),
-                  const SizedBox(height: 12),
-                  Expanded(
-                    child:
-                        filtered.isEmpty
-                            ? FxEmptyState(
-                              icon: 'search',
-                              title:
-                                  _query.trim().isNotEmpty
-                                      ? 'Nada encontrado para "${_query.trim()}"'
-                                      : 'Nenhum exercício nesta lista',
-                              subtitle:
-                                  _query.trim().isNotEmpty
-                                      ? 'Tente outro termo ou limpe a busca.'
-                                      : 'Ajuste os filtros na tela anterior.',
-                              action:
-                                  _query.trim().isNotEmpty
-                                      ? FxEmptyAction(
-                                        label: 'Limpar busca',
-                                        onTap: () {
-                                          _searchCtrl.clear();
-                                          setState(() {
-                                            _query = '';
-                                            _highlightQuery = '';
-                                          });
-                                        },
-                                      )
-                                      : null,
-                            )
-                            : ListView.separated(
-                              controller: scrollController,
-                              keyboardDismissBehavior:
-                                  ScrollViewKeyboardDismissBehavior.onDrag,
-                              padding: const EdgeInsets.only(bottom: 8),
-                              itemCount: filtered.length,
-                              separatorBuilder:
-                                  (_, __) => const SizedBox(height: 8),
-                              itemBuilder: (context, index) {
-                                final exercicio = _resolve(filtered[index]);
-                                final selected =
-                                    widget.selected?.id == exercicio.id;
-                                return _ExercisePickerTile(
-                                  exercicio: exercicio,
-                                  selected: selected,
-                                  alreadyInTreino: widget.alreadyInTreinoIds
-                                      .contains(exercicio.id),
-                                  highlightQuery: _highlightQuery,
-                                  primary: primary,
-                                  isDark: isDark,
-                                  uploadEnabled:
-                                      widget.onUploadVideo != null &&
-                                      !_uploadingInSheet,
-                                  onTap: () {
-                                    HapticFeedback.selectionClick();
-                                    Navigator.pop(context, exercicio);
-                                  },
-                                  onPreviewThumb:
-                                      canPreviewExerciseMedia(exercicio)
-                                          ? () => showExerciseMediaPreview(
-                                            context,
-                                            exercicio: exercicio,
-                                          )
-                                          : null,
-                                  onUploadVideo:
-                                      widget.onUploadVideo == null
-                                          ? null
-                                          : () => _handleUpload(exercicio),
-                                );
-                              },
-                            ),
-                  ),
-                ],
-              ),
-            ),
           ),
-        );
-      },
+        ],
+      ),
     );
   }
 }

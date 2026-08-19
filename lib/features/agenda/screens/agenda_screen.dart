@@ -15,6 +15,7 @@ import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../core/widgets/feedback_helper.dart';
@@ -155,11 +156,8 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
   }
 
   Future<void> _openAgendamentoDetails(Agendamento ag) async {
-    await showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      backgroundColor: Colors.transparent,
+    await showFxHomeSheet<void>(
+      context,
       builder:
           (_) => _AgendaEventSheet(
             agendamento: ag,
@@ -738,27 +736,3 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
   String _hm(DateTime date) =>
       '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
 }
-
-BoxDecoration _agendaSheetDecoration(BuildContext context) {
-  final chrome = ShellChrome.of(context);
-  return BoxDecoration(
-    color: chrome.sheetFill,
-    borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-    border: Border(
-      top: BorderSide(color: chrome.lineStrong),
-      left: BorderSide(color: chrome.lineStrong),
-      right: BorderSide(color: chrome.lineStrong),
-    ),
-  );
-}
-
-Widget _agendaSheetHandle(BuildContext context) => Center(
-  child: Container(
-    width: 38,
-    height: 4,
-    decoration: BoxDecoration(
-      color: ShellChrome.of(context).lineStrong,
-      borderRadius: BorderRadius.circular(999),
-    ),
-  ),
-);

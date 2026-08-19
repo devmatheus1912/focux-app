@@ -49,11 +49,8 @@ Future<bool> showNovoPacoteSheet(
   BuildContext context, {
   required PacoteRepository repo,
 }) async {
-  final created = await showModalBottomSheet<bool>(
-    context: context,
-    isScrollControlled: true,
-    useSafeArea: true,
-    backgroundColor: Colors.transparent,
+  final created = await showFxHomeSheet<bool>(
+    context,
     builder: (ctx) => _NovoPacoteSheet(repo: repo),
   );
   return created ?? false;
@@ -61,54 +58,48 @@ Future<bool> showNovoPacoteSheet(
 
 /// Confirma desativação antes de remover da vitrine.
 Future<bool> confirmDesativarPacote(BuildContext context, String titulo) async {
-  final ink = fxScreenInk(context);
   final mute = fxScreenMute(context);
-  final confirmed = await showModalBottomSheet<bool>(
-    context: context,
-    backgroundColor: Colors.transparent,
+  final confirmed = await showFxHomeSheet<bool>(
+    context,
     builder: (ctx) {
       final isDark = Theme.of(ctx).brightness == Brightness.dark;
-      return Padding(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-        child: Container(
-          padding: const EdgeInsets.fromLTRB(22, 22, 22, 20),
-          decoration: BoxDecoration(
-            color: isDark ? EagleTokens.darkCard : TokensStrip.pageBg,
-            borderRadius: BorderRadius.circular(24),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Desativar plano?',
-                style: TextStyle(
-                  color: ink,
-                  fontWeight: FontWeight.w800,
-                  fontSize: 18,
-                  letterSpacing: -0.3,
-                ),
+      final primary = Theme.of(ctx).colorScheme.primary;
+      return FxHomeSheetSurface(
+        isDark: isDark,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            FxHomeSheetHandle(isDark: isDark),
+            SizedBox(height: TokensStrip.s4),
+            FxHomeSheetHeader(
+              isDark: isDark,
+              title: 'Desativar plano?',
+              leading: Icon(
+                Icons.delete_outline_rounded,
+                color: primary,
+                size: 18,
               ),
-              const SizedBox(height: 10),
-              Text(
-                '“$titulo” some da sua página na internet. '
-                'Quem abrir seu link não verá mais este plano. '
-                'Você pode criar outro depois.',
-                textAlign: TextAlign.center,
-                style: TokensStrip.bodyMuted(color: mute).copyWith(height: 1.4),
-              ),
-              const SizedBox(height: 20),
-              FxLiquidPrimaryButton(
-                label: 'Desativar',
-                icon: Icons.delete_outline_rounded,
-                onPressed: () => Navigator.of(ctx).pop(true),
-              ),
-              const SizedBox(height: 10),
-              FxLiquidSecondaryButton(
-                label: 'Cancelar',
-                onPressed: () => Navigator.of(ctx).pop(false),
-              ),
-            ],
-          ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              '“$titulo” some da sua página na internet. '
+              'Quem abrir seu link não verá mais este plano. '
+              'Você pode criar outro depois.',
+              textAlign: TextAlign.center,
+              style: TokensStrip.bodyMuted(color: mute).copyWith(height: 1.4),
+            ),
+            const SizedBox(height: 20),
+            FxLiquidPrimaryButton(
+              label: 'Desativar',
+              icon: Icons.delete_outline_rounded,
+              onPressed: () => Navigator.of(ctx).pop(true),
+            ),
+            const SizedBox(height: 10),
+            FxLiquidSecondaryButton(
+              label: 'Cancelar',
+              onPressed: () => Navigator.of(ctx).pop(false),
+            ),
+          ],
         ),
       );
     },
@@ -179,220 +170,176 @@ class _NovoPacoteSheetState extends State<_NovoPacoteSheet> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-    final bottom = MediaQuery.of(context).viewInsets.bottom;
-    final reduceMotion = reduceMotionOf(context);
+    final primary = Theme.of(context).colorScheme.primary;
 
-    Widget sheet = Padding(
-      padding: EdgeInsets.only(bottom: bottom),
-      child: Container(
-        decoration: BoxDecoration(
-          color: isDark ? EagleTokens.darkCard : TokensStrip.pageBg,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-        ),
-        child: SingleChildScrollView(
-          padding: EdgeInsets.fromLTRB(
-            20,
-            12,
-            20,
-            20 + MediaQuery.of(context).padding.bottom,
-          ),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Center(
-                  child: Container(
-                    width: 42,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color:
-                          isDark
-                              ? EagleTokens.darkLine
-                              : TokensStrip.borderDefault,
-                      borderRadius: BorderRadius.circular(999),
+    return FxHomeSheetSurface(
+      isDark: isDark,
+      maxHeight:
+          MediaQuery.sizeOf(context).height * FxHomeSheetChrome.maxHeightFactor,
+      child: SingleChildScrollView(
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              FxHomeSheetHandle(isDark: isDark),
+              SizedBox(height: TokensStrip.s4),
+              FxHomeSheetHeader(
+                isDark: isDark,
+                title: 'Novo plano',
+                subtitle:
+                    'Quem abrir seu link verá este plano na sua página de vendas.',
+                leading: Icon(
+                  Icons.add_card_outlined,
+                  color: primary,
+                  size: 18,
+                ),
+                trailing: IconButton(
+                  tooltip: 'Fechar',
+                  onPressed:
+                      _enviando ? null : () => Navigator.of(context).pop(),
+                  style: IconButton.styleFrom(
+                    minimumSize: const Size(
+                      FxHomeSheetChrome.touchTarget,
+                      FxHomeSheetChrome.touchTarget,
                     ),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
+                  icon: const Icon(Icons.close_rounded, size: 22),
                 ),
-                const SizedBox(height: 18),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        'Novo plano',
-                        style: TextStyle(
-                          color: ink,
-                          fontSize: 20,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: -0.5,
-                        ),
-                      ),
-                    ),
-                    Semantics(
-                      button: true,
-                      label: 'Fechar',
-                      child: IconButton(
-                        tooltip: 'Fechar',
-                        constraints: const BoxConstraints(
-                          minWidth: 48,
-                          minHeight: 48,
-                        ),
-                        onPressed:
-                            _enviando
-                                ? null
-                                : () => Navigator.of(context).pop(),
-                        icon: const Icon(Icons.close_rounded),
-                      ),
-                    ),
-                  ],
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _tituloCtrl,
+                enabled: !_enviando,
+                textInputAction: TextInputAction.next,
+                decoration: FxInputDeco.build(
+                  context,
+                  'Título *',
+                  icon: Icons.title_rounded,
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  'Quem abrir seu link verá este plano na sua página de vendas.',
-                  style: TokensStrip.bodyMuted(
-                    color: mute,
-                  ).copyWith(fontSize: 13),
+                validator:
+                    (v) =>
+                        v == null || v.trim().isEmpty
+                            ? 'Informe um título'
+                            : null,
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _descCtrl,
+                enabled: !_enviando,
+                textInputAction: TextInputAction.next,
+                maxLines: 2,
+                decoration: FxInputDeco.build(
+                  context,
+                  'Descrição',
+                  icon: Icons.notes_rounded,
                 ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _tituloCtrl,
-                  enabled: !_enviando,
-                  textInputAction: TextInputAction.next,
-                  decoration: FxInputDeco.build(
-                    context,
-                    'Título *',
-                    icon: Icons.title_rounded,
-                  ),
-                  validator:
-                      (v) =>
-                          v == null || v.trim().isEmpty
-                              ? 'Informe um título'
-                              : null,
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _valorCtrl,
+                enabled: !_enviando,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
                 ),
-                const SizedBox(height: 12),
-                TextFormField(
-                  controller: _descCtrl,
-                  enabled: !_enviando,
-                  textInputAction: TextInputAction.next,
-                  maxLines: 2,
-                  decoration: FxInputDeco.build(
-                    context,
-                    'Descrição',
-                    icon: Icons.notes_rounded,
-                  ),
+                textInputAction: TextInputAction.done,
+                decoration: FxInputDeco.build(
+                  context,
+                  'Valor que o cliente paga (R\$) *',
+                  icon: Icons.attach_money_rounded,
+                  hint: 'Ex.: 500',
                 ),
-                const SizedBox(height: 12),
-                TextFormField(
-                  controller: _valorCtrl,
-                  enabled: !_enviando,
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
-                  ),
-                  textInputAction: TextInputAction.done,
-                  decoration: FxInputDeco.build(
-                    context,
-                    'Valor que o cliente paga (R\$) *',
-                    icon: Icons.attach_money_rounded,
-                    hint: 'Ex.: 500',
-                  ),
-                  validator: (v) {
-                    if (v == null || v.trim().isEmpty) {
-                      return 'Informe o valor';
-                    }
-                    final valor =
-                        double.tryParse(v.trim().replaceAll(',', '.')) ?? 0;
-                    if (valor <= 0) return 'Valor deve ser maior que zero';
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 18),
-                _SheetSectionLabel('Duração do plano', ink: ink),
-                const SizedBox(height: 10),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    for (final meses in [1, 3, 6, 12])
-                      _PacoteOptionChip(
-                        label: meses == 1 ? '1 mês' : '$meses meses',
-                        selected: _duracao == meses,
-                        onTap:
-                            _enviando
-                                ? null
-                                : () {
-                                  HapticFeedback.selectionClick();
-                                  setState(() => _duracao = meses);
-                                },
-                      ),
-                  ],
-                ),
-                const SizedBox(height: 18),
-                _SheetSectionLabel('O que inclui', ink: ink),
-                const SizedBox(height: 10),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
+                validator: (v) {
+                  if (v == null || v.trim().isEmpty) {
+                    return 'Informe o valor';
+                  }
+                  final valor =
+                      double.tryParse(v.trim().replaceAll(',', '.')) ?? 0;
+                  if (valor <= 0) return 'Valor deve ser maior que zero';
+                  return null;
+                },
+              ),
+              const SizedBox(height: 18),
+              _SheetSectionLabel('Duração do plano', ink: ink),
+              const SizedBox(height: 10),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  for (final meses in [1, 3, 6, 12])
                     _PacoteOptionChip(
-                      label: 'Treino',
-                      selected: _treino,
+                      label: meses == 1 ? '1 mês' : '$meses meses',
+                      selected: _duracao == meses,
                       onTap:
                           _enviando
                               ? null
-                              : () => setState(() => _treino = !_treino),
+                              : () {
+                                HapticFeedback.selectionClick();
+                                setState(() => _duracao = meses);
+                              },
                     ),
-                    _PacoteOptionChip(
-                      label: 'Nutrição',
-                      selected: _nutri,
-                      onTap:
-                          _enviando
-                              ? null
-                              : () => setState(() => _nutri = !_nutri),
-                    ),
-                    _PacoteOptionChip(
-                      label: 'Consultoria',
-                      selected: _consultoria,
-                      onTap:
-                          _enviando
-                              ? null
-                              : () =>
-                                  setState(() => _consultoria = !_consultoria),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 18),
-                _SheetSectionLabel('Mostrar em destaque', ink: ink),
-                const SizedBox(height: 10),
-                _PacoteOptionChip(
-                  label: 'Aparecer primeiro na página',
-                  selected: _destaque,
-                  onTap:
-                      _enviando
-                          ? null
-                          : () => setState(() => _destaque = !_destaque),
-                ),
-                const SizedBox(height: 20),
-                FxLiquidPrimaryButton(
-                  label: 'Criar plano',
-                  icon: Icons.check_rounded,
-                  loading: _enviando,
-                  loadingLabel: 'Criando…',
-                  onPressed: _enviando ? null : _submit,
-                ),
-              ],
-            ),
+                ],
+              ),
+              const SizedBox(height: 18),
+              _SheetSectionLabel('O que inclui', ink: ink),
+              const SizedBox(height: 10),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  _PacoteOptionChip(
+                    label: 'Treino',
+                    selected: _treino,
+                    onTap:
+                        _enviando
+                            ? null
+                            : () => setState(() => _treino = !_treino),
+                  ),
+                  _PacoteOptionChip(
+                    label: 'Nutrição',
+                    selected: _nutri,
+                    onTap:
+                        _enviando
+                            ? null
+                            : () => setState(() => _nutri = !_nutri),
+                  ),
+                  _PacoteOptionChip(
+                    label: 'Consultoria',
+                    selected: _consultoria,
+                    onTap:
+                        _enviando
+                            ? null
+                            : () =>
+                                setState(() => _consultoria = !_consultoria),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 18),
+              _SheetSectionLabel('Mostrar em destaque', ink: ink),
+              const SizedBox(height: 10),
+              _PacoteOptionChip(
+                label: 'Aparecer primeiro na página',
+                selected: _destaque,
+                onTap:
+                    _enviando
+                        ? null
+                        : () => setState(() => _destaque = !_destaque),
+              ),
+              const SizedBox(height: 20),
+              FxLiquidPrimaryButton(
+                label: 'Criar plano',
+                icon: Icons.check_rounded,
+                loading: _enviando,
+                loadingLabel: 'Criando…',
+                onPressed: _enviando ? null : _submit,
+              ),
+            ],
           ),
         ),
       ),
     );
-
-    if (reduceMotion) return sheet;
-    return sheet
-        .animate()
-        .fadeIn(duration: 220.ms, curve: Curves.easeOutCubic)
-        .slideY(begin: 0.04, curve: Curves.easeOutCubic, duration: 260.ms);
   }
 }
 

@@ -47,7 +47,7 @@ void main() {
     expect(widget, contains('message-circle'));
     expect(widget, isNot(contains('atalhoKicker')));
     expect(widget, contains('if (hasTrend)'));
-    expect(widget, contains('snapSizes'));
+    expect(widget, contains('expand: true'));
     expect(widget, contains('scrollDirection: Axis.horizontal'));
     expect(widget, contains('Shimmer.fromColors'));
     expect(widget, contains('maxLines: 2'));
@@ -122,7 +122,8 @@ void main() {
     expect(widget, contains('dashboardFormatCountCopy'));
     expect(widget, contains('dashboardClampActionCopy'));
     expect(widget, contains('showFxHomeSheet'));
-    expect(widget, contains('DraggableScrollableSheet'));
+    expect(widget, contains('FxHomeSheetSurface'));
+    expect(widget, contains('expandHeightFactor'));
     expect(widget, contains('maisPrioridades'));
     expect(widget, contains('hasRiskCurated'));
     expect(widget, contains('dashboardPriorityBadgeColors'));

@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_loading.dart';
-import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../constants/aluno_360_layout.dart';
 import '../data/aluno_repository.dart';
@@ -52,166 +52,122 @@ class Aluno360TimelineFullSheet extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final pagedAsync = ref.watch(alunoTimeline360PagedProvider(aluno.id));
-    final ink = fxScreenInk(context);
-    final mute = fxScreenMute(context);
+    final maxHeight =
+        MediaQuery.sizeOf(context).height *
+        FxHomeSheetChrome.expandHeightFactor;
+    String? headerSubtitle;
+    if (pagedAsync.hasValue) {
+      final state = pagedAsync.requireValue;
+      final items = _itemsFromEvents(state.events);
+      headerSubtitle =
+          state.totalCount > 0
+              ? '${state.totalCount} sinais'
+              : '${items.length} sinais';
+    }
 
-    return DraggableScrollableSheet(
-      expand: false,
-      initialChildSize: 0.78,
-      minChildSize: 0.45,
-      maxChildSize: 0.92,
-      builder: (ctx, controller) {
-        return Aluno360TimelineSheetEntrance(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 4, 16, 0),
-            child: ShellSurface(
-              radius: 28,
-              padding: EdgeInsets.fromLTRB(
-                16,
-                8,
-                16,
-                24 + MediaQuery.of(ctx).padding.bottom,
-              ),
-              child: pagedAsync.when(
-                loading: () => const SkeletonList(count: 6),
-                error:
-                    (e, _) => FxErrorState(
-                      chromeOnDark: isDark,
-                      primary: primary,
-                      message: friendlyError(
-                        e,
-                        fallback: 'Não foi possível carregar o histórico.',
-                      ),
-                      onRetry:
-                          () =>
-                              ref
-                                  .read(
-                                    alunoTimeline360PagedProvider(
-                                      aluno.id,
-                                    ).notifier,
-                                  )
-                                  .refresh(),
-                      title: 'Não conseguimos carregar o histórico',
+    return FxHomeSheetSurface(
+      isDark: isDark,
+      maxHeight: maxHeight,
+      expand: true,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          FxHomeSheetHandle(isDark: isDark),
+          SizedBox(height: TokensStrip.s4),
+          FxHomeSheetHeader(
+            isDark: isDark,
+            title: 'Histórico 360',
+            subtitle: headerSubtitle,
+            leading: Icon(Icons.timeline_rounded, color: primary, size: 18),
+          ),
+          SizedBox(height: TokensStrip.s3),
+          Expanded(
+            child: pagedAsync.when(
+              loading: () => const SkeletonList(count: 6),
+              error:
+                  (e, _) => FxErrorState(
+                    chromeOnDark: isDark,
+                    primary: primary,
+                    message: friendlyError(
+                      e,
+                      fallback: 'Não foi possível carregar o histórico.',
                     ),
-                data: (state) {
-                  final items = _itemsFromEvents(state.events);
-                  final itemCount =
-                      1 + items.length + (state.loadingMore ? 1 : 0);
-                  return NotificationListener<ScrollNotification>(
-                    onNotification: (notification) {
-                      if (notification.metrics.pixels <
-                          notification.metrics.maxScrollExtent - 120) {
-                        return false;
-                      }
-                      ref
-                          .read(
-                            alunoTimeline360PagedProvider(aluno.id).notifier,
-                          )
-                          .loadMore();
+                    onRetry:
+                        () =>
+                            ref
+                                .read(
+                                  alunoTimeline360PagedProvider(
+                                    aluno.id,
+                                  ).notifier,
+                                )
+                                .refresh(),
+                    title: 'Não conseguimos carregar o histórico',
+                  ),
+              data: (state) {
+                final items = _itemsFromEvents(state.events);
+                final itemCount = items.length + (state.loadingMore ? 1 : 0);
+                return NotificationListener<ScrollNotification>(
+                  onNotification: (notification) {
+                    if (notification.metrics.pixels <
+                        notification.metrics.maxScrollExtent - 120) {
                       return false;
-                    },
-                    child: ListView.separated(
-                      controller: controller,
-                      itemCount: itemCount,
-                      separatorBuilder: (_, index) {
-                        if (index == 0) return const SizedBox(height: 12);
-                        return const SizedBox(height: 10);
-                      },
-                      itemBuilder: (context, index) {
-                        if (index == 0) {
-                          final totalLabel =
-                              state.totalCount > 0
-                                  ? '${state.totalCount} sinais'
-                                  : '${items.length} sinais';
-                          return Semantics(
-                            header: true,
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'Histórico 360',
-                                        style: Aluno360Layout.sectionTitleStyle(
-                                          context,
-                                          ink,
-                                        ),
-                                      ),
-                                      Text(
-                                        totalLabel,
-                                        style: Aluno360Layout.captionStyle(
-                                          context,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                IconButton(
-                                  tooltip: 'Fechar histórico',
-                                  onPressed: () => Navigator.of(ctx).pop(),
-                                  icon: Icon(Icons.close_rounded, color: mute),
-                                  constraints: const BoxConstraints(
-                                    minWidth: 44,
-                                    minHeight: 44,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
-                        }
-                        final tileIndex = index - 1;
-                        if (tileIndex >= items.length) {
-                          return const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 12),
-                            child: Center(
-                              child: FxLoading(size: 22, strokeWidth: 2),
-                            ),
-                          );
-                        }
-                        return Aluno360TimelineTileEntrance(
-                          index: tileIndex,
-                          child: DecoratedBox(
-                            decoration:
-                                Aluno360Layout.timelineModalTileDecoration(
-                                  context,
-                                  isDark: isDark,
-                                ),
-                            child: Timeline360Tile(
-                              item: items[tileIndex],
-                              isDark: isDark,
-                              accent: primary,
-                              alunoFirstName: aluno.nome.split(' ').first,
-                              showSpineBelow: tileIndex < items.length - 1,
-                              inkWell: true,
-                              onExpandableTap: (tileContext, item) {
-                                final host = context;
-                                Navigator.of(tileContext).pop();
-                                WidgetsBinding.instance.addPostFrameCallback((
-                                  _,
-                                ) {
-                                  if (!host.mounted) return;
-                                  showTimeline360BodySheet(
-                                    host,
-                                    item,
-                                    accent: primary,
-                                    isDark: isDark,
-                                  );
-                                });
-                              },
-                            ),
+                    }
+                    ref
+                        .read(alunoTimeline360PagedProvider(aluno.id).notifier)
+                        .loadMore();
+                    return false;
+                  },
+                  child: ListView.separated(
+                    itemCount: itemCount,
+                    separatorBuilder: (_, __) => const SizedBox(height: 10),
+                    itemBuilder: (context, index) {
+                      if (index >= items.length) {
+                        return const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 12),
+                          child: Center(
+                            child: FxLoading(size: 22, strokeWidth: 2),
                           ),
                         );
-                      },
-                    ),
-                  );
-                },
-              ),
+                      }
+                      return Aluno360TimelineTileEntrance(
+                        index: index,
+                        child: DecoratedBox(
+                          decoration:
+                              Aluno360Layout.timelineModalTileDecoration(
+                                context,
+                                isDark: isDark,
+                              ),
+                          child: Timeline360Tile(
+                            item: items[index],
+                            isDark: isDark,
+                            accent: primary,
+                            alunoFirstName: aluno.nome.split(' ').first,
+                            showSpineBelow: index < items.length - 1,
+                            inkWell: true,
+                            onExpandableTap: (tileContext, item) {
+                              final host = context;
+                              Navigator.of(tileContext).pop();
+                              WidgetsBinding.instance.addPostFrameCallback((_) {
+                                if (!host.mounted) return;
+                                showTimeline360BodySheet(
+                                  host,
+                                  item,
+                                  accent: primary,
+                                  isDark: isDark,
+                                );
+                              });
+                            },
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                );
+              },
             ),
           ),
-        );
-      },
+        ],
+      ),
     );
   }
 }

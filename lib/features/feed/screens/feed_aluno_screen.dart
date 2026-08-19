@@ -12,6 +12,7 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../../alunos/providers/alunos_provider.dart';
 import '../data/feed_repository.dart';
 import '../widgets/feed_comments_sheet.dart';
+import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -86,12 +87,8 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
 
   void _abrirComentarios(int postId) {
     final aluno = ref.read(alunoMeProvider).valueOrNull;
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-      ),
+    showFxHomeSheet<void>(
+      context,
       builder:
           (ctx) => FeedCommentsSheet(
             postId: postId,
@@ -144,10 +141,7 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
       child: FxShellScaffold(
         useMesh: true,
         extendBody: true,
-        appBar: FxShellAppBar(
-          title: 'Feed',
-          subtitle: freshnessLabel,
-        ),
+        appBar: FxShellAppBar(title: 'Feed', subtitle: freshnessLabel),
         body: SafeArea(
           child:
               _loading

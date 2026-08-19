@@ -3,8 +3,8 @@ import 'package:video_player/video_player.dart';
 
 import '../../../../core/theme/design_tokens.dart';
 import '../../../../core/theme/tokens_strip.dart';
+import '../../../../core/widgets/fx_home_sheet.dart';
 import '../../../../core/widgets/fx_loading.dart';
-import '../../../../core/widgets/fx_shell_scaffold.dart';
 import '../../data/exercicio_repository.dart';
 import '../../services/biblioteca_media_config.dart';
 import '../../services/biblioteca_sync_status.dart';
@@ -25,11 +25,8 @@ Future<void> showExerciseMediaPreview(
   }
   final gif = exercicio.gifUrl?.trim();
   if (gif == null || gif.isEmpty) return Future.value();
-  return showModalBottomSheet<void>(
-    context: context,
-    isScrollControlled: true,
-    backgroundColor: Colors.transparent,
-    barrierColor: Colors.black.withValues(alpha: 0.52),
+  return showFxHomeSheet<void>(
+    context,
     builder: (_) => ExerciseGifPreviewSheet(exercicio: exercicio, url: gif),
   );
 }
@@ -41,11 +38,8 @@ Future<void> showExerciseVideoPreview(
 }) {
   final resolved = url?.trim() ?? exercicio.videoUrl?.trim();
   if (resolved == null || resolved.isEmpty) return Future.value();
-  return showModalBottomSheet<void>(
-    context: context,
-    isScrollControlled: true,
-    backgroundColor: Colors.transparent,
-    barrierColor: Colors.black.withValues(alpha: 0.52),
+  return showFxHomeSheet<void>(
+    context,
     builder:
         (_) => ExerciseVideoPreviewSheet(
           exercicio: exercicio,
@@ -59,11 +53,8 @@ Future<void> showLibraryDemoStandbySheet(
   BuildContext context, {
   required Exercicio exercicio,
 }) {
-  return showModalBottomSheet<void>(
-    context: context,
-    isScrollControlled: true,
-    backgroundColor: Colors.transparent,
-    barrierColor: Colors.black.withValues(alpha: 0.52),
+  return showFxHomeSheet<void>(
+    context,
     builder: (_) => ExerciseLibraryDemoStandbySheet(exercicio: exercicio),
   );
 }
@@ -77,115 +68,73 @@ class ExerciseLibraryDemoStandbySheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-    final bottom = MediaQuery.of(context).padding.bottom;
 
-    return SafeArea(
-      top: false,
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(12, 0, 12, bottom + 10),
-        child: Container(
-          padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 10, 16, 16),
-          decoration: fxListCardDecoration(context, accent: primary),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                exercicio.nomeDisplay,
-                style: AppTypography.inter(
-                  color: ink,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
-              const SizedBox(height: 8),
-              _PreviewSourceLabel(
-                label: 'Demo oficial em breve',
-                color: mute,
-                isDark: isDark,
-              ),
-              const SizedBox(height: 12),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(16),
-                child: AspectRatio(
-                  aspectRatio: 16 / 9,
-                  child: ColoredBox(
-                    color: primary.withValues(alpha: isDark ? 0.12 : 0.08),
-                    child: Padding(
-                      padding: const EdgeInsets.all(24),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.video_library_outlined,
-                            color: primary,
-                            size: 40,
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            'A demonstração oficial deste exercício será '
-                            'publicada em breve.',
-                            textAlign: TextAlign.center,
-                            style: AppTypography.inter(
-                              color: mute,
-                              fontSize: 13,
-                              height: 1.4,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Enquanto isso, envie seu vídeo na tela anterior.',
-                            textAlign: TextAlign.center,
-                            style: AppTypography.inter(
-                              color: mute.withValues(alpha: 0.85),
-                              fontSize: 12,
-                              height: 1.35,
-                            ),
-                          ),
-                        ],
+    return FxHomeSheetSurface(
+      isDark: isDark,
+      maxHeight:
+          MediaQuery.sizeOf(context).height * FxHomeSheetChrome.maxHeightFactor,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          FxHomeSheetHandle(isDark: isDark),
+          SizedBox(height: TokensStrip.s4),
+          FxHomeSheetHeader(
+            isDark: isDark,
+            title: exercicio.nomeDisplay,
+            subtitle: 'Demo oficial em breve',
+            leading: Icon(
+              Icons.video_library_outlined,
+              color: primary,
+              size: 18,
+            ),
+          ),
+          const SizedBox(height: 12),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: AspectRatio(
+              aspectRatio: 16 / 9,
+              child: ColoredBox(
+                color: primary.withValues(alpha: isDark ? 0.12 : 0.08),
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.video_library_outlined,
+                        color: primary,
+                        size: 40,
                       ),
-                    ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'A demonstração oficial deste exercício será '
+                        'publicada em breve.',
+                        textAlign: TextAlign.center,
+                        style: AppTypography.inter(
+                          color: mute,
+                          fontSize: 13,
+                          height: 1.4,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Enquanto isso, envie seu vídeo na tela anterior.',
+                        textAlign: TextAlign.center,
+                        style: AppTypography.inter(
+                          color: mute.withValues(alpha: 0.85),
+                          fontSize: 12,
+                          height: 1.35,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
-            ],
+            ),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _PreviewSourceLabel extends StatelessWidget {
-  const _PreviewSourceLabel({
-    required this.label,
-    required this.color,
-    required this.isDark,
-  });
-
-  final String label;
-  final Color color;
-  final bool isDark;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-        decoration: BoxDecoration(
-          color: color.withValues(alpha: isDark ? 0.12 : 0.08),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Text(
-          label,
-          style: AppTypography.inter(
-            color: color,
-            fontSize: 11,
-            fontWeight: FontWeight.w800,
-          ),
-        ),
+        ],
       ),
     );
   }
@@ -246,9 +195,7 @@ class _ExerciseGifPreviewSheetState extends State<ExerciseGifPreviewSheet> {
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-    final bottom = MediaQuery.of(context).padding.bottom;
 
     if (kBibliotecaLibraryVideosStandby &&
         !exercicioHasPublishedLibraryMedia(widget.exercicio)) {
@@ -265,77 +212,69 @@ class _ExerciseGifPreviewSheetState extends State<ExerciseGifPreviewSheet> {
         final displayUrl =
             _candidates.isEmpty ? null : _candidates[_candidateIndex];
         final showSyncOnly = pending && (!_exhausted || sync.syncing);
+        final subtitle =
+            showSyncOnly
+                ? (sync.message ??
+                    'Sincronizando demonstração da biblioteca...')
+                : 'Demonstração da biblioteca';
 
-        return SafeArea(
-          top: false,
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(12, 0, 12, bottom + 10),
-            child: Container(
-              padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 10, 16, 16),
-              decoration: fxListCardDecoration(context, accent: primary),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    widget.exercicio.nomeDisplay,
-                    style: AppTypography.inter(
-                      color: ink,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w900,
-                    ),
+        return FxHomeSheetSurface(
+          isDark: isDark,
+          maxHeight:
+              MediaQuery.sizeOf(context).height *
+              FxHomeSheetChrome.maxHeightFactor,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                FxHomeSheetHandle(isDark: isDark),
+                SizedBox(height: TokensStrip.s4),
+                FxHomeSheetHeader(
+                  isDark: isDark,
+                  title: widget.exercicio.nomeDisplay,
+                  subtitle: subtitle,
+                  leading: Icon(
+                    Icons.gif_box_outlined,
+                    color: primary,
+                    size: 18,
                   ),
-                  const SizedBox(height: 6),
-                  Text(
-                    showSyncOnly
-                        ? (sync.message ??
-                            'Sincronizando demonstração da biblioteca...')
-                        : 'Demonstração da biblioteca',
-                    style: AppTypography.inter(
-                      color: mute,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(16),
-                    child: AspectRatio(
-                      aspectRatio: 1,
-                      child:
-                          showSyncOnly
-                              ? _PreviewLoading(mute: mute)
-                              : displayUrl == null
-                              ? _PreviewUnavailable(
-                                mute: mute,
-                                pending: pending,
-                              )
-                              : Image.network(
-                                displayUrl,
-                                key: ValueKey(displayUrl),
-                                fit: BoxFit.cover,
-                                errorBuilder: (_, __, ___) {
-                                  WidgetsBinding.instance.addPostFrameCallback((
-                                    _,
-                                  ) {
-                                    if (mounted) _tryNextCandidate();
-                                  });
-                                  if (!_exhausted) {
-                                    return _PreviewLoading(mute: mute);
-                                  }
-                                  return _PreviewUnavailable(
-                                    mute: mute,
-                                    pending: pending,
-                                  );
-                                },
-                                loadingBuilder: (context, child, progress) {
-                                  if (progress == null) return child;
+                ),
+                const SizedBox(height: 12),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: AspectRatio(
+                    aspectRatio: 1,
+                    child:
+                        showSyncOnly
+                            ? _PreviewLoading(mute: mute)
+                            : displayUrl == null
+                            ? _PreviewUnavailable(mute: mute, pending: pending)
+                            : Image.network(
+                              displayUrl,
+                              key: ValueKey(displayUrl),
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, __, ___) {
+                                WidgetsBinding.instance.addPostFrameCallback((
+                                  _,
+                                ) {
+                                  if (mounted) _tryNextCandidate();
+                                });
+                                if (!_exhausted) {
                                   return _PreviewLoading(mute: mute);
-                                },
-                              ),
-                    ),
+                                }
+                                return _PreviewUnavailable(
+                                  mute: mute,
+                                  pending: pending,
+                                );
+                              },
+                              loadingBuilder: (context, child, progress) {
+                                if (progress == null) return child;
+                                return _PreviewLoading(mute: mute);
+                              },
+                            ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         );
@@ -466,66 +405,57 @@ class _ExerciseVideoPreviewSheetState extends State<ExerciseVideoPreviewSheet> {
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-    final bottom = MediaQuery.of(context).padding.bottom;
 
-    return SafeArea(
-      top: false,
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(12, 0, 12, bottom + 10),
-        child: Container(
-          padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 10, 16, 16),
-          decoration: fxListCardDecoration(context, accent: primary),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                widget.exercicio.nomeDisplay,
-                style: AppTypography.inter(
-                  color: ink,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
-              const SizedBox(height: 8),
-              _PreviewSourceLabel(
-                label:
-                    widget.isPersonalVideo
-                        ? 'Seu vídeo'
-                        : 'Demonstração da biblioteca',
-                color: widget.isPersonalVideo ? primary : mute,
-                isDark: isDark,
-              ),
-              const SizedBox(height: 12),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(16),
-                child: AspectRatio(
-                  aspectRatio:
-                      _ready && _controller != null
-                          ? _controller!.value.aspectRatio
-                          : 16 / 9,
-                  child: ColoredBox(
-                    color: Colors.black,
-                    child:
-                        _failed
-                            ? Center(
-                              child: Text(
-                                'Prévia indisponível agora.',
-                                style: AppTypography.inter(color: mute),
-                              ),
-                            )
-                            : _ready && _controller != null
-                            ? VideoPlayer(_controller!)
-                            : const Center(
-                              child: FxLoading(size: 28, color: Colors.white),
-                            ),
-                  ),
-                ),
-              ),
-            ],
+    return FxHomeSheetSurface(
+      isDark: isDark,
+      maxHeight:
+          MediaQuery.sizeOf(context).height * FxHomeSheetChrome.maxHeightFactor,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          FxHomeSheetHandle(isDark: isDark),
+          SizedBox(height: TokensStrip.s4),
+          FxHomeSheetHeader(
+            isDark: isDark,
+            title: widget.exercicio.nomeDisplay,
+            subtitle:
+                widget.isPersonalVideo
+                    ? 'Seu vídeo'
+                    : 'Demonstração da biblioteca',
+            leading: Icon(
+              Icons.play_circle_outline_rounded,
+              color: primary,
+              size: 18,
+            ),
           ),
-        ),
+          const SizedBox(height: 12),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: AspectRatio(
+              aspectRatio:
+                  _ready && _controller != null
+                      ? _controller!.value.aspectRatio
+                      : 16 / 9,
+              child: ColoredBox(
+                color: Colors.black,
+                child:
+                    _failed
+                        ? Center(
+                          child: Text(
+                            'Prévia indisponível agora.',
+                            style: AppTypography.inter(color: mute),
+                          ),
+                        )
+                        : _ready && _controller != null
+                        ? VideoPlayer(_controller!)
+                        : const Center(
+                          child: FxLoading(size: 28, color: Colors.white),
+                        ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

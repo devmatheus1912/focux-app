@@ -12,6 +12,7 @@ import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import 'package:focux_app/core/widgets/fx_motion.dart';
@@ -120,10 +121,8 @@ class _SuporteScreenState extends ConsumerState<SuporteScreen> {
   }
 
   Future<void> _abrirTicketSheet() async {
-    final ticket = await showModalBottomSheet<SuporteTicket>(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
+    final ticket = await showFxHomeSheet<SuporteTicket>(
+      context,
       builder: (_) => const _NovoTicketSheet(),
     );
     if (ticket == null || !mounted) return;
@@ -145,16 +144,7 @@ class _SuporteScreenState extends ConsumerState<SuporteScreen> {
   }
 
   void _abrirTicketsSheet() {
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      builder:
-          (_) => const FractionallySizedBox(
-            heightFactor: 0.82,
-            child: _MeusTicketsTab(),
-          ),
-    );
+    showFxHomeSheet<void>(context, builder: (_) => const _MeusTicketsTab());
   }
 
   void _scrollToBottom() {

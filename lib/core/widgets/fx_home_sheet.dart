@@ -19,6 +19,7 @@ abstract final class FxHomeSheetChrome {
   static const double handleHeight = 4;
   static const double leadingSize = 38;
   static const double maxHeightFactor = 0.72;
+  static const double expandHeightFactor = 0.92;
   static const double touchTarget = 48;
   static const EdgeInsets contentPadding = EdgeInsets.fromLTRB(18, 10, 18, 18);
 
@@ -136,12 +137,14 @@ class FxHomeSheetSurface extends StatelessWidget {
     required this.isDark,
     required this.child,
     this.maxHeight,
+    this.expand = false,
     this.padding = FxHomeSheetChrome.contentPadding,
   });
 
   final bool isDark;
   final Widget child;
   final double? maxHeight;
+  final bool expand;
   final EdgeInsetsGeometry padding;
 
   @override
@@ -150,7 +153,11 @@ class FxHomeSheetSurface extends StatelessWidget {
       padding: FxHomeSheetChrome.paddingOf(context),
       child: Container(
         constraints:
-            maxHeight == null ? null : BoxConstraints(maxHeight: maxHeight!),
+            maxHeight == null
+                ? null
+                : expand
+                ? BoxConstraints.tightFor(height: maxHeight)
+                : BoxConstraints(maxHeight: maxHeight!),
         clipBehavior: Clip.antiAlias,
         padding: padding,
         decoration: fxStripCardDecoration(
@@ -254,6 +261,65 @@ class FxHomeSheetHeader extends StatelessWidget {
               icon: const Icon(Icons.close_rounded, size: 22),
             ),
       ],
+    );
+  }
+}
+
+/// Handle + header + corpo no card da Home. Use para migrar sheets de uma vez.
+class FxHomeSheetScaffold extends StatelessWidget {
+  const FxHomeSheetScaffold({
+    super.key,
+    required this.isDark,
+    required this.leading,
+    required this.title,
+    required this.child,
+    this.subtitle,
+    this.trailing,
+    this.maxHeightFactor = FxHomeSheetChrome.maxHeightFactor,
+    this.scroll = true,
+    this.padding = FxHomeSheetChrome.contentPadding,
+  });
+
+  final bool isDark;
+  final Widget leading;
+  final String title;
+  final String? subtitle;
+  final Widget? trailing;
+  final Widget child;
+  final double maxHeightFactor;
+  final bool scroll;
+  final EdgeInsetsGeometry padding;
+
+  @override
+  Widget build(BuildContext context) {
+    final maxHeight = MediaQuery.sizeOf(context).height * maxHeightFactor;
+    return FxHomeSheetSurface(
+      isDark: isDark,
+      maxHeight: maxHeight,
+      padding: padding,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          FxHomeSheetHandle(isDark: isDark),
+          SizedBox(height: TokensStrip.s4),
+          FxHomeSheetHeader(
+            isDark: isDark,
+            leading: leading,
+            title: title,
+            subtitle: subtitle,
+            trailing: trailing,
+          ),
+          SizedBox(height: TokensStrip.s3),
+          if (scroll)
+            ConstrainedBox(
+              constraints: BoxConstraints(maxHeight: maxHeight - 120),
+              child: SingleChildScrollView(child: child),
+            )
+          else
+            child,
+        ],
+      ),
     );
   }
 }

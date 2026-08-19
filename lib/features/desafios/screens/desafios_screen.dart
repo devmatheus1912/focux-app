@@ -16,6 +16,8 @@ import '../../../core/widgets/fx_empty_state.dart';
 
 import '../../../core/widgets/fx_error_state.dart';
 
+import '../../../core/widgets/fx_home_sheet.dart';
+
 import '../../../core/widgets/fx_motion.dart';
 
 import '../../../core/widgets/skeleton_loader.dart';
@@ -133,39 +135,53 @@ class _DesafiosScreenState extends ConsumerState<DesafiosScreen> {
 
       if (!mounted) return;
 
-      showModalBottomSheet<void>(
-        context: context,
-
-        builder:
-            (_) => ListView(
-              padding: const EdgeInsets.all(16),
-
+      showFxHomeSheet<void>(
+        context,
+        builder: (ctx) {
+          final isDark = Theme.of(ctx).brightness == Brightness.dark;
+          final primary = Theme.of(ctx).colorScheme.primary;
+          return FxHomeSheetSurface(
+            isDark: isDark,
+            expand: true,
+            maxHeight:
+                MediaQuery.sizeOf(ctx).height *
+                FxHomeSheetChrome.expandHeightFactor,
+            child: Column(
               children: [
-                Text(
-                  'Ranking — ${d.titulo}',
-
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 18,
+                FxHomeSheetHandle(isDark: isDark),
+                SizedBox(height: TokensStrip.s4),
+                FxHomeSheetHeader(
+                  isDark: isDark,
+                  title: 'Ranking',
+                  subtitle: d.titulo,
+                  leading: Icon(
+                    Icons.emoji_events_outlined,
+                    color: primary,
+                    size: 18,
                   ),
                 ),
-
-                const SizedBox(height: 12),
-
-                if (lb.isEmpty)
-                  const Text('Nenhum participante com pontos ainda.')
-                else
-                  ...lb.asMap().entries.map(
-                    (e) => ListTile(
-                      leading: CircleAvatar(child: Text('${e.key + 1}')),
-
-                      title: Text(e.value['alunoNome'] as String? ?? ''),
-
-                      trailing: Text('${e.value['pontos']} pts'),
-                    ),
+                SizedBox(height: TokensStrip.s3),
+                Expanded(
+                  child: ListView(
+                    children: [
+                      if (lb.isEmpty)
+                        const Text('Nenhum participante com pontos ainda.')
+                      else
+                        ...lb.asMap().entries.map(
+                          (e) => ListTile(
+                            contentPadding: EdgeInsets.zero,
+                            leading: CircleAvatar(child: Text('${e.key + 1}')),
+                            title: Text(e.value['alunoNome'] as String? ?? ''),
+                            trailing: Text('${e.value['pontos']} pts'),
+                          ),
+                        ),
+                    ],
                   ),
+                ),
               ],
             ),
+          );
+        },
       );
     } catch (e) {
       if (!mounted) return;
@@ -199,89 +215,93 @@ class _DesafiosScreenState extends ConsumerState<DesafiosScreen> {
             subtitle: freshnessLabel ?? 'Ranking e metas da comunidade',
           ),
 
-        floatingActionButton: Semantics(
-          label: 'Criar novo desafio',
+          floatingActionButton: Semantics(
+            label: 'Criar novo desafio',
 
-          button: true,
+            button: true,
 
-          child: FloatingActionButton.extended(
-            onPressed: _criar,
+            child: FloatingActionButton.extended(
+              onPressed: _criar,
 
-            icon: const Icon(Icons.add),
+              icon: const Icon(Icons.add),
 
-            label: const Text('Novo'),
+              label: const Text('Novo'),
+            ),
           ),
-        ),
 
-        body:
-            _loading
-                ? const SkeletonList(count: 5)
-                : _error != null
-                ? FxErrorState(
-                  chromeOnDark: chrome.isDark,
-                  primary: scheme.primary,
-                  message: _error!,
-                  onRetry: _load,
-                )
-                : _desafios.isEmpty
-                ? FxEmptyState(
-                  icon: 'spark',
+          body:
+              _loading
+                  ? const SkeletonList(count: 5)
+                  : _error != null
+                  ? FxErrorState(
+                    chromeOnDark: chrome.isDark,
+                    primary: scheme.primary,
+                    message: _error!,
+                    onRetry: _load,
+                  )
+                  : _desafios.isEmpty
+                  ? FxEmptyState(
+                    icon: 'spark',
 
-                  title: 'Nenhum desafio',
+                    title: 'Nenhum desafio',
 
-                  subtitle: 'Crie o primeiro desafio para engajar seus alunos.',
+                    subtitle:
+                        'Crie o primeiro desafio para engajar seus alunos.',
 
-                  action: FxEmptyAction(label: 'Criar desafio', onTap: _criar),
-                )
-                : RefreshIndicator(
-                  onRefresh: _load,
-
-                  child: ListView.builder(
-                    padding: const EdgeInsets.fromLTRB(
-                      TokensStrip.s4,
-
-                      TokensStrip.s2,
-
-                      TokensStrip.s4,
-
-                      96,
+                    action: FxEmptyAction(
+                      label: 'Criar desafio',
+                      onTap: _criar,
                     ),
+                  )
+                  : RefreshIndicator(
+                    onRefresh: _load,
 
-                    itemCount: _desafios.length,
+                    child: ListView.builder(
+                      padding: const EdgeInsets.fromLTRB(
+                        TokensStrip.s4,
 
-                    itemBuilder: (_, i) {
-                      final d = _desafios[i];
+                        TokensStrip.s2,
 
-                      return FxStaggerItem(
-                        index: i,
+                        TokensStrip.s4,
 
-                        child: Semantics(
-                          label: 'Desafio ${d.titulo}',
+                        96,
+                      ),
 
-                          button: true,
+                      itemCount: _desafios.length,
 
-                          child: FxSatelliteListTile(
-                            title: d.titulo,
+                      itemBuilder: (_, i) {
+                        final d = _desafios[i];
 
-                            titleCase: false,
+                        return FxStaggerItem(
+                          index: i,
 
-                            onTap: () => _abrirLeaderboard(d),
+                          child: Semantics(
+                            label: 'Desafio ${d.titulo}',
 
-                            leading: Icon(
-                              Icons.emoji_events_outlined,
+                            button: true,
 
-                              color: scheme.primary,
-                            ),
+                            child: FxSatelliteListTile(
+                              title: d.titulo,
 
-                            subtitle: Text(
-                              '${d.tipo} · meta ${d.metaPontos} pts',
+                              titleCase: false,
+
+                              onTap: () => _abrirLeaderboard(d),
+
+                              leading: Icon(
+                                Icons.emoji_events_outlined,
+
+                                color: scheme.primary,
+                              ),
+
+                              subtitle: Text(
+                                '${d.tipo} · meta ${d.metaPontos} pts',
+                              ),
                             ),
                           ),
-                        ),
-                      );
-                    },
+                        );
+                      },
+                    ),
                   ),
-                ),
         ),
       ),
     );

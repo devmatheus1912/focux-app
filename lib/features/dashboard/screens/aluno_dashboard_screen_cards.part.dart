@@ -226,116 +226,59 @@ void _showAlunoPlanSheet(
   required AlunoAutonomyPlan plan,
   required void Function(AlunoAutonomyTask task) onOpenTask,
 }) {
-  final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
-  final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-  final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-
-  showModalBottomSheet<void>(
-    context: context,
-    backgroundColor: Colors.transparent,
-    barrierColor: Colors.black.withValues(alpha: isDark ? 0.56 : 0.24),
-    isScrollControlled: true,
-    useSafeArea: true,
+  showFxHomeSheet<void>(
+    context,
     builder: (sheetContext) {
-      final media = MediaQuery.of(sheetContext);
-      return Padding(
-        padding: EdgeInsets.fromLTRB(14, 0, 14, media.viewPadding.bottom + 10),
-        child: Container(
-          constraints: BoxConstraints(maxHeight: media.size.height * 0.76),
-          padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
-          decoration: fxListCardDecoration(sheetContext, accent: primary),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Container(
-                  width: 42,
-                  height: 4,
-                  margin: const EdgeInsets.only(bottom: 14),
-                  decoration: BoxDecoration(
-                    color: line,
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                ),
+      return FxHomeSheetSurface(
+        isDark: isDark,
+        maxHeight:
+            MediaQuery.sizeOf(sheetContext).height *
+            FxHomeSheetChrome.maxHeightFactor,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            FxHomeSheetHandle(isDark: isDark),
+            SizedBox(height: TokensStrip.s4),
+            FxHomeSheetHeader(
+              isDark: isDark,
+              title: 'Plano do aluno',
+              subtitle:
+                  '${plan.doneCount} de ${plan.tasks.length} passos fechados.',
+              leading: Icon(Icons.route_outlined, size: 18, color: primary),
+            ),
+            const SizedBox(height: 12),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(999),
+              child: LinearProgressIndicator(
+                value:
+                    plan.tasks.isEmpty ? 1 : plan.doneCount / plan.tasks.length,
+                minHeight: 8,
+                backgroundColor: BrandPalette.soft(primary, dark: isDark),
+                valueColor: AlwaysStoppedAnimation(primary),
               ),
-              Row(
-                children: [
-                  Container(
-                    width: 38,
-                    height: 38,
-                    decoration: BoxDecoration(
-                      color: BrandPalette.soft(primary, dark: isDark),
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    child: Icon(Icons.route_outlined, size: 18, color: primary),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Plano do aluno',
-                          style: FocuxHubTypography.pageTitle(
-                            context,
-                            color: ink,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          '${plan.doneCount} de ${plan.tasks.length} passos fechados.',
-                          style: TextStyle(
-                            color: mute,
-                            fontSize: 12.2,
-                            height: 1.2,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: () => Navigator.of(sheetContext).pop(),
-                    visualDensity: VisualDensity.compact,
-                    icon: Icon(Icons.close_rounded, size: 18, color: mute),
-                  ),
-                ],
+            ),
+            const SizedBox(height: 14),
+            Flexible(
+              child: ListView.separated(
+                shrinkWrap: true,
+                physics: const BouncingScrollPhysics(),
+                itemCount: plan.tasks.length,
+                separatorBuilder: (_, _) => const SizedBox(height: 9),
+                itemBuilder: (_, index) {
+                  final task = plan.tasks[index];
+                  return _AutonomyTaskTile(
+                    task: task,
+                    isDark: isDark,
+                    onTap: () {
+                      Navigator.of(sheetContext).pop();
+                      onOpenTask(task);
+                    },
+                  );
+                },
               ),
-              const SizedBox(height: 12),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(999),
-                child: LinearProgressIndicator(
-                  value:
-                      plan.tasks.isEmpty
-                          ? 1
-                          : plan.doneCount / plan.tasks.length,
-                  minHeight: 8,
-                  backgroundColor: BrandPalette.soft(primary, dark: isDark),
-                  valueColor: AlwaysStoppedAnimation(primary),
-                ),
-              ),
-              const SizedBox(height: 14),
-              Flexible(
-                child: ListView.separated(
-                  shrinkWrap: true,
-                  physics: const BouncingScrollPhysics(),
-                  itemCount: plan.tasks.length,
-                  separatorBuilder: (_, _) => const SizedBox(height: 9),
-                  itemBuilder: (_, index) {
-                    final task = plan.tasks[index];
-                    return _AutonomyTaskTile(
-                      task: task,
-                      isDark: isDark,
-                      onTap: () {
-                        Navigator.of(sheetContext).pop();
-                        onOpenTask(task);
-                      },
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       );
     },

@@ -22,7 +22,6 @@ class _TrainingSkeleton extends StatelessWidget {
   }
 }
 
-
 class _TrainingHero extends StatelessWidget {
   final int ativos;
   final int total;
@@ -361,96 +360,49 @@ void _showTrainingPendingSheet({
   final primary = Theme.of(context).colorScheme.primary;
   final chrome = ShellChrome.forDark(isDark);
   final ink = chrome.ink;
-  final mute = chrome.mute;
 
-  showModalBottomSheet<void>(
-    context: context,
-    useSafeArea: true,
-    showDragHandle: true,
-    backgroundColor: Colors.transparent,
+  showFxHomeSheet<void>(
+    context,
     builder:
-        (sheetContext) => Padding(
-          padding: const EdgeInsets.fromLTRB(12, 0, 12, 18),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(TokensStrip.rXl),
-            child: DecoratedBox(
-              decoration: chrome.listCard(primary: primary),
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(22, 12, 22, 22),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          width: 46,
-                          height: 46,
-                          decoration: BoxDecoration(
-                            color: BrandPalette.soft(primary, dark: isDark),
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: Icon(
-                            Icons.pending_actions_rounded,
-                            color: primary,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                treinoNome,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  color: ink,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w900,
-                                ),
-                              ),
-                              const SizedBox(height: 3),
-                              Text(
-                                'Em preparacao',
-                                style: TextStyle(
-                                  color: mute,
-                                  fontSize: 12.5,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 18),
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(TokensStrip.s4),
-                      decoration: chrome.panel(accent: primary),
-                      child: Text(
-                        'Seu personal ja reservou este treino. Assim que os exercicios forem liberados, o botao Iniciar aparece com registro de series, videos e feedback.',
-                        style: TextStyle(
-                          color: ink,
-                          fontSize: 13,
-                          height: 1.42,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: TokensStrip.s4),
-                    SizedBox(
-                      width: double.infinity,
-                      child: FxLiquidPrimaryButton(
-                        label: 'Entendi',
-                        onPressed: () => Navigator.of(sheetContext).pop(),
-                      ),
-                    ),
-                  ],
+        (sheetContext) => FxHomeSheetSurface(
+          isDark: isDark,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              FxHomeSheetHandle(isDark: isDark),
+              SizedBox(height: TokensStrip.s4),
+              FxHomeSheetHeader(
+                isDark: isDark,
+                title: treinoNome,
+                subtitle: 'Em preparacao',
+                leading: Icon(
+                  Icons.pending_actions_rounded,
+                  color: primary,
+                  size: 18,
                 ),
               ),
-            ),
+              const SizedBox(height: 18),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(TokensStrip.s4),
+                decoration: chrome.panel(accent: primary),
+                child: Text(
+                  'Seu personal ja reservou este treino. Assim que os exercicios forem liberados, o botao Iniciar aparece com registro de series, videos e feedback.',
+                  style: TextStyle(
+                    color: ink,
+                    fontSize: 13,
+                    height: 1.42,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              SizedBox(height: TokensStrip.s4),
+              FxLiquidPrimaryButton(
+                label: 'Entendi',
+                onPressed: () => Navigator.of(sheetContext).pop(),
+              ),
+            ],
           ),
         ),
   );

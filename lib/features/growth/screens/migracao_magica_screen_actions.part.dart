@@ -187,53 +187,42 @@ extension MigracaoMagicaScreenActions on _MigracaoMagicaScreenState {
     if (!await _verificarAcessoFoto()) return;
     if (!mounted) return;
 
-    final source = await showModalBottomSheet<ImageSource>(
-      context: context,
-      showDragHandle: true,
+    final source = await showFxHomeSheet<ImageSource>(
+      context,
       builder: (ctx) {
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  'Subir foto ou print',
-                  style: AppTypography.inter(
-                    fontSize: 17,
-                    fontWeight: FontWeight.w800,
-                    color:
-                        Theme.of(ctx).brightness == Brightness.dark
-                            ? EagleTokens.darkInk
-                            : TokensStrip.textPrimary,
-                  ),
+        final isDark = Theme.of(ctx).brightness == Brightness.dark;
+        final primary = Theme.of(ctx).colorScheme.primary;
+        return FxHomeSheetSurface(
+          isDark: isDark,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              FxHomeSheetHandle(isDark: isDark),
+              SizedBox(height: TokensStrip.s4),
+              FxHomeSheetHeader(
+                isDark: isDark,
+                title: 'Subir foto ou print',
+                subtitle:
+                    'Screenshot de MFIT, Trainerize, planilha ou lista no WhatsApp.',
+                leading: Icon(
+                  Icons.add_a_photo_outlined,
+                  color: primary,
+                  size: 18,
                 ),
-                const SizedBox(height: 6),
-                Text(
-                  'Screenshot de MFIT, Trainerize, planilha ou lista no WhatsApp.',
-                  style: TextStyle(
-                    fontSize: 13,
-                    height: 1.4,
-                    color:
-                        Theme.of(ctx).brightness == Brightness.dark
-                            ? EagleTokens.darkInkMute
-                            : TokensStrip.textSecondary,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                ListTile(
-                  leading: const Icon(Icons.photo_library_outlined),
-                  title: const Text('Escolher da galeria'),
-                  onTap: () => Navigator.pop(ctx, ImageSource.gallery),
-                ),
-                ListTile(
-                  leading: const Icon(Icons.photo_camera_outlined),
-                  title: const Text('Tirar foto agora'),
-                  onTap: () => Navigator.pop(ctx, ImageSource.camera),
-                ),
-              ],
-            ),
+              ),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: Icon(Icons.photo_library_outlined, color: primary),
+                title: const Text('Escolher da galeria'),
+                onTap: () => Navigator.pop(ctx, ImageSource.gallery),
+              ),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: Icon(Icons.photo_camera_outlined, color: primary),
+                title: const Text('Tirar foto agora'),
+                onTap: () => Navigator.pop(ctx, ImageSource.camera),
+              ),
+            ],
           ),
         );
       },
@@ -402,9 +391,7 @@ extension MigracaoMagicaScreenActions on _MigracaoMagicaScreenState {
     final alunos = _alunosEncontrados;
     if (alunos == null || alunos.isEmpty) return;
 
-    final toSave = alunos
-        .where((a) => !a.duplicado)
-        .toList(growable: false);
+    final toSave = alunos.where((a) => !a.duplicado).toList(growable: false);
     if (toSave.isEmpty) {
       FeedbackHelper.showError(
         context,
@@ -626,58 +613,62 @@ extension MigracaoMagicaScreenActions on _MigracaoMagicaScreenState {
     final telCtrl = TextEditingController(text: aluno.telefone ?? '');
     final objCtrl = TextEditingController(text: aluno.objetivo ?? '');
 
-    final saved = await showModalBottomSheet<bool>(
-      context: context,
-      isScrollControlled: true,
-      showDragHandle: true,
+    final saved = await showFxHomeSheet<bool>(
+      context,
       builder: (ctx) {
-        final bottom = MediaQuery.viewInsetsOf(ctx).bottom;
         final isDark = Theme.of(ctx).brightness == Brightness.dark;
-        final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+        final primary = Theme.of(ctx).colorScheme.primary;
 
-        return Padding(
-          padding: EdgeInsets.fromLTRB(20, 8, 20, 20 + bottom),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                'Editar aluno',
-                style: AppTypography.inter(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w800,
-                  color: ink,
+        return FxHomeSheetSurface(
+          isDark: isDark,
+          maxHeight:
+              MediaQuery.sizeOf(ctx).height * FxHomeSheetChrome.maxHeightFactor,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                FxHomeSheetHandle(isDark: isDark),
+                SizedBox(height: TokensStrip.s4),
+                FxHomeSheetHeader(
+                  isDark: isDark,
+                  title: 'Editar aluno',
+                  leading: Icon(
+                    Icons.person_outline_rounded,
+                    color: primary,
+                    size: 18,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: nomeCtrl,
-                textCapitalization: TextCapitalization.words,
-                decoration: FxInputDeco.build(ctx, 'Nome'),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: emailCtrl,
-                keyboardType: TextInputType.emailAddress,
-                decoration: FxInputDeco.build(ctx, 'E-mail (opcional)'),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: telCtrl,
-                keyboardType: TextInputType.phone,
-                decoration: FxInputDeco.build(ctx, 'Telefone (opcional)'),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: objCtrl,
-                decoration: FxInputDeco.build(ctx, 'Objetivo (opcional)'),
-              ),
-              const SizedBox(height: 20),
-              FilledButton(
-                onPressed: () => Navigator.pop(ctx, true),
-                child: const Text('Salvar alterações'),
-              ),
-            ],
+                const SizedBox(height: 16),
+                TextField(
+                  controller: nomeCtrl,
+                  textCapitalization: TextCapitalization.words,
+                  decoration: FxInputDeco.build(ctx, 'Nome'),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: emailCtrl,
+                  keyboardType: TextInputType.emailAddress,
+                  decoration: FxInputDeco.build(ctx, 'E-mail (opcional)'),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: telCtrl,
+                  keyboardType: TextInputType.phone,
+                  decoration: FxInputDeco.build(ctx, 'Telefone (opcional)'),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: objCtrl,
+                  decoration: FxInputDeco.build(ctx, 'Objetivo (opcional)'),
+                ),
+                const SizedBox(height: 20),
+                FilledButton(
+                  onPressed: () => Navigator.pop(ctx, true),
+                  child: const Text('Salvar alterações'),
+                ),
+              ],
+            ),
           ),
         );
       },

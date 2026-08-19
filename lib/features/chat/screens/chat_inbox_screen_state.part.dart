@@ -364,30 +364,14 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
 
   void _showAlunoPicker() {
     HapticFeedback.selectionClick();
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
+    showFxHomeSheet<void>(
+      context,
       builder:
-          (ctx) => Padding(
-            padding: EdgeInsets.fromLTRB(
-              16,
-              8,
-              16,
-              16 + MediaQuery.of(ctx).padding.bottom,
-            ),
-            child: ShellSurface(
-              radius: 28,
-              child: _AlunoPickerSheet(
-                onSelect: (aluno) {
-                  Navigator.pop(ctx);
-                  _openThread(aluno.id, extra: aluno.nome);
-                },
-              ),
-            ),
+          (ctx) => _AlunoPickerSheet(
+            onSelect: (aluno) {
+              Navigator.pop(ctx);
+              _openThread(aluno.id, extra: aluno.nome);
+            },
           ),
     );
   }

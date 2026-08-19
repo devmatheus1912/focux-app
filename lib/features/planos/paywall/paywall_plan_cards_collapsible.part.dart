@@ -469,158 +469,140 @@ void showPaywallFeatureEducation(
   VoidCallback? onViewPlan,
 }) {
   final isDark = Theme.of(context).brightness == Brightness.dark;
-  final sheetInk = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
   final sheetMute =
       isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-  final sheetLine = isDark ? EagleTokens.darkLine : EagleTokens.line;
   final targetPlan = _educationTargetPlan(content.plans);
   final targetLabel =
       targetPlan == null ? null : PaywallCatalog.displayPlanName(targetPlan);
 
-  showModalBottomSheet<void>(
-    context: context,
-    isScrollControlled: true,
-    backgroundColor: Colors.transparent,
-    barrierColor: Colors.black.withValues(alpha: 0.48),
+  showFxHomeSheet<void>(
+    context,
     builder: (ctx) {
-      return DraggableScrollableSheet(
-        expand: false,
-        initialChildSize: 0.72,
-        minChildSize: 0.45,
-        maxChildSize: 0.92,
-        builder: (_, scroll) {
-          return ClipRRect(
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-            child: BackdropFilter(
-              filter: TokensStrip.blurFilter(TokensStrip.blurMedium),
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: TokensStrip.glassFill(
-                    dark: isDark,
-                    opacity: isDark ? 0.92 : 0.96,
-                  ),
-                  border: Border(
-                    top: BorderSide(color: sheetLine.withValues(alpha: 0.5)),
-                  ),
-                ),
-                child: ListView(
-                  controller: scroll,
-                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
-                  children: [
-                    Center(
-                      child: Container(
-                        width: 40,
-                        height: 4,
-                        decoration: BoxDecoration(
-                          color: sheetLine,
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    Text(content.title, style: TokensStrip.h2(color: sheetInk)),
-                    const SizedBox(height: 16),
-                    Text(
-                      'O que é',
-                      style: TextStyle(
-                        color: PaywallCatalog.brandDeep,
-                        fontWeight: FontWeight.w800,
-                        fontSize: 13,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      content.whatIs,
-                      style: TokensStrip.body(color: sheetMute),
-                    ),
-                    const SizedBox(height: 14),
-                    Text(
-                      'Por que importa pra você',
-                      style: TextStyle(
-                        color: PaywallCatalog.brandDeep,
-                        fontWeight: FontWeight.w800,
-                        fontSize: 13,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      content.whyMatters,
-                      style: TokensStrip.body(color: sheetMute),
-                    ),
-                    if (content.roiStatement != null) ...[
-                      const SizedBox(height: 14),
-                      PaywallInsetPanel(
-                        accent: PaywallCatalog.green,
-                        isDark: isDark,
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Icon(
-                              Icons.savings_outlined,
-                              size: 18,
-                              color: PaywallCatalog.green,
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                content.roiStatement!,
-                                style: const TextStyle(
-                                  color: PaywallCatalog.green,
-                                  fontWeight: FontWeight.w800,
-                                  fontSize: 13,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                    const SizedBox(height: 14),
-                    Text(
-                      'Disponível em',
-                      style: TextStyle(
-                        color: PaywallCatalog.brandDeep,
-                        fontWeight: FontWeight.w800,
-                        fontSize: 13,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Wrap(
-                      spacing: 6,
-                      children:
-                          content.plans
-                              .map(
-                                (p) => _PlanChip(
-                                  label: p,
-                                  color: PaywallCatalog.accentForPlan(
-                                    subscriptionPlanFromApi(p),
-                                  ),
-                                ),
-                              )
-                              .toList(),
-                    ),
-                    if (targetPlan != null && onViewPlan != null) ...[
-                      const SizedBox(height: 20),
-                      FxLiquidPrimaryButton(
-                        label: 'Ver $targetLabel',
-                        icon: Icons.workspace_premium_rounded,
-                        onPressed: () {
-                          Navigator.of(ctx).pop();
-                          onViewPlan();
-                        },
-                      ),
-                    ],
-                    const SizedBox(height: 10),
-                    FxLiquidSecondaryButton(
-                      label: 'Fechar',
-                      onPressed: () => Navigator.of(ctx).pop(),
-                    ),
-                  ],
-                ),
+      final maxHeight =
+          MediaQuery.sizeOf(ctx).height * FxHomeSheetChrome.expandHeightFactor;
+      return FxHomeSheetSurface(
+        isDark: isDark,
+        maxHeight: maxHeight,
+        expand: true,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            FxHomeSheetHandle(isDark: isDark),
+            SizedBox(height: TokensStrip.s4),
+            FxHomeSheetHeader(
+              isDark: isDark,
+              title: content.title,
+              leading: Icon(
+                Icons.help_outline_rounded,
+                color: PaywallCatalog.brandDeep,
+                size: 18,
               ),
             ),
-          );
-        },
+            SizedBox(height: TokensStrip.s3),
+            Expanded(
+              child: ListView(
+                padding: EdgeInsets.zero,
+                children: [
+                  Text(
+                    'O que é',
+                    style: TextStyle(
+                      color: PaywallCatalog.brandDeep,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 13,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    content.whatIs,
+                    style: TokensStrip.body(color: sheetMute),
+                  ),
+                  const SizedBox(height: 14),
+                  Text(
+                    'Por que importa pra você',
+                    style: TextStyle(
+                      color: PaywallCatalog.brandDeep,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 13,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    content.whyMatters,
+                    style: TokensStrip.body(color: sheetMute),
+                  ),
+                  if (content.roiStatement != null) ...[
+                    const SizedBox(height: 14),
+                    PaywallInsetPanel(
+                      accent: PaywallCatalog.green,
+                      isDark: isDark,
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Icon(
+                            Icons.savings_outlined,
+                            size: 18,
+                            color: PaywallCatalog.green,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              content.roiStatement!,
+                              style: const TextStyle(
+                                color: PaywallCatalog.green,
+                                fontWeight: FontWeight.w800,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 14),
+                  Text(
+                    'Disponível em',
+                    style: TextStyle(
+                      color: PaywallCatalog.brandDeep,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 13,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 6,
+                    children:
+                        content.plans
+                            .map(
+                              (p) => _PlanChip(
+                                label: p,
+                                color: PaywallCatalog.accentForPlan(
+                                  subscriptionPlanFromApi(p),
+                                ),
+                              ),
+                            )
+                            .toList(),
+                  ),
+                  if (targetPlan != null && onViewPlan != null) ...[
+                    const SizedBox(height: 20),
+                    FxLiquidPrimaryButton(
+                      label: 'Ver $targetLabel',
+                      icon: Icons.workspace_premium_rounded,
+                      onPressed: () {
+                        Navigator.of(ctx).pop();
+                        onViewPlan();
+                      },
+                    ),
+                  ],
+                  const SizedBox(height: 10),
+                  FxLiquidSecondaryButton(
+                    label: 'Fechar',
+                    onPressed: () => Navigator.of(ctx).pop(),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       );
     },
   );

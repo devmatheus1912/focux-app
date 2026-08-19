@@ -1,6 +1,5 @@
 part of 'chat_inbox_screen.dart';
 
-
 class _AlunoPickerSheet extends ConsumerStatefulWidget {
   const _AlunoPickerSheet({required this.onSelect});
 
@@ -25,80 +24,54 @@ class _AlunoPickerSheetState extends ConsumerState<_AlunoPickerSheet> {
     final chrome = ShellChrome.of(context);
     final isDark = chrome.isDark;
     final primary = Theme.of(context).colorScheme.primary;
-    final ink = chrome.ink;
-    final mute = chrome.mute;
-    final bottom = MediaQuery.of(context).viewInsets.bottom;
     final homeAsync = ref.watch(alunosHomeProvider);
     final alunos = alunoPickerAlunosFromHome(homeAsync);
+    final maxHeight =
+        MediaQuery.sizeOf(context).height * FxHomeSheetChrome.maxHeightFactor;
 
-    return SafeArea(
-      top: false,
-      child: AnimatedPadding(
-        duration: const Duration(milliseconds: 180),
-        curve: Curves.easeOutCubic,
-        padding: EdgeInsets.only(bottom: bottom),
-        child: SizedBox(
-          height: MediaQuery.sizeOf(context).height * 0.72,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 12, 16, 16),
-            child: Column(
-              children: [
-                Container(
-                  width: 36,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: chrome.line,
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                ),
-                const SizedBox(height: 14),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        'Nova mensagem',
-                        style: TextStyle(
-                          color: ink,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                    ),
-                    IconButton(
-                      onPressed: () => Navigator.pop(context),
-                      icon: Icon(Icons.close_rounded, color: mute),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: _searchCtrl,
-                  autofocus: true,
-                  onChanged: (v) => setState(() => _query = v.trim()),
-                  decoration: InputDecoration(
-                    hintText: 'Buscar aluno',
-                    prefixIcon: const Icon(Icons.search_rounded),
-                    filled: true,
-                    fillColor: chrome.cardFill,
-                    border: FxInputDeco.outlineBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: BorderSide(color: chrome.line),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Expanded(
-                  child: _buildAlunosBody(
-                    homeAsync: homeAsync,
-                    alunos: alunos,
-                    isDark: isDark,
-                    primary: primary,
-                  ),
-                ),
-              ],
+    return FxHomeSheetSurface(
+      isDark: isDark,
+      maxHeight: maxHeight,
+      expand: true,
+      child: Column(
+        children: [
+          FxHomeSheetHandle(isDark: isDark),
+          SizedBox(height: TokensStrip.s4),
+          FxHomeSheetHeader(
+            isDark: isDark,
+            title: 'Nova mensagem',
+            leading: Icon(
+              Icons.chat_bubble_outline_rounded,
+              color: primary,
+              size: 18,
             ),
           ),
-        ),
+          const SizedBox(height: 8),
+          TextField(
+            controller: _searchCtrl,
+            autofocus: true,
+            onChanged: (v) => setState(() => _query = v.trim()),
+            decoration: InputDecoration(
+              hintText: 'Buscar aluno',
+              prefixIcon: const Icon(Icons.search_rounded),
+              filled: true,
+              fillColor: chrome.cardFill,
+              border: FxInputDeco.outlineBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide(color: chrome.line),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Expanded(
+            child: _buildAlunosBody(
+              homeAsync: homeAsync,
+              alunos: alunos,
+              isDark: isDark,
+              primary: primary,
+            ),
+          ),
+        ],
       ),
     );
   }

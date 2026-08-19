@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/design_tokens.dart';
+import '../../../../core/theme/tokens_strip.dart';
+import '../../../../core/widgets/fx_home_sheet.dart';
 import '../../../treinos/utils/exercise_picker_sort.dart';
 import '../../data/enums.dart';
 import '../../data/exercicio_repository.dart';
@@ -36,222 +38,184 @@ class PadraoExerciciosBottomSheet extends ConsumerWidget {
         padrao != null
             ? TaxonomyLabels.padrao[padrao!] ?? 'Padrão'
             : TaxonomyLabels.grupo[grupo!] ?? 'Grupo';
-
-    return DraggableScrollableSheet(
-      expand: false,
-      initialChildSize: 0.72,
-      minChildSize: 0.42,
-      maxChildSize: 0.92,
-      builder: (context, scrollController) {
-        final scheme = Theme.of(context).colorScheme;
-        return DecoratedBox(
-          decoration: BoxDecoration(
-            color: scheme.surface,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.14),
-                blurRadius: 32,
-                offset: const Offset(0, -12),
-              ),
-            ],
-          ),
-          child: asyncList.when(
-            loading:
-                () => ListView.separated(
-                  controller: scrollController,
-                  padding: EdgeInsets.fromLTRB(
-                    18,
-                    10,
-                    18,
-                    MediaQuery.paddingOf(context).bottom + 18,
-                  ),
-                  itemCount: 7,
-                  separatorBuilder: (_, __) => const SizedBox(height: 10),
-                  itemBuilder: (_, index) {
-                    if (index == 0) {
-                      return _SheetHeader(title: title, count: 0);
-                    }
-                    return const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 6),
-                      child: Row(
-                        children: [
-                          SkeletonLoader(
-                            width: 44,
-                            height: 44,
-                            borderRadius: 14,
-                          ),
-                          SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                SkeletonLoader(height: 14, borderRadius: 8),
-                                SizedBox(height: 8),
-                                SkeletonLoader(
-                                  height: 11,
-                                  width: 120,
-                                  borderRadius: 8,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
-            error:
-                (e, _) => Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Text(
-                      'Não foi possível carregar os exercícios.',
-                      textAlign: TextAlign.center,
-                      style: AppTypography.inter(
-                        color: scheme.onSurfaceVariant,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ),
-            data: (all) {
-              final filtered = applyExercisePickerFilter(all, pickerFilter);
-              final items = sortExerciciosForPicker(
-                filtered.where((ex) {
-                  if (padrao != null) {
-                    return ex.padraoMovimento == padrao;
-                  }
-                  if (grupo != null) {
-                    return ex.grupoMuscularPrimario == grupo;
-                  }
-                  return false;
-                }),
-                alreadyInTreinoIds: alreadyInTreinoIds,
-              );
-
-              return ListView.separated(
-                controller: scrollController,
-                padding: EdgeInsets.fromLTRB(
-                  18,
-                  10,
-                  18,
-                  MediaQuery.paddingOf(context).bottom + 18,
-                ),
-                itemCount: items.length + 1,
-                separatorBuilder:
-                    (context, index) =>
-                        index == 0
-                            ? const SizedBox(height: 10)
-                            : Divider(
-                              height: 1,
-                              color: scheme.outlineVariant.withValues(
-                                alpha: 0.6,
-                              ),
-                            ),
-                itemBuilder: (context, index) {
-                  if (index == 0) {
-                    return _SheetHeader(title: title, count: items.length);
-                  }
-                  final ex = items[index - 1];
-                  final subtitle = [
-                    if (ex.grupoMuscularPrimario != null)
-                      TaxonomyLabels.grupo[ex.grupoMuscularPrimario!],
-                    if (ex.equipamentos.isNotEmpty)
-                      ex.equipamentos
-                          .take(2)
-                          .map((e) => TaxonomyLabels.equipamento[e])
-                          .whereType<String>()
-                          .join(' / '),
-                  ].whereType<String>().join(' · ');
-                  return _ExerciseChoiceTile(
-                    exercicio: ex,
-                    subtitle: subtitle,
-                    alreadyInTreino: alreadyInTreinoIds.contains(ex.id),
-                    onPreview:
-                        ex.hasPlayableMedia
-                            ? () =>
-                                showExerciseMediaPreview(context, exercicio: ex)
-                            : null,
-                    onTap: () {
-                      HapticFeedback.selectionClick();
-                      Navigator.pop(context);
-                      onAdicionar(ex);
-                    },
-                  );
-                },
-              );
-            },
-          ),
-        );
-      },
-    );
-  }
-}
-
-class _SheetHeader extends StatelessWidget {
-  final String title;
-  final int count;
-
-  const _SheetHeader({required this.title, required this.count});
-
-  @override
-  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
     final scheme = Theme.of(context).colorScheme;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Center(
-          child: Container(
-            width: 38,
-            height: 4,
-            decoration: BoxDecoration(
-              color: scheme.outlineVariant,
-              borderRadius: BorderRadius.circular(999),
+    final maxHeight =
+        MediaQuery.sizeOf(context).height *
+        FxHomeSheetChrome.expandHeightFactor;
+
+    Widget header({int count = 0}) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          FxHomeSheetHandle(isDark: isDark),
+          SizedBox(height: TokensStrip.s4),
+          FxHomeSheetHeader(
+            isDark: isDark,
+            title: title,
+            subtitle: 'Toque para revisar a prescrição e adicionar ao treino.',
+            leading: Icon(
+              Icons.fitness_center_outlined,
+              color: primary,
+              size: 18,
             ),
-          ),
-        ),
-        const SizedBox(height: 18),
-        Row(
-          children: [
-            Expanded(
-              child: Text(
-                title,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: AppTypography.inter(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
-            ),
-            Container(
+            trailing: Container(
+              margin: const EdgeInsets.only(top: 6),
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               decoration: BoxDecoration(
-                color: scheme.primary.withValues(alpha: 0.08),
+                color: primary.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(999),
               ),
               child: Text(
                 '$count exercícios',
                 style: AppTypography.inter(
-                  color: scheme.primary,
+                  color: primary,
                   fontSize: 12,
                   fontWeight: FontWeight.w800,
                 ),
               ),
             ),
-          ],
-        ),
-        const SizedBox(height: 4),
-        Text(
-          'Toque para revisar a prescrição e adicionar ao treino.',
-          style: AppTypography.inter(
-            color: scheme.onSurfaceVariant,
-            fontSize: 12.5,
-            fontWeight: FontWeight.w600,
           ),
-        ),
-      ],
+        ],
+      );
+    }
+
+    return FxHomeSheetSurface(
+      isDark: isDark,
+      expand: true,
+      maxHeight: maxHeight,
+      child: asyncList.when(
+        loading:
+            () => Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                header(),
+                const SizedBox(height: 10),
+                Expanded(
+                  child: ListView.separated(
+                    padding: EdgeInsets.zero,
+                    itemCount: 6,
+                    separatorBuilder: (_, __) => const SizedBox(height: 10),
+                    itemBuilder:
+                        (_, __) => const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 6),
+                          child: Row(
+                            children: [
+                              SkeletonLoader(
+                                width: 44,
+                                height: 44,
+                                borderRadius: 14,
+                              ),
+                              SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    SkeletonLoader(height: 14, borderRadius: 8),
+                                    SizedBox(height: 8),
+                                    SkeletonLoader(
+                                      height: 11,
+                                      width: 120,
+                                      borderRadius: 8,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                  ),
+                ),
+              ],
+            ),
+        error:
+            (e, _) => Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                header(),
+                Expanded(
+                  child: Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: Text(
+                        'Não foi possível carregar os exercícios.',
+                        textAlign: TextAlign.center,
+                        style: AppTypography.inter(
+                          color: scheme.onSurfaceVariant,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+        data: (all) {
+          final filtered = applyExercisePickerFilter(all, pickerFilter);
+          final items = sortExerciciosForPicker(
+            filtered.where((ex) {
+              if (padrao != null) {
+                return ex.padraoMovimento == padrao;
+              }
+              if (grupo != null) {
+                return ex.grupoMuscularPrimario == grupo;
+              }
+              return false;
+            }),
+            alreadyInTreinoIds: alreadyInTreinoIds,
+          );
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              header(count: items.length),
+              const SizedBox(height: 10),
+              Expanded(
+                child: ListView.separated(
+                  padding: EdgeInsets.zero,
+                  itemCount: items.length,
+                  separatorBuilder:
+                      (context, index) => Divider(
+                        height: 1,
+                        color: scheme.outlineVariant.withValues(alpha: 0.6),
+                      ),
+                  itemBuilder: (context, index) {
+                    final ex = items[index];
+                    final subtitle = [
+                      if (ex.grupoMuscularPrimario != null)
+                        TaxonomyLabels.grupo[ex.grupoMuscularPrimario!],
+                      if (ex.equipamentos.isNotEmpty)
+                        ex.equipamentos
+                            .take(2)
+                            .map((e) => TaxonomyLabels.equipamento[e])
+                            .whereType<String>()
+                            .join(' / '),
+                    ].whereType<String>().join(' · ');
+                    return _ExerciseChoiceTile(
+                      exercicio: ex,
+                      subtitle: subtitle,
+                      alreadyInTreino: alreadyInTreinoIds.contains(ex.id),
+                      onPreview:
+                          ex.hasPlayableMedia
+                              ? () => showExerciseMediaPreview(
+                                context,
+                                exercicio: ex,
+                              )
+                              : null,
+                      onTap: () {
+                        HapticFeedback.selectionClick();
+                        Navigator.pop(context);
+                        onAdicionar(ex);
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
+          );
+        },
+      ),
     );
   }
 }

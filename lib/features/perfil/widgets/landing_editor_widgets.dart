@@ -6,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../data/landing_growth_repository.dart';
@@ -470,78 +471,73 @@ Future<void> showLandingContentReviewSheet(
 }) {
   final scheme = Theme.of(context).colorScheme;
 
-  return showModalBottomSheet<void>(
-    context: context,
-    showDragHandle: true,
+  return showFxHomeSheet<void>(
+    context,
     builder: (ctx) {
-      final maxHeight = MediaQuery.sizeOf(ctx).height * 0.55;
-      return SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                'O que revisar',
-                style: Theme.of(
-                  ctx,
-                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+      final isDark = Theme.of(ctx).brightness == Brightness.dark;
+      final maxHeight =
+          MediaQuery.sizeOf(ctx).height * FxHomeSheetChrome.maxHeightFactor;
+      return FxHomeSheetSurface(
+        isDark: isDark,
+        maxHeight: maxHeight,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            FxHomeSheetHandle(isDark: isDark),
+            SizedBox(height: TokensStrip.s4),
+            FxHomeSheetHeader(
+              isDark: isDark,
+              title: 'O que revisar',
+              subtitle:
+                  'Toque em um item ou use o modo foco para ver só o pendente.',
+              leading: Icon(
+                Icons.warning_amber_rounded,
+                color: EagleTokens.landingWarnIcon,
+                size: 18,
               ),
-              const SizedBox(height: 4),
-              Text(
-                'Toque em um item ou use o modo foco para ver só o pendente.',
-                style: TextStyle(
-                  fontSize: 13,
-                  color: scheme.onSurface.withValues(alpha: 0.65),
-                ),
-              ),
-              if (onFocusMode != null) ...[
-                const SizedBox(height: 12),
-                FilledButton.tonalIcon(
-                  onPressed: () {
-                    Navigator.pop(ctx);
-                    onFocusMode();
-                  },
-                  icon: const Icon(
-                    Icons.center_focus_strong_outlined,
-                    size: 18,
-                  ),
-                  label: const Text('Modo foco — só textos pendentes'),
-                ),
-              ],
+            ),
+            if (onFocusMode != null) ...[
               const SizedBox(height: 12),
-              ConstrainedBox(
-                constraints: BoxConstraints(maxHeight: maxHeight),
-                child: ListView.separated(
-                  shrinkWrap: true,
-                  itemCount: issues.length,
-                  separatorBuilder: (_, __) => const Divider(height: 1),
-                  itemBuilder: (_, i) {
-                    final issue = issues[i];
-                    return FxSatelliteListTile(
-                      title: issue.message,
-                      titleCase: false,
-                      margin: EdgeInsets.zero,
-                      accent: EagleTokens.landingWarnIcon,
-                      leading: Icon(
-                        Icons.warning_amber_rounded,
-                        color: EagleTokens.landingWarnIcon,
-                      ),
-                      trailing: Icon(
-                        Icons.chevron_right_rounded,
-                        color: scheme.onSurface.withValues(alpha: 0.35),
-                      ),
-                      onTap: () {
-                        Navigator.pop(ctx);
-                        onIssueTap(issue);
-                      },
-                    );
-                  },
-                ),
+              FilledButton.tonalIcon(
+                onPressed: () {
+                  Navigator.pop(ctx);
+                  onFocusMode();
+                },
+                icon: const Icon(Icons.center_focus_strong_outlined, size: 18),
+                label: const Text('Modo foco — só textos pendentes'),
               ),
             ],
-          ),
+            const SizedBox(height: 12),
+            Flexible(
+              child: ListView.separated(
+                shrinkWrap: true,
+                itemCount: issues.length,
+                separatorBuilder: (_, __) => const Divider(height: 1),
+                itemBuilder: (_, i) {
+                  final issue = issues[i];
+                  return FxSatelliteListTile(
+                    title: issue.message,
+                    titleCase: false,
+                    margin: EdgeInsets.zero,
+                    accent: EagleTokens.landingWarnIcon,
+                    leading: Icon(
+                      Icons.warning_amber_rounded,
+                      color: EagleTokens.landingWarnIcon,
+                    ),
+                    trailing: Icon(
+                      Icons.chevron_right_rounded,
+                      color: scheme.onSurface.withValues(alpha: 0.35),
+                    ),
+                    onTap: () {
+                      Navigator.pop(ctx);
+                      onIssueTap(issue);
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
         ),
       );
     },

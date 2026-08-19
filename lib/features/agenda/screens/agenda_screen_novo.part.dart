@@ -31,11 +31,8 @@ class _NovoAgendamentoScreenState extends ConsumerState<NovoAgendamentoScreen> {
                 (_inicio ?? DateTime.now().add(const Duration(hours: 1))).add(
                   const Duration(hours: 1),
                 ));
-    final dt = await showModalBottomSheet<DateTime>(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      backgroundColor: Colors.transparent,
+    final dt = await showFxHomeSheet<DateTime>(
+      context,
       builder:
           (_) => _AgendaDateTimeSheet(
             title: isInicio ? 'Início' : 'Fim',
@@ -56,11 +53,8 @@ class _NovoAgendamentoScreenState extends ConsumerState<NovoAgendamentoScreen> {
   }
 
   Future<void> _showAlunoSheet(List<Aluno> alunos) async {
-    final aluno = await showModalBottomSheet<Aluno>(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      backgroundColor: Colors.transparent,
+    final aluno = await showFxHomeSheet<Aluno>(
+      context,
       builder: (_) => _AgendaAlunoSheet(alunos: alunos, selectedId: _alunoId),
     );
     if (aluno == null || !mounted) return;
@@ -522,176 +516,135 @@ class _AgendaAlunoSheetState extends State<_AgendaAlunoSheet> {
       namesRoute: true,
       explicitChildNodes: true,
       label: 'Selecionar aluno, ${alunos.length} de ${widget.alunos.length}',
-      child: DraggableScrollableSheet(
-        initialChildSize: 0.78,
-        minChildSize: 0.5,
-        maxChildSize: 0.92,
-        builder:
-            (context, controller) => Container(
-              decoration: _agendaSheetDecoration(context),
-              child: Column(
-                children: [
-                  const SizedBox(height: 10),
-                  _agendaSheetHandle(context),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(
-                      TokensStrip.s5,
-                      18,
-                      20,
-                      12,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Text(
-                              'Selecionar aluno',
-                              style: AppTypography.inter(
-                                fontSize: 20,
-                                fontWeight: FontWeight.w800,
-                                color: chrome.ink,
-                              ),
-                            ),
-                            const Spacer(),
-                            Text(
-                              '${alunos.length}/${widget.alunos.length}',
-                              style: AppTypography.mono(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w700,
-                                color: primary,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        Semantics(
-                          textField: true,
-                          label: 'Buscar por nome, e-mail ou objetivo',
-                          child: TextField(
-                            controller: _search,
-                            onChanged: (_) => setState(() {}),
-                            decoration: InputDecoration(
-                              hintText: 'Buscar por nome, e-mail ou objetivo',
-                              prefixIcon: Icon(
-                                Icons.search,
-                                size: 19,
-                                color: chrome.mute,
-                              ),
-                              filled: true,
-                              fillColor: chrome.cardFill,
-                              border: FxInputDeco.outlineBorder(
-                                borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide(
-                                  color: chrome.lineStrong,
-                                ),
-                              ),
-                              enabledBorder: FxInputDeco.outlineBorder(
-                                borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide(
-                                  color: chrome.lineStrong,
-                                ),
-                              ),
-                              focusedBorder: FxInputDeco.outlineBorder(
-                                borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide(color: primary),
-                              ),
-                            ),
+      child: FxHomeSheetSurface(
+        isDark: chrome.isDark,
+        expand: true,
+        maxHeight:
+            MediaQuery.sizeOf(context).height *
+            FxHomeSheetChrome.expandHeightFactor,
+        child: Column(
+          children: [
+            FxHomeSheetHandle(isDark: chrome.isDark),
+            SizedBox(height: TokensStrip.s4),
+            FxHomeSheetHeader(
+              isDark: chrome.isDark,
+              title: 'Selecionar aluno',
+              subtitle: '${alunos.length} de ${widget.alunos.length}',
+              leading: Icon(
+                Icons.person_outline_rounded,
+                color: primary,
+                size: 18,
+              ),
+            ),
+            SizedBox(height: TokensStrip.s3),
+            Semantics(
+              textField: true,
+              label: 'Buscar por nome, e-mail ou objetivo',
+              child: TextField(
+                controller: _search,
+                onChanged: (_) => setState(() {}),
+                decoration: InputDecoration(
+                  hintText: 'Buscar por nome, e-mail ou objetivo',
+                  prefixIcon: Icon(Icons.search, size: 19, color: chrome.mute),
+                  filled: true,
+                  fillColor: chrome.cardFill,
+                  border: FxInputDeco.outlineBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide(color: chrome.lineStrong),
+                  ),
+                  enabledBorder: FxInputDeco.outlineBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide(color: chrome.lineStrong),
+                  ),
+                  focusedBorder: FxInputDeco.outlineBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide(color: primary),
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(height: TokensStrip.s3),
+            Expanded(
+              child: ListView.separated(
+                padding: EdgeInsets.zero,
+                itemCount: alunos.length,
+                separatorBuilder: (_, __) => const SizedBox(height: 8),
+                itemBuilder: (_, index) {
+                  final aluno = alunos[index];
+                  final selected = aluno.id == widget.selectedId;
+                  return Semantics(
+                    button: true,
+                    selected: selected,
+                    label:
+                        'Aluno ${aluno.nome}${selected ? ', selecionado' : ''}',
+                    child: InkWell(
+                      onTap: () => Navigator.pop(context, aluno),
+                      borderRadius: BorderRadius.circular(18),
+                      child: Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color:
+                              selected
+                                  ? primary.withValues(
+                                    alpha: chrome.isDark ? 0.18 : 0.10,
+                                  )
+                                  : chrome.cardFill,
+                          borderRadius: BorderRadius.circular(18),
+                          border: Border.all(
+                            color: selected ? primary : chrome.lineStrong,
                           ),
                         ),
-                      ],
-                    ),
-                  ),
-                  Expanded(
-                    child: ListView.separated(
-                      controller: controller,
-                      padding: const EdgeInsets.fromLTRB(
-                        TokensStrip.s5,
-                        0,
-                        20,
-                        28,
-                      ),
-                      itemCount: alunos.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 8),
-                      itemBuilder: (_, index) {
-                        final aluno = alunos[index];
-                        final selected = aluno.id == widget.selectedId;
-                        return Semantics(
-                          button: true,
-                          selected: selected,
-                          label:
-                              'Aluno ${aluno.nome}${selected ? ', selecionado' : ''}',
-                          child: InkWell(
-                            onTap: () => Navigator.pop(context, aluno),
-                            borderRadius: BorderRadius.circular(18),
-                            child: Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color:
-                                    selected
-                                        ? primary.withValues(
-                                          alpha: chrome.isDark ? 0.18 : 0.10,
-                                        )
-                                        : chrome.cardFill,
-                                borderRadius: BorderRadius.circular(18),
-                                border: Border.all(
-                                  color: selected ? primary : chrome.lineStrong,
-                                ),
-                              ),
-                              child: Row(
+                        child: Row(
+                          children: [
+                            _AgendaAlunoAvatar(aluno: aluno),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  _AgendaAlunoAvatar(aluno: aluno),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          aluno.nome,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: AppTypography.inter(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w800,
-                                            color: chrome.ink,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 3),
-                                        Text(
-                                          [
-                                            if ((aluno.objetivo ?? '')
-                                                .isNotEmpty)
-                                              aluno.objetivo!,
-                                            aluno.email,
-                                          ].join(' · '),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: AppTypography.inter(
-                                            fontSize: 11,
-                                            color: chrome.mute,
-                                          ),
-                                        ),
-                                      ],
+                                  Text(
+                                    aluno.nome,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: AppTypography.inter(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w800,
+                                      color: chrome.ink,
                                     ),
                                   ),
-                                  Icon(
-                                    selected
-                                        ? Icons.check_circle
-                                        : Icons.chevron_right_rounded,
-                                    color: selected ? primary : chrome.mute,
+                                  const SizedBox(height: 3),
+                                  Text(
+                                    [
+                                      if ((aluno.objetivo ?? '').isNotEmpty)
+                                        aluno.objetivo!,
+                                      aluno.email,
+                                    ].join(' · '),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: AppTypography.inter(
+                                      fontSize: 11,
+                                      color: chrome.mute,
+                                    ),
                                   ),
                                 ],
                               ),
                             ),
-                          ),
-                        );
-                      },
+                            Icon(
+                              selected
+                                  ? Icons.check_circle
+                                  : Icons.chevron_right_rounded,
+                              color: selected ? primary : chrome.mute,
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                  ),
-                ],
+                  );
+                },
               ),
             ),
+          ],
+        ),
       ),
     );
   }
@@ -744,24 +697,24 @@ class _AgendaDateTimeSheetState extends State<_AgendaDateTimeSheet> {
       namesRoute: true,
       explicitChildNodes: true,
       label: 'Selecionar ${widget.title.toLowerCase()}',
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 10, 20, 20),
-        decoration: _agendaSheetDecoration(context),
+      child: FxHomeSheetSurface(
+        isDark: chrome.isDark,
+        maxHeight:
+            MediaQuery.sizeOf(context).height *
+            FxHomeSheetChrome.maxHeightFactor,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _agendaSheetHandle(context),
-            const SizedBox(height: 18),
-            Text(
-              widget.title,
-              style: AppTypography.inter(
-                fontSize: 20,
-                fontWeight: FontWeight.w800,
-                color: chrome.ink,
-              ),
+            FxHomeSheetHandle(isDark: chrome.isDark),
+            SizedBox(height: TokensStrip.s4),
+            FxHomeSheetHeader(
+              isDark: chrome.isDark,
+              title: widget.title,
+              subtitle: 'Escolha o dia e o horário.',
+              leading: Icon(Icons.schedule_outlined, color: primary, size: 18),
             ),
-            const SizedBox(height: 14),
+            SizedBox(height: TokensStrip.s3),
             SizedBox(
               height: 74,
               child: ListView.separated(

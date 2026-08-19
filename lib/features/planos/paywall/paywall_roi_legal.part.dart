@@ -545,42 +545,46 @@ class PaywallUpgradeLegalCompact extends StatelessWidget {
     required bool restoring,
     VoidCallback? onRestore,
   }) {
-    final chrome = ShellChrome.of(context);
-    return showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
+    return showFxHomeSheet<void>(
+      context,
       builder: (ctx) {
-        final bottom = MediaQuery.paddingOf(ctx).bottom;
-        return Padding(
-          padding: EdgeInsets.fromLTRB(12, 0, 12, bottom + 12),
-          child: DecoratedBox(
-            decoration: chrome.bottomSheet(radius: PaywallSurface.cardRadius),
-            child: SafeArea(
-              top: false,
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Text(
-                      'Termos e cobrança',
-                      style: TokensStrip.h2(color: ink).copyWith(fontSize: 20),
-                    ),
-                    const SizedBox(height: 16),
-                    PaywallTrustFooter(mute: mute, primary: primary),
-                    const SizedBox(height: 16),
-                    PaywallBillingLegalPanel(
-                      ink: ink,
-                      mute: mute,
-                      showStoreBillingNote: showStoreBillingNote,
-                      restoring: restoring,
-                      onRestore: onRestore,
-                    ),
-                  ],
+        final isDark = Theme.of(ctx).brightness == Brightness.dark;
+        final maxHeight =
+            MediaQuery.sizeOf(ctx).height * FxHomeSheetChrome.maxHeightFactor;
+        return FxHomeSheetSurface(
+          isDark: isDark,
+          maxHeight: maxHeight,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              FxHomeSheetHandle(isDark: isDark),
+              SizedBox(height: TokensStrip.s4),
+              FxHomeSheetHeader(
+                isDark: isDark,
+                title: 'Termos e cobrança',
+                leading: Icon(Icons.policy_outlined, color: primary, size: 18),
+              ),
+              SizedBox(height: TokensStrip.s3),
+              Flexible(
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      PaywallTrustFooter(mute: mute, primary: primary),
+                      const SizedBox(height: 16),
+                      PaywallBillingLegalPanel(
+                        ink: ink,
+                        mute: mute,
+                        showStoreBillingNote: showStoreBillingNote,
+                        restoring: restoring,
+                        onRestore: onRestore,
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
+            ],
           ),
         );
       },
