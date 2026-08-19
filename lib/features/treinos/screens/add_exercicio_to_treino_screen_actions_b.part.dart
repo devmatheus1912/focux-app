@@ -328,10 +328,8 @@ extension AddExercicioToTreinoScreenActionsB
   Future<void> _removeSelectedExerciseVideo() async {
     final exercicio = _selecionado;
     if (exercicio == null || _mediaLoading) return;
-    final confirmed = await showModalBottomSheet<bool>(
+    final confirmed = await showFxBottomSheet<bool>(
       context: context,
-      backgroundColor: Colors.transparent,
-      barrierColor: Colors.black.withValues(alpha: 0.34),
       builder:
           (sheetContext) => _RemoveExerciseVideoSheet(exercicio: exercicio),
     );

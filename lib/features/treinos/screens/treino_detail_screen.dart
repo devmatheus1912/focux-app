@@ -24,6 +24,7 @@ import '../../../core/theme/shell_chrome.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_help.dart';
+import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
@@ -229,12 +230,9 @@ Future<T?> _showTreinoSheet<T>({
   required WidgetBuilder builder,
   bool isScrollControlled = true,
 }) {
-  return showModalBottomSheet<T>(
-    context: context,
-    useRootNavigator: true,
+  return showFxHomeSheet<T>(
+    context,
     isScrollControlled: isScrollControlled,
-    backgroundColor: fxTransparent,
-    barrierColor: heroScrim(0.34),
     builder: builder,
   );
 }

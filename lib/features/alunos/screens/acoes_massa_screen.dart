@@ -3,11 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../features/auth/providers/auth_provider.dart';
+import '../constants/alunos_list_filters.dart';
 import '../data/aluno_contact_utils.dart';
 import '../data/aluno_repository.dart';
 import '../providers/alunos_provider.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_motion.dart';
@@ -55,8 +57,8 @@ class _AcoesMassaScreenState extends ConsumerState<AcoesMassaScreen> {
       FeedbackHelper.showError(context, 'Selecione pelo menos um aluno');
       return;
     }
-    showModalBottomSheet(
-      context: context,
+    showFxHomeSheet<void>(
+      context,
       builder:
           (sheetContext) => _BottomSheetAcoes(
             qtd: _selecionados.length,
@@ -306,25 +308,29 @@ class _BottomSheetAcoesState extends State<_BottomSheetAcoes> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 20, 20, 32),
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
+    return FxHomeSheetSurface(
+      isDark: isDark,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            '${widget.qtd} aluno(s) selecionado(s)',
-            style: Theme.of(context).textTheme.titleMedium,
+          FxHomeSheetHandle(isDark: isDark),
+          SizedBox(height: TokensStrip.s4),
+          FxHomeSheetHeader(
+            isDark: isDark,
+            title: alunosSelectionTitle(widget.qtd),
+            subtitle: 'Ações em lote para os alunos selecionados.',
+            leading: Icon(Icons.checklist_rounded, color: primary, size: 18),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
           FxLiquidPrimaryButton(
             icon: Icons.attach_money,
             label: 'Marcar mensalidade como paga',
             onPressed: widget.onMarcarPagos,
           ),
           const SizedBox(height: TokensStrip.s4),
-          const Divider(),
-          const SizedBox(height: 8),
           Text(
             'Atualizar status',
             style: Theme.of(context).textTheme.titleSmall,
@@ -346,8 +352,6 @@ class _BottomSheetAcoesState extends State<_BottomSheetAcoes> {
             label: const Text('Aplicar status'),
           ),
           const SizedBox(height: TokensStrip.s4),
-          const Divider(),
-          const SizedBox(height: 8),
           OutlinedButton.icon(
             onPressed: widget.onExcluir,
             icon: const Icon(Icons.delete_outline, color: EagleTokens.bad),

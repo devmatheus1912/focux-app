@@ -11,6 +11,7 @@ import '../../../core/utils/pt_br_display.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
@@ -209,10 +210,8 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
   }
 
   Future<void> _selecionarTipoPix(FormFieldState<String> field) async {
-    final selected = await showModalBottomSheet<String>(
-      context: context,
-      useSafeArea: true,
-      backgroundColor: Colors.transparent,
+    final selected = await showFxHomeSheet<String>(
+      context,
       builder:
           (ctx) => _PixTipoBottomSheet(
             tipos: _tiposChavePix,

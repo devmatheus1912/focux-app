@@ -13,6 +13,7 @@ import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
@@ -217,37 +218,70 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
   }
 
   void _openFiltros() {
-    showModalBottomSheet(
-      context: context,
-      builder:
-          (sheetContext) => SafeArea(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ListTile(
-                  title: const Text('Todos'),
-                  onTap: () {
-                    setState(() => _filtroScoreMin = null);
-                    Navigator.pop(sheetContext);
-                  },
+    showFxHomeSheet<void>(
+      context,
+      builder: (sheetContext) {
+        final isDark = Theme.of(sheetContext).brightness == Brightness.dark;
+        final primary = Theme.of(sheetContext).colorScheme.primary;
+        Widget option({
+          required String title,
+          required IconData icon,
+          required VoidCallback onTap,
+        }) {
+          return ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: Icon(icon, color: primary, size: 20),
+            title: Text(title),
+            onTap: onTap,
+            minVerticalPadding: 12,
+          );
+        }
+
+        return FxHomeSheetSurface(
+          isDark: isDark,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              FxHomeSheetHandle(isDark: isDark),
+              SizedBox(height: TokensStrip.s4),
+              FxHomeSheetHeader(
+                isDark: isDark,
+                title: 'Filtrar alertas',
+                subtitle: 'Mostre só o nível de risco que você quer ver agora.',
+                leading: Icon(
+                  Icons.filter_list_rounded,
+                  color: primary,
+                  size: 18,
                 ),
-                ListTile(
-                  title: const Text('Score ≥ 2 (alto)'),
-                  onTap: () {
-                    setState(() => _filtroScoreMin = 2);
-                    Navigator.pop(sheetContext);
-                  },
-                ),
-                ListTile(
-                  title: const Text('Score = 1 (médio)'),
-                  onTap: () {
-                    setState(() => _filtroScoreMin = 1);
-                    Navigator.pop(sheetContext);
-                  },
-                ),
-              ],
-            ),
+              ),
+              option(
+                title: 'Todos',
+                icon: Icons.all_inclusive_rounded,
+                onTap: () {
+                  setState(() => _filtroScoreMin = null);
+                  Navigator.pop(sheetContext);
+                },
+              ),
+              option(
+                title: 'Score ≥ 2 (alto)',
+                icon: Icons.priority_high_rounded,
+                onTap: () {
+                  setState(() => _filtroScoreMin = 2);
+                  Navigator.pop(sheetContext);
+                },
+              ),
+              option(
+                title: 'Score = 1 (médio)',
+                icon: Icons.remove_rounded,
+                onTap: () {
+                  setState(() => _filtroScoreMin = 1);
+                  Navigator.pop(sheetContext);
+                },
+              ),
+            ],
           ),
+        );
+      },
     );
   }
 

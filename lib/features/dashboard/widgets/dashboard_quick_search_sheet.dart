@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/router/safe_navigation.dart';
-import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_icon.dart';
 import '../data/dashboard_tool_shortcuts.dart';
 import '../utils/dashboard_microcopy.dart';
@@ -18,13 +18,9 @@ Future<void> showDashboardQuickSearchSheet(
   required Color primary,
 }) {
   AnalyticsService.instance.track(ProductEvents.homeSearchOpened);
-  return showModalBottomSheet<void>(
-    context: context,
-    isScrollControlled: true,
-    backgroundColor: Colors.transparent,
-    builder: (ctx) {
-      return _QuickSearchSheet(isDark: isDark, primary: primary);
-    },
+  return showFxHomeSheet<void>(
+    context,
+    builder: (ctx) => _QuickSearchSheet(isDark: isDark, primary: primary),
   );
 }
 
@@ -48,6 +44,44 @@ class _QuickSearchSheetState extends ConsumerState<_QuickSearchSheet> {
     super.dispose();
   }
 
+  Widget _row({
+    required String icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    final mute = dashboardReadableCaption(context, isDark: widget.isDark);
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(TokensStrip.rCard),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(
+            minHeight: FxHomeSheetChrome.touchTarget,
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+            child: Row(
+              children: [
+                FxIcon(name: icon, color: widget.primary, size: 18),
+                SizedBox(width: TokensStrip.s3),
+                Expanded(
+                  child: Text(
+                    label,
+                    style: FocuxHubTypography.cardTitle(
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                  ),
+                ),
+                Icon(Icons.chevron_right_rounded, color: mute, size: 20),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final q = _query.trim().toLowerCase();
@@ -59,114 +93,88 @@ class _QuickSearchSheetState extends ConsumerState<_QuickSearchSheet> {
                 .where((t) => t.label.toLowerCase().contains(q))
                 .take(12)
                 .toList();
-    final heading = BrandPalette.sectionHeading(
-      widget.primary,
-      dark: widget.isDark,
-    );
     final mute = dashboardReadableCaption(context, isDark: widget.isDark);
-    final ink =
-        widget.isDark
-            ? Theme.of(context).colorScheme.onSurface
-            : TokensStrip.textPrimary;
 
-    return DraggableScrollableSheet(
-      initialChildSize: 0.62,
-      minChildSize: 0.4,
-      maxChildSize: 0.92,
-      builder: (context, scrollController) {
-        return Material(
-          color:
-              widget.isDark
-                  ? const Color(0xFF101C2E)
-                  : Theme.of(context).colorScheme.surface,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-          child: ListView(
-            controller: scrollController,
-            padding: const EdgeInsets.fromLTRB(16, 10, 16, 24),
-            children: [
-              Center(
-                child: Container(
-                  width: 36,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: widget.primary.withValues(alpha: 0.35),
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 14),
-              Text(
-                DashboardMicrocopy.buscaRapida,
-                style: dashboardSectionTitleStyle(context, color: heading),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: _controller,
-                onChanged: (v) => setState(() => _query = v),
-                decoration: InputDecoration(
-                  hintText: DashboardMicrocopy.buscaRapidaHint,
-                  prefixIcon: Icon(Icons.search, color: widget.primary),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(TokensStrip.rInput),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              ListTile(
-                leading: FxIcon(
-                  name: 'users',
-                  color: widget.primary,
-                  size: 20,
-                ),
-                title: Text(
-                  q.isEmpty ? 'Ver alunos' : 'Buscar “$_query” em alunos',
-                  style: FocuxHubTypography.cardTitle(color: ink),
-                ),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () {
-                  Navigator.pop(context);
-                  goPersonalShellTab(
-                    context,
-                    q.isEmpty
-                        ? '/alunos'
-                        : '/alunos?q=${Uri.encodeComponent(q)}',
-                  );
-                },
-              ),
-              const Divider(),
-              Text(
-                'Ferramentas',
-                style: FocuxHubTypography.bodyMuted(color: mute),
-              ),
-              const SizedBox(height: 6),
-              if (tools.isEmpty)
-                Text(
-                  DashboardMicrocopy.nenhumaFerramenta,
-                  style: FocuxHubTypography.bodyMuted(color: mute),
-                )
-              else
-                ...tools.map(
-                  (t) => ListTile(
-                    leading: FxIcon(
-                      name: t.icon,
-                      color: widget.primary,
-                      size: 20,
-                    ),
-                    title: Text(
-                      t.label,
-                      style: FocuxHubTypography.cardTitle(color: ink),
-                    ),
-                    trailing: const Icon(Icons.chevron_right),
-                    onTap: () {
-                      Navigator.pop(context);
-                      openDashboardShortcut(context, ref, t);
-                    },
-                  ),
-                ),
-            ],
+    return FxHomeSheetSurface(
+      isDark: widget.isDark,
+      maxHeight:
+          MediaQuery.sizeOf(context).height * FxHomeSheetChrome.maxHeightFactor,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          FxHomeSheetHandle(isDark: widget.isDark),
+          SizedBox(height: TokensStrip.s4),
+          FxHomeSheetHeader(
+            isDark: widget.isDark,
+            title: DashboardMicrocopy.buscaRapida,
+            subtitle: DashboardMicrocopy.buscaRapidaHint,
+            leading: Icon(
+              Icons.search_rounded,
+              color: widget.primary,
+              size: 18,
+            ),
           ),
-        );
-      },
+          SizedBox(height: TokensStrip.s3),
+          TextField(
+            controller: _controller,
+            onChanged: (v) => setState(() => _query = v),
+            autofocus: true,
+            decoration: InputDecoration(
+              hintText: DashboardMicrocopy.buscaRapidaHint,
+              prefixIcon: Icon(Icons.search_rounded, color: widget.primary),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(TokensStrip.rInput),
+              ),
+            ),
+          ),
+          SizedBox(height: TokensStrip.s3),
+          Flexible(
+            child: ListView(
+              shrinkWrap: true,
+              physics: const BouncingScrollPhysics(),
+              children: [
+                _row(
+                  icon: 'users',
+                  label:
+                      q.isEmpty ? 'Ver alunos' : 'Buscar “$_query” em alunos',
+                  onTap: () {
+                    Navigator.pop(context);
+                    goPersonalShellTab(
+                      context,
+                      q.isEmpty
+                          ? '/alunos'
+                          : '/alunos?q=${Uri.encodeComponent(q)}',
+                    );
+                  },
+                ),
+                SizedBox(height: TokensStrip.s2),
+                Text(
+                  'Ferramentas',
+                  style: FocuxHubTypography.bodyMuted(color: mute),
+                ),
+                const SizedBox(height: 4),
+                if (tools.isEmpty)
+                  Text(
+                    DashboardMicrocopy.nenhumaFerramenta,
+                    style: FocuxHubTypography.bodyMuted(color: mute),
+                  )
+                else
+                  ...tools.map(
+                    (t) => _row(
+                      icon: t.icon,
+                      label: t.label,
+                      onTap: () {
+                        Navigator.pop(context);
+                        openDashboardShortcut(context, ref, t);
+                      },
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

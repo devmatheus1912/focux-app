@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../core/utils/friendly_error.dart';
@@ -75,26 +76,44 @@ class _State extends ConsumerState<EvolucaoFotosScreen> {
   }
 
   Future<void> _addFoto() async {
-    final src = await showModalBottomSheet<ImageSource>(
-      context: context,
-      builder:
-          (ctx) => SafeArea(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ListTile(
-                  leading: const Icon(Icons.camera_alt),
-                  title: const Text('Câmera'),
-                  onTap: () => Navigator.pop(ctx, ImageSource.camera),
+    final src = await showFxHomeSheet<ImageSource>(
+      context,
+      builder: (ctx) {
+        final isDark = Theme.of(ctx).brightness == Brightness.dark;
+        final primary = Theme.of(ctx).colorScheme.primary;
+        return FxHomeSheetSurface(
+          isDark: isDark,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              FxHomeSheetHandle(isDark: isDark),
+              SizedBox(height: TokensStrip.s4),
+              FxHomeSheetHeader(
+                isDark: isDark,
+                title: 'Adicionar foto',
+                subtitle: 'Escolha de onde vem a foto de evolução.',
+                leading: Icon(
+                  Icons.add_a_photo_outlined,
+                  color: primary,
+                  size: 18,
                 ),
-                ListTile(
-                  leading: const Icon(Icons.photo_library),
-                  title: const Text('Galeria'),
-                  onTap: () => Navigator.pop(ctx, ImageSource.gallery),
-                ),
-              ],
-            ),
+              ),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: Icon(Icons.camera_alt_outlined, color: primary),
+                title: const Text('Câmera'),
+                onTap: () => Navigator.pop(ctx, ImageSource.camera),
+              ),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: Icon(Icons.photo_library_outlined, color: primary),
+                title: const Text('Galeria'),
+                onTap: () => Navigator.pop(ctx, ImageSource.gallery),
+              ),
+            ],
           ),
+        );
+      },
     );
     if (src == null) return;
     final file = await _picker.pickImage(
@@ -157,12 +176,8 @@ class _State extends ConsumerState<EvolucaoFotosScreen> {
                 ? FxEmptyState(
                   icon: 'spark',
                   title: 'Nenhuma foto de evolução',
-                  subtitle:
-                      'Tire a primeira foto para acompanhar a evolução.',
-                  action: FxEmptyAction(
-                    label: 'Tirar Foto',
-                    onTap: _addFoto,
-                  ),
+                  subtitle: 'Tire a primeira foto para acompanhar a evolução.',
+                  action: FxEmptyAction(label: 'Tirar Foto', onTap: _addFoto),
                 )
                 : _content(isDark, primary),
       ),

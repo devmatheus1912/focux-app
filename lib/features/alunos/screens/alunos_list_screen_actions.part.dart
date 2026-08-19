@@ -123,107 +123,81 @@ class _AlunosBulkActionsSheetState extends State<_AlunosBulkActionsSheet> {
   @override
   Widget build(BuildContext context) {
     final ink = widget.isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final line =
-        widget.isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
     final primary = Theme.of(context).colorScheme.primary;
-    final maxHeight = MediaQuery.sizeOf(context).height * 0.72;
+    final maxHeight =
+        MediaQuery.sizeOf(context).height * FxHomeSheetChrome.maxHeightFactor;
 
-    return Padding(
-      padding: EdgeInsets.fromLTRB(
-        14,
-        0,
-        14,
-        math.max(12, MediaQuery.paddingOf(context).bottom + 10),
-      ),
-      child: Container(
-        constraints: BoxConstraints(maxHeight: maxHeight),
-        padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
-        decoration: fxStripCardDecoration(
-          context,
-          radius: 28,
-          glowStrength: widget.isDark ? 0.10 : 0.16,
-        ),
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Center(
-                child: Container(
-                  width: 42,
-                  height: 4,
-                  margin: const EdgeInsets.only(bottom: 14),
-                  decoration: BoxDecoration(
-                    color: line.withValues(alpha: 0.9),
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                ),
-              ),
+    return FxHomeSheetSurface(
+      isDark: widget.isDark,
+      maxHeight: maxHeight,
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            FxHomeSheetHandle(isDark: widget.isDark),
+            SizedBox(height: TokensStrip.s4),
+            FxHomeSheetHeader(
+              isDark: widget.isDark,
+              title: alunosSelectionTitle(widget.count),
+              subtitle: 'Ações em lote para os alunos selecionados.',
+              leading: Icon(Icons.checklist_rounded, color: primary, size: 18),
+            ),
+            const SizedBox(height: 18),
+            if (widget.mostrarMarcarPago) ...[
               Semantics(
-                header: true,
-                child: Text(
-                  alunosSelectionTitle(widget.count),
-                  style: FocuxHubTypography.sectionTitle(
-                    context,
-                    color: ink,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 18),
-              if (widget.mostrarMarcarPago) ...[
-                Semantics(
-                  button: true,
-                  label: 'Marcar mensalidade como paga',
-                  child: SizedBox(
-                    height: AlunosLayout.touchTarget,
-                    child: FilledButton.icon(
-                      onPressed: widget.onMarcarPagos,
-                      icon: const Icon(Icons.payments_rounded, size: 18),
-                      label: const Text('Marcar mensalidade como paga'),
-                      style: FilledButton.styleFrom(
-                        backgroundColor: primary,
-                        foregroundColor: Colors.white,
-                        shape: const StadiumBorder(),
-                      ),
+                button: true,
+                label: 'Marcar mensalidade como paga',
+                child: SizedBox(
+                  height: AlunosLayout.touchTarget,
+                  child: FilledButton.icon(
+                    onPressed: widget.onMarcarPagos,
+                    icon: const Icon(Icons.payments_rounded, size: 18),
+                    label: const Text('Marcar mensalidade como paga'),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: primary,
+                      foregroundColor: Colors.white,
+                      shape: const StadiumBorder(),
                     ),
                   ),
                 ),
-                const SizedBox(height: 20),
-              ],
-              Text(
-                'Atualizar status',
-                style: FocuxHubTypography.eyebrow(
-                  context,
-                  color: ink,
-                  fontWeight: FontWeight.w700,
-                ).copyWith(fontSize: TokensStrip.fontBodySm),
               ),
-              const SizedBox(height: 10),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  for (final option in _statusOptions)
-                    Semantics(
-                      button: true,
+              const SizedBox(height: 20),
+            ],
+            Text(
+              'Atualizar status',
+              style: FocuxHubTypography.eyebrow(
+                context,
+                color: ink,
+                fontWeight: FontWeight.w700,
+              ).copyWith(fontSize: TokensStrip.fontBodySm),
+            ),
+            const SizedBox(height: 10),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final option in _statusOptions)
+                  Semantics(
+                    button: true,
+                    selected: _statusSelecionado == option.value,
+                    label: 'Status ${option.label}',
+                    child: _SheetShortcutChip(
+                      label: option.label,
                       selected: _statusSelecionado == option.value,
-                      label: 'Status ${option.label}',
-                      child: _SheetShortcutChip(
-                        label: option.label,
-                        selected: _statusSelecionado == option.value,
-                        onTap:
-                            () => setState(
-                              () => _statusSelecionado = option.value,
-                            ),
-                      ),
+                      onTap:
+                          () =>
+                              setState(() => _statusSelecionado = option.value),
                     ),
-                ],
-              ),
-              const SizedBox(height: 14),
-              SizedBox(
-                height: AlunosLayout.touchTarget,
-                child: widget.mostrarMarcarPago
-                    ? OutlinedButton.icon(
+                  ),
+              ],
+            ),
+            const SizedBox(height: 14),
+            SizedBox(
+              height: AlunosLayout.touchTarget,
+              child:
+                  widget.mostrarMarcarPago
+                      ? OutlinedButton.icon(
                         onPressed:
                             () => widget.onAtualizarStatus(_statusSelecionado),
                         icon: const Icon(Icons.check_rounded, size: 18),
@@ -236,7 +210,7 @@ class _AlunosBulkActionsSheetState extends State<_AlunosBulkActionsSheet> {
                           shape: const StadiumBorder(),
                         ),
                       )
-                    : FilledButton.icon(
+                      : FilledButton.icon(
                         onPressed:
                             () => widget.onAtualizarStatus(_statusSelecionado),
                         icon: const Icon(Icons.check_rounded, size: 18),
@@ -247,29 +221,28 @@ class _AlunosBulkActionsSheetState extends State<_AlunosBulkActionsSheet> {
                           shape: const StadiumBorder(),
                         ),
                       ),
-              ),
-              const SizedBox(height: 10),
-              Semantics(
-                button: true,
-                label: 'Excluir alunos selecionados',
-                child: SizedBox(
-                  height: AlunosLayout.touchTarget,
-                  child: OutlinedButton.icon(
-                    onPressed: widget.onExcluir,
-                    icon: const Icon(Icons.delete_outline_rounded, size: 18),
-                    label: const Text('Excluir selecionados'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: EagleTokens.bad,
-                      side: BorderSide(
-                        color: EagleTokens.bad.withValues(alpha: 0.45),
-                      ),
-                      shape: const StadiumBorder(),
+            ),
+            const SizedBox(height: 10),
+            Semantics(
+              button: true,
+              label: 'Excluir alunos selecionados',
+              child: SizedBox(
+                height: AlunosLayout.touchTarget,
+                child: OutlinedButton.icon(
+                  onPressed: widget.onExcluir,
+                  icon: const Icon(Icons.delete_outline_rounded, size: 18),
+                  label: const Text('Excluir selecionados'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: EagleTokens.bad,
+                    side: BorderSide(
+                      color: EagleTokens.bad.withValues(alpha: 0.45),
                     ),
+                    shape: const StadiumBorder(),
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -287,68 +260,31 @@ class _ExcluirAlunosSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-    final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
 
     final label =
         count == 1
             ? '1 aluno selecionado será excluído permanentemente.'
             : '$count alunos selecionados serão excluídos permanentemente.';
 
-    return Container(
-      decoration: BoxDecoration(
-        color: isDark ? EagleTokens.darkCard : Colors.white,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-      ),
-      padding: EdgeInsets.fromLTRB(
-        20,
-        12,
-        20,
-        24 + MediaQuery.of(context).padding.bottom,
-      ),
+    return FxHomeSheetSurface(
+      isDark: isDark,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            width: 42,
-            height: 4,
-            decoration: BoxDecoration(
-              color: line,
-              borderRadius: BorderRadius.circular(999),
-            ),
-          ),
-          const SizedBox(height: 22),
-          Container(
-            width: 54,
-            height: 54,
-            decoration: BoxDecoration(
-              color: EagleTokens.bad.withValues(alpha: 0.12),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
+          FxHomeSheetHandle(isDark: isDark),
+          SizedBox(height: TokensStrip.s4),
+          FxHomeSheetHeader(
+            isDark: isDark,
+            title: 'Excluir alunos?',
+            subtitle: label,
+            leading: const Icon(
               Icons.delete_outline_rounded,
               color: EagleTokens.bad,
-              size: 26,
+              size: 18,
             ),
           ),
-          const SizedBox(height: TokensStrip.s4),
-          Text(
-            'Excluir alunos?',
-            style: AppTypography.inter(
-              fontSize: 22,
-              fontWeight: FontWeight.w700,
-              letterSpacing: -0.6,
-              color: ink,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            label,
-            textAlign: TextAlign.center,
-            style: TextStyle(color: mute, fontSize: 13.4, height: 1.35),
-          ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 10),
           Text(
             'Esta ação não pode ser desfeita.',
             textAlign: TextAlign.center,
@@ -361,7 +297,7 @@ class _ExcluirAlunosSheet extends StatelessWidget {
           const SizedBox(height: 22),
           SizedBox(
             width: double.infinity,
-            height: 52,
+            height: AlunosLayout.touchTarget,
             child: ElevatedButton.icon(
               onPressed: () {
                 HapticFeedback.heavyImpact();
@@ -382,10 +318,14 @@ class _ExcluirAlunosSheet extends StatelessWidget {
           const SizedBox(height: 10),
           SizedBox(
             width: double.infinity,
-            height: 48,
+            height: AlunosLayout.touchTarget,
             child: TextButton(
               onPressed: () => Navigator.of(context).pop(false),
               style: TextButton.styleFrom(
+                minimumSize: const Size(
+                  FxHomeSheetChrome.touchTarget,
+                  FxHomeSheetChrome.touchTarget,
+                ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14),
                 ),
@@ -401,4 +341,3 @@ class _ExcluirAlunosSheet extends StatelessWidget {
     );
   }
 }
-

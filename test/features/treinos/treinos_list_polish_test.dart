@@ -22,7 +22,7 @@ void main() {
       ).readAsStringSync(),
     ].join('\n');
 
-    expect(screen, contains('isScrollControlled: true'));
+    expect(screen, contains('showFxHomeSheet'));
     expect(screen, contains('SingleChildScrollView'));
     expect(screen, contains('maxHeight: maxHeight'));
     expect(screen, contains('Atribuir a um aluno'));
@@ -40,7 +40,7 @@ void main() {
       ).readAsStringSync(),
       contains('showFxHelpSheet'),
     );
-    expect(screen, contains('useRootNavigator: true'));
+    expect(screen, contains('showFxHomeSheet'));
     expect(screen, contains('_TreinosBulkBar'));
     expect(screen, contains('Selecionar todos'));
     expect(screen, contains('TreinosListLabels.deleteTitle'));

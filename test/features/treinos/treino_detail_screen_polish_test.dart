@@ -47,7 +47,7 @@ void main() {
     expect(screen, contains('FocuxHubTypography'));
     expect(screen, contains('Ações do exercício'));
     expect(screen, contains('Ações do treino'));
-    expect(screen, contains('useRootNavigator: true'));
+    expect(screen, contains('showFxHomeSheet'));
     expect(screen, contains('ProductEvents.treinoDetailViewed'));
     expect(screen, contains('ProductEvents.treinoDetailAddTapped'));
     expect(screen, contains('ProductEvents.treinoDetailMenuOpened'));

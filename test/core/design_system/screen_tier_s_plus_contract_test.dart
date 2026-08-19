@@ -30,11 +30,12 @@ void main() {
   };
 
   test('every feature screen meets Tier S+ baseline', () {
-    final screens = Directory('lib/features')
-        .listSync(recursive: true)
-        .whereType<File>()
-        .where((f) => f.path.endsWith('_screen.dart'))
-        .toList();
+    final screens =
+        Directory('lib/features')
+            .listSync(recursive: true)
+            .whereType<File>()
+            .where((f) => f.path.endsWith('_screen.dart'))
+            .toList();
 
     final failures = <String>[];
 
@@ -46,36 +47,44 @@ void main() {
       final mainSource = file.readAsStringSync();
       final source = readScreenSourceBundle(norm);
 
-      if (!source.contains('fxScreenA11yScope') && !source.contains('Semantics(')) {
+      if (!source.contains('fxScreenA11yScope') &&
+          !source.contains('Semantics(')) {
         failures.add('$norm: sem root a11y');
       }
       if (source.contains('CircularProgressIndicator')) {
         failures.add('$norm: CircularProgressIndicator proibido');
       }
-      final rawListTile = source.contains('ListTile(') &&
+      final rawListTile =
+          source.contains('ListTile(') &&
           !source.contains('CheckboxListTile') &&
           !source.contains('SwitchListTile') &&
           !source.contains('RadioListTile') &&
           !source.contains('FxSatelliteListTile') &&
           !source.contains('fxListTileCardShell');
-      if (rawListTile && !source.contains('showModalBottomSheet')) {
+      if (rawListTile &&
+          !source.contains('showModalBottomSheet') &&
+          !source.contains('showFxHomeSheet') &&
+          !source.contains('showFxBottomSheet')) {
         failures.add('$norm: ListTile cru (use FxSatelliteListTile)');
       }
 
-      final isAsync = source.contains('.when(') ||
+      final isAsync =
+          source.contains('.when(') ||
           source.contains('FutureProvider') ||
           source.contains('AsyncValue') ||
           source.contains('_loading');
 
       if (isAsync) {
-        final hasErrorUx = source.contains('friendlyError') ||
+        final hasErrorUx =
+            source.contains('friendlyError') ||
             source.contains('DashboardErrorState') ||
             source.contains('FxEmptyState') ||
             source.contains('_erro') ||
             source.contains('_erroIaTexto') ||
             source.contains('_TrainingEmptyState') ||
             source.contains('ref.invalidate');
-        final hasLoadingUx = source.contains('FxLoading') ||
+        final hasLoadingUx =
+            source.contains('FxLoading') ||
             source.contains('SkeletonLoader') ||
             source.contains('SkeletonList') ||
             source.contains('DashboardShimmer') ||
@@ -88,7 +97,8 @@ void main() {
 
       if (source.contains('FxShellScaffold') &&
           !allowedWithoutLimiter.contains(norm)) {
-        final hasLimiter = source.contains('FxContentWidthLimiter') ||
+        final hasLimiter =
+            source.contains('FxContentWidthLimiter') ||
             !source.contains('constrainWidth: false');
         if (!hasLimiter) {
           failures.add('$norm: FxShellScaffold sem width constraint');

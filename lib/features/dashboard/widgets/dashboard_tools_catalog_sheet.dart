@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_input_deco.dart';
 import '../../planos/data/planos_repository.dart';
 import '../data/dashboard_tool_shortcuts.dart';
@@ -19,13 +20,8 @@ Future<void> showDashboardToolsCatalogSheet(
   required double shortcutAspectRatio,
   PlanoFeatures? homePlanoFeatures,
 }) {
-  return showModalBottomSheet<void>(
-    context: context,
-    isScrollControlled: true,
-    useSafeArea: false,
-    useRootNavigator: true,
-    backgroundColor: Colors.transparent,
-    barrierColor: Colors.black.withValues(alpha: isDark ? 0.72 : 0.40),
+  return showFxHomeSheet<void>(
+    context,
     builder: (sheetContext) {
       return Padding(
         padding: EdgeInsets.only(
@@ -43,10 +39,8 @@ Future<void> showDashboardToolsCatalogSheet(
                 duration: const Duration(milliseconds: 220),
                 curve: Curves.easeOutCubic,
                 builder:
-                    (context, value, child) => Opacity(
-                      opacity: value,
-                      child: child,
-                    ),
+                    (context, value, child) =>
+                        Opacity(opacity: value, child: child),
                 child: DashboardToolsCatalogSheet(
                   parentContext: context,
                   parentRef: ref,
@@ -85,14 +79,14 @@ class DashboardToolsCatalogSheet extends StatefulWidget {
       _DashboardToolsCatalogSheetState();
 }
 
-class _DashboardToolsCatalogSheetState extends State<DashboardToolsCatalogSheet> {
+class _DashboardToolsCatalogSheetState
+    extends State<DashboardToolsCatalogSheet> {
   String _searchQuery = '';
 
   @override
   Widget build(BuildContext context) {
     final mute = dashboardReadableMuted(context, isDark: widget.isDark);
-    final ink =
-        widget.isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final ink = widget.isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final hint = ink.withValues(alpha: widget.isDark ? 0.78 : 0.62);
     final shortcuts = filterDashboardToolShortcuts(
       DashboardToolShortcut.moreTools,
@@ -116,16 +110,7 @@ class _DashboardToolsCatalogSheetState extends State<DashboardToolsCatalogSheet>
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           const SizedBox(height: 10),
-          Center(
-            child: Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: mute.withValues(alpha: 0.35),
-                borderRadius: BorderRadius.circular(99),
-              ),
-            ),
-          ),
+          FxHomeSheetHandle(isDark: widget.isDark),
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 14, 8, 8),
             child: Row(
@@ -133,10 +118,7 @@ class _DashboardToolsCatalogSheetState extends State<DashboardToolsCatalogSheet>
                 Expanded(
                   child: Text(
                     DashboardMicrocopy.catalogoCompleto,
-                    style: FocuxHubTypography.sectionTitle(
-                      context,
-                      color: ink,
-                    ),
+                    style: FocuxHubTypography.sectionTitle(context, color: ink),
                   ),
                 ),
                 IconButton(
@@ -163,9 +145,7 @@ class _DashboardToolsCatalogSheetState extends State<DashboardToolsCatalogSheet>
                   filled: true,
                   fillColor: searchFill,
                   border: FxInputDeco.outlineBorder(
-                    borderRadius: BorderRadius.circular(
-                      TokensStrip.rInput,
-                    ),
+                    borderRadius: BorderRadius.circular(TokensStrip.rInput),
                     borderSide: BorderSide(
                       color: TokensStrip.borderDefault.withValues(
                         alpha: widget.isDark ? 0.85 : 0.9,

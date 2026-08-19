@@ -61,70 +61,39 @@ class _PixTipoBottomSheet extends StatelessWidget {
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
     final ink = chrome.ink;
-    final line = chrome.line;
-    final surface = chrome.sheetFill;
 
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 0, TokensStrip.s4, 16),
-      child: ClipRRect(
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-        child: Material(
-          color: surface,
-          child: SafeArea(
-            top: false,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const SizedBox(height: 10),
-                Container(
-                  width: 34,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: line,
-                    borderRadius: BorderRadius.circular(999),
-                  ),
+    return FxHomeSheetSurface(
+      isDark: chrome.isDark,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          FxHomeSheetHandle(isDark: chrome.isDark),
+          SizedBox(height: TokensStrip.s4),
+          FxHomeSheetHeader(
+            isDark: chrome.isDark,
+            title: 'Tipo de chave PIX',
+            subtitle: 'Escolha o formato da chave que você vai receber.',
+            leading: Icon(Icons.key_rounded, color: primary, size: 18),
+          ),
+          ...tipos.map(
+            (tipo) => ListTile(
+              contentPadding: EdgeInsets.zero,
+              title: Text(
+                WalletPixValidation.labelForTipo(tipo),
+                style: TextStyle(
+                  color: ink,
+                  fontWeight:
+                      selected == tipo ? FontWeight.w700 : FontWeight.w500,
                 ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 18, 20, 8),
-                  child: Row(
-                    children: [
-                      Icon(Icons.key_rounded, color: primary, size: 20),
-                      const SizedBox(width: 10),
-                      Text(
-                        'Tipo de chave PIX',
-                        style: AppTypography.inter(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w800,
-                          color: ink,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                ...tipos.map(
-                  (tipo) => ListTile(
-                    title: Text(
-                      WalletPixValidation.labelForTipo(tipo),
-                      style: TextStyle(
-                        color: ink,
-                        fontWeight:
-                            selected == tipo
-                                ? FontWeight.w700
-                                : FontWeight.w500,
-                      ),
-                    ),
-                    trailing:
-                        selected == tipo
-                            ? Icon(Icons.check_circle_rounded, color: primary)
-                            : null,
-                    onTap: () => Navigator.pop(context, tipo),
-                  ),
-                ),
-                const SizedBox(height: 8),
-              ],
+              ),
+              trailing:
+                  selected == tipo
+                      ? Icon(Icons.check_circle_rounded, color: primary)
+                      : null,
+              onTap: () => Navigator.pop(context, tipo),
             ),
           ),
-        ),
+        ],
       ),
     );
   }

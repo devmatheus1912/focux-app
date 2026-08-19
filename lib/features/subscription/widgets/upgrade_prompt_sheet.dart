@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_home_sheet.dart';
 import '../../planos/paywall/paywall_catalog.dart';
 import '../models/subscription_plan.dart';
 import '../plan_entitlements.dart';
@@ -83,44 +84,28 @@ class UpgradePromptSheet {
         ) ??
         offer.body;
 
-    await showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: EagleTokens.darkCard,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
+    await showFxHomeSheet<void>(
+      context,
       builder: (ctx) {
-        return Padding(
-          padding: EdgeInsets.fromLTRB(
-            20,
-            12,
-            20,
-            20 + MediaQuery.paddingOf(ctx).bottom,
-          ),
+        final isDark = Theme.of(ctx).brightness == Brightness.dark;
+        final chrome = Theme.of(ctx).colorScheme;
+        return FxHomeSheetSurface(
+          isDark: isDark,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: EagleTokens.darkLine,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
+              FxHomeSheetHandle(isDark: isDark),
+              SizedBox(height: TokensStrip.s4),
+              FxHomeSheetHeader(
+                isDark: isDark,
+                title: offer.headline,
+                subtitle: body,
+                leading: Icon(
+                  Icons.lock_outline_rounded,
+                  color: accent,
+                  size: 18,
                 ),
-              ),
-              const SizedBox(height: 18),
-              Text(
-                offer.headline,
-                style: TokensStrip.h2(color: EagleTokens.darkInk),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                body,
-                style: TokensStrip.body(color: EagleTokens.darkInkMute),
               ),
               const SizedBox(height: 14),
               FilledButton(
@@ -173,7 +158,7 @@ class UpgradePromptSheet {
                   child: Text(
                     'Não mostrar novamente',
                     style: TextStyle(
-                      color: EagleTokens.darkInkMute.withValues(alpha: 0.8),
+                      color: chrome.onSurface.withValues(alpha: 0.55),
                     ),
                   ),
                 ),

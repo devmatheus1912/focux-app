@@ -29,10 +29,7 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
       _maybeOpenHelpFromDeepLink();
       AnalyticsService.instance.track(
         ProductEvents.alunosViewed,
-        props: {
-          'filtro': _filtro.name,
-          'compact': _listaCompacta,
-        },
+        props: {'filtro': _filtro.name, 'compact': _listaCompacta},
       );
     });
   }
@@ -98,7 +95,8 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
   Future<void> _adicionarAluno() async {
     HapticFeedback.selectionClick();
     final home = ref.read(alunosHomeProvider).valueOrNull;
-    final plano = home?.planoFeatures ?? ref.read(planoFeaturesProvider).valueOrNull;
+    final plano =
+        home?.planoFeatures ?? ref.read(planoFeaturesProvider).valueOrNull;
     final limite = plano?.limiteAlunos;
     final total = home?.stats.total ?? 0;
     if (limite != null && limite > 0 && total >= limite) {
@@ -206,12 +204,8 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
   Future<void> _excluirSelecionados() async {
     final total = _selecionados.length;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final confirmar = await showModalBottomSheet<bool>(
-      context: context,
-      useRootNavigator: true,
-      backgroundColor: Colors.transparent,
-      showDragHandle: true,
-      barrierColor: Colors.black.withValues(alpha: 0.34),
+    final confirmar = await showFxHomeSheet<bool>(
+      context,
       builder: (_) => _ExcluirAlunosSheet(count: total, isDark: isDark),
     );
     if (confirmar != true) return;
@@ -309,14 +303,8 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
     final mostrarMarcarPago = showAlunosBulkPayCta(
       alunos.where((a) => _selecionados.contains(a.id)),
     );
-    showModalBottomSheet<void>(
-      context: context,
-      useRootNavigator: true,
-      backgroundColor: Colors.transparent,
-      showDragHandle: true,
-      barrierColor: Colors.black.withValues(alpha: 0.34),
-      isScrollControlled: true,
-      useSafeArea: true,
+    showFxHomeSheet<void>(
+      context,
       builder:
           (sheetContext) => _AlunosBulkActionsSheet(
             count: qtd,
@@ -369,7 +357,9 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
     ref.listen<AsyncValue<AlunosHomeBundle>>(alunosHomeProvider, (_, next) {
       next.whenData((home) {
         ref.read(alunosHomeTailProvider.notifier).reset(home.page);
-        setState(() => _fetchedAt = AlunosHomeClientCache.fetchedAt ?? DateTime.now());
+        setState(
+          () => _fetchedAt = AlunosHomeClientCache.fetchedAt ?? DateTime.now(),
+        );
       });
     });
 

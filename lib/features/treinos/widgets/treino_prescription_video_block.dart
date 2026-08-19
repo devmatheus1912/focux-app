@@ -7,11 +7,11 @@ import '../../../core/analytics/analytics_service.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
-import '../../../core/theme/hero_teal.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../exercicios/data/exercicio_repository.dart';
 import '../../exercicios/providers/exercicios_provider.dart';
@@ -167,12 +167,8 @@ class _TreinoPrescriptionVideoBlockState
   }
 
   Future<ImageSource?> _showSourceSheet() {
-    return showModalBottomSheet<ImageSource>(
-      context: context,
-      useRootNavigator: true,
-      isScrollControlled: true,
-      backgroundColor: fxTransparent,
-      barrierColor: heroScrim(0.34),
+    return showFxHomeSheet<ImageSource>(
+      context,
       builder: (ctx) {
         final isDark = Theme.of(ctx).brightness == Brightness.dark;
         final chrome = ShellChrome.forDark(isDark);
@@ -312,12 +308,8 @@ class _TreinoPrescriptionVideoBlockState
   }
 
   Future<bool?> _showRemoveSheet() {
-    return showModalBottomSheet<bool>(
-      context: context,
-      useRootNavigator: true,
-      isScrollControlled: true,
-      backgroundColor: fxTransparent,
-      barrierColor: heroScrim(0.34),
+    return showFxHomeSheet<bool>(
+      context,
       builder: (ctx) {
         final isDark = Theme.of(ctx).brightness == Brightness.dark;
         final chrome = ShellChrome.forDark(isDark);

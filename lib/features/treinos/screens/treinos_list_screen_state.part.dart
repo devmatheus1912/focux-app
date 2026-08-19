@@ -96,12 +96,8 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
     try {
       final alunos = await ref.read(alunosProvider.future);
       if (!mounted) return;
-      final selected = await showModalBottomSheet<int>(
-        context: context,
-        backgroundColor: Colors.transparent,
-        barrierColor: Colors.black.withValues(alpha: 0.34),
-        isScrollControlled: true,
-        useRootNavigator: true,
+      final selected = await showFxHomeSheet<int>(
+        context,
         builder: (_) => _AssignWorkoutSheet(alunos: alunos),
       );
       if (selected == null) return;
@@ -149,12 +145,8 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
     try {
       final alunos = await ref.read(alunosProvider.future);
       if (!mounted) return;
-      final selected = await showModalBottomSheet<int>(
-        context: context,
-        backgroundColor: Colors.transparent,
-        barrierColor: Colors.black.withValues(alpha: 0.34),
-        isScrollControlled: true,
-        useRootNavigator: true,
+      final selected = await showFxHomeSheet<int>(
+        context,
         builder: (_) => _AssignWorkoutSheet(alunos: alunos),
       );
       if (selected == null) return;
@@ -187,12 +179,8 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
       ProductEvents.treinosActionOpened,
       props: _analyticsScope,
     );
-    final action = await showModalBottomSheet<_TreinoAction>(
-      context: context,
-      backgroundColor: Colors.transparent,
-      barrierColor: Colors.black.withValues(alpha: 0.34),
-      isScrollControlled: true,
-      useRootNavigator: true,
+    final action = await showFxHomeSheet<_TreinoAction>(
+      context,
       builder:
           (_) => _TreinoActionsSheet(
             treino: treino,
@@ -232,12 +220,8 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
   }) async {
     if (treinos.isEmpty) return;
     final count = treinos.length;
-    final confirmed = await showModalBottomSheet<bool>(
-      context: context,
-      isScrollControlled: true,
-      useRootNavigator: true,
-      backgroundColor: Colors.transparent,
-      barrierColor: Colors.black.withValues(alpha: 0.34),
+    final confirmed = await showFxHomeSheet<bool>(
+      context,
       builder:
           (context) => _DeleteWorkoutSheet(
             count: count,

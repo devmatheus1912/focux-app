@@ -29,7 +29,9 @@ void main() {
     expect(screen, contains("label: 'Bloqueado'"));
     expect(screen, contains('_SheetShortcutChip'));
     expect(screen, contains('Lista compacta'));
-    expect(screen, contains('useRootNavigator: true'));
+    expect(screen, contains('showFxHomeSheet'));
+    expect(screen, contains('FxHomeSheetSurface'));
+    expect(screen, contains('FxHomeSheetHeader'));
     expect(screen, isNot(contains('Atalhos de foco')));
     expect(screen, contains('showAlunosBulkPayCta'));
     expect(screen, contains('ListenableBuilder'));
@@ -57,8 +59,6 @@ void main() {
       isNot(contains("part 'alunos_list_screen_aluno_card.part.dart'")),
     );
     expect(screen, isNot(contains("aluno.email.toLowerCase()")));
-    expect(screen, contains('isScrollControlled: true'));
-    expect(screen, contains('useSafeArea: true'));
     expect(screen, contains('SingleChildScrollView'));
     expect(screen, isNot(contains('aluno(s) selecionado(s)')));
     expect(screen, isNot(contains('DropdownButtonFormField')));

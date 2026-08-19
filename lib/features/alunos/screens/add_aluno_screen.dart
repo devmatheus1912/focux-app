@@ -10,6 +10,7 @@ import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../providers/alunos_provider.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
@@ -207,257 +208,211 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
     );
     final hasWhatsapp = whatsappNumber.isNotEmpty;
 
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
+    showFxHomeSheet<void>(
+      context,
       isDismissible: false,
       enableDrag: false,
-      backgroundColor: Colors.transparent,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-      ),
-      builder:
-          (ctx) => Padding(
-            padding: EdgeInsets.fromLTRB(
-              20,
-              12,
-              20,
-              24 + MediaQuery.of(ctx).padding.bottom,
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 42,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color:
-                        isDark
-                            ? EagleTokens.darkLine
-                            : TokensStrip.borderDefault,
-                    borderRadius: BorderRadius.circular(999),
-                  ),
+      builder: (ctx) {
+        return FxHomeSheetSurface(
+          isDark: isDark,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              FxHomeSheetHandle(isDark: isDark),
+              SizedBox(height: TokensStrip.s4),
+              FxHomeSheetHeader(
+                isDark: isDark,
+                title: 'Aluno cadastrado',
+                subtitle: 'Compartilhe o convite para o aluno acessar o app.',
+                leading: Icon(
+                  Icons.check_rounded,
+                  color: EagleTokens.good,
+                  size: 18,
                 ),
-                const SizedBox(height: 22),
-                Container(
-                  width: 54,
-                  height: 54,
-                  decoration: BoxDecoration(
-                    color: EagleTokens.good.withValues(alpha: 0.12),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.check_rounded,
-                    color: EagleTokens.good,
-                    size: 29,
-                  ),
+                trailing: const SizedBox.shrink(),
+              ),
+              const SizedBox(height: 16),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.fromLTRB(18, 15, 18, 14),
+                decoration: BoxDecoration(
+                  color: primary.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: primary.withValues(alpha: 0.2)),
                 ),
-                const SizedBox(height: TokensStrip.s4),
-                Text(
-                  'Aluno cadastrado',
-                  style: AppTypography.inter(
-                    fontSize: 22,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: -0.6,
-                    color:
-                        isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Compartilhe o convite para o aluno acessar o app.',
-                  style: TextStyle(
-                    color:
-                        isDark
-                            ? EagleTokens.darkInkMute
-                            : TokensStrip.textSecondary,
-                    fontSize: 13.4,
-                    height: 1.35,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 20),
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.fromLTRB(18, 15, 18, 14),
-                  decoration: BoxDecoration(
-                    color: primary.withValues(alpha: 0.08),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: primary.withValues(alpha: 0.2)),
-                  ),
-                  child: Column(
-                    children: [
-                      Text(
-                        'Senha provisória',
-                        style: TextStyle(
-                          color:
-                              isDark
-                                  ? EagleTokens.darkInkMute
-                                  : TokensStrip.textSecondary,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        aluno.senhaProvisoria!,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 31,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 5.5,
-                          color:
-                              isDark ? Colors.white : TokensStrip.textPrimary,
-                        ),
-                      ),
-                      const SizedBox(height: 9),
-                      Text(
-                        'O aluno deve trocar a senha no primeiro acesso.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color:
-                              isDark
-                                  ? EagleTokens.darkInkMute
-                                  : TokensStrip.textSecondary,
-                          fontSize: 11.8,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 18),
-                SizedBox(
-                  width: double.infinity,
-                  height: 52,
-                  child: ElevatedButton.icon(
-                    onPressed: () async {
-                      final texto = _inviteMessage(aluno);
-                      HapticFeedback.mediumImpact();
-                      if (hasWhatsapp) {
-                        final uri = Uri.parse(
-                          'https://wa.me/55$whatsappNumber?text=${Uri.encodeComponent(texto)}',
-                        );
-                        if (await canLaunchUrl(uri)) {
-                          await launchUrl(
-                            uri,
-                            mode: LaunchMode.externalApplication,
-                          );
-                          if (ctx.mounted) Navigator.of(ctx).pop();
-                          if (mounted) context.pop(true);
-                          return;
-                        }
-                      }
-                      await Clipboard.setData(ClipboardData(text: texto));
-                      if (ctx.mounted) Navigator.of(ctx).pop();
-                      if (mounted) {
-                        FeedbackHelper.showSuccess(
-                          context,
-                          hasWhatsapp
-                              ? 'Mensagem copiada. Abra o WhatsApp e envie ao aluno.'
-                              : 'Convite copiado.',
-                        );
-                        context.pop(true);
-                      }
-                    },
-                    icon: Icon(
-                      hasWhatsapp ? Icons.send_rounded : Icons.copy_rounded,
-                      size: 18,
-                    ),
-                    label: Text(
-                      hasWhatsapp ? 'Enviar no WhatsApp' : 'Copiar convite',
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: primary,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      elevation: 0,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 10),
-                if (hasWhatsapp) ...[
-                  SizedBox(
-                    width: double.infinity,
-                    height: 48,
-                    child: OutlinedButton.icon(
-                      onPressed: () async {
-                        await Clipboard.setData(
-                          ClipboardData(text: _inviteMessage(aluno)),
-                        );
-                        HapticFeedback.mediumImpact();
-                        if (ctx.mounted) Navigator.of(ctx).pop();
-                        if (mounted) {
-                          FeedbackHelper.showSuccess(
-                            context,
-                            'Mensagem copiada.',
-                          );
-                          context.pop(true);
-                        }
-                      },
-                      icon: Icon(
-                        Icons.copy_rounded,
-                        size: 18,
-                        color:
-                            isDark
-                                ? EagleTokens.darkInk
-                                : TokensStrip.textPrimary,
-                      ),
-                      label: Text(
-                        'Copiar convite',
-                        style: TextStyle(
-                          color:
-                              isDark
-                                  ? EagleTokens.darkInk
-                                  : TokensStrip.textPrimary,
-                        ),
-                      ),
-                      style: OutlinedButton.styleFrom(
-                        side: BorderSide(
-                          color:
-                              isDark
-                                  ? EagleTokens.darkLine
-                                  : TokensStrip.borderDefault,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                ],
-                const SizedBox(height: 6),
-                SizedBox(
-                  width: double.infinity,
-                  height: 44,
-                  child: TextButton(
-                    style: TextButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                    ),
-                    onPressed: () {
-                      Navigator.of(ctx).pop();
-                      if (mounted) context.pop(true);
-                    },
-                    child: Text(
-                      'Fechar',
+                child: Column(
+                  children: [
+                    Text(
+                      'Senha provisória',
                       style: TextStyle(
                         color:
                             isDark
                                 ? EagleTokens.darkInkMute
                                 : TokensStrip.textSecondary,
-                        fontWeight: FontWeight.w700,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      aluno.senhaProvisoria!,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 31,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 5.5,
+                        color: isDark ? Colors.white : TokensStrip.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 9),
+                    Text(
+                      'O aluno deve trocar a senha no primeiro acesso.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color:
+                            isDark
+                                ? EagleTokens.darkInkMute
+                                : TokensStrip.textSecondary,
+                        fontSize: 11.8,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 18),
+              SizedBox(
+                width: double.infinity,
+                height: 52,
+                child: ElevatedButton.icon(
+                  onPressed: () async {
+                    final texto = _inviteMessage(aluno);
+                    HapticFeedback.mediumImpact();
+                    if (hasWhatsapp) {
+                      final uri = Uri.parse(
+                        'https://wa.me/55$whatsappNumber?text=${Uri.encodeComponent(texto)}',
+                      );
+                      if (await canLaunchUrl(uri)) {
+                        await launchUrl(
+                          uri,
+                          mode: LaunchMode.externalApplication,
+                        );
+                        if (ctx.mounted) Navigator.of(ctx).pop();
+                        if (mounted) context.pop(true);
+                        return;
+                      }
+                    }
+                    await Clipboard.setData(ClipboardData(text: texto));
+                    if (ctx.mounted) Navigator.of(ctx).pop();
+                    if (mounted) {
+                      FeedbackHelper.showSuccess(
+                        context,
+                        hasWhatsapp
+                            ? 'Mensagem copiada. Abra o WhatsApp e envie ao aluno.'
+                            : 'Convite copiado.',
+                      );
+                      context.pop(true);
+                    }
+                  },
+                  icon: Icon(
+                    hasWhatsapp ? Icons.send_rounded : Icons.copy_rounded,
+                    size: 18,
+                  ),
+                  label: Text(
+                    hasWhatsapp ? 'Enviar no WhatsApp' : 'Copiar convite',
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: primary,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    elevation: 0,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
+              if (hasWhatsapp) ...[
+                SizedBox(
+                  width: double.infinity,
+                  height: 48,
+                  child: OutlinedButton.icon(
+                    onPressed: () async {
+                      await Clipboard.setData(
+                        ClipboardData(text: _inviteMessage(aluno)),
+                      );
+                      HapticFeedback.mediumImpact();
+                      if (ctx.mounted) Navigator.of(ctx).pop();
+                      if (mounted) {
+                        FeedbackHelper.showSuccess(
+                          context,
+                          'Mensagem copiada.',
+                        );
+                        context.pop(true);
+                      }
+                    },
+                    icon: Icon(
+                      Icons.copy_rounded,
+                      size: 18,
+                      color:
+                          isDark
+                              ? EagleTokens.darkInk
+                              : TokensStrip.textPrimary,
+                    ),
+                    label: Text(
+                      'Copiar convite',
+                      style: TextStyle(
+                        color:
+                            isDark
+                                ? EagleTokens.darkInk
+                                : TokensStrip.textPrimary,
+                      ),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      side: BorderSide(
+                        color:
+                            isDark
+                                ? EagleTokens.darkLine
+                                : TokensStrip.borderDefault,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
                       ),
                     ),
                   ),
                 ),
+                const SizedBox(height: 6),
               ],
-            ),
+              const SizedBox(height: 6),
+              SizedBox(
+                width: double.infinity,
+                height: FxHomeSheetChrome.touchTarget,
+                child: TextButton(
+                  style: TextButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                  onPressed: () {
+                    Navigator.of(ctx).pop();
+                    if (mounted) context.pop(true);
+                  },
+                  child: Text(
+                    'Fechar',
+                    style: TextStyle(
+                      color:
+                          isDark
+                              ? EagleTokens.darkInkMute
+                              : TokensStrip.textSecondary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
+        );
+      },
     );
   }
 

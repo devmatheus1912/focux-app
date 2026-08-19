@@ -61,8 +61,9 @@ void main() {
     expect(widget, contains('class DashboardPrioritiesOverlay'));
     expect(widget, contains('dashboardPanelIsOffscreen'));
     expect(
-      File('lib/features/dashboard/widgets/dashboard_base_radar_strip.dart')
-          .readAsStringSync(),
+      File(
+        'lib/features/dashboard/widgets/dashboard_base_radar_strip.dart',
+      ).readAsStringSync(),
       contains('SingleChildScrollView'),
     );
     expect(
@@ -120,7 +121,7 @@ void main() {
     expect(widget, contains('BILLING_PENDING'));
     expect(widget, contains('dashboardFormatCountCopy'));
     expect(widget, contains('dashboardClampActionCopy'));
-    expect(widget, contains('useRootNavigator: true'));
+    expect(widget, contains('showFxHomeSheet'));
     expect(widget, contains('DraggableScrollableSheet'));
     expect(widget, contains('maisPrioridades'));
     expect(widget, contains('hasRiskCurated'));

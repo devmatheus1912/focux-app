@@ -6,6 +6,7 @@ import '../../../core/analytics/analytics_service.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_icon.dart';
 import '../data/command_action_item.dart';
 import '../providers/dashboard_provider.dart';
@@ -118,17 +119,12 @@ class DashboardCommandCenterSectionState
         if (!widget.hideHeader) ...[
           Text(
             DashboardMicrocopy.proximasAcoes,
-            style: dashboardSectionTitleStyle(
-              context,
-              color: heading,
-            ),
+            style: dashboardSectionTitleStyle(context, color: heading),
           ),
           const SizedBox(height: 4),
           Text(
             contextualSubtitle ?? DashboardMicrocopy.commandCenterSubtitle,
-            style: TokensStrip.bodyMuted(color: mute).copyWith(
-              height: 1.35,
-            ),
+            style: TokensStrip.bodyMuted(color: mute).copyWith(height: 1.35),
           ),
           const SizedBox(height: 20),
         ],
@@ -194,11 +190,7 @@ class _MessagesShortcutRow extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 2),
           child: Row(
             children: [
-              FxIcon(
-                name: 'message-circle',
-                size: 17,
-                color: actionColor,
-              ),
+              FxIcon(name: 'message-circle', size: 17, color: actionColor),
               const SizedBox(width: 10),
               Expanded(
                 child: Text.rich(
@@ -206,9 +198,9 @@ class _MessagesShortcutRow extends StatelessWidget {
                     children: [
                       TextSpan(
                         text: title,
-                        style: dashboardCardTitleStyle(ink).copyWith(
-                          fontWeight: FontWeight.w700,
-                        ),
+                        style: dashboardCardTitleStyle(
+                          ink,
+                        ).copyWith(fontWeight: FontWeight.w700),
                       ),
                       TextSpan(
                         text: ' · $subtitle',
@@ -242,12 +234,8 @@ void showCommandActionsSheet(
     ProductEvents.homePrioritiesOpened,
     props: {'actions': actions.length},
   );
-  showModalBottomSheet<void>(
-    context: context,
-    backgroundColor: Colors.transparent,
-    barrierColor: Colors.black.withValues(alpha: isDark ? 0.56 : 0.24),
-    isScrollControlled: true,
-    useSafeArea: true,
+  showFxHomeSheet<void>(
+    context,
     builder: (sheetContext) {
       return CommandPrioritiesSheet(
         parentContext: context,
