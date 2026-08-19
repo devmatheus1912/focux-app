@@ -29,6 +29,9 @@ class _TreinoDetailBody extends StatelessWidget {
   final int? alunoId;
   final String? alunoNome;
   final bool isDark;
+  final String? freshnessLabel;
+  final VoidCallback onHelp;
+  final Future<void> Function() onRefresh;
   final WidgetRef ref;
   const _TreinoDetailBody({
     required this.treino,
@@ -36,6 +39,9 @@ class _TreinoDetailBody extends StatelessWidget {
     required this.alunoId,
     required this.alunoNome,
     required this.isDark,
+    required this.freshnessLabel,
+    required this.onHelp,
+    required this.onRefresh,
     required this.ref,
   });
 
@@ -388,150 +394,185 @@ class _TreinoDetailBody extends StatelessWidget {
       }
     }
 
-    return CustomScrollView(
-      slivers: [
-        SliverAppBar(
-          pinned: true,
-          automaticallyImplyLeading: false,
-          backgroundColor: fxTransparent,
-          surfaceTintColor: fxTransparent,
-          elevation: 0,
-          scrolledUnderElevation: 0,
-          leadingWidth: 52,
-          leading: Padding(
-            padding: const EdgeInsets.only(left: 4),
-            child: _TreinoDetailBackButton(alunoId: alunoId),
+    return RefreshIndicator(
+      onRefresh: onRefresh,
+      child: FxContentWidthLimiter(
+        child: CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(
+            parent: BouncingScrollPhysics(),
           ),
-          actions: [
-            Padding(
-              padding: const EdgeInsets.only(right: TokensStrip.s3),
-              child: IconButton(
-                tooltip: 'Opções do treino',
-                onPressed: () => _openMenu(context),
-                icon: Container(
-                  width: TreinosLayout.headerChromeSize,
-                  height: TreinosLayout.headerChromeSize,
-                  decoration: chrome.headerAction(radius: 12),
-                  child: Icon(
-                    Icons.more_horiz_rounded,
-                    size: 18,
-                    color: chrome.ink,
+          slivers: [
+            SliverAppBar(
+              pinned: true,
+              automaticallyImplyLeading: false,
+              backgroundColor: fxTransparent,
+              surfaceTintColor: fxTransparent,
+              elevation: 0,
+              scrolledUnderElevation: 0,
+              leadingWidth: 52,
+              leading: Padding(
+                padding: const EdgeInsets.only(left: 4),
+                child: _TreinoDetailBackButton(alunoId: alunoId),
+              ),
+              actions: [
+                Padding(
+                  padding: const EdgeInsets.only(
+                    right: TreinosLayout.headerChromeGap,
                   ),
+                  child: ShellHeaderIconButton(
+                    icon: 'help',
+                    size: TreinosLayout.headerChromeSize,
+                    tooltip: 'Como montar este treino',
+                    onTap: onHelp,
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(right: TokensStrip.s3),
+                  child: IconButton(
+                    tooltip: 'Opções do treino',
+                    onPressed: () => _openMenu(context),
+                    icon: Container(
+                      width: TreinosLayout.headerChromeSize,
+                      height: TreinosLayout.headerChromeSize,
+                      decoration: chrome.headerAction(radius: 12),
+                      child: Icon(
+                        Icons.more_horiz_rounded,
+                        size: 18,
+                        color: chrome.ink,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  TokensStrip.s5,
+                  TokensStrip.s2,
+                  TokensStrip.s5,
+                  TokensStrip.s3,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      contextLabel,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: FocuxHubTypography.eyebrow(
+                        context,
+                        color: chrome.mute,
+                      ),
+                    ),
+                    SizedBox(height: TokensStrip.s1),
+                    Text(
+                      displayName,
+                      style: FocuxHubTypography.pageTitle(
+                        context,
+                        color: chrome.ink,
+                      ),
+                    ),
+                    SizedBox(height: TokensStrip.s2),
+                    Text(
+                      metaLine,
+                      style: FocuxHubTypography.bodyMuted(
+                        color: chrome.mute,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    if (freshnessLabel != null &&
+                        freshnessLabel!.isNotEmpty) ...[
+                      SizedBox(height: TokensStrip.s1),
+                      Semantics(
+                        liveRegion: true,
+                        child: Text(
+                          freshnessLabel!,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: FocuxHubTypography.bodyMuted(
+                            color: chrome.mute,
+                            fontWeight: FontWeight.w600,
+                          ).copyWith(fontSize: 11),
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               ),
             ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  TokensStrip.s5,
+                  TokensStrip.s2,
+                  TokensStrip.s5,
+                  TokensStrip.s3,
+                ),
+                child: _TreinoHeroActions(onAdd: openAdd),
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  TokensStrip.s5,
+                  TokensStrip.s3,
+                  TokensStrip.s5,
+                  TokensStrip.s3,
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'Exercícios',
+                        style: FocuxHubTypography.sectionTitle(
+                          context,
+                          color: chrome.ink,
+                        ),
+                      ),
+                    ),
+                    if (exerciseCount > 1)
+                      Text(
+                        'Segure para reordenar',
+                        style: FocuxHubTypography.bodyMuted(
+                          color: chrome.mute,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+
+            if (treino.exercicios.isEmpty)
+              SliverFillRemaining(
+                hasScrollBody: false,
+                child: FxEmptyState(
+                  icon: 'dumbbell',
+                  title: 'Nenhum exercício ainda',
+                  subtitle:
+                      'Adicione exercícios da biblioteca curada para montar este treino.',
+                  action: FxEmptyAction(
+                    label: 'Adicionar exercício',
+                    onTap: () => openAdd(source: 'empty'),
+                  ),
+                ),
+              )
+            else
+              _TreinoExerciseReorderList(
+                exercises: orderedExercises,
+                treinoId: treinoId,
+                alunoId: alunoId,
+                isDark: isDark,
+                primary: primary,
+                repo: repo,
+                ref: ref,
+                onEditPrescription: openEditPrescription,
+              ),
+            const SliverToBoxAdapter(child: SizedBox(height: 80)),
           ],
         ),
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(
-              TokensStrip.s5,
-              TokensStrip.s2,
-              TokensStrip.s5,
-              TokensStrip.s3,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  contextLabel,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: FocuxHubTypography.eyebrow(
-                    context,
-                    color: chrome.mute,
-                  ),
-                ),
-                SizedBox(height: TokensStrip.s1),
-                Text(
-                  displayName,
-                  style: FocuxHubTypography.pageTitle(
-                    context,
-                    color: chrome.ink,
-                  ),
-                ),
-                SizedBox(height: TokensStrip.s2),
-                Text(
-                  metaLine,
-                  style: FocuxHubTypography.bodyMuted(
-                    color: chrome.mute,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(
-              TokensStrip.s5,
-              TokensStrip.s2,
-              TokensStrip.s5,
-              TokensStrip.s3,
-            ),
-            child: _TreinoHeroActions(onAdd: openAdd),
-          ),
-        ),
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(
-              TokensStrip.s5,
-              TokensStrip.s3,
-              TokensStrip.s5,
-              TokensStrip.s3,
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    'Exercícios',
-                    style: FocuxHubTypography.sectionTitle(
-                      context,
-                      color: chrome.ink,
-                    ),
-                  ),
-                ),
-                if (exerciseCount > 1)
-                  Text(
-                    'Segure para reordenar',
-                    style: FocuxHubTypography.bodyMuted(
-                      color: chrome.mute,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        ),
-
-        if (treino.exercicios.isEmpty)
-          SliverFillRemaining(
-            hasScrollBody: false,
-            child: FxEmptyState(
-              icon: 'dumbbell',
-              title: 'Nenhum exercício ainda',
-              subtitle:
-                  'Adicione exercícios da biblioteca curada para montar este treino.',
-              action: FxEmptyAction(
-                label: 'Adicionar exercício',
-                onTap: () => openAdd(source: 'empty'),
-              ),
-            ),
-          )
-        else
-          _TreinoExerciseReorderList(
-            exercises: orderedExercises,
-            treinoId: treinoId,
-            alunoId: alunoId,
-            isDark: isDark,
-            primary: primary,
-            repo: repo,
-            ref: ref,
-            onEditPrescription: openEditPrescription,
-          ),
-        const SliverToBoxAdapter(child: SizedBox(height: 80)),
-      ],
+      ),
     );
   }
 }

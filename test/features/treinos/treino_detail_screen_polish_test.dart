@@ -49,9 +49,16 @@ void main() {
     expect(screen, contains('ProductEvents.treinoDetailAddTapped'));
     expect(screen, contains('ProductEvents.treinoDetailMenuOpened'));
     expect(screen, contains('ProductEvents.treinoExerciseMenuOpened'));
+    expect(screen, contains('ProductEvents.treinoDetailHelpOpened'));
+    expect(screen, contains('ProductEvents.treinoDetailRefreshed'));
     expect(screen, contains("source: 'empty'"));
     expect(screen, contains('TreinosLayout.touchTarget'));
     expect(screen, contains('chrome.bottomSheet'));
+    expect(screen, contains('FxHubFreshness.fromFetchedAt'));
+    expect(screen, contains('showTreinoDetailHelpSheet'));
+    expect(screen, contains('RefreshIndicator'));
+    expect(screen, contains('FxContentWidthLimiter'));
+    expect(screen, contains('treino_detail_grouping.dart'));
     expect(screen, isNot(contains('_GridTexturePainter')));
     expect(screen, isNot(contains('_HeroMetricChip')));
     expect(screen, isNot(contains('_ExerciseActionTile')));
