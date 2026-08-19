@@ -58,7 +58,12 @@ void main() {
     expect(screen, contains('TreinosLayout.touchTarget'));
     expect(screen, contains('TreinoHomeSheetSurface'));
     expect(screen, contains('treino_home_sheet.dart'));
-    expect(screen, contains('FxInputDeco.outlineBorder'));
+    expect(
+      File(
+        'lib/features/treinos/widgets/treino_prescription_form.dart',
+      ).readAsStringSync(),
+      contains('FxInputDeco.outlineBorder'),
+    );
     expect(screen, isNot(contains('ChoiceChip')));
     expect(screen, isNot(contains('DropdownButtonFormField')));
     expect(screen, contains('FxHubFreshness.fromFetchedAt'));
@@ -71,6 +76,10 @@ void main() {
     expect(screen, contains('TreinoSheetChromeHeader'));
     expect(screen, contains('TreinoPrescriptionVideoBlock'));
     expect(screen, contains('treino_prescription_video_block.dart'));
+    expect(screen, contains('treino_prescription_form.dart'));
+    expect(screen, contains('TreinoPrescriptionField'));
+    expect(screen, contains('TreinoTipoSeriePicker'));
+    expect(screen, contains('FxLiquidPrimaryButton'));
     expect(screen, contains('height * 0.82'));
     expect(
       File(

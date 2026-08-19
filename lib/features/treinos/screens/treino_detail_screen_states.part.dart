@@ -85,119 +85,8 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
     }
   }
 
-  InputDecoration _decoration(
-    BuildContext context, {
-    required String label,
-    String? hint,
-  }) {
-    final chrome = ShellChrome.forDark(widget.isDark);
-    final primary = Theme.of(context).colorScheme.primary;
-    final fill = widget.isDark ? EagleTokens.darkCardHi : TokensStrip.pageBg;
-    final radius = BorderRadius.circular(14);
-    return InputDecoration(
-      labelText: label,
-      hintText: hint,
-      isDense: true,
-      filled: true,
-      fillColor: fill,
-      labelStyle: FocuxHubTypography.bodyMuted(
-        color: chrome.mute,
-        fontWeight: FontWeight.w600,
-      ),
-      hintStyle: FocuxHubTypography.bodyMuted(
-        color: chrome.mute.withValues(alpha: 0.45),
-      ),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      border: FxInputDeco.outlineBorder(
-        borderRadius: radius,
-        borderSide: BorderSide(color: chrome.line),
-      ),
-      enabledBorder: FxInputDeco.outlineBorder(
-        borderRadius: radius,
-        borderSide: BorderSide(color: chrome.line),
-      ),
-      focusedBorder: FxInputDeco.outlineBorder(
-        borderRadius: radius,
-        borderSide: BorderSide(color: primary, width: 1.6),
-      ),
-    );
-  }
-
-  Widget _tipoSerieChips({
-    required Color primary,
-    required Color mute,
-    required bool isDark,
-  }) {
-    const options = <(String, String)>[
-      ('NORMAL', 'Normal'),
-      ('SUPERSET', 'Superset'),
-      ('DROPSET', 'Drop set'),
-    ];
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Tipo de série',
-          style: FocuxHubTypography.bodyMuted(
-            color: mute,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        SizedBox(height: TokensStrip.s2),
-        Wrap(
-          spacing: TokensStrip.s2,
-          runSpacing: TokensStrip.s2,
-          children: [
-            for (final option in options)
-              Semantics(
-                button: true,
-                selected: _tipoSerie == option.$1,
-                label: 'Tipo de série: ${option.$2}',
-                child: Material(
-                  color: fxTransparent,
-                  child: InkWell(
-                    onTap:
-                        _saving || _videoBusy
-                            ? null
-                            : () => setState(() => _tipoSerie = option.$1),
-                    borderRadius: BorderRadius.circular(TokensStrip.rCard),
-                    child: Ink(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 10,
-                      ),
-                      decoration: BoxDecoration(
-                        color:
-                            _tipoSerie == option.$1
-                                ? primary
-                                : BrandPalette.soft(primary, dark: isDark),
-                        borderRadius: BorderRadius.circular(TokensStrip.rCard),
-                        border: Border.all(
-                          color: primary.withValues(
-                            alpha: _tipoSerie == option.$1 ? 0 : 0.18,
-                          ),
-                        ),
-                      ),
-                      child: Text(
-                        option.$2,
-                        style: FocuxHubTypography.cardTitle(
-                          color:
-                              _tipoSerie == option.$1 ? Colors.white : primary,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-          ],
-        ),
-      ],
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    final primary = Theme.of(context).colorScheme.primary;
     final chrome = ShellChrome.forDark(widget.isDark);
 
     Widget pair(Widget left, Widget right) {
@@ -245,7 +134,9 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     pair(
-                      TextField(
+                      TreinoPrescriptionField(
+                        label: 'Séries',
+                        isDark: widget.isDark,
                         controller: _seriesCtrl,
                         keyboardType: TextInputType.number,
                         textInputAction: TextInputAction.next,
@@ -253,28 +144,25 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
                           FilteringTextInputFormatter.digitsOnly,
                           LengthLimitingTextInputFormatter(2),
                         ],
-                        style: FocuxHubTypography.body(color: chrome.ink),
-                        decoration: _decoration(context, label: 'Séries'),
                       ),
-                      TextField(
+                      TreinoPrescriptionField(
+                        label: 'Repetições',
+                        isDark: widget.isDark,
                         controller: _repCtrl,
+                        hint: '10-12',
                         textInputAction: TextInputAction.next,
                         inputFormatters: [
                           FilteringTextInputFormatter.allow(
                             RegExp(r'[0-9\-xX/ ]'),
                           ),
                         ],
-                        style: FocuxHubTypography.body(color: chrome.ink),
-                        decoration: _decoration(
-                          context,
-                          label: 'Repetições',
-                          hint: '10-12',
-                        ),
                       ),
                     ),
-                    SizedBox(height: TokensStrip.s3),
+                    SizedBox(height: TokensStrip.s4),
                     pair(
-                      TextField(
+                      TreinoPrescriptionField(
+                        label: 'Descanso (s)',
+                        isDark: widget.isDark,
                         controller: _descansoCtrl,
                         keyboardType: TextInputType.number,
                         textInputAction: TextInputAction.next,
@@ -282,11 +170,12 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
                           FilteringTextInputFormatter.digitsOnly,
                           LengthLimitingTextInputFormatter(3),
                         ],
-                        style: FocuxHubTypography.body(color: chrome.ink),
-                        decoration: _decoration(context, label: 'Descanso (s)'),
                       ),
-                      TextField(
+                      TreinoPrescriptionField(
+                        label: 'Carga (kg)',
+                        isDark: widget.isDark,
                         controller: _cargaCtrl,
+                        hint: 'Opcional',
                         keyboardType: const TextInputType.numberWithOptions(
                           decimal: true,
                         ),
@@ -296,36 +185,28 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
                             RegExp(r'^\d+[.,]?\d{0,2}'),
                           ),
                         ],
-                        style: FocuxHubTypography.body(color: chrome.ink),
-                        decoration: _decoration(
-                          context,
-                          label: 'Carga (kg)',
-                          hint: 'Opcional',
-                        ),
                       ),
                     ),
                     SizedBox(height: TokensStrip.s4),
-                    _tipoSerieChips(
-                      primary: primary,
-                      mute: chrome.mute,
+                    TreinoTipoSeriePicker(
+                      value: _tipoSerie,
                       isDark: widget.isDark,
+                      enabled: !_saving && !_videoBusy,
+                      onChanged: (value) => setState(() => _tipoSerie = value),
                     ),
                     if (_tipoSerie == 'SUPERSET') ...[
-                      SizedBox(height: TokensStrip.s3),
-                      TextField(
+                      SizedBox(height: TokensStrip.s4),
+                      TreinoPrescriptionField(
+                        label: 'Grupo superset',
+                        isDark: widget.isDark,
                         controller: _supersetCtrl,
+                        hint: 'Mesmo número = juntos',
                         keyboardType: TextInputType.number,
                         textInputAction: TextInputAction.next,
                         inputFormatters: [
                           FilteringTextInputFormatter.digitsOnly,
                           LengthLimitingTextInputFormatter(2),
                         ],
-                        style: FocuxHubTypography.body(color: chrome.ink),
-                        decoration: _decoration(
-                          context,
-                          label: 'Grupo superset',
-                          hint: 'Mesmo número = juntos',
-                        ),
                       ),
                     ],
                     if (_tipoSerie == 'DROPSET') ...[
@@ -333,23 +214,23 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
                       Text(
                         'Anote a queda de carga nas observações.',
                         style: FocuxHubTypography.bodyMuted(
-                          color: chrome.mute,
+                          color: dashboardReadableCaption(
+                            context,
+                            isDark: widget.isDark,
+                          ),
                           fontWeight: FontWeight.w600,
                         ),
                       ),
                     ],
-                    SizedBox(height: TokensStrip.s3),
-                    TextField(
+                    SizedBox(height: TokensStrip.s4),
+                    TreinoPrescriptionField(
+                      label: 'Observações',
+                      isDark: widget.isDark,
                       controller: _obsCtrl,
+                      hint: 'Cadência, pausa, execução…',
+                      textInputAction: TextInputAction.done,
                       minLines: 1,
                       maxLines: 3,
-                      textInputAction: TextInputAction.done,
-                      style: FocuxHubTypography.body(color: chrome.ink),
-                      decoration: _decoration(
-                        context,
-                        label: 'Observações',
-                        hint: 'Cadência, pausa, execução…',
-                      ),
                     ),
                     SizedBox(height: TokensStrip.s4),
                     TreinoPrescriptionVideoBlock(
@@ -365,8 +246,11 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
                 ),
               ),
             ),
-            SizedBox(height: TokensStrip.s3),
-            FilledButton(
+            Divider(height: 1, color: chrome.line.withValues(alpha: 0.8)),
+            SizedBox(height: TokensStrip.s4),
+            FxLiquidPrimaryButton(
+              label: 'Salvar prescrição',
+              loading: _saving,
               onPressed:
                   _saving || _videoBusy
                       ? null
@@ -374,24 +258,6 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
                         HapticFeedback.mediumImpact();
                         _save();
                       },
-              style: FilledButton.styleFrom(
-                minimumSize: const Size.fromHeight(TreinosLayout.touchTarget),
-                backgroundColor: primary,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-              ),
-              child:
-                  _saving
-                      ? const FxLoading(
-                        size: 22,
-                        strokeWidth: 2,
-                        color: Colors.white,
-                      )
-                      : const Text(
-                        'Salvar prescrição',
-                        style: TextStyle(fontWeight: FontWeight.w800),
-                      ),
             ),
           ],
         ),

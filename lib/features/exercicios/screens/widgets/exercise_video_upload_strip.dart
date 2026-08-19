@@ -92,6 +92,8 @@ class ExerciseVideoUploadStrip extends StatelessWidget {
             ? 'Seu vídeo está pronto'
             : hasLibraryDemo
             ? 'Demonstração da biblioteca'
+            : quietCta
+            ? 'Vídeo (opcional)'
             : 'Vídeo do exercício (opcional)';
     final statusSubtitle =
         mediaLoading
@@ -113,6 +115,8 @@ class ExerciseVideoUploadStrip extends StatelessWidget {
     );
 
     if (dense) {
+      final caption =
+          isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
       return Semantics(
         liveRegion: mediaLoading,
         label:
@@ -120,22 +124,21 @@ class ExerciseVideoUploadStrip extends StatelessWidget {
                 ? 'Enviando vídeo, aguarde. Não feche o app.'
                 : '$statusTitle. $statusSubtitle',
         child: Container(
-          padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+          padding: const EdgeInsets.fromLTRB(12, 10, 8, 10),
           decoration: decoration,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
-                    width: 34,
-                    height: 34,
+                    width: 40,
+                    height: 40,
                     decoration: BoxDecoration(
                       color: statusColor.withValues(alpha: isDark ? 0.16 : 0.1),
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(14),
                     ),
-                    child: Icon(statusIcon, color: statusColor, size: 18),
+                    child: Icon(statusIcon, color: statusColor, size: 20),
                   ),
                   const SizedBox(width: 10),
                   Expanded(
@@ -147,38 +150,97 @@ class ExerciseVideoUploadStrip extends StatelessWidget {
                           style: AppTypography.inter(
                             color: ink,
                             fontSize: 13,
-                            fontWeight: FontWeight.w900,
+                            fontWeight: FontWeight.w800,
                           ),
                         ),
-                        const SizedBox(height: 3),
+                        const SizedBox(height: 2),
                         Text(
                           statusSubtitle,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                           style: AppTypography.inter(
-                            color: mute,
-                            fontSize: 11.5,
+                            color: caption,
+                            fontSize: 12,
                             height: 1.3,
-                            fontWeight: FontWeight.w700,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ],
                     ),
                   ),
+                  if (!mediaLoading && quietCta)
+                    TextButton(
+                      onPressed: onUpload,
+                      style: TextButton.styleFrom(
+                        minimumSize: const Size(48, 48),
+                        foregroundColor: primary,
+                        textStyle: const TextStyle(fontWeight: FontWeight.w800),
+                      ),
+                      child: Text(hasPersonalVideo ? 'Trocar' : 'Enviar'),
+                    ),
                 ],
               ),
-              const SizedBox(height: 10),
-              _DenseActions(
-                primary: primary,
-                mute: mute,
-                mediaLoading: mediaLoading,
-                hasPersonalVideo: hasPersonalVideo,
-                canPreview: canPreview,
-                uploadLabel: uploadLabel,
-                quietCta: quietCta,
-                onPreview: onPreview,
-                onUpload: onUpload,
-                onRemove: onRemove,
-              ),
-              if (footer != null) ...[const SizedBox(height: 8), footer!],
+              if (mediaLoading) ...[
+                const SizedBox(height: 10),
+                _DenseActions(
+                  primary: primary,
+                  mute: mute,
+                  mediaLoading: true,
+                  hasPersonalVideo: hasPersonalVideo,
+                  canPreview: canPreview,
+                  uploadLabel: uploadLabel,
+                  quietCta: quietCta,
+                  onPreview: onPreview,
+                  onUpload: onUpload,
+                  onRemove: onRemove,
+                ),
+              ] else if (!quietCta) ...[
+                const SizedBox(height: 10),
+                _DenseActions(
+                  primary: primary,
+                  mute: mute,
+                  mediaLoading: false,
+                  hasPersonalVideo: hasPersonalVideo,
+                  canPreview: canPreview,
+                  uploadLabel: uploadLabel,
+                  quietCta: false,
+                  onPreview: onPreview,
+                  onUpload: onUpload,
+                  onRemove: onRemove,
+                ),
+              ] else ...[
+                if (canPreview || hasPersonalVideo)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 2),
+                    child: Row(
+                      children: [
+                        if (canPreview)
+                          TextButton(
+                            onPressed: onPreview,
+                            style: TextButton.styleFrom(
+                              minimumSize: const Size(48, 40),
+                              foregroundColor: primary,
+                              visualDensity: VisualDensity.compact,
+                            ),
+                            child: Text(
+                              hasPersonalVideo ? 'Ver vídeo' : 'Ver demo',
+                            ),
+                          ),
+                        if (hasPersonalVideo)
+                          TextButton(
+                            onPressed: onRemove,
+                            style: TextButton.styleFrom(
+                              minimumSize: const Size(48, 40),
+                              foregroundColor: mute,
+                              visualDensity: VisualDensity.compact,
+                            ),
+                            child: const Text('Remover'),
+                          ),
+                      ],
+                    ),
+                  ),
+              ],
+              if (footer != null) ...[const SizedBox(height: 4), footer!],
             ],
           ),
         ),

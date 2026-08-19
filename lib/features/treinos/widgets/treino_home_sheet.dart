@@ -4,6 +4,7 @@ import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../dashboard/utils/dashboard_readability.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../constants/treinos_layout.dart';
 
@@ -64,8 +65,8 @@ class TreinoSheetChromeHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final chrome = ShellChrome.forDark(isDark);
     final primary = Theme.of(context).colorScheme.primary;
+    final caption = dashboardReadableCaption(context, isDark: isDark);
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -105,7 +106,7 @@ class TreinoSheetChromeHeader extends StatelessWidget {
                   maxLines: 3,
                   overflow: TextOverflow.ellipsis,
                   style: FocuxHubTypography.bodyMuted(
-                    color: chrome.mute,
+                    color: caption,
                     fontWeight: FontWeight.w600,
                     height: 1.3,
                   ),
@@ -117,8 +118,15 @@ class TreinoSheetChromeHeader extends StatelessWidget {
         IconButton(
           tooltip: 'Fechar',
           onPressed: () => Navigator.of(context).pop(),
-          visualDensity: VisualDensity.compact,
-          icon: Icon(Icons.close_rounded, size: 18, color: chrome.mute),
+          style: IconButton.styleFrom(
+            minimumSize: const Size(
+              TreinosLayout.touchTarget,
+              TreinosLayout.touchTarget,
+            ),
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            foregroundColor: caption,
+          ),
+          icon: const Icon(Icons.close_rounded, size: 22),
         ),
       ],
     );

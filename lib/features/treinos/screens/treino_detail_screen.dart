@@ -4,8 +4,7 @@ import '../../../core/analytics/analytics_service.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/widgets/feedback_helper.dart';
-import '../../../core/widgets/fx_input_deco.dart';
-import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_icon.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
@@ -31,6 +30,7 @@ import '../constants/treinos_layout.dart';
 import '../utils/treino_detail_grouping.dart';
 import '../widgets/treino_detail_help_sheet.dart';
 import '../widgets/treino_home_sheet.dart';
+import '../widgets/treino_prescription_form.dart';
 import '../widgets/treino_prescription_video_block.dart';
 
 part 'treino_detail_screen_body.part.dart';
