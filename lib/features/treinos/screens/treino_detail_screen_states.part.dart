@@ -84,19 +84,71 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
     }
   }
 
-  InputDecoration _decoration(String label, Color primary) {
-    final radius = BorderRadius.circular(14);
-    return InputDecoration(
-      labelText: label,
-      border: FxInputDeco.outlineBorder(borderRadius: radius),
-      enabledBorder: FxInputDeco.outlineBorder(
-        borderRadius: radius,
-        borderSide: BorderSide(color: primary.withValues(alpha: 0.22)),
-      ),
-      focusedBorder: FxInputDeco.outlineBorder(
-        borderRadius: radius,
-        borderSide: BorderSide(color: primary, width: 1.4),
-      ),
+  InputDecoration _decoration(
+    BuildContext context, {
+    required String label,
+    String? hint,
+  }) {
+    return FxInputDeco.build(
+      context,
+      label,
+      hint: hint,
+    ).copyWith(floatingLabelBehavior: FloatingLabelBehavior.always);
+  }
+
+  Widget _tipoSerieChips({
+    required Color primary,
+    required Color mute,
+    required bool isDark,
+  }) {
+    const options = <(String, String)>[
+      ('NORMAL', 'Normal'),
+      ('SUPERSET', 'Superset'),
+      ('DROPSET', 'Drop set'),
+    ];
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Tipo de série',
+          style: FocuxHubTypography.bodyMuted(
+            color: mute,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        SizedBox(height: TokensStrip.s2),
+        Wrap(
+          spacing: TokensStrip.s2,
+          runSpacing: TokensStrip.s2,
+          children: [
+            for (final option in options)
+              Semantics(
+                button: true,
+                selected: _tipoSerie == option.$1,
+                label: option.$2,
+                child: ChoiceChip(
+                  selected: _tipoSerie == option.$1,
+                  showCheckmark: false,
+                  label: Text(option.$2),
+                  labelStyle: FocuxHubTypography.cardTitle(
+                    color: _tipoSerie == option.$1 ? Colors.white : primary,
+                  ),
+                  selectedColor: primary,
+                  backgroundColor: BrandPalette.soft(primary, dark: isDark),
+                  side: BorderSide(
+                    color: primary.withValues(
+                      alpha: _tipoSerie == option.$1 ? 0 : 0.22,
+                    ),
+                  ),
+                  onSelected:
+                      _saving
+                          ? null
+                          : (_) => setState(() => _tipoSerie = option.$1),
+                ),
+              ),
+          ],
+        ),
+      ],
     );
   }
 
@@ -106,10 +158,21 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
     final chrome = ShellChrome.forDark(widget.isDark);
     final bottom = MediaQuery.viewInsetsOf(context).bottom;
 
+    Widget pair(Widget left, Widget right) {
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(child: left),
+          SizedBox(width: TokensStrip.s3),
+          Expanded(child: right),
+        ],
+      );
+    }
+
     return SafeArea(
       top: false,
       child: Padding(
-        padding: EdgeInsets.fromLTRB(12, 0, 12, 12 + bottom),
+        padding: EdgeInsets.fromLTRB(14, 0, 14, 12 + bottom),
         child: Container(
           padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
           decoration: chrome.bottomSheet(radius: 28),
@@ -123,121 +186,153 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
                     width: 42,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: chrome.mute.withValues(alpha: 0.26),
+                      color: chrome.line,
                       borderRadius: BorderRadius.circular(999),
                     ),
                   ),
                 ),
                 SizedBox(height: TokensStrip.s4),
-                Text(
-                  'Editar prescrição',
-                  style: FocuxHubTypography.pageTitle(
-                    context,
-                    color: chrome.ink,
-                  ).copyWith(fontWeight: FontWeight.w800, height: 1.15),
+                _TreinoSheetChromeHeader(
+                  icon: Icons.edit_note_rounded,
+                  title: 'Editar prescrição',
+                  subtitle: widget.item.exercicio.nomeDisplay,
+                  isDark: widget.isDark,
                 ),
-                SizedBox(height: TokensStrip.s1),
-                Text(
-                  widget.item.exercicio.nomeDisplay,
-                  style: FocuxHubTypography.bodyMuted(
-                    color: chrome.mute,
-                    fontWeight: FontWeight.w600,
+                SizedBox(height: TokensStrip.s4),
+                pair(
+                  TextField(
+                    controller: _seriesCtrl,
+                    keyboardType: TextInputType.number,
+                    textInputAction: TextInputAction.next,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                      LengthLimitingTextInputFormatter(2),
+                    ],
+                    style: FocuxHubTypography.body(color: chrome.ink),
+                    decoration: _decoration(context, label: 'Séries'),
+                  ),
+                  TextField(
+                    controller: _repCtrl,
+                    textInputAction: TextInputAction.next,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'[0-9\-xX/ ]')),
+                    ],
+                    style: FocuxHubTypography.body(color: chrome.ink),
+                    decoration: _decoration(
+                      context,
+                      label: 'Repetições',
+                      hint: '10-12',
+                    ),
                   ),
                 ),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: _seriesCtrl,
-                        keyboardType: TextInputType.number,
-                        decoration: _decoration('Séries', primary),
-                      ),
+                SizedBox(height: TokensStrip.s3),
+                pair(
+                  TextField(
+                    controller: _descansoCtrl,
+                    keyboardType: TextInputType.number,
+                    textInputAction: TextInputAction.next,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                      LengthLimitingTextInputFormatter(3),
+                    ],
+                    style: FocuxHubTypography.body(color: chrome.ink),
+                    decoration: _decoration(context, label: 'Descanso (s)'),
+                  ),
+                  TextField(
+                    controller: _cargaCtrl,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
                     ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      flex: 2,
-                      child: TextField(
-                        controller: _repCtrl,
-                        decoration: _decoration('Repetições', primary),
+                    textInputAction: TextInputAction.next,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(
+                        RegExp(r'^\d+[.,]?\d{0,2}'),
                       ),
+                    ],
+                    style: FocuxHubTypography.body(color: chrome.ink),
+                    decoration: _decoration(
+                      context,
+                      label: 'Carga (kg)',
+                      hint: 'Opcional',
                     ),
-                  ],
+                  ),
                 ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: _descansoCtrl,
-                        keyboardType: TextInputType.number,
-                        decoration: _decoration('Descanso (s)', primary),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: TextField(
-                        controller: _cargaCtrl,
-                        keyboardType: const TextInputType.numberWithOptions(
-                          decimal: true,
-                        ),
-                        decoration: _decoration('Carga (kg)', primary),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                DropdownButtonFormField<String>(
-                  initialValue: _tipoSerie,
-                  decoration: _decoration('Tipo de série', primary),
-                  items: const [
-                    DropdownMenuItem(value: 'NORMAL', child: Text('Normal')),
-                    DropdownMenuItem(
-                      value: 'SUPERSET',
-                      child: Text('Superset'),
-                    ),
-                    DropdownMenuItem(value: 'DROPSET', child: Text('Drop set')),
-                  ],
-                  onChanged:
-                      _saving
-                          ? null
-                          : (value) {
-                            if (value == null) return;
-                            setState(() => _tipoSerie = value);
-                          },
+                SizedBox(height: TokensStrip.s4),
+                _tipoSerieChips(
+                  primary: primary,
+                  mute: chrome.mute,
+                  isDark: widget.isDark,
                 ),
                 if (_tipoSerie == 'SUPERSET') ...[
-                  const SizedBox(height: 12),
+                  SizedBox(height: TokensStrip.s3),
                   TextField(
                     controller: _supersetCtrl,
                     keyboardType: TextInputType.number,
-                    decoration: _decoration('Grupo superset', primary),
+                    textInputAction: TextInputAction.next,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                      LengthLimitingTextInputFormatter(2),
+                    ],
+                    style: FocuxHubTypography.body(color: chrome.ink),
+                    decoration: _decoration(
+                      context,
+                      label: 'Grupo superset',
+                      hint: 'Mesmo número = juntos',
+                    ),
                   ),
                 ],
-                const SizedBox(height: 12),
+                if (_tipoSerie == 'DROPSET') ...[
+                  SizedBox(height: TokensStrip.s2),
+                  Text(
+                    'Anote a queda de carga nas observações.',
+                    style: FocuxHubTypography.bodyMuted(
+                      color: chrome.mute,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+                SizedBox(height: TokensStrip.s3),
                 TextField(
                   controller: _obsCtrl,
                   minLines: 2,
                   maxLines: 4,
-                  decoration: _decoration('Observações', primary),
+                  textInputAction: TextInputAction.done,
+                  style: FocuxHubTypography.body(color: chrome.ink),
+                  decoration: _decoration(
+                    context,
+                    label: 'Observações',
+                    hint: 'Cadência, pausa, execução…',
+                  ),
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: TokensStrip.s4),
                 FilledButton(
-                  onPressed: _saving ? null : _save,
+                  onPressed:
+                      _saving
+                          ? null
+                          : () {
+                            HapticFeedback.mediumImpact();
+                            _save();
+                          },
                   style: FilledButton.styleFrom(
                     minimumSize: const Size.fromHeight(
                       TreinosLayout.touchTarget,
                     ),
                     backgroundColor: primary,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
                   ),
                   child:
                       _saving
-                          ? FxLoading(
+                          ? const FxLoading(
                             size: 22,
                             strokeWidth: 2,
-                            color: heroTealInk(),
+                            color: Colors.white,
                           )
-                          : const Text('Salvar prescrição'),
+                          : const Text(
+                            'Salvar prescrição',
+                            style: TextStyle(fontWeight: FontWeight.w800),
+                          ),
                 ),
               ],
             ),

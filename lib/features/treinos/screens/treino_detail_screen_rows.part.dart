@@ -265,7 +265,7 @@ class _ExerciseActionsSheet extends StatelessWidget {
     return SafeArea(
       top: false,
       child: Padding(
-        padding: EdgeInsets.fromLTRB(12, 0, 12, 12 + bottom),
+        padding: EdgeInsets.fromLTRB(14, 0, 14, 12 + bottom),
         child: Container(
           constraints: BoxConstraints(maxHeight: maxHeight),
           padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
@@ -279,53 +279,17 @@ class _ExerciseActionsSheet extends StatelessWidget {
                   width: 42,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: chrome.mute.withValues(alpha: 0.26),
+                    color: chrome.line,
                     borderRadius: BorderRadius.circular(999),
                   ),
                 ),
               ),
               SizedBox(height: TokensStrip.s4),
-              Row(
-                children: [
-                  Container(
-                    width: 42,
-                    height: 42,
-                    decoration: BoxDecoration(
-                      color: BrandPalette.soft(primary, dark: isDark),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Icon(
-                      Icons.fitness_center_rounded,
-                      color: primary,
-                      size: 20,
-                    ),
-                  ),
-                  SizedBox(width: TokensStrip.s3),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          title,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: FocuxHubTypography.pageTitle(
-                            context,
-                            color: chrome.ink,
-                          ).copyWith(fontWeight: FontWeight.w800, height: 1.15),
-                        ),
-                        SizedBox(height: TokensStrip.s1),
-                        Text(
-                          'Escolha uma ação.',
-                          style: FocuxHubTypography.bodyMuted(
-                            color: chrome.mute,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+              _TreinoSheetChromeHeader(
+                icon: Icons.fitness_center_rounded,
+                title: title,
+                subtitle: 'Escolha uma ação.',
+                isDark: isDark,
               ),
               const SizedBox(height: TokensStrip.s4),
               Flexible(

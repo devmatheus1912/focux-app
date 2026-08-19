@@ -260,6 +260,74 @@ class _TreinoExerciseReorderListState
   }
 }
 
+class _TreinoSheetChromeHeader extends StatelessWidget {
+  const _TreinoSheetChromeHeader({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.isDark,
+  });
+
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    final chrome = ShellChrome.forDark(isDark);
+    final primary = Theme.of(context).colorScheme.primary;
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 38,
+          height: 38,
+          decoration: BoxDecoration(
+            color: BrandPalette.soft(primary, dark: isDark),
+            borderRadius: BorderRadius.circular(15),
+          ),
+          child: Icon(icon, color: primary, size: 18),
+        ),
+        SizedBox(width: TokensStrip.s3),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: FocuxHubTypography.sectionTitle(
+                  context,
+                  color: chrome.ink,
+                ),
+              ),
+              SizedBox(height: TokensStrip.s1),
+              Text(
+                subtitle,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: FocuxHubTypography.bodyMuted(
+                  color: chrome.mute,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ),
+        IconButton(
+          tooltip: 'Fechar',
+          onPressed: () => Navigator.of(context).pop(),
+          visualDensity: VisualDensity.compact,
+          icon: Icon(Icons.close_rounded, size: 18, color: chrome.mute),
+        ),
+      ],
+    );
+  }
+}
+
 class _DetailActionTile extends StatelessWidget {
   final IconData icon;
   final String label;

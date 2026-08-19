@@ -60,6 +60,10 @@ void main() {
     expect(screen, contains('FxContentWidthLimiter'));
     expect(screen, contains('treino_detail_grouping.dart'));
     expect(screen, contains('treinoDetailMetaLine'));
+    expect(screen, contains('FxInputDeco.build'));
+    expect(screen, contains('ChoiceChip'));
+    expect(screen, contains('_TreinoSheetChromeHeader'));
+    expect(screen, isNot(contains('DropdownButtonFormField')));
     expect(screen, isNot(contains('durationMin')));
     expect(screen, isNot(contains('* 3.5')));
     expect(screen, isNot(contains('_GridTexturePainter')));
