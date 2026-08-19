@@ -59,6 +59,9 @@ void main() {
     expect(screen, contains('RefreshIndicator'));
     expect(screen, contains('FxContentWidthLimiter'));
     expect(screen, contains('treino_detail_grouping.dart'));
+    expect(screen, contains('treinoDetailMetaLine'));
+    expect(screen, isNot(contains('durationMin')));
+    expect(screen, isNot(contains('* 3.5')));
     expect(screen, isNot(contains('_GridTexturePainter')));
     expect(screen, isNot(contains('_HeroMetricChip')));
     expect(screen, isNot(contains('_ExerciseActionTile')));

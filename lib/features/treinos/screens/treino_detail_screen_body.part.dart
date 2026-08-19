@@ -347,18 +347,7 @@ class _TreinoDetailBody extends StatelessWidget {
     final displayName = _displayWorkoutName(treino.nome);
     final orderedExercises = [...treino.exercicios]
       ..sort((a, b) => a.ordem.compareTo(b.ordem));
-
-    final grouped = <String, List<TreinoExercicioItem>>{};
-    for (final te in orderedExercises) {
-      grouped.putIfAbsent(_workoutGroupLabel(te), () => []).add(te);
-    }
-    final durationMin = math.max(4, (treino.exercicios.length * 3.5).round());
-    final exerciseCount = treino.exercicios.length;
-    final metaLine = [
-      '$exerciseCount exercício${exerciseCount == 1 ? '' : 's'}',
-      '~${durationMin}min',
-      '${grouped.keys.length} grupo${grouped.keys.length == 1 ? '' : 's'}',
-    ].join(' · ');
+    final metaLine = treinoDetailMetaLine(orderedExercises);
 
     Future<void> openEditPrescription(TreinoExercicioItem item) async {
       HapticFeedback.selectionClick();
@@ -531,7 +520,7 @@ class _TreinoDetailBody extends StatelessWidget {
                         ),
                       ),
                     ),
-                    if (exerciseCount > 1)
+                    if (orderedExercises.length > 1)
                       Text(
                         'Segure para reordenar',
                         style: FocuxHubTypography.bodyMuted(
