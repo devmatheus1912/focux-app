@@ -36,10 +36,20 @@ class _QuickSearchSheet extends ConsumerStatefulWidget {
 
 class _QuickSearchSheetState extends ConsumerState<_QuickSearchSheet> {
   final _controller = TextEditingController();
+  final _focus = FocusNode();
   String _query = '';
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _focus.requestFocus();
+    });
+  }
+
+  @override
   void dispose() {
+    _focus.dispose();
     _controller.dispose();
     super.dispose();
   }
@@ -118,8 +128,8 @@ class _QuickSearchSheetState extends ConsumerState<_QuickSearchSheet> {
           SizedBox(height: TokensStrip.s3),
           TextField(
             controller: _controller,
+            focusNode: _focus,
             onChanged: (v) => setState(() => _query = v),
-            autofocus: true,
             decoration: InputDecoration(
               hintText: DashboardMicrocopy.buscaRapidaHint,
               prefixIcon: Icon(Icons.search_rounded, color: widget.primary),

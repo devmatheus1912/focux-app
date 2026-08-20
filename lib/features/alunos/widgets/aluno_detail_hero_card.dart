@@ -73,116 +73,114 @@ class AlunoDetailHeroCard extends StatelessWidget {
               Expanded(
                 child: LayoutBuilder(
                   builder: (context, constraints) {
-                    return FittedBox(
-                      fit: BoxFit.scaleDown,
-                      alignment: Alignment.centerLeft,
-                      child: SizedBox(
-                        width: constraints.maxWidth,
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            AlunoAvatar(
-                              name: displayName,
-                              photoUrl: aluno.fotoUrl,
-                              variant:
-                                  compactContactPriority
-                                      ? AlunoAvatarVariant.strip
-                                      : AlunoAvatarVariant.hero,
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  LayoutBuilder(
-                                    builder: (context, nameConstraints) {
-                                      final showStatusBadge =
-                                          alunoHeroShouldShowStatusBadge(
-                                            signal: signal,
-                                            status: status,
-                                          );
-                                      final stackStatusBadge =
-                                          showStatusBadge &&
-                                          nameConstraints.maxWidth < 140;
-                                      final nameStyle =
-                                          Aluno360Layout.identityNameStyle(
-                                            context,
-                                            ink,
-                                          );
-                                      if (stackStatusBadge) {
-                                        return Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Text(
-                                              displayName,
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: nameStyle,
-                                            ),
-                                            const SizedBox(height: 2),
-                                            _IdentityStatusChip(
-                                              status: status,
-                                              isDark: isDark,
-                                            ),
-                                          ],
-                                        );
-                                      }
-                                      return Row(
-                                        children: [
-                                          Expanded(
-                                            child: Text(
-                                              displayName,
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: nameStyle,
-                                            ),
-                                          ),
-                                          if (showStatusBadge) ...[
-                                            const SizedBox(width: 4),
-                                            _IdentityStatusChip(
-                                              status: status,
-                                              isDark: isDark,
-                                            ),
-                                          ],
-                                        ],
-                                      );
-                                    },
-                                  ),
-                                  SizedBox(
-                                    height: compactContactPriority ? 2 : 4,
-                                  ),
-                                  if (!objectiveDefined &&
-                                      onDefineObjective != null)
-                                    _IdentityObjectiveRow(
-                                      label: objective,
-                                      primary: primary,
-                                      isDark: isDark,
-                                      mute: mute,
-                                      onDefineObjective: onDefineObjective!,
-                                    )
-                                  else
-                                    Text(
-                                      subtitle,
-                                      maxLines: subtitleMaxLines,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: Aluno360Layout.captionStyle(
-                                        context,
-                                      ).copyWith(
-                                        color: mute,
-                                        fontWeight: FontWeight.w600,
-                                        height: 1.3,
-                                      ),
-                                    ),
-                                ],
-                              ),
-                            ),
-                          ],
+                    return Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        AlunoAvatar(
+                          name: displayName,
+                          photoUrl: aluno.fotoUrl,
+                          variant:
+                              compactContactPriority
+                                  ? AlunoAvatarVariant.strip
+                                  : AlunoAvatarVariant.hero,
                         ),
-                      ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Builder(
+                                builder: (context) {
+                                  final showStatusBadge =
+                                      alunoHeroShouldShowStatusBadge(
+                                        signal: signal,
+                                        status: status,
+                                      );
+                                  final avatarSize =
+                                      compactContactPriority
+                                          ? AlunoAvatar.stripSize
+                                          : AlunoAvatar.heroSize;
+                                  final nameMaxWidth = (constraints.maxWidth -
+                                          avatarSize -
+                                          12)
+                                      .clamp(0.0, constraints.maxWidth);
+                                  final stackStatusBadge =
+                                      showStatusBadge && nameMaxWidth < 140;
+                                  final nameStyle =
+                                      Aluno360Layout.identityNameStyle(
+                                        context,
+                                        ink,
+                                      );
+                                  if (stackStatusBadge) {
+                                    return Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          displayName,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: nameStyle,
+                                        ),
+                                        const SizedBox(height: 2),
+                                        _IdentityStatusChip(
+                                          status: status,
+                                          isDark: isDark,
+                                        ),
+                                      ],
+                                    );
+                                  }
+                                  return Row(
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          displayName,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: nameStyle,
+                                        ),
+                                      ),
+                                      if (showStatusBadge) ...[
+                                        const SizedBox(width: 4),
+                                        _IdentityStatusChip(
+                                          status: status,
+                                          isDark: isDark,
+                                        ),
+                                      ],
+                                    ],
+                                  );
+                                },
+                              ),
+                              SizedBox(height: compactContactPriority ? 2 : 4),
+                              if (!objectiveDefined &&
+                                  onDefineObjective != null)
+                                _IdentityObjectiveRow(
+                                  label: objective,
+                                  primary: primary,
+                                  isDark: isDark,
+                                  mute: mute,
+                                  onDefineObjective: onDefineObjective!,
+                                )
+                              else
+                                Text(
+                                  subtitle,
+                                  maxLines: subtitleMaxLines,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: Aluno360Layout.captionStyle(
+                                    context,
+                                  ).copyWith(
+                                    color: mute,
+                                    fontWeight: FontWeight.w600,
+                                    height: 1.3,
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                      ],
                     );
                   },
                 ),
@@ -355,9 +353,7 @@ class _IdentityMetricChip extends StatelessWidget {
             : Color.lerp(ink, accent, 0.35)!;
     final valueColor =
         emphasis == OperationalMetricEmphasis.alert
-            ? (isDark
-                ? ink
-                : Color.lerp(accent, EagleTokens.riskDeeper, 0.55)!)
+            ? (isDark ? ink : Color.lerp(accent, EagleTokens.riskDeeper, 0.55)!)
             : ink;
 
     final semanticsLabel =

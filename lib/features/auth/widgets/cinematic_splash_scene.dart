@@ -204,35 +204,24 @@ class _LoadingRail extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          LayoutBuilder(
-            builder: (context, constraints) {
-              final width = math.min(constraints.maxWidth, 280.0);
-              final fillWidth = width * clamped;
-
-              return SizedBox(
-                width: width,
-                height: 3.5,
-                child: Stack(
-                  alignment: Alignment.centerLeft,
-                  children: [
-                    DecoratedBox(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(99),
-                        color: heroTealSurface(0.06),
-                        border: Border.all(
-                          color: primary.withValues(alpha: 0.14),
-                        ),
-                      ),
-                      child: const SizedBox.expand(),
-                    ),
-                    if (fillWidth > 1)
-                      AnimatedContainer(
-                        duration: const Duration(milliseconds: 120),
-                        curve: Curves.easeOut,
-                        width: fillWidth,
-                        height: 3.5,
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 280),
+            child: SizedBox(
+              height: 3.5,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(99),
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: heroTealSurface(0.06),
+                    border: Border.all(color: primary.withValues(alpha: 0.14)),
+                  ),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: FractionallySizedBox(
+                      widthFactor: clamped,
+                      heightFactor: 1,
+                      child: DecoratedBox(
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(99),
                           color: primary,
                           boxShadow: TokensStrip.coloredDepthGlow(
                             primary,
@@ -240,10 +229,11 @@ class _LoadingRail extends StatelessWidget {
                           ),
                         ),
                       ),
-                  ],
+                    ),
+                  ),
                 ),
-              );
-            },
+              ),
+            ),
           ),
         ],
       ),

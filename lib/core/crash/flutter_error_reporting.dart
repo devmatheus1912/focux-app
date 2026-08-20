@@ -12,6 +12,9 @@ bool isNonFatalFlutterFrameworkError(Object exception) {
     'debugDeactivated',
     'Looking up a deactivated widget',
     'deactivated widget\'s ancestor',
+    // Debug-only: re-entrant layout. Release strips the assert; still noise
+    // if a debug APK reports it while the offending LayoutBuilder is fixed.
+    '_debugDoingThisLayout',
   ];
   return needles.any(msg.contains);
 }

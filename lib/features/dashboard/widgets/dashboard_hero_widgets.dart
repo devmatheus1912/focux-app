@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-
 import '../utils/dashboard_readability.dart';
 
 class DashboardHeroProgressRail extends StatelessWidget {
@@ -38,36 +37,39 @@ class DashboardHeroProgressRail extends StatelessWidget {
             ),
           ),
         if (percentLabel != null) const SizedBox(height: 5),
-        LayoutBuilder(
-          builder: (context, constraints) {
-            final width = constraints.maxWidth;
-            final fillWidth = width * displayProgress;
-
-            return SizedBox(
-              height: exceeded ? 12 : 14,
-              child: Stack(
-                clipBehavior: Clip.none,
-                alignment: Alignment.centerLeft,
-                children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(99),
+        SizedBox(
+          height: exceeded ? 12 : 14,
+          child: Stack(
+            clipBehavior: Clip.none,
+            alignment: Alignment.centerLeft,
+            children: [
+              Positioned.fill(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(99),
+                    color: Colors.white.withValues(
+                      alpha: exceeded ? 0.20 : 0.14,
+                    ),
+                    border: Border.all(
                       color: Colors.white.withValues(
-                        alpha: exceeded ? 0.20 : 0.14,
-                      ),
-                      border: Border.all(
-                        color: Colors.white.withValues(
-                          alpha: exceeded ? 0.30 : 0.20,
-                        ),
+                        alpha: exceeded ? 0.30 : 0.20,
                       ),
                     ),
                   ),
-                  if (fillWidth > 2)
-                    Positioned(
-                      left: 0,
-                      width: fillWidth,
-                      height: exceeded ? 10 : 10,
-                      top: exceeded ? 1 : 2,
+                ),
+              ),
+              if (displayProgress > 0.02)
+                Positioned.fill(
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      0,
+                      exceeded ? 1 : 2,
+                      0,
+                      exceeded ? 1 : 2,
+                    ),
+                    child: FractionallySizedBox(
+                      alignment: Alignment.centerLeft,
+                      widthFactor: displayProgress,
                       child: DecoratedBox(
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(99),
@@ -96,33 +98,32 @@ class DashboardHeroProgressRail extends StatelessWidget {
                         ),
                       ),
                     ),
-                  if (exceeded && excessBeyondMeta > 0)
-                    Positioned(
-                      right: -6,
-                      top: exceeded ? -1 : 0,
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          for (var i = 0; i < 3; i++)
-                            Container(
-                              width: 5,
-                              height: exceeded ? 12 : 10,
-                              margin: EdgeInsets.only(left: i == 0 ? 0 : 3),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(99),
-                                color: Colors.white.withValues(
-                                  alpha: 0.92 - (i * 0.22),
-                                ),
-                                boxShadow: const [],
-                              ),
+                  ),
+                ),
+              if (exceeded && excessBeyondMeta > 0)
+                Positioned(
+                  right: -6,
+                  top: exceeded ? -1 : 0,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      for (var i = 0; i < 3; i++)
+                        Container(
+                          width: 5,
+                          height: exceeded ? 12 : 10,
+                          margin: EdgeInsets.only(left: i == 0 ? 0 : 3),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(99),
+                            color: Colors.white.withValues(
+                              alpha: 0.92 - (i * 0.22),
                             ),
-                        ],
-                      ),
-                    ),
-                ],
-              ),
-            );
-          },
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+            ],
+          ),
         ),
       ],
     );
@@ -147,9 +148,7 @@ class DashboardHeroMiniStat extends StatelessWidget {
       children: [
         Text(
           label,
-          style: dashboardHeroEyebrowOnTeal().copyWith(
-            letterSpacing: 0.08,
-          ),
+          style: dashboardHeroEyebrowOnTeal().copyWith(letterSpacing: 0.08),
         ),
         const SizedBox(height: 2),
         Text.rich(

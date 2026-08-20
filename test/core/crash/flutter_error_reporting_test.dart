@@ -43,6 +43,18 @@ void main() {
     );
   });
 
+  test('re-entrant layout debug assert is not fatal', () {
+    expect(
+      isNonFatalFlutterFrameworkError(
+        FlutterError(
+          "'package:flutter/src/rendering/object.dart': Failed assertion: "
+          "line 2841 pos 12: '!_debugDoingThisLayout': is not true.",
+        ),
+      ),
+      isTrue,
+    );
+  });
+
   test('real exceptions stay fatal', () {
     expect(isNonFatalFlutterFrameworkError(StateError('bad')), isFalse);
   });

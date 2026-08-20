@@ -22,8 +22,10 @@ class DashboardCommandCenterStickyHeaderDelegate
   final bool isDark;
   final Color primary;
   final String subtitle;
+
   /// Modo foco: sticky curto, sem subtítulo — evita título duplicado.
   final bool compact;
+
   /// Barra só com Prioridades — não rotula Pulso/financeiro como Central.
   final bool utilityOnly;
   final bool showPrioritiesAction;
@@ -70,6 +72,16 @@ class DashboardCommandCenterStickyHeaderDelegate
             : showSubtitle
             ? '${DashboardMicrocopy.proximasAcoes}. $subtitle'
             : DashboardMicrocopy.proximasAcoes;
+    final headerHeight = (maxExtent - shrinkOffset).clamp(minExtent, maxExtent);
+    final layoutCompact = utilityOnly || compact || headerHeight < 52;
+    final showSubtitleLine =
+        showSubtitle && !layoutCompact && !showPrioritiesAction;
+    final chipLabel =
+        (utilityOnly || layoutCompact) && hasTrailing
+            ? 'Prioridades'
+            : trailingActionLabel;
+    final topPad = layoutCompact ? 4.0 : (8 - (4 * progress));
+    final bottomPad = layoutCompact ? 4.0 : 8.0;
 
     return Semantics(
       header: !utilityOnly,
@@ -89,100 +101,85 @@ class DashboardCommandCenterStickyHeaderDelegate
               ),
             ),
           ),
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final layoutCompact =
-                  utilityOnly || compact || constraints.maxHeight < 52;
-              final showSubtitleLine =
-                  showSubtitle && !layoutCompact && !showPrioritiesAction;
-              final chipLabel =
-                  (utilityOnly || layoutCompact) && hasTrailing
-                      ? 'Prioridades'
-                      : trailingActionLabel;
-              final topPad = layoutCompact ? 4.0 : (8 - (4 * progress));
-              final bottomPad = layoutCompact ? 4.0 : 8.0;
-
-              return Padding(
-                padding: EdgeInsets.fromLTRB(
-                  TokensStrip.s4,
-                  topPad,
-                  TokensStrip.s4,
-                  bottomPad,
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    if (!utilityOnly)
-                      Expanded(
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: ClipRect(
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  DashboardMicrocopy.proximasAcoes,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: FocuxHubTypography.sectionTitle(
-                                    context,
-                                    color: heading,
-                                  ),
-                                ),
-                                if (showSubtitleLine) ...[
-                                  const SizedBox(height: 1),
-                                  Text(
-                                    subtitle,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: FocuxHubTypography.bodyMuted(
-                                      color: mute,
-                                      height: 1.2,
-                                    ),
-                                  ),
-                                ],
-                              ],
-                            ),
-                          ),
-                        ),
-                      )
-                    else
-                      const Spacer(),
-                    if (showTrailingChip && chipLabel != null)
-                      Padding(
-                        padding: const EdgeInsets.only(left: 6),
-                        child: Semantics(
-                          button: true,
-                          label: chipLabel,
-                          child: TextButton(
-                            onPressed: onTrailingAction,
-                            style: TextButton.styleFrom(
-                              minimumSize: const Size(48, 48),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 7,
-                              ),
-                              foregroundColor: chipFg,
-                              backgroundColor: chipBg,
-                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                              shape: const StadiumBorder(),
-                            ),
-                            child: Text(
-                              chipLabel,
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(
+              TokensStrip.s4,
+              topPad,
+              TokensStrip.s4,
+              bottomPad,
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                if (!utilityOnly)
+                  Expanded(
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: ClipRect(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              DashboardMicrocopy.proximasAcoes,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: dashboardChipLabelStyle(chipFg).copyWith(
-                                fontWeight: FontWeight.w800,
+                              style: FocuxHubTypography.sectionTitle(
+                                context,
+                                color: heading,
                               ),
                             ),
-                          ),
+                            if (showSubtitleLine) ...[
+                              const SizedBox(height: 1),
+                              Text(
+                                subtitle,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: FocuxHubTypography.bodyMuted(
+                                  color: mute,
+                                  height: 1.2,
+                                ),
+                              ),
+                            ],
+                          ],
                         ),
                       ),
-                  ],
-                ),
-              );
-            },
+                    ),
+                  )
+                else
+                  const Spacer(),
+                if (showTrailingChip && chipLabel != null)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 6),
+                    child: Semantics(
+                      button: true,
+                      label: chipLabel,
+                      child: TextButton(
+                        onPressed: onTrailingAction,
+                        style: TextButton.styleFrom(
+                          minimumSize: const Size(48, 48),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 7,
+                          ),
+                          foregroundColor: chipFg,
+                          backgroundColor: chipBg,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          shape: const StadiumBorder(),
+                        ),
+                        child: Text(
+                          chipLabel,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: dashboardChipLabelStyle(
+                            chipFg,
+                          ).copyWith(fontWeight: FontWeight.w800),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
           ),
         ),
       ),
@@ -225,12 +222,7 @@ class DashboardPrioritiesOverlay extends StatelessWidget {
     final chipBg = dashboardPrioritiesChipBackground(primary, isDark: isDark);
     // bottomEnd: não cobre o miolo do grid de ferramentas (antes centrado).
     return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        TokensStrip.s4,
-        0,
-        TokensStrip.s4,
-        10,
-      ),
+      padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 0, TokensStrip.s4, 10),
       child: Align(
         alignment: AlignmentDirectional.bottomEnd,
         child: Semantics(
@@ -253,9 +245,9 @@ class DashboardPrioritiesOverlay extends StatelessWidget {
                   label,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: dashboardChipLabelStyle(chipFg).copyWith(
-                    fontWeight: FontWeight.w800,
-                  ),
+                  style: dashboardChipLabelStyle(
+                    chipFg,
+                  ).copyWith(fontWeight: FontWeight.w800),
                 ),
               ),
             ),
