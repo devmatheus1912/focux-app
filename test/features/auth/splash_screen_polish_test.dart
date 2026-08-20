@@ -11,7 +11,10 @@ void main() {
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(screen, contains('CinematicSplashScene'));
     expect(screen, contains('FocuxSystemChrome.dark'));
-    expect(screen, contains('showCornerGlow: true'));
+    expect(screen, contains('AuthShell('));
+    expect(screen, contains('animateGridIn: false'));
+    expect(screen, isNot(contains('flatBackground: false')));
+    expect(screen, isNot(contains('showCornerGlow: true')));
     expect(screen, contains('extendBody: true'));
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(16));
   });

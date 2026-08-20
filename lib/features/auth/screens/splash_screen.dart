@@ -187,12 +187,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
           backgroundColor: TokensStrip.cinematicBg,
           extendBody: true,
           body: AuthShell(
-            forceDark: true,
-            flatBackground: false,
-            showGrid: true,
             animateGridIn: false,
-            showCenterGlow: false,
-            showCornerGlow: true,
             child: AnimatedBuilder(
               animation: Listenable.merge([
                 _ambientCtrl,
