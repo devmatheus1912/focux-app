@@ -73,26 +73,36 @@ class AgendaDayChip extends StatelessWidget {
               child: Stack(
                 clipBehavior: Clip.none,
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 6),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          weekdayLabel,
-                          style: FocuxHubTypography.bodyMuted(
-                            color: selected ? primary : chrome.mute,
-                            fontWeight: FontWeight.w700,
-                          ).copyWith(fontSize: 10),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          '$dayNumber',
-                          style: FocuxHubTypography.cardTitle(
-                            color: selected ? primary : chrome.ink,
+                  Positioned.fill(
+                    child: Padding(
+                      padding: EdgeInsets.fromLTRB(
+                        4,
+                        6,
+                        4,
+                        todayHint ? 10 : 6,
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text(
+                            weekdayLabel,
+                            textAlign: TextAlign.center,
+                            style: FocuxHubTypography.bodyMuted(
+                              color: selected ? primary : chrome.mute,
+                              fontWeight: FontWeight.w700,
+                            ).copyWith(fontSize: 10),
                           ),
-                        ),
-                      ],
+                          const SizedBox(height: 2),
+                          Text(
+                            '$dayNumber',
+                            textAlign: TextAlign.center,
+                            style: FocuxHubTypography.cardTitle(
+                              color: selected ? primary : chrome.ink,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                   if (todayHint)
