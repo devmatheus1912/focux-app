@@ -4,9 +4,6 @@
 /// só aparece depois que o painel de próximas ações sai da viewport.
 const double dashboardScrollOffsetEpsilon = 2;
 
-/// @Deprecated — chip flutuante removido (duplicava sticky + painel).
-bool dashboardShowsFloatingPrioritiesChip(double offset) => false;
-
 /// Sticky só quando o painel de próximas ações saiu da viewport (medido via
 /// GlobalKey em runtime), ainda há prioridades extras, e o bloco de tools
 /// não está na faixa do chip (evita cobrir «Mais ferramentas» / catálogo).

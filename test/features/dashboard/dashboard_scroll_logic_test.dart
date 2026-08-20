@@ -2,11 +2,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/dashboard/utils/dashboard_scroll_logic.dart';
 
 void main() {
-  test('floating chip is disabled to avoid duplicate Ver prioridades', () {
-    expect(dashboardShowsFloatingPrioritiesChip(80), isFalse);
-    expect(dashboardShowsFloatingPrioritiesChip(150), isFalse);
-  });
-
   group('dashboardShowsStickyPrioritiesAction', () {
     test('sticky only when panel is offscreen and link is available', () {
       expect(
