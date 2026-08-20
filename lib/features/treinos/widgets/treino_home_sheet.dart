@@ -8,12 +8,14 @@ class TreinoHomeSheetSurface extends StatelessWidget {
     required this.isDark,
     required this.child,
     this.maxHeight,
+    this.expand = false,
     this.padding = FxHomeSheetChrome.contentPadding,
   });
 
   final bool isDark;
   final Widget child;
   final double? maxHeight;
+  final bool expand;
   final EdgeInsetsGeometry padding;
 
   @override
@@ -21,6 +23,7 @@ class TreinoHomeSheetSurface extends StatelessWidget {
     return FxHomeSheetSurface(
       isDark: isDark,
       maxHeight: maxHeight,
+      expand: expand,
       padding: padding,
       child: child,
     );

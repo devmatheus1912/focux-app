@@ -104,21 +104,12 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
       canPop: !_saving && !_videoBusy,
       child: TreinoHomeSheetSurface(
         isDark: widget.isDark,
+        expand: true,
         maxHeight: MediaQuery.sizeOf(context).height * 0.82,
         child: Column(
-          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Center(
-              child: Container(
-                width: 42,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: chrome.line,
-                  borderRadius: BorderRadius.circular(999),
-                ),
-              ),
-            ),
+            FxHomeSheetHandle(isDark: widget.isDark),
             SizedBox(height: TokensStrip.s4),
             TreinoSheetChromeHeader(
               icon: Icons.edit_note_rounded,
@@ -126,8 +117,8 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
               subtitle: widget.item.exercicio.nomeDisplay,
               isDark: widget.isDark,
             ),
-            SizedBox(height: TokensStrip.s4),
-            Flexible(
+            SizedBox(height: TokensStrip.s3),
+            Expanded(
               child: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,

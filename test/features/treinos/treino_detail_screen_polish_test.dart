@@ -75,6 +75,8 @@ void main() {
     expect(screen, contains('treinoDetailMetaLine'));
     expect(screen, contains('treinoDetailExerciseLine'));
     expect(screen, contains('TreinoSheetChromeHeader'));
+    expect(screen, contains('FxHomeSheetHandle'));
+    expect(screen, contains('expand: true'));
     expect(screen, contains('TreinoPrescriptionVideoBlock'));
     expect(screen, contains('treino_prescription_video_block.dart'));
     expect(screen, contains('treino_prescription_form.dart'));
@@ -82,6 +84,18 @@ void main() {
     expect(screen, contains('TreinoTipoSeriePicker'));
     expect(screen, contains('FxLiquidPrimaryButton'));
     expect(screen, contains('height * 0.82'));
+    expect(
+      File(
+        'lib/features/treinos/widgets/treino_prescription_video_block.dart',
+      ).readAsStringSync(),
+      allOf(
+        contains('ExerciseVideoSpecTips.open'),
+        contains('FxHelpIconButton'),
+        isNot(contains('Celular em pé')),
+        isNot(contains('Ver seu vídeo')),
+        isNot(contains('ExerciseVideoUploadStrip')),
+      ),
+    );
     expect(
       File(
         'lib/features/treinos/widgets/treino_detail_help_sheet.dart',

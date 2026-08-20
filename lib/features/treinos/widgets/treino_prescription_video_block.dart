@@ -11,13 +11,13 @@ import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../exercicios/data/exercicio_repository.dart';
 import '../../exercicios/providers/exercicios_provider.dart';
 import '../../exercicios/screens/widgets/exercise_video_preview_sheet.dart';
 import '../../exercicios/screens/widgets/exercise_video_spec_tips.dart';
-import '../../exercicios/screens/widgets/exercise_video_upload_strip.dart';
 import '../../exercicios/screens/widgets/exercise_media_thumb.dart';
 import '../../exercicios/utils/exercise_video_upload_spec.dart';
 import '../constants/treinos_layout.dart';
@@ -250,16 +250,7 @@ class _TreinoPrescriptionVideoBlockState
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Center(
-                child: Container(
-                  width: 42,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: chrome.line,
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                ),
-              ),
+              FxHomeSheetHandle(isDark: isDark),
               SizedBox(height: TokensStrip.s4),
               TreinoSheetChromeHeader(
                 icon: Icons.videocam_rounded,
@@ -319,29 +310,18 @@ class _TreinoPrescriptionVideoBlockState
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Center(
-                child: Container(
-                  width: 42,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: chrome.line,
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                ),
-              ),
+              FxHomeSheetHandle(isDark: isDark),
               SizedBox(height: TokensStrip.s4),
-              Text(
-                'Remover seu vídeo?',
-                style: FocuxHubTypography.pageTitle(ctx, color: chrome.ink),
-              ),
-              SizedBox(height: TokensStrip.s2),
-              Text(
-                'A demonstração da biblioteca volta a aparecer, se houver. '
-                'O aluno deixa de ver a sua gravação.',
-                style: FocuxHubTypography.bodyMuted(
-                  color: chrome.mute,
-                  fontWeight: FontWeight.w600,
-                  height: 1.35,
+              FxHomeSheetHeader(
+                isDark: isDark,
+                title: 'Remover seu vídeo?',
+                subtitle:
+                    'A demonstração da biblioteca volta a aparecer, se houver. '
+                    'O aluno deixa de ver a sua gravação.',
+                leading: Icon(
+                  Icons.delete_outline_rounded,
+                  color: EagleTokens.bad,
+                  size: 18,
                 ),
               ),
               SizedBox(height: TokensStrip.s4),
@@ -387,21 +367,147 @@ class _TreinoPrescriptionVideoBlockState
 
   @override
   Widget build(BuildContext context) {
+    final chrome = ShellChrome.forDark(widget.isDark);
     final primary = Theme.of(context).colorScheme.primary;
     final locked = widget.busy || _mediaLoading;
+    final hasPersonal = exercicioHasPersonalVideo(_exercicio);
+    final canPreview = canPreviewExerciseMedia(_exercicio);
+    final title =
+        locked
+            ? 'Enviando vídeo…'
+            : hasPersonal
+            ? 'Seu vídeo está pronto'
+            : 'Vídeo (opcional)';
+    final subtitle =
+        locked
+            ? 'Não feche o app enquanto o envio termina.'
+            : ExerciseVideoSpecTips.summary;
 
-    return ExerciseVideoUploadStrip(
-      exercicio: _exercicio,
-      isDark: widget.isDark,
-      primary: primary,
-      mediaLoading: locked,
-      dense: true,
-      quietCta: true,
-      emptySubtitle: 'Filme a execução para o aluno ver neste treino.',
-      onPreview: _preview,
-      onUpload: _upload,
-      onRemove: _remove,
-      footer: ExerciseVideoSpecTips(isDark: widget.isDark, embedded: true),
+    return Semantics(
+      container: true,
+      liveRegion: locked,
+      label: '$title. $subtitle',
+      child: DecoratedBox(
+        decoration: fxStripCardDecoration(
+          context,
+          accent: hasPersonal || locked ? primary : null,
+        ),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(12, 10, 4, 8),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: FxHomeSheetChrome.leadingSize,
+                    height: FxHomeSheetChrome.leadingSize,
+                    decoration: BoxDecoration(
+                      color: BrandPalette.soft(primary, dark: widget.isDark),
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    child: Icon(
+                      locked
+                          ? Icons.hourglass_top_rounded
+                          : hasPersonal
+                          ? Icons.play_circle_fill_rounded
+                          : Icons.videocam_outlined,
+                      color: primary,
+                      size: 18,
+                    ),
+                  ),
+                  SizedBox(width: TokensStrip.s3),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title,
+                          style: FocuxHubTypography.cardTitle(
+                            color: chrome.ink,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          subtitle,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: FocuxHubTypography.bodyMuted(
+                            color: chrome.mute,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  FxHelpIconButton(
+                    tooltip: 'Como filmar',
+                    onTap: () => ExerciseVideoSpecTips.open(context),
+                    expandHitTarget: true,
+                  ),
+                ],
+              ),
+              if (locked) ...[
+                SizedBox(height: TokensStrip.s3),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: LinearProgressIndicator(
+                    minHeight: 6,
+                    backgroundColor: primary.withValues(alpha: 0.12),
+                    color: primary,
+                  ),
+                ),
+              ] else
+                Row(
+                  children: [
+                    if (canPreview)
+                      TextButton(
+                        onPressed: _preview,
+                        style: TextButton.styleFrom(
+                          minimumSize: const Size(
+                            FxHomeSheetChrome.touchTarget,
+                            FxHomeSheetChrome.touchTarget,
+                          ),
+                          foregroundColor: primary,
+                          textStyle: const TextStyle(
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        child: Text(hasPersonal ? 'Ver' : 'Demo'),
+                      ),
+                    TextButton(
+                      onPressed: _upload,
+                      style: TextButton.styleFrom(
+                        minimumSize: const Size(
+                          FxHomeSheetChrome.touchTarget,
+                          FxHomeSheetChrome.touchTarget,
+                        ),
+                        foregroundColor: primary,
+                        textStyle: const TextStyle(fontWeight: FontWeight.w800),
+                      ),
+                      child: Text(hasPersonal ? 'Trocar' : 'Enviar'),
+                    ),
+                    if (hasPersonal)
+                      TextButton(
+                        onPressed: _remove,
+                        style: TextButton.styleFrom(
+                          minimumSize: const Size(
+                            FxHomeSheetChrome.touchTarget,
+                            FxHomeSheetChrome.touchTarget,
+                          ),
+                          foregroundColor: chrome.mute,
+                          textStyle: const TextStyle(
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        child: const Text('Remover'),
+                      ),
+                  ],
+                ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

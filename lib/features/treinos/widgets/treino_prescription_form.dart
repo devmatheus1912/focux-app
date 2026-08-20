@@ -3,11 +3,9 @@ import 'package:flutter/services.dart';
 
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
-import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_input_deco.dart';
-import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../dashboard/utils/dashboard_readability.dart';
 import '../constants/treinos_layout.dart';
 
@@ -18,7 +16,7 @@ InputDecoration treinoPrescriptionDecoration(
 }) {
   final chrome = ShellChrome.forDark(isDark);
   final primary = Theme.of(context).colorScheme.primary;
-  final fill = isDark ? EagleTokens.darkCardHi : const Color(0xFFEEF2F5);
+  final fill = isDark ? EagleTokens.darkCardHi : TokensStrip.pageBg;
   final radius = BorderRadius.circular(TokensStrip.rXl);
 
   return InputDecoration(
@@ -134,7 +132,7 @@ class TreinoTipoSeriePicker extends StatelessWidget {
     final chrome = ShellChrome.forDark(isDark);
     final primary = Theme.of(context).colorScheme.primary;
     final caption = dashboardReadableCaption(context, isDark: isDark);
-    final fill = isDark ? EagleTokens.darkCardHi : const Color(0xFFEEF2F5);
+    final fill = isDark ? EagleTokens.darkCardHi : TokensStrip.pageBg;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

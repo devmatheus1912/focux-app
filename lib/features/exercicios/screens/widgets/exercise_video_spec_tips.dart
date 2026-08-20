@@ -27,7 +27,7 @@ class ExerciseVideoSpecTips extends StatelessWidget {
 
   static const _title = 'Como filmar';
 
-  Future<void> _open(BuildContext context) {
+  static Future<void> open(BuildContext context) {
     HapticFeedback.selectionClick();
     return showFxHelpSheet(
       context,
@@ -39,6 +39,8 @@ class ExerciseVideoSpecTips extends StatelessWidget {
       ],
     );
   }
+
+  Future<void> _open(BuildContext context) => open(context);
 
   @override
   Widget build(BuildContext context) {
