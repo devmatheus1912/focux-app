@@ -78,6 +78,8 @@ class _QuickSearchSheetState extends ConsumerState<_QuickSearchSheet> {
                 Expanded(
                   child: Text(
                     label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: FocuxHubTypography.cardTitle(
                       color: Theme.of(context).colorScheme.onSurface,
                     ),
@@ -109,8 +111,8 @@ class _QuickSearchSheetState extends ConsumerState<_QuickSearchSheet> {
       isDark: widget.isDark,
       maxHeight:
           MediaQuery.sizeOf(context).height * FxHomeSheetChrome.maxHeightFactor,
+      expand: true,
       child: Column(
-        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           FxHomeSheetHandle(isDark: widget.isDark),
@@ -132,6 +134,7 @@ class _QuickSearchSheetState extends ConsumerState<_QuickSearchSheet> {
             onChanged: (v) => setState(() => _query = v),
             decoration: InputDecoration(
               hintText: DashboardMicrocopy.buscaRapidaHint,
+              isDense: true,
               prefixIcon: Icon(Icons.search_rounded, color: widget.primary),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(TokensStrip.rInput),
@@ -139,15 +142,9 @@ class _QuickSearchSheetState extends ConsumerState<_QuickSearchSheet> {
             ),
           ),
           SizedBox(height: TokensStrip.s3),
-          ConstrainedBox(
-            constraints: BoxConstraints(
-              maxHeight:
-                  MediaQuery.sizeOf(context).height *
-                  FxHomeSheetChrome.maxHeightFactor *
-                  0.55,
-            ),
+          Expanded(
             child: ListView(
-              shrinkWrap: true,
+              padding: EdgeInsets.zero,
               physics: const BouncingScrollPhysics(),
               children: [
                 _row(

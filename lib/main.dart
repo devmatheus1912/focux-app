@@ -33,94 +33,91 @@ void main() {
   // IMPORTANT: Both ensureInitialized() and runApp() MUST be in the same zone.
   // Otherwise Flutter Web throws "Zone mismatch" which cascades into
   // layout/hit-test failures across the entire widget tree.
-  runZonedGuarded(
-    () async {
-      WidgetsFlutterBinding.ensureInitialized();
-      TlsCertificatePinning.installGlobalOverrides();
-      await HomeWidgetService.init();
+  runZonedGuarded(() async {
+    WidgetsFlutterBinding.ensureInitialized();
+    TlsCertificatePinning.installGlobalOverrides();
+    await HomeWidgetService.init();
 
-      await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-      SystemChrome.setSystemUIOverlayStyle(FocuxSystemChrome.dark);
+    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    SystemChrome.setSystemUIOverlayStyle(FocuxSystemChrome.dark);
 
-      // ignore: unused_local_variable
-      bool crashlyticsReady = false;
+    // ignore: unused_local_variable
+    bool crashlyticsReady = false;
 
-      try {
-        if (!kIsWeb) {
-          await Firebase.initializeApp();
-          await FcmService.init(ApiClient());
-          crashlyticsReady = true;
+    try {
+      if (!kIsWeb) {
+        await Firebase.initializeApp();
+        await FcmService.init(ApiClient());
+        crashlyticsReady = true;
 
-          FlutterError.onError = (details) {
-            unawaited(reportFlutterErrorToCrashlytics(details));
-          };
+        FlutterError.onError = (details) {
+          unawaited(reportFlutterErrorToCrashlytics(details));
+        };
 
-          PlatformDispatcher.instance.onError = (error, stack) {
-            FirebaseCrashlytics.instance.recordError(
-              error,
-              stack,
-              fatal: !isNonFatalFlutterFrameworkError(error),
-            );
+        PlatformDispatcher.instance.onError = (error, stack) {
+          if (isNonFatalFlutterFrameworkError(error, stack)) {
+            debugPrint('[Focux] framework noise (not sent): $error');
             return true;
-          };
-        }
-      } catch (error) {
-        debugPrint('[Focux] Firebase init error: $error');
-        // Firebase ainda não está configurado em todos os ambientes.
-        // Fallback: captura erros localmente sem Crashlytics.
-        FlutterError.onError = (FlutterErrorDetails details) {
-          debugPrint('[Focux] FlutterError: ${details.exceptionAsString()}');
-          debugPrint('${details.stack}');
+          }
+          FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+          return true;
         };
       }
+    } catch (error) {
+      debugPrint('[Focux] Firebase init error: $error');
+      // Firebase ainda não está configurado em todos os ambientes.
+      // Fallback: captura erros localmente sem Crashlytics.
+      FlutterError.onError = (FlutterErrorDetails details) {
+        debugPrint('[Focux] FlutterError: ${details.exceptionAsString()}');
+        debugPrint('${details.stack}');
+      };
+    }
 
-      // ── Global Red-Screen killer ──────────────────────────────────
-      // Replaces Flutter's red error screen with a friendly message in release/profile.
-      ErrorWidget.builder = (FlutterErrorDetails details) {
-        if (kDebugMode) return ErrorWidget(details.exception);
-        return Material(
-          color: const Color(0xFF080C10),
-          child: Center(
-            child: Padding(
-              padding: const EdgeInsets.all(32),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 64,
-                    height: 64,
-                    decoration: BoxDecoration(
-                      color: Colors.red.withValues(alpha: 0.15),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.error_outline,
-                      color: Colors.redAccent,
-                      size: 30,
-                    ),
+    // ── Global Red-Screen killer ──────────────────────────────────
+    // Replaces Flutter's red error screen with a friendly message in release/profile.
+    ErrorWidget.builder = (FlutterErrorDetails details) {
+      if (kDebugMode) return ErrorWidget(details.exception);
+      return Material(
+        color: const Color(0xFF080C10),
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(32),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 64,
+                  height: 64,
+                  decoration: BoxDecoration(
+                    color: Colors.red.withValues(alpha: 0.15),
+                    shape: BoxShape.circle,
                   ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'Algo deu errado nesta tela.\nVolte e tente novamente.',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Colors.white70,
-                      fontSize: 14,
-                      height: 1.5,
-                      decoration: TextDecoration.none,
-                    ),
+                  child: const Icon(
+                    Icons.error_outline,
+                    color: Colors.redAccent,
+                    size: 30,
                   ),
-                ],
-              ),
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Algo deu errado nesta tela.\nVolte e tente novamente.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.white70,
+                    fontSize: 14,
+                    height: 1.5,
+                    decoration: TextDecoration.none,
+                  ),
+                ),
+              ],
             ),
           ),
-        );
-      };
+        ),
+      );
+    };
 
-      runApp(const ProviderScope(child: FocuxApp()));
-    },
-    reportUncaughtZoneError,
-  );
+    runApp(const ProviderScope(child: FocuxApp()));
+  }, reportUncaughtZoneError);
 }
 
 class FocuxApp extends ConsumerStatefulWidget {

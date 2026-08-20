@@ -55,6 +55,24 @@ void main() {
     );
   });
 
+  test('S.of null-check is not fatal when stack points at l10n', () {
+    expect(
+      isNonFatalFlutterFrameworkError(
+        FlutterError('Null check operator used on a null value.'),
+        StackTrace.fromString(
+          '#0      S.of (package:focux_app/l10n/app_localizations.dart:72:44)',
+        ),
+      ),
+      isTrue,
+    );
+    expect(
+      isNonFatalFlutterFrameworkError(
+        FlutterError('Null check operator used on a null value.'),
+      ),
+      isFalse,
+    );
+  });
+
   test('real exceptions stay fatal', () {
     expect(isNonFatalFlutterFrameworkError(StateError('bad')), isFalse);
   });

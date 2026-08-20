@@ -81,8 +81,8 @@ class _CommandPrioritiesSheetState extends State<CommandPrioritiesSheet> {
       maxHeight:
           MediaQuery.sizeOf(widget.sheetContext).height *
           FxHomeSheetChrome.maxHeightFactor,
+      expand: true,
       child: Column(
-        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           FxHomeSheetHandle(isDark: isDark),
@@ -94,15 +94,9 @@ class _CommandPrioritiesSheetState extends State<CommandPrioritiesSheet> {
             leading: FxIcon(name: 'route', size: 18, color: primary),
           ),
           const SizedBox(height: 14),
-          ConstrainedBox(
-            constraints: BoxConstraints(
-              maxHeight:
-                  MediaQuery.sizeOf(context).height *
-                  FxHomeSheetChrome.maxHeightFactor *
-                  0.55,
-            ),
+          Expanded(
             child: ListView(
-              shrinkWrap: true,
+              padding: EdgeInsets.zero,
               physics: const BouncingScrollPhysics(),
               children: [
                 for (var index = 0; index < impactActions.length; index++) ...[

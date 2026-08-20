@@ -161,23 +161,34 @@ class FxHomeSheetSurface extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final outerPad = FxHomeSheetChrome.paddingOf(context);
     return Padding(
-      padding: FxHomeSheetChrome.paddingOf(context),
-      child: Container(
-        constraints:
-            maxHeight == null
-                ? null
-                : expand
-                ? BoxConstraints.tightFor(height: maxHeight)
-                : BoxConstraints(maxHeight: maxHeight!),
-        clipBehavior: Clip.antiAlias,
-        padding: padding,
-        decoration: fxStripCardDecoration(
-          context,
-          radius: FxHomeSheetChrome.radius,
-          glowStrength: FxHomeSheetChrome.glow(isDark),
-        ),
-        child: child,
+      padding: outerPad,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          var limit = double.infinity;
+          if (constraints.maxHeight.isFinite) {
+            limit = constraints.maxHeight;
+          }
+          if (maxHeight != null) {
+            limit = math.min(limit, maxHeight!);
+          }
+          final bounded = limit.isFinite;
+          return Container(
+            width: double.infinity,
+            height: expand && bounded ? limit : null,
+            constraints:
+                bounded && !expand ? BoxConstraints(maxHeight: limit) : null,
+            clipBehavior: Clip.antiAlias,
+            padding: padding,
+            decoration: fxStripCardDecoration(
+              context,
+              radius: FxHomeSheetChrome.radius,
+              glowStrength: FxHomeSheetChrome.glow(isDark),
+            ),
+            child: child,
+          );
+        },
       ),
     );
   }
@@ -308,9 +319,10 @@ class FxHomeSheetScaffold extends StatelessWidget {
     return FxHomeSheetSurface(
       isDark: isDark,
       maxHeight: maxHeight,
+      expand: scroll,
       padding: padding,
       child: Column(
-        mainAxisSize: MainAxisSize.min,
+        mainAxisSize: scroll ? MainAxisSize.max : MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           FxHomeSheetHandle(isDark: isDark),
@@ -324,10 +336,7 @@ class FxHomeSheetScaffold extends StatelessWidget {
           ),
           SizedBox(height: TokensStrip.s3),
           if (scroll)
-            ConstrainedBox(
-              constraints: BoxConstraints(maxHeight: maxHeight - 120),
-              child: SingleChildScrollView(child: child),
-            )
+            Expanded(child: SingleChildScrollView(child: child))
           else
             child,
         ],
