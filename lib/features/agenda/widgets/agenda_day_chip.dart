@@ -66,10 +66,9 @@ class AgendaDayChip extends StatelessWidget {
                         : chrome.lineStrong,
               ),
             ),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(
-                minHeight: FxHomeSheetChrome.touchTarget,
-              ),
+            child: SizedBox(
+              height: FxHomeSheetChrome.touchTarget,
+              width: width,
               child: Stack(
                 clipBehavior: Clip.none,
                 children: [
@@ -77,9 +76,9 @@ class AgendaDayChip extends StatelessWidget {
                     child: Padding(
                       padding: EdgeInsets.fromLTRB(
                         4,
-                        6,
                         4,
-                        todayHint ? 10 : 6,
+                        4,
+                        todayHint ? 8 : 4,
                       ),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
