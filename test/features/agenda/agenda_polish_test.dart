@@ -10,7 +10,7 @@ void main() {
     final router = readRouterSourceBundle();
 
     expect(screen, contains('NovoAgendamentoScreen'));
-    expect(screen, contains("context.push('/agenda/novo')"));
+    expect(screen, contains("context.push('/agenda/novo'"));
     expect(screen, contains('Selecione quem será atendido'));
     expect(screen, contains('_AgendaHorarioCard'));
     expect(screen, contains('FxShellScaffold'));
@@ -19,6 +19,11 @@ void main() {
     expect(screen, contains('showFxHomeSheet'));
     expect(screen, contains('FxHomeSheetSurface'));
     expect(screen, contains('FxHomeSheetHeader'));
+    expect(screen, contains('AgendaDayChip'));
+    expect(screen, contains('showAgendaHelpSheet'));
+    expect(screen, contains('agendaEventTitle'));
+    expect(screen, contains('maskEmailForList'));
+    expect(screen, contains('expand: true'));
     expect(screen, contains('Semantics('));
     expect(screen, contains('explicitChildNodes: true'));
     expect(screen, isNot(contains('ListTile(')));
@@ -26,6 +31,6 @@ void main() {
     expect(screen, isNot(contains('quem sera atendido')));
 
     expect(router, contains("path: '/agenda/novo'"));
-    expect(router, contains('const NovoAgendamentoScreen()'));
+    expect(router, contains('NovoAgendamentoScreen('));
   });
 }

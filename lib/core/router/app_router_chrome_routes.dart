@@ -440,7 +440,12 @@ RouteBase buildChromeShellRoute() {
           // Agenda sub-routes (tab stays in shell)
           GoRoute(
             path: '/agenda/novo',
-            builder: (context, state) => const NovoAgendamentoScreen(),
+            builder: (context, state) {
+              final extra = state.extra;
+              return NovoAgendamentoScreen(
+                seedDay: extra is DateTime ? extra : null,
+              );
+            },
           ),
           GoRoute(
             path: '/agenda/aluno',

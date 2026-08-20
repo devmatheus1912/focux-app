@@ -1,7 +1,10 @@
 part of 'agenda_screen.dart';
 
 class NovoAgendamentoScreen extends ConsumerStatefulWidget {
-  const NovoAgendamentoScreen({super.key});
+  const NovoAgendamentoScreen({super.key, this.seedDay});
+
+  final DateTime? seedDay;
+
   @override
   ConsumerState<NovoAgendamentoScreen> createState() =>
       _NovoAgendamentoScreenState();
@@ -24,11 +27,12 @@ class _NovoAgendamentoScreenState extends ConsumerState<NovoAgendamentoScreen> {
   }
 
   Future<void> _pickDateTime(bool isInicio) async {
+    final seed = widget.seedDay ?? DateTime.now();
     final base =
         isInicio
-            ? (_inicio ?? DateTime.now().add(const Duration(hours: 1)))
+            ? (_inicio ?? agendaDefaultSlot(seed))
             : (_fim ??
-                (_inicio ?? DateTime.now().add(const Duration(hours: 1))).add(
+                (_inicio ?? agendaDefaultSlot(seed)).add(
                   const Duration(hours: 1),
                 ));
     final dt = await showFxHomeSheet<DateTime>(
@@ -170,7 +174,7 @@ class _NovoAgendamentoScreenState extends ConsumerState<NovoAgendamentoScreen> {
                                   ),
                                   child: FxLoading.sectionShimmer(
                                     context,
-                                    height: 72,
+                                    height: 52,
                                     showHeader: false,
                                   ),
                                 ),
@@ -193,22 +197,31 @@ class _NovoAgendamentoScreenState extends ConsumerState<NovoAgendamentoScreen> {
                                 ),
                           ),
                       Divider(height: 20, thickness: 1, color: line),
+                      Text(
+                        'Título (opcional)',
+                        style: FocuxHubTypography.bodyMuted(
+                          color: mute,
+                          fontWeight: FontWeight.w800,
+                        ).copyWith(fontSize: 12, letterSpacing: 0.1),
+                      ),
+                      const SizedBox(height: 6),
                       Semantics(
                         textField: true,
                         label: 'Título opcional do atendimento',
                         child: TextFormField(
                           controller: _titulo,
-                          style: TextStyle(
+                          style: FocuxHubTypography.body(
                             color: ink,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                          ),
+                          ).copyWith(fontWeight: FontWeight.w700),
                           cursorColor: primary,
                           decoration: InputDecoration(
-                            hintText: 'Título (opcional)',
+                            hintText: 'Avaliação, retorno, foco da sessão…',
                             filled: true,
-                            fillColor: chrome.cardFill,
-                            hintStyle: TextStyle(
+                            fillColor:
+                                chrome.isDark
+                                    ? EagleTokens.darkCardHi
+                                    : TokensStrip.pageBg,
+                            hintStyle: FocuxHubTypography.bodyMuted(
                               color: mute.withValues(alpha: 0.72),
                             ),
                             contentPadding: const EdgeInsets.symmetric(
@@ -216,24 +229,49 @@ class _NovoAgendamentoScreenState extends ConsumerState<NovoAgendamentoScreen> {
                               vertical: 14,
                             ),
                             border: FxInputDeco.outlineBorder(
-                              borderRadius: BorderRadius.circular(16),
+                              borderRadius: BorderRadius.circular(
+                                TokensStrip.rXl,
+                              ),
                               borderSide: BorderSide(color: line),
                             ),
                             enabledBorder: FxInputDeco.outlineBorder(
-                              borderRadius: BorderRadius.circular(16),
+                              borderRadius: BorderRadius.circular(
+                                TokensStrip.rXl,
+                              ),
                               borderSide: BorderSide(color: line),
                             ),
                             focusedBorder: FxInputDeco.outlineBorder(
-                              borderRadius: BorderRadius.circular(16),
+                              borderRadius: BorderRadius.circular(
+                                TokensStrip.rXl,
+                              ),
                               borderSide: BorderSide(
-                                color: primary.withValues(alpha: 0.68),
-                                width: 1.5,
+                                color: primary,
+                                width: 1.6,
                               ),
                             ),
                           ),
                         ),
                       ),
-                      const SizedBox(height: 12),
+                      SizedBox(height: TokensStrip.s4),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              'Horário',
+                              style: FocuxHubTypography.bodyMuted(
+                                color: mute,
+                                fontWeight: FontWeight.w800,
+                              ).copyWith(fontSize: 12, letterSpacing: 0.1),
+                            ),
+                          ),
+                          FxHelpIconButton(
+                            tooltip: 'Como o fim é sugerido',
+                            onTap: () => showAgendaHelpSheet(context),
+                            expandHitTarget: true,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
                       _AgendaHorarioCard(
                         inicioLabel: _fmtDt(_inicio),
                         fimLabel: _fmtDt(_fim),
@@ -243,15 +281,6 @@ class _NovoAgendamentoScreenState extends ConsumerState<NovoAgendamentoScreen> {
                         onFim: () => _pickDateTime(false),
                       ),
                     ],
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  'Ao confirmar início, o fim é sugerido com +1 hora. Você pode ajustar depois.',
-                  style: AppTypography.inter(
-                    fontSize: 11.5,
-                    height: 1.35,
-                    color: mute,
                   ),
                 ),
               ],
@@ -306,20 +335,20 @@ class _AgendaAlunoButton extends StatelessWidget {
                       aluno?.nome ?? 'Aluno',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: AppTypography.inter(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w800,
+                      style: FocuxHubTypography.cardTitle(
                         color: aluno == null ? chrome.mute : chrome.ink,
                       ),
                     ),
                     const SizedBox(height: 3),
                     Text(
-                      aluno?.email ?? 'Selecione quem será atendido',
+                      aluno == null
+                          ? 'Selecione quem será atendido'
+                          : maskEmailForList(aluno!.email),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: AppTypography.inter(
-                        fontSize: 11,
+                      style: FocuxHubTypography.bodyMuted(
                         color: chrome.mute,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ],
@@ -401,8 +430,12 @@ class _AgendaDateTimeRow extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(TokensStrip.rCard),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(
+            minHeight: FxHomeSheetChrome.touchTarget,
+          ),
+          child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
           child: Row(
             children: [
               Expanded(
@@ -432,6 +465,7 @@ class _AgendaDateTimeRow extends StatelessWidget {
               Icon(Icons.calendar_today_outlined, size: 20, color: primary),
             ],
           ),
+          ),
         ),
       ),
     );
@@ -445,27 +479,37 @@ class _AgendaAlunoAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final chrome = ShellChrome.of(context);
+    final primary = Theme.of(context).colorScheme.primary;
     final foto = aluno?.fotoUrl;
     final hasPhoto = foto != null && foto.isNotEmpty;
+    final initials = _initials(aluno?.nome ?? '');
     return ClipRRect(
       borderRadius: BorderRadius.circular(13),
       child: Container(
         width: 42,
         height: 42,
-        color: EagleTokens.brandSoft,
+        color: BrandPalette.soft(primary, dark: chrome.isDark),
         child:
             hasPhoto
-                ? Image.network(foto, fit: BoxFit.cover)
-                : Center(
-                  child: Text(
-                    _initials(aluno?.nome ?? ''),
-                    style: AppTypography.inter(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w800,
-                      color: TokensStrip.primaryHover,
-                    ),
-                  ),
-                ),
+                ? Image.network(
+                  foto,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, _, _) => _fallback(primary, initials),
+                )
+                : _fallback(primary, initials),
+      ),
+    );
+  }
+
+  Widget _fallback(Color primary, String initials) {
+    if (initials == '?') {
+      return Icon(Icons.person_outline_rounded, color: primary, size: 20);
+    }
+    return Center(
+      child: Text(
+        initials,
+        style: FocuxHubTypography.cardTitle(color: primary),
       ),
     );
   }
@@ -547,7 +591,10 @@ class _AgendaAlunoSheetState extends State<_AgendaAlunoSheet> {
                   hintText: 'Buscar por nome, e-mail ou objetivo',
                   prefixIcon: Icon(Icons.search, size: 19, color: chrome.mute),
                   filled: true,
-                  fillColor: chrome.cardFill,
+                  fillColor:
+                      chrome.isDark
+                          ? EagleTokens.darkCardHi
+                          : TokensStrip.pageBg,
                   border: FxInputDeco.outlineBorder(
                     borderRadius: BorderRadius.circular(16),
                     borderSide: BorderSide(color: chrome.lineStrong),
@@ -565,7 +612,20 @@ class _AgendaAlunoSheetState extends State<_AgendaAlunoSheet> {
             ),
             SizedBox(height: TokensStrip.s3),
             Expanded(
-              child: ListView.separated(
+              child:
+                  alunos.isEmpty
+                      ? FxEmptyState(
+                        icon: 'search',
+                        title:
+                            query.isEmpty
+                                ? 'Nenhum aluno'
+                                : 'Nada com essa busca',
+                        subtitle:
+                            query.isEmpty
+                                ? 'Cadastre um aluno para marcar o atendimento.'
+                                : 'Tente outro nome, e-mail ou objetivo.',
+                      )
+                      : ListView.separated(
                 padding: EdgeInsets.zero,
                 itemCount: alunos.length,
                 separatorBuilder: (_, __) => const SizedBox(height: 8),
@@ -606,9 +666,7 @@ class _AgendaAlunoSheetState extends State<_AgendaAlunoSheet> {
                                     aluno.nome,
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
-                                    style: AppTypography.inter(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w800,
+                                    style: FocuxHubTypography.cardTitle(
                                       color: chrome.ink,
                                     ),
                                   ),
@@ -617,13 +675,13 @@ class _AgendaAlunoSheetState extends State<_AgendaAlunoSheet> {
                                     [
                                       if ((aluno.objetivo ?? '').isNotEmpty)
                                         aluno.objetivo!,
-                                      aluno.email,
+                                      maskEmailForList(aluno.email),
                                     ].join(' · '),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
-                                    style: AppTypography.inter(
-                                      fontSize: 11,
+                                    style: FocuxHubTypography.bodyMuted(
                                       color: chrome.mute,
+                                      fontWeight: FontWeight.w600,
                                     ),
                                   ),
                                 ],
@@ -699,11 +757,9 @@ class _AgendaDateTimeSheetState extends State<_AgendaDateTimeSheet> {
       label: 'Selecionar ${widget.title.toLowerCase()}',
       child: FxHomeSheetSurface(
         isDark: chrome.isDark,
-        maxHeight:
-            MediaQuery.sizeOf(context).height *
-            FxHomeSheetChrome.maxHeightFactor,
+        expand: true,
+        maxHeight: MediaQuery.sizeOf(context).height * 0.82,
         child: Column(
-          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             FxHomeSheetHandle(isDark: chrome.isDark),
@@ -723,58 +779,17 @@ class _AgendaDateTimeSheetState extends State<_AgendaDateTimeSheet> {
                 separatorBuilder: (_, __) => const SizedBox(width: 8),
                 itemBuilder: (_, index) {
                   final day = days[index];
-                  final selected = _sameDay(day, _selectedDay);
-                  return Semantics(
-                    button: true,
-                    selected: selected,
-                    label: '${_weekLabel(day.weekday)} ${day.day}',
-                    child: InkWell(
-                      onTap: () => setState(() => _selectedDay = day),
-                      borderRadius: BorderRadius.circular(16),
-                      child: Container(
-                        width: 58,
-                        padding: const EdgeInsets.symmetric(vertical: 9),
-                        decoration: BoxDecoration(
-                          color: selected ? primary : chrome.cardFill,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(
-                            color: selected ? primary : chrome.lineStrong,
-                          ),
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              _weekLabel(day.weekday),
-                              style: AppTypography.inter(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w700,
-                                color:
-                                    selected
-                                        ? Colors.white
-                                        : TokensStrip.textSecondary,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              '${day.day}',
-                              style: AppTypography.inter(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w800,
-                                color: selected ? Colors.white : chrome.ink,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
+                  return AgendaDayChip(
+                    weekdayLabel: agendaWeekdayShort(day.weekday),
+                    dayNumber: day.day,
+                    selected: agendaSameDay(day, _selectedDay),
+                    onTap: () => setState(() => _selectedDay = day),
                   );
                 },
               ),
             ),
-            const SizedBox(height: TokensStrip.s4),
-            SizedBox(
-              height: 230,
+            SizedBox(height: TokensStrip.s4),
+            Expanded(
               child: GridView.builder(
                 itemCount: slots.length,
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -795,21 +810,29 @@ class _AgendaDateTimeSheetState extends State<_AgendaDateTimeSheet> {
                     child: InkWell(
                       onTap: () => setState(() => _selectedTime = slot),
                       borderRadius: BorderRadius.circular(14),
-                      child: Container(
-                        alignment: Alignment.center,
+                      child: Ink(
                         decoration: BoxDecoration(
-                          color: selected ? primary : chrome.cardFill,
+                          color:
+                              selected
+                                  ? BrandPalette.soft(
+                                    primary,
+                                    dark: chrome.isDark,
+                                  )
+                                  : chrome.cardFill,
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(
-                            color: selected ? primary : chrome.lineStrong,
+                            color:
+                                selected
+                                    ? primary.withValues(alpha: 0.42)
+                                    : chrome.lineStrong,
                           ),
                         ),
-                        child: Text(
-                          _timeLabel(slot),
-                          style: AppTypography.mono(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700,
-                            color: selected ? Colors.white : chrome.ink,
+                        child: Center(
+                          child: Text(
+                            _timeLabel(slot),
+                            style: FocuxHubTypography.cardTitle(
+                              color: selected ? primary : chrome.ink,
+                            ),
                           ),
                         ),
                       ),
@@ -818,7 +841,8 @@ class _AgendaDateTimeSheetState extends State<_AgendaDateTimeSheet> {
                 },
               ),
             ),
-            const SizedBox(height: 14),
+            Divider(height: 1, color: chrome.line.withValues(alpha: 0.8)),
+            SizedBox(height: TokensStrip.s4),
             Semantics(
               button: true,
               label: 'Confirmar horário',
@@ -843,12 +867,6 @@ class _AgendaDateTimeSheetState extends State<_AgendaDateTimeSheet> {
       ),
     );
   }
-
-  bool _sameDay(DateTime a, DateTime b) =>
-      a.year == b.year && a.month == b.month && a.day == b.day;
-
-  String _weekLabel(int weekday) =>
-      const ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'][weekday - 1];
 
   String _timeLabel(TimeOfDay time) =>
       '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';

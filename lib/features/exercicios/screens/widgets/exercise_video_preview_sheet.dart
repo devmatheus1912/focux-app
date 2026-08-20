@@ -409,10 +409,10 @@ class _ExerciseVideoPreviewSheetState extends State<ExerciseVideoPreviewSheet> {
 
     return FxHomeSheetSurface(
       isDark: isDark,
-      maxHeight:
-          MediaQuery.sizeOf(context).height * FxHomeSheetChrome.maxHeightFactor,
+      expand: true,
+      maxHeight: MediaQuery.sizeOf(context).height * 0.82,
       child: Column(
-        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           FxHomeSheetHandle(isDark: isDark),
           SizedBox(height: TokensStrip.s4),
@@ -430,13 +430,9 @@ class _ExerciseVideoPreviewSheetState extends State<ExerciseVideoPreviewSheet> {
             ),
           ),
           const SizedBox(height: 12),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(16),
-            child: AspectRatio(
-              aspectRatio:
-                  _ready && _controller != null
-                      ? _controller!.value.aspectRatio
-                      : 16 / 9,
+          Expanded(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(16),
               child: ColoredBox(
                 color: Colors.black,
                 child:
@@ -448,7 +444,14 @@ class _ExerciseVideoPreviewSheetState extends State<ExerciseVideoPreviewSheet> {
                           ),
                         )
                         : _ready && _controller != null
-                        ? VideoPlayer(_controller!)
+                        ? FittedBox(
+                          fit: BoxFit.contain,
+                          child: SizedBox(
+                            width: _controller!.value.size.width,
+                            height: _controller!.value.size.height,
+                            child: VideoPlayer(_controller!),
+                          ),
+                        )
                         : const Center(
                           child: FxLoading(size: 28, color: Colors.white),
                         ),

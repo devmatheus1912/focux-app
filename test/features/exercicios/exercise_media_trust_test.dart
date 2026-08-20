@@ -64,7 +64,7 @@ void main() {
     expect(builder, contains('canPreviewExerciseMedia'));
     expect(detail, contains('_PrescriptionReadinessPanel'));
     expect(detail, contains('mediaTrustLabel'));
-    expect(treinoDetail, contains('mediaTrustLabel'));
+    expect(treinoDetail, contains('TreinoPrescriptionVideoBlock'));
   });
 
   test('exercise media import surface exposes editorial approval controls', () {
@@ -77,5 +77,17 @@ void main() {
     expect(list, contains('Notas editoriais padrao'));
     expect(list, contains('previewMidias(midias)'));
     expect(list, contains('importarMidias(midias)'));
+  });
+
+  test('prévia de vídeo cabe na sheet da Home', () {
+    final preview =
+        File(
+          'lib/features/exercicios/screens/widgets/exercise_video_preview_sheet.dart',
+        ).readAsStringSync();
+    expect(preview, contains('expand: true'));
+    expect(preview, contains('FittedBox'));
+    expect(preview, contains('BoxFit.contain'));
+    expect(preview, contains('height * 0.82'));
+    expect(preview, contains('VideoPlayer(_controller!)'));
   });
 }

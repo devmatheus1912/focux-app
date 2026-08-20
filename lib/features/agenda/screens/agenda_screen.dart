@@ -3,18 +3,24 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/config/env.dart';
 import '../../../core/router/safe_navigation.dart';
+import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../features/alunos/data/aluno_contact_utils.dart';
 import '../../../features/alunos/data/aluno_repository.dart';
 import '../../../features/alunos/providers/alunos_provider.dart';
 import '../data/agenda_repository.dart';
 import '../providers/agenda_provider.dart';
+import '../utils/agenda_schedule.dart';
+import '../widgets/agenda_day_chip.dart';
+import '../widgets/agenda_help_sheet.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/skeleton_loader.dart';
@@ -23,6 +29,7 @@ import 'package:focux_app/core/widgets/fx_input_deco.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/fx_motion.dart';
 import 'package:focux_app/core/widgets/fx_shell_scaffold.dart';
+import '../../dashboard/utils/dashboard_readability.dart';
 
 part 'agenda_screen_widgets.part.dart';
 part 'agenda_screen_novo.part.dart';
@@ -77,7 +84,8 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
   }
 
   Future<void> _novoAgendamento() async {
-    await context.push('/agenda/novo');
+    final selectedDate = _weekStart.add(Duration(days: _selectedIdx));
+    await context.push('/agenda/novo', extra: selectedDate);
     if (!mounted) return;
     _load(force: true);
   }
@@ -177,7 +185,6 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
   Widget build(BuildContext context) {
     final chrome = ShellChrome.of(context);
     final isDark = chrome.isDark;
-    final cardBg = chrome.cardFill;
     final ink = chrome.ink;
     final mute = chrome.mute;
     final primary = Theme.of(context).colorScheme.primary;
@@ -255,11 +262,9 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                               'Agenda',
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                fontSize: 28,
-                                fontWeight: FontWeight.w700,
+                              style: dashboardPageTitleStyle(
+                                context,
                                 color: ink,
-                                letterSpacing: -0.5,
                               ),
                             ),
                           ),
@@ -269,13 +274,18 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
+                        FxHelpIconButton(
+                          tooltip: 'Como usar a agenda',
+                          onTap: () => showAgendaHelpSheet(context),
+                          expandHitTarget: true,
+                        ),
                         IconButton(
                           tooltip: 'Exportar iCal',
                           visualDensity: VisualDensity.compact,
                           padding: EdgeInsets.zero,
                           constraints: const BoxConstraints(
-                            minWidth: 36,
-                            minHeight: 36,
+                            minWidth: FxHomeSheetChrome.touchTarget,
+                            minHeight: FxHomeSheetChrome.touchTarget,
                           ),
                           icon: Icon(
                             Icons.calendar_month_outlined,
@@ -349,92 +359,16 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Row(
                   children: List.generate(7, (i) {
-                    final isSelected = i == _selectedIdx;
                     final dayDate = _weekStart.add(Duration(days: i));
                     final count = (eventosMap[i] ?? []).length;
-
-                    return Semantics(
-                      button: true,
-                      selected: isSelected,
-                      label:
-                          '${diasSemanaStr[i]} ${dayDate.day}, $count atendimento${count == 1 ? '' : 's'}',
-                      child: GestureDetector(
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 6),
+                      child: AgendaDayChip(
+                        weekdayLabel: diasSemanaStr[i],
+                        dayNumber: dayDate.day,
+                        selected: i == _selectedIdx,
+                        count: count,
                         onTap: () => setState(() => _selectedIdx = i),
-                        child: Container(
-                          margin: const EdgeInsets.only(right: 6),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 10,
-                          ),
-                          constraints: const BoxConstraints(minWidth: 46),
-                          decoration: BoxDecoration(
-                            color: isSelected ? primary : cardBg,
-                            borderRadius: BorderRadius.circular(
-                              TokensStrip.rCard,
-                            ),
-                            border:
-                                isSelected
-                                    ? null
-                                    : Border.all(color: chrome.lineStrong),
-                            boxShadow:
-                                isSelected && !isDark
-                                    ? [
-                                      BoxShadow(
-                                        color: primary.withValues(alpha: 0.35),
-                                        blurRadius: 12,
-                                        offset: const Offset(0, 4),
-                                      ),
-                                    ]
-                                    : null,
-                          ),
-                          child: Column(
-                            children: [
-                              Text(
-                                diasSemanaStr[i],
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w600,
-                                  color: isSelected ? Colors.white : mute,
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                '${dayDate.day}',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w700,
-                                  color: isSelected ? Colors.white : ink,
-                                  height: 1.2,
-                                ),
-                              ),
-                              if (count > 0) ...[
-                                const SizedBox(height: 4),
-                                Container(
-                                  width: 16,
-                                  height: 16,
-                                  decoration: BoxDecoration(
-                                    color:
-                                        isSelected
-                                            ? Colors.white.withValues(
-                                              alpha: 0.3,
-                                            )
-                                            : primary,
-                                    shape: BoxShape.circle,
-                                  ),
-                                  alignment: Alignment.center,
-                                  child: Text(
-                                    '$count',
-                                    style: const TextStyle(
-                                      fontSize: 9,
-                                      fontWeight: FontWeight.w700,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ],
-                          ),
-                        ),
                       ),
                     );
                   }),
@@ -522,72 +456,26 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                             TokensStrip.s4,
                             0,
                             16,
-                            100,
+                            16,
                           ),
-                          itemCount: dailyEvents.length + 1,
+                          itemCount: dailyEvents.length,
                           itemBuilder: (_, i) {
-                            if (i == dailyEvents.length) {
-                              // Add slot button
-                              return Semantics(
-                                button: true,
-                                label: 'Novo agendamento',
-                                child: GestureDetector(
-                                  onTap: _novoAgendamento,
-                                  child: Container(
-                                    height: 56,
-                                    margin: const EdgeInsets.only(top: 10),
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(
-                                        TokensStrip.rCard,
-                                      ),
-                                      color: primary,
-                                      boxShadow: [
-                                        if (!isDark)
-                                          BoxShadow(
-                                            color: primary.withValues(
-                                              alpha: 0.18,
-                                            ),
-                                            blurRadius: 18,
-                                            offset: const Offset(0, 8),
-                                          ),
-                                      ],
-                                    ),
-                                    alignment: Alignment.center,
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        const Icon(
-                                          Icons.add_rounded,
-                                          size: 20,
-                                          color: Colors.white,
-                                        ),
-                                        const SizedBox(width: 8),
-                                        const Text(
-                                          'Novo agendamento',
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w800,
-                                            color: Colors.white,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              );
-                            }
-
                             final e = dailyEvents[i];
                             final sColor = _statusColor(
                               e.status,
                               isDark,
                               primary,
                             );
+                            final title = agendaEventTitle(
+                              alunoNome: e.alunoNome,
+                              titulo: e.titulo,
+                            );
+                            final note = agendaEventNote(e.titulo);
 
                             return Semantics(
                               button: true,
                               label:
-                                  'Atendimento ${e.titulo ?? e.alunoNome}, ${_statusText(e.status)}, ${_hm(e.inicio)}',
+                                  'Atendimento $title, ${_statusText(e.status)}, ${_hm(e.inicio)}',
                               child: InkWell(
                                 onTap: () => _openAgendamentoDetails(e),
                                 borderRadius: BorderRadius.circular(
@@ -641,7 +529,10 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                                           right: 12,
                                         ),
                                         decoration: BoxDecoration(
-                                          color: primary,
+                                          color: BrandPalette.soft(
+                                            primary,
+                                            dark: isDark,
+                                          ),
                                           shape: BoxShape.circle,
                                         ),
                                         alignment: Alignment.center,
@@ -649,10 +540,8 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                                           e.alunoNome.isNotEmpty
                                               ? e.alunoNome[0].toUpperCase()
                                               : '?',
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w700,
+                                          style: FocuxHubTypography.cardTitle(
+                                            color: primary,
                                           ),
                                         ),
                                       ),
@@ -662,14 +551,24 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                                               CrossAxisAlignment.start,
                                           children: [
                                             Text(
-                                              e.titulo ?? e.alunoNome,
-                                              style: TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.w600,
+                                              title,
+                                              style: FocuxHubTypography.cardTitle(
                                                 color: ink,
                                               ),
                                               overflow: TextOverflow.ellipsis,
                                             ),
+                                            if (note != null) ...[
+                                              const SizedBox(height: 2),
+                                              Text(
+                                                note,
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: FocuxHubTypography.bodyMuted(
+                                                  color: mute,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                              ),
+                                            ],
                                             const SizedBox(height: 2),
                                             Row(
                                               children: [
@@ -726,6 +625,18 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                           },
                         ),
               ),
+              if (!_loading && _erro == null && dailyEvents.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 4, 20, 88),
+                  child: Semantics(
+                    button: true,
+                    label: 'Novo agendamento',
+                    child: FxLiquidPrimaryButton(
+                      label: 'Novo agendamento',
+                      onPressed: _novoAgendamento,
+                    ),
+                  ),
+                ),
             ],
           ),
         ),
