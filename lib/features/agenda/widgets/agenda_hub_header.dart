@@ -6,7 +6,6 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
-import '../../dashboard/constants/dashboard_layout.dart';
 import '../../dashboard/utils/dashboard_readability.dart';
 import '../utils/agenda_schedule.dart';
 
@@ -30,10 +29,6 @@ class AgendaHubHeader extends StatelessWidget {
     final primary = Theme.of(context).colorScheme.primary;
     final ink = chrome.ink;
     final mute = dashboardReadableCaption(context, isDark: chrome.isDark);
-    final compact = DashboardLayout.isCompact(MediaQuery.sizeOf(context).width);
-    final chromeSize = DashboardLayout.headerActionSize(
-      MediaQuery.sizeOf(context).width,
-    );
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(
@@ -86,43 +81,55 @@ class AgendaHubHeader extends StatelessWidget {
                   ),
                 ),
               ),
+              const SizedBox(width: TokensStrip.s2),
               FxHelpIconButton(
                 tooltip: 'Como usar a agenda',
                 onTap: onHelp,
-                expandHitTarget: true,
               ),
-              IconButton(
+              const SizedBox(width: FxHelpChrome.gap),
+              ShellHeaderIconButton(
+                icon: 'calendar',
+                size: FxHelpChrome.iconSize,
                 tooltip: 'Exportar iCal',
-                visualDensity: VisualDensity.compact,
-                constraints: BoxConstraints(
-                  minWidth: chromeSize,
-                  minHeight: chromeSize,
-                ),
-                icon: Icon(
-                  Icons.calendar_month_outlined,
-                  color: chrome.mute,
-                  size: compact ? 20 : 22,
-                ),
-                onPressed: onIcal,
+                onTap: () {
+                  HapticFeedback.selectionClick();
+                  onIcal();
+                },
               ),
-              if (onToday != null)
-                IconButton(
-                  tooltip: 'Ir para hoje',
-                  visualDensity: VisualDensity.compact,
-                  constraints: BoxConstraints(
-                    minWidth: chromeSize,
-                    minHeight: chromeSize,
+              if (onToday != null) ...[
+                const SizedBox(width: FxHelpChrome.gap),
+                Semantics(
+                  button: true,
+                  label: 'Ir para hoje',
+                  child: Tooltip(
+                    message: 'Ir para hoje',
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: () {
+                          HapticFeedback.selectionClick();
+                          onToday!();
+                        },
+                        borderRadius: BorderRadius.circular(
+                          FxHelpChrome.iconSize / 2,
+                        ),
+                        child: Container(
+                          width: FxHelpChrome.iconSize,
+                          height: FxHelpChrome.iconSize,
+                          decoration: chrome.headerAction(
+                            radius: FxHelpChrome.iconSize / 2,
+                          ),
+                          child: Icon(
+                            Icons.today_outlined,
+                            color: primary,
+                            size: FxHelpChrome.iconSize * 0.48,
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
-                  icon: Icon(
-                    Icons.today_outlined,
-                    color: primary,
-                    size: compact ? 20 : 22,
-                  ),
-                  onPressed: () {
-                    HapticFeedback.selectionClick();
-                    onToday!();
-                  },
                 ),
+              ],
             ],
           ),
         ),
