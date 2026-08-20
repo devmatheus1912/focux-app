@@ -524,11 +524,7 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                                           child: FxEmptyState(
                                             icon: 'calendar',
                                             title: 'Dia livre',
-                                            subtitle: agendaEmptyDaySubtitle(
-                                              weekdayLabel:
-                                                  diasSemanaStr[_selectedIdx],
-                                              date: selectedDate,
-                                            ),
+                                            subtitle: agendaEmptyDaySubtitle(),
                                           ),
                                         ),
                                       ),

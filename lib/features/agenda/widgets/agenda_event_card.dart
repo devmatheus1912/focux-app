@@ -38,7 +38,7 @@ class AgendaEventCard extends StatelessWidget {
       alunoNome: agendamento.alunoNome,
       titulo: agendamento.titulo,
     );
-    final note = agendaEventNote(agendamento.titulo);
+    final note = agendaEventSessionNote(agendamento.titulo);
     final showEnd = agendamento.fim.isAfter(agendamento.inicio);
 
     return Semantics(

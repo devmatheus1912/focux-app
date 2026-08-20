@@ -52,16 +52,20 @@ class _AgendaEventSheetState extends State<_AgendaEventSheet> {
   @override
   Widget build(BuildContext context) {
     final chrome = ShellChrome.of(context);
-    final primary = Theme.of(context).colorScheme.primary;
     final ag = widget.agendamento;
     final title = agendaEventTitle(alunoNome: ag.alunoNome, titulo: ag.titulo);
-    final note = agendaEventNote(ag.titulo);
+    final sessionNote = agendaEventSessionNote(ag.titulo);
+    final subtitle = agendaEventSheetSubtitle(
+      inicio: ag.inicio,
+      fim: ag.fim,
+      statusLabel: widget.statusLabel,
+    );
+    final date =
+        '${ag.inicio.day.toString().padLeft(2, '0')}/${ag.inicio.month.toString().padLeft(2, '0')}/${ag.inicio.year}';
     final time =
         ag.fim.isAfter(ag.inicio)
             ? '${agendaHm(ag.inicio)}–${agendaHm(ag.fim)}'
             : agendaHm(ag.inicio);
-    final date =
-        '${ag.inicio.day.toString().padLeft(2, '0')}/${ag.inicio.month.toString().padLeft(2, '0')}/${ag.inicio.year}';
     final completePrimary = agendaSessionIsDue(ag) && widget.onComplete != null;
     final obs = ag.observacoes?.trim();
     final pos = ag.observacoesPosAtendimento?.trim();
@@ -74,8 +78,9 @@ class _AgendaEventSheetState extends State<_AgendaEventSheet> {
       label: 'Detalhes do atendimento, $title',
       child: FxHomeSheetSurface(
         isDark: chrome.isDark,
-        expand: true,
+        maxHeight: MediaQuery.sizeOf(context).height * 0.78,
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             FxHomeSheetHandle(isDark: chrome.isDark),
@@ -83,7 +88,7 @@ class _AgendaEventSheetState extends State<_AgendaEventSheet> {
             FxHomeSheetHeader(
               isDark: chrome.isDark,
               title: title,
-              subtitle: note,
+              subtitle: subtitle,
               leading: AlunoAvatar(
                 name: title,
                 photoUrl: widget.photoUrl,
@@ -91,42 +96,31 @@ class _AgendaEventSheetState extends State<_AgendaEventSheet> {
               ),
             ),
             SizedBox(height: TokensStrip.s3),
-            Expanded(
-              child: ListView(
-                padding: EdgeInsets.zero,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _AgendaInfoTile(label: 'Data', value: date),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: _AgendaInfoTile(label: 'Horário', value: time),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  _AgendaInfoTile(label: 'Status', value: widget.statusLabel),
-                  if (atendimento != null && atendimento.isNotEmpty) ...[
-                    const SizedBox(height: 10),
-                    _AgendaInfoTile(
-                      label: 'Após a sessão',
-                      value: agendaStatusLabel(atendimento),
-                    ),
-                  ],
-                  if (obs != null && obs.isNotEmpty) ...[
-                    const SizedBox(height: 10),
-                    _AgendaInfoTile(label: 'Nota', value: obs),
-                  ],
-                  if (pos != null && pos.isNotEmpty) ...[
-                    const SizedBox(height: 10),
-                    _AgendaInfoTile(label: 'Depois do atendimento', value: pos),
-                  ],
-                ],
-              ),
+            _AgendaMetaStrip(
+              date: date,
+              time: time,
+              status: widget.statusLabel,
             ),
-            SizedBox(height: TokensStrip.s3),
+            if (sessionNote != null) ...[
+              const SizedBox(height: TokensStrip.s2),
+              _AgendaDetailNote(label: 'Tipo de sessão', value: sessionNote),
+            ],
+            if (atendimento != null && atendimento.isNotEmpty) ...[
+              const SizedBox(height: TokensStrip.s2),
+              _AgendaDetailNote(
+                label: 'Após a sessão',
+                value: agendaStatusLabel(atendimento),
+              ),
+            ],
+            if (obs != null && obs.isNotEmpty) ...[
+              const SizedBox(height: TokensStrip.s2),
+              _AgendaDetailNote(label: 'Nota', value: obs),
+            ],
+            if (pos != null && pos.isNotEmpty) ...[
+              const SizedBox(height: TokensStrip.s2),
+              _AgendaDetailNote(label: 'Depois do atendimento', value: pos),
+            ],
+            SizedBox(height: TokensStrip.s4),
             Semantics(
               button: true,
               label:
@@ -148,71 +142,69 @@ class _AgendaEventSheetState extends State<_AgendaEventSheet> {
                             ),
               ),
             ),
-            if (!completePrimary && widget.onComplete != null) ...[
-              const SizedBox(height: 8),
-              Semantics(
-                button: true,
-                label: 'Marcar atendimento como concluído',
-                child: OutlinedButton(
-                  onPressed: _busy ? null : () => _run(widget.onComplete),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: primary,
-                    minimumSize: const Size.fromHeight(48),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                  ),
-                  child: const Text('Marcar concluído'),
-                ),
-              ),
-            ],
-            const SizedBox(height: 8),
-            if (widget.onWhatsapp != null || widget.onConfirm != null)
+            if (widget.onWhatsapp != null || widget.onConfirm != null) ...[
+              const SizedBox(height: TokensStrip.s2),
               Row(
                 children: [
-                if (widget.onWhatsapp != null)
-                  Expanded(
-                    child: Semantics(
-                      button: true,
-                      label: 'WhatsApp para confirmar horário',
-                      child: OutlinedButton.icon(
+                  if (widget.onWhatsapp != null)
+                    Expanded(
+                      child: FxLiquidSecondaryButton(
+                        label: 'WhatsApp',
+                        icon: Icons.chat_outlined,
                         onPressed: _busy ? null : () => _run(widget.onWhatsapp),
-                        icon: const Icon(Icons.chat_outlined, size: 18),
-                        label: const Text('WhatsApp'),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: chrome.ink,
-                          minimumSize: const Size.fromHeight(48),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                        ),
                       ),
                     ),
-                  ),
-                if (widget.onWhatsapp != null && widget.onConfirm != null)
-                  const SizedBox(width: 8),
-                if (widget.onConfirm != null)
-                  Expanded(
-                    child: Semantics(
-                      button: true,
-                      label: 'Marcar horário como confirmado',
-                      child: OutlinedButton(
+                  if (widget.onWhatsapp != null && widget.onConfirm != null)
+                    const SizedBox(width: TokensStrip.s2),
+                  if (widget.onConfirm != null)
+                    Expanded(
+                      child: FxLiquidSecondaryButton(
+                        label: 'Confirmado',
                         onPressed: _busy ? null : () => _run(widget.onConfirm),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: primary,
-                          minimumSize: const Size.fromHeight(48),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                        ),
-                        child: const Text('Confirmado'),
                       ),
                     ),
-                  ),
-              ],
-            ),
+                ],
+              ),
+            ],
+            if (widget.onReschedule != null ||
+                (!completePrimary && widget.onComplete != null) ||
+                (completePrimary && widget.onOpenAluno != null)) ...[
+              const SizedBox(height: TokensStrip.s2),
+              Row(
+                children: [
+                  if (widget.onReschedule != null)
+                    Expanded(
+                      child: FxLiquidSecondaryButton(
+                        label: 'Remarcar',
+                        onPressed:
+                            _busy ? null : () => _run(widget.onReschedule),
+                      ),
+                    ),
+                  if (widget.onReschedule != null &&
+                      ((!completePrimary && widget.onComplete != null) ||
+                          (completePrimary && widget.onOpenAluno != null)))
+                    const SizedBox(width: TokensStrip.s2),
+                  if (!completePrimary && widget.onComplete != null)
+                    Expanded(
+                      child: FxLiquidSecondaryButton(
+                        label: 'Concluído',
+                        onPressed:
+                            _busy ? null : () => _run(widget.onComplete),
+                      ),
+                    )
+                  else if (completePrimary && widget.onOpenAluno != null)
+                    Expanded(
+                      child: FxLiquidSecondaryButton(
+                        label: 'Ver aluno',
+                        onPressed:
+                            _busy ? null : () => _run(widget.onOpenAluno),
+                      ),
+                    ),
+                ],
+              ),
+            ],
             if (widget.onCancel != null) ...[
-              const SizedBox(height: 4),
+              const SizedBox(height: TokensStrip.s1),
               Semantics(
                 button: true,
                 label: 'Cancelar horário',
@@ -220,40 +212,29 @@ class _AgendaEventSheetState extends State<_AgendaEventSheet> {
                   onPressed: _busy ? null : () => _run(widget.onCancel),
                   child: Text(
                     'Cancelar horário',
-                    style: TextStyle(color: chrome.mute),
+                    style: TextStyle(
+                      color: chrome.mute,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ),
             ],
-            if (widget.onReschedule != null)
-              Semantics(
-                button: true,
-                label: 'Remarcar horário',
-                child: OutlinedButton(
-                  onPressed: _busy ? null : () => _run(widget.onReschedule),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: chrome.ink,
-                    minimumSize: const Size.fromHeight(48),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                  ),
-                  child: const Text('Remarcar'),
-                ),
-              ),
             Semantics(
               button: true,
               label: 'Excluir agendamento',
-              child: OutlinedButton.icon(
+              child: TextButton.icon(
                 onPressed: _busy ? null : () => _run(widget.onDelete),
-                icon: const Icon(Icons.delete_outline_rounded, size: 18),
-                label: const Text('Excluir agendamento'),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: EagleTokens.bad,
-                  side: const BorderSide(color: EagleTokens.badSoft),
-                  minimumSize: const Size.fromHeight(48),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
+                icon: Icon(
+                  Icons.delete_outline_rounded,
+                  size: 18,
+                  color: EagleTokens.bad.withValues(alpha: _busy ? 0.4 : 1),
+                ),
+                label: Text(
+                  'Excluir agendamento',
+                  style: TextStyle(
+                    color: EagleTokens.bad.withValues(alpha: _busy ? 0.4 : 1),
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ),
@@ -265,46 +246,141 @@ class _AgendaEventSheetState extends State<_AgendaEventSheet> {
   }
 }
 
-class _AgendaInfoTile extends StatelessWidget {
+class _AgendaMetaStrip extends StatelessWidget {
+  const _AgendaMetaStrip({
+    required this.date,
+    required this.time,
+    required this.status,
+  });
+
+  final String date;
+  final String time;
+  final String status;
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    return DecoratedBox(
+      decoration: fxStripCardDecoration(
+        context,
+        accent: primary,
+        radius: 16,
+        glowStrength: 0.03,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+        child: IntrinsicHeight(
+          child: Row(
+            children: [
+              Expanded(child: _AgendaMetaCell(label: 'Data', value: date)),
+              _AgendaMetaDivider(color: primary),
+              Expanded(child: _AgendaMetaCell(label: 'Horário', value: time)),
+              _AgendaMetaDivider(color: primary),
+              Expanded(child: _AgendaMetaCell(label: 'Status', value: status)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _AgendaMetaDivider extends StatelessWidget {
+  const _AgendaMetaDivider({required this.color});
+
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: VerticalDivider(
+        width: 1,
+        thickness: 1,
+        color: color.withValues(alpha: 0.16),
+      ),
+    );
+  }
+}
+
+class _AgendaMetaCell extends StatelessWidget {
+  const _AgendaMetaCell({required this.label, required this.value});
+
   final String label;
   final String value;
 
-  const _AgendaInfoTile({required this.label, required this.value});
+  @override
+  Widget build(BuildContext context) {
+    final chrome = ShellChrome.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: AppTypography.inter(
+            fontSize: 10,
+            fontWeight: FontWeight.w700,
+            color: chrome.mute,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: AppTypography.inter(
+            fontSize: 13,
+            fontWeight: FontWeight.w800,
+            color: chrome.ink,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _AgendaDetailNote extends StatelessWidget {
+  const _AgendaDetailNote({required this.label, required this.value});
+
+  final String label;
+  final String value;
 
   @override
   Widget build(BuildContext context) {
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: primary.withValues(alpha: chrome.isDark ? 0.14 : 0.08),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: primary.withValues(alpha: 0.28)),
+    return DecoratedBox(
+      decoration: fxStripCardDecoration(
+        context,
+        accent: primary,
+        radius: 14,
+        glowStrength: 0.02,
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: AppTypography.inter(
-              fontSize: 10,
-              fontWeight: FontWeight.w700,
-              color: chrome.mute,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              label,
+              style: AppTypography.inter(
+                fontSize: 10,
+                fontWeight: FontWeight.w700,
+                color: chrome.mute,
+              ),
             ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            value,
-            maxLines: 3,
-            overflow: TextOverflow.ellipsis,
-            style: AppTypography.inter(
-              fontSize: 13,
-              fontWeight: FontWeight.w800,
-              color: chrome.ink,
+            const SizedBox(height: 4),
+            Text(
+              value,
+              style: AppTypography.inter(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: chrome.ink,
+                height: 1.35,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

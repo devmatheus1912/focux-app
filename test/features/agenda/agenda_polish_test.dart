@@ -36,7 +36,9 @@ void main() {
     expect(screen, contains('listarSemana'));
     expect(screen, contains('RefreshIndicator'));
     expect(screen, contains('maskEmailForList'));
-    expect(screen, contains('expand: true'));
+    expect(screen, contains('agendaEventSessionNote'));
+    expect(screen, contains('FxLiquidSecondaryButton'));
+    expect(screen, contains('_AgendaMetaStrip'));
     expect(screen, contains('Semantics('));
     expect(screen, contains('explicitChildNodes: true'));
     expect(screen, isNot(contains('ListTile(')));

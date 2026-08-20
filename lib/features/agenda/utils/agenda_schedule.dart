@@ -30,10 +30,30 @@ String agendaEventTitle({required String alunoNome, String? titulo}) {
   return name.isEmpty ? (titulo?.trim().isNotEmpty == true ? titulo!.trim() : 'Atendimento') : name;
 }
 
-String? agendaEventNote(String? titulo) {
+String? agendaEventNote(String? titulo) => agendaEventSessionNote(titulo);
+
+const _trivialSessionNotes = {'oi', 'ok', 'teste', 'test', '-', '.', 'x'};
+
+/// Nota de sessão só quando ajuda o personal (ignora placeholder curto).
+String? agendaEventSessionNote(String? titulo) {
   final t = titulo?.trim();
   if (t == null || t.isEmpty) return null;
+  if (t.length < 4 && _trivialSessionNotes.contains(t.toLowerCase())) {
+    return null;
+  }
   return t;
+}
+
+String agendaEventSheetSubtitle({
+  required DateTime inicio,
+  required DateTime fim,
+  required String statusLabel,
+}) {
+  final time =
+      fim.isAfter(inicio)
+          ? '${agendaHm(inicio)}–${agendaHm(fim)}'
+          : agendaHm(inicio);
+  return '$time · $statusLabel';
 }
 
 String agendaIsoDate(DateTime d) {
@@ -88,8 +108,5 @@ String agendaDayHeading({
   return '$datePart · $countLabel';
 }
 
-String agendaEmptyDaySubtitle({
-  required String weekdayLabel,
-  required DateTime date,
-}) =>
-    '$weekdayLabel, ${date.day} ${agendaMonthShort[date.month]} · encaixe avaliação, retorno ou sessão.';
+String agendaEmptyDaySubtitle() =>
+    'Nenhum horário. Encaixe avaliação, retorno ou sessão.';

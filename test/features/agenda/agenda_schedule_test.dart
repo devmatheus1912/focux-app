@@ -29,14 +29,26 @@ void main() {
     );
   });
 
-  test('card mostra o aluno; título vira nota', () {
+  test('card mostra o aluno; título vira nota quando útil', () {
     expect(
       agendaEventTitle(alunoNome: 'Bruno', titulo: 'oi'),
       'Bruno',
     );
-    expect(agendaEventNote('oi'), 'oi');
+    expect(agendaEventSessionNote('oi'), isNull);
+    expect(agendaEventSessionNote('Avaliação'), 'Avaliação');
     expect(agendaEventNote('  '), isNull);
     expect(agendaEventTitle(alunoNome: '  ', titulo: 'Avaliação'), 'Avaliação');
+  });
+
+  test('subtítulo do sheet resume horário e status', () {
+    expect(
+      agendaEventSheetSubtitle(
+        inicio: DateTime(2026, 8, 19, 8, 30),
+        fim: DateTime(2026, 8, 19, 9, 30),
+        statusLabel: 'Agendado',
+      ),
+      '08:30–09:30 · Agendado',
+    );
   });
 
   test('iso date e segunda da semana', () {
@@ -62,12 +74,6 @@ void main() {
       ),
       'Qui · 20 ago · 1 atendimento',
     );
-    expect(
-      agendaEmptyDaySubtitle(
-        weekdayLabel: 'Qui',
-        date: DateTime(2026, 8, 20),
-      ),
-      'Qui, 20 ago · encaixe avaliação, retorno ou sessão.',
-    );
+    expect(agendaEmptyDaySubtitle(), 'Nenhum horário. Encaixe avaliação, retorno ou sessão.');
   });
 }
