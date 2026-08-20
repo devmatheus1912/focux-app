@@ -30,8 +30,11 @@ void main() {
     for (final other in files) {
       if (other == file) continue;
       final target = _libPath(other);
+      final pkg = 'package:focux_app/${target.replaceFirst('lib/', '')}';
       if (content.contains(target) ||
-          content.contains(target.replaceAll('.dart', ''))) {
+          content.contains(target.replaceAll('.dart', '')) ||
+          content.contains(pkg) ||
+          content.contains(pkg.replaceAll('.dart', ''))) {
         importers[other]!.add(self);
       }
     }
@@ -40,6 +43,22 @@ void main() {
       for (final entry in importers.entries) {
         if (_libPath(entry.key) == partPath) {
           entry.value.add(self);
+        }
+      }
+    }
+  }
+
+  final testDir = Directory('test');
+  if (testDir.existsSync()) {
+    for (final file in testDir.listSync(recursive: true).whereType<File>()) {
+      if (!file.path.endsWith('.dart')) continue;
+      final content = file.readAsStringSync();
+      for (final other in files) {
+        final target = _libPath(other);
+        final pkg = 'package:focux_app/${target.replaceFirst('lib/', '')}';
+        if (content.contains(pkg) ||
+            content.contains(pkg.replaceAll('.dart', ''))) {
+          importers[other]!.add(_libPath(file.path));
         }
       }
     }

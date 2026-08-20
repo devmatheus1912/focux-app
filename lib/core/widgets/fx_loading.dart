@@ -25,16 +25,6 @@ class FxLoading extends StatelessWidget {
     this.valueColor,
   });
 
-  /// Inline section loading bar — legacy; prefer [sectionShimmer].
-  static Widget sectionBar(BuildContext context) {
-    final primary = Theme.of(context).colorScheme.primary;
-    return LinearProgressIndicator(
-      minHeight: 2,
-      color: primary,
-      backgroundColor: primary.withValues(alpha: 0.12),
-    );
-  }
-
   /// Card-shaped skeleton aligned with ShellChrome / dashboard shimmer.
   static Widget sectionShimmer(
     BuildContext context, {

@@ -22,9 +22,6 @@ abstract final class FocuxBrandCopy {
   static const onboardingSocialProofFallback =
       'Personais e alunos treinando todo dia';
 
-  @Deprecated('Use onboardingSocialProofFallback ou formatBrandSocialProofLine')
-  static const onboardingSocialProof = onboardingSocialProofFallback;
-
   static const onboardingSkip = 'Pular';
 
   static const onboardingCtaNext = 'Quero isso →';
@@ -141,10 +138,6 @@ abstract final class FocuxBrandCopy {
       ],
     ),
   ];
-
-  @Deprecated('Use slidesFor(OnboardingPersona.personal)')
-  static List<OnboardingSlideCopy> get onboardingSlides =>
-      onboardingSlidesPersonal;
 }
 
 enum OnboardingPersona { personal, aluno }

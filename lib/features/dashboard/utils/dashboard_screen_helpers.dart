@@ -29,23 +29,6 @@ String dashboardPersonalFirstName(String? nome) {
   return fxTitleCaseName(parts.first);
 }
 
-/// @Deprecated — Home operacional não usa saudação horária.
-String dashboardGreeting(String? nome, {bool compact = false}) {
-  final hour = DateTime.now().hour;
-  final prefix =
-      hour < 12
-          ? 'Bom dia'
-          : hour < 18
-          ? 'Boa tarde'
-          : 'Boa noite';
-  final display = dashboardPersonalDisplayName(nome);
-  if (display == 'Personal') return prefix;
-  if (compact && display.length > 18) {
-    return '$prefix, ${display.substring(0, 17)}…';
-  }
-  return '$prefix, $display';
-}
-
 bool isRiskEchoCopy(String text) {
   final lower = text.toLowerCase();
   return lower.contains('risco') ||
