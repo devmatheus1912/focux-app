@@ -21,6 +21,16 @@ class _NovoAgendamentoScreenState extends ConsumerState<NovoAgendamentoScreen> {
   bool get _canSave => _alunoId != null && _inicio != null && _fim != null;
 
   @override
+  void initState() {
+    super.initState();
+    final seed = widget.seedDay;
+    if (seed != null && (seed.hour != 0 || seed.minute != 0)) {
+      _inicio = seed;
+      _fim = seed.add(const Duration(hours: 1));
+    }
+  }
+
+  @override
   void dispose() {
     _titulo.dispose();
     super.dispose();
@@ -98,6 +108,7 @@ class _NovoAgendamentoScreenState extends ConsumerState<NovoAgendamentoScreen> {
             _titulo.text.isEmpty ? null : _titulo.text,
           );
       invalidateAgendaCaches(ref);
+      AnalyticsService.instance.track(ProductEvents.agendaCreated);
       if (mounted) safePopOrGo(context, '/agenda');
     } catch (e) {
       if (mounted) {

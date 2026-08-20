@@ -6,23 +6,23 @@ Future<void> showAgendaHelpSheet(BuildContext context) {
   return showFxHelpSheet(
     context,
     title: 'Como usar a agenda',
-    subtitle: 'Marque o dia, encaixe o aluno e confirme o horário.',
+    subtitle: 'O dia do personal: próximo horário, lacunas e a ficha do aluno.',
     tips: const [
       FxHelpTip(
-        'Dia',
-        'Toque no dia para ver os horários. As setas mudam a semana — os dados vêm do servidor.',
+        'Próximo',
+        'O card verde é o próximo atendimento de hoje. Toque para abrir, confirmar ou concluir.',
+      ),
+      FxHelpTip(
+        'Lacuna',
+        'Faixas “min livres” são buracos na agenda. Toque em Encaixar para preencher.',
       ),
       FxHelpTip(
         'Atendimento',
-        'Toque no aluno para abrir a ficha, confirmar, concluir ou avisar no WhatsApp. O título opcional vira nota.',
-      ),
-      FxHelpTip(
-        'Hoje',
-        'Fora do dia atual, o ícone de hoje (calendário com o dia) volta para agora.',
+        'Toque no aluno para abrir a ficha, remarcar, WhatsApp, confirmar ou concluir.',
       ),
       FxHelpTip(
         'iCal',
-        'O ícone de calendário copia o link para o Google Calendar ou o Apple Calendar.',
+        'O ícone de calendário no topo copia o link para o Google Calendar ou o Apple Calendar.',
       ),
     ],
   );

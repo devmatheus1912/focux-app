@@ -151,7 +151,7 @@ class AgendaEventCard extends StatelessWidget {
                   decoration: BoxDecoration(
                     color:
                         chrome.isDark
-                            ? Colors.white.withValues(alpha: 0.06)
+                            ? chrome.ink.withValues(alpha: 0.08)
                             : primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(10),
                   ),

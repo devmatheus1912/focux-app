@@ -100,7 +100,22 @@ class AgendaRepository {
     return Agendamento.fromJson(r.data);
   }
 
-  Future<void> excluir(int id) => _dio.delete('/api/agenda/$id');
+  Future<Agendamento> atualizarHorario(
+    int id,
+    DateTime inicio,
+    DateTime fim, {
+    String? titulo,
+  }) async {
+    final r = await _dio.patch(
+      '/api/agenda/$id',
+      data: {
+        'inicio': inicio.toIso8601String(),
+        'fim': fim.toIso8601String(),
+        if (titulo != null) 'titulo': titulo,
+      },
+    );
+    return Agendamento.fromJson(r.data as Map<String, dynamic>);
+  }
 
   Future<Agendamento> atualizarStatus(int id, String status) async {
     final r = await _dio.put(
@@ -108,6 +123,10 @@ class AgendaRepository {
       queryParameters: {'status': status},
     );
     return Agendamento.fromJson(r.data as Map<String, dynamic>);
+  }
+
+  Future<void> excluir(int id) async {
+    await _dio.delete('/api/agenda/$id');
   }
 
   Future<List<Agendamento>> listarSemana(String data) async {

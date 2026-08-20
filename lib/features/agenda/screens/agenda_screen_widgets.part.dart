@@ -10,6 +10,7 @@ class _AgendaEventSheet extends StatefulWidget {
     this.onConfirm,
     this.onComplete,
     this.onCancel,
+    this.onReschedule,
     required this.onDelete,
   });
 
@@ -21,6 +22,7 @@ class _AgendaEventSheet extends StatefulWidget {
   final Future<void> Function()? onConfirm;
   final Future<void> Function()? onComplete;
   final Future<void> Function()? onCancel;
+  final Future<void> Function()? onReschedule;
   final Future<void> Function() onDelete;
 
   @override
@@ -35,6 +37,13 @@ class _AgendaEventSheetState extends State<_AgendaEventSheet> {
     setState(() => _busy = true);
     try {
       await action();
+    } catch (e) {
+      if (mounted) {
+        FeedbackHelper.showError(
+          context,
+          friendlyError(e, fallback: 'Não foi possível concluir.'),
+        );
+      }
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -221,6 +230,22 @@ class _AgendaEventSheetState extends State<_AgendaEventSheet> {
                 ),
               ),
             ],
+            if (widget.onReschedule != null)
+              Semantics(
+                button: true,
+                label: 'Remarcar horário',
+                child: OutlinedButton(
+                  onPressed: _busy ? null : () => _run(widget.onReschedule),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: chrome.ink,
+                    minimumSize: const Size.fromHeight(48),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                  child: const Text('Remarcar'),
+                ),
+              ),
             Semantics(
               button: true,
               label: 'Excluir agendamento',

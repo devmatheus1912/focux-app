@@ -59,3 +59,19 @@ String agendaWhatsappReminder({
   final first = parts.isEmpty || parts.first.isEmpty ? 'oi' : parts.first;
   return 'Oi $first, confirmando nosso horário às ${agendaHm(inicio)}.';
 }
+
+const agendaMonthShort = [
+  '',
+  'jan',
+  'fev',
+  'mar',
+  'abr',
+  'mai',
+  'jun',
+  'jul',
+  'ago',
+  'set',
+  'out',
+  'nov',
+  'dez',
+];

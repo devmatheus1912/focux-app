@@ -22,7 +22,9 @@ void main() {
     expect(screen, contains('AgendaDayChip'));
     expect(screen, contains('showAgendaHelpSheet'));
     expect(screen, contains('agendaEventTitle'));
-    expect(screen, contains('AgendaEventCard'));
+    expect(screen, contains('AgendaHubHeader'));
+    expect(screen, contains('AgendaNextBanner'));
+    expect(screen, contains('agendaBuildDayLane'));
     expect(screen, contains('listarSemana'));
     expect(screen, contains('RefreshIndicator'));
     expect(screen, contains('maskEmailForList'));

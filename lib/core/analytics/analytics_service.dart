@@ -167,6 +167,16 @@ class ProductEvents {
   static const chatThreadOpened = 'chat_thread_opened';
   static const financeiroCobrarViaChat = 'financeiro_cobrar_via_chat';
 
+  static const agendaViewed = 'agenda_viewed';
+  static const agendaRefreshed = 'agenda_refreshed';
+  static const agendaHelpOpened = 'agenda_help_opened';
+  static const agendaCreated = 'agenda_created';
+  static const agendaStatusChanged = 'agenda_status_changed';
+  static const agendaDeleted = 'agenda_deleted';
+  static const agendaWhatsapp = 'agenda_whatsapp';
+  static const agendaAlunoOpened = 'agenda_aluno_opened';
+  static const agendaRescheduled = 'agenda_rescheduled';
+
   static const perfilViewed = 'perfil_viewed';
   static const perfilRefreshed = 'perfil_refreshed';
   static const perfilStickyTapped = 'perfil_sticky_tapped';

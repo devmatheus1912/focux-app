@@ -24,7 +24,7 @@ class AgendaDayChip extends StatelessWidget {
   final bool selected;
   final VoidCallback onTap;
   final int count;
-  final double width;
+  final double? width;
 
   @override
   Widget build(BuildContext context) {
@@ -88,15 +88,18 @@ class AgendaDayChip extends StatelessWidget {
                     if (count > 0) ...[
                       const SizedBox(height: 4),
                       Container(
-                        width: 16,
-                        height: 16,
+                        constraints: const BoxConstraints(
+                          minWidth: 16,
+                          minHeight: 16,
+                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 3),
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
                           color: primary,
-                          shape: BoxShape.circle,
+                          borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
-                          '$count',
+                          count > 9 ? '9+' : '$count',
                           style: FocuxHubTypography.chip(Colors.white).copyWith(
                             fontSize: 9,
                             fontWeight: FontWeight.w800,
