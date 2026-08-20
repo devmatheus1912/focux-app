@@ -94,7 +94,13 @@ class _CommandPrioritiesSheetState extends State<CommandPrioritiesSheet> {
             leading: FxIcon(name: 'route', size: 18, color: primary),
           ),
           const SizedBox(height: 14),
-          Flexible(
+          ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight:
+                  MediaQuery.sizeOf(context).height *
+                  FxHomeSheetChrome.maxHeightFactor *
+                  0.55,
+            ),
             child: ListView(
               shrinkWrap: true,
               physics: const BouncingScrollPhysics(),

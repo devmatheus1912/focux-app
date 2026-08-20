@@ -66,7 +66,8 @@ void main() {
     final indexHtml = File('web/index.html').readAsStringSync();
     final manifest = File('web/manifest.json').readAsStringSync();
 
-    expect(mainDart, contains("locale: const Locale('pt', 'BR')"));
+    expect(mainDart, contains("locale: const Locale('pt')"));
+    expect(mainDart, contains('S.supportedLocales'));
     expect(indexHtml, contains('Focux Personal'));
     expect(manifest, contains('Focux Personal'));
     expect(File('deploy.bat').existsSync(), isTrue);

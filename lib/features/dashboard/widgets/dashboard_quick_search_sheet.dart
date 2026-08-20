@@ -129,7 +129,13 @@ class _QuickSearchSheetState extends ConsumerState<_QuickSearchSheet> {
             ),
           ),
           SizedBox(height: TokensStrip.s3),
-          Flexible(
+          ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight:
+                  MediaQuery.sizeOf(context).height *
+                  FxHomeSheetChrome.maxHeightFactor *
+                  0.55,
+            ),
             child: ListView(
               shrinkWrap: true,
               physics: const BouncingScrollPhysics(),

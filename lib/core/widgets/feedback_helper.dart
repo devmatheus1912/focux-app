@@ -45,6 +45,9 @@ class FeedbackHelper {
     double reserveBottom = 0,
     FeedbackPlacement placement = FeedbackPlacement.standard,
   }) {
+    if (!context.mounted) return;
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    if (messenger == null) return;
     final margin = _snackMargin(
       context,
       reserveBottom: reserveBottom,
@@ -52,8 +55,8 @@ class FeedbackHelper {
     );
     final useFloating =
         placement == FeedbackPlacement.operacaoTop || reserveBottom > 0;
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    ScaffoldMessenger.of(context).showSnackBar(
+    messenger.hideCurrentSnackBar();
+    messenger.showSnackBar(
       SnackBar(
         content: snackBar.content,
         action: snackBar.action,
@@ -112,6 +115,7 @@ class FeedbackHelper {
     double reserveBottom = 0,
     FeedbackPlacement placement = FeedbackPlacement.standard,
   }) {
+    if (!context.mounted) return;
     HapticFeedback.selectionClick();
     _showSnackbar(
       context,
@@ -161,6 +165,9 @@ class FeedbackHelper {
     double reserveBottom = 0,
     FeedbackPlacement placement = FeedbackPlacement.standard,
   }) {
+    if (!context.mounted) return;
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    if (messenger == null) return;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final snackFill = isDark ? EagleTokens.darkCardHi : EagleTokens.ink;
     final margin = _snackMargin(
@@ -169,8 +176,8 @@ class FeedbackHelper {
       placement: placement,
     );
 
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    ScaffoldMessenger.of(context).showSnackBar(
+    messenger.hideCurrentSnackBar();
+    messenger.showSnackBar(
       SnackBar(
         content: Row(
           children: [

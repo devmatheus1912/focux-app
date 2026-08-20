@@ -60,7 +60,19 @@ Future<T?> showFxHomeSheet<T>(
     enableDrag: enableDrag,
     backgroundColor: fxTransparent,
     barrierColor: FxHomeSheetChrome.barrier(isDark),
-    builder: (ctx) => _FxHomeSheetEnter(child: builder(ctx)),
+    builder: (ctx) {
+      final maxH =
+          MediaQuery.sizeOf(ctx).height * FxHomeSheetChrome.expandHeightFactor;
+      return _FxHomeSheetEnter(
+        child: Align(
+          alignment: Alignment.bottomCenter,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxHeight: maxH),
+            child: builder(ctx),
+          ),
+        ),
+      );
+    },
   );
 }
 

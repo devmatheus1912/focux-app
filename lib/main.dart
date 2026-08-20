@@ -12,6 +12,7 @@ import 'package:dio/dio.dart';
 import 'core/api/api_client.dart';
 import 'core/api/tls_certificate_pinning.dart';
 import 'core/auth/session_cache_evictor.dart';
+import 'core/crash/flutter_error_reporting.dart';
 import 'core/fcm/fcm_service.dart';
 import 'core/fcm/plan_sync_coordinator.dart';
 import 'features/subscription/providers/iap_store_health_provider.dart';
@@ -50,11 +51,16 @@ void main() {
           await FcmService.init(ApiClient());
           crashlyticsReady = true;
 
-          FlutterError.onError =
-              FirebaseCrashlytics.instance.recordFlutterFatalError;
+          FlutterError.onError = (details) {
+            unawaited(reportFlutterErrorToCrashlytics(details));
+          };
 
           PlatformDispatcher.instance.onError = (error, stack) {
-            FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+            FirebaseCrashlytics.instance.recordError(
+              error,
+              stack,
+              fatal: !isNonFatalFlutterFrameworkError(error),
+            );
             return true;
           };
         }
@@ -113,10 +119,7 @@ void main() {
 
       runApp(const ProviderScope(child: FocuxApp()));
     },
-    (Object error, StackTrace stack) {
-      debugPrint('[Focux] Uncaught async error: $error');
-      debugPrint('$stack');
-    },
+    reportUncaughtZoneError,
   );
 }
 
@@ -272,12 +275,8 @@ class _FocuxAppState extends ConsumerState<FocuxApp> {
       themeAnimationCurve: Curves.easeInOutCubic,
       routerConfig: AppRouter.router,
       debugShowCheckedModeBanner: false,
-      locale: const Locale('pt', 'BR'),
-      supportedLocales: const [
-        Locale('pt', 'BR'),
-        Locale('en', 'US'),
-        Locale('es', 'ES'),
-      ],
+      locale: const Locale('pt'),
+      supportedLocales: S.supportedLocales,
       localizationsDelegates: S.localizationsDelegates,
       // Acessibilidade: respeita escala do sistema, mas evita explosões
       // de layout em escalas absurdas (>1.6) — mantém WCAG AA sem
