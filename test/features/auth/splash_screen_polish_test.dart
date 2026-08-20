@@ -39,9 +39,14 @@ void main() {
 
   test('launch theme Android é dark como a Home', () {
     final styles = File('android/app/src/main/res/values/styles.xml').readAsStringSync();
+    final launchBg = File(
+      'android/app/src/main/res/drawable/launch_background.xml',
+    ).readAsStringSync();
     expect(styles, contains('Theme.Black.NoTitleBar'));
     expect(styles, isNot(contains('Theme.Light.NoTitleBar')));
     expect(styles, contains('focux_cinematic_bg'));
     expect(styles, contains('navigationBarColor'));
+    expect(launchBg, contains('@color/focux_cinematic_bg'));
+    expect(launchBg, isNot(contains('@drawable/background')));
   });
 }
