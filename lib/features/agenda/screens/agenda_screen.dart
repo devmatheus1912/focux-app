@@ -14,8 +14,11 @@ import '../../../features/alunos/providers/alunos_provider.dart';
 import '../data/agenda_repository.dart';
 import '../providers/agenda_provider.dart';
 import '../utils/agenda_schedule.dart';
+import '../utils/agenda_status.dart';
 import '../widgets/agenda_day_chip.dart';
+import '../widgets/agenda_event_card.dart';
 import '../widgets/agenda_help_sheet.dart';
+import '../../alunos/widgets/aluno_avatar.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/fx_empty_state.dart';
@@ -55,7 +58,7 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
     final now = DateTime.now();
     _hojeIdx = now.weekday - 1; // 0 = Monday, 6 = Sunday
     _selectedIdx = _hojeIdx;
-    _weekStart = now.subtract(Duration(days: _hojeIdx));
+    _weekStart = agendaWeekStart(now);
     _load();
   }
 
@@ -65,11 +68,24 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
       _erro = null;
     });
     try {
-      if (force) invalidateAgendaCaches(ref);
-      final home = await ref.read(agendaHomeProvider.future);
+      final monday = DateTime(
+        _weekStart.year,
+        _weekStart.month,
+        _weekStart.day,
+      );
+      final currentMonday = agendaWeekStart(DateTime.now());
+      final List<Agendamento> items;
+      if (agendaSameDay(monday, currentMonday)) {
+        if (force) invalidateAgendaCaches(ref);
+        items = (await ref.read(agendaHomeProvider.future)).firstPaintItems;
+      } else {
+        items = await ref
+            .read(agendaRepositoryProvider)
+            .listarSemana(agendaIsoDate(monday));
+      }
       if (!mounted) return;
       setState(() {
-        _ags = home.firstPaintItems;
+        _ags = items;
         _loading = false;
         _fetchedAt = DateTime.now();
       });
@@ -90,39 +106,101 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
     _load(force: true);
   }
 
-  Color _statusColor(String s, bool isDark, Color primary) {
-    if (s == 'PRESENTE' || s == 'CONCLUIDO') {
-      return EagleTokens.semanticGood(isDark: isDark);
-    }
-    if (s == 'FALTA') return EagleTokens.semanticBad(isDark: isDark);
-    if (s == 'CANCELADO') {
-      return isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-    }
-    return primary; // AGENDADO
+  bool get _isTodayVisible {
+    final now = DateTime.now();
+    return agendaSameDay(
+          DateTime(_weekStart.year, _weekStart.month, _weekStart.day),
+          agendaWeekStart(now),
+        ) &&
+        _selectedIdx == now.weekday - 1;
   }
 
-  String _statusText(String status) {
-    switch (status) {
-      case 'AGENDADO':
-        return 'Agendado';
-      case 'PRESENTE':
-        return 'Presente';
-      case 'CONCLUIDO':
-        return 'Concluído';
-      case 'FALTA':
-        return 'Falta';
-      case 'CANCELADO':
-        return 'Cancelado';
-      default:
-        return status;
-    }
+  void _goToday() {
+    final now = DateTime.now();
+    final monday = agendaWeekStart(now);
+    final sameWeek = agendaSameDay(
+      DateTime(_weekStart.year, _weekStart.month, _weekStart.day),
+      monday,
+    );
+    setState(() {
+      _weekStart = monday;
+      _selectedIdx = now.weekday - 1;
+    });
+    if (!sameWeek) _load();
   }
 
   void _changeWeek(int delta) {
+    final next = _weekStart.add(Duration(days: delta * 7));
+    final now = DateTime.now();
+    final todayMonday = agendaWeekStart(now);
     setState(() {
-      _weekStart = _weekStart.add(Duration(days: delta * 7));
-      _selectedIdx = 0;
+      _weekStart = DateTime(next.year, next.month, next.day);
+      _selectedIdx =
+          agendaSameDay(_weekStart, todayMonday) ? now.weekday - 1 : 0;
     });
+    _load();
+  }
+
+  String? _photoFor(int alunoId) {
+    final list = ref.read(alunosProvider).valueOrNull;
+    if (list == null) return null;
+    for (final aluno in list) {
+      if (aluno.id == alunoId) return aluno.fotoUrl;
+    }
+    return null;
+  }
+
+  Aluno? _alunoFromCache(int alunoId) {
+    final list = ref.read(alunosProvider).valueOrNull;
+    if (list == null) return null;
+    for (final aluno in list) {
+      if (aluno.id == alunoId) return aluno;
+    }
+    return null;
+  }
+
+  Future<bool> _confirmDestructive({
+    required String title,
+    required String body,
+    required String confirmLabel,
+  }) async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) {
+        final chrome = ShellChrome.of(ctx);
+        return AlertDialog(
+          title: Text(title),
+          content: Text(body),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: Text('Voltar', style: TextStyle(color: chrome.mute)),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: Text(confirmLabel),
+            ),
+          ],
+        );
+      },
+    );
+    return ok == true;
+  }
+
+  Future<void> _setStatus(Agendamento ag, String status) async {
+    await ref.read(agendaRepositoryProvider).atualizarStatus(ag.id, status);
+    if (!mounted) return;
+    Navigator.pop(context);
+    await _load(force: true);
+    if (!mounted) return;
+    FeedbackHelper.showSuccess(
+      context,
+      status == 'CONFIRMADO'
+          ? 'Horário confirmado.'
+          : status == 'CONCLUIDO'
+          ? 'Atendimento concluído.'
+          : 'Horário cancelado.',
+    );
   }
 
   /// Combina `Env.apiUrl` (https://host[/api]) com um path relativo (/api/...) sem
@@ -164,17 +242,70 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
   }
 
   Future<void> _openAgendamentoDetails(Agendamento ag) async {
+    Aluno? aluno = _alunoFromCache(ag.alunoId);
+    try {
+      aluno = await ref.read(alunoProvider(ag.alunoId).future);
+    } catch (_) {}
+    if (!mounted) return;
+    final digits = (aluno?.whatsapp ?? '').replaceAll(RegExp(r'\D'), '');
+    final actionable = agendaStatusIsActionable(ag.status);
+
     await showFxHomeSheet<void>(
       context,
       builder:
           (_) => _AgendaEventSheet(
             agendamento: ag,
-            statusLabel: _statusText(ag.status),
+            statusLabel: agendaStatusLabel(ag.status),
+            photoUrl: aluno?.fotoUrl ?? _photoFor(ag.alunoId),
+            onOpenAluno: () async {
+              Navigator.pop(context);
+              if (!mounted) return;
+              context.push('/alunos/${ag.alunoId}');
+            },
+            onWhatsapp:
+                digits.isEmpty
+                    ? null
+                    : () => openAlunoWhatsappOutreach(
+                      context,
+                      displayName: ag.alunoNome,
+                      whatsappNumber: digits,
+                      emRisco: aluno?.emRisco ?? false,
+                      message: agendaWhatsappReminder(
+                        alunoNome: ag.alunoNome,
+                        inicio: ag.inicio,
+                      ),
+                    ),
+            onConfirm:
+                agendaStatusNeedsConfirm(ag.status)
+                    ? () => _setStatus(ag, 'CONFIRMADO')
+                    : null,
+            onComplete:
+                actionable ? () => _setStatus(ag, 'CONCLUIDO') : null,
+            onCancel:
+                actionable
+                    ? () async {
+                      final ok = await _confirmDestructive(
+                        title: 'Cancelar horário?',
+                        body:
+                            'O horário com ${ag.alunoNome} deixa de aparecer como ativo.',
+                        confirmLabel: 'Cancelar horário',
+                      );
+                      if (!ok) return;
+                      await _setStatus(ag, 'CANCELADO');
+                    }
+                    : null,
             onDelete: () async {
+              final ok = await _confirmDestructive(
+                title: 'Excluir atendimento?',
+                body: 'Isso remove o horário com ${ag.alunoNome} da agenda.',
+                confirmLabel: 'Excluir',
+              );
+              if (!ok) return;
               await ref.read(agendaRepositoryProvider).excluir(ag.id);
               if (!mounted) return;
               Navigator.pop(context);
-              _load(force: true);
+              await _load(force: true);
+              if (!mounted) return;
               FeedbackHelper.showSuccess(context, 'Agendamento excluído.');
             },
           ),
@@ -205,7 +336,9 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
       }
     }
 
-    final dailyEvents = eventosMap[_selectedIdx] ?? [];
+    final dailyEvents = [...(eventosMap[_selectedIdx] ?? <Agendamento>[])]
+      ..sort((a, b) => a.inicio.compareTo(b.inicio));
+    final nextOpen = agendaNextOpen(dailyEvents);
     final selectedDate = _weekStart.add(Duration(days: _selectedIdx));
     final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
 
@@ -225,6 +358,7 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
       'dez',
     ];
 
+    ref.watch(alunosProvider);
     return fxScreenA11yScope(
       label: 'Agenda',
       child: FxShellScaffold(
@@ -294,6 +428,22 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                           ),
                           onPressed: _copyIcalLink,
                         ),
+                        if (!_isTodayVisible)
+                          IconButton(
+                            tooltip: 'Ir para hoje',
+                            visualDensity: VisualDensity.compact,
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(
+                              minWidth: FxHomeSheetChrome.touchTarget,
+                              minHeight: FxHomeSheetChrome.touchTarget,
+                            ),
+                            icon: Icon(
+                              Icons.today_outlined,
+                              color: primary,
+                              size: 22,
+                            ),
+                            onPressed: _goToday,
+                          ),
                         const SizedBox(width: 6),
                         Flexible(
                           child: FittedBox(
@@ -312,7 +462,7 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                                     onTap: () => _changeWeek(-1),
                                     borderRadius: BorderRadius.circular(999),
                                     child: Padding(
-                                      padding: const EdgeInsets.all(2),
+                                      padding: const EdgeInsets.all(8),
                                       child: Icon(
                                         Icons.chevron_left,
                                         size: 16,
@@ -334,7 +484,7 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                                     onTap: () => _changeWeek(1),
                                     borderRadius: BorderRadius.circular(999),
                                     child: Padding(
-                                      padding: const EdgeInsets.all(2),
+                                      padding: const EdgeInsets.all(8),
                                       child: Icon(
                                         Icons.chevron_right,
                                         size: 16,
@@ -440,192 +590,56 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                         )
                         : _loading
                         ? const SkeletonList(count: 4)
-                        : dailyEvents.isEmpty
-                        ? FxEmptyState(
-                          icon: 'calendar',
-                          title: 'Dia livre',
-                          subtitle:
-                              '${diasSemanaStr[_selectedIdx]}, ${selectedDate.day} ${monthNames[selectedDate.month]} · nenhum atendimento marcado. Encaixe uma avaliação, retorno ou sessão avulsa.',
-                          action: FxEmptyAction(
-                            label: 'Novo agendamento',
-                            onTap: _novoAgendamento,
-                          ),
-                        )
-                        : ListView.builder(
-                          padding: const EdgeInsets.fromLTRB(
-                            TokensStrip.s4,
-                            0,
-                            16,
-                            16,
-                          ),
-                          itemCount: dailyEvents.length,
-                          itemBuilder: (_, i) {
-                            final e = dailyEvents[i];
-                            final sColor = _statusColor(
-                              e.status,
-                              isDark,
-                              primary,
-                            );
-                            final title = agendaEventTitle(
-                              alunoNome: e.alunoNome,
-                              titulo: e.titulo,
-                            );
-                            final note = agendaEventNote(e.titulo);
-
-                            return Semantics(
-                              button: true,
-                              label:
-                                  'Atendimento $title, ${_statusText(e.status)}, ${_hm(e.inicio)}',
-                              child: InkWell(
-                                onTap: () => _openAgendamentoDetails(e),
-                                borderRadius: BorderRadius.circular(
-                                  TokensStrip.rCard,
-                                ),
-                                child: Container(
-                                  margin: const EdgeInsets.only(bottom: 8),
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 14,
-                                    vertical: 14,
-                                  ),
-                                  decoration: fxListCardDecoration(
-                                    context,
-                                    accent: sColor,
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      SizedBox(
-                                        width: 52,
-                                        child: Column(
-                                          children: [
-                                            Text(
-                                              '${e.inicio.hour.toString().padLeft(2, '0')}:${e.inicio.minute.toString().padLeft(2, '0')}',
-                                              style: AppTypography.mono(
-                                                fontSize: 13,
-                                                fontWeight: FontWeight.w600,
-                                                color: primary,
-                                              ),
+                        : RefreshIndicator(
+                          color: primary,
+                          onRefresh: () => _load(force: true),
+                          child:
+                              dailyEvents.isEmpty
+                                  ? LayoutBuilder(
+                                    builder: (context, constraints) {
+                                      return ListView(
+                                        physics:
+                                            const AlwaysScrollableScrollPhysics(),
+                                        children: [
+                                          SizedBox(
+                                            height: constraints.maxHeight,
+                                            child: FxEmptyState(
+                                              icon: 'calendar',
+                                              title: 'Dia livre',
+                                              subtitle:
+                                                  '${diasSemanaStr[_selectedIdx]}, ${selectedDate.day} ${monthNames[selectedDate.month]} · nenhum atendimento. O botão abaixo encaixa avaliação, retorno ou sessão.',
                                             ),
-                                            Container(
-                                              width: 2,
-                                              height: 20,
-                                              margin: const EdgeInsets.only(
-                                                top: 4,
-                                              ),
-                                              decoration: BoxDecoration(
-                                                color: primary.withValues(
-                                                  alpha: 0.3,
-                                                ),
-                                                borderRadius:
-                                                    BorderRadius.circular(2),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      Container(
-                                        width: 40,
-                                        height: 40,
-                                        margin: const EdgeInsets.only(
-                                          right: 12,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: BrandPalette.soft(
-                                            primary,
-                                            dark: isDark,
                                           ),
-                                          shape: BoxShape.circle,
-                                        ),
-                                        alignment: Alignment.center,
-                                        child: Text(
-                                          e.alunoNome.isNotEmpty
-                                              ? e.alunoNome[0].toUpperCase()
-                                              : '?',
-                                          style: FocuxHubTypography.cardTitle(
-                                            color: primary,
-                                          ),
-                                        ),
-                                      ),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              title,
-                                              style: FocuxHubTypography.cardTitle(
-                                                color: ink,
-                                              ),
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                            if (note != null) ...[
-                                              const SizedBox(height: 2),
-                                              Text(
-                                                note,
-                                                maxLines: 1,
-                                                overflow: TextOverflow.ellipsis,
-                                                style: FocuxHubTypography.bodyMuted(
-                                                  color: mute,
-                                                  fontWeight: FontWeight.w600,
-                                                ),
-                                              ),
-                                            ],
-                                            const SizedBox(height: 2),
-                                            Row(
-                                              children: [
-                                                Container(
-                                                  width: 5,
-                                                  height: 5,
-                                                  decoration: BoxDecoration(
-                                                    color: sColor,
-                                                    shape: BoxShape.circle,
-                                                  ),
-                                                ),
-                                                const SizedBox(width: 5),
-                                                Text(
-                                                  _statusText(e.status),
-                                                  style: TextStyle(
-                                                    fontSize: 11.5,
-                                                    fontWeight: FontWeight.w600,
-                                                    color: sColor,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      Container(
-                                        width: 34,
-                                        height: 34,
-                                        decoration: BoxDecoration(
-                                          color:
-                                              isDark
-                                                  ? Colors.white.withValues(
-                                                    alpha: 0.06,
-                                                  )
-                                                  : primary.withValues(
-                                                    alpha: 0.1,
-                                                  ),
-                                          borderRadius: BorderRadius.circular(
-                                            10,
-                                          ),
-                                        ),
-                                        alignment: Alignment.center,
-                                        child: Icon(
-                                          Icons.chevron_right,
-                                          size: 18,
-                                          color: primary,
-                                        ),
-                                      ),
-                                    ],
+                                        ],
+                                      );
+                                    },
+                                  )
+                                  : ListView.separated(
+                                    physics:
+                                        const AlwaysScrollableScrollPhysics(),
+                                    padding: const EdgeInsets.fromLTRB(
+                                      TokensStrip.s4,
+                                      0,
+                                      16,
+                                      16,
+                                    ),
+                                    itemCount: dailyEvents.length,
+                                    separatorBuilder:
+                                        (_, __) => const SizedBox(height: 8),
+                                    itemBuilder: (_, i) {
+                                      final e = dailyEvents[i];
+                                      return AgendaEventCard(
+                                        agendamento: e,
+                                        photoUrl: _photoFor(e.alunoId),
+                                        emphasized: nextOpen?.id == e.id,
+                                        onTap:
+                                            () => _openAgendamentoDetails(e),
+                                      );
+                                    },
                                   ),
-                                ),
-                              ),
-                            );
-                          },
                         ),
               ),
-              if (!_loading && _erro == null && dailyEvents.isNotEmpty)
+              if (!_loading && _erro == null)
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20, 4, 20, 88),
                   child: Semantics(
@@ -643,7 +657,4 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
       ),
     );
   }
-
-  String _hm(DateTime date) =>
-      '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
 }

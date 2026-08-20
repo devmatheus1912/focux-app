@@ -38,4 +38,20 @@ void main() {
     expect(agendaEventNote('  '), isNull);
     expect(agendaEventTitle(alunoNome: '  ', titulo: 'Avaliação'), 'Avaliação');
   });
+
+  test('iso date e segunda da semana', () {
+    expect(agendaIsoDate(DateTime(2026, 8, 19)), '2026-08-19');
+    expect(agendaWeekStart(DateTime(2026, 8, 19)), DateTime(2026, 8, 17));
+    expect(agendaHm(DateTime(2026, 8, 19, 8, 30)), '08:30');
+  });
+
+  test('lembrete de whatsapp usa primeiro nome e horário', () {
+    expect(
+      agendaWhatsappReminder(
+        alunoNome: 'Beatriz Carvalho',
+        inicio: DateTime(2026, 8, 19, 8, 30),
+      ),
+      'Oi Beatriz, confirmando nosso horário às 08:30.',
+    );
+  });
 }

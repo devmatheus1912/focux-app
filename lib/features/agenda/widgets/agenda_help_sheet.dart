@@ -10,15 +10,15 @@ Future<void> showAgendaHelpSheet(BuildContext context) {
     tips: const [
       FxHelpTip(
         'Dia',
-        'Toque no dia da semana para ver os atendimentos. O mês muda nas setas.',
+        'Toque no dia para ver os horários. As setas mudam a semana — os dados vêm do servidor.',
       ),
       FxHelpTip(
-        'Novo',
-        'Escolha o aluno, o início e o fim. Ao confirmar o início, o fim vem com +1 hora.',
+        'Atendimento',
+        'Toque no aluno para abrir a ficha, confirmar, concluir ou avisar no WhatsApp. O título opcional vira nota.',
       ),
       FxHelpTip(
-        'Título',
-        'Opcional. Avaliação, retorno ou o foco da sessão — o nome do aluno já identifica o card.',
+        'Hoje',
+        'Fora do dia atual, o ícone de hoje (calendário com o dia) volta para agora.',
       ),
       FxHelpTip(
         'iCal',

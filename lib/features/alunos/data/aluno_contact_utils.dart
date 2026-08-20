@@ -109,13 +109,15 @@ Future<void> openAlunoWhatsappOutreach(
   required String displayName,
   required String whatsappNumber,
   required bool emRisco,
+  String? message,
 }) async {
   HapticFeedback.selectionClick();
   final firstName = displayName.split(' ').first;
   final mensagem =
-      emRisco
+      message ??
+      (emRisco
           ? 'Oi $firstName, tudo bem? Vi que faz um tempo sem registrarmos treino. Posso te ajudar a retomar a rotina?'
-          : 'Oi $firstName, tudo bem? Passando para alinhar sua mensalidade pendente.';
+          : 'Oi $firstName, tudo bem? Passando para alinhar sua mensalidade pendente.');
   final uri = Uri.parse(
     'https://wa.me/55$whatsappNumber?text=${Uri.encodeComponent(mensagem)}',
   );

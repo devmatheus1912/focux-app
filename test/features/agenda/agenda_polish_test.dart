@@ -22,6 +22,9 @@ void main() {
     expect(screen, contains('AgendaDayChip'));
     expect(screen, contains('showAgendaHelpSheet'));
     expect(screen, contains('agendaEventTitle'));
+    expect(screen, contains('AgendaEventCard'));
+    expect(screen, contains('listarSemana'));
+    expect(screen, contains('RefreshIndicator'));
     expect(screen, contains('maskEmailForList'));
     expect(screen, contains('expand: true'));
     expect(screen, contains('Semantics('));

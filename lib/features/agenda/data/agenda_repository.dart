@@ -8,6 +8,7 @@ class Agendamento {
   final DateTime inicio;
   final DateTime fim;
   final String? titulo;
+  final String? observacoes;
   final String status;
   final String? statusAtendimento;
   final String? observacoesPosAtendimento;
@@ -19,6 +20,7 @@ class Agendamento {
     required this.inicio,
     required this.fim,
     this.titulo,
+    this.observacoes,
     required this.status,
     this.statusAtendimento,
     this.observacoesPosAtendimento,
@@ -31,6 +33,7 @@ class Agendamento {
     inicio: DateTime.parse(j['inicio'] as String).toLocal(),
     fim: DateTime.parse(j['fim'] as String).toLocal(),
     titulo: j['titulo'] as String?,
+    observacoes: j['observacoes'] as String?,
     status: j['status'] as String,
     statusAtendimento: j['statusAtendimento'] as String?,
     observacoesPosAtendimento: j['observacoesPosAtendimento'] as String?,
@@ -98,6 +101,14 @@ class AgendaRepository {
   }
 
   Future<void> excluir(int id) => _dio.delete('/api/agenda/$id');
+
+  Future<Agendamento> atualizarStatus(int id, String status) async {
+    final r = await _dio.put(
+      '/api/agenda/$id/status',
+      queryParameters: {'status': status},
+    );
+    return Agendamento.fromJson(r.data as Map<String, dynamic>);
+  }
 
   Future<List<Agendamento>> listarSemana(String data) async {
     final r = await _dio.get(

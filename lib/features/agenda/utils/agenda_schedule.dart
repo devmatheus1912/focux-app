@@ -35,3 +35,27 @@ String? agendaEventNote(String? titulo) {
   if (t == null || t.isEmpty) return null;
   return t;
 }
+
+String agendaIsoDate(DateTime d) {
+  final y = d.year.toString().padLeft(4, '0');
+  final m = d.month.toString().padLeft(2, '0');
+  final day = d.day.toString().padLeft(2, '0');
+  return '$y-$m-$day';
+}
+
+DateTime agendaWeekStart(DateTime d) {
+  final day = DateTime(d.year, d.month, d.day);
+  return day.subtract(Duration(days: day.weekday - 1));
+}
+
+String agendaHm(DateTime date) =>
+    '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+
+String agendaWhatsappReminder({
+  required String alunoNome,
+  required DateTime inicio,
+}) {
+  final parts = alunoNome.trim().split(RegExp(r'\s+'));
+  final first = parts.isEmpty || parts.first.isEmpty ? 'oi' : parts.first;
+  return 'Oi $first, confirmando nosso horário às ${agendaHm(inicio)}.';
+}
