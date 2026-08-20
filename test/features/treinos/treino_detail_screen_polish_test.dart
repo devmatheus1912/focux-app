@@ -54,6 +54,8 @@ void main() {
     expect(screen, contains('ProductEvents.treinoExerciseMenuOpened'));
     expect(screen, contains('ProductEvents.treinoDetailHelpOpened'));
     expect(screen, contains('ProductEvents.treinoDetailRefreshed'));
+    expect(screen, contains('ProductEvents.treinoPrescriptionSaved'));
+    expect(screen, contains('treinoPrescriptionRejection'));
     expect(screen, contains("source: 'empty'"));
     expect(screen, contains('TreinosLayout.touchTarget'));
     expect(screen, contains('TreinoHomeSheetSurface'));
@@ -62,7 +64,12 @@ void main() {
       File(
         'lib/features/treinos/widgets/treino_prescription_form.dart',
       ).readAsStringSync(),
-      contains('FxInputDeco.outlineBorder'),
+      allOf(
+        contains('FxInputDeco.outlineBorder'),
+        contains('Semantics('),
+        contains('textField: true'),
+        contains('selected: value == option.\$1'),
+      ),
     );
     expect(screen, isNot(contains('ChoiceChip')));
     expect(screen, isNot(contains('DropdownButtonFormField')));
@@ -91,6 +98,8 @@ void main() {
       allOf(
         contains('ExerciseVideoSpecTips.open'),
         contains('FxHelpIconButton'),
+        contains('Semantics('),
+        contains('liveRegion: locked'),
         isNot(contains('Celular em pé')),
         isNot(contains('Ver seu vídeo')),
         isNot(contains('ExerciseVideoUploadStrip')),

@@ -157,6 +157,7 @@ class ProductEvents {
   static const treinoExerciseMenuOpened = 'treino_exercise_menu_opened';
   static const treinoDetailHelpOpened = 'treino_detail_help_opened';
   static const treinoDetailRefreshed = 'treino_detail_refreshed';
+  static const treinoPrescriptionSaved = 'treino_prescription_saved';
   static const leadCreatedOrOpened = 'lead_created_or_opened';
   static const alertaRiscoOpened = 'alerta_risco_opened';
   static const dunningMarkedRecovered = 'dunning_marked_recovered';

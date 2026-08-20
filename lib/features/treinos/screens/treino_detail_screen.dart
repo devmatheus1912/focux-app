@@ -30,6 +30,7 @@ import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../constants/treinos_layout.dart';
 import '../utils/treino_detail_grouping.dart';
+import '../utils/treino_prescription_rules.dart';
 import '../widgets/treino_detail_help_sheet.dart';
 import '../widgets/treino_home_sheet.dart';
 import '../widgets/treino_prescription_form.dart';

@@ -61,19 +61,37 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
 
   Future<void> _save() async {
     if (_saving || _videoBusy) return;
+    final series = int.tryParse(_seriesCtrl.text) ?? widget.item.series;
+    final descansoSegundos = int.tryParse(_descansoCtrl.text) ?? 60;
+    final rejection = treinoPrescriptionRejection(
+      series: series,
+      descansoSegundos: descansoSegundos,
+    );
+    if (rejection != null) {
+      FeedbackHelper.showError(context, rejection);
+      return;
+    }
     setState(() => _saving = true);
     try {
       await widget.repo.atualizarExercicioPrescricao(
         widget.treinoId,
         widget.item.id,
-        series: int.tryParse(_seriesCtrl.text) ?? widget.item.series,
+        series: series,
         repeticoes: _repCtrl.text.trim(),
-        descansoSegundos: int.tryParse(_descansoCtrl.text) ?? 60,
+        descansoSegundos: descansoSegundos,
         cargaKg: double.tryParse(_cargaCtrl.text.replaceAll(',', '.')),
         observacoes: _obsCtrl.text,
         tipoSerie: _tipoSerie,
         grupoSuperset:
             _tipoSerie == 'SUPERSET' ? int.tryParse(_supersetCtrl.text) : null,
+      );
+      AnalyticsService.instance.track(
+        ProductEvents.treinoPrescriptionSaved,
+        props: {
+          'id': widget.treinoId,
+          'itemId': widget.item.id,
+          'tipoSerie': _tipoSerie,
+        },
       );
       if (mounted) Navigator.pop(context, true);
     } catch (e) {

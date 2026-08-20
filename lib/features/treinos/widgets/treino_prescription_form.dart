@@ -86,20 +86,24 @@ class TreinoPrescriptionField extends StatelessWidget {
           ).copyWith(fontSize: 12, letterSpacing: 0.1),
         ),
         const SizedBox(height: 6),
-        TextField(
-          controller: controller,
-          keyboardType: keyboardType,
-          textInputAction: textInputAction,
-          inputFormatters: inputFormatters,
-          minLines: minLines,
-          maxLines: maxLines,
-          style: FocuxHubTypography.body(
-            color: chrome.ink,
-          ).copyWith(fontWeight: FontWeight.w700),
-          decoration: treinoPrescriptionDecoration(
-            context,
-            isDark: isDark,
-            hint: hint,
+        Semantics(
+          textField: true,
+          label: hint == null ? label : '$label. $hint',
+          child: TextField(
+            controller: controller,
+            keyboardType: keyboardType,
+            textInputAction: textInputAction,
+            inputFormatters: inputFormatters,
+            minLines: minLines,
+            maxLines: maxLines,
+            style: FocuxHubTypography.body(
+              color: chrome.ink,
+            ).copyWith(fontWeight: FontWeight.w700),
+            decoration: treinoPrescriptionDecoration(
+              context,
+              isDark: isDark,
+              hint: hint,
+            ),
           ),
         ),
       ],
