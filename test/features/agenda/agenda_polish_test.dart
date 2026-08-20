@@ -25,6 +25,14 @@ void main() {
     expect(screen, contains('AgendaHubHeader'));
     expect(screen, contains('AgendaNextBanner'));
     expect(screen, contains('agendaBuildDayLane'));
+    expect(screen, contains('agendaDayHeading'));
+    expect(screen, contains('DashboardLayout.bottomDockClearance'));
+    expect(
+      screen,
+      isNot(contains("safePopOrGo(context, '/dashboard/personal')")),
+    );
+    expect(screen, isNot(contains('arrow_back')));
+    expect(screen, isNot(contains('LayoutBuilder(')));
     expect(screen, contains('listarSemana'));
     expect(screen, contains('RefreshIndicator'));
     expect(screen, contains('maskEmailForList'));

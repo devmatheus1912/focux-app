@@ -16,6 +16,7 @@ class AgendaDayChip extends StatelessWidget {
     required this.selected,
     required this.onTap,
     this.count = 0,
+    this.isToday = false,
     this.width = 52,
   });
 
@@ -24,6 +25,7 @@ class AgendaDayChip extends StatelessWidget {
   final bool selected;
   final VoidCallback onTap;
   final int count;
+  final bool isToday;
   final double? width;
 
   @override
@@ -31,14 +33,16 @@ class AgendaDayChip extends StatelessWidget {
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
     final fill = chrome.cardFill;
+    final todayHint = isToday && !selected;
 
     return Semantics(
       button: true,
       selected: selected,
-      label:
-          count > 0
-              ? '$weekdayLabel $dayNumber, $count atendimento${count == 1 ? '' : 's'}'
-              : '$weekdayLabel $dayNumber',
+      label: [
+        '$weekdayLabel $dayNumber',
+        if (isToday) 'hoje',
+        if (count > 0) '$count atendimento${count == 1 ? '' : 's'}',
+      ].join(', '),
       child: Material(
         color: fxTransparent,
         child: InkWell(
@@ -66,28 +70,52 @@ class AgendaDayChip extends StatelessWidget {
               constraints: const BoxConstraints(
                 minHeight: FxHomeSheetChrome.touchTarget,
               ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 6),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      weekdayLabel,
-                      style: FocuxHubTypography.bodyMuted(
-                        color: selected ? primary : chrome.mute,
-                        fontWeight: FontWeight.w700,
-                      ).copyWith(fontSize: 10),
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 6),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          weekdayLabel,
+                          style: FocuxHubTypography.bodyMuted(
+                            color: selected ? primary : chrome.mute,
+                            fontWeight: FontWeight.w700,
+                          ).copyWith(fontSize: 10),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          '$dayNumber',
+                          style: FocuxHubTypography.cardTitle(
+                            color: selected ? primary : chrome.ink,
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 2),
-                    Text(
-                      '$dayNumber',
-                      style: FocuxHubTypography.cardTitle(
-                        color: selected ? primary : chrome.ink,
+                  ),
+                  if (todayHint)
+                    Positioned(
+                      bottom: 4,
+                      left: 0,
+                      right: 0,
+                      child: Center(
+                        child: Container(
+                          width: 4,
+                          height: 4,
+                          decoration: BoxDecoration(
+                            color: primary,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
                       ),
                     ),
-                    if (count > 0) ...[
-                      const SizedBox(height: 4),
-                      Container(
+                  if (count > 0)
+                    Positioned(
+                      top: 3,
+                      right: 3,
+                      child: Container(
                         constraints: const BoxConstraints(
                           minWidth: 16,
                           minHeight: 16,
@@ -106,9 +134,8 @@ class AgendaDayChip extends StatelessWidget {
                           ),
                         ),
                       ),
-                    ],
-                  ],
-                ),
+                    ),
+                ],
               ),
             ),
           ),

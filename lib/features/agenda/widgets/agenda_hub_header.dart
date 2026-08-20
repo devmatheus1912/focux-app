@@ -6,6 +6,7 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../dashboard/constants/dashboard_layout.dart';
 import '../../dashboard/utils/dashboard_readability.dart';
 import '../utils/agenda_schedule.dart';
 
@@ -13,14 +14,12 @@ class AgendaHubHeader extends StatelessWidget {
   const AgendaHubHeader({
     super.key,
     required this.freshnessLabel,
-    required this.onBack,
     required this.onHelp,
     required this.onIcal,
     this.onToday,
   });
 
   final String? freshnessLabel;
-  final VoidCallback onBack;
   final VoidCallback onHelp;
   final VoidCallback onIcal;
   final VoidCallback? onToday;
@@ -31,6 +30,10 @@ class AgendaHubHeader extends StatelessWidget {
     final primary = Theme.of(context).colorScheme.primary;
     final ink = chrome.ink;
     final mute = dashboardReadableCaption(context, isDark: chrome.isDark);
+    final compact = DashboardLayout.isCompact(MediaQuery.sizeOf(context).width);
+    final chromeSize = DashboardLayout.headerActionSize(
+      MediaQuery.sizeOf(context).width,
+    );
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(
@@ -47,42 +50,40 @@ class AgendaHubHeader extends StatelessWidget {
           glowStrength: 0.04,
         ),
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(10, 10, 8, 10),
+          padding: const EdgeInsets.fromLTRB(12, 11, 10, 11),
           child: Row(
             children: [
-              IconButton(
-                tooltip: 'Voltar',
-                onPressed: onBack,
-                visualDensity: VisualDensity.compact,
-                constraints: const BoxConstraints(
-                  minWidth: FxHomeSheetChrome.touchTarget,
-                  minHeight: FxHomeSheetChrome.touchTarget,
-                ),
-                icon: Icon(Icons.arrow_back_ios_new, size: 18, color: ink),
-              ),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Agenda',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: dashboardPageTitleStyle(context, color: ink),
-                    ),
-                    if (freshnessLabel != null) ...[
-                      const SizedBox(height: 2),
+                child: Semantics(
+                  header: true,
+                  label: [
+                    'Agenda',
+                    if (freshnessLabel != null && freshnessLabel!.isNotEmpty)
+                      freshnessLabel!,
+                  ].join('. '),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                       Text(
-                        freshnessLabel!,
+                        'Agenda',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: FocuxHubTypography.bodyMuted(
-                          color: mute,
-                          fontWeight: FontWeight.w600,
-                        ).copyWith(fontSize: 11.5),
+                        style: dashboardPageTitleStyle(context, color: ink),
                       ),
+                      if (freshnessLabel != null) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          freshnessLabel!,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: FocuxHubTypography.bodyMuted(
+                            color: mute,
+                            fontWeight: FontWeight.w600,
+                          ).copyWith(fontSize: 11.5),
+                        ),
+                      ],
                     ],
-                  ],
+                  ),
                 ),
               ),
               FxHelpIconButton(
@@ -93,14 +94,14 @@ class AgendaHubHeader extends StatelessWidget {
               IconButton(
                 tooltip: 'Exportar iCal',
                 visualDensity: VisualDensity.compact,
-                constraints: const BoxConstraints(
-                  minWidth: FxHomeSheetChrome.touchTarget,
-                  minHeight: FxHomeSheetChrome.touchTarget,
+                constraints: BoxConstraints(
+                  minWidth: chromeSize,
+                  minHeight: chromeSize,
                 ),
                 icon: Icon(
                   Icons.calendar_month_outlined,
                   color: chrome.mute,
-                  size: 22,
+                  size: compact ? 20 : 22,
                 ),
                 onPressed: onIcal,
               ),
@@ -108,11 +109,15 @@ class AgendaHubHeader extends StatelessWidget {
                 IconButton(
                   tooltip: 'Ir para hoje',
                   visualDensity: VisualDensity.compact,
-                  constraints: const BoxConstraints(
-                    minWidth: FxHomeSheetChrome.touchTarget,
-                    minHeight: FxHomeSheetChrome.touchTarget,
+                  constraints: BoxConstraints(
+                    minWidth: chromeSize,
+                    minHeight: chromeSize,
                   ),
-                  icon: Icon(Icons.today_outlined, color: primary, size: 22),
+                  icon: Icon(
+                    Icons.today_outlined,
+                    color: primary,
+                    size: compact ? 20 : 22,
+                  ),
                   onPressed: () {
                     HapticFeedback.selectionClick();
                     onToday!();

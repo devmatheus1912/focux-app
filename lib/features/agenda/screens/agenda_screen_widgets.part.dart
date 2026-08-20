@@ -75,9 +75,6 @@ class _AgendaEventSheetState extends State<_AgendaEventSheet> {
       child: FxHomeSheetSurface(
         isDark: chrome.isDark,
         expand: true,
-        maxHeight:
-            MediaQuery.sizeOf(context).height *
-            FxHomeSheetChrome.expandHeightFactor * 0.9,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -87,12 +84,10 @@ class _AgendaEventSheetState extends State<_AgendaEventSheet> {
               isDark: chrome.isDark,
               title: title,
               subtitle: note,
-              leading: FittedBox(
-                child: AlunoAvatar(
-                  name: title,
-                  photoUrl: widget.photoUrl,
-                  variant: AlunoAvatarVariant.strip,
-                ),
+              leading: AlunoAvatar(
+                name: title,
+                photoUrl: widget.photoUrl,
+                variant: AlunoAvatarVariant.strip,
               ),
             ),
             SizedBox(height: TokensStrip.s3),

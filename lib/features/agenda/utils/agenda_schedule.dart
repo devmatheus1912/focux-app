@@ -75,3 +75,21 @@ const agendaMonthShort = [
   'nov',
   'dez',
 ];
+
+String agendaDayHeading({
+  required String weekdayLabel,
+  required DateTime date,
+  required int visibleCount,
+}) {
+  final datePart = '$weekdayLabel · ${date.day} ${agendaMonthShort[date.month]}';
+  if (visibleCount <= 0) return datePart;
+  final countLabel =
+      visibleCount == 1 ? '1 atendimento' : '$visibleCount atendimentos';
+  return '$datePart · $countLabel';
+}
+
+String agendaEmptyDaySubtitle({
+  required String weekdayLabel,
+  required DateTime date,
+}) =>
+    '$weekdayLabel, ${date.day} ${agendaMonthShort[date.month]} · encaixe avaliação, retorno ou sessão.';

@@ -37,6 +37,7 @@ import 'package:focux_app/core/widgets/fx_input_deco.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/fx_motion.dart';
 import 'package:focux_app/core/widgets/fx_shell_scaffold.dart';
+import '../../dashboard/constants/dashboard_layout.dart';
 import '../../dashboard/utils/dashboard_readability.dart';
 
 part 'agenda_screen_widgets.part.dart';
@@ -387,17 +388,7 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
     final primary = Theme.of(context).colorScheme.primary;
     final diasSemanaStr = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
 
-    final eventosMap = <int, List<Agendamento>>{};
-    for (var i = 0; i < 7; i++) {
-      eventosMap[i] = [];
-    }
-    for (final ag in _ags) {
-      final diff = ag.inicio.difference(_weekStart).inDays;
-      if (diff >= 0 && diff < 7) {
-        eventosMap[ag.inicio.weekday - 1]?.add(ag);
-      }
-    }
-
+    final eventosMap = agendaEventsByWeekday(_ags, _weekStart);
     final dailyEvents = [...(eventosMap[_selectedIdx] ?? <Agendamento>[])]
       ..sort((a, b) => a.inicio.compareTo(b.inicio));
     final visible = agendaVisibleEvents(dailyEvents);
@@ -406,11 +397,12 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
     final cancelled = agendaCancelledCount(dailyEvents);
     final selectedDate = _weekStart.add(Duration(days: _selectedIdx));
     final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
-    final dayCountLabel = visible.length == 1
-        ? '1 atendimento'
-        : '${visible.length} atendimentos';
-
-    ref.watch(alunosProvider);
+    final now = DateTime.now();
+    final dayHeading = agendaDayHeading(
+      weekdayLabel: diasSemanaStr[_selectedIdx],
+      date: selectedDate,
+      visibleCount: visible.length,
+    );
     return fxScreenA11yScope(
       label: 'Agenda',
       child: FxShellScaffold(
@@ -425,7 +417,6 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
               children: [
                 AgendaHubHeader(
                   freshnessLabel: freshnessLabel,
-                  onBack: () => safePopOrGo(context, '/dashboard/personal'),
                   onHelp: () {
                     AnalyticsService.instance.track(ProductEvents.agendaHelpOpened);
                     showAgendaHelpSheet(context);
@@ -453,12 +444,15 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                       ).length;
                       return Expanded(
                         child: Padding(
-                          padding: EdgeInsets.only(right: i == 6 ? 0 : 4),
+                          padding: EdgeInsets.only(
+                            right: i == 6 ? 0 : TokensStrip.s1,
+                          ),
                           child: AgendaDayChip(
                             weekdayLabel: diasSemanaStr[i],
                             dayNumber: dayDate.day,
                             selected: i == _selectedIdx,
                             count: count,
+                            isToday: agendaSameDay(dayDate, now),
                             width: double.infinity,
                             onTap: () => setState(() => _selectedIdx = i),
                           ),
@@ -482,7 +476,7 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                       TokensStrip.s2,
                     ),
                     child: Text(
-                      '${diasSemanaStr[_selectedIdx]} · ${selectedDate.day} ${agendaMonthShort[selectedDate.month]} · $dayCountLabel',
+                      dayHeading,
                       style: dashboardPageTitleStyle(
                         context,
                         color: chrome.ink,
@@ -508,24 +502,38 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                             return _load(force: true);
                           },
                           child: visible.isEmpty
-                              ? LayoutBuilder(
-                                  builder: (context, constraints) {
-                                    return ListView(
-                                      physics:
-                                          const AlwaysScrollableScrollPhysics(),
-                                      children: [
-                                        SizedBox(
-                                          height: constraints.maxHeight,
+                              ? CustomScrollView(
+                                  physics:
+                                      const AlwaysScrollableScrollPhysics(),
+                                  slivers: [
+                                    SliverPadding(
+                                      padding: const EdgeInsets.fromLTRB(
+                                        TokensStrip.s4,
+                                        TokensStrip.s1,
+                                        TokensStrip.s4,
+                                        TokensStrip.s3,
+                                      ),
+                                      sliver: SliverToBoxAdapter(
+                                        child: DecoratedBox(
+                                          decoration: fxStripCardDecoration(
+                                            context,
+                                            accent: primary,
+                                            radius: TokensStrip.rCard,
+                                            glowStrength: 0.04,
+                                          ),
                                           child: FxEmptyState(
                                             icon: 'calendar',
                                             title: 'Dia livre',
-                                            subtitle:
-                                                '${diasSemanaStr[_selectedIdx]}, ${selectedDate.day} ${agendaMonthShort[selectedDate.month]} · encaixe avaliação, retorno ou sessão no botão abaixo.',
+                                            subtitle: agendaEmptyDaySubtitle(
+                                              weekdayLabel:
+                                                  diasSemanaStr[_selectedIdx],
+                                              date: selectedDate,
+                                            ),
                                           ),
                                         ),
-                                      ],
-                                    );
-                                  },
+                                      ),
+                                    ),
+                                  ],
                                 )
                               : ListView.separated(
                                   physics:
@@ -534,11 +542,11 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                                     TokensStrip.s4,
                                     0,
                                     TokensStrip.s4,
-                                    12,
+                                    TokensStrip.s3,
                                   ),
                                   itemCount: lane.length + (cancelled > 0 ? 1 : 0),
                                   separatorBuilder: (_, __) =>
-                                      const SizedBox(height: 8),
+                                      const SizedBox(height: TokensStrip.s2),
                                   itemBuilder: (_, i) {
                                     if (i >= lane.length) {
                                       return Text(
@@ -580,7 +588,7 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                       TokensStrip.s4,
                       TokensStrip.s1,
                       TokensStrip.s4,
-                      88,
+                      DashboardLayout.bottomDockClearance,
                     ),
                     child: Semantics(
                       button: true,

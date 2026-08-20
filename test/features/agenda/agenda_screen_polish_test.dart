@@ -25,5 +25,6 @@ void main() {
     expect(screen, contains('SkeletonList'));
     expect(screen, contains('FxHubFreshness.fromFetchedAt'));
     expect(screen, isNot(contains('class _AgendaEmptyState')));
+    expect(screen, isNot(contains('ref.watch(alunosProvider)')));
   });
 }

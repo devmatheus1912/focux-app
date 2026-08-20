@@ -42,4 +42,16 @@ void main() {
     expect(agendaGapLabel(const Duration(hours: 1)), '1 hora livre');
     expect(agendaGapLabel(const Duration(hours: 2, minutes: 15)), '2h 15min livres');
   });
+
+  test('agrupa eventos da semana por weekday', () {
+    final monday = DateTime(2026, 8, 17);
+    final map = agendaEventsByWeekday([
+      _ag(id: 1, inicio: DateTime(2026, 8, 19, 8, 30)),
+      _ag(id: 2, inicio: DateTime(2026, 8, 20, 9)),
+      _ag(id: 3, inicio: DateTime(2026, 8, 10, 9)),
+    ], monday);
+    expect(map[1], isEmpty); // terça
+    expect(map[2]!.single.id, 1); // qua
+    expect(map[3]!.single.id, 2); // qui
+  });
 }

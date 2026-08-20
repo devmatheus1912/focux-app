@@ -794,6 +794,7 @@ class _AgendaDateTimeSheetState extends State<_AgendaDateTimeSheet> {
                     weekdayLabel: agendaWeekdayShort(day.weekday),
                     dayNumber: day.day,
                     selected: agendaSameDay(day, _selectedDay),
+                    isToday: agendaSameDay(day, DateTime.now()),
                     onTap: () => setState(() => _selectedDay = day),
                   );
                 },

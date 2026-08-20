@@ -45,13 +45,29 @@ void main() {
     expect(agendaHm(DateTime(2026, 8, 19, 8, 30)), '08:30');
   });
 
-  test('lembrete de whatsapp usa primeiro nome e horário', () {
+  test('heading omite zero atendimentos', () {
     expect(
-      agendaWhatsappReminder(
-        alunoNome: 'Beatriz Carvalho',
-        inicio: DateTime(2026, 8, 19, 8, 30),
+      agendaDayHeading(
+        weekdayLabel: 'Qui',
+        date: DateTime(2026, 8, 20),
+        visibleCount: 0,
       ),
-      'Oi Beatriz, confirmando nosso horário às 08:30.',
+      'Qui · 20 ago',
+    );
+    expect(
+      agendaDayHeading(
+        weekdayLabel: 'Qui',
+        date: DateTime(2026, 8, 20),
+        visibleCount: 1,
+      ),
+      'Qui · 20 ago · 1 atendimento',
+    );
+    expect(
+      agendaEmptyDaySubtitle(
+        weekdayLabel: 'Qui',
+        date: DateTime(2026, 8, 20),
+      ),
+      'Qui, 20 ago · encaixe avaliação, retorno ou sessão.',
     );
   });
 }

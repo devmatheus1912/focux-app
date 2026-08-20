@@ -1,6 +1,22 @@
 import '../data/agenda_repository.dart';
 import 'agenda_status.dart';
 
+Map<int, List<Agendamento>> agendaEventsByWeekday(
+  List<Agendamento> items,
+  DateTime weekStart,
+) {
+  final map = <int, List<Agendamento>>{
+    for (var i = 0; i < 7; i++) i: <Agendamento>[],
+  };
+  for (final ag in items) {
+    final diff = ag.inicio.difference(weekStart).inDays;
+    if (diff >= 0 && diff < 7) {
+      map[ag.inicio.weekday - 1]?.add(ag);
+    }
+  }
+  return map;
+}
+
 sealed class AgendaLaneItem {
   const AgendaLaneItem();
 }
