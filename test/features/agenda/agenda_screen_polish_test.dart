@@ -21,7 +21,7 @@ void main() {
 
     expect(screen, contains('fxScreenA11yScope'));
     expect(screen, contains('FxErrorState'));
-    expect(screen, contains('FxEmptyState'));
+    expect(screen, contains('AgendaDayEmptyPanel'));
     expect(screen, contains('SkeletonList'));
     expect(screen, contains('FxHubFreshness.fromFetchedAt'));
     expect(screen, isNot(contains('class _AgendaEmptyState')));

@@ -74,6 +74,6 @@ void main() {
       ),
       'Qui · 20 ago · 1 atendimento',
     );
-    expect(agendaEmptyDaySubtitle(), 'Nenhum horário. Encaixe avaliação, retorno ou sessão.');
+    expect(agendaEmptyDayHint(), 'Encaixe avaliação, retorno ou sessão.');
   });
 }

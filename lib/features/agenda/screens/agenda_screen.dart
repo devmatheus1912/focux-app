@@ -17,6 +17,7 @@ import '../providers/agenda_provider.dart';
 import '../utils/agenda_day_lane.dart';
 import '../utils/agenda_schedule.dart';
 import '../utils/agenda_status.dart';
+import '../widgets/agenda_day_empty_panel.dart';
 import '../widgets/agenda_day_chip.dart';
 import '../widgets/agenda_event_card.dart';
 import '../widgets/agenda_help_sheet.dart';
@@ -467,7 +468,7 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                     photoUrl: _photoFor(nextOpen.alunoId),
                     onTap: () => _openAgendamentoDetails(nextOpen),
                   )
-                else
+                else if (!_loading && _erro == null && visible.isNotEmpty)
                   Padding(
                     padding: const EdgeInsets.fromLTRB(
                       TokensStrip.s4,
@@ -507,25 +508,16 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                                       const AlwaysScrollableScrollPhysics(),
                                   slivers: [
                                     SliverPadding(
-                                      padding: const EdgeInsets.fromLTRB(
+                                      padding: EdgeInsets.fromLTRB(
                                         TokensStrip.s4,
                                         TokensStrip.s1,
                                         TokensStrip.s4,
-                                        TokensStrip.s3,
+                                        DashboardLayout.bottomDockClearance,
                                       ),
                                       sliver: SliverToBoxAdapter(
-                                        child: DecoratedBox(
-                                          decoration: fxStripCardDecoration(
-                                            context,
-                                            accent: primary,
-                                            radius: TokensStrip.rCard,
-                                            glowStrength: 0.04,
-                                          ),
-                                          child: FxEmptyState(
-                                            icon: 'calendar',
-                                            title: 'Dia livre',
-                                            subtitle: agendaEmptyDaySubtitle(),
-                                          ),
+                                        child: AgendaDayEmptyPanel(
+                                          dayLabel: dayHeading,
+                                          onNew: () => _novoAgendamento(),
                                         ),
                                       ),
                                     ),
@@ -578,7 +570,7 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                                 ),
                         ),
                 ),
-                if (!_loading && _erro == null)
+                if (!_loading && _erro == null && visible.isNotEmpty)
                   Padding(
                     padding: const EdgeInsets.fromLTRB(
                       TokensStrip.s4,

@@ -108,5 +108,5 @@ String agendaDayHeading({
   return '$datePart · $countLabel';
 }
 
-String agendaEmptyDaySubtitle() =>
-    'Nenhum horário. Encaixe avaliação, retorno ou sessão.';
+String agendaEmptyDayHint() =>
+    'Encaixe avaliação, retorno ou sessão.';
