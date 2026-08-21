@@ -42,4 +42,22 @@ void main() {
     );
     expect(mapSignupCodeError(dio(429)), contains('Aguarde'));
   });
+
+  test('mapGoogleSignInError humaniza timeout do proxy', () {
+    expect(
+      mapGoogleSignInError(
+        DioException(
+          requestOptions: RequestOptions(path: '/api/auth/google'),
+          response: Response(
+            requestOptions: RequestOptions(path: '/api/auth/google'),
+            statusCode: 502,
+            data: 'Application failed to respond',
+          ),
+          type: DioExceptionType.badResponse,
+        ),
+        isAluno: false,
+      ),
+      'Servidor indisponível no momento. Tente de novo em instantes.',
+    );
+  });
 }

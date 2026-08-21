@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/services.dart';
 
 /// Mapeia erros do login por e-mail/senha para mensagens amigáveis em pt-BR.
 String mapLoginError(Object error) {
@@ -14,18 +15,35 @@ String mapLoginError(Object error) {
 String? _backendMessage(Object error) {
   if (error is! DioException) return null;
   final body = error.response?.data;
-  if (body is Map && body['message'] is String) {
-    final msg = (body['message'] as String).trim();
-    if (msg.isNotEmpty) return msg;
+  if (body is Map) {
+    for (final key in ['message', 'erro', 'mensagem', 'error']) {
+      final raw = body[key];
+      if (raw is String) {
+        final msg = raw.trim();
+        if (msg.isNotEmpty) return _humanizeProxyTimeout(msg);
+      }
+    }
   }
   if (body is String) {
     final raw = body.trim();
-    if (raw.toLowerCase().contains('failed to respond') ||
-        raw.toLowerCase().contains('application failed')) {
-      return 'Servidor indisponível no momento. Tente de novo em instantes.';
-    }
+    if (raw.isNotEmpty) return _humanizeProxyTimeout(raw);
+  }
+  final dioMessage = error.message?.trim();
+  if (dioMessage != null && dioMessage.isNotEmpty) {
+    return _humanizeProxyTimeout(dioMessage);
   }
   return null;
+}
+
+String _humanizeProxyTimeout(String raw) {
+  final lower = raw.toLowerCase();
+  if (lower.contains('failed to respond') ||
+      lower.contains('application failed') ||
+      lower.contains('gateway timeout') ||
+      lower.contains('service unavailable')) {
+    return 'Servidor indisponível no momento. Tente de novo em instantes.';
+  }
+  return raw;
 }
 
 /// Cadastro personal (e-mail/senha + código).
@@ -92,14 +110,33 @@ String mapGoogleSignInError(Object error, {required bool isAluno}) {
     if (statusCode == 503) {
       return 'Google ainda não está configurado neste ambiente. Use e-mail e senha por enquanto.';
     }
-    if (statusCode == null) return 'Sem conexão com o servidor.';
-    final msg =
-        (body is Map && body['message'] is String)
-            ? body['message'] as String
-            : null;
+    if (statusCode == 400) {
+      return _backendMessage(error) ??
+          'Dados inválidos no cadastro com Google. Tente de novo.';
+    }
+    if (statusCode == 502 || statusCode == 503 || statusCode == 504) {
+      return _backendMessage(error) ??
+          'Servidor indisponível no momento. Tente de novo em instantes.';
+    }
+    if (statusCode == null) {
+      return _backendMessage(error) ?? 'Sem conexão com o servidor.';
+    }
+    final msg = _backendMessage(error);
     return msg != null && msg.isNotEmpty
         ? msg
         : 'Erro $statusCode no login com Google.';
+  }
+  if (error is PlatformException) {
+    final code = error.code;
+    final detail = '${error.message ?? ''} ${error.details ?? ''}'.toLowerCase();
+    if (code == 'sign_in_failed' &&
+        (detail.contains('10') || detail.contains('developer_error'))) {
+      return 'Google Sign-In não está liberado para este APK de release. '
+          'No Firebase, cadastre o SHA-1 do keystore de release do app.';
+    }
+    if (code == 'sign_in_canceled') {
+      return 'Login com Google cancelado.';
+    }
   }
   if (error is StateError) {
     if (error.message == 'PERSONAL_SLUG_REQUIRED') {
