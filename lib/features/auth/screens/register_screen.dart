@@ -19,6 +19,7 @@ import '../../../core/widgets/fx_motion.dart';
 import '../../../features/perfil/providers/perfil_provider.dart';
 import '../providers/auth_provider.dart';
 import '../utils/auth_error_messages.dart';
+import '../widgets/auth_operational_notice.dart';
 import '../widgets/auth_shell.dart';
 import '../widgets/google_sign_in_button.dart';
 import '../widgets/password_strength_meter.dart';
@@ -50,10 +51,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   int _resendSeconds = 0;
   Timer? _resendTimer;
   String? _error;
+  bool? _emailDeliveryAvailable;
 
   @override
   void initState() {
     super.initState();
+    _loadCapabilities();
     _passwordController.addListener(() {
       if (mounted) setState(() {});
     });
@@ -73,6 +76,19 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     _codeController.dispose();
     _passwordFocus.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadCapabilities() async {
+    try {
+      final caps = await ref.read(authRepositoryProvider).capabilities();
+      if (!mounted) return;
+      setState(() {
+        _emailDeliveryAvailable = caps.passwordResetEmailAvailable;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _emailDeliveryAvailable = null);
+    }
   }
 
   void _startResendCountdown() {
@@ -107,14 +123,27 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     HapticFeedback.selectionClick();
 
     try {
-      await ref.read(authProvider.notifier).enviarCodigoEmail(email);
+      final result =
+          await ref.read(authProvider.notifier).enviarCodigoEmail(email);
       if (!mounted) return;
+      if (!result.codigoEnviado) {
+        HapticFeedback.heavyImpact();
+        setState(() {
+          _codeSent = false;
+          _error = result.hint.isNotEmpty
+              ? result.hint
+              : 'Não enviamos código para este e-mail. Tente Entrar se já tiver conta.';
+        });
+        return;
+      }
       setState(() => _codeSent = true);
       _startResendCountdown();
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text(
-            'Código enviado. Confira a caixa de entrada (e o spam).',
+            result.hint.isNotEmpty
+                ? result.hint
+                : 'Código enviado. Confira a caixa de entrada (e o spam).',
           ),
         ),
       );
@@ -286,6 +315,16 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         ),
                       ),
                       const SizedBox(height: 18),
+                      if (_emailDeliveryAvailable == false) ...[
+                        const AuthOperationalNotice(
+                          icon: Icons.mail_lock_outlined,
+                          title: 'E-mail temporariamente indisponível',
+                          text:
+                              'Não conseguimos enviar códigos agora. '
+                              'Use Entrar com Google ou tente de novo mais tarde.',
+                        ),
+                        const SizedBox(height: 12),
+                      ],
                     AuthField(
                       label: 'Nome completo',
                       controller: _nameController,
@@ -343,7 +382,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           onPressed:
                               (_sendingCode ||
                                       _loading ||
-                                      _resendSeconds > 0)
+                                      _resendSeconds > 0 ||
+                                      _emailDeliveryAvailable == false)
                                   ? null
                                   : _enviarCodigo,
                           child: Text(

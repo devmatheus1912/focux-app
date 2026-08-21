@@ -39,6 +39,28 @@ class AuthCapabilities {
   }
 }
 
+class EnviarCodigoEmailResult {
+  final String status;
+  final bool codigoEnviado;
+  final String hint;
+
+  const EnviarCodigoEmailResult({
+    required this.status,
+    required this.codigoEnviado,
+    required this.hint,
+  });
+
+  factory EnviarCodigoEmailResult.fromJson(Map<String, dynamic> json) {
+    return EnviarCodigoEmailResult(
+      status:
+          json['status'] as String? ??
+          'Se o e-mail for válido, você receberá um código.',
+      codigoEnviado: json['codigoEnviado'] as bool? ?? true,
+      hint: json['hint'] as String? ?? '',
+    );
+  }
+}
+
 class AuthEnvironmentIssue {
   final String area;
   final String severity;
@@ -196,10 +218,13 @@ class AuthRepository {
     return token;
   }
 
-  Future<void> enviarCodigoEmail(String email) async {
-    await _dio.post(
+  Future<EnviarCodigoEmailResult> enviarCodigoEmail(String email) async {
+    final response = await _dio.post(
       '/api/auth/email/enviar-codigo',
       data: {'email': email},
+    );
+    return EnviarCodigoEmailResult.fromJson(
+      response.data as Map<String, dynamic>,
     );
   }
 
