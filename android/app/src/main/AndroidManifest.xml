@@ -110,6 +110,7 @@
         <activity-alias
             android:name="ViewPermissionUsageActivity"
             android:exported="true"
+            android:taskAffinity=""
             android:targetActivity=".MainActivity"
             android:permission="android.permission.START_VIEW_PERMISSION_USAGE">
             <intent-filter>
