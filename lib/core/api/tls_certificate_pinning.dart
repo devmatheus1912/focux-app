@@ -9,10 +9,33 @@ import 'package:flutter/foundation.dart';
 import '../config/env.dart';
 
 /// TLS pinning para Dio **e** WebSocket (via [HttpOverrides.global]).
+///
+/// Pinning aplica **somente** aos hosts da API/WS ([Env.apiUrl], [Env.wsUrl]).
+/// Outros HTTPS (Google Fonts, Firebase, etc.) usam TLS padrão do sistema.
 class TlsCertificatePinning {
   TlsCertificatePinning._();
 
   static bool _overridesInstalled = false;
+
+  /// Hosts que exigem certificate pinning (lowercase).
+  @visibleForTesting
+  static Set<String> pinnedHosts() {
+    final hosts = <String>{};
+    for (final raw in [Env.apiUrl, Env.wsUrl]) {
+      if (raw.isEmpty) continue;
+      try {
+        hosts.add(Uri.parse(raw).host.toLowerCase());
+      } catch (_) {
+        // Ignora URL malformada em testes.
+      }
+    }
+    return hosts;
+  }
+
+  @visibleForTesting
+  static bool shouldPinHost(String host) {
+    return pinnedHosts().contains(host.toLowerCase());
+  }
 
   /// Instalar cedo no [main] — cobre `WebSocket.connect` / STOMP / HttpClient.
   static void installGlobalOverrides() {
@@ -46,18 +69,42 @@ class TlsCertificatePinning {
 
     dio.httpClientAdapter = IOHttpClientAdapter(
       createHttpClient: () => createPinnedHttpClient(pins),
-      validateCertificate: (cert, host, port) => matches(cert, pins),
+      validateCertificate: (cert, host, port) {
+        if (!shouldPinHost(host)) return true;
+        return matches(cert, pins);
+      },
+    );
+  }
+
+  /// HttpClient real — sem reentrar em [HttpOverrides] (evita stack overflow).
+  @visibleForTesting
+  static HttpClient baseHttpClient({SecurityContext? context}) {
+    return HttpOverrides.runWithHttpOverrides(
+      () => HttpClient(context: context),
+      _DirectHttpOverrides(),
     );
   }
 
   static HttpClient createPinnedHttpClient([Set<String>? pins]) {
     final allowed = pins ?? _allowedPins();
-    final client = HttpClient();
-    client.connectionFactory = (Uri uri, String? proxyHost, int? proxyPort) {
+    final client = baseHttpClient();
+    client.connectionFactory = _connectionFactory(allowed);
+    return client;
+  }
+
+  static Future<ConnectionTask<Socket>> Function(
+    Uri url,
+    String? proxyHost,
+    int? proxyPort,
+  ) _connectionFactory(Set<String> allowed) {
+    return (Uri uri, String? proxyHost, int? proxyPort) {
       final host = uri.host;
       final port = uri.hasPort ? uri.port : (uri.scheme == 'https' ? 443 : 80);
       if (uri.scheme != 'https' && uri.scheme != 'wss') {
         return Socket.startConnect(host, port);
+      }
+      if (!shouldPinHost(host)) {
+        return SecureSocket.startConnect(host, port);
       }
       final Future<Socket> future =
           SecureSocket.connect(host, port).then((SecureSocket sock) {
@@ -71,7 +118,6 @@ class TlsCertificatePinning {
         ConnectionTask.fromSocket(future, () {}),
       );
     };
-    return client;
   }
 
   static bool matches(X509Certificate? cert, [Set<String>? pins]) {
@@ -107,5 +153,13 @@ class _PinnedHttpOverrides extends HttpOverrides {
   @override
   HttpClient createHttpClient(SecurityContext? context) {
     return TlsCertificatePinning.createPinnedHttpClient(pins);
+  }
+}
+
+/// Delegates para [_HttpClient] nativo — usado para escapar overrides globais.
+class _DirectHttpOverrides extends HttpOverrides {
+  @override
+  HttpClient createHttpClient(SecurityContext? context) {
+    return super.createHttpClient(context);
   }
 }
