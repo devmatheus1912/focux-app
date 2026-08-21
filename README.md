@@ -32,6 +32,7 @@ O app se conecta ao `focux-backend`, usa JWT para sessao, aplica rotas por perfi
 - **FeatureGate** reusa cache da Home (sem GET extra de `/planos/me` no caminho quente).
 - **Sessao**: logout limpa tokens, caches locais e leftovers de entitlement; web nao persiste JWT em storage persistente.
 - **TLS**: builds de loja exigem certificate pinning da API (Dio + WebSocket/STOMP).
+- **Seguranca automatizada**: catalogo `FocuxSecurity` (`lib/core/security/focux_security.dart`) + testes de contrato nos hubs e hardening Android (`test/core/security/`).
 - **Design system**: tokens Strip / Liquid Glass em `lib/core/theme` (+ docs de produto quando presentes no repo).
 - **Repo enxuto**: `scripts/`, `android/gradle.properties` e l10n gerados sao locais (gitignored); use os `.example`.
 
@@ -715,6 +716,12 @@ CI e pre-commit devem manter **zero issues**.
 flutter test
 ```
 
+Contratos de seguranca (hubs + Android; monorepo valida website se o checkout incluir `../focux-website/`):
+
+```bash
+flutter test test/core/security/ test/core/design_system/security_pillar_contract_test.dart
+```
+
 ### Integration tests
 
 ```bash
@@ -784,12 +791,22 @@ Repositorio: `focux-backend` (deploy Railway). Aponte o app para o host HTTPS do
 
 ## Seguranca (app)
 
+Catalogo central: **`lib/core/security/focux_security.dart`** (`FocuxSecurity` v1.1).
+
+| Gate | Arquivo | O que trava |
+|---|---|---|
+| Hubs | `test/core/design_system/security_pillar_contract_test.dart` | Token em `SecureStorage`, erros sem `$e` na UI, disclaimer IA, padroes proibidos |
+| App + TLS | `test/core/security/focux_security_test.dart` | Fontes do catalogo, pinning, device guard, CI Semgrep/gitleaks |
+| Android | `test/core/security/platform_hardening_test.dart` | Manifest (HTTPS, sem backup, App Links `focuxpersonal.com`, `taskAffinity=""`), `network_security_config`, backup rules, ProGuard |
+| Monorepo | mesmo teste acima | Se existir checkout irmao: `focux-website/vercel.json`, `assetlinks.json` |
+
 Postura atual (alto nivel):
 
 - Autenticacao JWT; refresh com rotacao; logout invalida sessao local e no backend.
 - Storage seguro para tokens no mobile; limpeza de cache/offline no logout.
 - Builds de release exigem certificate pinning da API (scripts em `tools/release/`).
-- App Links / Universal Links com paths allowlisted; deep-link metadata vem do backend/site quando configurado.
+- App Links / Universal Links com paths allowlisted em `focuxpersonal.com`; fingerprint release sincronizado com website e backend (nao publicar valor no git markdown).
+- Hardening Android: cleartext off, backup off, rede TLS-only — nao regredir ao elevar telas.
 - Autorizacao e isolamento de tenant sao responsabilidade do backend — o app nao e fonte de verdade.
 
 Nunca commitar:

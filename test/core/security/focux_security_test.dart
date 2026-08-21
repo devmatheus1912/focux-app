@@ -38,4 +38,18 @@ void main() {
       expect(File(path).existsSync(), isTrue, reason: 'Workflow ausente: $path');
     }
   });
+
+  test('android hardening catalog is complete', () {
+    expect(FocuxSecurity.androidHardeningSources, isNotEmpty);
+    for (final path in FocuxSecurity.androidHardeningSources) {
+      expect(File(path).existsSync(), isTrue, reason: 'Artefato ausente: $path');
+    }
+  });
+
+  test('platform hardening contract test is registered', () {
+    expect(
+      File('test/core/security/platform_hardening_test.dart').existsSync(),
+      isTrue,
+    );
+  });
 }

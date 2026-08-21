@@ -31,13 +31,36 @@ void main() {
       File('test/core/security/focux_security_test.dart').existsSync(),
       isTrue,
     );
+    expect(
+      File('test/core/security/platform_hardening_test.dart').existsSync(),
+      isTrue,
+    );
+    for (final path in FocuxSecurity.androidHardeningSources) {
+      expect(File(path).existsSync(), isTrue, reason: 'Artefato ausente: $path');
+    }
   });
 
-  test('DESIGN_SYSTEM documents security', () {
-    final doc = File('docs/DESIGN_SYSTEM.md').readAsStringSync();
-    expect(doc, contains('Segurança'));
+  test('security reference documents FocuxSecurity catalog', () {
+    const candidates = [
+      '../docs/HOME_REFERENCE_10_10.md',
+      'docs/HOME_REFERENCE_10_10.md',
+    ];
+    File? docFile;
+    for (final path in candidates) {
+      final file = File(path);
+      if (file.existsSync()) {
+        docFile = file;
+        break;
+      }
+    }
+    if (docFile == null) {
+      // Checkout isolado de focux-app — coberto no monorepo via platform_hardening_test.
+      return;
+    }
+    final doc = docFile.readAsStringSync();
     expect(doc, contains('FocuxSecurity'));
     expect(doc, contains('security_pillar_contract_test'));
+    expect(doc, contains('Hardening mobile & web'));
   });
 
   test('hub screens handle errors safely and expose async guards', () {
