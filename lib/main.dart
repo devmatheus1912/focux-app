@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import 'package:dio/dio.dart';
 import 'core/api/api_client.dart';
@@ -35,6 +36,7 @@ void main() {
   // layout/hit-test failures across the entire widget tree.
   runZonedGuarded(() async {
     WidgetsFlutterBinding.ensureInitialized();
+    GoogleFonts.config.allowRuntimeFetching = kDebugMode;
     TlsCertificatePinning.installGlobalOverrides();
     await HomeWidgetService.init();
 

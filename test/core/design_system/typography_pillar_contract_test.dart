@@ -80,6 +80,18 @@ void main() {
     }
   });
 
+  test('main disables google_fonts HTTP in release/profile', () {
+    final mainSource = File('lib/main.dart').readAsStringSync();
+    expect(mainSource, contains('GoogleFonts.config.allowRuntimeFetching'));
+    expect(mainSource, contains('kDebugMode'));
+  });
+
+  test('AppTypography uses bundled fonts outside debug', () {
+    final source = File('lib/core/theme/app_typography.dart').readAsStringSync();
+    expect(source, contains('kReleaseMode'));
+    expect(source, contains('kProfileMode'));
+  });
+
   test('features do not call GoogleFonts directly', () {
     final failures = <String>[];
     for (final file in Directory('lib/features')

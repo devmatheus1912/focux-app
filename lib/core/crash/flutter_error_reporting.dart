@@ -16,6 +16,8 @@ bool isNonFatalFlutterFrameworkError(Object exception, [StackTrace? stack]) {
     '_debugDoingThisLayout',
     'S.of',
     'app_localizations.dart',
+    'google_fonts was unable to load font',
+    '_httpFetchFontAndSaveToDevice',
   ];
   return needles.any(msg.contains);
 }

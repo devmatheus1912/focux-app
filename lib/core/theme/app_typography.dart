@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -56,7 +57,7 @@ abstract final class AppTypography {
       fontFamilyFallback: fontFamilyFallback,
     );
 
-    if (!GoogleFonts.config.allowRuntimeFetching) {
+    if (_useBundledFonts) {
       return base.copyWith(fontFamily: 'Inter');
     }
 
@@ -114,7 +115,7 @@ abstract final class AppTypography {
       fontFamilyFallback: fontFamilyFallback,
     );
 
-    if (!GoogleFonts.config.allowRuntimeFetching) {
+    if (_useBundledFonts) {
       return base.copyWith(fontFamily: 'JetBrains Mono');
     }
 
@@ -172,10 +173,14 @@ abstract final class AppTypography {
       fontFamilyFallback: fontFamilyFallback,
     );
 
-    if (!GoogleFonts.config.allowRuntimeFetching) {
+    if (_useBundledFonts) {
       return base.copyWith(fontFamily: 'Barlow Condensed');
     }
 
-    return GoogleFonts.barlowCondensed(textStyle: base);
+    return GoogleFonts.barlowCondensed(textStyle: base      );
   }
+
+  /// Release/profile e testes usam fontes locais — evita HTTP em runtime (Crashlytics / pinning).
+  static bool get _useBundledFonts =>
+      kReleaseMode || kProfileMode || !GoogleFonts.config.allowRuntimeFetching;
 }
