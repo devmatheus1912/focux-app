@@ -105,6 +105,11 @@
                 <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE"/>
             </intent-filter>
         </activity>
+        <!-- url_launcher: mitiga StrandHogg 2.0 no WebView in-app -->
+        <activity
+            android:name="io.flutter.plugins.urllauncher.WebViewActivity"
+            android:taskAffinity=""
+            tools:replace="android:taskAffinity" />
         <activity-alias
             android:name="ViewPermissionUsageActivity"
             android:exported="true"
