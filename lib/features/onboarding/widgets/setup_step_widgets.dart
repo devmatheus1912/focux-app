@@ -4,10 +4,13 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../../../core/theme/design_tokens.dart';
-import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/motion_preferences.dart';
 import '../../../core/widgets/fx_icon.dart';
+import '../../../core/widgets/fx_motion.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../dashboard/utils/dashboard_readability.dart';
+import '../../dashboard/widgets/dashboard_hero_widgets.dart';
 
 /// Normaliza rotas do wizard para deep-links consistentes no app.
 String normalizeSetupActionRoute(String route) {
@@ -41,6 +44,87 @@ IconData setupStepIcon(String name) {
       return Icons.link_rounded;
     default:
       return Icons.check_circle_outline_rounded;
+  }
+}
+
+String setupStepFxIconName(String name) {
+  switch (name) {
+    case 'person':
+    case 'person_add':
+      return 'users';
+    case 'fitness_center':
+      return 'dumbbell';
+    case 'inventory_2':
+      return 'article';
+    case 'repeat':
+      return 'route';
+    case 'attach_money':
+      return 'pix';
+    case 'link':
+      return 'route';
+    default:
+      return 'circle-check';
+  }
+}
+
+/// Hero de progresso — paridade visual com cards da Home.
+class SetupProgressHeroCard extends StatelessWidget {
+  const SetupProgressHeroCard({
+    super.key,
+    required this.progressPercent,
+    required this.completedCount,
+    required this.totalCount,
+    this.nextActionLabel,
+  });
+
+  final int progressPercent;
+  final int completedCount;
+  final int totalCount;
+  final String? nextActionLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+
+    return DecoratedBox(
+      decoration: fxStripCardDecoration(
+        context,
+        accent: primary,
+        radius: TokensStrip.rCard,
+        glowStrength: 0.08,
+        emphasize: true,
+      ),
+      child: CustomPaint(
+        foregroundPainter: const DashboardHeroGridPainter(lineAlpha: 0.05),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(
+            TokensStrip.s4,
+            TokensStrip.s4,
+            TokensStrip.s4,
+            TokensStrip.s3 + 2,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Ativação · setup D0',
+                style: FocuxHubTypography.eyebrow(
+                  context,
+                  color: primary,
+                ),
+              ),
+              const SizedBox(height: TokensStrip.s2),
+              SetupProgressHeader(
+                progressPercent: progressPercent,
+                completedCount: completedCount,
+                totalCount: totalCount,
+                nextActionLabel: nextActionLabel,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
 
@@ -100,11 +184,12 @@ class SetupProgressHeader extends StatelessWidget {
             children: [
               Text(
                 '$progressPercent% concluído',
-                style: TextStyle(
+                style: dashboardPageTitleStyle(
+                  context,
                   color: ink,
+                ).copyWith(
                   fontSize: compact ? 16 : 18,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: -0.3,
+                  letterSpacing: -0.35,
                 ),
               ),
               Text(
@@ -121,9 +206,10 @@ class SetupProgressHeader extends StatelessWidget {
               nextActionLabel!.isNotEmpty)
             Text(
               'Próximo: $nextActionLabel',
-              style: TokensStrip.bodyMuted(
-                color: mute,
-              ).copyWith(fontWeight: FontWeight.w600, height: 1.35),
+              style: dashboardCardSubtitleStyle(
+                context,
+                isDark: isDark,
+              ).copyWith(fontWeight: FontWeight.w700),
             ),
           if (compact) ...[
             Text(
@@ -153,6 +239,7 @@ class SetupStepCard extends StatelessWidget {
     this.estimatedMinutes,
     this.onTap,
     this.variant = SetupStepCardVariant.full,
+    this.isLead = false,
   });
 
   final String title;
@@ -162,6 +249,7 @@ class SetupStepCard extends StatelessWidget {
   final int? estimatedMinutes;
   final VoidCallback? onTap;
   final SetupStepCardVariant variant;
+  final bool isLead;
 
   @override
   Widget build(BuildContext context) {
@@ -177,12 +265,13 @@ class SetupStepCard extends StatelessWidget {
     final primary = Theme.of(context).colorScheme.primary;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final mute = dashboardReadableCaption(context, isDark: isDark);
     final doneColor =
         isDark
             ? TokensStrip.badgeSuccess.withValues(alpha: 0.92)
             : TokensStrip.badgeSuccess;
-    final chrome = ShellPalette(isDark);
+    final accent = completed ? doneColor : primary;
+    final lead = isLead && !completed;
 
     return Semantics(
       button: !completed,
@@ -205,11 +294,14 @@ class SetupStepCard extends StatelessWidget {
                     },
             borderRadius: BorderRadius.circular(TokensStrip.rCard),
             child: Ink(
-              decoration: chrome.listCard(radius: TokensStrip.rCard),
-              padding: const EdgeInsets.symmetric(
-                horizontal: TokensStrip.s4,
-                vertical: TokensStrip.s3 + 2,
+              decoration: fxStripCardDecoration(
+                context,
+                accent: accent,
+                radius: TokensStrip.rCard,
+                glowStrength: lead ? (isDark ? 0.18 : 0.22) : 0.05,
+                emphasize: lead,
               ),
+              padding: EdgeInsets.all(lead ? 14 : 12),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -219,41 +311,73 @@ class SetupStepCard extends StatelessWidget {
                     primary: primary,
                     doneColor: doneColor,
                     mute: mute,
-                    size: 40,
-                    iconSize: 20,
+                    size: lead ? 40 : 36,
+                    iconSize: lead ? 19 : 17,
+                    lead: lead,
                   ),
-                  const SizedBox(width: TokensStrip.s3),
+                  SizedBox(width: lead ? 12 : 10),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          title,
-                          style: TextStyle(
-                            color: completed ? doneColor : ink,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 15,
-                            height: 1.25,
-                          ),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                title,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: dashboardCardTitleStyle(ink).copyWith(
+                                  color: completed ? doneColor : ink,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: lead ? -0.15 : -0.1,
+                                ),
+                              ),
+                            ),
+                            if (lead) ...[
+                              const SizedBox(width: 6),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: primary.withValues(
+                                    alpha: isDark ? 0.34 : 0.14,
+                                  ),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Text(
+                                  'AGORA',
+                                  style: dashboardChipLabelStyle(primary),
+                                ),
+                              ),
+                            ],
+                          ],
                         ),
                         if (description != null &&
                             description!.trim().isNotEmpty) ...[
                           const SizedBox(height: 4),
                           Text(
                             description!,
-                            style: TokensStrip.bodyMuted(
-                              color: mute,
-                            ).copyWith(height: 1.4),
+                            maxLines: lead ? 2 : 3,
+                            overflow: TextOverflow.ellipsis,
+                            style: dashboardCardSubtitleStyle(
+                              context,
+                              isDark: isDark,
+                            ),
                           ),
                         ],
                         if (estimatedMinutes != null) ...[
                           const SizedBox(height: 6),
                           Text(
                             '~$estimatedMinutes min',
-                            style: TextStyle(
-                              color: mute.withValues(alpha: 0.78),
+                            style: dashboardCardSubtitleStyle(
+                              context,
+                              isDark: isDark,
+                            ).copyWith(
                               fontSize: 12,
-                              fontWeight: FontWeight.w600,
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
                         ],
@@ -261,10 +385,15 @@ class SetupStepCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  _SetupStepTrailing(
-                    completed: completed,
-                    primary: primary,
-                    doneColor: doneColor,
+                  FxIcon(
+                    name: completed ? 'circle-check' : 'chevron-right',
+                    color:
+                        completed
+                            ? doneColor
+                            : (lead
+                                ? primary.withValues(alpha: 0.85)
+                                : mute),
+                    size: lead ? 20 : 18,
                   ),
                 ],
               ),
@@ -359,6 +488,7 @@ class _SetupStepIconBadge extends StatelessWidget {
     required this.mute,
     required this.size,
     required this.iconSize,
+    this.lead = false,
   });
 
   final String icon;
@@ -368,9 +498,13 @@ class _SetupStepIconBadge extends StatelessWidget {
   final Color mute;
   final double size;
   final double iconSize;
+  final bool lead;
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final accent = completed ? doneColor : primary;
+
     return Container(
       width: size,
       height: size,
@@ -378,49 +512,26 @@ class _SetupStepIconBadge extends StatelessWidget {
         color:
             completed
                 ? TokensStrip.badgeSuccessBg
-                : primary.withValues(alpha: 0.10),
-        shape: BoxShape.circle,
+                : accent.withValues(alpha: isDark ? 0.26 : 0.14),
+        borderRadius: BorderRadius.circular(TokensStrip.rInput),
         border: Border.all(
           color:
               completed
                   ? TokensStrip.badgeSuccess.withValues(alpha: 0.45)
-                  : primary.withValues(alpha: 0.28),
+                  : accent.withValues(alpha: isDark ? 0.38 : 0.22),
         ),
       ),
       child: Center(
         child:
             completed
                 ? Icon(Icons.check_rounded, size: iconSize, color: doneColor)
-                : Icon(setupStepIcon(icon), size: iconSize, color: primary),
+                : FxIcon(
+                  name: setupStepFxIconName(icon),
+                  size: iconSize,
+                  color: accent,
+                  strokeWidth: lead ? 2.05 : 1.75,
+                ),
       ),
-    );
-  }
-}
-
-class _SetupStepTrailing extends StatelessWidget {
-  const _SetupStepTrailing({
-    required this.completed,
-    required this.primary,
-    required this.doneColor,
-  });
-
-  final bool completed;
-  final Color primary;
-  final Color doneColor;
-
-  @override
-  Widget build(BuildContext context) {
-    if (completed) {
-      return Icon(Icons.check_circle_rounded, color: doneColor, size: 22);
-    }
-    return Container(
-      width: 28,
-      height: 28,
-      decoration: BoxDecoration(
-        color: primary.withValues(alpha: 0.10),
-        shape: BoxShape.circle,
-      ),
-      child: Icon(Icons.chevron_right_rounded, size: 18, color: primary),
     );
   }
 }
@@ -664,12 +775,11 @@ class SetupWizardCta extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final primary = Theme.of(context).colorScheme.primary;
-
     return Semantics(
       button: true,
       label: label,
-      child: FilledButton(
+      child: FxLiquidPrimaryButton(
+        label: label,
         onPressed:
             onPressed == null
                 ? null
@@ -677,17 +787,6 @@ class SetupWizardCta extends StatelessWidget {
                   HapticFeedback.mediumImpact();
                   onPressed!();
                 },
-        style: FilledButton.styleFrom(
-          minimumSize: const Size.fromHeight(48),
-          backgroundColor: primary,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(TokensStrip.rInput),
-          ),
-        ),
-        child: Text(
-          label,
-          style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
-        ),
       ),
     );
   }

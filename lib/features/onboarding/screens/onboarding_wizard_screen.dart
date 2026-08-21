@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -117,50 +118,64 @@ class _OnboardingWizardScreenState
                 )
                 : RefreshIndicator(
                   onRefresh: _load,
-                  child: Column(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(
-                          TokensStrip.s4,
-                          TokensStrip.s3,
-                          TokensStrip.s4,
-                          0,
-                        ),
-                        child: SetupProgressHeader(
-                          progressPercent: wizard.progressPercent,
-                          completedCount: wizard.completedCount,
-                          totalCount: wizard.totalCount,
-                          nextActionLabel: wizard.nextActionLabel,
-                        ),
-                      ),
-                      Expanded(
-                        child: ListView(
+                  child: FxContentWidthLimiter(
+                    child: Column(
+                      children: [
+                        Padding(
                           padding: const EdgeInsets.fromLTRB(
                             TokensStrip.s4,
+                            TokensStrip.s3,
                             TokensStrip.s4,
-                            TokensStrip.s4,
-                            TokensStrip.s2,
+                            0,
                           ),
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          children: _buildStepList(wizard),
-                        ),
-                      ),
-                      SafeArea(
-                        child: Padding(
-                          padding: const EdgeInsets.all(TokensStrip.s4),
-                          child: SetupWizardCta(
-                            label:
-                                wizard.allStepsDone
-                                    ? 'Concluir setup'
-                                    : 'Continuar setup',
-                            onPressed:
-                                wizard.allStepsDone || wizard.wizardCompleto
-                                    ? _concluir
-                                    : () => _abrirStep(wizard.nextActionRoute),
+                          child: SetupProgressHeroCard(
+                            progressPercent: wizard.progressPercent,
+                            completedCount: wizard.completedCount,
+                            totalCount: wizard.totalCount,
+                            nextActionLabel: wizard.nextActionLabel,
                           ),
                         ),
-                      ),
-                    ],
+                        Expanded(
+                          child: ListView(
+                            padding: const EdgeInsets.fromLTRB(
+                              TokensStrip.s4,
+                              TokensStrip.s4,
+                              TokensStrip.s4,
+                              TokensStrip.s2,
+                            ),
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            children: _buildStepList(wizard),
+                          ),
+                        ),
+                        DecoratedBox(
+                          decoration: BoxDecoration(
+                            color: chrome.cardFill,
+                            border: Border(
+                              top: BorderSide(
+                                color: chrome.line.withValues(alpha: 0.35),
+                              ),
+                            ),
+                          ),
+                          child: SafeArea(
+                            top: false,
+                            child: Padding(
+                              padding: const EdgeInsets.all(TokensStrip.s4),
+                              child: SetupWizardCta(
+                                label:
+                                    wizard.allStepsDone
+                                        ? 'Concluir setup'
+                                        : 'Continuar setup',
+                                onPressed:
+                                    wizard.allStepsDone || wizard.wizardCompleto
+                                        ? _concluir
+                                        : () =>
+                                            _abrirStep(wizard.nextActionRoute),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
       ),
@@ -182,6 +197,7 @@ class _OnboardingWizardScreenState
             estimatedMinutes: entry.value.estimatedMinutes,
             icon: entry.value.icon,
             completed: false,
+            isLead: entry.key == 0,
             onTap: () => _abrirStep(entry.value.actionRoute),
           ),
         ),

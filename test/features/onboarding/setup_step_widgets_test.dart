@@ -10,4 +10,11 @@ void main() {
       expect(normalizeSetupActionRoute('/pacotes'), '/pacotes');
     });
   });
+
+  group('setupStepFxIconName', () {
+    test('mapeia icones do backend para FxIcon', () {
+      expect(setupStepFxIconName('fitness_center'), 'dumbbell');
+      expect(setupStepFxIconName('attach_money'), 'pix');
+    });
+  });
 }
