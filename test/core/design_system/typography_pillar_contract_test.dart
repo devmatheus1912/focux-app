@@ -92,6 +92,27 @@ void main() {
     expect(source, contains('kProfileMode'));
   });
 
+  test('bundled font assets exist for offline release', () {
+    const required = [
+      'assets/google_fonts/Inter-Regular.ttf',
+      'assets/google_fonts/Inter-Medium.ttf',
+      'assets/google_fonts/Inter-SemiBold.ttf',
+      'assets/google_fonts/Inter-Bold.ttf',
+      'assets/google_fonts/JetBrainsMono-Regular.ttf',
+      'assets/google_fonts/JetBrainsMono-Bold.ttf',
+      'assets/google_fonts/BarlowCondensed-Bold.ttf',
+      'assets/google_fonts/OFL.txt',
+    ];
+    for (final path in required) {
+      expect(File(path).existsSync(), isTrue, reason: 'Fonte ausente: $path');
+    }
+    final pubspec = File('pubspec.yaml').readAsStringSync();
+    expect(pubspec, contains('assets/google_fonts/'));
+    expect(pubspec, contains('family: Inter'));
+    expect(pubspec, contains('family: JetBrains Mono'));
+    expect(pubspec, contains('family: Barlow Condensed'));
+  });
+
   test('features do not call GoogleFonts directly', () {
     final failures = <String>[];
     for (final file in Directory('lib/features')

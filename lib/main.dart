@@ -36,6 +36,11 @@ void main() {
   // layout/hit-test failures across the entire widget tree.
   runZonedGuarded(() async {
     WidgetsFlutterBinding.ensureInitialized();
+    LicenseRegistry.addLicense(() async* {
+      final license =
+          await rootBundle.loadString('assets/google_fonts/OFL.txt');
+      yield LicenseEntryWithLineBreaks(<String>['google_fonts'], license);
+    });
     GoogleFonts.config.allowRuntimeFetching = kDebugMode;
     TlsCertificatePinning.installGlobalOverrides();
     await HomeWidgetService.init();
