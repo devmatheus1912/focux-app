@@ -59,14 +59,6 @@
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
-                <data android:scheme="https" android:host="focux.app" android:pathPrefix="/p"/>
-                <data android:scheme="https" android:host="focux.app" android:pathPrefix="/convite"/>
-                <data android:scheme="https" android:host="focux.app" android:pathPrefix="/resetar-senha"/>
-                <data android:scheme="https" android:host="focux.app" android:pathPrefix="/aluno"/>
-                <data android:scheme="https" android:host="www.focux.app" android:pathPrefix="/p"/>
-                <data android:scheme="https" android:host="www.focux.app" android:pathPrefix="/convite"/>
-                <data android:scheme="https" android:host="www.focux.app" android:pathPrefix="/resetar-senha"/>
-                <data android:scheme="https" android:host="www.focux.app" android:pathPrefix="/aluno"/>
                 <data android:scheme="https" android:host="focuxpersonal.com" android:pathPrefix="/p"/>
                 <data android:scheme="https" android:host="focuxpersonal.com" android:pathPrefix="/c"/>
                 <data android:scheme="https" android:host="focuxpersonal.com" android:pathPrefix="/convite"/>
