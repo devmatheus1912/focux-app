@@ -88,12 +88,12 @@ class _OnboardingWizardScreenState
     final primary = Theme.of(context).colorScheme.primary;
 
     return fxScreenA11yScope(
-      label: 'Setup D0',
+      label: 'Primeiros passos, configuração inicial',
       child: FxShellScaffold(
         useMesh: true,
         appBar: FxShellAppBar(
-          title: 'Setup D0',
-          subtitle: 'Primeira vitória em 10 min',
+          title: 'Primeiros passos',
+          subtitle: 'Deixe seu espaço pronto em cerca de 10 min',
           onBack: () => context.go('/dashboard/personal'),
         ),
         body:

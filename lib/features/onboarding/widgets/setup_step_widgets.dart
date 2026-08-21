@@ -107,7 +107,7 @@ class SetupProgressHeroCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Ativação · setup D0',
+                'Sua ativação',
                 style: FocuxHubTypography.eyebrow(
                   context,
                   color: primary,
