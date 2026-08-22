@@ -14,7 +14,6 @@ import '../../../core/theme/hero_teal.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../features/perfil/providers/perfil_provider.dart';
-import '../../../features/subscription/models/subscription_plan.dart';
 import '../../dashboard/utils/dashboard_home_prefetch.dart';
 import '../../alunos/utils/alunos_home_prefetch.dart';
 import '../providers/auth_provider.dart';
@@ -254,20 +253,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       ref.invalidate(perfilProvider);
       prefetchPersonalDashboardHome(ref);
       prefetchAlunosHome(ref);
-      final perfil = await ref.read(perfilProvider.future);
-      final plan = subscriptionPlanFromApi(perfil.plano);
-      final trialActive =
-          perfil.trialEndsAt != null &&
-          perfil.trialEndsAt!.isAfter(DateTime.now());
-      final shouldOfferTrial =
-          perfil.trialUsed != true &&
-          (plan == SubscriptionPlan.FREE ||
-              plan == SubscriptionPlan.ENTERPRISE && !trialActive);
-      if (shouldOfferTrial || plan == SubscriptionPlan.FREE) {
-        return '/assinatura';
-      }
+      await ref.read(perfilProvider.future);
     } catch (_) {
-      return '/assinatura';
+      // Prefetch best-effort — Home ainda é o destino.
     }
     return fallback;
   }

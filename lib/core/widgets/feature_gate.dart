@@ -8,7 +8,6 @@ import '../../features/auth/providers/auth_provider.dart';
 import '../../features/planos/providers/plano_features_provider.dart';
 import '../../features/planos/data/planos_repository.dart';
 import '../../features/subscription/plan_entitlements.dart';
-import '../../features/subscription/widgets/upgrade_prompt_sheet.dart';
 import '../analytics/analytics_service.dart';
 import '../router/role_home.dart';
 import '../router/safe_navigation.dart';
@@ -68,9 +67,10 @@ class FeatureGate extends ConsumerWidget {
     if (featuresAsync.hasError) {
       final isAluno = ref.read(authProvider) == AuthStatus.authenticated &&
           ref.read(authProvider.notifier).currentRole == UserRole.aluno;
+      // Fail-closed: nunca liberar Enterprise fantasma quando /planos/me falha.
       final fallback = (isAluno
               ? PlanoFeatures.optimisticAluno
-              : PlanoFeatures.optimisticEnterprise)
+              : PlanoFeatures.free)
           .normalizeForTier();
       return _buildGatedContent(
         context: context,
@@ -241,15 +241,7 @@ class _LockedScreenState extends ConsumerState<_LockedScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      UpgradePromptSheet.showIfAllowed(
-        context: context,
-        featureName: widget.featureName,
-        capability: widget.capability,
-        requiredPlan: widget.requiredPlan,
-      );
-    });
+    // Locked screen is enough — no auto-sheet on mount (evita spam de upsell).
   }
 
   @override

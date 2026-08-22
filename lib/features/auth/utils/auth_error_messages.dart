@@ -6,7 +6,10 @@ String mapLoginError(Object error) {
   if (error is DioException) {
     final statusCode = error.response?.statusCode;
     if (statusCode == null) return 'Sem conexão com o servidor.';
-    if (statusCode == 401) return 'Email ou senha incorretos.';
+    if (statusCode == 401) {
+      return 'Email ou senha incorretos. '
+          'Se você entrou com Google, use o botão Google ou redefina a senha.';
+    }
   }
   return 'Não foi possível entrar agora.';
 }
@@ -98,7 +101,6 @@ String mapSignupCodeError(Object error) {
 String mapGoogleSignInError(Object error, {required bool isAluno}) {
   if (error is DioException) {
     final statusCode = error.response?.statusCode;
-    final body = error.response?.data;
     if (statusCode == 401) {
       return isAluno
           ? 'Este Google não está vinculado a um aluno.'

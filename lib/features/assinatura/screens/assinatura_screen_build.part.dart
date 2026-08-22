@@ -91,6 +91,12 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
         ctaLabel = 'Sincronizando assinatura...';
         ctaEnabled = false;
         footnote = 'Aguarde a confirmação da loja.';
+      } else if (selectedPlan == SubscriptionPlan.FREE) {
+        ctaMode = _AssinaturaCtaMode.goHome;
+        ctaLabel = 'Continuar no FREE';
+        ctaEnabled = true;
+        footnote =
+            'Sem cartão. Você já pode usar a Home e os recursos do plano gratuito.';
       } else if (isCurrentPlan) {
         ctaMode =
             subscriptionUsesNativeStore
@@ -128,11 +134,6 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
             subscriptionUsesNativeStore
                 ? 'Downgrade só nas assinaturas do dispositivo. Você pode perder recursos do plano atual.'
                 : '';
-      } else if (selectedPlan == SubscriptionPlan.FREE) {
-        ctaMode = _AssinaturaCtaMode.blocked;
-        ctaLabel = 'Plano gratuito';
-        ctaEnabled = false;
-        footnote = 'O plano gratuito não requer assinatura.';
       } else {
         ctaMode = _AssinaturaCtaMode.subscribe;
         ctaEnabled =
@@ -147,14 +148,10 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
         final selectedLabel = PaywallCatalog.displayPlanName(selectedPlan);
         ctaLabel =
             trialOffer
-                ? 'Começar $trialDays dias grátis — ${PaywallCatalog.displayPlanName(SubscriptionPlan.ENTERPRISE)}'
+                ? 'Começar $trialDays dias grátis — $selectedLabel'
                 : isUpgrade
-                ? 'Confirmar upgrade'
-                : selectedPlan == SubscriptionPlan.ENTERPRISE_PRO
-                ? 'Continuar com $selectedLabel'
-                : selectedPlan == SubscriptionPlan.ENTERPRISE
-                ? 'Continuar com $selectedLabel'
-                : 'Continuar com ${PaywallCatalog.displayPlanName(SubscriptionPlan.PREMIUM)}';
+                ? 'Confirmar upgrade · $selectedLabel'
+                : 'Continuar com $selectedLabel';
         footnote =
             subscriptionUsesNativeStore
                 ? (_billingPeriod == SubscriptionBillingPeriod.yearly
@@ -178,29 +175,24 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
             : null;
 
     final isUpgradeSelection =
-        planos != null &&
-        subscriptionPlanFromApi(
-              _selectedPlanName ?? currentPlan.apiName,
-            ).level >
-            currentPlan.level;
+        planos == null
+            ? false
+            : subscriptionPlanFromApi(
+                  _selectedPlanName ?? currentPlan.apiName,
+                ).level >
+                currentPlan.level;
     final stickyTierAccent =
         isUpgradeSelection && selectedPlan == SubscriptionPlan.ENTERPRISE_PRO
             ? PaywallCatalog.accentForPlan(SubscriptionPlan.ENTERPRISE_PRO)
             : null;
     if (_paymentBlocked) {
-      return FxShellScaffold(
-        appBar: FxShellAppBar(
-          title: 'Planos',
-          onBack: () => safePopOrGo(context, '/dashboard/personal'),
-        ),
-        body: const FxEmptyState(
-          icon: 'alert-triangle',
-          title: 'Dispositivo não seguro',
-          subtitle:
-              'Detectamos risco de jailbreak ou modo desenvolvedor. '
-              'Por sua segurança, pagamentos estão desativados neste aparelho.',
-        ),
-      );
+      // Ainda mostra Planos — só checkout fica bloqueado (DeviceGuard).
+      ctaMode = _AssinaturaCtaMode.blocked;
+      ctaLabel = 'Pagamentos indisponíveis neste aparelho';
+      ctaEnabled = false;
+      footnote =
+          'Opções de desenvolvedor ou root detectadas. '
+          'Desligue para testar compras. Conta FREE segue ativa.';
     }
 
     return FxShellScaffold(
@@ -254,7 +246,10 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
                     onSubscribe:
                         () =>
                             _startCheckout(selectedPlan, selectedBackendPlan!),
-                    onManage: _openSubscriptionManagement,
+                    onManage:
+                        ctaMode == _AssinaturaCtaMode.goHome
+                            ? () => context.go('/dashboard/personal')
+                            : _openSubscriptionManagement,
                     onRestore:
                         hideScrollUpgradeLegal && subscriptionUsesNativeStore
                             ? _restorePurchases

@@ -312,9 +312,10 @@ class _PersonalDashboardScreenState
       if (!mounted) return;
       _applyFinanceData(home.financeiro);
     } catch (e) {
-      if (mounted) {
-        FeedbackHelper.showWarn(context, friendlyError(e));
-      }
+      if (!mounted) return;
+      // Gate de plano ≠ outage — Home já mostra locked/upsell; sem snackbar.
+      if (isPlanGateError(e)) return;
+      FeedbackHelper.showWarn(context, friendlyError(e));
     }
   }
 

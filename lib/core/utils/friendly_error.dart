@@ -80,6 +80,11 @@ String _humanizeServerMessage(String raw) {
   if (msg.isEmpty) return 'Algo deu errado. Tente novamente.';
 
   final lower = msg.toLowerCase();
+  if (lower.contains('requer plano') ||
+      lower.contains('faça upgrade') ||
+      lower.contains('faca upgrade')) {
+    return msg;
+  }
   if (lower.contains('cloudinary') &&
       lower.contains('nao configurado')) {
     return 'Envio de vídeo indisponível: Cloudinary não está configurado no servidor (CLOUDINARY_CLOUD_NAME, API_KEY e API_SECRET).';
@@ -93,4 +98,24 @@ String _humanizeServerMessage(String raw) {
   }
 
   return msg;
+}
+
+/// True when the error is a plan/feature gate (not a real outage).
+bool isPlanGateError(Object error) {
+  if (error is! DioException) return false;
+  if (error.response?.statusCode != 403) return false;
+  final data = error.response?.data;
+  String? msg;
+  if (data is Map) {
+    final raw = data['message'] ?? data['erro'] ?? data['mensagem'];
+    if (raw is String) msg = raw;
+  } else if (data is String) {
+    msg = data;
+  }
+  if (msg == null) return false;
+  final lower = msg.toLowerCase();
+  return lower.contains('requer plano') ||
+      lower.contains('faça upgrade') ||
+      lower.contains('faca upgrade') ||
+      lower.contains('premium');
 }

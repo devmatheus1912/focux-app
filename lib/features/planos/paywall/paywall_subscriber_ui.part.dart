@@ -120,41 +120,34 @@ class PaywallHero extends StatelessWidget {
     }
 
     return PaywallGlassCard(
-      margin: const EdgeInsets.fromLTRB(0, 8, 0, 20),
+      margin: const EdgeInsets.fromLTRB(0, 8, 0, 16),
       accent: primary,
-      glow: true,
+      glow: false,
       blur: false,
-      elevationLevel: 12,
-      padding: const EdgeInsets.all(22),
+      elevationLevel: 8,
+      padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           PaywallTierBrandPill(
-            label: 'FOCUX · PLANOS',
+            label: 'PLANOS',
             accent: primary,
             isDark: isDark,
-            icon: Icons.bolt_rounded,
-          ),
-          const SizedBox(height: 18),
-          ShaderMask(
-            shaderCallback:
-                (bounds) => LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [ink, primary],
-                ).createShader(bounds),
-            child: Text(
-              'Seu app. Sua marca.\nSeus alunos. Sem limite.',
-              textAlign: TextAlign.center,
-              style: TokensStrip.h1(
-                color: Colors.white,
-              ).copyWith(fontSize: 26, height: 1.06, letterSpacing: -1.2),
-            ),
+            icon: Icons.workspace_premium_outlined,
           ),
           const SizedBox(height: 12),
           Text(
-            'Cada recurso aqui responde: isso me ajuda a ganhar mais ou trabalhar menos?',
-            textAlign: TextAlign.center,
-            style: TokensStrip.bodyMuted(color: mute).copyWith(fontSize: 15),
+            'Escolha o plano que cabe no seu momento',
+            style: TokensStrip.h2(color: ink).copyWith(
+              fontWeight: FontWeight.w800,
+              height: 1.2,
+              fontSize: 22,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'FREE para começar. Premium quando for cobrar e escalar.',
+            style: TokensStrip.body(color: mute).copyWith(height: 1.4),
           ),
         ],
       ),

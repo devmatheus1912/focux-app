@@ -47,13 +47,16 @@ extension AssinaturaScreenBuildBody on _AssinaturaScreenState {
     var selPlan = subscriptionPlanFromApi(
       _selectedPlanName ?? currentPlan.apiName,
     );
-    if (selPlan == SubscriptionPlan.FREE) {
-      selPlan = subscriptionPlanFromApi(paid.last.nome);
-    }
+    // Mantém FREE selecionável (CTA "Continuar no FREE"); não forçar pago.
 
     final selBackend = sortedPlans.firstWhere(
       (plan) => subscriptionPlanFromApi(plan.nome) == selPlan,
-      orElse: () => paid.last,
+      orElse: () =>
+          selPlan == SubscriptionPlan.FREE && sortedPlans.isNotEmpty
+              ? sortedPlans.first
+              : paid.isNotEmpty
+              ? paid.last
+              : sortedPlans.first,
     );
     final currentBackend = sortedPlans.firstWhere(
       (plan) => subscriptionPlanFromApi(plan.nome) == currentPlan,

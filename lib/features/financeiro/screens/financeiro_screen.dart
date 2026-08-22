@@ -67,7 +67,22 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen>
   }
 
   @override
+  @override
   Widget build(BuildContext context) {
+    final featuresAsync = ref.watch(planoFeaturesProvider);
+    final features = featuresAsync.valueOrNull;
+    final hasFinanceiro = features?.financeiro == true;
+
+    // Gate first: não dispara BFF financeiro sem capability.
+    if (features == null || !hasFinanceiro) {
+      return const FeatureGate(
+        featureName: 'Financeiro',
+        requiredPlan: SubscriptionPlan.PREMIUM,
+        capability: 'financeiro',
+        child: SizedBox.shrink(),
+      );
+    }
+
     final homeAsync = ref.watch(financeiroHomeProvider);
     final home = homeAsync.valueOrNull;
     final planoFromHome = home?.planoFeatures;

@@ -26,6 +26,7 @@ import 'core/theme/design_tokens.dart';
 import 'core/theme/focux_system_chrome.dart';
 import 'core/theme/theme_provider.dart';
 import 'features/auth/providers/auth_provider.dart';
+import 'features/auth/utils/legacy_password_reset_redirect.dart';
 import 'features/perfil/data/perfil_repository.dart';
 import 'l10n/app_localizations.dart';
 
@@ -123,6 +124,7 @@ void main() {
       );
     };
 
+    applyLegacyPasswordResetRedirect(AppRouter.router);
     runApp(const ProviderScope(child: FocuxApp()));
   }, reportUncaughtZoneError);
 }

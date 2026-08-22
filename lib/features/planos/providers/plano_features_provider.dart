@@ -125,7 +125,7 @@ class PlanoFeaturesNotifier extends StateNotifier<AsyncValue<PlanoFeatures>> {
         final fallback =
             (forAluno
                     ? PlanoFeatures.optimisticAluno
-                    : PlanoFeatures.optimisticEnterprise)
+                    : PlanoFeatures.free)
                 .normalizeForTier();
         state = AsyncData(fallback);
         unawaited(
@@ -134,7 +134,7 @@ class PlanoFeaturesNotifier extends StateNotifier<AsyncValue<PlanoFeatures>> {
             props: {
               'plan': fallback.plano.name,
               'error': error.toString(),
-              'allowedByOptimisticFallback': true,
+              'allowedByOptimisticFallback': false,
               'forAluno': forAluno,
             },
           ),
