@@ -26,4 +26,30 @@ void main() {
     expect(repo, contains('/api/planos/paywall/home'));
     expect(repo, contains('getPaywallHome'));
   });
+
+  test('FREE sem deep link inicia no plano atual (não Premium)', () {
+    final screen = File(
+      'lib/features/assinatura/screens/assinatura_screen.dart',
+    ).readAsStringSync();
+    expect(screen, contains('return currentPlan.apiName;'));
+    expect(
+      screen,
+      isNot(contains('SubscriptionPlan.PREMIUM.apiName')),
+    );
+  });
+
+  test('assinatura sticky e scroll respeitam reduced motion e refresh', () {
+    final build = File(
+      'lib/features/assinatura/screens/assinatura_screen_build.part.dart',
+    ).readAsStringSync();
+    expect(build, contains('FxContentWidthLimiter'));
+    expect(build, contains('AnimatedSwitcher'));
+    expect(build, contains('Continuar no FREE'));
+
+    final body = File(
+      'lib/features/assinatura/screens/assinatura_screen_build_body.part.dart',
+    ).readAsStringSync();
+    expect(body, contains('RefreshIndicator'));
+    expect(body, contains('AlwaysScrollableScrollPhysics'));
+  });
 }

@@ -555,7 +555,6 @@ class PaywallUpgradeLegalCompact extends StatelessWidget {
           isDark: isDark,
           maxHeight: maxHeight,
           child: Column(
-            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               FxHomeSheetHandle(isDark: isDark),
@@ -566,7 +565,7 @@ class PaywallUpgradeLegalCompact extends StatelessWidget {
                 leading: Icon(Icons.policy_outlined, color: primary, size: 18),
               ),
               SizedBox(height: TokensStrip.s3),
-              Flexible(
+              Expanded(
                 child: SingleChildScrollView(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,

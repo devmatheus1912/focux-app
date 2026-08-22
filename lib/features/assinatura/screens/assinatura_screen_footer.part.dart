@@ -168,6 +168,24 @@ class _AssinaturaStickyGlassBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final reduceMotion = TokensStrip.prefersReducedMotion(context);
+    final fill = DecoratedBox(
+      decoration: BoxDecoration(
+        color: TokensStrip.glassFill(
+          dark: isDark,
+          opacity: isDark ? 0.86 : 0.91,
+        ),
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Colors.white.withValues(alpha: isDark ? 0.06 : 0.42),
+            Colors.transparent,
+          ],
+        ),
+      ),
+      child: child,
+    );
     return DecoratedBox(
       decoration: BoxDecoration(
         border: Border(
@@ -175,28 +193,14 @@ class _AssinaturaStickyGlassBar extends StatelessWidget {
         ),
       ),
       child: ClipRect(
-        child: BackdropFilter(
-          filter: TokensStrip.blurFilter(
-            isDark ? TokensStrip.blurMedium : TokensStrip.blurLight,
-          ),
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: TokensStrip.glassFill(
-                dark: isDark,
-                opacity: isDark ? 0.86 : 0.91,
+        child: reduceMotion
+            ? fill
+            : BackdropFilter(
+              filter: TokensStrip.blurFilter(
+                isDark ? TokensStrip.blurMedium : TokensStrip.blurLight,
               ),
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Colors.white.withValues(alpha: isDark ? 0.06 : 0.42),
-                  Colors.transparent,
-                ],
-              ),
+              child: fill,
             ),
-            child: child,
-          ),
-        ),
       ),
     );
   }
@@ -345,40 +349,50 @@ class _AssinaturaStickyFooter extends StatelessWidget {
           const SizedBox(height: 8),
         ],
         if (isActionable)
-          tierAccent != null && mode == _AssinaturaCtaMode.subscribe
-              ? DecoratedBox(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(TokensStrip.rButton),
-                  border: Border.all(color: tierAccent!, width: 2),
-                  boxShadow: [
-                    BoxShadow(
-                      color: tierAccent!.withValues(alpha: 0.28),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
+          Semantics(
+            button: true,
+            label: label,
+            liveRegion: mode == _AssinaturaCtaMode.syncing,
+            child:
+                tierAccent != null &&
+                        mode == _AssinaturaCtaMode.subscribe &&
+                        !TokensStrip.prefersReducedMotion(context)
+                    ? DecoratedBox(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(
+                          TokensStrip.rButton,
+                        ),
+                        border: Border.all(color: tierAccent!, width: 2),
+                        boxShadow: [
+                          BoxShadow(
+                            color: tierAccent!.withValues(alpha: 0.28),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: FxLiquidPrimaryButton(
+                        label: label,
+                        icon: icon,
+                        loading: loading || mode == _AssinaturaCtaMode.syncing,
+                        loadingLabel:
+                            mode == _AssinaturaCtaMode.syncing
+                                ? 'Sincronizando…'
+                                : null,
+                        onPressed: onPressed,
+                      ),
+                    )
+                    : FxLiquidPrimaryButton(
+                      label: label,
+                      icon: icon,
+                      loading: loading || mode == _AssinaturaCtaMode.syncing,
+                      loadingLabel:
+                          mode == _AssinaturaCtaMode.syncing
+                              ? 'Sincronizando…'
+                              : null,
+                      onPressed: onPressed,
                     ),
-                  ],
-                ),
-                child: FxLiquidPrimaryButton(
-                  label: label,
-                  icon: icon,
-                  loading: loading || mode == _AssinaturaCtaMode.syncing,
-                  loadingLabel:
-                      mode == _AssinaturaCtaMode.syncing
-                          ? 'Sincronizando…'
-                          : null,
-                  onPressed: onPressed,
-                ),
-              )
-              : FxLiquidPrimaryButton(
-                label: label,
-                icon: icon,
-                loading: loading || mode == _AssinaturaCtaMode.syncing,
-                loadingLabel:
-                    mode == _AssinaturaCtaMode.syncing
-                        ? 'Sincronizando…'
-                        : null,
-                onPressed: onPressed,
-              )
+          )
         else
           FxLiquidPrimaryButton(label: label, onPressed: null),
         if (footnote.isNotEmpty) ...[
@@ -402,7 +416,7 @@ class _AssinaturaStickyFooter extends StatelessWidget {
                 TextButton(
                   onPressed: onBillingDetails,
                   style: TextButton.styleFrom(
-                    minimumSize: const Size(44, 36),
+                    minimumSize: const Size(48, 48),
                     padding: const EdgeInsets.symmetric(horizontal: 8),
                   ),
                   child: Text(
@@ -418,7 +432,7 @@ class _AssinaturaStickyFooter extends StatelessWidget {
                 TextButton(
                   onPressed: restoringPurchases ? null : onRestore,
                   style: TextButton.styleFrom(
-                    minimumSize: const Size(44, 36),
+                    minimumSize: const Size(48, 48),
                     padding: const EdgeInsets.symmetric(horizontal: 8),
                   ),
                   child: Text(

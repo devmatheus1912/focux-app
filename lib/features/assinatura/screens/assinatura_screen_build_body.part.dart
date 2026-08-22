@@ -30,10 +30,10 @@ extension AssinaturaScreenBuildBody on _AssinaturaScreenState {
             )
             .toList();
 
-    if (paid.isEmpty) {
+    if (sortedPlans.isEmpty) {
       return FxEmptyState(
         icon: 'dollar-sign',
-        title: 'Nenhum plano pago disponível',
+        title: 'Nenhum plano disponível',
         subtitle: 'Tente atualizar em instantes.',
         action: FxEmptyAction(
           label: 'Atualizar',
@@ -42,6 +42,11 @@ extension AssinaturaScreenBuildBody on _AssinaturaScreenState {
           },
         ),
       );
+    }
+
+    // Só FREE no catálogo: ainda mostra card FREE + CTA Home (não empty).
+    if (paid.isEmpty) {
+      // Fall through — sortedPlans has FREE only; cards render below.
     }
 
     var selPlan = subscriptionPlanFromApi(
@@ -114,15 +119,25 @@ extension AssinaturaScreenBuildBody on _AssinaturaScreenState {
     final usePlanStudio =
         !isAcquisition && currentPlan != SubscriptionPlan.FREE;
 
-    return ListView(
-      controller: _paywallScrollController,
-      padding: const EdgeInsets.fromLTRB(
-        TokensStrip.s5,
-        4,
-        TokensStrip.s5,
-        140,
-      ),
-      children: [
+    final bottomInset = MediaQuery.paddingOf(context).bottom;
+    final stickyReserve = 156.0 + bottomInset;
+
+    return RefreshIndicator(
+      onRefresh: () async {
+        ref.invalidate(paywallHomeProvider);
+        ref.invalidate(planoFeaturesProvider);
+        await ref.read(paywallHomeProvider.future);
+      },
+      child: ListView(
+        controller: _paywallScrollController,
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: EdgeInsets.fromLTRB(
+          TokensStrip.s5,
+          4,
+          TokensStrip.s5,
+          stickyReserve,
+        ),
+        children: [
         if (!usePlanStudio)
           PaywallHero(
             ink: ink,
@@ -716,7 +731,8 @@ extension AssinaturaScreenBuildBody on _AssinaturaScreenState {
             isDark: isDark,
           ),
         ],
-        if (!(usePlanStudio && isUpgradeTargetSelected)) ...[
+        if (!(usePlanStudio && isUpgradeTargetSelected) &&
+            !isAcquisition) ...[
           const SizedBox(height: 16),
           PaywallSectionAnchor(
             anchorKey: _paywallLegalKey,
@@ -745,6 +761,7 @@ extension AssinaturaScreenBuildBody on _AssinaturaScreenState {
           ),
         ],
       ],
+      ),
     );
   }
 }

@@ -201,75 +201,92 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
         title: 'Planos',
         onBack: () => safePopOrGo(context, '/dashboard/personal'),
         actions: [
-          Semantics(
-            button: true,
-            label: 'Cancelar assinatura',
-            child: IconButton(
-              icon: const Icon(Icons.cancel_outlined),
-              tooltip: 'Cancelar assinatura',
-              onPressed: () => context.push('/cancel-save'),
+          if (currentPlan != SubscriptionPlan.FREE)
+            Semantics(
+              button: true,
+              label: 'Cancelar assinatura',
+              child: IconButton(
+                icon: const Icon(Icons.cancel_outlined),
+                tooltip: 'Cancelar assinatura',
+                onPressed: () => context.push('/cancel-save'),
+              ),
             ),
-          ),
         ],
       ),
       bottomNavigationBar:
           selectedBackendPlan == null
               ? null
-              : _AssinaturaStickyGlassBar(
-                isDark: isDark,
-                line: line,
-                child: SafeArea(
-                  minimum: const EdgeInsets.fromLTRB(16, 10, 16, 12),
-                  child: _AssinaturaStickyFooter(
-                    mode: ctaMode,
-                    label: ctaLabel,
-                    planSummary: planSummary,
-                    footnote: footnote,
-                    enabled: ctaEnabled,
-                    loading: _loadingCheckout || _syncingPurchase,
-                    trialHint: trialOffer,
-                    showLegalConsent: ctaMode == _AssinaturaCtaMode.subscribe,
-                    isUpgrade: isUpgradeSelection,
-                    tierAccent: stickyTierAccent,
-                    ink: ink,
-                    mute: mute,
-                    line: line,
-                    primary: primary,
-                    secondaryLabel:
-                        showEnterpriseProStickySecondary
-                            ? 'Ver Enterprise Pro'
-                            : null,
-                    onSecondary:
-                        showEnterpriseProStickySecondary
-                            ? _focusEnterpriseProUpgrade
-                            : null,
-                    onSubscribe:
-                        () =>
-                            _startCheckout(selectedPlan, selectedBackendPlan!),
-                    onManage:
-                        ctaMode == _AssinaturaCtaMode.goHome
-                            ? () => context.go('/dashboard/personal')
-                            : _openSubscriptionManagement,
-                    onRestore:
-                        hideScrollUpgradeLegal && subscriptionUsesNativeStore
-                            ? _restorePurchases
-                            : null,
-                    restoringPurchases: _restoringPurchases,
-                    onBillingDetails:
-                        hideScrollUpgradeLegal
-                            ? () => PaywallUpgradeLegalCompact.showBillingSheet(
-                              context,
-                              ink: ink,
-                              mute: mute,
-                              primary: primary,
-                              showStoreBillingNote: subscriptionUsesNativeStore,
-                              restoring: _restoringPurchases,
-                              onRestore:
-                                  subscriptionUsesNativeStore
-                                      ? _restorePurchases
-                                      : null,
-                            )
-                            : null,
+              : FxContentWidthLimiter(
+                child: AnimatedSwitcher(
+                  duration: TokensStrip.prefersReducedMotion(context)
+                      ? Duration.zero
+                      : const Duration(milliseconds: 220),
+                  child: KeyedSubtree(
+                    key: ValueKey('${ctaMode.name}-$ctaLabel'),
+                    child: _AssinaturaStickyGlassBar(
+                      isDark: isDark,
+                      line: line,
+                      child: SafeArea(
+                        minimum: const EdgeInsets.fromLTRB(16, 10, 16, 12),
+                        child: _AssinaturaStickyFooter(
+                          mode: ctaMode,
+                          label: ctaLabel,
+                          planSummary: planSummary,
+                          footnote: footnote,
+                          enabled: ctaEnabled,
+                          loading: _loadingCheckout || _syncingPurchase,
+                          trialHint: trialOffer,
+                          showLegalConsent:
+                              ctaMode == _AssinaturaCtaMode.subscribe,
+                          isUpgrade: isUpgradeSelection,
+                          tierAccent: stickyTierAccent,
+                          ink: ink,
+                          mute: mute,
+                          line: line,
+                          primary: primary,
+                          secondaryLabel:
+                              showEnterpriseProStickySecondary
+                                  ? 'Ver Enterprise Pro'
+                                  : null,
+                          onSecondary:
+                              showEnterpriseProStickySecondary
+                                  ? _focusEnterpriseProUpgrade
+                                  : null,
+                          onSubscribe:
+                              () => _startCheckout(
+                                selectedPlan,
+                                selectedBackendPlan!,
+                              ),
+                          onManage:
+                              ctaMode == _AssinaturaCtaMode.goHome
+                                  ? () => context.go('/dashboard/personal')
+                                  : _openSubscriptionManagement,
+                          onRestore:
+                              hideScrollUpgradeLegal &&
+                                      subscriptionUsesNativeStore
+                                  ? _restorePurchases
+                                  : null,
+                          restoringPurchases: _restoringPurchases,
+                          onBillingDetails:
+                              hideScrollUpgradeLegal
+                                  ? () =>
+                                      PaywallUpgradeLegalCompact.showBillingSheet(
+                                        context,
+                                        ink: ink,
+                                        mute: mute,
+                                        primary: primary,
+                                        showStoreBillingNote:
+                                            subscriptionUsesNativeStore,
+                                        restoring: _restoringPurchases,
+                                        onRestore:
+                                            subscriptionUsesNativeStore
+                                                ? _restorePurchases
+                                                : null,
+                                      )
+                                  : null,
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ),

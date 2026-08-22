@@ -19,6 +19,7 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -75,6 +76,7 @@ bool _shouldLoadEnterprisePreview(
 }
 
 /// Plano pré-selecionado: atual por padrão; deep link só se for upgrade válido.
+/// FREE sem deep link: fica em FREE (Home first) — upgrade é escolha, não default.
 String _resolveInitialPlanSelection({
   required SubscriptionPlan currentPlan,
   String? deepLinkPlan,
@@ -87,8 +89,7 @@ String _resolveInitialPlanSelection({
       return target.apiName;
     }
   }
-  if (currentPlan != SubscriptionPlan.FREE) return currentPlan.apiName;
-  return deep ?? SubscriptionPlan.PREMIUM.apiName;
+  return currentPlan.apiName;
 }
 
 /// Trial só para quem ainda pode assinar Enterprise (não assinante atual).
