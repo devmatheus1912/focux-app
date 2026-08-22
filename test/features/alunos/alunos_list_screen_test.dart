@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/core/theme/design_tokens.dart';
 import 'package:focux_app/features/alertas/data/alertas_repository.dart';
-import 'package:focux_app/features/alunos/constants/alunos_list_filters.dart';
 import 'package:focux_app/features/alunos/data/aluno_repository.dart';
 import 'package:focux_app/features/alunos/providers/alunos_provider.dart';
 import 'package:focux_app/features/alunos/screens/alunos_list_screen.dart';

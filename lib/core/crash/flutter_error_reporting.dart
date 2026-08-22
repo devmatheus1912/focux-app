@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart';
 /// but does not kill the isolate. Sending these to Crashlytics as fatal
 /// (or at all) inflates the dashboard.
 bool isNonFatalFlutterFrameworkError(Object exception, [StackTrace? stack]) {
-  final msg = '${exception}\n${stack ?? ''}';
+  final msg = '$exception\n${stack ?? ''}';
   const needles = <String>[
     'overflowed by',
     'RenderFlex children have non-zero flex',

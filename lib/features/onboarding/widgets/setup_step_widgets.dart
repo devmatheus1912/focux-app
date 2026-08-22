@@ -51,6 +51,7 @@ IconData setupStepIcon(String name) {
 String setupStepFxIconName(String name) {
   switch (name) {
     case 'person':
+      return 'target';
     case 'person_add':
       return 'users';
     case 'fitness_center':
@@ -62,11 +63,14 @@ String setupStepFxIconName(String name) {
     case 'attach_money':
       return 'pix';
     case 'link':
-      return 'route';
+      return 'spark';
     default:
       return 'circle-check';
   }
 }
+
+bool setupStepUsesMaterialIcon(String name) =>
+    name == 'person' || name == 'person_add' || name == 'link';
 
 /// Hero de progresso — paridade visual com cards da Home.
 class SetupProgressHeroCard extends StatelessWidget {
@@ -462,6 +466,8 @@ class _SetupStepCompactRow extends StatelessWidget {
                 Expanded(
                   child: Text(
                     title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       color: completed ? doneColor : ink,
                       fontWeight: FontWeight.w600,
@@ -526,6 +532,8 @@ class _SetupStepIconBadge extends StatelessWidget {
         child:
             completed
                 ? Icon(Icons.check_rounded, size: iconSize, color: doneColor)
+                : setupStepUsesMaterialIcon(icon)
+                ? Icon(setupStepIcon(icon), size: iconSize, color: accent)
                 : FxIcon(
                   name: setupStepFxIconName(icon),
                   size: iconSize,

@@ -33,14 +33,31 @@ class _PerfilBody extends StatefulWidget {
 
 class _PerfilBodyState extends State<_PerfilBody> {
   bool _stickyVisible = false;
+  final GlobalKey _completenessCardKey = GlobalKey();
 
-  bool _onScroll(ScrollNotification notification) {
+  bool _completenessCardInViewport(BuildContext context) {
+    final ctx = _completenessCardKey.currentContext;
+    if (ctx == null) return false;
+    final render = ctx.findRenderObject();
+    if (render is! RenderBox || !render.hasSize) return false;
+
+    final topLeft = render.localToGlobal(Offset.zero);
+    final bottom = topLeft.dy + render.size.height;
+    final viewportTop = MediaQuery.paddingOf(context).top + kToolbarHeight;
+    final viewportBottom = MediaQuery.sizeOf(context).height - 96;
+    return bottom > viewportTop && topLeft.dy < viewportBottom;
+  }
+
+  bool _onScroll(ScrollNotification notification, {required bool profileComplete}) {
     if (notification is! ScrollUpdateNotification &&
         notification is! ScrollMetricsNotification) {
       return false;
     }
-    final show =
+    final scrolledPastReveal =
         notification.metrics.pixels > PerfilLayout.stickyRevealScrollOffset;
+    final hideForInlineCompleteness =
+        !profileComplete && _completenessCardInViewport(context);
+    final show = scrolledPastReveal && !hideForInlineCompleteness;
     if (show != _stickyVisible) {
       setState(() => _stickyVisible = show);
     }
@@ -121,7 +138,9 @@ class _PerfilBodyState extends State<_PerfilBody> {
               color: accent,
               onRefresh: onRefresh,
               child: NotificationListener<ScrollNotification>(
-                onNotification: _onScroll,
+                onNotification:
+                    (notification) =>
+                        _onScroll(notification, profileComplete: profileComplete),
                 child: CustomScrollView(
                   physics: const AlwaysScrollableScrollPhysics(),
                   slivers: [
@@ -372,6 +391,7 @@ class _PerfilBodyState extends State<_PerfilBody> {
                                 FxStaggerItem(
                                   index: 2,
                                   child: _CompletenessCard(
+                                    key: _completenessCardKey,
                                     score: profileScore,
                                     accent: accent,
                                     isDark: isDark,

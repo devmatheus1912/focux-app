@@ -9,6 +9,7 @@ class _CompletenessCard extends StatelessWidget {
   final void Function(PerfilChecklistAction action) onChecklistAction;
 
   const _CompletenessCard({
+    super.key,
     required this.score,
     required this.accent,
     required this.isDark,

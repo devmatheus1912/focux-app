@@ -156,10 +156,5 @@ class _PinnedHttpOverrides extends HttpOverrides {
   }
 }
 
-/// Delegates para [_HttpClient] nativo — usado para escapar overrides globais.
-class _DirectHttpOverrides extends HttpOverrides {
-  @override
-  HttpClient createHttpClient(SecurityContext? context) {
-    return super.createHttpClient(context);
-  }
-}
+/// Delegates para o [HttpOverrides] padrão — usado para escapar overrides globais.
+class _DirectHttpOverrides extends HttpOverrides {}

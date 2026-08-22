@@ -30,7 +30,7 @@ class PerfilContaSegurancaSection extends StatelessWidget {
     return Column(
       children: [
         PerfilActionTile(
-          icon: Icons.description_outlined,
+          icon: Icons.gavel_outlined,
           label: 'Termos de uso',
           value: '',
           accent: accent,
@@ -40,7 +40,7 @@ class PerfilContaSegurancaSection extends StatelessWidget {
           onTap: () => FocuxLegal.openTerms(),
         ),
         PerfilActionTile(
-          icon: Icons.privacy_tip_outlined,
+          icon: Icons.shield_outlined,
           label: 'Política de privacidade',
           value: '',
           accent: accent,
