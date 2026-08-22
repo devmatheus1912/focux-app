@@ -16,6 +16,9 @@ void main() {
     expect(screen, contains('enviarCodigoEmail'));
     expect(screen, contains('mapRegisterError'));
     expect(screen, contains('mapSignupCodeError'));
+    // Crashlytics: nunca bang em FormState nulo no submit.
+    expect(screen, isNot(contains('currentState!.validate')));
+    expect(screen, contains('form == null || !form.validate()'));
     expect(screen, contains('AutofillHints.oneTimeCode'));
     expect(screen, contains('heroTeal'));
     // Primário antes do secondary (hierarquia de CTA).
