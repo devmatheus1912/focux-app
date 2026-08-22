@@ -157,7 +157,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   }
 
   Future<void> _submit() async {
-    if (!_formKey.currentState!.validate()) {
+    final form = _formKey.currentState;
+    if (form == null || !form.validate()) {
       return;
     }
     if (!_codeSent && _codeController.text.trim().isEmpty) {
@@ -194,6 +195,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       context.go('/dashboard/personal');
     } catch (error) {
       HapticFeedback.heavyImpact();
+      if (!mounted) return;
       setState(() {
         _error = mapRegisterError(error);
       });

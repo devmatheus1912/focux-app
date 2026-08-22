@@ -67,7 +67,8 @@ class _ResetarSenhaScreenState extends State<ResetarSenhaScreen> {
   String get _loginPath => _role == null ? '/login' : '/login?role=$_role';
 
   Future<void> _submit() async {
-    if (!_formKey.currentState!.validate()) return;
+    final form = _formKey.currentState;
+    if (form == null || !form.validate()) return;
     setState(() {
       _loading = true;
       _error = null;

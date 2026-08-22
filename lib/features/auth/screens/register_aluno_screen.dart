@@ -58,7 +58,8 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen> {
   }
 
   Future<void> _submit() async {
-    if (!_formKey.currentState!.validate()) return;
+    final form = _formKey.currentState;
+    if (form == null || !form.validate()) return;
     setState(() {
       _loading = true;
       _error = null;

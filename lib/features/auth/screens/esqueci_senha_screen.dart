@@ -80,7 +80,8 @@ class _EsqueciSenhaScreenState extends ConsumerState<EsqueciSenhaScreen> {
   }
 
   Future<void> _submit() async {
-    if (!_formKey.currentState!.validate()) {
+    final form = _formKey.currentState;
+    if (form == null || !form.validate()) {
       return;
     }
 
