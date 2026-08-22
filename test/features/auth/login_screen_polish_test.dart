@@ -12,11 +12,10 @@ void main() {
     expect(screen, anyOf(contains('FxLoading'), contains('SkeletonLoader'), contains('SkeletonList'), contains('DashboardShimmer'), contains('Shimmer'), contains('IaCopilotInsightsLoading'), contains('_loading')));
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(16));
 
-    // Esqueci-senha herda o papel selecionado no login (personal/aluno).
-    expect(
-      screen,
-      contains(r"/esqueci-senha?role=${_isAluno ? 'aluno' : 'personal'}"),
-    );
+    // Esqueci-senha herda papel + slug do personal quando aluno já informou tenant.
+    expect(screen, contains('/esqueci-senha?role='));
+    expect(screen, contains("Uri.encodeComponent(slug)"));
+    expect(screen, contains('&p='));
 
     // Lockup de marca compartilhado — largura única para Personal e Aluno.
     expect(screen, contains('AuthLoginBrandHeader'));
