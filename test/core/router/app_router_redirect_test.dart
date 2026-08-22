@@ -6,6 +6,7 @@ void main() {
     expect(isPublicLocation('/login'), isTrue);
     expect(isPublicLocation('/esqueci-senha'), isTrue);
     expect(isPublicLocation('/resetar-senha'), isTrue);
+    expect(isPublicLocation('/resetar-senha/verificar-codigo'), isTrue);
     expect(isPublicLocation('/dashboard/personal'), isFalse);
   });
 

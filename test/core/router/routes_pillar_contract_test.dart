@@ -72,6 +72,7 @@ void main() {
     for (final path in publicRoutes) {
       expect(redirect, contains("path == '$path'"));
     }
+    expect(redirect, contains("path.startsWith('/resetar-senha/')"));
   });
 
   test('checkin deep link supports treinoId query param', () {

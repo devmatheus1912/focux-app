@@ -36,7 +36,8 @@ bool isPublicAuthPath(String path) {
       path == '/register/aluno' ||
       path == '/onboarding' ||
       path == '/esqueci-senha' ||
-      path == '/resetar-senha';
+      path == '/resetar-senha' ||
+      path.startsWith('/resetar-senha/');
 }
 
 bool isAlunoPath(String path) {

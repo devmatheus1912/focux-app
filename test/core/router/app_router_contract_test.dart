@@ -99,6 +99,7 @@ void main() {
     ]) {
       expect(redirect, contains("path == '$publicPath'"));
     }
+    expect(redirect, contains("path.startsWith('/resetar-senha/')"));
 
     expect(redirect, isNot(contains("path.startsWith('/p/')")));
     expect(router, isNot(contains("path == '/ia'")));

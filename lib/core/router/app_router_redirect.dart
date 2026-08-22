@@ -59,6 +59,7 @@ bool isPublicLocation(String path) {
       path == '/onboarding' ||
       path == '/esqueci-senha' ||
       path == '/resetar-senha' ||
+      path.startsWith('/resetar-senha/') ||
       (kDebugMode && path.startsWith('/qa/'));
 }
 
