@@ -95,7 +95,7 @@ class _EsqueciSenhaScreenState extends ConsumerState<EsqueciSenhaScreen> {
     HapticFeedback.mediumImpact();
 
     try {
-      final result = await ref
+      await ref
           .read(authRepositoryProvider)
           .solicitarResetSenha(
             email: _emailController.text.trim(),
@@ -107,13 +107,13 @@ class _EsqueciSenhaScreenState extends ConsumerState<EsqueciSenhaScreen> {
         return;
       }
 
-      setState(() {
-        _message = result.mensagem;
-        _hint =
-            result.deliveryAvailable
-                ? 'Verifique sua caixa de entrada e spam.'
-                : 'Recuperação por e-mail não está configurada neste ambiente ainda.';
-      });
+      final role = _isAluno ? 'aluno' : 'personal';
+      final email = Uri.encodeComponent(_emailController.text.trim());
+      final slug =
+          _personalSlug != null && _personalSlug!.isNotEmpty
+              ? '&p=${Uri.encodeComponent(_personalSlug!)}'
+              : '';
+      context.go('/resetar-senha/verificar-codigo?email=$email&role=$role$slug');
     } catch (error) {
       HapticFeedback.heavyImpact();
       setState(() {
@@ -135,7 +135,7 @@ class _EsqueciSenhaScreenState extends ConsumerState<EsqueciSenhaScreen> {
         return 'Sem conexão com o servidor.';
       }
     }
-    return 'Não foi possível enviar o link agora.';
+    return 'Não foi possível enviar o código agora.';
   }
 
   String _resetEnvironmentWarning() {
@@ -234,7 +234,7 @@ class _EsqueciSenhaScreenState extends ConsumerState<EsqueciSenhaScreen> {
                     ConstrainedBox(
                       constraints: const BoxConstraints(maxWidth: 320),
                       child: Text(
-                        'Digite seu e-mail e vamos enviar um link pra redefinir sua senha.',
+                        'Digite seu e-mail e enviamos um código de 6 dígitos para redefinir sua senha.',
                         style: AppTypography.inter(
                           color: heroTealSurface(0.82),
                           fontSize: 14.5,
@@ -322,7 +322,7 @@ class _EsqueciSenhaScreenState extends ConsumerState<EsqueciSenhaScreen> {
                       const SizedBox(height: 14),
                     ],
                     FxLiquidPrimaryButton(
-                      label: 'Enviar link de recuperação',
+                      label: 'Enviar código',
                       icon: Icons.send_rounded,
                       loading: _loading,
                       onPressed: _loading ? null : _submit,

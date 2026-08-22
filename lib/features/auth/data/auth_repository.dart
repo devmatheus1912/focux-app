@@ -337,6 +337,41 @@ class AuthRepository {
     );
   }
 
+  Future<String> validarResetCodigo({
+    required String email,
+    required String codigo,
+    required bool isAluno,
+    String? personalSlug,
+  }) async {
+    final response = await _dio.post(
+      '/api/auth/resetar-senha/validar-codigo',
+      data: {
+        'email': email,
+        'codigo': codigo,
+        'tipo': isAluno ? 'ALUNO' : 'PERSONAL',
+        if (personalSlug != null && personalSlug.isNotEmpty)
+          'personalSlug': personalSlug,
+      },
+    );
+    return (response.data as Map<String, dynamic>)['resetNonce'] as String;
+  }
+
+  Future<void> confirmarResetSenha({
+    String? token,
+    String? resetNonce,
+    required String novaSenha,
+  }) async {
+    await _dio.post(
+      '/api/auth/resetar-senha',
+      data: {
+        if (token != null && token.isNotEmpty) 'token': token,
+        if (resetNonce != null && resetNonce.isNotEmpty)
+          'resetNonce': resetNonce,
+        'novaSenha': novaSenha,
+      },
+    );
+  }
+
   Future<void> logout() async {
     final refresh = await SecureStorage.getRefreshToken();
     if (refresh != null && refresh.isNotEmpty) {

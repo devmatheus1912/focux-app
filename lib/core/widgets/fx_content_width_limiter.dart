@@ -19,7 +19,10 @@ class FxContentWidthLimiter extends StatelessWidget {
       alignment: Alignment.topCenter,
       child: ConstrainedBox(
         constraints: BoxConstraints(maxWidth: maxWidth),
-        child: child,
+        child: SizedBox(
+          width: maxWidth,
+          child: child,
+        ),
       ),
     );
   }

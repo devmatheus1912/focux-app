@@ -38,6 +38,19 @@ void main() {
     );
   });
 
+  test('fx shell expande body quando sticky footer presente', () {
+    final shell = File('lib/core/widgets/fx_shell_scaffold.dart').readAsStringSync();
+    expect(shell, contains('SizedBox.expand'));
+    expect(shell, isNot(contains('FxPremiumEntrance(child: inner)')));
+  });
+
+  test('plan studio cai para aquisicao quando upgradePlans vazio', () {
+    final body = File(
+      'lib/features/assinatura/screens/assinatura_screen_build_body.part.dart',
+    ).readAsStringSync();
+    expect(body, contains('upgradePlansForStudio.isNotEmpty'));
+  });
+
   test('assinatura sticky e scroll respeitam reduced motion e refresh', () {
     final build = File(
       'lib/features/assinatura/screens/assinatura_screen_build.part.dart',

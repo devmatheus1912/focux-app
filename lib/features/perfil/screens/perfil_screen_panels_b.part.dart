@@ -37,7 +37,7 @@ class _CompletenessCard extends StatelessWidget {
           TokensStrip.s4,
           TokensStrip.s3,
         ),
-        decoration: chrome.panel(radius: 16, accent: accent),
+        decoration: fxStripCardDecoration(context, accent: accent, emphasize: !complete),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -397,6 +397,7 @@ class _ProfessionalDataPanel extends StatelessWidget {
                             actionInk: actionInk,
                             ink: ink,
                             isDark: isDark,
+                            maxLines: 2,
                           ),
                         ),
                         const SizedBox(width: TokensStrip.s2),
@@ -408,6 +409,7 @@ class _ProfessionalDataPanel extends StatelessWidget {
                             actionInk: actionInk,
                             ink: ink,
                             isDark: isDark,
+                            maxLines: 2,
                           ),
                         ),
                       ],
@@ -423,6 +425,7 @@ class _ProfessionalDataPanel extends StatelessWidget {
                             actionInk: actionInk,
                             ink: ink,
                             isDark: isDark,
+                            maxLines: 2,
                           ),
                         ),
                         const SizedBox(width: TokensStrip.s2),
@@ -434,6 +437,7 @@ class _ProfessionalDataPanel extends StatelessWidget {
                             actionInk: actionInk,
                             ink: ink,
                             isDark: isDark,
+                            maxLines: 2,
                           ),
                         ),
                       ],
@@ -551,6 +555,7 @@ class _ProfessionalFactRow extends StatelessWidget {
     required this.actionInk,
     required this.ink,
     required this.isDark,
+    this.maxLines = 1,
   });
 
   final IconData icon;
@@ -559,6 +564,7 @@ class _ProfessionalFactRow extends StatelessWidget {
   final Color actionInk;
   final Color ink;
   final bool isDark;
+  final int maxLines;
 
   @override
   Widget build(BuildContext context) {
@@ -593,7 +599,7 @@ class _ProfessionalFactRow extends StatelessWidget {
           Expanded(
             child: Text(
               text,
-              maxLines: 1,
+              maxLines: maxLines,
               overflow: TextOverflow.ellipsis,
               style: TokensStrip.bodyMuted(
                 color: pending ? actionInk : ink,

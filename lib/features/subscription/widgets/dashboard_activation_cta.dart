@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../onboarding/widgets/setup_step_widgets.dart';
 
 /// CTAs de ativação quando o personal ainda não extraiu valor do app.
@@ -54,10 +55,9 @@ class DashboardActivationCta extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 0, TokensStrip.s5, 12),
       child: Material(
-        color: primary.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(14),
+        color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(TokensStrip.rCard),
           onTap: () {
             AnalyticsService.instance.track(
               'activation_cta_tapped',
@@ -65,37 +65,38 @@ class DashboardActivationCta extends StatelessWidget {
             );
             context.push(normalizeSetupActionRoute(activeStep.route));
           },
-          child: Semantics(
+          child: Ink(
+            decoration: fxStripCardDecoration(context, accent: primary),
+            padding: const EdgeInsets.all(TokensStrip.s4),
+            child: Semantics(
             button: true,
             label: '${activeStep.title}. ${activeStep.cta}',
-            child: Padding(
-              padding: const EdgeInsets.all(14),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    activeStep.title,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w800,
-                      fontSize: 14,
-                    ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  activeStep.title,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 14,
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    activeStep.body,
-                    style: const TextStyle(fontSize: 12, height: 1.4),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  activeStep.body,
+                  style: const TextStyle(fontSize: 12, height: 1.4),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  activeStep.cta,
+                  style: TextStyle(
+                    color: primary,
+                    fontWeight: FontWeight.w700,
                   ),
-                  const SizedBox(height: 10),
-                  Text(
-                    activeStep.cta,
-                    style: TextStyle(
-                      color: primary,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
+          ),
           ),
         ),
       ),

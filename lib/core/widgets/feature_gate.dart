@@ -12,6 +12,7 @@ import '../analytics/analytics_service.dart';
 import '../router/role_home.dart';
 import '../router/safe_navigation.dart';
 import 'fx_motion.dart';
+import 'fx_shell_scaffold.dart';
 import 'skeleton_loader.dart';
 
 class FeatureGate extends ConsumerWidget {
@@ -253,7 +254,8 @@ class _LockedScreenState extends ConsumerState<_LockedScreen> {
     );
     final primary = Theme.of(context).colorScheme.primary;
 
-    return Scaffold(
+    return FxShellScaffold(
+      useMesh: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -268,31 +270,40 @@ class _LockedScreenState extends ConsumerState<_LockedScreen> {
             children: [
               const Spacer(),
               Container(
-                width: 64,
-                height: 64,
-                decoration: BoxDecoration(
-                  color: primary.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(18),
-                ),
-                child: Icon(Icons.lock_open_rounded, size: 32, color: primary),
-              ),
-              const SizedBox(height: 20),
-              Text(
-                offer.headline,
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.w800,
-                  height: 1.15,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                offer.body,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Colors.grey.shade600,
-                  fontSize: 14,
-                  height: 1.45,
+                width: double.infinity,
+                padding: const EdgeInsets.all(20),
+                decoration: fxStripCardDecoration(context, accent: primary),
+                child: Column(
+                  children: [
+                    Container(
+                      width: 64,
+                      height: 64,
+                      decoration: BoxDecoration(
+                        color: primary.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                      child: Icon(Icons.lock_open_rounded, size: 32, color: primary),
+                    ),
+                    const SizedBox(height: 20),
+                    Text(
+                      offer.headline,
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        height: 1.15,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      offer.body,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Colors.grey.shade600,
+                        fontSize: 14,
+                        height: 1.45,
+                      ),
+                    ),
+                  ],
                 ),
               ),
               const Spacer(),

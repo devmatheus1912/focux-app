@@ -116,8 +116,26 @@ extension AssinaturaScreenBuildBody on _AssinaturaScreenState {
             );
 
     final isUpgradeTargetSelected = selPlan.level > currentPlan.level;
-    final usePlanStudio =
-        !isAcquisition && currentPlan != SubscriptionPlan.FREE;
+    final visiblePlansForStudio =
+        currentPlan == SubscriptionPlan.FREE
+            ? sortedPlans
+            : sortedPlans
+                .where(
+                  (p) =>
+                      subscriptionPlanFromApi(p.nome) != SubscriptionPlan.FREE,
+                )
+                .toList();
+    final upgradePlansForStudio =
+        visiblePlansForStudio
+            .where(
+              (p) =>
+                  subscriptionPlanFromApi(p.nome).level >= currentPlan.level,
+            )
+            .toList();
+    var usePlanStudio =
+        !isAcquisition &&
+        currentPlan != SubscriptionPlan.FREE &&
+        upgradePlansForStudio.isNotEmpty;
 
     final bottomInset = MediaQuery.paddingOf(context).bottom;
     final stickyReserve = 156.0 + bottomInset;

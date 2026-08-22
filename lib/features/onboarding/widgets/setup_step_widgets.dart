@@ -9,6 +9,7 @@ import '../../../core/utils/motion_preferences.dart';
 import '../../../core/widgets/fx_icon.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../dashboard/utils/dashboard_command_copy.dart';
 import '../../dashboard/utils/dashboard_readability.dart';
 import '../../dashboard/widgets/dashboard_hero_widgets.dart';
 
@@ -684,6 +685,12 @@ class _SetupCompletedStepsCollapseState
             ? TokensStrip.badgeSuccess.withValues(alpha: 0.92)
             : TokensStrip.badgeSuccess;
 
+    final doneLabel = dashboardCountLabel(
+      widget.titles.length,
+      'passo concluído',
+      'passos concluídos',
+    );
+
     return Padding(
       padding: const EdgeInsets.only(top: TokensStrip.s2),
       child: Column(
@@ -694,7 +701,7 @@ class _SetupCompletedStepsCollapseState
             label:
                 _expanded
                     ? 'Ocultar passos concluídos'
-                    : '${widget.titles.length} passos concluídos, expandir',
+                    : '$doneLabel, expandir',
             child: InkWell(
               onTap: () => setState(() => _expanded = !_expanded),
               borderRadius: BorderRadius.circular(TokensStrip.rInput),
@@ -713,7 +720,7 @@ class _SetupCompletedStepsCollapseState
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        '${widget.titles.length} passos concluídos',
+                        doneLabel,
                         style: TextStyle(
                           color: mute,
                           fontWeight: FontWeight.w600,

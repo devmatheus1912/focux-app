@@ -6,7 +6,6 @@ import '../../../core/brand/focux_microcopy.dart';
 import '../../../core/legal/focux_legal.dart';
 import '../../../core/platform/secure_screen.dart';
 import '../../../core/theme/brand_palette.dart';
-import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_empty_state.dart';
@@ -179,27 +178,38 @@ class _AssinaturaReviewScreenState extends State<AssinaturaReviewScreen> {
                       ),
                     ),
                     const SizedBox(height: TokensStrip.s5),
-                    Text(
-                      _legalBody(price, freq),
-                      style: TokensStrip.bodyMuted(
-                        color: mute,
-                      ).copyWith(fontSize: 12, height: 1.5),
-                    ),
-                    const SizedBox(height: TokensStrip.s2),
-                    Wrap(
-                      spacing: 12,
-                      children: [
-                        TextButton(
-                          onPressed: () => FocuxLegal.openPrivacy(),
-                          child: const Text('Privacidade'),
+                    ExpansionTile(
+                      tilePadding: EdgeInsets.zero,
+                      title: Text(
+                        'Detalhes legais',
+                        style: TokensStrip.bodyMuted(color: mute).copyWith(
+                          fontWeight: FontWeight.w700,
                         ),
-                        TextButton(
-                          onPressed: () => FocuxLegal.openTerms(),
-                          child: const Text('Termos'),
+                      ),
+                      children: [
+                        Text(
+                          _legalBody(price, freq),
+                          style: TokensStrip.bodyMuted(
+                            color: mute,
+                          ).copyWith(fontSize: 12, height: 1.5),
+                        ),
+                        const SizedBox(height: TokensStrip.s2),
+                        Wrap(
+                          spacing: 12,
+                          children: [
+                            TextButton(
+                              onPressed: () => FocuxLegal.openPrivacy(),
+                              child: const Text('Privacidade'),
+                            ),
+                            TextButton(
+                              onPressed: () => FocuxLegal.openTerms(),
+                              child: const Text('Termos'),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                    const SizedBox(height: TokensStrip.s6),
+                    SizedBox(height: MediaQuery.paddingOf(context).bottom + TokensStrip.s4),
                     Semantics(
                       button: true,
                       label:
@@ -211,7 +221,7 @@ class _AssinaturaReviewScreenState extends State<AssinaturaReviewScreen> {
                         },
                         style: FilledButton.styleFrom(
                           backgroundColor: accent,
-                          foregroundColor: EagleTokens.inkDeep,
+                          foregroundColor: Colors.white,
                           minimumSize: const Size.fromHeight(52),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(

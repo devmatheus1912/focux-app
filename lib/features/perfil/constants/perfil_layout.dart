@@ -8,7 +8,7 @@ abstract final class PerfilLayout {
   static const double stickyRevealScrollOffset = 120;
 
   /// Só o chip (sem barra).
-  static const double stickyOverlayReserve = 56;
+  static const double stickyOverlayReserve = 88;
 
   static const double stickyBottomInset = 8;
 

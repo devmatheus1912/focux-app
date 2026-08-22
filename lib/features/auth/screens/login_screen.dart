@@ -374,9 +374,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 alignment: Alignment.centerRight,
                                 child: TextButton(
                                   onPressed:
-                                      () => context.go(
-                                        '/esqueci-senha?role=${_isAluno ? 'aluno' : 'personal'}',
-                                      ),
+                                      () {
+                                        final slug = _personalSlug?.trim();
+                                        final role =
+                                            _isAluno ? 'aluno' : 'personal';
+                                        final path =
+                                            slug != null && slug.isNotEmpty
+                                                ? '/esqueci-senha?role=$role&p=${Uri.encodeComponent(slug)}'
+                                                : '/esqueci-senha?role=$role';
+                                        context.go(path);
+                                      },
                                   child: Text(
                                     'Esqueci minha senha',
                                     style: TextStyle(

@@ -47,13 +47,24 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
       }
     }
 
-    if (!_initialSelectionApplied && planos != null) {
-      _selectedPlanName = _resolveInitialPlanSelection(
-        currentPlan: currentPlan,
-        deepLinkPlan: widget.initialPlan,
-      );
-      _initialSelectionApplied = true;
-    }
+    ref.listen(paywallHomeProvider, (previous, next) {
+      next.whenData((home) {
+        if (_initialSelectionApplied || home.planos.isEmpty) return;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted || _initialSelectionApplied) return;
+          final billingPlan = subscriptionPlanFromApi(
+            ref.read(perfilProvider).valueOrNull?.plano,
+          );
+          setState(() {
+            _selectedPlanName = _resolveInitialPlanSelection(
+              currentPlan: billingPlan,
+              deepLinkPlan: widget.initialPlan,
+            );
+            _initialSelectionApplied = true;
+          });
+        });
+      });
+    });
 
     SubscriptionPlan selectedPlan = currentPlan;
     Plano? selectedBackendPlan;

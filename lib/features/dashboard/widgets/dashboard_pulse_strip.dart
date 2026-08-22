@@ -124,7 +124,7 @@ class DashboardDayPulseStrip extends StatelessWidget {
                   child: DashboardPulseChip(
                   icon: 'circle-check',
                   value: checkinsHoje.toString(),
-                  label: DashboardMicrocopy.checkinsPulseLabel,
+                  label: tight ? 'Checks' : DashboardMicrocopy.checkinsPulseLabel,
                   accent: checkinsAccent,
                   isDark: isDark,
                   compact: tight,

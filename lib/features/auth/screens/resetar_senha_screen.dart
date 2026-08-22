@@ -1,30 +1,32 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/api/api_client.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/hero_teal.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
+import '../providers/auth_provider.dart';
 import '../widgets/auth_shell.dart';
 import '../widgets/password_strength_meter.dart';
 
-class ResetarSenhaScreen extends StatefulWidget {
+class ResetarSenhaScreen extends ConsumerStatefulWidget {
   final String? token;
+  final String? resetNonce;
 
-  const ResetarSenhaScreen({super.key, this.token});
+  const ResetarSenhaScreen({super.key, this.token, this.resetNonce});
 
   @override
-  State<ResetarSenhaScreen> createState() => _ResetarSenhaScreenState();
+  ConsumerState<ResetarSenhaScreen> createState() =>
+      _ResetarSenhaScreenState();
 }
 
-class _ResetarSenhaScreenState extends State<ResetarSenhaScreen> {
+class _ResetarSenhaScreenState extends ConsumerState<ResetarSenhaScreen> {
   static const _minPasswordLength = 8;
 
   final _formKey = GlobalKey<FormState>();
-  final _tokenController = TextEditingController();
   final _senhaController = TextEditingController();
   final _confirmarController = TextEditingController();
   bool _loading = false;
@@ -32,11 +34,14 @@ class _ResetarSenhaScreenState extends State<ResetarSenhaScreen> {
   String? _message;
   String? _role;
   bool _roleFromQueryApplied = false;
+  String? _linkToken;
+  String? _resetNonce;
 
   @override
   void initState() {
     super.initState();
-    _tokenController.text = widget.token ?? '';
+    _linkToken = widget.token;
+    _resetNonce = widget.resetNonce;
     _senhaController.addListener(() {
       if (mounted) setState(() {});
     });
@@ -47,18 +52,21 @@ class _ResetarSenhaScreenState extends State<ResetarSenhaScreen> {
     super.didChangeDependencies();
     if (_roleFromQueryApplied) return;
     _roleFromQueryApplied = true;
-    final role =
-        GoRouterState.of(
-          context,
-        ).uri.queryParameters['role']?.trim().toLowerCase();
+    final params = GoRouterState.of(context).uri.queryParameters;
+    final role = params['role']?.trim().toLowerCase();
     if (role == 'aluno' || role == 'personal') {
       _role = role;
     }
+    _linkToken ??= params['token'];
+    _resetNonce ??= params['resetNonce'];
   }
+
+  bool get _usesPresetCredential =>
+      (_linkToken != null && _linkToken!.isNotEmpty) ||
+      (_resetNonce != null && _resetNonce!.isNotEmpty);
 
   @override
   void dispose() {
-    _tokenController.dispose();
     _senhaController.dispose();
     _confirmarController.dispose();
     super.dispose();
@@ -77,12 +85,10 @@ class _ResetarSenhaScreenState extends State<ResetarSenhaScreen> {
     HapticFeedback.mediumImpact();
 
     try {
-      await ApiClient().dio.post(
-        '/api/auth/resetar-senha',
-        data: {
-          'token': _tokenController.text.trim(),
-          'novaSenha': _senhaController.text,
-        },
+      await ref.read(authRepositoryProvider).confirmarResetSenha(
+        token: _linkToken,
+        resetNonce: _resetNonce,
+        novaSenha: _senhaController.text,
       );
       if (!mounted) return;
       setState(() => _message = 'Senha alterada. Entre novamente.');
@@ -101,11 +107,18 @@ class _ResetarSenhaScreenState extends State<ResetarSenhaScreen> {
     if (error is DioException && error.response?.statusCode == null) {
       return 'Sem conexão com o servidor.';
     }
-    return 'Token inválido, expirado ou senha recusada.';
+    return 'Código ou senha recusados. Solicite um novo código se expirou.';
   }
 
   @override
   Widget build(BuildContext context) {
+    final subtitle =
+        _linkToken != null && _linkToken!.isNotEmpty
+            ? 'Link confirmado. Escolha uma nova senha segura.'
+            : _resetNonce != null && _resetNonce!.isNotEmpty
+            ? 'Código validado. Escolha uma nova senha segura.'
+            : 'Valide o código enviado por e-mail antes de definir a senha.';
+
     return fxScreenA11yScope(
       label: 'Nova senha',
       child: AnnotatedRegion<SystemUiOverlayStyle>(
@@ -135,107 +148,109 @@ class _ResetarSenhaScreenState extends State<ResetarSenhaScreen> {
                         width: authLogoWidthFor(context),
                       ),
                       const SizedBox(height: 16),
-                    Text(
-                      'Nova senha',
-                      style: AppTypography.inter(
-                        color: heroTealInk(),
-                        fontSize: 30,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: -0.8,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      'Use o token recebido por e-mail para redefinir sua senha.',
-                      style: AppTypography.inter(
-                        color: heroTealSurface(0.78),
-                        fontSize: 14.5,
-                        height: 1.55,
-                      ),
-                    ),
-                    const SizedBox(height: 28),
-                    AuthField(
-                      label: 'Token',
-                      controller: _tokenController,
-                      hintText: 'TOKEN',
-                      icon: Icons.key_rounded,
-                      textInputAction: TextInputAction.next,
-                      validator:
-                          (value) =>
-                              value == null || value.trim().isEmpty
-                                  ? 'Informe o token.'
-                                  : null,
-                    ),
-                    const SizedBox(height: 14),
-                    AuthField(
-                      label: 'Nova senha',
-                      controller: _senhaController,
-                      hintText: 'Mín. $_minPasswordLength caracteres',
-                      icon: Icons.lock_outline_rounded,
-                      obscureText: true,
-                      textInputAction: TextInputAction.next,
-                      validator: (value) {
-                        if (value == null || value.length < _minPasswordLength) {
-                          return 'A senha precisa ter no mínimo $_minPasswordLength caracteres.';
-                        }
-                        return null;
-                      },
-                    ),
-                    if (_senhaController.text.isNotEmpty) ...[
-                      const SizedBox(height: 8),
-                      PasswordStrengthMeter(
-                        password: _senhaController.text,
-                        minLength: _minPasswordLength,
-                      ),
-                    ],
-                    const SizedBox(height: 14),
-                    AuthField(
-                      label: 'Confirmar senha',
-                      controller: _confirmarController,
-                      hintText: 'Repita a senha',
-                      icon: Icons.lock_reset_rounded,
-                      obscureText: true,
-                      textInputAction: TextInputAction.done,
-                      onFieldSubmitted: (_) => _submit(),
-                      validator: (value) {
-                        if (value != _senhaController.text) {
-                          return 'As senhas não conferem.';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 20),
-                    if (_error != null) ...[
-                      Semantics(
-                        liveRegion: true,
-                        child: Text(
-                          _error!,
-                          style: TextStyle(
-                            color: EagleTokens.authErrorSoft,
-                            fontSize: 12.5,
-                          ),
+                      Text(
+                        'Nova senha',
+                        style: AppTypography.inter(
+                          color: heroTealInk(),
+                          fontSize: 30,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: -0.8,
                         ),
                       ),
-                      const SizedBox(height: 12),
-                    ],
-                    if (_message != null) ...[
-                      Semantics(
-                        liveRegion: true,
-                        child: Text(
-                          _message!,
-                          style: TextStyle(
-                            color: EagleTokens.authSuccessSoft,
-                            fontSize: 12.5,
-                          ),
+                      const SizedBox(height: 10),
+                      Text(
+                        subtitle,
+                        style: AppTypography.inter(
+                          color: heroTealSurface(0.78),
+                          fontSize: 14.5,
+                          height: 1.55,
                         ),
                       ),
-                      const SizedBox(height: 12),
-                    ],
+                      const SizedBox(height: 28),
+                      AuthField(
+                        label: 'Nova senha',
+                        controller: _senhaController,
+                        hintText: 'Mín. $_minPasswordLength caracteres',
+                        icon: Icons.lock_outline_rounded,
+                        obscureText: true,
+                        textInputAction: TextInputAction.next,
+                        validator: (value) {
+                          if (value == null ||
+                              value.length < _minPasswordLength) {
+                            return 'A senha precisa ter no mínimo $_minPasswordLength caracteres.';
+                          }
+                          return null;
+                        },
+                      ),
+                      if (_senhaController.text.isNotEmpty) ...[
+                        const SizedBox(height: 8),
+                        PasswordStrengthMeter(
+                          password: _senhaController.text,
+                          minLength: _minPasswordLength,
+                        ),
+                      ],
+                      const SizedBox(height: 14),
+                      AuthField(
+                        label: 'Confirmar senha',
+                        controller: _confirmarController,
+                        hintText: 'Repita a senha',
+                        icon: Icons.lock_reset_rounded,
+                        obscureText: true,
+                        textInputAction: TextInputAction.done,
+                        onFieldSubmitted: (_) => _submit(),
+                        validator: (value) {
+                          if (value != _senhaController.text) {
+                            return 'As senhas não conferem.';
+                          }
+                          return null;
+                        },
+                      ),
+                      if (!_usesPresetCredential) ...[
+                        const SizedBox(height: 16),
+                        TextButton(
+                          onPressed:
+                              () => context.go('/esqueci-senha?role=${_role ?? 'personal'}'),
+                          child: Text(
+                            'Preciso validar o código primeiro',
+                            style: AppTypography.inter(
+                              color: heroTealSurface(0.9),
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: 20),
+                      if (_error != null) ...[
+                        Semantics(
+                          liveRegion: true,
+                          child: Text(
+                            _error!,
+                            style: TextStyle(
+                              color: EagleTokens.authErrorSoft,
+                              fontSize: 12.5,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                      ],
+                      if (_message != null) ...[
+                        Semantics(
+                          liveRegion: true,
+                          child: Text(
+                            _message!,
+                            style: TextStyle(
+                              color: EagleTokens.authSuccessSoft,
+                              fontSize: 12.5,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                      ],
                       FxLiquidPrimaryButton(
                         label: 'Alterar senha',
                         icon: Icons.check_rounded,
                         loading: _loading,
-                        onPressed: _loading ? null : _submit,
+                        onPressed: _loading || !_usesPresetCredential ? null : _submit,
                       ),
                     ],
                   ),

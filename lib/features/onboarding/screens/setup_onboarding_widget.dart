@@ -8,6 +8,7 @@ import '../data/onboarding_status_data.dart';
 import '../data/setup_steps_catalog.dart';
 import '../providers/onboarding_provider.dart';
 import '../../perfil/providers/perfil_provider.dart';
+import '../../dashboard/utils/dashboard_command_copy.dart';
 import '../widgets/setup_step_widgets.dart';
 
 class SetupOnboardingWidget extends ConsumerWidget {
@@ -104,7 +105,7 @@ class SetupOnboardingWidget extends ConsumerWidget {
               if (completedCount > 0) ...[
                 const SizedBox(height: TokensStrip.s2),
                 Text(
-                  '$completedCount passos concluídos · foco nos próximos',
+                  '${dashboardCountLabel(completedCount, 'passo concluído', 'passos concluídos')} · foco nos próximos',
                   style: TokensStrip.bodyMuted(
                     color: mute,
                   ).copyWith(fontSize: 12, fontWeight: FontWeight.w500),

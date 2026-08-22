@@ -55,7 +55,7 @@ class DashboardDayFocus {
     coversRetention: false,
     riskDominante: false,
     headline: 'Operação sob controle',
-    detail: 'Use as próximas ações para a melhor próxima ação.',
+    detail: 'Veja as próximas ações abaixo e escolha por onde começar.',
     semanticLabel: 'Foco do dia: operação sob controle.',
   );
 
@@ -65,7 +65,7 @@ class DashboardDayFocus {
       headline: json['headline'] as String? ?? 'Operação sob controle',
       detail:
           json['detail'] as String? ??
-          'Use as próximas ações para a melhor próxima ação.',
+          'Veja as próximas ações abaixo e escolha por onde começar.',
       semanticLabel:
           json['semanticLabel'] as String? ?? 'Foco do dia: operação sob controle.',
       coversRetention: json['coversRetention'] as bool?,
@@ -157,7 +157,7 @@ class DashboardDayFocus {
       coversRetention: false,
       riskDominante: riskDominante,
       headline: 'Operação sob controle',
-      detail: 'Use as próximas ações para a melhor próxima ação.',
+      detail: 'Veja as próximas ações abaixo e escolha por onde começar.',
       semanticLabel: 'Foco do dia: operação sob controle.',
     );
   }
