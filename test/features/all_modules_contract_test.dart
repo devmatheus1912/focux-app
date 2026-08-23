@@ -17,11 +17,17 @@ void main() {
       final name = module.path.split(Platform.pathSeparator).last;
       final files = module.listSync(recursive: true).whereType<File>().toList();
       final hasScreen = files.any((f) => f.path.endsWith('_screen.dart'));
-      final hasData = files.any(
-        (f) =>
-            f.path.contains('_repository.dart') ||
-            f.path.contains('/data/') && f.path.endsWith('.dart'),
-      );
+      // Camada de dados: repository, service ou provider dedicado (paths
+      // normalizados — no Windows o separador é `\`).
+      final hasData = files.any((f) {
+        final p = f.path.replaceAll(r'\', '/');
+        if (!p.endsWith('.dart')) return false;
+        return p.contains('_repository.dart') ||
+            p.contains('_service.dart') ||
+            p.contains('_provider.dart') ||
+            p.contains('/data/') ||
+            p.contains('/services/');
+      });
 
       final screenExempt = {'planos', 'pricing', 'pql', 'subscription'};
       if (!hasScreen && !screenExempt.contains(name)) {

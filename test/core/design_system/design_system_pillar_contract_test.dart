@@ -23,8 +23,9 @@ void main() {
     'lib/features/ia/screens/ia_copiloto_screen.dart',
   ];
 
+  // (?<!Pdf) — PdfColors do pacote pdf não são tema Flutter (export A4).
   final semanticColorPattern = RegExp(
-    r'Colors\.(red|green|blue|orange|purple|pink|yellow|teal|cyan|amber|indigo|brown|grey|gray|lime|deepOrange|deepPurple|lightBlue|lightGreen)',
+    r'(?<!Pdf)Colors\.(red|green|blue|orange|purple|pink|yellow|teal|cyan|amber|indigo|brown|grey|gray|lime|deepOrange|deepPurple|lightBlue|lightGreen)',
   );
 
   const excludedPrefixes = ['lib/features/qa/'];

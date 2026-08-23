@@ -28,13 +28,14 @@ void main() {
   });
 
   test('command center low severity follows active primary color', () {
-    final commandCenter =
+    // Mapeamento de tom → accent extraído para o tile compartilhado.
+    final actionTile =
         File(
-          'lib/features/dashboard/widgets/dashboard_command_center_section.dart',
+          'lib/features/dashboard/widgets/command_action_tile.dart',
         ).readAsStringSync();
 
-    expect(commandCenter, contains('CommandActionTone.primary => primary'));
-    expect(commandCenter, isNot(contains('return const Color(0xFF2563EB);')));
+    expect(actionTile, contains('CommandActionTone.primary => primary'));
+    expect(actionTile, isNot(contains('return const Color(0xFF2563EB);')));
   });
 
   test('feature screens do not use fixed Focux brand tokens', () {

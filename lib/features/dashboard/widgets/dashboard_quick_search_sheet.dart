@@ -6,6 +6,7 @@ import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_icon.dart';
+import '../../../core/widgets/fx_input_deco.dart';
 import '../data/dashboard_tool_shortcuts.dart';
 import '../utils/dashboard_microcopy.dart';
 import '../utils/dashboard_readability.dart';
@@ -136,8 +137,9 @@ class _QuickSearchSheetState extends ConsumerState<_QuickSearchSheet> {
               hintText: DashboardMicrocopy.buscaRapidaHint,
               isDense: true,
               prefixIcon: Icon(Icons.search_rounded, color: widget.primary),
-              border: OutlineInputBorder(
+              border: FxInputDeco.outlineBorder(
                 borderRadius: BorderRadius.circular(TokensStrip.rInput),
+                borderSide: const BorderSide(),
               ),
             ),
           ),

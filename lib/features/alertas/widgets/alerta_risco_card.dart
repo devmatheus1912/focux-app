@@ -196,7 +196,7 @@ class AlertaRiscoCard extends StatelessWidget {
                           fontWeight: FontWeight.w600,
                           color:
                               chrome.isDark
-                                  ? const Color(0xFF6FE296)
+                                  ? EagleTokens.goodDark
                                   : EagleTokens.good,
                         ),
                       ),

@@ -75,8 +75,21 @@ void main() {
     final source = readScreenSourceBundle(
       'lib/features/dashboard/screens/personal_dashboard_screen.dart',
     );
-    expect(source, contains('dashboard_a11y.dart'));
     expect(source, contains('fxScreenA11yScope'));
+
+    // Helpers de a11y vivem nos widgets extraídos da Home.
+    const dashboardWidgets = [
+      'lib/features/dashboard/widgets/dashboard_tool_grid.dart',
+      'lib/features/dashboard/widgets/dashboard_attention_rail.dart',
+      'lib/features/dashboard/widgets/dashboard_collapsible_section.dart',
+    ];
+    for (final path in dashboardWidgets) {
+      expect(
+        File(path).readAsStringSync(),
+        contains('dashboard_a11y'),
+        reason: '$path deve usar dashboard_a11y helpers',
+      );
+    }
   });
 
   test('aluno 360 module exposes dedicated a11y labels', () {

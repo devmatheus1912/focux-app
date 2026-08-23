@@ -11,6 +11,8 @@ import '../../features/subscription/plan_entitlements.dart';
 import '../analytics/analytics_service.dart';
 import '../router/role_home.dart';
 import '../router/safe_navigation.dart';
+import '../theme/design_tokens.dart';
+import '../theme/shell_chrome.dart';
 import 'fx_motion.dart';
 import 'fx_shell_scaffold.dart';
 import 'skeleton_loader.dart';
@@ -171,10 +173,10 @@ class _PlanSyncBannerShell extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               decoration: BoxDecoration(
-                color: const Color(0xFF0F1419).withValues(alpha: 0.94),
+                color: EagleTokens.cinematicBgHi.withValues(alpha: 0.94),
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(
-                  color: const Color(0xFFFFB020).withValues(alpha: 0.28),
+                  color: EagleTokens.opsNotice.withValues(alpha: 0.28),
                 ),
                 boxShadow: [
                   BoxShadow(
@@ -186,9 +188,9 @@ class _PlanSyncBannerShell extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.cloud_off_rounded,
-                    color: Color(0xFFFFD28A),
+                    color: EagleTokens.warnDark,
                     size: 18,
                   ),
                   const SizedBox(width: 10),
@@ -298,7 +300,7 @@ class _LockedScreenState extends ConsumerState<_LockedScreen> {
                       offer.body,
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        color: Colors.grey.shade600,
+                        color: ShellChrome.of(context).mute,
                         fontSize: 14,
                         height: 1.45,
                       ),

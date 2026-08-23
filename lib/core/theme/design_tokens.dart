@@ -134,7 +134,16 @@ abstract class EagleTokens {
   // Special
   static const Color gold = Color(0xFFE5B84C);
   static const Color goldSoft = Color(0xFFFFF8E6);
+
+  /// Ouro escurecido para texto sobre fundo claro (contraste AA no premium).
+  static const Color goldInk = Color(0xFF9A6B12);
   static const Color purple = Color(0xFF6B46C1);
+
+  /// Tinta escura para CTA sólido branco sobre mesh (AA em light e dark).
+  static const Color inkOnLightCta = Color(0xFF0B1524);
+
+  /// Preenchimento neutro de card em light (par do [darkCardHi]).
+  static const Color lightCardHi = Color(0xFFEEF2F5);
 
   // ── Glass / Liquid Glass Surfaces ───────────────────────────────────
   static const Color glassFill = Color(0x18FFFFFF);

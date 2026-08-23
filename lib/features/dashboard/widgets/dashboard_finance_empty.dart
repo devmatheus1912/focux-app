@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../utils/dashboard_microcopy.dart';
 import '../utils/dashboard_readability.dart';
@@ -40,8 +41,8 @@ class DashboardFinanceEmptyState extends StatelessWidget {
               minimumSize: const Size(48, 48),
               // CTA sólido branco + tinta escura — AA no teal (light e dark).
               backgroundColor: Colors.white,
-              foregroundColor: const Color(0xFF0B1524),
-              disabledForegroundColor: const Color(0xFF0B1524).withValues(
+              foregroundColor: EagleTokens.inkOnLightCta,
+              disabledForegroundColor: EagleTokens.inkOnLightCta.withValues(
                 alpha: 0.5,
               ),
               side: BorderSide.none,

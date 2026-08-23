@@ -127,7 +127,7 @@ class _PlanPill extends StatelessWidget {
                 : chrome.line.withValues(alpha: 0.28));
     final foreground =
         isPremium
-            ? (isDark ? EagleTokens.gold : const Color(0xFF9A6B12))
+            ? (isDark ? EagleTokens.gold : EagleTokens.goldInk)
             : chrome.mute;
 
     return _HeroMetaPill(

@@ -14,7 +14,7 @@ void main() {
       'aluno360_copilot_logic.dart',
     ],
     'lib/features/alunos/screens/alunos_list_screen.dart': [
-      'alunos_list_sparkline_logic.dart',
+      'aluno_list_card.dart',
       "part 'alunos_list_screen_state.part.dart'",
     ],
     'lib/features/treinos/screens/treinos_list_screen.dart': [
@@ -52,6 +52,12 @@ void main() {
         );
       }
     }
+
+    // Sparkline delegada ao card compartilhado, que usa a logic pura.
+    final alunoCard = File(
+      'lib/features/alunos/widgets/aluno_list_card.dart',
+    ).readAsStringSync();
+    expect(alunoCard, contains('alunos_list_sparkline_logic.dart'));
   });
 
   test('required business logic modules exist', () {

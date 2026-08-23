@@ -60,7 +60,8 @@ void main() {
         ).readAsStringSync();
 
     expect(profile, contains('foto de evolução'));
-    expect(profile, contains('Não foi possível'));
+    // Erros humanizados migraram para o helper central friendlyError (PT-BR).
+    expect(profile, contains('friendlyError'));
     expect(profile, contains("'Saúde e restrições'"));
     expect(profile, contains("'Lesões ou limitações'"));
     expect(profile, contains("'Observações para o personal'"));

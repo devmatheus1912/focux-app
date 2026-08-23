@@ -10,6 +10,8 @@ void main() {
   const excludedFiles = {
     'lib/features/auth/widgets/google_sign_in_button.dart',
     'lib/features/dashboard/utils/dashboard_readability.dart',
+    // Parser de hex do white-label — constrói Color a partir de string, não é token.
+    'lib/features/dashboard/utils/dashboard_screen_helpers.dart',
   };
 
   test('features evitam Color(0x literais', () {

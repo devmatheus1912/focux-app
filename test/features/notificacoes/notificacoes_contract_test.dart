@@ -42,7 +42,11 @@ void main() {
 
     expect(router, contains("path: '/notificacoes'"));
     expect(alunoDashboard, contains('NotificacaoBadgeButton'));
-    expect(personalDashboard, contains('NotificacaoBadgeButton'));
+    // Na Home o sino vive no header extraído (dashboard_home_header).
+    final personalHeader = File(
+      'lib/features/dashboard/widgets/dashboard_home_header.dart',
+    ).readAsStringSync();
+    expect(personalHeader, contains('NotificacaoBadgeButton'));
     expect(personalDashboard, contains('notificacoesNaoLidasProvider'));
     expect(screen, contains('Ler todas'));
     expect(repo, contains('/api/notificacoes'));

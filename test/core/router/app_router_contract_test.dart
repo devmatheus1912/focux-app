@@ -135,10 +135,6 @@ void main() {
   });
 
   test('operational screens use safe fallback navigation', () {
-    final agenda =
-        File(
-          'lib/features/agenda/screens/agenda_screen.dart',
-        ).readAsStringSync();
     final alertas =
         File(
           'lib/features/alertas/screens/alertas_screen.dart',
@@ -171,7 +167,8 @@ void main() {
           'lib/features/alimentar/screens/plano_alimentar_detail_screen.dart',
         ).readAsStringSync();
 
-    expect(agenda, contains("safePopOrGo(context, '/dashboard/personal')"));
+    // /agenda é tab do shell (FocuxNavigation.shellTabPaths) — sem back para a
+    // Home; o fallback dela é coberto em 'residual back controls'.
     expect(alertas, contains("safePopOrGo(context, '/dashboard/personal')"));
     expect(financeiro, contains("safePopOrGo(context, '/dashboard/personal')"));
     expect(leadsKanban, contains("safePopOrGo(context, '/leads')"));

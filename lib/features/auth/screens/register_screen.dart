@@ -15,6 +15,7 @@ import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/hero_teal.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/br_phone.dart';
+import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../features/perfil/providers/perfil_provider.dart';
 import '../providers/auth_provider.dart';
@@ -138,14 +139,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       }
       setState(() => _codeSent = true);
       _startResendCountdown();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            result.hint.isNotEmpty
-                ? result.hint
-                : 'Código enviado. Confira a caixa de entrada (e o spam).',
-          ),
-        ),
+      FeedbackHelper.showSuccess(
+        context,
+        result.hint.isNotEmpty
+            ? result.hint
+            : 'Código enviado. Confira a caixa de entrada (e o spam).',
       );
     } catch (error) {
       HapticFeedback.heavyImpact();

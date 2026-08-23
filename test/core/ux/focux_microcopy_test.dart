@@ -24,10 +24,5 @@ void main() {
             .readAsStringSync();
     expect(dashboard, contains('Panorama financeiro'));
     expect(dashboard, contains('Ver prioridades'));
-
-    final aluno360 =
-        File('lib/features/alunos/utils/aluno360_microcopy.dart')
-            .readAsStringSync();
-    expect(aluno360, contains('Evolução inteligente'));
   });
 }

@@ -29,7 +29,7 @@ class PerfilAppearanceSection extends ConsumerWidget {
     final primary = Theme.of(context).colorScheme.primary;
     final heading = BrandPalette.sectionHeading(primary, dark: isDark);
     final caption = dashboardReadableCaption(context, isDark: isDark);
-    final fill = isDark ? EagleTokens.darkCardHi : const Color(0xFFEEF2F5);
+    final fill = isDark ? EagleTokens.darkCardHi : EagleTokens.lightCardHi;
 
     return DecoratedBox(
       decoration: fxStripCardDecoration(

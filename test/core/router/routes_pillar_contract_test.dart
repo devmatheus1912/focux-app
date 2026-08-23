@@ -81,10 +81,14 @@ void main() {
     expect(routes, contains("state.uri.queryParameters['treinoId']"));
   });
 
-  test('README route catalog file exists', () {
+  test('README aponta o catálogo de rotas para o router', () {
     expect(File('README.md').existsSync(), isTrue);
     final readme = File('README.md').readAsStringSync();
-    expect(readme, contains('/alunos/:id/equipamentos'));
-    expect(readme, contains('/ia/copiloto'));
+    // Catálogo vive no código (evita doc drift); README só precisa apontar.
+    expect(readme, contains('lib/core/router/'));
+
+    final routes = readRouterSourceBundle();
+    expect(routes, contains('/alunos/:id/equipamentos'));
+    expect(routes, contains('/ia/copiloto'));
   });
 }

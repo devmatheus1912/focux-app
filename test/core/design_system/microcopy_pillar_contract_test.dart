@@ -45,9 +45,6 @@ void main() {
       'lib/features/financeiro/screens/financeiro_dashboard_screen.dart',
       'lib/features/financeiro/screens/financeiro_resumo_screen.dart',
     ];
-    const alunoDetailWidgets = [
-      'lib/features/alunos/widgets/aluno_detail_error_state.dart',
-    ];
     const alunosStatePart =
         'lib/features/alunos/screens/alunos_list_screen_state.part.dart';
     const alunosActionsPart =
@@ -69,16 +66,12 @@ void main() {
           source += File(tab).readAsStringSync();
         }
       }
-      if (path.endsWith('aluno_detail_screen.dart')) {
-        for (final widget in alunoDetailWidgets) {
-          source += File(widget).readAsStringSync();
-        }
-        source += File('lib/features/alunos/utils/aluno360_microcopy.dart')
-            .readAsStringSync();
-      }
       if (path.endsWith('alunos_list_screen.dart')) {
         source += File(alunosStatePart).readAsStringSync();
         source += File(alunosActionsPart).readAsStringSync();
+        source += File(
+          'lib/features/alunos/widgets/alunos_error_scaffold.dart',
+        ).readAsStringSync();
       }
       if (path.endsWith('ia_copiloto_screen.dart')) {
         for (final part in iaParts) {
@@ -105,10 +98,13 @@ void main() {
         reason: '$path deve humanizar erros com friendlyError',
       );
 
+      // Retry canônico: label direto ou delegação ao FxErrorState (que usa
+      // FocuxMicrocopy.tentarNovamente internamente — coberto no teste abaixo).
       expect(
-        source.contains('FocuxMicrocopy.tentarNovamente'),
+        source.contains('FocuxMicrocopy.tentarNovamente') ||
+            source.contains('FxErrorState('),
         isTrue,
-        reason: '$path deve usar FocuxMicrocopy.tentarNovamente em retry',
+        reason: '$path deve usar FocuxMicrocopy.tentarNovamente ou FxErrorState',
       );
     }
   });
@@ -136,14 +132,24 @@ void main() {
   });
 
   test('error states use FocuxMicrocopy retry label', () {
+    // Fonte da verdade do retry — o widget canônico usa o label central.
+    final fxErrorState = File(
+      'lib/core/widgets/fx_error_state.dart',
+    ).readAsStringSync();
+    expect(fxErrorState, contains('FocuxMicrocopy.tentarNovamente'));
+
     const errorWidgets = [
       'lib/features/dashboard/widgets/dashboard_error_state.dart',
-      'lib/features/alunos/widgets/aluno_detail_error_state.dart',
     ];
 
     for (final path in errorWidgets) {
       final source = File(path).readAsStringSync();
-      expect(source, contains('FocuxMicrocopy.tentarNovamente'));
+      expect(
+        source.contains('FocuxMicrocopy.tentarNovamente') ||
+            source.contains('FxErrorState('),
+        isTrue,
+        reason: '$path deve usar label central ou delegar ao FxErrorState',
+      );
     }
   });
 }

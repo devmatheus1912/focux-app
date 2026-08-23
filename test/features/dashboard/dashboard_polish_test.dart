@@ -103,7 +103,10 @@ void main() {
     expect(screen, contains('dashboardPrioritiesChipForeground'));
     expect(screen, contains('RISK_STUDENTS'));
     expect(screen, contains('DashboardFinanceEmptyState'));
-    expect(screen, contains('0.40'));
+    // Sheet de prioridades migrou para o chrome canônico da Home (sem
+    // DraggableScrollableSheet ad-hoc com snapSizes soltos).
+    expect(screen, contains('showFxHomeSheet'));
+    expect(screen, isNot(contains('DraggableScrollableSheet(')));
     expect(screen, contains('maxVisibleNextActions'));
     expect(screen, contains('modoFoco'));
     final shortcutsFile =

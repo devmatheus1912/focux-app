@@ -14,6 +14,7 @@ import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
+import '../data/busca_repository.dart';
 import '../models/busca_global_models.dart';
 
 // ─── Providers ────────────────────────────────────────────────────────────────
@@ -21,14 +22,16 @@ import '../models/busca_global_models.dart';
 final buscaQueryProvider = StateProvider<String>((ref) => '');
 final buscaFilterProvider = StateProvider<BuscaTipo>((ref) => BuscaTipo.todos);
 
+final buscaRepositoryProvider = Provider<BuscaRepository>(
+  (ref) => BuscaRepository(ref.read(apiClientProvider)),
+);
+
 final buscaResultadoProvider = FutureProvider.autoDispose<BuscaGlobalResult?>((
   ref,
 ) async {
   final query = ref.watch(buscaQueryProvider);
   if (query.trim().length < 2) return null;
-  final api = ref.read(apiClientProvider);
-  final res = await api.dio.get('/api/busca?q=${Uri.encodeComponent(query)}');
-  return BuscaGlobalResult.fromJson(res.data as Map<String, dynamic>);
+  return ref.read(buscaRepositoryProvider).buscar(query);
 });
 
 // ─── Screen ───────────────────────────────────────────────────────────────────

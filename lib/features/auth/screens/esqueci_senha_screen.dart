@@ -309,7 +309,8 @@ class _EsqueciSenhaScreenState extends ConsumerState<EsqueciSenhaScreen> {
                       loading: _loading,
                       onPressed: _loading ? null : _submit,
                     ),
-                    const Spacer(),
+                    // Sem Spacer: o corpo vive num scroll com altura ilimitada
+                    // (flex aqui quebra o layout). Padrão igual ao login.
                     const SizedBox(height: TokensStrip.s5),
                     Center(
                       child: AuthTextLink(

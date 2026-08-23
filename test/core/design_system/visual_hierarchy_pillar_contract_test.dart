@@ -93,9 +93,14 @@ void main() {
   });
 
   test('personal dashboard exposes day focus banner', () {
-    final source = readScreenSourceBundle(
-      'lib/features/dashboard/screens/personal_dashboard_screen.dart',
-    );
+    // Banner de foco vive nos slivers extraídos da Home.
+    final source =
+        readScreenSourceBundle(
+          'lib/features/dashboard/screens/personal_dashboard_screen.dart',
+        ) +
+        File(
+          'lib/features/dashboard/widgets/dashboard_home_primary_slivers.dart',
+        ).readAsStringSync();
     expect(source, contains('DashboardDayFocusBanner'));
     expect(source, contains('dashboard_day_focus.dart'));
   });

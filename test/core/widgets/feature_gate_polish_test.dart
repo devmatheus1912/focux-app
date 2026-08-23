@@ -68,7 +68,9 @@ void main() {
     expect(gate, contains('SkeletonList'));
     expect(gate, isNot(contains('FxLoading')));
     expect(gate, isNot(contains('CircularProgressIndicator')));
-    expect(gate, contains('UpgradePromptSheet.showIfAllowed'));
+    // Upsell só na tela travada — auto-sheet no mount foi removido de propósito.
+    expect(gate, isNot(contains('UpgradePromptSheet.showIfAllowed')));
+    expect(gate, contains('_LockedScreen'));
     expect(gate, contains('DashboardHomeClientCache.getIfFresh'));
     expect(gate, contains('seedFromHome'));
     expect(gate, contains('addPostFrameCallback'));

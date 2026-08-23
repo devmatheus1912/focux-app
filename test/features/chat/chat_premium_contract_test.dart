@@ -11,10 +11,10 @@ void main() {
       'lib/features/chat/widgets/conversation_message_widgets.dart',
     ).readAsStringSync();
 
-    expect(conversation, contains('_loadFailed'));
+    // Retry de carregamento migrou para o estado canônico FxErrorState.
+    expect(conversation, contains('FxErrorState'));
+    expect(conversation, contains('friendly_error.dart'));
     expect(messageWidgets, contains('formatChatTextForDisplay'));
-    expect(messageWidgets, contains('ConversationErrorState'));
-    expect(messageWidgets, contains('Tentar novamente'));
     expect(messageWidgets, contains('ConversationBubble('));
     expect(conversation, contains('accentColor: primary'));
   });

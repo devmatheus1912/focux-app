@@ -94,9 +94,14 @@ void main() {
   });
 
   test('personal dashboard switches shell tabs via goPersonalShellTab', () {
-    final source = readScreenSourceBundle(
-      'lib/features/dashboard/screens/personal_dashboard_screen.dart',
-    );
+    // Slivers extraídos carregam a navegação de tab da Home.
+    final source =
+        readScreenSourceBundle(
+          'lib/features/dashboard/screens/personal_dashboard_screen.dart',
+        ) +
+        File(
+          'lib/features/dashboard/widgets/dashboard_home_primary_slivers.dart',
+        ).readAsStringSync();
     expect(source, contains('goPersonalShellTab'));
     expect(source, contains("'/alunos"));
     expect(source, contains("'/agenda'"));
