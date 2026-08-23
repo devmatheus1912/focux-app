@@ -7,11 +7,9 @@ import '../../../core/api/api_client.dart';
 import '../../../core/brand/brand_pulse.dart';
 import '../../../core/brand/focux_brand_copy.dart';
 import '../../../core/theme/design_tokens.dart';
-import '../../../core/theme/focux_system_chrome.dart';
 import '../../../core/theme/hero_teal.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/motion_preferences.dart';
-import '../../../core/widgets/auth_grid_painter.dart';
 import '../../../core/widgets/focux_official_logo.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
@@ -41,7 +39,6 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   PageController get _activePage => _page;
 
   late AnimationController _entryCtrl;
-  late AnimationController _gridFadeCtrl;
   late Animation<double> _iconScale;
   late Animation<double> _titleSlide;
   late Animation<double> _subtitleSlide;
@@ -114,13 +111,8 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   @override
   void initState() {
     super.initState();
-    _gridFadeCtrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 420),
-    );
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      _gridFadeCtrl.forward();
       _loadSocialProof();
     });
   }
@@ -148,7 +140,6 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     _motionConfigured = true;
     final reduce = reduceMotionOf(context);
     _setupEntryAnimation(reduceMotion: reduce);
-    _gridFadeCtrl.duration = Duration(milliseconds: reduce ? 0 : 420);
     _entryCtrl.forward();
   }
 
@@ -158,7 +149,6 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   void dispose() {
     _page.dispose();
     _entryCtrl.dispose();
-    _gridFadeCtrl.dispose();
     super.dispose();
   }
 
@@ -209,10 +199,14 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   void _next() {
     HapticFeedback.selectionClick();
     if (_current < _pages.length - 1) {
-      _activePage.nextPage(
-        duration: const Duration(milliseconds: 400),
-        curve: Curves.easeOutCubic,
-      );
+      if (reduceMotionOf(context)) {
+        _activePage.jumpToPage(_current + 1);
+      } else {
+        _activePage.nextPage(
+          duration: const Duration(milliseconds: 400),
+          curve: Curves.easeOutCubic,
+        );
+      }
     } else {
       _finish();
     }
@@ -236,78 +230,61 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       label: 'Boas-vindas Focux',
       child: MediaQuery(
         data: MediaQuery.of(context).copyWith(textScaler: textScaler),
-        child: AnnotatedRegion<SystemUiOverlayStyle>(
-          value: FocuxSystemChrome.dark,
-          child: Scaffold(
-            body: Stack(
-            fit: StackFit.expand,
-            children: [
-              Container(color: TokensStrip.cinematicBg),
-              FadeTransition(
-                opacity: CurvedAnimation(
-                  parent: _gridFadeCtrl,
-                  curve: Curves.easeOutCubic,
+        child: Scaffold(
+          body: AuthShell(
+            child: Column(
+              children: [
+                _OnboardingHeader(
+                  persona: _persona,
+                  onPersonaChanged: _setPersona,
+                  onSkip: _skip,
                 ),
-                child: const CustomPaint(
-                  painter: AuthGridPainter(),
-                  size: Size.infinite,
-                ),
-              ),
-              SafeArea(
-                child: Column(
-                  children: [
-                    _OnboardingHeader(
-                      persona: _persona,
-                      onPersonaChanged: _setPersona,
-                      onSkip: _skip,
-                    ),
-                    Expanded(
-                      child: Semantics(
-                        label: 'Slide ${_current + 1} de ${pages.length}',
-                        child: PageView.builder(
-                          clipBehavior: Clip.none,
-                          controller: _activePage,
-                          itemCount: pages.length,
-                          onPageChanged: _onPageChanged,
-                          itemBuilder:
-                              (_, i) => _OBPageWidget(
-                                key: ValueKey('${_persona.name}-$i'),
-                                pageIndex: i,
-                                persona: _persona,
-                                data: pages[i],
-                                compact: compact,
-                                iconScale: _iconScale,
-                                titleSlide: _titleSlide,
-                                subtitleSlide: _subtitleSlide,
-                                metricsSlide: _metricsSlide,
-                                fade: _fade,
-                              ),
-                        ),
-                      ),
-                    ),
-                    _OnboardingFooter(
-                      primary: primary,
-                      pageCount: pages.length,
-                      current: _current,
-                      isLast: isLast,
-                      persona: _persona,
-                      socialProofLine:
-                          _current == 0 ? _socialProofLine : null,
-                      onDotTap:
-                          (i) => _activePage.animateToPage(
-                            i,
-                            duration: const Duration(milliseconds: 400),
-                            curve: Curves.easeOutCubic,
+                Expanded(
+                  child: Semantics(
+                    label: 'Slide ${_current + 1} de ${pages.length}',
+                    child: PageView.builder(
+                      clipBehavior: Clip.none,
+                      controller: _activePage,
+                      itemCount: pages.length,
+                      onPageChanged: _onPageChanged,
+                      itemBuilder:
+                          (_, i) => _OBPageWidget(
+                            key: ValueKey('${_persona.name}-$i'),
+                            pageIndex: i,
+                            persona: _persona,
+                            data: pages[i],
+                            compact: compact,
+                            iconScale: _iconScale,
+                            titleSlide: _titleSlide,
+                            subtitleSlide: _subtitleSlide,
+                            metricsSlide: _metricsSlide,
+                            fade: _fade,
                           ),
-                      onLogin: _goLogin,
-                      onPrimary: _next,
                     ),
-                  ],
+                  ),
                 ),
-              ),
-            ],
+                _OnboardingFooter(
+                  primary: primary,
+                  pageCount: pages.length,
+                  current: _current,
+                  isLast: isLast,
+                  persona: _persona,
+                  socialProofLine: _current == 0 ? _socialProofLine : null,
+                  onDotTap:
+                      (i) =>
+                          reduceMotionOf(context)
+                              ? _activePage.jumpToPage(i)
+                              : _activePage.animateToPage(
+                                i,
+                                duration: const Duration(milliseconds: 400),
+                                curve: Curves.easeOutCubic,
+                              ),
+                  onLogin: _goLogin,
+                  onPrimary: _next,
+                ),
+              ],
+            ),
           ),
-        ),
         ),
       ),
     );

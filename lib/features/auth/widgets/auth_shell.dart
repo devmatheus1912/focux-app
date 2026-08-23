@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import '../../../core/brand/focux_brand_copy.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/focux_system_chrome.dart';
 import '../../../core/theme/hero_teal.dart';
 import '../../../core/theme/theme_provider.dart';
@@ -68,6 +69,22 @@ class AuthShell extends StatelessWidget {
     );
   }
 }
+
+/// Título de página auth — mesmo papel do `pageTitle` da Home (ink hero).
+TextStyle authPageTitleStyle(BuildContext context, {Color? color}) =>
+    FocuxHubTypography.pageTitle(context, color: color ?? heroTealInk());
+
+/// Subtítulo/apoio abaixo do título — `bodyMuted` da Home sobre mesh.
+TextStyle authSubtitleStyle({Color? color}) =>
+    FocuxHubTypography.bodyMuted(color: color ?? heroTealSurface(0.78));
+
+/// Erro inline padrão das telas auth (mesma cor semântica em todas).
+TextStyle authInlineErrorStyle() =>
+    FocuxHubTypography.bodyMuted(color: EagleTokens.authErrorSoft);
+
+/// Sucesso inline padrão das telas auth.
+TextStyle authInlineSuccessStyle() =>
+    FocuxHubTypography.bodyMuted(color: EagleTokens.authSuccessSoft);
 
 class AuthLogoMark extends ConsumerWidget {
   const AuthLogoMark({

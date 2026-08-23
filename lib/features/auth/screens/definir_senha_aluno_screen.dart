@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -41,8 +42,16 @@ class _DefinirSenhaAlunoScreenState
     _iconAnim = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 800),
-    )..forward();
+    );
     _iconScale = CurvedAnimation(parent: _iconAnim, curve: Curves.elasticOut);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (TokensStrip.prefersReducedMotion(context)) {
+        _iconAnim.value = 1;
+      } else {
+        _iconAnim.forward();
+      }
+    });
     _novaSenhaCtrl.addListener(() => setState(() {}));
   }
 
@@ -177,19 +186,16 @@ class _DefinirSenhaAlunoScreenState
                       Text(
                         'Crie sua senha',
                         textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 26,
-                          fontWeight: FontWeight.w800,
+                        style: FocuxHubTypography.pageTitle(
+                          context,
                           color: ink,
-                          letterSpacing: -0.5,
                         ),
                       ),
                       const SizedBox(height: 8),
                       Text(
                         'Por segurança, defina uma senha pessoal\npara proteger sua conta.',
                         textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 14,
+                        style: FocuxHubTypography.bodyMuted(
                           color: mute,
                           height: 1.5,
                         ),
@@ -199,7 +205,7 @@ class _DefinirSenhaAlunoScreenState
                       // ── Card ──
                       Container(
                         padding: const EdgeInsets.all(TokensStrip.s4),
-                        decoration: fxListCardDecoration(context),
+                        decoration: fxStripCardDecoration(context),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
@@ -344,10 +350,8 @@ class _DefinirSenhaAlunoScreenState
                                   const SizedBox(width: 10),
                                   Text(
                                     _strengthLabel(),
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600,
-                                      color: _strengthColor(),
+                                    style: FocuxHubTypography.chip(
+                                      _strengthColor(),
                                     ),
                                   ),
                                 ],
@@ -450,9 +454,8 @@ class _DefinirSenhaAlunoScreenState
                                     Expanded(
                                       child: Text(
                                         _error!,
-                                        style: const TextStyle(
+                                        style: FocuxHubTypography.bodyMuted(
                                           color: EagleTokens.bad,
-                                          fontSize: 13,
                                           fontWeight: FontWeight.w500,
                                         ),
                                       ),
@@ -498,8 +501,7 @@ class _DefinirSenhaAlunoScreenState
                             Expanded(
                               child: Text(
                                 'Use pelo menos 6 caracteres, combinando letras maiúsculas, números e símbolos para uma senha forte.',
-                                style: TextStyle(
-                                  fontSize: 12,
+                                style: FocuxHubTypography.bodyMuted(
                                   color: mute,
                                   height: 1.5,
                                 ),

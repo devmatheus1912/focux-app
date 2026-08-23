@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/hero_teal.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_motion.dart';
@@ -158,21 +158,12 @@ class _ResetarSenhaVerificarCodigoScreenState
                       const SizedBox(height: 16),
                       Text(
                         'Digite o código',
-                        style: AppTypography.inter(
-                          color: heroTealInk(),
-                          fontSize: 28,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: -0.7,
-                        ),
+                        style: authPageTitleStyle(context),
                       ),
                       const SizedBox(height: 8),
                       Text(
                         'Enviamos 6 dígitos para $_email. Válido por 10 minutos.',
-                        style: AppTypography.inter(
-                          color: heroTealSurface(0.78),
-                          fontSize: 14,
-                          height: 1.5,
-                        ),
+                        style: authSubtitleStyle().copyWith(height: 1.5),
                       ),
                       const SizedBox(height: 24),
                       AuthOtpField(
@@ -189,10 +180,7 @@ class _ResetarSenhaVerificarCodigoScreenState
                           liveRegion: true,
                           child: Text(
                             _error!,
-                            style: TextStyle(
-                              color: EagleTokens.authErrorSoft,
-                              fontSize: 12.5,
-                            ),
+                            style: authInlineErrorStyle(),
                           ),
                         ),
                       ],
@@ -208,10 +196,9 @@ class _ResetarSenhaVerificarCodigoScreenState
                         onPressed: () => context.go(_loginPath),
                         child: Text(
                           'Voltar ao login',
-                          style: AppTypography.inter(
+                          style: FocuxHubTypography.body(
                             color: heroTealSurface(0.85),
-                            fontWeight: FontWeight.w600,
-                          ),
+                          ).copyWith(fontWeight: FontWeight.w600),
                         ),
                       ),
                     ],

@@ -5,8 +5,10 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/brand/focux_brand_copy.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_motion.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_input_deco.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/auth_shell.dart';
@@ -137,11 +139,13 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen> {
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 14,
-                        vertical: 8,
+                        vertical: TokensStrip.s2,
                       ),
                       decoration: BoxDecoration(
                         color: primary.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(999),
+                        borderRadius: BorderRadius.circular(
+                          TokensStrip.rButton,
+                        ),
                         border: Border.all(
                           color: primary.withValues(alpha: 0.28),
                         ),
@@ -154,73 +158,57 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen> {
                             color: primary,
                             size: 16,
                           ),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: TokensStrip.s2),
                           Text(
                             'Convite do seu personal',
-                            style: TextStyle(
-                              color: primary,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                            ),
+                            style: FocuxHubTypography.chip(primary),
                           ),
                         ],
                       ),
                     ),
-                    const SizedBox(height: 16),
-                    const Text(
+                    const SizedBox(height: TokensStrip.s4),
+                    Text(
                       'Ativar conta',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 26,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: -0.7,
-                        height: 1.15,
-                      ),
+                      style: authPageTitleStyle(context, color: Colors.white),
                     ),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: TokensStrip.s2),
                     Text(
                       'Use o código que seu personal enviou e crie sua senha.',
-                      style: TextStyle(
+                      style: authSubtitleStyle(
                         color: Colors.white.withValues(alpha: 0.78),
-                        fontSize: 13.5,
-                        height: 1.4,
                       ),
                     ),
                     if (widget.personalSlug != null) ...[
-                      const SizedBox(height: 12),
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(14),
-                        decoration: BoxDecoration(
-                          color: primary.withValues(alpha: 0.08),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: primary.withValues(alpha: 0.25),
-                          ),
+                      const SizedBox(height: TokensStrip.s3),
+                      DecoratedBox(
+                        decoration: fxStripCardDecoration(
+                          context,
+                          glowStrength: 0.08,
                         ),
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.fitness_center_rounded,
-                              color: primary,
-                              size: 20,
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Text(
-                                'Cadastro vinculado ao app do seu personal',
-                                style: TextStyle(
-                                  color: primary,
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 13,
+                        child: Padding(
+                          padding: const EdgeInsets.all(14),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.fitness_center_rounded,
+                                color: primary,
+                                size: 20,
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Text(
+                                  'Cadastro vinculado ao app do seu personal',
+                                  style: FocuxHubTypography.cardTitle(
+                                    color: primary,
+                                  ),
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ],
-                    const SizedBox(height: 18),
+                    const SizedBox(height: TokensStrip.s5),
                     _InviteCodeField(
                       controller: _conviteCtrl,
                       primary: primary,
@@ -295,13 +283,7 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen> {
                     ],
                     if (_error != null) ...[
                       const SizedBox(height: 10),
-                      Text(
-                        _error!,
-                        style: TextStyle(
-                          color: EagleTokens.authErrorSoft,
-                          fontSize: 12.5,
-                        ),
-                      ),
+                      Text(_error!, style: authInlineErrorStyle()),
                     ],
                     const SizedBox(height: 22),
                     FxLiquidPrimaryButton(
@@ -347,11 +329,9 @@ class _InviteCodeField extends StatelessWidget {
       children: [
         Text(
           'Código do convite',
-          style: TextStyle(
+          style: FocuxHubTypography.bodyMuted(
             color: Colors.white.withValues(alpha: 0.78),
-            fontSize: 12.5,
             fontWeight: FontWeight.w600,
-            letterSpacing: 0.5,
           ),
         ),
         const SizedBox(height: 7),
@@ -359,10 +339,9 @@ class _InviteCodeField extends StatelessWidget {
           controller: controller,
           textCapitalization: TextCapitalization.characters,
           textAlign: TextAlign.center,
-          style: const TextStyle(
+          style: FocuxHubTypography.metric(
             color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
+            fontSize: FocuxHubTypography.metricEm,
             letterSpacing: 4,
           ),
           cursorColor: primary,

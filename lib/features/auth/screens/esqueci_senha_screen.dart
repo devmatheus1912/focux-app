@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/hero_teal.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_motion.dart';
@@ -222,24 +222,16 @@ class _EsqueciSenhaScreenState extends ConsumerState<EsqueciSenhaScreen> {
                                 children: [
                     Text(
                       'Recuperar senha',
-                      style: AppTypography.inter(
-                        color: heroTealInk(),
-                        fontSize: 30,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: -0.8,
-                        height: 1.15,
-                      ),
+                      style: authPageTitleStyle(context),
                     ),
                     const SizedBox(height: 10),
                     ConstrainedBox(
                       constraints: const BoxConstraints(maxWidth: 320),
                       child: Text(
                         'Digite seu e-mail e enviamos um código de 6 dígitos para redefinir sua senha.',
-                        style: AppTypography.inter(
+                        style: authSubtitleStyle(
                           color: heroTealSurface(0.82),
-                          fontSize: 14.5,
-                          height: 1.55,
-                        ),
+                        ).copyWith(height: 1.55),
                       ),
                     ),
                     const SizedBox(height: TokensStrip.s5),
@@ -287,13 +279,7 @@ class _EsqueciSenhaScreenState extends ConsumerState<EsqueciSenhaScreen> {
                     if (_error != null) ...[
                       Semantics(
                         liveRegion: true,
-                        child: Text(
-                          _error!,
-                          style: TextStyle(
-                            color: EagleTokens.authErrorSoft,
-                            fontSize: 12.5,
-                          ),
-                        ),
+                        child: Text(_error!, style: authInlineErrorStyle()),
                       ),
                       const SizedBox(height: 14),
                     ],
@@ -302,10 +288,7 @@ class _EsqueciSenhaScreenState extends ConsumerState<EsqueciSenhaScreen> {
                         liveRegion: true,
                         child: Text(
                           _message!,
-                          style: TextStyle(
-                            color: EagleTokens.authSuccessSoft,
-                            fontSize: 12.5,
-                          ),
+                          style: authInlineSuccessStyle(),
                         ),
                       ),
                       const SizedBox(height: 10),
@@ -313,9 +296,8 @@ class _EsqueciSenhaScreenState extends ConsumerState<EsqueciSenhaScreen> {
                     if (_hint != null) ...[
                       Text(
                         _hint!,
-                        style: AppTypography.inter(
+                        style: FocuxHubTypography.bodyMuted(
                           color: heroTealSurface(0.82),
-                          fontSize: 12.5,
                           height: 1.45,
                         ),
                       ),

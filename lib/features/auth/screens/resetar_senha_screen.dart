@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/hero_teal.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
@@ -150,21 +150,12 @@ class _ResetarSenhaScreenState extends ConsumerState<ResetarSenhaScreen> {
                       const SizedBox(height: 16),
                       Text(
                         'Nova senha',
-                        style: AppTypography.inter(
-                          color: heroTealInk(),
-                          fontSize: 30,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: -0.8,
-                        ),
+                        style: authPageTitleStyle(context),
                       ),
                       const SizedBox(height: 10),
                       Text(
                         subtitle,
-                        style: AppTypography.inter(
-                          color: heroTealSurface(0.78),
-                          fontSize: 14.5,
-                          height: 1.55,
-                        ),
+                        style: authSubtitleStyle().copyWith(height: 1.55),
                       ),
                       const SizedBox(height: 28),
                       AuthField(
@@ -212,10 +203,9 @@ class _ResetarSenhaScreenState extends ConsumerState<ResetarSenhaScreen> {
                               () => context.go('/esqueci-senha?role=${_role ?? 'personal'}'),
                           child: Text(
                             'Preciso validar o código primeiro',
-                            style: AppTypography.inter(
+                            style: FocuxHubTypography.body(
                               color: heroTealSurface(0.9),
-                              fontWeight: FontWeight.w600,
-                            ),
+                            ).copyWith(fontWeight: FontWeight.w600),
                           ),
                         ),
                       ],
@@ -225,10 +215,7 @@ class _ResetarSenhaScreenState extends ConsumerState<ResetarSenhaScreen> {
                           liveRegion: true,
                           child: Text(
                             _error!,
-                            style: TextStyle(
-                              color: EagleTokens.authErrorSoft,
-                              fontSize: 12.5,
-                            ),
+                            style: authInlineErrorStyle(),
                           ),
                         ),
                         const SizedBox(height: 12),
@@ -238,10 +225,7 @@ class _ResetarSenhaScreenState extends ConsumerState<ResetarSenhaScreen> {
                           liveRegion: true,
                           child: Text(
                             _message!,
-                            style: TextStyle(
-                              color: EagleTokens.authSuccessSoft,
-                              fontSize: 12.5,
-                            ),
+                            style: authInlineSuccessStyle(),
                           ),
                         ),
                         const SizedBox(height: 12),

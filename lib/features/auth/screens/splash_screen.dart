@@ -40,7 +40,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     _ambientCtrl = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 5200),
-    )..repeat();
+    );
 
     _entryCtrl = AnimationController(
       vsync: this,
@@ -63,6 +63,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     ).animate(CurvedAnimation(parent: _fadeCtrl, curve: Curves.easeInCubic));
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (mounted && !TokensStrip.prefersReducedMotion(context)) {
+        _ambientCtrl.repeat();
+      }
       final compact = await _resolveQuickSplash();
       if (!mounted) return;
       if (compact) {

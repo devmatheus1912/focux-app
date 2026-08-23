@@ -9,7 +9,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 
 import '../../../core/auth/session_cache_evictor.dart';
 import '../../../core/config/env.dart';
-import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/hero_teal.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/widgets/fx_motion.dart';
@@ -294,12 +294,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             children: [
                               Text(
                                 'Entrar',
-                                style: AppTypography.inter(
-                                  color: heroTealInk(),
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.w700,
-                                  letterSpacing: -0.4,
-                                ),
+                                style: authPageTitleStyle(context),
                               ),
                               const SizedBox(height: 16),
                               AuthRoleToggle(
@@ -361,11 +356,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                     },
                                     child: Text(
                                       _showPassword ? 'Ocultar' : 'Ver',
-                                      style: TextStyle(
-                                        color: primary,
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w600,
-                                      ),
+                                      style: FocuxHubTypography.chip(primary),
                                     ),
                                   ),
                                 ),
@@ -386,9 +377,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                       },
                                   child: Text(
                                     'Esqueci minha senha',
-                                    style: TextStyle(
+                                    style: FocuxHubTypography.bodyMuted(
                                       color: primary,
-                                      fontSize: 13,
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
@@ -399,10 +389,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                   liveRegion: true,
                                   child: Text(
                                     _error!,
-                                    style: TextStyle(
-                                      color: EagleTokens.authErrorSoft,
-                                      fontSize: 12.5,
-                                    ),
+                                    style: authInlineErrorStyle(),
                                   ),
                                 ),
                                 const SizedBox(height: 14),
@@ -476,9 +463,8 @@ class _AuthDivider extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 10),
           child: Text(
             label,
-            style: AppTypography.inter(
+            style: FocuxHubTypography.bodyMuted(
               color: heroTealSurface(0.82),
-              fontSize: 12,
               fontWeight: FontWeight.w500,
             ),
           ),

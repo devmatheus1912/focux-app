@@ -11,7 +11,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import '../../../core/brand/focux_brand_copy.dart';
 import '../../../core/config/env.dart';
 import '../../../core/legal/focux_legal.dart';
-import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/hero_teal.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/br_phone.dart';
@@ -299,21 +299,13 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           children: [
                       Text(
                         'Criar conta',
-                        style: AppTypography.inter(
-                          color: heroTealInk(),
-                          fontSize: 26,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: -0.7,
-                          height: 1.15,
-                        ),
+                        style: authPageTitleStyle(context),
                       ),
                       const SizedBox(height: 6),
                       Text(
                         'Comece com sua conta e escolha o plano depois.',
-                        style: AppTypography.inter(
+                        style: authSubtitleStyle(
                           color: heroTealSurface(0.82),
-                          fontSize: 13.5,
-                          fontWeight: FontWeight.w500,
                         ),
                       ),
                       const SizedBox(height: 18),
@@ -394,11 +386,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                 : _resendSeconds > 0
                                 ? '${_resendSeconds}s'
                                 : 'Enviar',
-                            style: AppTypography.inter(
-                              fontSize: 12.5,
-                              fontWeight: FontWeight.w700,
-                              color: primary,
-                            ),
+                            style: FocuxHubTypography.chip(primary),
                           ),
                         ),
                       ),
@@ -408,9 +396,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       _codeSent
                           ? 'Código enviado. Válido por 10 minutos.'
                           : 'Toque em Enviar para receber o código no e-mail.',
-                      style: AppTypography.inter(
+                      style: FocuxHubTypography.bodyMuted(
                         color: heroTealSurface(0.72),
-                        fontSize: 12,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -467,10 +454,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         liveRegion: true,
                         child: Text(
                           _error!,
-                          style: TextStyle(
-                            color: EagleTokens.authErrorSoft,
-                            fontSize: 12.5,
-                          ),
+                          style: authInlineErrorStyle(),
                         ),
                       ),
                       const SizedBox(height: 12),
@@ -504,9 +488,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       child: Center(
                         child: Text.rich(
                           TextSpan(
-                            style: AppTypography.inter(
+                            style: FocuxHubTypography.bodyMuted(
                               color: heroTealSurface(0.78),
-                              fontSize: 11.5,
                               height: 1.45,
                             ),
                             children: [
@@ -574,9 +557,8 @@ class _AuthDivider extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 10),
           child: Text(
             label,
-            style: AppTypography.inter(
+            style: FocuxHubTypography.bodyMuted(
               color: heroTealSurface(0.82),
-              fontSize: 12,
               fontWeight: FontWeight.w500,
             ),
           ),
