@@ -1,14 +1,14 @@
 import 'package:go_router/go_router.dart';
 
-import '../../../features/auth/screens/definir_senha_aluno_screen.dart';
-import '../../../features/auth/screens/esqueci_senha_screen.dart';
-import '../../../features/auth/screens/login_screen.dart';
-import '../../../features/auth/screens/register_aluno_screen.dart';
-import '../../../features/auth/screens/register_screen.dart';
-import '../../../features/auth/screens/resetar_senha_verificar_codigo_screen.dart';
-import '../../../features/auth/screens/resetar_senha_screen.dart';
-import '../../../features/auth/screens/splash_screen.dart';
-import '../../../features/onboarding/screens/onboarding_screen.dart';
+import '../../features/auth/screens/definir_senha_aluno_screen.dart';
+import '../../features/auth/screens/esqueci_senha_screen.dart';
+import '../../features/auth/screens/login_screen.dart';
+import '../../features/auth/screens/register_aluno_screen.dart';
+import '../../features/auth/screens/register_screen.dart';
+import '../../features/auth/screens/resetar_senha_verificar_codigo_screen.dart';
+import '../../features/auth/screens/resetar_senha_screen.dart';
+import '../../features/auth/screens/splash_screen.dart';
+import '../../features/onboarding/screens/onboarding_screen.dart';
 import 'role_home.dart';
 
 /// Public and auth routes (no shell).

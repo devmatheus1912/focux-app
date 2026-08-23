@@ -8,7 +8,6 @@ abstract final class FocuxMicrocopy {
     'lib/core/brand/focux_microcopy.dart',
     'lib/core/utils/friendly_error.dart',
     'lib/features/dashboard/utils/dashboard_microcopy.dart',
-    'lib/features/alunos/utils/aluno360_microcopy.dart',
   ];
 
   static const List<String> hubCopyPatterns = [
@@ -16,7 +15,6 @@ abstract final class FocuxMicrocopy {
     'friendlyError',
     'focux_microcopy.dart',
     'dashboard_microcopy.dart',
-    'aluno360_microcopy.dart',
   ];
 
   static const List<String> automatedGates = [

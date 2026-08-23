@@ -27,7 +27,6 @@ abstract final class FocuxFeedback {
     'friendlyError',
     'FxEmptyState',
     'DashboardErrorState',
-    'AlunoDetailErrorState',
     '_erroIaTexto',
   ];
 }

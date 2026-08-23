@@ -23,7 +23,6 @@ abstract final class FocuxComponents {
     'SkeletonLoader',
     'DashboardShimmer',
     'AlunoDetailLoadingSkeleton',
-    'AlunoDetailErrorState',
   ];
 
   /// Arquivos do catálogo Fx em `lib/core/widgets/`.

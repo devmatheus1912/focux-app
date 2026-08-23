@@ -1,8 +1,19 @@
 // ignore_for_file: avoid_print
 import 'dart:io';
 
-// Lista arquivos .dart em lib/ sem nenhum importador (exceto main e parts).
+// Lista arquivos .dart em lib/ que ninguém importa (nem lib/, nem test/).
+// Resolve import/export/part de verdade (relativo + package:), então o
+// resultado é acionável — não é heurística de substring.
 // Uso: dart run tools/find_orphan_dart.dart
+
+const _entryPoints = {'lib/main.dart'};
+
+/// Superfícies documentadas do design system (DESIGN_SYSTEM.md + gates de
+/// pilar exigem que existam), mesmo sem importador em código hoje.
+const _documentedApi = {
+  'lib/core/theme/focux_spacing.dart',
+  'lib/core/theme/fx_chart_theme.dart',
+};
 
 void main() {
   final lib = Directory('lib');
@@ -11,84 +22,91 @@ void main() {
     exit(1);
   }
 
-  final files =
-      lib
-          .listSync(recursive: true)
-          .whereType<File>()
-          .where((f) => f.path.endsWith('.dart'))
-          .map((f) => f.path.replaceAll(r'\', '/'))
-          .toList();
+  final libFiles = _dartFilesIn(lib);
+  final referenced = <String>{};
 
-  final importers = <String, Set<String>>{};
-  for (final path in files) {
-    importers[path] = {};
-  }
-
-  for (final file in files) {
-    final content = File(file).readAsStringSync();
-    final self = _libPath(file);
-    for (final other in files) {
-      if (other == file) continue;
-      final target = _libPath(other);
-      final pkg = 'package:focux_app/${target.replaceFirst('lib/', '')}';
-      if (content.contains(target) ||
-          content.contains(target.replaceAll('.dart', '')) ||
-          content.contains(pkg) ||
-          content.contains(pkg.replaceAll('.dart', ''))) {
-        importers[other]!.add(self);
-      }
-    }
-    for (final match in RegExp(r"part\s+'([^']+)'").allMatches(content)) {
-      final partPath = _resolvePart(self, match.group(1)!);
-      for (final entry in importers.entries) {
-        if (_libPath(entry.key) == partPath) {
-          entry.value.add(self);
-        }
-      }
+  for (final source in [...libFiles, ..._dartFilesIn(Directory('test'))]) {
+    for (final target in _directiveTargets(source)) {
+      referenced.add(target);
     }
   }
 
-  final testDir = Directory('test');
-  if (testDir.existsSync()) {
-    for (final file in testDir.listSync(recursive: true).whereType<File>()) {
-      if (!file.path.endsWith('.dart')) continue;
-      final content = file.readAsStringSync();
-      for (final other in files) {
-        final target = _libPath(other);
-        final pkg = 'package:focux_app/${target.replaceFirst('lib/', '')}';
-        if (content.contains(pkg) ||
-            content.contains(pkg.replaceAll('.dart', ''))) {
-          importers[other]!.add(_libPath(file.path));
-        }
-      }
-    }
-  }
+  final orphans =
+      libFiles
+          .where(
+            (f) =>
+                !_entryPoints.contains(f) &&
+                !_documentedApi.contains(f) &&
+                !referenced.contains(f),
+          )
+          .toList()
+        ..sort();
 
-  final orphans = <String>[];
-  for (final path in files) {
-    final normalized = _libPath(path);
-    if (normalized == 'lib/main.dart') continue;
-    if (importers[path]!.isEmpty) orphans.add(normalized);
-  }
-
-  orphans.sort();
   if (orphans.isEmpty) {
     print('Nenhum órfão em lib/.');
-  } else {
-    print('Possíveis órfãos (${orphans.length}):');
-    for (final o in orphans) {
-      print('  $o');
-    }
+    return;
   }
+  print('Órfãos em lib/ (${orphans.length}):');
+  for (final orphan in orphans) {
+    print('  $orphan');
+  }
+  exit(1);
 }
 
-String _libPath(String filePath) {
-  final normalized = filePath.replaceAll(r'\', '/');
+List<String> _dartFilesIn(Directory dir) {
+  if (!dir.existsSync()) return const [];
+  return dir
+      .listSync(recursive: true)
+      .whereType<File>()
+      .map(_normalize)
+      .where((p) => p.endsWith('.dart'))
+      .toList();
+}
+
+/// Caminhos `lib/...` referenciados pelas diretivas de [source].
+///
+/// Cobre import/export/part, incluindo os alvos condicionais
+/// (`export 'a.dart' if (dart.library.io) 'b.dart';`) — ambos contam como uso.
+Iterable<String> _directiveTargets(String source) {
+  final directive = RegExp(
+    r'^\s*(?:import|export|part)\s+[^;]+;',
+    multiLine: true,
+  );
+  final uri = RegExp(r"""['"]([^'"]+\.dart)['"]""");
+  final sourceUri = Uri.file(File(source).absolute.path);
+
+  return directive
+      .allMatches(File(source).readAsStringSync())
+      .expand((d) => uri.allMatches(d.group(0)!))
+      .map((m) => m.group(1)!)
+      .map((raw) => _resolveTarget(raw, sourceUri))
+      .whereType<String>();
+}
+
+String? _resolveTarget(String raw, Uri sourceUri) {
+  if (raw.startsWith('dart:')) return null;
+
+  if (raw.startsWith('package:focux_app/')) {
+    return 'lib/${raw.substring('package:focux_app/'.length)}';
+  }
+  if (raw.startsWith('package:')) return null;
+
+  final libRoot = Directory('lib').absolute.path.replaceAll(r'\', '/');
+  final resolved = sourceUri.resolve(raw).toFilePath().replaceAll(r'\', '/');
+  if (resolved.startsWith(libRoot)) {
+    return _normalize('lib${resolved.substring(libRoot.length)}');
+  }
+
+  // O compilador tolera `../` a mais e clampa na raiz de lib/ — espelhamos
+  // isso para não marcar o alvo real como órfão.
+  final tail = raw.replaceAll(RegExp(r'^(?:\.\./)+'), '');
+  final clamped = 'lib/$tail';
+  return File(clamped).existsSync() ? clamped : null;
+}
+
+String _normalize(Object pathOrFile) {
+  final raw = pathOrFile is File ? pathOrFile.path : pathOrFile as String;
+  final normalized = raw.replaceAll(r'\', '/');
   final idx = normalized.indexOf('lib/');
   return idx >= 0 ? normalized.substring(idx) : normalized;
-}
-
-String _resolvePart(String libraryPath, String part) {
-  final dir = libraryPath.substring(0, libraryPath.lastIndexOf('/'));
-  return '$dir/$part';
 }
