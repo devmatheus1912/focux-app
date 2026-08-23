@@ -44,6 +44,15 @@ void main() {
     expect(shell, isNot(contains('FxPremiumEntrance(child: inner)')));
   });
 
+  test('content width limiter preenche altura bounded do scaffold', () {
+    final limiter = File(
+      'lib/core/widgets/fx_content_width_limiter.dart',
+    ).readAsStringSync();
+    expect(limiter, contains('fillHeight'));
+    expect(limiter, contains('constraints.maxHeight'));
+    expect(limiter, contains('LayoutBuilder'));
+  });
+
   test('plan studio cai para aquisicao quando upgradePlans vazio', () {
     final body = File(
       'lib/features/assinatura/screens/assinatura_screen_build_body.part.dart',
