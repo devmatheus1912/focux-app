@@ -301,11 +301,9 @@ class PaywallEnterpriseProRoiCard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     'Por que o Enterprise Pro?',
-                    style: AppTypography.inter(
+                    style: FocuxHubTypography.body(color: ink).copyWith(
                       fontWeight: FontWeight.w800,
-                      fontSize: 15,
                       height: 1.25,
-                      color: ink,
                     ),
                   ),
                 ),

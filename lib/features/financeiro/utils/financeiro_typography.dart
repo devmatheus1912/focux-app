@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_typography.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 
@@ -8,10 +9,8 @@ import '../../../core/theme/tokens_strip.dart';
 abstract class FinanceiroTypography {
   static TextStyle alunoNome(BuildContext context) {
     final chrome = ShellChrome.of(context);
-    return AppTypography.inter(
-      fontSize: TokensStrip.fontBody,
+    return FocuxHubTypography.body(color: chrome.ink).copyWith(
       fontWeight: FontWeight.w800,
-      color: chrome.ink,
       height: 1.2,
       letterSpacing: -0.15,
     );
@@ -26,19 +25,13 @@ abstract class FinanceiroTypography {
   }
 
   static TextStyle meta(BuildContext context) {
-    return AppTypography.inter(
-      fontSize: TokensStrip.fontBodySm,
+    return FocuxHubTypography.bodyMuted(
       color: ShellChrome.of(context).mute,
       fontWeight: FontWeight.w600,
     );
   }
 
   static TextStyle badge(BuildContext context, Color fg) {
-    return AppTypography.inter(
-      fontSize: TokensStrip.fontBodySm,
-      color: fg,
-      fontWeight: FontWeight.w800,
-      letterSpacing: 0.3,
-    );
+    return FocuxHubTypography.chip(fg);
   }
 }

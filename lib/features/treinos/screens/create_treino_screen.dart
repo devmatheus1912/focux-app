@@ -17,6 +17,7 @@ import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../providers/treinos_provider.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
 
 part 'create_treino_screen_state.part.dart';

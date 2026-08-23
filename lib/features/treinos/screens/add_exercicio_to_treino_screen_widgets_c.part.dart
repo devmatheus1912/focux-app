@@ -316,10 +316,11 @@ class _ExercisePickerTile extends StatelessWidget {
                     highlightedExerciseName(
                       name: exercicio.nomeDisplay,
                       query: highlightQuery,
-                      baseStyle: AppTypography.inter(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w900,
-                      ),
+                      baseStyle: FocuxHubTypography.cardTitle(
+                        color: isDark
+                            ? EagleTokens.darkInk
+                            : TokensStrip.textPrimary,
+                      ).copyWith(fontWeight: FontWeight.w900),
                       highlightColor: primary,
                     ),
                     const SizedBox(height: 4),
@@ -329,9 +330,8 @@ class _ExercisePickerTile extends StatelessWidget {
                           : _exerciseMeta(exercicio),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: AppTypography.inter(
+                      style: FocuxHubTypography.bodyMuted(
                         color: _metaTextColor(isDark),
-                        fontSize: 11.5,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -431,9 +431,8 @@ class _PresetSelector extends StatelessWidget {
               const SizedBox(width: 8),
               Text(
                 'Presets de prescrição',
-                style: AppTypography.inter(
+                style: FocuxHubTypography.bodyMuted(
                   color: ink,
-                  fontSize: 13,
                   fontWeight: FontWeight.w900,
                 ),
               ),
@@ -449,9 +448,8 @@ class _PresetSelector extends StatelessWidget {
                   return ChoiceChip(
                     selected: isSelected,
                     label: Text(preset.label),
-                    labelStyle: AppTypography.inter(
-                      color: isSelected ? Colors.white : primary,
-                      fontWeight: FontWeight.w800,
+                    labelStyle: FocuxHubTypography.chip(
+                      isSelected ? Colors.white : primary,
                     ),
                     selectedColor: primary,
                     backgroundColor: primary.withValues(alpha: 0.08),
@@ -465,9 +463,8 @@ class _PresetSelector extends StatelessWidget {
           const SizedBox(height: 10),
           Text(
             selected.summary,
-            style: AppTypography.inter(
+            style: FocuxHubTypography.bodyMuted(
               color: mute,
-              fontSize: 12.5,
               height: 1.35,
               fontWeight: FontWeight.w600,
             ),
@@ -508,9 +505,8 @@ class _SerieTypeSelector extends StatelessWidget {
         children: [
           Text(
             'Tipo de série',
-            style: AppTypography.inter(
+            style: FocuxHubTypography.bodyMuted(
               color: mute,
-              fontSize: 12,
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -529,9 +525,8 @@ class _SerieTypeSelector extends StatelessWidget {
                       color: selected ? Colors.white : primary,
                     ),
                     label: Text(option.$3),
-                    labelStyle: AppTypography.inter(
-                      color: selected ? Colors.white : primary,
-                      fontWeight: FontWeight.w800,
+                    labelStyle: FocuxHubTypography.chip(
+                      selected ? Colors.white : primary,
                     ),
                     selectedColor: primary,
                     backgroundColor: primary.withValues(alpha: 0.08),
@@ -578,9 +573,8 @@ class _ModeHint extends StatelessWidget {
           Expanded(
             child: Text(
               text,
-              style: AppTypography.inter(
+              style: FocuxHubTypography.bodyMuted(
                 color: color,
-                fontSize: 12.5,
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -614,14 +608,12 @@ InputDecoration _fxInputDecoration({
   return InputDecoration(
     labelText: label,
     helperText: helper,
-    labelStyle: AppTypography.inter(
+    labelStyle: FocuxHubTypography.bodyMuted(
       color: labelColor,
-      fontSize: 13,
       fontWeight: FontWeight.w800,
     ),
-    floatingLabelStyle: AppTypography.inter(
+    floatingLabelStyle: FocuxHubTypography.bodyMuted(
       color: primary,
-      fontSize: 12.5,
       fontWeight: FontWeight.w900,
     ),
     filled: true,

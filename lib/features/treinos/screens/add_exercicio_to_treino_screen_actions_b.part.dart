@@ -603,8 +603,7 @@ extension AddExercicioToTreinoScreenActionsB
                 _recentIds.isNotEmpty
                     ? 'Seus recentes e mais usados'
                     : 'Mais usados pelos personais',
-                style: AppTypography.inter(
-                  fontSize: 12,
+                style: FocuxHubTypography.bodyMuted(
                   fontWeight: FontWeight.w800,
                   color:
                       isDark
@@ -632,8 +631,7 @@ extension AddExercicioToTreinoScreenActionsB
               const SizedBox(height: 12),
               Text(
                 'Seus favoritos',
-                style: AppTypography.inter(
-                  fontSize: 12,
+                style: FocuxHubTypography.bodyMuted(
                   fontWeight: FontWeight.w800,
                   color:
                       isDark
@@ -721,9 +719,8 @@ extension AddExercicioToTreinoScreenActionsB
                   ),
                   label: Text(
                     'Trocar por similar',
-                    style: AppTypography.inter(
+                    style: FocuxHubTypography.bodyMuted(
                       color: primary,
-                      fontSize: 13,
                       fontWeight: FontWeight.w800,
                     ),
                   ),

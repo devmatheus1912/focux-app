@@ -138,10 +138,8 @@ class PaywallHero extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             'Escolha o plano que cabe no seu momento',
-            style: TokensStrip.h2(color: ink).copyWith(
-              fontWeight: FontWeight.w800,
+            style: FocuxHubTypography.sectionTitle(context, color: ink).copyWith(
               height: 1.2,
-              fontSize: 22,
             ),
           ),
           const SizedBox(height: 8),
@@ -535,10 +533,9 @@ class PaywallSubscriberQuickNav extends StatelessWidget {
                       const SizedBox(width: TokensStrip.s2),
                       Text(
                         _items[i].label,
-                        style: AppTypography.inter(
+                        style: FocuxHubTypography.bodyMuted(
                           color: ink,
                           fontWeight: FontWeight.w700,
-                          fontSize: TokensStrip.fontBodySm,
                           height: 1.2,
                         ),
                       ),
@@ -625,11 +622,7 @@ class PaywallQuickNav extends StatelessWidget {
                       const SizedBox(width: 8),
                       Text(
                         items[i].label,
-                        style: AppTypography.inter(
-                          color: ink,
-                          fontWeight: FontWeight.w800,
-                          fontSize: 13,
-                        ),
+                        style: FocuxHubTypography.cardTitle(color: ink),
                       ),
                     ],
                   ),

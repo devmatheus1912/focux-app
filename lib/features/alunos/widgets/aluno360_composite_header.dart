@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../constants/aluno_360_layout.dart';
 
@@ -131,11 +132,9 @@ class Aluno360HeaderToolbar extends StatelessWidget {
                         const SizedBox(width: 10),
                         Text(
                           'Excluir aluno',
-                          style: AppTypography.inter(
+                          style: FocuxHubTypography.body(
                             color: EagleTokens.bad,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 14,
-                          ),
+                          ).copyWith(fontWeight: FontWeight.w700),
                         ),
                       ],
                     ),

@@ -16,7 +16,6 @@
 /// ## Tipografia
 /// - [FocuxHubTypography] — pageTitle/sectionTitle/eyebrow/body/bodyMuted/
 ///   chip/cardTitle/metric/kpi. Proibido fontSize literal (18/20/22) na UI.
-/// - `FocuxHierarchy` está deprecated — não usar em código novo.
 ///
 /// ## Superfícies
 /// - [FxStripCard] / [fxStripCardDecoration] — card padrão (glass strip).
@@ -39,8 +38,8 @@
 /// ## Catálogo de pilares (gates de contrato leem ESTE arquivo)
 /// Acessibilidade — FocuxA11y — accessibility_pillar_contract_test —
 /// TalkBack / VoiceOver.
-/// Hierarquia visual & foco — FocuxHubTypography (canônico) /
-/// FocuxHierarchy (deprecated) — visual_hierarchy_pillar_contract_test.
+/// Hierarquia visual & foco — FocuxHubTypography + TokensStrip.layer* —
+/// visual_hierarchy_pillar_contract_test.
 /// Navegação & arquitetura — FocuxNavigation —
 /// navigation_architecture_pillar_contract_test.
 /// Tipografia — AppTypography / FocuxTypography / FocuxHubTypography —

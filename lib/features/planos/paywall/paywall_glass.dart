@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_glass_surface.dart';
@@ -481,10 +481,8 @@ class _PaywallGlassAccordionState extends State<PaywallGlassAccordion> {
                 childrenPadding: const EdgeInsets.fromLTRB(6, 0, 6, 10),
                 title: Text(
                   widget.title,
-                  style: AppTypography.inter(
+                  style: FocuxHubTypography.body(color: widget.ink).copyWith(
                     fontWeight: FontWeight.w700,
-                    fontSize: 15,
-                    color: widget.ink,
                   ),
                 ),
                 subtitle:
@@ -492,10 +490,9 @@ class _PaywallGlassAccordionState extends State<PaywallGlassAccordion> {
                         ? null
                         : Text(
                           widget.subtitle!,
-                          style: TextStyle(
-                            fontSize: 13,
-                            height: 1.35,
+                          style: FocuxHubTypography.bodyMuted(
                             color: secondary,
+                            height: 1.35,
                           ),
                         ),
                 children: _mountedChildren ? widget.children : const [],
@@ -612,11 +609,11 @@ class PaywallSubscriberHeroGlass extends StatelessWidget {
                             isMaxTier
                                 ? 'Plano máximo'
                                 : 'Você está no $planLabel',
-                            style: AppTypography.inter(
-                              fontWeight: FontWeight.w800,
-                              fontSize: 22,
-                              letterSpacing: -0.5,
+                            style: FocuxHubTypography.sectionTitle(
+                              context,
                               color: ink,
+                            ).copyWith(
+                              letterSpacing: -0.5,
                               height: 1.12,
                             ),
                           ),

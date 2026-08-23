@@ -69,10 +69,9 @@ class _AlunosTriageBanner extends StatelessWidget {
               ),
               Text(
                 AlunosMicrocopy.focarAgora,
-                style: AppTypography.inter(
-                  fontSize: TokensStrip.fontBodySm,
-                  fontWeight: FontWeight.w700,
+                style: FocuxHubTypography.bodyMuted(
                   color: BrandPalette.sectionLink(primary, dark: isDark),
+                  fontWeight: FontWeight.w700,
                   height: 1.1,
                 ),
               ),
@@ -288,9 +287,8 @@ class _ExcluirAlunosSheet extends StatelessWidget {
           Text(
             'Esta ação não pode ser desfeita.',
             textAlign: TextAlign.center,
-            style: TextStyle(
+            style: FocuxHubTypography.bodyMuted(
               color: EagleTokens.bad.withValues(alpha: 0.78),
-              fontSize: 12,
               fontWeight: FontWeight.w600,
             ),
           ),

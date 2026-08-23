@@ -160,12 +160,10 @@ class _PlanSectionTitle extends StatelessWidget {
           Expanded(
             child: Text(
               title,
-              style: AppTypography.inter(
-                fontSize: 11,
+              style: FocuxHubTypography.chip(labelColor).copyWith(
                 fontWeight: FontWeight.w700,
                 letterSpacing: 0.4,
                 height: 1.25,
-                color: labelColor,
               ),
             ),
           ),
@@ -219,21 +217,18 @@ class _PriceBox extends StatelessWidget {
           children: [
             Text(
               label.toUpperCase(),
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w800,
-                letterSpacing: 0.8,
+              style: FocuxHubTypography.bodyMuted(
                 color: mute,
-              ),
+                fontWeight: FontWeight.w800,
+              ).copyWith(letterSpacing: 0.8),
             ),
             const SizedBox(height: 4),
             Text(
               price,
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w900,
+              style: FocuxHubTypography.metric(
                 color: textInk,
-                fontFamily: 'monospace',
+                fontSize: FocuxHubTypography.metricLg,
+                fontWeight: FontWeight.w900,
               ),
             ),
           ],
@@ -313,12 +308,9 @@ class _PlanReferenceStoreHint extends StatelessWidget {
               children: [
                 Text(
                   headline,
-                  style: AppTypography.inter(
-                    fontWeight: FontWeight.w800,
-                    fontSize: 14,
-                    height: 1.25,
+                  style: FocuxHubTypography.cardTitle(
                     color: ink,
-                  ),
+                  ).copyWith(height: 1.25),
                 ),
                 const SizedBox(height: 4),
                 Text(

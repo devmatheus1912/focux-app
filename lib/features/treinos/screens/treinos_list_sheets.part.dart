@@ -375,9 +375,8 @@ class _AssignWorkoutSheetState extends State<_AssignWorkoutSheet> {
               ),
               child: Text(
                 'Adicione um aluno para atribuir treinos direto da biblioteca.',
-                style: AppTypography.inter(
+                style: FocuxHubTypography.bodyMuted(
                   color: chrome.mute,
-                  fontSize: 13,
                   height: 1.35,
                   fontWeight: FontWeight.w600,
                 ),
@@ -439,9 +438,8 @@ class _AssignWorkoutSheetState extends State<_AssignWorkoutSheet> {
                             ),
                             child: Text(
                               initials,
-                              style: AppTypography.inter(
+                              style: FocuxHubTypography.bodyMuted(
                                 color: selected ? heroTealInk() : chrome.ink,
-                                fontSize: 12,
                                 fontWeight: FontWeight.w800,
                               ),
                             ),
@@ -455,10 +453,8 @@ class _AssignWorkoutSheetState extends State<_AssignWorkoutSheet> {
                                   aluno.nome,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
-                                  style: AppTypography.inter(
+                                  style: FocuxHubTypography.cardTitle(
                                     color: chrome.ink,
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w800,
                                   ),
                                 ),
                                 SizedBox(height: TokensStrip.s1),
@@ -470,9 +466,8 @@ class _AssignWorkoutSheetState extends State<_AssignWorkoutSheet> {
                                       : 'Objetivo não definido',
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
-                                  style: AppTypography.inter(
+                                  style: FocuxHubTypography.bodyMuted(
                                     color: chrome.mute,
-                                    fontSize: 11.5,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
@@ -512,7 +507,7 @@ class _AssignWorkoutSheetState extends State<_AssignWorkoutSheet> {
                   ),
                   child: Text(
                     'Cancelar',
-                    style: AppTypography.inter(fontWeight: FontWeight.w800),
+                    style: FocuxHubTypography.cardTitle(color: chrome.ink),
                   ),
                 ),
               ),
@@ -533,7 +528,7 @@ class _AssignWorkoutSheetState extends State<_AssignWorkoutSheet> {
                   ),
                   child: Text(
                     'Atribuir',
-                    style: AppTypography.inter(fontWeight: FontWeight.w800),
+                    style: FocuxHubTypography.cardTitle(color: heroTealInk()),
                   ),
                 ),
               ),

@@ -91,9 +91,8 @@ class _ExercisePickerCard extends StatelessWidget {
                                         : 'Escolher exercício',
                                     maxLines: selected ? 2 : 1,
                                     overflow: TextOverflow.ellipsis,
-                                    style: AppTypography.inter(
-                                      color: ink,
-                                      fontSize: 15,
+                                    style: FocuxHubTypography.body(color: ink)
+                                        .copyWith(
                                       height: 1.12,
                                       fontWeight: FontWeight.w900,
                                     ),
@@ -107,9 +106,8 @@ class _ExercisePickerCard extends StatelessWidget {
                                 _exerciseMeta(exercicio!),
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
-                                style: AppTypography.inter(
+                                style: FocuxHubTypography.bodyMuted(
                                   color: _metaTextColor(isDark),
-                                  fontSize: 12,
                                   height: 1.18,
                                   fontWeight: FontWeight.w700,
                                 ),
@@ -122,9 +120,8 @@ class _ExercisePickerCard extends StatelessWidget {
                                     libraryLines.primary,
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
-                                    style: AppTypography.inter(
+                                    style: FocuxHubTypography.bodyMuted(
                                       color: _metaTextColor(isDark),
-                                      fontSize: 12,
                                       height: 1.18,
                                       fontWeight: FontWeight.w800,
                                     ),
@@ -134,9 +131,8 @@ class _ExercisePickerCard extends StatelessWidget {
                                       libraryLines.secondary!,
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
-                                      style: AppTypography.inter(
+                                      style: FocuxHubTypography.bodyMuted(
                                         color: _metaTextColor(isDark),
-                                        fontSize: 11.5,
                                         height: 1.15,
                                         fontWeight: FontWeight.w700,
                                       ),
@@ -185,9 +181,8 @@ class _ExercisePickerCard extends StatelessWidget {
                       selected
                           ? 'Revise a prescrição abaixo antes de adicionar.'
                           : 'Busque acima ou explore por movimento/grupo.',
-                      style: AppTypography.inter(
+                      style: FocuxHubTypography.bodyMuted(
                         color: mute,
-                        fontSize: 12,
                         height: 1.25,
                         fontWeight: FontWeight.w700,
                       ),
@@ -216,9 +211,8 @@ class _ExercisePickerCard extends StatelessWidget {
                   Expanded(
                     child: Text(
                       'Vídeo do exercício (opcional)',
-                      style: AppTypography.inter(
+                      style: FocuxHubTypography.bodyMuted(
                         color: mute,
-                        fontSize: 12,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -304,18 +298,15 @@ class _RemoveExerciseVideoSheet extends StatelessWidget {
                       children: [
                         Text(
                           'Remover vídeo?',
-                          style: AppTypography.inter(
-                            color: ink,
-                            fontSize: 18,
+                          style: FocuxHubTypography.body(color: ink).copyWith(
                             fontWeight: FontWeight.w900,
                           ),
                         ),
                         const SizedBox(height: 5),
                         Text(
                           '"${exercicio.nomeDisplay}" continua na biblioteca. Só a mídia de demonstração será removida.',
-                          style: AppTypography.inter(
+                          style: FocuxHubTypography.bodyMuted(
                             color: mute,
-                            fontSize: 12.5,
                             height: 1.35,
                             fontWeight: FontWeight.w600,
                           ),
@@ -487,18 +478,15 @@ class _ExerciseVideoPreviewSheetState
                           widget.exercicio.nomeDisplay,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: AppTypography.inter(
-                            color: ink,
-                            fontSize: 17,
+                          style: FocuxHubTypography.body(color: ink).copyWith(
                             fontWeight: FontWeight.w900,
                           ),
                         ),
                         const SizedBox(height: 3),
                         Text(
                           'Confira se a demonstração está correta.',
-                          style: AppTypography.inter(
+                          style: FocuxHubTypography.bodyMuted(
                             color: mute,
-                            fontSize: 12,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
@@ -605,16 +593,13 @@ class _VideoPreparingPreview extends StatelessWidget {
           Text(
             'Preparando prévia do vídeo...',
             textAlign: TextAlign.center,
-            style: AppTypography.inter(
-              color: Colors.white,
-              fontWeight: FontWeight.w800,
-            ),
+            style: FocuxHubTypography.cardTitle(color: Colors.white),
           ),
           const SizedBox(height: 5),
           Text(
             'Na primeira abertura, o Cloudinary pode levar até um minuto.',
             textAlign: TextAlign.center,
-            style: AppTypography.inter(color: Colors.white70, fontSize: 12.5),
+            style: FocuxHubTypography.bodyMuted(color: Colors.white70),
           ),
         ],
       ),
@@ -639,16 +624,13 @@ class _VideoPreviewFallback extends StatelessWidget {
             Text(
               'Vídeo enviado, mas a prévia ainda não ficou disponível.',
               textAlign: TextAlign.center,
-              style: AppTypography.inter(
-                color: Colors.white,
-                fontWeight: FontWeight.w800,
-              ),
+              style: FocuxHubTypography.cardTitle(color: Colors.white),
             ),
             const SizedBox(height: 5),
             Text(
               'Tente abrir novamente em instantes. Se persistir, envie um MP4 H.264.',
               textAlign: TextAlign.center,
-              style: AppTypography.inter(color: Colors.white70, fontSize: 12.5),
+              style: FocuxHubTypography.bodyMuted(color: Colors.white70),
             ),
           ],
         ),

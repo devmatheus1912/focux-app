@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
@@ -191,11 +192,10 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen> {
                                 ),
                                 child: Text(
                                   fxInitials(displayName),
-                                  style: AppTypography.inter(
-                                    fontSize: 28,
-                                    fontWeight: FontWeight.w800,
+                                  style: FocuxHubTypography.pageTitle(
+                                    context,
                                     color: primary,
-                                  ),
+                                  ).copyWith(fontWeight: FontWeight.w800),
                                 ),
                               ),
                               const SizedBox(height: 10),
@@ -204,13 +204,14 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen> {
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
                                 textAlign: TextAlign.center,
-                                style: AppTypography.inter(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w700,
+                                style: FocuxHubTypography.body(
                                   color:
                                       isDark
                                           ? EagleTokens.darkInk
                                           : TokensStrip.textPrimary,
+                                ).copyWith(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: FocuxHubTypography.metricEm,
                                 ),
                               ),
                               if (objetivoPreview.isNotEmpty)
@@ -220,9 +221,8 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen> {
                                     objetivoPreview,
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
+                                    style: FocuxHubTypography.bodyMuted(
                                       color: mute,
-                                      fontSize: 12.5,
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
@@ -512,17 +512,13 @@ class _SectionCard extends StatelessWidget {
           children: [
             Text(
               title,
-              style: AppTypography.inter(
-                color: ink,
-                fontWeight: FontWeight.w800,
-                fontSize: 14,
-              ),
+              style: FocuxHubTypography.cardTitle(color: ink),
             ),
             if (showHint && hint != null) ...[
               const SizedBox(height: 4),
               Text(
                 hint!,
-                style: TextStyle(color: mute, fontSize: 11.5, height: 1.3),
+                style: FocuxHubTypography.bodyMuted(color: mute, height: 1.3),
               ),
             ],
             const SizedBox(height: 14),

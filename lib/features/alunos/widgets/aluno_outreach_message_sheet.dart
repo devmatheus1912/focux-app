@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/clipboard_sensitive.dart';
 import '../../../core/utils/fx_utils.dart';
@@ -124,10 +125,7 @@ class _AlunoOutreachMessageSheet extends StatelessWidget {
                       ),
                       child: Text(
                         'Para $firstName',
-                        style: AppTypography.inter(
-                          fontSize: 11.5,
-                          fontWeight: FontWeight.w800,
-                          color: Colors.white,
+                        style: FocuxHubTypography.chip(Colors.white).copyWith(
                           letterSpacing: 0.15,
                         ),
                       ),
@@ -164,10 +162,8 @@ class _AlunoOutreachMessageSheet extends StatelessWidget {
                           Expanded(
                             child: Text(
                               message,
-                              style: AppTypography.inter(
-                                fontSize: 14,
+                              style: FocuxHubTypography.body(color: ink).copyWith(
                                 fontWeight: FontWeight.w500,
-                                color: ink,
                                 height: 1.45,
                               ),
                             ),
@@ -221,11 +217,7 @@ class _AlunoOutreachMessageSheet extends StatelessWidget {
                         ),
                         label: Text(
                           'Copiar mensagem',
-                          style: AppTypography.inter(
-                            fontSize: 13.5,
-                            fontWeight: FontWeight.w800,
-                            color: primary,
-                          ),
+                          style: FocuxHubTypography.cardTitle(color: primary),
                         ),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: primary,

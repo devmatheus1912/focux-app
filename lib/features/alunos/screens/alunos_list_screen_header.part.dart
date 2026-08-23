@@ -286,9 +286,7 @@ extension AlunosListScreenHeader on _AlunosListScreenState {
                               onTapOutside: (_) => _searchFocusNode.unfocus(),
                               textInputAction: TextInputAction.search,
                               cursorColor: primary,
-                              style: AppTypography.inter(
-                                fontSize: TokensStrip.fontBody,
-                                color: ink,
+                              style: FocuxHubTypography.body(color: ink).copyWith(
                                 fontWeight: FontWeight.w500,
                               ),
                               decoration: InputDecoration(
@@ -297,11 +295,9 @@ extension AlunosListScreenHeader on _AlunosListScreenState {
                                   vertical: 10,
                                 ),
                                 hintText: context.alunosL10n.alunosSearchHint,
-                                hintStyle: AppTypography.inter(
-                                  fontSize: TokensStrip.fontBody,
+                                hintStyle: FocuxHubTypography.body(
                                   color: mute,
-                                  fontWeight: FontWeight.w500,
-                                ),
+                                ).copyWith(fontWeight: FontWeight.w500),
                                 border: InputBorder.none,
                                 enabledBorder: InputBorder.none,
                                 focusedBorder: InputBorder.none,

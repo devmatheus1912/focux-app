@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/theme/app_typography.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../constants/aluno_360_layout.dart';
 import '../data/aluno_repository.dart';
@@ -161,9 +161,8 @@ class Aluno360QuickActionPill extends StatelessWidget {
                     label,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: AppTypography.inter(
+                    style: FocuxHubTypography.bodyMuted(
                       color: pillInk,
-                      fontSize: 12,
                       fontWeight: FontWeight.w600,
                     ),
                   ),

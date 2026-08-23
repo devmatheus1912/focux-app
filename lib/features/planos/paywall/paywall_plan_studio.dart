@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../../core/theme/app_typography.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../assinatura/data/plano.dart';
 import '../../subscription/plan_entitlements.dart';
@@ -287,10 +287,9 @@ class _PaywallPlanStudioHero extends StatelessWidget {
       accent,
       isDark: isDark,
     );
-    final anchorStyle = TextStyle(
-      fontSize: 12,
-      fontWeight: FontWeight.w700,
+    final anchorStyle = FocuxHubTypography.bodyMuted(
       color: PaywallCatalog.readableTierAccent(accent, isDark: isDark),
+      fontWeight: FontWeight.w700,
     );
 
     return Semantics(
@@ -307,23 +306,21 @@ class _PaywallPlanStudioHero extends StatelessWidget {
                 children: [
                   Text(
                     kicker,
-                    style: AppTypography.inter(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w800,
+                    style: FocuxHubTypography.chip(kickerColor).copyWith(
                       letterSpacing: 1.35,
                       height: 1.0,
-                      color: kickerColor,
                     ),
                   ),
                   const SizedBox(height: TokensStrip.s3),
                   Text(
                     statusLabel,
-                    style: AppTypography.inter(
+                    style: FocuxHubTypography.pageTitle(
+                      context,
+                      color: ink,
+                    ).copyWith(
                       fontWeight: FontWeight.w800,
-                      fontSize: 30,
                       letterSpacing: -0.85,
                       height: 1.04,
-                      color: ink,
                     ),
                   ),
                   const SizedBox(height: TokensStrip.s3),
@@ -560,17 +557,16 @@ class _PaywallStudioSegment extends StatelessWidget {
                     textAlign: TextAlign.center,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: AppTypography.inter(
-                      fontSize: 11,
+                    style: FocuxHubTypography.chip(
+                      isSelected
+                          ? PaywallCatalog.readableTierAccent(
+                            accent,
+                            isDark: isDark,
+                          )
+                          : mute,
+                    ).copyWith(
                       fontWeight:
                           isSelected ? FontWeight.w800 : FontWeight.w600,
-                      color:
-                          isSelected
-                              ? PaywallCatalog.readableTierAccent(
-                                accent,
-                                isDark: isDark,
-                              )
-                              : mute,
                       height: 1.1,
                     ),
                   ),

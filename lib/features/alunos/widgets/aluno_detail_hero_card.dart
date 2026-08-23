@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/operational_metric_tile.dart';
@@ -391,9 +392,7 @@ class _IdentityMetricChip extends StatelessWidget {
               if (eyebrow != null) ...[
                 Text(
                   eyebrow,
-                  style: AppTypography.inter(
-                    color: eyebrowColor,
-                    fontSize: 11,
+                  style: FocuxHubTypography.chip(eyebrowColor).copyWith(
                     fontWeight: FontWeight.w700,
                     height: 1.05,
                   ),
@@ -413,9 +412,7 @@ class _IdentityMetricChip extends StatelessWidget {
               if (signal.suffix != null)
                 Text(
                   signal.suffix!,
-                  style: AppTypography.inter(
-                    color: fxScreenMute(context),
-                    fontSize: 11,
+                  style: FocuxHubTypography.chip(fxScreenMute(context)).copyWith(
                     fontWeight: FontWeight.w700,
                     height: 1.05,
                   ),
@@ -466,9 +463,8 @@ class _IdentityMetricChip extends StatelessWidget {
                     padding: const EdgeInsets.only(left: 1),
                     child: Text(
                       signal.suffix!,
-                      style: AppTypography.inter(
+                      style: FocuxHubTypography.bodyMuted(
                         color: fxScreenMute(context),
-                        fontSize: 12,
                         fontWeight: FontWeight.w700,
                         height: 1.1,
                       ),
@@ -549,9 +545,7 @@ class _HeroRiscoMetricBadge extends StatelessWidget {
                         children: [
                           Text(
                             'Risco',
-                            style: AppTypography.inter(
-                              color: ink,
-                              fontSize: 11,
+                            style: FocuxHubTypography.chip(ink).copyWith(
                               fontWeight: FontWeight.w700,
                               letterSpacing: 0.15,
                               height: 1.1,
@@ -576,9 +570,7 @@ class _HeroRiscoMetricBadge extends StatelessWidget {
                         children: [
                           Text(
                             'Risco',
-                            style: AppTypography.inter(
-                              color: ink,
-                              fontSize: 11,
+                            style: FocuxHubTypography.chip(ink).copyWith(
                               fontWeight: FontWeight.w700,
                               letterSpacing: 0.2,
                               height: 1.1,

@@ -287,20 +287,22 @@ class PaywallRichPlanCard extends StatelessWidget {
                             )
                             : Text(
                               'Ativo',
-                              style: AppTypography.inter(
+                              style: FocuxHubTypography.pageTitle(
+                                context,
+                                color: ink,
+                              ).copyWith(
                                 fontWeight: FontWeight.w800,
-                                fontSize: 26,
                                 letterSpacing: -0.4,
                                 height: 1.05,
-                                color: ink,
                               ),
                             )
                       else if (plan == SubscriptionPlan.FREE)
                         Text(
                           'R\$ 0',
-                          style: TokensStrip.h2(
+                          style: FocuxHubTypography.sectionTitle(
+                            context,
                             color: ink,
-                          ).copyWith(fontSize: 22),
+                          ),
                         ),
                       if (roiTag != null && !referenceMode) ...[
                         const SizedBox(height: 10),
@@ -523,11 +525,7 @@ class _PaywallStudioFeatureSummary extends StatelessWidget {
         children: [
           Text(
             'Incluído no seu plano',
-            style: AppTypography.inter(
-              fontWeight: FontWeight.w800,
-              fontSize: 12,
-              color: ink,
-            ),
+            style: FocuxHubTypography.cardTitle(color: ink),
           ),
           const SizedBox(height: 8),
           for (final item in items)

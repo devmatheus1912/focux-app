@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/theme/app_typography.dart';
 import '../../../core/theme/brand_palette.dart';
-import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
+import '../../../core/theme/focux_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../utils/aluno360_readability.dart';
@@ -156,18 +156,14 @@ abstract final class Aluno360Layout {
   /// Secondary copy inside cards — matches Home/Alunos muted body.
   static TextStyle captionStyle(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return AppTypography.inter(
-      fontSize: TokensStrip.fontBodySm,
-      height: TokensStrip.leadingBody,
-      fontWeight: FontWeight.w400,
+    return FocuxHubTypography.bodyMuted(
       color: aluno360ReadableCaption(context, isDark: isDark),
     );
   }
 
   /// Secondary metadata — min 12px with stronger contrast.
   static TextStyle metaStyle(BuildContext context) {
-    return AppTypography.inter(
-      fontSize: 12,
+    return FocuxHubTypography.bodyMuted(
       fontWeight: FontWeight.w600,
       height: 1.3,
       color: aluno360ReadableMuted(
@@ -179,31 +175,24 @@ abstract final class Aluno360Layout {
 
   /// Uppercase metric eyebrows (hero, operational tiles).
   static TextStyle eyebrowLabelStyle(BuildContext context, Color color) {
-    return AppTypography.inter(
-      color: color,
-      fontSize: 12,
+    return FocuxHubTypography.chip(color).copyWith(
       fontWeight: FontWeight.w600,
       letterSpacing: 0.35,
-      height: 1,
     );
   }
 
   /// Micro badges (module tiles, status chips).
   static TextStyle badgeMicroStyle(BuildContext context, Color color) {
-    return AppTypography.inter(
-      color: color,
-      fontSize: 12,
+    return FocuxHubTypography.chip(color).copyWith(
       fontWeight: FontWeight.w600,
       letterSpacing: 0.15,
-      height: 1,
     );
   }
 
   /// Sticky bar and primary pill labels.
   static TextStyle ctaLabelStyle(BuildContext context, Color color) {
-    return AppTypography.inter(
+    return FocuxHubTypography.bodyMuted(
       color: color,
-      fontSize: TokensStrip.fontBodySm,
       fontWeight: FontWeight.w600,
       height: 1.2,
     );
@@ -211,42 +200,39 @@ abstract final class Aluno360Layout {
 
   /// Module tile title (Ferramentas grid).
   static TextStyle moduleTileTitleStyle(BuildContext context, Color ink) {
-    return AppTypography.inter(
-      color: ink,
-      fontSize: TokensStrip.fontBodySm,
+    return FocuxHubTypography.cardTitle(color: ink).copyWith(
       fontWeight: FontWeight.w600,
       height: 1.12,
-      letterSpacing: -0.15,
     );
   }
 
   /// Module tile subtitle.
   static TextStyle moduleTileSubtitleStyle(BuildContext context, Color mute) {
-    return captionStyle(
-      context,
-    ).copyWith(color: mute, fontSize: 12, height: 1.25);
+    return captionStyle(context).copyWith(color: mute, height: 1.25);
   }
 
   /// Tab bar selected label (Operação · Evolução · Ferramentas).
   static TextStyle tabSelectedLabelStyle() {
-    return AppTypography.inter(
-      fontSize: TokensStrip.fontBodySm,
+    return FocuxHubTypography.bodyMuted(
+      color: TokensStrip.textPrimary,
       fontWeight: FontWeight.w600,
-      letterSpacing: -0.1,
-    );
+    ).copyWith(letterSpacing: -0.1);
   }
 
   /// Tab bar unselected label.
   static TextStyle tabUnselectedLabelStyle() {
-    return AppTypography.inter(
-      fontSize: TokensStrip.fontBodySm,
+    return FocuxHubTypography.bodyMuted(
+      color: TokensStrip.textSecondary,
       fontWeight: FontWeight.w500,
     );
   }
 
   /// Compact secondary actions in empty states.
   static TextStyle secondaryActionLabelStyle() {
-    return AppTypography.inter(fontSize: 12, fontWeight: FontWeight.w600);
+    return FocuxHubTypography.bodyMuted(
+      color: TokensStrip.textPrimary,
+      fontWeight: FontWeight.w600,
+    );
   }
 
   /// Chip / button labels inside Operação cards.
@@ -265,20 +251,14 @@ abstract final class Aluno360Layout {
     required Color primary,
     required bool isDark,
   }) {
-    return AppTypography.inter(
-      fontSize: TokensStrip.fontH2,
-      fontWeight: TokensStrip.weightH2,
-      letterSpacing: TokensStrip.trackingH2,
-      height: 1.2,
+    return FocuxTypography.headline(
       color: BrandPalette.sectionHeading(primary, dark: isDark),
     );
   }
 
   /// Card section titles — same weight as Alunos list card names.
   static TextStyle sectionTitleStyle(BuildContext context, Color ink) {
-    return AppTypography.inter(
-      color: ink,
-      fontSize: TokensStrip.fontBody,
+    return FocuxHubTypography.body(color: ink).copyWith(
       fontWeight: FontWeight.w700,
       letterSpacing: -0.15,
       height: 1.2,
@@ -287,20 +267,15 @@ abstract final class Aluno360Layout {
 
   /// Collapsible inset headers (Próximo contato compact).
   static TextStyle compactSectionTitleStyle(BuildContext context, Color ink) {
-    return AppTypography.inter(
-      color: ink,
-      fontSize: TokensStrip.fontBodySm,
+    return FocuxHubTypography.cardTitle(color: ink).copyWith(
       fontWeight: FontWeight.w600,
       letterSpacing: -0.1,
-      height: 1.2,
     );
   }
 
   /// Titles inside nested panels (empty states, callouts).
   static TextStyle panelTitleStyle(BuildContext context, Color ink) {
-    return AppTypography.inter(
-      color: ink,
-      fontSize: TokensStrip.fontBodySm,
+    return FocuxHubTypography.cardTitle(color: ink).copyWith(
       fontWeight: FontWeight.w600,
       height: 1.25,
       letterSpacing: -0.05,
@@ -314,9 +289,8 @@ abstract final class Aluno360Layout {
 
   /// Emphasized body inside cards (prescription, instructions).
   static TextStyle bodyEmphasisStyle(BuildContext context, Color ink) {
-    return AppTypography.inter(
+    return FocuxHubTypography.bodyMuted(
       color: ink,
-      fontSize: TokensStrip.fontBodySm,
       fontWeight: FontWeight.w600,
       height: 1.38,
     );
@@ -324,20 +298,15 @@ abstract final class Aluno360Layout {
 
   /// Compact metric inside signal tiles and chips.
   static TextStyle inlineMetricStyle(BuildContext context, Color ink) {
-    return AppTypography.inter(
-      color: ink,
-      fontSize: TokensStrip.fontBodySm,
+    return FocuxHubTypography.cardTitle(color: ink).copyWith(
       fontWeight: FontWeight.w700,
       height: 1.15,
-      letterSpacing: -0.1,
     );
   }
 
   /// Hero / identity name on Aluno 360 toolbar and hero card.
   static TextStyle identityNameStyle(BuildContext context, Color ink) {
-    return AppTypography.inter(
-      color: ink,
-      fontSize: TokensStrip.fontBody,
+    return FocuxHubTypography.body(color: ink).copyWith(
       fontWeight: FontWeight.w700,
       letterSpacing: -0.15,
       height: 1.15,

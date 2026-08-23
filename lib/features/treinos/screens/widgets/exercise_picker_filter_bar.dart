@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../../core/theme/design_tokens.dart';
+import '../../../../core/theme/focux_hub_typography.dart';
 import '../../../../core/theme/tokens_strip.dart';
 import '../../../exercicios/data/enums.dart';
 import '../../../exercicios/data/exercicio_taxonomy_labels.dart';
@@ -187,20 +188,17 @@ class _ExercisePickerFilterBarState extends State<ExercisePickerFilterBar> {
             Expanded(
               child: Text(
                 'Filtros',
-                style: AppTypography.inter(
+                style: FocuxHubTypography.bodyMuted(
                   color: mute,
-                  fontSize: 11.5,
                   fontWeight: FontWeight.w800,
-                  letterSpacing: 0.4,
-                ),
+                ).copyWith(letterSpacing: 0.4),
               ),
             ),
             if (_activeCount > 0)
               Text(
                 '$_activeCount ativo${_activeCount == 1 ? '' : 's'}',
-                style: AppTypography.inter(
+                style: FocuxHubTypography.bodyMuted(
                   color: widget.primary,
-                  fontSize: 11.5,
                   fontWeight: FontWeight.w900,
                 ),
               ),
@@ -214,9 +212,8 @@ class _ExercisePickerFilterBarState extends State<ExercisePickerFilterBar> {
               },
               child: Text(
                 widget.filter.isActive ? 'Limpar' : 'Recolher',
-                style: AppTypography.inter(
+                style: FocuxHubTypography.bodyMuted(
                   color: mute,
-                  fontSize: 12,
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -227,12 +224,10 @@ class _ExercisePickerFilterBarState extends State<ExercisePickerFilterBar> {
           padding: const EdgeInsets.only(bottom: 6),
           child: Text(
             'Espaço',
-            style: AppTypography.inter(
+            style: FocuxHubTypography.bodyMuted(
               color: mute,
-              fontSize: 10.5,
               fontWeight: FontWeight.w800,
-              letterSpacing: 0.35,
-            ),
+            ).copyWith(letterSpacing: 0.35),
           ),
         ),
         SingleChildScrollView(
@@ -314,12 +309,10 @@ class _ExercisePickerFilterBarState extends State<ExercisePickerFilterBar> {
           padding: const EdgeInsets.only(top: 4, bottom: 6),
           child: Text(
             'Equipamento',
-            style: AppTypography.inter(
+            style: FocuxHubTypography.bodyMuted(
               color: mute,
-              fontSize: 10.5,
               fontWeight: FontWeight.w800,
-              letterSpacing: 0.35,
-            ),
+            ).copyWith(letterSpacing: 0.35),
           ),
         ),
         SingleChildScrollView(
@@ -413,10 +406,8 @@ class _FilterChip extends StatelessWidget {
                 ],
                 Text(
                   label,
-                  style: AppTypography.inter(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w800,
-                    color: selected ? Colors.white : ink,
+                  style: FocuxHubTypography.chip(
+                    selected ? Colors.white : ink,
                   ),
                 ),
               ],

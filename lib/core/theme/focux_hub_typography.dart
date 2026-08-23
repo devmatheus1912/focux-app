@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'app_typography.dart';
 import 'focux_typography.dart';
 import 'tokens_strip.dart';
 
@@ -76,10 +75,8 @@ abstract final class FocuxHubTypography {
 
   /// Título de linha em lista/card sem [BuildContext] (equiv. sectionTitle).
   static TextStyle cardTitle({required Color color}) {
-    return AppTypography.inter(
-      fontSize: 13.5,
+    return FocuxTypography.bodySmall(color: color).copyWith(
       fontWeight: FontWeight.w800,
-      color: color,
       letterSpacing: -0.2,
       height: 1.2,
     );

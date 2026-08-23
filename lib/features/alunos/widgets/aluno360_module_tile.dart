@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_sparkline.dart';
@@ -67,11 +68,10 @@ class Aluno360MeasurementCard extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   textAlign: TextAlign.center,
-                  style: AppTypography.inter(
-                    fontSize: 18,
+                  style: FocuxHubTypography.body(color: ink).copyWith(
                     fontWeight: FontWeight.w700,
                     letterSpacing: -0.5,
-                    color: ink,
+                    fontSize: FocuxHubTypography.metricEm,
                   ),
                 ),
               ),

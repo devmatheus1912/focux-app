@@ -165,6 +165,15 @@ abstract class TokensStrip {
   static const Color badgeWarningBg = Color(0xFFFFEDD5);
   static const Color badgeNotify = Color(0xFFF59E0B);
   static const Color badgeNotifyBg = Color(0xFFFEF3C7);
+
+  /// Camadas de elevação (base → modal). Use com [elevation].
+  static const int layerBase = 0;
+  static const int layerRaised = 4;
+  static const int layerSticky = 8;
+  static const int layerOverlay = 16;
+  static const int layerModal = 24;
+  static const double focusRingWidth = 2;
+
   static List<BoxShadow> elevation(
     int level, {
     required bool dark,

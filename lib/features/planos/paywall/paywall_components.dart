@@ -4,6 +4,7 @@ import 'package:shimmer/shimmer.dart';
 
 import '../../../core/legal/focux_legal.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../assinatura/data/plano.dart';
 import '../../subscription/models/subscription_plan.dart';

@@ -7,7 +7,7 @@ import '../../support/screen_source_bundle.dart';
 /// Pilar 8 — Hierarquia visual & foco: escala tipográfica, elevação e hubs.
 void main() {
   const hierarchySources = [
-    'lib/core/theme/focux_hierarchy.dart',
+    'lib/core/theme/focux_hub_typography.dart',
     'lib/core/theme/focux_typography.dart',
     'lib/core/theme/tokens_strip.dart',
     'lib/core/theme/shell_chrome.dart',
@@ -28,7 +28,7 @@ void main() {
       expect(File(path).existsSync(), isTrue, reason: 'Fonte ausente: $path');
     }
     expect(
-      File('test/core/theme/focux_hierarchy_test.dart').existsSync(),
+      File('test/core/theme/focux_hub_typography_test.dart').existsSync(),
       isTrue,
       reason: 'Testes unitários de hierarquia ausentes',
     );
@@ -38,22 +38,17 @@ void main() {
     final doc = File('lib/core/design_system.dart').readAsStringSync();
     expect(doc, contains('Hierarquia visual & foco'));
     expect(doc, contains('FocuxHubTypography'));
-    expect(doc, contains('FocuxHierarchy'));
     expect(doc, contains('visual_hierarchy_pillar_contract_test'));
   });
 
-  test('FocuxHierarchy exposes type roles and elevation layers', () {
-    final source = File('lib/core/theme/focux_hierarchy.dart').readAsStringSync();
-    for (final symbol in [
-      'pageTitle',
-      'sectionTitle',
-      'cardTitle',
-      'eyebrow',
-      'layerSticky',
-      'layerModal',
-      'focusRingWidth',
-    ]) {
-      expect(source, contains(symbol), reason: 'FocuxHierarchy.$symbol ausente');
+  test('hub typography and tokens expose type roles and elevation layers', () {
+    final type = File('lib/core/theme/focux_hub_typography.dart').readAsStringSync();
+    for (final symbol in ['pageTitle', 'sectionTitle', 'cardTitle', 'eyebrow']) {
+      expect(type, contains(symbol), reason: 'FocuxHubTypography.$symbol ausente');
+    }
+    final strip = File('lib/core/theme/tokens_strip.dart').readAsStringSync();
+    for (final symbol in ['layerSticky', 'layerModal', 'focusRingWidth']) {
+      expect(strip, contains(symbol), reason: 'TokensStrip.$symbol ausente');
     }
   });
 
@@ -70,7 +65,7 @@ void main() {
       expect(File(path).existsSync(), isTrue, reason: 'Hub ausente: $path');
       final source = readScreenSourceBundle(path);
       final usesHierarchy = source.contains('shell_chrome.dart') ||
-          source.contains('FocuxHierarchy') ||
+          source.contains('FocuxHubTypography') ||
           source.contains('FocuxTypography') ||
           source.contains('TokensStrip.h1') ||
           source.contains('TokensStrip.h2') ||

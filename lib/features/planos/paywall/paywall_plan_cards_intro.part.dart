@@ -64,13 +64,7 @@ class _StudioActiveStatusBanner extends StatelessWidget {
               children: [
                 Text(
                   'Assinatura ativa',
-                  style: AppTypography.inter(
-                    fontWeight: FontWeight.w800,
-                    fontSize: 17,
-                    letterSpacing: -0.2,
-                    height: 1.2,
-                    color: ink,
-                  ),
+                  style: FocuxHubTypography.sectionTitle(context, color: ink),
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -208,13 +202,7 @@ class PaywallSectionHeader extends StatelessWidget {
               if (stackNote) ...[
                 Text(
                   title,
-                  style: AppTypography.inter(
-                    fontWeight: FontWeight.w800,
-                    fontSize: TokensStrip.fontH2,
-                    letterSpacing: TokensStrip.trackingH2,
-                    height: 1.15,
-                    color: ink,
-                  ),
+                  style: FocuxHubTypography.sectionTitle(context, color: ink),
                 ),
                 const SizedBox(height: TokensStrip.s2),
                 Text(
@@ -230,11 +218,8 @@ class PaywallSectionHeader extends StatelessWidget {
                     Expanded(
                       child: Text(
                         title,
-                        style: AppTypography.inter(
-                          fontWeight: FontWeight.w800,
-                          fontSize: TokensStrip.fontH2,
-                          letterSpacing: TokensStrip.trackingH2,
-                          height: 1.15,
+                        style: FocuxHubTypography.sectionTitle(
+                          context,
                           color: ink,
                         ),
                       ),

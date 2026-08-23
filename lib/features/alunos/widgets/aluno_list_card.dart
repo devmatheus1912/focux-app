@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/fx_utils.dart';
@@ -47,9 +48,7 @@ class AlunoStatusPill extends StatelessWidget {
         label,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
-        style: AppTypography.inter(
-          color: foreground,
-          fontSize: compact ? 9.5 : 10,
+        style: FocuxHubTypography.chip(foreground).copyWith(
           fontWeight: FontWeight.w700,
           letterSpacing: 0.12,
           height: 1.1,
@@ -211,10 +210,8 @@ class AlunoListCard extends ConsumerWidget {
                             Flexible(
                               child: Text(
                                 displayName,
-                                style: AppTypography.inter(
-                                  fontSize: TokensStrip.fontBody,
+                                style: FocuxHubTypography.body(color: ink).copyWith(
                                   fontWeight: FontWeight.w700,
-                                  color: ink,
                                   letterSpacing: -0.15,
                                   height: 1.2,
                                 ),
@@ -240,8 +237,7 @@ class AlunoListCard extends ConsumerWidget {
                           const SizedBox(height: 2),
                           Text(
                             '$objetivo · ${maskEmailForList(aluno.email)}',
-                            style: AppTypography.inter(
-                              fontSize: TokensStrip.fontBodySm,
+                            style: FocuxHubTypography.bodyMuted(
                               color: secondaryInk,
                               height: 1.25,
                             ),
@@ -252,8 +248,7 @@ class AlunoListCard extends ConsumerWidget {
                           const SizedBox(height: 2),
                           Text(
                             objetivo,
-                            style: AppTypography.inter(
-                              fontSize: TokensStrip.fontBodySm,
+                            style: FocuxHubTypography.bodyMuted(
                               color: secondaryInk,
                               height: 1.25,
                             ),
@@ -297,13 +292,9 @@ class AlunoListCard extends ConsumerWidget {
                                   ),
                                   child: Text(
                                     '·',
-                                    style: AppTypography.inter(
-                                      fontSize: 11,
-                                      color: secondaryInk.withValues(
-                                        alpha: 0.85,
-                                      ),
-                                      height: 1.1,
-                                    ),
+                                    style: FocuxHubTypography.chip(
+                                      secondaryInk.withValues(alpha: 0.85),
+                                    ).copyWith(height: 1.1),
                                   ),
                                 ),
                               ],
@@ -312,13 +303,12 @@ class AlunoListCard extends ConsumerWidget {
                                   opsText,
                                   style:
                                       opsIsDays
-                                          ? AppTypography.inter(
-                                            fontSize: compact ? 11 : 12,
-                                            fontWeight: FontWeight.w600,
+                                          ? FocuxHubTypography.bodyMuted(
                                             color:
                                                 isDark
                                                     ? EagleTokens.warnAccentSoft
                                                     : EagleTokens.warnDeep,
+                                            fontWeight: FontWeight.w600,
                                             height: 1.15,
                                           )
                                           : AppTypography.mono(

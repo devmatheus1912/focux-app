@@ -8,6 +8,7 @@ import '../../../core/analytics/analytics_service.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/utils/pt_br_display.dart';
@@ -374,8 +375,9 @@ class _AddExercicioToTreinoScreenState
                                             final wide =
                                                 constraints.maxWidth > 600;
                                             final fieldStyle =
-                                                AppTypography.inter(
+                                                FocuxHubTypography.body(
                                                   color: ink,
+                                                ).copyWith(
                                                   fontWeight: FontWeight.w700,
                                                 );
                                             final seriesField = TextFormField(
@@ -491,8 +493,9 @@ class _AddExercicioToTreinoScreenState
                                               primary: primary,
                                             ),
                                             keyboardType: TextInputType.number,
-                                            style: AppTypography.inter(
+                                            style: FocuxHubTypography.body(
                                               color: ink,
+                                            ).copyWith(
                                               fontWeight: FontWeight.w700,
                                             ),
                                           ),
@@ -517,8 +520,9 @@ class _AddExercicioToTreinoScreenState
                                           ),
                                           minLines: 2,
                                           maxLines: 4,
-                                          style: AppTypography.inter(
+                                          style: FocuxHubTypography.body(
                                             color: ink,
+                                          ).copyWith(
                                             fontWeight: FontWeight.w700,
                                           ),
                                         ),

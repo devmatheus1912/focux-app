@@ -137,11 +137,7 @@ class _CreationHero extends StatelessWidget {
                 ),
                 child: Text(
                   'Criação guiada',
-                  style: AppTypography.inter(
-                    color: Colors.white,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                  ),
+                  style: FocuxHubTypography.chip(Colors.white),
                 ),
               ),
             ],
@@ -151,18 +147,16 @@ class _CreationHero extends StatelessWidget {
             title,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: AppTypography.inter(
+            style: FocuxHubTypography.sectionTitle(
+              context,
               color: Colors.white,
-              fontSize: 21,
-              fontWeight: FontWeight.w800,
             ),
           ),
           const SizedBox(height: 5),
           Text(
             'Monte a base agora. Os exercícios entram no próximo passo.',
-            style: AppTypography.inter(
+            style: FocuxHubTypography.bodyMuted(
               color: Colors.white.withValues(alpha: 0.72),
-              fontSize: 12.2,
               height: 1.25,
               fontWeight: FontWeight.w600,
             ),
@@ -207,9 +201,8 @@ class _HeroPill extends StatelessWidget {
               label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: AppTypography.inter(
+              style: FocuxHubTypography.bodyMuted(
                 color: Colors.white.withValues(alpha: 0.88),
-                fontSize: 11.5,
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -243,9 +236,7 @@ class _SectionKicker extends StatelessWidget {
         Expanded(
           child: Text(
             title,
-            style: AppTypography.inter(
-              color: ink,
-              fontSize: 15,
+            style: FocuxHubTypography.body(color: ink).copyWith(
               fontWeight: FontWeight.w800,
             ),
           ),
@@ -266,11 +257,7 @@ class _SectionKicker extends StatelessWidget {
                         fontSize: 10.5,
                         fontWeight: FontWeight.w700,
                       )
-                      : AppTypography.inter(
-                        color: mute,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
-                      ),
+                      : FocuxHubTypography.chip(mute),
             ),
           ),
         ),
@@ -335,12 +322,11 @@ class _PresetRail extends StatelessWidget {
                       preset.title,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: AppTypography.inter(
+                      style: FocuxHubTypography.bodyMuted(
                         color:
                             isDark
                                 ? EagleTokens.darkInk
                                 : TokensStrip.textPrimary,
-                        fontSize: 12.5,
                         fontWeight: FontWeight.w800,
                       ),
                     ),
@@ -349,12 +335,11 @@ class _PresetRail extends StatelessWidget {
                       preset.subtitle,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: AppTypography.inter(
+                      style: FocuxHubTypography.bodyMuted(
                         color:
                             isDark
                                 ? EagleTokens.darkInkMute
                                 : TokensStrip.textSecondary,
-                        fontSize: 10.5,
                         fontWeight: FontWeight.w700,
                         height: 1.15,
                       ),
@@ -452,9 +437,8 @@ class _LevelSelector extends StatelessWidget {
                         _niveisLabel[i],
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: AppTypography.inter(
+                        style: FocuxHubTypography.bodyMuted(
                           color: sel ? _niveisCor[i] : idleInk,
-                          fontSize: 11,
                           fontWeight: sel ? FontWeight.w800 : FontWeight.w700,
                         ),
                       ),
@@ -498,11 +482,9 @@ class _FxField extends StatelessWidget {
       focusNode: focusNode,
       maxLines: maxLines,
       validator: validator,
-      style: AppTypography.inter(
+      style: FocuxHubTypography.body(
         color: isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
-        fontSize: 15,
-        fontWeight: FontWeight.w700,
-      ),
+      ).copyWith(fontWeight: FontWeight.w700),
       cursorColor: primary,
       decoration: InputDecoration(
         labelText: label,
@@ -513,7 +495,7 @@ class _FxField extends StatelessWidget {
         ),
         filled: true,
         fillColor: isDark ? EagleTokens.darkCardHi : TokensStrip.cardBg,
-        labelStyle: AppTypography.inter(
+        labelStyle: FocuxHubTypography.bodyMuted(
           color: isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
           fontWeight: FontWeight.w600,
         ),
@@ -541,9 +523,8 @@ class _FxField extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           borderSide: const BorderSide(color: EagleTokens.bad),
         ),
-        errorStyle: AppTypography.inter(
+        errorStyle: FocuxHubTypography.bodyMuted(
           color: EagleTokens.bad,
-          fontSize: 11,
           fontWeight: FontWeight.w700,
         ),
       ),

@@ -18,7 +18,7 @@ abstract final class FocuxGestalt {
 
   static const List<String> coreSources = [
     'lib/core/gestalt/focux_gestalt.dart',
-    'lib/core/theme/focux_hierarchy.dart',
+    'lib/core/theme/focux_hub_typography.dart',
     'lib/core/widgets/fx_shell_scaffold.dart',
     'lib/core/widgets/fx_horizontal_scroll_peek.dart',
     'lib/features/alunos/widgets/aluno360_section_header.dart',
@@ -37,7 +37,7 @@ abstract final class FocuxGestalt {
     'dashboard_collapsible_section',
     'TabBar',
     '_FxChip',
-    'FocuxHierarchy',
+    'FocuxHubTypography',
     'sectionTitle',
   ];
 

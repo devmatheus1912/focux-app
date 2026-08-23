@@ -39,9 +39,8 @@ class _BibliotecaSyncBanner extends StatelessWidget {
             Expanded(
               child: Text(
                 message,
-                style: AppTypography.inter(
+                style: FocuxHubTypography.bodyMuted(
                   color: isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
-                  fontSize: 12.5,
                   height: 1.35,
                   fontWeight: FontWeight.w700,
                 ),
@@ -80,9 +79,8 @@ class _RepeatPrescriptionBanner extends StatelessWidget {
           Expanded(
             child: Text(
               'Repetir última prescrição (${memory.summary})',
-              style: AppTypography.inter(
+              style: FocuxHubTypography.bodyMuted(
                 color: mute,
-                fontSize: 12,
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -91,8 +89,7 @@ class _RepeatPrescriptionBanner extends StatelessWidget {
             onPressed: onApply,
             child: Text(
               'Aplicar',
-              style: AppTypography.inter(
-                color: primary,
+              style: FocuxHubTypography.body(color: primary).copyWith(
                 fontWeight: FontWeight.w900,
               ),
             ),
@@ -139,10 +136,9 @@ class _AlunoEquipmentFilterBanner extends StatelessWidget {
                 'Equipamento de $alunoNome: $labels',
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: AppTypography.inter(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
+                style: FocuxHubTypography.bodyMuted(
                   color: mute,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ),
@@ -150,9 +146,8 @@ class _AlunoEquipmentFilterBanner extends StatelessWidget {
               onPressed: onClear,
               child: Text(
                 'Limpar',
-                style: AppTypography.inter(
+                style: FocuxHubTypography.bodyMuted(
                   color: primary,
-                  fontSize: 12,
                   fontWeight: FontWeight.w800,
                 ),
               ),
@@ -292,18 +287,16 @@ class _CompactSelectedExerciseBar extends StatelessWidget {
                   exercicio.nomeDisplay,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: AppTypography.inter(
-                    fontSize: 14.5,
-                    fontWeight: FontWeight.w900,
-                  ),
+                  style: FocuxHubTypography.cardTitle(
+                    color: isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
+                  ).copyWith(fontWeight: FontWeight.w900),
                 ),
                 Text(
                   _exerciseMeta(exercicio),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: AppTypography.inter(
+                  style: FocuxHubTypography.bodyMuted(
                     color: _metaTextColor(isDark),
-                    fontSize: 11.5,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -314,8 +307,7 @@ class _CompactSelectedExerciseBar extends StatelessWidget {
             onPressed: onChange,
             child: Text(
               'Trocar',
-              style: AppTypography.inter(
-                color: primary,
+              style: FocuxHubTypography.body(color: primary).copyWith(
                 fontWeight: FontWeight.w900,
               ),
             ),
@@ -379,18 +371,18 @@ class _QuickSearchResultTile extends StatelessWidget {
                       highlightedExerciseName(
                         name: exercicio.nomeDisplay,
                         query: highlightQuery,
-                        baseStyle: AppTypography.inter(
-                          fontSize: 13.5,
-                          fontWeight: FontWeight.w800,
+                        baseStyle: FocuxHubTypography.cardTitle(
+                          color: isDark
+                              ? EagleTokens.darkInk
+                              : TokensStrip.textPrimary,
                         ),
                         highlightColor: primary,
                       ),
                       if (alreadyInTreino)
                         Text(
                           'Já está neste treino',
-                          style: AppTypography.inter(
+                          style: FocuxHubTypography.bodyMuted(
                             color: mute,
-                            fontSize: 11,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
@@ -452,17 +444,17 @@ class _MontarComModeloCard extends StatelessWidget {
                   children: [
                     Text(
                       'Montar com modelo',
-                      style: AppTypography.inter(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w900,
-                      ),
+                      style: FocuxHubTypography.cardTitle(
+                        color: isDark
+                            ? EagleTokens.darkInk
+                            : TokensStrip.textPrimary,
+                      ).copyWith(fontWeight: FontWeight.w900),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       'Full body, PPL, bro split e mais — $templateCount modelos.',
-                      style: AppTypography.inter(
+                      style: FocuxHubTypography.bodyMuted(
                         color: mute,
-                        fontSize: 12,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -539,8 +531,10 @@ class _ActivePrescriptionStrip extends StatelessWidget {
                       'Prescrição ativa: ${preset.label}',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: AppTypography.inter(
-                        fontSize: 12.5,
+                      style: FocuxHubTypography.bodyMuted(
+                        color: isDark
+                            ? EagleTokens.darkInk
+                            : TokensStrip.textPrimary,
                         fontWeight: FontWeight.w800,
                       ),
                     ),
@@ -549,9 +543,8 @@ class _ActivePrescriptionStrip extends StatelessWidget {
                       '$series×$repeticoes · ${descanso}s descanso$tipoLabel',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: AppTypography.inter(
+                      style: FocuxHubTypography.bodyMuted(
                         color: mute,
-                        fontSize: 11.5,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -560,9 +553,8 @@ class _ActivePrescriptionStrip extends StatelessWidget {
               ),
               Text(
                 'Editar',
-                style: AppTypography.inter(
+                style: FocuxHubTypography.bodyMuted(
                   color: primary,
-                  fontSize: 12,
                   fontWeight: FontWeight.w800,
                 ),
               ),
@@ -637,10 +629,9 @@ class _StickyAddExerciseBar extends StatelessWidget {
               'Concluir e voltar ao treino',
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: AppTypography.inter(
-                fontWeight: FontWeight.w800,
-                fontSize: 14,
-              ),
+              style: FocuxHubTypography.body(
+                color: primary,
+              ).copyWith(fontWeight: FontWeight.w800),
             ),
           ),
           const SizedBox(height: 8),

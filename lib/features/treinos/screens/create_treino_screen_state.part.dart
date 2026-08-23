@@ -188,12 +188,11 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen>
                         const SizedBox(height: 10),
                         Text(
                           'Deslize para ver mais modelos',
-                          style: AppTypography.inter(
+                          style: FocuxHubTypography.bodyMuted(
                             color:
                                 isDark
                                     ? EagleTokens.darkInkMute
                                     : TokensStrip.textSecondary,
-                            fontSize: 10.5,
                             fontWeight: FontWeight.w600,
                           ),
                         ),

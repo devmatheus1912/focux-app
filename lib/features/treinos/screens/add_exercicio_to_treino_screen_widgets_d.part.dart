@@ -35,9 +35,7 @@ class _PrescriptionSectionHeader extends StatelessWidget {
                 globalPresetMode
                     ? 'Prescrição padrão do treino'
                     : 'Prescrição do exercício',
-                style: AppTypography.inter(
-                  color: ink,
-                  fontSize: 15,
+                style: FocuxHubTypography.body(color: ink).copyWith(
                   fontWeight: FontWeight.w800,
                   letterSpacing: -0.15,
                 ),
@@ -49,9 +47,8 @@ class _PrescriptionSectionHeader extends StatelessWidget {
                     : 'Ajuste séries, carga, descanso e observações antes de salvar.',
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: AppTypography.inter(
+                style: FocuxHubTypography.bodyMuted(
                   color: mute,
-                  fontSize: 12,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -101,15 +98,13 @@ class _AddExerciseTabStrip extends StatelessWidget {
                     children: [
                       Text(
                         _labels[i],
-                        style: AppTypography.inter(
+                        style: FocuxHubTypography.bodyMuted(
                           color: selectedIndex == i ? primary : mute,
-                          fontSize: 13,
                           fontWeight:
                               selectedIndex == i
                                   ? FontWeight.w800
                                   : FontWeight.w600,
-                          letterSpacing: -0.1,
-                        ),
+                        ).copyWith(letterSpacing: -0.1),
                       ),
                       const SizedBox(height: 10),
                       AnimatedContainer(
@@ -166,10 +161,8 @@ class _BrowseLibraryCta extends StatelessWidget {
           icon: Icon(Icons.library_books_outlined, color: primary, size: 20),
           label: Text(
             'Ver biblioteca ($totalCount)',
-            style: AppTypography.inter(
-              color: primary,
+            style: FocuxHubTypography.cardTitle(color: primary).copyWith(
               fontWeight: FontWeight.w900,
-              fontSize: 13.5,
             ),
           ),
         );
@@ -233,11 +226,14 @@ class _CreateExerciseButton extends StatelessWidget {
       icon: Icon(Icons.add_rounded, color: primary, size: compact ? 20 : 21),
       label: Text(
         label,
-        style: AppTypography.inter(
-          color: primary,
-          fontWeight: FontWeight.w900,
-          fontSize: compact ? 13 : 13.5,
-        ),
+        style: compact
+            ? FocuxHubTypography.bodyMuted(
+                color: primary,
+                fontWeight: FontWeight.w900,
+              )
+            : FocuxHubTypography.cardTitle(color: primary).copyWith(
+                fontWeight: FontWeight.w900,
+              ),
       ),
     );
 

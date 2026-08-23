@@ -48,11 +48,7 @@ class PaywallUsageMeters extends StatelessWidget {
           children: [
             Text(
               'Uso do seu plano',
-              style: AppTypography.inter(
-                fontWeight: FontWeight.w800,
-                fontSize: 13,
-                color: ink,
-              ),
+              style: FocuxHubTypography.cardTitle(color: ink),
             ),
             const SizedBox(height: 10),
             if (showAlunosUnlimited)
@@ -538,11 +534,10 @@ class PaywallSocialProofStrip extends StatelessWidget {
                   children: [
                     Text(
                       socialProof[i].value,
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w900,
+                      style: FocuxHubTypography.metric(
                         color: ink,
-                        fontFamily: 'monospace',
+                        fontSize: FocuxHubTypography.metricLg,
+                        fontWeight: FontWeight.w900,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -639,11 +634,10 @@ class _RoiCell extends StatelessWidget {
         children: [
           Text(
             item.value,
-            style: TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.w900,
+            style: FocuxHubTypography.metric(
               color: item.color,
-              fontFamily: 'monospace',
+              fontSize: FocuxHubTypography.metricLg,
+              fontWeight: FontWeight.w900,
             ),
           ),
           const SizedBox(height: 4),
