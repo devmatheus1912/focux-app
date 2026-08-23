@@ -4,6 +4,10 @@ import 'focux_typography.dart';
 import 'tokens_strip.dart';
 
 /// Papéis tipográficos e camadas de elevação — hierarquia visual e foco.
+@Deprecated(
+  'Legado pré-Home 10/10. Use FocuxHubTypography (tipografia) e '
+  'TokensStrip.elevation (camadas). Mantido só pelo catálogo FocuxGestalt.',
+)
 abstract final class FocuxHierarchy {
   FocuxHierarchy._();
 

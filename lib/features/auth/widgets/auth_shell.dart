@@ -17,6 +17,9 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/focux_official_logo.dart';
 import '../../../core/widgets/focux_brand_tagline.dart';
 import '../../../core/widgets/cinematic_mesh_background.dart';
+import '../../../core/widgets/fx_premium_entrance.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/mesh_scope.dart';
 import '../utils/auth_layout.dart';
 
 export '../utils/auth_layout.dart'
@@ -57,7 +60,10 @@ class AuthShell extends StatelessWidget {
         flatBackground: flatBackground,
         showGrid: showGrid,
         animateGridIn: animateGridIn,
-        child: SafeArea(child: child),
+        child: MeshScope(
+          active: true,
+          child: SafeArea(child: child),
+        ),
       ),
     );
   }
@@ -128,8 +134,9 @@ class AuthLoginBrandHeader extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final logoWidth = authLogoWidthFor(context, withTagline: true);
+    final reduceMotion = TokensStrip.prefersReducedMotion(context);
     return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 280),
+      duration: reduceMotion ? Duration.zero : const Duration(milliseconds: 280),
       switchInCurve: Curves.easeOutCubic,
       switchOutCurve: Curves.easeInCubic,
       child:
@@ -142,7 +149,7 @@ class AuthLoginBrandHeader extends ConsumerWidget {
                     center: true,
                     width: logoWidth,
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: TokensStrip.s3),
                   AuthWordmark(taglineSize: taglineSize),
                 ],
               )
@@ -154,7 +161,7 @@ class AuthLoginBrandHeader extends ConsumerWidget {
                     center: true,
                     width: logoWidth,
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: TokensStrip.s3),
                   AuthWordmark(taglineSize: taglineSize),
                 ],
               ),
@@ -162,7 +169,7 @@ class AuthLoginBrandHeader extends ConsumerWidget {
   }
 }
 
-/// Entrada suave do formulário auth (respeita reduce-motion).
+/// Entrada do formulário auth — mesma linguagem da Home ([FxPremiumEntrance]).
 class AuthFormEntrance extends StatelessWidget {
   const AuthFormEntrance({super.key, required this.child});
 
@@ -170,22 +177,7 @@ class AuthFormEntrance extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (TokensStrip.prefersReducedMotion(context)) return child;
-    return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0, end: 1),
-      duration: const Duration(milliseconds: 400),
-      curve: Curves.easeOutCubic,
-      builder: (context, t, child) {
-        return Opacity(
-          opacity: t,
-          child: Transform.translate(
-            offset: Offset(0, 10 * (1 - t)),
-            child: child,
-          ),
-        );
-      },
-      child: child,
-    );
+    return FxPremiumEntrance(child: child);
   }
 }
 
@@ -274,9 +266,11 @@ class AuthRoleToggle extends StatelessWidget {
           child: GestureDetector(
             onTap: onTap,
             child: AnimatedContainer(
-              duration: const Duration(milliseconds: 180),
+              duration: TokensStrip.prefersReducedMotion(context)
+                  ? Duration.zero
+                  : const Duration(milliseconds: 180),
               curve: Curves.easeOutCubic,
-              padding: const EdgeInsets.symmetric(vertical: 11),
+              padding: const EdgeInsets.symmetric(vertical: TokensStrip.s3),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
                 gradient:
@@ -337,8 +331,11 @@ class AuthGlassCard extends StatelessWidget {
   const AuthGlassCard({
     super.key,
     required this.child,
-    this.padding = const EdgeInsets.symmetric(horizontal: 20, vertical: 22),
-    this.radius = 20,
+    this.padding = const EdgeInsets.symmetric(
+      horizontal: TokensStrip.s5,
+      vertical: TokensStrip.s5 + 2,
+    ),
+    this.radius = TokensStrip.rCard,
   });
 
   final Widget child;
@@ -347,24 +344,19 @@ class AuthGlassCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final primary = Theme.of(context).colorScheme.primary;
-    // Paridade Home: strip soft (glow ~0.12), sem neon.
+    // Paridade Home: strip emphasize + blur cinematográfico.
     return ClipRRect(
       borderRadius: BorderRadius.circular(radius),
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-        child: Container(
-          padding: padding,
-          decoration: BoxDecoration(
-            color: TokensStrip.glassFill(dark: true, opacity: 0.90),
-            borderRadius: BorderRadius.circular(radius),
-            border: Border.all(color: primary.withValues(alpha: 0.14)),
-            boxShadow: [
-              ...TokensStrip.elevation(8, dark: true, accent: primary),
-              ...TokensStrip.coloredDepthGlow(primary, strength: 0.12),
-            ],
+        child: DecoratedBox(
+          decoration: fxStripCardDecoration(
+            context,
+            radius: radius,
+            emphasize: true,
+            glowStrength: 0.16,
           ),
-          child: child,
+          child: Padding(padding: padding, child: child),
         ),
       ),
     );
@@ -520,20 +512,26 @@ class _AuthPrimaryButtonState extends State<AuthPrimaryButton>
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
+    final reduceMotion = TokensStrip.prefersReducedMotion(context);
     return GestureDetector(
-      onTapDown: widget.isLoading ? null : (_) => _ctrl.forward(),
+      onTapDown:
+          widget.isLoading || reduceMotion ? null : (_) => _ctrl.forward(),
       onTapUp:
           widget.isLoading
               ? null
               : (_) {
-                _ctrl.reverse();
+                if (!reduceMotion) _ctrl.reverse();
                 widget.onPressed?.call();
               },
-      onTapCancel: widget.isLoading ? null : () => _ctrl.reverse(),
+      onTapCancel:
+          widget.isLoading || reduceMotion ? null : () => _ctrl.reverse(),
       child: AnimatedBuilder(
         animation: _scale,
         builder:
-            (_, child) => Transform.scale(scale: _scale.value, child: child),
+            (_, child) => Transform.scale(
+              scale: reduceMotion ? 1.0 : _scale.value,
+              child: child,
+            ),
         child: SizedBox(
           width: double.infinity,
           height: 48,
