@@ -12,6 +12,7 @@ import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_form_sheet.dart';
+import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -451,9 +452,11 @@ class _OfertaCard extends StatelessWidget {
           TextField(
             maxLines: 3,
             maxLength: 2000,
-            decoration: InputDecoration(
-              labelText: 'Feedback (opcional)',
-              hintText: 'Conte o que faltou ou o que podemos melhorar',
+            decoration: FxInputDeco.build(
+              context,
+              'Feedback (opcional)',
+              hint: 'Conte o que faltou ou o que podemos melhorar',
+            ).copyWith(
               counterStyle: TokensStrip.bodyMuted(
                 color: secondary,
               ).copyWith(fontSize: 11),

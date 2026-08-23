@@ -206,8 +206,7 @@ class _KpiCard extends StatelessWidget {
             const SizedBox(height: 6),
             Text(
               value,
-              style: AppTypography.inter(
-                color: ink,
+              style: FocuxTypography.display(color: ink).copyWith(
                 fontSize: 26,
                 fontWeight: FontWeight.w700,
                 height: 1,
@@ -233,11 +232,9 @@ class _SectionTitle extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 4, 20, 10),
       child: Text(
         title,
-        style: TextStyle(
+        style: FocuxHubTypography.sectionTitle(
+          context,
           color: ShellChrome.of(context).ink,
-          fontSize: 18,
-          fontWeight: FontWeight.w600,
-          letterSpacing: -0.4,
         ),
       ),
     );

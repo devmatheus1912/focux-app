@@ -7,6 +7,7 @@ import '../../../core/ux/fx_hub_freshness.dart';
 
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../alunos/providers/alunos_provider.dart';
@@ -365,14 +366,14 @@ class _PostAuthorHeader extends StatelessWidget {
                 name,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: 13,
+                style: FocuxHubTypography.bodyMuted(
+                  color: Theme.of(context).colorScheme.onSurface,
                   fontWeight: FontWeight.w800,
                 ),
               ),
               Text(
                 fxTimeAgo(DateTime.parse(post.criadoEm)),
-                style: TextStyle(fontSize: 12, color: mute),
+                style: FocuxHubTypography.bodyMuted(color: mute),
               ),
             ],
           ),

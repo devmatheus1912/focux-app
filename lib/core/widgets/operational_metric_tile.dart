@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../theme/app_typography.dart';
+import '../theme/focux_hub_typography.dart';
 import 'fx_shell_scaffold.dart';
 
 /// Shared surface styling for operational KPI tiles (Aluno 360 + dashboard pulse).
@@ -86,10 +86,7 @@ class OperationalMetricTile extends StatelessWidget {
               children: [
                 Text(
                   label.toUpperCase(),
-                  style: AppTypography.inter(
-                    color: labelColor,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
+                  style: FocuxHubTypography.chip(labelColor).copyWith(
                     letterSpacing: 0.4,
                   ),
                 ),
@@ -103,22 +100,20 @@ class OperationalMetricTile extends StatelessWidget {
                     Flexible(
                       child: Text(
                         value,
-                        style: AppTypography.condensed(
+                        style: FocuxHubTypography.kpi(
                           color: ink,
-                          fontSize: 20,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 0.2,
-                        ),
+                          fontSize: FocuxHubTypography.metricMd,
+                        ).copyWith(letterSpacing: 0.2),
                       ),
                     ),
                   ],
                 ),
                 Text(
                   hint,
-                  style: AppTypography.inter(
+                  style: FocuxHubTypography.bodyMuted(
                     color: hintColor,
-                    fontSize: 12,
                     fontWeight: FontWeight.w600,
+                    height: 1.2,
                   ),
                 ),
               ],

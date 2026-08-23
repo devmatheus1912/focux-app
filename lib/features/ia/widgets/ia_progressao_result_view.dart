@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/motion_preferences.dart';
 import '../../../core/widgets/feedback_helper.dart';
@@ -239,7 +240,9 @@ class _FallbackPlainText extends StatelessWidget {
       children: [
         SelectableText(
           text,
-          style: const TextStyle(fontSize: 14, height: 1.45),
+          style: FocuxHubTypography.body(
+            color: Theme.of(context).colorScheme.onSurface,
+          ).copyWith(height: 1.45),
         ),
         const SizedBox(height: TokensStrip.s2),
         IaProgressaoResultActionBar(

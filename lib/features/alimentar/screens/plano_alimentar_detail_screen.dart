@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dio/dio.dart';
 import '../../../features/auth/providers/auth_provider.dart';
@@ -13,6 +14,7 @@ import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_form_sheet.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
+import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import 'package:focux_app/core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -113,20 +115,21 @@ class _PlanoAlimentarDetailScreenState
         children: [
           TextField(
             controller: objetivoCtrl,
-            decoration: const InputDecoration(
-              labelText: 'Objetivo (ex: Hipertrofia)',
+            decoration: FxInputDeco.build(
+              context,
+              'Objetivo (ex: Hipertrofia)',
             ),
           ),
           const SizedBox(height: 8),
           TextField(
             controller: calCtrl,
-            decoration: const InputDecoration(labelText: 'Calorias Alvo'),
+            decoration: FxInputDeco.build(context, 'Calorias Alvo'),
             keyboardType: TextInputType.number,
           ),
           const SizedBox(height: 8),
           TextField(
             controller: refCtrl,
-            decoration: const InputDecoration(labelText: 'Nº de Refeições'),
+            decoration: FxInputDeco.build(context, 'Nº de Refeições'),
             keyboardType: TextInputType.number,
           ),
         ],
@@ -427,7 +430,7 @@ class _RefeicaoCard extends StatelessWidget {
                 const SizedBox(height: 8),
                 Text(
                   r.alimentos!,
-                  style: const TextStyle(fontSize: 13, color: Colors.black87),
+                  style: FocuxHubTypography.bodyMuted(color: Colors.black87),
                 ),
               ],
             ],
@@ -556,7 +559,7 @@ class _NovaRefeicaoSheetState extends ConsumerState<_NovaRefeicaoSheet> {
         padding: const EdgeInsets.only(bottom: 12),
         child: TextFormField(
           controller: c,
-          decoration: InputDecoration(labelText: label),
+          decoration: FxInputDeco.build(context, label),
           maxLines: maxLines,
         ),
       );
@@ -565,7 +568,7 @@ class _NovaRefeicaoSheetState extends ConsumerState<_NovaRefeicaoSheet> {
     padding: const EdgeInsets.only(bottom: 12),
     child: TextFormField(
       controller: c,
-      decoration: InputDecoration(labelText: label),
+      decoration: FxInputDeco.build(context, label),
       keyboardType: TextInputType.number,
     ),
   );

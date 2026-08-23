@@ -317,21 +317,15 @@ class _AgendaMetaCell extends StatelessWidget {
       children: [
         Text(
           label,
-          style: AppTypography.inter(
-            fontSize: 10,
-            fontWeight: FontWeight.w700,
-            color: chrome.mute,
-          ),
+          style: FocuxHubTypography.chip(chrome.mute),
         ),
         const SizedBox(height: 4),
         Text(
           value,
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
-          style: AppTypography.inter(
-            fontSize: 13,
+          style: FocuxHubTypography.body(color: chrome.ink).copyWith(
             fontWeight: FontWeight.w800,
-            color: chrome.ink,
           ),
         ),
       ],
@@ -363,20 +357,14 @@ class _AgendaDetailNote extends StatelessWidget {
           children: [
             Text(
               label,
-              style: AppTypography.inter(
-                fontSize: 10,
-                fontWeight: FontWeight.w700,
-                color: chrome.mute,
-              ),
+              style: FocuxHubTypography.chip(chrome.mute),
             ),
             const SizedBox(height: 4),
             Text(
               value,
-              style: AppTypography.inter(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
+              style: FocuxHubTypography.bodyMuted(
                 color: chrome.ink,
-                height: 1.35,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ],

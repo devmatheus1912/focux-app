@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../planos/data/planos_repository.dart';
 import '../../planos/providers/plano_features_provider.dart';
@@ -58,15 +59,17 @@ class TrialCountdownBanner extends ConsumerWidget {
                             dias <= 1
                                 ? 'Trial Enterprise acaba hoje'
                                 : 'Trial Enterprise · $dias dias restantes',
-                            style: const TextStyle(
+                            style: FocuxHubTypography.bodyMuted(
+                              color: Theme.of(context).colorScheme.onSurface,
                               fontWeight: FontWeight.w800,
-                              fontSize: 13,
                             ),
                           ),
                           const SizedBox(height: 2),
-                          const Text(
+                          Text(
                             'Assine para manter IA, financeiro e automações.',
-                            style: TextStyle(fontSize: 12, height: 1.35),
+                            style: FocuxHubTypography.bodyMuted(
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            ),
                           ),
                         ],
                       ),

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/analytics/analytics_service.dart';
 import '../../../features/auth/providers/auth_provider.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/utils/friendly_error.dart';
@@ -122,17 +123,18 @@ class _ReferralScreenState extends ConsumerState<ReferralScreen> {
                           children: [
                             Text(
                               _info?.codigo ?? '—',
-                              style: TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: 2,
+                              style: FocuxHubTypography.metric(
                                 color: primary,
-                              ),
+                                fontSize: FocuxHubTypography.metricLg,
+                                fontWeight: FontWeight.w800,
+                              ).copyWith(letterSpacing: 2),
                             ),
                             const SizedBox(height: 8),
                             Text(
                               '${_info?.usosTotais ?? 0} indicações convertidas',
-                              style: const TextStyle(fontSize: 13),
+                              style: FocuxHubTypography.bodyMuted(
+                                color: Theme.of(context).colorScheme.onSurface,
+                              ),
                             ),
                           ],
                         ),

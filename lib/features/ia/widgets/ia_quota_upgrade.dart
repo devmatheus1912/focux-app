@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/analytics/analytics_service.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../planos/data/planos_repository.dart';
 import '../../planos/providers/plano_features_provider.dart';
@@ -98,9 +99,9 @@ class IaQuotaUpgrade {
                 children: [
                   Text(
                     offer.headline,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w800,
+                    style: FocuxHubTypography.sectionTitle(
+                      ctx,
+                      color: Theme.of(ctx).colorScheme.onSurface,
                     ),
                   ),
                   const SizedBox(height: 10),

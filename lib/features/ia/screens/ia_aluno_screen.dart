@@ -17,6 +17,7 @@ import 'package:focux_app/core/widgets/fx_input_deco.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
 import 'package:focux_app/core/widgets/fx_motion.dart';
 import '../../../core/router/safe_navigation.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
@@ -413,9 +414,12 @@ class _ProgressaoTabState extends ConsumerState<_ProgressaoTab> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Text(
+          Text(
             'Progressão de Carga',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+            style: FocuxHubTypography.sectionTitle(
+              context,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
           ),
           const SizedBox(height: 8),
           const Text(

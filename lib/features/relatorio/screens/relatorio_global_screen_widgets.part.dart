@@ -312,9 +312,9 @@ class _MetricTile extends StatelessWidget {
                   value,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
+                  style: FocuxHubTypography.metric(
                     color: chrome.ink,
-                    fontSize: 18,
+                    fontSize: FocuxHubTypography.metricEm,
                     fontWeight: FontWeight.w900,
                   ),
                 ),

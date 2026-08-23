@@ -4,6 +4,7 @@ import '../../../core/analytics/analytics_service.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -396,17 +397,16 @@ class _KanbanCard extends StatelessWidget {
           lead.nome,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
+          style: FocuxHubTypography.bodyMuted(
             color: ink,
+            fontWeight: FontWeight.w600,
           ),
         ),
         subtitle: Text(
           lead.objetivo ?? lead.origem ?? '',
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
-          style: TextStyle(fontSize: 11, color: mute),
+          style: FocuxHubTypography.bodyMuted(color: mute),
         ),
         trailing: Wrap(
           spacing: 6,

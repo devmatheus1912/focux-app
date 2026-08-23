@@ -242,8 +242,7 @@ class _SearchResultTile extends StatelessWidget {
                 const SizedBox(width: 6),
                 Text(
                   msg.remetente == 'PERSONAL' ? 'Você' : 'Aluno',
-                  style: TextStyle(
-                    fontSize: 11,
+                  style: FocuxHubTypography.bodyMuted(
                     color: mute,
                     fontWeight: FontWeight.w600,
                   ),
@@ -251,7 +250,7 @@ class _SearchResultTile extends StatelessWidget {
                 const Spacer(),
                 Text(
                   fxTimeAgo(msg.enviadoEm),
-                  style: TextStyle(fontSize: 11, color: mute),
+                  style: FocuxHubTypography.chip(mute),
                 ),
               ],
             ),
@@ -260,7 +259,7 @@ class _SearchResultTile extends StatelessWidget {
               msg.conteudo,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(fontSize: 14, color: ink),
+              style: FocuxHubTypography.body(color: ink),
             ),
           ],
         ),

@@ -8,6 +8,7 @@ import '../data/alimentar_repository.dart';
 import 'plano_alimentar_detail_screen.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -352,7 +353,7 @@ class _NovoPlanoScreenState extends ConsumerState<_NovoPlanoScreen> {
     padding: const EdgeInsets.only(bottom: 12),
     child: TextFormField(
       controller: c,
-      decoration: InputDecoration(labelText: label),
+      decoration: FxInputDeco.build(context, label),
       keyboardType: TextInputType.number,
     ),
   );
@@ -362,7 +363,7 @@ class _NovoPlanoScreenState extends ConsumerState<_NovoPlanoScreen> {
         padding: const EdgeInsets.only(bottom: 12),
         child: TextFormField(
           controller: c,
-          decoration: InputDecoration(labelText: label),
+          decoration: FxInputDeco.build(context, label),
           maxLines: maxLines,
         ),
       );

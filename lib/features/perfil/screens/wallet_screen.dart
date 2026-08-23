@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
@@ -126,9 +127,12 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Text(
+                Text(
                   'Descartar alterações?',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+                  style: FocuxHubTypography.sectionTitle(
+                    ctx,
+                    color: ShellChrome.of(ctx).ink,
+                  ),
                 ),
                 const SizedBox(height: 10),
                 Text(

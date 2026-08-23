@@ -109,14 +109,12 @@ class _FinanceiroDashboardScreenState
                   children: [
                     Text(
                       'Vencimentos',
-                      style: AppTypography.inter(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
+                      style: FocuxHubTypography.sectionTitle(
+                        context,
                         color:
                             isDark
                                 ? EagleTokens.darkInk
                                 : TokensStrip.textPrimary,
-                        letterSpacing: -0.3,
                       ),
                     ),
                     Text(
@@ -147,12 +145,10 @@ class _FinanceiroDashboardScreenState
                 padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 22, 20, 10),
                 child: Text(
                   'Top alunos · acumulado',
-                  style: AppTypography.inter(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
+                  style: FocuxHubTypography.sectionTitle(
+                    context,
                     color:
                         isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
-                    letterSpacing: -0.3,
                   ),
                 ),
               ),

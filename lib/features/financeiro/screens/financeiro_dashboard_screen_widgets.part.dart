@@ -78,7 +78,10 @@ class _HeroRing extends StatelessWidget {
                         '${(perc * 100).round()}%',
                         style: dashboardHeroMutedOnTealStyle(
                           fontWeight: FontWeight.w700,
-                        ).copyWith(fontSize: 18, letterSpacing: -0.5),
+                        ).copyWith(
+                          fontSize: FocuxHubTypography.metricEm,
+                          letterSpacing: -0.5,
+                        ),
                       ),
                     ],
                   ),
@@ -338,11 +341,9 @@ class _EvolucaoChart extends StatelessWidget {
               children: [
                 Text(
                   'Evolução · 6 meses',
-                  style: TextStyle(
-                    fontSize: 15,
+                  style: FocuxHubTypography.body(color: ink).copyWith(
                     fontWeight: FontWeight.w600,
                     letterSpacing: -0.2,
-                    color: ink,
                   ),
                 ),
                 if (items.length > 1)
@@ -355,7 +356,7 @@ class _EvolucaoChart extends StatelessWidget {
                         final sign = diff > 0 ? '+' : '';
                         return Text(
                           '$sign$diff% vs ${items[items.length - 2].mes.substring(5)}',
-                          style: TextStyle(fontSize: 11, color: mute),
+                          style: FocuxHubTypography.chip(mute),
                         );
                       }
                       return const SizedBox.shrink();
@@ -528,15 +529,14 @@ class _VencimentoRow extends StatelessWidget {
                     const SizedBox(width: 5),
                     Text(
                       isAtrasado ? 'Atrasado' : 'Vencendo',
-                      style: TextStyle(
-                        fontSize: 11.5,
-                        fontWeight: FontWeight.w600,
+                      style: FocuxHubTypography.bodyMuted(
                         color: color,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                     Text(
                       ' · ${item.mesReferencia.substring(0, 7)}',
-                      style: TextStyle(fontSize: 11.5, color: mute),
+                      style: FocuxHubTypography.bodyMuted(color: mute),
                     ),
                   ],
                 ),
@@ -548,10 +548,8 @@ class _VencimentoRow extends StatelessWidget {
             children: [
               Text(
                 'R\$ ${item.valor.toStringAsFixed(0)}',
-                style: TextStyle(
-                  fontSize: 15,
+                style: FocuxHubTypography.body(color: ink).copyWith(
                   fontWeight: FontWeight.w600,
-                  color: ink,
                   letterSpacing: -0.2,
                 ),
               ),
@@ -570,11 +568,7 @@ class _VencimentoRow extends StatelessWidget {
                 ),
                 child: Text(
                   'Cobrar',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    color: primary,
-                  ),
+                  style: FocuxHubTypography.chip(primary),
                 ),
               ),
             ],

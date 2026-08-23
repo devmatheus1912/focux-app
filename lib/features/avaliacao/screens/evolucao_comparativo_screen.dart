@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../../core/router/safe_navigation.dart';
@@ -157,7 +158,9 @@ class _EvolucaoComparativoScreenState
                         const SizedBox(height: 4),
                         Text(
                           _fmtData(primeira.avaliadoEm),
-                          style: const TextStyle(fontSize: 13),
+                          style: FocuxHubTypography.bodyMuted(
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
                         ),
                       ],
                     ),
@@ -181,7 +184,9 @@ class _EvolucaoComparativoScreenState
                         const SizedBox(height: 4),
                         Text(
                           _fmtData(atual.avaliadoEm),
-                          style: const TextStyle(fontSize: 13),
+                          style: FocuxHubTypography.bodyMuted(
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
                         ),
                       ],
                     ),
@@ -384,14 +389,21 @@ class _EvolucaoComparativoScreenState
         children: [
           Expanded(
             flex: 3,
-            child: Text(label, style: const TextStyle(fontSize: 13)),
+            child: Text(
+              label,
+              style: FocuxHubTypography.bodyMuted(
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+            ),
           ),
           Expanded(
             flex: 2,
             child: Text(
               vPrimeira != null ? '${_fmtNum(vPrimeira)}$unidStr' : '—',
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 13),
+              style: FocuxHubTypography.bodyMuted(
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
             ),
           ),
           Expanded(
@@ -399,7 +411,9 @@ class _EvolucaoComparativoScreenState
             child: Text(
               vAtual != null ? '${_fmtNum(vAtual)}$unidStr' : '—',
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 13),
+              style: FocuxHubTypography.bodyMuted(
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
             ),
           ),
           Expanded(
@@ -413,10 +427,9 @@ class _EvolucaoComparativoScreenState
                 ],
                 Text(
                   deltaText,
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
+                  style: FocuxHubTypography.bodyMuted(
                     color: deltaColor,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ],

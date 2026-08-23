@@ -9,6 +9,7 @@ import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
+import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -326,18 +327,17 @@ class _NovaAulaSheetState extends State<_NovaAulaSheet> {
             SizedBox(height: TokensStrip.s3),
             TextField(
               controller: _titulo,
-              decoration: const InputDecoration(
-                labelText: 'Título *',
-                hintText: 'Ex: Funcional ao ar livre',
+              decoration: FxInputDeco.build(
+                context,
+                'Título *',
+                hint: 'Ex: Funcional ao ar livre',
               ),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: _descricao,
               maxLines: 2,
-              decoration: const InputDecoration(
-                labelText: 'Descrição (opcional)',
-              ),
+              decoration: FxInputDeco.build(context, 'Descrição (opcional)'),
             ),
             const SizedBox(height: 12),
             Row(
@@ -366,7 +366,7 @@ class _NovaAulaSheetState extends State<_NovaAulaSheet> {
                   child: TextField(
                     controller: _capacidade,
                     keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(labelText: 'Capacidade'),
+                    decoration: FxInputDeco.build(context, 'Capacidade'),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -374,9 +374,10 @@ class _NovaAulaSheetState extends State<_NovaAulaSheet> {
                   flex: 2,
                   child: TextField(
                     controller: _local,
-                    decoration: const InputDecoration(
-                      labelText: 'Local (opcional)',
-                      hintText: 'Studio, Praia, Online…',
+                    decoration: FxInputDeco.build(
+                      context,
+                      'Local (opcional)',
+                      hint: 'Studio, Praia, Online…',
                     ),
                   ),
                 ),

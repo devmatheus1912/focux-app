@@ -19,7 +19,10 @@ class _PacoteTag extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+        style: FocuxHubTypography.bodyMuted(
+          color: Theme.of(context).colorScheme.onSurface,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     );
   }

@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/design_tokens.dart';
+import '../../../../core/theme/focux_hub_typography.dart';
 import '../../../../core/theme/tokens_strip.dart';
 import '../../../../core/widgets/feedback_helper.dart';
 import '../../../../core/widgets/fx_bottom_sheet.dart';
@@ -79,30 +80,25 @@ class _TemplateIntro extends StatelessWidget {
               children: [
                 Text(
                   'Dica',
-                  style: AppTypography.inter(
-                    color: primary,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w800,
+                  style: FocuxHubTypography.chip(primary).copyWith(
                     letterSpacing: 0.3,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   'Comece por uma estrutura',
-                  style: AppTypography.inter(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w900,
-                  ),
+                  style: FocuxHubTypography.body(
+                    color: scheme.onSurface,
+                  ).copyWith(fontWeight: FontWeight.w900),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   'Escolha um modelo abaixo e preencha cada slot com exercícios da biblioteca (${templateSplits.length} opções).',
                   maxLines: 3,
-                  style: AppTypography.inter(
+                  style: FocuxHubTypography.bodyMuted(
                     color: scheme.onSurfaceVariant,
-                    fontSize: 11.5,
-                    height: 1.25,
                     fontWeight: FontWeight.w600,
+                    height: 1.25,
                   ),
                 ),
               ],
@@ -163,30 +159,24 @@ class _TemplateCard extends StatelessWidget {
                       template.nome,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: AppTypography.inter(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w900,
-                      ),
+                      style: FocuxHubTypography.cardTitle(
+                        color: scheme.onSurface,
+                      ).copyWith(fontWeight: FontWeight.w900),
                     ),
                     const SizedBox(height: 3),
                     Text(
                       template.descricao,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: AppTypography.inter(
+                      style: FocuxHubTypography.bodyMuted(
                         color: scheme.onSurfaceVariant,
-                        fontSize: 12,
                         height: 1.25,
                       ),
                     ),
                     const SizedBox(height: 8),
                     Text(
                       '$dias ${dias == 1 ? 'dia' : 'dias'} · $slots slots',
-                      style: AppTypography.inter(
-                        color: primary,
-                        fontSize: 11.5,
-                        fontWeight: FontWeight.w800,
-                      ),
+                      style: FocuxHubTypography.chip(primary),
                     ),
                   ],
                 ),
@@ -250,10 +240,8 @@ class _TemplateSlotEditorState extends ConsumerState<_TemplateSlotEditor> {
           for (final (dayIndex, day) in widget.template.dias.indexed) ...[
             Text(
               _templateDayTitle(day.nome, dayIndex),
-              style: AppTypography.inter(
-                fontSize: 13,
+              style: FocuxHubTypography.body(color: scheme.onSurface).copyWith(
                 fontWeight: FontWeight.w900,
-                color: scheme.onSurface,
               ),
             ),
             const SizedBox(height: 8),
@@ -303,9 +291,8 @@ class _TemplateSlotEditorState extends ConsumerState<_TemplateSlotEditor> {
               child: Text(
                 'Salvando exercício...',
                 textAlign: TextAlign.center,
-                style: AppTypography.inter(
+                style: FocuxHubTypography.bodyMuted(
                   color: mute,
-                  fontSize: 12.5,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -356,10 +343,9 @@ class _TemplateCompleteCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   'Modelo concluído',
-                  style: AppTypography.inter(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w900,
-                  ),
+                  style: FocuxHubTypography.cardTitle(
+                    color: scheme.onSurface,
+                  ).copyWith(fontWeight: FontWeight.w900),
                 ),
               ),
             ],
@@ -367,10 +353,8 @@ class _TemplateCompleteCard extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             'Todos os slots foram preenchidos com a prescrição ativa.',
-            style: AppTypography.inter(
+            style: FocuxHubTypography.bodyMuted(
               color: scheme.onSurfaceVariant,
-              fontSize: 12.5,
-              height: 1.35,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -416,17 +400,15 @@ class _TemplateProgressCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   'Preencha os slots do modelo',
-                  style: AppTypography.inter(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w900,
-                  ),
+                  style: FocuxHubTypography.body(
+                    color: scheme.onSurface,
+                  ).copyWith(fontWeight: FontWeight.w900),
                 ),
               ),
               Text(
                 '$done/$total',
-                style: AppTypography.inter(
+                style: FocuxHubTypography.metric(
                   color: scheme.primary,
-                  fontSize: 12.5,
                   fontWeight: FontWeight.w900,
                 ),
               ),
@@ -506,17 +488,15 @@ class _SlotTile extends StatelessWidget {
                 children: [
                   Text(
                     slot.label,
-                    style: AppTypography.inter(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w800,
+                    style: FocuxHubTypography.cardTitle(
+                      color: scheme.onSurface,
                     ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     done ? 'Adicionado ao treino' : 'Escolher exercício',
-                    style: AppTypography.inter(
+                    style: FocuxHubTypography.bodyMuted(
                       color: scheme.onSurfaceVariant,
-                      fontSize: 12,
                       fontWeight: FontWeight.w600,
                     ),
                   ),

@@ -289,16 +289,18 @@ class _MiniValueChip extends StatelessWidget {
         children: [
           Text(
             label,
-            style: TextStyle(
+            style: FocuxHubTypography.bodyMuted(
               color: Theme.of(context).colorScheme.onSurfaceVariant,
-              fontSize: 10.5,
               fontWeight: FontWeight.w600,
             ),
           ),
           const SizedBox(height: 2),
           Text(
             value,
-            style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800),
+            style: FocuxHubTypography.bodyMuted(
+              color: Theme.of(context).colorScheme.onSurface,
+              fontWeight: FontWeight.w800,
+            ),
           ),
         ],
       ),
@@ -331,7 +333,7 @@ class _Field extends StatelessWidget {
         controller: controller,
         maxLines: maxLines,
         keyboardType: keyboardType,
-        decoration: InputDecoration(labelText: label, prefixIcon: Icon(icon)),
+        decoration: FxInputDeco.build(context, label, icon: icon),
         validator:
             requiredField
                 ? (value) =>

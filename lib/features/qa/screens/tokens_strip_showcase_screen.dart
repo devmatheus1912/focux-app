@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../dashboard/utils/dashboard_readability.dart';
 import '../../../core/widgets/fx_input_deco.dart';
@@ -220,12 +221,7 @@ class _HeaderBadge extends StatelessWidget {
       children: [
         Text(
           'TOKENS STRIP',
-          style: AppTypography.inter(
-            fontSize: 28,
-            fontWeight: FontWeight.w800,
-            color: TokensStrip.textPrimary,
-            letterSpacing: -0.5,
-          ),
+          style: FocuxTypography.display(color: TokensStrip.textPrimary),
         ),
         const SizedBox(width: 10),
         Container(
@@ -271,11 +267,8 @@ class _ShowcaseSection extends StatelessWidget {
         children: [
           Text(
             title.toUpperCase(),
-            style: AppTypography.inter(
-              fontSize: 11,
-              fontWeight: FontWeight.w700,
+            style: FocuxHubTypography.chip(TokensStrip.textSecondary).copyWith(
               letterSpacing: 0.6,
-              color: TokensStrip.textSecondary,
             ),
           ),
           const SizedBox(height: TokensStrip.s3),
@@ -295,29 +288,38 @@ class _TypographyPanel extends StatelessWidget {
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final h2Color = isDark ? TokensStrip.neonGlow : TokensStrip.textH2;
-    final fontFamily = Theme.of(context).textTheme.bodyLarge?.fontFamily;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'H1: System OS',
-          style: TokensStrip.h1(color: ink, fontFamily: fontFamily),
+          'Display / page title',
+          style: FocuxTypography.display(color: ink),
         ),
         const SizedBox(height: 12),
         Text(
-          'H2: Section Title',
-          style: TokensStrip.h2(color: h2Color, fontFamily: fontFamily),
+          'Headline',
+          style: FocuxTypography.headline(color: h2Color),
         ),
         const SizedBox(height: 12),
+        Text(
+          'Section title',
+          style: FocuxHubTypography.sectionTitle(context, color: ink),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'Card title',
+          style: FocuxHubTypography.cardTitle(color: ink),
+        ),
+        const SizedBox(height: 8),
         Text(
           'Body: Default text',
-          style: TokensStrip.body(color: ink, fontFamily: fontFamily),
+          style: FocuxHubTypography.body(color: ink),
         ),
         const SizedBox(height: 6),
         Text(
           'The quick brown fox jumps over the lazy dog. 0123456789',
-          style: TokensStrip.bodyMuted(color: mute, fontFamily: fontFamily),
+          style: FocuxHubTypography.bodyMuted(color: mute),
         ),
       ],
     );
@@ -532,10 +534,9 @@ class _ShadowDepth extends StatelessWidget {
         const SizedBox(width: 12),
         Text(
           label,
-          style: AppTypography.inter(
-            fontSize: 11,
-            fontWeight: FontWeight.w600,
+          style: FocuxHubTypography.bodyMuted(
             color: TokensStrip.textSecondary,
+            fontWeight: FontWeight.w600,
           ),
         ),
       ],
@@ -850,9 +851,8 @@ class _MiniCalendar extends StatelessWidget {
             Icon(Icons.chevron_left, size: 18, color: primary),
             Text(
               'June 2022',
-              style: AppTypography.inter(
-                fontWeight: FontWeight.w700,
-                fontSize: 13,
+              style: FocuxHubTypography.cardTitle(
+                color: TokensStrip.textPrimary,
               ),
             ),
             Icon(Icons.chevron_right, size: 18, color: primary),
@@ -1194,27 +1194,19 @@ class _SpecCard extends StatelessWidget {
         children: [
           Text(
             'Title',
-            style: AppTypography.inter(
-              fontSize: 11,
-              fontWeight: FontWeight.w700,
-              color: primary,
+            style: FocuxHubTypography.chip(primary).copyWith(
               letterSpacing: 0.4,
             ),
           ),
           const SizedBox(height: 6),
           Text(
             'Content block title',
-            style: AppTypography.inter(
-              fontSize: 15,
-              fontWeight: FontWeight.w700,
-              color: ink,
-            ),
+            style: FocuxHubTypography.cardTitle(color: ink),
           ),
           const SizedBox(height: 6),
           Text(
             'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
-            style: AppTypography.inter(
-              fontSize: 12.5,
+            style: FocuxHubTypography.bodyMuted(
               color: TokensStrip.textSecondary,
               height: 1.45,
             ),
@@ -1233,12 +1225,10 @@ class _TablePreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    TextStyle head() => AppTypography.inter(
-      fontSize: 12,
+    TextStyle head() => FocuxTypography.bodySmall(color: primary).copyWith(
       fontWeight: FontWeight.w700,
-      color: primary,
     );
-    TextStyle cell() => AppTypography.inter(fontSize: 12, color: ink);
+    TextStyle cell() => FocuxTypography.bodySmall(color: ink);
 
     Widget row(List<String> cells, {bool header = false}) {
       return Container(

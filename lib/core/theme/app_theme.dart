@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'brand_palette.dart';
 import 'design_tokens.dart';
+import 'focux_hub_typography.dart';
 import 'fx_page_transitions_builder.dart';
 import 'tokens_strip.dart';
 
@@ -124,7 +125,7 @@ class AppTheme {
         letterSpacing: TokensStrip.trackingH2,
       ),
       headlineMedium: _inter(
-        fontSize: 18,
+        fontSize: FocuxHubTypography.metricEm,
         fontWeight: FontWeight.w600,
         color: onSurface,
         letterSpacing: -0.1,
@@ -357,7 +358,7 @@ class AppTheme {
         ),
         backgroundColor: dark ? EagleTokens.darkCard : surface,
         titleTextStyle: _inter(
-          fontSize: 18,
+          fontSize: FocuxHubTypography.metricEm,
           fontWeight: FontWeight.w600,
           color: onSurface,
         ),

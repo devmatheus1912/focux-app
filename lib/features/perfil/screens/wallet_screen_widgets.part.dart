@@ -28,17 +28,13 @@ class _WalletSectionCard extends StatelessWidget {
           children: [
             Text(
               title,
-              style: AppTypography.inter(
-                color: ink,
-                fontWeight: FontWeight.w800,
-                fontSize: 14,
-              ),
+              style: FocuxHubTypography.cardTitle(color: ink),
             ),
             if (subtitle != null) ...[
               const SizedBox(height: 4),
               Text(
                 subtitle!,
-                style: TextStyle(color: mute, fontSize: 11.5, height: 1.35),
+                style: FocuxHubTypography.bodyMuted(color: mute),
               ),
             ],
             const SizedBox(height: TokensStrip.s3),
@@ -204,9 +200,8 @@ class _ResumoMensalCardState extends ConsumerState<_ResumoMensalCard> {
                     Expanded(
                       child: Text(
                         'Resumo · $periodoLabel',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w800,
+                        style: FocuxHubTypography.cardTitle(
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
                     ),
@@ -257,16 +252,15 @@ class _ResumoMensalCardState extends ConsumerState<_ResumoMensalCard> {
                   const SizedBox(height: 6),
                   Text(
                     '${(percentRecebido * 100).round()}% do previsto recebido',
-                    style: TextStyle(fontSize: 12, color: mute),
+                    style: FocuxHubTypography.bodyMuted(color: mute),
                   ),
                 ],
                 const SizedBox(height: TokensStrip.s2),
                 Text(
                   'Ver financeiro completo',
-                  style: TextStyle(
-                    fontSize: 12.5,
-                    fontWeight: FontWeight.w700,
+                  style: FocuxHubTypography.bodyMuted(
                     color: primary,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ],
@@ -320,7 +314,9 @@ class _Stat extends StatelessWidget {
       children: [
         Text(
           label,
-          style: TextStyle(fontSize: 12, color: ShellChrome.of(context).mute),
+          style: FocuxHubTypography.bodyMuted(
+            color: ShellChrome.of(context).mute,
+          ),
         ),
         const SizedBox(height: 2),
         FittedBox(
@@ -328,11 +324,7 @@ class _Stat extends StatelessWidget {
           alignment: Alignment.centerLeft,
           child: Text(
             valor,
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w800,
-              color: color,
-            ),
+            style: FocuxHubTypography.cardTitle(color: color),
           ),
         ),
       ],

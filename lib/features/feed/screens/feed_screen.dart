@@ -6,6 +6,7 @@ import '../../../core/utils/friendly_error.dart';
 import '../../../core/utils/fx_utils.dart';
 
 import '../../../core/api/media_upload_service.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';

@@ -455,18 +455,15 @@ class _AgendaDateTimeRow extends StatelessWidget {
                   children: [
                     Text(
                       label,
-                      style: AppTypography.inter(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
+                      style: FocuxHubTypography.bodyMuted(
                         color: chrome.mute,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       value,
-                      style: AppTypography.inter(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w800,
+                      style: FocuxHubTypography.cardTitle(
                         color: isPlaceholder ? chrome.mute : chrome.ink,
                       ),
                     ),

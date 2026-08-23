@@ -11,6 +11,7 @@ import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
+import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
@@ -322,7 +323,7 @@ class _EnviarFormSheetState extends State<_EnviarFormSheet> {
             DropdownButtonFormField<int>(
               initialValue: _exercicioId,
               isExpanded: true,
-              decoration: const InputDecoration(labelText: 'Exercício *'),
+              decoration: FxInputDeco.build(context, 'Exercício *'),
               items:
                   widget.exercicios
                       .map(
@@ -336,18 +337,20 @@ class _EnviarFormSheetState extends State<_EnviarFormSheet> {
             TextField(
               controller: _videoUrl,
               keyboardType: TextInputType.url,
-              decoration: const InputDecoration(
-                labelText: 'URL do vídeo *',
-                hintText: 'https://youtube.com/...',
+              decoration: FxInputDeco.build(
+                context,
+                'URL do vídeo *',
+                hint: 'https://youtube.com/...',
               ),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: _comentario,
               maxLines: 2,
-              decoration: const InputDecoration(
-                labelText: 'O que você quer que a IA observe? (opcional)',
-                hintText: 'Ex: amplitude do agachamento, joelho passando do pé',
+              decoration: FxInputDeco.build(
+                context,
+                'O que você quer que a IA observe? (opcional)',
+                hint: 'Ex: amplitude do agachamento, joelho passando do pé',
               ),
             ),
             const SizedBox(height: 20),

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
@@ -198,9 +199,10 @@ class _EnterprisePromoScreenState extends ConsumerState<EnterprisePromoScreen> {
                                       useStore
                                           ? 'Assinatura pela loja'
                                           : '5 dias grátis',
-                                      style: TokensStrip.h2(
+                                      style: FocuxHubTypography.sectionTitle(
+                                        context,
                                         color: EagleTokens.goldStar,
-                                      ).copyWith(fontSize: 18),
+                                      ),
                                     ),
                                   ],
                                 ),

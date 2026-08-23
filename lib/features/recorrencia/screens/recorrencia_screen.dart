@@ -7,6 +7,7 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_form_sheet.dart';
+import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feedback_helper.dart';
@@ -93,14 +94,12 @@ class _RecorrenciaScreenState extends ConsumerState<RecorrenciaScreen> {
                     )
                     .toList(),
             onChanged: (v) => alunoId = v,
-            decoration: const InputDecoration(labelText: 'Aluno'),
+            decoration: FxInputDeco.build(context, 'Aluno'),
           ),
           TextField(
             controller: valorCtrl,
             keyboardType: TextInputType.number,
-            decoration: const InputDecoration(
-              labelText: 'Valor mensal (R\$)',
-            ),
+            decoration: FxInputDeco.build(context, 'Valor mensal (R\$)'),
           ),
         ],
       ),

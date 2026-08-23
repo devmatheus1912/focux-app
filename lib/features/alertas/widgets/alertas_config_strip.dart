@@ -43,24 +43,22 @@ class AlertasConfigStrip extends StatelessWidget {
                   children: [
                     TextSpan(
                       text: 'Dispara se: ',
-                      style: TextStyle(fontSize: 12, color: chrome.mute),
+                      style: FocuxHubTypography.bodyMuted(color: chrome.mute),
                     ),
                     TextSpan(
                       text: 'sem treino > ${config.diasSemTreino} dias ',
-                      style: TextStyle(
-                        fontSize: 12,
+                      style: FocuxHubTypography.bodyMuted(
                         color: chrome.ink,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                     TextSpan(
                       text: 'ou ',
-                      style: TextStyle(fontSize: 12, color: chrome.mute),
+                      style: FocuxHubTypography.bodyMuted(color: chrome.mute),
                     ),
                     TextSpan(
                       text: 'aderência < ${config.aderenciaMinima}%',
-                      style: TextStyle(
-                        fontSize: 12,
+                      style: FocuxHubTypography.bodyMuted(
                         color: chrome.ink,
                         fontWeight: FontWeight.w600,
                       ),
@@ -73,11 +71,7 @@ class AlertasConfigStrip extends StatelessWidget {
               onTap: onEditar,
               child: Text(
                 'Editar',
-                style: TextStyle(
-                  fontSize: 11.5,
-                  fontWeight: FontWeight.w600,
-                  color: brand,
-                ),
+                style: FocuxHubTypography.chip(brand),
               ),
             ),
           ],

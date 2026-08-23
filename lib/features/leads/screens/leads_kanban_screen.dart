@@ -14,6 +14,7 @@ import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 
@@ -298,10 +299,10 @@ class _LeadsKanbanScreenState extends ConsumerState<LeadsKanbanScreen> {
                                       ),
                                       Text(
                                         '${_cols[col]?.length ?? 0}',
-                                        style: TextStyle(
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.w700,
+                                        style: FocuxHubTypography.kpi(
                                           color: ink,
+                                          fontSize:
+                                              FocuxHubTypography.metricMd,
                                         ),
                                       ),
                                       Text(
@@ -576,11 +577,7 @@ class _LeadCard extends StatelessWidget {
                   ),
                   child: Text(
                     tag,
-                    style: TextStyle(
-                      fontSize: 9.5,
-                      fontWeight: FontWeight.w700,
-                      color: cColor,
-                    ),
+                    style: FocuxHubTypography.chip(cColor),
                   ),
                 ),
             ],
@@ -591,9 +588,12 @@ class _LeadCard extends StatelessWidget {
             children: [
               Text(
                 lead.telefone?.isNotEmpty == true ? lead.telefone! : 'Orgânico',
-                style: TextStyle(fontSize: 11, color: mute),
+                style: FocuxHubTypography.bodyMuted(color: mute),
               ),
-              Text('2d', style: TextStyle(fontSize: 10.5, color: mute)),
+              Text(
+                '2d',
+                style: FocuxHubTypography.chip(mute),
+              ),
             ],
           ),
           const SizedBox(height: 10),

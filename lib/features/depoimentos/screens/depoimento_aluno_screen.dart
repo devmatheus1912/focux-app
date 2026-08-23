@@ -6,6 +6,7 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../data/depoimento_repository.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_empty_state.dart';
+import '../../../core/widgets/fx_input_deco.dart';
 import 'package:focux_app/core/widgets/fx_motion.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
@@ -124,11 +125,12 @@ class _State extends ConsumerState<DepoimentoAlunoScreen> {
                           maxLines: 5,
                           maxLength: 500,
                           enabled: !_enviando,
-                          decoration: const InputDecoration(
-                            hintText:
+                          decoration: FxInputDeco.build(
+                            context,
+                            'Depoimento',
+                            hint:
                                 'Conte como foi sua experiência com seu personal trainer...',
-                            alignLabelWithHint: true,
-                          ),
+                          ).copyWith(alignLabelWithHint: true),
                           validator:
                               (v) =>
                                   (v == null || v.trim().length < 10)

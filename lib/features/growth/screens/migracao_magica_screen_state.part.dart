@@ -144,10 +144,8 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                       const SizedBox(height: TokensStrip.s2),
                       Text(
                         'Importe alunos',
-                        style: AppTypography.inter(
+                        style: FocuxTypography.display(color: ink).copyWith(
                           fontSize: 28,
-                          fontWeight: FontWeight.w800,
-                          color: ink,
                           letterSpacing: -0.5,
                           height: 1.1,
                         ),
@@ -197,11 +195,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                             children: [
                               Text(
                                 'Veio de outro app?',
-                                style: AppTypography.inter(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w800,
-                                  color: ink,
-                                ),
+                                style: FocuxHubTypography.cardTitle(color: ink),
                               ),
                               const SizedBox(height: 4),
                               Text(
@@ -319,11 +313,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                     children: [
                       Text(
                         'Importar dados',
-                        style: AppTypography.inter(
-                          fontSize: 13,
-                          color: ink,
-                          fontWeight: FontWeight.w800,
-                        ),
+                        style: FocuxHubTypography.cardTitle(color: ink),
                       ),
                       const SizedBox(height: 4),
                       Text(
@@ -620,17 +610,15 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                 children: [
                   Text(
                     '${alunos.length} alunos encontrados',
-                    style: AppTypography.inter(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w800,
+                    style: FocuxHubTypography.sectionTitle(
+                      context,
                       color: ink,
-                      letterSpacing: -0.3,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     'Toque para editar · remova duplicados antes de salvar',
-                    style: TextStyle(fontSize: 12, color: mute, height: 1.35),
+                    style: FocuxHubTypography.bodyMuted(color: mute),
                   ),
                 ],
               ),

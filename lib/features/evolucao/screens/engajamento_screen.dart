@@ -8,6 +8,7 @@ import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
@@ -160,7 +161,7 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
                       ),
                       trailing: Text(
                         _formatarDataHora(e.dataHora),
-                        style: TextStyle(fontSize: 12, color: chrome.mute),
+                        style: FocuxHubTypography.bodyMuted(color: chrome.mute),
                       ),
                       leading: CircleAvatar(
                         backgroundColor:

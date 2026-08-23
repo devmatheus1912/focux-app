@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/analytics/analytics_service.dart';
-import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
@@ -136,9 +136,7 @@ class _AutomacoesScreenState extends ConsumerState<AutomacoesScreen> {
                     children: [
                       Text(
                         'Templates',
-                        style: AppTypography.inter(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
+                        style: FocuxHubTypography.cardTitle(
                           color: scheme.onSurface,
                         ),
                       ),
@@ -176,9 +174,7 @@ class _AutomacoesScreenState extends ConsumerState<AutomacoesScreen> {
                         const SizedBox(height: TokensStrip.s4),
                         Text(
                           'Fluxos ativos',
-                          style: AppTypography.inter(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
+                          style: FocuxHubTypography.cardTitle(
                             color: scheme.onSurface,
                           ),
                         ),

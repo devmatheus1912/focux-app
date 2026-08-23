@@ -22,6 +22,7 @@ import '../providers/perfil_provider.dart';
 import '../utils/brand_slogan_display.dart';
 import '../../subscription/utils/landing_editor_access.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../dashboard/utils/dashboard_readability.dart';
@@ -392,10 +393,8 @@ class _IdentidadeVisualScreenState
                                               const SizedBox(width: 6),
                                               Text(
                                                 'Restaurar cores padrão',
-                                                style: AppTypography.inter(
-                                                  color: _corPrimaria,
-                                                  fontWeight: FontWeight.w700,
-                                                  fontSize: 12,
+                                                style: FocuxHubTypography.chip(
+                                                  _corPrimaria,
                                                 ),
                                               ),
                                             ],

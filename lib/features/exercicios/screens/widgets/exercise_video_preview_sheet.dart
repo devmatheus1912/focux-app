@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
 import '../../../../core/theme/design_tokens.dart';
+import '../../../../core/theme/focux_hub_typography.dart';
 import '../../../../core/theme/tokens_strip.dart';
 import '../../../../core/widgets/fx_home_sheet.dart';
 import '../../../../core/widgets/fx_loading.dart';
@@ -111,21 +112,18 @@ class ExerciseLibraryDemoStandbySheet extends StatelessWidget {
                         'A demonstração oficial deste exercício será '
                         'publicada em breve.',
                         textAlign: TextAlign.center,
-                        style: AppTypography.inter(
+                        style: FocuxHubTypography.bodyMuted(
                           color: mute,
-                          fontSize: 13,
-                          height: 1.4,
                           fontWeight: FontWeight.w700,
+                          height: 1.4,
                         ),
                       ),
                       const SizedBox(height: 8),
                       Text(
                         'Enquanto isso, envie seu vídeo na tela anterior.',
                         textAlign: TextAlign.center,
-                        style: AppTypography.inter(
+                        style: FocuxHubTypography.bodyMuted(
                           color: mute.withValues(alpha: 0.85),
-                          fontSize: 12,
-                          height: 1.35,
                         ),
                       ),
                     ],
@@ -300,7 +298,7 @@ class _PreviewLoading extends StatelessWidget {
             const SizedBox(height: 12),
             Text(
               'Carregando demonstração...',
-              style: AppTypography.inter(color: mute),
+              style: FocuxHubTypography.bodyMuted(color: mute),
             ),
           ],
         ),
@@ -327,7 +325,7 @@ class _PreviewUnavailable extends StatelessWidget {
                 ? 'Demonstração ainda sincronizando.\nTente novamente em instantes.'
                 : 'Prévia indisponível agora.',
             textAlign: TextAlign.center,
-            style: AppTypography.inter(color: mute, height: 1.35),
+            style: FocuxHubTypography.bodyMuted(color: mute),
           ),
         ),
       ),
@@ -440,7 +438,7 @@ class _ExerciseVideoPreviewSheetState extends State<ExerciseVideoPreviewSheet> {
                         ? Center(
                           child: Text(
                             'Prévia indisponível agora.',
-                            style: AppTypography.inter(color: mute),
+                            style: FocuxHubTypography.bodyMuted(color: mute),
                           ),
                         )
                         : _ready && _controller != null

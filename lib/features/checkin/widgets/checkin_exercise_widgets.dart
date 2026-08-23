@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -303,10 +304,11 @@ class CheckinSerieCard extends StatelessWidget {
                             child: Text(
                               ee.seriesFeitas.toString(),
                               textAlign: TextAlign.center,
-                              style: TextStyle(
+                              style: FocuxHubTypography.metric(
                                 color: ink,
-                                fontSize: 18,
+                                fontSize: FocuxHubTypography.metricEm,
                                 fontWeight: FontWeight.w900,
+                              ).copyWith(
                                 fontFeatures: const [
                                   FontFeature.tabularFigures(),
                                 ],

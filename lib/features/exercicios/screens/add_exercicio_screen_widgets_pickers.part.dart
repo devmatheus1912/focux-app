@@ -247,9 +247,7 @@ class _EnumPickerFullScreenState<T extends Enum>
                         const SizedBox(height: 2),
                         Text(
                           widget.title,
-                          style: TextStyle(
-                            color: ink,
-                            fontSize: 20,
+                          style: FocuxTypography.headline(color: ink).copyWith(
                             fontWeight: FontWeight.w900,
                             height: 1.15,
                           ),

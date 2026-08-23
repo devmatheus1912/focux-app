@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../../core/router/safe_navigation.dart';
+import '../../../core/theme/focux_hub_typography.dart';
+import '../../../core/theme/focux_typography.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
@@ -194,9 +196,8 @@ class _PodioCard extends StatelessWidget {
                   item.logoUrl == null
                       ? Text(
                         item.nome.isNotEmpty ? item.nome[0].toUpperCase() : '?',
-                        style: TextStyle(
+                        style: FocuxTypography.headline(
                           color: isDark ? EagleTokens.darkInk : primary,
-                          fontSize: 20,
                         ),
                       )
                       : null,
@@ -237,10 +238,10 @@ class _PodioCard extends StatelessWidget {
               alignment: Alignment.center,
               child: Text(
                 '${item.posicao}',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w800,
+                style: FocuxHubTypography.kpi(
                   color: isGold ? Colors.white : primary,
+                  fontSize: FocuxHubTypography.metricLg,
+                  fontWeight: FontWeight.w800,
                 ),
               ),
             ),

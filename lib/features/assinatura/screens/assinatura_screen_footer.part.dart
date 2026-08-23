@@ -123,12 +123,8 @@ class _EnterpriseProUpgradePriceHint extends StatelessWidget {
               children: [
                 Text(
                   'Quanto custa o upgrade?',
-                  style: AppTypography.inter(
-                    fontWeight: FontWeight.w800,
-                    fontSize: 14,
-                    height: 1.25,
-                    color: ink,
-                  ),
+                  style: FocuxHubTypography.cardTitle(color: ink)
+                      .copyWith(height: 1.25),
                 ),
                 const SizedBox(height: 4),
                 Text(

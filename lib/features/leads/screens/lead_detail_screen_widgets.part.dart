@@ -295,17 +295,16 @@ class _InteracaoTile extends StatelessWidget {
                   children: [
                     Text(
                       interacao.tipo,
-                      style: const TextStyle(
+                      style: FocuxHubTypography.bodyMuted(
+                        color: Theme.of(context).colorScheme.onSurface,
                         fontWeight: FontWeight.w600,
-                        fontSize: 13,
                       ),
                     ),
                     if (dataStr.isNotEmpty) ...[
                       const SizedBox(width: 8),
                       Text(
                         dataStr,
-                        style: const TextStyle(
-                          fontSize: 11,
+                        style: FocuxHubTypography.bodyMuted(
                           color: TokensStrip.textSecondary,
                         ),
                       ),
@@ -313,7 +312,12 @@ class _InteracaoTile extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 2),
-                Text(interacao.descricao, style: const TextStyle(fontSize: 13)),
+                Text(
+                  interacao.descricao,
+                  style: FocuxHubTypography.bodyMuted(
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                ),
               ],
             ),
           ),

@@ -8,6 +8,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/utils/friendly_error.dart';
@@ -193,9 +194,7 @@ class _ConvitesScreenState extends ConsumerState<ConvitesScreen> {
                                     children: [
                                       Text(
                                         'Link gerado',
-                                        style: AppTypography.inter(
-                                          fontWeight: FontWeight.w800,
-                                          fontSize: 16,
+                                        style: FocuxHubTypography.cardTitle(
                                           color: ink,
                                         ),
                                       ),
@@ -326,10 +325,9 @@ class _HeroCard extends StatelessWidget {
               children: [
                 Text(
                   'Convite único',
-                  style: AppTypography.inter(
+                  style: FocuxHubTypography.sectionTitle(
+                    context,
                     color: ink,
-                    fontWeight: FontWeight.w800,
-                    fontSize: 17,
                   ),
                 ),
                 const SizedBox(height: 4),

@@ -340,16 +340,13 @@ class _ProgressLegendChip extends StatelessWidget {
             const SizedBox(width: 6),
             Text(
               label,
-              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
+              style: FocuxHubTypography.chip(scheme.onSurface),
             ),
             const Spacer(),
             Text(
               caption,
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w800,
-                color:
-                    complete ? ready : scheme.onSurface.withValues(alpha: 0.72),
+              style: FocuxHubTypography.chip(
+                complete ? ready : scheme.onSurface.withValues(alpha: 0.72),
               ),
             ),
           ],

@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/design_tokens.dart';
+import '../../../../core/theme/focux_hub_typography.dart';
 import '../../../../core/theme/tokens_strip.dart';
 import '../../../../core/widgets/fx_home_sheet.dart';
 import '../../../../core/widgets/fx_loading.dart';
@@ -63,7 +64,7 @@ class SubstituirExercicioBottomSheet extends ConsumerWidget {
                   (_, __) => Center(
                     child: Text(
                       'Não foi possível buscar alternativas.',
-                      style: AppTypography.inter(color: mute),
+                      style: FocuxHubTypography.bodyMuted(color: mute),
                     ),
                   ),
               data: (todos) {
@@ -82,9 +83,8 @@ class SubstituirExercicioBottomSheet extends ConsumerWidget {
                           alignment: Alignment.centerLeft,
                           child: Text(
                             '${alternativas.length} opções por padrão de movimento e equipamento',
-                            style: AppTypography.inter(
+                            style: FocuxHubTypography.bodyMuted(
                               color: primary,
-                              fontSize: 11.5,
                               fontWeight: FontWeight.w700,
                             ),
                           ),
@@ -217,11 +217,9 @@ class _AlternativaTile extends StatelessWidget {
                             exercicio.nomeDisplay,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
-                            style: AppTypography.inter(
+                            style: FocuxHubTypography.cardTitle(
                               color: ink,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w900,
-                            ),
+                            ).copyWith(fontWeight: FontWeight.w900),
                           ),
                         ),
                         const SizedBox(width: 8),
@@ -234,9 +232,8 @@ class _AlternativaTile extends StatelessWidget {
                         meta,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: AppTypography.inter(
+                        style: FocuxHubTypography.bodyMuted(
                           color: mute,
-                          fontSize: 11.5,
                           fontWeight: FontWeight.w600,
                           height: 1.25,
                         ),
@@ -296,11 +293,7 @@ class _MatchBadge extends StatelessWidget {
       ),
       child: Text(
         '$clamped%',
-        style: AppTypography.inter(
-          color: primary,
-          fontSize: 10.5,
-          fontWeight: FontWeight.w800,
-        ),
+        style: FocuxHubTypography.chip(primary),
       ),
     );
   }
@@ -325,7 +318,7 @@ class _EmptyState extends StatelessWidget {
         Text(
           'Nenhuma alternativa próxima encontrada.',
           textAlign: TextAlign.center,
-          style: AppTypography.inter(
+          style: FocuxHubTypography.bodyMuted(
             color: EagleTokens.inkMute,
             fontWeight: FontWeight.w700,
           ),

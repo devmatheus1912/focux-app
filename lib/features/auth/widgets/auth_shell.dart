@@ -9,6 +9,7 @@ import '../../../core/brand/focux_brand_copy.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
+import '../../../core/theme/focux_typography.dart';
 import '../../../core/theme/focux_system_chrome.dart';
 import '../../../core/theme/hero_teal.dart';
 import '../../../core/theme/theme_provider.dart';
@@ -232,8 +233,7 @@ class AuthWordmark extends ConsumerWidget {
           Text(
             displayName,
             textAlign: align,
-            style: AppTypography.inter(
-              color: Colors.white,
+            style: FocuxTypography.display(color: Colors.white).copyWith(
               fontSize: taglineSize * 1.65,
               fontWeight: FontWeight.w700,
               letterSpacing: -0.4,
@@ -420,8 +420,7 @@ class AuthField extends StatelessWidget {
       children: [
         Text(
           label,
-          style: AppTypography.inter(
-            color: heroTealSurface(0.86),
+          style: FocuxHubTypography.chip(heroTealSurface(0.86)).copyWith(
             fontSize: 12.5,
             fontWeight: FontWeight.w600,
             letterSpacing: 0.5,
@@ -438,13 +437,10 @@ class AuthField extends StatelessWidget {
           validator: validator,
           obscureText: obscureText,
           onFieldSubmitted: onFieldSubmitted,
-          style: AppTypography.inter(color: heroTealInk(), fontSize: 15),
+          style: FocuxHubTypography.body(color: heroTealInk()),
           decoration: InputDecoration(
             hintText: hintText,
-            hintStyle: AppTypography.inter(
-              color: heroTealSurface(0.72),
-              fontSize: 15,
-            ),
+            hintStyle: FocuxHubTypography.body(color: heroTealSurface(0.72)),
             prefixIcon:
                 icon == null
                     ? null
@@ -748,8 +744,9 @@ class AuthStickyRoleBar extends StatelessWidget {
               child: Text(
                 '— ${roleLabel.toUpperCase()} —',
                 textAlign: TextAlign.center,
-                style: AppTypography.inter(
-                  color: primary.withValues(alpha: 0.92),
+                style: FocuxHubTypography.chip(
+                  primary.withValues(alpha: 0.92),
+                ).copyWith(
                   fontSize: 11.5,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 2.4,
@@ -796,10 +793,9 @@ class AuthTextLink extends StatelessWidget {
         child: RichText(
           textAlign: TextAlign.center,
           text: TextSpan(
-            style: AppTypography.inter(
+            style: FocuxHubTypography.body(
               color: textColor ?? heroTealSurface(0.82),
-              fontSize: fontSize,
-            ),
+            ).copyWith(fontSize: fontSize),
             children: [
               TextSpan(text: text),
               TextSpan(

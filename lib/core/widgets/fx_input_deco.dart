@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../theme/design_tokens.dart';
+import '../theme/focux_hub_typography.dart';
 import '../theme/tokens_strip.dart';
 
 /// Premium input decoration factory — TOKENS STRIP Liquid Glass.
@@ -34,12 +35,13 @@ class FxInputDeco {
     return InputDecoration(
       labelText: label,
       hintText: hint,
-      labelStyle: TextStyle(
+      labelStyle: FocuxHubTypography.bodyMuted(
         color: mute,
-        fontSize: 13.5,
         fontWeight: FontWeight.w600,
       ),
-      hintStyle: TextStyle(color: mute.withValues(alpha: 0.5), fontSize: 13.5),
+      hintStyle: FocuxHubTypography.bodyMuted(
+        color: mute.withValues(alpha: 0.5),
+      ),
       prefixIcon: icon != null ? Icon(icon, size: 20, color: mute) : null,
       suffixIcon: suffix,
       filled: true,

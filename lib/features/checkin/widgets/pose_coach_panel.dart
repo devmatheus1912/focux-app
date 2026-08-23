@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import 'pose_coach_camera.dart';
 
 /// Rep counter + optional MediaPipe camera coach during check-in.
@@ -77,10 +78,9 @@ class _PoseCoachPanelState extends State<PoseCoachPanel> {
               Expanded(
                 child: Text(
                   'Coach de execucao',
-                  style: TextStyle(
+                  style: FocuxHubTypography.bodyMuted(
                     color: ink,
                     fontWeight: FontWeight.w800,
-                    fontSize: 13,
                   ),
                 ),
               ),
@@ -101,7 +101,7 @@ class _PoseCoachPanelState extends State<PoseCoachPanel> {
           Text(
             _formHint ??
                 'Conte reps com precisao. ${target != null ? 'Meta: $target.' : 'Toque +1 a cada repeticao.'}',
-            style: TextStyle(color: mute, fontSize: 12, height: 1.35),
+            style: FocuxHubTypography.bodyMuted(color: mute),
           ),
           const SizedBox(height: 12),
           Row(
@@ -149,15 +149,15 @@ class _RepChip extends StatelessWidget {
         children: [
           Text(
             label,
-            style: TextStyle(fontSize: 11, color: brand.withValues(alpha: 0.8)),
+            style: FocuxHubTypography.chip(brand.withValues(alpha: 0.8)),
           ),
           const SizedBox(width: 8),
           Text(
             value,
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w900,
+            style: FocuxHubTypography.metric(
               color: brand,
+              fontSize: FocuxHubTypography.metricEm,
+              fontWeight: FontWeight.w900,
             ),
           ),
         ],

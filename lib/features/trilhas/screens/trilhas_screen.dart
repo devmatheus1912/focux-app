@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focux_app/core/widgets/fx_motion.dart';
 
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
@@ -249,13 +250,9 @@ class _TrilhaCard extends StatelessWidget {
                       color: EagleTokens.good.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: const Text(
+                    child: Text(
                       '✓ CONCLUÍDA',
-                      style: TextStyle(
-                        fontSize: 10,
-                        color: EagleTokens.good,
-                        fontWeight: FontWeight.w700,
-                      ),
+                      style: FocuxHubTypography.chip(EagleTokens.good),
                     ),
                   ),
               ],
@@ -264,7 +261,7 @@ class _TrilhaCard extends StatelessWidget {
               const SizedBox(height: 4),
               Text(
                 trilha.descricao!,
-                style: TextStyle(fontSize: 12, color: chrome.mute),
+                style: FocuxHubTypography.bodyMuted(color: chrome.mute),
               ),
             ],
             const SizedBox(height: 14),
@@ -275,7 +272,7 @@ class _TrilhaCard extends StatelessWidget {
               children: [
                 Text(
                   'Progresso',
-                  style: TextStyle(fontSize: 12, color: chrome.mute),
+                  style: FocuxHubTypography.bodyMuted(color: chrome.mute),
                 ),
                 Text(
                   '${trilha.percentualConclusao.toStringAsFixed(0)}%',

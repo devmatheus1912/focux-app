@@ -25,6 +25,9 @@ void main() {
     expect(page.fontSize, TokensStrip.fontH1);
     expect(section.fontSize, TokensStrip.fontH2);
     expect(caption.fontSize, TokensStrip.fontBodySm);
+    expect(FocuxHubTypography.metricEm, TokensStrip.fontBody + 3);
+    expect(FocuxHubTypography.metricMd, TokensStrip.fontBody + 5);
+    expect(FocuxHubTypography.metricLg, TokensStrip.fontH2);
   });
 
   test('elevation layers are monotonically ordered', () {

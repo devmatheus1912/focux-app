@@ -7,6 +7,7 @@ import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
@@ -138,26 +139,24 @@ class _OfertasUpsellScreenState extends ConsumerState<OfertasUpsellScreen> {
                     const SizedBox(height: TokensStrip.s4),
                     TextField(
                       controller: _titulo,
-                      decoration: const InputDecoration(labelText: 'Título'),
+                      decoration: FxInputDeco.build(context, 'Título'),
                     ),
                     const SizedBox(height: TokensStrip.s2),
                     TextField(
                       controller: _descricao,
-                      decoration: const InputDecoration(labelText: 'Descrição'),
+                      decoration: FxInputDeco.build(context, 'Descrição'),
                       maxLines: 2,
                     ),
                     const SizedBox(height: TokensStrip.s2),
                     TextField(
                       controller: _valor,
                       keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                        labelText: 'Valor (R\$)',
-                      ),
+                      decoration: FxInputDeco.build(context, 'Valor (R\$)'),
                     ),
                     const SizedBox(height: TokensStrip.s2),
                     DropdownButtonFormField<String>(
                       initialValue: _tipoGatilho,
-                      decoration: const InputDecoration(labelText: 'Gatilho'),
+                      decoration: FxInputDeco.build(context, 'Gatilho'),
                       items: const [
                         DropdownMenuItem(
                           value: 'MANUAL',

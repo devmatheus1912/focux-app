@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'landing_editor_sections.dart';
@@ -378,8 +379,7 @@ InputDecoration landingEditorFieldDecoration(
   String? helperText,
   int? maxLength,
 }) {
-  return InputDecoration(
-    labelText: labelText,
+  return FxInputDeco.build(context, labelText).copyWith(
     helperText: helperText,
     helperMaxLines: 2,
     helperStyle: landingEditorMutedStyle(context),

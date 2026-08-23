@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/theme/design_tokens.dart';
+import '../../../../core/theme/focux_hub_typography.dart';
 import '../../data/enums.dart';
 import '../../data/exercicio_repository.dart';
 import '../../data/exercicio_taxonomy_labels.dart';
@@ -123,11 +123,9 @@ class _PadraoMovimentoGridState extends ConsumerState<PadraoMovimentoGrid> {
                                 ? 'Nenhuma categoria combina com os filtros ativos.'
                                 : 'Nenhuma categoria com exercícios disponíveis nesta visão.',
                             textAlign: TextAlign.center,
-                            style: AppTypography.inter(
+                            style: FocuxHubTypography.bodyMuted(
                               color: mute,
-                              fontSize: 13,
                               fontWeight: FontWeight.w600,
-                              height: 1.35,
                             ),
                           ),
                           if (widget.pickerFilter.isActive &&
@@ -227,19 +225,17 @@ class _CategoryIntro extends StatelessWidget {
               children: [
                 Text(
                   'Escolha por intenção',
-                  style: AppTypography.inter(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w900,
-                  ),
+                  style: FocuxHubTypography.body(
+                    color: scheme.onSurface,
+                  ).copyWith(fontWeight: FontWeight.w900),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   'Abra uma categoria e selecione o exercício certo para prescrever.',
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: AppTypography.inter(
+                  style: FocuxHubTypography.bodyMuted(
                     color: scheme.onSurfaceVariant,
-                    fontSize: 11.5,
                     height: 1.25,
                   ),
                 ),
@@ -296,14 +292,15 @@ class _GridItem extends StatelessWidget {
                 label,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: AppTypography.inter(fontWeight: FontWeight.w900),
+                style: FocuxHubTypography.cardTitle(
+                  color: scheme.onSurface,
+                ).copyWith(fontWeight: FontWeight.w900),
               ),
               const SizedBox(height: 3),
               Text(
                 '$count exercícios',
-                style: AppTypography.inter(
+                style: FocuxHubTypography.bodyMuted(
                   color: scheme.onSurfaceVariant,
-                  fontSize: 12,
                   fontWeight: FontWeight.w700,
                 ),
               ),

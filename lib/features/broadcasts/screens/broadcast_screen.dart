@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:focux_app/core/widgets/fx_motion.dart';
@@ -192,12 +193,7 @@ class _BroadcastScreenState extends ConsumerState<BroadcastScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 4),
                   child: Text(
                     'Historico',
-                    style: TextStyle(
-                      color: ink,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: -0.2,
-                    ),
+                    style: FocuxHubTypography.cardTitle(color: ink),
                   ),
                 ),
                 const SizedBox(height: 12),

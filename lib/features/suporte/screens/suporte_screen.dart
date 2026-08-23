@@ -4,6 +4,7 @@ import '../../../core/utils/friendly_error.dart';
 import '../../../core/utils/fx_utils.dart';
 
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/widgets/branded_app_identity.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/suporte_repository.dart';

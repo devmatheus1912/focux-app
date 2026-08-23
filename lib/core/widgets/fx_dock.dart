@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../theme/app_typography.dart';
+import '../theme/focux_hub_typography.dart';
 import '../theme/tokens_strip.dart';
 import 'fx_icon.dart';
 
@@ -227,11 +227,10 @@ class _FxDockNavItemState extends State<_FxDockNavItem> {
                     const SizedBox(height: 2),
                     Text(
                       widget.item.label,
-                      style: AppTypography.inter(
+                      style: FocuxHubTypography.chip(color).copyWith(
                         fontSize: labelSize,
                         fontWeight:
                             widget.active ? FontWeight.w700 : FontWeight.w600,
-                        color: color,
                         height: 1.05,
                         letterSpacing: widget.active ? 0.15 : 0.05,
                       ),

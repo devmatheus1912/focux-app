@@ -18,6 +18,7 @@ import '../../evolucao/data/evolucao_repository.dart';
 import '../utils/birth_date_api_format.dart';
 import '../../../core/widgets/fx_form_sheet.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
+import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_loading.dart';

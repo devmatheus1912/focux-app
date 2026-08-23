@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
@@ -210,7 +211,10 @@ class _NpsDashboardScreenState extends ConsumerState<NpsDashboardScreen> {
                 backgroundColor: detractorColor,
                 foregroundColor: Colors.white,
                 radius: 18,
-                child: Text('${n.score}', style: const TextStyle(fontSize: 13)),
+                child: Text(
+                  '${n.score}',
+                  style: FocuxHubTypography.bodyMuted(color: Colors.white),
+                ),
               ),
               const SizedBox(width: 10),
               Expanded(
@@ -225,8 +229,7 @@ class _NpsDashboardScreenState extends ConsumerState<NpsDashboardScreen> {
                     ),
                     Text(
                       'Detrator · ${n.criadoEm}',
-                      style: TextStyle(
-                        fontSize: 12,
+                      style: FocuxHubTypography.bodyMuted(
                         color: ShellChrome.of(context).mute,
                       ),
                     ),
@@ -240,9 +243,12 @@ class _NpsDashboardScreenState extends ConsumerState<NpsDashboardScreen> {
             Text(n.comentario!, style: const TextStyle(height: 1.4)),
           ],
           const SizedBox(height: 12),
-          const Text(
+          Text(
             'Playbook: entre em contato para entender o problema e recuperar a confiança.',
-            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+            style: FocuxHubTypography.bodyMuted(
+              color: Theme.of(context).colorScheme.onSurface,
+              fontWeight: FontWeight.w600,
+            ),
           ),
           const SizedBox(height: 10),
           FilledButton.icon(
@@ -259,9 +265,17 @@ class _NpsDashboardScreenState extends ConsumerState<NpsDashboardScreen> {
     children: [
       Text(
         value,
-        style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700),
+        style: FocuxHubTypography.kpi(
+          color: Theme.of(context).colorScheme.onSurface,
+          fontSize: FocuxHubTypography.metricLg,
+        ),
       ),
-      Text(label, style: const TextStyle(fontSize: 12)),
+      Text(
+        label,
+        style: FocuxHubTypography.bodyMuted(
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
+        ),
+      ),
     ],
   );
 
@@ -282,15 +296,16 @@ class _NpsDashboardScreenState extends ConsumerState<NpsDashboardScreen> {
           const SizedBox(height: 4),
           Text(
             '$valor',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
+            style: FocuxHubTypography.kpi(
               color: color,
+              fontSize: FocuxHubTypography.metricEm,
             ),
           ),
           Text(
             '$pct% · $label',
-            style: const TextStyle(fontSize: 11),
+            style: FocuxHubTypography.chip(
+              Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
             textAlign: TextAlign.center,
           ),
         ],

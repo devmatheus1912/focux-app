@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../widgets/auth_shell.dart';
 
 /// Campo OTP 6 dígitos reutilizável (cadastro + reset de senha).
@@ -61,10 +61,9 @@ class AuthOtpField extends StatelessWidget {
                 : resendSeconds > 0
                 ? '${resendSeconds}s'
                 : resendLabel,
-            style: AppTypography.inter(
+            style: FocuxHubTypography.chip(primary).copyWith(
               fontSize: 12.5,
               fontWeight: FontWeight.w700,
-              color: primary,
             ),
           ),
         ),

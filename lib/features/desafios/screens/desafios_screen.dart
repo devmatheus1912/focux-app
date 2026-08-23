@@ -18,6 +18,7 @@ import '../../../core/widgets/fx_error_state.dart';
 
 import '../../../core/widgets/fx_form_sheet.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
+import '../../../core/widgets/fx_input_deco.dart';
 
 import '../../../core/widgets/fx_motion.dart';
 
@@ -93,7 +94,7 @@ class _DesafiosScreenState extends ConsumerState<DesafiosScreen> {
       confirmLabel: 'Criar',
       child: TextField(
         controller: ctrl,
-        decoration: const InputDecoration(labelText: 'Título'),
+        decoration: FxInputDeco.build(context, 'Título'),
       ),
     );
 

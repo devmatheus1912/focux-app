@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/theme/design_tokens.dart';
+import '../../../../core/theme/focux_hub_typography.dart';
 import '../../../../core/theme/tokens_strip.dart';
 import '../../../../core/widgets/fx_home_sheet.dart';
 import '../../../treinos/utils/exercise_picker_sort.dart';
@@ -69,11 +69,7 @@ class PadraoExerciciosBottomSheet extends ConsumerWidget {
               ),
               child: Text(
                 '$count exercícios',
-                style: AppTypography.inter(
-                  color: primary,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w800,
-                ),
+                style: FocuxHubTypography.chip(primary),
               ),
             ),
           ),
@@ -141,7 +137,7 @@ class PadraoExerciciosBottomSheet extends ConsumerWidget {
                       child: Text(
                         'Não foi possível carregar os exercícios.',
                         textAlign: TextAlign.center,
-                        style: AppTypography.inter(
+                        style: FocuxHubTypography.bodyMuted(
                           color: scheme.onSurfaceVariant,
                           fontWeight: FontWeight.w600,
                         ),
@@ -270,21 +266,17 @@ class _ExerciseChoiceTile extends StatelessWidget {
                     nome,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: AppTypography.inter(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w800,
-                      color: muted ? scheme.onSurfaceVariant : null,
+                    style: FocuxHubTypography.cardTitle(
+                      color: muted
+                          ? scheme.onSurfaceVariant
+                          : scheme.onSurface,
                     ),
                   ),
                   if (alreadyInTreino) ...[
                     const SizedBox(height: 2),
                     Text(
                       'Já está neste treino',
-                      style: AppTypography.inter(
-                        color: scheme.onSurfaceVariant,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
-                      ),
+                      style: FocuxHubTypography.chip(scheme.onSurfaceVariant),
                     ),
                   ] else if (subtitle.isNotEmpty) ...[
                     const SizedBox(height: 2),
@@ -292,9 +284,8 @@ class _ExerciseChoiceTile extends StatelessWidget {
                       subtitle,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: AppTypography.inter(
+                      style: FocuxHubTypography.bodyMuted(
                         color: scheme.onSurfaceVariant,
-                        fontSize: 12,
                         fontWeight: FontWeight.w600,
                         height: 1.2,
                       ),

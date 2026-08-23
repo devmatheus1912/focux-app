@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/design_tokens.dart';
+import '../../../../core/theme/focux_hub_typography.dart';
 import '../../../../core/theme/tokens_strip.dart';
 import '../../../../core/widgets/fx_motion.dart';
 import '../../../../core/widgets/fx_shell_scaffold.dart';
@@ -147,9 +148,7 @@ class ExerciseVideoUploadStrip extends StatelessWidget {
                       children: [
                         Text(
                           statusTitle,
-                          style: AppTypography.inter(
-                            color: ink,
-                            fontSize: 13,
+                          style: FocuxHubTypography.body(color: ink).copyWith(
                             fontWeight: FontWeight.w800,
                           ),
                         ),
@@ -158,11 +157,10 @@ class ExerciseVideoUploadStrip extends StatelessWidget {
                           statusSubtitle,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: AppTypography.inter(
+                          style: FocuxHubTypography.bodyMuted(
                             color: caption,
-                            fontSize: 12,
-                            height: 1.3,
                             fontWeight: FontWeight.w600,
+                            height: 1.3,
                           ),
                         ),
                       ],
@@ -278,20 +276,17 @@ class ExerciseVideoUploadStrip extends StatelessWidget {
                     children: [
                       Text(
                         statusTitle,
-                        style: AppTypography.inter(
-                          color: ink,
-                          fontSize: 12.5,
+                        style: FocuxHubTypography.cardTitle(color: ink).copyWith(
                           fontWeight: FontWeight.w900,
                         ),
                       ),
                       const SizedBox(height: 2),
                       Text(
                         statusSubtitle,
-                        style: AppTypography.inter(
+                        style: FocuxHubTypography.bodyMuted(
                           color: mute,
-                          fontSize: 11.2,
-                          height: 1.3,
                           fontWeight: FontWeight.w700,
+                          height: 1.3,
                         ),
                       ),
                     ],
@@ -351,9 +346,7 @@ class _SourceBadge extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: AppTypography.inter(
-          color: color,
-          fontSize: 10.5,
+        style: FocuxHubTypography.chip(color).copyWith(
           fontWeight: FontWeight.w900,
           letterSpacing: 0.2,
         ),
@@ -408,9 +401,8 @@ class _DenseActions extends StatelessWidget {
             Text(
               'Enviando para a nuvem...',
               textAlign: TextAlign.center,
-              style: AppTypography.inter(
+              style: FocuxHubTypography.bodyMuted(
                 color: mute,
-                fontSize: 12,
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -458,9 +450,8 @@ class _DenseActions extends StatelessWidget {
               icon: Icon(Icons.delete_outline_rounded, color: mute, size: 18),
               label: Text(
                 'Remover vídeo',
-                style: AppTypography.inter(
+                style: FocuxHubTypography.bodyMuted(
                   color: mute,
-                  fontSize: 12,
                   fontWeight: FontWeight.w700,
                 ),
               ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/fx_empty_state.dart';
@@ -147,11 +148,9 @@ class _FinanceiroResumoScreenState
                   const SizedBox(width: 16),
                   Text(
                     '${_meses[_mes]} $_ano',
-                    style: AppTypography.inter(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
+                    style: FocuxHubTypography.sectionTitle(
+                      context,
                       color: ink,
-                      letterSpacing: -0.3,
                     ),
                   ),
                   const SizedBox(width: 16),

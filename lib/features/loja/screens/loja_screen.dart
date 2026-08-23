@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/analytics/analytics_service.dart';
-import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
@@ -13,6 +13,7 @@ import '../../../core/widgets/feature_gate.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_form_sheet.dart';
+import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
@@ -99,12 +100,12 @@ class _LojaScreenState extends ConsumerState<LojaScreen>
         children: [
           TextField(
             controller: emailCtrl,
-            decoration: const InputDecoration(labelText: 'Email do comprador'),
+            decoration: FxInputDeco.build(context, 'Email do comprador'),
             keyboardType: TextInputType.emailAddress,
           ),
           TextField(
             controller: nomeCtrl,
-            decoration: const InputDecoration(labelText: 'Nome (opcional)'),
+            decoration: FxInputDeco.build(context, 'Nome (opcional)'),
           ),
         ],
       ),
@@ -310,10 +311,8 @@ class _LojaScreenState extends ConsumerState<LojaScreen>
                 subtitle: Text('Status: ${pedido.status}'),
                 trailing: Text(
                   'R\$ ${pedido.valor.toStringAsFixed(2)}',
-                  style: AppTypography.inter(
-                    fontWeight: FontWeight.w700,
-                    color: scheme.primary,
-                  ),
+                  style: FocuxHubTypography.body(color: scheme.primary)
+                      .copyWith(fontWeight: FontWeight.w700),
                 ),
               ),
             ),

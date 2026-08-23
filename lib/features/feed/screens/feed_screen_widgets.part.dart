@@ -70,14 +70,14 @@ class _PostAuthorHeader extends StatelessWidget {
                 name,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: 13,
+                style: FocuxHubTypography.bodyMuted(
+                  color: Theme.of(context).colorScheme.onSurface,
                   fontWeight: FontWeight.w800,
                 ),
               ),
               Text(
                 fxTimeAgo(DateTime.parse(post.criadoEm)),
-                style: TextStyle(fontSize: 12, color: mute),
+                style: FocuxHubTypography.bodyMuted(color: mute),
               ),
             ],
           ),
@@ -362,7 +362,12 @@ class _FeedPostCard extends StatelessWidget {
               const SizedBox(height: 6),
               _TypeBadge(tipo: post.tipoPost, color: badgeColor),
               const SizedBox(height: 8),
-              Text(post.conteudo, style: const TextStyle(fontSize: 14)),
+              Text(
+                post.conteudo,
+                style: FocuxHubTypography.body(
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+              ),
               if (mUrl != null && mUrl.isNotEmpty) ...[
                 const SizedBox(height: 12),
                 post.tipoPost == 'VIDEO'

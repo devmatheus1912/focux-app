@@ -100,12 +100,9 @@ class _LiveBrandHero extends StatelessWidget {
                       const SizedBox(width: 6),
                       Text(
                         'Preview ao vivo · $paletteName',
-                        style: AppTypography.inter(
-                          color: heroTealSurface(0.92),
-                          fontSize: 10.5,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 0.3,
-                        ),
+                        style: FocuxHubTypography.chip(
+                          heroTealSurface(0.92),
+                        ).copyWith(letterSpacing: 0.3),
                       ),
                     ],
                   ),
@@ -124,10 +121,8 @@ class _LiveBrandHero extends StatelessWidget {
                           logoUrl == null || logoUrl!.isEmpty
                               ? Text(
                                 name.isNotEmpty ? name[0].toUpperCase() : 'P',
-                                style: AppTypography.inter(
+                                style: FocuxTypography.headline(
                                   color: heroTealInk(),
-                                  fontWeight: FontWeight.w800,
-                                  fontSize: 22,
                                 ),
                               )
                               : null,
@@ -141,13 +136,10 @@ class _LiveBrandHero extends StatelessWidget {
                             name.isNotEmpty ? name : 'Seu app Focux',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: AppTypography.inter(
+                            style: FocuxHubTypography.pageTitle(
+                              context,
                               color: heroTealInk(),
-                              fontWeight: FontWeight.w800,
-                              fontSize: 20,
-                              letterSpacing: -0.5,
-                              height: 1,
-                            ),
+                            ).copyWith(letterSpacing: -0.5, height: 1),
                           ),
                           const SizedBox(height: 6),
                           Text(
@@ -156,11 +148,10 @@ class _LiveBrandHero extends StatelessWidget {
                                 : 'Slogan aparece aqui em tempo real',
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
-                            style: AppTypography.inter(
+                            style: FocuxHubTypography.bodyMuted(
                               color: heroTealSurface(0.82),
-                              fontSize: 12.5,
-                              height: 1.3,
                               fontWeight: FontWeight.w500,
+                              height: 1.3,
                             ),
                           ),
                         ],
@@ -235,11 +226,9 @@ class _LogoUploadRing extends StatelessWidget {
                     : Center(
                       child: Text(
                         nome.isNotEmpty ? nome[0].toUpperCase() : '?',
-                        style: AppTypography.inter(
-                          fontSize: 36,
-                          fontWeight: FontWeight.w800,
+                        style: FocuxTypography.display(
                           color: primary,
-                        ),
+                        ).copyWith(fontSize: 36),
                       ),
                     ),
           ),
@@ -403,10 +392,7 @@ class _CuratedPaletteGrid extends StatelessWidget {
                     palette.name,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: AppTypography.inter(
-                      fontWeight: FontWeight.w800,
-                      fontSize: 12.5,
-                      color: chrome.ink,
+                    style: FocuxHubTypography.chip(chrome.ink).copyWith(
                       letterSpacing: -0.2,
                     ),
                   ),
@@ -460,11 +446,8 @@ class _BrandField extends StatelessWidget {
       children: [
         Text(
           label.toUpperCase(),
-          style: AppTypography.inter(
-            fontSize: 10.5,
-            fontWeight: FontWeight.w800,
+          style: FocuxHubTypography.chip(chrome.mute).copyWith(
             letterSpacing: 0.8,
-            color: chrome.mute,
           ),
         ),
         const SizedBox(height: 8),
@@ -490,10 +473,8 @@ class _BrandField extends StatelessWidget {
             enabled: enabled,
             maxLines: maxLines,
             maxLength: maxLength,
-            style: AppTypography.inter(
-              fontSize: 14,
+            style: FocuxHubTypography.body(color: chrome.ink).copyWith(
               fontWeight: FontWeight.w600,
-              color: chrome.ink,
               height: maxLines > 1 ? 1.45 : 1.2,
             ),
             decoration: InputDecoration(
@@ -580,10 +561,8 @@ class _PanelTitle extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: AppTypography.inter(
-                  fontWeight: FontWeight.w800,
-                  fontSize: 16,
-                  letterSpacing: -0.3,
+                style: FocuxHubTypography.sectionTitle(
+                  context,
                   color: ShellChrome.of(context).ink,
                 ),
               ),
@@ -663,11 +642,7 @@ class _PaywallCard extends StatelessWidget {
               const SizedBox(width: 8),
               Text(
                 'Recurso Premium',
-                style: AppTypography.inter(
-                  fontWeight: FontWeight.w800,
-                  fontSize: 16,
-                  color: chrome.ink,
-                ),
+                style: FocuxHubTypography.cardTitle(color: chrome.ink),
               ),
             ],
           ),

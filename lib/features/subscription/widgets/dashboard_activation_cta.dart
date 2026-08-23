@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/analytics/analytics_service.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../onboarding/widgets/setup_step_widgets.dart';
@@ -76,15 +77,17 @@ class DashboardActivationCta extends StatelessWidget {
               children: [
                 Text(
                   activeStep.title,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w800,
-                    fontSize: 14,
-                  ),
+                  style: FocuxHubTypography.body(
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ).copyWith(fontWeight: FontWeight.w800),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   activeStep.body,
-                  style: const TextStyle(fontSize: 12, height: 1.4),
+                  style: FocuxHubTypography.bodyMuted(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    height: 1.4,
+                  ),
                 ),
                 const SizedBox(height: 10),
                 Text(

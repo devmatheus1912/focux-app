@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/router/safe_navigation.dart';
-import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
@@ -111,9 +111,8 @@ class _WinbackScreenState extends ConsumerState<WinbackScreen> {
                             const SizedBox(height: 12),
                             Text(
                               'Automação FCM ativa',
-                              style: AppTypography.inter(
-                                fontWeight: FontWeight.w800,
-                                fontSize: 18,
+                              style: FocuxHubTypography.sectionTitle(
+                                context,
                                 color: chrome.ink,
                               ),
                             ),
@@ -136,11 +135,7 @@ class _WinbackScreenState extends ConsumerState<WinbackScreen> {
                       const SizedBox(height: 16),
                       Text(
                         'Histórico de envios (${_entries.length})',
-                        style: AppTypography.inter(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 14,
-                          color: chrome.ink,
-                        ),
+                        style: FocuxHubTypography.cardTitle(color: chrome.ink),
                       ),
                       const SizedBox(height: 10),
                       if (_entries.isEmpty)

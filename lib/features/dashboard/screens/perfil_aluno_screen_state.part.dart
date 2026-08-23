@@ -202,12 +202,12 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
           TextField(
             controller: passwordCtrl,
             obscureText: true,
-            decoration: const InputDecoration(labelText: 'Senha atual'),
+            decoration: FxInputDeco.build(context, 'Senha atual'),
           ),
           const SizedBox(height: 8),
           TextField(
             controller: confirmCtrl,
-            decoration: const InputDecoration(labelText: 'Digite EXCLUIR'),
+            decoration: FxInputDeco.build(context, 'Digite EXCLUIR'),
           ),
         ],
       ),
@@ -960,9 +960,10 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
                       children: [
                         DropdownButtonFormField<String>(
                           initialValue: _nivelAtividade,
-                          decoration: const InputDecoration(
-                            labelText: 'Nível de atividade',
-                            prefixIcon: Icon(Icons.insights_outlined),
+                          decoration: FxInputDeco.build(
+                            context,
+                            'Nível de atividade',
+                            icon: Icons.insights_outlined,
                           ),
                           items:
                               _niveisAtividade

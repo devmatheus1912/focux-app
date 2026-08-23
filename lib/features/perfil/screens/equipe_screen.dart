@@ -9,6 +9,7 @@ import '../../../core/widgets/feature_gate.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_form_sheet.dart';
+import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
@@ -73,7 +74,7 @@ class _EquipeScreenState extends ConsumerState<EquipeScreen> {
       confirmLabel: 'Convidar',
       child: TextField(
         controller: ctrl,
-        decoration: const InputDecoration(labelText: 'Email'),
+        decoration: FxInputDeco.build(context, 'Email'),
         keyboardType: TextInputType.emailAddress,
       ),
     );

@@ -3,7 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../../../core/brand/focux_brand_copy.dart';
-import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/hero_teal.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/motion_preferences.dart';
@@ -196,8 +196,9 @@ class _LoadingRail extends StatelessWidget {
         children: [
           Text(
             FocuxBrandCopy.splashLoading.toUpperCase(),
-            style: AppTypography.inter(
-              color: primary.withValues(alpha: 0.72),
+            style: FocuxHubTypography.chip(
+              primary.withValues(alpha: 0.72),
+            ).copyWith(
               fontSize: 10.5,
               fontWeight: FontWeight.w600,
               letterSpacing: 3.8,

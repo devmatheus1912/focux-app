@@ -352,12 +352,10 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
                                           SizedBox(height: TokensStrip.s2),
                                           Text(
                                             '${insights.length} recomendações geradas',
-                                            style: const TextStyle(
+                                            style:
+                                                FocuxHubTypography.cardTitle(
                                               color: Colors.white,
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.w600,
-                                              height: 1.2,
-                                            ),
+                                            ).copyWith(height: 1.2),
                                           ),
                                         ],
                                       ),

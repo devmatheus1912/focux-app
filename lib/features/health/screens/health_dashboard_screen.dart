@@ -4,6 +4,8 @@ import '../../../core/api/api_client.dart';
 import '../../../core/brand/focux_microcopy.dart';
 import '../../../core/health/health_service.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
+import '../../../core/theme/focux_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
@@ -200,20 +202,14 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
               children: [
                 Text(
                   'Prontidao ${recovery.recoveryScore}%',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 22,
-                    fontWeight: FontWeight.w900,
-                  ),
+                  style: FocuxTypography.headline(color: Colors.white),
                 ),
                 const SizedBox(height: 6),
                 Text(
                   recovery.recoveryLabel,
-                  style: const TextStyle(
+                  style: FocuxHubTypography.body(
                     color: Colors.white,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
-                  ),
+                  ).copyWith(fontWeight: FontWeight.w700),
                 ),
                 const SizedBox(height: 8),
                 Text(
@@ -229,11 +225,7 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
           const SizedBox(height: TokensStrip.s4),
           Text(
             'Resumo de Hoje',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
-              color: chrome.ink,
-            ),
+            style: FocuxTypography.headline(color: chrome.ink),
           ),
           const SizedBox(height: TokensStrip.s4),
           Row(
@@ -346,16 +338,15 @@ class _MetricCard extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             value,
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.w700,
+            style: FocuxHubTypography.kpi(
               color: chrome.ink,
+              fontSize: FocuxHubTypography.metricLg,
             ),
           ),
           const SizedBox(height: 4),
           Text(
             label,
-            style: TextStyle(fontSize: 13, color: chrome.mute),
+            style: FocuxHubTypography.bodyMuted(color: chrome.mute),
           ),
         ],
       ),

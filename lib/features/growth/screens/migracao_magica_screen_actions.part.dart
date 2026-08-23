@@ -66,9 +66,9 @@ extension MigracaoMagicaScreenActions on _MigracaoMagicaScreenState {
                 children: [
                   Text(
                     offer.headline,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w800,
+                    style: FocuxHubTypography.sectionTitle(
+                      ctx,
+                      color: ShellChrome.of(ctx).ink,
                     ),
                   ),
                   const SizedBox(height: 10),
@@ -458,17 +458,16 @@ extension MigracaoMagicaScreenActions on _MigracaoMagicaScreenState {
                 children: [
                   Text(
                     '$value',
-                    style: AppTypography.inter(
-                      fontSize: 22,
-                      fontWeight: FontWeight.w800,
-                      color: color,
-                    ),
+                    style: FocuxTypography.headline(color: color),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     label,
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 11, color: mute, height: 1.3),
+                    style: FocuxHubTypography.bodyMuted(
+                      color: mute,
+                      height: 1.3,
+                    ),
                   ),
                 ],
               ),
@@ -493,9 +492,8 @@ extension MigracaoMagicaScreenActions on _MigracaoMagicaScreenState {
                     Expanded(
                       child: Text(
                         'Importação concluída',
-                        style: AppTypography.inter(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w800,
+                        style: FocuxHubTypography.sectionTitle(
+                          context,
                           color: ink,
                         ),
                       ),
@@ -738,9 +736,12 @@ extension MigracaoMagicaScreenActions on _MigracaoMagicaScreenState {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Text(
+                Text(
                   'Sair da migração?',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+                  style: FocuxHubTypography.sectionTitle(
+                    ctx,
+                    color: ShellChrome.of(ctx).ink,
+                  ),
                 ),
                 const SizedBox(height: 10),
                 Text(

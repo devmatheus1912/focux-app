@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/router/safe_navigation.dart';
+import '../../core/theme/focux_hub_typography.dart';
+import '../../core/theme/focux_typography.dart';
 import '../../core/theme/brand_palette.dart';
 import '../../core/theme/design_tokens.dart';
 import '../../core/theme/shell_chrome.dart';
@@ -184,10 +186,8 @@ class _PlanoSucessoScreenState extends State<PlanoSucessoScreen> {
                           const SizedBox(height: 4),
                           Text(
                             '$done de $total etapas',
-                            style: const TextStyle(
+                            style: FocuxTypography.headline(
                               color: Colors.white,
-                              fontSize: 22,
-                              fontWeight: FontWeight.w800,
                             ),
                           ),
                           const SizedBox(height: 4),
@@ -273,9 +273,9 @@ class _SuccessRing extends StatelessWidget {
           ),
           Text(
             '${(fraction * 100).round()}%',
-            style: const TextStyle(
+            style: FocuxHubTypography.metric(
               color: Colors.white,
-              fontSize: 18,
+              fontSize: FocuxHubTypography.metricEm,
               fontWeight: FontWeight.w900,
             ),
           ),

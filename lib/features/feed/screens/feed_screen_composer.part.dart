@@ -100,12 +100,12 @@ class _FeedComposerSheetState extends State<_FeedComposerSheet> {
               children: [
                 Row(
                   children: [
-                    const Expanded(
+                    Expanded(
                       child: Text(
                         'Nova Publicação',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
+                        style: FocuxHubTypography.sectionTitle(
+                          context,
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
                     ),

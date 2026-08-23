@@ -450,10 +450,10 @@ class _IdentityMetricChip extends StatelessWidget {
               children: [
                 Text(
                   signal.value,
-                  style: AppTypography.condensed(
+                  style: FocuxHubTypography.kpi(
                     color: valueColor,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
+                    fontSize: FocuxHubTypography.metricEm,
+                  ).copyWith(
                     letterSpacing: -0.4,
                     height: 1.1,
                   ),

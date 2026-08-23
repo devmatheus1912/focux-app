@@ -7,6 +7,8 @@ import 'package:image_picker/image_picker.dart';
 import '../../../core/api/media_upload_service.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
+import '../../../core/theme/focux_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/br_phone.dart';
@@ -244,11 +246,9 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
                                               ? widget.perfil.nome[0]
                                                   .toUpperCase()
                                               : '?',
-                                          style: AppTypography.inter(
-                                            fontSize: 36,
-                                            fontWeight: FontWeight.w800,
+                                          style: FocuxTypography.display(
                                             color: primary,
-                                          ),
+                                          ).copyWith(fontSize: 36),
                                         )
                                         : null,
                               ),
@@ -296,7 +296,7 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
                     Center(
                       child: Text(
                         'Toque no ícone para trocar a foto',
-                        style: TextStyle(fontSize: 12, color: mute),
+                        style: FocuxHubTypography.bodyMuted(color: mute),
                       ),
                     ),
                     const SizedBox(height: TokensStrip.s3),
@@ -485,17 +485,16 @@ class _SectionCard extends StatelessWidget {
           children: [
             Text(
               title,
-              style: AppTypography.inter(
-                color: ink,
-                fontWeight: FontWeight.w800,
-                fontSize: 14,
-              ),
+              style: FocuxHubTypography.cardTitle(color: ink),
             ),
             if (showHint) ...[
               const SizedBox(height: 3),
               Text(
                 _hintCopy,
-                style: TextStyle(color: mute, fontSize: 11.5, height: 1.25),
+                style: FocuxHubTypography.bodyMuted(
+                  color: mute,
+                  height: 1.25,
+                ),
               ),
             ],
             const SizedBox(height: TokensStrip.s2),

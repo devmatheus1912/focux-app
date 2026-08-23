@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_typography.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../data/checkin_repository.dart';
 import '../providers/checkin_provider.dart';
@@ -205,9 +206,7 @@ class _State extends ConsumerState<ModoPresencialScreen> {
         children: [
           Text(
             'DESCANSO',
-            style: TextStyle(
-              color: heroTealMuted(0.54),
-              fontSize: 20,
+            style: FocuxTypography.headline(color: heroTealMuted(0.54)).copyWith(
               fontWeight: FontWeight.w700,
               letterSpacing: 4,
             ),
@@ -243,11 +242,7 @@ class _State extends ConsumerState<ModoPresencialScreen> {
             ),
             child: Text(
               'PULAR',
-              style: TextStyle(
-                color: heroTealInk(),
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-              ),
+              style: FocuxHubTypography.cardTitle(color: heroTealInk()),
             ),
           ),
         ],
@@ -396,10 +391,9 @@ class _State extends ConsumerState<ModoPresencialScreen> {
                                   )
                                   : Text(
                                     '${i + 1}',
-                                    style: TextStyle(
+                                    style: FocuxHubTypography.kpi(
                                       color: heroTealMuted(0.54),
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.w700,
+                                      fontSize: FocuxHubTypography.metricMd,
                                     ),
                                   ),
                         ),

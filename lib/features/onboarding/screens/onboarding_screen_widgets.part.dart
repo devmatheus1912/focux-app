@@ -83,9 +83,8 @@ class _OnboardingHeader extends StatelessWidget {
                     children: [
                       Text(
                         FocuxBrandCopy.onboardingSkip,
-                        style: AppTypography.inter(
+                        style: FocuxHubTypography.bodyMuted(
                           color: heroTealInk().withValues(alpha: 0.78),
-                          fontSize: 13,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -190,8 +189,7 @@ class _OnboardingFooter extends StatelessWidget {
                 Text(
                   FocuxBrandCopy.onboardingFinishHint(persona),
                   textAlign: TextAlign.center,
-                  style: AppTypography.inter(
-                    color: heroTealSurface(0.78),
+                  style: FocuxHubTypography.chip(heroTealSurface(0.78)).copyWith(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
                   ),
@@ -292,8 +290,8 @@ class _OBPageWidget extends StatelessWidget {
                     child: RichText(
                       textAlign: TextAlign.center,
                       text: TextSpan(
-                        style: AppTypography.inter(
-                          color: heroTealInk(),
+                        style: FocuxTypography.display(color: heroTealInk())
+                            .copyWith(
                           fontSize: titleSize,
                           fontWeight: FontWeight.w700,
                           letterSpacing: -0.7,
@@ -320,12 +318,9 @@ class _OBPageWidget extends StatelessWidget {
                       child: Text(
                         data.subtitle,
                         textAlign: TextAlign.center,
-                        style: AppTypography.inter(
+                        style: FocuxHubTypography.body(
                           color: heroTealSurface(0.86),
-                          fontSize: 14,
-                          fontWeight: FontWeight.w400,
-                          height: 1.48,
-                        ),
+                        ).copyWith(fontSize: 14, height: 1.48),
                       ),
                     ),
                   ),
@@ -378,11 +373,10 @@ class _OBPageWidget extends StatelessWidget {
                                       Expanded(
                                         child: Text(
                                           e.value,
-                                          style: AppTypography.inter(
+                                          style: FocuxHubTypography.bodyMuted(
                                             color: heroTealInk().withValues(
                                               alpha: 0.82,
                                             ),
-                                            fontSize: 13,
                                             fontWeight: FontWeight.w500,
                                             height: 1.38,
                                           ),
@@ -431,8 +425,7 @@ class _OnboardingSocialProof extends StatelessWidget {
               child: Text(
                 line,
                 textAlign: TextAlign.center,
-                style: AppTypography.inter(
-                  color: heroTealSurface(0.78),
+                style: FocuxHubTypography.chip(heroTealSurface(0.78)).copyWith(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
                   letterSpacing: 0.12,
@@ -472,13 +465,11 @@ class _OnboardingHook extends StatelessWidget {
         child: RichText(
           textAlign: TextAlign.center,
           text: TextSpan(
-            style: AppTypography.inter(
+            style: FocuxHubTypography.bodyMuted(
               color: heroTealSurface(0.88),
-              fontSize: 13,
               fontWeight: FontWeight.w500,
               height: 1.45,
-              letterSpacing: 0.06,
-            ),
+            ).copyWith(letterSpacing: 0.06),
             children: [
               TextSpan(text: prefix),
               TextSpan(

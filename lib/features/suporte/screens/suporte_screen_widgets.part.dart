@@ -374,12 +374,21 @@ class _TypingIndicator extends StatelessWidget {
             color: Theme.of(context).colorScheme.surfaceContainerHighest,
             borderRadius: BorderRadius.circular(16),
           ),
-          child: const Row(
+          child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              SizedBox(width: 16, height: 16, child: FxLoading(strokeWidth: 2)),
-              SizedBox(width: 8),
-              Text('digitando...', style: TextStyle(fontSize: 12)),
+              const SizedBox(
+                width: 16,
+                height: 16,
+                child: FxLoading(strokeWidth: 2),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'digitando...',
+                style: FocuxHubTypography.bodyMuted(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
             ],
           ),
         ),
@@ -712,17 +721,19 @@ class _TicketCard extends StatelessWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text(
+                                Text(
                                   'Resposta do suporte',
-                                  style: TextStyle(
+                                  style: FocuxHubTypography.bodyMuted(
+                                    color: Theme.of(context).colorScheme.onSurface,
                                     fontWeight: FontWeight.w600,
-                                    fontSize: 12,
                                   ),
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
                                   ticket.respostaAdmin!,
-                                  style: const TextStyle(fontSize: 13),
+                                  style: FocuxHubTypography.bodyMuted(
+                                    color: Theme.of(context).colorScheme.onSurface,
+                                  ),
                                 ),
                               ],
                             ),

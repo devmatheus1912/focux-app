@@ -62,12 +62,11 @@ class _LandingTemplatesSheet extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
+                            Text(
                               'Catálogo de modelos',
-                              style: TextStyle(
-                                fontWeight: FontWeight.w800,
-                                fontSize: 18,
-                                letterSpacing: -0.2,
+                              style: FocuxHubTypography.sectionTitle(
+                                context,
+                                color: scheme.onSurface,
                               ),
                             ),
                             const SizedBox(height: 4),

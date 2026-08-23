@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
@@ -249,7 +250,7 @@ class _BuscaGlobalScreenState extends ConsumerState<BuscaGlobalScreen> {
             child: TextField(
               controller: _ctrl,
               autofocus: true,
-              style: TextStyle(fontSize: 16, color: chrome.ink),
+              style: FocuxHubTypography.body(color: chrome.ink),
               decoration: InputDecoration(
                 hintText: 'Buscar alunos, treinos, cobranças...',
                 border: InputBorder.none,

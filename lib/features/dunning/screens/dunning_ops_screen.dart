@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
@@ -127,9 +128,7 @@ class _DunningOpsScreenState extends ConsumerState<DunningOpsScreen> {
                             children: [
                               Text(
                                 'Taxa de recuperação: ${snap.recoveryRate.toStringAsFixed(1)}%',
-                                style: AppTypography.inter(
-                                  fontWeight: FontWeight.w800,
-                                  fontSize: 16,
+                                style: FocuxHubTypography.cardTitle(
                                   color: chrome.ink,
                                 ),
                               ),

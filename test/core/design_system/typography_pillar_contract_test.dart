@@ -9,6 +9,7 @@ void main() {
   const typographySources = [
     'lib/core/theme/app_typography.dart',
     'lib/core/theme/focux_typography.dart',
+    'lib/core/theme/focux_hub_typography.dart',
     'lib/core/theme/tokens_strip.dart',
     'lib/core/theme/app_theme.dart',
   ];
@@ -69,6 +70,7 @@ void main() {
       final source = readScreenSourceBundle(path);
       final usesTypography = source.contains('AppTypography') ||
           source.contains('FocuxTypography') ||
+          source.contains('FocuxHubTypography') ||
           source.contains('FinanceiroTypography') ||
           source.contains('TokensStrip.h1') ||
           source.contains('TokensStrip.h2') ||
@@ -113,6 +115,22 @@ void main() {
     expect(pubspec, contains('family: Barlow Condensed'));
   });
 
+  test('features do not call AppTypography.inter ad-hoc', () {
+    final failures = <String>[];
+    for (final file in Directory('lib/features')
+        .listSync(recursive: true)
+        .whereType<File>()
+        .where((f) => f.path.endsWith('.dart'))) {
+      final path = file.path.replaceAll(r'\', '/');
+      final norm = path.substring(path.indexOf('lib/'));
+      final source = file.readAsStringSync();
+      if (source.contains('AppTypography.inter')) {
+        failures.add(norm);
+      }
+    }
+    expect(failures, isEmpty, reason: failures.join('\n'));
+  });
+
   test('features do not call GoogleFonts directly', () {
     final failures = <String>[];
     for (final file in Directory('lib/features')
@@ -136,5 +154,6 @@ void main() {
     expect(doc, contains('Tipografia'));
     expect(doc, contains('AppTypography'));
     expect(doc, contains('FocuxTypography'));
+    expect(doc, contains('FocuxHubTypography'));
   });
 }

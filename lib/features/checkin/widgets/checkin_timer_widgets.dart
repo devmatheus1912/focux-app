@@ -4,6 +4,8 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
+import '../../../core/theme/focux_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 
@@ -170,23 +172,22 @@ class CheckinRestTimerDock extends StatelessWidget {
                 children: [
                   Text(
                     'DESCANSO',
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w700,
-                      color: mute,
+                    style: FocuxHubTypography.chip(mute).copyWith(
                       letterSpacing: 0.5,
                     ),
                   ),
                   Text(
                     '$seconds',
-                    style: AppTypography.inter(
+                    style: FocuxTypography.display(color: ink).copyWith(
                       fontSize: 42,
                       fontWeight: FontWeight.w600,
-                      color: ink,
                       fontFeatures: const [FontFeature.tabularFigures()],
                     ),
                   ),
-                  Text('seg', style: TextStyle(fontSize: 12, color: mute)),
+                  Text(
+                    'seg',
+                    style: FocuxHubTypography.bodyMuted(color: mute),
+                  ),
                   const SizedBox(height: 8),
                   TextButton(
                     onPressed: onSkip,

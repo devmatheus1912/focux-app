@@ -11,6 +11,7 @@ import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/feature_gate.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_form_sheet.dart';
+import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -96,7 +97,7 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
               children: [
                 if (templates.isNotEmpty) ...[
                   DropdownButtonFormField<HabitoTemplate>(
-                    decoration: const InputDecoration(labelText: 'Template'),
+                    decoration: FxInputDeco.build(ctx, 'Template'),
                     items:
                         templates
                             .map(
@@ -120,14 +121,12 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
                 ],
                 TextField(
                   controller: tituloCtrl,
-                  decoration: const InputDecoration(labelText: 'Título'),
+                  decoration: FxInputDeco.build(ctx, 'Título'),
                 ),
                 const SizedBox(height: 8),
                 TextField(
                   controller: descricaoCtrl,
-                  decoration: const InputDecoration(
-                    labelText: 'Descrição (opcional)',
-                  ),
+                  decoration: FxInputDeco.build(ctx, 'Descrição (opcional)'),
                 ),
               ],
             ),

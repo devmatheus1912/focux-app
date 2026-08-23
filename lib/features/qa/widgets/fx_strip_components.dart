@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
+import '../../../core/theme/focux_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_motion.dart';
 
@@ -204,9 +206,8 @@ class FxStripBadge extends StatelessWidget {
         const SizedBox(height: 6),
         Text(
           label,
-          style: AppTypography.inter(
-            fontSize: 10,
-            color: TokensStrip.textSecondary,
+          style: FocuxHubTypography.chip(TokensStrip.textSecondary).copyWith(
+            fontWeight: FontWeight.w400,
           ),
         ),
       ],
@@ -266,16 +267,13 @@ class FxStripToast extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: AppTypography.inter(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 13.5,
+                  style: FocuxHubTypography.cardTitle(
                     color: TokensStrip.textPrimary,
                   ),
                 ),
                 Text(
                   subtitle,
-                  style: AppTypography.inter(
-                    fontSize: 11.5,
+                  style: FocuxHubTypography.bodyMuted(
                     color: TokensStrip.textSecondary,
                     height: 1.25,
                   ),
@@ -333,11 +331,9 @@ class FxStripTooltip extends StatelessWidget {
             const SizedBox(width: 8),
             Text(
               message,
-              style: AppTypography.inter(
-                fontSize: 12.5,
-                fontWeight: FontWeight.w600,
+              style: FocuxTypography.bodySmall(
                 color: TokensStrip.textPrimary,
-              ),
+              ).copyWith(fontWeight: FontWeight.w600),
             ),
           ],
         ),
@@ -465,13 +461,11 @@ class FxStripBreadcrumbs extends StatelessWidget {
         for (var i = 0; i < segments.length; i++) ...[
           Text(
             segments[i],
-            style: AppTypography.inter(
+            style: FocuxTypography.bodySmall(
               color: primary.withValues(
                 alpha: i == segments.length - 1 ? 1 : 0.72,
               ),
-              fontWeight: FontWeight.w600,
-              fontSize: 12.5,
-            ),
+            ).copyWith(fontWeight: FontWeight.w600),
           ),
           if (i < segments.length - 1)
             Icon(
@@ -596,11 +590,7 @@ class FxStripEmptyState extends StatelessWidget {
             Text(
               title,
               textAlign: TextAlign.center,
-              style: AppTypography.inter(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                color: ink,
-              ),
+              style: FocuxHubTypography.cardTitle(color: ink),
             ),
             if (message != null) ...[
               const SizedBox(height: TokensStrip.s2),

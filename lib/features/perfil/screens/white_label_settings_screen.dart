@@ -5,12 +5,14 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/config/env.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/feature_gate.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -141,18 +143,20 @@ class _WhiteLabelSettingsScreenState
                   const SizedBox(height: 8),
                   TextField(
                     controller: _appNameCtrl,
-                    decoration: const InputDecoration(
-                      labelText: 'Nome do app (aluno)',
-                      hintText: 'Ex: Studio João Silva',
+                    decoration: FxInputDeco.build(
+                      context,
+                      'Nome do app (aluno)',
+                      hint: 'Ex: Studio João Silva',
                     ),
                   ),
                   const SizedBox(height: 24),
                   _sectionTitle('Domínio customizado'),
                   TextField(
                     controller: _domainCtrl,
-                    decoration: const InputDecoration(
-                      labelText: 'Domínio',
-                      hintText: 'treino.seudominio.com.br',
+                    decoration: FxInputDeco.build(
+                      context,
+                      'Domínio',
+                      hint: 'treino.seudominio.com.br',
                     ),
                     autocorrect: false,
                     keyboardType: TextInputType.url,
@@ -170,9 +174,8 @@ class _WhiteLabelSettingsScreenState
                           const SizedBox(width: 6),
                           Text(
                             'Domínio verificado',
-                            style: TextStyle(
+                            style: FocuxHubTypography.bodyMuted(
                               color: EagleTokens.success,
-                              fontSize: 13,
                             ),
                           ),
                         ],
@@ -189,9 +192,8 @@ class _WhiteLabelSettingsScreenState
                     ),
                     child: Text(
                       config.dnsInstrucoes,
-                      style: TextStyle(
+                      style: FocuxHubTypography.bodyMuted(
                         color: chrome.mute,
-                        fontSize: 12,
                         height: 1.45,
                       ),
                     ),
@@ -235,7 +237,7 @@ class _WhiteLabelSettingsScreenState
                     _landingModo == 'CAPTURA'
                         ? 'Destaque o link curto de captura no dashboard e anúncios.'
                         : 'Destaque a página completa com foto, planos e depoimentos.',
-                    style: TextStyle(color: chrome.mute, fontSize: 13),
+                    style: FocuxHubTypography.bodyMuted(color: chrome.mute),
                   ),
                   const SizedBox(height: 16),
                   if (config.slug != null && config.slug!.isNotEmpty) ...[
@@ -276,7 +278,9 @@ class _WhiteLabelSettingsScreenState
                       controlAffinity: ListTileControlAffinity.leading,
                       title: Text(
                         item.label,
-                        style: const TextStyle(fontSize: 14),
+                        style: FocuxHubTypography.body(
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
                       ),
                     ),
                   ),
@@ -310,7 +314,10 @@ class _WhiteLabelSettingsScreenState
     padding: const EdgeInsets.only(bottom: 8),
     child: Text(
       text,
-      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+      style: FocuxHubTypography.sectionTitle(
+        context,
+        color: Theme.of(context).colorScheme.onSurface,
+      ),
     ),
   );
 
@@ -334,12 +341,14 @@ class _WhiteLabelSettingsScreenState
           children: [
             Text(
               title,
-              style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
+              style: FocuxHubTypography.body(
+                color: Theme.of(context).colorScheme.onSurface,
+              ).copyWith(fontWeight: FontWeight.w700),
             ),
             const SizedBox(height: 2),
             Text(
               hint,
-              style: TextStyle(color: chrome.mute, fontSize: 12, height: 1.35),
+              style: FocuxHubTypography.bodyMuted(color: chrome.mute),
             ),
             const SizedBox(height: 8),
             Container(
@@ -351,9 +360,9 @@ class _WhiteLabelSettingsScreenState
               ),
               child: Text(
                 displayLabel,
-                style: const TextStyle(
+                style: FocuxHubTypography.bodyMuted(
+                  color: Theme.of(context).colorScheme.onSurface,
                   fontWeight: FontWeight.w700,
-                  fontSize: 13,
                 ),
               ),
             ),

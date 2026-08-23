@@ -188,10 +188,9 @@ class _CardAderencia extends StatelessWidget {
                     children: [
                       Text(
                         '${taxa.toInt()}%',
-                        style: AppTypography.inter(
+                        style: FocuxTypography.display(color: cor).copyWith(
                           fontSize: 28,
                           fontWeight: FontWeight.w700,
-                          color: cor,
                         ),
                       ),
                       Text(

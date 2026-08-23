@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -104,8 +105,7 @@ class CheckinWorkoutHeader extends StatelessWidget {
               children: [
                 Text(
                   duration,
-                  style: AppTypography.inter(
-                    color: ink,
+                  style: FocuxTypography.display(color: ink).copyWith(
                     fontSize: 56,
                     fontWeight: FontWeight.w600,
                     height: 0.96,

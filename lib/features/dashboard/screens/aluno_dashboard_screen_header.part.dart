@@ -523,18 +523,18 @@ class _MiniMetricCard extends StatelessWidget {
         children: [
           Text(
             value,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w800,
-              height: 1.05,
-            ),
+            style: FocuxHubTypography.cardTitle(
+              color: Theme.of(context).colorScheme.onSurface,
+            ).copyWith(height: 1.05),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: 4),
           Text(
             label,
-            style: const TextStyle(fontSize: 10.5, height: 1.15),
+            style: FocuxHubTypography.chip(
+              Theme.of(context).colorScheme.onSurfaceVariant,
+            ).copyWith(height: 1.15),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),

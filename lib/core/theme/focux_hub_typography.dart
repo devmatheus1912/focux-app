@@ -10,8 +10,9 @@ import 'tokens_strip.dart';
 abstract final class FocuxHubTypography {
   FocuxHubTypography._();
 
-  /// Métricas intermediárias (ex.: sufixo /100) — evita literais 18/22 na UI.
+  /// Métricas intermediárias — evita literais 18/20/22 na UI.
   static const double metricEm = TokensStrip.fontBody + 3; // 18
+  static const double metricMd = TokensStrip.fontBody + 5; // 20
   static const double metricLg = TokensStrip.fontH2; // 22
 
   /// Saudação / nome hero / headline principal do card.

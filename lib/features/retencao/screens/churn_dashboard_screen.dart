@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
@@ -285,21 +286,17 @@ class _SummaryChip extends StatelessWidget {
         children: [
           Text(
             '$value',
-            style: AppTypography.mono(
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
+            style: FocuxHubTypography.metric(
               color: fg,
+              fontSize: FocuxHubTypography.metricMd,
+              fontWeight: FontWeight.w700,
               height: 1,
             ),
           ),
           const SizedBox(height: 4),
           Text(
             label,
-            style: AppTypography.inter(
-              fontSize: 11,
-              fontWeight: FontWeight.w700,
-              color: ink.withValues(alpha: 0.72),
-            ),
+            style: FocuxHubTypography.chip(ink.withValues(alpha: 0.72)),
           ),
         ],
       ),
@@ -366,11 +363,7 @@ class _ChurnScoreCard extends StatelessWidget {
                 alignment: Alignment.center,
                 child: Text(
                   fxInitials(nome),
-                  style: AppTypography.inter(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w800,
-                    color: pillFg,
-                  ),
+                  style: FocuxHubTypography.cardTitle(color: pillFg),
                 ),
               ),
               const SizedBox(width: 12),
@@ -382,10 +375,8 @@ class _ChurnScoreCard extends StatelessWidget {
                       nome,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: AppTypography.inter(
-                        fontSize: 15,
+                      style: FocuxHubTypography.body(color: ink).copyWith(
                         fontWeight: FontWeight.w700,
-                        color: ink,
                         letterSpacing: -0.2,
                       ),
                     ),
@@ -443,10 +434,7 @@ class _ChurnScoreCard extends StatelessWidget {
                 ),
                 child: Text(
                   riskLabel,
-                  style: AppTypography.inter(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w800,
-                    color: pillFg,
+                  style: FocuxHubTypography.chip(pillFg).copyWith(
                     letterSpacing: 0.2,
                   ),
                 ),

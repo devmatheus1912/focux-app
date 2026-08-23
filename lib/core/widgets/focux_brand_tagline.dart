@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../brand/focux_brand_copy.dart';
-import '../theme/design_tokens.dart';
+import '../theme/focux_hub_typography.dart';
 
 /// Tagline de marca — hook unificado em splash, login e onboarding.
 class FocuxBrandTagline extends StatelessWidget {
@@ -37,8 +37,9 @@ class FocuxBrandTagline extends StatelessWidget {
         child: RichText(
           textAlign: align,
           text: TextSpan(
-            style: AppTypography.inter(
+            style: FocuxHubTypography.body(
               color: Colors.white.withValues(alpha: 0.88),
+            ).copyWith(
               fontSize: fontSize,
               fontWeight: FontWeight.w500,
               height: 1.5,

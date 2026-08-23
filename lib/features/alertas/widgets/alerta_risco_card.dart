@@ -56,11 +56,9 @@ class AlertaRiscoCard extends StatelessWidget {
                     alignment: Alignment.center,
                     child: Text(
                       fxInitials(alerta.alunoNome),
-                      style: TextStyle(
+                      style: FocuxHubTypography.body(
                         color: heroTealInk(),
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                      ),
+                      ).copyWith(fontWeight: FontWeight.w700),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -73,11 +71,9 @@ class AlertaRiscoCard extends StatelessWidget {
                             Flexible(
                               child: Text(
                                 alerta.alunoNome,
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
+                                style: FocuxHubTypography.body(
                                   color: chrome.ink,
-                                ),
+                                ).copyWith(fontWeight: FontWeight.w600),
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
@@ -93,12 +89,7 @@ class AlertaRiscoCard extends StatelessWidget {
                               ),
                               child: Text(
                                 'Score ${alerta.score}',
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w700,
-                                  color: sColor,
-                                  fontFamily: 'monospace',
-                                ),
+                                style: FocuxHubTypography.chip(sColor),
                               ),
                             ),
                           ],
@@ -121,10 +112,9 @@ class AlertaRiscoCard extends StatelessWidget {
                                 Flexible(
                                   child: Text(
                                     m,
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w500,
+                                    style: FocuxHubTypography.bodyMuted(
                                       color: sColor,
+                                      fontWeight: FontWeight.w500,
                                     ),
                                   ),
                                 ),
@@ -141,15 +131,14 @@ class AlertaRiscoCard extends StatelessWidget {
                     children: [
                       Text(
                         '${alerta.diasSemTreino ?? 0}d',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w700,
+                        style: FocuxHubTypography.kpi(
                           color: sColor,
+                          fontSize: FocuxHubTypography.metricMd,
                         ),
                       ),
                       Text(
                         '${alerta.aderenciaPercent?.toStringAsFixed(0) ?? 0}% ader.',
-                        style: TextStyle(fontSize: 10.5, color: chrome.mute),
+                        style: FocuxHubTypography.bodyMuted(color: chrome.mute),
                       ),
                     ],
                   ),
@@ -174,10 +163,9 @@ class AlertaRiscoCard extends StatelessWidget {
                       alignment: Alignment.center,
                       child: Text(
                         '💬 Mensagem',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
+                        style: FocuxHubTypography.bodyMuted(
                           color: brand,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),
@@ -191,13 +179,12 @@ class AlertaRiscoCard extends StatelessWidget {
                       alignment: Alignment.center,
                       child: Text(
                         '✓ Resolvido',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
+                        style: FocuxHubTypography.bodyMuted(
                           color:
                               chrome.isDark
                                   ? EagleTokens.goodDark
                                   : EagleTokens.good,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),

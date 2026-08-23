@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../theme/design_tokens.dart';
+import '../theme/focux_hub_typography.dart';
 import '../theme/shell_chrome.dart';
 import '../theme/tokens_strip.dart';
 import '../utils/fx_utils.dart';
@@ -320,10 +320,8 @@ class FxSatelliteListTile extends StatelessWidget {
         trailing: trailing,
         title: Text(
           displayTitle,
-          style: AppTypography.inter(
+          style: FocuxHubTypography.body(color: ink).copyWith(
             fontWeight: FontWeight.w700,
-            fontSize: 15,
-            color: ink,
             letterSpacing: -0.15,
           ),
         ),
@@ -331,11 +329,10 @@ class FxSatelliteListTile extends StatelessWidget {
             subtitle == null
                 ? null
                 : DefaultTextStyle(
-                  style: TextStyle(
-                    fontSize: 12,
-                    height: 1.35,
+                  style: FocuxHubTypography.bodyMuted(
                     color: mute,
                     fontWeight: FontWeight.w500,
+                    height: 1.35,
                   ),
                   child: subtitle!,
                 ),

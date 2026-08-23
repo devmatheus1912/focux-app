@@ -5,6 +5,8 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'fx_confetti_burst.dart';
 import 'fx_rive_player.dart';
 import '../animations/fx_rive_assets.dart';
+import '../theme/focux_hub_typography.dart';
+import '../theme/focux_typography.dart';
 
 class FxCelebrationOverlay {
   static Future<void> show(
@@ -102,8 +104,9 @@ class FxCelebrationOverlay {
                             Text(
                               title,
                               textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                fontSize: 20,
+                              style: FocuxTypography.headline(
+                                color: Theme.of(ctx).colorScheme.onSurface,
+                              ).copyWith(
                                 fontWeight: FontWeight.w900,
                                 letterSpacing: -0.3,
                               ),
@@ -113,10 +116,11 @@ class FxCelebrationOverlay {
                               Text(
                                 subtitle,
                                 textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: Theme.of(ctx).colorScheme.onSurfaceVariant,
+                                style: FocuxHubTypography.bodyMuted(
+                                  color: Theme.of(ctx)
+                                      .colorScheme
+                                      .onSurfaceVariant,
                                   height: 1.35,
-                                  fontSize: 14,
                                 ),
                               ),
                             ],

@@ -6,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/config/env.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/utils/motion_preferences.dart';
@@ -431,12 +432,11 @@ class PacoteStorefrontCard extends StatelessWidget {
           const SizedBox(height: 14),
           Text(
             'R\$ ${pacote.valor.toStringAsFixed(2).replaceAll('.', ',')}',
-            style: TextStyle(
+            style: FocuxHubTypography.metric(
               color: primary,
+              fontSize: FocuxHubTypography.metricLg,
               fontWeight: FontWeight.w900,
-              fontSize: 22,
-              letterSpacing: -0.6,
-            ),
+            ).copyWith(letterSpacing: -0.6),
           ),
         ],
       ),

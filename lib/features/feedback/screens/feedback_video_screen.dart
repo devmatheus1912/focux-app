@@ -15,6 +15,7 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
+import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../alunos/utils/satellite_screen_utils.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
@@ -334,9 +335,10 @@ class _NovoFeedbackDialogState extends ConsumerState<_NovoFeedbackDialog> {
             ] else ...[
               TextField(
                 controller: _alunoIdCtrl,
-                decoration: const InputDecoration(
-                  labelText: 'Aluno (ID interno)',
-                  hintText: 'Somente se não veio do perfil',
+                decoration: FxInputDeco.build(
+                  context,
+                  'Aluno (ID interno)',
+                  hint: 'Somente se não veio do perfil',
                 ),
                 keyboardType: TextInputType.number,
               ),
@@ -344,25 +346,25 @@ class _NovoFeedbackDialogState extends ConsumerState<_NovoFeedbackDialog> {
             ],
             TextField(
               controller: _exercicioIdCtrl,
-              decoration: const InputDecoration(
-                labelText: 'Exercício',
-                hintText: 'ID do exercício no app',
+              decoration: FxInputDeco.build(
+                context,
+                'Exercício',
+                hint: 'ID do exercício no app',
               ),
               keyboardType: TextInputType.number,
             ),
             const SizedBox(height: 8),
             TextField(
               controller: _videoUrlCtrl,
-              decoration: const InputDecoration(
-                labelText: 'URL do Vídeo (Cloudinary, YouTube, etc)',
+              decoration: FxInputDeco.build(
+                context,
+                'URL do Vídeo (Cloudinary, YouTube, etc)',
               ),
             ),
             const SizedBox(height: 8),
             TextField(
               controller: _comentarioCtrl,
-              decoration: const InputDecoration(
-                labelText: 'Comentário Técnico',
-              ),
+              decoration: FxInputDeco.build(context, 'Comentário Técnico'),
               maxLines: 3,
             ),
             const SizedBox(height: 16),

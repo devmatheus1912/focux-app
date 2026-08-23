@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
+import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../data/nps_repository.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -93,8 +94,10 @@ class _NpsDialogState extends State<_NpsDialog> {
           TextField(
             controller: _comentario,
             maxLines: 2,
-            decoration: const InputDecoration(
-              hintText: 'Comentário (opcional)',
+            decoration: FxInputDeco.build(
+              context,
+              'Comentário',
+              hint: 'Comentário (opcional)',
             ),
           ),
           const SizedBox(height: 16),

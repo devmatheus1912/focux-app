@@ -6,12 +6,14 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/anamnese_repository.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -356,8 +358,9 @@ class _AnamneseScreenState extends ConsumerState<AnamneseScreen>
         const SizedBox(height: 12),
         DropdownButtonFormField<String>(
           initialValue: _nivelAtividade,
-          decoration: const InputDecoration(
-            labelText: 'Nível de atividade física',
+          decoration: FxInputDeco.build(
+            context,
+            'Nível de atividade física',
           ),
           items:
               _niveis
@@ -438,7 +441,9 @@ class _AnamneseScreenState extends ConsumerState<AnamneseScreen>
             Expanded(
               child: Text(
                 'Disponibilidade semanal: $_dispSemanal dias/semana',
-                style: const TextStyle(fontSize: 14),
+                style: FocuxHubTypography.body(
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
               ),
             ),
           ],
@@ -490,13 +495,7 @@ class _AnamneseScreenState extends ConsumerState<AnamneseScreen>
     padding: const EdgeInsets.only(bottom: 12),
     child: TextFormField(
       controller: c,
-      decoration: InputDecoration(
-        labelText: label,
-        hintText: hint,
-        hintStyle: TextStyle(
-          color: TokensStrip.textSecondary.withValues(alpha: 0.72),
-        ),
-      ),
+      decoration: FxInputDeco.build(context, label, hint: hint),
       maxLines: maxLines,
     ),
   );

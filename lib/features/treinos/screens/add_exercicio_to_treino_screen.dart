@@ -382,10 +382,9 @@ class _AddExercicioToTreinoScreenState
                                                 );
                                             final seriesField = TextFormField(
                                               controller: _seriesCtrl,
-                                              decoration: _fxInputDecoration(
-                                                label: 'Séries',
-                                                isDark: isDark,
-                                                primary: primary,
+                                              decoration: FxInputDeco.build(
+                                                context,
+                                                'Séries',
                                               ),
                                               keyboardType:
                                                   TextInputType.number,
@@ -393,19 +392,17 @@ class _AddExercicioToTreinoScreenState
                                             );
                                             final repField = TextFormField(
                                               controller: _repCtrl,
-                                              decoration: _fxInputDecoration(
-                                                label: 'Repetições',
-                                                isDark: isDark,
-                                                primary: primary,
+                                              decoration: FxInputDeco.build(
+                                                context,
+                                                'Repetições',
                                               ),
                                               style: fieldStyle,
                                             );
                                             final descansoField = TextFormField(
                                               controller: _descansoCtrl,
-                                              decoration: _fxInputDecoration(
-                                                label: 'Descanso (segundos)',
-                                                isDark: isDark,
-                                                primary: primary,
+                                              decoration: FxInputDeco.build(
+                                                context,
+                                                'Descanso (segundos)',
                                               ),
                                               keyboardType:
                                                   TextInputType.number,
@@ -413,11 +410,11 @@ class _AddExercicioToTreinoScreenState
                                             );
                                             final cargaField = TextFormField(
                                               controller: _cargaCtrl,
-                                              decoration: _fxInputDecoration(
-                                                label: 'Carga alvo (kg)',
-                                                helper: 'Opcional',
-                                                isDark: isDark,
-                                                primary: primary,
+                                              decoration: FxInputDeco.build(
+                                                context,
+                                                'Carga alvo (kg)',
+                                              ).copyWith(
+                                                helperText: 'Opcional',
                                               ),
                                               keyboardType:
                                                   const TextInputType.numberWithOptions(
@@ -485,12 +482,12 @@ class _AddExercicioToTreinoScreenState
                                           ),
                                           TextFormField(
                                             controller: _grupoSupersetCtrl,
-                                            decoration: _fxInputDecoration(
-                                              label: 'Grupo do superset',
-                                              helper:
+                                            decoration: FxInputDeco.build(
+                                              context,
+                                              'Grupo do superset',
+                                            ).copyWith(
+                                              helperText:
                                                   'Use o mesmo número em exercícios que devem ficar juntos.',
-                                              isDark: isDark,
-                                              primary: primary,
                                             ),
                                             keyboardType: TextInputType.number,
                                             style: FocuxHubTypography.body(
@@ -513,10 +510,9 @@ class _AddExercicioToTreinoScreenState
                                         const SizedBox(height: TokensStrip.s4),
                                         TextFormField(
                                           controller: _observacoesCtrl,
-                                          decoration: _fxInputDecoration(
-                                            label: 'Observações de execução',
-                                            isDark: isDark,
-                                            primary: primary,
+                                          decoration: FxInputDeco.build(
+                                            context,
+                                            'Observações de execução',
                                           ),
                                           minLines: 2,
                                           maxLines: 4,

@@ -671,7 +671,9 @@ class _MiniActionButton extends StatelessWidget {
         foregroundColor: primary,
         minimumSize: const Size(0, 36),
         padding: const EdgeInsets.symmetric(horizontal: 9),
-        textStyle: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w900),
+        textStyle: FocuxHubTypography.chip(primary).copyWith(
+          fontWeight: FontWeight.w900,
+        ),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(11)),
       ),
       child: Text(label),

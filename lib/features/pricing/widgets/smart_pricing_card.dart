@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../data/smart_pricing_repository.dart';
@@ -91,7 +92,9 @@ class _SmartPricingCardState extends ConsumerState<SmartPricingCard> {
           const SizedBox(height: 6),
           Text(
             d.rationale,
-            style: TextStyle(color: Theme.of(context).hintColor, fontSize: 13),
+            style: FocuxHubTypography.bodyMuted(
+              color: Theme.of(context).hintColor,
+            ),
           ),
           if (d.pacotesSugeridos.isNotEmpty) ...[
             const SizedBox(height: 12),
@@ -100,7 +103,9 @@ class _SmartPricingCardState extends ConsumerState<SmartPricingCard> {
                 padding: const EdgeInsets.only(bottom: 4),
                 child: Text(
                   '• ${p.nome}: R\$ ${p.valor.toStringAsFixed(0)} — ${p.descricao}',
-                  style: const TextStyle(fontSize: 12),
+                  style: FocuxHubTypography.bodyMuted(
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
                 ),
               ),
             ),

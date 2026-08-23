@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
@@ -166,12 +167,7 @@ class _GamificacaoBody extends StatelessWidget {
             ),
             child: Text(
               'Conquistas',
-              style: TextStyle(
-                color: ink,
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                letterSpacing: -0.5,
-              ),
+              style: FocuxHubTypography.sectionTitle(context, color: ink),
             ),
           ),
           Padding(
@@ -294,7 +290,10 @@ class _GamificacaoBody extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      const Text('🎁', style: TextStyle(fontSize: 22)),
+                      const Text(
+                        '🎁',
+                        style: TextStyle(fontSize: FocuxHubTypography.metricLg),
+                      ),
                       const SizedBox(width: 10),
                       Text(
                         'Indique um amigo',
@@ -393,12 +392,10 @@ class _StreakHeroStatic extends StatelessWidget {
                       children: [
                         Text(
                           '$streak dias',
-                          style: AppTypography.inter(
+                          style: FocuxHubTypography.kpi(
                             color: heroInk,
-                            fontSize: 44,
-                            fontWeight: FontWeight.w600,
-                            height: 1,
-                          ),
+                            fontSize: TokensStrip.fontH1,
+                          ).copyWith(height: 1),
                         ),
                         Text(
                           'Sequência ativa!',
