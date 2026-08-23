@@ -45,6 +45,7 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
             await _tryPopAfterLeaveConfirm();
           },
           child: FxShellScaffold(
+            useMesh: true,
             appBar: FxShellAppBar(
               title: 'Editor da landing',
               subtitle: _c.dirty ? 'Alterações pendentes' : null,

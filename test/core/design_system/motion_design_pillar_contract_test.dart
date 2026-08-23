@@ -30,7 +30,7 @@ void main() {
   });
 
   test('DESIGN_SYSTEM documents motion design', () {
-    final doc = File('docs/DESIGN_SYSTEM.md').readAsStringSync();
+    final doc = File('lib/core/design_system.dart').readAsStringSync();
     expect(doc, contains('Motion design'));
     expect(doc, contains('FocuxMotion'));
     expect(doc, contains('motion_design_pillar_contract_test'));

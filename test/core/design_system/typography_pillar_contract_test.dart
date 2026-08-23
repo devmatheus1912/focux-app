@@ -132,7 +132,7 @@ void main() {
   });
 
   test('DESIGN_SYSTEM documents typography', () {
-    final doc = File('docs/DESIGN_SYSTEM.md').readAsStringSync();
+    final doc = File('lib/core/design_system.dart').readAsStringSync();
     expect(doc, contains('Tipografia'));
     expect(doc, contains('AppTypography'));
     expect(doc, contains('FocuxTypography'));

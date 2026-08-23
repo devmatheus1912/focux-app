@@ -67,6 +67,7 @@ class _RecorrenciaAlunoScreenState
     return fxScreenA11yScope(
       label: 'Minha assinatura',
       child: FxShellScaffold(
+        useMesh: true,
         appBar: FxShellAppBar(
           title: 'Minha assinatura',
           subtitle: freshnessLabel,

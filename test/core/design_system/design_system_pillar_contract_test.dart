@@ -39,9 +39,9 @@ void main() {
       expect(File(path).existsSync(), isTrue, reason: 'Token ausente: $path');
     }
     expect(
-      File('docs/DESIGN_SYSTEM.md').existsSync(),
+      File('lib/core/design_system.dart').existsSync(),
       isTrue,
-      reason: 'docs/DESIGN_SYSTEM.md ausente',
+      reason: 'lib/core/design_system.dart ausente',
     );
     expect(
       File('lib/features/qa/screens/tokens_strip_showcase_screen.dart').existsSync(),

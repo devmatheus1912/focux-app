@@ -87,8 +87,10 @@ class TreinoDetailScreen extends ConsumerWidget {
           if (didPop) return;
           _popTreinoDetail(context, alunoId: alunoId);
         },
-        child: Scaffold(
-          backgroundColor: fxTransparent,
+        child: FxShellScaffold(
+          useMesh: true,
+          constrainWidth: false,
+          safeArea: false,
           body: treinoAsync.when(
             skipLoadingOnReload: true,
             skipLoadingOnRefresh: true,

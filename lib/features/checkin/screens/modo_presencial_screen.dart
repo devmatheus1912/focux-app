@@ -10,6 +10,7 @@ import '../../../core/utils/friendly_error.dart';
 import 'package:focux_app/core/widgets/fx_empty_state.dart';
 import 'package:focux_app/core/widgets/fx_error_state.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../dashboard/utils/dashboard_readability.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
@@ -137,8 +138,9 @@ class _State extends ConsumerState<ModoPresencialScreen> {
     if (_loading) {
       return fxScreenA11yScope(
         label: 'Modo Presencial',
-        child: Scaffold(
-          backgroundColor: EagleTokens.darkBg,
+        child: FxShellScaffold(
+          useMesh: true,
+          constrainWidth: false,
           body: const SkeletonList(count: 4),
         ),
       );
@@ -146,8 +148,9 @@ class _State extends ConsumerState<ModoPresencialScreen> {
     if (_erro != null) {
       return fxScreenA11yScope(
         label: 'Modo Presencial',
-        child: Scaffold(
-          backgroundColor: EagleTokens.darkBg,
+        child: FxShellScaffold(
+          useMesh: true,
+          constrainWidth: false,
           body: FxErrorState(
             chromeOnDark: true,
             primary: primary,
@@ -161,8 +164,9 @@ class _State extends ConsumerState<ModoPresencialScreen> {
     if (_exec == null || _exec!.exercicios.isEmpty) {
       return fxScreenA11yScope(
         label: 'Modo Presencial',
-        child: Scaffold(
-          backgroundColor: EagleTokens.darkBg,
+        child: FxShellScaffold(
+          useMesh: true,
+          constrainWidth: false,
           body: FxEmptyState(
             icon: 'dumbbell',
             title: 'Treino não encontrado',
@@ -183,14 +187,13 @@ class _State extends ConsumerState<ModoPresencialScreen> {
 
     return fxScreenA11yScope(
       label: 'Modo Presencial',
-      child: Scaffold(
-        backgroundColor: EagleTokens.darkBg,
-        body: SafeArea(
-          child:
-              _resting
-                  ? _restView(primary)
-                  : _trainingView(ex, total, done, primary),
-        ),
+      child: FxShellScaffold(
+        useMesh: true,
+        constrainWidth: false,
+        body:
+            _resting
+                ? _restView(primary)
+                : _trainingView(ex, total, done, primary),
       ),
     );
   }

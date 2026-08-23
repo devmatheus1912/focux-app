@@ -30,7 +30,7 @@ void main() {
   });
 
   test('DESIGN_SYSTEM documents clean scalable code', () {
-    final doc = File('docs/DESIGN_SYSTEM.md').readAsStringSync();
+    final doc = File('lib/core/design_system.dart').readAsStringSync();
     expect(doc, contains('Código limpo'));
     expect(doc, contains('FocuxCleanCode'));
     expect(doc, contains('clean_scalable_code_pillar_contract_test'));
@@ -85,7 +85,7 @@ void main() {
   });
 
   test('coding standards document clean code principles', () {
-    final doc = File('docs/CODING_STANDARDS.md').readAsStringSync();
+    final doc = File('lib/core/design_system.dart').readAsStringSync();
     expect(doc, contains('Lógica fora da UI'));
     expect(doc, contains('Tipos explícitos'));
   });

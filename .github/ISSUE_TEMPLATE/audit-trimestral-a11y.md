@@ -10,7 +10,7 @@ assignees: ''
 
 Confirmar que as 8 telas críticas são usáveis com leitor de tela (TalkBack Android ou VoiceOver iOS).
 
-Guia completo: `docs/MANUAL-TRIMESTRAL.md` (seção 1)
+Guia: `lib/core/a11y/focux_a11y.dart` + Home (`/dashboard/personal`).
 
 ## Checklist — 8 hubs
 

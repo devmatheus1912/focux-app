@@ -179,6 +179,7 @@ class _LojaScreenState extends ConsumerState<LojaScreen>
         requiredPlan: SubscriptionPlan.ENTERPRISE_PRO,
         capability: 'lojaDigital',
         child: FxShellScaffold(
+          useMesh: true,
           appBar: FxShellAppBar(
             title: 'Loja digital',
             subtitle: freshnessLabel ?? 'Vitrine de pacotes e pedidos PIX',

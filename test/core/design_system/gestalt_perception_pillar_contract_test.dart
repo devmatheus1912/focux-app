@@ -30,7 +30,7 @@ void main() {
   });
 
   test('DESIGN_SYSTEM documents gestalt and perception', () {
-    final doc = File('docs/DESIGN_SYSTEM.md').readAsStringSync();
+    final doc = File('lib/core/design_system.dart').readAsStringSync();
     expect(doc, contains('Gestalt & percepção'));
     expect(doc, contains('FocuxGestalt'));
     expect(doc, contains('gestalt_perception_pillar_contract_test'));

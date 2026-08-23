@@ -35,8 +35,9 @@ void main() {
   });
 
   test('DESIGN_SYSTEM documents visual hierarchy and focus', () {
-    final doc = File('docs/DESIGN_SYSTEM.md').readAsStringSync();
+    final doc = File('lib/core/design_system.dart').readAsStringSync();
     expect(doc, contains('Hierarquia visual & foco'));
+    expect(doc, contains('FocuxHubTypography'));
     expect(doc, contains('FocuxHierarchy'));
     expect(doc, contains('visual_hierarchy_pillar_contract_test'));
   });

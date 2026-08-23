@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/brand/focux_microcopy.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
@@ -110,9 +111,10 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen>
 
     return fxScreenA11yScope(
       label: 'Financeiro',
-      child: Scaffold(
+      child: FxShellScaffold(
+        useMesh: true,
         extendBody: true,
-        backgroundColor: Colors.transparent,
+        constrainWidth: false,
         appBar: PreferredSize(
           preferredSize: const Size.fromHeight(136),
           child: FxContentWidthLimiter(
@@ -247,10 +249,9 @@ class _FinanceiroAlunoContextBanner extends ConsumerWidget {
             Expanded(
               child: Text(
                 'Mensalidades de $nome',
-                style: TextStyle(
+                style: FocuxHubTypography.bodyMuted(
                   color: chrome.ink,
                   fontWeight: FontWeight.w800,
-                  fontSize: 12.5,
                 ),
               ),
             ),

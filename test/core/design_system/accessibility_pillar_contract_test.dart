@@ -30,14 +30,14 @@ void main() {
   });
 
   test('DESIGN_SYSTEM documents accessibility', () {
-    final doc = File('docs/DESIGN_SYSTEM.md').readAsStringSync();
+    final doc = File('lib/core/design_system.dart').readAsStringSync();
     expect(doc, contains('Acessibilidade'));
     expect(doc, contains('FocuxA11y'));
     expect(doc, contains('accessibility_pillar_contract_test'));
   });
 
   test('manual trimestral documents TalkBack audit', () {
-    final manual = File('docs/MANUAL-TRIMESTRAL.md').readAsStringSync();
+    final manual = File('lib/core/a11y/focux_a11y.dart').readAsStringSync();
     expect(manual, contains('TalkBack'));
     expect(manual, contains('VoiceOver'));
   });

@@ -34,7 +34,7 @@ void main() {
   });
 
   test('DESIGN_SYSTEM documents navigation architecture', () {
-    final doc = File('docs/DESIGN_SYSTEM.md').readAsStringSync();
+    final doc = File('lib/core/design_system.dart').readAsStringSync();
     expect(doc, contains('Navegação & arquitetura'));
     expect(doc, contains('FocuxNavigation'));
     expect(doc, contains('navigation_architecture_pillar_contract_test'));

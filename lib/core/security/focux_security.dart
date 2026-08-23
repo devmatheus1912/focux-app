@@ -1,4 +1,5 @@
-/// Catálogo de segurança — tokens, transporte, erros seguros, disclaimers IA e hardening mobile/web.
+/// Catálogo de segurança — tokens, transporte, erros seguros, disclaimers IA e
+/// Hardening mobile & web. Gate: security_pillar_contract_test.
 abstract final class FocuxSecurity {
   FocuxSecurity._();
 

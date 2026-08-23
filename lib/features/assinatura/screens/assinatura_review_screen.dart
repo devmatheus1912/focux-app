@@ -89,6 +89,7 @@ class _AssinaturaReviewScreenState extends State<AssinaturaReviewScreen> {
     return fxScreenA11yScope(
       label: 'Confirmar assinatura',
       child: FxShellScaffold(
+        useMesh: true,
         appBar: FxShellAppBar(
           title: 'Confirmar assinatura',
           onBack: () => Navigator.of(context).pop(false),

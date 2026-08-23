@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
@@ -67,15 +68,14 @@ class _AlunoDeleteConfirmSheetState extends State<AlunoDeleteConfirmSheet> {
           Text(
             'Treinos, check-ins e histórico vinculados também serão apagados.',
             textAlign: TextAlign.center,
-            style: TextStyle(color: mute, fontSize: 12.5, height: 1.35),
+            style: FocuxHubTypography.bodyMuted(color: mute, height: 1.35),
           ),
           const SizedBox(height: 6),
           Text(
             'Esta ação não pode ser desfeita.',
             textAlign: TextAlign.center,
-            style: TextStyle(
+            style: FocuxHubTypography.bodyMuted(
               color: EagleTokens.bad.withValues(alpha: 0.85),
-              fontSize: 12,
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -84,9 +84,8 @@ class _AlunoDeleteConfirmSheetState extends State<AlunoDeleteConfirmSheet> {
             alignment: Alignment.centerLeft,
             child: Text(
               'Digite "${widget.confirmToken}" para confirmar:',
-              style: TextStyle(
+              style: FocuxHubTypography.bodyMuted(
                 color: mute,
-                fontSize: 12.5,
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -118,11 +117,11 @@ class _AlunoDeleteConfirmSheetState extends State<AlunoDeleteConfirmSheet> {
                 alpha: isDark ? 0.08 : 0.05,
               ),
               enabledBorder: FxInputDeco.outlineBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(TokensStrip.rInput),
                 borderSide: BorderSide(color: line),
               ),
               focusedBorder: FxInputDeco.outlineBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(TokensStrip.rInput),
                 borderSide: BorderSide(
                   color: EagleTokens.bad.withValues(alpha: 0.45),
                 ),
@@ -165,7 +164,10 @@ class _AlunoDeleteConfirmSheetState extends State<AlunoDeleteConfirmSheet> {
               onPressed: () => Navigator.of(context).pop(false),
               child: Text(
                 'Cancelar',
-                style: TextStyle(color: mute, fontWeight: FontWeight.w700),
+                style: FocuxHubTypography.bodyMuted(
+                  color: mute,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ),
           ),

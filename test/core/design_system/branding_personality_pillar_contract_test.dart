@@ -34,7 +34,7 @@ void main() {
   });
 
   test('DESIGN_SYSTEM documents branding and personality', () {
-    final doc = File('docs/DESIGN_SYSTEM.md').readAsStringSync();
+    final doc = File('lib/core/design_system.dart').readAsStringSync();
     expect(doc, contains('Branding & personalidade'));
     expect(doc, contains('FocuxBranding'));
     expect(doc, contains('branding_personality_pillar_contract_test'));

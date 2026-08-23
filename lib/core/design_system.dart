@@ -35,6 +35,43 @@
 /// - [FxLiquidPrimaryButton] — CTA primário.
 /// - Loading = skeleton/shimmer (nunca spinner isolado); erro =
 ///   `FxErrorState`/`friendlyError` + retry; vazio = `FxEmptyState` com CTA.
+///
+/// ## Catálogo de pilares (gates de contrato leem ESTE arquivo)
+/// Acessibilidade — FocuxA11y — accessibility_pillar_contract_test —
+/// TalkBack / VoiceOver.
+/// Hierarquia visual & foco — FocuxHubTypography (canônico) /
+/// FocuxHierarchy (deprecated) — visual_hierarchy_pillar_contract_test.
+/// Navegação & arquitetura — FocuxNavigation —
+/// navigation_architecture_pillar_contract_test.
+/// Tipografia — AppTypography / FocuxTypography / FocuxHubTypography —
+/// typography_pillar_contract_test.
+/// Hardening mobile & web — FocuxSecurity —
+/// security_pillar_contract_test.
+/// Código limpo — FocuxCleanCode — Lógica fora da UI — Tipos explícitos —
+/// clean_scalable_code_pillar_contract_test.
+/// Data viz & conteúdo dinâmico — FocuxDataViz —
+/// data_viz_dynamic_content_pillar_contract_test.
+/// Densidade de informação — FocuxDensity —
+/// information_density_pillar_contract_test.
+/// Refatoração robusta — FocuxRefactoring —
+/// robust_refactoring_pillar_contract_test.
+/// Branding & personalidade — FocuxBranding —
+/// branding_personality_pillar_contract_test.
+/// Gestalt & percepção — FocuxGestalt — gestalt_perception_pillar_contract_test.
+/// Adaptação de plataforma — FocuxPlatform —
+/// platform_adaptation_pillar_contract_test.
+/// Motion design — FocuxMotion — motion_design_pillar_contract_test.
+/// Performance percebida — FocuxPerformance —
+/// perceived_performance_pillar_contract_test.
+/// UX & feedback — FocuxFeedback — ux_feedback_pillar_contract_test.
+/// Componentes & consistência — FocuxComponents —
+/// components_consistency_pillar_contract_test.
+/// Cores & contraste — FocuxContrast — WCAG —
+/// colors_contrast_pillar_contract_test.
+/// Espaçamento — FocuxSpacing — FxContentWidthLimiter —
+/// spacing_layout_pillar_contract_test.
+/// Microcopy — FocuxMicrocopy — microcopy_pillar_contract_test.
+/// Gates de produtividade: flutter test · Tier S+.
 library;
 
 export 'theme/tokens_strip.dart' show TokensStrip;

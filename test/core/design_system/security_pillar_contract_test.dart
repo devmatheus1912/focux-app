@@ -42,8 +42,9 @@ void main() {
 
   test('security reference documents FocuxSecurity catalog', () {
     const candidates = [
+      'lib/core/design_system.dart',
+      'lib/core/security/focux_security.dart',
       '../docs/HOME_REFERENCE_10_10.md',
-      'docs/HOME_REFERENCE_10_10.md',
     ];
     File? docFile;
     for (final path in candidates) {

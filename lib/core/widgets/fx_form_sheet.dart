@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../brand/focux_microcopy.dart';
 import '../theme/design_tokens.dart';
+import '../theme/focux_hub_typography.dart';
 import '../theme/tokens_strip.dart';
 import 'fx_home_sheet.dart';
 
 /// Sheet de formulário curto — substitui `AlertDialog` com campos.
 ///
-/// O [child] fica com os inputs; o caller guarda os controllers. Retorna
-/// `true` só se o usuário confirmar.
+/// Layout igual à busca rápida da Home: superfície expandida +
+/// [Expanded] + scroll. O [child] fica com os inputs; o caller
+/// guarda os controllers. Retorna `true` só se o usuário confirmar.
 Future<bool> showFxFormSheet(
   BuildContext context, {
   required String title,
@@ -85,11 +88,14 @@ class _FxFormSheet extends StatelessWidget {
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final accent = destructive ? EagleTokens.bad : Theme.of(context).colorScheme.primary;
     final onAccent = destructive ? Colors.white : Theme.of(context).colorScheme.onPrimary;
+    final maxHeight =
+        MediaQuery.sizeOf(context).height * FxHomeSheetChrome.maxHeightFactor;
 
     return FxHomeSheetSurface(
       isDark: isDark,
+      maxHeight: maxHeight,
+      expand: true,
       child: Column(
-        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           FxHomeSheetHandle(isDark: isDark),
@@ -101,16 +107,17 @@ class _FxFormSheet extends StatelessWidget {
             leading: Icon(icon, color: accent, size: 18),
           ),
           SizedBox(height: TokensStrip.s4),
-          Flexible(
-            child: SingleChildScrollView(
-              child: child,
-            ),
+          Expanded(
+            child: SingleChildScrollView(child: child),
           ),
           const SizedBox(height: 20),
           SizedBox(
             height: 52,
             child: ElevatedButton(
-              onPressed: () => Navigator.of(context).pop(true),
+              onPressed: () {
+                if (destructive) HapticFeedback.heavyImpact();
+                Navigator.of(context).pop(true);
+              },
               style: ElevatedButton.styleFrom(
                 backgroundColor: accent,
                 foregroundColor: onAccent,
@@ -129,7 +136,10 @@ class _FxFormSheet extends StatelessWidget {
               onPressed: () => Navigator.of(context).pop(false),
               child: Text(
                 cancelLabel,
-                style: TextStyle(color: mute, fontWeight: FontWeight.w700),
+                style: FocuxHubTypography.bodyMuted(
+                  color: mute,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ),
           ),
@@ -161,11 +171,15 @@ class _FxNoticeSheet extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final primary = Theme.of(context).colorScheme.primary;
+    final maxHeight =
+        MediaQuery.sizeOf(context).height * FxHomeSheetChrome.maxHeightFactor;
+    final messageText = message?.trim();
 
     return FxHomeSheetSurface(
       isDark: isDark,
+      maxHeight: maxHeight,
+      expand: true,
       child: Column(
-        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           FxHomeSheetHandle(isDark: isDark),
@@ -175,18 +189,31 @@ class _FxNoticeSheet extends StatelessWidget {
             title: title,
             leading: Icon(icon, color: primary, size: 18),
           ),
-          if (message != null && message!.trim().isNotEmpty) ...[
-            SizedBox(height: TokensStrip.s3),
-            Text(
-              message!,
-              textAlign: TextAlign.center,
-              style: TextStyle(color: mute, fontSize: 12.5, height: 1.35),
+          SizedBox(height: TokensStrip.s3),
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (messageText != null && messageText.isNotEmpty)
+                    Text(
+                      messageText,
+                      textAlign: TextAlign.center,
+                      style: FocuxHubTypography.bodyMuted(
+                        color: mute,
+                        fontWeight: FontWeight.w400,
+                        height: 1.35,
+                      ),
+                    ),
+                  if (body != null) ...[
+                    if (messageText != null && messageText.isNotEmpty)
+                      SizedBox(height: TokensStrip.s3),
+                    body!,
+                  ],
+                ],
+              ),
             ),
-          ],
-          if (body != null) ...[
-            SizedBox(height: TokensStrip.s3),
-            Flexible(child: SingleChildScrollView(child: body)),
-          ],
+          ),
           const SizedBox(height: 20),
           ...extraActions,
           SizedBox(

@@ -101,6 +101,7 @@ class _WhiteLabelSettingsScreenState
       requiredPlan: SubscriptionPlan.ENTERPRISE,
       capability: 'whiteLabel',
       child: FxShellScaffold(
+        useMesh: true,
         constrainWidth: false,
         appBar: FxShellAppBar(
           title: 'Marca própria',

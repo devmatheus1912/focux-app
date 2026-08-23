@@ -30,7 +30,7 @@ void main() {
   });
 
   test('DESIGN_SYSTEM documents information density', () {
-    final doc = File('docs/DESIGN_SYSTEM.md').readAsStringSync();
+    final doc = File('lib/core/design_system.dart').readAsStringSync();
     expect(doc, contains('Densidade de informação'));
     expect(doc, contains('FocuxDensity'));
     expect(doc, contains('information_density_pillar_contract_test'));

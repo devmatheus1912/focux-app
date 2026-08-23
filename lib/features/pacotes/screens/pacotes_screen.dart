@@ -94,6 +94,7 @@ class _PacotesScreenState extends ConsumerState<PacotesScreen> {
     return fxScreenA11yScope(
       label: 'Planos & link de vendas',
       child: FxShellScaffold(
+        useMesh: true,
         appBar: FxShellAppBar(
           title: 'Planos & link de vendas',
           subtitle:

@@ -18,6 +18,7 @@ import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import 'package:focux_app/core/widgets/fx_celebration_overlay.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../widgets/checkin_header_widgets.dart';
 import '../widgets/checkin_exercise_widgets.dart';
@@ -421,13 +422,12 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
     if (_loading) {
       return fxScreenA11yScope(
         label: 'Checkin',
-        child: Scaffold(
-          backgroundColor: Colors.transparent,
-          body: const SafeArea(
-            child: Padding(
-              padding: EdgeInsets.all(TokensStrip.s4),
-              child: SkeletonList(count: 5),
-            ),
+        child: FxShellScaffold(
+          useMesh: true,
+          constrainWidth: false,
+          body: const Padding(
+            padding: EdgeInsets.all(TokensStrip.s4),
+            child: SkeletonList(count: 5),
           ),
         ),
       );
@@ -436,29 +436,28 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
     if (_loadError != null) {
       return fxScreenA11yScope(
         label: 'Checkin',
-        child: Scaffold(
-          backgroundColor: Colors.transparent,
-          body: SafeArea(
-            child: Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  FxErrorState(
-                    chromeOnDark: dark,
-                    primary: brand,
-                    title: 'Não foi possível iniciar',
-                    message: _loadError!,
-                    onRetry: _iniciar,
+        child: FxShellScaffold(
+          useMesh: true,
+          constrainWidth: false,
+          body: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                FxErrorState(
+                  chromeOnDark: dark,
+                  primary: brand,
+                  title: 'Não foi possível iniciar',
+                  message: _loadError!,
+                  onRetry: _iniciar,
+                ),
+                TextButton(
+                  onPressed: () => safePopOrGo(context, '/checkin/treinos'),
+                  child: Text(
+                    'Voltar aos treinos',
+                    style: TextStyle(color: mute),
                   ),
-                  TextButton(
-                    onPressed: () => safePopOrGo(context, '/checkin/treinos'),
-                    child: Text(
-                      'Voltar aos treinos',
-                      style: TextStyle(color: mute),
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),
@@ -477,9 +476,13 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
     );
     final progresso = exercicios.isEmpty ? 0.0 : concluidos / exercicios.length;
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: Stack(
+    return fxScreenA11yScope(
+      label: 'Checkin',
+      child: FxShellScaffold(
+        useMesh: true,
+        constrainWidth: false,
+        safeArea: false,
+        body: Stack(
         children: [
           CustomScrollView(
             slivers: [
@@ -613,6 +616,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
               ),
             ),
         ],
+      ),
       ),
     );
   }

@@ -108,6 +108,7 @@ class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
     return fxScreenA11yScope(
       label: 'Minhas Mensalidades',
       child: FxShellScaffold(
+        useMesh: true,
         appBar: FxShellAppBar(
           title: 'Minhas Mensalidades',
           actions: [

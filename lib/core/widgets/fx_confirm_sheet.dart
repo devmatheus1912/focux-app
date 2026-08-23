@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../brand/focux_microcopy.dart';
 import '../theme/design_tokens.dart';
+import '../theme/focux_hub_typography.dart';
 import '../theme/tokens_strip.dart';
 import 'fx_home_sheet.dart';
 
@@ -87,7 +88,11 @@ class _FxConfirmSheet extends StatelessWidget {
             Text(
               message!,
               textAlign: TextAlign.center,
-              style: TextStyle(color: mute, fontSize: 12.5, height: 1.35),
+              style: FocuxHubTypography.bodyMuted(
+                color: mute,
+                fontWeight: FontWeight.w400,
+                height: 1.35,
+              ),
             ),
           ],
           const SizedBox(height: 20),
@@ -120,7 +125,10 @@ class _FxConfirmSheet extends StatelessWidget {
               onPressed: () => Navigator.of(context).pop(false),
               child: Text(
                 cancelLabel,
-                style: TextStyle(color: mute, fontWeight: FontWeight.w700),
+                style: FocuxHubTypography.bodyMuted(
+                  color: mute,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ),
           ),

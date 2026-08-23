@@ -101,7 +101,7 @@ void main() {
   });
 
   test('DESIGN_SYSTEM documents spacing and layout', () {
-    final doc = File('docs/DESIGN_SYSTEM.md').readAsStringSync();
+    final doc = File('lib/core/design_system.dart').readAsStringSync();
     expect(doc, contains('Espaçamento'));
     expect(doc, contains('FocuxSpacing'));
     expect(doc, contains('FxContentWidthLimiter'));

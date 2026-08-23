@@ -42,7 +42,7 @@ void main() {
   });
 
   test('DESIGN_SYSTEM documents colors and contrast', () {
-    final doc = File('docs/DESIGN_SYSTEM.md').readAsStringSync();
+    final doc = File('lib/core/design_system.dart').readAsStringSync();
     expect(doc, contains('Cores & contraste'));
     expect(doc, contains('FocuxContrast'));
     expect(doc, contains('WCAG'));

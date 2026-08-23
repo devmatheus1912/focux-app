@@ -83,6 +83,7 @@ class _ReferralScreenState extends ConsumerState<ReferralScreen> {
     return fxScreenA11yScope(
       label: 'Indique e ganhe',
       child: FxShellScaffold(
+        useMesh: true,
         appBar: FxShellAppBar(title: 'Indique e ganhe'),
         body:
             _loading

@@ -101,9 +101,9 @@ void main() {
     expect(File('tool/verify.ps1').existsSync(), isTrue);
   });
 
-  test('AUDIT.md documents productivity gates', () {
-    final audit = File('AUDIT.md').readAsStringSync();
-    expect(audit, contains('flutter test'));
-    expect(audit, contains('Tier S+'));
+  test('design system documents productivity gates', () {
+    final catalog = File('lib/core/design_system.dart').readAsStringSync();
+    expect(catalog, contains('flutter test'));
+    expect(catalog, contains('Tier S+'));
   });
 }

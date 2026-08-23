@@ -8,8 +8,8 @@ import 'dart:io';
 
 const _entryPoints = {'lib/main.dart'};
 
-/// Superfícies documentadas do design system (DESIGN_SYSTEM.md + gates de
-/// pilar exigem que existam), mesmo sem importador em código hoje.
+/// Superfícies do design system (barrel + gates de pilar exigem que
+/// existam), mesmo sem importador em código hoje.
 const _documentedApi = {
   'lib/core/theme/focux_spacing.dart',
   'lib/core/theme/fx_chart_theme.dart',

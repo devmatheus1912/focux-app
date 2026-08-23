@@ -30,7 +30,7 @@ void main() {
   });
 
   test('DESIGN_SYSTEM documents robust refactoring', () {
-    final doc = File('docs/DESIGN_SYSTEM.md').readAsStringSync();
+    final doc = File('lib/core/design_system.dart').readAsStringSync();
     expect(doc, contains('Refatoração robusta'));
     expect(doc, contains('FocuxRefactoring'));
     expect(doc, contains('robust_refactoring_pillar_contract_test'));

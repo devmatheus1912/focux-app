@@ -34,7 +34,7 @@ void main() {
   });
 
   test('DESIGN_SYSTEM documents microcopy', () {
-    final doc = File('docs/DESIGN_SYSTEM.md').readAsStringSync();
+    final doc = File('lib/core/design_system.dart').readAsStringSync();
     expect(doc, contains('Microcopy'));
     expect(doc, contains('FocuxMicrocopy'));
     expect(doc, contains('microcopy_pillar_contract_test'));

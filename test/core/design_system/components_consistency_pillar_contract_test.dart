@@ -35,7 +35,7 @@ void main() {
   });
 
   test('DESIGN_SYSTEM documents components and consistency', () {
-    final doc = File('docs/DESIGN_SYSTEM.md').readAsStringSync();
+    final doc = File('lib/core/design_system.dart').readAsStringSync();
     expect(doc, contains('Componentes & consistência'));
     expect(doc, contains('FocuxComponents'));
     expect(doc, contains('components_consistency_pillar_contract_test'));

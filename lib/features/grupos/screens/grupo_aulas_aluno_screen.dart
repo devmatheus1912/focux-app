@@ -83,6 +83,7 @@ class _GrupoAulasAlunoScreenState extends ConsumerState<GrupoAulasAlunoScreen> {
     return fxScreenA11yScope(
       label: 'Aulas em grupo',
       child: FxShellScaffold(
+        useMesh: true,
         appBar: FxShellAppBar(
           title: 'Aulas em grupo',
           subtitle: freshnessLabel,

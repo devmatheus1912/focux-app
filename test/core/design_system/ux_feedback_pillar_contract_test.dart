@@ -35,7 +35,7 @@ void main() {
   });
 
   test('DESIGN_SYSTEM documents UX and feedback', () {
-    final doc = File('docs/DESIGN_SYSTEM.md').readAsStringSync();
+    final doc = File('lib/core/design_system.dart').readAsStringSync();
     expect(doc, contains('UX & feedback'));
     expect(doc, contains('FocuxFeedback'));
     expect(doc, contains('ux_feedback_pillar_contract_test'));
