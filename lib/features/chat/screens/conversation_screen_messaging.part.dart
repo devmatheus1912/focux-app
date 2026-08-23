@@ -378,34 +378,21 @@ extension ConversationScreenMessaging on _ConversationScreenState {
     final ctrl = TextEditingController(
       text: formatChatTextForDisplay(msg.conteudo),
     );
-    final next = await showDialog<String>(
-      context: context,
-      builder:
-          (dialogContext) => AlertDialog(
-            title: const Text('Editar mensagem'),
-            content: TextField(
-              controller: ctrl,
-              autofocus: true,
-              minLines: 1,
-              maxLines: 5,
-              textInputAction: TextInputAction.newline,
-              decoration: const InputDecoration(
-                hintText: 'Digite sua mensagem…',
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(dialogContext),
-                child: const Text('Cancelar'),
-              ),
-              FxLiquidPrimaryButton(
-                label: 'Salvar',
-                expand: false,
-                onPressed: () => Navigator.pop(dialogContext, ctrl.text),
-              ),
-            ],
-          ),
+    final saved = await showFxFormSheet(
+      context,
+      title: 'Editar mensagem',
+      icon: Icons.edit_outlined,
+      confirmLabel: 'Salvar',
+      child: TextField(
+        controller: ctrl,
+        autofocus: true,
+        minLines: 1,
+        maxLines: 5,
+        textInputAction: TextInputAction.newline,
+        decoration: const InputDecoration(hintText: 'Digite sua mensagem…'),
+      ),
     );
+    final next = saved ? ctrl.text : null;
     ctrl.dispose();
     final normalized = next?.trim();
     if (normalized == null ||
@@ -430,27 +417,15 @@ extension ConversationScreenMessaging on _ConversationScreenState {
 
   Future<void> _deleteMessage(ChatMsg msg) async {
     if (!_canDeleteMessage(msg)) return;
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder:
-          (dialogContext) => AlertDialog(
-            title: const Text('Apagar mensagem?'),
-            content: const Text(
-              'A conversa vai mostrar que a mensagem foi apagada.',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(dialogContext, false),
-                child: const Text('Cancelar'),
-              ),
-              FilledButton(
-                onPressed: () => Navigator.pop(dialogContext, true),
-                child: const Text('Apagar'),
-              ),
-            ],
-          ),
+    final confirmed = await showFxConfirmSheet(
+      context,
+      title: 'Apagar mensagem?',
+      message: 'A conversa vai mostrar que a mensagem foi apagada.',
+      icon: Icons.delete_outline_rounded,
+      confirmLabel: 'Apagar',
+      destructive: true,
     );
-    if (confirmed != true) return;
+    if (!confirmed) return;
     try {
       final repo = ChatRepository(ref.read(apiClientProvider));
       final updated =

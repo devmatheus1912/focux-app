@@ -9,6 +9,7 @@ import '../../../core/utils/friendly_error.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_form_sheet.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../data/checkin_repository.dart';
@@ -328,57 +329,37 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
   ) async {
     if (!mounted) return;
     final primary = Theme.of(context).colorScheme.primary;
-    await showDialog<void>(
-      context: context,
-      builder:
-          (ctx) => AlertDialog(
-            title: const Text('Evolucao registrada'),
-            content: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 420),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
+    await showFxNoticeSheet(
+      context,
+      title: 'Evolucao registrada',
+      icon: Icons.trending_up_rounded,
+      actionLabel: 'Continuar',
+      message:
+          'Voce evoluiu neste treino. A mensagem tambem ficou salva no chat com seu personal.',
+      body: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          for (final evolucao in evolucoes.take(4))
+            Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Voce evoluiu neste treino. A mensagem tambem ficou salva no chat com seu personal.',
-                  ),
-                  const SizedBox(height: 14),
-                  for (final evolucao in evolucoes.take(4))
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 10),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Icon(
-                            Icons.trending_up_rounded,
-                            color: primary,
-                            size: 20,
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              '${_labelEvolucao(evolucao.tipo)} em ${evolucao.exercicioNome}: '
-                              '${_fmtValor(evolucao.valorAnterior, evolucao.unidade)} -> ${_fmtValor(evolucao.valorAtual, evolucao.unidade)}'
-                              '${evolucao.percentual == null ? '' : ' (+${evolucao.percentual}%)'}',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                  Icon(Icons.trending_up_rounded, color: primary, size: 20),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      '${_labelEvolucao(evolucao.tipo)} em ${evolucao.exercicioNome}: '
+                      '${_fmtValor(evolucao.valorAnterior, evolucao.unidade)} -> ${_fmtValor(evolucao.valorAtual, evolucao.unidade)}'
+                      '${evolucao.percentual == null ? '' : ' (+${evolucao.percentual}%)'}',
+                      style: const TextStyle(fontWeight: FontWeight.w700),
                     ),
+                  ),
                 ],
               ),
             ),
-            actions: [
-              FxLiquidPrimaryButton(
-                label: 'Continuar',
-                onPressed: () => Navigator.pop(ctx),
-                expand: false,
-              ),
-            ],
-          ),
+        ],
+      ),
     );
   }
 

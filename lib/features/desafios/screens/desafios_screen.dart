@@ -16,6 +16,7 @@ import '../../../core/widgets/fx_empty_state.dart';
 
 import '../../../core/widgets/fx_error_state.dart';
 
+import '../../../core/widgets/fx_form_sheet.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 
 import '../../../core/widgets/fx_motion.dart';
@@ -85,31 +86,15 @@ class _DesafiosScreenState extends ConsumerState<DesafiosScreen> {
   Future<void> _criar() async {
     final ctrl = TextEditingController();
 
-    final ok = await showDialog<bool>(
-      context: context,
-
-      builder:
-          (ctx) => AlertDialog(
-            title: const Text('Novo desafio'),
-
-            content: TextField(
-              controller: ctrl,
-
-              decoration: const InputDecoration(labelText: 'Título'),
-            ),
-
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, false),
-                child: const Text('Cancelar'),
-              ),
-
-              FilledButton(
-                onPressed: () => Navigator.pop(ctx, true),
-                child: const Text('Criar'),
-              ),
-            ],
-          ),
+    final ok = await showFxFormSheet(
+      context,
+      title: 'Novo desafio',
+      icon: Icons.flag_outlined,
+      confirmLabel: 'Criar',
+      child: TextField(
+        controller: ctrl,
+        decoration: const InputDecoration(labelText: 'Título'),
+      ),
     );
 
     if (ok != true || ctrl.text.trim().isEmpty) return;

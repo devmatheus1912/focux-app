@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../data/nps_repository.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -16,9 +17,8 @@ Future<void> showNpsPromptIfNeeded(
     final repo = NpsRepository(ref.read(apiClientProvider));
     final deve = deveResponder ?? await repo.deveResponder();
     if (!deve || !context.mounted) return;
-    await showDialog<void>(
-      context: context,
-      barrierDismissible: true,
+    await showFxHomeSheet<void>(
+      context,
       builder: (ctx) => _NpsDialog(repo: repo),
     );
   } catch (_) {}
@@ -61,13 +61,25 @@ class _NpsDialogState extends State<_NpsDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text('Como está sua experiência?'),
-      content: Column(
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
+    return FxHomeSheetSurface(
+      isDark: isDark,
+      child: Column(
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          FxHomeSheetHandle(isDark: isDark),
+          const SizedBox(height: 16),
+          FxHomeSheetHeader(
+            isDark: isDark,
+            title: 'Como está sua experiência?',
+            leading: Icon(Icons.favorite_outline, color: primary, size: 18),
+          ),
+          const SizedBox(height: 16),
           Text(
             'Nota: $_score',
+            textAlign: TextAlign.center,
             style: const TextStyle(fontWeight: FontWeight.w600),
           ),
           Slider(
@@ -85,21 +97,20 @@ class _NpsDialogState extends State<_NpsDialog> {
               hintText: 'Comentário (opcional)',
             ),
           ),
+          const SizedBox(height: 16),
+          FilledButton(
+            onPressed: _saving ? null : _enviar,
+            child:
+                _saving
+                    ? const FxLoading(size: 18, strokeWidth: 2)
+                    : const Text('Enviar'),
+          ),
+          TextButton(
+            onPressed: _saving ? null : () => Navigator.pop(context),
+            child: const Text('Depois'),
+          ),
         ],
       ),
-      actions: [
-        TextButton(
-          onPressed: _saving ? null : () => Navigator.pop(context),
-          child: const Text('Depois'),
-        ),
-        FilledButton(
-          onPressed: _saving ? null : _enviar,
-          child:
-              _saving
-                  ? const FxLoading(size: 18, strokeWidth: 2)
-                  : const Text('Enviar'),
-        ),
-      ],
     );
   }
 }

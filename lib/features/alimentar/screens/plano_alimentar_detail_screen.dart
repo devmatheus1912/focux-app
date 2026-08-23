@@ -11,6 +11,7 @@ import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_form_sheet.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import 'package:focux_app/core/widgets/fx_motion.dart';
@@ -96,69 +97,40 @@ class _PlanoAlimentarDetailScreenState
   }
 
   Future<void> _abrirGerarIa() async {
-    final primary = Theme.of(context).colorScheme.primary;
     final objetivoCtrl = TextEditingController(text: 'Hipertrofia');
     final calCtrl = TextEditingController(text: '2500');
     final refCtrl = TextEditingController(text: '4');
 
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder:
-          (ctx) => StatefulBuilder(
-            builder:
-                (ctx, set) => AlertDialog(
-                  title: Row(
-                    children: [
-                      Icon(Icons.auto_awesome, color: primary),
-                      const SizedBox(width: 8),
-                      const Text('Gerar Dieta com IA'),
-                    ],
-                  ),
-                  content: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Text(
-                        'A IA vai criar refeições estruturadas e adicionar diretamente neste plano.',
-                      ),
-                      const SizedBox(height: TokensStrip.s4),
-                      TextField(
-                        controller: objetivoCtrl,
-                        decoration: const InputDecoration(
-                          labelText: 'Objetivo (ex: Hipertrofia)',
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      TextField(
-                        controller: calCtrl,
-                        decoration: const InputDecoration(
-                          labelText: 'Calorias Alvo',
-                        ),
-                        keyboardType: TextInputType.number,
-                      ),
-                      const SizedBox(height: 8),
-                      TextField(
-                        controller: refCtrl,
-                        decoration: const InputDecoration(
-                          labelText: 'Nº de Refeições',
-                        ),
-                        keyboardType: TextInputType.number,
-                      ),
-                    ],
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(ctx, false),
-                      child: const Text('Cancelar'),
-                    ),
-                    FxLiquidPrimaryButton(
-                      label: 'Gerar',
-                      icon: Icons.auto_awesome,
-                      expand: false,
-                      onPressed: () => Navigator.pop(ctx, true),
-                    ),
-                  ],
-                ),
+    final confirm = await showFxFormSheet(
+      context,
+      title: 'Gerar Dieta com IA',
+      subtitle:
+          'A IA vai criar refeições estruturadas e adicionar diretamente neste plano.',
+      icon: Icons.auto_awesome,
+      confirmLabel: 'Gerar',
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextField(
+            controller: objetivoCtrl,
+            decoration: const InputDecoration(
+              labelText: 'Objetivo (ex: Hipertrofia)',
+            ),
           ),
+          const SizedBox(height: 8),
+          TextField(
+            controller: calCtrl,
+            decoration: const InputDecoration(labelText: 'Calorias Alvo'),
+            keyboardType: TextInputType.number,
+          ),
+          const SizedBox(height: 8),
+          TextField(
+            controller: refCtrl,
+            decoration: const InputDecoration(labelText: 'Nº de Refeições'),
+            keyboardType: TextInputType.number,
+          ),
+        ],
+      ),
     );
 
     if (confirm != true) return;

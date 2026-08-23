@@ -613,98 +613,54 @@ class _ProfessionalFactRow extends StatelessWidget {
   }
 }
 
-void _showDeleteAccountDialog(
+Future<void> _showDeleteAccountDialog(
   BuildContext context, {
   required Future<void> Function() onSessionCleared,
-}) {
+}) async {
   final passwordCtrl = TextEditingController();
   final confirmCtrl = TextEditingController();
-  showDialog<void>(
-    context: context,
-    barrierDismissible: false,
-    builder: (ctx) {
-      var loading = false;
-      return StatefulBuilder(
-        builder: (ctx, setDialogState) {
-          return AlertDialog(
-            title: const Text('Excluir conta'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Esta ação é irreversível. Todos os seus dados pessoais serão anonimizados '
-                  'conforme a LGPD (Art. 18). Dados financeiros serão mantidos por 5 anos '
-                  'conforme legislação fiscal.\n\n'
-                  'Digite sua senha e EXCLUIR para confirmar.',
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: passwordCtrl,
-                  obscureText: true,
-                  decoration: const InputDecoration(
-                    labelText: 'Senha atual',
-                  ),
-                ),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: confirmCtrl,
-                  decoration: const InputDecoration(
-                    labelText: 'Digite EXCLUIR',
-                  ),
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: loading
-                    ? null
-                    : () {
-                      passwordCtrl.dispose();
-                      confirmCtrl.dispose();
-                      Navigator.of(ctx).pop();
-                    },
-                child: const Text('Cancelar'),
-              ),
-              FilledButton(
-                style: FilledButton.styleFrom(backgroundColor: EagleTokens.bad),
-                onPressed:
-                    loading
-                        ? null
-                        : () async {
-                          setDialogState(() => loading = true);
-                          try {
-                            final dio = ApiClient().dio;
-                            await dio.delete(
-                              '/api/lgpd/me/delete',
-                              data: {
-                                'senha': passwordCtrl.text,
-                                'confirmacao': confirmCtrl.text.trim(),
-                              },
-                            );
-                            if (!ctx.mounted) return;
-                            passwordCtrl.dispose();
-                            confirmCtrl.dispose();
-                            Navigator.of(ctx).pop();
-                            await onSessionCleared();
-                          } catch (e) {
-                            if (!ctx.mounted) return;
-                            setDialogState(() => loading = false);
-                            if (!context.mounted) return;
-                            FeedbackHelper.showError(
-                              context,
-                              friendlyError(e),
-                            );
-                          }
-                        },
-                child: Text(loading ? 'Excluindo…' : 'Excluir definitivamente'),
-              ),
-            ],
-          );
-        },
-      );
-    },
+  final ok = await showFxFormSheet(
+    context,
+    title: 'Excluir conta',
+    subtitle:
+        'Esta ação é irreversível. Todos os seus dados pessoais serão anonimizados '
+        'conforme a LGPD (Art. 18). Dados financeiros serão mantidos por 5 anos '
+        'conforme legislação fiscal.\n\n'
+        'Digite sua senha e EXCLUIR para confirmar.',
+    icon: Icons.delete_forever_outlined,
+    confirmLabel: 'Excluir definitivamente',
+    destructive: true,
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        TextField(
+          controller: passwordCtrl,
+          obscureText: true,
+          decoration: const InputDecoration(labelText: 'Senha atual'),
+        ),
+        const SizedBox(height: 8),
+        TextField(
+          controller: confirmCtrl,
+          decoration: const InputDecoration(labelText: 'Digite EXCLUIR'),
+        ),
+      ],
+    ),
   );
+  final senha = passwordCtrl.text;
+  final confirmacao = confirmCtrl.text.trim();
+  passwordCtrl.dispose();
+  confirmCtrl.dispose();
+  if (!ok || !context.mounted) return;
+  try {
+    await ApiClient().dio.delete(
+      '/api/lgpd/me/delete',
+      data: {'senha': senha, 'confirmacao': confirmacao},
+    );
+    await onSessionCleared();
+  } catch (e) {
+    if (!context.mounted) return;
+    FeedbackHelper.showError(context, friendlyError(e));
+  }
 }
 
 String _buildSubtitle(PerfilPersonal perfil) {

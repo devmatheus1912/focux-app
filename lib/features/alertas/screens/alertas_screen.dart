@@ -13,8 +13,8 @@ import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_form_sheet.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
-import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../features/auth/providers/auth_provider.dart';
@@ -75,50 +75,38 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
     int dias = _config!.diasSemTreino;
     int aderencia = _config!.aderenciaMinima;
 
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder:
-          (ctx) => StatefulBuilder(
-            builder:
-                (ctx, set) => AlertDialog(
-                  title: const Text('Configurar Alertas'),
-                  content: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text('Dias sem treino: $dias'),
-                      Slider(
-                        value: dias.toDouble(),
-                        min: 1,
-                        max: 30,
-                        divisions: 29,
-                        label: '$dias dias',
-                        onChanged: (v) => set(() => dias = v.toInt()),
-                      ),
-                      const SizedBox(height: 8),
-                      Text('Aderência mínima: $aderencia%'),
-                      Slider(
-                        value: aderencia.toDouble(),
-                        min: 10,
-                        max: 100,
-                        divisions: 18,
-                        label: '$aderencia%',
-                        onChanged: (v) => set(() => aderencia = v.toInt()),
-                      ),
-                    ],
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(ctx, false),
-                      child: const Text('Cancelar'),
-                    ),
-                    FxLiquidPrimaryButton(
-                      label: 'Salvar',
-                      expand: false,
-                      onPressed: () => Navigator.pop(ctx, true),
-                    ),
-                  ],
+    final confirm = await showFxFormSheet(
+      context,
+      title: 'Configurar Alertas',
+      icon: Icons.tune_rounded,
+      confirmLabel: 'Salvar',
+      child: StatefulBuilder(
+        builder:
+            (ctx, set) => Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('Dias sem treino: $dias'),
+                Slider(
+                  value: dias.toDouble(),
+                  min: 1,
+                  max: 30,
+                  divisions: 29,
+                  label: '$dias dias',
+                  onChanged: (v) => set(() => dias = v.toInt()),
                 ),
-          ),
+                const SizedBox(height: 8),
+                Text('Aderência mínima: $aderencia%'),
+                Slider(
+                  value: aderencia.toDouble(),
+                  min: 10,
+                  max: 100,
+                  divisions: 18,
+                  label: '$aderencia%',
+                  onChanged: (v) => set(() => aderencia = v.toInt()),
+                ),
+              ],
+            ),
+      ),
     );
     if (confirm != true) return;
     try {
@@ -155,33 +143,20 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
           'Olá ${alerta.alunoNome.split(' ').first}! Vi que faz um tempo que não treina. Que tal retomarmos hoje? 💪',
     );
 
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder:
-          (ctx) => AlertDialog(
-            title: const Text('Enviar mensagem'),
-            content: TextField(
-              controller: ctrl,
-              maxLines: 3,
-              decoration: InputDecoration(
-                border: FxInputDeco.outlineBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, false),
-                child: const Text('Cancelar'),
-              ),
-              FxLiquidPrimaryButton(
-                label: 'Enviar',
-                icon: Icons.send,
-                expand: false,
-                onPressed: () => Navigator.pop(ctx, true),
-              ),
-            ],
+    final confirm = await showFxFormSheet(
+      context,
+      title: 'Enviar mensagem',
+      icon: Icons.send_rounded,
+      confirmLabel: 'Enviar',
+      child: TextField(
+        controller: ctrl,
+        maxLines: 3,
+        decoration: InputDecoration(
+          border: FxInputDeco.outlineBorder(
+            borderRadius: BorderRadius.circular(14),
           ),
+        ),
+      ),
     );
 
     if (confirm != true || ctrl.text.trim().isEmpty) return;

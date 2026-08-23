@@ -217,30 +217,15 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
     );
   }
 
-  void _confirmarExclusao(int id) {
-    showDialog(
-      context: context,
-      builder:
-          (ctx) => AlertDialog(
-            title: const Text('Excluir publicação?'),
-            content: const Text('Esta ação não pode ser desfeita.'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(ctx).pop(),
-                child: const Text('Cancelar'),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.of(ctx).pop();
-                  _deletar(id);
-                },
-                child: const Text(
-                  'Excluir',
-                  style: TextStyle(color: EagleTokens.bad),
-                ),
-              ),
-            ],
-          ),
+  Future<void> _confirmarExclusao(int id) async {
+    final ok = await showFxConfirmSheet(
+      context,
+      title: 'Excluir publicação?',
+      message: 'Esta ação não pode ser desfeita.',
+      icon: Icons.delete_outline_rounded,
+      confirmLabel: 'Excluir',
+      destructive: true,
     );
+    if (ok) _deletar(id);
   }
 }

@@ -71,36 +71,18 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
     final ids = _selectedAlunoIds.toList();
     if (ids.isEmpty) return;
 
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (ctx) {
-        final isDark = Theme.of(ctx).brightness == Brightness.dark;
-        final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-        return AlertDialog(
-          title: Text(
-            ids.length == 1 ? 'Excluir mensagens?' : 'Excluir conversas?',
-            style: TextStyle(color: ink),
-          ),
-          content: Text(
-            ids.length == 1
-                ? 'As mensagens desta conversa serao limpas da sua caixa.'
-                : 'As mensagens das ${ids.length} conversas selecionadas serao limpas da sua caixa.',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Cancelar'),
-            ),
-            FilledButton(
-              style: FilledButton.styleFrom(backgroundColor: EagleTokens.bad),
-              onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('Excluir'),
-            ),
-          ],
-        );
-      },
+    final confirm = await showFxConfirmSheet(
+      context,
+      title: ids.length == 1 ? 'Excluir mensagens?' : 'Excluir conversas?',
+      message:
+          ids.length == 1
+              ? 'As mensagens desta conversa serao limpas da sua caixa.'
+              : 'As mensagens das ${ids.length} conversas selecionadas serao limpas da sua caixa.',
+      icon: Icons.delete_outline_rounded,
+      confirmLabel: 'Excluir',
+      destructive: true,
     );
-    if (confirm != true) return;
+    if (!confirm) return;
 
     HapticFeedback.mediumImpact();
     try {

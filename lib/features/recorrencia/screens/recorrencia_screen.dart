@@ -6,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_empty_state.dart';
+import '../../../core/widgets/fx_form_sheet.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feedback_helper.dart';
@@ -72,48 +73,37 @@ class _RecorrenciaScreenState extends ConsumerState<RecorrenciaScreen> {
     final valorCtrl = TextEditingController(text: '199');
 
     if (!mounted) return;
-    final ok = await showDialog<bool>(
-      context: context,
-      builder:
-          (ctx) => AlertDialog(
-            title: const Text('Nova recorrência'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                DropdownButtonFormField<int>(
-                  initialValue: alunoId,
-                  items:
-                      alunos
-                          .map(
-                            (a) => DropdownMenuItem(
-                              value: a.id,
-                              child: Text(a.nome),
-                            ),
-                          )
-                          .toList(),
-                  onChanged: (v) => alunoId = v,
-                  decoration: const InputDecoration(labelText: 'Aluno'),
-                ),
-                TextField(
-                  controller: valorCtrl,
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    labelText: 'Valor mensal (R\$)',
-                  ),
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, false),
-                child: const Text('Cancelar'),
-              ),
-              FilledButton(
-                onPressed: () => Navigator.pop(ctx, true),
-                child: const Text('Criar'),
-              ),
-            ],
+    final ok = await showFxFormSheet(
+      context,
+      title: 'Nova recorrência',
+      icon: Icons.repeat_rounded,
+      confirmLabel: 'Criar',
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          DropdownButtonFormField<int>(
+            initialValue: alunoId,
+            items:
+                alunos
+                    .map(
+                      (a) => DropdownMenuItem(
+                        value: a.id,
+                        child: Text(a.nome),
+                      ),
+                    )
+                    .toList(),
+            onChanged: (v) => alunoId = v,
+            decoration: const InputDecoration(labelText: 'Aluno'),
           ),
+          TextField(
+            controller: valorCtrl,
+            keyboardType: TextInputType.number,
+            decoration: const InputDecoration(
+              labelText: 'Valor mensal (R\$)',
+            ),
+          ),
+        ],
+      ),
     );
     if (ok != true || alunoId == null) return;
 

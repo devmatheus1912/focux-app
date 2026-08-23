@@ -10,9 +10,10 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_empty_state.dart';
+import '../../../core/widgets/fx_form_sheet.dart';
 import '../../../core/widgets/fx_error_state.dart';
-import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
@@ -105,31 +106,16 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
   }
 
   Future<void> _deleteOne(Exercicio exercicio) async {
-    final ok = await showDialog<bool>(
-      context: context,
-      builder:
-          (ctx) => AlertDialog(
-            title: const Text('Excluir exercicio?'),
-            content: Text(
-              'Isso remove "${exercicio.nome}" da biblioteca. Se estiver em treino, o backend pode bloquear.',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, false),
-                child: const Text('Cancelar'),
-              ),
-              FilledButton(
-                style: FilledButton.styleFrom(
-                  backgroundColor: Theme.of(ctx).colorScheme.error,
-                  foregroundColor: Theme.of(ctx).colorScheme.onError,
-                ),
-                onPressed: () => Navigator.pop(ctx, true),
-                child: const Text('Excluir'),
-              ),
-            ],
-          ),
+    final ok = await showFxConfirmSheet(
+      context,
+      title: 'Excluir exercicio?',
+      message:
+          'Isso remove "${exercicio.nome}" da biblioteca. Se estiver em treino, o backend pode bloquear.',
+      icon: Icons.delete_outline_rounded,
+      confirmLabel: 'Excluir',
+      destructive: true,
     );
-    if (ok != true || !mounted) return;
+    if (!ok || !mounted) return;
     try {
       await ref.read(exercicioRepositoryProvider).excluir(exercicio.id);
       _selected.remove(exercicio.id);
@@ -181,33 +167,18 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
   Future<void> _deleteBatch(List<Exercicio> exercicios) async {
     final count = _selected.length;
     if (count == 0) return;
-    final ok = await showDialog<bool>(
-      context: context,
-      builder:
-          (ctx) => AlertDialog(
-            title: Text('Excluir $count exercicios?'),
-            content: Text(
-              'Esta acao remove os exercicios selecionados da biblioteca. '
-              'Se algum estiver cadastrado em treino de aluno, ele sera mantido '
-              'e eu vou te mostrar quais foram bloqueados.',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, false),
-                child: const Text('Cancelar'),
-              ),
-              FilledButton(
-                style: FilledButton.styleFrom(
-                  backgroundColor: Theme.of(ctx).colorScheme.error,
-                  foregroundColor: Theme.of(ctx).colorScheme.onError,
-                ),
-                onPressed: () => Navigator.pop(ctx, true),
-                child: const Text('Excluir'),
-              ),
-            ],
-          ),
+    final ok = await showFxConfirmSheet(
+      context,
+      title: 'Excluir $count exercicios?',
+      message:
+          'Esta acao remove os exercicios selecionados da biblioteca. '
+          'Se algum estiver cadastrado em treino de aluno, ele sera mantido '
+          'e eu vou te mostrar quais foram bloqueados.',
+      icon: Icons.delete_outline_rounded,
+      confirmLabel: 'Excluir',
+      destructive: true,
     );
-    if (ok != true) return;
+    if (!ok) return;
     final repo = ref.read(exercicioRepositoryProvider);
     final byId = {for (final ex in exercicios) ex.id: ex};
     final deleted = <int>[];
@@ -247,49 +218,29 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
       return;
     }
 
-    await showDialog<void>(
-      context: context,
-      builder:
-          (ctx) => AlertDialog(
-            title: const Text('Alguns exercicios nao foram excluidos'),
-            content: SizedBox(
-              width: double.maxFinite,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (deleted.isNotEmpty)
-                    Text('${deleted.length} excluido(s) com sucesso.'),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Mantidos porque estao cadastrados para aluno ou em treino:',
-                  ),
-                  const SizedBox(height: 8),
-                  Flexible(
-                    child: ListView.separated(
-                      shrinkWrap: true,
-                      itemCount: blocked.length,
-                      separatorBuilder: (_, __) => const Divider(height: 12),
-                      itemBuilder: (_, index) {
-                        final item = blocked[index];
-                        return Text(
-                          '${item.nome}\n${item.motivo}',
-                          style: const TextStyle(fontSize: 13),
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            actions: [
-              FxLiquidPrimaryButton(
-                label: 'Entendi',
-                onPressed: () => Navigator.pop(ctx),
-                expand: false,
-              ),
-            ],
+    await showFxNoticeSheet(
+      context,
+      title: 'Alguns exercicios nao foram excluidos',
+      icon: Icons.info_outline_rounded,
+      body: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (deleted.isNotEmpty)
+            Text('${deleted.length} excluido(s) com sucesso.'),
+          const SizedBox(height: 8),
+          const Text(
+            'Mantidos porque estao cadastrados para aluno ou em treino:',
           ),
+          const SizedBox(height: 8),
+          ...blocked.map(
+            (item) => Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Text('${item.nome}\n${item.motivo}'),
+            ),
+          ),
+        ],
+      ),
     );
   }
 

@@ -30,6 +30,7 @@ import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
+import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/skeleton_loader.dart';
@@ -198,28 +199,15 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
     required String title,
     required String body,
     required String confirmLabel,
-  }) async {
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (ctx) {
-        final chrome = ShellChrome.of(ctx);
-        return AlertDialog(
-          title: Text(title),
-          content: Text(body),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: Text('Voltar', style: TextStyle(color: chrome.mute)),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, true),
-              child: Text(confirmLabel),
-            ),
-          ],
-        );
-      },
+  }) {
+    return showFxConfirmSheet(
+      context,
+      title: title,
+      message: body,
+      confirmLabel: confirmLabel,
+      cancelLabel: 'Voltar',
+      destructive: true,
     );
-    return ok == true;
   }
 
   Future<void> _setStatus(Agendamento ag, String status) async {

@@ -23,6 +23,8 @@
 /// - [fxListTileCardShell] / [fxListCardDecoration] — linhas de lista.
 /// - [FxShellScaffold] + [FxShellAppBar] — telas satélite (useMesh: true).
 /// - [showFxHomeSheet] / [FxHomeSheetSurface] — bottom sheets (radius 28).
+/// - [showFxConfirmSheet] — confirmar/cancelar (nunca `AlertDialog`).
+/// - [showFxFormSheet] / [showFxNoticeSheet] — formulário curto e aviso.
 /// - [CinematicMeshBackground] + [MeshScope] — atmosfera (shell provê;
 ///   scaffold da tela fica transparente).
 ///
@@ -51,6 +53,8 @@ export 'widgets/fx_shell_scaffold.dart'
         fxListTileCardShell;
 export 'widgets/fx_strip_card.dart' show FxStripCard;
 export 'widgets/fx_home_sheet.dart';
+export 'widgets/fx_confirm_sheet.dart' show showFxConfirmSheet;
+export 'widgets/fx_form_sheet.dart' show showFxFormSheet, showFxNoticeSheet;
 export 'widgets/fx_premium_entrance.dart' show FxPremiumEntrance;
 export 'widgets/fx_motion.dart' show FxLiquidPrimaryButton, FxStaggerItem;
 export 'widgets/fx_content_width_limiter.dart' show FxContentWidthLimiter;

@@ -187,45 +187,30 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
   Future<void> _confirmDeleteAccount() async {
     final passwordCtrl = TextEditingController();
     final confirmCtrl = TextEditingController();
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) {
-        return AlertDialog(
-          title: const Text('Excluir conta'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Esta acao e irreversivel. Seus dados pessoais serao anonimizados conforme a LGPD. Historico financeiro ou operacional pode ser mantido pelo prazo legal.\n\n'
-                'Digite sua senha e EXCLUIR para confirmar.',
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: passwordCtrl,
-                obscureText: true,
-                decoration: const InputDecoration(labelText: 'Senha atual'),
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: confirmCtrl,
-                decoration: const InputDecoration(labelText: 'Digite EXCLUIR'),
-              ),
-            ],
+    final confirmed = await showFxFormSheet(
+      context,
+      title: 'Excluir conta',
+      subtitle:
+          'Esta acao e irreversivel. Seus dados pessoais serao anonimizados conforme a LGPD. Historico financeiro ou operacional pode ser mantido pelo prazo legal.\n\n'
+          'Digite sua senha e EXCLUIR para confirmar.',
+      icon: Icons.delete_forever_outlined,
+      confirmLabel: 'Excluir definitivamente',
+      destructive: true,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextField(
+            controller: passwordCtrl,
+            obscureText: true,
+            decoration: const InputDecoration(labelText: 'Senha atual'),
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(ctx).pop(false),
-              child: const Text('Cancelar'),
-            ),
-            FilledButton(
-              style: FilledButton.styleFrom(backgroundColor: EagleTokens.bad),
-              onPressed: () => Navigator.of(ctx).pop(true),
-              child: const Text('Excluir definitivamente'),
-            ),
-          ],
-        );
-      },
+          const SizedBox(height: 8),
+          TextField(
+            controller: confirmCtrl,
+            decoration: const InputDecoration(labelText: 'Digite EXCLUIR'),
+          ),
+        ],
+      ),
     );
 
     final senha = passwordCtrl.text;

@@ -9,7 +9,6 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../data/evolucao_repository.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_error_state.dart';
-import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
@@ -18,6 +17,7 @@ import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_empty_state.dart';
+import '../../../core/widgets/fx_form_sheet.dart';
 import '../../alunos/utils/satellite_screen_utils.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 
@@ -188,171 +188,134 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen>
     );
   }
 
-  void _mostrarDialogMedida(BuildContext context) {
+  Future<void> _mostrarDialogMedida(BuildContext context) async {
     final pesoCtrl = TextEditingController();
     final gorduraCtrl = TextEditingController();
     final massaMagraCtrl = TextEditingController();
     final abdomenCtrl = TextEditingController();
     final obsCtrl = TextEditingController();
 
-    showDialog(
-      context: context,
-      builder:
-          (ctx) => AlertDialog(
-            title: const Text('Nova Medida Corporal'),
-            content: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  _CampoNumerico(controller: pesoCtrl, label: 'Peso (kg)'),
-                  const SizedBox(height: 10),
-                  _CampoNumerico(controller: gorduraCtrl, label: '% Gordura'),
-                  const SizedBox(height: 10),
-                  _CampoNumerico(
-                    controller: massaMagraCtrl,
-                    label: 'Massa Magra (kg)',
-                  ),
-                  const SizedBox(height: 10),
-                  _CampoNumerico(
-                    controller: abdomenCtrl,
-                    label: 'Circunf. Abdômen (cm)',
-                  ),
-                  const SizedBox(height: 10),
-                  TextField(
-                    controller: obsCtrl,
-                    decoration: InputDecoration(
-                      labelText: 'Observação',
-                      border: FxInputDeco.outlineBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                    ),
-                    maxLines: 2,
-                  ),
-                ],
+    final saved = await showFxFormSheet(
+      context,
+      title: 'Nova Medida Corporal',
+      icon: Icons.monitor_weight_outlined,
+      confirmLabel: 'Salvar',
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _CampoNumerico(controller: pesoCtrl, label: 'Peso (kg)'),
+          const SizedBox(height: 10),
+          _CampoNumerico(controller: gorduraCtrl, label: '% Gordura'),
+          const SizedBox(height: 10),
+          _CampoNumerico(
+            controller: massaMagraCtrl,
+            label: 'Massa Magra (kg)',
+          ),
+          const SizedBox(height: 10),
+          _CampoNumerico(
+            controller: abdomenCtrl,
+            label: 'Circunf. Abdômen (cm)',
+          ),
+          const SizedBox(height: 10),
+          TextField(
+            controller: obsCtrl,
+            decoration: InputDecoration(
+              labelText: 'Observação',
+              border: FxInputDeco.outlineBorder(
+                borderRadius: BorderRadius.circular(14),
               ),
             ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx),
-                child: const Text('Cancelar'),
-              ),
-              FxLiquidPrimaryButton(
-                label: 'Salvar',
-                onPressed: () async {
-                  Navigator.pop(ctx);
-                  try {
-                    final repo = EvolucaoRepository(
-                      ref.read(apiClientProvider),
-                    );
-                    await repo.adicionarMedida(
-                      widget.alunoId,
-                      peso: double.tryParse(pesoCtrl.text),
-                      cintura: double.tryParse(abdomenCtrl.text),
-                    );
-                    ref.invalidate(evolucaoHomeProvider(widget.alunoId));
-                    if (context.mounted) {
-                      FeedbackHelper.showSuccess(context, 'Medida adicionada!');
-                    }
-                  } catch (e) {
-                    if (context.mounted) {
-                      FeedbackHelper.showError(context, friendlyError(e));
-                    }
-                  }
-                },
-                expand: false,
-              ),
-            ],
+            maxLines: 2,
           ),
+        ],
+      ),
     );
+    if (!saved) return;
+    try {
+      final repo = EvolucaoRepository(ref.read(apiClientProvider));
+      await repo.adicionarMedida(
+        widget.alunoId,
+        peso: double.tryParse(pesoCtrl.text),
+        cintura: double.tryParse(abdomenCtrl.text),
+      );
+      ref.invalidate(evolucaoHomeProvider(widget.alunoId));
+      if (context.mounted) {
+        FeedbackHelper.showSuccess(context, 'Medida adicionada!');
+      }
+    } catch (e) {
+      if (context.mounted) {
+        FeedbackHelper.showError(context, friendlyError(e));
+      }
+    }
   }
 
-  void _mostrarDialogRecorde(BuildContext context) {
+  Future<void> _mostrarDialogRecorde(BuildContext context) async {
     final exercicioCtrl = TextEditingController();
     final cargaCtrl = TextEditingController();
     final unidadeCtrl = TextEditingController(text: 'kg');
     final obsCtrl = TextEditingController();
 
-    showDialog(
-      context: context,
-      builder:
-          (ctx) => AlertDialog(
-            title: const Text('Novo Recorde Pessoal'),
-            content: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextField(
-                    controller: exercicioCtrl,
-                    decoration: InputDecoration(
-                      labelText: 'Exercício',
-                      border: FxInputDeco.outlineBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  _CampoNumerico(controller: cargaCtrl, label: 'Carga'),
-                  const SizedBox(height: 10),
-                  TextField(
-                    controller: unidadeCtrl,
-                    decoration: InputDecoration(
-                      labelText: 'Unidade (kg, reps...)',
-                      border: FxInputDeco.outlineBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  TextField(
-                    controller: obsCtrl,
-                    decoration: InputDecoration(
-                      labelText: 'Observação',
-                      border: FxInputDeco.outlineBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                    ),
-                    maxLines: 2,
-                  ),
-                ],
+    final saved = await showFxFormSheet(
+      context,
+      title: 'Novo Recorde Pessoal',
+      icon: Icons.emoji_events_outlined,
+      confirmLabel: 'Salvar',
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextField(
+            controller: exercicioCtrl,
+            decoration: InputDecoration(
+              labelText: 'Exercício',
+              border: FxInputDeco.outlineBorder(
+                borderRadius: BorderRadius.circular(14),
               ),
             ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx),
-                child: const Text('Cancelar'),
-              ),
-              FxLiquidPrimaryButton(
-                label: 'Salvar',
-                onPressed: () async {
-                  Navigator.pop(ctx);
-                  try {
-                    final repo = EvolucaoRepository(
-                      ref.read(apiClientProvider),
-                    );
-                    await repo.adicionarRecorde(
-                      widget.alunoId,
-                      exercicioNome: exercicioCtrl.text.trim(),
-                      carga: double.tryParse(cargaCtrl.text),
-                      unidade: unidadeCtrl.text.trim(),
-                      observacao: obsCtrl.text.trim(),
-                    );
-                    ref.invalidate(evolucaoHomeProvider(widget.alunoId));
-                    if (context.mounted) {
-                      FeedbackHelper.showSuccess(
-                        context,
-                        'Recorde adicionado!',
-                      );
-                    }
-                  } catch (e) {
-                    if (context.mounted) {
-                      FeedbackHelper.showError(context, friendlyError(e));
-                    }
-                  }
-                },
-                expand: false,
-              ),
-            ],
           ),
+          const SizedBox(height: 10),
+          _CampoNumerico(controller: cargaCtrl, label: 'Carga'),
+          const SizedBox(height: 10),
+          TextField(
+            controller: unidadeCtrl,
+            decoration: InputDecoration(
+              labelText: 'Unidade (kg, reps...)',
+              border: FxInputDeco.outlineBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+          TextField(
+            controller: obsCtrl,
+            decoration: InputDecoration(
+              labelText: 'Observação',
+              border: FxInputDeco.outlineBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+            ),
+            maxLines: 2,
+          ),
+        ],
+      ),
     );
+    if (!saved) return;
+    try {
+      final repo = EvolucaoRepository(ref.read(apiClientProvider));
+      await repo.adicionarRecorde(
+        widget.alunoId,
+        exercicioNome: exercicioCtrl.text.trim(),
+        carga: double.tryParse(cargaCtrl.text),
+        unidade: unidadeCtrl.text.trim(),
+        observacao: obsCtrl.text.trim(),
+      );
+      ref.invalidate(evolucaoHomeProvider(widget.alunoId));
+      if (context.mounted) {
+        FeedbackHelper.showSuccess(context, 'Recorde adicionado!');
+      }
+    } catch (e) {
+      if (context.mounted) {
+        FeedbackHelper.showError(context, friendlyError(e));
+      }
+    }
   }
 }

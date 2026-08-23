@@ -5,6 +5,7 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/utils/motion_preferences.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../constants/aluno_360_layout.dart';
@@ -39,28 +40,16 @@ class _Aluno360FollowUpCardState extends ConsumerState<Aluno360FollowUpCard> {
 
   Future<void> _confirmClearFollowUp(dynamic actions) async {
     if (_busy) return;
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder:
-          (ctx) => AlertDialog(
-            title: const Text('Limpar follow-up?'),
-            content: Text(
-              'Remove a data de próximo contato de ${aluno.nome}. '
-              'Você pode definir outra data depois.',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, false),
-                child: const Text('Cancelar'),
-              ),
-              FilledButton(
-                onPressed: () => Navigator.pop(ctx, true),
-                child: const Text('Limpar'),
-              ),
-            ],
-          ),
+    final confirmed = await showFxConfirmSheet(
+      context,
+      title: 'Limpar follow-up?',
+      message:
+          'Remove a data de próximo contato de ${aluno.nome}. '
+          'Você pode definir outra data depois.',
+      icon: Icons.event_busy_rounded,
+      confirmLabel: 'Limpar',
     );
-    if (confirmed != true) return;
+    if (!confirmed) return;
     await _runAction(() => actions.clearFollowUp(aluno.id), 'Follow-up limpo');
   }
 

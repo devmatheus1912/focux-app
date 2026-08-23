@@ -5,6 +5,7 @@ import '../../../core/api/media_upload_service.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/galeria_repository.dart';
+import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_loading.dart';
@@ -88,25 +89,15 @@ class _State extends ConsumerState<GaleriaScreen> {
   }
 
   Future<void> _delete(int id) async {
-    final ok = await showDialog<bool>(
-      context: context,
-      builder:
-          (_) => AlertDialog(
-            title: const Text('Remover foto'),
-            content: const Text('Remover esta foto da galeria?'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context, false),
-                child: const Text('Cancelar'),
-              ),
-              FilledButton(
-                onPressed: () => Navigator.pop(context, true),
-                child: const Text('Remover'),
-              ),
-            ],
-          ),
+    final ok = await showFxConfirmSheet(
+      context,
+      title: 'Remover foto?',
+      message: 'Remover esta foto da galeria?',
+      icon: Icons.delete_outline_rounded,
+      confirmLabel: 'Remover',
+      destructive: true,
     );
-    if (ok != true) return;
+    if (!ok) return;
     try {
       await GaleriaRepository(ref.read(apiClientProvider)).deletar(id);
       await _load();

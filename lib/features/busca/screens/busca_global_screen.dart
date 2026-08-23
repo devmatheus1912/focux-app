@@ -4,6 +4,7 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
@@ -201,25 +202,14 @@ class _BuscaGlobalScreenState extends ConsumerState<BuscaGlobalScreen> {
       return;
     }
     if (!mounted) return;
-    final ok = await showDialog<bool>(
-      context: context,
-      builder:
-          (dialogCtx) => AlertDialog(
-            title: const Text('Abrir link externo?'),
-            content: Text(uri.toString()),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(dialogCtx, false),
-                child: const Text('Cancelar'),
-              ),
-              TextButton(
-                onPressed: () => Navigator.pop(dialogCtx, true),
-                child: const Text('Abrir'),
-              ),
-            ],
-          ),
+    final ok = await showFxConfirmSheet(
+      context,
+      title: 'Abrir link externo?',
+      message: uri.toString(),
+      icon: Icons.open_in_new_rounded,
+      confirmLabel: 'Abrir',
     );
-    if (ok != true) return;
+    if (!ok) return;
     final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
     if (!launched && mounted) _showError('Não foi possível abrir este link.');
   }

@@ -110,28 +110,14 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
   }
 
   Future<void> _converter() async {
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder:
-          (ctx) => AlertDialog(
-            title: const Text('Converter em Aluno?'),
-            content: Text(
-              '${_activeLead.nome} será criado como aluno na sua lista.',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, false),
-                child: const Text('Cancelar'),
-              ),
-              FxLiquidPrimaryButton(
-                expand: false,
-                label: 'Converter',
-                onPressed: () => Navigator.pop(ctx, true),
-              ),
-            ],
-          ),
+    final confirm = await showFxConfirmSheet(
+      context,
+      title: 'Converter em Aluno?',
+      message: '${_activeLead.nome} será criado como aluno na sua lista.',
+      icon: Icons.person_add_alt_1_rounded,
+      confirmLabel: 'Converter',
     );
-    if (confirm != true) return;
+    if (!confirm) return;
     try {
       await LeadRepository(
         ref.read(apiClientProvider),
@@ -148,26 +134,15 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
   }
 
   Future<void> _arquivar() async {
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder:
-          (ctx) => AlertDialog(
-            title: const Text('Arquivar lead?'),
-            content: const Text('O lead será marcado como Cancelado.'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, false),
-                child: const Text('Cancelar'),
-              ),
-              FxLiquidPrimaryButton(
-                expand: false,
-                label: 'Arquivar',
-                onPressed: () => Navigator.pop(ctx, true),
-              ),
-            ],
-          ),
+    final confirm = await showFxConfirmSheet(
+      context,
+      title: 'Arquivar lead?',
+      message: 'O lead será marcado como Cancelado.',
+      icon: Icons.archive_outlined,
+      confirmLabel: 'Arquivar',
+      destructive: true,
     );
-    if (confirm != true) return;
+    if (!confirm) return;
     try {
       await LeadRepository(
         ref.read(apiClientProvider),

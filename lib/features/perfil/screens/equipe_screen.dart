@@ -8,6 +8,7 @@ import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feature_gate.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_empty_state.dart';
+import '../../../core/widgets/fx_form_sheet.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
@@ -65,27 +66,16 @@ class _EquipeScreenState extends ConsumerState<EquipeScreen> {
 
   Future<void> _convidar() async {
     final ctrl = TextEditingController();
-    final ok = await showDialog<bool>(
-      context: context,
-      builder:
-          (ctx) => AlertDialog(
-            title: const Text('Convidar assistente'),
-            content: TextField(
-              controller: ctrl,
-              decoration: const InputDecoration(labelText: 'Email'),
-              keyboardType: TextInputType.emailAddress,
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, false),
-                child: const Text('Cancelar'),
-              ),
-              FilledButton(
-                onPressed: () => Navigator.pop(ctx, true),
-                child: const Text('Convidar'),
-              ),
-            ],
-          ),
+    final ok = await showFxFormSheet(
+      context,
+      title: 'Convidar assistente',
+      icon: Icons.person_add_outlined,
+      confirmLabel: 'Convidar',
+      child: TextField(
+        controller: ctrl,
+        decoration: const InputDecoration(labelText: 'Email'),
+        keyboardType: TextInputType.emailAddress,
+      ),
     );
 
     if (ok != true || ctrl.text.trim().isEmpty) return;

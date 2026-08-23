@@ -10,6 +10,7 @@ import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/feature_gate.dart';
 import '../../../core/widgets/fx_empty_state.dart';
+import '../../../core/widgets/fx_form_sheet.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -83,73 +84,54 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
     HabitoTemplate? selected;
     final tituloCtrl = TextEditingController();
     final descricaoCtrl = TextEditingController();
-    final ok = await showDialog<bool>(
-      context: context,
-      builder:
-          (ctx) => StatefulBuilder(
-            builder:
-                (ctx, setDialogState) => AlertDialog(
-                  title: const Text('Novo hábito'),
-                  content: SingleChildScrollView(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (templates.isNotEmpty) ...[
-                          DropdownButtonFormField<HabitoTemplate>(
-                            decoration: const InputDecoration(
-                              labelText: 'Template',
-                            ),
-                            items:
-                                templates
-                                    .map(
-                                      (t) => DropdownMenuItem(
-                                        value: t,
-                                        child: Text(
-                                          '${t.icone ?? ''} ${t.titulo}',
-                                        ),
-                                      ),
-                                    )
-                                    .toList(),
-                            onChanged: (t) {
-                              setDialogState(() {
-                                selected = t;
-                                if (t != null) {
-                                  tituloCtrl.text = t.titulo;
-                                  descricaoCtrl.text = t.descricao ?? '';
-                                }
-                              });
-                            },
-                          ),
-                          const SizedBox(height: 8),
-                        ],
-                        TextField(
-                          controller: tituloCtrl,
-                          decoration: const InputDecoration(
-                            labelText: 'Título',
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        TextField(
-                          controller: descricaoCtrl,
-                          decoration: const InputDecoration(
-                            labelText: 'Descrição (opcional)',
-                          ),
-                        ),
-                      ],
-                    ),
+    final ok = await showFxFormSheet(
+      context,
+      title: 'Novo hábito',
+      icon: Icons.add_task_outlined,
+      confirmLabel: 'Criar',
+      child: StatefulBuilder(
+        builder:
+            (ctx, setDialogState) => Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (templates.isNotEmpty) ...[
+                  DropdownButtonFormField<HabitoTemplate>(
+                    decoration: const InputDecoration(labelText: 'Template'),
+                    items:
+                        templates
+                            .map(
+                              (t) => DropdownMenuItem(
+                                value: t,
+                                child: Text('${t.icone ?? ''} ${t.titulo}'),
+                              ),
+                            )
+                            .toList(),
+                    onChanged: (t) {
+                      setDialogState(() {
+                        selected = t;
+                        if (t != null) {
+                          tituloCtrl.text = t.titulo;
+                          descricaoCtrl.text = t.descricao ?? '';
+                        }
+                      });
+                    },
                   ),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.of(ctx).pop(false),
-                      child: const Text('Cancelar'),
-                    ),
-                    FilledButton(
-                      onPressed: () => Navigator.of(ctx).pop(true),
-                      child: const Text('Criar'),
-                    ),
-                  ],
+                  const SizedBox(height: 8),
+                ],
+                TextField(
+                  controller: tituloCtrl,
+                  decoration: const InputDecoration(labelText: 'Título'),
                 ),
-          ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: descricaoCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'Descrição (opcional)',
+                  ),
+                ),
+              ],
+            ),
+      ),
     );
     if (ok == true && tituloCtrl.text.trim().isNotEmpty) {
       try {

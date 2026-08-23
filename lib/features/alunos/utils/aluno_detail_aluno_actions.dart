@@ -9,8 +9,8 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/clipboard_sensitive.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
-import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/aluno_repository.dart';
@@ -55,29 +55,16 @@ Future<void> confirmarGerarSenhaAlunoDetail(
   WidgetRef ref,
   Aluno aluno,
 ) async {
-  final confirm = await showDialog<bool>(
-    context: context,
-    builder:
-        (ctx) => AlertDialog(
-          title: const Text('Gerar nova senha?'),
-          content: Text(
-            'A senha atual de ${aluno.nome} deixará de funcionar. Gere apenas se o aluno esqueceu a senha ou precisa recuperar acesso.',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Cancelar'),
-            ),
-            FxLiquidPrimaryButton(
-              expand: false,
-              icon: Icons.key_rounded,
-              label: 'Gerar senha',
-              onPressed: () => Navigator.pop(ctx, true),
-            ),
-          ],
-        ),
+  final confirm = await showFxConfirmSheet(
+    context,
+    title: 'Gerar nova senha?',
+    message:
+        'A senha atual de ${aluno.nome} deixará de funcionar. Gere apenas se o aluno esqueceu a senha ou precisa recuperar acesso.',
+    icon: Icons.key_rounded,
+    confirmIcon: Icons.key_rounded,
+    confirmLabel: 'Gerar senha',
   );
-  if (confirm != true || !context.mounted) return;
+  if (!confirm || !context.mounted) return;
 
   try {
     final senha = await AlunoRepository(

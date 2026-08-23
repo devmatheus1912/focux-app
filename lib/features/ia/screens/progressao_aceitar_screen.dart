@@ -11,6 +11,7 @@ import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_loading.dart';
@@ -268,27 +269,16 @@ class _ProgressaoAceitarScreenState
     ProgressaoAceitarRouteArgs args,
     ProgressaoSugestao sugestao,
   ) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder:
-          (ctx) => AlertDialog(
-            title: const Text('Descartar sugestão?'),
-            content: Text(
-              'A sugestão de ${sugestao.exercicio} (${sugestao.cargaSugerida}) será removida.',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, false),
-                child: const Text('Cancelar'),
-              ),
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, true),
-                child: const Text('Descartar'),
-              ),
-            ],
-          ),
+    final confirmed = await showFxConfirmSheet(
+      context,
+      title: 'Descartar sugestão?',
+      message:
+          'A sugestão de ${sugestao.exercicio} (${sugestao.cargaSugerida}) será removida.',
+      icon: Icons.delete_sweep_rounded,
+      confirmLabel: 'Descartar',
+      destructive: true,
     );
-    if (confirmed == true && mounted) {
+    if (confirmed && mounted) {
       await _acao(args, sugestao, aceitar: false);
     }
   }

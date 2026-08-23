@@ -9,8 +9,8 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../data/lead_repository.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_empty_state.dart';
+import '../../../core/widgets/fx_form_sheet.dart';
 import '../../../core/widgets/fx_error_state.dart';
-import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
@@ -129,55 +129,41 @@ class _LeadsKanbanScreenState extends ConsumerState<LeadsKanbanScreen> {
   Future<void> _novoLeadRapido() async {
     final nomeCtrl = TextEditingController();
     final telefoneCtrl = TextEditingController();
-    final created = await showDialog<bool>(
-      context: context,
-      builder:
-          (ctx) => AlertDialog(
-            title: const Text('Novo lead'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: nomeCtrl,
-                  decoration: const InputDecoration(labelText: 'Nome'),
-                ),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: telefoneCtrl,
-                  decoration: const InputDecoration(labelText: 'Telefone'),
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, false),
-                child: const Text('Cancelar'),
-              ),
-              FxLiquidPrimaryButton(
-                expand: false,
-                label: 'Criar',
-                onPressed: () async {
-                  if (nomeCtrl.text.trim().isEmpty) return;
-                  try {
-                    await LeadRepository(ref.read(apiClientProvider)).criar(
-                      nome: nomeCtrl.text.trim(),
-                      telefone: telefoneCtrl.text.trim(),
-                      origem: 'Kanban',
-                    );
-                    if (ctx.mounted) Navigator.pop(ctx, true);
-                  } catch (e) {
-                    if (ctx.mounted) {
-                      FeedbackHelper.showError(ctx, friendlyError(e));
-                    }
-                  }
-                },
-              ),
-            ],
+    final created = await showFxFormSheet(
+      context,
+      title: 'Novo lead',
+      icon: Icons.person_add_outlined,
+      confirmLabel: 'Criar',
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextField(
+            controller: nomeCtrl,
+            decoration: const InputDecoration(labelText: 'Nome'),
           ),
+          const SizedBox(height: 8),
+          TextField(
+            controller: telefoneCtrl,
+            decoration: const InputDecoration(labelText: 'Telefone'),
+          ),
+        ],
+      ),
     );
+    final nome = nomeCtrl.text.trim();
+    final telefone = telefoneCtrl.text.trim();
     nomeCtrl.dispose();
     telefoneCtrl.dispose();
-    if (created == true) _load();
+    if (!created || nome.isEmpty) return;
+    try {
+      await LeadRepository(ref.read(apiClientProvider)).criar(
+        nome: nome,
+        telefone: telefone,
+        origem: 'Kanban',
+      );
+      if (mounted) _load();
+    } catch (e) {
+      if (mounted) FeedbackHelper.showError(context, friendlyError(e));
+    }
   }
 
   @override

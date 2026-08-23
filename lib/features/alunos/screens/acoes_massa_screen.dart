@@ -9,6 +9,7 @@ import '../data/aluno_repository.dart';
 import '../providers/alunos_provider.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_input_deco.dart';
@@ -79,28 +80,16 @@ class _AcoesMassaScreenState extends ConsumerState<AcoesMassaScreen> {
   }
 
   Future<void> _confirmarExclusao(BuildContext context) async {
-    final confirmar = await showDialog<bool>(
-      context: context,
-      builder:
-          (ctx) => AlertDialog(
-            title: const Text('Excluir alunos?'),
-            content: Text(
-              '${_selecionados.length} aluno(s) serão excluídos permanentemente. Esta ação não pode ser desfeita.',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, false),
-                child: const Text('Cancelar'),
-              ),
-              TextButton(
-                style: TextButton.styleFrom(foregroundColor: EagleTokens.bad),
-                onPressed: () => Navigator.pop(ctx, true),
-                child: const Text('Excluir'),
-              ),
-            ],
-          ),
+    final confirmar = await showFxConfirmSheet(
+      context,
+      title: 'Excluir alunos?',
+      message:
+          '${_selecionados.length} aluno(s) serão excluídos permanentemente. Esta ação não pode ser desfeita.',
+      icon: Icons.delete_outline_rounded,
+      confirmLabel: 'Excluir',
+      destructive: true,
     );
-    if (confirmar == true) _excluirSelecionados();
+    if (confirmar) _excluirSelecionados();
   }
 
   Future<void> _excluirSelecionados() async {

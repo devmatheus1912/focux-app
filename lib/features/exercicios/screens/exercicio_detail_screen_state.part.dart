@@ -52,35 +52,24 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
     String? currentNotes,
   ) async {
     final notesCtrl = TextEditingController(text: currentNotes ?? '');
-    final notes = await showDialog<String?>(
-      context: context,
-      builder:
-          (ctx) => AlertDialog(
-            title: Text(_editorialActionTitle(status)),
-            content: TextField(
-              controller: notesCtrl,
-              minLines: 3,
-              maxLines: 6,
-              decoration: InputDecoration(
-                border: FxInputDeco.outlineBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                hintText: 'Notas tecnicas, fonte do video ou motivo da decisao',
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx),
-                child: const Text('Cancelar'),
-              ),
-              FxLiquidPrimaryButton(
-                label: 'Salvar',
-                onPressed: () => Navigator.pop(ctx, notesCtrl.text.trim()),
-                expand: false,
-              ),
-            ],
+    final saved = await showFxFormSheet(
+      context,
+      title: _editorialActionTitle(status),
+      icon: Icons.rate_review_outlined,
+      confirmLabel: 'Salvar',
+      child: TextField(
+        controller: notesCtrl,
+        minLines: 3,
+        maxLines: 6,
+        decoration: InputDecoration(
+          border: FxInputDeco.outlineBorder(
+            borderRadius: BorderRadius.circular(14),
           ),
+          hintText: 'Notas tecnicas, fonte do video ou motivo da decisao',
+        ),
+      ),
     );
+    final notes = saved ? notesCtrl.text.trim() : null;
     notesCtrl.dispose();
     if (notes == null) return;
 

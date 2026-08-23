@@ -239,61 +239,46 @@ extension FinanceiroMensalidadesTabActions on _FinanceiroMensalidadesTabState {
     String? tipoSelecionado = tipos.first;
     final obsCtrl = TextEditingController();
 
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder:
-          (ctx) => StatefulBuilder(
-            builder:
-                (ctx, set) => AlertDialog(
-                  title: const Text('Registrar Contato'),
-                  content: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      DropdownButtonFormField<String>(
-                        initialValue: tipoSelecionado,
-                        decoration: InputDecoration(
-                          labelText: 'Tipo',
-                          border: FxInputDeco.outlineBorder(
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                        ),
-                        items:
-                            tipos
-                                .map(
-                                  (t) => DropdownMenuItem(
-                                    value: t,
-                                    child: Text(t),
-                                  ),
-                                )
-                                .toList(),
-                        onChanged: (v) => set(() => tipoSelecionado = v),
-                      ),
-                      const SizedBox(height: 12),
-                      TextField(
-                        controller: obsCtrl,
-                        decoration: InputDecoration(
-                          labelText: 'Observação (opcional)',
-                          border: FxInputDeco.outlineBorder(
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                        ),
-                        maxLines: 2,
-                      ),
-                    ],
+    final confirm = await showFxFormSheet(
+      context,
+      title: 'Registrar Contato',
+      icon: Icons.call_outlined,
+      confirmLabel: 'Registrar',
+      child: StatefulBuilder(
+        builder:
+            (ctx, set) => Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                DropdownButtonFormField<String>(
+                  initialValue: tipoSelecionado,
+                  decoration: InputDecoration(
+                    labelText: 'Tipo',
+                    border: FxInputDeco.outlineBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
                   ),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(ctx, false),
-                      child: const Text('Cancelar'),
-                    ),
-                    FxLiquidPrimaryButton(
-                      label: 'Registrar',
-                      expand: false,
-                      onPressed: () => Navigator.pop(ctx, true),
-                    ),
-                  ],
+                  items:
+                      tipos
+                          .map(
+                            (t) => DropdownMenuItem(value: t, child: Text(t)),
+                          )
+                          .toList(),
+                  onChanged: (v) => set(() => tipoSelecionado = v),
                 ),
-          ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: obsCtrl,
+                  decoration: InputDecoration(
+                    labelText: 'Observação (opcional)',
+                    border: FxInputDeco.outlineBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                  maxLines: 2,
+                ),
+              ],
+            ),
+      ),
     );
     if (confirm != true || tipoSelecionado == null) return;
     try {
@@ -349,9 +334,8 @@ extension FinanceiroMensalidadesTabActions on _FinanceiroMensalidadesTabState {
     bool carregando = true;
     String? erro;
 
-    await showDialog(
-      context: context,
-      barrierDismissible: false,
+    await showFxHomeSheet<void>(
+      context,
       builder:
           (ctx) => StatefulBuilder(
             builder: (ctx, setDialogState) {
@@ -372,52 +356,67 @@ extension FinanceiroMensalidadesTabActions on _FinanceiroMensalidadesTabState {
                     });
               }
 
-              return AlertDialog(
-                title: const Text('PIX - Escaneie ou copie'),
-                content:
-                    carregando
-                        ? const SizedBox(height: 80, child: FxLoading())
-                        : erro != null
-                        ? Text(
-                          erro!,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: EagleTokens.bad,
-                            fontSize: 13,
-                            height: 1.35,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        )
-                        : Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Image.memory(
-                              base64Decode(pix!.qrCodeBase64),
-                              width: 200,
-                              height: 200,
-                            ),
-                            const SizedBox(height: TokensStrip.s4),
-                            TextButton.icon(
-                              icon: const Icon(Icons.copy),
-                              label: const Text('Copiar codigo PIX'),
-                              onPressed: () {
-                                Clipboard.setData(
-                                  ClipboardData(text: pix!.pixCopiaECola),
-                                );
-                                FeedbackHelper.showSuccess(
-                                  context,
-                                  'Código PIX copiado!',
-                                );
-                              },
-                            ),
-                          ],
+              final isDark = Theme.of(ctx).brightness == Brightness.dark;
+              final primary = Theme.of(ctx).colorScheme.primary;
+              return FxHomeSheetSurface(
+                isDark: isDark,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    FxHomeSheetHandle(isDark: isDark),
+                    SizedBox(height: TokensStrip.s4),
+                    FxHomeSheetHeader(
+                      isDark: isDark,
+                      title: 'PIX - Escaneie ou copie',
+                      leading: Icon(
+                        Icons.qr_code_rounded,
+                        color: primary,
+                        size: 18,
+                      ),
+                    ),
+                    SizedBox(height: TokensStrip.s4),
+                    if (carregando)
+                      const SizedBox(height: 80, child: FxLoading())
+                    else if (erro != null)
+                      Text(
+                        erro!,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: EagleTokens.bad,
+                          fontSize: 13,
+                          height: 1.35,
+                          fontWeight: FontWeight.w600,
                         ),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.of(ctx).pop(),
-                    child: const Text('Fechar'),
-                  ),
-                ],
+                      )
+                    else ...[
+                      Image.memory(
+                        base64Decode(pix!.qrCodeBase64),
+                        width: 200,
+                        height: 200,
+                      ),
+                      const SizedBox(height: TokensStrip.s4),
+                      TextButton.icon(
+                        icon: const Icon(Icons.copy),
+                        label: const Text('Copiar codigo PIX'),
+                        onPressed: () {
+                          Clipboard.setData(
+                            ClipboardData(text: pix!.pixCopiaECola),
+                          );
+                          FeedbackHelper.showSuccess(
+                            context,
+                            'Código PIX copiado!',
+                          );
+                        },
+                      ),
+                    ],
+                    const SizedBox(height: 12),
+                    TextButton(
+                      onPressed: () => Navigator.of(ctx).pop(),
+                      child: const Text('Fechar'),
+                    ),
+                  ],
+                ),
               );
             },
           ),

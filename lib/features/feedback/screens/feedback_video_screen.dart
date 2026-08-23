@@ -14,6 +14,7 @@ import '../../../core/widgets/skeleton_loader.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/widgets/fx_empty_state.dart';
+import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../alunos/utils/satellite_screen_utils.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
@@ -91,8 +92,8 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
   }
 
   Future<void> _novoFeedback() async {
-    await showDialog(
-      context: context,
+    await showFxHomeSheet(
+      context,
       builder:
           (ctx) => _NovoFeedbackDialog(
             alunoIdPreenchido: widget.alunoId,
@@ -304,12 +305,23 @@ class _NovoFeedbackDialogState extends ConsumerState<_NovoFeedbackDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text('Novo Feedback de Vídeo'),
-      content: SingleChildScrollView(
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
+    return FxHomeSheetSurface(
+      isDark: isDark,
+      child: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            FxHomeSheetHandle(isDark: isDark),
+            const SizedBox(height: 16),
+            FxHomeSheetHeader(
+              isDark: isDark,
+              title: 'Novo Feedback de Vídeo',
+              leading: Icon(Icons.videocam_outlined, color: primary, size: 18),
+            ),
+            const SizedBox(height: 16),
             if (widget.alunoIdPreenchido != null &&
                 (widget.alunoNome ?? '').trim().isNotEmpty) ...[
               Align(
@@ -353,21 +365,19 @@ class _NovoFeedbackDialogState extends ConsumerState<_NovoFeedbackDialog> {
               ),
               maxLines: 3,
             ),
+            const SizedBox(height: 16),
+            FxLiquidPrimaryButton(
+              label: 'Salvar',
+              loading: _salvando,
+              onPressed: _salvando ? null : _salvar,
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancelar'),
+            ),
           ],
         ),
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Cancelar'),
-        ),
-        FxLiquidPrimaryButton(
-          label: 'Salvar',
-          expand: false,
-          loading: _salvando,
-          onPressed: _salvando ? null : _salvar,
-        ),
-      ],
     );
   }
 }

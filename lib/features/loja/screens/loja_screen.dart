@@ -12,6 +12,7 @@ import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feature_gate.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_empty_state.dart';
+import '../../../core/widgets/fx_form_sheet.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
@@ -87,37 +88,23 @@ class _LojaScreenState extends ConsumerState<LojaScreen>
   Future<void> _checkoutPacote(Pacote pacote) async {
     final emailCtrl = TextEditingController();
     final nomeCtrl = TextEditingController();
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text('Checkout — ${pacote.titulo}'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'R\$ ${pacote.valor.toStringAsFixed(2)}',
-              style: Theme.of(ctx).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: emailCtrl,
-              decoration: const InputDecoration(labelText: 'Email do comprador'),
-              keyboardType: TextInputType.emailAddress,
-            ),
-            TextField(
-              controller: nomeCtrl,
-              decoration: const InputDecoration(labelText: 'Nome (opcional)'),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancelar'),
+    final ok = await showFxFormSheet(
+      context,
+      title: 'Checkout — ${pacote.titulo}',
+      subtitle: 'R\$ ${pacote.valor.toStringAsFixed(2)}',
+      icon: Icons.qr_code_rounded,
+      confirmLabel: 'Gerar PIX',
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextField(
+            controller: emailCtrl,
+            decoration: const InputDecoration(labelText: 'Email do comprador'),
+            keyboardType: TextInputType.emailAddress,
           ),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Gerar PIX'),
+          TextField(
+            controller: nomeCtrl,
+            decoration: const InputDecoration(labelText: 'Nome (opcional)'),
           ),
         ],
       ),
@@ -140,26 +127,28 @@ class _LojaScreenState extends ConsumerState<LojaScreen>
       if (!mounted) return;
 
       final pix = result.pixCopiaECola;
-      await showDialog<void>(
-        context: context,
-        builder: (ctx) => AlertDialog(
-          title: const Text('PIX gerado'),
-          content: SelectableText(pix.isEmpty ? 'Pedido criado.' : pix),
-          actions: [
-            if (pix.isNotEmpty)
-              TextButton(
-                onPressed: () {
-                  Clipboard.setData(ClipboardData(text: pix));
-                  FeedbackHelper.showSuccess(ctx, 'Código copiado');
-                },
-                child: const Text('Copiar'),
+      await showFxNoticeSheet(
+        context,
+        title: 'PIX gerado',
+        icon: Icons.qr_code_rounded,
+        actionLabel: 'OK',
+        message: pix.isEmpty ? 'Pedido criado.' : pix,
+        extraActions: [
+          if (pix.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: SizedBox(
+                height: 48,
+                child: TextButton(
+                  onPressed: () {
+                    Clipboard.setData(ClipboardData(text: pix));
+                    FeedbackHelper.showSuccess(context, 'Código copiado');
+                  },
+                  child: const Text('Copiar'),
+                ),
               ),
-            FilledButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: const Text('OK'),
             ),
-          ],
-        ),
+        ],
       );
 
       await _load();

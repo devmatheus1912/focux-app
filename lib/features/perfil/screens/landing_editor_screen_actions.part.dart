@@ -173,29 +173,16 @@ extension LandingEditorScreenActions on _LandingEditorScreenState {
     }
   }
 
-  Future<bool> _confirmApplyTemplate(String label) async {
-    final ok = await showDialog<bool>(
-      context: context,
-      builder:
-          (ctx) => AlertDialog(
-            title: Text('Aplicar $label?'),
-            content: const Text(
-              'Os textos atuais da abertura, serviços, dúvidas e botões serão substituídos. '
-              'Fotos e planos da vitrine não mudam.',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, false),
-                child: const Text('Cancelar'),
-              ),
-              FilledButton(
-                onPressed: () => Navigator.pop(ctx, true),
-                child: const Text('Aplicar modelo'),
-              ),
-            ],
-          ),
+  Future<bool> _confirmApplyTemplate(String label) {
+    return showFxConfirmSheet(
+      context,
+      title: 'Aplicar $label?',
+      message:
+          'Os textos atuais da abertura, serviços, dúvidas e botões serão substituídos. '
+          'Fotos e planos da vitrine não mudam.',
+      icon: Icons.auto_fix_high_rounded,
+      confirmLabel: 'Aplicar modelo',
     );
-    return ok ?? false;
   }
 
   Future<void> _applyTemplate(LandingCompleteTemplate template) async {
@@ -249,48 +236,48 @@ extension LandingEditorScreenActions on _LandingEditorScreenState {
     final issues = _c.contentIssuesForReview();
     if (issues.isEmpty) return true;
 
-    final publish = await showDialog<bool>(
-      context: context,
-      builder:
-          (ctx) => AlertDialog(
-            title: const Text('Publicar mesmo assim?'),
-            content: Text(
-              '${issues.map((e) => '• ${e.message}').join('\n')}\n\n'
-              'Sua página pode parecer incompleta para quem visita.',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, false),
-                child: const Text('Revisar conteúdo'),
-              ),
-              FilledButton(
-                onPressed: () => Navigator.pop(ctx, true),
-                child: const Text('Publicar assim'),
-              ),
-            ],
-          ),
+    final publish = await showFxConfirmSheet(
+      context,
+      title: 'Publicar mesmo assim?',
+      message:
+          '${issues.map((e) => '• ${e.message}').join('\n')}\n\n'
+          'Sua página pode parecer incompleta para quem visita.',
+      icon: Icons.publish_rounded,
+      confirmLabel: 'Publicar assim',
+      cancelLabel: 'Revisar conteúdo',
     );
-    if (publish == false) _openContentReview();
-    return publish ?? false;
+    if (!publish) _openContentReview();
+    return publish;
   }
 
   Future<bool> _confirmLeave() async {
     if (!_c.dirty) return true;
 
     final scheme = Theme.of(context).colorScheme;
-    final choice = await showDialog<LandingEditorLeaveChoice>(
-      context: context,
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final choice = await showFxHomeSheet<LandingEditorLeaveChoice>(
+      context,
       builder:
-          (ctx) => AlertDialog(
-            title: const Text('Salvar antes de sair?'),
-            content: Column(
+          (ctx) => FxHomeSheetSurface(
+            isDark: isDark,
+            child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Text(
-                  'Você fez alterações na landing. O que prefere fazer?',
-                ),
+                FxHomeSheetHandle(isDark: isDark),
                 const SizedBox(height: 16),
+                FxHomeSheetHeader(
+                  isDark: isDark,
+                  title: 'Salvar antes de sair?',
+                  subtitle:
+                      'Você fez alterações na landing. O que prefere fazer?',
+                  leading: Icon(
+                    Icons.save_outlined,
+                    color: scheme.primary,
+                    size: 18,
+                  ),
+                ),
+                const SizedBox(height: 20),
                 FilledButton(
                   onPressed:
                       () => Navigator.pop(
@@ -332,28 +319,15 @@ extension LandingEditorScreenActions on _LandingEditorScreenState {
     }
   }
 
-  Future<bool> _confirmDelete(String label) async {
-    final ok = await showDialog<bool>(
-      context: context,
-      builder:
-          (ctx) => AlertDialog(
-            title: Text('Remover $label?'),
-            content: const Text(
-              'Essa ação não pode ser desfeita até você salvar.',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, false),
-                child: const Text('Cancelar'),
-              ),
-              FilledButton(
-                onPressed: () => Navigator.pop(ctx, true),
-                child: const Text('Remover'),
-              ),
-            ],
-          ),
+  Future<bool> _confirmDelete(String label) {
+    return showFxConfirmSheet(
+      context,
+      title: 'Remover $label?',
+      message: 'Essa ação não pode ser desfeita até você salvar.',
+      icon: Icons.delete_outline_rounded,
+      confirmLabel: 'Remover',
+      destructive: true,
     );
-    return ok ?? false;
   }
 
   Future<void> _removeServico(int index) async {
@@ -440,25 +414,15 @@ extension LandingEditorScreenActions on _LandingEditorScreenState {
         hero
             ? 'A imagem será removida da landing. Toque em Salvar para publicar a alteração.'
             : 'A foto customizada será removida. A seção sobre voltará a usar sua foto de perfil.';
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder:
-          (ctx) => AlertDialog(
-            title: Text('Remover $label?'),
-            content: Text(content),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, false),
-                child: const Text('Cancelar'),
-              ),
-              FilledButton(
-                onPressed: () => Navigator.pop(ctx, true),
-                child: const Text('Remover'),
-              ),
-            ],
-          ),
+    final confirmed = await showFxConfirmSheet(
+      context,
+      title: 'Remover $label?',
+      message: content,
+      icon: Icons.delete_outline_rounded,
+      confirmLabel: 'Remover',
+      destructive: true,
     );
-    if (confirmed != true || !mounted) return;
+    if (!confirmed || !mounted) return;
     setState(() {
       if (hero) {
         _c.clearHeroImage();

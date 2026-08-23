@@ -11,6 +11,7 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_form_sheet.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -159,41 +160,20 @@ class _CancelSaveScreenState extends ConsumerState<CancelSaveScreen> {
     }
   }
 
-  void _showResultado(CancelSaveResposta r) {
-    final theme = Theme.of(context);
-    showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder:
-          (ctx) => AlertDialog(
-            icon: Icon(
-              r.aceita ? Icons.celebration_rounded : Icons.exit_to_app_rounded,
-              color:
-                  r.aceita ? PaywallCatalog.green : theme.colorScheme.outline,
-              size: 48,
-            ),
-            title: Text(
-              r.aceita ? 'Oferta registrada' : 'Cancelamento registrado',
-            ),
-            content: Text(
-              r.mensagem,
-              style: theme.textTheme.bodyMedium?.copyWith(height: 1.45),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(ctx).pop();
-                  if (r.aceita) {
-                    context.go('/assinatura');
-                  } else {
-                    context.go('/dashboard/personal');
-                  }
-                },
-                child: const Text('Continuar'),
-              ),
-            ],
-          ),
+  Future<void> _showResultado(CancelSaveResposta r) async {
+    await showFxNoticeSheet(
+      context,
+      title: r.aceita ? 'Oferta registrada' : 'Cancelamento registrado',
+      message: r.mensagem,
+      icon: r.aceita ? Icons.celebration_rounded : Icons.exit_to_app_rounded,
+      actionLabel: 'Continuar',
     );
+    if (!mounted) return;
+    if (r.aceita) {
+      context.go('/assinatura');
+    } else {
+      context.go('/dashboard/personal');
+    }
   }
 
   @override
