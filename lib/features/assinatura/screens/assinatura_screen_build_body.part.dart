@@ -140,36 +140,31 @@ extension AssinaturaScreenBuildBody on _AssinaturaScreenState {
                 _selectPlan(target);
               },
             ),
-          PaywallSectionAnchor(
-            anchorKey: _paywallPlanosKey,
-            child: PaywallCompareStage(
-              plans: tabPlans,
-              currentPlan: currentPlan,
-              selectedPlan: selPlan,
-              comparisonRows: vitrineComparison,
-              billingPeriod: _billingPeriod,
-              onSelectPlan: _selectPlan,
-              onBillingPeriod:
-                  showBilling
-                      ? (period) {
-                        AnalyticsService.instance.track(
-                          ProductEvents.billingToggleChanged,
-                          props: {'to': period.name, 'source': 'compare_tabs'},
-                        );
-                        setState(() => _billingPeriod = period);
-                        _selectPlan(selPlan);
-                      }
-                      : null,
-              ink: ink,
-              mute: mute,
-              primary: primary,
-              isDark: isDark,
-              line: line,
-              roiTag:
-                  showEnterpriseProStickySecondary
-                      ? null
-                      : enterpriseProRoiTag,
-            ),
+          PaywallCompareStage(
+            plans: tabPlans,
+            currentPlan: currentPlan,
+            selectedPlan: selPlan,
+            comparisonRows: vitrineComparison,
+            billingPeriod: _billingPeriod,
+            onSelectPlan: _selectPlan,
+            onBillingPeriod:
+                showBilling
+                    ? (period) {
+                      AnalyticsService.instance.track(
+                        ProductEvents.billingToggleChanged,
+                        props: {'to': period.name, 'source': 'compare_tabs'},
+                      );
+                      setState(() => _billingPeriod = period);
+                      _selectPlan(selPlan);
+                    }
+                    : null,
+            ink: ink,
+            mute: mute,
+            primary: primary,
+            isDark: isDark,
+            line: line,
+            roiTag:
+                showEnterpriseProStickySecondary ? null : enterpriseProRoiTag,
           ),
           if (_shouldShowEnterpriseTrialCard(
             selPlan,
@@ -248,31 +243,23 @@ extension AssinaturaScreenBuildBody on _AssinaturaScreenState {
           ],
           if (!isAcquisition) ...[
             const SizedBox(height: TokensStrip.s4),
-            PaywallSectionAnchor(
-              anchorKey: _paywallLegalKey,
-              child:
-                  isCurrentPlanSelected
-                      ? PaywallSubscriberLegalStrip(
-                        mute: mute,
-                        primary: primary,
-                        restoring: _restoringPurchases,
-                        onRestore:
-                            subscriptionUsesNativeStore
-                                ? _restorePurchases
-                                : null,
-                      )
-                      : PaywallUpgradeLegalCompact(
-                        ink: ink,
-                        mute: mute,
-                        primary: primary,
-                        showStoreBillingNote: subscriptionUsesNativeStore,
-                        restoring: _restoringPurchases,
-                        onRestore:
-                            subscriptionUsesNativeStore
-                                ? _restorePurchases
-                                : null,
-                      ),
-            ),
+            isCurrentPlanSelected
+                ? PaywallSubscriberLegalStrip(
+                  mute: mute,
+                  primary: primary,
+                  restoring: _restoringPurchases,
+                  onRestore:
+                      subscriptionUsesNativeStore ? _restorePurchases : null,
+                )
+                : PaywallUpgradeLegalCompact(
+                  ink: ink,
+                  mute: mute,
+                  primary: primary,
+                  showStoreBillingNote: subscriptionUsesNativeStore,
+                  restoring: _restoringPurchases,
+                  onRestore:
+                      subscriptionUsesNativeStore ? _restorePurchases : null,
+                ),
           ],
         ],
       ),

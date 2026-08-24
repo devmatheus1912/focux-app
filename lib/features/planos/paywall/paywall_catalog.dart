@@ -5,9 +5,6 @@ import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../assinatura/data/plano.dart';
 import '../../subscription/models/subscription_plan.dart';
-import 'paywall_plan_sections.dart';
-
-export 'paywall_plan_sections.dart';
 
 /// Catálogo estático de educação e vitrine — preços vêm do backend/loja.
 class PaywallCatalog {
@@ -163,141 +160,6 @@ class PaywallCatalog {
     ),
     (value: '40%', label: 'Menos inadimplência c/ PIX', color: green),
   ];
-
-  static List<PaywallPlanFeatureSection> featureSectionsForPlan(
-    Plano plano,
-    SubscriptionPlan plan,
-  ) => PaywallPlanSections.forPlan(plano, plan);
-
-  static List<PaywallFeatureEducation> featuresForPlan(
-    Plano plano,
-    SubscriptionPlan plan,
-  ) {
-    final unlimited = plano.limiteAlunos == null;
-    final alunosLabel =
-        unlimited ? 'Alunos ILIMITADOS' : 'Até ${plano.limiteAlunos} alunos';
-    final rows = <PaywallFeatureRow>[
-      PaywallFeatureRow(
-        label: alunosLabel,
-        included: true,
-        highlight: unlimited,
-      ),
-      if (plan != SubscriptionPlan.FREE)
-        PaywallFeatureRow(
-          label: _iaCopilotoLabel(plan),
-          included: true,
-          highlight: true,
-        ),
-      if (plan != SubscriptionPlan.FREE)
-        PaywallFeatureRow(
-          label: 'PIX com QR Code + cobrança no chat',
-          included: plano.temFinanceiro,
-          highlight: plano.temFinanceiro,
-        ),
-      if (plan != SubscriptionPlan.FREE)
-        PaywallFeatureRow(
-          label: FocuxMicrocopy.commandCenterPlusFocuxScore,
-          included: plano.temRelatorios,
-          highlight: plano.temRelatorios,
-        ),
-      if (plan == SubscriptionPlan.ENTERPRISE ||
-          plan == SubscriptionPlan.ENTERPRISE_PRO)
-        PaywallFeatureRow(
-          label: 'Marca própria — seu logo e suas cores',
-          included: plano.temWhiteLabel,
-          highlight: true,
-        ),
-      if (plan == SubscriptionPlan.ENTERPRISE_PRO)
-        PaywallFeatureRow(
-          label: 'Landing page COMPLETA',
-          included: plano.temLandingCompleta,
-          highlight: true,
-        ),
-      if (plan == SubscriptionPlan.FREE) ...[
-        PaywallFeatureRow(label: 'PIX com QR Code no chat', included: false),
-        PaywallFeatureRow(label: 'IA Copiloto', included: false),
-        PaywallFeatureRow(label: 'CRM + landing page', included: false),
-      ],
-    ];
-    return rows
-        .map(
-          (r) => PaywallFeatureEducation(
-            row: r,
-            education: educationByLabel[r.label],
-          ),
-        )
-        .toList();
-  }
-
-  static const Map<String, PaywallEducationContent> educationByLabel = {
-    'PIX com QR Code + cobrança no chat': PaywallEducationContent(
-      id: 'pix_chat',
-      title: 'PIX + QR Code no chat',
-      whatIs:
-          'Você gera um QR Code de cobrança direto na conversa com o aluno. '
-          'Ele escaneia e paga na hora — sem sair do app.',
-      whyMatters:
-          'Personais que cobram pelo app têm 40% menos inadimplência. '
-          'Chega de cobrar no WhatsApp sem saber se foi pago.',
-      roiStatement: '1 mensalidade recuperada = 5× o custo do Premium',
-      plans: ['PREMIUM', 'ENTERPRISE'],
-    ),
-    'IA Copiloto — 120 interações/mês': PaywallEducationContent(
-      id: 'ia_copiloto',
-      title: 'IA Copiloto',
-      whatIs:
-          'IA que conhece o histórico, aderência e Recovery Score de cada aluno. '
-          'Monta treino e responde em minutos.',
-      whyMatters:
-          'Treino pronto em 3 minutos, não 30. Você escala sem perder qualidade.',
-      roiStatement: '5h/semana = R\$ 1.280+/mês em produtividade',
-      plans: ['PREMIUM', 'ENTERPRISE'],
-    ),
-    'IA Copiloto — 400+ interações/mês': PaywallEducationContent(
-      id: 'ia_copiloto_ent',
-      title: 'IA Copiloto — 400+ interações/mês',
-      whatIs: 'Mesma IA com mais interações e contexto avançado por aluno.',
-      whyMatters:
-          'Ideal para operações com muitos alunos e alto volume de ajustes.',
-      roiStatement: 'Escala sem contratar assistente full-time',
-      plans: ['ENTERPRISE'],
-    ),
-    FocuxMicrocopy.commandCenterPlusFocuxScore: PaywallEducationContent(
-      id: 'command_center',
-      title: FocuxMicrocopy.commandCenterPlusFocuxScore,
-      whatIs:
-          'Painel do CEO do personal: quem vai cancelar, inadimplência e próxima ação.',
-      whyMatters: 'Em 2 minutos você sabe o que priorizar — sem planilha.',
-      roiStatement: 'Salvar 1 aluno/mês = R\$ 300–600',
-      plans: ['PREMIUM', 'ENTERPRISE'],
-    ),
-    'Marca própria — seu logo e suas cores': PaywallEducationContent(
-      id: 'white_label',
-      title: 'Marca própria',
-      whatIs:
-          'Seus alunos abrem o app com SEU logo e SUAS cores — não um visual genérico.',
-      whyMatters: 'Posicionamento premium que justifica cobrar 20–30% mais.',
-      roiStatement: 'Diferencial de marca = ticket maior',
-      plans: ['ENTERPRISE'],
-    ),
-    'Alunos ILIMITADOS': PaywallEducationContent(
-      id: 'alunos_ilimitados',
-      title: 'Alunos ilimitados',
-      whatIs: 'Sem teto de cadastro de alunos ativos no app.',
-      whyMatters:
-          'Cada novo aluno = R\$ 300–600/mês. O teto do plano anterior vira receita perdida.',
-      roiStatement: 'ROI imediato no 1º aluno extra',
-      plans: ['ENTERPRISE'],
-    ),
-  };
-
-  static String _iaCopilotoLabel(SubscriptionPlan plan) {
-    if (plan == SubscriptionPlan.ENTERPRISE ||
-        plan == SubscriptionPlan.ENTERPRISE_PRO) {
-      return 'IA Copiloto — 400+ interações/mês';
-    }
-    return 'IA Copiloto — 120 interações/mês';
-  }
 
   static const List<PaywallComparisonRow> comparisonRows = [
     PaywallComparisonRow(
@@ -679,52 +541,6 @@ class PaywallCatalog {
           'Investe em tráfego mas manda para página genérica? Landing que converte lead 24h/dia.',
     ),
   ];
-}
-
-class PaywallFeatureRow {
-  final String label;
-  final bool included;
-  final bool highlight;
-  final bool comingSoon;
-
-  const PaywallFeatureRow({
-    required this.label,
-    required this.included,
-    this.highlight = false,
-    this.comingSoon = false,
-  });
-}
-
-class PaywallFeatureEducation {
-  final PaywallFeatureRow row;
-  final PaywallEducationContent? education;
-  final String? capability;
-  final SubscriptionPlan? upgradePlan;
-
-  const PaywallFeatureEducation({
-    required this.row,
-    this.education,
-    this.capability,
-    this.upgradePlan,
-  });
-}
-
-class PaywallEducationContent {
-  final String id;
-  final String title;
-  final String whatIs;
-  final String whyMatters;
-  final String? roiStatement;
-  final List<String> plans;
-
-  const PaywallEducationContent({
-    required this.id,
-    required this.title,
-    required this.whatIs,
-    required this.whyMatters,
-    this.roiStatement,
-    required this.plans,
-  });
 }
 
 class PaywallComparisonRow {

@@ -20,8 +20,9 @@ void main() {
     );
     expect(assinatura, contains('Gerenciar assinatura'));
     expect(
-      readPaywallComponentsBundle(),
-      contains('PaywallRichPlanCard'),
+      File('lib/features/planos/paywall/paywall_compare_stage.dart')
+          .readAsStringSync(),
+      contains('class PaywallCompareStage'),
     );
     expect(assinatura, contains('openNativeSubscriptionManagement'));
   });

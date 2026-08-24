@@ -62,6 +62,16 @@ void main() {
     expect(body, contains('PaywallCompareStage'));
     expect(body, isNot(contains('PaywallPlanStudio')));
     expect(body, isNot(contains('PaywallRichPlanCard')));
+
+    final components = File(
+      'lib/features/planos/paywall/paywall_components.dart',
+    ).readAsStringSync();
+    expect(components, isNot(contains('paywall_plan_studio')));
+    expect(components, isNot(contains('paywall_plan_cards')));
+    expect(
+      File('lib/features/planos/paywall/paywall_catalog.dart').readAsStringSync(),
+      isNot(contains('paywall_plan_sections')),
+    );
   });
 
   test('assinatura sticky e scroll respeitam reduced motion e refresh', () {

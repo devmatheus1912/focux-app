@@ -28,9 +28,8 @@ void main() {
     expect(layout, contains('_PaywallLegalConsentLine'));
     expect(layout, contains('FocuxLegal.openTerms'));
     expect(layout, contains('FocuxLegal.openPrivacy'));
-    expect(layout, contains('_paywallMotion'));
     expect(layout, contains('_paywallSecondaryText'));
-    expect(layout, contains('AnimatedSwitcher'));
+    expect(layout, contains('_PaywallInlineNote'));
 
     expect(legal, contains('focuxpersonal.com/termos'));
     expect(legal, contains('focuxpersonal.com/privacidade'));

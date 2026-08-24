@@ -27,8 +27,6 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../../../features/perfil/providers/perfil_provider.dart';
 import '../../../features/planos/data/planos_repository.dart';
 import '../../../features/planos/providers/plano_features_provider.dart';
-import '../../../features/subscription/utils/plano_ia_limits.dart';
-import '../../../features/growth/utils/migracao_foto_limits.dart';
 import '../../../features/subscription/models/subscription_plan.dart';
 import '../../../features/subscription/services/iap_service.dart';
 import '../../../features/subscription/store_subscription_policy.dart';
@@ -126,10 +124,6 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
   final Set<String> _handledPurchases = <String>{};
   StreamSubscription<List<PurchaseDetails>>? _purchaseSubscription;
   final ScrollController _paywallScrollController = ScrollController();
-  final GlobalKey _paywallPlanosKey = GlobalKey();
-  final GlobalKey _paywallUpgradeKey = GlobalKey();
-  final GlobalKey _paywallCompareKey = GlobalKey();
-  final GlobalKey _paywallLegalKey = GlobalKey();
 
   String? _selectedPlanName;
   bool _loadingCheckout = false;
@@ -257,10 +251,6 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
   void _focusEnterpriseProUpgrade() {
     HapticFeedback.selectionClick();
     _selectPlan(SubscriptionPlan.ENTERPRISE_PRO);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      _scrollToPaywallSection(PaywallScrollTarget.comparar);
-    });
   }
 
   Future<void> _reconcilePlanFromServer() async {
@@ -280,46 +270,6 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
     if (meFeatures.plano.level >= billingPlan.level) return;
     _planReconcileAttempted = true;
     unawaited(_reconcilePlanFromServer());
-  }
-
-  void _scrollToPaywallSection(PaywallScrollTarget target) {
-    if (target == PaywallScrollTarget.features ||
-        target == PaywallScrollTarget.roi) {
-      HapticFeedback.selectionClick();
-      if (FocuxLegal.plansMarketingWebLive) {
-        unawaited(FocuxLegal.openPlansMarketing());
-      } else {
-        FeedbackHelper.showInfo(
-          context,
-          'Comparação detalhada (tabela, ROI e features) no site em breve.',
-        );
-      }
-      return;
-    }
-
-    final GlobalKey anchorKey = switch (target) {
-      PaywallScrollTarget.planos ||
-      PaywallScrollTarget.seuPlano => _paywallPlanosKey,
-      PaywallScrollTarget.upgrade => _paywallUpgradeKey,
-      PaywallScrollTarget.comparar => _paywallCompareKey,
-      PaywallScrollTarget.legal => _paywallLegalKey,
-      PaywallScrollTarget.features ||
-      PaywallScrollTarget.roi => _paywallPlanosKey,
-    };
-
-    final ctx = anchorKey.currentContext;
-    if (ctx == null) return;
-    HapticFeedback.selectionClick();
-    final motion =
-        TokensStrip.prefersReducedMotion(context)
-            ? Duration.zero
-            : const Duration(milliseconds: 420);
-    Scrollable.ensureVisible(
-      ctx,
-      duration: motion,
-      curve: Curves.easeOutCubic,
-      alignment: 0.06,
-    );
   }
 
   void _handleDowngradeTierTap() {
