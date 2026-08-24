@@ -199,13 +199,6 @@ final alunoOpenIaActionsProvider =
           .getIaCommandActions(status: 'ABERTO', alunoId: alunoId);
     });
 
-final alunoScoreSnapshotsProvider = FutureProvider.family<
-  List<FocuxScoreSnapshotResumo>,
-  int
->((ref, alunoId) async {
-  return ref.read(dashboardRepositoryProvider).getFocuxScoreSnapshots(alunoId);
-});
-
 final alunoEvolucaoInteligenteProvider =
     FutureProvider.family<EvolucaoInteligente, int>((ref, alunoId) async {
       return AlunoRepository(
@@ -259,9 +252,7 @@ Future<void> invalidateAluno360Providers(WidgetRef ref, int alunoId) async {
   ref.invalidate(aluno360Provider(alunoId));
   ref.invalidate(alunoProvider(alunoId));
   ref.invalidate(alunoRecoveryProvider(alunoId));
-  ref.invalidate(alunoAutonomiaEventosProvider(alunoId));
   ref.invalidate(alunoAutonomiaResumoProvider(alunoId));
-  ref.invalidate(alunoScoreSnapshotsProvider(alunoId));
   ref.invalidate(alunoEvolucaoInteligenteProvider(alunoId));
   ref.invalidate(alunoTimeline360PagedProvider(alunoId));
   ref.read(alunoCopilotoForceIaProvider(alunoId).notifier).state = false;

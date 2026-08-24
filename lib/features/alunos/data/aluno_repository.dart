@@ -157,46 +157,6 @@ class AlunosStats {
   );
 }
 
-class AlunoAutonomiaEvento {
-  final int id;
-  final String taskId;
-  final String taskTitle;
-  final String action;
-  final String? route;
-  final String? priority;
-  final bool done;
-  final int? profileCompletion;
-  final DateTime? criadoEm;
-
-  const AlunoAutonomiaEvento({
-    required this.id,
-    required this.taskId,
-    required this.taskTitle,
-    required this.action,
-    this.route,
-    this.priority,
-    this.done = false,
-    this.profileCompletion,
-    this.criadoEm,
-  });
-
-  factory AlunoAutonomiaEvento.fromJson(Map<String, dynamic> json) =>
-      AlunoAutonomiaEvento(
-        id: (json['id'] as num).toInt(),
-        taskId: json['taskId'] as String? ?? '',
-        taskTitle: json['taskTitle'] as String? ?? 'Tarefa do aluno',
-        action: json['action'] as String? ?? '',
-        route: json['route'] as String?,
-        priority: json['priority'] as String?,
-        done: json['done'] as bool? ?? false,
-        profileCompletion: (json['profileCompletion'] as num?)?.toInt(),
-        criadoEm:
-            json['criadoEm'] == null
-                ? null
-                : DateTime.tryParse(json['criadoEm'].toString()),
-      );
-}
-
 /// Sinais de evolução a partir de check-ins concluídos (backend).
 class EvolucaoInteligente {
   final String sinal;
@@ -545,11 +505,6 @@ class AlunoRepository {
     return AlunosHomeBundle.fromJson(response.data as Map<String, dynamic>);
   }
 
-  Future<AlunosStats> buscarStats() async {
-    final response = await _dio.get('/api/alunos/stats');
-    return AlunosStats.fromJson(response.data as Map<String, dynamic>);
-  }
-
   Future<Aluno> atualizarFollowUp(
     int id, {
     String? proximoContato,
@@ -671,13 +626,6 @@ class AlunoRepository {
     return AderenciaSemanalBundle.fromJson(
       Map<String, dynamic>.from(data as Map),
     );
-  }
-
-  Future<List<AlunoAutonomiaEvento>> listarAutonomiaEventos(int alunoId) async {
-    final response = await _dio.get('/api/alunos/$alunoId/autonomia/eventos');
-    return (response.data as List<dynamic>)
-        .map((e) => AlunoAutonomiaEvento.fromJson(e as Map<String, dynamic>))
-        .toList();
   }
 
   Future<AlunoAutonomiaResumo> buscarAutonomiaResumo(int alunoId) async {

@@ -210,20 +210,10 @@ class FinanceiroRepository {
     await _dio.patch('/api/financeiro/mensalidades/atualizar-atrasos');
   }
 
-  Future<FinanceiroDashboard> dashboard() async {
-    final r = await _dio.get('/api/financeiro/mensalidades/dashboard');
-    return FinanceiroDashboard.fromJson(r.data as Map<String, dynamic>);
-  }
-
   /// BFF first paint — dashboard + mensalidades + resumo + planoFeatures.
   Future<FinanceiroHomeBundle> getHome() async {
     final r = await _dio.get('/api/financeiro/home');
     return FinanceiroHomeBundle.fromJson(r.data as Map<String, dynamic>);
-  }
-
-  Future<List<Mensalidade>> listar() async {
-    final r = await _dio.get('/api/financeiro/mensalidades');
-    return (r.data as List).map((e) => Mensalidade.fromJson(e)).toList();
   }
 
   Future<Mensalidade> criar(

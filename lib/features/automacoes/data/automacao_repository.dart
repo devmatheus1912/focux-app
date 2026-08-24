@@ -86,20 +86,6 @@ class AutomacaoRepository {
   final Dio _dio;
   AutomacaoRepository(ApiClient c) : _dio = c.dio;
 
-  Future<List<AutomacaoFluxo>> listar() async {
-    final r = await _dio.get('/api/automacoes');
-    return (r.data as List)
-        .map((e) => AutomacaoFluxo.fromJson(e as Map<String, dynamic>))
-        .toList();
-  }
-
-  Future<List<AutomacaoTemplate>> templates() async {
-    final r = await _dio.get('/api/automacoes/templates');
-    return (r.data as List)
-        .map((e) => AutomacaoTemplate.fromJson(e as Map<String, dynamic>))
-        .toList();
-  }
-
   /// BFF tipado — first paint da tela Automações (fluxos + templates).
   Future<AutomacoesHomeBundle> getHome() async {
     final r = await _dio.get('/api/automacoes/home');

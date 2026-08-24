@@ -112,11 +112,6 @@ final alunoProvider = FutureProvider.family<Aluno, int>((ref, id) async {
   return ref.read(alunoRepositoryProvider).buscar(id);
 });
 
-final alunoAutonomiaEventosProvider =
-    FutureProvider.family<List<AlunoAutonomiaEvento>, int>((ref, id) async {
-      return ref.read(alunoRepositoryProvider).listarAutonomiaEventos(id);
-    });
-
 final alunoAutonomiaResumoProvider =
     FutureProvider.family<AlunoAutonomiaResumo, int>((ref, id) async {
       return ref.read(alunoRepositoryProvider).buscarAutonomiaResumo(id);

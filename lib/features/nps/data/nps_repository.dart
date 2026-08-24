@@ -103,18 +103,6 @@ class NpsRepository {
     );
   }
 
-  Future<NpsResumo> resumo() async {
-    final r = await _dio.get('/api/nps/resumo');
-    return NpsResumo.fromJson(r.data as Map<String, dynamic>);
-  }
-
-  Future<List<NpsItem>> recentes() async {
-    final r = await _dio.get('/api/nps/recentes');
-    return (r.data as List)
-        .map((e) => NpsItem.fromJson(e as Map<String, dynamic>))
-        .toList();
-  }
-
   /// BFF tipado — first paint da tela NPS (resumo + recentes).
   Future<NpsHomeBundle> getHome() async {
     final r = await _dio.get('/api/nps/home');

@@ -109,13 +109,6 @@ class AlertasRepository {
     return AlertasHomeBundle.fromJson(r.data as Map<String, dynamic>);
   }
 
-  Future<List<AlertaRisco>> listarRiscos() async {
-    final r = await _dio.get('/api/alertas/risco');
-    return (r.data as List)
-        .map((e) => AlertaRisco.fromJson(e as Map<String, dynamic>))
-        .toList();
-  }
-
   Future<AlertasConfiguracao> getConfiguracao() async {
     final r = await _dio.get('/api/alertas/configuracao');
     return AlertasConfiguracao.fromJson(r.data as Map<String, dynamic>);

@@ -25,6 +25,9 @@ void main() {
     ).readAsStringSync();
     expect(repo, contains('/api/planos/paywall/home'));
     expect(repo, contains('getPaywallHome'));
+    expect(repo, isNot(contains('/api/planos/vitrine')));
+    expect(repo, isNot(contains('listarPlanos')));
+    expect(repo, isNot(contains('fetchVitrine')));
   });
 
   test('FREE sem deep link inicia no plano atual (não Premium)', () {

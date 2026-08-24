@@ -11,9 +11,6 @@ class PlanoCachePolicy {
   /// Em erro de refresh, só reutiliza snapshot se ainda estiver dentro desta janela.
   static const entitlementsStaleOnErrorMaxAge = Duration(hours: 4);
 
-  /// Matriz de comparação da vitrine (`/api/planos/vitrine`).
-  static const vitrineMaxAge = Duration(minutes: 15);
-
   /// GET `/api/planos/me` no [LocalCache] do Dio.
   static const planosMeHttpCacheTtl = Duration(minutes: 30);
 }

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'paywall_catalog.dart';
 
-/// Conteúdo educativo da vitrine (API `/api/planos/vitrine` ou fallback estático).
+/// Conteúdo educativo da vitrine (BFF `/api/planos/paywall/home` ou fallback estático).
 class PaywallVitrineSnapshot {
   const PaywallVitrineSnapshot({
     required this.socialProof,

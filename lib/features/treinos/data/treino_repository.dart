@@ -169,13 +169,6 @@ class TreinoRepository {
 
   TreinoRepository(ApiClient client) : _dio = client.dio;
 
-  Future<List<Treino>> listar() async {
-    final response = await _dio.get('/api/treinos');
-    return (response.data as List<dynamic>)
-        .map((e) => Treino.fromJson(e as Map<String, dynamic>))
-        .toList();
-  }
-
   /// BFF tipado — first paint da biblioteca (slim + resumo, sem N+1).
   Future<TreinosHomeBundle> getHome() async {
     final response = await _dio.get('/api/treinos/home');

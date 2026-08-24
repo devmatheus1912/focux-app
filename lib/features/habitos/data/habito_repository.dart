@@ -137,13 +137,6 @@ class HabitoRepository {
         .toList();
   }
 
-  Future<List<Habito>> listar() async {
-    final r = await _dio.get('/api/habitos');
-    return (r.data as List<dynamic>)
-        .map((e) => Habito.fromJson(e as Map<String, dynamic>))
-        .toList();
-  }
-
   /// BFF tipado — first paint da tela Hábitos (lista + compliance).
   Future<HabitosHomeBundle> getHome() async {
     final r = await _dio.get('/api/habitos/home');

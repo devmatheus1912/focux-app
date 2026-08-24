@@ -4,10 +4,6 @@ import '../data/aluno_repository.dart';
 import 'aluno_detail_providers.dart';
 import 'alunos_provider.dart';
 
-final alunosStatsProvider = FutureProvider<AlunosStats>((ref) async {
-  return (await ref.watch(alunosHomeProvider.future)).stats;
-});
-
 class AlunoFollowUpActions {
   AlunoFollowUpActions(this._ref);
 

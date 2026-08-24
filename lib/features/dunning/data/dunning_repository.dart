@@ -87,18 +87,6 @@ class DunningRepository {
 
   DunningRepository(ApiClient client) : _dio = client.dio;
 
-  Future<DunningSnapshot> me() async {
-    final r = await _dio.get('/api/dunning/me');
-    return DunningSnapshot.fromJson(r.data as Map<String, dynamic>);
-  }
-
-  Future<List<DunningFalha>> falhas() async {
-    final r = await _dio.get('/api/dunning/falhas');
-    return (r.data as List<dynamic>)
-        .map((e) => DunningFalha.fromJson(e as Map<String, dynamic>))
-        .toList();
-  }
-
   /// BFF tipado — first paint da tela Dunning (snapshot + falhas).
   Future<DunningHomeBundle> getHome() async {
     final r = await _dio.get('/api/dunning/home');

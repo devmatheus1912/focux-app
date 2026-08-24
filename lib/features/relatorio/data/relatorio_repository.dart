@@ -171,23 +171,8 @@ class RelatorioRepository {
     return RelatoriosHomeBundle.fromJson(r.data as Map<String, dynamic>);
   }
 
-  Future<List<ResumoAluno>> resumo() async {
-    final r = await _dio.get('/api/relatorios/resumo');
-    return (r.data as List)
-        .map((e) => ResumoAluno.fromJson(e as Map<String, dynamic>))
-        .toList();
-  }
-
   Future<ResumoGlobal> resumoGlobal() async {
     final r = await _dio.get('/api/relatorios/resumo-global');
     return ResumoGlobal.fromJson(r.data as Map<String, dynamic>);
-  }
-
-  Future<ComparativoPeriodo> comparativo(int alunoId, {int dias = 30}) async {
-    final r = await _dio.get(
-      '/api/relatorios/aderencia/$alunoId/comparativo',
-      queryParameters: {'dias': dias},
-    );
-    return ComparativoPeriodo.fromJson(r.data as Map<String, dynamic>);
   }
 }

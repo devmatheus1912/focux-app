@@ -151,55 +151,6 @@ class AlunoScoreResumo {
       );
 }
 
-class FocuxScoreSnapshotResumo {
-  final int id;
-  final int alunoId;
-  final String alunoNome;
-  final String dataReferencia;
-  final int score;
-  final String ritmo;
-  final String risco;
-  final String proximaAcao;
-  final String narrativa;
-  final String objetivo;
-  final String prioridade;
-  final bool iaSugerida;
-  final String? criadoEm;
-
-  FocuxScoreSnapshotResumo({
-    required this.id,
-    required this.alunoId,
-    required this.alunoNome,
-    required this.dataReferencia,
-    required this.score,
-    required this.ritmo,
-    required this.risco,
-    required this.proximaAcao,
-    required this.narrativa,
-    required this.objetivo,
-    required this.prioridade,
-    required this.iaSugerida,
-    this.criadoEm,
-  });
-
-  factory FocuxScoreSnapshotResumo.fromJson(Map<String, dynamic> json) =>
-      FocuxScoreSnapshotResumo(
-        id: (json['id'] as num?)?.toInt() ?? 0,
-        alunoId: (json['alunoId'] as num?)?.toInt() ?? 0,
-        alunoNome: json['alunoNome'] as String? ?? 'Aluno',
-        dataReferencia: json['dataReferencia'] as String? ?? '',
-        score: (json['score'] as num?)?.toInt() ?? 0,
-        ritmo: json['ritmo'] as String? ?? 'Ritmo em leitura',
-        risco: json['risco'] as String? ?? 'Risco baixo',
-        proximaAcao: json['proximaAcao'] as String? ?? 'Abrir aluno',
-        narrativa: json['narrativa'] as String? ?? '',
-        objetivo: json['objetivo'] as String? ?? 'Objetivo indefinido',
-        prioridade: json['prioridade'] as String? ?? 'P2',
-        iaSugerida: json['iaSugerida'] as bool? ?? false,
-        criadoEm: json['criadoEm'] as String?,
-      );
-}
-
 class AutonomiaGargaloResumo {
   final int alunoId;
   final String alunoNome;

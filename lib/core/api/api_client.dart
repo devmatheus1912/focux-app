@@ -231,7 +231,6 @@ class ApiClient {
     if (_isSensitiveDiskCachePath(path)) return false;
     const cacheable = [
       '/api/planos/me',
-      '/api/planos/vitrine',
     ];
     for (final prefix in cacheable) {
       if (path == prefix ||
@@ -269,9 +268,6 @@ class ApiClient {
   }
 
   static Duration? _cacheTtlForPath(String path) {
-    if (path.startsWith('/api/planos/vitrine')) {
-      return PlanoCachePolicy.vitrineMaxAge;
-    }
     if (path.startsWith('/api/planos/me')) {
       return PlanoCachePolicy.planosMeHttpCacheTtl;
     }

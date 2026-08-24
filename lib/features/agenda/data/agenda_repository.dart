@@ -71,11 +71,6 @@ class AgendaRepository {
   final Dio _dio;
   AgendaRepository(ApiClient c) : _dio = c.dio;
 
-  Future<List<Agendamento>> proximos() async {
-    final r = await _dio.get('/api/agenda');
-    return _parseAgendamentos(r.data);
-  }
-
   /// BFF tipado — first paint da Agenda (próximos + semana corrente).
   Future<AgendaHomeBundle> getHome() async {
     final r = await _dio.get('/api/agenda/home');

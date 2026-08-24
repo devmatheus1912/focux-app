@@ -54,7 +54,6 @@ void main() {
             .readAsStringSync();
 
     expect(winback, contains('/api/winback/log'));
-    expect(dunning, contains('/api/dunning/me'));
-    expect(dunning, contains('/api/dunning/falhas'));
+    expect(dunning, contains('/api/dunning/home'));
   });
 }

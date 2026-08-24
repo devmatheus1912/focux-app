@@ -399,9 +399,6 @@ class PlanoFeatures {
     ).normalizeForTier();
   }
 
-  /// @deprecated Use [normalizeForTier].
-  PlanoFeatures withTierCeiling() => normalizeForTier();
-
   /// Matriz canônica de capabilities por tier (paywall + gates).
   static Map<String, bool> canonicalCapabilitiesFor(SubscriptionPlan plan) =>
       Map<String, bool>.unmodifiable(_canonicalCapsFor(plan));
