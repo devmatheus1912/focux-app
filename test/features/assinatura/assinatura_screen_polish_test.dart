@@ -51,6 +51,8 @@ void main() {
     expect(limiter, contains('fillHeight'));
     expect(limiter, contains('constraints.maxHeight'));
     expect(limiter, contains('LayoutBuilder'));
+    expect(limiter, contains('mainAxisAlignment: MainAxisAlignment.center'));
+    expect(limiter, isNot(contains('Alignment.topCenter')));
   });
 
   test('plan studio cai para aquisicao quando upgradePlans vazio', () {
@@ -65,6 +67,7 @@ void main() {
       'lib/features/assinatura/screens/assinatura_screen_build.part.dart',
     ).readAsStringSync();
     expect(build, contains('FxContentWidthLimiter'));
+    expect(build, contains('expandHeight: false'));
     expect(build, contains('AnimatedSwitcher'));
     expect(build, contains('Continuar no FREE'));
 

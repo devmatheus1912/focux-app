@@ -228,6 +228,7 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
           selectedBackendPlan == null
               ? null
               : FxContentWidthLimiter(
+                expandHeight: false,
                 child: AnimatedSwitcher(
                   duration: TokensStrip.prefersReducedMotion(context)
                       ? Duration.zero
