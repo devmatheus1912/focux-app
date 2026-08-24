@@ -11,7 +11,6 @@ abstract final class FocuxDataViz {
 
   static const List<String> coreSources = [
     'lib/core/data_viz/focux_data_viz.dart',
-    'lib/core/theme/fx_chart_theme.dart',
     'lib/core/widgets/fx_sparkline.dart',
     'lib/features/dashboard/utils/dashboard_sparkline_helpers.dart',
     'lib/features/alunos/utils/aluno360_evolucao_inteligente_logic.dart',
@@ -19,7 +18,6 @@ abstract final class FocuxDataViz {
 
   static const List<String> hubDataVizPatterns = [
     'FxSparkline',
-    'FxChartTheme',
     'fl_chart',
     'CustomPaint',
     'sparkline',

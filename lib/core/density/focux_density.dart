@@ -20,7 +20,7 @@ abstract final class FocuxDensity {
   static const List<String> coreSources = [
     'lib/core/density/focux_density.dart',
     'lib/core/theme/app_theme.dart',
-    'lib/core/theme/focux_spacing.dart',
+    'lib/core/theme/tokens_strip.dart',
     'lib/features/alunos/data/aluno_list_preferences_store.dart',
     'lib/features/dashboard/widgets/dashboard_collapsible_section.dart',
     'lib/features/dashboard/constants/dashboard_layout.dart',

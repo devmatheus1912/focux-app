@@ -33,10 +33,6 @@ void main() {
         File('lib/core/widgets/fx_sparkline.dart').readAsStringSync();
     expect(sparkline, contains('FxSparkline'));
     expect(sparkline, contains('CustomPaint'));
-
-    final chartTheme =
-        File('lib/core/theme/fx_chart_theme.dart').readAsStringSync();
-    expect(chartTheme, contains('donutPalette'));
   });
 
   test('dashboard sparkline helpers derive series from domain data', () {

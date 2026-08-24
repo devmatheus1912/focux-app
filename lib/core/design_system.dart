@@ -67,7 +67,7 @@
 /// components_consistency_pillar_contract_test.
 /// Cores & contraste — FocuxContrast — WCAG —
 /// colors_contrast_pillar_contract_test.
-/// Espaçamento — FocuxSpacing — FxContentWidthLimiter —
+/// Espaçamento — TokensStrip — FxContentWidthLimiter —
 /// spacing_layout_pillar_contract_test.
 /// Microcopy — FocuxMicrocopy — microcopy_pillar_contract_test.
 /// Gates de produtividade: flutter test · Tier S+.

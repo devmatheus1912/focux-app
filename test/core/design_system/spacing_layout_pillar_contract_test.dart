@@ -7,7 +7,6 @@ import '../../support/screen_source_bundle.dart';
 /// Pilar 6 — Espaçamento & layout: grade 8pt, limiter e tokens por hub.
 void main() {
   const spacingSources = [
-    'lib/core/theme/focux_spacing.dart',
     'lib/core/theme/tokens_strip.dart',
     'lib/core/theme/design_tokens.dart',
     'lib/core/widgets/fx_content_width_limiter.dart',
@@ -68,7 +67,6 @@ void main() {
       expect(File(path).existsSync(), isTrue, reason: 'Hub ausente: $path');
       final source = readScreenSourceBundle(path);
       final usesSpacing = source.contains('TokensStrip.s') ||
-          source.contains('FocuxSpacing') ||
           source.contains('Aluno360Layout') ||
           source.contains('DashboardLayout') ||
           source.contains('FxContentWidthLimiter');
@@ -103,7 +101,7 @@ void main() {
   test('DESIGN_SYSTEM documents spacing and layout', () {
     final doc = File('lib/core/design_system.dart').readAsStringSync();
     expect(doc, contains('Espaçamento'));
-    expect(doc, contains('FocuxSpacing'));
+    expect(doc, contains('TokensStrip'));
     expect(doc, contains('FxContentWidthLimiter'));
   });
 }

@@ -10,10 +10,7 @@ const _entryPoints = {'lib/main.dart'};
 
 /// Superfícies do design system (barrel + gates de pilar exigem que
 /// existam), mesmo sem importador em código hoje.
-const _documentedApi = {
-  'lib/core/theme/focux_spacing.dart',
-  'lib/core/theme/fx_chart_theme.dart',
-};
+const _documentedApi = <String>{};
 
 void main() {
   final lib = Directory('lib');
