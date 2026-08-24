@@ -21,7 +21,9 @@ void main() {
     expect(screen, contains('AuthLoginBrandHeader'));
     expect(shell, contains('AuthFormEntrance'));
     expect(shell, contains('coloredDepthGlow'));
-    expect(shell, contains('glassPanel'));
+    expect(shell, contains('TokensStrip.glassPanel'));
+    expect(shell, contains('AppTheme.buildDarkTheme'));
+    expect(shell, isNot(contains('fxStripCardDecoration')));
     expect(screen, contains('authScrollPadding'));
     expect(
       readScreenSourceBundle('lib/features/auth/utils/auth_layout.dart'),

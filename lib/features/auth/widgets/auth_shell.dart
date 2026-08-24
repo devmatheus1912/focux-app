@@ -10,6 +10,7 @@ import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/focux_typography.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/focux_system_chrome.dart';
 import '../../../core/theme/hero_teal.dart';
 import '../../../core/theme/theme_provider.dart';
@@ -20,7 +21,6 @@ import '../../../core/widgets/focux_official_logo.dart';
 import '../../../core/widgets/focux_brand_tagline.dart';
 import '../../../core/widgets/cinematic_mesh_background.dart';
 import '../../../core/widgets/fx_premium_entrance.dart';
-import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/mesh_scope.dart';
 import '../utils/auth_layout.dart';
 
@@ -53,6 +53,13 @@ class AuthShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    // Mesh é sempre escuro; o tema do app (light no celular) não pode
+    // pintar card branco com tinta branca por cima.
+    final content =
+        forceDark
+            ? Theme(data: AppTheme.buildDarkTheme(primary), child: child)
+            : child;
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: FocuxSystemChrome.dark,
       child: CinematicMeshBackground(
@@ -64,7 +71,7 @@ class AuthShell extends StatelessWidget {
         animateGridIn: animateGridIn,
         child: MeshScope(
           active: true,
-          child: SafeArea(child: child),
+          child: SafeArea(child: content),
         ),
       ),
     );
@@ -361,17 +368,18 @@ class AuthGlassCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Paridade Home: strip emphasize + blur cinematográfico.
+    final primary = Theme.of(context).colorScheme.primary;
+    // Vidro escuro do mesh — nunca o strip branco da Home (tinta auth é clara).
     return ClipRRect(
       borderRadius: BorderRadius.circular(radius),
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
         child: DecoratedBox(
-          decoration: fxStripCardDecoration(
-            context,
+          decoration: TokensStrip.glassPanel(
+            dark: true,
             radius: radius,
-            emphasize: true,
-            glowStrength: 0.16,
+            accent: primary,
+            elevationLevel: 10,
           ),
           child: Padding(padding: padding, child: child),
         ),
@@ -447,7 +455,7 @@ class AuthField extends StatelessWidget {
                     : Icon(icon, color: heroTealSurface(0.78), size: 18),
             suffixIcon: suffix,
             filled: true,
-            fillColor: EagleTokens.glassFill,
+            fillColor: TokensStrip.glassFill(dark: true, opacity: 0.55),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 14,
               vertical: 12,
