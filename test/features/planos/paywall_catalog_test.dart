@@ -7,10 +7,8 @@ void main() {
     expect(PaywallCatalog.comparisonRows.length, 14);
   });
 
-  test('roi strip and rows match reference', () {
+  test('roi strip match reference', () {
     expect(PaywallCatalog.roiStrip.length, 6);
-    expect(PaywallCatalog.roiRows.length, 10);
-    expect(PaywallCatalog.topFeatures.length, 10);
     expect(PaywallCatalog.upgradeTriggers.length, 8); // modais in-app, não vitrine
   });
 

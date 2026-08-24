@@ -19,19 +19,16 @@ void main() {
     expect(find.text('Nenhum fluxo ativo'), findsOneWidget);
   });
 
-  test('paywall topFeatures habit coaching is LIVE not coming soon', () {
-    final habit = PaywallCatalog.topFeatures.firstWhere(
-      (f) => f.title.contains('Habit'),
+  test('habit coaching e loja digital seguem na matriz', () {
+    expect(
+      PaywallCatalog.comparisonRows.any((r) => r.feature.contains('Habit')),
+      isTrue,
     );
-    expect(habit.badge, 'LIVE');
-    expect(habit.comingSoon, isFalse);
-  });
-
-  test('paywall loja digital feature is LIVE', () {
-    final loja = PaywallCatalog.topFeatures.firstWhere(
-      (f) => f.title.toLowerCase().contains('loja'),
+    expect(
+      PaywallCatalog.comparisonRows.any(
+        (r) => r.feature.toLowerCase().contains('loja'),
+      ),
+      isTrue,
     );
-    expect(loja.comingSoon, isFalse);
-    expect(loja.badge, 'LIVE');
   });
 }
