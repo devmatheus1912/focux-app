@@ -241,8 +241,20 @@ class PaywallSectionHeader extends StatelessWidget {
                     ],
                   ],
                 ),
-              const SizedBox(height: 10),
-              Divider(height: 1, color: secondary.withValues(alpha: 0.35)),
+              const SizedBox(height: TokensStrip.s2),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: SizedBox(
+                  width: 36,
+                  height: 2,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: ink.withValues(alpha: 0.22),
+                      borderRadius: BorderRadius.circular(1),
+                    ),
+                  ),
+                ),
+              ),
             ],
           );
         },

@@ -211,24 +211,33 @@ class _PriceBox extends StatelessWidget {
         blur: false,
         radius: TokensStrip.rSm,
         elevationLevel: effectiveSelected ? 8 : 3,
-        padding: const EdgeInsets.all(10),
+        padding: const EdgeInsets.fromLTRB(
+          TokensStrip.s3,
+          TokensStrip.s3,
+          TokensStrip.s3,
+          TokensStrip.s2 + 2,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               label.toUpperCase(),
-              style: FocuxHubTypography.bodyMuted(
-                color: mute,
-                fontWeight: FontWeight.w800,
-              ).copyWith(letterSpacing: 0.8),
+              style: FocuxHubTypography.chip(mute),
             ),
-            const SizedBox(height: 4),
-            Text(
-              price,
-              style: FocuxHubTypography.metric(
-                color: textInk,
-                fontSize: FocuxHubTypography.metricLg,
-                fontWeight: FontWeight.w900,
+            const SizedBox(height: TokensStrip.s1),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text(
+                price,
+                maxLines: 1,
+                softWrap: false,
+                style: FocuxHubTypography.metric(
+                  color: textInk,
+                  fontSize: FocuxHubTypography.metricEm,
+                  fontWeight: FontWeight.w900,
+                  height: 1.1,
+                ),
               ),
             ),
           ],

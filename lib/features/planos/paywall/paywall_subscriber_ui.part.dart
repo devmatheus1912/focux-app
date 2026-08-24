@@ -585,9 +585,7 @@ class PaywallQuickNav extends StatelessWidget {
   List<({PaywallScrollTarget id, String label, IconData icon})>
   get _visibleItems {
     if (FocuxLegal.plansMarketingWebLive) return _items;
-    return _items
-        .where((item) => item.id == PaywallScrollTarget.planos)
-        .toList(growable: false);
+    return const [];
   }
 
   @override

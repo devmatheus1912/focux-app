@@ -79,28 +79,16 @@ class PaywallRichPlanCard extends StatelessWidget {
         referenceMode ||
         (collapseFeatureDetails && (isCurrent || embeddedInStudio));
 
+    final headerPill =
+        !embeddedInStudio && isCurrent
+            ? 'SEU PLANO'
+            : !embeddedInStudio && !referenceMode && badge != null && !isCurrent
+            ? badge
+            : null;
+
     final cardBody = Stack(
+      clipBehavior: Clip.none,
       children: [
-        if (!embeddedInStudio && !referenceMode && badge != null && !isCurrent)
-          Positioned(
-            top: TokensStrip.s4,
-            right: TokensStrip.s4,
-            child: PaywallTierBrandPill(
-              label: badge,
-              accent: accent,
-              isDark: isDark,
-            ),
-          ),
-        if (!embeddedInStudio && isCurrent)
-          Positioned(
-            top: TokensStrip.s4,
-            right: TokensStrip.s4,
-            child: PaywallTierBrandPill(
-              label: 'SEU PLANO',
-              accent: accent,
-              isDark: isDark,
-            ),
-          ),
         Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -113,13 +101,9 @@ class PaywallRichPlanCard extends StatelessWidget {
                 ),
                 child: Padding(
                   padding: EdgeInsets.fromLTRB(
-                    embeddedInStudio ? 16 : TokensStrip.s5,
-                    embeddedInStudio ? 8 : TokensStrip.s5,
-                    embeddedInStudio
-                        ? 16
-                        : (badge != null || isCurrent)
-                        ? 100
-                        : TokensStrip.s5,
+                    embeddedInStudio ? TokensStrip.s4 : TokensStrip.s5,
+                    embeddedInStudio ? TokensStrip.s2 : TokensStrip.s5,
+                    embeddedInStudio ? TokensStrip.s4 : TokensStrip.s5,
                     TokensStrip.s3,
                   ),
                   child: Column(
@@ -141,20 +125,25 @@ class PaywallRichPlanCard extends StatelessWidget {
                                 children: [
                                   Text(
                                     planTitle.toUpperCase(),
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w900,
-                                      letterSpacing: 1.2,
-                                      height: 1.1,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: FocuxHubTypography.sectionTitle(
+                                      context,
                                       color: PaywallCatalog.tierAccentOnSurface(
                                         plan,
                                         isDark: isDark,
                                       ),
+                                    ).copyWith(
+                                      letterSpacing: 0.6,
+                                      height: 1.15,
+                                      fontWeight: FontWeight.w900,
                                     ),
                                   ),
                                   const SizedBox(height: TokensStrip.s1),
                                   Text(
                                     planSubtitle,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
                                     style: TokensStrip.bodyMuted(
                                       color: secondary,
                                     ).copyWith(
@@ -165,6 +154,14 @@ class PaywallRichPlanCard extends StatelessWidget {
                                 ],
                               ),
                             ),
+                            if (headerPill != null) ...[
+                              const SizedBox(width: TokensStrip.s2),
+                              PaywallTierBrandPill(
+                                label: headerPill,
+                                accent: accent,
+                                isDark: isDark,
+                              ),
+                            ],
                           ],
                         )
                       else if (!isCurrent) ...[

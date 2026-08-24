@@ -199,7 +199,7 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
     if (_paymentBlocked) {
       // Ainda mostra Planos — só checkout fica bloqueado (DeviceGuard).
       ctaMode = _AssinaturaCtaMode.blocked;
-      ctaLabel = 'Pagamentos indisponíveis neste aparelho';
+      ctaLabel = 'Compras bloqueadas no aparelho';
       ctaEnabled = false;
       footnote =
           'Opções de desenvolvedor ou root detectadas. '

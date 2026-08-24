@@ -138,7 +138,7 @@ extension AssinaturaScreenBuildBody on _AssinaturaScreenState {
         upgradePlansForStudio.isNotEmpty;
 
     final bottomInset = MediaQuery.paddingOf(context).bottom;
-    final stickyReserve = 156.0 + bottomInset;
+    final stickyReserve = 228.0 + bottomInset;
 
     return RefreshIndicator(
       onRefresh: () async {

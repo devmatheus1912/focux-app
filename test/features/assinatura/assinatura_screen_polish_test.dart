@@ -70,11 +70,26 @@ void main() {
     expect(build, contains('expandHeight: false'));
     expect(build, contains('AnimatedSwitcher'));
     expect(build, contains('Continuar no FREE'));
+    expect(build, contains('Compras bloqueadas no aparelho'));
 
     final body = File(
       'lib/features/assinatura/screens/assinatura_screen_build_body.part.dart',
     ).readAsStringSync();
     expect(body, contains('RefreshIndicator'));
     expect(body, contains('AlwaysScrollableScrollPhysics'));
+    expect(body, contains('228.0'));
+
+    final priceBox = File(
+      'lib/features/planos/paywall/paywall_plan_cards_enterprise.part.dart',
+    ).readAsStringSync();
+    expect(priceBox, contains('FittedBox'));
+    expect(priceBox, contains('maxLines: 1'));
+    expect(priceBox, contains('FocuxHubTypography.metricEm'));
+
+    final cards = File(
+      'lib/features/planos/paywall/paywall_plan_cards.part.dart',
+    ).readAsStringSync();
+    expect(cards, contains('headerPill'));
+    expect(cards, isNot(contains('Positioned(')));
   });
 }

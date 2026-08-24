@@ -225,7 +225,7 @@ class PaywallTierCard extends StatelessWidget {
     return PaywallGlassCard(
       margin:
           nestedInAccordion
-              ? const EdgeInsets.fromLTRB(4, 0, 4, 8)
+              ? const EdgeInsets.fromLTRB(4, 4, 4, 8)
               : const EdgeInsets.only(bottom: TokensStrip.s4),
       accent: accent,
       glow: showGlow && !TokensStrip.prefersReducedMotion(context),
@@ -234,7 +234,7 @@ class PaywallTierCard extends StatelessWidget {
       elevationLevel: isCurrent ? 12 : (isSelected ? 10 : 8),
       padding: EdgeInsets.zero,
       child: Stack(
-        clipBehavior: Clip.hardEdge,
+        clipBehavior: Clip.none,
         children: [
           PaywallTierChrome.cardWash(
             accent: accent,
@@ -360,12 +360,9 @@ class PaywallTierBrandPill extends StatelessWidget {
           ],
           Text(
             label,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 1.2,
+            style: FocuxHubTypography.chip(fg).copyWith(
+              letterSpacing: 1.1,
               height: 1.1,
-              color: fg,
             ),
           ),
         ],

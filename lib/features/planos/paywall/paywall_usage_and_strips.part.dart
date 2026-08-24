@@ -479,16 +479,28 @@ class PaywallContextBanner extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Icon(Icons.bolt_rounded, color: accent, size: 22),
-          const SizedBox(width: 10),
-          Expanded(child: Text(msg, style: TokensStrip.body(color: ink))),
-          if (onCta != null)
-            TextButton(
-              onPressed: onCta,
-              child: Text(
-                'Ver ${PlanEntitlements.displayPlanName(target)}',
-                style: TextStyle(color: accent),
-              ),
+          const SizedBox(width: TokensStrip.s3),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(msg, style: TokensStrip.body(color: ink).copyWith(height: 1.4)),
+                if (onCta != null)
+                  TextButton(
+                    onPressed: onCta,
+                    style: TextButton.styleFrom(
+                      minimumSize: const Size(48, 40),
+                      padding: const EdgeInsets.only(top: TokensStrip.s1),
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    child: Text(
+                      'Ver ${PlanEntitlements.displayPlanName(target)}',
+                      style: FocuxHubTypography.chip(accent),
+                    ),
+                  ),
+              ],
             ),
+          ),
         ],
       ),
     );
