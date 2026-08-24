@@ -61,7 +61,6 @@ List<RouteBase> buildAuthRoutes() {
     GoRoute(
       path: '/resetar-senha',
       builder: (context, state) => ResetarSenhaScreen(
-        token: state.uri.queryParameters['token'],
         resetNonce: state.uri.queryParameters['resetNonce'],
       ),
     ),

@@ -13,10 +13,9 @@ import '../widgets/auth_shell.dart';
 import '../widgets/password_strength_meter.dart';
 
 class ResetarSenhaScreen extends ConsumerStatefulWidget {
-  final String? token;
   final String? resetNonce;
 
-  const ResetarSenhaScreen({super.key, this.token, this.resetNonce});
+  const ResetarSenhaScreen({super.key, this.resetNonce});
 
   @override
   ConsumerState<ResetarSenhaScreen> createState() =>
@@ -34,13 +33,11 @@ class _ResetarSenhaScreenState extends ConsumerState<ResetarSenhaScreen> {
   String? _message;
   String? _role;
   bool _roleFromQueryApplied = false;
-  String? _linkToken;
   String? _resetNonce;
 
   @override
   void initState() {
     super.initState();
-    _linkToken = widget.token;
     _resetNonce = widget.resetNonce;
     _senhaController.addListener(() {
       if (mounted) setState(() {});
@@ -57,13 +54,11 @@ class _ResetarSenhaScreenState extends ConsumerState<ResetarSenhaScreen> {
     if (role == 'aluno' || role == 'personal') {
       _role = role;
     }
-    _linkToken ??= params['token'];
     _resetNonce ??= params['resetNonce'];
   }
 
   bool get _usesPresetCredential =>
-      (_linkToken != null && _linkToken!.isNotEmpty) ||
-      (_resetNonce != null && _resetNonce!.isNotEmpty);
+      _resetNonce != null && _resetNonce!.isNotEmpty;
 
   @override
   void dispose() {
@@ -86,7 +81,6 @@ class _ResetarSenhaScreenState extends ConsumerState<ResetarSenhaScreen> {
 
     try {
       await ref.read(authRepositoryProvider).confirmarResetSenha(
-        token: _linkToken,
         resetNonce: _resetNonce,
         novaSenha: _senhaController.text,
       );
@@ -113,9 +107,7 @@ class _ResetarSenhaScreenState extends ConsumerState<ResetarSenhaScreen> {
   @override
   Widget build(BuildContext context) {
     final subtitle =
-        _linkToken != null && _linkToken!.isNotEmpty
-            ? 'Link confirmado. Escolha uma nova senha segura.'
-            : _resetNonce != null && _resetNonce!.isNotEmpty
+        _resetNonce != null && _resetNonce!.isNotEmpty
             ? 'Código validado. Escolha uma nova senha segura.'
             : 'Valide o código enviado por e-mail antes de definir a senha.';
 

@@ -357,14 +357,12 @@ class AuthRepository {
   }
 
   Future<void> confirmarResetSenha({
-    String? token,
     String? resetNonce,
     required String novaSenha,
   }) async {
     await _dio.post(
       '/api/auth/resetar-senha',
       data: {
-        if (token != null && token.isNotEmpty) 'token': token,
         if (resetNonce != null && resetNonce.isNotEmpty)
           'resetNonce': resetNonce,
         'novaSenha': novaSenha,
