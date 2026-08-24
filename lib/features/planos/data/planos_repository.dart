@@ -51,7 +51,7 @@ class TrialStatus {
     required this.diasRestantes,
     required this.planoAtual,
     required this.subscriptionTokenPresent,
-    this.trialDaysOffer = 14,
+    this.trialDaysOffer = 30,
     this.trialEligible = false,
   });
 
@@ -63,7 +63,7 @@ class TrialStatus {
     diasRestantes: (j['diasRestantes'] as num?)?.toInt() ?? 0,
     planoAtual: subscriptionPlanFromApi(j['planoAtual'] as String?),
     subscriptionTokenPresent: j['subscriptionTokenPresent'] as bool? ?? false,
-    trialDaysOffer: (j['trialDaysOffer'] as num?)?.toInt() ?? 14,
+    trialDaysOffer: (j['trialDaysOffer'] as num?)?.toInt() ?? 30,
     trialEligible: j['trialEligible'] as bool? ?? false,
   );
 }

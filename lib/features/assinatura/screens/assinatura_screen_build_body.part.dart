@@ -185,7 +185,7 @@ extension AssinaturaScreenBuildBody on _AssinaturaScreenState {
               text:
                   _loadingTrial
                       ? 'Carregando oferta de teste…'
-                      : '$kPaywallMaxPlanTrialDays dias grátis no plano máximo. '
+                      : '$kPaywallMaxPlanTrialDays dias grátis no Enterprise Pro. '
                           'A loja pede o cartão na assinatura; cancele antes para não ser cobrado.',
               ink: ink,
               mute: mute,

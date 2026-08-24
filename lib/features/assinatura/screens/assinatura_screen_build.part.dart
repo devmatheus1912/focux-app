@@ -165,7 +165,7 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
                 : 'Continuar com $selectedLabel';
         footnote =
             trialOffer
-                ? 'Cadastre o cartão. $trialDays dias grátis no plano máximo. '
+                ? 'Cadastre o cartão. $trialDays dias grátis no Enterprise Pro. '
                     'Depois vale o preço da loja. Cancele quando quiser.'
                 : subscriptionUsesNativeStore
                 ? (_billingPeriod == SubscriptionBillingPeriod.yearly

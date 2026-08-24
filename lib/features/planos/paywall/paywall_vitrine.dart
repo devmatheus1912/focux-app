@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'paywall_catalog.dart';
+import 'paywall_price.dart';
 
 /// Conteúdo educativo da vitrine (BFF `/api/planos/paywall/home` ou fallback estático).
 class PaywallVitrineSnapshot {
@@ -51,7 +52,7 @@ class PaywallVitrineSnapshot {
     socialProof: PaywallCatalog.socialProof,
     roiStrip: PaywallCatalog.roiStrip,
     comparisonRows: PaywallCatalog.comparisonRows,
-    trialDaysOffer: 14,
+    trialDaysOffer: kPaywallMaxPlanTrialDays,
     fromApi: false,
     version: null,
   );

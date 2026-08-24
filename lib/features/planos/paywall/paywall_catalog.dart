@@ -5,6 +5,7 @@ import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../assinatura/data/plano.dart';
 import '../../subscription/models/subscription_plan.dart';
+import 'paywall_price.dart';
 
 /// Catálogo estático de educação e vitrine — preços vêm do backend/loja.
 class PaywallCatalog {
@@ -83,8 +84,7 @@ class PaywallCatalog {
 
   static String? badgeForPlan(SubscriptionPlan plan) => switch (plan) {
     SubscriptionPlan.PREMIUM => 'MAIS POPULAR',
-    SubscriptionPlan.ENTERPRISE => 'TRIAL 14 DIAS',
-    SubscriptionPlan.ENTERPRISE_PRO => 'MÁXIMO ROI',
+    SubscriptionPlan.ENTERPRISE_PRO => 'TRIAL $kPaywallMaxPlanTrialDays DIAS',
     _ => null,
   };
 

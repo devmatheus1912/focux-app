@@ -91,7 +91,7 @@ String _resolveInitialPlanSelection({
   return currentPlan.apiName;
 }
 
-/// Trial introdutório só no plano máximo (Pro), com cartão na loja.
+/// Trial introdutório só no Enterprise Pro, com cartão na loja.
 bool _shouldShowEnterpriseTrialCard(
   SubscriptionPlan selectedPlan,
   SubscriptionPlan currentPlan,
@@ -521,7 +521,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                 current: billingPlan,
                 trialEligible: _trialStatus?.trialEligible,
               )
-              ? '$kPaywallMaxPlanTrialDays dias grátis no plano máximo com cadastro de cartão. '
+              ? '$kPaywallMaxPlanTrialDays dias grátis no Enterprise Pro com cadastro de cartão. '
                   'A loja confirma o valor após o período.'
               : null;
       final confirmed = await context.push<bool>(

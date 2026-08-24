@@ -20,7 +20,9 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../../../features/subscription/models/subscription_plan.dart';
 import '../../../features/subscription/utils/plano_ia_limits.dart';
 import '../../../features/subscription/store_subscription_policy.dart';
+import '../../../features/subscription/subscription_products.dart';
 import '../data/planos_repository.dart';
+import '../paywall/paywall_price.dart';
 
 class EnterprisePromoScreen extends ConsumerStatefulWidget {
   const EnterprisePromoScreen({super.key});
@@ -63,7 +65,7 @@ class _EnterprisePromoScreenState extends ConsumerState<EnterprisePromoScreen> {
       if (subscriptionUsesNativeStore) {
         await context.push(
           '/assinatura',
-          extra: SubscriptionPlan.ENTERPRISE.apiName,
+          extra: SubscriptionPlan.ENTERPRISE_PRO.apiName,
         );
         return;
       }
@@ -71,7 +73,7 @@ class _EnterprisePromoScreenState extends ConsumerState<EnterprisePromoScreen> {
       await PlanosRepository(ref.read(apiClientProvider)).startTrial(
         payload:
             buildLocalSubscriptionMetadata(
-              productId: 'focux_enterprise_trial',
+              productId: SubscriptionProducts.enterpriseProMonthly,
             ).toTrialPayload(),
       );
       ref.invalidate(perfilProvider);
@@ -79,7 +81,7 @@ class _EnterprisePromoScreenState extends ConsumerState<EnterprisePromoScreen> {
 
       FeedbackHelper.showSuccess(
         context,
-        'Trial Enterprise ativado. Aproveite os próximos 5 dias.',
+        'Trial Enterprise Pro ativado. Aproveite os próximos $kPaywallMaxPlanTrialDays dias.',
       );
       context.go('/dashboard/personal');
     } catch (error) {
@@ -97,7 +99,9 @@ class _EnterprisePromoScreenState extends ConsumerState<EnterprisePromoScreen> {
       Theme.of(context).colorScheme.primary,
     );
     final useStore = subscriptionUsesNativeStore;
-    final trialEndDate = DateTime.now().add(const Duration(days: 5));
+    final trialEndDate = DateTime.now().add(
+      const Duration(days: kPaywallMaxPlanTrialDays),
+    );
     final dateStr =
         '${trialEndDate.day.toString().padLeft(2, '0')}/${trialEndDate.month.toString().padLeft(2, '0')}/${trialEndDate.year}';
     // Promo surface is always cinematic dark — force readable ink.
@@ -105,7 +109,7 @@ class _EnterprisePromoScreenState extends ConsumerState<EnterprisePromoScreen> {
     const mute = EagleTokens.darkInkMute;
 
     return fxScreenA11yScope(
-      label: 'Promoção Enterprise',
+      label: 'Promoção Enterprise Pro',
       child: FxShellScaffold(
         useMesh: true,
         body: Container(
@@ -140,7 +144,7 @@ class _EnterprisePromoScreenState extends ConsumerState<EnterprisePromoScreen> {
                           ),
                           const SizedBox(height: TokensStrip.s5),
                           Text(
-                            'Transforme seu negócio.\nExperimente o Enterprise.',
+                            'Transforme seu negócio.\nExperimente o Enterprise Pro.',
                             textAlign: TextAlign.center,
                             style: TokensStrip.h1(
                               color: ink,
@@ -198,7 +202,7 @@ class _EnterprisePromoScreenState extends ConsumerState<EnterprisePromoScreen> {
                                     Text(
                                       useStore
                                           ? 'Assinatura pela loja'
-                                          : '5 dias grátis',
+                                          : '$kPaywallMaxPlanTrialDays dias grátis',
                                       style: FocuxHubTypography.sectionTitle(
                                         context,
                                         color: EagleTokens.goldStar,
@@ -219,7 +223,7 @@ class _EnterprisePromoScreenState extends ConsumerState<EnterprisePromoScreen> {
                                   Padding(
                                     padding: const EdgeInsets.only(top: 4),
                                     child: Text(
-                                      'Depois disso: R\$149,90/mês',
+                                      'Depois disso: R\$199,90/mês',
                                       textAlign: TextAlign.center,
                                       style: TokensStrip.bodyMuted(
                                         color: mute,
@@ -235,12 +239,12 @@ class _EnterprisePromoScreenState extends ConsumerState<EnterprisePromoScreen> {
                             label:
                                 useStore
                                     ? 'Continuar na loja'
-                                    : 'Experimentar 5 dias grátis',
+                                    : 'Experimentar $kPaywallMaxPlanTrialDays dias grátis',
                             child: FxLiquidPrimaryButton(
                               label:
                                   useStore
                                       ? 'Continuar na loja'
-                                      : 'Experimentar 5 dias grátis',
+                                      : 'Experimentar $kPaywallMaxPlanTrialDays dias grátis',
                               loading: _starting,
                               onPressed:
                                   _starting ? null : _continueToCheckout,

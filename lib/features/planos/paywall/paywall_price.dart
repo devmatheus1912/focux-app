@@ -1,7 +1,7 @@
 import '../../subscription/models/subscription_plan.dart';
 import '../../subscription/subscription_products.dart';
 
-/// Trial introdutório só no plano máximo, com cadastro de cartão na loja.
+/// 30 dias grátis só no Enterprise Pro, na primeira assinatura (cadastro de cartão).
 const kPaywallMaxPlanTrialDays = 30;
 
 class PaywallPriceCopy {

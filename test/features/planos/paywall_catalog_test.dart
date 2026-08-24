@@ -19,6 +19,14 @@ void main() {
     );
   });
 
+  test('badge de 30 dias só no Pro', () {
+    expect(PaywallCatalog.badgeForPlan(SubscriptionPlan.ENTERPRISE), isNull);
+    expect(
+      PaywallCatalog.badgeForPlan(SubscriptionPlan.ENTERPRISE_PRO),
+      'TRIAL 30 DIAS',
+    );
+  });
+
   test('roi tags omit emoji prefix', () {
     final tag = PaywallCatalog.roiTagForPlan(SubscriptionPlan.PREMIUM);
     expect(tag, isNotNull);

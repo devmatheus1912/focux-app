@@ -24,10 +24,10 @@ void main() {
       'roiStrip': [
         {'value': '5×', 'label': 'ROI', 'tone': 'brand'},
       ],
-      'trialDaysOffer': 14,
+      'trialDaysOffer': 30,
     });
     expect(snapshot.fromApi, isTrue);
-    expect(snapshot.trialDaysOffer, 14);
+    expect(snapshot.trialDaysOffer, 30);
     expect(snapshot.effectiveRoiStrip.first.value, '5×');
   });
 
