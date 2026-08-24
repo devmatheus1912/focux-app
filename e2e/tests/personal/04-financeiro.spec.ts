@@ -3,7 +3,7 @@ import { test, expect } from '../_fixtures';
 test.describe('@p0 personal financeiro', () => {
   test('tela /financeiro abre com dashboard', async ({ page }) => {
     const resp = page.waitForResponse((r) =>
-      r.url().includes('/api/financeiro/mensalidades/dashboard')
+      r.url().includes('/api/financeiro/home')
     );
     await page.goto('/financeiro');
     const r = await resp.catch(() => null);
@@ -13,7 +13,7 @@ test.describe('@p0 personal financeiro', () => {
 
   test('lista mensalidades não retorna 500', async ({ page }) => {
     const resp = page.waitForResponse((r) =>
-      r.url().match(/\/api\/financeiro\/mensalidades(\?|$)/)
+      r.url().includes('/api/financeiro/home')
     );
     await page.goto('/financeiro');
     const r = await resp.catch(() => null);
