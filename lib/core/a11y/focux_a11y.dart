@@ -1,8 +1,8 @@
 /// Catálogo de acessibilidade — fonte única para gates de leitor de tela.
 ///
-/// Auditoria manual trimestral: TalkBack (Android) e VoiceOver (iOS)
+/// Auditoria manual: TalkBack (Android) e VoiceOver (iOS)
 /// nos 8 hubs — login, Home, alunos, treinos, financeiro, chat, check-in,
-/// suporte. Checklist em `.github/ISSUE_TEMPLATE/audit-trimestral-a11y.md`.
+/// suporte.
 abstract final class FocuxA11y {
   FocuxA11y._();
 
