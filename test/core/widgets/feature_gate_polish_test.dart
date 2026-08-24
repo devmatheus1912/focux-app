@@ -89,7 +89,7 @@ void main() {
       DashboardHomeClientCache.put(
         _homeBundle(
           const PlanoFeatures(
-            plano: SubscriptionPlan.PREMIUM,
+            plano: SubscriptionPlan.PRO,
             financeiro: true,
             agenda: true,
             relatorios: true,
@@ -108,7 +108,7 @@ void main() {
           notifier: notifier,
           gate: const FeatureGate(
             featureName: 'Financeiro',
-            requiredPlan: SubscriptionPlan.PREMIUM,
+            requiredPlan: SubscriptionPlan.PRO,
             capability: 'financeiro',
             child: Text('gated-child'),
           ),
@@ -144,7 +144,7 @@ void main() {
           notifier: notifier,
           gate: const FeatureGate(
             featureName: 'Financeiro',
-            requiredPlan: SubscriptionPlan.PREMIUM,
+            requiredPlan: SubscriptionPlan.PRO,
             capability: 'financeiro',
             lockedBuilder: Text('locked-ui'),
             child: Text('paid-content'),
@@ -168,7 +168,7 @@ void main() {
           notifier: notifier,
           gate: const FeatureGate(
             featureName: 'Financeiro',
-            requiredPlan: SubscriptionPlan.PREMIUM,
+            requiredPlan: SubscriptionPlan.PRO,
             capability: 'financeiro',
             child: Text('gated-child'),
           ),

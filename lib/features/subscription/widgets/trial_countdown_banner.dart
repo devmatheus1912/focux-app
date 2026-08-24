@@ -43,7 +43,7 @@ class TrialCountdownBanner extends ConsumerWidget {
               onTap:
                   () => context.push(
                     '/assinatura',
-                    extra: SubscriptionPlan.ENTERPRISE_PRO.apiName,
+                    extra: SubscriptionPlan.ENTERPRISE.apiName,
                   ),
               child: Padding(
                 padding: const EdgeInsets.all(14),
@@ -57,8 +57,8 @@ class TrialCountdownBanner extends ConsumerWidget {
                         children: [
                           Text(
                             dias <= 1
-                                ? 'Trial Enterprise Pro acaba hoje'
-                                : 'Trial Enterprise Pro · $dias dias restantes',
+                                ?         'Trial Enterprise acaba hoje'
+                                : 'Trial Enterprise · $dias dias restantes',
                             style: FocuxHubTypography.bodyMuted(
                               color: Theme.of(context).colorScheme.onSurface,
                               fontWeight: FontWeight.w800,

@@ -29,7 +29,7 @@ class DashboardActivationCta extends StatelessWidget {
       step = (
         title: 'Importe seus alunos em 2 minutos',
         body:
-            'MFIT, Trainerize, planilha ou foto — migração mágica no Premium.',
+            'MFIT, Trainerize, planilha ou foto — migração mágica no Pro.',
         cta: 'Importar alunos',
         route: '/growth/migracao',
       );

@@ -28,7 +28,7 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
       label: 'Copiloto',
       child: FeatureGate(
         featureName: 'Copiloto IA',
-        requiredPlan: SubscriptionPlan.PREMIUM,
+        requiredPlan: SubscriptionPlan.PRO,
         capability: 'iaCopiloto',
         child: FxShellScaffold(
           useMesh: true,

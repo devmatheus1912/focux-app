@@ -3,32 +3,34 @@ import 'package:focux_app/features/planos/paywall/paywall_catalog.dart';
 import 'package:focux_app/features/subscription/models/subscription_plan.dart';
 
 void main() {
-  test('comparison table matches reference row count', () {
-    expect(PaywallCatalog.comparisonRows.length, 14);
+  test('comparisons binárias batem com a spec', () {
+    expect(PaywallCatalog.comparisonFreeVsPro.length, 6);
+    expect(PaywallCatalog.comparisonFreeVsEnterprise.length, 9);
   });
 
   test('roi strip match reference', () {
     expect(PaywallCatalog.roiStrip.length, 6);
-    expect(PaywallCatalog.upgradeTriggers.length, 8); // modais in-app, não vitrine
+    expect(PaywallCatalog.upgradeTriggers.length, 8);
   });
 
-  test('displayPlanName formats ENTERPRISE PRO', () {
+  test('displayPlanName usa o nome canônico', () {
+    expect(PaywallCatalog.displayPlanName(SubscriptionPlan.PRO), 'PRO');
     expect(
-      PaywallCatalog.displayPlanName(SubscriptionPlan.ENTERPRISE_PRO),
-      'ENTERPRISE PRO',
+      PaywallCatalog.displayPlanName(SubscriptionPlan.ENTERPRISE),
+      'ENTERPRISE',
     );
   });
 
-  test('badge de 30 dias só no Pro', () {
-    expect(PaywallCatalog.badgeForPlan(SubscriptionPlan.ENTERPRISE), isNull);
+  test('badge de 30 dias só no Enterprise', () {
+    expect(PaywallCatalog.badgeForPlan(SubscriptionPlan.PRO), 'MAIS POPULAR');
     expect(
-      PaywallCatalog.badgeForPlan(SubscriptionPlan.ENTERPRISE_PRO),
+      PaywallCatalog.badgeForPlan(SubscriptionPlan.ENTERPRISE),
       'TRIAL 30 DIAS',
     );
   });
 
   test('roi tags omit emoji prefix', () {
-    final tag = PaywallCatalog.roiTagForPlan(SubscriptionPlan.PREMIUM);
+    final tag = PaywallCatalog.roiTagForPlan(SubscriptionPlan.PRO);
     expect(tag, isNotNull);
     expect(tag!, isNot(startsWith('💰')));
   });
@@ -37,7 +39,7 @@ void main() {
     final a = PaywallCatalog.parseFeatureLabel('Pose Coach ML ✦');
     expect(a.label, 'Pose Coach ML');
     expect(a.pro, isTrue);
-    final b = PaywallCatalog.parseFeatureLabel('20 alunos ativos');
+    final b = PaywallCatalog.parseFeatureLabel('30 alunos ativos');
     expect(b.pro, isFalse);
   });
 

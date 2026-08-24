@@ -177,7 +177,7 @@ class _LojaScreenState extends ConsumerState<LojaScreen>
       label: 'Loja digital',
       child: FeatureGate(
         featureName: 'Loja Digital',
-        requiredPlan: SubscriptionPlan.ENTERPRISE_PRO,
+        requiredPlan: SubscriptionPlan.ENTERPRISE,
         capability: 'lojaDigital',
         child: FxShellScaffold(
           useMesh: true,

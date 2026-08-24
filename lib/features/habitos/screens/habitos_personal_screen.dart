@@ -176,7 +176,7 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
       label: 'Hábitos & Compliance',
       child: FeatureGate(
         featureName: 'Habit Coaching',
-        requiredPlan: SubscriptionPlan.PREMIUM,
+        requiredPlan: SubscriptionPlan.PRO,
         capability: 'habitCoaching',
         child: FxShellScaffold(
           useMesh: true,

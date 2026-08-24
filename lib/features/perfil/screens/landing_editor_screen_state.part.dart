@@ -35,7 +35,7 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
     return fxScreenA11yScope(
       label: 'Editor da landing',
       child: FeatureGate(
-        requiredPlan: SubscriptionPlan.ENTERPRISE_PRO,
+        requiredPlan: SubscriptionPlan.ENTERPRISE,
         capability: 'landingCompleta',
         featureName: 'Landing page completa',
         child: PopScope(

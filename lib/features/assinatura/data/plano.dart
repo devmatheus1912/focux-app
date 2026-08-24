@@ -5,6 +5,12 @@ class Plano {
   final double precoMensal;
   final double? precoAnual;
   final double? precoAnualMensalEquiv;
+  final double? precoAnualCheio;
+  final double? economiaAnual;
+  final double? descontoAnualPercentual;
+  final double? equivMensalNoAnual;
+  final String? labelDescontoAnual;
+  final String? labelEconomiaAnual;
   final int? limiteAlunos;
   final bool temWhiteLabel;
   final bool temFinanceiro;
@@ -23,6 +29,12 @@ class Plano {
     required this.precoMensal,
     this.precoAnual,
     this.precoAnualMensalEquiv,
+    this.precoAnualCheio,
+    this.economiaAnual,
+    this.descontoAnualPercentual,
+    this.equivMensalNoAnual,
+    this.labelDescontoAnual,
+    this.labelEconomiaAnual,
     this.limiteAlunos,
     required this.temWhiteLabel,
     required this.temFinanceiro,
@@ -36,7 +48,7 @@ class Plano {
     this.tierOrder,
   });
 
-  double annualPriceOrComputed() => precoAnual ?? (precoMensal * 12 * 0.8);
+  double annualPriceOrComputed() => precoAnual ?? (precoMensal * 10);
 
   factory Plano.fromJson(Map<String, dynamic> json) => Plano(
     id: json['id'] as int,
@@ -44,6 +56,13 @@ class Plano {
     precoMensal: (json['precoMensal'] as num).toDouble(),
     precoAnual: (json['precoAnual'] as num?)?.toDouble(),
     precoAnualMensalEquiv: (json['precoAnualMensalEquiv'] as num?)?.toDouble(),
+    precoAnualCheio: (json['precoAnualCheio'] as num?)?.toDouble(),
+    economiaAnual: (json['economiaAnual'] as num?)?.toDouble(),
+    descontoAnualPercentual: (json['descontoAnualPercentual'] as num?)
+        ?.toDouble(),
+    equivMensalNoAnual: (json['equivMensalNoAnual'] as num?)?.toDouble(),
+    labelDescontoAnual: json['labelDescontoAnual'] as String?,
+    labelEconomiaAnual: json['labelEconomiaAnual'] as String?,
     limiteAlunos: json['limiteAlunos'] as int?,
     temWhiteLabel: json['temWhiteLabel'] as bool,
     temFinanceiro: json['temFinanceiro'] as bool,

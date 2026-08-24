@@ -78,7 +78,7 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen>
     if (features == null || !hasFinanceiro) {
       return const FeatureGate(
         featureName: 'Financeiro',
-        requiredPlan: SubscriptionPlan.PREMIUM,
+        requiredPlan: SubscriptionPlan.PRO,
         capability: 'financeiro',
         child: SizedBox.shrink(),
       );
@@ -96,7 +96,7 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen>
 
     return FeatureGate(
       featureName: 'Financeiro',
-      requiredPlan: SubscriptionPlan.PREMIUM,
+      requiredPlan: SubscriptionPlan.PRO,
       capability: 'financeiro',
       child: _buildContent(context, home?.fetchedAt),
     );

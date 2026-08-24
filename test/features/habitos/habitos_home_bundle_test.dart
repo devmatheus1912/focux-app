@@ -41,7 +41,7 @@ void main() {
     expect(bundle.compliance, hasLength(1));
     expect(bundle.compliance.first.alunoNome, 'Ana Silva');
     expect(bundle.compliance.first.compliancePct, 71);
-    expect(bundle.planoFeatures?.plano, SubscriptionPlan.PREMIUM);
+    expect(bundle.planoFeatures?.plano, SubscriptionPlan.PRO);
     expect(bundle.planoFeatures?.habitCoaching, isTrue);
   });
 

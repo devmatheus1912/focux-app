@@ -71,7 +71,7 @@ class _RelatorioGlobalScreenState extends ConsumerState<RelatorioGlobalScreen> {
       label: 'Relatorio global',
       child: FeatureGate(
         featureName: 'Relatório global',
-        requiredPlan: SubscriptionPlan.PREMIUM,
+        requiredPlan: SubscriptionPlan.PRO,
         capability: 'relatorios',
         child: FxShellScaffold(
           constrainWidth: false,

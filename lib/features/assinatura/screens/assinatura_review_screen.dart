@@ -258,19 +258,13 @@ class _AssinaturaReviewScreenState extends State<AssinaturaReviewScreen> {
   }
 
   static List<String> _topFeatures(SubscriptionPlan plan) => switch (plan) {
-    SubscriptionPlan.ENTERPRISE_PRO => [
+    SubscriptionPlan.ENTERPRISE => [
       'Landing page completa com depoimentos e FAQ',
       'Marca própria e domínio customizado',
-      'Alunos ilimitados + IA ampliada',
+      'Alunos ilimitados + IA 600/mês + equipe (5)',
     ],
-    SubscriptionPlan.ENTERPRISE => [
-      'Alunos ilimitados',
-      'Marca própria e identidade visual',
-      'IA Copiloto com cota ampliada',
-      'Financeiro, CRM e relatórios',
-    ],
-    SubscriptionPlan.PREMIUM => [
-      'Até 20 alunos ativos',
+    SubscriptionPlan.PRO => [
+      'Até 30 alunos ativos',
       'PIX e financeiro no app',
       'IA Copiloto e ${FocuxMicrocopy.commandCenter}',
       'Agenda e relatórios avançados',

@@ -19,13 +19,13 @@ void main() {
       alunosAtivos: 10,
       limiteAlunos: null,
       iaUsadaMes: 0,
-      limiteIaMensal: 400,
+      limiteIaMensal: 600,
     );
     final target = PlanEntitlements.resolveUpgradeTarget(
       usage: usage,
       blockedFeatureLabel: 'Editor completo — depoimentos, galeria e FAQ',
     );
-    expect(target, SubscriptionPlan.ENTERPRISE_PRO);
+    expect(target, SubscriptionPlan.ENTERPRISE);
   });
 
   test('snapshot uses billing tier for unlimited alunos when API says FREE', () {
@@ -41,7 +41,7 @@ void main() {
     expect(usage.plano, SubscriptionPlan.ENTERPRISE);
     expect(usage.limiteAlunos, isNull);
     expect(usage.planMismatch, isTrue);
-    expect(usage.limiteIaMensal, 400);
+    expect(usage.limiteIaMensal, 600);
   });
 
   test('alignedToBilling elevates FREE /me to Enterprise limits', () {
@@ -59,7 +59,7 @@ void main() {
     final aligned = me.alignedToBilling(SubscriptionPlan.ENTERPRISE);
     expect(aligned.plano, SubscriptionPlan.ENTERPRISE);
     expect(aligned.limiteAlunos, isNull);
-    expect(aligned.limiteIaMensal, 400);
+    expect(aligned.limiteIaMensal, 600);
     expect(aligned.whiteLabel, isTrue);
   });
 }

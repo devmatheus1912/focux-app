@@ -34,7 +34,7 @@ void main() {
     expect(bundle.dashboard.receitaMes, 1200.0);
     expect(bundle.mensalidades, isEmpty);
     expect(bundle.resumoMesAtual.totalRecebido, 900.0);
-    expect(bundle.planoFeatures?.plano, SubscriptionPlan.PREMIUM);
+    expect(bundle.planoFeatures?.plano, SubscriptionPlan.PRO);
     expect(bundle.planoFeatures?.financeiro, isTrue);
   });
 

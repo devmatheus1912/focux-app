@@ -21,7 +21,7 @@ void main() {
       },
     });
 
-    expect(features.plano, SubscriptionPlan.PREMIUM);
+    expect(features.plano, SubscriptionPlan.PRO);
     expect(features.fromCache, isTrue);
     expect(features.cacheSavedAt, cachedAt);
     expect(features.syncWarning, 'Usando plano salvo.');

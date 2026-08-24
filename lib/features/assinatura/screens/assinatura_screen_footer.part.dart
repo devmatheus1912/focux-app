@@ -496,7 +496,10 @@ String _formatPrice(
   return buildPaywallPriceCopy(
     precoMensal: plano.precoMensal,
     precoAnual: plano.precoAnual,
-    precoAnualMensalEquiv: plano.precoAnualMensalEquiv,
+    precoAnualMensalEquiv:
+        plano.equivMensalNoAnual ?? plano.precoAnualMensalEquiv,
+    labelDescontoAnual: plano.labelDescontoAnual,
+    labelEconomiaAnual: plano.labelEconomiaAnual,
     period: period,
     storePrice: productDetails?.price,
   ).primary;

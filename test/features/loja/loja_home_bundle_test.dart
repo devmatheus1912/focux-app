@@ -39,7 +39,7 @@ void main() {
     expect(bundle.pedidos, hasLength(1));
     expect(bundle.pedidos.first.buyerEmail, 'ana@test.com');
     expect(bundle.pedidos.first.status, 'PENDENTE');
-    expect(bundle.planoFeatures?.plano, SubscriptionPlan.ENTERPRISE_PRO);
+    expect(bundle.planoFeatures?.plano, SubscriptionPlan.ENTERPRISE);
     expect(bundle.planoFeatures?.lojaDigital, isTrue);
   });
 

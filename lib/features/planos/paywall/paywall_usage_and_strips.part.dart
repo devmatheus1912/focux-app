@@ -34,15 +34,15 @@ class PaywallContextBanner extends StatelessWidget {
     }
     if (usage.iaAtLimit) {
       return 'Você usou ${usage.iaUsadaMes} de ${usage.limiteIaMensal} IA este mês. '
-          'Enterprise libera até 400+ interações.';
+          'Enterprise libera até ${PlanoIaLimits.enterprise} interações.';
     }
     if (usage.iaNearLimit) {
       return 'Você usou ${usage.iaUsadaMes} de ${usage.limiteIaMensal} interações de IA. '
           'Enterprise dá mais folga no Copiloto.';
     }
     if (usage.plano == SubscriptionPlan.FREE) {
-      return 'Com 20 alunos a R\$ 400 = R\$ 8.000/mês. '
-          'O Premium representa menos de 1% desse faturamento.';
+      return 'Com 30 alunos a R\$ 400 = R\$ 12.000/mês. '
+          'O Pro representa menos de 1% desse faturamento.';
     }
     return null;
   }

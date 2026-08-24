@@ -40,16 +40,14 @@ class PaywallCompareRow {
 
 String paywallTabLabel(SubscriptionPlan plan) => switch (plan) {
   SubscriptionPlan.FREE => 'Free',
-  SubscriptionPlan.PREMIUM => 'Premium',
+  SubscriptionPlan.PRO => 'Pro',
   SubscriptionPlan.ENTERPRISE => 'Enterprise',
-  SubscriptionPlan.ENTERPRISE_PRO => 'Pro',
 };
 
 String paywallPrettyName(SubscriptionPlan plan) => switch (plan) {
   SubscriptionPlan.FREE => 'FREE',
-  SubscriptionPlan.PREMIUM => 'Premium',
+  SubscriptionPlan.PRO => 'Pro',
   SubscriptionPlan.ENTERPRISE => 'Enterprise',
-  SubscriptionPlan.ENTERPRISE_PRO => 'Enterprise Pro',
 };
 
 String paywallCompareHeadline({
@@ -73,18 +71,26 @@ bool paywallCompareCellIncluded(String value) {
 PaywallCompareView buildPaywallCompareView({
   required SubscriptionPlan selected,
   required SubscriptionPlan current,
-  List<PaywallComparisonRow> rows = PaywallCatalog.comparisonRows,
+  List<PaywallComparisonRow>? rows,
 }) {
   const baseline = SubscriptionPlan.FREE;
   final showTwo = selected != SubscriptionPlan.FREE;
+  final source =
+      (rows != null && rows.isNotEmpty)
+          ? rows
+          : switch (selected) {
+            SubscriptionPlan.ENTERPRISE =>
+              PaywallCatalog.comparisonFreeVsEnterprise,
+            _ => PaywallCatalog.comparisonFreeVsPro,
+          };
   final mapped =
-      rows
+      source
           .map((row) {
             final parsed = PaywallCatalog.parseFeatureLabel(row.feature);
             return PaywallCompareRow(
               feature: parsed.label,
-              baseline: row.valueFor(baseline),
-              selected: row.valueFor(selected),
+              baseline: row.free,
+              selected: row.paid,
             );
           })
           .toList(growable: false);

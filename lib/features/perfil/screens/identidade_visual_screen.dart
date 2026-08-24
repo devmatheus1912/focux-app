@@ -210,11 +210,6 @@ class _IdentidadeVisualScreenState
     final planUpper = plano.toUpperCase();
     final isEnterprise =
         planUpper == 'ENTERPRISE' || planUpper == 'ENTERPRISE_PRO';
-    final isPremiumOrAbove = [
-      'PREMIUM',
-      'ENTERPRISE',
-      'ENTERPRISE_PRO',
-    ].contains(planUpper);
     final nomePersonal = perfil.nome;
 
     return fxScreenA11yScope(
@@ -231,7 +226,7 @@ class _IdentidadeVisualScreenState
           leading: widget.isSetup ? const SizedBox(width: 8) : null,
         ),
         bottomNavigationBar:
-            isPremiumOrAbove
+            isEnterprise
                 ? _SaveBar(
                   salvando: _salvando,
                   label:
@@ -250,7 +245,7 @@ class _IdentidadeVisualScreenState
               padding: const EdgeInsets.fromLTRB(18, 4, 18, 120),
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
-                  if (!isPremiumOrAbove) ...[
+                  if (!isEnterprise) ...[
                     _PaywallCard(
                       onTap: () => context.go('/assinatura'),
                       chrome: chrome,
@@ -258,9 +253,9 @@ class _IdentidadeVisualScreenState
                     const SizedBox(height: 18),
                   ],
                   AbsorbPointer(
-                    absorbing: !isPremiumOrAbove,
+                    absorbing: !isEnterprise,
                     child: Opacity(
-                      opacity: isPremiumOrAbove ? 1 : 0.38,
+                      opacity: isEnterprise ? 1 : 0.38,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
@@ -280,7 +275,7 @@ class _IdentidadeVisualScreenState
                                       openLandingEditorOrUpgrade(context, ref),
                               icon: const Icon(Icons.language_outlined),
                               label: const Text(
-                                'Editor da landing (Enterprise Pro)',
+                                'Editor da landing (Enterprise)',
                               ),
                             ),
                           const SizedBox(height: TokensStrip.s4),
@@ -426,7 +421,7 @@ class _IdentidadeVisualScreenState
                                 _BrandField(
                                   label: 'Descrição profissional',
                                   controller: _descCtrl,
-                                  enabled: isPremiumOrAbove,
+                                  enabled: isEnterprise,
                                   accent: _corPrimaria,
                                   hint:
                                       'Trajetória, metodologia, diferencial...',
@@ -437,7 +432,7 @@ class _IdentidadeVisualScreenState
                                 _BrandField(
                                   label: 'Especialidades',
                                   controller: _espCtrl,
-                                  enabled: isPremiumOrAbove,
+                                  enabled: isEnterprise,
                                   accent: _corPrimaria,
                                   icon: Icons.fitness_center_outlined,
                                   hint:
@@ -447,7 +442,7 @@ class _IdentidadeVisualScreenState
                                 _BrandField(
                                   label: 'Instagram',
                                   controller: _instaCtrl,
-                                  enabled: isPremiumOrAbove,
+                                  enabled: isEnterprise,
                                   accent: _corPrimaria,
                                   icon: Icons.alternate_email,
                                   hint: '@seuperfil',

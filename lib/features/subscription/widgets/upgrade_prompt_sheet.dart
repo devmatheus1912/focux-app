@@ -75,7 +75,7 @@ class UpgradePromptSheet {
       capability: capability,
       requiredPlan: requiredPlan,
     );
-    final plan = offer.targetPlan ?? SubscriptionPlan.PREMIUM;
+    final plan = offer.targetPlan ?? SubscriptionPlan.PRO;
     final accent = PaywallCatalog.accentForPlan(plan);
     final body =
         PaywallCatalog.modalMessageFor(

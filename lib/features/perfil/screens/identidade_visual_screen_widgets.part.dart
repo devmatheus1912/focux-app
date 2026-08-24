@@ -641,7 +641,7 @@ class _PaywallCard extends StatelessWidget {
               Icon(Icons.lock_outline, color: primary, size: 20),
               const SizedBox(width: 8),
               Text(
-                'Recurso Premium',
+                'Recurso Enterprise',
                 style: FocuxHubTypography.cardTitle(color: chrome.ink),
               ),
             ],
@@ -652,7 +652,7 @@ class _PaywallCard extends StatelessWidget {
             style: TextStyle(color: chrome.mute, fontSize: 12.5, height: 1.35),
           ),
           const SizedBox(height: 14),
-          FxLiquidPrimaryButton(label: 'Assinar Premium', onPressed: onTap),
+          FxLiquidPrimaryButton(label: 'Assinar Enterprise', onPressed: onTap),
         ],
       ),
     );

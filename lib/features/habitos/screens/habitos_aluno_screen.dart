@@ -109,7 +109,7 @@ class _HabitosAlunoScreenState extends ConsumerState<HabitosAlunoScreen> {
       label: 'Meus hábitos',
       child: FeatureGate(
         featureName: 'Habit Coaching',
-        requiredPlan: SubscriptionPlan.PREMIUM,
+        requiredPlan: SubscriptionPlan.PRO,
         capability: 'habitCoaching',
         child: FxShellScaffold(
           useMesh: true,

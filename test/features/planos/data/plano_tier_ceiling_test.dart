@@ -24,8 +24,8 @@ void main() {
       expect(f.agenda, isTrue);
     });
 
-    test('PREMIUM — hábitos e financeiro, sem Enterprise/Pro', () {
-      final f = _tier(SubscriptionPlan.PREMIUM);
+    test('PRO — hábitos e financeiro, sem Enterprise', () {
+      final f = _tier(SubscriptionPlan.PRO);
       expect(f.financeiro, isTrue);
       expect(f.habitCoaching, isTrue);
       expect(f.relatorios, isTrue);
@@ -36,22 +36,22 @@ void main() {
       expect(f.whiteLabel, isFalse);
     });
 
-    test('ENTERPRISE — escala ops, sem Pro', () {
+    test('ENTERPRISE — marca, loja, landing e equipe', () {
       final f = _tier(SubscriptionPlan.ENTERPRISE);
       expect(f.automacoes, isTrue);
       expect(f.equipeRbac, isTrue);
       expect(f.comunidadeGrupos, isTrue);
       expect(f.whiteLabel, isTrue);
-      expect(f.lojaDigital, isFalse);
-      expect(f.landingCompleta, isFalse);
-      expect(f.poseCoach, isFalse);
-      expect(f.automacoesAvancadas, isFalse);
-      expect(f.limiteAssistentes, 1);
+      expect(f.lojaDigital, isTrue);
+      expect(f.landingCompleta, isTrue);
+      expect(f.poseCoach, isTrue);
+      expect(f.automacoesAvancadas, isTrue);
+      expect(f.limiteAssistentes, 5);
     });
 
-    test('ENTERPRISE_PRO — tudo liberado mesmo com API deflacionada', () {
+    test('ENTERPRISE — tudo liberado mesmo com API deflacionada', () {
       const deflated = PlanoFeatures(
-        plano: SubscriptionPlan.ENTERPRISE_PRO,
+        plano: SubscriptionPlan.ENTERPRISE,
         financeiro: false,
         agenda: true,
         relatorios: false,
@@ -73,53 +73,21 @@ void main() {
       expect(f.automacoes, isTrue);
       expect(f.automacoesAvancadas, isTrue);
       expect(f.equipeRbac, isTrue);
-      expect(f.limiteAssistentes, isNull);
-    });
-
-    test('ENTERPRISE bloqueia flags Pro mesmo com API inflada', () {
-      const inflated = PlanoFeatures(
-        plano: SubscriptionPlan.ENTERPRISE,
-        financeiro: true,
-        agenda: true,
-        relatorios: true,
-        whiteLabel: true,
-        iaCopiloto: true,
-        migracaoFoto: true,
-        landingCompleta: true,
-        habitCoaching: true,
-        comunidadePrivada: true,
-        automacoes: true,
-        automacoesAvancadas: true,
-        comunidadeGrupos: true,
-        equipeRbac: true,
-        lojaDigital: true,
-        poseCoach: true,
-        limiteAssistentes: 99,
-      );
-
-      final f = inflated.normalizeForTier();
-
-      expect(f.landingCompleta, isFalse);
-      expect(f.lojaDigital, isFalse);
-      expect(f.poseCoach, isFalse);
-      expect(f.automacoesAvancadas, isFalse);
-      expect(f.automacoes, isTrue);
-      expect(f.limiteAssistentes, 1);
+      expect(f.limiteAssistentes, 5);
     });
   });
 
   group('Dashboard shortcuts — atalhos trancados por tier', () {
-    int locked(PlanoFeatures f) =>
-        DashboardToolShortcut.moreTools
-            .where((s) => s.capability != null && !s.isUnlocked(f))
-            .length;
+    int locked(PlanoFeatures f) => DashboardToolShortcut.moreTools
+        .where((s) => s.capability != null && !s.isUnlocked(f))
+        .length;
 
     test('FREE tranca maioria dos atalhos pagos', () {
       expect(locked(_tier(SubscriptionPlan.FREE)), greaterThan(8));
     });
 
-    test('PREMIUM tranca Enterprise e Pro', () {
-      final f = _tier(SubscriptionPlan.PREMIUM);
+    test('PRO tranca Loja e Landing', () {
+      final f = _tier(SubscriptionPlan.PRO);
       expect(
         DashboardToolShortcut.moreTools
             .firstWhere((s) => s.label == 'Automações')
@@ -140,31 +108,8 @@ void main() {
       );
     });
 
-    test('ENTERPRISE tranca só Pro (Loja + Landing)', () {
+    test('ENTERPRISE — zero atalhos trancados no grid', () {
       final f = _tier(SubscriptionPlan.ENTERPRISE);
-      expect(
-        DashboardToolShortcut.moreTools
-            .firstWhere((s) => s.label == 'Loja')
-            .isUnlocked(f),
-        isFalse,
-      );
-      expect(
-        DashboardToolShortcut.moreTools
-            .firstWhere((s) => s.label == 'Landing')
-            .isUnlocked(f),
-        isFalse,
-      );
-      expect(
-        DashboardToolShortcut.moreTools
-            .firstWhere((s) => s.label == 'Automações')
-            .isUnlocked(f),
-        isTrue,
-      );
-      expect(locked(f), 2);
-    });
-
-    test('ENTERPRISE_PRO — zero atalhos trancados no grid', () {
-      final f = _tier(SubscriptionPlan.ENTERPRISE_PRO);
       expect(locked(f), 0);
       for (final s in DashboardToolShortcut.moreTools) {
         if (s.capability != null) {

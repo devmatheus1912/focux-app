@@ -15,58 +15,62 @@ void main() {
 
   test('mensal usa BFF quando a loja não veio', () {
     final copy = buildPaywallPriceCopy(
-      precoMensal: 99,
+      precoMensal: 99.90,
       period: SubscriptionBillingPeriod.monthly,
     );
-    expect(copy.primary, 'R\$ 99,00/mês');
+    expect(copy.primary, 'R\$ 99,90/mês');
     expect(copy.secondary, isNull);
   });
 
-  test('anual mostra total e equivalente mensal', () {
+  test('anual mostra total, equivalente e 2 meses grátis', () {
     final copy = buildPaywallPriceCopy(
-      precoMensal: 100,
-      precoAnual: 960,
-      precoAnualMensalEquiv: 80,
+      precoMensal: 99.90,
+      precoAnual: 999,
+      precoAnualMensalEquiv: 83.25,
+      labelDescontoAnual: '2 meses grátis',
+      labelEconomiaAnual: 'Economize R\$ 199,80',
       period: SubscriptionBillingPeriod.yearly,
     );
-    expect(copy.primary, 'R\$ 960,00/ano');
-    expect(copy.secondary, 'Equiv. R\$ 80,00/mês');
+    expect(copy.primary, 'R\$ 999,00/ano');
+    expect(copy.secondary, contains('Equiv. R\$ 83,25/mês'));
+    expect(copy.secondary, contains('2 meses grátis'));
+    expect(copy.secondary, contains('Economize R\$ 199,80'));
   });
 
   test('loja ganha do catálogo', () {
     final copy = buildPaywallPriceCopy(
-      precoMensal: 99,
+      precoMensal: 99.90,
       period: SubscriptionBillingPeriod.monthly,
       storePrice: 'R\$ 89,90',
     );
     expect(copy.primary, 'R\$ 89,90/mês');
   });
 
-  test('30 dias só no Pro para conta FREE', () {
+  test('30 dias só no Enterprise para conta FREE', () {
     expect(
       paywallShowsMaxPlanTrial(
-        selected: SubscriptionPlan.ENTERPRISE_PRO,
+        selected: SubscriptionPlan.ENTERPRISE,
         current: SubscriptionPlan.FREE,
       ),
       isTrue,
     );
     expect(
       paywallShowsMaxPlanTrial(
-        selected: SubscriptionPlan.ENTERPRISE,
+        selected: SubscriptionPlan.PRO,
         current: SubscriptionPlan.FREE,
       ),
       isFalse,
     );
     expect(
       paywallShowsMaxPlanTrial(
-        selected: SubscriptionPlan.ENTERPRISE_PRO,
-        current: SubscriptionPlan.PREMIUM,
+        selected: SubscriptionPlan.ENTERPRISE,
+        current: SubscriptionPlan.PRO,
       ),
       isFalse,
     );
     expect(
       paywallShowsMaxPlanTrial(
-        selected: SubscriptionPlan.ENTERPRISE_PRO,
+        selected: SubscriptionPlan.ENTERPRISE,
         current: SubscriptionPlan.FREE,
         trialEligible: false,
       ),

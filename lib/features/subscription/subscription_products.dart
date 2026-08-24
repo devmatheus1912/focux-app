@@ -6,23 +6,29 @@ enum SubscriptionBillingPeriod { monthly, yearly }
 class SubscriptionProducts {
   SubscriptionProducts._();
 
-  static const String premiumMonthly = 'focux_premium_monthly';
-  static const String premiumYearly = 'focux_premium_yearly';
+  static const String proMonthly = 'focux_pro_monthly';
+  static const String proYearly = 'focux_pro_yearly';
   static const String enterpriseMonthly = 'focux_enterprise_monthly';
   static const String enterpriseYearly = 'focux_enterprise_yearly';
-  static const String enterpriseProMonthly = 'focux_enterprise_pro_monthly';
-  static const String enterpriseProYearly = 'focux_enterprise_pro_yearly';
 
-  /// Desconto de referência no anual vs 12× mensal (exibido na vitrine).
-  static const double annualDiscountRate = 0.20;
+  /// SKUs legados ainda em voo (restore / receipts).
+  static const String premiumMonthlyLegacy = 'focux_premium_monthly';
+  static const String premiumYearlyLegacy = 'focux_premium_yearly';
+  static const String enterpriseProMonthlyLegacy = 'focux_enterprise_pro_monthly';
+  static const String enterpriseProYearlyLegacy = 'focux_enterprise_pro_yearly';
+
+  /// Anual = 2 meses grátis ≈ 16,67% off sobre 12× mensal.
+  static const double annualDiscountRate = 1 / 6;
 
   static const Set<String> allStoreProductIds = {
-    premiumMonthly,
-    premiumYearly,
+    proMonthly,
+    proYearly,
     enterpriseMonthly,
     enterpriseYearly,
-    enterpriseProMonthly,
-    enterpriseProYearly,
+    premiumMonthlyLegacy,
+    premiumYearlyLegacy,
+    enterpriseProMonthlyLegacy,
+    enterpriseProYearlyLegacy,
   };
 
   static String productIdFor(
@@ -30,27 +36,27 @@ class SubscriptionProducts {
     SubscriptionBillingPeriod period,
   ) {
     return switch (plan) {
-      SubscriptionPlan.PREMIUM =>
-        period == SubscriptionBillingPeriod.yearly
-            ? premiumYearly
-            : premiumMonthly,
+      SubscriptionPlan.PRO =>
+        period == SubscriptionBillingPeriod.yearly ? proYearly : proMonthly,
       SubscriptionPlan.ENTERPRISE =>
         period == SubscriptionBillingPeriod.yearly
             ? enterpriseYearly
             : enterpriseMonthly,
-      SubscriptionPlan.ENTERPRISE_PRO =>
-        period == SubscriptionBillingPeriod.yearly
-            ? enterpriseProYearly
-            : enterpriseProMonthly,
       SubscriptionPlan.FREE => '',
     };
   }
 
   static SubscriptionPlan? planForProductId(String productId) {
     final id = productId.toLowerCase();
-    if (id.contains('enterprise_pro')) return SubscriptionPlan.ENTERPRISE_PRO;
-    if (id.contains('enterprise')) return SubscriptionPlan.ENTERPRISE;
-    if (id.contains('premium')) return SubscriptionPlan.PREMIUM;
+    if (id.contains('enterprise_pro') || id.contains('enterprise')) {
+      return SubscriptionPlan.ENTERPRISE;
+    }
+    if (id.contains('premium') ||
+        id.contains('_pro_') ||
+        id.endsWith('_pro') ||
+        id.contains('.pro.')) {
+      return SubscriptionPlan.PRO;
+    }
     return null;
   }
 
@@ -69,30 +75,22 @@ class SubscriptionProducts {
       billingPeriodForProductId(productId) == SubscriptionBillingPeriod.yearly;
 
   /// Preço anual de vitrine quando a loja ainda não retornou ProductDetails.
-  static double referenceAnnualPrice(double monthlyPrice) =>
-      (monthlyPrice * 12 * (1 - annualDiscountRate));
+  static double referenceAnnualPrice(double monthlyPrice) => monthlyPrice * 10;
 
-  static String savingsLabel() =>
-      'Economize ${(annualDiscountRate * 100).round()}% no plano anual';
+  static String savingsLabel() => '2 meses grátis';
 
-  static double annualSavingsAmount(double monthlyPrice) =>
-      monthlyPrice * 12 * annualDiscountRate;
+  static double annualSavingsAmount(double monthlyPrice) => monthlyPrice * 2;
 
-  /// Texto curto para o segmento Anual (ex.: −20% · R$ 192/ano).
   static String annualSavingsCompactLabel(double monthlyPrice) {
-    if (monthlyPrice <= 0) {
-      return 'Economize ${(annualDiscountRate * 100).round()}%';
-    }
+    if (monthlyPrice <= 0) return '2 meses grátis';
     final saved = annualSavingsAmount(monthlyPrice);
-    final pct = (annualDiscountRate * 100).round();
-    return '−$pct% · R\$ ${saved.toStringAsFixed(0)}/ano';
+    return '2 meses grátis · R\$ ${saved.toStringAsFixed(0)}';
   }
 
-  /// Subtexto do card anual — sem repetir o −20% do segmento.
   static String annualSavingsCardLabel(double monthlyPrice) {
     if (monthlyPrice <= 0) return '';
     final saved = annualSavingsAmount(monthlyPrice);
-    return 'Economize R\$ ${saved.toStringAsFixed(0)}/ano';
+    return 'Economize R\$ ${saved.toStringAsFixed(2).replaceAll('.', ',')}/ano';
   }
 
   static String periodLabel(SubscriptionBillingPeriod period) =>

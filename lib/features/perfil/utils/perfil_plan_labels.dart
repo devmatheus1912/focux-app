@@ -9,8 +9,7 @@ String perfilPlanSectionLabel(String apiPlano) {
 /// Texto curto no pill do hero (ex.: Pro).
 String perfilPlanPillLabel(String apiPlano) {
   return switch (subscriptionPlanFromApi(apiPlano)) {
-    SubscriptionPlan.ENTERPRISE_PRO => 'PRO',
-    SubscriptionPlan.PREMIUM => 'PRO',
+    SubscriptionPlan.PRO => 'PRO',
     SubscriptionPlan.ENTERPRISE => 'ENTERPRISE',
     SubscriptionPlan.FREE => 'FREE',
   };

@@ -192,9 +192,6 @@ abstract final class PlanoFeaturesSyncCopy {
   static const optimisticAluno =
       'Não foi possível confirmar o plano do seu personal. Mantivemos acesso seguro enquanto sincroniza.';
 
-  static const optimisticEnterprisePro =
-      'Não foi possível confirmar o plano agora. Acesso Pro liberado em modo seguro enquanto sincroniza.';
-
   static const optimisticEnterprise =
       'Não foi possível confirmar o plano agora. Acesso liberado em modo seguro enquanto sincroniza.';
 
@@ -345,24 +342,24 @@ class PlanoFeatures {
   }
 
   /// Perfil canônico de capabilities por tier (matriz V130 + landing Pro).
-  /// Aplica teto (não ultrapassa o plano) e piso (Pro/Premium recebem o mínimo do tier).
+  /// Aplica teto (não ultrapassa o plano) e piso (Pro recebe o mínimo do tier).
   PlanoFeatures normalizeForTier() => _applyCanonical(_canonicalCapsFor(plano));
 
   /// Quando `/me` está atrás da assinatura (loja/perfil), eleva flags ao tier de cobrança.
   PlanoFeatures alignedToBilling(SubscriptionPlan billing) {
     if (billing.level <= plano.level) return this;
     final limiteAlunosEff = switch (billing) {
-      SubscriptionPlan.ENTERPRISE || SubscriptionPlan.ENTERPRISE_PRO => null,
+      SubscriptionPlan.ENTERPRISE => null,
       _ => limiteAlunos,
     };
     final limiteIaEff = switch (billing) {
-      SubscriptionPlan.ENTERPRISE || SubscriptionPlan.ENTERPRISE_PRO =>
+      SubscriptionPlan.ENTERPRISE =>
         (limiteIaMensal == null || limiteIaMensal! <= 0)
-            ? 400
+            ? 600
             : limiteIaMensal!,
-      SubscriptionPlan.PREMIUM =>
+      SubscriptionPlan.PRO =>
         (limiteIaMensal == null || limiteIaMensal! <= 0)
-            ? 120
+            ? 200
             : limiteIaMensal!,
       _ => limiteIaMensal ?? 0,
     };
@@ -424,7 +421,7 @@ class PlanoFeatures {
         'lojaDigital': off,
         'poseCoach': off,
       },
-      SubscriptionPlan.PREMIUM => {
+      SubscriptionPlan.PRO => {
         'financeiro': on,
         'agenda': on,
         'relatorios': on,
@@ -448,23 +445,6 @@ class PlanoFeatures {
         'whiteLabel': on,
         'iaCopiloto': on,
         'migracaoFoto': on,
-        'landingCompleta': off,
-        'habitCoaching': on,
-        'comunidadePrivada': on,
-        'automacoes': on,
-        'automacoesAvancadas': off,
-        'comunidadeGrupos': on,
-        'equipeRbac': on,
-        'lojaDigital': off,
-        'poseCoach': off,
-      },
-      SubscriptionPlan.ENTERPRISE_PRO => {
-        'financeiro': on,
-        'agenda': on,
-        'relatorios': on,
-        'whiteLabel': on,
-        'iaCopiloto': on,
-        'migracaoFoto': on,
         'landingCompleta': on,
         'habitCoaching': on,
         'comunidadePrivada': on,
@@ -480,8 +460,7 @@ class PlanoFeatures {
 
   PlanoFeatures _applyCanonical(Map<String, bool> caps) {
     final limiteAssistentes = switch (plano) {
-      SubscriptionPlan.ENTERPRISE => 1,
-      SubscriptionPlan.ENTERPRISE_PRO => null,
+      SubscriptionPlan.ENTERPRISE => 5,
       _ => null,
     };
     return PlanoFeatures(
@@ -587,7 +566,7 @@ class PlanoFeatures {
 
   static const free = PlanoFeatures(
     plano: SubscriptionPlan.FREE,
-    limiteAlunos: 5,
+    limiteAlunos: 3,
     financeiro: false,
     agenda: true,
     relatorios: false,
@@ -599,7 +578,7 @@ class PlanoFeatures {
 
   /// Fallback conservador para aluno — não concede Enterprise completo.
   static const optimisticAluno = PlanoFeatures(
-    plano: SubscriptionPlan.PREMIUM,
+    plano: SubscriptionPlan.PRO,
     fromCache: true,
     syncWarning: PlanoFeaturesSyncCopy.optimisticAluno,
     financeiro: false,
@@ -618,12 +597,12 @@ class PlanoFeatures {
     poseCoach: false,
   );
 
-  static const optimisticEnterprisePro = PlanoFeatures(
-    plano: SubscriptionPlan.ENTERPRISE_PRO,
+  static const optimisticEnterprise = PlanoFeatures(
+    plano: SubscriptionPlan.ENTERPRISE,
     fromCache: true,
-    syncWarning: PlanoFeaturesSyncCopy.optimisticEnterprisePro,
+    syncWarning: PlanoFeaturesSyncCopy.optimisticEnterprise,
     limiteAlunos: null,
-    limiteIaMensal: 400,
+    limiteIaMensal: 600,
     financeiro: true,
     agenda: true,
     relatorios: true,
@@ -639,33 +618,8 @@ class PlanoFeatures {
     equipeRbac: true,
     lojaDigital: true,
     poseCoach: true,
-    limiteAssistentes: null,
-    limiteMigracaoFotoMensal: 50,
-  );
-
-  static const optimisticEnterprise = PlanoFeatures(
-    plano: SubscriptionPlan.ENTERPRISE,
-    fromCache: true,
-    syncWarning: PlanoFeaturesSyncCopy.optimisticEnterprise,
-    limiteAlunos: null,
-    limiteIaMensal: 400,
-    financeiro: true,
-    agenda: true,
-    relatorios: true,
-    whiteLabel: true,
-    iaCopiloto: true,
-    migracaoFoto: true,
-    landingCompleta: false,
-    habitCoaching: true,
-    comunidadePrivada: true,
-    automacoes: true,
-    automacoesAvancadas: false,
-    comunidadeGrupos: true,
-    equipeRbac: true,
-    lojaDigital: false,
-    poseCoach: false,
-    limiteAssistentes: 1,
-    limiteMigracaoFotoMensal: 50,
+    limiteAssistentes: 5,
+    limiteMigracaoFotoMensal: 80,
   );
 }
 

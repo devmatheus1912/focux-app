@@ -8,7 +8,7 @@ import '../../planos/providers/plano_features_provider.dart';
 import '../../subscription/models/subscription_plan.dart';
 import 'pose_coach_panel.dart';
 
-/// Pose Coach with Enterprise Pro gate + heuristic form hints.
+/// Pose Coach with Enterprise gate + heuristic form hints.
 class GatedPoseCoachPanel extends ConsumerWidget {
   const GatedPoseCoachPanel({
     super.key,
@@ -32,7 +32,7 @@ class GatedPoseCoachPanel extends ConsumerWidget {
         DashboardHomeClientCache.getIfFresh()?.planoFeatures;
     return FeatureGate(
       featureName: 'Pose Coach',
-      requiredPlan: SubscriptionPlan.ENTERPRISE_PRO,
+      requiredPlan: SubscriptionPlan.ENTERPRISE,
       capability: 'poseCoach',
       lockedBuilder: _UpgradeHint(brand: brand, dark: dark),
       child: PoseCoachPanel(
@@ -55,7 +55,7 @@ class _UpgradeHint extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FxSatelliteListTile(
-      title: 'Pose Coach ML — Enterprise Pro',
+      title: 'Pose Coach ML — Enterprise',
       titleCase: false,
       subtitle: const Text('Análise de postura em tempo real'),
       leading: Icon(Icons.lock_outline, color: brand),

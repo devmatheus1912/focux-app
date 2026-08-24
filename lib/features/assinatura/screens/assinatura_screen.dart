@@ -69,9 +69,7 @@ bool _shouldLoadEnterprisePreview(
   SubscriptionPlan selectedPlan,
 ) {
   if (selectedPlan.level <= currentPlan.level) return false;
-  return selectedPlan == SubscriptionPlan.ENTERPRISE ||
-      (currentPlan == SubscriptionPlan.ENTERPRISE &&
-          selectedPlan == SubscriptionPlan.ENTERPRISE_PRO);
+  return selectedPlan == SubscriptionPlan.ENTERPRISE;
 }
 
 /// Plano pré-selecionado: atual por padrão; deep link só se for upgrade válido.
@@ -91,7 +89,7 @@ String _resolveInitialPlanSelection({
   return currentPlan.apiName;
 }
 
-/// Trial introdutório só no Enterprise Pro, com cartão na loja.
+/// Trial introdutório só no Enterprise, com cartão na loja.
 bool _shouldShowEnterpriseTrialCard(
   SubscriptionPlan selectedPlan,
   SubscriptionPlan currentPlan,
@@ -253,7 +251,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
 
   void _focusEnterpriseProUpgrade() {
     HapticFeedback.selectionClick();
-    _selectPlan(SubscriptionPlan.ENTERPRISE_PRO);
+    _selectPlan(SubscriptionPlan.ENTERPRISE);
   }
 
   Future<void> _reconcilePlanFromServer() async {
@@ -521,7 +519,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                 current: billingPlan,
                 trialEligible: _trialStatus?.trialEligible,
               )
-              ? '$kPaywallMaxPlanTrialDays dias grátis no Enterprise Pro com cadastro de cartão. '
+              ? '$kPaywallMaxPlanTrialDays dias grátis no Enterprise com cadastro de cartão. '
                   'A loja confirma o valor após o período.'
               : null;
       final confirmed = await context.push<bool>(

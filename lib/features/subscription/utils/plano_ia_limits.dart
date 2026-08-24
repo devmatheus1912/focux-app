@@ -2,13 +2,14 @@
 class PlanoIaLimits {
   PlanoIaLimits._();
 
-  static const premium = 120;
-  static const enterprise = 400;
+  static const pro = 200;
+  static const premium = pro;
+  static const enterprise = 600;
 
   static int forPlan(String? apiName) {
     final p = apiName?.trim().toUpperCase();
-    if (p == 'ENTERPRISE') return enterprise;
-    if (p == 'PREMIUM' || p == 'PRO') return premium;
+    if (p == 'ENTERPRISE' || p == 'ENTERPRISE_PRO') return enterprise;
+    if (p == 'PREMIUM' || p == 'PRO') return pro;
     return 0;
   }
 }

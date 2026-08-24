@@ -38,7 +38,7 @@ extension MigracaoMagicaScreenActions on _MigracaoMagicaScreenState {
       FeedbackHelper.showError(
         context,
         'Limite mensal de fotos atingido ($limite). '
-        '${atual.plano == SubscriptionPlan.PREMIUM ? 'Upgrade para Enterprise (${MigracaoFotoLimits.enterprise}/mês) ou use planilha/texto.' : 'Tente no próximo mês ou use planilha/texto.'}',
+        '${atual.plano == SubscriptionPlan.PRO ? 'Upgrade para Enterprise (${MigracaoFotoLimits.enterprise}/mês) ou use planilha/texto.' : 'Tente no próximo mês ou use planilha/texto.'}',
       );
       return false;
     }

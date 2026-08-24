@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rive/rive.dart';
 
-import '../../../core/brand/focux_microcopy.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
@@ -164,17 +163,12 @@ class AssinaturaSuccessScreen extends StatelessWidget {
   }
 
   static List<String> _nextSteps(SubscriptionPlan plan) => switch (plan) {
-    SubscriptionPlan.ENTERPRISE_PRO => [
+    SubscriptionPlan.ENTERPRISE => [
       'Personalize sua landing completa no editor.',
       'Configure marca própria e domínio.',
       'Abra o IA Copiloto para o primeiro treino assistido.',
     ],
-    SubscriptionPlan.ENTERPRISE => [
-      'Configure marca própria e identidade visual.',
-      'Conecte domínio customizado se tiver.',
-      'Use o ${FocuxMicrocopy.commandCenter} para priorizar o dia.',
-    ],
-    SubscriptionPlan.PREMIUM => [
+    SubscriptionPlan.PRO => [
       'Configure cobrança PIX no chat com alunos.',
       'Abra o IA Copiloto e monte o próximo treino.',
       'Revise inadimplência no financeiro.',

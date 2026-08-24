@@ -20,7 +20,9 @@ void main() {
 
   test('fromApi parses roi strip and trial offer', () {
     final snapshot = PaywallVitrineSnapshot.fromApi({
-      'socialProof': [{'value': '1', 'label': 'x'}],
+      'socialProof': [
+        {'value': '1', 'label': 'x'},
+      ],
       'roiStrip': [
         {'value': '5×', 'label': 'ROI', 'tone': 'brand'},
       ],
@@ -31,26 +33,23 @@ void main() {
     expect(snapshot.effectiveRoiStrip.first.value, '5×');
   });
 
-  test('fromApi parses comparison rows from vitrine', () {
+  test('fromApi parses comparisons binárias Free × plano', () {
     final snapshot = PaywallVitrineSnapshot.fromApi({
-      'comparisonRows': [
-        {
-          'feature': 'Landing page COMPLETA',
-          'free': '—',
-          'premium': '—',
-          'enterprise': '—',
-          'enterprisePro': '✓',
-        },
+      'comparisonFreeVsPro': [
+        {'feature': 'PIX / financeiro', 'free': '—', 'paid': '✓'},
       ],
-      'version': '2026-05-30',
+      'comparisonFreeVsEnterprise': [
+        {'feature': 'Landing + loja', 'free': '—', 'paid': '✓'},
+      ],
+      'version': '2026-08-24',
     });
     expect(snapshot.fromApi, isTrue);
-    expect(snapshot.effectiveComparisonRows.first.feature, 'Landing page COMPLETA');
+    expect(snapshot.rowsFor(SubscriptionPlan.PRO).first.feature, 'PIX / financeiro');
+    expect(snapshot.rowsFor(SubscriptionPlan.PRO).first.paid, '✓');
     expect(
-      snapshot.effectiveComparisonRows.first.valueFor(
-        SubscriptionPlan.ENTERPRISE_PRO,
-      ),
-      '✓',
+      snapshot.rowsFor(SubscriptionPlan.ENTERPRISE).first.feature,
+      'Landing + loja',
     );
+    expect(snapshot.rowsFor(SubscriptionPlan.ENTERPRISE).first.paid, '✓');
   });
 }

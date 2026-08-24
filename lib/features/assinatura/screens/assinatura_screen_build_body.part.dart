@@ -11,8 +11,6 @@ extension AssinaturaScreenBuildBody on _AssinaturaScreenState {
     required bool isDark,
     required AsyncValue<PlanoFeatures?> featuresAsync,
     required PaywallVitrineSnapshot? vitrine,
-    required bool showEnterpriseProStickySecondary,
-    required List<PaywallComparisonRow> vitrineComparison,
     required PaywallPriceCopy? selectedPrice,
     required SubscriptionPlan? paywallNextTier,
     required bool paywallHasUpgradeAbove,
@@ -143,7 +141,11 @@ extension AssinaturaScreenBuildBody on _AssinaturaScreenState {
             plans: tabPlans,
             currentPlan: currentPlan,
             selectedPlan: selPlan,
-            comparisonRows: vitrineComparison,
+            comparisonRows:
+                vitrine?.rowsFor(selPlan) ??
+                (selPlan == SubscriptionPlan.ENTERPRISE
+                    ? PaywallCatalog.comparisonFreeVsEnterprise
+                    : PaywallCatalog.comparisonFreeVsPro),
             billingPeriod: _billingPeriod,
             onSelectPlan: _selectPlan,
             onBillingPeriod:
@@ -185,7 +187,7 @@ extension AssinaturaScreenBuildBody on _AssinaturaScreenState {
               text:
                   _loadingTrial
                       ? 'Carregando oferta de teste…'
-                      : '$kPaywallMaxPlanTrialDays dias grátis no Enterprise Pro. '
+                      : '$kPaywallMaxPlanTrialDays dias grátis no Enterprise. '
                           'A loja pede o cartão na assinatura; cancele antes para não ser cobrado.',
               ink: ink,
               mute: mute,
@@ -208,7 +210,7 @@ extension AssinaturaScreenBuildBody on _AssinaturaScreenState {
             ),
           ] else if (isUpgradeTargetSelected &&
               currentPlan == SubscriptionPlan.ENTERPRISE &&
-              selPlan == SubscriptionPlan.ENTERPRISE_PRO) ...[
+              selPlan == SubscriptionPlan.ENTERPRISE) ...[
             const SizedBox(height: TokensStrip.s3),
             _EnterpriseProUpgradePriceHint(
               currentPlan: currentPlan,

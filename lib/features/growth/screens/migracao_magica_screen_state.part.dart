@@ -41,7 +41,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
       label: 'Migração Focux — importar alunos',
       child: FeatureGate(
         featureName: 'Migração Focux',
-        requiredPlan: SubscriptionPlan.PREMIUM,
+        requiredPlan: SubscriptionPlan.PRO,
         capability: 'iaCopiloto',
         child: _buildContent(context),
       ),
@@ -200,8 +200,8 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                               const SizedBox(height: 4),
                               Text(
                                 'Suba um print da lista de alunos (MFIT, Trainerize, Excel, WhatsApp). '
-                                'OCR no celular lê a tela — sem redigitar. Premium: '
-                                '${MigracaoFotoLimits.premium} fotos/mês · Enterprise: '
+                                'OCR no celular lê a tela — sem redigitar. Pro: '
+                                '${MigracaoFotoLimits.pro} fotos/mês · Enterprise: '
                                 '${MigracaoFotoLimits.enterprise}/mês.',
                                 style: TextStyle(
                                   fontSize: 12.5,
@@ -331,7 +331,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                             return Padding(
                               padding: const EdgeInsets.only(top: 8),
                               child: Text(
-                                'Foto/print: Premium (${MigracaoFotoLimits.premium}/mês) ou Enterprise (${MigracaoFotoLimits.enterprise}/mês).',
+                                'Foto/print: Pro (${MigracaoFotoLimits.pro}/mês) ou Enterprise (${MigracaoFotoLimits.enterprise}/mês).',
                                 style: TextStyle(
                                   fontSize: 11.5,
                                   color: mute,

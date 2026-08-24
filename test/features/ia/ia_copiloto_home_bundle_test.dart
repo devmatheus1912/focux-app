@@ -19,7 +19,7 @@ void main() {
     expect(bundle.alunosResumo, hasLength(1));
     expect(bundle.alunosResumo.first.id, 3);
     expect(bundle.alunosResumo.first.nome, 'Ana');
-    expect(bundle.planoFeatures?.plano, SubscriptionPlan.PREMIUM);
+    expect(bundle.planoFeatures?.plano, SubscriptionPlan.PRO);
     expect(bundle.planoFeatures?.iaRestantes, 112);
     expect(bundle.planoFeatures?.iaCopiloto, isTrue);
   });

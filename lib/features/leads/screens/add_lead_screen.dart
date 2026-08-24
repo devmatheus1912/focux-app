@@ -58,8 +58,8 @@ class _AddLeadScreenState extends ConsumerState<AddLeadScreen> {
           FeedbackHelper.showInfo(
             context,
             msg.contains('Limite')
-                ? 'Limite de 5 leads no plano Free. Assine Premium para CRM ilimitado.'
-                : 'Recurso disponível no Premium.',
+                ? 'Limite de 5 leads no plano Free. Assine o Pro para CRM ilimitado.'
+                : 'Recurso disponível no Pro.',
           );
         } else {
           FeedbackHelper.showError(

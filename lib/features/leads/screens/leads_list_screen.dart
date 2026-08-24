@@ -172,7 +172,7 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
               Material(
                 color: primary.withValues(alpha: 0.1),
                 child: InkWell(
-                  onTap: () => context.push('/assinatura', extra: 'Premium'),
+                  onTap: () => context.push('/assinatura', extra: 'Pro'),
                   child: Padding(
                     padding: const EdgeInsets.all(12),
                     child: Row(
@@ -189,7 +189,7 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
                           ),
                         ),
                         Text(
-                          'Premium →',
+                          'Pro →',
                           style: TextStyle(
                             color: primary,
                             fontWeight: FontWeight.w800,

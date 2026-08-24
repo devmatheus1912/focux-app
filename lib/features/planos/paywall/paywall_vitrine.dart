@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../subscription/models/subscription_plan.dart';
 import 'paywall_catalog.dart';
 import 'paywall_price.dart';
 
@@ -8,7 +9,8 @@ class PaywallVitrineSnapshot {
   const PaywallVitrineSnapshot({
     required this.socialProof,
     this.roiStrip = const [],
-    this.comparisonRows = const [],
+    this.comparisonFreeVsPro = const [],
+    this.comparisonFreeVsEnterprise = const [],
     this.trialDaysOffer,
     this.fromApi = false,
     this.version,
@@ -16,7 +18,8 @@ class PaywallVitrineSnapshot {
 
   final List<({String value, String label})> socialProof;
   final List<({String value, String label, Color color})> roiStrip;
-  final List<PaywallComparisonRow> comparisonRows;
+  final List<PaywallComparisonRow> comparisonFreeVsPro;
+  final List<PaywallComparisonRow> comparisonFreeVsEnterprise;
   final int? trialDaysOffer;
   final bool fromApi;
   final String? version;
@@ -25,23 +28,42 @@ class PaywallVitrineSnapshot {
       roiStrip.isNotEmpty ? roiStrip : PaywallCatalog.roiStrip;
 
   List<PaywallComparisonRow> get effectiveComparisonRows =>
-      comparisonRows.isNotEmpty
-          ? comparisonRows
-          : PaywallCatalog.comparisonRows;
+      comparisonFreeVsPro.isNotEmpty
+          ? comparisonFreeVsPro
+          : PaywallCatalog.comparisonFreeVsPro;
+
+  List<PaywallComparisonRow> rowsFor(SubscriptionPlan plan) => switch (plan) {
+    SubscriptionPlan.ENTERPRISE =>
+      comparisonFreeVsEnterprise.isNotEmpty
+          ? comparisonFreeVsEnterprise
+          : PaywallCatalog.comparisonFreeVsEnterprise,
+    _ =>
+      comparisonFreeVsPro.isNotEmpty
+          ? comparisonFreeVsPro
+          : PaywallCatalog.comparisonFreeVsPro,
+  };
 
   factory PaywallVitrineSnapshot.fromApi(Map<String, dynamic> json) {
     final social = _parseSocialProof(json['socialProof']);
     final roi = _parseRoiStrip(json['roiStrip']);
-    final comparison = _parseComparisonRows(json['comparisonRows']);
+    final comparisonPro = _parseComparisonRows(
+      json['comparisonFreeVsPro'] ?? json['comparisonRows'],
+    );
+    final comparisonEnt = _parseComparisonRows(json['comparisonFreeVsEnterprise']);
     final trial = (json['trialDaysOffer'] as num?)?.toInt();
     final version = json['version'] as String?;
-    if (social.isEmpty && roi.isEmpty && comparison.isEmpty && trial == null) {
+    if (social.isEmpty &&
+        roi.isEmpty &&
+        comparisonPro.isEmpty &&
+        comparisonEnt.isEmpty &&
+        trial == null) {
       return PaywallVitrineSnapshot.fromCatalog();
     }
     return PaywallVitrineSnapshot(
       socialProof: social.isNotEmpty ? social : PaywallCatalog.socialProof,
       roiStrip: roi,
-      comparisonRows: comparison,
+      comparisonFreeVsPro: comparisonPro,
+      comparisonFreeVsEnterprise: comparisonEnt,
       trialDaysOffer: trial,
       fromApi: true,
       version: version,
@@ -51,7 +73,8 @@ class PaywallVitrineSnapshot {
   factory PaywallVitrineSnapshot.fromCatalog() => PaywallVitrineSnapshot(
     socialProof: PaywallCatalog.socialProof,
     roiStrip: PaywallCatalog.roiStrip,
-    comparisonRows: PaywallCatalog.comparisonRows,
+    comparisonFreeVsPro: PaywallCatalog.comparisonFreeVsPro,
+    comparisonFreeVsEnterprise: PaywallCatalog.comparisonFreeVsEnterprise,
     trialDaysOffer: kPaywallMaxPlanTrialDays,
     fromApi: false,
     version: null,
@@ -101,10 +124,10 @@ class PaywallVitrineSnapshot {
           return PaywallComparisonRow(
             feature: feature,
             free: m['free'] as String? ?? '—',
-            premium: m['premium'] as String? ?? '—',
-            enterprise: m['enterprise'] as String? ?? '—',
-            enterprisePro:
-                m['enterprisePro'] as String? ?? m['entPro'] as String? ?? '—',
+            paid: m['paid'] as String? ??
+                m['pro'] as String? ??
+                m['premium'] as String? ??
+                '—',
           );
         })
         .whereType<PaywallComparisonRow>()

@@ -65,7 +65,7 @@ class _EnterprisePromoScreenState extends ConsumerState<EnterprisePromoScreen> {
       if (subscriptionUsesNativeStore) {
         await context.push(
           '/assinatura',
-          extra: SubscriptionPlan.ENTERPRISE_PRO.apiName,
+          extra: SubscriptionPlan.ENTERPRISE.apiName,
         );
         return;
       }
@@ -73,7 +73,7 @@ class _EnterprisePromoScreenState extends ConsumerState<EnterprisePromoScreen> {
       await PlanosRepository(ref.read(apiClientProvider)).startTrial(
         payload:
             buildLocalSubscriptionMetadata(
-              productId: SubscriptionProducts.enterpriseProMonthly,
+              productId: SubscriptionProducts.enterpriseMonthly,
             ).toTrialPayload(),
       );
       ref.invalidate(perfilProvider);
@@ -81,7 +81,7 @@ class _EnterprisePromoScreenState extends ConsumerState<EnterprisePromoScreen> {
 
       FeedbackHelper.showSuccess(
         context,
-        'Trial Enterprise Pro ativado. Aproveite os próximos $kPaywallMaxPlanTrialDays dias.',
+        'Trial Enterprise ativado. Aproveite os próximos $kPaywallMaxPlanTrialDays dias.',
       );
       context.go('/dashboard/personal');
     } catch (error) {
@@ -109,7 +109,7 @@ class _EnterprisePromoScreenState extends ConsumerState<EnterprisePromoScreen> {
     const mute = EagleTokens.darkInkMute;
 
     return fxScreenA11yScope(
-      label: 'Promoção Enterprise Pro',
+      label: 'Promoção Enterprise',
       child: FxShellScaffold(
         useMesh: true,
         body: Container(
@@ -144,7 +144,7 @@ class _EnterprisePromoScreenState extends ConsumerState<EnterprisePromoScreen> {
                           ),
                           const SizedBox(height: TokensStrip.s5),
                           Text(
-                            'Transforme seu negócio.\nExperimente o Enterprise Pro.',
+                            'Transforme seu negócio.\nExperimente o Enterprise.',
                             textAlign: TextAlign.center,
                             style: TokensStrip.h1(
                               color: ink,

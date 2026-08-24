@@ -6,10 +6,7 @@ import '../subscription/utils/plano_ia_limits.dart';
 class PlanEntitlements {
   PlanEntitlements._();
 
-  static String displayPlanName(SubscriptionPlan plan) => switch (plan) {
-    SubscriptionPlan.ENTERPRISE_PRO => 'ENTERPRISE PRO',
-    _ => plan.apiName,
-  };
+  static String displayPlanName(SubscriptionPlan plan) => plan.apiName;
 
   /// Infere capability a partir do rótulo exibido no paywall ou deep link `feature=`.
   static String? capabilityFromFeatureLabel(String label) {
@@ -68,23 +65,22 @@ class PlanEntitlements {
     final soft = softGateTargetPlan(usage);
     if (soft != null && soft.level > usage.plano.level) return soft;
     return switch (usage.plano) {
-      SubscriptionPlan.ENTERPRISE => SubscriptionPlan.ENTERPRISE_PRO,
-      SubscriptionPlan.PREMIUM => SubscriptionPlan.ENTERPRISE,
-      SubscriptionPlan.FREE => SubscriptionPlan.PREMIUM,
-      _ => SubscriptionPlan.PREMIUM,
+      SubscriptionPlan.ENTERPRISE => SubscriptionPlan.ENTERPRISE,
+      SubscriptionPlan.PRO => SubscriptionPlan.ENTERPRISE,
+      SubscriptionPlan.FREE => SubscriptionPlan.PRO,
     };
   }
 
   static SubscriptionPlan targetPlan({
     String? capability,
-    SubscriptionPlan fallback = SubscriptionPlan.PREMIUM,
+    SubscriptionPlan fallback = SubscriptionPlan.PRO,
   }) {
     switch (capability) {
       case 'landingCompleta':
       case 'lojaDigital':
       case 'poseCoach':
       case 'automacoesAvancadas':
-        return SubscriptionPlan.ENTERPRISE_PRO;
+        return SubscriptionPlan.ENTERPRISE;
       case 'whiteLabel':
       case 'automacoes':
       case 'comunidadeGrupos':
@@ -97,7 +93,7 @@ class PlanEntitlements {
       case 'iaCopiloto':
       case 'migracaoFoto':
       case 'agenda':
-        return SubscriptionPlan.PREMIUM;
+        return SubscriptionPlan.PRO;
       default:
         return fallback;
     }
@@ -110,12 +106,12 @@ class PlanEntitlements {
   }) {
     final plan = targetPlan(
       capability: capability,
-      fallback: requiredPlan ?? SubscriptionPlan.PREMIUM,
+      fallback: requiredPlan ?? SubscriptionPlan.PRO,
     );
     final planLabel = switch (plan) {
-      SubscriptionPlan.ENTERPRISE_PRO => 'Enterprise Pro',
       SubscriptionPlan.ENTERPRISE => 'Enterprise',
-      _ => 'Premium',
+      SubscriptionPlan.PRO => 'Pro',
+      _ => 'Pro',
     };
 
     final headline = switch (capability) {
@@ -144,14 +140,13 @@ class PlanEntitlements {
             'Personal trainers que cobram no app convertem mais e perdem menos alunos.',
       'iaCopiloto' =>
         'Gere treinos, insights e respostas com IA no plano $planLabel '
-            '(${PlanoIaLimits.premium} interações/mês). '
+            '(${PlanoIaLimits.pro} interações/mês). '
             'Enterprise: ${PlanoIaLimits.enterprise}/mês.',
       'migracaoFoto' =>
         'Importar alunos por foto/print (OCR gratuito) está no $planLabel '
-            '— ${MigracaoFotoLimits.premium}/mês. Enterprise: ${MigracaoFotoLimits.enterprise}/mês.',
+            '— ${MigracaoFotoLimits.pro}/mês. Enterprise: ${MigracaoFotoLimits.enterprise}/mês.',
       'landingCompleta' =>
-        'Depoimentos ilimitados, galeria, FAQ e formulário Meta exigem Enterprise Pro — '
-            'poupa R\$ 1k–3k de agência por +R\$ 50/mês vs Enterprise.',
+        'Depoimentos ilimitados, galeria, FAQ e formulário Meta exigem Enterprise.',
       'whiteLabel' =>
         'Cores, logo e identidade visual premium exigem Enterprise — '
             'sua marca em cada tela do app, não um visual genérico.',
@@ -166,16 +161,15 @@ class PlanEntitlements {
       'automacoes' =>
         'Automações sequenciais (onboarding, winback) exigem Enterprise.',
       'automacoesAvancadas' =>
-        'Ramificações e automações avançadas exigem Enterprise Pro.',
+        'Ramificações e automações avançadas exigem Enterprise.',
       'comunidadeGrupos' =>
         'Desafios com ranking e grupos exigem Enterprise ou superior.',
       'equipeRbac' =>
-        'Convide assistentes com permissões granulares no Enterprise '
-            '(1 assistente) ou Pro (ilimitado).',
+        'Convide assistentes com permissões granulares no Enterprise (até 5 seats).',
       'lojaDigital' =>
-        'Venda programas digitais com checkout PIX no Enterprise Pro.',
+        'Venda programas digitais com checkout PIX no Enterprise.',
       'poseCoach' =>
-        'Análise de postura por ML em tempo real no Enterprise Pro.',
+        'Análise de postura por ML em tempo real no Enterprise.',
       _ =>
         '"$featureName" faz parte do plano $planLabel. Faça upgrade em um passo.',
     };
@@ -184,9 +178,8 @@ class PlanEntitlements {
       headline: headline,
       body: body,
       ctaLabel: switch (plan) {
-        SubscriptionPlan.ENTERPRISE_PRO => 'Ver plano Enterprise Pro',
         SubscriptionPlan.ENTERPRISE => 'Ver plano Enterprise',
-        _ => 'Assinar Premium',
+        _ => 'Assinar Pro',
       },
       targetPlan: plan,
     );
@@ -198,11 +191,11 @@ class PlanEntitlements {
     int? limiteAtual,
   }) {
     if (currentPlan == SubscriptionPlan.FREE ||
-        targetPlan == SubscriptionPlan.PREMIUM) {
+        targetPlan == SubscriptionPlan.PRO) {
       return lockedOffer(
         featureName: 'IA Copiloto',
         capability: 'iaCopiloto',
-        requiredPlan: SubscriptionPlan.PREMIUM,
+        requiredPlan: SubscriptionPlan.PRO,
       );
     }
     if (currentPlan == SubscriptionPlan.ENTERPRISE && targetPlan == null) {
@@ -218,7 +211,7 @@ class PlanEntitlements {
     return LockedOffer(
       headline: 'Cota de IA esgotada este mês',
       body:
-          'Você usou todas as ${limiteAtual ?? PlanoIaLimits.premium} interações do Premium. '
+          'Você usou todas as ${limiteAtual ?? PlanoIaLimits.pro} interações do Pro. '
           'No Enterprise são ${PlanoIaLimits.enterprise} interações/mês — mais espaço para Copiloto, treinos e chat.',
       ctaLabel: 'Ver plano Enterprise',
       targetPlan: targetPlan ?? SubscriptionPlan.ENTERPRISE,
@@ -230,8 +223,7 @@ class PlanEntitlements {
     required SubscriptionPlan billingPlan,
     required int? fromApi,
   }) {
-    if (billingPlan == SubscriptionPlan.ENTERPRISE ||
-        billingPlan == SubscriptionPlan.ENTERPRISE_PRO) {
+    if (billingPlan == SubscriptionPlan.ENTERPRISE) {
       return null;
     }
     return fromApi;
@@ -243,9 +235,8 @@ class PlanEntitlements {
   }) {
     if (fromApi != null && fromApi > 0) return fromApi;
     return switch (billingPlan) {
-      SubscriptionPlan.ENTERPRISE ||
-      SubscriptionPlan.ENTERPRISE_PRO => PlanoIaLimits.enterprise,
-      SubscriptionPlan.PREMIUM => PlanoIaLimits.premium,
+      SubscriptionPlan.ENTERPRISE => PlanoIaLimits.enterprise,
+      SubscriptionPlan.PRO => PlanoIaLimits.pro,
       _ => 0,
     };
   }
@@ -284,15 +275,15 @@ class PlanEntitlements {
     if (usage.alunosNearLimit) {
       final left = (usage.limiteAlunos! - usage.alunosAtivos).clamp(0, 999);
       return 'Você usa $left de ${usage.limiteAlunos} vagas no ${usage.planoLabel}. '
-          'Premium libera até 20 alunos.';
+          'Pro libera até 30 alunos.';
     }
     if (usage.iaAtLimit) {
       return 'Cota de IA esgotada (${usage.limiteIaMensal}/mês). '
-          '${usage.plano == SubscriptionPlan.PREMIUM ? 'Enterprise libera até ${PlanoIaLimits.enterprise} interações/mês.' : 'Renova no próximo ciclo.'}';
+          '${usage.plano == SubscriptionPlan.PRO ? 'Enterprise libera até ${PlanoIaLimits.enterprise} interações/mês.' : 'Renova no próximo ciclo.'}';
     }
     if (usage.iaNearLimit) {
       return 'Você usou ${usage.iaUsadaMes} de ${usage.limiteIaMensal} interações de IA este mês. '
-          '${usage.plano == SubscriptionPlan.PREMIUM ? 'Enterprise sobe para ${PlanoIaLimits.enterprise}/mês.' : 'Use com parcimônia até renovar.'}';
+          '${usage.plano == SubscriptionPlan.PRO ? 'Enterprise sobe para ${PlanoIaLimits.enterprise}/mês.' : 'Use com parcimônia até renovar.'}';
     }
     return null;
   }
@@ -300,13 +291,13 @@ class PlanEntitlements {
   static SubscriptionPlan? softGateTargetPlan(PlanoUsageSnapshot usage) {
     if (usage.alunosNearLimit) {
       return switch (usage.plano) {
-        SubscriptionPlan.FREE => SubscriptionPlan.PREMIUM,
-        SubscriptionPlan.PREMIUM => SubscriptionPlan.ENTERPRISE,
+        SubscriptionPlan.FREE => SubscriptionPlan.PRO,
+        SubscriptionPlan.PRO => SubscriptionPlan.ENTERPRISE,
         _ => null,
       };
     }
     if (usage.iaNearLimit || usage.iaAtLimit) {
-      return usage.plano == SubscriptionPlan.PREMIUM
+      return usage.plano == SubscriptionPlan.PRO
           ? SubscriptionPlan.ENTERPRISE
           : null;
     }

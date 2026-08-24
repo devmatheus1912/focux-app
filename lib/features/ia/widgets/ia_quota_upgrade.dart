@@ -55,7 +55,7 @@ class IaQuotaUpgrade {
   ) {
     final target = error.suggestedUpgradePlan;
     if (target == SubscriptionPlan.ENTERPRISE) {
-      return SubscriptionPlan.PREMIUM;
+      return SubscriptionPlan.PRO;
     }
     return SubscriptionPlan.FREE;
   }

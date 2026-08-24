@@ -14,7 +14,7 @@ import 'package:focux_app/features/planos/providers/plano_features_provider.dart
 import 'package:focux_app/features/subscription/models/subscription_plan.dart';
 
 const _premium = PlanoFeatures(
-  plano: SubscriptionPlan.PREMIUM,
+  plano: SubscriptionPlan.PRO,
   financeiro: true,
   agenda: true,
   relatorios: true,
@@ -111,7 +111,7 @@ void main() {
 
       expect(repo.freshCalls, 0);
       expect(repo.cacheLoads, 0);
-      expect(notifier.state.valueOrNull?.plano, SubscriptionPlan.PREMIUM);
+      expect(notifier.state.valueOrNull?.plano, SubscriptionPlan.PRO);
       expect(notifier.state.valueOrNull?.financeiro, isTrue);
     },
   );
@@ -126,7 +126,7 @@ void main() {
       await notifier.bootstrap();
 
       expect(repo.freshCalls, 1);
-      expect(notifier.state.valueOrNull?.plano, SubscriptionPlan.PREMIUM);
+      expect(notifier.state.valueOrNull?.plano, SubscriptionPlan.PRO);
     },
   );
 
@@ -159,7 +159,7 @@ void main() {
       await Future<void>.delayed(Duration.zero);
       await Future<void>.delayed(Duration.zero);
 
-      expect(notifier.state.valueOrNull?.plano, SubscriptionPlan.PREMIUM);
+      expect(notifier.state.valueOrNull?.plano, SubscriptionPlan.PRO);
       expect(repo.freshCalls, 1);
 
       repo.freshDelay!.complete(_free);
@@ -186,7 +186,7 @@ void main() {
       repo.freshDelay!.complete(_free);
       await done;
 
-      expect(notifier.state.valueOrNull?.plano, SubscriptionPlan.PREMIUM);
+      expect(notifier.state.valueOrNull?.plano, SubscriptionPlan.PRO);
       expect(notifier.state.valueOrNull?.financeiro, isTrue);
     },
   );
@@ -204,7 +204,7 @@ void main() {
       await done;
 
       expect(repo.freshCalls, 0);
-      expect(notifier.state.valueOrNull?.plano, SubscriptionPlan.PREMIUM);
+      expect(notifier.state.valueOrNull?.plano, SubscriptionPlan.PRO);
     },
   );
 }

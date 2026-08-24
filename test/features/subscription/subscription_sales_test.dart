@@ -31,22 +31,24 @@ void main() {
     final products = File(
       'lib/features/subscription/subscription_products.dart',
     ).readAsStringSync();
-    expect(products, contains('focux_premium_yearly'));
+    expect(products, contains('focux_pro_yearly'));
     expect(products, contains('focux_enterprise_yearly'));
+    expect(products, contains('focux_premium_yearly'));
     expect(products, contains('annualDiscountRate'));
     expect(products, contains('annualSavingsCompactLabel'));
   });
 
   test('segmento anual sem hifen duplo no subtexto', () {
-    final label = SubscriptionProducts.annualSavingsCompactLabel(150);
-    expect(label, '−20% · R\$ 360/ano');
+    final label = SubscriptionProducts.annualSavingsCompactLabel(99.90);
+    expect(label, contains('2 meses grátis'));
+    expect(label, isNot(contains('−20%')));
     expect(label, isNot(contains('− −')));
     expect(label, isNot(contains('- -')));
   });
 
   test('card anual usa copy distinta do segmento', () {
-    final card = SubscriptionProducts.annualSavingsCardLabel(149.90);
-    expect(card, 'Economize R\$ 360/ano');
+    final card = SubscriptionProducts.annualSavingsCardLabel(99.90);
+    expect(card, contains('Economize R\$ 199,80'));
     expect(card, isNot(contains('−20%')));
   });
 
@@ -69,6 +71,6 @@ void main() {
     expect(gate, contains('/assinatura'));
     expect(repo, contains('alunosAtivos'));
     expect(repo, contains('agenda: true'));
-    expect(repo, contains('limiteAlunos: 5'));
+    expect(repo, contains('limiteAlunos: 3'));
   });
 }

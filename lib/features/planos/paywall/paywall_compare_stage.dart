@@ -315,8 +315,8 @@ class _BillingTabs extends StatelessWidget {
             ),
             Expanded(
               child: _TabChip(
-                label: 'Anual',
-                semanticLabel: 'Cobrança anual',
+                label: 'Anual · 2 meses grátis',
+                semanticLabel: 'Cobrança anual, 2 meses grátis',
                 selected: period == SubscriptionBillingPeriod.yearly,
                 accent: accent,
                 ink: ink,

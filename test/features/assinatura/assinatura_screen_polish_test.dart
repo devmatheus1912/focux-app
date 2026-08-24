@@ -37,7 +37,7 @@ void main() {
     expect(screen, contains('return currentPlan.apiName;'));
     expect(
       screen,
-      isNot(contains('SubscriptionPlan.PREMIUM.apiName')),
+      isNot(contains('SubscriptionPlan.PRO.apiName')),
     );
   });
 

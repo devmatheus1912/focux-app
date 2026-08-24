@@ -12,40 +12,41 @@ void main() {
     expect(view.headline, 'Seu plano FREE');
     expect(view.showTwoColumns, isFalse);
     expect(view.showBillingToggle, isFalse);
-    expect(view.rows.length, PaywallCatalog.comparisonRows.length);
+    expect(view.rows.length, PaywallCatalog.comparisonFreeVsPro.length);
   });
 
-  test('aba Premium compara Free x Premium e muda o título', () {
+  test('aba Pro compara Free x Pro e muda o título', () {
     final view = buildPaywallCompareView(
-      selected: SubscriptionPlan.PREMIUM,
+      selected: SubscriptionPlan.PRO,
       current: SubscriptionPlan.FREE,
     );
-    expect(view.headline, 'Assinar Premium');
+    expect(view.headline, 'Assinar Pro');
     expect(view.showTwoColumns, isTrue);
     expect(view.showBillingToggle, isTrue);
     expect(view.baselineColumnLabel, 'Free');
-    expect(view.selectedColumnLabel, 'Premium');
+    expect(view.selectedColumnLabel, 'Pro');
 
-    final pix = view.rows.firstWhere((r) => r.feature == 'PIX + QR Code');
+    final pix = view.rows.firstWhere((r) => r.feature.contains('PIX'));
     expect(paywallCompareCellIncluded(pix.baseline), isFalse);
     expect(pix.selected, '✓');
+
+    final extra = view.rows.firstWhere(
+      (r) => r.feature.toLowerCase().contains('white-label'),
+    );
+    expect(extra.selected, '—');
   });
 
-  test('upgrade a partir do Premium aponta Enterprise', () {
+  test('aba Enterprise compara Free x Enterprise', () {
     final view = buildPaywallCompareView(
       selected: SubscriptionPlan.ENTERPRISE,
-      current: SubscriptionPlan.PREMIUM,
+      current: SubscriptionPlan.PRO,
     );
     expect(view.headline, 'Assinar Enterprise');
-    expect(paywallTabLabel(SubscriptionPlan.ENTERPRISE_PRO), 'Pro');
-  });
+    expect(view.selectedColumnLabel, 'Enterprise');
+    expect(paywallTabLabel(SubscriptionPlan.ENTERPRISE), 'Enterprise');
 
-  test('marcador pro some do rótulo da linha', () {
-    final view = buildPaywallCompareView(
-      selected: SubscriptionPlan.ENTERPRISE_PRO,
-      current: SubscriptionPlan.FREE,
-    );
+    final pose = view.rows.firstWhere((r) => r.feature == 'Pose Coach');
+    expect(pose.selected, '✓');
     expect(view.rows.any((r) => r.feature.contains('✦')), isFalse);
-    expect(view.rows.any((r) => r.feature == 'Pose Coach ML'), isTrue);
   });
 }

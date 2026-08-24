@@ -14,22 +14,15 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
     final currentPlan = subscriptionPlanFromApi(perfil?.plano);
     final homeAsync = ref.watch(paywallHomeProvider);
     final vitrine = homeAsync.valueOrNull?.vitrine;
-    final vitrineComparison =
-        vitrine?.effectiveComparisonRows ?? PaywallCatalog.comparisonRows;
     final featuresAsync = ref.watch(planoFeaturesProvider);
 
     final planos = homeAsync.valueOrNull?.planos;
 
     SubscriptionPlan? paywallNextTier;
     var paywallHasUpgradeAbove = false;
-    String? enterpriseProRoiTag;
     if (planos != null && planos.isNotEmpty) {
-      Plano? enterprisePlano;
-      Plano? enterpriseProPlano;
       for (final p in planos) {
         final tier = subscriptionPlanFromApi(p.nome);
-        if (tier == SubscriptionPlan.ENTERPRISE) enterprisePlano = p;
-        if (tier == SubscriptionPlan.ENTERPRISE_PRO) enterpriseProPlano = p;
         final nextTier = paywallNextTier;
         if (tier.level > currentPlan.level &&
             (nextTier == null || tier.level > nextTier.level)) {
@@ -37,13 +30,6 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
         }
       }
       paywallHasUpgradeAbove = paywallNextTier != null;
-      if (enterprisePlano != null && enterpriseProPlano != null) {
-        final delta =
-            enterpriseProPlano.precoMensal - enterprisePlano.precoMensal;
-        if (delta > 0) {
-          enterpriseProRoiTag = '+R\$ ${delta.toStringAsFixed(0)}/mês';
-        }
-      }
     }
 
     ref.listen(paywallHomeProvider, (previous, next) {
@@ -89,12 +75,7 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
       hideScrollUpgradeLegal =
           currentPlan != SubscriptionPlan.FREE &&
           selectedPlan.level > currentPlan.level;
-      showEnterpriseProStickySecondary =
-          isCurrentPlan &&
-          currentPlan == SubscriptionPlan.ENTERPRISE &&
-          paywallHasUpgradeAbove &&
-          paywallNextTier == SubscriptionPlan.ENTERPRISE_PRO &&
-          subscriptionUsesNativeStore;
+      showEnterpriseProStickySecondary = false;
 
       if (_syncingPurchase) {
         ctaMode = _AssinaturaCtaMode.syncing;
@@ -117,19 +98,7 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
                 ? 'Gerenciar assinatura na loja'
                 : 'Plano atual';
         ctaEnabled = subscriptionUsesNativeStore && !_loadingCheckout;
-        if (showEnterpriseProStickySecondary) {
-          footnote = '';
-        } else if (currentPlan == SubscriptionPlan.ENTERPRISE &&
-            paywallHasUpgradeAbove &&
-            paywallNextTier == SubscriptionPlan.ENTERPRISE_PRO &&
-            subscriptionUsesNativeStore) {
-          footnote =
-              enterpriseProRoiTag != null
-                  ? 'Enterprise Pro: Landing, Loja e Pose Coach · $enterpriseProRoiTag'
-                  : 'Enterprise Pro desbloqueia Landing, Loja digital e Pose Coach.';
-        } else {
-          footnote = '';
-        }
+        footnote = '';
       } else if (isDowngrade) {
         ctaMode =
             subscriptionUsesNativeStore
@@ -165,7 +134,7 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
                 : 'Continuar com $selectedLabel';
         footnote =
             trialOffer
-                ? 'Cadastre o cartão. $trialDays dias grátis no Enterprise Pro. '
+                ? 'Cadastre o cartão. $trialDays dias grátis no Enterprise. '
                     'Depois vale o preço da loja. Cancele quando quiser.'
                 : subscriptionUsesNativeStore
                 ? (_billingPeriod == SubscriptionBillingPeriod.yearly
@@ -193,7 +162,11 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
             : buildPaywallPriceCopy(
               precoMensal: selectedBackendPlan.precoMensal,
               precoAnual: selectedBackendPlan.precoAnual,
-              precoAnualMensalEquiv: selectedBackendPlan.precoAnualMensalEquiv,
+              precoAnualMensalEquiv:
+                  selectedBackendPlan.equivMensalNoAnual ??
+                  selectedBackendPlan.precoAnualMensalEquiv,
+              labelDescontoAnual: selectedBackendPlan.labelDescontoAnual,
+              labelEconomiaAnual: selectedBackendPlan.labelEconomiaAnual,
               period: _billingPeriod,
               storePrice: selectedStorePrice,
             );
@@ -214,8 +187,8 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
                 ).level >
                 currentPlan.level;
     final stickyTierAccent =
-        isUpgradeSelection && selectedPlan == SubscriptionPlan.ENTERPRISE_PRO
-            ? PaywallCatalog.accentForPlan(SubscriptionPlan.ENTERPRISE_PRO)
+        isUpgradeSelection && selectedPlan == SubscriptionPlan.ENTERPRISE
+            ? PaywallCatalog.accentForPlan(SubscriptionPlan.ENTERPRISE)
             : null;
     if (_paymentBlocked) {
       // Ainda mostra Planos — só checkout fica bloqueado (DeviceGuard).
@@ -281,7 +254,7 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
                           primary: primary,
                           secondaryLabel:
                               showEnterpriseProStickySecondary
-                                  ? 'Ver Enterprise Pro'
+                                  ? 'Ver Enterprise'
                                   : null,
                           onSecondary:
                               showEnterpriseProStickySecondary
@@ -362,11 +335,9 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
             isDark: isDark,
             featuresAsync: featuresAsync,
             vitrine: vitrine,
-            vitrineComparison: vitrineComparison,
             selectedPrice: selectedPrice,
             paywallNextTier: paywallNextTier,
             paywallHasUpgradeAbove: paywallHasUpgradeAbove,
-            showEnterpriseProStickySecondary: showEnterpriseProStickySecondary,
           );
         },
       ),

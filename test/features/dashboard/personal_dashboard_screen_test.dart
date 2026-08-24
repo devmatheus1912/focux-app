@@ -120,7 +120,7 @@ void main() {
     (tester) async {
       final home = _homeFixture();
       const features = PlanoFeatures(
-        plano: SubscriptionPlan.PREMIUM,
+        plano: SubscriptionPlan.PRO,
         financeiro: true,
         agenda: true,
         relatorios: true,

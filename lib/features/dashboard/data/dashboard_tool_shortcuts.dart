@@ -48,15 +48,14 @@ class DashboardToolShortcut {
 
   SubscriptionPlan targetPlan() => PlanEntitlements.targetPlan(
     capability: capability,
-    fallback: SubscriptionPlan.PREMIUM,
+    fallback: SubscriptionPlan.PRO,
   );
 
   String tierBadgeLabel() {
     return switch (targetPlan()) {
-      SubscriptionPlan.ENTERPRISE_PRO => 'Pro',
       SubscriptionPlan.ENTERPRISE => 'Enterprise',
-      SubscriptionPlan.PREMIUM => 'Premium',
-      _ => 'Premium',
+      SubscriptionPlan.PRO => 'Pro',
+      _ => 'Pro',
     };
   }
 

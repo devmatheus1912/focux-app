@@ -6,9 +6,8 @@ import '../../subscription/models/subscription_plan.dart';
 import 'paywall_catalog.dart';
 
 IconData _tierIconFor(SubscriptionPlan plan) => switch (plan) {
-  SubscriptionPlan.PREMIUM => Icons.trending_up_rounded,
+  SubscriptionPlan.PRO => Icons.trending_up_rounded,
   SubscriptionPlan.ENTERPRISE => Icons.diamond_outlined,
-  SubscriptionPlan.ENTERPRISE_PRO => Icons.workspace_premium_rounded,
   _ => Icons.layers_outlined,
 };
 

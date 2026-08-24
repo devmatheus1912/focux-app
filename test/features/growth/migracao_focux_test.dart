@@ -43,7 +43,7 @@ void main() {
                 PlanoFeaturesNotifier(PlanosRepository(ApiClient()))
                   ..state = const AsyncData(
                     PlanoFeatures(
-                      plano: SubscriptionPlan.PREMIUM,
+                      plano: SubscriptionPlan.PRO,
                       financeiro: true,
                       agenda: true,
                       relatorios: true,
