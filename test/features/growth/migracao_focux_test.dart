@@ -50,7 +50,7 @@ void main() {
                       whiteLabel: false,
                       iaCopiloto: true,
                       migracaoFoto: true,
-                      limiteMigracaoFotoMensal: MigracaoFotoLimits.premium,
+                      limiteMigracaoFotoMensal: MigracaoFotoLimits.pro,
                       migracaoFotosUsadasMes: 2,
                     ),
                   ),

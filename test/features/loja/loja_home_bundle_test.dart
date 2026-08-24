@@ -29,7 +29,7 @@ void main() {
         },
       ],
       'planoFeatures': {
-        'plano': 'ENTERPRISE_PRO',
+        'plano': 'ENTERPRISE',
         'features': {'lojaDigital': true, 'agenda': true},
       },
     });

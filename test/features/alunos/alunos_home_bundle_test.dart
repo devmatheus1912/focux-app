@@ -24,7 +24,7 @@ void main() {
       },
       'alertasConfig': {'diasSemTreino': 7, 'aderenciaMinima': 50},
       'planoFeatures': {
-        'plano': 'PREMIUM',
+        'plano': 'PRO',
         'features': {
           'financeiro': true,
           'agenda': true,

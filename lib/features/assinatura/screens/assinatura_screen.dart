@@ -249,11 +249,6 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
     );
   }
 
-  void _focusEnterpriseProUpgrade() {
-    HapticFeedback.selectionClick();
-    _selectPlan(SubscriptionPlan.ENTERPRISE);
-  }
-
   Future<void> _reconcilePlanFromServer() async {
     await ref.read(assinaturaRepositoryProvider).clearVitrineCache();
     ref.invalidate(paywallHomeProvider);

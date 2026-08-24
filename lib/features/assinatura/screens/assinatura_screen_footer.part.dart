@@ -221,8 +221,6 @@ class _AssinaturaStickyFooter extends StatelessWidget {
   final Color primary;
   final VoidCallback onSubscribe;
   final VoidCallback onManage;
-  final String? secondaryLabel;
-  final VoidCallback? onSecondary;
   final VoidCallback? onRestore;
   final bool restoringPurchases;
   final VoidCallback? onBillingDetails;
@@ -246,8 +244,6 @@ class _AssinaturaStickyFooter extends StatelessWidget {
     required this.primary,
     required this.onSubscribe,
     required this.onManage,
-    this.secondaryLabel,
-    this.onSecondary,
     this.onRestore,
     this.restoringPurchases = false,
     this.onBillingDetails,
@@ -360,16 +356,6 @@ class _AssinaturaStickyFooter extends StatelessWidget {
                 : 'Cancele antes do fim do período gratuito para evitar cobrança.',
             textAlign: TextAlign.center,
             style: TokensStrip.bodyMuted(color: secondary),
-          ),
-          const SizedBox(height: 8),
-        ],
-        if (secondaryLabel != null &&
-            onSecondary != null &&
-            mode == _AssinaturaCtaMode.manageStore) ...[
-          FxLiquidSecondaryButton(
-            label: secondaryLabel!,
-            icon: Icons.workspace_premium_outlined,
-            onPressed: onSecondary,
           ),
           const SizedBox(height: 8),
         ],

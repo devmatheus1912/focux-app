@@ -17,7 +17,7 @@ class SubscriptionProducts {
   static const String enterpriseProMonthlyLegacy = 'focux_enterprise_pro_monthly';
   static const String enterpriseProYearlyLegacy = 'focux_enterprise_pro_yearly';
 
-  /// Anual = 2 meses grátis ≈ 16,67% off sobre 12× mensal.
+  /// Anual = mensal × 10 (2 meses grátis).
   static const double annualDiscountRate = 1 / 6;
 
   static const Set<String> allStoreProductIds = {

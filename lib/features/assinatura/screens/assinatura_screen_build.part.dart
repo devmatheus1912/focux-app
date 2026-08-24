@@ -59,7 +59,6 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
     var ctaLabel = 'Assinar';
     var ctaMode = _AssinaturaCtaMode.subscribe;
     String footnote = '';
-    var showEnterpriseProStickySecondary = false;
     var hideScrollUpgradeLegal = false;
 
     if (planos != null && planos.isNotEmpty) {
@@ -75,7 +74,6 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
       hideScrollUpgradeLegal =
           currentPlan != SubscriptionPlan.FREE &&
           selectedPlan.level > currentPlan.level;
-      showEnterpriseProStickySecondary = false;
 
       if (_syncingPurchase) {
         ctaMode = _AssinaturaCtaMode.syncing;
@@ -252,14 +250,6 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
                           mute: mute,
                           line: line,
                           primary: primary,
-                          secondaryLabel:
-                              showEnterpriseProStickySecondary
-                                  ? 'Ver Enterprise'
-                                  : null,
-                          onSecondary:
-                              showEnterpriseProStickySecondary
-                                  ? _focusEnterpriseProUpgrade
-                                  : null,
                           onSubscribe:
                               () => _startCheckout(
                                 selectedPlan,

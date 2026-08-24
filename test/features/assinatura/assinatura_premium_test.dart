@@ -23,7 +23,6 @@ void main() {
     expect(screen, contains('_PaywallLegalConsentLine'));
     expect(screen, contains('showLegalConsent'));
     expect(screen, contains('Gerenciar assinatura na loja'));
-    expect(screen, contains('_focusEnterpriseProUpgrade'));
 
     expect(layout, contains('_PaywallLegalConsentLine'));
     expect(layout, contains('FocuxLegal.openTerms'));

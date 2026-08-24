@@ -7,7 +7,7 @@ void main() {
   test('PlanoFeatures preserves cache operational metadata', () {
     final cachedAt = DateTime.utc(2026, 4, 28, 18, 0);
     final features = PlanoFeatures.fromJson({
-      'plano': 'PREMIUM',
+      'plano': 'PRO',
       'fromCache': true,
       'cacheSavedAt': cachedAt.toIso8601String(),
       'syncWarning': 'Usando plano salvo.',

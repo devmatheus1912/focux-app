@@ -26,7 +26,7 @@ void main() {
         'acumuladoAnual': 4800.0,
       },
       'planoFeatures': {
-        'plano': 'PREMIUM',
+        'plano': 'PRO',
         'features': {'financeiro': true, 'agenda': true},
       },
     });

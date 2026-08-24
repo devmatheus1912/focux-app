@@ -30,7 +30,7 @@ void main() {
         },
       ],
       'planoFeatures': {
-        'plano': 'PREMIUM',
+        'plano': 'PRO',
         'features': {'habitCoaching': true, 'agenda': true},
       },
     });

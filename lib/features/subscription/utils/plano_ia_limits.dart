@@ -3,7 +3,6 @@ class PlanoIaLimits {
   PlanoIaLimits._();
 
   static const pro = 200;
-  static const premium = pro;
   static const enterprise = 600;
 
   static int forPlan(String? apiName) {

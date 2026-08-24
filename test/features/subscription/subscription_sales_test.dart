@@ -41,6 +41,7 @@ void main() {
   test('segmento anual sem hifen duplo no subtexto', () {
     final label = SubscriptionProducts.annualSavingsCompactLabel(99.90);
     expect(label, contains('2 meses grátis'));
+    expect(label, isNot(contains('20%')));
     expect(label, isNot(contains('−20%')));
     expect(label, isNot(contains('− −')));
     expect(label, isNot(contains('- -')));
@@ -49,6 +50,7 @@ void main() {
   test('card anual usa copy distinta do segmento', () {
     final card = SubscriptionProducts.annualSavingsCardLabel(99.90);
     expect(card, contains('Economize R\$ 199,80'));
+    expect(card, isNot(contains('20%')));
     expect(card, isNot(contains('−20%')));
   });
 

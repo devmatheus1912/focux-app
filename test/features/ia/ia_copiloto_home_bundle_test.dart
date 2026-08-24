@@ -9,7 +9,7 @@ void main() {
         {'id': 3, 'nome': 'Ana', 'objetivo': 'Hipertrofia'},
       ],
       'planoFeatures': {
-        'plano': 'PREMIUM',
+        'plano': 'PRO',
         'limiteIaMensal': 120,
         'iaUsadaMes': 8,
         'features': {'iaCopiloto': true, 'financeiro': true, 'agenda': true},
