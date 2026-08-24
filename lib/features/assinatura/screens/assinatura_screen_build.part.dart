@@ -14,7 +14,6 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
     final currentPlan = subscriptionPlanFromApi(perfil?.plano);
     final homeAsync = ref.watch(paywallHomeProvider);
     final vitrine = homeAsync.valueOrNull?.vitrine;
-    final trialDaysFromVitrine = vitrine?.trialDaysOffer;
     final vitrineComparison =
         vitrine?.effectiveComparisonRows ?? PaywallCatalog.comparisonRows;
     final featuresAsync = ref.watch(planoFeaturesProvider);
@@ -150,11 +149,12 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
         ctaEnabled =
             !_loadingCheckout &&
             (kIsWeb || !subscriptionUsesNativeStore || _storeAvailable);
-        final trialDays =
-            _trialStatus?.trialDaysOffer ?? trialDaysFromVitrine ?? 14;
-        final trialOffer =
-            selectedPlan == SubscriptionPlan.ENTERPRISE &&
-            _trialStatus?.trialEligible == true;
+        final trialOffer = paywallShowsMaxPlanTrial(
+          selected: selectedPlan,
+          current: currentPlan,
+          trialEligible: _trialStatus?.trialEligible,
+        );
+        const trialDays = kPaywallMaxPlanTrialDays;
         final isUpgrade = selectedPlan.level > currentPlan.level;
         final selectedLabel = PaywallCatalog.displayPlanName(selectedPlan);
         ctaLabel =
@@ -164,7 +164,10 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
                 ? 'Confirmar upgrade · $selectedLabel'
                 : 'Continuar com $selectedLabel';
         footnote =
-            subscriptionUsesNativeStore
+            trialOffer
+                ? 'Cadastre o cartão. $trialDays dias grátis no plano máximo. '
+                    'Depois vale o preço da loja. Cancele quando quiser.'
+                : subscriptionUsesNativeStore
                 ? (_billingPeriod == SubscriptionBillingPeriod.yearly
                     ? 'Cobrança anual com renovação automática. Cancele na loja quando quiser.'
                     : 'Cobrança mensal com renovação automática. Cancele na loja quando quiser.')
@@ -172,10 +175,28 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
       }
     }
 
-    final trialOffer =
-        selectedPlan == SubscriptionPlan.ENTERPRISE &&
-        !isCurrentPlan &&
-        _trialStatus?.trialEligible == true;
+    final trialOffer = paywallShowsMaxPlanTrial(
+      selected: selectedPlan,
+      current: currentPlan,
+      trialEligible: _trialStatus?.trialEligible,
+    );
+    final selectedStorePrice =
+        selectedBackendPlan == null
+            ? null
+            : _productDetails[SubscriptionProducts.productIdFor(
+              selectedPlan,
+              _billingPeriod,
+            )]?.price;
+    final selectedPrice =
+        selectedBackendPlan == null
+            ? null
+            : buildPaywallPriceCopy(
+              precoMensal: selectedBackendPlan.precoMensal,
+              precoAnual: selectedBackendPlan.precoAnual,
+              precoAnualMensalEquiv: selectedBackendPlan.precoAnualMensalEquiv,
+              period: _billingPeriod,
+              storePrice: selectedStorePrice,
+            );
     final planSummary =
         planos == null
             ? null
@@ -244,6 +265,8 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
                           mode: ctaMode,
                           label: ctaLabel,
                           planSummary: planSummary,
+                          priceLabel: selectedPrice?.primary,
+                          priceCaption: selectedPrice?.secondary,
                           footnote: footnote,
                           enabled: ctaEnabled,
                           loading: _loadingCheckout || _syncingPurchase,
@@ -340,10 +363,9 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
             featuresAsync: featuresAsync,
             vitrine: vitrine,
             vitrineComparison: vitrineComparison,
-            trialDaysFromVitrine: trialDaysFromVitrine,
+            selectedPrice: selectedPrice,
             paywallNextTier: paywallNextTier,
             paywallHasUpgradeAbove: paywallHasUpgradeAbove,
-            enterpriseProRoiTag: enterpriseProRoiTag,
             showEnterpriseProStickySecondary: showEnterpriseProStickySecondary,
           );
         },

@@ -36,6 +36,7 @@ import '../data/plano.dart';
 import '../providers/assinatura_provider.dart';
 import '../../planos/paywall/paywall_catalog.dart';
 import '../../planos/paywall/paywall_components.dart';
+import '../../planos/paywall/paywall_price.dart';
 import '../../planos/paywall/paywall_vitrine.dart';
 import '../../subscription/plan_entitlements.dart';
 import '../services/subscription_biometric_gate.dart';
@@ -90,16 +91,18 @@ String _resolveInitialPlanSelection({
   return currentPlan.apiName;
 }
 
-/// Trial só para quem ainda pode assinar Enterprise (não assinante atual).
+/// Trial introdutório só no plano máximo (Pro), com cartão na loja.
 bool _shouldShowEnterpriseTrialCard(
   SubscriptionPlan selectedPlan,
   SubscriptionPlan currentPlan,
   TrialStatus? trialStatus,
 ) {
-  if (selectedPlan != SubscriptionPlan.ENTERPRISE) return false;
-  if (currentPlan == SubscriptionPlan.ENTERPRISE) return false;
-  if (trialStatus?.trialAtivo == true) return true;
-  return trialStatus?.trialEligible == true;
+  return paywallShowsMaxPlanTrial(
+    selected: selectedPlan,
+    current: currentPlan,
+    trialEligible:
+        trialStatus?.trialAtivo == true ? true : trialStatus?.trialEligible,
+  );
 }
 
 class AssinaturaScreen extends ConsumerStatefulWidget {
@@ -509,10 +512,17 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
             _billingPeriod,
           )];
       final priceDisplay = _formatPrice(backendPlan, product, _billingPeriod);
+      final billingPlan = subscriptionPlanFromApi(
+        ref.read(perfilProvider).valueOrNull?.plano,
+      );
       final trialNote =
-          plan == SubscriptionPlan.ENTERPRISE &&
-                  _trialStatus?.trialEligible == true
-              ? 'Teste introdutório pode ser aplicado pela loja ao assinar.'
+          paywallShowsMaxPlanTrial(
+                selected: plan,
+                current: billingPlan,
+                trialEligible: _trialStatus?.trialEligible,
+              )
+              ? '$kPaywallMaxPlanTrialDays dias grátis no plano máximo com cadastro de cartão. '
+                  'A loja confirma o valor após o período.'
               : null;
       final confirmed = await context.push<bool>(
         '/assinatura/review',

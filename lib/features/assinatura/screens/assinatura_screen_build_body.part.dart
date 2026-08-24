@@ -13,10 +13,9 @@ extension AssinaturaScreenBuildBody on _AssinaturaScreenState {
     required PaywallVitrineSnapshot? vitrine,
     required bool showEnterpriseProStickySecondary,
     required List<PaywallComparisonRow> vitrineComparison,
-    required int? trialDaysFromVitrine,
+    required PaywallPriceCopy? selectedPrice,
     required SubscriptionPlan? paywallNextTier,
     required bool paywallHasUpgradeAbove,
-    required String? enterpriseProRoiTag,
   }) {
     final sortedPlans = [...planosList]..sort(
       (a, b) => subscriptionPlanFromApi(
@@ -163,8 +162,17 @@ extension AssinaturaScreenBuildBody on _AssinaturaScreenState {
             primary: primary,
             isDark: isDark,
             line: line,
-            roiTag:
-                showEnterpriseProStickySecondary ? null : enterpriseProRoiTag,
+            priceLabel: selectedPrice?.primary,
+            priceCaption: selectedPrice?.secondary,
+            trialBadge:
+                paywallShowsMaxPlanTrial(
+                      selected: selPlan,
+                      current: currentPlan,
+                      trialEligible: _trialStatus?.trialEligible,
+                    )
+                    ? '$kPaywallMaxPlanTrialDays dias grátis com cartão'
+                    : null,
+            roiTag: null,
           ),
           if (_shouldShowEnterpriseTrialCard(
             selPlan,
@@ -177,9 +185,8 @@ extension AssinaturaScreenBuildBody on _AssinaturaScreenState {
               text:
                   _loadingTrial
                       ? 'Carregando oferta de teste…'
-                      : subscriptionUsesNativeStore
-                      ? 'Teste introdutório configurado na ${subscriptionChannelLabel()}.'
-                      : '${trialDaysFromVitrine ?? _trialStatus?.trialDaysOffer ?? 14} dias grátis neste plano Enterprise.',
+                      : '$kPaywallMaxPlanTrialDays dias grátis no plano máximo. '
+                          'A loja pede o cartão na assinatura; cancele antes para não ser cobrado.',
               ink: ink,
               mute: mute,
               isDark: isDark,

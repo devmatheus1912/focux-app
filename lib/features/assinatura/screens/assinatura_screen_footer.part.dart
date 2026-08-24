@@ -206,6 +206,8 @@ class _AssinaturaStickyFooter extends StatelessWidget {
   final _AssinaturaCtaMode mode;
   final String label;
   final String? planSummary;
+  final String? priceLabel;
+  final String? priceCaption;
   final String footnote;
   final bool enabled;
   final bool loading;
@@ -229,6 +231,8 @@ class _AssinaturaStickyFooter extends StatelessWidget {
     required this.mode,
     required this.label,
     this.planSummary,
+    this.priceLabel,
+    this.priceCaption,
     required this.footnote,
     required this.enabled,
     required this.loading,
@@ -322,6 +326,31 @@ class _AssinaturaStickyFooter extends StatelessWidget {
               );
             },
           ),
+          const SizedBox(height: 10),
+        ],
+        if (priceLabel != null &&
+            priceLabel!.trim().isNotEmpty &&
+            priceLabel != 'Grátis') ...[
+          Text(
+            priceLabel!,
+            textAlign: TextAlign.center,
+            style: FocuxHubTypography.metric(
+              color: ink,
+              fontSize: FocuxHubTypography.metricEm,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          if (priceCaption != null && priceCaption!.trim().isNotEmpty) ...[
+            const SizedBox(height: 2),
+            Text(
+              priceCaption!,
+              textAlign: TextAlign.center,
+              style: TokensStrip.bodyMuted(color: secondary).copyWith(
+                fontWeight: FontWeight.w600,
+                fontSize: 12,
+              ),
+            ),
+          ],
           const SizedBox(height: 10),
         ],
         if (trialHint) ...[
@@ -464,12 +493,11 @@ String _formatPrice(
   ProductDetails? productDetails,
   SubscriptionBillingPeriod period,
 ) {
-  if (plano.precoMensal == 0) return 'Grátis';
-  final suffix = period == SubscriptionBillingPeriod.yearly ? '/ano' : '/mês';
-  if (productDetails != null) return '${productDetails.price}$suffix';
-  if (period == SubscriptionBillingPeriod.yearly) {
-    final annual = plano.annualPriceOrComputed();
-    return 'R\$ ${annual.toStringAsFixed(2)}$suffix';
-  }
-  return 'R\$ ${plano.precoMensal.toStringAsFixed(2)}$suffix';
+  return buildPaywallPriceCopy(
+    precoMensal: plano.precoMensal,
+    precoAnual: plano.precoAnual,
+    precoAnualMensalEquiv: plano.precoAnualMensalEquiv,
+    period: period,
+    storePrice: productDetails?.price,
+  ).primary;
 }

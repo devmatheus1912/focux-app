@@ -26,6 +26,9 @@ class PaywallCompareStage extends StatelessWidget {
     required this.isDark,
     this.line,
     this.roiTag,
+    this.priceLabel,
+    this.priceCaption,
+    this.trialBadge,
     this.onBillingPeriod,
   });
 
@@ -42,6 +45,9 @@ class PaywallCompareStage extends StatelessWidget {
   final bool isDark;
   final Color? line;
   final String? roiTag;
+  final String? priceLabel;
+  final String? priceCaption;
+  final String? trialBadge;
 
   @override
   Widget build(BuildContext context) {
@@ -70,6 +76,9 @@ class PaywallCompareStage extends StatelessWidget {
             ink: ink,
             mute: mute,
             isDark: isDark,
+            priceLabel: priceLabel,
+            priceCaption: priceCaption,
+            trialBadge: trialBadge,
           ),
         ),
         const SizedBox(height: TokensStrip.s4),
@@ -122,6 +131,9 @@ class _CompareHero extends StatelessWidget {
     required this.ink,
     required this.mute,
     required this.isDark,
+    this.priceLabel,
+    this.priceCaption,
+    this.trialBadge,
   });
 
   final PaywallCompareView view;
@@ -130,6 +142,9 @@ class _CompareHero extends StatelessWidget {
   final Color ink;
   final Color mute;
   final bool isDark;
+  final String? priceLabel;
+  final String? priceCaption;
+  final String? trialBadge;
 
   @override
   Widget build(BuildContext context) {
@@ -160,6 +175,38 @@ class _CompareHero extends StatelessWidget {
             textAlign: TextAlign.center,
             style: FocuxHubTypography.bodyMuted(color: secondary, height: 1.4),
           ),
+          if (priceLabel != null && priceLabel!.trim().isNotEmpty) ...[
+            const SizedBox(height: TokensStrip.s4),
+            Text(
+              priceLabel!,
+              textAlign: TextAlign.center,
+              style: FocuxHubTypography.metric(
+                color: ink,
+                fontSize: FocuxHubTypography.metricLg,
+                fontWeight: FontWeight.w800,
+                height: 1.1,
+              ),
+            ),
+            if (priceCaption != null && priceCaption!.trim().isNotEmpty) ...[
+              const SizedBox(height: TokensStrip.s1),
+              Text(
+                priceCaption!,
+                textAlign: TextAlign.center,
+                style: FocuxHubTypography.bodyMuted(
+                  color: secondary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ],
+          if (trialBadge != null && trialBadge!.trim().isNotEmpty) ...[
+            const SizedBox(height: TokensStrip.s3),
+            Text(
+              trialBadge!,
+              textAlign: TextAlign.center,
+              style: FocuxHubTypography.chip(accent),
+            ),
+          ],
         ],
       ),
     );
