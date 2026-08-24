@@ -55,11 +55,13 @@ void main() {
     expect(limiter, isNot(contains('Alignment.topCenter')));
   });
 
-  test('plan studio cai para aquisicao quando upgradePlans vazio', () {
+  test('planos usa compare stage (uma aba, um card)', () {
     final body = File(
       'lib/features/assinatura/screens/assinatura_screen_build_body.part.dart',
     ).readAsStringSync();
-    expect(body, contains('upgradePlansForStudio.isNotEmpty'));
+    expect(body, contains('PaywallCompareStage'));
+    expect(body, isNot(contains('PaywallPlanStudio')));
+    expect(body, isNot(contains('PaywallRichPlanCard')));
   });
 
   test('assinatura sticky e scroll respeitam reduced motion e refresh', () {
@@ -77,19 +79,13 @@ void main() {
     ).readAsStringSync();
     expect(body, contains('RefreshIndicator'));
     expect(body, contains('AlwaysScrollableScrollPhysics'));
-    expect(body, contains('228.0'));
+    expect(body, contains('TokensStrip.s8 * 3'));
 
-    final priceBox = File(
-      'lib/features/planos/paywall/paywall_plan_cards_enterprise.part.dart',
+    final stage = File(
+      'lib/features/planos/paywall/paywall_compare_stage.dart',
     ).readAsStringSync();
-    expect(priceBox, contains('FittedBox'));
-    expect(priceBox, contains('maxLines: 1'));
-    expect(priceBox, contains('FocuxHubTypography.metricEm'));
-
-    final cards = File(
-      'lib/features/planos/paywall/paywall_plan_cards.part.dart',
-    ).readAsStringSync();
-    expect(cards, contains('headerPill'));
-    expect(cards, isNot(contains('Positioned(')));
+    expect(stage, contains('_PlanTabs'));
+    expect(stage, contains('_CompareCard'));
+    expect(stage, contains('prefersReducedMotion'));
   });
 }

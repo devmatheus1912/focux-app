@@ -21,6 +21,7 @@ import 'paywall_glass.dart';
 
 export 'paywall_glass.dart';
 export 'paywall_plan_studio.dart';
+export 'paywall_compare_stage.dart';
 
 part 'paywall_subscriber_ui.part.dart';
 part 'paywall_usage_and_strips.part.dart';

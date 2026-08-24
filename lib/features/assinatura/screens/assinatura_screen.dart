@@ -13,7 +13,6 @@ import '../../../core/analytics/analytics_service.dart';
 import '../../../core/legal/focux_legal.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
-import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -131,7 +130,6 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
   final GlobalKey _paywallUpgradeKey = GlobalKey();
   final GlobalKey _paywallCompareKey = GlobalKey();
   final GlobalKey _paywallLegalKey = GlobalKey();
-  final GlobalKey _paywallUpgradeTargetKey = GlobalKey();
 
   String? _selectedPlanName;
   bool _loadingCheckout = false;
@@ -147,8 +145,6 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
   bool _loadingTrial = false;
   bool _restoringPurchases = false;
   bool _paymentBlocked = false;
-  bool _upgradeOffersExpanded = false;
-  bool _compareRevealed = false;
   bool _planReconcileAttempted = false;
   SubscriptionBillingPeriod _billingPeriod = SubscriptionBillingPeriod.yearly;
 
@@ -260,10 +256,6 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
 
   void _focusEnterpriseProUpgrade() {
     HapticFeedback.selectionClick();
-    setState(() {
-      _upgradeOffersExpanded = true;
-      _compareRevealed = true;
-    });
     _selectPlan(SubscriptionPlan.ENTERPRISE_PRO);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
@@ -327,21 +319,6 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
       duration: motion,
       curve: Curves.easeOutCubic,
       alignment: 0.06,
-    );
-  }
-
-  void _scrollToUpgradeTargetCard() {
-    final ctx = _paywallUpgradeTargetKey.currentContext;
-    if (ctx == null) return;
-    final motion =
-        TokensStrip.prefersReducedMotion(context)
-            ? Duration.zero
-            : const Duration(milliseconds: 420);
-    Scrollable.ensureVisible(
-      ctx,
-      duration: motion,
-      curve: Curves.easeOutCubic,
-      alignment: 0.12,
     );
   }
 
