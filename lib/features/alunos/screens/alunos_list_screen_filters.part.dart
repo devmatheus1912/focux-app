@@ -236,7 +236,7 @@ extension AlunosListScreenFilters on _AlunosListScreenState {
                     },
                     icon: FxIcon(
                       name: FxHelpChrome.iconName,
-                      size: 18,
+                      size: FxHelpChrome.glyphSize,
                       color: linkColor,
                     ),
                     label: Text(

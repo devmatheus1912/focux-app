@@ -175,7 +175,6 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
   }
 
   Future<void> _openHelp() async {
-    HapticFeedback.selectionClick();
     AnalyticsService.instance.track(ProductEvents.alunosHelpOpened);
     await showAlunosListHelpSheet(context);
   }

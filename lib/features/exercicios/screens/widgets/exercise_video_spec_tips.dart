@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../../../../core/theme/focux_hub_typography.dart';
 import '../../../../core/theme/shell_chrome.dart';
@@ -28,7 +27,6 @@ class ExerciseVideoSpecTips extends StatelessWidget {
   static const _title = 'Como filmar';
 
   static Future<void> open(BuildContext context) {
-    HapticFeedback.selectionClick();
     return showFxHelpSheet(
       context,
       title: _title,

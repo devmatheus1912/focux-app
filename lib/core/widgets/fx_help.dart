@@ -1,16 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
+import '../theme/brand_palette.dart';
 import '../theme/focux_hub_typography.dart';
+import '../theme/fx_settings_layout.dart';
 import '../theme/shell_chrome.dart';
 import '../theme/tokens_strip.dart';
 import 'fx_home_sheet.dart';
 import 'fx_icon.dart';
 
 /// Chrome canônico do ícone de ajuda — paridade Home (`DashboardHomeHeader` 36pt).
+/// Glifo = `?` outline (Perfil). O círculo é só o well do header.
 abstract final class FxHelpChrome {
   FxHelpChrome._();
 
   static const double iconSize = 36;
+  static const double glyphSize = FxSettingsLayout.iconSize;
   static const double gap = 3;
   static const double touchTarget = 48;
   static const String iconName = 'help';
@@ -23,7 +28,7 @@ class FxHelpTip {
   final String body;
 }
 
-/// `?` circular da Home. Use em todo header e ajuda inline.
+/// `?` no well circular da Home. Use em todo header e ajuda inline.
 class FxHelpIconButton extends StatelessWidget {
   const FxHelpIconButton({
     super.key,
@@ -67,6 +72,7 @@ Future<void> showFxHelpSheet(
   List<FxHelpTip> tips = const [],
   List<Widget> extra = const [],
 }) {
+  HapticFeedback.selectionClick();
   return showFxHomeSheet<void>(
     context,
     builder: (ctx) {
@@ -101,7 +107,7 @@ class FxHelpSheetFrame extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final chrome = ShellChrome.forDark(isDark);
-    final primary = Theme.of(context).colorScheme.primary;
+    final brand = BrandPalette.softened(Theme.of(context).colorScheme.primary);
     final maxHeight =
         MediaQuery.sizeOf(context).height * FxHomeSheetChrome.maxHeightFactor;
 
@@ -120,8 +126,8 @@ class FxHelpSheetFrame extends StatelessWidget {
             subtitle: subtitle,
             leading: FxIcon(
               name: FxHelpChrome.iconName,
-              color: primary,
-              size: 18,
+              color: brand,
+              size: FxHelpChrome.glyphSize,
             ),
           ),
           SizedBox(height: TokensStrip.s4),
