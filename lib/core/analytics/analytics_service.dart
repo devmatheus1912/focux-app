@@ -96,6 +96,11 @@ class ProductEvents {
 
   static const referralLinkShared = 'referral_link_shared';
   static const activationCtaTapped = 'activation_cta_tapped';
+  static const setupWizardViewed = 'setup_wizard_viewed';
+  static const setupWizardRefreshed = 'setup_wizard_refreshed';
+  static const setupWizardContinue = 'setup_wizard_continue';
+  static const setupWizardCompleted = 'setup_wizard_completed';
+  static const setupWizardTtv = 'setup_wizard_ttv';
   static const mensalidadeCreated = 'mensalidade_created';
   static const paywallDismissed = 'paywall_dismissed';
   static const trialBannerTapped = 'trial_banner_tapped';

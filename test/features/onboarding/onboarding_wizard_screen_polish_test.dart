@@ -43,6 +43,12 @@ void main() {
     expect(screen, contains('RefreshIndicator'));
     expect(screen, contains('FxSettingsGroup'));
     expect(screen, contains('SetupWizardCta'));
+    expect(screen, contains('FxHubFreshness'));
+    expect(screen, contains('ProductEvents.setupWizardViewed'));
+    expect(screen, contains('ProductEvents.setupWizardContinue'));
+    expect(screen, contains('ProductEvents.setupWizardCompleted'));
+    expect(screen, contains('DashboardHomeClientCache.clear'));
+    expect(screen, contains('_load(silent: true)'));
     expect(screen, isNot(contains('FxLiquidPrimaryButton')));
   });
 
