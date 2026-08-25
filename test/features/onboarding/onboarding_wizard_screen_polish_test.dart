@@ -49,6 +49,7 @@ void main() {
     expect(screen, contains('ProductEvents.setupWizardContinue'));
     expect(screen, contains('ProductEvents.setupWizardCompleted'));
     expect(screen, contains('DashboardHomeClientCache.clear'));
+    expect(screen, contains('OnboardingWizardClientCache'));
     expect(screen, contains('_load(silent: true)'));
     expect(screen, isNot(contains('FxLiquidPrimaryButton')));
   });

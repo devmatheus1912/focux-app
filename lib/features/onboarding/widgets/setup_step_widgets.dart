@@ -367,7 +367,7 @@ class SetupWizardSkeleton extends StatelessWidget {
               width: 180,
               height: 18,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: highlight,
                 borderRadius: BorderRadius.circular(6),
               ),
             ),
@@ -376,7 +376,7 @@ class SetupWizardSkeleton extends StatelessWidget {
               width: double.infinity,
               height: 4,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: highlight,
                 borderRadius: BorderRadius.circular(4),
               ),
             ),
@@ -385,7 +385,7 @@ class SetupWizardSkeleton extends StatelessWidget {
               Container(
                 height: 220,
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: highlight,
                   borderRadius: BorderRadius.circular(
                     FxSettingsLayout.groupRadius,
                   ),

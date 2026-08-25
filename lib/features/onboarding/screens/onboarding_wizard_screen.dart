@@ -23,6 +23,7 @@ import '../../auth/providers/auth_provider.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
 import '../../dashboard/utils/dashboard_home_client_cache.dart';
 import '../data/onboarding_repository.dart';
+import '../data/onboarding_wizard_client_cache.dart';
 import '../widgets/setup_step_widgets.dart';
 
 class OnboardingWizardScreen extends ConsumerStatefulWidget {
@@ -65,7 +66,61 @@ class _OnboardingWizardScreenState
 
   void _evictHomeCaches() {
     DashboardHomeClientCache.clear();
+    OnboardingWizardClientCache.clear();
     ref.invalidate(dashboardHomeProvider);
+  }
+
+  Future<void> _load({bool silent = false}) async {
+    final cached = OnboardingWizardClientCache.getIfFresh();
+    final keepFold = silent && _wizard != null;
+    if (!keepFold) {
+      if (cached != null) {
+        setState(() {
+          _wizard = cached;
+          _loading = false;
+          _erro = null;
+          _fetchedAt = OnboardingWizardClientCache.fetchedAt;
+          _previousCompleted = cached.completedCount;
+        });
+      } else {
+        setState(() {
+          _loading = true;
+          _erro = null;
+        });
+      }
+    }
+    try {
+      final w =
+          await OnboardingRepository(ref.read(apiClientProvider)).wizard();
+      if (!mounted) return;
+      OnboardingWizardClientCache.put(w);
+      final completed = w.completedCount;
+      if (completed > _previousCompleted && _previousCompleted > 0) {
+        HapticFeedback.mediumImpact();
+        _evictHomeCaches();
+        OnboardingWizardClientCache.put(w);
+      }
+      if (w.allStepsDone && !_celebratedAllDone) {
+        HapticFeedback.heavyImpact();
+        _celebratedAllDone = true;
+      }
+      setState(() {
+        _wizard = w;
+        _loading = false;
+        _erro = null;
+        _previousCompleted = completed;
+        _fetchedAt = DateTime.now();
+      });
+      _trackViewedOnce(w);
+      _trackTtvOnce();
+    } catch (e) {
+      if (!mounted) return;
+      if (_wizard != null) return;
+      setState(() {
+        _loading = false;
+        _erro = friendlyError(e);
+      });
+    }
   }
 
   void _trackViewedOnce(OnboardingWizard wizard) {
@@ -94,46 +149,6 @@ class _OnboardingWizardScreenState
         },
       ),
     );
-  }
-
-  Future<void> _load({bool silent = false}) async {
-    final keepFold = silent && _wizard != null;
-    if (!keepFold) {
-      setState(() {
-        _loading = true;
-        _erro = null;
-      });
-    }
-    try {
-      final w =
-          await OnboardingRepository(ref.read(apiClientProvider)).wizard();
-      if (!mounted) return;
-      final completed = w.completedCount;
-      if (completed > _previousCompleted && _previousCompleted > 0) {
-        HapticFeedback.mediumImpact();
-        _evictHomeCaches();
-      }
-      if (w.allStepsDone && !_celebratedAllDone) {
-        HapticFeedback.heavyImpact();
-        _celebratedAllDone = true;
-      }
-      setState(() {
-        _wizard = w;
-        _loading = false;
-        _erro = null;
-        _previousCompleted = completed;
-        _fetchedAt = DateTime.now();
-      });
-      _trackViewedOnce(w);
-      _trackTtvOnce();
-    } catch (e) {
-      if (!mounted) return;
-      if (keepFold) return;
-      setState(() {
-        _loading = false;
-        _erro = friendlyError(e);
-      });
-    }
   }
 
   Future<void> _refresh() async {
