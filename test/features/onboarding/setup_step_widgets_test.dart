@@ -41,4 +41,32 @@ void main() {
     expect(find.text('Adicione cor da marca'), findsOneWidget);
     expect(find.text('~2 min'), findsOneWidget);
   });
+
+  testWidgets('CTA do wizard não estica na tela', (tester) async {
+    const screen = Size(400, 800);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SizedBox(
+            width: screen.width,
+            height: screen.height,
+            child: Stack(
+              children: [
+                SetupWizardCta(
+                  label: 'Continuar setup',
+                  accent: const Color(0xFF13C2C2),
+                  isDark: false,
+                  onPressed: () {},
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final chip = tester.getSize(find.text('Continuar setup'));
+    expect(chip.width, lessThan(screen.width / 2));
+    expect(chip.height, lessThan(80));
+  });
 }

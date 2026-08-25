@@ -614,23 +614,16 @@ class SetupWizardCta extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Align(
-      alignment: AlignmentDirectional.bottomEnd,
+    return PositionedDirectional(
+      end: TokensStrip.s4,
+      bottom: TokensStrip.s4,
       child: SafeArea(
         top: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(
-            TokensStrip.s4,
-            0,
-            TokensStrip.s4,
-            TokensStrip.s4,
-          ),
-          child: DashboardHomeActionChip(
-            label: label,
-            accent: accent,
-            isDark: isDark,
-            onPressed: onPressed,
-          ),
+        child: DashboardHomeActionChip(
+          label: label,
+          accent: accent,
+          isDark: isDark,
+          onPressed: onPressed,
         ),
       ),
     );

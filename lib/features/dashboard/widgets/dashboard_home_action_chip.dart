@@ -28,25 +28,25 @@ class DashboardHomeActionChip extends StatelessWidget {
     return Semantics(
       button: true,
       label: label,
-      child: Material(
-        color: bg,
-        elevation: isDark ? 3 : 1,
-        shadowColor: accent.withValues(alpha: isDark ? 0.38 : 0.14),
-        shape: const StadiumBorder(),
-        child: InkWell(
-          onTap: () {
-            HapticFeedback.selectionClick();
-            onPressed();
-          },
-          customBorder: const StadiumBorder(),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(minHeight: 48, minWidth: 48),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: TokensStrip.s4,
-                vertical: 11,
-              ),
-              child: Center(
+      child: UnconstrainedBox(
+        child: Material(
+          color: bg,
+          elevation: isDark ? 3 : 1,
+          shadowColor: accent.withValues(alpha: isDark ? 0.38 : 0.14),
+          shape: const StadiumBorder(),
+          child: InkWell(
+            onTap: () {
+              HapticFeedback.selectionClick();
+              onPressed();
+            },
+            customBorder: const StadiumBorder(),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 48, minWidth: 48),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: TokensStrip.s4,
+                  vertical: 11,
+                ),
                 child: Text(
                   label,
                   maxLines: 1,
