@@ -6,12 +6,14 @@ import '../theme/design_tokens.dart';
 import '../theme/fx_settings_layout.dart';
 import '../theme/shell_chrome.dart';
 import '../theme/tokens_strip.dart';
+import 'fx_icon.dart';
 
 /// Linha de ajustes inset — anatomia ChatGPT/iOS, pele da Home.
 class FxSettingsTile extends StatelessWidget {
   const FxSettingsTile({
     super.key,
-    required this.icon,
+    this.icon,
+    this.fxIcon,
     required this.label,
     required this.value,
     required this.onTap,
@@ -26,9 +28,10 @@ class FxSettingsTile extends StatelessWidget {
     this.numeric = false,
     this.onLongPress,
     this.upgradeTierLabel,
-  });
+  }) : assert(icon != null || fxIcon != null);
 
-  final IconData icon;
+  final IconData? icon;
+  final String? fxIcon;
   final String label;
   final String value;
   final VoidCallback onTap;
@@ -94,11 +97,17 @@ class FxSettingsTile extends StatelessWidget {
           ),
           child: Row(
             children: [
-              Icon(
-                icon,
-                size: FxSettingsLayout.iconSize,
-                color: iconColor,
-              ),
+              fxIcon != null
+                  ? FxIcon(
+                    name: fxIcon!,
+                    size: FxSettingsLayout.iconSize,
+                    color: iconColor,
+                  )
+                  : Icon(
+                    icon!,
+                    size: FxSettingsLayout.iconSize,
+                    color: iconColor,
+                  ),
               const SizedBox(width: FxSettingsLayout.iconGap),
               Expanded(
                 child: DecoratedBox(

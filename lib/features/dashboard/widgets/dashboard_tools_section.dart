@@ -70,7 +70,6 @@ class DashboardCollapsibleToolsSection extends ConsumerWidget {
         context,
         ref: ref,
         isDark: isDark,
-        shortcutAspectRatio: shortcutAspectRatio,
         homePlanoFeatures: homePlanoFeatures,
       );
     }

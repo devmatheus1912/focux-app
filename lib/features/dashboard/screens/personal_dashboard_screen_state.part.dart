@@ -135,10 +135,6 @@ class _PersonalDashboardScreenState
           context,
           ref: ref,
           isDark: isDark,
-          shortcutAspectRatio:
-              DashboardLayout.isCompact(MediaQuery.sizeOf(context).width)
-                  ? 2.55
-                  : 2.85,
         );
       }
     });

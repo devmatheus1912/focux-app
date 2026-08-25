@@ -140,4 +140,21 @@ void main() {
     final semanticsCount = 'Semantics('.allMatches(screen).length;
     expect(semanticsCount, greaterThanOrEqualTo(10));
   });
+
+  test('catálogo completo é lista inset sem accordion', () {
+    final catalog = File(
+      'lib/features/dashboard/widgets/dashboard_tools_catalog_sheet.dart',
+    ).readAsStringSync();
+    final grid = File(
+      'lib/features/dashboard/widgets/dashboard_tool_grid.dart',
+    ).readAsStringSync();
+    expect(catalog, contains('FxSettingsGroup'));
+    expect(catalog, contains('FxSettingsTile'));
+    expect(catalog, contains('ListView.builder'));
+    expect(catalog, contains('catalogoSubtitle'));
+    expect(catalog, isNot(contains('DashboardExpandableToolGroups')));
+    expect(catalog, isNot(contains('shortcutAspectRatio')));
+    expect(grid, isNot(contains('class DashboardExpandableToolGroups')));
+    expect(grid, contains('class DashboardShortcutGrid'));
+  });
 }

@@ -22,6 +22,8 @@ abstract final class DashboardMicrocopy {
   static const ferramentasEmDestaque = 'Ferramentas em destaque';
   static const verCatalogoCompleto = 'Ver catálogo completo';
   static const catalogoCompleto = 'Catálogo completo';
+  static const catalogoSubtitle =
+      'Ferramentas do plano. Bloqueadas abrem o upgrade.';
   static const buscarFerramenta = 'Buscar ferramenta...';
   static const tendencia7Dias = 'Tendência 7 dias';
   static const tendenciaVaziaChip = 'Sem treinos';

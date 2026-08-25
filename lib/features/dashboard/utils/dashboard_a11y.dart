@@ -56,12 +56,3 @@ String dashboardAttentionCarouselSemantics(int total) {
   return 'Carrossel horizontal, $total '
       '${total == 1 ? 'item' : 'itens'}. Deslize para ver mais';
 }
-
-String dashboardToolGroupSemanticsLabel(
-  String title,
-  bool expanded,
-  int count,
-) {
-  return '${dashboardCollapsibleSemanticsLabel(title, expanded)}. '
-      '$count ferramentas';
-}

@@ -1,23 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/brand_palette.dart';
+import '../../../core/theme/focux_hub_typography.dart';
+import '../../../core/theme/fx_settings_layout.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_input_deco.dart';
+import '../../../core/widgets/fx_settings_group.dart';
+import '../../../core/widgets/fx_settings_tile.dart';
 import '../../planos/data/planos_repository.dart';
+import '../../planos/utils/effective_plano_features.dart';
 import '../data/dashboard_tool_shortcuts.dart';
 import '../utils/dashboard_microcopy.dart';
-import '../utils/dashboard_readability.dart';
 import '../utils/dashboard_shortcut_navigation.dart';
 import '../utils/dashboard_tool_groups.dart';
-import 'dashboard_tool_grid.dart';
 
 Future<void> showDashboardToolsCatalogSheet(
   BuildContext context, {
   required WidgetRef ref,
   required bool isDark,
-  required double shortcutAspectRatio,
   PlanoFeatures? homePlanoFeatures,
 }) {
   return showFxHomeSheet<void>(
@@ -27,7 +30,6 @@ Future<void> showDashboardToolsCatalogSheet(
           parentContext: context,
           parentRef: ref,
           isDark: isDark,
-          shortcutAspectRatio: shortcutAspectRatio,
           homePlanoFeatures: homePlanoFeatures,
         ),
   );
@@ -39,14 +41,12 @@ class DashboardToolsCatalogSheet extends StatefulWidget {
     required this.parentContext,
     required this.parentRef,
     required this.isDark,
-    required this.shortcutAspectRatio,
     this.homePlanoFeatures,
   });
 
   final BuildContext parentContext;
   final WidgetRef parentRef;
   final bool isDark;
-  final double shortcutAspectRatio;
   final PlanoFeatures? homePlanoFeatures;
 
   @override
@@ -60,17 +60,13 @@ class _DashboardToolsCatalogSheetState
 
   @override
   Widget build(BuildContext context) {
-    final mute = dashboardReadableMuted(context, isDark: widget.isDark);
-    final ink = widget.isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final hint = ink.withValues(alpha: widget.isDark ? 0.78 : 0.62);
+    final chrome = ShellChrome.of(context);
+    final brand = BrandPalette.softened(Theme.of(context).colorScheme.primary);
     final shortcuts = filterDashboardToolShortcuts(
       DashboardToolShortcut.moreTools,
       _searchQuery,
     );
     final groups = groupDashboardToolShortcuts(shortcuts);
-    final primary = Theme.of(context).colorScheme.primary;
-    final searchFill =
-        widget.isDark ? EagleTokens.darkCardHi : TokensStrip.pageBg;
     final maxHeight =
         MediaQuery.sizeOf(context).height *
         FxHomeSheetChrome.expandHeightFactor;
@@ -83,38 +79,88 @@ class _DashboardToolsCatalogSheetState
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           FxHomeSheetHandle(isDark: widget.isDark),
-          SizedBox(height: TokensStrip.s4),
-          FxHomeSheetHeader(
-            isDark: widget.isDark,
-            title: DashboardMicrocopy.catalogoCompleto,
-            subtitle: DashboardMicrocopy.buscarFerramenta,
-            leading: Icon(Icons.apps_rounded, color: primary, size: 18),
+          const SizedBox(height: TokensStrip.s4),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(
+                Icons.apps_outlined,
+                size: FxSettingsLayout.iconSize,
+                color: brand,
+              ),
+              const SizedBox(width: FxSettingsLayout.iconGap),
+              Expanded(
+                child: Semantics(
+                  header: true,
+                  label:
+                      '${DashboardMicrocopy.catalogoCompleto}. '
+                      '${DashboardMicrocopy.catalogoSubtitle}',
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        DashboardMicrocopy.catalogoCompleto,
+                        style: FocuxHubTypography.sectionTitle(
+                          context,
+                          color: chrome.ink,
+                        ),
+                      ),
+                      const SizedBox(height: TokensStrip.s1),
+                      Text(
+                        DashboardMicrocopy.catalogoSubtitle,
+                        style: FocuxHubTypography.bodyMuted(
+                          color: chrome.mute,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              IconButton(
+                tooltip: 'Fechar',
+                onPressed: () => Navigator.of(context).pop(),
+                style: IconButton.styleFrom(
+                  minimumSize: const Size(
+                    FxHomeSheetChrome.touchTarget,
+                    FxHomeSheetChrome.touchTarget,
+                  ),
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  foregroundColor: chrome.mute,
+                ),
+                icon: const Icon(Icons.close_rounded, size: 22),
+              ),
+            ],
           ),
           Padding(
-            padding: const EdgeInsets.only(top: 8, bottom: 12),
+            padding: const EdgeInsets.only(
+              top: TokensStrip.s3,
+              bottom: TokensStrip.s3,
+            ),
             child: Semantics(
               textField: true,
               label: DashboardMicrocopy.buscarFerramenta,
               child: TextField(
                 onChanged: (v) => setState(() => _searchQuery = v),
-                style: FocuxHubTypography.body(color: ink),
+                textInputAction: TextInputAction.search,
+                style: FocuxHubTypography.body(color: chrome.ink),
                 decoration: InputDecoration(
                   hintText: DashboardMicrocopy.buscarFerramenta,
-                  hintStyle: FocuxHubTypography.bodyMuted(color: hint),
-                  prefixIcon: Icon(Icons.search_rounded, color: hint),
+                  hintStyle: FocuxHubTypography.bodyMuted(color: chrome.mute),
+                  prefixIcon: Icon(
+                    Icons.search_rounded,
+                    color: chrome.mute,
+                    size: FxSettingsLayout.iconSize,
+                  ),
                   isDense: true,
                   filled: true,
-                  fillColor: searchFill,
+                  fillColor: chrome.cardFill,
                   border: FxInputDeco.outlineBorder(
                     borderRadius: BorderRadius.circular(TokensStrip.rInput),
-                    borderSide: BorderSide(
-                      color: TokensStrip.borderDefault.withValues(
-                        alpha: widget.isDark ? 0.85 : 0.9,
-                      ),
-                    ),
+                    borderSide: BorderSide(color: chrome.line),
                   ),
                   contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 12,
+                    horizontal: TokensStrip.s3,
                     vertical: 10,
                   ),
                 ),
@@ -122,23 +168,31 @@ class _DashboardToolsCatalogSheetState
             ),
           ),
           Expanded(
-            child: ListView(
-              padding: EdgeInsets.zero,
-              children: [
-                if (groups.isEmpty)
-                  Padding(
+            child: ListView.builder(
+              padding: const EdgeInsets.only(bottom: TokensStrip.s4),
+              itemCount: groups.isEmpty ? 1 : groups.length,
+              itemBuilder: (context, index) {
+                if (groups.isEmpty) {
+                  return Padding(
                     padding: const EdgeInsets.symmetric(vertical: 28),
                     child: Text(
                       DashboardMicrocopy.nenhumaFerramenta,
-                      style: FocuxHubTypography.bodyMuted(color: mute),
+                      textAlign: TextAlign.center,
+                      style: FocuxHubTypography.bodyMuted(color: chrome.mute),
                     ),
-                  )
-                else
-                  DashboardExpandableToolGroups(
-                    groups: groups,
-                    isDark: widget.isDark,
-                    shortcutAspectRatio: widget.shortcutAspectRatio,
-                    searchQuery: _searchQuery,
+                  );
+                }
+                final group = groups[index];
+                return Padding(
+                  padding: EdgeInsets.only(
+                    bottom:
+                        index < groups.length - 1
+                            ? FxSettingsLayout.groupGap
+                            : 0,
+                  ),
+                  child: _DashboardCatalogGroup(
+                    group: group,
+                    homePlanoFeatures: widget.homePlanoFeatures,
                     onShortcut: (shortcut) {
                       Navigator.of(context).pop();
                       openDashboardShortcut(
@@ -149,11 +203,54 @@ class _DashboardToolsCatalogSheetState
                       );
                     },
                   ),
-              ],
+                );
+              },
             ),
           ),
         ],
       ),
+    );
+  }
+}
+
+class _DashboardCatalogGroup extends ConsumerWidget {
+  const _DashboardCatalogGroup({
+    required this.group,
+    required this.onShortcut,
+    this.homePlanoFeatures,
+  });
+
+  final DashboardToolGroupSection group;
+  final PlanoFeatures? homePlanoFeatures;
+  final void Function(DashboardToolShortcut shortcut) onShortcut;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final features = effectivePlanoFeatures(
+      ref,
+      homeOverride: homePlanoFeatures,
+    );
+    final chrome = ShellChrome.of(context);
+
+    return FxSettingsGroup(
+      header: group.title,
+      children: [
+        for (var i = 0; i < group.shortcuts.length; i++)
+          FxSettingsTile(
+            fxIcon: group.shortcuts[i].icon,
+            label: group.shortcuts[i].label,
+            value:
+                group.shortcuts[i].isUnlocked(features)
+                    ? ''
+                    : group.shortcuts[i].tierBadgeLabel(),
+            locked: !group.shortcuts[i].isUnlocked(features),
+            upgradeTierLabel: group.shortcuts[i].tierBadgeLabel(),
+            mute: chrome.mute,
+            line: chrome.line,
+            showDivider: i < group.shortcuts.length - 1,
+            onTap: () => onShortcut(group.shortcuts[i]),
+          ),
+      ],
     );
   }
 }
