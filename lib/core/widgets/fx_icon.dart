@@ -275,6 +275,11 @@ class _FxIconPainter extends CustomPainter {
         canvas.drawLine(const Offset(5, 12), const Offset(19, 12), paint);
         break;
 
+      case 'x':
+        canvas.drawLine(const Offset(7, 7), const Offset(17, 17), paint);
+        canvas.drawLine(const Offset(17, 7), const Offset(7, 17), paint);
+        break;
+
       case 'calendar':
         canvas.drawRRect(
           RRect.fromRectAndRadius(

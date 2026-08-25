@@ -22,6 +22,7 @@ import '../../../core/widgets/skeleton_loader.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
 import '../../dashboard/utils/dashboard_home_client_cache.dart';
+import '../../dashboard/utils/dashboard_onboarding_logic.dart';
 import '../../dashboard/widgets/dashboard_command_center_sticky_header.dart';
 import '../data/onboarding_repository.dart';
 import '../data/onboarding_wizard_client_cache.dart';
@@ -194,6 +195,12 @@ class _OnboardingWizardScreenState
     if (mounted) await _load(silent: true);
   }
 
+  void _sairSemConcluir() {
+    HapticFeedback.selectionClick();
+    DashboardOnboardingWizardGate.dismissForSession();
+    context.go('/dashboard/personal');
+  }
+
   @override
   Widget build(BuildContext context) {
     final wizard = _wizard;
@@ -208,7 +215,23 @@ class _OnboardingWizardScreenState
         appBar: FxShellAppBar(
           title: 'Primeiros passos',
           subtitle: _appBarSubtitle,
-          onBack: () => context.go('/dashboard/personal'),
+          onBack: _sairSemConcluir,
+          actions: [
+            Padding(
+              padding: const EdgeInsets.only(right: TokensStrip.s3),
+              child: Center(
+                child: Semantics(
+                  button: true,
+                  label: 'Fechar',
+                  child: ShellHeaderIconButton(
+                    icon: 'x',
+                    tooltip: 'Fechar',
+                    onTap: _sairSemConcluir,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
         body:
             _loading && wizard == null

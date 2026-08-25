@@ -45,14 +45,17 @@ class DashboardHomeActionChip extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: TokensStrip.s4,
-                  vertical: 11,
                 ),
-                child: Text(
-                  label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: dashboardChipLabelStyle(fg).copyWith(
-                    fontWeight: FontWeight.w800,
+                child: Center(
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                    style: dashboardChipLabelStyle(fg).copyWith(
+                      fontWeight: FontWeight.w800,
+                      height: 1.0,
+                    ),
                   ),
                 ),
               ),

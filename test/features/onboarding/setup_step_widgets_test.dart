@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/dashboard/widgets/dashboard_command_center_sticky_header.dart';
+import 'package:focux_app/features/dashboard/widgets/dashboard_home_action_chip.dart';
 import 'package:focux_app/features/onboarding/widgets/setup_step_widgets.dart';
 
 void main() {
@@ -68,6 +69,16 @@ void main() {
     final chip = tester.getSize(find.text('Continuar'));
     expect(chip.width, lessThan(screen.width / 2));
     expect(chip.height, lessThan(80));
+
+    final labelBox = tester.getRect(find.text('Continuar'));
+    final materialBox = tester.getRect(
+      find.descendant(
+        of: find.byType(DashboardHomeActionChip),
+        matching: find.byType(Material),
+      ),
+    );
+    expect((labelBox.center.dy - materialBox.center.dy).abs(), lessThan(1.5));
+    expect((labelBox.center.dx - materialBox.center.dx).abs(), lessThan(1.5));
   });
 
   testWidgets('passo pendente tem Semantics de botão', (tester) async {

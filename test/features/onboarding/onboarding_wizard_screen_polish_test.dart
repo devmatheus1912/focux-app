@@ -51,6 +51,9 @@ void main() {
     expect(screen, contains('DashboardHomeClientCache.clear'));
     expect(screen, contains('OnboardingWizardClientCache'));
     expect(screen, contains('_load(silent: true)'));
+    expect(screen, contains('dismissForSession'));
+    expect(screen, contains("icon: 'x'"));
+    expect(screen, contains("tooltip: 'Fechar'"));
     expect(screen, isNot(contains('FxLiquidPrimaryButton')));
   });
 
