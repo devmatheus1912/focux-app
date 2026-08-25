@@ -85,9 +85,19 @@ class TlsCertificatePinning {
     );
   }
 
+  /// Pin só quando há pins configurados. Sideload sem [Env.apiCertPins]
+  /// não pode rejeitar o certificado do Railway (o pool HTTP reusa este client).
+  @visibleForTesting
+  static bool shouldEnforcePin(String host, Set<String> allowed) {
+    return allowed.isNotEmpty && shouldPinHost(host);
+  }
+
   static HttpClient createPinnedHttpClient([Set<String>? pins]) {
     final allowed = pins ?? _allowedPins();
     final client = baseHttpClient();
+    if (allowed.isEmpty) {
+      return client;
+    }
     client.connectionFactory = _connectionFactory(allowed);
     return client;
   }
@@ -103,7 +113,7 @@ class TlsCertificatePinning {
       if (uri.scheme != 'https' && uri.scheme != 'wss') {
         return Socket.startConnect(host, port);
       }
-      if (!shouldPinHost(host)) {
+      if (!shouldEnforcePin(host, allowed)) {
         return SecureSocket.startConnect(host, port);
       }
       final Future<Socket> future =
@@ -123,7 +133,7 @@ class TlsCertificatePinning {
   static bool matches(X509Certificate? cert, [Set<String>? pins]) {
     if (cert == null) return false;
     final allowed = pins ?? _allowedPins();
-    if (allowed.isEmpty) return !kReleaseMode;
+    if (allowed.isEmpty) return true;
     final digest = sha256.convert(cert.der);
     final b64 = base64.encode(digest.bytes);
     final hex = digest.bytes

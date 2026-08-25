@@ -4,7 +4,10 @@ import 'package:dio/io.dart';
 import 'tls_certificate_pinning.dart';
 
 /// Tunes the native HTTP client for many parallel API calls (dashboard + sync).
-/// Preserva o client pinado quando [TlsCertificatePinning.apply] já rodou.
+///
+/// Sem pins, [TlsCertificatePinning.createPinnedHttpClient] devolve um
+/// HttpClient normal — não pode pin-mismatch em sideload/release sem
+/// `API_CERT_PINS`.
 void configureHttpConnectionPool(Dio dio) {
   final adapter = dio.httpClientAdapter;
   if (adapter is! IOHttpClientAdapter) {

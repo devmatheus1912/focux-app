@@ -29,6 +29,23 @@ void main() {
     );
   });
 
+  test('sem pins o host da API usa TLS do sistema', () {
+    expect(
+      TlsCertificatePinning.shouldEnforcePin(
+        'focux-backend-production.up.railway.app',
+        const {},
+      ),
+      isFalse,
+    );
+    expect(
+      TlsCertificatePinning.shouldEnforcePin(
+        'focux-backend-production.up.railway.app',
+        {'sha256/abc'},
+      ),
+      isTrue,
+    );
+  });
+
   test('baseHttpClient nao reentra no HttpOverrides global', () {
     HttpOverrides.global = _PinnedHttpOverrides({'sha256/test'});
     addTearDown(() => HttpOverrides.global = null);
