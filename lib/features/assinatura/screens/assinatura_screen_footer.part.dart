@@ -1,147 +1,5 @@
 part of 'assinatura_screen.dart';
 
-class _EnterprisePreviewCard extends StatelessWidget {
-  final EnterpriseUpgradePreview preview;
-  final Color primary;
-  final Color ink;
-  final Color mute;
-  final bool isDark;
-
-  const _EnterprisePreviewCard({
-    required this.preview,
-    required this.primary,
-    required this.ink,
-    required this.mute,
-    required this.isDark,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final accent = PaywallCatalog.accentForPlan(preview.planoDestino);
-    final destLabel = PaywallCatalog.displayPlanName(preview.planoDestino);
-    return PaywallGlassCard(
-      accent: accent,
-      padding: const EdgeInsets.all(14),
-      blur: false,
-      elevationLevel: 4,
-      child: Text(
-        preview.cobrancaImediata
-            ? 'Upgrade para $destLabel: cobrança proporcional de R\$ ${preview.valorProporcional.toStringAsFixed(2)} (${preview.diasRestantes} dias restantes no ciclo).'
-            : 'Upgrade para $destLabel sem cobrança proporcional imediata neste ciclo.',
-        style: TokensStrip.body(color: ink),
-      ),
-    );
-  }
-}
-
-class _EnterpriseProUpgradePriceHint extends StatelessWidget {
-  final SubscriptionPlan currentPlan;
-  final SubscriptionPlan targetPlan;
-  final SubscriptionBillingPeriod billingPeriod;
-  final Map<String, ProductDetails> productDetails;
-  final Plano currentBackend;
-  final Plano targetBackend;
-  final Color primary;
-  final Color ink;
-  final Color mute;
-  final bool isDark;
-
-  const _EnterpriseProUpgradePriceHint({
-    required this.currentPlan,
-    required this.targetPlan,
-    required this.billingPeriod,
-    required this.productDetails,
-    required this.currentBackend,
-    required this.targetBackend,
-    required this.primary,
-    required this.ink,
-    required this.mute,
-    required this.isDark,
-  });
-
-  static String _formatBrl(double value) =>
-      'R\$ ${value.toStringAsFixed(2).replaceAll('.', ',')}';
-
-  String? _storeDeltaCopy() {
-    final currentProduct =
-        productDetails[SubscriptionProducts.productIdFor(
-          currentPlan,
-          billingPeriod,
-        )];
-    final targetProduct =
-        productDetails[SubscriptionProducts.productIdFor(
-          targetPlan,
-          billingPeriod,
-        )];
-    if (currentProduct == null || targetProduct == null) return null;
-
-    final currentRaw = currentProduct.rawPrice;
-    final targetRaw = targetProduct.rawPrice;
-    if (currentRaw <= 0 || targetRaw <= currentRaw) return null;
-
-    final delta = targetRaw - currentRaw;
-    final periodLabel =
-        billingPeriod == SubscriptionBillingPeriod.yearly ? 'ano' : 'mês';
-    final deltaLabel = delta.toStringAsFixed(2).replaceAll('.', ',');
-    return 'Estimativa na ${subscriptionChannelLabel()}: +'
-        '${targetProduct.currencySymbol}$deltaLabel/$periodLabel '
-        'em relação ao seu plano atual. A loja confirma o valor final '
-        'e o crédito proporcional do ciclo.';
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final accent = PaywallCatalog.accentForPlan(targetPlan);
-    final secondary = PaywallCatalog.readableSecondary(
-      ink,
-      mute,
-      isDark: isDark,
-    );
-    final storeCopy = _storeDeltaCopy();
-    final fallbackMonthly =
-        targetBackend.precoMensal - currentBackend.precoMensal;
-    final body =
-        storeCopy ??
-        (fallbackMonthly > 0
-            ? 'Referência: +${_formatBrl(fallbackMonthly)}/mês. '
-                'Valor final na ${subscriptionChannelLabel()}, '
-                'com crédito proporcional se aplicável.'
-            : 'Valor final na ${subscriptionChannelLabel()}, '
-                'com crédito proporcional do ciclo se aplicável.');
-
-    return PaywallInsetPanel(
-      accent: accent,
-      isDark: isDark,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(Icons.payments_outlined, size: 18, color: accent),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Quanto custa o upgrade?',
-                  style: FocuxHubTypography.cardTitle(color: ink)
-                      .copyWith(height: 1.25),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  body,
-                  style: TokensStrip.bodyMuted(
-                    color: secondary,
-                  ).copyWith(fontSize: 13, height: 1.4),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 enum _AssinaturaCtaMode {
   subscribe,
   manageStore,
@@ -206,18 +64,14 @@ class _AssinaturaStickyFooter extends StatelessWidget {
   final _AssinaturaCtaMode mode;
   final String label;
   final String? planSummary;
-  final String? priceLabel;
-  final String? priceCaption;
   final String footnote;
   final bool enabled;
   final bool loading;
-  final bool trialHint;
   final bool showLegalConsent;
   final bool isUpgrade;
   final Color? tierAccent;
   final Color ink;
   final Color mute;
-  final Color line;
   final Color primary;
   final VoidCallback onSubscribe;
   final VoidCallback onManage;
@@ -229,18 +83,14 @@ class _AssinaturaStickyFooter extends StatelessWidget {
     required this.mode,
     required this.label,
     this.planSummary,
-    this.priceLabel,
-    this.priceCaption,
     required this.footnote,
     required this.enabled,
     required this.loading,
-    required this.trialHint,
     required this.showLegalConsent,
     this.isUpgrade = false,
     this.tierAccent,
     required this.ink,
     required this.mute,
-    required this.line,
     required this.primary,
     required this.onSubscribe,
     required this.onManage,
@@ -273,92 +123,46 @@ class _AssinaturaStickyFooter extends StatelessWidget {
     if (mode == _AssinaturaCtaMode.manageStore ||
         mode == _AssinaturaCtaMode.goHome) {
       icon = Icons.home_rounded;
-    } else if (mode == _AssinaturaCtaMode.subscribe) {
-      icon =
-          trialHint
-              ? Icons.card_giftcard_rounded
-              : Icons.workspace_premium_rounded;
     }
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (planSummary != null) ...[
-          Builder(
-            builder: (context) {
-              final parts = planSummary!.split(' · ');
-              if (parts.length == 2) {
-                return Text.rich(
+        if (planSummary != null)
+          Padding(
+            padding: const EdgeInsets.only(bottom: TokensStrip.s2),
+            child: Builder(
+              builder: (context) {
+                final parts = planSummary!.split(' · ');
+                if (parts.length == 2) {
+                  return Text.rich(
+                    textAlign: TextAlign.center,
+                    TextSpan(
+                      children: [
+                        TextSpan(
+                          text: '${parts[0]} · ',
+                          style: FocuxHubTypography.bodyMuted(
+                            color: secondary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        TextSpan(
+                          text: parts[1],
+                          style: FocuxHubTypography.cardTitle(color: ink),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+                return Text(
+                  planSummary!,
                   textAlign: TextAlign.center,
-                  TextSpan(
-                    children: [
-                      TextSpan(
-                        text: '${parts[0]} · ',
-                        style: TokensStrip.bodyMuted(color: secondary).copyWith(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 12,
-                          letterSpacing: 0.3,
-                        ),
-                      ),
-                      TextSpan(
-                        text: parts[1],
-                        style: TokensStrip.body(color: ink).copyWith(
-                          fontWeight: FontWeight.w800,
-                          fontSize: 15,
-                          letterSpacing: 0.15,
-                        ),
-                      ),
-                    ],
-                  ),
+                  style: FocuxHubTypography.cardTitle(color: ink),
                 );
-              }
-              return Text(
-                planSummary!,
-                textAlign: TextAlign.center,
-                style: TokensStrip.body(
-                  color: ink,
-                ).copyWith(fontWeight: FontWeight.w700, fontSize: 14),
-              );
-            },
-          ),
-          const SizedBox(height: 10),
-        ],
-        if (priceLabel != null &&
-            priceLabel!.trim().isNotEmpty &&
-            priceLabel != 'Grátis') ...[
-          Text(
-            priceLabel!,
-            textAlign: TextAlign.center,
-            style: FocuxHubTypography.metric(
-              color: ink,
-              fontSize: FocuxHubTypography.metricEm,
-              fontWeight: FontWeight.w800,
+              },
             ),
           ),
-          if (priceCaption != null && priceCaption!.trim().isNotEmpty) ...[
-            const SizedBox(height: 2),
-            Text(
-              priceCaption!,
-              textAlign: TextAlign.center,
-              style: TokensStrip.bodyMuted(color: secondary).copyWith(
-                fontWeight: FontWeight.w600,
-                fontSize: 12,
-              ),
-            ),
-          ],
-          const SizedBox(height: 10),
-        ],
-        if (trialHint) ...[
-          Text(
-            subscriptionUsesNativeStore
-                ? 'Oferta introdutória aplicada pela loja ao concluir a assinatura.'
-                : 'Cancele antes do fim do período gratuito para evitar cobrança.',
-            textAlign: TextAlign.center,
-            style: TokensStrip.bodyMuted(color: secondary),
-          ),
-          const SizedBox(height: 8),
-        ],
         if (isActionable)
           Semantics(
             button: true,
@@ -407,20 +211,23 @@ class _AssinaturaStickyFooter extends StatelessWidget {
         else
           FxLiquidPrimaryButton(label: label, onPressed: null),
         if (footnote.isNotEmpty) ...[
-          const SizedBox(height: 10),
+          const SizedBox(height: TokensStrip.s2),
           Text(
             footnote,
             textAlign: TextAlign.center,
-            style: TokensStrip.bodyMuted(
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: FocuxHubTypography.bodyMuted(
               color: secondary,
-            ).copyWith(fontSize: 12, height: 1.45),
+              height: 1.35,
+            ),
           ),
         ],
         if (onBillingDetails != null || onRestore != null) ...[
-          const SizedBox(height: 8),
+          const SizedBox(height: TokensStrip.s1),
           Wrap(
             alignment: WrapAlignment.center,
-            spacing: 4,
+            spacing: TokensStrip.s1,
             runSpacing: 0,
             children: [
               if (onBillingDetails != null)
@@ -428,15 +235,13 @@ class _AssinaturaStickyFooter extends StatelessWidget {
                   onPressed: onBillingDetails,
                   style: TextButton.styleFrom(
                     minimumSize: const Size(48, 48),
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: TokensStrip.s2,
+                    ),
                   ),
                   child: Text(
                     'Cobrança e termos',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: tierAccent ?? primary,
-                    ),
+                    style: FocuxHubTypography.chip(tierAccent ?? primary),
                   ),
                 ),
               if (onRestore != null)
@@ -444,22 +249,20 @@ class _AssinaturaStickyFooter extends StatelessWidget {
                   onPressed: restoringPurchases ? null : onRestore,
                   style: TextButton.styleFrom(
                     minimumSize: const Size(48, 48),
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: TokensStrip.s2,
+                    ),
                   ),
                   child: Text(
                     restoringPurchases ? 'Restaurando…' : 'Restaurar compras',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: tierAccent ?? primary,
-                    ),
+                    style: FocuxHubTypography.chip(tierAccent ?? primary),
                   ),
                 ),
             ],
           ),
         ],
         if (showLegalConsent) ...[
-          const SizedBox(height: 8),
+          const SizedBox(height: TokensStrip.s1),
           _PaywallLegalConsentLine(
             ink: ink,
             mute: mute,

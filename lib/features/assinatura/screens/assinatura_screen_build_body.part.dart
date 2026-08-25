@@ -11,7 +11,6 @@ extension AssinaturaScreenBuildBody on _AssinaturaScreenState {
     required bool isDark,
     required AsyncValue<PlanoFeatures?> featuresAsync,
     required PaywallVitrineSnapshot? vitrine,
-    required PaywallPriceCopy? selectedPrice,
     required SubscriptionPlan? paywallNextTier,
     required bool paywallHasUpgradeAbove,
   }) {
@@ -46,17 +45,7 @@ extension AssinaturaScreenBuildBody on _AssinaturaScreenState {
       selPlan = tabPlans.first;
     }
 
-    final selBackend = sortedPlans.firstWhere(
-      (plan) => subscriptionPlanFromApi(plan.nome) == selPlan,
-      orElse: () => sortedPlans.first,
-    );
-    final currentBackend = sortedPlans.firstWhere(
-      (plan) => subscriptionPlanFromApi(plan.nome) == currentPlan,
-      orElse: () => selBackend,
-    );
-    final isCurrentPlanSelected = selPlan == currentPlan;
     final isAcquisition = currentPlan == SubscriptionPlan.FREE;
-    final isUpgradeTargetSelected = selPlan.level > currentPlan.level;
     final hasUpgradeAbove =
         paywallHasUpgradeAbove ||
         (paywallNextTier != null && paywallNextTier.level > currentPlan.level);
@@ -98,178 +87,109 @@ extension AssinaturaScreenBuildBody on _AssinaturaScreenState {
         subscriptionUsesNativeStore &&
         storeOk;
 
-    final bottomInset = MediaQuery.paddingOf(context).bottom;
-    final stickyReserve =
-        TokensStrip.s8 * 3 + TokensStrip.s6 + bottomInset;
-
     return RefreshIndicator(
       onRefresh: () async {
         ref.invalidate(paywallHomeProvider);
         ref.invalidate(planoFeaturesProvider);
         await ref.read(paywallHomeProvider.future);
       },
-      child: ListView(
+      child: CustomScrollView(
         controller: _paywallScrollController,
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: EdgeInsets.fromLTRB(
-          TokensStrip.s5,
-          TokensStrip.s1,
-          TokensStrip.s5,
-          stickyReserve,
-        ),
-        children: [
-          if (usage != null &&
-              ((widget.blockedFeature != null &&
-                      widget.blockedFeature!.isNotEmpty) ||
-                  widget.blockedCapability != null))
-            PaywallContextBanner(
-              usage: usage,
-              blockedFeatureLabel: widget.blockedFeature,
-              blockedCapability: widget.blockedCapability,
-              ink: ink,
-              mute: mute,
-              onCta: () {
-                final target = PlanEntitlements.resolveUpgradeTarget(
-                  usage: usage,
-                  blockedFeatureLabel: widget.blockedFeature,
-                  blockedCapability: widget.blockedCapability,
-                );
-                _selectPlan(target);
-              },
+        slivers: [
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(
+              TokensStrip.s5,
+              TokensStrip.s1,
+              TokensStrip.s5,
+              TokensStrip.s3,
             ),
-          PaywallCompareStage(
-            plans: tabPlans,
-            currentPlan: currentPlan,
-            selectedPlan: selPlan,
-            comparisonRows:
-                vitrine?.rowsFor(selPlan) ??
-                (selPlan == SubscriptionPlan.ENTERPRISE
-                    ? PaywallCatalog.comparisonFreeVsEnterprise
-                    : PaywallCatalog.comparisonFreeVsPro),
-            billingPeriod: _billingPeriod,
-            onSelectPlan: _selectPlan,
-            onBillingPeriod:
-                showBilling
-                    ? (period) {
-                      AnalyticsService.instance.track(
-                        ProductEvents.billingToggleChanged,
-                        props: {'to': period.name, 'source': 'compare_tabs'},
-                      );
-                      setState(() => _billingPeriod = period);
-                      _selectPlan(selPlan);
-                    }
-                    : null,
-            ink: ink,
-            mute: mute,
-            primary: primary,
-            isDark: isDark,
-            line: line,
-            priceLabel: selectedPrice?.primary,
-            priceCaption: selectedPrice?.secondary,
-            trialBadge:
-                paywallShowsMaxPlanTrial(
-                      selected: selPlan,
-                      current: currentPlan,
-                      trialEligible: _trialStatus?.trialEligible,
-                    )
-                    ? '$kPaywallMaxPlanTrialDays dias grátis com cartão'
-                    : null,
-            roiTag: null,
+            sliver: SliverFillRemaining(
+              hasScrollBody: false,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (usage != null &&
+                      ((widget.blockedFeature != null &&
+                              widget.blockedFeature!.isNotEmpty) ||
+                          widget.blockedCapability != null))
+                    PaywallContextBanner(
+                      usage: usage,
+                      blockedFeatureLabel: widget.blockedFeature,
+                      blockedCapability: widget.blockedCapability,
+                      ink: ink,
+                      mute: mute,
+                      onCta: () {
+                        final target = PlanEntitlements.resolveUpgradeTarget(
+                          usage: usage,
+                          blockedFeatureLabel: widget.blockedFeature,
+                          blockedCapability: widget.blockedCapability,
+                        );
+                        _selectPlan(target);
+                      },
+                    ),
+                  Expanded(
+                    child: PaywallCompareStage(
+                      fillViewport: true,
+                      plans: tabPlans,
+                      currentPlan: currentPlan,
+                      selectedPlan: selPlan,
+                      comparisonRows:
+                          vitrine?.rowsFor(selPlan) ??
+                          (selPlan == SubscriptionPlan.ENTERPRISE
+                              ? PaywallCatalog.comparisonFreeVsEnterprise
+                              : PaywallCatalog.comparisonFreeVsPro),
+                      billingPeriod: _billingPeriod,
+                      onSelectPlan: _selectPlan,
+                      onBillingPeriod:
+                          showBilling
+                              ? (period) {
+                                AnalyticsService.instance.track(
+                                  ProductEvents.billingToggleChanged,
+                                  props: {
+                                    'to': period.name,
+                                    'source': 'compare_tabs',
+                                  },
+                                );
+                                setState(() => _billingPeriod = period);
+                                _selectPlan(selPlan);
+                              }
+                              : null,
+                      ink: ink,
+                      mute: mute,
+                      isDark: isDark,
+                      line: line,
+                    ),
+                  ),
+                  if (!_storeAvailable &&
+                      !kIsWeb &&
+                      subscriptionUsesNativeStore &&
+                      !isAcquisition &&
+                      !hasUpgradeAbove) ...[
+                    const SizedBox(height: TokensStrip.s3),
+                    _PaywallInlineNote(
+                      icon: Icons.store_outlined,
+                      text:
+                          'Loja indisponível nesta sessão — use o botão abaixo para abrir ${subscriptionChannelLabel()} e gerenciar sua assinatura.',
+                      ink: ink,
+                      mute: mute,
+                      isDark: isDark,
+                    ),
+                  ],
+                  if (kIsWeb) ...[
+                    const SizedBox(height: TokensStrip.s3),
+                    _PaywallInlineNote(
+                      icon: Icons.smartphone_outlined,
+                      text: 'No celular, assine pela App Store ou Google Play.',
+                      ink: ink,
+                      mute: mute,
+                      isDark: isDark,
+                    ),
+                  ],
+                ],
+              ),
+            ),
           ),
-          if (_shouldShowEnterpriseTrialCard(
-            selPlan,
-            currentPlan,
-            _trialStatus,
-          )) ...[
-            const SizedBox(height: TokensStrip.s4),
-            _PaywallInlineNote(
-              icon: Icons.card_giftcard_outlined,
-              text:
-                  _loadingTrial
-                      ? 'Carregando oferta de teste…'
-                      : '$kPaywallMaxPlanTrialDays dias grátis no Enterprise. '
-                          'A loja pede o cartão na assinatura; cancele antes para não ser cobrado.',
-              ink: ink,
-              mute: mute,
-              isDark: isDark,
-            ),
-          ],
-          if (_enterprisePreview != null &&
-              _enterprisePreviewIsInformative(
-                _enterprisePreview!,
-                currentPlan,
-                selPlan,
-              )) ...[
-            const SizedBox(height: TokensStrip.s3),
-            _EnterprisePreviewCard(
-              preview: _enterprisePreview!,
-              primary: primary,
-              ink: ink,
-              mute: mute,
-              isDark: isDark,
-            ),
-          ] else if (isUpgradeTargetSelected &&
-              currentPlan == SubscriptionPlan.ENTERPRISE &&
-              selPlan == SubscriptionPlan.ENTERPRISE) ...[
-            const SizedBox(height: TokensStrip.s3),
-            _EnterpriseProUpgradePriceHint(
-              currentPlan: currentPlan,
-              targetPlan: selPlan,
-              billingPeriod: _billingPeriod,
-              productDetails: _productDetails,
-              currentBackend: currentBackend,
-              targetBackend: selBackend,
-              primary: primary,
-              ink: ink,
-              mute: mute,
-              isDark: isDark,
-            ),
-          ],
-          if (!_storeAvailable &&
-              !kIsWeb &&
-              subscriptionUsesNativeStore &&
-              !isAcquisition &&
-              !hasUpgradeAbove) ...[
-            const SizedBox(height: TokensStrip.s3),
-            _PaywallInlineNote(
-              icon: Icons.store_outlined,
-              text:
-                  'Loja indisponível nesta sessão — use o botão abaixo para abrir ${subscriptionChannelLabel()} e gerenciar sua assinatura.',
-              ink: ink,
-              mute: mute,
-              isDark: isDark,
-            ),
-          ],
-          if (kIsWeb) ...[
-            const SizedBox(height: TokensStrip.s3),
-            _PaywallInlineNote(
-              icon: Icons.smartphone_outlined,
-              text: 'No celular, assine pela App Store ou Google Play.',
-              ink: ink,
-              mute: mute,
-              isDark: isDark,
-            ),
-          ],
-          if (!isAcquisition) ...[
-            const SizedBox(height: TokensStrip.s4),
-            isCurrentPlanSelected
-                ? PaywallSubscriberLegalStrip(
-                  mute: mute,
-                  primary: primary,
-                  restoring: _restoringPurchases,
-                  onRestore:
-                      subscriptionUsesNativeStore ? _restorePurchases : null,
-                )
-                : PaywallUpgradeLegalCompact(
-                  ink: ink,
-                  mute: mute,
-                  primary: primary,
-                  showStoreBillingNote: subscriptionUsesNativeStore,
-                  restoring: _restoringPurchases,
-                  onRestore:
-                      subscriptionUsesNativeStore ? _restorePurchases : null,
-                ),
-          ],
         ],
       ),
     );

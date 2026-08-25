@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../../../core/brand/focux_microcopy.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
-import '../../assinatura/data/plano.dart';
 import '../../subscription/models/subscription_plan.dart';
 import 'paywall_price.dart';
 
@@ -19,14 +18,7 @@ class PaywallCatalog {
   /// Teal slate — tier ENTERPRISE (premium, sem ouro).
   static const Color tierEnterprise = EagleTokens.tierEnterprise;
 
-  /// Legado vitrine/API (`badgeColor: gold`) — mapeado para [tierEnterprise] na UI.
-  static const Color gold = tierEnterprise;
   static const Color green = EagleTokens.brightGreen;
-  static const Color warning = EagleTokens.warn;
-
-  /// Chrome neutro para blocos secundários (accordions, downgrade).
-  static Color chromeNeutral(Color ink, {required bool isDark}) =>
-      isDark ? EagleTokens.chromeNeutralDark : ink.withValues(alpha: 0.38);
 
   /// Texto secundário com contraste AA em fundos claros (ui-ux-pro-max).
   static Color readableSecondary(
@@ -42,12 +34,6 @@ class PaywallCatalog {
     t = t.replaceAll(RegExp(r'[✦✨]\s*'), '').trim();
     return (label: t, pro: pro);
   }
-
-  static IconData tierIconFor(SubscriptionPlan plan) => switch (plan) {
-    SubscriptionPlan.PRO => Icons.trending_up_rounded,
-    SubscriptionPlan.ENTERPRISE => Icons.diamond_outlined,
-    _ => Icons.layers_outlined,
-  };
 
   static Color accentForPlan(SubscriptionPlan plan) => switch (plan) {
     SubscriptionPlan.PRO => brand,
@@ -68,17 +54,6 @@ class PaywallCatalog {
     };
   }
 
-  /// Versão por [accent] (seções internas do card sem [SubscriptionPlan]).
-  static Color readableTierAccent(Color accent, {required bool isDark}) {
-    if (isDark) return accent;
-    if (accent == tierEnterprise || accent == gold) {
-      return EagleTokens.tierEnterpriseInk;
-    }
-    if (accent == brandDeep) return EagleTokens.tierEnterpriseProInk;
-    if (accent == brand) return brandDeep;
-    return accent;
-  }
-
   static String? badgeForPlan(SubscriptionPlan plan) => switch (plan) {
     SubscriptionPlan.PRO => 'MAIS POPULAR',
     SubscriptionPlan.ENTERPRISE => 'TRIAL $kPaywallMaxPlanTrialDays DIAS',
@@ -86,30 +61,6 @@ class PaywallCatalog {
   };
 
   static String displayPlanName(SubscriptionPlan plan) => plan.apiName;
-
-  static String displayNameFor(Plano plano, SubscriptionPlan plan) {
-    final api = plano.displayName?.trim();
-    if (api != null && api.isNotEmpty) return api;
-    return displayPlanName(plan);
-  }
-
-  static String subtitleFor(Plano plano, SubscriptionPlan plan) {
-    final api = plano.subtitle?.trim();
-    if (api != null && api.isNotEmpty) return api;
-    return subtitleForPlan(plan);
-  }
-
-  static String? badgeFor(Plano plano, SubscriptionPlan plan) {
-    final api = plano.badge?.trim();
-    if (api != null && api.isNotEmpty) return api;
-    return badgeForPlan(plan);
-  }
-
-  static String? roiTagFor(Plano plano, SubscriptionPlan plan) {
-    final api = plano.roiTag?.trim();
-    if (api != null && api.isNotEmpty) return api;
-    return roiTagForPlan(plan);
-  }
 
   static String subtitleForPlan(SubscriptionPlan plan) => switch (plan) {
     SubscriptionPlan.FREE => 'Para começar',
@@ -122,15 +73,6 @@ class PaywallCatalog {
     SubscriptionPlan.ENTERPRISE =>
       'Substitui R\$ 1–3k de agência · 1 aluno novo paga o plano',
     _ => null,
-  };
-
-  static String descriptionForPlan(SubscriptionPlan plan) => switch (plan) {
-    SubscriptionPlan.FREE =>
-      'Sem cartão. Sem risco. Para testar com seus primeiros alunos.',
-    SubscriptionPlan.PRO =>
-      'Para o personal que quer organizar, cobrar e reter alunos.',
-    SubscriptionPlan.ENTERPRISE =>
-      'Alunos ilimitados, marca própria, landing, loja e equipe.',
   };
 
   static const List<({String value, String label})> socialProof = [

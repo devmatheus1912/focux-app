@@ -17,6 +17,7 @@ import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
@@ -32,6 +33,7 @@ import '../../../features/subscription/services/iap_service.dart';
 import '../../../features/subscription/store_subscription_policy.dart';
 import '../../../features/subscription/subscription_products.dart';
 
+import '../data/assinatura_repository.dart';
 import '../data/plano.dart';
 import '../providers/assinatura_provider.dart';
 import '../../planos/paywall/paywall_catalog.dart';
@@ -64,6 +66,22 @@ bool _enterprisePreviewIsInformative(
       preview.diferencaDiaria > 0;
 }
 
+/// Nota curta no sticky — nunca um card por cima da tabela.
+String? _enterprisePreviewFootnote(
+  EnterpriseUpgradePreview preview,
+  SubscriptionPlan currentPlan,
+  SubscriptionPlan selectedPlan,
+) {
+  if (!_enterprisePreviewIsInformative(preview, currentPlan, selectedPlan)) {
+    return null;
+  }
+  if (preview.cobrancaImediata) {
+    return 'Cobrança proporcional de '
+        '${formatPaywallBrl(preview.valorProporcional)} neste ciclo.';
+  }
+  return 'Sem cobrança proporcional neste ciclo.';
+}
+
 bool _shouldLoadEnterprisePreview(
   SubscriptionPlan currentPlan,
   SubscriptionPlan selectedPlan,
@@ -87,20 +105,6 @@ String _resolveInitialPlanSelection({
     }
   }
   return currentPlan.apiName;
-}
-
-/// Trial introdutório só no Enterprise, com cartão na loja.
-bool _shouldShowEnterpriseTrialCard(
-  SubscriptionPlan selectedPlan,
-  SubscriptionPlan currentPlan,
-  TrialStatus? trialStatus,
-) {
-  return paywallShowsMaxPlanTrial(
-    selected: selectedPlan,
-    current: currentPlan,
-    trialEligible:
-        trialStatus?.trialAtivo == true ? true : trialStatus?.trialEligible,
-  );
 }
 
 class AssinaturaScreen extends ConsumerStatefulWidget {
@@ -137,11 +141,12 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
 
   // Trial
   TrialStatus? _trialStatus;
-  bool _loadingTrial = false;
   bool _restoringPurchases = false;
   bool _paymentBlocked = false;
   bool _planReconcileAttempted = false;
   SubscriptionBillingPeriod _billingPeriod = SubscriptionBillingPeriod.yearly;
+  DateTime? _paywallFetchedAt;
+  ProviderSubscription<AsyncValue<PaywallHomeBundle>>? _paywallFreshnessSub;
 
   Future<void> _checkDeviceSecurity() async {
     if (kIsWeb) return;
@@ -223,6 +228,13 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
     _initializeStore();
     _loadTrialStatus();
     _checkDeviceSecurity();
+    _paywallFreshnessSub = ref.listenManual(paywallHomeProvider, (_, next) {
+      if (!next.hasValue || next.isLoading || next.hasError) return;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        setState(() => _paywallFetchedAt = DateTime.now());
+      });
+    }, fireImmediately: true);
     if (widget.initialPlan?.trim().toUpperCase() == 'ENTERPRISE') {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) _loadEnterprisePreview();
@@ -279,23 +291,20 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
   @override
   void dispose() {
     _purchaseSubscription?.cancel();
+    _paywallFreshnessSub?.close();
     _paywallScrollController.dispose();
     super.dispose();
   }
 
   Future<void> _loadTrialStatus() async {
-    if (mounted) setState(() => _loadingTrial = true);
     try {
       final status =
           await PlanosRepository(ref.read(apiClientProvider)).getTrialStatus();
       if (mounted) {
-        setState(() {
-          _trialStatus = status;
-          _loadingTrial = false;
-        });
+        setState(() => _trialStatus = status);
       }
     } catch (_) {
-      if (mounted) setState(() => _loadingTrial = false);
+      // Sem trial: CTA segue no preço cheio.
     }
   }
 

@@ -10,6 +10,21 @@ import 'paywall_catalog.dart';
 import 'paywall_compare_logic.dart';
 import 'paywall_glass.dart';
 
+/// Colunas de valor — mesma largura no header e na célula (eixo único).
+const double _kValueCol = 80;
+
+/// Números da paywall — Barlow Condensed, mesmo role KPI da Home.
+TextStyle paywallNumberStyle({
+  required Color color,
+  double fontSize = TokensStrip.fontBodySm,
+}) {
+  return FocuxHubTypography.kpi(
+    color: color,
+    fontSize: fontSize,
+    fontWeight: FontWeight.w700,
+  );
+}
+
 /// Fold de planos: hero + abas + um card (IA ChatGPT, visual Home).
 class PaywallCompareStage extends StatelessWidget {
   const PaywallCompareStage({
@@ -22,14 +37,11 @@ class PaywallCompareStage extends StatelessWidget {
     required this.onSelectPlan,
     required this.ink,
     required this.mute,
-    required this.primary,
     required this.isDark,
     this.line,
     this.roiTag,
-    this.priceLabel,
-    this.priceCaption,
-    this.trialBadge,
     this.onBillingPeriod,
+    this.fillViewport = false,
   });
 
   final List<SubscriptionPlan> plans;
@@ -41,13 +53,12 @@ class PaywallCompareStage extends StatelessWidget {
   final ValueChanged<SubscriptionBillingPeriod>? onBillingPeriod;
   final Color ink;
   final Color mute;
-  final Color primary;
   final bool isDark;
   final Color? line;
   final String? roiTag;
-  final String? priceLabel;
-  final String? priceCaption;
-  final String? trialBadge;
+
+  /// Preenche o viewport restante (sem faixa branca entre o card e o sticky).
+  final bool fillViewport;
 
   @override
   Widget build(BuildContext context) {
@@ -60,6 +71,39 @@ class PaywallCompareStage extends StatelessWidget {
     final reduced = TokensStrip.prefersReducedMotion(context);
     final duration =
         reduced ? Duration.zero : const Duration(milliseconds: 220);
+    final tag = (roiTag != null && roiTag!.trim().isNotEmpty)
+        ? roiTag!.trim()
+        : PaywallCatalog.roiTagForPlan(selectedPlan);
+
+    final card = AnimatedSwitcher(
+      duration: duration,
+      switchInCurve: Curves.easeOutCubic,
+      switchOutCurve: Curves.easeInCubic,
+      child: fillViewport
+          ? SizedBox.expand(
+              key: ValueKey('${selectedPlan.name}-${view.showTwoColumns}'),
+              child: _CompareCard(
+                view: view,
+                accent: accent,
+                ink: ink,
+                mute: mute,
+                isDark: isDark,
+                line: line,
+                roiTag: tag,
+                expand: true,
+              ),
+            )
+          : _CompareCard(
+              key: ValueKey('${selectedPlan.name}-${view.showTwoColumns}'),
+              view: view,
+              accent: accent,
+              ink: ink,
+              mute: mute,
+              isDark: isDark,
+              line: line,
+              roiTag: tag,
+            ),
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -76,47 +120,28 @@ class PaywallCompareStage extends StatelessWidget {
             ink: ink,
             mute: mute,
             isDark: isDark,
-            priceLabel: priceLabel,
-            priceCaption: priceCaption,
-            trialBadge: trialBadge,
           ),
         ),
-        const SizedBox(height: TokensStrip.s4),
+        const SizedBox(height: TokensStrip.s3),
         _PlanTabs(
           plans: plans,
           selected: selectedPlan,
           current: currentPlan,
-          ink: ink,
           mute: mute,
           accent: accent,
           onSelect: onSelectPlan,
         ),
         if (view.showBillingToggle && onBillingPeriod != null) ...[
-          const SizedBox(height: TokensStrip.s3),
+          const SizedBox(height: TokensStrip.s2),
           _BillingTabs(
             period: billingPeriod,
             accent: accent,
-            ink: ink,
             mute: mute,
             onChanged: onBillingPeriod!,
           ),
         ],
-        const SizedBox(height: TokensStrip.s4),
-        AnimatedSwitcher(
-          duration: duration,
-          switchInCurve: Curves.easeOutCubic,
-          switchOutCurve: Curves.easeInCubic,
-          child: _CompareCard(
-            key: ValueKey('${selectedPlan.name}-${view.showTwoColumns}'),
-            view: view,
-            accent: accent,
-            ink: ink,
-            mute: mute,
-            isDark: isDark,
-            line: line,
-            roiTag: roiTag,
-          ),
-        ),
+        const SizedBox(height: TokensStrip.s3),
+        if (fillViewport) Expanded(child: card) else card,
       ],
     );
   }
@@ -131,9 +156,6 @@ class _CompareHero extends StatelessWidget {
     required this.ink,
     required this.mute,
     required this.isDark,
-    this.priceLabel,
-    this.priceCaption,
-    this.trialBadge,
   });
 
   final PaywallCompareView view;
@@ -142,9 +164,6 @@ class _CompareHero extends StatelessWidget {
   final Color ink;
   final Color mute;
   final bool isDark;
-  final String? priceLabel;
-  final String? priceCaption;
-  final String? trialBadge;
 
   @override
   Widget build(BuildContext context) {
@@ -154,59 +173,33 @@ class _CompareHero extends StatelessWidget {
       isDark: isDark,
     );
     return Padding(
-      padding: const EdgeInsets.only(top: TokensStrip.s3),
+      padding: const EdgeInsets.only(top: TokensStrip.s2),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          PaywallTierMedallion(
-            plan: selectedPlan,
-            accent: accent,
-            isDark: isDark,
-            size: TokensStrip.s8,
+          Center(
+            child: PaywallTierMedallion(
+              plan: selectedPlan,
+              accent: accent,
+              isDark: isDark,
+              size: TokensStrip.s7,
+            ),
           ),
-          const SizedBox(height: TokensStrip.s4),
+          const SizedBox(height: TokensStrip.s3),
           Text(
             view.headline,
             textAlign: TextAlign.center,
-            style: FocuxHubTypography.pageTitle(context, color: ink),
+            style: FocuxHubTypography.sectionTitle(context, color: ink),
           ),
           const SizedBox(height: TokensStrip.s2),
           Text(
             view.subtitle,
             textAlign: TextAlign.center,
-            style: FocuxHubTypography.bodyMuted(color: secondary, height: 1.4),
+            style: FocuxHubTypography.bodyMuted(
+              color: secondary,
+              height: 1.35,
+            ),
           ),
-          if (priceLabel != null && priceLabel!.trim().isNotEmpty) ...[
-            const SizedBox(height: TokensStrip.s4),
-            Text(
-              priceLabel!,
-              textAlign: TextAlign.center,
-              style: FocuxHubTypography.metric(
-                color: ink,
-                fontSize: FocuxHubTypography.metricLg,
-                fontWeight: FontWeight.w800,
-                height: 1.1,
-              ),
-            ),
-            if (priceCaption != null && priceCaption!.trim().isNotEmpty) ...[
-              const SizedBox(height: TokensStrip.s1),
-              Text(
-                priceCaption!,
-                textAlign: TextAlign.center,
-                style: FocuxHubTypography.bodyMuted(
-                  color: secondary,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ],
-          if (trialBadge != null && trialBadge!.trim().isNotEmpty) ...[
-            const SizedBox(height: TokensStrip.s3),
-            Text(
-              trialBadge!,
-              textAlign: TextAlign.center,
-              style: FocuxHubTypography.chip(accent),
-            ),
-          ],
         ],
       ),
     );
@@ -218,7 +211,6 @@ class _PlanTabs extends StatelessWidget {
     required this.plans,
     required this.selected,
     required this.current,
-    required this.ink,
     required this.mute,
     required this.accent,
     required this.onSelect,
@@ -227,7 +219,6 @@ class _PlanTabs extends StatelessWidget {
   final List<SubscriptionPlan> plans;
   final SubscriptionPlan selected;
   final SubscriptionPlan current;
-  final Color ink;
   final Color mute;
   final Color accent;
   final ValueChanged<SubscriptionPlan> onSelect;
@@ -247,6 +238,7 @@ class _PlanTabs extends StatelessWidget {
           children: [
             for (final plan in plans)
               Expanded(
+                key: ValueKey('paywall-tab-${plan.name}'),
                 child: _TabChip(
                   label: paywallTabLabel(plan),
                   semanticLabel:
@@ -254,7 +246,6 @@ class _PlanTabs extends StatelessWidget {
                       '${plan == current ? ', plano atual' : ''}',
                   selected: plan == selected,
                   accent: accent,
-                  ink: ink,
                   mute: mute,
                   onTap: () {
                     if (plan == selected) return;
@@ -274,14 +265,12 @@ class _BillingTabs extends StatelessWidget {
   const _BillingTabs({
     required this.period,
     required this.accent,
-    required this.ink,
     required this.mute,
     required this.onChanged,
   });
 
   final SubscriptionBillingPeriod period;
   final Color accent;
-  final Color ink;
   final Color mute;
   final ValueChanged<SubscriptionBillingPeriod> onChanged;
 
@@ -304,7 +293,6 @@ class _BillingTabs extends StatelessWidget {
                 semanticLabel: 'Cobrança mensal',
                 selected: period == SubscriptionBillingPeriod.monthly,
                 accent: accent,
-                ink: ink,
                 mute: mute,
                 onTap: () {
                   if (period == SubscriptionBillingPeriod.monthly) return;
@@ -315,11 +303,11 @@ class _BillingTabs extends StatelessWidget {
             ),
             Expanded(
               child: _TabChip(
-                label: 'Anual · 2 meses grátis',
+                label: 'Anual',
+                caption: '2 meses grátis',
                 semanticLabel: 'Cobrança anual, 2 meses grátis',
                 selected: period == SubscriptionBillingPeriod.yearly,
                 accent: accent,
-                ink: ink,
                 mute: mute,
                 onTap: () {
                   if (period == SubscriptionBillingPeriod.yearly) return;
@@ -341,22 +329,23 @@ class _TabChip extends StatelessWidget {
     required this.semanticLabel,
     required this.selected,
     required this.accent,
-    required this.ink,
     required this.mute,
     required this.onTap,
+    this.caption,
   });
 
   final String label;
+  final String? caption;
   final String semanticLabel;
   final bool selected;
   final Color accent;
-  final Color ink;
   final Color mute;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final fg = selected ? Colors.white : mute;
+    final fg = selected ? TokensStrip.cardBg : mute;
+    final labelStyle = FocuxHubTypography.chip(fg);
     return Semantics(
       button: true,
       selected: selected,
@@ -372,20 +361,34 @@ class _TabChip extends StatelessWidget {
                 : const Duration(milliseconds: 160),
             height: TokensStrip.s7,
             alignment: Alignment.center,
+            padding: const EdgeInsets.symmetric(horizontal: TokensStrip.s2),
             decoration: BoxDecoration(
               color: selected ? accent : Colors.transparent,
               borderRadius: BorderRadius.circular(TokensStrip.rPill),
             ),
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: TokensStrip.s2),
-                child: Text(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
                   label,
                   maxLines: 1,
-                  style: FocuxHubTypography.chip(fg),
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                  style: labelStyle,
                 ),
-              ),
+                if (caption != null)
+                  Text(
+                    caption!,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                    style: labelStyle.copyWith(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                      height: 1.1,
+                    ),
+                  ),
+              ],
             ),
           ),
         ),
@@ -404,6 +407,7 @@ class _CompareCard extends StatelessWidget {
     required this.isDark,
     this.line,
     this.roiTag,
+    this.expand = false,
   });
 
   final PaywallCompareView view;
@@ -413,6 +417,7 @@ class _CompareCard extends StatelessWidget {
   final bool isDark;
   final Color? line;
   final String? roiTag;
+  final bool expand;
 
   @override
   Widget build(BuildContext context) {
@@ -421,152 +426,145 @@ class _CompareCard extends StatelessWidget {
       mute,
       isDark: isDark,
     );
-    return PaywallGlassCard(
+    final selectedAccent =
+        view.selected == SubscriptionPlan.FREE ? ink : accent;
+    final divider = line ?? ink.withValues(alpha: isDark ? 0.12 : 0.06);
+    final tag = roiTag?.trim();
+
+    final table = _CompareTable(
+      view: view,
+      accent: selectedAccent,
+      ink: ink,
+      mute: secondary,
+      divider: divider,
+    );
+    final footer = <Widget>[
+      if (tag != null && tag.isNotEmpty) ...[
+        const SizedBox(height: TokensStrip.s3),
+        Text(
+          tag,
+          textAlign: TextAlign.center,
+          style: FocuxHubTypography.chip(selectedAccent),
+        ),
+      ],
+    ];
+
+    final body = expand
+        ? ListView(
+            padding: EdgeInsets.zero,
+            physics: const ClampingScrollPhysics(),
+            children: [table, ...footer],
+          )
+        : Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [table, ...footer],
+          );
+
+    final card = PaywallGlassCard(
       accent: accent,
       glow: !TokensStrip.prefersReducedMotion(context),
       glowStrength: 0.28,
       blur: false,
+      expand: expand,
       elevationLevel: 10,
       padding: const EdgeInsets.fromLTRB(
         TokensStrip.s4,
         TokensStrip.s4,
         TokensStrip.s4,
-        TokensStrip.s3,
+        TokensStrip.s4,
       ),
       margin: EdgeInsets.zero,
-      child: Column(
-        children: [
-          _HeaderRow(
-            showTwo: view.showTwoColumns,
-            baseline: view.baselineColumnLabel,
-            selected: view.selectedColumnLabel,
-            ink: ink,
-            mute: secondary,
-            accent: accent,
-          ),
-          const SizedBox(height: TokensStrip.s3),
-          for (var i = 0; i < view.rows.length; i++) ...[
-            if (i > 0)
-              Divider(
-                height: TokensStrip.s4,
-                color:
-                    line ?? ink.withValues(alpha: isDark ? 0.12 : 0.06),
-              ),
-            _FeatureRow(
-              row: view.rows[i],
-              showTwo: view.showTwoColumns,
-              accent: accent,
-              ink: ink,
-              mute: secondary,
+      child: expand ? SizedBox.expand(child: body) : body,
+    );
+    if (!expand) return card;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (!constraints.maxHeight.isFinite) return card;
+        return SizedBox(
+          width: constraints.maxWidth,
+          height: constraints.maxHeight,
+          child: card,
+        );
+      },
+    );
+  }
+}
+
+class _CompareTable extends StatelessWidget {
+  const _CompareTable({
+    required this.view,
+    required this.accent,
+    required this.ink,
+    required this.mute,
+    required this.divider,
+  });
+
+  final PaywallCompareView view;
+  final Color accent;
+  final Color ink;
+  final Color mute;
+  final Color divider;
+
+  @override
+  Widget build(BuildContext context) {
+    final showTwo = view.showTwoColumns;
+    return Table(
+      columnWidths: {
+        0: const FlexColumnWidth(1),
+        if (showTwo) 1: const FixedColumnWidth(_kValueCol),
+        showTwo ? 2 : 1: const FixedColumnWidth(_kValueCol),
+      },
+      defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+      border: TableBorder(
+        horizontalInside: BorderSide(color: divider),
+      ),
+      children: [
+        TableRow(
+          children: [
+            _labelCell(
+              'Recursos',
+              style: FocuxHubTypography.chip(mute),
+              align: TextAlign.start,
             ),
-          ],
-          if (roiTag != null && roiTag!.trim().isNotEmpty) ...[
-            const SizedBox(height: TokensStrip.s3),
-            Text(
-              roiTag!.trim(),
-              textAlign: TextAlign.center,
+            if (showTwo)
+              _labelCell(
+                view.baselineColumnLabel,
+                style: FocuxHubTypography.chip(mute),
+              ),
+            _labelCell(
+              view.selectedColumnLabel,
               style: FocuxHubTypography.chip(accent),
             ),
           ],
-        ],
-      ),
-    );
-  }
-}
-
-class _HeaderRow extends StatelessWidget {
-  const _HeaderRow({
-    required this.showTwo,
-    required this.baseline,
-    required this.selected,
-    required this.ink,
-    required this.mute,
-    required this.accent,
-  });
-
-  final bool showTwo;
-  final String baseline;
-  final String selected;
-  final Color ink;
-  final Color mute;
-  final Color accent;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          flex: 5,
-          child: Text(
-            'Recursos',
-            style: FocuxHubTypography.chip(mute),
-          ),
         ),
-        if (showTwo)
-          SizedBox(
-            width: 56,
-            child: Text(
-              baseline,
-              textAlign: TextAlign.center,
-              style: FocuxHubTypography.chip(mute),
-            ),
+        for (final row in view.rows)
+          TableRow(
+            children: [
+              _labelCell(
+                row.feature,
+                style: FocuxHubTypography.cardTitle(color: ink),
+                align: TextAlign.start,
+              ),
+              if (showTwo)
+                _Cell(value: row.baseline, accent: mute, muted: true),
+              _Cell(value: row.selected, accent: accent, muted: false),
+            ],
           ),
-        SizedBox(
-          width: 64,
-          child: Text(
-            selected,
-            textAlign: TextAlign.center,
-            style: FocuxHubTypography.chip(accent),
-          ),
-        ),
       ],
     );
   }
-}
 
-class _FeatureRow extends StatelessWidget {
-  const _FeatureRow({
-    required this.row,
-    required this.showTwo,
-    required this.accent,
-    required this.ink,
-    required this.mute,
-  });
-
-  final PaywallCompareRow row;
-  final bool showTwo;
-  final Color accent;
-  final Color ink;
-  final Color mute;
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _labelCell(
+    String text, {
+    required TextStyle style,
+    TextAlign align = TextAlign.center,
+  }) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: TokensStrip.s1),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Expanded(
-            flex: 5,
-            child: Text(
-              row.feature,
-              style: TokensStrip.body(color: ink).copyWith(
-                fontSize: TokensStrip.fontBodySm,
-                fontWeight: FontWeight.w600,
-                height: 1.25,
-              ),
-            ),
-          ),
-          if (showTwo)
-            SizedBox(
-              width: 56,
-              child: _Cell(value: row.baseline, accent: mute, muted: true),
-            ),
-          SizedBox(
-            width: 64,
-            child: _Cell(value: row.selected, accent: accent, muted: false),
-          ),
-        ],
+      padding: const EdgeInsets.symmetric(vertical: TokensStrip.s2),
+      child: Text(
+        text,
+        textAlign: align,
+        style: style,
       ),
     );
   }
@@ -585,26 +583,28 @@ class _Cell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!paywallCompareCellIncluded(value)) {
-      return Text(
-        '—',
-        textAlign: TextAlign.center,
-        style: FocuxHubTypography.chip(accent.withValues(alpha: 0.55)),
-      );
-    }
-    if (value.trim() == '✓') {
-      return Icon(
-        Icons.check_rounded,
-        size: 20,
-        color: muted ? accent.withValues(alpha: 0.7) : accent,
-      );
-    }
-    return Text(
-      value,
-      textAlign: TextAlign.center,
-      maxLines: 2,
-      overflow: TextOverflow.ellipsis,
-      style: FocuxHubTypography.chip(accent),
+    final child = !paywallCompareCellIncluded(value)
+        ? Text(
+            '—',
+            textAlign: TextAlign.center,
+            style: FocuxHubTypography.chip(accent.withValues(alpha: 0.55)),
+          )
+        : value.trim() == '✓'
+        ? Icon(
+            Icons.check_rounded,
+            size: 20,
+            color: muted ? accent.withValues(alpha: 0.7) : accent,
+          )
+        : Text(
+            value,
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: paywallNumberStyle(color: accent),
+          );
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: TokensStrip.s2),
+      child: Center(child: child),
     );
   }
 }

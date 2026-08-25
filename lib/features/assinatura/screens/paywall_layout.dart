@@ -21,21 +21,20 @@ class _PaywallInlineNote extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PaywallGlassCard(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(TokensStrip.s4),
       blur: false,
       elevationLevel: 4,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Icon(icon, size: 18, color: mute),
-          const SizedBox(width: 10),
+          const SizedBox(width: TokensStrip.s3),
           Expanded(
             child: Text(
               text,
-              style: TextStyle(
-                fontSize: 13,
-                height: 1.45,
+              style: FocuxHubTypography.bodyMuted(
                 color: ink.withValues(alpha: 0.85),
+                height: 1.45,
               ),
             ),
           ),

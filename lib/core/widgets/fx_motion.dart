@@ -180,15 +180,17 @@ class FxLiquidPrimaryButton extends StatelessWidget {
                             const SizedBox(width: TokensStrip.s2),
                           ],
                           Flexible(
-                            child: Text(
-                              label,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                color: labelColor,
-                                fontWeight: FontWeight.w700,
-                                fontSize: 15,
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                label,
+                                maxLines: 1,
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  color: labelColor,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 15,
+                                ),
                               ),
                             ),
                           ),

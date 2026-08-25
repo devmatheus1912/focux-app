@@ -78,4 +78,42 @@ void main() {
     );
     expect(kPaywallMaxPlanTrialDays, 30);
   });
+
+  test('CTA sticky leva o preço; trial não mostra valor no botão', () {
+    expect(
+      paywallStickyCtaLabel(
+        trialOffer: true,
+        isUpgrade: true,
+        planName: 'ENTERPRISE',
+        pricePrimary: 'R\$ 199,90/mês',
+      ),
+      'Começar 30 dias grátis',
+    );
+    expect(
+      paywallStickyCtaLabel(
+        trialOffer: false,
+        isUpgrade: true,
+        planName: 'PRO',
+        pricePrimary: 'R\$ 99,90/mês',
+      ),
+      'Fazer upgrade por R\$ 99,90/mês',
+    );
+    expect(
+      paywallStickyCtaLabel(
+        trialOffer: false,
+        isUpgrade: false,
+        planName: 'PRO',
+        pricePrimary: 'R\$ 99,90/mês',
+      ),
+      'Assinar PRO por R\$ 99,90/mês',
+    );
+    expect(
+      paywallStickyCtaLabel(
+        trialOffer: false,
+        isUpgrade: true,
+        planName: 'PRO',
+      ),
+      'Confirmar upgrade',
+    );
+  });
 }

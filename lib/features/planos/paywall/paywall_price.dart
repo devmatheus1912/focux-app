@@ -91,3 +91,20 @@ bool paywallShowsMaxPlanTrial({
   if (current != SubscriptionPlan.FREE) return false;
   return trialEligible != false;
 }
+
+/// CTA sticky no estilo ChatGPT: preço só no botão, nunca no hero.
+String paywallStickyCtaLabel({
+  required bool trialOffer,
+  int trialDays = kPaywallMaxPlanTrialDays,
+  required bool isUpgrade,
+  required String planName,
+  String? pricePrimary,
+}) {
+  if (trialOffer) return 'Começar $trialDays dias grátis';
+  final price = pricePrimary?.trim();
+  final hasPrice = price != null && price.isNotEmpty && price != 'Grátis';
+  if (hasPrice) {
+    return isUpgrade ? 'Fazer upgrade por $price' : 'Assinar $planName por $price';
+  }
+  return isUpgrade ? 'Confirmar upgrade' : 'Assinar $planName';
+}

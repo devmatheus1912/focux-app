@@ -24,6 +24,7 @@ class PaywallGlassCard extends StatelessWidget {
     this.elevationLevel = 8,
     this.radius = TokensStrip.rCard,
     this.glowStrength = 1,
+    this.expand = false,
   });
 
   final Widget child;
@@ -35,26 +36,51 @@ class PaywallGlassCard extends StatelessWidget {
   final int elevationLevel;
   final double radius;
   final double glowStrength;
+  final bool expand;
 
   @override
   Widget build(BuildContext context) {
     final tint = accent ?? TokensStrip.primary;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    Widget surface = expand
+        ? Container(
+            width: double.infinity,
+            height: double.infinity,
+            padding: padding,
+            decoration: TokensStrip.glassPanel(
+              dark: isDark,
+              radius: radius,
+              accent: accent,
+              elevationLevel: elevationLevel,
+            ),
+            child: child,
+          )
+        : FxGlassSurface(
+            accent: tint,
+            glow: false,
+            blur: blur,
+            radius: radius,
+            padding: padding,
+            elevationLevel: elevationLevel,
+            child: child,
+          );
+    if (expand) {
+      surface = ClipRRect(
+        borderRadius: BorderRadius.circular(radius),
+        child: surface,
+      );
+    }
     return Padding(
-      padding: margin ?? const EdgeInsets.only(bottom: TokensStrip.s4),
+      padding: margin ??
+          (expand
+              ? EdgeInsets.zero
+              : const EdgeInsets.only(bottom: TokensStrip.s4)),
       child: _TierGlowWrapper(
         enabled: glow,
         color: tint,
         radius: radius,
         strength: glowStrength,
-        child: FxGlassSurface(
-          accent: tint,
-          glow: false,
-          blur: blur,
-          radius: radius,
-          padding: padding,
-          elevationLevel: elevationLevel,
-          child: child,
-        ),
+        child: surface,
       ),
     );
   }
@@ -145,7 +171,7 @@ class PaywallTierMedallion extends StatelessWidget {
       width: size,
       height: size,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(TokensStrip.rCard),
+        borderRadius: BorderRadius.circular(size / 2),
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,

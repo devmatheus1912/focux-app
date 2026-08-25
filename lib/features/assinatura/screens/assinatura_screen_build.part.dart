@@ -59,7 +59,6 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
     var ctaLabel = 'Assinar';
     var ctaMode = _AssinaturaCtaMode.subscribe;
     String footnote = '';
-    var hideScrollUpgradeLegal = false;
 
     if (planos != null && planos.isNotEmpty) {
       selectedPlan = subscriptionPlanFromApi(
@@ -71,9 +70,6 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
       );
       isCurrentPlan = selectedPlan == currentPlan;
       isDowngrade = selectedPlan.level < currentPlan.level;
-      hideScrollUpgradeLegal =
-          currentPlan != SubscriptionPlan.FREE &&
-          selectedPlan.level > currentPlan.level;
 
       if (_syncingPurchase) {
         ctaMode = _AssinaturaCtaMode.syncing;
@@ -126,19 +122,18 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
         final selectedLabel = PaywallCatalog.displayPlanName(selectedPlan);
         ctaLabel =
             trialOffer
-                ? 'Começar $trialDays dias grátis — $selectedLabel'
+                ? 'Começar $trialDays dias grátis'
                 : isUpgrade
-                ? 'Confirmar upgrade · $selectedLabel'
+                ? 'Confirmar upgrade'
                 : 'Continuar com $selectedLabel';
         footnote =
             trialOffer
-                ? 'Cadastre o cartão. $trialDays dias grátis no Enterprise. '
-                    'Depois vale o preço da loja. Cancele quando quiser.'
+                ? ''
                 : subscriptionUsesNativeStore
                 ? (_billingPeriod == SubscriptionBillingPeriod.yearly
-                    ? 'Cobrança anual com renovação automática. Cancele na loja quando quiser.'
-                    : 'Cobrança mensal com renovação automática. Cancele na loja quando quiser.')
-                : 'Checkout seguro via Mercado Pago. Ao continuar, você aceita os Termos e a Privacidade.';
+                    ? 'Anual · 2 meses grátis. Cancele na loja quando quiser.'
+                    : 'Renova na loja. Cancele quando quiser.')
+                : 'Checkout seguro via Mercado Pago.';
       }
     }
 
@@ -169,13 +164,9 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
               storePrice: selectedStorePrice,
             );
     final planSummary =
-        planos == null
+        planos == null || !isCurrentPlan
             ? null
-            : isCurrentPlan
-            ? '${PaywallCatalog.displayPlanName(currentPlan)} · Ativo'
-            : selectedPlan.level > currentPlan.level
-            ? 'Upgrade · ${PaywallCatalog.displayPlanName(selectedPlan)}'
-            : null;
+            : '${PaywallCatalog.displayPlanName(currentPlan)} · Ativo';
 
     final isUpgradeSelection =
         planos == null
@@ -184,6 +175,30 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
                   _selectedPlanName ?? currentPlan.apiName,
                 ).level >
                 currentPlan.level;
+    if (planos != null &&
+        ctaMode == _AssinaturaCtaMode.subscribe &&
+        !_syncingPurchase) {
+      ctaLabel = paywallStickyCtaLabel(
+        trialOffer: trialOffer,
+        isUpgrade: isUpgradeSelection,
+        planName: PaywallCatalog.displayPlanName(selectedPlan),
+        pricePrimary: selectedPrice?.primary,
+      );
+      if (trialOffer) {
+        final price = selectedPrice?.primary.trim();
+        if (price != null && price.isNotEmpty && price != 'Grátis') {
+          footnote = 'Depois $price. Cancele quando quiser.';
+        }
+      }
+    }
+    if (_enterprisePreview != null) {
+      final note = _enterprisePreviewFootnote(
+        _enterprisePreview!,
+        currentPlan,
+        selectedPlan,
+      );
+      if (note != null) footnote = note;
+    }
     final stickyTierAccent =
         isUpgradeSelection && selectedPlan == SubscriptionPlan.ENTERPRISE
             ? PaywallCatalog.accentForPlan(SubscriptionPlan.ENTERPRISE)
@@ -202,6 +217,7 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
       useMesh: true,
       appBar: FxShellAppBar(
         title: 'Planos',
+        subtitle: FxHubFreshness.fromFetchedAt(_paywallFetchedAt),
         onBack: () => safePopOrGo(context, '/dashboard/personal'),
         actions: [
           if (currentPlan != SubscriptionPlan.FREE)
@@ -231,24 +247,25 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
                       isDark: isDark,
                       line: line,
                       child: SafeArea(
-                        minimum: const EdgeInsets.fromLTRB(16, 10, 16, 12),
+                        minimum: const EdgeInsets.fromLTRB(
+                          TokensStrip.s5,
+                          TokensStrip.s2,
+                          TokensStrip.s5,
+                          TokensStrip.s2,
+                        ),
                         child: _AssinaturaStickyFooter(
                           mode: ctaMode,
                           label: ctaLabel,
                           planSummary: planSummary,
-                          priceLabel: selectedPrice?.primary,
-                          priceCaption: selectedPrice?.secondary,
                           footnote: footnote,
                           enabled: ctaEnabled,
                           loading: _loadingCheckout || _syncingPurchase,
-                          trialHint: trialOffer,
                           showLegalConsent:
                               ctaMode == _AssinaturaCtaMode.subscribe,
                           isUpgrade: isUpgradeSelection,
                           tierAccent: stickyTierAccent,
                           ink: ink,
                           mute: mute,
-                          line: line,
                           primary: primary,
                           onSubscribe:
                               () => _startCheckout(
@@ -260,13 +277,13 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
                                   ? () => context.go('/dashboard/personal')
                                   : _openSubscriptionManagement,
                           onRestore:
-                              hideScrollUpgradeLegal &&
+                              ctaMode == _AssinaturaCtaMode.manageStore &&
                                       subscriptionUsesNativeStore
                                   ? _restorePurchases
                                   : null,
                           restoringPurchases: _restoringPurchases,
                           onBillingDetails:
-                              hideScrollUpgradeLegal
+                              ctaMode == _AssinaturaCtaMode.manageStore
                                   ? () =>
                                       PaywallUpgradeLegalCompact.showBillingSheet(
                                         context,
@@ -325,7 +342,6 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
             isDark: isDark,
             featuresAsync: featuresAsync,
             vitrine: vitrine,
-            selectedPrice: selectedPrice,
             paywallNextTier: paywallNextTier,
             paywallHasUpgradeAbove: paywallHasUpgradeAbove,
           );

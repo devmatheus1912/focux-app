@@ -1,24 +1,7 @@
 part of 'paywall_components.dart';
 
-/// Rodapé legal compacto no fluxo de upgrade — detalhes em bottom sheet.
-class PaywallUpgradeLegalCompact extends StatelessWidget {
-  final Color ink;
-  final Color mute;
-  final Color primary;
-  final bool showStoreBillingNote;
-  final bool restoring;
-  final VoidCallback? onRestore;
-
-  const PaywallUpgradeLegalCompact({
-    super.key,
-    required this.ink,
-    required this.mute,
-    required this.primary,
-    this.showStoreBillingNote = true,
-    this.restoring = false,
-    this.onRestore,
-  });
-
+/// Sheet de termos/cobrança no fluxo de upgrade (sem widget inline).
+abstract final class PaywallUpgradeLegalCompact {
   static Future<void> showBillingSheet(
     BuildContext context, {
     required Color ink,
@@ -70,60 +53,6 @@ class PaywallUpgradeLegalCompact extends StatelessWidget {
           ),
         );
       },
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final secondary = PaywallCatalog.readableSecondary(
-      ink,
-      mute,
-      isDark: Theme.of(context).brightness == Brightness.dark,
-    );
-
-    return PaywallGlassCard(
-      accent: primary,
-      blur: false,
-      glow: false,
-      elevationLevel: 4,
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      child: Column(
-        children: [
-          Text(
-            'Sem fidelidade · Cancele quando quiser',
-            textAlign: TextAlign.center,
-            style: TokensStrip.bodyMuted(
-              color: secondary,
-            ).copyWith(fontSize: 13),
-          ),
-          const SizedBox(height: 8),
-          Semantics(
-            button: true,
-            label: 'Abrir termos, privacidade e informações de cobrança',
-            child: TextButton.icon(
-              onPressed:
-                  () => showBillingSheet(
-                    context,
-                    ink: ink,
-                    mute: mute,
-                    primary: primary,
-                    showStoreBillingNote: showStoreBillingNote,
-                    restoring: restoring,
-                    onRestore: onRestore,
-                  ),
-              icon: Icon(Icons.policy_outlined, size: 18, color: primary),
-              label: Text(
-                'Termos, privacidade e cobrança',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                  color: primary,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

@@ -17,6 +17,7 @@ void main() {
     );
     expect(screen, contains('paywallHomeProvider'));
     expect(screen, contains('ref.watch(paywallHomeProvider)'));
+    expect(screen, contains('FxHubFreshness.fromFetchedAt'));
     expect(screen, isNot(contains('ref.watch(planosProvider)')));
     expect(screen, isNot(contains('ref.watch(paywallVitrineProvider)')));
 
@@ -92,13 +93,41 @@ void main() {
     ).readAsStringSync();
     expect(body, contains('RefreshIndicator'));
     expect(body, contains('AlwaysScrollableScrollPhysics'));
-    expect(body, contains('TokensStrip.s8 * 3'));
+    expect(body, contains('SliverFillRemaining'));
+    expect(body, contains('fillViewport: true'));
+    expect(body, isNot(contains('TokensStrip.s8 * 3')));
 
     final stage = File(
       'lib/features/planos/paywall/paywall_compare_stage.dart',
     ).readAsStringSync();
     expect(stage, contains('_PlanTabs'));
     expect(stage, contains('_CompareCard'));
+    expect(stage, contains('fillViewport'));
+    expect(stage, contains('FocuxHubTypography.sectionTitle'));
+    expect(stage, contains('paywallNumberStyle'));
+    expect(stage, contains('FocuxHubTypography.kpi'));
+    expect(stage, contains('fontWeight: FontWeight.w700'));
+    expect(stage, contains('Table('));
     expect(stage, contains('prefersReducedMotion'));
+    expect(stage, contains('textAlign: TextAlign.center'));
+    expect(stage, isNot(contains('priceLabel')));
+    expect(stage, isNot(contains('descriptionForPlan')));
+
+    final price = File(
+      'lib/features/planos/paywall/paywall_price.dart',
+    ).readAsStringSync();
+    expect(price, contains('paywallStickyCtaLabel'));
+    expect(price, contains('Fazer upgrade por'));
+
+    final screen = File(
+      'lib/features/assinatura/screens/assinatura_screen.dart',
+    ).readAsStringSync();
+    expect(screen, contains('_enterprisePreviewFootnote'));
+    expect(build, contains('paywallStickyCtaLabel'));
+    expect(build, contains('Começar \$trialDays dias grátis'));
+    expect(build, contains('Confirmar upgrade'));
+    expect(build, isNot(contains('— \$selectedLabel')));
+    expect(body, isNot(contains('_EnterprisePreviewCard')));
+    expect(body, isNot(contains('priceLabel:')));
   });
 }
