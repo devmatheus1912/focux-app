@@ -14,7 +14,11 @@ void main() {
     expect(FxSettingsLayout.avatarSize, TokensStrip.s9);
     expect(
       File('lib/core/theme/fx_settings_layout.dart').readAsStringSync(),
-      contains('FocuxHubTypography'),
+      contains('FocuxHubTypography.sectionTitle'),
+    );
+    expect(
+      File('lib/core/theme/fx_settings_layout.dart').readAsStringSync(),
+      contains('FocuxHubTypography.cardTitle'),
     );
   });
 }

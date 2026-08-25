@@ -5,17 +5,16 @@ import 'tokens_strip.dart';
 
 /// Arquitetura de **ajustes inset** (ChatGPT iOS / `UITableView.insetGrouped`).
 ///
-/// Identidade, tipografia e cor: Home (`FocuxHubTypography`, `ShellChrome`,
-/// `BrandPalette`). **Não** copia o tema preto/azul do ChatGPT nem a escala
-/// Dynamic Type como família própria.
+/// Identidade, tipografia e cor: os mesmos papéis do Planos/Home
+/// (`FocuxHubTypography`). **Não** copia o tema preto/azul do ChatGPT.
 ///
 /// ## O que é ChatGPT/iOS (estrutura)
 /// Página inset, grupo arredondado, linha com ícone outline + chevron,
 /// divisor depois do ícone, Sair em grupo separado, picker com check.
 ///
-/// ## O que é Home (pele)
-/// Inter/roles do hub, ink/mute/line do chrome, teal da marca, números em
-/// métrica (JetBrains Mono) quando o valor é score/%.
+/// ## O que é Planos/Home (tamanho)
+/// Nome = `sectionTitle` (headline do Planos). Linha = `cardTitle`.
+/// Subtítulo/footer = `bodyMuted`. Score = métrica `fontBodySm`.
 abstract final class FxSettingsLayout {
   FxSettingsLayout._();
 
@@ -37,16 +36,13 @@ abstract final class FxSettingsLayout {
   static const double editBadge = 28;
 
   static TextStyle profileName(BuildContext context, {required Color color}) =>
-      FocuxHubTypography.pageTitle(context, color: color);
+      FocuxHubTypography.sectionTitle(context, color: color);
 
-  static TextStyle avatarInitials(BuildContext context, {required Color color}) =>
+  static TextStyle avatarInitials({required Color color}) =>
       FocuxHubTypography.cardTitle(color: color);
 
   static TextStyle rowLabel({required Color color}) =>
-      FocuxHubTypography.body(color: color).copyWith(
-        fontWeight: FontWeight.w700,
-        letterSpacing: -0.15,
-      );
+      FocuxHubTypography.cardTitle(color: color);
 
   static TextStyle rowValue({required Color color}) =>
       FocuxHubTypography.bodyMuted(color: color);
@@ -54,7 +50,7 @@ abstract final class FxSettingsLayout {
   static TextStyle rowMetric({required Color color}) =>
       FocuxHubTypography.metric(
         color: color,
-        fontSize: TokensStrip.fontBody,
+        fontSize: TokensStrip.fontBodySm,
       );
 
   static TextStyle sectionHeader({required Color color}) =>
@@ -64,8 +60,8 @@ abstract final class FxSettingsLayout {
       );
 
   static TextStyle footer({required Color color}) =>
-      FocuxHubTypography.bodyMuted(color: color);
+      FocuxHubTypography.bodyMuted(color: color, height: 1.35);
 
   static TextStyle subhead({required Color color}) =>
-      FocuxHubTypography.body(color: color);
+      FocuxHubTypography.bodyMuted(color: color, height: 1.35);
 }

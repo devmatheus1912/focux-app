@@ -26,7 +26,7 @@ class _Avatar extends StatelessWidget {
     Widget avatarContent() {
       return Text(
         _initials(nome),
-        style: FxSettingsLayout.avatarInitials(context, color: primaryColor),
+        style: FxSettingsLayout.avatarInitials(color: primaryColor),
       );
     }
 
