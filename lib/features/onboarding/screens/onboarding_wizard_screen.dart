@@ -3,18 +3,21 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/theme/brand_palette.dart';
+import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
+import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../data/onboarding_repository.dart';
 import '../widgets/setup_step_widgets.dart';
-import '../../../core/widgets/fx_screen_a11y.dart';
 
 class OnboardingWizardScreen extends ConsumerStatefulWidget {
   const OnboardingWizardScreen({super.key});
@@ -86,6 +89,7 @@ class _OnboardingWizardScreenState
     final wizard = _wizard;
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
+    final accent = BrandPalette.softened(primary);
 
     return fxScreenA11yScope(
       label: 'Primeiros passos, configuração inicial',
@@ -119,60 +123,50 @@ class _OnboardingWizardScreenState
                 : RefreshIndicator(
                   onRefresh: _load,
                   child: FxContentWidthLimiter(
-                    child: Column(
+                    child: Stack(
                       children: [
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(
-                            TokensStrip.s4,
-                            TokensStrip.s3,
-                            TokensStrip.s4,
-                            0,
-                          ),
-                          child: SetupProgressHeroCard(
-                            progressPercent: wizard.progressPercent,
-                            completedCount: wizard.completedCount,
-                            totalCount: wizard.totalCount,
-                            nextActionLabel: wizard.nextActionLabel,
-                          ),
-                        ),
-                        Expanded(
-                          child: ListView(
-                            padding: const EdgeInsets.fromLTRB(
-                              TokensStrip.s4,
-                              TokensStrip.s4,
-                              TokensStrip.s4,
-                              TokensStrip.s2,
-                            ),
-                            physics: const AlwaysScrollableScrollPhysics(),
-                            children: _buildStepList(wizard),
-                          ),
-                        ),
-                        DecoratedBox(
-                          decoration: BoxDecoration(
-                            color: chrome.cardFill,
-                            border: Border(
-                              top: BorderSide(
-                                color: chrome.line.withValues(alpha: 0.35),
+                        Column(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(
+                                FxSettingsLayout.pageInset,
+                                TokensStrip.s3,
+                                FxSettingsLayout.pageInset,
+                                0,
+                              ),
+                              child: SetupProgressHeroCard(
+                                progressPercent: wizard.progressPercent,
+                                completedCount: wizard.completedCount,
+                                totalCount: wizard.totalCount,
+                                nextActionLabel: wizard.nextActionLabel,
                               ),
                             ),
-                          ),
-                          child: SafeArea(
-                            top: false,
-                            child: Padding(
-                              padding: const EdgeInsets.all(TokensStrip.s4),
-                              child: SetupWizardCta(
-                                label:
-                                    wizard.allStepsDone
-                                        ? 'Concluir setup'
-                                        : 'Continuar setup',
-                                onPressed:
-                                    wizard.allStepsDone || wizard.wizardCompleto
-                                        ? _concluir
-                                        : () =>
-                                            _abrirStep(wizard.nextActionRoute),
+                            Expanded(
+                              child: ListView(
+                                padding: const EdgeInsets.fromLTRB(
+                                  FxSettingsLayout.pageInset,
+                                  FxSettingsLayout.groupGap,
+                                  FxSettingsLayout.pageInset,
+                                  96,
+                                ),
+                                physics:
+                                    const AlwaysScrollableScrollPhysics(),
+                                children: _buildStepList(wizard),
                               ),
                             ),
-                          ),
+                          ],
+                        ),
+                        SetupWizardCta(
+                          label:
+                              wizard.allStepsDone
+                                  ? 'Concluir setup'
+                                  : 'Continuar setup',
+                          accent: accent,
+                          isDark: chrome.isDark,
+                          onPressed:
+                              wizard.allStepsDone || wizard.wizardCompleto
+                                  ? _concluir
+                                  : () => _abrirStep(wizard.nextActionRoute),
                         ),
                       ],
                     ),
@@ -188,23 +182,41 @@ class _OnboardingWizardScreenState
 
     return [
       if (wizard.allStepsDone) const SetupAllDoneBanner(),
-      ...pending.asMap().entries.map(
-        (entry) => SetupStepEntrance(
-          index: entry.key,
-          child: SetupStepCard(
-            title: entry.value.title,
-            description: entry.value.description,
-            estimatedMinutes: entry.value.estimatedMinutes,
-            icon: entry.value.icon,
-            completed: false,
-            isLead: entry.key == 0,
-            onTap: () => _abrirStep(entry.value.actionRoute),
-          ),
+      if (pending.isNotEmpty)
+        FxSettingsGroup(
+          children: [
+            for (var i = 0; i < pending.length; i++)
+              SetupStepEntrance(
+                index: i,
+                child: SetupStepCard(
+                  title: pending[i].title,
+                  description: pending[i].description,
+                  estimatedMinutes: pending[i].estimatedMinutes,
+                  icon: pending[i].icon,
+                  completed: false,
+                  isLead: i == 0,
+                  showDivider: i < pending.length - 1,
+                  onTap: () => _abrirStep(pending[i].actionRoute),
+                ),
+              ),
+          ],
         ),
-      ),
-      SetupCompletedStepsCollapse(
-        titles: completed.map((s) => s.title).toList(),
-      ),
+      if (completed.isNotEmpty) ...[
+        if (pending.isNotEmpty)
+          const SizedBox(height: FxSettingsLayout.groupGap),
+        FxSettingsGroup(
+          header: 'Concluídos',
+          children: [
+            for (var i = 0; i < completed.length; i++)
+              SetupStepCard(
+                title: completed[i].title,
+                icon: completed[i].icon,
+                completed: true,
+                showDivider: i < completed.length - 1,
+              ),
+          ],
+        ),
+      ],
     ];
   }
 }

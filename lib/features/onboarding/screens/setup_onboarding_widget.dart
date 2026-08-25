@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/theme/brand_palette.dart';
+import '../../../core/theme/focux_hub_typography.dart';
+import '../../../core/theme/fx_settings_layout.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../data/onboarding_status_data.dart';
@@ -44,10 +48,7 @@ class SetupOnboardingWidget extends ConsumerWidget {
             ? AsyncValue<OnboardingStatusData>.data(statusFromHome!)
             : ref.watch(onboardingStatusProvider);
     final primary = Theme.of(context).colorScheme.primary;
-    final mute =
-        Theme.of(context).brightness == Brightness.dark
-            ? TokensStrip.textSecondary
-            : TokensStrip.textSecondary;
+    final chrome = ShellChrome.of(context);
 
     return statusAsync.when(
       loading: () => const SetupWizardSkeleton(compact: true),
@@ -59,14 +60,15 @@ class SetupOnboardingWidget extends ConsumerWidget {
         final preview = dashboardSetupPreview(data);
         final hiddenPending = hiddenPendingSetupCount(data);
         final completedCount = data.etapasFeitas;
+        final brand = BrandPalette.softened(primary);
 
         return Container(
           margin: const EdgeInsets.only(bottom: TokensStrip.s4),
           padding: const EdgeInsets.all(TokensStrip.s4),
-          decoration: fxStripCardDecoration(
+          decoration: fxListCardDecoration(
             context,
-            accent: primary,
-            radius: TokensStrip.rCard,
+            accent: brand,
+            radius: FxSettingsLayout.groupRadius,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -76,21 +78,13 @@ class SetupOnboardingWidget extends ConsumerWidget {
                 children: [
                   Text(
                     'Sua ativação',
-                    style: TokensStrip.h2(
-                      color: primary,
-                      fontFamily:
-                          Theme.of(context).textTheme.bodyLarge?.fontFamily,
-                    ),
+                    style: FocuxHubTypography.eyebrow(context, color: brand),
                   ),
                   TextButton(
                     onPressed: () => context.push('/onboarding/wizard'),
                     child: Text(
                       'Ver tudo',
-                      style: TextStyle(
-                        color: primary,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 13,
-                      ),
+                      style: FocuxHubTypography.chip(brand),
                     ),
                   ),
                 ],
@@ -106,9 +100,7 @@ class SetupOnboardingWidget extends ConsumerWidget {
                 const SizedBox(height: TokensStrip.s2),
                 Text(
                   '${dashboardCountLabel(completedCount, 'passo concluído', 'passos concluídos')} · foco nos próximos',
-                  style: TokensStrip.bodyMuted(
-                    color: mute,
-                  ).copyWith(fontSize: 12, fontWeight: FontWeight.w500),
+                  style: FocuxHubTypography.bodyMuted(color: chrome.mute),
                 ),
               ],
               const SizedBox(height: TokensStrip.s3),
@@ -140,16 +132,12 @@ class SetupOnboardingWidget extends ConsumerWidget {
                         children: [
                           Text(
                             '+ $hiddenPending passo${hiddenPending > 1 ? 's' : ''} no setup completo',
-                            style: TextStyle(
-                              color: primary,
-                              fontWeight: FontWeight.w700,
-                              fontSize: 13,
-                            ),
+                            style: FocuxHubTypography.chip(brand),
                           ),
                           Icon(
-                            Icons.chevron_right_rounded,
-                            size: 18,
-                            color: primary,
+                            Icons.chevron_right,
+                            size: FxSettingsLayout.chevronSize,
+                            color: brand,
                           ),
                         ],
                       ),
