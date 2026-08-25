@@ -43,7 +43,13 @@ void main() {
       yield LicenseEntryWithLineBreaks(<String>['google_fonts'], license);
     });
     GoogleFonts.config.allowRuntimeFetching = kDebugMode;
-    TlsCertificatePinning.installGlobalOverrides();
+    try {
+      TlsCertificatePinning.installGlobalOverrides();
+    } catch (error, stack) {
+      // Pin ausente não pode prender a splash nativa — o app ainda sobe.
+      debugPrint('[Focux] TLS pinning init error: $error');
+      reportUncaughtZoneError(error, stack);
+    }
     await HomeWidgetService.init();
 
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
