@@ -77,7 +77,7 @@ class DashboardCollapsibleToolsSection extends ConsumerWidget {
         FxSettingsLayout.pageInset,
         0,
         FxSettingsLayout.pageInset,
-        TokensStrip.s2,
+        TokensStrip.s4,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -115,7 +115,7 @@ class DashboardCollapsibleToolsSection extends ConsumerWidget {
                               style:
                                   quietChrome
                                       ? FocuxHubTypography.bodyMuted(
-                                        color: heading,
+                                        color: mute,
                                         fontWeight: FontWeight.w700,
                                         height: 1.25,
                                       )
@@ -138,7 +138,7 @@ class DashboardCollapsibleToolsSection extends ConsumerWidget {
                       Icon(
                         Icons.chevron_right_rounded,
                         size: FxSettingsLayout.chevronSize,
-                        color: link,
+                        color: mute,
                       ),
                     ],
                   ),

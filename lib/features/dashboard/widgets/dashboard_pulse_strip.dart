@@ -409,7 +409,7 @@ class DashboardPulseChip extends StatelessWidget {
                       : null,
             ),
             child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: TokensStrip.s3),
+              padding: const EdgeInsets.symmetric(vertical: TokensStrip.s2),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [

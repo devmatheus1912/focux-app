@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../../../core/theme/brand_palette.dart';
-import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../data/command_action_item.dart';
 import '../utils/dashboard_microcopy.dart';
+import '../utils/dashboard_readability.dart';
 import 'command_action_tile.dart';
 import 'command_status_tile.dart';
 
@@ -33,7 +33,7 @@ class CommandActionPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final heading = BrandPalette.sectionHeading(primary, dark: isDark);
+    final mute = dashboardReadableCaption(context, isDark: isDark);
     final link = BrandPalette.sectionLink(primary, dark: isDark);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -43,10 +43,7 @@ class CommandActionPanel extends StatelessWidget {
             Expanded(
               child: Text(
                 DashboardMicrocopy.proximasAcoes,
-                style: FocuxHubTypography.sectionTitle(
-                  context,
-                  color: heading,
-                ),
+                style: FxSettingsLayout.sectionHeader(color: mute),
               ),
             ),
             if (prioritiesActionLabel != null && onPrioritiesTap != null)
@@ -71,8 +68,7 @@ class CommandActionPanel extends StatelessWidget {
             else
               Text(
                 DashboardMicrocopy.impactoHoje,
-                style: FocuxHubTypography.chip(link)
-                    .copyWith(letterSpacing: 0.2),
+                style: FxSettingsLayout.sectionHeader(color: mute),
               ),
           ],
         ),

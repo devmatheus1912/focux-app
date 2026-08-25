@@ -88,7 +88,11 @@ class _DashboardCollapsibleSectionState
   Widget build(BuildContext context) {
     final motionDuration = dashboardMotionDuration(context);
     final primary = Theme.of(context).colorScheme.primary;
-    final heading = BrandPalette.sectionHeading(primary, dark: widget.isDark);
+    final mute = dashboardReadableCaption(context, isDark: widget.isDark);
+    final heading =
+        widget.quietChrome
+            ? mute
+            : BrandPalette.sectionHeading(primary, dark: widget.isDark);
     final link = BrandPalette.sectionLink(primary, dark: widget.isDark);
     final hasCollapsedAction =
         !_expanded &&
@@ -100,7 +104,7 @@ class _DashboardCollapsibleSectionState
         TokensStrip.s4,
         0,
         TokensStrip.s4,
-        widget.quietChrome ? TokensStrip.s2 : TokensStrip.s3,
+        widget.quietChrome ? TokensStrip.s4 : TokensStrip.s3,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -229,7 +233,7 @@ class _DashboardCollapsibleSectionState
                                   ? Icons.expand_less_rounded
                                   : Icons.expand_more_rounded,
                               size: widget.quietChrome ? 20 : 22,
-                              color: link,
+                              color: widget.quietChrome ? mute : link,
                             ),
                           ),
                         ),

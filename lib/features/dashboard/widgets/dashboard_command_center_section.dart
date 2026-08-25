@@ -147,7 +147,7 @@ class DashboardCommandCenterSectionState
                   )
                   : null,
         ),
-        const SizedBox(height: TokensStrip.s3),
+        const SizedBox(height: TokensStrip.s4),
         FxSettingsGroup(
           accent: primary,
           children: [

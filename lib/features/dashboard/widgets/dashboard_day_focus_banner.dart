@@ -6,6 +6,7 @@ import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_icon.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../constants/dashboard_layout.dart';
 import '../utils/dashboard_day_focus.dart';
 import '../utils/dashboard_entry_motion.dart';
 import '../utils/dashboard_microcopy.dart';
@@ -43,12 +44,7 @@ class DashboardDayFocusBanner extends StatelessWidget {
       container: true,
       label: focus.semanticLabel,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(
-          TokensStrip.s4,
-          0,
-          TokensStrip.s4,
-          TokensStrip.s3,
-        ),
+        padding: DashboardLayout.foldCard,
         child: TweenAnimationBuilder<double>(
           tween: Tween(begin: reduceMotion ? 1 : 0.96, end: 1),
           duration: dashboardMotionDuration(
@@ -75,8 +71,8 @@ class DashboardDayFocusBanner extends StatelessWidget {
               context,
               accent: primary,
               radius: FxSettingsLayout.groupRadius,
-              glowStrength: focusMode ? 0.10 : 0.07,
-              emphasize: true,
+              glowStrength: focusMode ? 0.06 : 0.04,
+              emphasize: focusMode,
             ),
               child: ClipRRect(
               borderRadius: BorderRadius.circular(FxSettingsLayout.groupRadius),
@@ -163,11 +159,11 @@ class DashboardDayFocusBanner extends StatelessWidget {
                                       curve: Curves.easeOutCubic,
                                       constraints: const BoxConstraints(
                                         minWidth: 48,
-                                        minHeight: 36,
+                                        minHeight: 48,
                                       ),
                                       padding: const EdgeInsets.symmetric(
                                         horizontal: 12,
-                                        vertical: 7,
+                                        vertical: 8,
                                       ),
                                       decoration: BoxDecoration(
                                         color:
@@ -205,10 +201,8 @@ class DashboardDayFocusBanner extends StatelessWidget {
                                       child: Row(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
-                                          Icon(
-                                            focusMode
-                                                ? Icons.bolt_rounded
-                                                : Icons.bolt_outlined,
+                                          FxIcon(
+                                            name: 'zap',
                                             size: 15,
                                             color:
                                                 focusMode

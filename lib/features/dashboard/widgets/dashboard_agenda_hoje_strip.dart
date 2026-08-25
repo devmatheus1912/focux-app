@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_icon.dart';
+import '../constants/dashboard_layout.dart';
 import '../data/command_center_data.dart';
 import '../utils/dashboard_microcopy.dart';
 import '../utils/dashboard_readability.dart';
@@ -26,16 +28,11 @@ class DashboardAgendaHojeStrip extends StatelessWidget {
   Widget build(BuildContext context) {
     if (items.isEmpty) return const SizedBox.shrink();
     final visible = items.take(3).toList(growable: false);
-    final heading = BrandPalette.sectionHeading(primary, dark: isDark);
+    final mute = dashboardReadableCaption(context, isDark: isDark);
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        TokensStrip.s4,
-        0,
-        TokensStrip.s4,
-        TokensStrip.s3,
-      ),
+      padding: DashboardLayout.foldCard,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -43,7 +40,7 @@ class DashboardAgendaHojeStrip extends StatelessWidget {
             children: [
               Text(
                 DashboardMicrocopy.agendaHoje,
-                style: dashboardSectionTitleStyle(context, color: heading),
+                style: FxSettingsLayout.sectionHeader(color: mute),
               ),
               const Spacer(),
               TextButton(
@@ -64,10 +61,14 @@ class DashboardAgendaHojeStrip extends StatelessWidget {
                   color: Colors.transparent,
                   child: InkWell(
                     onTap: () => goPersonalShellTab(context, '/agenda'),
-                    borderRadius: BorderRadius.circular(TokensStrip.rCard),
+                    borderRadius: BorderRadius.circular(
+                      FxSettingsLayout.groupRadius,
+                    ),
                     child: Ink(
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(TokensStrip.rCard),
+                        borderRadius: BorderRadius.circular(
+                          FxSettingsLayout.groupRadius,
+                        ),
                         border: Border.all(
                           color: primary.withValues(alpha: isDark ? 0.28 : 0.18),
                         ),

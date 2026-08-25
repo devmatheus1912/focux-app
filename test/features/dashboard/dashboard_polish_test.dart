@@ -167,23 +167,36 @@ void main() {
     expect(group, contains('homeOverride: homePlanoFeatures'));
   });
 
-  test('alerta de ativação da Home é faixa inset', () {
+  test('alerta de ativação da Home é faixa inset abaixo do Olá', () {
     final setup = File(
       'lib/features/onboarding/screens/setup_onboarding_widget.dart',
     ).readAsStringSync();
     final cta = File(
       'lib/features/subscription/widgets/dashboard_activation_cta.dart',
     ).readAsStringSync();
+    final strip = File(
+      'lib/features/dashboard/widgets/dashboard_home_activation_strip.dart',
+    ).readAsStringSync();
+    final slivers = File(
+      'lib/features/dashboard/widgets/dashboard_home_primary_slivers.dart',
+    ).readAsStringSync();
     expect(setup, contains('Sua ativação'));
-    expect(setup, contains('FxSettingsLayout.rowMinHeight'));
-    expect(setup, contains('minHeight: 4'));
+    expect(setup, contains('DashboardHomeActivationStrip'));
     expect(setup, isNot(contains('dashboardSetupPreview')));
     expect(setup, isNot(contains('Ver tudo')));
     expect(setup, isNot(contains('SetupStepCard')));
     expect(setup, isNot(contains('SetupProgressHeader')));
-    expect(cta, contains('FxSettingsLayout.rowMinHeight'));
-    expect(cta, contains('FxSettingsLayout.pageInset'));
+    expect(cta, contains('DashboardHomeActivationStrip'));
+    expect(cta, contains('DashboardLayout.foldCard'));
     expect(cta, isNot(contains('TokensStrip.s5')));
+    expect(strip, contains('FxSettingsLayout.rowMinHeight'));
+    expect(strip, contains('minHeight: 3'));
+    expect(strip, contains('fxStripCardDecoration'));
+    expect(
+      slivers.indexOf('DashboardHomeHeader'),
+      lessThan(slivers.indexOf('SetupOnboardingWidget')),
+    );
+    expect(slivers, contains('DashboardLayout.foldCard'));
   });
 
   test('Home opera o dia em grupos inset ChatGPT/iOS', () {

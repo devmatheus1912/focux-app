@@ -147,7 +147,7 @@ List<CommandActionItem> buildDashboardNextActions({
       const CommandActionItem(
         icon: 'plus',
         title: 'Criar próxima oportunidade',
-        subtitle: 'Cadastre aluno, treino ou lead antes do pico do dia',
+        subtitle: 'Aluno, treino ou lead antes do pico',
         route: '/alunos/novo',
         tone: CommandActionTone.primary,
       ),

@@ -60,12 +60,7 @@ class DashboardHomeHeader extends StatelessWidget {
             : DashboardMicrocopy.painelAtualizado;
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        TokensStrip.s4,
-        0,
-        TokensStrip.s4,
-        TokensStrip.s3,
-      ),
+      padding: DashboardLayout.foldFirst,
       child: DecoratedBox(
         decoration: fxStripCardDecoration(
           context,

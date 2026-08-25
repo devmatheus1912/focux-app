@@ -25,6 +25,19 @@ abstract final class DashboardLayout {
 
   static const double screenPadding = TokensStrip.s4;
   static const double sectionGap = TokensStrip.s4;
+  /// Folga entre cards do fold (Olá → ativação → Foco → ações).
+  static const EdgeInsets foldCard = EdgeInsets.fromLTRB(
+    TokensStrip.s4,
+    0,
+    TokensStrip.s4,
+    TokensStrip.s4,
+  );
+  static const EdgeInsets foldFirst = EdgeInsets.fromLTRB(
+    TokensStrip.s4,
+    TokensStrip.s2,
+    TokensStrip.s4,
+    TokensStrip.s4,
+  );
   static const double sliverSectionGap = TokensStrip.s2;
   static const double sliverTightGap = TokensStrip.s1;
   static const double headerIconGap = TokensStrip.s2;

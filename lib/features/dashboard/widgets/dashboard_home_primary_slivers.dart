@@ -26,7 +26,7 @@ import 'dashboard_home_coach_banner.dart';
 import 'dashboard_home_header.dart';
 import 'dashboard_pulse_strip.dart';
 
-/// Slivers do fold principal: promo → header → foco → CC → agenda → atenção → pulso.
+/// Slivers do fold: promo → Olá → ativação → Foco → CC → agenda → pulso.
 List<Widget> buildDashboardHomePrimarySlivers({
   required BuildContext context,
   required DashboardHomeSnapshot snap,
@@ -77,31 +77,6 @@ List<Widget> buildDashboardHomePrimarySlivers({
     if (!focusRules.hidePromoBanners) ...[
       const SliverToBoxAdapter(child: TrialCountdownBanner()),
       const SliverToBoxAdapter(child: PlanUsageBanner()),
-      if (onboardingIncomplete)
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(
-              TokensStrip.s4,
-              4,
-              TokensStrip.s4,
-              0,
-            ),
-            child: SetupOnboardingWidget(
-              statusFromHome: onboardingFromHome,
-            ),
-          ),
-        )
-      else
-        SliverToBoxAdapter(
-          child: DashboardActivationCta(
-            alunosAtivos: alunosAtivos,
-            temTreinos: primeiroTreinoCriado || checkinsHoje > 0,
-            temFinanceiro:
-                finData != null &&
-                (finData.receitaMes > 0 ||
-                    finData.vencimentosProximos.isNotEmpty),
-          ),
-        ),
     ],
     SliverToBoxAdapter(
       child: DashboardHomeHeader(
@@ -116,6 +91,22 @@ List<Widget> buildDashboardHomePrimarySlivers({
         freshnessLabel: freshnessLabel,
       ),
     ),
+    if (!focusRules.hidePromoBanners)
+      SliverToBoxAdapter(
+        child:
+            onboardingIncomplete
+                ? SetupOnboardingWidget(
+                  statusFromHome: onboardingFromHome,
+                )
+                : DashboardActivationCta(
+                  alunosAtivos: alunosAtivos,
+                  temTreinos: primeiroTreinoCriado || checkinsHoje > 0,
+                  temFinanceiro:
+                      finData != null &&
+                      (finData.receitaMes > 0 ||
+                          finData.vencimentosProximos.isNotEmpty),
+                ),
+      ),
     if (showCoachBanner && dismissCoach != null)
       SliverToBoxAdapter(
         child: DashboardHomeCoachBanner(
@@ -137,12 +128,7 @@ List<Widget> buildDashboardHomePrimarySlivers({
         context: context,
         fade: commandFade,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(
-            TokensStrip.s4,
-            0,
-            TokensStrip.s4,
-            TokensStrip.s3,
-          ),
+          padding: DashboardLayout.foldCard,
           child: DashboardCommandCenterSection(
             isDark: isDark,
             primary: primary,
@@ -223,12 +209,7 @@ List<Widget> buildDashboardHomePrimarySlivers({
       ),
     SliverToBoxAdapter(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(
-          TokensStrip.s4,
-          TokensStrip.s3,
-          TokensStrip.s4,
-          TokensStrip.s3,
-        ),
+        padding: DashboardLayout.foldCard,
         child: DashboardDayPulseStrip(
           fade: kpiFade,
           isDark: isDark,

@@ -346,31 +346,31 @@ class SetupWizardSkeleton extends StatelessWidget {
     return Shimmer.fromColors(
       baseColor: base,
       highlightColor: highlight,
-      child: Padding(
-        padding: const EdgeInsets.all(TokensStrip.s4),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              width: 180,
-              height: 18,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              TokensStrip.s4,
+              TokensStrip.s2,
+              TokensStrip.s3,
+              TokensStrip.s2,
+            ),
+            child: Container(
+              height: FxSettingsLayout.rowMinHeight,
               decoration: BoxDecoration(
                 color: highlight,
                 borderRadius: BorderRadius.circular(6),
               ),
             ),
-            const SizedBox(height: TokensStrip.s3),
-            Container(
-              width: double.infinity,
-              height: 4,
-              decoration: BoxDecoration(
-                color: highlight,
-                borderRadius: BorderRadius.circular(4),
-              ),
-            ),
-          ],
-        ),
+          ),
+          Container(
+            width: double.infinity,
+            height: 3,
+            color: highlight,
+          ),
+        ],
       ),
     );
   }

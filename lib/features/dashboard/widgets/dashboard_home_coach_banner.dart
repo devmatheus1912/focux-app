@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
+import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../constants/dashboard_layout.dart';
 import '../utils/dashboard_microcopy.dart';
 
 /// Banner one-shot: aponta o catálogo de ferramentas.
@@ -23,12 +25,7 @@ class DashboardHomeCoachBanner extends StatelessWidget {
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        TokensStrip.s4,
-        0,
-        TokensStrip.s4,
-        TokensStrip.s2,
-      ),
+      padding: DashboardLayout.foldCard,
       child: Semantics(
         liveRegion: true,
         label: DashboardMicrocopy.coachCatalogHint,
@@ -38,7 +35,7 @@ class DashboardHomeCoachBanner extends StatelessWidget {
                 isDark
                     ? EagleTokens.darkCardHi
                     : BrandPalette.soft(primary, dark: false),
-            borderRadius: BorderRadius.circular(TokensStrip.rCard),
+            borderRadius: BorderRadius.circular(FxSettingsLayout.groupRadius),
             border: Border.all(
               color: primary.withValues(alpha: isDark ? 0.35 : 0.22),
             ),

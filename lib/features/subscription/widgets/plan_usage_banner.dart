@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../planos/providers/plano_features_provider.dart';
 import '../../subscription/models/subscription_plan.dart';
@@ -34,12 +35,17 @@ class PlanUsageBanner extends ConsumerWidget {
     final warn = isDark ? EagleTokens.planUsageWarn : EagleTokens.warn;
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 0, TokensStrip.s5, 12),
+      padding: const EdgeInsets.fromLTRB(
+        FxSettingsLayout.pageInset,
+        0,
+        FxSettingsLayout.pageInset,
+        TokensStrip.s4,
+      ),
       child: Material(
         color: warn.withValues(alpha: isDark ? 0.12 : 0.14),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(FxSettingsLayout.groupRadius),
         child: InkWell(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(FxSettingsLayout.groupRadius),
           onTap: () => context.push('/assinatura', extra: target.apiName),
           child: Padding(
             padding: const EdgeInsets.all(14),

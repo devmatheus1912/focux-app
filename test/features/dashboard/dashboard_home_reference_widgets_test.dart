@@ -6,6 +6,7 @@ import 'package:focux_app/features/dashboard/widgets/dashboard_agenda_hoje_strip
 import 'package:focux_app/features/dashboard/widgets/dashboard_base_radar_strip.dart';
 import 'package:focux_app/features/dashboard/widgets/dashboard_finance_empty.dart';
 import 'package:focux_app/features/dashboard/widgets/dashboard_home_action_chip.dart';
+import 'package:focux_app/features/dashboard/widgets/dashboard_home_activation_strip.dart';
 import 'package:focux_app/features/dashboard/widgets/dashboard_home_coach_banner.dart';
 
 void main() {
@@ -113,4 +114,35 @@ void main() {
     await tester.tap(find.text(DashboardMicrocopy.coachEntendi));
     expect(dismissed, isTrue);
   });
+
+  testWidgets('faixa de ativação cabe em uma linha 52 + barra 3', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF13C2C2)),
+        ),
+        home: const Scaffold(
+          body: DashboardHomeActivationStrip(
+            title: 'Sua ativação',
+            subtitle: 'Complete seu perfil',
+            trailingMetric: '1/7',
+            progress: 0.14,
+            onTap: _noop,
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Sua ativação'), findsOneWidget);
+    expect(find.text('Complete seu perfil'), findsOneWidget);
+    expect(find.text('1/7'), findsOneWidget);
+    expect(find.byType(LinearProgressIndicator), findsOneWidget);
+    final size = tester.getSize(find.byType(DashboardHomeActivationStrip));
+    expect(size.height, lessThan(88));
+  });
 }
+
+void _noop() {}
+

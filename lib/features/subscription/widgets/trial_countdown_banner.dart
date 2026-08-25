@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
+import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../planos/data/planos_repository.dart';
 import '../../planos/providers/plano_features_provider.dart';
@@ -30,16 +31,16 @@ class TrialCountdownBanner extends ConsumerWidget {
 
         return Padding(
           padding: const EdgeInsets.fromLTRB(
-            TokensStrip.s5,
+            FxSettingsLayout.pageInset,
             0,
-            TokensStrip.s5,
-            8,
+            FxSettingsLayout.pageInset,
+            TokensStrip.s4,
           ),
           child: Material(
             color: warn.withValues(alpha: 0.12),
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(FxSettingsLayout.groupRadius),
             child: InkWell(
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(FxSettingsLayout.groupRadius),
               onTap:
                   () => context.push(
                     '/assinatura',

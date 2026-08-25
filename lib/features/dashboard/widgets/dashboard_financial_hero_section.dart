@@ -126,7 +126,7 @@ class DashboardFinancialHeroSection extends StatelessWidget {
             context,
             accent: heroPrimary,
             radius: FxSettingsLayout.groupRadius,
-            glowStrength: themeDark ? 0.06 : 0.08,
+            glowStrength: 0.04,
           ),
           padding: const EdgeInsets.fromLTRB(
             TokensStrip.s4,
