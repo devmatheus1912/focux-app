@@ -28,7 +28,6 @@ class _PersonalDashboardScreenState
   bool _coachLoaded = false;
   bool _deepLinkApplied = false;
 
-  late AnimationController _gradientCtrl;
   late AnimationController _counterCtrl;
   late AnimationController _entryCtrl;
   late Animation<double> _counterAnim;
@@ -39,10 +38,6 @@ class _PersonalDashboardScreenState
   @override
   void initState() {
     super.initState();
-    _gradientCtrl = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 8),
-    );
     _counterCtrl = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1200),
@@ -186,10 +181,8 @@ class _PersonalDashboardScreenState
     if (_motionConfigured) return;
     _motionConfigured = true;
     if (TokensStrip.prefersReducedMotion(context)) {
-      _gradientCtrl.stop();
       _entryCtrl.value = 1.0;
     } else {
-      _gradientCtrl.repeat();
       _entryCtrl.forward(from: 0);
     }
   }
@@ -300,7 +293,6 @@ class _PersonalDashboardScreenState
     }
     _homeScrollController.removeListener(_onHomeScroll);
     _homeScrollController.dispose();
-    _gradientCtrl.dispose();
     _counterCtrl.dispose();
     _entryCtrl.dispose();
     super.dispose();

@@ -5,14 +5,18 @@ import 'package:focux_app/features/dashboard/utils/dashboard_microcopy.dart';
 import 'package:focux_app/features/dashboard/widgets/dashboard_agenda_hoje_strip.dart';
 import 'package:focux_app/features/dashboard/widgets/dashboard_base_radar_strip.dart';
 import 'package:focux_app/features/dashboard/widgets/dashboard_finance_empty.dart';
+import 'package:focux_app/features/dashboard/widgets/dashboard_home_action_chip.dart';
 import 'package:focux_app/features/dashboard/widgets/dashboard_home_coach_banner.dart';
 
 void main() {
-  testWidgets('finance empty CTA usa contraste AA (branco + tinta escura)', (
+  testWidgets('finance empty usa chip da Home, sem CTA invertido', (
     tester,
   ) async {
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF00BFA5)),
+        ),
         home: Scaffold(
           body: DashboardFinanceEmptyState(
             mes: 'agosto',
@@ -22,16 +26,9 @@ void main() {
       ),
     );
 
-    final button = tester.widget<FilledButton>(find.byType(FilledButton));
-    final style = button.style!;
-    expect(
-      style.backgroundColor!.resolve({}),
-      Colors.white,
-    );
-    expect(
-      style.foregroundColor!.resolve({}),
-      const Color(0xFF0B1524),
-    );
+    expect(find.byType(DashboardHomeActionChip), findsOneWidget);
+    expect(find.byType(FilledButton), findsNothing);
+    expect(find.text(DashboardMicrocopy.abrirFinanceiro), findsOneWidget);
   });
 
   testWidgets('agenda strip mostra até 3 compromissos', (tester) async {

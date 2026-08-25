@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_icon.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -65,35 +66,24 @@ class CommandActionTile extends StatelessWidget {
               );
               context.go(item.route);
             },
-        borderRadius: BorderRadius.circular(TokensStrip.rCard),
+          borderRadius: BorderRadius.circular(FxSettingsLayout.groupRadius),
         child: Container(
           padding: const EdgeInsets.all(12),
           decoration: fxStripCardDecoration(
             context,
             accent: accent,
-            radius: TokensStrip.rCard,
+            radius: FxSettingsLayout.groupRadius,
             glowStrength: isLead ? (isDark ? 0.18 : 0.24) : 0.05,
             emphasize: isLead,
           ),
           child: Row(
             children: [
-              Container(
-                width: isLead ? 40 : 36,
-                height: isLead ? 40 : 36,
-                decoration: BoxDecoration(
-                  color: accent.withValues(alpha: isDark ? 0.26 : 0.14),
-                  borderRadius: BorderRadius.circular(TokensStrip.rInput),
-                ),
-                child: Center(
-                  child: FxIcon(
-                    name: item.icon,
-                    color: accent,
-                    size: isLead ? 19 : 17,
-                    strokeWidth: isLead ? 2.05 : 1.75,
-                  ),
-                ),
+              FxIcon(
+                name: item.icon,
+                color: accent,
+                size: FxSettingsLayout.iconSize,
               ),
-              SizedBox(width: isLead ? 12 : 10),
+              const SizedBox(width: FxSettingsLayout.iconGap),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -165,8 +155,8 @@ class CommandActionTile extends StatelessWidget {
               const SizedBox(width: 8),
               FxIcon(
                 name: 'chevron-right',
-                color: isLead ? accent.withValues(alpha: 0.85) : mute,
-                size: 20,
+                color: mute,
+                size: FxSettingsLayout.chevronSize,
               ),
             ],
           ),

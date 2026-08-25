@@ -1,27 +1,24 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../../../core/theme/brand_palette.dart';
-import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/fx_settings_layout.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_sparkline.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../financeiro/data/financeiro_repository.dart';
 import '../utils/dashboard_readability.dart';
 import '../utils/dashboard_screen_helpers.dart';
 import 'dashboard_finance_empty.dart';
-import 'dashboard_hero_widgets.dart';
 
 class DashboardFinancialHeroSection extends StatelessWidget {
   const DashboardFinancialHeroSection({
     super.key,
-    required this.gradientCtrl,
     required this.reduceMotion,
     required this.themeDark,
     required this.heroPrimary,
-    required this.heroDeep,
     required this.mes,
     required this.receitaAtual,
     required this.pendente,
@@ -33,11 +30,9 @@ class DashboardFinancialHeroSection extends StatelessWidget {
     required this.receitaTrend,
   });
 
-  final AnimationController gradientCtrl;
   final bool reduceMotion;
   final bool themeDark;
   final Color heroPrimary;
-  final Color heroDeep;
   final String mes;
   final double receitaAtual;
   final double pendente;
@@ -56,7 +51,6 @@ class DashboardFinancialHeroSection extends StatelessWidget {
     if (meta > 0) {
       return 'Meta R\$ ${meta.toStringAsFixed(0)}';
     }
-    // Ticket médio só com receita real — evita R$1100 “fantasma” em mês zerado.
     if (receitaAtual > 0 && ticket > 0) {
       return 'Ticket médio R\$ ${ticket.toStringAsFixed(0)} · defina meta no financeiro';
     }
@@ -68,16 +62,24 @@ class DashboardFinancialHeroSection extends StatelessWidget {
     return receitaAtual > 0 && ticket > 0;
   }
 
-  Widget _receitaAmount(BuildContext context) {
+  Widget _receitaAmount(BuildContext context, Color ink) {
+    final style = FocuxHubTypography.metric(
+      color: ink,
+      fontSize: 34,
+      fontWeight: FontWeight.w600,
+      letterSpacing: -0.5,
+      height: 1,
+    );
     if (loadingFin) {
+      final chrome = ShellChrome.of(context);
       return Shimmer.fromColors(
-        baseColor: Colors.white.withValues(alpha: 0.15),
-        highlightColor: Colors.white.withValues(alpha: 0.30),
+        baseColor: chrome.line,
+        highlightColor: chrome.mute.withValues(alpha: 0.35),
         child: Container(
           width: 160,
           height: 36,
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: chrome.cardFill,
             borderRadius: BorderRadius.circular(12),
           ),
         ),
@@ -86,13 +88,7 @@ class DashboardFinancialHeroSection extends StatelessWidget {
     if (reduceMotion) {
       return Text(
         'R\$ ${receitaAtual.toInt().toString().replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (m) => '.')}',
-        style: FocuxHubTypography.metric(
-          color: Colors.white,
-          fontSize: 34,
-          fontWeight: FontWeight.w600,
-          letterSpacing: -0.5,
-          height: 1,
-        ),
+        style: style,
       );
     }
     return AnimatedBuilder(
@@ -100,103 +96,56 @@ class DashboardFinancialHeroSection extends StatelessWidget {
       builder:
           (ctx, _) => Text(
             'R\$ ${counterAnim.value.toInt().toString().replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (m) => '.')}',
-            style: FocuxHubTypography.metric(
-              color: Colors.white,
-              fontSize: 34,
-              fontWeight: FontWeight.w600,
-              letterSpacing: -0.5,
-              height: 1,
-            ),
+            style: style,
           ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: AnimatedBuilder(
-        animation: gradientCtrl,
-        builder: (ctx, _) {
-          final angle = reduceMotion ? 0.0 : gradientCtrl.value * 2 * math.pi;
-          final begin = Alignment(-math.cos(angle), -math.sin(angle));
-          final end = Alignment(math.cos(angle), math.sin(angle));
-          return Semantics(
-            label:
-                'Panorama financeiro de $mes. '
-                'Recebido R\$ ${receitaAtual.toInt()}. '
-                'Toque para abrir financeiro',
-            button: true,
-            child: InkWell(
-              onTap: () => context.go('/financeiro'),
-              borderRadius: BorderRadius.circular(24),
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(24),
-                  gradient: LinearGradient(
-                    colors:
-                        _compactZeroRevenue
-                            ? [
-                              Color.lerp(heroDeep, EagleTokens.darkCard, 0.45)!,
-                              heroDeep,
-                            ]
-                            : [heroPrimary, heroDeep],
-                    begin: begin,
-                    end: end,
-                  ),
-                  boxShadow: [
-                    ...TokensStrip.coloredDepthGlow(
-                      heroPrimary,
-                      strength:
-                          themeDark
-                              ? (_compactZeroRevenue ? 0.06 : 0.14)
-                              : 0.18,
-                    ),
-                    BoxShadow(
-                      color: heroPrimary.withValues(
-                        alpha: themeDark ? 0.14 : 0.10,
-                      ),
-                      blurRadius: themeDark ? 16 : 14,
-                      offset: const Offset(0, 8),
-                      spreadRadius: -8,
-                    ),
-                  ],
-                ),
-                padding: EdgeInsets.fromLTRB(
-                  18,
-                  18,
-                  18,
-                  _compactZeroRevenue ? 14 : 16,
-                ),
-                child: CustomPaint(
-                  foregroundPainter:
-                      _compactZeroRevenue ? null : DashboardHeroGridPainter(),
-                  child:
-                      _compactZeroRevenue
-                          ? _buildCompactContent(context)
-                          : _buildFullContent(context),
-                ),
-              ),
-            ),
-          );
-        },
+    final chrome = ShellChrome.of(context);
+    return Semantics(
+      label:
+          'Panorama financeiro de $mes. '
+          'Recebido R\$ ${receitaAtual.toInt()}. '
+          'Toque para abrir financeiro',
+      button: true,
+      child: InkWell(
+        onTap: () => context.go('/financeiro'),
+        borderRadius: BorderRadius.circular(FxSettingsLayout.groupRadius),
+        child: Ink(
+          decoration: fxStripCardDecoration(
+            context,
+            accent: heroPrimary,
+            radius: FxSettingsLayout.groupRadius,
+            glowStrength: themeDark ? 0.06 : 0.08,
+          ),
+          padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
+          child:
+              _compactZeroRevenue
+                  ? DashboardFinanceEmptyState(
+                    mes: mes,
+                    ctaLabel: finData?.zeroCta,
+                    onOpen: () => context.go('/financeiro'),
+                  )
+                  : _buildFullContent(context, chrome),
+        ),
       ),
     );
   }
 
-  Widget _buildCompactContent(BuildContext context) {
-    return DashboardFinanceEmptyState(
-      mes: mes,
-      ctaLabel: finData?.zeroCta,
-      onOpen: () => context.go('/financeiro'),
-    );
-  }
-
-  Widget _buildFullContent(BuildContext context) {
+  Widget _buildFullContent(BuildContext context, ShellPalette chrome) {
+    final brand = BrandPalette.sectionAccent(heroPrimary, dark: themeDark);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Receita recebida · $mes', style: dashboardHeroEyebrowOnTeal()),
+        Text(
+          'Receita recebida · $mes',
+          style: FocuxHubTypography.bodyMuted(
+            color: chrome.mute,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
         const SizedBox(height: 4),
         Text(
           metaSuperada
@@ -204,20 +153,18 @@ class DashboardFinancialHeroSection extends StatelessWidget {
               : pendente > 0
               ? 'Recebido agora. Faltam R\$ ${pendente.toInt()} para a meta.'
               : 'Recebido agora. Meta do mês sob controle.',
-          style: dashboardHeroCaptionOnTealStyle(),
+          style: FocuxHubTypography.bodyMuted(color: chrome.mute, height: 1.35),
         ),
         const SizedBox(height: 8),
         Row(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            _receitaAmount(context),
+            _receitaAmount(context, chrome.ink),
             Padding(
               padding: const EdgeInsets.only(left: 8, bottom: 5),
               child: Text(
                 'recebido',
-                style: dashboardHeroEyebrowOnTeal().copyWith(
-                  letterSpacing: 0.1,
-                ),
+                style: FocuxHubTypography.bodyMuted(color: chrome.mute),
               ),
             ),
           ],
@@ -225,27 +172,19 @@ class DashboardFinancialHeroSection extends StatelessWidget {
         const SizedBox(height: 5),
         Row(
           children: [
-            Text(_metaLine(), style: dashboardHeroMutedOnTealStyle()),
-            if (metaSuperada) ...[
-              const SizedBox(width: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.14),
-                  borderRadius: BorderRadius.circular(TokensStrip.rInput),
-                  border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.28),
-                  ),
-                ),
-                child: Text(
-                  'SUPERADA',
-                  style: dashboardHeroEyebrowOnTeal().copyWith(
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 0.55,
-                  ),
+            Expanded(
+              child: Text(
+                _metaLine(),
+                style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+              ),
+            ),
+            if (metaSuperada)
+              Text(
+                'Superada',
+                style: FocuxHubTypography.chip(brand).copyWith(
+                  fontWeight: FontWeight.w800,
                 ),
               ),
-            ],
           ],
         ),
         const SizedBox(height: 12),
@@ -258,7 +197,7 @@ class DashboardFinancialHeroSection extends StatelessWidget {
                   padding: const EdgeInsets.only(bottom: 10),
                   child: Text(
                     'Histórico mensal aparece ao registrar cobranças',
-                    style: dashboardHeroCaptionOnTealStyle(),
+                    style: FocuxHubTypography.bodyMuted(color: chrome.mute),
                   ),
                 );
               }
@@ -270,14 +209,15 @@ class DashboardFinancialHeroSection extends StatelessWidget {
                     children: [
                       Text(
                         'Receita · últimos meses',
-                        style: dashboardHeroCaptionOnTealStyle(
+                        style: FocuxHubTypography.bodyMuted(
+                          color: chrome.mute,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
                       const Spacer(),
                       FxSparkline(
                         data: receitaTrend,
-                        color: Colors.white.withValues(alpha: 0.92),
+                        color: brand,
                         width: 96,
                         height: 26,
                         fill: true,
@@ -289,46 +229,36 @@ class DashboardFinancialHeroSection extends StatelessWidget {
             },
           ),
         ],
-        DashboardHeroProgressRail(
-          progress: progressRaw.clamp(0.0, 1.0),
-          exceeded: metaSuperada,
-          glow: BrandPalette.accent(heroPrimary),
-          percentLabel: financePercentLabel(
-            progressRaw,
-            exceeded: metaSuperada,
-          ),
-          excessBeyondMeta: metaSuperada ? math.max(0, progressRaw - 1) : 0,
+        Row(
+          children: [
+            Expanded(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(99),
+                child: LinearProgressIndicator(
+                  value: progressRaw.clamp(0.0, 1.0),
+                  minHeight: 8,
+                  backgroundColor: chrome.line,
+                  color: brand,
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Text(
+              financePercentLabel(progressRaw, exceeded: metaSuperada),
+              style: FocuxHubTypography.metric(
+                color: chrome.ink,
+                fontSize: TokensStrip.fontBodySm,
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: TokensStrip.s3),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            DashboardHeroMiniStat(
-              label: 'Pendente',
-              value: 'R\$ ${pendente.toInt()}',
-            ),
-            Container(
-              width: 1,
-              height: 30,
-              color: Colors.white.withValues(alpha: 0.15),
-            ),
-            DashboardHeroMiniStat(
-              label: financeInadimplLabel(MediaQuery.sizeOf(context).width),
-              value: '${finData?.totalInadimplentes ?? 0}',
-              suffix: ' alunos',
-            ),
-            if (_showTicketMedio) ...[
-              Container(
-                width: 1,
-                height: 30,
-                color: Colors.white.withValues(alpha: 0.15),
-              ),
-              DashboardHeroMiniStat(
-                label: 'Ticket médio',
-                value: 'R\$ ${finData!.ticketMedio.toStringAsFixed(0)}',
-              ),
-            ],
-          ],
+        Text(
+          'Pendente R\$ ${pendente.toInt()}'
+          ' · ${financeInadimplLabel(MediaQuery.sizeOf(context).width)}'
+          ' ${finData?.totalInadimplentes ?? 0}'
+          '${_showTicketMedio ? ' · Ticket R\$ ${finData!.ticketMedio.toStringAsFixed(0)}' : ''}',
+          style: FocuxHubTypography.bodyMuted(color: chrome.mute, height: 1.35),
         ),
       ],
     );

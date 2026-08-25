@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
+import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../../core/widgets/fx_help.dart';
@@ -69,7 +70,7 @@ class DashboardHomeHeader extends StatelessWidget {
         decoration: fxStripCardDecoration(
           context,
           accent: primary,
-          radius: TokensStrip.rCard,
+          radius: FxSettingsLayout.groupRadius,
           glowStrength: 0.04,
         ),
         child: Padding(

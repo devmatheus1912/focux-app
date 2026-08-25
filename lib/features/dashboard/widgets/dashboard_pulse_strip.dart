@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_icon.dart';
 import '../../../core/widgets/fx_sparkline.dart';
-import '../../../core/widgets/operational_metric_tile.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../constants/dashboard_layout.dart';
 import '../utils/dashboard_entry_motion.dart';
 import '../utils/dashboard_microcopy.dart';
 import '../utils/dashboard_readability.dart';
 import '../utils/dashboard_screen_helpers.dart';
 
-/// Tappable pulse chips reuse [operationalMetricDecoration] from `OperationalMetricTile`
-/// so dashboard KPIs match Aluno 360 visual language (display tiles stay read-only).
+/// Chips de pulso na pele glass da Home (ícone da marca, sem poço colorido).
 class DashboardDayPulseStrip extends StatelessWidget {
   const DashboardDayPulseStrip({
     super.key,
@@ -66,7 +66,7 @@ class DashboardDayPulseStrip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final riscoAccent =
-        riscoAlto > 0 ? EagleTokens.warn : TokensStrip.badgeSuccess;
+        riscoAlto > 0 ? EagleTokens.warn : primary;
     final width = MediaQuery.sizeOf(context).width;
     final tight = DashboardLayout.isCompact(width);
     final comfortable = DashboardLayout.isComfortable(width);
@@ -371,8 +371,6 @@ class DashboardPulseChip extends StatelessWidget {
     final comfortable =
         !compact &&
         DashboardLayout.isComfortable(MediaQuery.sizeOf(context).width);
-    final iconSize = compact ? 22.0 : comfortable ? 26.0 : 24.0;
-    final iconGlyph = compact ? 11.0 : comfortable ? 13.0 : 12.0;
     final valueSize =
         compact
             ? TokensStrip.fontBodySm
@@ -382,7 +380,7 @@ class DashboardPulseChip extends StatelessWidget {
     final labelSize = TokensStrip.fontBodySm;
     final hPad = compact ? 7.0 : comfortable ? 12.0 : 9.0;
     final vPad = compact ? 9.0 : comfortable ? 12.0 : 9.0;
-    final emphasis = OperationalMetricEmphasis.normal;
+    final brand = Theme.of(context).colorScheme.primary;
 
     return Semantics(
       button: true,
@@ -391,14 +389,14 @@ class DashboardPulseChip extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(TokensStrip.rCard),
+          borderRadius: BorderRadius.circular(FxSettingsLayout.groupRadius),
           child: Ink(
             padding: EdgeInsets.symmetric(horizontal: hPad, vertical: vPad),
-            decoration: operationalMetricDecoration(
-              accent: accent,
-              isDark: isDark,
-              radius: TokensStrip.rCard,
-              emphasis: emphasis,
+            decoration: fxStripCardDecoration(
+              context,
+              accent: brand,
+              radius: FxSettingsLayout.groupRadius,
+              glowStrength: 0.04,
             ),
             child: ConstrainedBox(
               constraints: const BoxConstraints(minHeight: 48),
@@ -408,24 +406,10 @@ class DashboardPulseChip extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      Container(
-                        width: iconSize,
-                        height: iconSize,
-                        decoration: BoxDecoration(
-                          color: accent.withValues(
-                            alpha: isDark ? 0.22 : 0.14,
-                          ),
-                          borderRadius: BorderRadius.circular(
-                            TokensStrip.rInput,
-                          ),
-                        ),
-                        child: Center(
-                          child: FxIcon(
-                            name: icon,
-                            size: iconGlyph,
-                            color: accent,
-                          ),
-                        ),
+                      FxIcon(
+                        name: icon,
+                        size: FxSettingsLayout.iconSize,
+                        color: accent,
                       ),
                       SizedBox(width: compact ? 5 : 6),
                       Expanded(
@@ -446,16 +430,19 @@ class DashboardPulseChip extends StatelessWidget {
                   SizedBox(height: compact ? 2 : 3),
                   Padding(
                     padding: EdgeInsets.only(
-                      left: iconSize + (compact ? 5 : 6),
+                      left: FxSettingsLayout.iconSize + (compact ? 5 : 6),
                     ),
                     child: Text(
                       label,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: FocuxHubTypography.chip(accent).copyWith(
-                        fontSize: labelSize,
+                      style: FocuxHubTypography.bodyMuted(
+                        color: dashboardReadableCaption(
+                          context,
+                          isDark: isDark,
+                        ),
                         height: 1.1,
-                      ),
+                      ).copyWith(fontSize: labelSize),
                     ),
                   ),
                 ],

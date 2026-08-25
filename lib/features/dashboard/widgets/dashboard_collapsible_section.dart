@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/brand_palette.dart';
+import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../utils/dashboard_a11y.dart';
@@ -117,7 +118,7 @@ class _DashboardCollapsibleSectionState
               ),
               child: InkWell(
                 onTap: _onHeaderTap,
-                borderRadius: BorderRadius.circular(TokensStrip.rCard),
+                borderRadius: BorderRadius.circular(FxSettingsLayout.groupRadius),
                 child: Ink(
                   padding: EdgeInsets.symmetric(
                     horizontal: widget.quietChrome ? 12 : 14,
@@ -125,7 +126,7 @@ class _DashboardCollapsibleSectionState
                   ),
                   decoration: fxStripCardDecoration(
                     context,
-                    radius: TokensStrip.rCard,
+                    radius: FxSettingsLayout.groupRadius,
                     glowStrength: widget.quietChrome ? 0.03 : 0.08,
                   ),
                   child: Row(

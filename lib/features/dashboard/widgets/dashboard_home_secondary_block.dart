@@ -23,7 +23,6 @@ class DashboardHomeSecondaryBlock extends StatelessWidget {
     required this.focusRules,
     required this.isDark,
     required this.heroPrimary,
-    required this.heroDeep,
     required this.mes,
     required this.receitaAtual,
     required this.pendente,
@@ -33,7 +32,6 @@ class DashboardHomeSecondaryBlock extends StatelessWidget {
     required this.counterAnim,
     required this.finData,
     required this.receitaTrend,
-    required this.gradientCtrl,
     required this.reduceMotion,
     required this.heroFade,
     required this.shortcutAspectRatio,
@@ -47,7 +45,6 @@ class DashboardHomeSecondaryBlock extends StatelessWidget {
   final DashboardHomeFocusRules focusRules;
   final bool isDark;
   final Color heroPrimary;
-  final Color heroDeep;
   final String mes;
   final double receitaAtual;
   final double pendente;
@@ -57,7 +54,6 @@ class DashboardHomeSecondaryBlock extends StatelessWidget {
   final Animation<double> counterAnim;
   final FinanceiroDashboard? finData;
   final List<double> receitaTrend;
-  final AnimationController gradientCtrl;
   final bool reduceMotion;
   final Animation<double> heroFade;
   final double shortcutAspectRatio;
@@ -123,11 +119,9 @@ class DashboardHomeSecondaryBlock extends StatelessWidget {
             fade: heroFade,
             slideBegin: const Offset(0, 0.05),
             child: DashboardFinancialHeroSection(
-              gradientCtrl: gradientCtrl,
               reduceMotion: reduceMotion,
               themeDark: isDark,
               heroPrimary: heroPrimary,
-              heroDeep: heroDeep,
               mes: mes,
               receitaAtual: receitaAtual,
               pendente: pendente,

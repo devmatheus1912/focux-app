@@ -83,10 +83,10 @@ void main() {
     expect(screen, contains('pulseCheckinsAccent'));
     expect(screen, contains('DashboardHorizontalScrollPeek'));
     expect(screen, contains('scrollPeekHint'));
-    expect(screen, contains("label: 'Pendente'"));
-    expect(screen, contains("label: 'Ticket médio'"));
+    expect(screen, contains('Pendente'));
+    expect(screen, contains('Ticket médio'));
     expect(screen, contains('_showTicketMedio'));
-    expect(screen, contains('excessBeyondMeta'));
+    expect(screen, contains('DashboardHomeActionChip'));
     expect(screen, contains('BrandPalette.sectionLink'));
     expect(screen, contains('showPrioritiesLink'));
     expect(screen, contains('verPrioridades'));

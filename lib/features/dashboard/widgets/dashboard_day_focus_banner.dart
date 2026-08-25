@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_icon.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -73,12 +74,12 @@ class DashboardDayFocusBanner extends StatelessWidget {
             decoration: fxStripCardDecoration(
               context,
               accent: primary,
-              radius: TokensStrip.rCard,
+              radius: FxSettingsLayout.groupRadius,
               glowStrength: focusMode ? 0.10 : 0.07,
               emphasize: true,
             ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(TokensStrip.rCard),
+              child: ClipRRect(
+              borderRadius: BorderRadius.circular(FxSettingsLayout.groupRadius),
               child: Stack(
                 clipBehavior: Clip.hardEdge,
                 children: [
@@ -106,25 +107,18 @@ class DashboardDayFocusBanner extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             Container(
-                              width: 36,
-                              height: 36,
-                              decoration: BoxDecoration(
-                                color: accent.withValues(
-                                  alpha: isDark ? 0.24 : 0.12,
-                                ),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Center(
-                                child: FxIcon(
-                                  name:
-                                      focus.kind ==
-                                              DashboardDayFocusKind
-                                                  .retomadaUrgente
-                                          ? 'target'
-                                          : 'route',
-                                  size: 17,
-                                  color: accent,
-                                ),
+                              width: FxSettingsLayout.iconSize,
+                              height: FxSettingsLayout.iconSize,
+                              alignment: Alignment.center,
+                              child: FxIcon(
+                                name:
+                                    focus.kind ==
+                                            DashboardDayFocusKind
+                                                .retomadaUrgente
+                                        ? 'target'
+                                        : 'route',
+                                size: FxSettingsLayout.iconSize,
+                                color: accent,
                               ),
                             ),
                             const SizedBox(width: 10),
@@ -262,7 +256,7 @@ class DashboardDayFocusBanner extends StatelessWidget {
                           ),
                           child: Text(
                             focus.headline,
-                            style: dashboardPageTitleStyle(
+                            style: dashboardSectionTitleStyle(
                               context,
                               color: ink,
                             ),

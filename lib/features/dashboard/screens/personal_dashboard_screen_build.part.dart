@@ -4,7 +4,6 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
   Widget buildPersonalDashboardBody(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
     final heroPrimary = BrandPalette.softened(primary, amount: 0.06);
-    final heroDeep = BrandPalette.deep(heroPrimary);
     final homeAsync = ref.watch(dashboardHomeProvider);
     final reduceMotion = TokensStrip.prefersReducedMotion(context);
     final themeDark = Theme.of(context).brightness == Brightness.dark;
@@ -286,7 +285,6 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                                 focusRules: focusRules,
                                 isDark: themeDark,
                                 heroPrimary: heroPrimary,
-                                heroDeep: heroDeep,
                                 mes: mes,
                                 receitaAtual: receitaAtual,
                                 pendente: pendente,
@@ -296,7 +294,6 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                                 counterAnim: _counterAnim,
                                 finData: home.financeiro,
                                 receitaTrend: receitaTrend,
-                                gradientCtrl: _gradientCtrl,
                                 reduceMotion: reduceMotion,
                                 heroFade: _heroFade,
                                 shortcutAspectRatio: shortcutAspectRatio,

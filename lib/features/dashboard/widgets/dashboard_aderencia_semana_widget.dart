@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../../core/widgets/fx_icon.dart';
@@ -11,6 +12,7 @@ import '../../../core/widgets/fx_sparkline.dart';
 import '../providers/aderencia_provider.dart';
 import '../utils/dashboard_home_focus.dart';
 import '../utils/dashboard_readability.dart';
+import 'dashboard_home_action_chip.dart';
 
 class DashboardAderenciaSemanaWidget extends StatelessWidget {
   final bool isDark;
@@ -91,7 +93,7 @@ class DashboardAderenciaSemanaWidget extends StatelessWidget {
       decoration: fxStripCardDecoration(
         context,
         accent: primary,
-        radius: TokensStrip.rCard,
+        radius: FxSettingsLayout.groupRadius,
       ),
       child: Column(
         children: List.generate(items.length, (index) {
@@ -220,7 +222,7 @@ class DashboardAderenciaSemanaEmptyCard extends StatelessWidget {
       decoration: fxStripCardDecoration(
         context,
         accent: quiet ? null : primary,
-        radius: TokensStrip.rCard,
+        radius: FxSettingsLayout.groupRadius,
         glowStrength: quiet ? 0.06 : 0.44,
       ),
       child: Column(
@@ -230,20 +232,10 @@ class DashboardAderenciaSemanaEmptyCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               if (!quiet) ...[
-                Container(
-                  width: 38,
-                  height: 38,
-                  decoration: BoxDecoration(
-                    color: primary.withValues(alpha: isDark ? 0.18 : 0.10),
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: Center(
-                    child: FxIcon(
-                      name: 'calendar',
-                      size: 18,
-                      color: BrandPalette.sectionAccent(primary, dark: isDark),
-                    ),
-                  ),
+                FxIcon(
+                  name: 'calendar',
+                  size: FxSettingsLayout.iconSize,
+                  color: BrandPalette.sectionAccent(primary, dark: isDark),
                 ),
                 const SizedBox(width: 12),
               ],
@@ -277,77 +269,32 @@ class DashboardAderenciaSemanaEmptyCard extends StatelessWidget {
           ),
           if (showActions) ...[
             const SizedBox(height: 14),
-            LayoutBuilder(
-              builder: (context, constraints) {
-                final stacked = constraints.maxWidth < 340;
-                final primaryBtn = SizedBox(
-                  width: stacked ? double.infinity : null,
-                  child: FilledButton(
-                    onPressed: onPrimary,
-                    style: FilledButton.styleFrom(
-                      minimumSize: const Size.fromHeight(44),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(
-                          TokensStrip.rButton,
-                        ),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                DashboardHomeActionChip(
+                  label: primaryAction!,
+                  accent: primary,
+                  isDark: isDark,
+                  onPressed: onPrimary!,
+                ),
+                if (secondaryAction != null && onSecondary != null)
+                  TextButton(
+                    onPressed: onSecondary,
+                    style: TextButton.styleFrom(
+                      foregroundColor: primary,
+                      minimumSize: const Size(48, 48),
+                    ),
+                    child: Text(
+                      secondaryAction!,
+                      style: FocuxHubTypography.bodyMuted(
+                        color: primary,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
-                    child: Text(primaryAction!),
                   ),
-                );
-                final secondaryBtn =
-                    secondaryAction != null && onSecondary != null
-                        ? SizedBox(
-                          width: stacked ? double.infinity : null,
-                          child: OutlinedButton(
-                            onPressed: onSecondary,
-                            style: OutlinedButton.styleFrom(
-                              minimumSize: const Size.fromHeight(44),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(
-                                  TokensStrip.rButton,
-                                ),
-                              ),
-                            ),
-                            child: Text(
-                              secondaryAction!,
-                              textAlign: TextAlign.center,
-                              style: FocuxHubTypography.bodyMuted(
-                                color: Theme.of(context).colorScheme.primary,
-                                fontWeight: FontWeight.w700,
-                                height: 1.1,
-                              ),
-                            ),
-                          ),
-                        )
-                        : null;
-
-                if (stacked) {
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      primaryBtn,
-                      if (secondaryBtn != null) ...[
-                        const SizedBox(height: 8),
-                        secondaryBtn,
-                      ],
-                    ],
-                  );
-                }
-
-                return Row(
-                  children: [
-                    Expanded(child: primaryBtn),
-                    if (secondaryBtn != null) ...[
-                      const SizedBox(width: 8),
-                      Expanded(child: secondaryBtn),
-                    ],
-                  ],
-                );
-              },
+              ],
             ),
           ],
         ],
