@@ -34,7 +34,6 @@ class DashboardHomeSecondaryBlock extends StatelessWidget {
     required this.receitaTrend,
     required this.reduceMotion,
     required this.heroFade,
-    required this.shortcutAspectRatio,
     required this.onOpenRelatorio,
     this.topAderencia = const [],
     this.alunosScore = const [],
@@ -56,7 +55,6 @@ class DashboardHomeSecondaryBlock extends StatelessWidget {
   final List<double> receitaTrend;
   final bool reduceMotion;
   final Animation<double> heroFade;
-  final double shortcutAspectRatio;
   final VoidCallback onOpenRelatorio;
   final List<DashboardAderenciaTopItem> topAderencia;
   final List<AlunoScoreResumo> alunosScore;
@@ -139,7 +137,6 @@ class DashboardHomeSecondaryBlock extends StatelessWidget {
           key: toolsSectionKey,
           child: DashboardCollapsibleToolsSection(
             isDark: isDark,
-            shortcutAspectRatio: shortcutAspectRatio,
             hideFeaturedTools: focusRules.hideFeaturedTools,
             homePlanoFeatures: homePlanoFeatures,
             quietChrome: true,

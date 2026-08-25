@@ -8,14 +8,12 @@ import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_input_deco.dart';
-import '../../../core/widgets/fx_settings_group.dart';
-import '../../../core/widgets/fx_settings_tile.dart';
 import '../../planos/data/planos_repository.dart';
-import '../../planos/utils/effective_plano_features.dart';
 import '../data/dashboard_tool_shortcuts.dart';
 import '../utils/dashboard_microcopy.dart';
 import '../utils/dashboard_shortcut_navigation.dart';
 import '../utils/dashboard_tool_groups.dart';
+import 'dashboard_tool_shortcut_group.dart';
 
 Future<void> showDashboardToolsCatalogSheet(
   BuildContext context, {
@@ -190,8 +188,9 @@ class _DashboardToolsCatalogSheetState
                             ? FxSettingsLayout.groupGap
                             : 0,
                   ),
-                  child: _DashboardCatalogGroup(
-                    group: group,
+                  child: DashboardToolShortcutGroup(
+                    header: group.title,
+                    shortcuts: group.shortcuts,
                     homePlanoFeatures: widget.homePlanoFeatures,
                     onShortcut: (shortcut) {
                       Navigator.of(context).pop();
@@ -209,48 +208,6 @@ class _DashboardToolsCatalogSheetState
           ),
         ],
       ),
-    );
-  }
-}
-
-class _DashboardCatalogGroup extends ConsumerWidget {
-  const _DashboardCatalogGroup({
-    required this.group,
-    required this.onShortcut,
-    this.homePlanoFeatures,
-  });
-
-  final DashboardToolGroupSection group;
-  final PlanoFeatures? homePlanoFeatures;
-  final void Function(DashboardToolShortcut shortcut) onShortcut;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final features = effectivePlanoFeatures(
-      ref,
-      homeOverride: homePlanoFeatures,
-    );
-    final chrome = ShellChrome.of(context);
-
-    return FxSettingsGroup(
-      header: group.title,
-      children: [
-        for (var i = 0; i < group.shortcuts.length; i++)
-          FxSettingsTile(
-            fxIcon: group.shortcuts[i].icon,
-            label: group.shortcuts[i].label,
-            value:
-                group.shortcuts[i].isUnlocked(features)
-                    ? ''
-                    : group.shortcuts[i].tierBadgeLabel(),
-            locked: !group.shortcuts[i].isUnlocked(features),
-            upgradeTierLabel: group.shortcuts[i].tierBadgeLabel(),
-            mute: chrome.mute,
-            line: chrome.line,
-            showDivider: i < group.shortcuts.length - 1,
-            onTap: () => onShortcut(group.shortcuts[i]),
-          ),
-      ],
     );
   }
 }

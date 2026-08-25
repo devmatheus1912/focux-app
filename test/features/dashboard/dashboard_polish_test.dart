@@ -141,20 +141,29 @@ void main() {
     expect(semanticsCount, greaterThanOrEqualTo(10));
   });
 
-  test('catálogo completo é lista inset sem accordion', () {
+  test('destaque da Home e catálogo são lista inset', () {
     final catalog = File(
       'lib/features/dashboard/widgets/dashboard_tools_catalog_sheet.dart',
     ).readAsStringSync();
-    final grid = File(
-      'lib/features/dashboard/widgets/dashboard_tool_grid.dart',
+    final tools = File(
+      'lib/features/dashboard/widgets/dashboard_tools_section.dart',
     ).readAsStringSync();
-    expect(catalog, contains('FxSettingsGroup'));
-    expect(catalog, contains('FxSettingsTile'));
+    final group = File(
+      'lib/features/dashboard/widgets/dashboard_tool_shortcut_group.dart',
+    ).readAsStringSync();
+    expect(catalog, contains('DashboardToolShortcutGroup'));
     expect(catalog, contains('ListView.builder'));
     expect(catalog, contains('catalogoSubtitle'));
     expect(catalog, isNot(contains('DashboardExpandableToolGroups')));
     expect(catalog, isNot(contains('shortcutAspectRatio')));
-    expect(grid, isNot(contains('class DashboardExpandableToolGroups')));
-    expect(grid, contains('class DashboardShortcutGrid'));
+    expect(tools, contains('DashboardToolShortcutGroup'));
+    expect(tools, contains('FxSettingsLayout.groupRadius'));
+    expect(tools, isNot(contains('DashboardShortcutGrid')));
+    expect(tools, isNot(contains('shortcutAspectRatio')));
+    expect(tools, isNot(contains('AspectRatio')));
+    expect(group, contains('FxSettingsTile'));
+    expect(group, contains('FxSettingsGroup'));
+    expect(group, contains('dashboardShortcutSemanticsLabel'));
+    expect(group, contains('homeOverride: homePlanoFeatures'));
   });
 }

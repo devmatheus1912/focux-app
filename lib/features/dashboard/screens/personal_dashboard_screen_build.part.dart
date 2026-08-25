@@ -31,9 +31,6 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
               data: (home) {
                 _applyHomeDeepLinkOnce(context);
                 final data = home.personal;
-                final screenWidth = MediaQuery.sizeOf(context).width;
-                final isCompactPhone = DashboardLayout.isCompact(screenWidth);
-                final shortcutAspectRatio = isCompactPhone ? 2.55 : 2.85;
 
                 if (_homeFetchedAt == null) {
                   WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -296,7 +293,6 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                                 receitaTrend: receitaTrend,
                                 reduceMotion: reduceMotion,
                                 heroFade: _heroFade,
-                                shortcutAspectRatio: shortcutAspectRatio,
                                 topAderencia: home.topAderencia,
                                 alunosScore: home.commandCenter.alunosScore,
                                 homePlanoFeatures: home.planoFeatures,

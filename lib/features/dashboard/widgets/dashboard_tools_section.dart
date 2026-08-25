@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/theme/brand_palette.dart';
+import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../planos/data/planos_repository.dart';
@@ -12,25 +13,22 @@ import '../utils/dashboard_haptic.dart';
 import '../utils/dashboard_microcopy.dart';
 import '../utils/dashboard_readability.dart';
 import '../utils/dashboard_shortcut_navigation.dart';
-import 'dashboard_tool_grid.dart';
+import 'dashboard_tool_shortcut_group.dart';
 import 'dashboard_tools_catalog_sheet.dart';
 
-export 'dashboard_tool_grid.dart';
 export 'dashboard_tools_catalog_sheet.dart';
 
 class DashboardCollapsibleToolsSection extends ConsumerWidget {
   const DashboardCollapsibleToolsSection({
     super.key,
     required this.isDark,
-    required this.shortcutAspectRatio,
     this.hideFeaturedTools = false,
     this.homePlanoFeatures,
     this.quietChrome = false,
   });
 
   final bool isDark;
-  final double shortcutAspectRatio;
-  /// Modo foco: só header que abre o catálogo (sem grid featured).
+  /// Modo foco: só header que abre o catálogo (sem lista em destaque).
   final bool hideFeaturedTools;
   final PlanoFeatures? homePlanoFeatures;
   /// Home secundária: chrome alinhado aos collapsibles quiet.
@@ -76,9 +74,9 @@ class DashboardCollapsibleToolsSection extends ConsumerWidget {
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(
-        TokensStrip.s4,
+        FxSettingsLayout.pageInset,
         0,
-        TokensStrip.s4,
+        FxSettingsLayout.pageInset,
         TokensStrip.s2,
       ),
       child: Column(
@@ -93,7 +91,9 @@ class DashboardCollapsibleToolsSection extends ConsumerWidget {
                   '${DashboardMicrocopy.abrirCatalogo}',
               child: InkWell(
                 onTap: openCatalog,
-                borderRadius: BorderRadius.circular(TokensStrip.rCard),
+                borderRadius: BorderRadius.circular(
+                  FxSettingsLayout.groupRadius,
+                ),
                 child: Ink(
                   padding: EdgeInsets.symmetric(
                     horizontal: quietChrome ? 12 : 14,
@@ -101,7 +101,7 @@ class DashboardCollapsibleToolsSection extends ConsumerWidget {
                   ),
                   decoration: fxStripCardDecoration(
                     context,
-                    radius: TokensStrip.rCard,
+                    radius: FxSettingsLayout.groupRadius,
                     glowStrength: quietChrome ? 0.03 : 0.06,
                   ),
                   child: Row(
@@ -137,7 +137,7 @@ class DashboardCollapsibleToolsSection extends ConsumerWidget {
                       ),
                       Icon(
                         Icons.chevron_right_rounded,
-                        size: quietChrome ? 20 : 22,
+                        size: FxSettingsLayout.chevronSize,
                         color: link,
                       ),
                     ],
@@ -148,62 +148,56 @@ class DashboardCollapsibleToolsSection extends ConsumerWidget {
           ),
           if (!hideFeatured)
             Padding(
-              padding: const EdgeInsets.only(top: 10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  DashboardShortcutGrid(
-                    shortcuts: featuredShortcuts,
-                    isDark: isDark,
-                    aspectRatio: shortcutAspectRatio,
-                    onShortcut:
-                        (shortcut) =>
-                            openDashboardShortcut(
-                              context,
-                              ref,
-                              shortcut,
-                              homeOverride: homePlanoFeatures,
-                            ),
-                  ),
-                  const SizedBox(height: 6),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: Material(
-                      color: Colors.transparent,
-                      child: Semantics(
-                        button: true,
-                        label: DashboardMicrocopy.verCatalogoCompleto,
-                        child: InkWell(
-                          onTap: openCatalog,
-                          borderRadius: BorderRadius.circular(
-                            TokensStrip.rInput,
+              padding: const EdgeInsets.only(
+                top: FxSettingsLayout.headerToGroup,
+              ),
+              child: DashboardToolShortcutGroup(
+                shortcuts: featuredShortcuts,
+                homePlanoFeatures: homePlanoFeatures,
+                onShortcut:
+                    (shortcut) => openDashboardShortcut(
+                      context,
+                      ref,
+                      shortcut,
+                      homeOverride: homePlanoFeatures,
+                    ),
+                footer: Align(
+                  alignment: Alignment.centerRight,
+                  child: Material(
+                    color: Colors.transparent,
+                    child: Semantics(
+                      button: true,
+                      label: DashboardMicrocopy.verCatalogoCompleto,
+                      child: InkWell(
+                        onTap: openCatalog,
+                        borderRadius: BorderRadius.circular(
+                          TokensStrip.rInput,
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 6,
                           ),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 6,
-                              vertical: 6,
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  DashboardMicrocopy.verCatalogoCompleto,
-                                  style: FocuxHubTypography.chip(link),
-                                ),
-                                const SizedBox(width: 4),
-                                Icon(
-                                  Icons.chevron_right_rounded,
-                                  size: 16,
-                                  color: link,
-                                ),
-                              ],
-                            ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                DashboardMicrocopy.verCatalogoCompleto,
+                                style: FocuxHubTypography.chip(link),
+                              ),
+                              const SizedBox(width: 4),
+                              Icon(
+                                Icons.chevron_right_rounded,
+                                size: FxSettingsLayout.chevronSize,
+                                color: link,
+                              ),
+                            ],
                           ),
                         ),
                       ),
                     ),
                   ),
-                ],
+                ),
               ),
             ),
         ],

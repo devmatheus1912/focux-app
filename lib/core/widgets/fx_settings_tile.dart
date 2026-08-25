@@ -28,6 +28,7 @@ class FxSettingsTile extends StatelessWidget {
     this.numeric = false,
     this.onLongPress,
     this.upgradeTierLabel,
+    this.semanticsLabel,
   }) : assert(icon != null || fxIcon != null);
 
   final IconData? icon;
@@ -46,6 +47,7 @@ class FxSettingsTile extends StatelessWidget {
   final bool picker;
   final bool numeric;
   final String? upgradeTierLabel;
+  final String? semanticsLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -68,12 +70,13 @@ class FxSettingsTile extends StatelessWidget {
             : locked
             ? brand.withValues(alpha: 0.55)
             : brand;
+    final spoken = semanticsLabel ?? label;
     final a11y =
         danger
-            ? '$label. Ação destrutiva'
+            ? '$spoken. Ação destrutiva'
             : locked
-            ? '$label trancado. Plano ${upgradeTierLabel ?? 'upgrade'}'
-            : (value.isEmpty ? label : '$label. $value');
+            ? '$spoken trancado. Plano ${upgradeTierLabel ?? 'upgrade'}'
+            : (value.isEmpty ? spoken : '$spoken. $value');
 
     return Semantics(
       button: true,

@@ -79,7 +79,7 @@ void main() {
 
     // Helpers de a11y vivem nos widgets extraídos da Home.
     const dashboardWidgets = [
-      'lib/features/dashboard/widgets/dashboard_tool_grid.dart',
+      'lib/features/dashboard/widgets/dashboard_tool_shortcut_group.dart',
       'lib/features/dashboard/widgets/dashboard_attention_rail.dart',
       'lib/features/dashboard/widgets/dashboard_collapsible_section.dart',
     ];
