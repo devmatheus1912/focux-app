@@ -185,4 +185,38 @@ void main() {
     expect(cta, contains('FxSettingsLayout.pageInset'));
     expect(cta, isNot(contains('TokensStrip.s5')));
   });
+
+  test('Home opera o dia em grupos inset ChatGPT/iOS', () {
+    final tile = File(
+      'lib/features/dashboard/widgets/command_action_tile.dart',
+    ).readAsStringSync();
+    final panel = File(
+      'lib/features/dashboard/widgets/command_action_panel.dart',
+    ).readAsStringSync();
+    final finance = File(
+      'lib/features/dashboard/widgets/dashboard_finance_empty.dart',
+    ).readAsStringSync();
+    final aderencia = File(
+      'lib/features/dashboard/widgets/dashboard_aderencia_semana_widget.dart',
+    ).readAsStringSync();
+    expect(tile, contains('FxSettingsLayout.rowMinHeight'));
+    expect(tile, isNot(contains('fxStripCardDecoration')));
+    expect(tile, isNot(contains('entranceIndex')));
+    expect(panel, contains('FxSettingsGroup'));
+    expect(finance, contains('FxSettingsTile'));
+    expect(finance, isNot(contains('DashboardHomeActionChip')));
+    expect(aderencia, contains('FxSettingsTile'));
+    expect(aderencia, isNot(contains('DashboardHomeActionChip')));
+  });
+
+  test('pulso operacional é um grupo inset, sem cards KPI', () {
+    final pulse = File(
+      'lib/features/dashboard/widgets/dashboard_pulse_strip.dart',
+    ).readAsStringSync();
+    expect(pulse, contains('FxSettingsGroup'));
+    expect(pulse, contains('header: DashboardMicrocopy.pulsoOperacional'));
+    expect(pulse, isNot(contains('fxStripCardDecoration')));
+    expect(pulse, isNot(contains('_PulseChipEntrance')));
+    expect(pulse, contains('class DashboardPulseChip'));
+  });
 }

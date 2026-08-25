@@ -1,18 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/fx_settings_layout.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_icon.dart';
+import '../../../core/widgets/fx_settings_group.dart';
+import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_sparkline.dart';
-import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../constants/dashboard_layout.dart';
 import '../utils/dashboard_entry_motion.dart';
 import '../utils/dashboard_microcopy.dart';
 import '../utils/dashboard_readability.dart';
 import '../utils/dashboard_screen_helpers.dart';
 
-/// Chips de pulso na pele glass da Home (ícone da marca, sem poço colorido).
+/// Pulso do dia — um grupo inset (ChatGPT/iOS), sem cards KPI soltos.
 class DashboardDayPulseStrip extends StatelessWidget {
   const DashboardDayPulseStrip({
     super.key,
@@ -56,7 +59,7 @@ class DashboardDayPulseStrip extends StatelessWidget {
   final bool hideEmptyTrend;
   final String? emptyTrendCtaLabel;
   final VoidCallback? onEmptyTrendCta;
-  /// Modo foco: esconde tendência/sparkline (só chips).
+  /// Modo foco: esconde tendência/sparkline (só métricas).
   final bool collapseBody;
   /// Folga à direita quando o chip Ver prioridades está no overlay.
   final double trailingReserve;
@@ -65,12 +68,10 @@ class DashboardDayPulseStrip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final riscoAccent =
-        riscoAlto > 0 ? EagleTokens.warn : primary;
+    final riscoAccent = riscoAlto > 0 ? EagleTokens.warn : primary;
     final width = MediaQuery.sizeOf(context).width;
     final tight = DashboardLayout.isCompact(width);
     final comfortable = DashboardLayout.isComfortable(width);
-    final gap = tight ? 6.0 : comfortable ? TokensStrip.s3 : TokensStrip.s2;
     final caption = dashboardReadableCaption(context, isDark: isDark);
     final ativosAccent = alunosAtivos > 0 ? primary : caption;
     final checkinsAccent = pulseCheckinsAccent(
@@ -86,148 +87,237 @@ class DashboardDayPulseStrip extends StatelessWidget {
     final trendReady = checkinsTrend.length >= 7;
     final hasTrend = trendReady && checkinsTrend.any((v) => v > 0);
     final showTrendRow =
-        hasTrend || showEmptyTrendCta || (trendReady && !hideEmptyTrend);
+        !collapseBody &&
+        (hasTrend || showEmptyTrendCta || (trendReady && !hideEmptyTrend));
+    final showCta =
+        !collapseBody &&
+        showEmptyTrendCta &&
+        emptyTrendCtaLabel != null &&
+        onEmptyTrendCta != null;
 
     return dashboardEntryMotion(
       context: context,
       fade: fade,
       slideBegin: const Offset(0, 0.03),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: FxSettingsGroup(
+        header: DashboardMicrocopy.pulsoOperacional,
+        accent: primary,
         children: [
-          Text(
-            DashboardMicrocopy.pulsoOperacional,
-            style: dashboardSectionKickerStyle(context, isDark: isDark),
-          ),
-          const SizedBox(height: 6),
-          Row(
-            children: [
-              Expanded(
-                child: _PulseChipEntrance(
-                  index: 0,
+          ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 48),
+            child: Row(
+              children: [
+                Expanded(
                   child: DashboardPulseChip(
-                  icon: 'users',
-                  value: alunosAtivos.toString(),
-                  label: 'Ativos',
-                  accent: ativosAccent,
-                  isDark: isDark,
-                  compact: tight,
-                  empty: alunosAtivos == 0,
-                  onTap: onAtivos,
+                    icon: 'users',
+                    value: alunosAtivos.toString(),
+                    label: 'Ativos',
+                    accent: ativosAccent,
+                    isDark: isDark,
+                    empty: alunosAtivos == 0,
+                    showTrailingDivider: true,
+                    onTap: onAtivos,
+                  ),
                 ),
-                ),
-              ),
-              SizedBox(width: gap),
-              Expanded(
-                child: _PulseChipEntrance(
-                  index: 1,
+                Expanded(
                   child: DashboardPulseChip(
-                  icon: 'circle-check',
-                  value: checkinsHoje.toString(),
-                  label: tight ? 'Checks' : DashboardMicrocopy.checkinsPulseLabel,
-                  accent: checkinsAccent,
-                  isDark: isDark,
-                  compact: tight,
-                  empty: checkinsHoje == 0,
-                  onTap: onCheckins,
+                    icon: 'circle-check',
+                    value: checkinsHoje.toString(),
+                    label:
+                        tight
+                            ? 'Checks'
+                            : DashboardMicrocopy.checkinsPulseLabel,
+                    accent: checkinsAccent,
+                    isDark: isDark,
+                    empty: checkinsHoje == 0,
+                    showTrailingDivider: true,
+                    onTap: onCheckins,
+                  ),
                 ),
-                ),
-              ),
-              SizedBox(width: gap),
-              Expanded(
-                child: _PulseChipEntrance(
-                  index: 2,
+                Expanded(
                   child:
-                    hideRiscoChip
-                        ? DashboardPulseChip(
-                          icon: 'calendar',
-                          value: agendaHoje.toString(),
-                          label: 'Agenda',
-                          accent: agendaAccent,
-                          isDark: isDark,
-                          compact: tight,
-                          empty: agendaHoje == 0,
-                          onTap: onAgenda,
-                        )
-                        : DashboardPulseChip(
-                          icon:
-                              riscoAlto > 0 ? 'alert-triangle' : 'circle-check',
-                          value: riscoAlto.toString(),
-                          label: 'Risco',
-                          accent: riscoAccent,
-                          isDark: isDark,
-                          compact: tight,
-                          empty: riscoAlto == 0,
-                          onTap: onRisco,
-                        ),
+                      hideRiscoChip
+                          ? DashboardPulseChip(
+                            icon: 'calendar',
+                            value: agendaHoje.toString(),
+                            label: 'Agenda',
+                            accent: agendaAccent,
+                            isDark: isDark,
+                            empty: agendaHoje == 0,
+                            showTrailingDivider: false,
+                            onTap: onAgenda,
+                          )
+                          : DashboardPulseChip(
+                            icon:
+                                riscoAlto > 0
+                                    ? 'alert-triangle'
+                                    : 'circle-check',
+                            value: riscoAlto.toString(),
+                            label: 'Risco',
+                            accent: riscoAccent,
+                            isDark: isDark,
+                            empty: riscoAlto == 0,
+                            showTrailingDivider: false,
+                            onTap: onRisco,
+                          ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-          if (showTrendRow) ...[
-          const SizedBox(height: 8),
-          Builder(
-            builder: (context) {
-              final emptyDetail =
-                  alunosAtivos > 0
-                      ? DashboardMicrocopy.tendenciaVaziaBase
-                      : DashboardMicrocopy.tendenciaVaziaGeral;
-              final hint = dashboardPulseEmptyHint(
-                checkinsHoje: checkinsHoje,
-                checkinsTrend: checkinsTrend,
-                fromApi: emptyHint,
-              );
-              final sparkW = collapseBody
-                  ? (comfortable ? 88.0 : 72.0)
-                  : (comfortable ? 112.0 : 88.0);
-              final sparkH = collapseBody
-                  ? (comfortable ? 24.0 : 20.0)
-                  : (comfortable ? 28.0 : 24.0);
-              return Semantics(
-                label:
-                    !trendReady
-                        ? 'Tendência de check-ins carregando'
-                        : hasTrend
-                        ? 'Tendência de check-ins nos últimos 7 dias'
-                        : hint ?? emptyDetail,
-                child: InkWell(
-                  onTap: onCheckins,
-                  borderRadius: BorderRadius.circular(TokensStrip.rInput),
+          if (showTrendRow)
+            _PulseTrendRow(
+              isDark: isDark,
+              primary: primary,
+              hasTrend: hasTrend,
+              trendReady: trendReady,
+              hideEmptyTrend: hideEmptyTrend,
+              checkinsHoje: checkinsHoje,
+              checkinsTrend: checkinsTrend,
+              emptyHint: emptyHint,
+              alunosAtivos: alunosAtivos,
+              comfortable: comfortable,
+              trailingReserve: trailingReserve,
+              onTap: onCheckins,
+              showDivider: showCta,
+            ),
+          if (showCta)
+            FxSettingsTile(
+              fxIcon: emptyTrendCtaLabel!.toLowerCase().contains('agenda')
+                  ? 'calendar'
+                  : 'dumbbell',
+              label: emptyTrendCtaLabel!,
+              value: '',
+              onTap: onEmptyTrendCta!,
+              showDivider: false,
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PulseTrendRow extends StatelessWidget {
+  const _PulseTrendRow({
+    required this.isDark,
+    required this.primary,
+    required this.hasTrend,
+    required this.trendReady,
+    required this.hideEmptyTrend,
+    required this.checkinsHoje,
+    required this.checkinsTrend,
+    required this.emptyHint,
+    required this.alunosAtivos,
+    required this.comfortable,
+    required this.trailingReserve,
+    required this.onTap,
+    required this.showDivider,
+  });
+
+  final bool isDark;
+  final Color primary;
+  final bool hasTrend;
+  final bool trendReady;
+  final bool hideEmptyTrend;
+  final int checkinsHoje;
+  final List<double> checkinsTrend;
+  final String? emptyHint;
+  final int alunosAtivos;
+  final bool comfortable;
+  final double trailingReserve;
+  final VoidCallback onTap;
+  final bool showDivider;
+
+  @override
+  Widget build(BuildContext context) {
+    final chrome = ShellChrome.of(context);
+    final caption = dashboardReadableCaption(context, isDark: isDark);
+    final emptyDetail =
+        alunosAtivos > 0
+            ? DashboardMicrocopy.tendenciaVaziaBase
+            : DashboardMicrocopy.tendenciaVaziaGeral;
+    final hint = dashboardPulseEmptyHint(
+      checkinsHoje: checkinsHoje,
+      checkinsTrend: checkinsTrend,
+      fromApi: emptyHint,
+    );
+    final sparkW = comfortable ? 88.0 : 72.0;
+    final sparkH = comfortable ? 24.0 : 20.0;
+    final subtitle =
+        trendReady && !hasTrend && !hideEmptyTrend ? emptyDetail : null;
+
+    return Semantics(
+      button: true,
+      label:
+          !trendReady
+              ? 'Tendência de check-ins carregando'
+              : hasTrend
+              ? 'Tendência de check-ins nos últimos 7 dias'
+              : hint ?? emptyDetail,
+      child: InkWell(
+        onTap: () {
+          HapticFeedback.selectionClick();
+          onTap();
+        },
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(
+            minHeight: FxSettingsLayout.rowMinHeight,
+          ),
+          child: Row(
+            children: [
+              FxIcon(
+                name: 'trend',
+                size: FxSettingsLayout.iconSize,
+                color: primary,
+              ),
+              const SizedBox(width: FxSettingsLayout.iconGap),
+              Expanded(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    border: Border(
+                      bottom:
+                          showDivider
+                              ? BorderSide(
+                                color: chrome.line,
+                                width: FxSettingsLayout.dividerThickness,
+                              )
+                              : BorderSide.none,
+                    ),
+                  ),
                   child: Padding(
-                    padding: EdgeInsets.only(
-                      right: trailingReserve,
-                      top: 4,
-                      bottom: 4,
+                    padding: EdgeInsets.fromLTRB(
+                      0,
+                      TokensStrip.s3,
+                      trailingReserve,
+                      TokensStrip.s3,
                     ),
                     child: Row(
                       children: [
-                        if (!collapseBody)
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                DashboardMicrocopy.tendencia7Dias,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: FocuxHubTypography.cardTitle(
+                                  color: chrome.ink,
+                                ),
+                              ),
+                              if (subtitle != null) ...[
+                                const SizedBox(height: 2),
                                 Text(
-                                  DashboardMicrocopy.tendencia7Dias,
-                                  style: dashboardSectionKickerStyle(
-                                    context,
-                                    isDark: isDark,
+                                  subtitle,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: FocuxHubTypography.bodyMuted(
+                                    color: caption,
                                   ),
                                 ),
-                                if (trendReady && !hasTrend && !hideEmptyTrend) ...[
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    emptyDetail,
-                                    style: dashboardCardSubtitleStyle(
-                                      context,
-                                      isDark: isDark,
-                                    ),
-                                  ),
-                                ],
                               ],
-                            ),
-                          )
-                        else
-                          const Spacer(),
+                            ],
+                          ),
+                        ),
                         if (hasTrend)
                           FxSparkline(
                             data: checkinsTrend,
@@ -247,98 +337,24 @@ class DashboardDayPulseStrip extends StatelessWidget {
                           Text(
                             '—',
                             style: FocuxHubTypography.metric(
-                              color: dashboardReadableCaption(
-                                context,
-                                isDark: isDark,
-                              ),
-                              fontSize: FocuxHubTypography.metricEm,
-                            ).copyWith(
-                              fontWeight: FontWeight.w600,
-                              height: 1,
+                              color: caption,
+                              fontSize: TokensStrip.fontBodySm,
                             ),
                           ),
+                        Icon(
+                          Icons.chevron_right,
+                          size: FxSettingsLayout.chevronSize,
+                          color: caption,
+                        ),
                       ],
                     ),
                   ),
                 ),
-              );
-            },
-          ),
-          if (!collapseBody &&
-              showEmptyTrendCta &&
-              emptyTrendCtaLabel != null &&
-              onEmptyTrendCta != null) ...[
-            const SizedBox(height: 6),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Semantics(
-                button: true,
-                label: emptyTrendCtaLabel,
-                child: TextButton.icon(
-                  onPressed: onEmptyTrendCta,
-                  style: TextButton.styleFrom(
-                    minimumSize: const Size(48, 36),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 4,
-                    ),
-                    foregroundColor: primary,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                  icon: Icon(
-                    emptyTrendCtaLabel!.toLowerCase().contains('agenda')
-                        ? Icons.calendar_today_rounded
-                        : Icons.fitness_center_rounded,
-                    size: 16,
-                  ),
-                  label: Text(
-                    emptyTrendCtaLabel!,
-                    style: FocuxHubTypography.chip(primary)
-                        .copyWith(fontWeight: FontWeight.w700),
-                  ),
-                ),
               ),
-            ),
-          ],
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-class _PulseChipEntrance extends StatelessWidget {
-  const _PulseChipEntrance({required this.index, required this.child});
-
-  final int index;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    if (TokensStrip.prefersReducedMotion(context)) return child;
-    final delay = dashboardStaggerDelay(context, index);
-    final base = dashboardMotionDuration(
-      context,
-      normal: const Duration(milliseconds: 280),
-    );
-    return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0, end: 1),
-      duration: base + delay,
-      curve: Interval(
-        delay.inMilliseconds / (base + delay).inMilliseconds,
-        1,
-        curve: Curves.easeOutCubic,
-      ),
-      builder: (context, t, child) {
-        return Opacity(
-          opacity: t,
-          child: Transform.translate(
-            offset: Offset(0, (1 - t) * 6),
-            child: child,
+            ],
           ),
-        );
-      },
-      child: child,
+        ),
+      ),
     );
   }
 }
@@ -351,9 +367,9 @@ class DashboardPulseChip extends StatelessWidget {
     required this.label,
     required this.accent,
     required this.isDark,
-    required this.compact,
     required this.onTap,
     this.empty = false,
+    this.showTrailingDivider = false,
   });
 
   final String icon;
@@ -361,88 +377,70 @@ class DashboardPulseChip extends StatelessWidget {
   final String label;
   final Color accent;
   final bool isDark;
-  final bool compact;
   final bool empty;
+  final bool showTrailingDivider;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final comfortable =
-        !compact &&
-        DashboardLayout.isComfortable(MediaQuery.sizeOf(context).width);
-    final valueSize =
-        compact
-            ? TokensStrip.fontBodySm
-            : comfortable
-            ? 16.0
-            : 15.0;
-    final labelSize = TokensStrip.fontBodySm;
-    final hPad = compact ? 7.0 : comfortable ? 12.0 : 9.0;
-    final vPad = compact ? 9.0 : comfortable ? 12.0 : 9.0;
-    final brand = Theme.of(context).colorScheme.primary;
-
+    final chrome = ShellChrome.of(context);
     return Semantics(
       button: true,
       label: empty ? '$value $label, sem movimento hoje' : '$value $label',
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(FxSettingsLayout.groupRadius),
-          child: Ink(
-            padding: EdgeInsets.symmetric(horizontal: hPad, vertical: vPad),
-            decoration: fxStripCardDecoration(
-              context,
-              accent: brand,
-              radius: FxSettingsLayout.groupRadius,
-              glowStrength: 0.04,
+      child: InkWell(
+        onTap: () {
+          HapticFeedback.selectionClick();
+          onTap();
+        },
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(
+            minHeight: FxSettingsLayout.rowMinHeight,
+          ),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              border:
+                  showTrailingDivider
+                      ? Border(
+                        right: BorderSide(
+                          color: chrome.line,
+                          width: FxSettingsLayout.dividerThickness,
+                        ),
+                      )
+                      : null,
             ),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(minHeight: 48),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: TokensStrip.s3),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      FxIcon(
-                        name: icon,
-                        size: FxSettingsLayout.iconSize,
-                        color: accent,
-                      ),
-                      SizedBox(width: compact ? 5 : 6),
-                      Expanded(
-                        child: Text(
-                          value,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: FocuxHubTypography.metric(
-                            fontSize: valueSize,
-                            fontWeight: FontWeight.w700,
-                            color: ink,
-                            height: 1,
-                          ),
-                        ),
-                      ),
-                    ],
+                  FxIcon(
+                    name: icon,
+                    size: FxSettingsLayout.iconSize,
+                    color: accent,
                   ),
-                  SizedBox(height: compact ? 2 : 3),
-                  Padding(
-                    padding: EdgeInsets.only(
-                      left: FxSettingsLayout.iconSize + (compact ? 5 : 6),
+                  const SizedBox(height: 4),
+                  Text(
+                    value,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: FocuxHubTypography.metric(
+                      fontSize: TokensStrip.fontBodySm,
+                      color: chrome.ink,
+                      height: 1,
                     ),
-                    child: Text(
-                      label,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: FocuxHubTypography.bodyMuted(
-                        color: dashboardReadableCaption(
-                          context,
-                          isDark: isDark,
-                        ),
-                        height: 1.1,
-                      ).copyWith(fontSize: labelSize),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                    style: FocuxHubTypography.bodyMuted(
+                      color: dashboardReadableCaption(
+                        context,
+                        isDark: isDark,
+                      ),
+                      height: 1.1,
                     ),
                   ),
                 ],

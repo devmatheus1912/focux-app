@@ -99,7 +99,12 @@ class DashboardDayFocusBanner extends StatelessWidget {
                       ),
                     ),
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(14, 12, 12, 14),
+                    padding: const EdgeInsets.fromLTRB(
+                      TokensStrip.s4,
+                      TokensStrip.s3,
+                      TokensStrip.s3,
+                      TokensStrip.s3,
+                    ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -256,6 +261,8 @@ class DashboardDayFocusBanner extends StatelessWidget {
                           ),
                           child: Text(
                             focus.headline,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                             style: dashboardSectionTitleStyle(
                               context,
                               color: ink,
@@ -273,6 +280,8 @@ class DashboardDayFocusBanner extends StatelessWidget {
                           ),
                           child: Text(
                             focus.detail,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
                             style: dashboardCardSubtitleStyle(
                               context,
                               isDark: isDark,

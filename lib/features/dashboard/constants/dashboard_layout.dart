@@ -13,7 +13,7 @@ abstract final class DashboardLayout {
   static const double attentionCardWidth = 268;
   static const double attentionCardWidthCompact = 240;
   /// Folga extra no fim do scroll. O [MainShell] já aplica
-  /// `dockClearance` (~102–112 + safe inset) — aqui só respiração de conteúdo,
+  /// `FxDock.shellClearance` — aqui só respiração de conteúdo,
   /// não um segundo “dock fantasma”.
   static const double bottomDockClearance = 24;
   /// Folga no fim do scroll quando o chip sticky fica acima do dock.

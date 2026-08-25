@@ -19,7 +19,10 @@ class MainShell extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bottomInset = FocuxPlatform.safeBottomInset(context);
     final compact = FocuxPlatform.isCompact(context);
-    final dockClearance = bottomInset + (compact ? 102.0 : 112.0);
+    final dockClearance = FxDock.shellClearance(
+      bottomInset: bottomInset,
+      compact: compact,
+    );
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: FocuxSystemChrome.forDark(isDark),
@@ -39,9 +42,9 @@ class MainShell extends StatelessWidget {
                   child: navigationShell,
                 ),
                 Positioned(
-                  bottom: bottomInset + 18,
-                  left: 14,
-                  right: 14,
+                  bottom: bottomInset + FxDock.floatGap,
+                  left: FxDock.sideInset,
+                  right: FxDock.sideInset,
                   child: FxDock(
                     items: FxDockItems.personal,
                     currentIndex: navigationShell.currentIndex,

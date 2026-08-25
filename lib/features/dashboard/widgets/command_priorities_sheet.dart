@@ -6,6 +6,7 @@ import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_icon.dart';
+import '../../../core/widgets/fx_settings_group.dart';
 import '../data/command_action_item.dart';
 import '../utils/dashboard_haptic.dart';
 import '../utils/dashboard_readability.dart';
@@ -99,16 +100,20 @@ class _CommandPrioritiesSheetState extends State<CommandPrioritiesSheet> {
               padding: EdgeInsets.zero,
               physics: const BouncingScrollPhysics(),
               children: [
-                for (var index = 0; index < impactActions.length; index++) ...[
-                  if (index > 0) const SizedBox(height: 8),
-                  CommandActionTile(
-                    item: impactActions[index],
-                    isDark: isDark,
-                    primary: primary,
-                    entranceIndex: index,
-                    onTap: () => _openAction(impactActions[index]),
+                if (impactActions.isNotEmpty)
+                  FxSettingsGroup(
+                    accent: primary,
+                    children: [
+                      for (var index = 0; index < impactActions.length; index++)
+                        CommandActionTile(
+                          item: impactActions[index],
+                          isDark: isDark,
+                          primary: primary,
+                          showDivider: index < impactActions.length - 1,
+                          onTap: () => _openAction(impactActions[index]),
+                        ),
+                    ],
                   ),
-                ],
                 if (radarActions.isNotEmpty) ...[
                   if (impactActions.isNotEmpty) ...[
                     const SizedBox(height: 12),
@@ -155,20 +160,23 @@ class _CommandPrioritiesSheetState extends State<CommandPrioritiesSheet> {
                   ],
                   if (_radarExpanded || impactActions.isEmpty) ...[
                     if (impactActions.isNotEmpty) const SizedBox(height: 8),
-                    for (
-                      var index = 0;
-                      index < radarActions.length;
-                      index++
-                    ) ...[
-                      if (index > 0) const SizedBox(height: 8),
-                      CommandActionTile(
-                        item: radarActions[index],
-                        isDark: isDark,
-                        primary: primary,
-                        entranceIndex: index,
-                        onTap: () => _openAction(radarActions[index]),
-                      ),
-                    ],
+                    FxSettingsGroup(
+                      accent: primary,
+                      children: [
+                        for (
+                          var index = 0;
+                          index < radarActions.length;
+                          index++
+                        )
+                          CommandActionTile(
+                            item: radarActions[index],
+                            isDark: isDark,
+                            primary: primary,
+                            showDivider: index < radarActions.length - 1,
+                            onTap: () => _openAction(radarActions[index]),
+                          ),
+                      ],
+                    ),
                   ],
                 ],
               ],

@@ -5,6 +5,7 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../utils/dashboard_microcopy.dart';
 import '../utils/dashboard_readability.dart';
+import 'dashboard_home_action_chip.dart';
 
 class DashboardCommandCenterStickyHeaderDelegate
     extends SliverPersistentHeaderDelegate {
@@ -218,40 +219,15 @@ class DashboardPrioritiesOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final chipFg = dashboardPrioritiesChipForeground(primary, isDark: isDark);
-    final chipBg = dashboardPrioritiesChipBackground(primary, isDark: isDark);
-    // bottomEnd: não cobre o miolo do grid de ferramentas (antes centrado).
     return Padding(
       padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 0, TokensStrip.s4, 10),
       child: Align(
         alignment: AlignmentDirectional.bottomEnd,
-        child: Semantics(
-          button: true,
+        child: DashboardHomeActionChip(
           label: label,
-          child: Material(
-            color: chipBg,
-            elevation: isDark ? 5 : 2,
-            shadowColor: primary.withValues(alpha: isDark ? 0.45 : 0.18),
-            shape: const StadiumBorder(),
-            child: InkWell(
-              onTap: onTap,
-              customBorder: const StadiumBorder(),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 11,
-                ),
-                child: Text(
-                  label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: dashboardChipLabelStyle(
-                    chipFg,
-                  ).copyWith(fontWeight: FontWeight.w800),
-                ),
-              ),
-            ),
-          ),
+          accent: primary,
+          isDark: isDark,
+          onPressed: onTap,
         ),
       ),
     );

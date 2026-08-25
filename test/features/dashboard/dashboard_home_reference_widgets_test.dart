@@ -9,7 +9,7 @@ import 'package:focux_app/features/dashboard/widgets/dashboard_home_action_chip.
 import 'package:focux_app/features/dashboard/widgets/dashboard_home_coach_banner.dart';
 
 void main() {
-  testWidgets('finance empty usa chip da Home, sem CTA invertido', (
+  testWidgets('finance empty é tile inset, sem chip in-card', (
     tester,
   ) async {
     await tester.pumpWidget(
@@ -26,9 +26,10 @@ void main() {
       ),
     );
 
-    expect(find.byType(DashboardHomeActionChip), findsOneWidget);
+    expect(find.byType(DashboardHomeActionChip), findsNothing);
     expect(find.byType(FilledButton), findsNothing);
-    expect(find.text(DashboardMicrocopy.abrirFinanceiro), findsOneWidget);
+    expect(find.textContaining('Receita · agosto'), findsOneWidget);
+    expect(find.text(DashboardMicrocopy.abrirFinanceiro), findsNothing);
   });
 
   testWidgets('agenda strip mostra até 3 compromissos', (tester) async {

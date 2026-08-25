@@ -4,7 +4,7 @@ import '../theme/focux_hub_typography.dart';
 import 'fx_shell_scaffold.dart';
 
 /// Shared surface styling for operational KPI tiles (Aluno 360 + dashboard pulse).
-/// Dashboard pulse chips remain tappable wrappers — see [DashboardPulseChip].
+/// Dashboard pulse cells remain tappable wrappers — see [DashboardPulseChip].
 enum OperationalMetricEmphasis { normal, alert, muted }
 
 BoxDecoration operationalMetricDecoration({

@@ -103,6 +103,14 @@ class DashboardFinancialHeroSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (_compactZeroRevenue) {
+      return DashboardFinanceEmptyState(
+        mes: mes,
+        ctaLabel: finData?.zeroCta,
+        onOpen: () => context.go('/financeiro'),
+      );
+    }
+
     final chrome = ShellChrome.of(context);
     return Semantics(
       label:
@@ -120,15 +128,13 @@ class DashboardFinancialHeroSection extends StatelessWidget {
             radius: FxSettingsLayout.groupRadius,
             glowStrength: themeDark ? 0.06 : 0.08,
           ),
-          padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
-          child:
-              _compactZeroRevenue
-                  ? DashboardFinanceEmptyState(
-                    mes: mes,
-                    ctaLabel: finData?.zeroCta,
-                    onOpen: () => context.go('/financeiro'),
-                  )
-                  : _buildFullContent(context, chrome),
+          padding: const EdgeInsets.fromLTRB(
+            TokensStrip.s4,
+            TokensStrip.s3,
+            TokensStrip.s4,
+            TokensStrip.s3,
+          ),
+          child: _buildFullContent(context, chrome),
         ),
       ),
     );
@@ -236,7 +242,7 @@ class DashboardFinancialHeroSection extends StatelessWidget {
                 borderRadius: BorderRadius.circular(99),
                 child: LinearProgressIndicator(
                   value: progressRaw.clamp(0.0, 1.0),
-                  minHeight: 8,
+                  minHeight: 4,
                   backgroundColor: chrome.line,
                   color: brand,
                 ),

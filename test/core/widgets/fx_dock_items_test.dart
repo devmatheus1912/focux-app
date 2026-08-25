@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/core/widgets/fx_dock.dart';
@@ -48,5 +50,14 @@ void main() {
     expect(find.text('Treinos'), findsOneWidget);
     expect(find.text('Perfil'), findsOneWidget);
     expect(find.text('Alunos'), findsNothing);
+  });
+
+  test('FxDock não usa poço nem underline de ativo', () {
+    final dock = File('lib/core/widgets/fx_dock.dart').readAsStringSync();
+    expect(dock, contains('FxSettingsLayout.iconSize'));
+    expect(dock, contains('shellClearance'));
+    expect(dock, isNot(contains('glowSize')));
+    expect(dock, isNot(contains('RadialGradient')));
+    expect(dock, isNot(contains('height: 3')));
   });
 }

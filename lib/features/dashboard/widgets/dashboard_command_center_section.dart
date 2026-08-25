@@ -4,10 +4,10 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/theme/brand_palette.dart';
-import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
-import '../../../core/widgets/fx_icon.dart';
+import '../../../core/widgets/fx_settings_group.dart';
+import '../../../core/widgets/fx_settings_tile.dart';
 import '../data/command_action_item.dart';
 import '../providers/dashboard_provider.dart';
 import '../utils/dashboard_chat_subtitle.dart';
@@ -148,78 +148,20 @@ class DashboardCommandCenterSectionState
                   : null,
         ),
         const SizedBox(height: TokensStrip.s3),
-        _MessagesShortcutRow(
-          isDark: isDark,
-          primary: primary,
-          title: 'Mensagens',
-          subtitle: chatSubtitle,
-          onTap: () => context.go('/chat/inbox'),
+        FxSettingsGroup(
+          accent: primary,
+          children: [
+            FxSettingsTile(
+              fxIcon: 'message-circle',
+              label: 'Mensagens',
+              value: chatSubtitle,
+              onTap: () => context.go('/chat/inbox'),
+              showDivider: false,
+              semanticsLabel: 'Mensagens. $chatSubtitle',
+            ),
+          ],
         ),
       ],
-    );
-  }
-}
-
-class _MessagesShortcutRow extends StatelessWidget {
-  const _MessagesShortcutRow({
-    required this.isDark,
-    required this.primary,
-    required this.title,
-    required this.subtitle,
-    required this.onTap,
-  });
-
-  final bool isDark;
-  final Color primary;
-  final String title;
-  final String subtitle;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final actionColor = BrandPalette.sectionAction(primary, dark: isDark);
-    // Linha leve (não card) — peso visual abaixo de Foco/P0.
-    return Semantics(
-      button: true,
-      label: '$title. $subtitle',
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(TokensStrip.rInput),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 2),
-          child: Row(
-            children: [
-              FxIcon(name: 'message-circle', size: 17, color: actionColor),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text.rich(
-                  TextSpan(
-                    children: [
-                      TextSpan(
-                        text: title,
-                        style: dashboardCardTitleStyle(
-                          ink,
-                        ).copyWith(fontWeight: FontWeight.w700),
-                      ),
-                      TextSpan(
-                        text: ' · $subtitle',
-                        style: dashboardCardSubtitleStyle(
-                          context,
-                          isDark: isDark,
-                        ),
-                      ),
-                    ],
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              FxIcon(name: 'chevron-right', color: actionColor, size: 16),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }

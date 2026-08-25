@@ -43,7 +43,7 @@ void main() {
     expect(widget, contains('class CommandActionPanel'));
     expect(widget, contains('class CommandActionTile'));
     expect(widget, contains('showCommandActionsSheet'));
-    expect(widget, contains('_MessagesShortcutRow'));
+    expect(widget, contains('FxSettingsTile'));
     expect(widget, contains('message-circle'));
     expect(widget, isNot(contains('atalhoKicker')));
     expect(widget, contains('if (hasTrend)'));
@@ -138,7 +138,7 @@ void main() {
     expect(widget, contains('DashboardAderenciaSemanaEmptyCard'));
     expect(widget, contains('isRiskEchoCopy'));
     expect(widget, contains('BrandPalette.sectionHeading'));
-    expect(widget, contains('BrandPalette.sectionAction'));
+    expect(widget, contains('BrandPalette.sectionLink'));
 
     // Central de Comando é apresentacional — a fila é computada uma vez só.
     expect(widget, contains('required this.nextActions'));

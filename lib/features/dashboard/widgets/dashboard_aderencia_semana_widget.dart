@@ -4,15 +4,16 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/fx_settings_layout.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/fx_utils.dart';
-import '../../../core/widgets/fx_icon.dart';
+import '../../../core/widgets/fx_settings_group.dart';
+import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_sparkline.dart';
 import '../providers/aderencia_provider.dart';
 import '../utils/dashboard_home_focus.dart';
 import '../utils/dashboard_readability.dart';
-import 'dashboard_home_action_chip.dart';
 
 class DashboardAderenciaSemanaWidget extends StatelessWidget {
   final bool isDark;
@@ -38,7 +39,6 @@ class DashboardAderenciaSemanaWidget extends StatelessWidget {
 
     if (items.isEmpty) {
       return DashboardAderenciaSemanaEmptyCard(
-        isDark: isDark,
         primary: primary,
         mute: mute,
         title: 'Sem check-ins nesta semana',
@@ -62,7 +62,6 @@ class DashboardAderenciaSemanaWidget extends StatelessWidget {
     final semanaParada = items.every((a) => a.totalCheckinsSemana == 0);
     if (semanaParada) {
       return DashboardAderenciaSemanaEmptyCard(
-        isDark: isDark,
         primary: primary,
         mute: mute,
         title: 'Treinos parados na semana',
@@ -110,8 +109,8 @@ class DashboardAderenciaSemanaWidget extends StatelessWidget {
               onTap: () => context.push('/alunos/${a.alunoId}'),
               child: Container(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 14,
+                  horizontal: TokensStrip.s4,
+                  vertical: TokensStrip.s3,
                 ),
                 decoration: BoxDecoration(
                   border:
@@ -187,7 +186,6 @@ class DashboardAderenciaSemanaWidget extends StatelessWidget {
 class DashboardAderenciaSemanaEmptyCard extends StatelessWidget {
   const DashboardAderenciaSemanaEmptyCard({
     super.key,
-    required this.isDark,
     required this.primary,
     required this.mute,
     required this.title,
@@ -199,7 +197,6 @@ class DashboardAderenciaSemanaEmptyCard extends StatelessWidget {
     this.onSecondary,
   });
 
-  final bool isDark;
   final Color primary;
   final Color mute;
   final String title;
@@ -213,92 +210,66 @@ class DashboardAderenciaSemanaEmptyCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final showActions =
-        !quiet && primaryAction != null && onPrimary != null;
+    final chrome = ShellChrome.of(context);
+    final showPrimary = !quiet && primaryAction != null && onPrimary != null;
+    final showSecondary =
+        showPrimary && secondaryAction != null && onSecondary != null;
 
-    return Container(
-      padding: EdgeInsets.all(quiet ? TokensStrip.s3 : TokensStrip.s4),
-      decoration: fxStripCardDecoration(
-        context,
-        accent: quiet ? null : primary,
-        radius: FxSettingsLayout.groupRadius,
-        glowStrength: quiet ? 0.06 : 0.44,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    if (!showPrimary) {
+      return FxSettingsGroup(
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (!quiet) ...[
-                FxIcon(
-                  name: 'calendar',
-                  size: FxSettingsLayout.iconSize,
-                  color: BrandPalette.sectionAccent(primary, dark: isDark),
-                ),
-                const SizedBox(width: 12),
-              ],
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style:
-                          quiet
-                              ? FocuxHubTypography.bodyMuted(
-                                color: ink,
-                                height: 1.3,
-                                fontWeight: FontWeight.w600,
-                              )
-                              : FocuxHubTypography.cardTitle(color: ink),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      body,
-                      style: FocuxHubTypography.bodyMuted(
-                        color: mute,
-                        height: 1.35,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          if (showActions) ...[
-            const SizedBox(height: 14),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                DashboardHomeActionChip(
-                  label: primaryAction!,
-                  accent: primary,
-                  isDark: isDark,
-                  onPressed: onPrimary!,
-                ),
-                if (secondaryAction != null && onSecondary != null)
-                  TextButton(
-                    onPressed: onSecondary,
-                    style: TextButton.styleFrom(
-                      foregroundColor: primary,
-                      minimumSize: const Size(48, 48),
-                    ),
-                    child: Text(
-                      secondaryAction!,
-                      style: FocuxHubTypography.bodyMuted(
-                        color: primary,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-              ],
+          ConstrainedBox(
+            constraints: const BoxConstraints(
+              minHeight: FxSettingsLayout.rowMinHeight,
             ),
-          ],
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: TokensStrip.s3),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: FocuxHubTypography.cardTitle(color: chrome.ink),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    body,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: FocuxHubTypography.bodyMuted(color: mute),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ],
-      ),
+      );
+    }
+
+    return FxSettingsGroup(
+      accent: primary,
+      children: [
+        FxSettingsTile(
+          fxIcon: 'calendar',
+          label: title,
+          value: primaryAction!,
+          onTap: onPrimary!,
+          accent: primary,
+          showDivider: showSecondary,
+          semanticsLabel: '$title. $body. $primaryAction',
+        ),
+        if (showSecondary)
+          FxSettingsTile(
+            fxIcon: 'route',
+            label: secondaryAction!,
+            value: '',
+            onTap: onSecondary!,
+            accent: primary,
+            showDivider: false,
+          ),
+      ],
     );
   }
 }

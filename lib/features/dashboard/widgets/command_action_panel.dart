@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/focux_hub_typography.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../../../core/theme/brand_palette.dart';
-import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
+import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/tokens_strip.dart';
-import '../../../core/widgets/fx_icon.dart';
+import '../../../core/widgets/fx_settings_group.dart';
 import '../data/command_action_item.dart';
 import '../utils/dashboard_microcopy.dart';
 import 'command_action_tile.dart';
@@ -34,23 +34,21 @@ class CommandActionPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final heading = BrandPalette.sectionHeading(primary, dark: isDark);
-    final rowAccent = BrandPalette.sectionAccent(primary, dark: isDark);
     final link = BrandPalette.sectionLink(primary, dark: isDark);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
-            FxIcon(name: 'route', size: 17, color: rowAccent),
-            const SizedBox(width: 8),
-            Text(
-              DashboardMicrocopy.proximasAcoes,
-              style: FocuxHubTypography.sectionTitle(
-                context,
-                color: heading,
+            Expanded(
+              child: Text(
+                DashboardMicrocopy.proximasAcoes,
+                style: FocuxHubTypography.sectionTitle(
+                  context,
+                  color: heading,
+                ),
               ),
             ),
-            const Spacer(),
             if (prioritiesActionLabel != null && onPrioritiesTap != null)
               Semantics(
                 button: true,
@@ -78,53 +76,38 @@ class CommandActionPanel extends StatelessWidget {
               ),
           ],
         ),
-        const SizedBox(height: 12),
-        Divider(
-          color:
-              isDark
-                  ? EagleTokens.glassBorder
-                  : TokensStrip.borderDefault.withValues(alpha: 0.85),
-          height: 1,
-        ),
-        const SizedBox(height: 12),
-        if (loading)
-          CommandActionsShimmer(isDark: isDark, primary: primary)
-        else if (unavailable)
-          CommandStatusTile(
-            isDark: isDark,
-            primary: primary,
-            icon: Icons.cloud_off_rounded,
-            title: 'Central temporariamente indisponível',
-            subtitle: 'Puxe para atualizar ou tente em instantes.',
-          )
-        else if (actions.isEmpty)
-          CommandStatusTile(
-            isDark: isDark,
-            primary: primary,
-            icon: Icons.check_circle_outline_rounded,
-            title: 'Operação sob controle',
-            subtitle: 'Nenhuma ação crítica para agora.',
-          )
-        else
-          for (var index = 0; index < actions.length; index++) ...[
-            CommandActionTile(
-              item: actions[index],
-              isDark: isDark,
-              primary: primary,
-              entranceIndex: index,
-            ),
-            if (index < actions.length - 1) ...[
-              const SizedBox(height: 10),
-              Divider(
-                color:
-                    isDark
-                        ? EagleTokens.glassBorder.withValues(alpha: 0.65)
-                        : TokensStrip.borderDefault.withValues(alpha: 0.75),
-                height: 1,
-              ),
-              const SizedBox(height: 10),
-            ],
+        const SizedBox(height: FxSettingsLayout.headerToGroup),
+        FxSettingsGroup(
+          accent: primary,
+          children: [
+            if (loading)
+              CommandActionsShimmer(isDark: isDark, primary: primary)
+            else if (unavailable)
+              CommandStatusTile(
+                isDark: isDark,
+                primary: primary,
+                icon: Icons.cloud_off_rounded,
+                title: 'Central temporariamente indisponível',
+                subtitle: 'Puxe para atualizar ou tente em instantes.',
+              )
+            else if (actions.isEmpty)
+              CommandStatusTile(
+                isDark: isDark,
+                primary: primary,
+                icon: Icons.check_circle_outline_rounded,
+                title: 'Operação sob controle',
+                subtitle: 'Nenhuma ação crítica para agora.',
+              )
+            else
+              for (var index = 0; index < actions.length; index++)
+                CommandActionTile(
+                  item: actions[index],
+                  isDark: isDark,
+                  primary: primary,
+                  showDivider: index < actions.length - 1,
+                ),
           ],
+        ),
       ],
     );
   }
@@ -145,15 +128,17 @@ class CommandActionsShimmer extends StatelessWidget {
     return Column(
       children: List.generate(2, (index) {
         return Padding(
-          padding: EdgeInsets.only(bottom: index == 0 ? 10 : 0),
+          padding: EdgeInsets.only(bottom: index == 0 ? TokensStrip.s2 : 0),
           child: Shimmer.fromColors(
             baseColor: primary.withValues(alpha: isDark ? 0.18 : 0.10),
             highlightColor: primary.withValues(alpha: isDark ? 0.32 : 0.18),
             child: Container(
-              height: 62,
+              height: FxSettingsLayout.rowMinHeight,
               decoration: BoxDecoration(
                 color: primary.withValues(alpha: isDark ? 0.24 : 0.14),
-                borderRadius: BorderRadius.circular(TokensStrip.rCard),
+                borderRadius: BorderRadius.circular(
+                  FxSettingsLayout.groupRadius,
+                ),
               ),
             ),
           ),
