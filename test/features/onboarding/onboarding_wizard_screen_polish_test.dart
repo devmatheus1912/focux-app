@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:focux_app/features/onboarding/data/onboarding_repository.dart';
 
 import '../../support/screen_source_bundle.dart';
 
@@ -59,10 +60,56 @@ void main() {
     expect(widgets, contains('DashboardHomeActionChip'));
     expect(widgets, contains('FxSettingsLayout.iconSize'));
     expect(widgets, contains('FocuxHubTypography'));
+    expect(widgets, contains('minHeight: 4'));
+    expect(widgets, contains('maxLines: 1'));
+    expect(widgets, isNot(contains('maxLines: 2')));
+    expect(widgets, isNot(contains('Próximo:')));
+    expect(widgets, isNot(contains('setupStepUsesMaterialIcon')));
+    expect(widgets, isNot(contains('SetupStepEntrance')));
     expect(widgets, isNot(contains('AGORA')));
     expect(widgets, isNot(contains('_SetupStepIconBadge')));
     expect(widgets, isNot(contains('SetupCompletedStepsCollapse')));
     expect(widgets, isNot(contains('DashboardHeroGridPainter')));
     expect(widgets, isNot(contains('FxLiquidPrimaryButton')));
+  });
+
+  test('wizard lista usa inset compacto e tempo restante', () {
+    final screen = readScreenSourceBundle(
+      'lib/features/onboarding/screens/onboarding_wizard_screen.dart',
+    );
+    expect(screen, contains('FxSettingsLayout.headerToGroup'));
+    expect(screen, contains('remainingMinutes'));
+    expect(screen, isNot(contains('SetupStepEntrance')));
+    expect(screen, isNot(contains('nextActionLabel:')));
+  });
+
+  test('remainingMinutes soma só os passos pendentes', () {
+    OnboardingStep step({required bool done, required int minutes}) {
+      return OnboardingStep(
+        id: 'x',
+        title: 't',
+        description: 'd',
+        icon: 'person',
+        completed: done,
+        actionRoute: '/',
+        estimatedMinutes: minutes,
+      );
+    }
+
+    final wizard = OnboardingWizard(
+      steps: [
+        step(done: true, minutes: 2),
+        step(done: false, minutes: 2),
+        step(done: false, minutes: 3),
+      ],
+      completedCount: 1,
+      totalCount: 3,
+      progressPercent: 33,
+      nextActionLabel: 't',
+      nextActionRoute: '/',
+      wizardCompleto: false,
+      allStepsDone: false,
+    );
+    expect(wizard.remainingMinutes, 5);
   });
 }

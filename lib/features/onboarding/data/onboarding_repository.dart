@@ -66,6 +66,10 @@ class OnboardingWizard {
     wizardCompleto: j['wizardCompleto'] as bool? ?? false,
     allStepsDone: j['allStepsDone'] as bool? ?? false,
   );
+
+  int get remainingMinutes => steps
+      .where((step) => !step.completed)
+      .fold(0, (sum, step) => sum + step.estimatedMinutes);
 }
 
 class OnboardingRepository {

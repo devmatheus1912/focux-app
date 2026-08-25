@@ -25,8 +25,7 @@ final setupStepCatalog = [
   SetupStepCatalogEntry(
     id: 'perfil',
     title: 'Complete seu perfil',
-    description:
-        'Adicione cor da marca e descrição profissional para criar sua identidade visual.',
+    description: 'Cor da marca e bio profissional.',
     icon: 'person',
     actionRoute: '/perfil/editar',
     estimatedMinutes: 2,
@@ -35,8 +34,7 @@ final setupStepCatalog = [
   SetupStepCatalogEntry(
     id: 'primeiro-aluno',
     title: 'Cadastre seu primeiro aluno',
-    description:
-        'Adicione um aluno manualmente ou importe da concorrência com a Migração Mágica.',
+    description: 'Cadastre ou importe da concorrência.',
     icon: 'person_add',
     actionRoute: '/alunos/novo',
     estimatedMinutes: 2,
@@ -45,8 +43,7 @@ final setupStepCatalog = [
   SetupStepCatalogEntry(
     id: 'primeiro-treino',
     title: 'Crie o primeiro treino',
-    description:
-        'Monte um treino personalizado com exercícios da biblioteca ou gere com IA.',
+    description: 'Monte na biblioteca ou gere com IA.',
     icon: 'fitness_center',
     actionRoute: '/treinos/novo',
     estimatedMinutes: 3,
@@ -54,9 +51,8 @@ final setupStepCatalog = [
   ),
   SetupStepCatalogEntry(
     id: 'pacote',
-    title: 'Crie seu primeiro plano',
-    description:
-        'Monte um plano com preço e compartilhe o link no WhatsApp — como uma página sua na internet.',
+    title: 'Crie seu primeiro pacote',
+    description: 'O que o aluno contrata com você.',
     icon: 'inventory_2',
     actionRoute: '/pacotes',
     estimatedMinutes: 2,
@@ -65,7 +61,7 @@ final setupStepCatalog = [
   SetupStepCatalogEntry(
     id: 'habito',
     title: 'Configure hábitos',
-    description: 'Crie hábitos para aumentar adesão e retenção dos alunos.',
+    description: 'Rotina de check-in e aderência.',
     icon: 'repeat',
     actionRoute: '/habitos',
     estimatedMinutes: 2,
@@ -74,8 +70,7 @@ final setupStepCatalog = [
   SetupStepCatalogEntry(
     id: 'pagamento',
     title: 'Configure o recebimento',
-    description:
-        'Adicione sua chave PIX para receber pagamentos automaticamente.',
+    description: 'Chave PIX para receber no app.',
     icon: 'attach_money',
     actionRoute: '/perfil/wallet',
     estimatedMinutes: 1,
@@ -84,8 +79,7 @@ final setupStepCatalog = [
   SetupStepCatalogEntry(
     id: 'link-bio',
     title: 'Crie seu link na bio',
-    description:
-        'Monte sua landing page profissional e compartilhe para atrair novos alunos.',
+    description: 'Página pública para captação.',
     icon: 'link',
     actionRoute: '/perfil/landing-editor',
     estimatedMinutes: 2,

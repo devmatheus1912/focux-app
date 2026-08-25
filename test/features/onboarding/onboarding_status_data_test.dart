@@ -98,5 +98,18 @@ void main() {
         'habito',
       ]);
     });
+
+    test('descrições cabem em uma linha no fold inset', () {
+      for (final step in setupStepCatalog) {
+        expect(step.description.length, lessThanOrEqualTo(40));
+      }
+    });
+
+    test('título do pacote alinhado ao wizard', () {
+      expect(
+        setupStepCatalog.firstWhere((s) => s.id == 'pacote').title,
+        'Crie seu primeiro pacote',
+      );
+    });
   });
 }

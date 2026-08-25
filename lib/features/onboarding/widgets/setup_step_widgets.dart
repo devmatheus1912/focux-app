@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../../../core/theme/brand_palette.dart';
@@ -28,27 +27,6 @@ String normalizeSetupActionRoute(String route) {
   }
 }
 
-IconData setupStepIcon(String name) {
-  switch (name) {
-    case 'person':
-      return Icons.person_outline_rounded;
-    case 'person_add':
-      return Icons.person_add_outlined;
-    case 'fitness_center':
-      return Icons.fitness_center_rounded;
-    case 'inventory_2':
-      return Icons.inventory_2_outlined;
-    case 'repeat':
-      return Icons.repeat_rounded;
-    case 'attach_money':
-      return Icons.attach_money_rounded;
-    case 'link':
-      return Icons.link_rounded;
-    default:
-      return Icons.check_circle_outline_rounded;
-  }
-}
-
 String setupStepFxIconName(String name) {
   switch (name) {
     case 'person':
@@ -70,9 +48,6 @@ String setupStepFxIconName(String name) {
   }
 }
 
-bool setupStepUsesMaterialIcon(String name) =>
-    name == 'person' || name == 'person_add' || name == 'link';
-
 /// Hero de progresso — mesmo vidro e raio dos grupos inset.
 class SetupProgressHeroCard extends StatelessWidget {
   const SetupProgressHeroCard({
@@ -80,13 +55,11 @@ class SetupProgressHeroCard extends StatelessWidget {
     required this.progressPercent,
     required this.completedCount,
     required this.totalCount,
-    this.nextActionLabel,
   });
 
   final int progressPercent;
   final int completedCount;
   final int totalCount;
-  final String? nextActionLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -102,9 +75,9 @@ class SetupProgressHeroCard extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.fromLTRB(
           TokensStrip.s4,
+          TokensStrip.s3,
           TokensStrip.s4,
-          TokensStrip.s4,
-          TokensStrip.s3 + 2,
+          TokensStrip.s3,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -118,7 +91,6 @@ class SetupProgressHeroCard extends StatelessWidget {
               progressPercent: progressPercent,
               completedCount: completedCount,
               totalCount: totalCount,
-              nextActionLabel: nextActionLabel,
             ),
           ],
         ),
@@ -133,14 +105,12 @@ class SetupProgressHeader extends StatelessWidget {
     required this.progressPercent,
     required this.completedCount,
     required this.totalCount,
-    this.nextActionLabel,
     this.animateValue = true,
   });
 
   final int progressPercent;
   final int completedCount;
   final int totalCount;
-  final String? nextActionLabel;
   final bool animateValue;
 
   @override
@@ -164,7 +134,7 @@ class SetupProgressHeader extends StatelessWidget {
               value: v,
               backgroundColor: brand.withValues(alpha: 0.12),
               color: brand,
-              minHeight: 8,
+              minHeight: 4,
             ),
       ),
     );
@@ -195,15 +165,6 @@ class SetupProgressHeader extends StatelessWidget {
             ],
           ),
           const SizedBox(height: TokensStrip.s2),
-          if (nextActionLabel != null && nextActionLabel!.isNotEmpty)
-            Text(
-              'Próximo: $nextActionLabel',
-              style: FocuxHubTypography.bodyMuted(
-                color: chrome.mute,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          const SizedBox(height: TokensStrip.s3),
           progressBar,
         ],
       ),
@@ -282,17 +243,32 @@ class SetupStepCard extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            title,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: FxSettingsLayout.rowLabel(color: ink),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  title,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: FxSettingsLayout.rowLabel(color: ink),
+                                ),
+                              ),
+                              if (minutes.isNotEmpty) ...[
+                                const SizedBox(width: TokensStrip.s2),
+                                Text(
+                                  minutes,
+                                  style: FxSettingsLayout.rowValue(
+                                    color: chrome.mute,
+                                  ),
+                                ),
+                              ],
+                            ],
                           ),
                           if (desc.isNotEmpty) ...[
                             const SizedBox(height: 2),
                             Text(
                               desc,
-                              maxLines: 2,
+                              maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: FocuxHubTypography.bodyMuted(
                                 color: chrome.mute,
@@ -302,13 +278,6 @@ class SetupStepCard extends StatelessWidget {
                         ],
                       ),
                     ),
-                    if (minutes.isNotEmpty) ...[
-                      const SizedBox(width: TokensStrip.s2),
-                      Text(
-                        minutes,
-                        style: FxSettingsLayout.rowValue(color: chrome.mute),
-                      ),
-                    ],
                     if (!completed) ...[
                       const SizedBox(width: TokensStrip.s1),
                       Icon(
@@ -332,9 +301,13 @@ class SetupStepCard extends StatelessWidget {
       label:
           completed
               ? '$title, concluído'
-              : minutes.isEmpty
-              ? '$title, pendente, toque para abrir'
-              : '$title, pendente, $minutes, toque para abrir',
+              : [
+                  title,
+                  'pendente',
+                  if (desc.isNotEmpty) desc,
+                  if (minutes.isNotEmpty) minutes,
+                  'toque para abrir',
+                ].join(', '),
       child:
           completed
               ? row
@@ -362,22 +335,8 @@ class _SetupStepLeadingIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (completed) {
-      return FxIcon(
-        name: 'circle-check',
-        size: FxSettingsLayout.iconSize,
-        color: color,
-      );
-    }
-    if (setupStepUsesMaterialIcon(icon)) {
-      return Icon(
-        setupStepIcon(icon),
-        size: FxSettingsLayout.iconSize,
-        color: color,
-      );
-    }
     return FxIcon(
-      name: setupStepFxIconName(icon),
+      name: completed ? 'circle-check' : setupStepFxIconName(icon),
       size: FxSettingsLayout.iconSize,
       color: color,
     );
@@ -415,7 +374,7 @@ class SetupWizardSkeleton extends StatelessWidget {
             const SizedBox(height: 10),
             Container(
               width: double.infinity,
-              height: compact ? 4 : 8,
+              height: 4,
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(4),
@@ -437,27 +396,6 @@ class SetupWizardSkeleton extends StatelessWidget {
         ),
       ),
     );
-  }
-}
-
-/// Entrada escalonada das linhas — respeita reduced motion.
-class SetupStepEntrance extends StatelessWidget {
-  const SetupStepEntrance({
-    super.key,
-    required this.index,
-    required this.child,
-  });
-
-  final int index;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    if (reduceMotionOf(context)) return child;
-    return child
-        .animate(delay: Duration(milliseconds: index * 80))
-        .fadeIn(duration: 280.ms, curve: Curves.easeOutCubic)
-        .slideY(begin: 0.035, curve: Curves.easeOutCubic, duration: 300.ms);
   }
 }
 

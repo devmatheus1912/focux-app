@@ -52,10 +52,15 @@ class _OnboardingWizardScreenState
   }
 
   String get _appBarSubtitle {
-    const job = 'Deixe seu espaço pronto em cerca de 10 min';
+    final remaining = _wizard?.remainingMinutes ?? 10;
+    final mins = remaining <= 0 ? 'pronto' : '~$remaining min';
     final freshness = FxHubFreshness.fromFetchedAt(_fetchedAt);
-    if (freshness == null) return job;
-    return '$freshness · ~10 min';
+    if (freshness == null) {
+      return remaining <= 0
+          ? 'Tudo pronto por aqui'
+          : 'Deixe seu espaço pronto em cerca de $remaining min';
+    }
+    return '$freshness · $mins';
   }
 
   void _evictHomeCaches() {
@@ -227,16 +232,15 @@ class _OnboardingWizardScreenState
                                 progressPercent: wizard.progressPercent,
                                 completedCount: wizard.completedCount,
                                 totalCount: wizard.totalCount,
-                                nextActionLabel: wizard.nextActionLabel,
                               ),
                             ),
                             Expanded(
                               child: ListView(
                                 padding: const EdgeInsets.fromLTRB(
                                   FxSettingsLayout.pageInset,
-                                  FxSettingsLayout.groupGap,
+                                  FxSettingsLayout.headerToGroup,
                                   FxSettingsLayout.pageInset,
-                                  96,
+                                  TokensStrip.s8 + TokensStrip.s7,
                                 ),
                                 physics:
                                     const AlwaysScrollableScrollPhysics(),
@@ -278,18 +282,15 @@ class _OnboardingWizardScreenState
         FxSettingsGroup(
           children: [
             for (var i = 0; i < pending.length; i++)
-              SetupStepEntrance(
-                index: i,
-                child: SetupStepCard(
-                  title: pending[i].title,
-                  description: pending[i].description,
-                  estimatedMinutes: pending[i].estimatedMinutes,
-                  icon: pending[i].icon,
-                  completed: false,
-                  isLead: i == 0,
-                  showDivider: i < pending.length - 1,
-                  onTap: () => _abrirStep(pending[i].actionRoute),
-                ),
+              SetupStepCard(
+                title: pending[i].title,
+                description: pending[i].description,
+                estimatedMinutes: pending[i].estimatedMinutes,
+                icon: pending[i].icon,
+                completed: false,
+                isLead: i == 0,
+                showDivider: i < pending.length - 1,
+                onTap: () => _abrirStep(pending[i].actionRoute),
               ),
           ],
         ),
