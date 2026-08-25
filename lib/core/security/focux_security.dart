@@ -28,7 +28,7 @@ abstract final class FocuxSecurity {
 
   /// Monorepo local (`Focux Personal/`) — testes rodam só se o path existir.
   static const List<String> monorepoHardeningSources = [
-    '../docs/HOME_REFERENCE_10_10.md',
+    '../docs/PERFIL_DESIGN_REFERENCE.md',
     '../focux-website/vercel.json',
     '../focux-website/client/public/.well-known/assetlinks.json',
   ];

@@ -75,7 +75,7 @@ void main() {
           }
         }
 
-        if (path.endsWith('HOME_REFERENCE_10_10.md')) {
+        if (path.endsWith('PERFIL_DESIGN_REFERENCE.md')) {
           expect(content, contains('FocuxSecurity'));
           expect(content, contains('Hardening mobile & web'));
         }

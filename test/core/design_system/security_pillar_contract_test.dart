@@ -44,7 +44,7 @@ void main() {
     const candidates = [
       'lib/core/design_system.dart',
       'lib/core/security/focux_security.dart',
-      '../docs/HOME_REFERENCE_10_10.md',
+      '../docs/PERFIL_DESIGN_REFERENCE.md',
     ];
     File? docFile;
     for (final path in candidates) {
