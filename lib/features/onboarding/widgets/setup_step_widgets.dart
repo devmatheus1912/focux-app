@@ -11,7 +11,6 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/motion_preferences.dart';
 import '../../../core/widgets/fx_icon.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
-import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 
 /// Normaliza rotas do wizard para deep-links consistentes no app.
 String normalizeSetupActionRoute(String route) {
@@ -87,7 +86,7 @@ class SetupProgressHeroCard extends StatelessWidget {
               style: FocuxHubTypography.eyebrow(context, color: brand),
             ),
             const SizedBox(height: TokensStrip.s2),
-            SetupProgressHeader(
+            _SetupProgressHeader(
               progressPercent: progressPercent,
               completedCount: completedCount,
               totalCount: totalCount,
@@ -99,19 +98,16 @@ class SetupProgressHeroCard extends StatelessWidget {
   }
 }
 
-class SetupProgressHeader extends StatelessWidget {
-  const SetupProgressHeader({
-    super.key,
+class _SetupProgressHeader extends StatelessWidget {
+  const _SetupProgressHeader({
     required this.progressPercent,
     required this.completedCount,
     required this.totalCount,
-    this.animateValue = true,
   });
 
   final int progressPercent;
   final int completedCount;
   final int totalCount;
-  final bool animateValue;
 
   @override
   Widget build(BuildContext context) {
@@ -125,9 +121,7 @@ class SetupProgressHeader extends StatelessWidget {
       borderRadius: BorderRadius.circular(TokensStrip.rInput),
       child: TweenAnimationBuilder<double>(
         tween: Tween(begin: 0, end: value),
-        duration: Duration(
-          milliseconds: reduceMotion || !animateValue ? 0 : 420,
-        ),
+        duration: Duration(milliseconds: reduceMotion ? 0 : 420),
         curve: Curves.easeOutCubic,
         builder:
             (_, v, __) => LinearProgressIndicator(
@@ -181,7 +175,6 @@ class SetupStepCard extends StatelessWidget {
     this.description,
     this.estimatedMinutes,
     this.onTap,
-    this.isLead = false,
     this.showDivider = true,
   });
 
@@ -191,15 +184,13 @@ class SetupStepCard extends StatelessWidget {
   final String? description;
   final int? estimatedMinutes;
   final VoidCallback? onTap;
-  final bool isLead;
   final bool showDivider;
 
   @override
   Widget build(BuildContext context) {
     final chrome = ShellChrome.of(context);
     final brand = BrandPalette.softened(Theme.of(context).colorScheme.primary);
-    final highlight = isLead && !completed;
-    final ink = completed ? chrome.mute : (highlight ? brand : chrome.ink);
+    final ink = completed ? chrome.mute : chrome.ink;
     final minutes =
         !completed && estimatedMinutes != null
             ? '~$estimatedMinutes min'
@@ -344,9 +335,7 @@ class _SetupStepLeadingIcon extends StatelessWidget {
 }
 
 class SetupWizardSkeleton extends StatelessWidget {
-  const SetupWizardSkeleton({super.key, this.compact = false});
-
-  final bool compact;
+  const SetupWizardSkeleton({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -371,7 +360,7 @@ class SetupWizardSkeleton extends StatelessWidget {
                 borderRadius: BorderRadius.circular(6),
               ),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: TokensStrip.s3),
             Container(
               width: double.infinity,
               height: 4,
@@ -380,18 +369,6 @@ class SetupWizardSkeleton extends StatelessWidget {
                 borderRadius: BorderRadius.circular(4),
               ),
             ),
-            if (!compact) ...[
-              const SizedBox(height: 18),
-              Container(
-                height: 220,
-                decoration: BoxDecoration(
-                  color: highlight,
-                  borderRadius: BorderRadius.circular(
-                    FxSettingsLayout.groupRadius,
-                  ),
-                ),
-              ),
-            ],
           ],
         ),
       ),
@@ -437,39 +414,6 @@ class SetupAllDoneBanner extends StatelessWidget {
               ],
             ),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Chip overlay — mesmo peso do sticky Perfil / Hoje. Não é CTA full-width.
-class SetupWizardCta extends StatelessWidget {
-  const SetupWizardCta({
-    super.key,
-    required this.label,
-    required this.onPressed,
-    required this.accent,
-    required this.isDark,
-  });
-
-  final String label;
-  final VoidCallback onPressed;
-  final Color accent;
-  final bool isDark;
-
-  @override
-  Widget build(BuildContext context) {
-    return PositionedDirectional(
-      end: TokensStrip.s4,
-      bottom: TokensStrip.s4,
-      child: SafeArea(
-        top: false,
-        child: DashboardHomeActionChip(
-          label: label,
-          accent: accent,
-          isDark: isDark,
-          onPressed: onPressed,
         ),
       ),
     );

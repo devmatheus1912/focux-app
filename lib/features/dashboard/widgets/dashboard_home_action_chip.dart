@@ -31,7 +31,7 @@ class DashboardHomeActionChip extends StatelessWidget {
       child: UnconstrainedBox(
         child: Material(
           color: bg,
-          elevation: isDark ? 3 : 1,
+          elevation: isDark ? 4 : 2,
           shadowColor: accent.withValues(alpha: isDark ? 0.38 : 0.14),
           shape: const StadiumBorder(),
           child: InkWell(

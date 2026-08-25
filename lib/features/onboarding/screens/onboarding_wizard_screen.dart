@@ -22,6 +22,7 @@ import '../../../core/widgets/skeleton_loader.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
 import '../../dashboard/utils/dashboard_home_client_cache.dart';
+import '../../dashboard/widgets/dashboard_command_center_sticky_header.dart';
 import '../data/onboarding_repository.dart';
 import '../data/onboarding_wizard_client_cache.dart';
 import '../widgets/setup_step_widgets.dart';
@@ -255,7 +256,7 @@ class _OnboardingWizardScreenState
                                   FxSettingsLayout.pageInset,
                                   FxSettingsLayout.headerToGroup,
                                   FxSettingsLayout.pageInset,
-                                  TokensStrip.s8 + TokensStrip.s7,
+                                  TokensStrip.s9 + TokensStrip.s2,
                                 ),
                                 physics:
                                     const AlwaysScrollableScrollPhysics(),
@@ -264,14 +265,12 @@ class _OnboardingWizardScreenState
                             ),
                           ],
                         ),
-                        SetupWizardCta(
-                          label:
-                              wizard.allStepsDone
-                                  ? 'Concluir setup'
-                                  : 'Continuar setup',
-                          accent: accent,
+                        DashboardPrioritiesOverlay(
                           isDark: chrome.isDark,
-                          onPressed:
+                          primary: accent,
+                          label:
+                              wizard.allStepsDone ? 'Concluir' : 'Continuar',
+                          onTap:
                               wizard.allStepsDone || wizard.wizardCompleto
                                   ? _concluir
                                   : () => _abrirStep(
@@ -303,7 +302,6 @@ class _OnboardingWizardScreenState
                 estimatedMinutes: pending[i].estimatedMinutes,
                 icon: pending[i].icon,
                 completed: false,
-                isLead: i == 0,
                 showDivider: i < pending.length - 1,
                 onTap: () => _abrirStep(pending[i].actionRoute),
               ),

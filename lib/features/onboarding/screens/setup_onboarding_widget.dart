@@ -53,7 +53,7 @@ class SetupOnboardingWidget extends ConsumerWidget {
     final chrome = ShellChrome.of(context);
 
     return statusAsync.when(
-      loading: () => const SetupWizardSkeleton(compact: true),
+      loading: () => const SetupWizardSkeleton(),
       error: (e, _) => const SizedBox.shrink(),
       data: (data) {
         if (data.ativacaoCompleta) return const SizedBox.shrink();

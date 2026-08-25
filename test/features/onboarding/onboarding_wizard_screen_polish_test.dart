@@ -43,7 +43,7 @@ void main() {
     );
     expect(screen, contains('RefreshIndicator'));
     expect(screen, contains('FxSettingsGroup'));
-    expect(screen, contains('SetupWizardCta'));
+    expect(screen, contains('DashboardPrioritiesOverlay'));
     expect(screen, contains('FxHubFreshness'));
     expect(screen, contains('ProductEvents.setupWizardViewed'));
     expect(screen, contains('ProductEvents.setupWizardContinue'));
@@ -58,13 +58,15 @@ void main() {
     final widgets = readScreenSourceBundle(
       'lib/features/onboarding/widgets/setup_step_widgets.dart',
     );
-    expect(widgets, contains('DashboardHomeActionChip'));
     expect(widgets, contains('FxSettingsLayout.iconSize'));
     expect(widgets, contains('FocuxHubTypography'));
     expect(widgets, contains('minHeight: 4'));
     expect(widgets, contains('maxLines: 1'));
     expect(widgets, isNot(contains('maxLines: 2')));
     expect(widgets, isNot(contains('Próximo:')));
+    expect(widgets, isNot(contains('isLead')));
+    expect(widgets, isNot(contains('SetupWizardCta')));
+    expect(widgets, isNot(contains('DashboardHomeActionChip')));
     expect(widgets, isNot(contains('setupStepUsesMaterialIcon')));
     expect(widgets, isNot(contains('SetupStepEntrance')));
     expect(widgets, isNot(contains('AGORA')));

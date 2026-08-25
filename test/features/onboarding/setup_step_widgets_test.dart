@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:focux_app/features/dashboard/widgets/dashboard_command_center_sticky_header.dart';
 import 'package:focux_app/features/onboarding/widgets/setup_step_widgets.dart';
 
 void main() {
@@ -29,7 +30,6 @@ void main() {
             estimatedMinutes: 2,
             icon: 'person',
             completed: false,
-            isLead: true,
             onTap: () {},
           ),
         ),
@@ -52,11 +52,11 @@ void main() {
             height: screen.height,
             child: Stack(
               children: [
-                SetupWizardCta(
-                  label: 'Continuar setup',
-                  accent: const Color(0xFF13C2C2),
+                DashboardPrioritiesOverlay(
                   isDark: false,
-                  onPressed: () {},
+                  primary: const Color(0xFF13C2C2),
+                  label: 'Continuar',
+                  onTap: () {},
                 ),
               ],
             ),
@@ -65,7 +65,7 @@ void main() {
       ),
     );
 
-    final chip = tester.getSize(find.text('Continuar setup'));
+    final chip = tester.getSize(find.text('Continuar'));
     expect(chip.width, lessThan(screen.width / 2));
     expect(chip.height, lessThan(80));
   });
@@ -80,7 +80,6 @@ void main() {
             estimatedMinutes: 2,
             icon: 'person',
             completed: false,
-            isLead: true,
             onTap: () {},
           ),
         ),
@@ -121,7 +120,6 @@ void main() {
                 estimatedMinutes: 2,
                 icon: 'person',
                 completed: false,
-                isLead: true,
               ),
               SetupStepCard(
                 title: 'Crie seu link na bio',
@@ -169,15 +167,14 @@ void main() {
                       estimatedMinutes: 2,
                       icon: 'person_add',
                       completed: false,
-                      isLead: true,
                     ),
                   ],
                 ),
-                SetupWizardCta(
-                  label: 'Continuar setup',
-                  accent: const Color(0xFF13C2C2),
+                DashboardPrioritiesOverlay(
                   isDark: false,
-                  onPressed: () {},
+                  primary: const Color(0xFF13C2C2),
+                  label: 'Continuar',
+                  onTap: () {},
                 ),
               ],
             ),
@@ -190,6 +187,37 @@ void main() {
 
     expect(tester.takeException(), isNull);
     expect(find.text('Cadastre seu primeiro aluno'), findsOneWidget);
-    expect(find.text('Continuar setup'), findsOneWidget);
+    expect(find.text('Continuar'), findsOneWidget);
+  });
+
+  testWidgets('passos pendentes usam a mesma cor de título', (tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: Column(
+            children: [
+              SetupStepCard(
+                title: 'Complete seu perfil',
+                description: 'Cor da marca e bio profissional.',
+                estimatedMinutes: 2,
+                icon: 'person',
+                completed: false,
+              ),
+              SetupStepCard(
+                title: 'Cadastre seu primeiro aluno',
+                description: 'Cadastre ou importe da concorrência.',
+                estimatedMinutes: 2,
+                icon: 'person_add',
+                completed: false,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final perfil = tester.widget<Text>(find.text('Complete seu perfil'));
+    final aluno = tester.widget<Text>(find.text('Cadastre seu primeiro aluno'));
+    expect(perfil.style?.color, aluno.style?.color);
   });
 }
