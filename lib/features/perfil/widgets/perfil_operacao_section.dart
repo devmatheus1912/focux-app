@@ -1,67 +1,59 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import 'perfil_action_tile.dart';
+import '../../../core/widgets/fx_settings_tile.dart';
 
-/// Itens de Operação do hub Perfil (conteúdo; o colapso fica no pai).
+/// Itens de Operação do hub Perfil.
 class PerfilOperacaoSection extends StatelessWidget {
   const PerfilOperacaoSection({
     super.key,
-    required this.isDark,
     required this.accent,
-    required this.actionInk,
     required this.mute,
     required this.line,
     required this.pixDone,
+    required this.planoLabel,
   });
 
-  final bool isDark;
   final Color accent;
-  final Color actionInk;
   final Color mute;
   final Color line;
   final bool pixDone;
+  final String planoLabel;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        PerfilActionTile(
+        FxSettingsTile(
           icon: Icons.workspace_premium_outlined,
           label: 'Planos e assinatura',
-          value: 'Gerenciar',
+          value: planoLabel,
           accent: accent,
-          actionInk: actionInk,
+          highlight: true,
           mute: mute,
           line: line,
           onTap: () => context.push('/assinatura'),
         ),
-        PerfilActionTile(
+        FxSettingsTile(
           icon: Icons.account_balance_wallet_outlined,
           label: 'Carteira e PIX',
           value: pixDone ? 'Completa' : 'Configurar',
-          accent: accent,
-          actionInk: actionInk,
           mute: mute,
           line: line,
           onTap: () => context.push('/perfil/wallet'),
         ),
-        PerfilActionTile(
+        FxSettingsTile(
           icon: Icons.bolt_outlined,
           label: 'Migração Focux',
           value: 'Importar com IA',
-          accent: accent,
-          actionInk: actionInk,
           mute: mute,
           line: line,
           onTap: () => context.push('/migracao-magica'),
         ),
-        PerfilActionTile(
+        FxSettingsTile(
           icon: Icons.apps_outlined,
           label: 'Mais ferramentas',
           value: 'Crescimento e loja',
-          accent: accent,
-          actionInk: actionInk,
           mute: mute,
           line: line,
           showDivider: false,

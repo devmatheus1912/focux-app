@@ -1,0 +1,77 @@
+import 'package:flutter/material.dart';
+
+import '../theme/fx_settings_layout.dart';
+import 'fx_shell_scaffold.dart';
+
+/// Grupo inset (ChatGPT/iOS) — superfície da Home, tamanhos de [FxSettingsLayout].
+class FxSettingsGroup extends StatelessWidget {
+  const FxSettingsGroup({
+    super.key,
+    this.header,
+    this.caption,
+    required this.children,
+    this.footer,
+    this.accent,
+  });
+
+  final String? header;
+  final String? caption;
+  final List<Widget> children;
+  final Widget? footer;
+  final Color? accent;
+
+  @override
+  Widget build(BuildContext context) {
+    final mute = fxScreenMute(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (header != null) ...[
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: FxSettingsLayout.groupPadH,
+            ),
+            child: Text(
+              header!,
+              style: FxSettingsLayout.sectionHeader(color: mute),
+            ),
+          ),
+          if (caption != null) ...[
+            const SizedBox(height: FxSettingsLayout.captionAfterHeader),
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: FxSettingsLayout.groupPadH,
+              ),
+              child: Text(
+                caption!,
+                style: FxSettingsLayout.footer(color: mute),
+              ),
+            ),
+          ],
+          const SizedBox(height: FxSettingsLayout.headerToGroup),
+        ],
+        DecoratedBox(
+          decoration: fxListCardDecoration(
+            context,
+            accent: accent,
+            radius: FxSettingsLayout.groupRadius,
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: FxSettingsLayout.groupPadH,
+              vertical: FxSettingsLayout.groupPadV,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: children,
+            ),
+          ),
+        ),
+        if (footer != null) ...[
+          const SizedBox(height: FxSettingsLayout.footerAfterGroup),
+          footer!,
+        ],
+      ],
+    );
+  }
+}

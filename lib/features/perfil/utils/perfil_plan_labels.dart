@@ -6,11 +6,21 @@ String perfilPlanSectionLabel(String apiPlano) {
   return PlanEntitlements.displayPlanName(subscriptionPlanFromApi(apiPlano));
 }
 
-/// Texto curto no pill do hero (ex.: Pro).
+/// Código curto do plano (ex.: PRO) — usado em testes e mapeamento.
 String perfilPlanPillLabel(String apiPlano) {
   return switch (subscriptionPlanFromApi(apiPlano)) {
     SubscriptionPlan.PRO => 'PRO',
     SubscriptionPlan.ENTERPRISE => 'ENTERPRISE',
     SubscriptionPlan.FREE => 'FREE',
+  };
+}
+
+/// Valor à direita da linha Planos (ChatGPT/iOS).
+String perfilPlanRowValue(String apiPlano) {
+  return switch (perfilPlanPillLabel(apiPlano)) {
+    'PRO' => 'Pro',
+    'ENTERPRISE' => 'Enterprise',
+    'FREE' => 'Grátis',
+    final other => other,
   };
 }

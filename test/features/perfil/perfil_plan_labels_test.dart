@@ -14,4 +14,10 @@ void main() {
   test('unknown plan falls back to FREE pill', () {
     expect(perfilPlanPillLabel(''), 'FREE');
   });
+
+  test('linha de planos usa rótulo iOS, não o código da API', () {
+    expect(perfilPlanRowValue('ENTERPRISE'), 'Enterprise');
+    expect(perfilPlanRowValue('PREMIUM'), 'Pro');
+    expect(perfilPlanRowValue(''), 'Grátis');
+  });
 }

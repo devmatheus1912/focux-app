@@ -36,11 +36,11 @@ void main() {
     expect(find.text('QA Coach'), findsWidgets);
     expect(find.textContaining('Marca'), findsWidgets);
     expect(find.text('Prontidão comercial'), findsOneWidget);
-    expect(find.text('Marca e vitrine'), findsOneWidget);
+    expect(find.text('Vitrine'), findsOneWidget);
     expect(find.byIcon(Icons.copy_rounded), findsOneWidget);
     expect(find.text('Compartilhar'), findsOneWidget);
-    expect(find.text('Completar cadastro'), findsOneWidget);
-    expect(find.text('WhatsApp pendente'), findsOneWidget);
+    expect(find.text('Completar'), findsOneWidget);
+    expect(find.text('WhatsApp'), findsOneWidget);
     expect(find.textContaining('alunos'), findsWidgets);
 
     await tester.scrollUntilVisible(
@@ -53,14 +53,11 @@ void main() {
     expect(find.text('Sistema'), findsOneWidget);
     expect(find.text('Operação'), findsOneWidget);
     await tester.scrollUntilVisible(
-      find.text('Operação'),
+      find.text('Carteira e PIX'),
       240,
       scrollable: find.byType(Scrollable).first,
     );
     await tester.pump();
-    await tester.tap(find.text('Operação'));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 400));
 
     expect(find.text('Carteira e PIX'), findsOneWidget);
 
@@ -72,7 +69,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
 
-    expect(find.text('Completar'), findsOneWidget);
+    expect(find.text('Completar'), findsWidgets);
     expect(find.text('Meus alunos'), findsNothing);
     expect(find.text('Copiloto IA'), findsNothing);
     expect(find.text('Conta e segurança'), findsOneWidget);

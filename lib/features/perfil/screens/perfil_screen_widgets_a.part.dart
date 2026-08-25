@@ -33,31 +33,15 @@ class _PerfilBody extends StatefulWidget {
 
 class _PerfilBodyState extends State<_PerfilBody> {
   bool _stickyVisible = false;
-  final GlobalKey _completenessCardKey = GlobalKey();
-
-  bool _completenessCardInViewport(BuildContext context) {
-    final ctx = _completenessCardKey.currentContext;
-    if (ctx == null) return false;
-    final render = ctx.findRenderObject();
-    if (render is! RenderBox || !render.hasSize) return false;
-
-    final topLeft = render.localToGlobal(Offset.zero);
-    final bottom = topLeft.dy + render.size.height;
-    final viewportTop = MediaQuery.paddingOf(context).top + kToolbarHeight;
-    final viewportBottom = MediaQuery.sizeOf(context).height - 96;
-    return bottom > viewportTop && topLeft.dy < viewportBottom;
-  }
 
   bool _onScroll(ScrollNotification notification, {required bool profileComplete}) {
+    if (!profileComplete) return false;
     if (notification is! ScrollUpdateNotification &&
         notification is! ScrollMetricsNotification) {
       return false;
     }
-    final scrolledPastReveal =
+    final show =
         notification.metrics.pixels > PerfilLayout.stickyRevealScrollOffset;
-    final hideForInlineCompleteness =
-        !profileComplete && _completenessCardInViewport(context);
-    final show = scrolledPastReveal && !hideForInlineCompleteness;
     if (show != _stickyVisible) {
       setState(() => _stickyVisible = show);
     }
@@ -89,28 +73,12 @@ class _PerfilBodyState extends State<_PerfilBody> {
       perfil.corPrimaria ?? dashboard.corPrimaria,
       fallback: themePrimary,
     );
-    final secondaryColor = _parseColor(
-      perfil.corSecundaria ?? dashboard.corSecundaria,
-      fallback: BrandPalette.deep(themePrimary),
-    );
     final accent = BrandPalette.softened(primaryColor);
-    final actionInk = isDark ? primaryColor : BrandPalette.deep(primaryColor);
-    final heroPrimary = BrandPalette.softened(primaryColor, amount: 0.10);
-    final heroSecondary = BrandPalette.softened(secondaryColor, amount: 0.14);
     final readiness = PerfilReadinessView.from(
       perfil: perfil,
       dashboard: dashboard,
     );
     final profileScore = readiness.score;
-    final brandSubtitle = () {
-      final slogan = formatBrandSloganForDisplay((perfil.slogan ?? '').trim());
-      if (slogan.isNotEmpty) return slogan;
-      final slug = perfil.slug?.trim();
-      if (slug != null && slug.isNotEmpty) {
-        return Env.landingPageDisplayLabel(slug);
-      }
-      return 'Marca ativa no app';
-    }();
     final professionalSummary = PerfilProfessionalSummary.from(
       perfil: perfil,
       dashboard: dashboard,
@@ -121,265 +89,99 @@ class _PerfilBodyState extends State<_PerfilBody> {
         loadingMetrics
             ? '—'
             : '${dashboard.totalAlunos} alunos · ${dashboard.alunosAtivos} ativos';
-    final usingDefaultBrand = _usesDefaultPalette(primaryColor, secondaryColor);
-    // Sticky chip — só após scroll (paridade Home overlay).
     const scrollBottomPad = PerfilLayout.stickyOverlayReserve;
-    const chromeSize = PerfilLayout.headerChromeSize;
+    final stickyShown = !profileComplete || _stickyVisible;
 
     return FxShellScaffold(
       useMesh: true,
-      safeArea: false,
       constrainWidth: true,
+      appBar: FxShellAppBar(
+        title: 'Perfil',
+        subtitle: freshnessLabel,
+        onBack: () => safePopOrGo(context, '/dashboard/personal'),
+      ),
       body: Stack(
         children: [
-          SafeArea(
-            bottom: false,
-            child: RefreshIndicator(
-              color: accent,
-              onRefresh: onRefresh,
-              child: NotificationListener<ScrollNotification>(
-                onNotification:
-                    (notification) =>
-                        _onScroll(notification, profileComplete: profileComplete),
-                child: CustomScrollView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  slivers: [
-                    SliverToBoxAdapter(
-                      child: FxStaggerItem(
-                        index: 1,
-                        slideOffset: 18,
-                        duration: const Duration(milliseconds: 480),
+          RefreshIndicator(
+            color: accent,
+            onRefresh: onRefresh,
+            child: NotificationListener<ScrollNotification>(
+              onNotification:
+                  (notification) =>
+                      _onScroll(notification, profileComplete: profileComplete),
+              child: CustomScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                slivers: [
+                  SliverToBoxAdapter(
+                    child: FxStaggerItem(
+                      index: 1,
+                      slideOffset: 18,
+                      duration: const Duration(milliseconds: 480),
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(
+                          FxSettingsLayout.pageInset,
+                          FxSettingsLayout.pageInset,
+                          FxSettingsLayout.pageInset,
+                          0,
+                        ),
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(
-                                TokensStrip.s4,
-                                TokensStrip.s4,
-                                TokensStrip.s4,
-                                0,
-                              ),
-                              child: Row(
-                                children: [
-                                  _HeroAction(
-                                    icon: Icons.arrow_back_ios_new,
-                                    semanticsLabel: 'Voltar',
-                                    size: chromeSize,
-                                    onTap:
-                                        () => safePopOrGo(
-                                          context,
-                                          '/dashboard/personal',
-                                        ),
-                                  ),
-                                  Expanded(
-                                    child: Semantics(
-                                      header: true,
-                                      label:
-                                          freshnessLabel == null
-                                              ? 'Perfil'
-                                              : 'Perfil. $freshnessLabel',
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Text(
-                                            'Perfil',
-                                            textAlign: TextAlign.center,
-                                            style: FocuxHubTypography.pageTitle(
-                                              context,
-                                              color: ink,
-                                            ).copyWith(
-                                              fontWeight: FontWeight.w800,
-                                              height: 1.12,
-                                            ),
-                                          ),
-                                          if (freshnessLabel != null) ...[
-                                            const SizedBox(height: 2),
-                                            Text(
-                                              freshnessLabel,
-                                              textAlign: TextAlign.center,
-                                              style:
-                                                  FocuxHubTypography.bodyMuted(
-                                                    color: mute,
-                                                  ).copyWith(
-                                                    fontSize: 11,
-                                                    fontWeight: FontWeight.w600,
-                                                  ),
-                                            ),
-                                          ],
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                  _HeroAction(
-                                    icon: Icons.edit_outlined,
-                                    semanticsLabel: 'Editar perfil',
-                                    size: chromeSize,
-                                    onTap: onEditPerfil,
-                                  ),
-                                ],
-                              ),
+                            _Avatar(
+                              nome: perfil.nome,
+                              logoUrl: perfil.logoUrl ?? dashboard.logoUrl,
+                              primaryColor: primaryColor,
+                              onTap: onPickPhoto,
+                              loading: uploadingPhoto,
+                              semanticsLabel:
+                                  uploadingPhoto
+                                      ? 'Enviando foto do perfil'
+                                      : 'Alterar foto do perfil',
                             ),
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(
-                                TokensStrip.s4,
-                                TokensStrip.s3,
-                                TokensStrip.s4,
-                                0,
-                              ),
-                              child: DecoratedBox(
-                                decoration: fxStripCardDecoration(
-                                  context,
-                                  accent: profileComplete ? null : accent,
-                                  radius: TokensStrip.rCard,
-                                  glowStrength: profileComplete ? 0.03 : 0.04,
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.fromLTRB(
-                                    12,
-                                    11,
-                                    10,
-                                    11,
-                                  ),
-                                  child: Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      _Avatar(
-                                        nome: perfil.nome,
-                                        logoUrl:
-                                            perfil.logoUrl ?? dashboard.logoUrl,
-                                        primaryColor: primaryColor,
-                                        onTap: onPickPhoto,
-                                        loading: uploadingPhoto,
-                                        compact: true,
-                                        showEditBadge: false,
-                                        semanticsLabel:
-                                            uploadingPhoto
-                                                ? 'Enviando foto do perfil'
-                                                : 'Alterar foto do perfil',
-                                      ),
-                                      const SizedBox(width: 10),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Row(
-                                              children: [
-                                                Flexible(
-                                                  child: FittedBox(
-                                                    fit: BoxFit.scaleDown,
-                                                    alignment:
-                                                        Alignment.centerLeft,
-                                                    child: _PlanPill(
-                                                      label:
-                                                          perfilPlanPillLabel(
-                                                            perfil.plano,
-                                                          ),
-                                                    ),
-                                                  ),
-                                                ),
-                                                const SizedBox(width: 8),
-                                                _HeroMarcaChip(
-                                                  score: profileScore,
-                                                  accent: accent,
-                                                  actionInk: actionInk,
-                                                  onTap: () {
-                                                    HapticFeedback.selectionClick();
-                                                    if (!profileComplete) {
-                                                      // Prontidão está logo abaixo.
-                                                      return;
-                                                    }
-                                                    context.push(
-                                                      '/identidade-visual',
-                                                    );
-                                                  },
-                                                  onShowHint: () {
-                                                    HapticFeedback.selectionClick();
-                                                    unawaited(
-                                                      AnalyticsService.instance
-                                                          .track(
-                                                            ProductEvents
-                                                                .perfilMarcaHintOpened,
-                                                            props: {
-                                                              'score':
-                                                                  profileScore,
-                                                            },
-                                                          ),
-                                                    );
-                                                    FeedbackHelper.showInfo(
-                                                      context,
-                                                      'Marca $profileScore% — foto, CREF, especialidade, bio, Instagram, paleta e PIX.',
-                                                    );
-                                                  },
-                                                ),
-                                              ],
-                                            ),
-                                            const SizedBox(height: 6),
-                                            Text(
-                                              perfil.nome,
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                              style:
-                                                  FocuxHubTypography.pageTitle(
-                                                    context,
-                                                    color: ink,
-                                                  ).copyWith(
-                                                    fontWeight: FontWeight.w800,
-                                                    height: 1.12,
-                                                  ),
-                                            ),
-                                            const SizedBox(height: 3),
-                                            Text(
-                                              _buildSubtitle(perfil),
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                              style:
-                                                  FocuxHubTypography.bodyMuted(
-                                                    color: mute,
-                                                    height: 1.2,
-                                                  ),
-                                            ),
-                                            const SizedBox(height: 4),
-                                            Semantics(
-                                              button: true,
-                                              label:
-                                                  '$alunosLabel. Abrir alunos',
-                                              child: InkWell(
-                                                onTap: () {
-                                                  HapticFeedback.selectionClick();
-                                                  goPersonalShellTab(
-                                                    context,
-                                                    '/alunos',
-                                                  );
-                                                },
-                                                child: Text(
-                                                  alunosLabel,
-                                                  style: TokensStrip.bodyMuted(
-                                                    color: mute,
-                                                  ).copyWith(
-                                                    fontWeight: FontWeight.w600,
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
+                            const SizedBox(height: TokensStrip.s3),
+                            Text(
+                              perfil.nome,
+                              textAlign: TextAlign.center,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: FxSettingsLayout.profileName(color: ink),
+                            ),
+                            const SizedBox(height: TokensStrip.s1),
+                            Text(
+                              _buildSubtitle(perfil),
+                              textAlign: TextAlign.center,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: FxSettingsLayout.subhead(color: mute),
+                            ),
+                            const SizedBox(height: TokensStrip.s1),
+                            Semantics(
+                              button: true,
+                              label: '$alunosLabel. Abrir alunos',
+                              child: InkWell(
+                                onTap: () {
+                                  HapticFeedback.selectionClick();
+                                  goPersonalShellTab(context, '/alunos');
+                                },
+                                child: Text(
+                                  alunosLabel,
+                                  textAlign: TextAlign.center,
+                                  style: FxSettingsLayout.footer(
+                                    color: mute,
                                   ),
                                 ),
                               ),
                             ),
+                            const SizedBox(height: TokensStrip.s3),
                           ],
                         ),
                       ),
                     ),
+                  ),
                     SliverPadding(
                       padding: EdgeInsets.fromLTRB(
-                        TokensStrip.s4,
-                        TokensStrip.s3,
-                        TokensStrip.s4,
+                        FxSettingsLayout.pageInset,
+                        FxSettingsLayout.headerToGroup,
+                        FxSettingsLayout.pageInset,
                         scrollBottomPad,
                       ),
                       sliver: SliverList(
@@ -391,12 +193,9 @@ class _PerfilBodyState extends State<_PerfilBody> {
                                 FxStaggerItem(
                                   index: 2,
                                   child: _CompletenessCard(
-                                    key: _completenessCardKey,
                                     score: profileScore,
-                                    accent: accent,
                                     isDark: isDark,
                                     items: readiness.items,
-                                    nextStep: readiness.nextStep,
                                     onChecklistAction: onChecklistAction,
                                   ),
                                 ),
@@ -408,57 +207,15 @@ class _PerfilBodyState extends State<_PerfilBody> {
                                 index: 3,
                                 child: PerfilMarcaVitrineSection(
                                   profileComplete: profileComplete,
-                                  isDark: isDark,
-                                  accent: accent,
-                                  actionInk: actionInk,
-                                  brandPreview:
-                                      profileComplete
-                                          ? null
-                                          : Material(
-                                            color: Colors.transparent,
-                                            child: InkWell(
-                                              onTap: () {
-                                                HapticFeedback.selectionClick();
-                                                context.push(
-                                                  '/identidade-visual',
-                                                );
-                                              },
-                                              borderRadius:
-                                                  BorderRadius.circular(14),
-                                              child: _BrandPreview(
-                                                primary: heroPrimary,
-                                                secondary: heroSecondary,
-                                                profileName: perfil.nome,
-                                                subtitle: brandSubtitle,
-                                                logoUrl:
-                                                    perfil.logoUrl ??
-                                                    dashboard.logoUrl,
-                                                isDark: isDark,
-                                                compact: true,
-                                              ),
-                                            ),
-                                          ),
-                                  brandPalette:
-                                      profileComplete
-                                          ? null
-                                          : _BrandPaletteStrip(
-                                            primary: primaryColor,
-                                            secondary: secondaryColor,
-                                            mute: mute,
-                                            usingDefault: usingDefaultBrand,
-                                          ),
-                                  publicLink: _PerfilPublicLinkCard(
-                                    slug: perfil.slug,
-                                    accent: accent,
-                                    actionInk: actionInk,
-                                    mute: mute,
-                                    isDark: isDark,
-                                    profileComplete: profileComplete,
-                                    onOpenEditor: () {
-                                      HapticFeedback.selectionClick();
-                                      onOpenLandingEditor();
-                                    },
-                                  ),
+                                  children: [
+                                    _PerfilVitrineTiles(
+                                      slug: perfil.slug,
+                                      score: profileScore,
+                                      mute: mute,
+                                      line: line,
+                                      onOpenEditor: onOpenLandingEditor,
+                                    ),
+                                  ],
                                 ),
                               ),
                               const SizedBox(
@@ -469,11 +226,8 @@ class _PerfilBodyState extends State<_PerfilBody> {
                                   index: 4,
                                   child: _ProfessionalDataPanel(
                                     summary: professionalSummary,
-                                    accent: accent,
-                                    actionInk: actionInk,
                                     mute: mute,
-                                    isDark: isDark,
-                                    profileComplete: profileComplete,
+                                    line: line,
                                     onEdit: onEditPerfil,
                                   ),
                                 ),
@@ -490,23 +244,19 @@ class _PerfilBodyState extends State<_PerfilBody> {
                               ),
                               FxStaggerItem(
                                 index: 6,
-                                child: PerfilQuietCollapsible(
-                                  title: 'Operação',
-                                  collapsedHint:
-                                      'Plano, carteira e crescimento.',
-                                  collapsedPreview:
-                                      readiness.isPixDone
-                                          ? 'PIX ok · Gerenciar plano'
-                                          : 'Configurar PIX · plano e loja',
-                                  isDark: isDark,
-                                  child: PerfilOperacaoSection(
-                                    isDark: isDark,
-                                    accent: accent,
-                                    actionInk: actionInk,
-                                    mute: mute,
-                                    line: line,
-                                    pixDone: readiness.isPixDone,
-                                  ),
+                                child: FxSettingsGroup(
+                                  header: 'Operação',
+                                  children: [
+                                    PerfilOperacaoSection(
+                                      accent: accent,
+                                      mute: mute,
+                                      line: line,
+                                      pixDone: readiness.isPixDone,
+                                      planoLabel: perfilPlanRowValue(
+                                        perfil.plano,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                               const SizedBox(
@@ -514,27 +264,17 @@ class _PerfilBodyState extends State<_PerfilBody> {
                               ),
                               FxStaggerItem(
                                 index: 7,
-                                child: PerfilQuietCollapsible(
-                                  title: 'Conta e segurança',
-                                  collapsedHint:
-                                      'Documentos legais, sessão e exclusão LGPD.',
-                                  collapsedPreview: 'Termos · sair · excluir',
-                                  isDark: isDark,
-                                  child: PerfilContaSegurancaSection(
-                                    isDark: isDark,
-                                    accent: accent,
-                                    actionInk: actionInk,
-                                    mute: mute,
-                                    line: line,
-                                    onLogout: () {
-                                      onLogout();
-                                    },
-                                    onDeleteAccount:
-                                        () => _showDeleteAccountDialog(
-                                          context,
-                                          onSessionCleared: onLogout,
-                                        ),
-                                  ),
+                                child: PerfilContaSegurancaSection(
+                                  mute: mute,
+                                  line: line,
+                                  onLogout: () {
+                                    onLogout();
+                                  },
+                                  onDeleteAccount:
+                                      () => _showDeleteAccountDialog(
+                                        context,
+                                        onSessionCleared: onLogout,
+                                      ),
                                 ),
                               ),
                             ],
@@ -546,7 +286,6 @@ class _PerfilBodyState extends State<_PerfilBody> {
                 ),
               ),
             ),
-          ),
           Positioned(
             left: 0,
             right: 0,
@@ -561,7 +300,7 @@ class _PerfilBodyState extends State<_PerfilBody> {
                   accent: accent,
                   isDark: isDark,
                   profileComplete: profileComplete,
-                  visible: _stickyVisible,
+                  visible: stickyShown,
                 ),
               ),
             ),

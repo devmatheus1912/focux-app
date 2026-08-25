@@ -1,0 +1,144 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
+import '../theme/design_tokens.dart';
+import '../theme/fx_settings_layout.dart';
+import '../theme/tokens_strip.dart';
+
+/// Linha de ajustes inset — ícone 22, body 17, chevron muted.
+class FxSettingsTile extends StatelessWidget {
+  const FxSettingsTile({
+    super.key,
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.mute,
+    required this.line,
+    required this.onTap,
+    this.accent,
+    this.danger = false,
+    this.showDivider = true,
+    this.locked = false,
+    this.highlight = false,
+    this.picker = false,
+    this.upgradeTierLabel,
+  });
+
+  final IconData icon;
+  final String label;
+  final String value;
+  final Color mute;
+  final Color line;
+  final VoidCallback onTap;
+  final Color? accent;
+  final bool danger;
+  final bool showDivider;
+  final bool locked;
+  final bool highlight;
+  final bool picker;
+  final String? upgradeTierLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final ink =
+        danger
+            ? EagleTokens.bad
+            : highlight && accent != null
+            ? accent!
+            : (isDark ? EagleTokens.darkInk : TokensStrip.textPrimary);
+    final inkMuted = locked ? ink.withValues(alpha: 0.55) : ink;
+    final iconColor = inkMuted;
+    final a11y =
+        danger
+            ? '$label. Ação destrutiva'
+            : locked
+            ? '$label trancado. Plano ${upgradeTierLabel ?? 'upgrade'}'
+            : (value.isEmpty ? label : '$label. $value');
+
+    return Semantics(
+      button: true,
+      label: a11y,
+      hint: danger ? 'Confirmação será solicitada' : null,
+      child: InkWell(
+        onTap: () {
+          HapticFeedback.selectionClick();
+          onTap();
+        },
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(
+            minHeight: FxSettingsLayout.rowMinHeight,
+          ),
+          child: Row(
+            children: [
+              Icon(
+                icon,
+                size: FxSettingsLayout.iconSize,
+                color: iconColor,
+              ),
+              const SizedBox(width: FxSettingsLayout.iconGap),
+              Expanded(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    border:
+                        showDivider
+                            ? Border(
+                              bottom: BorderSide(
+                                color: line,
+                                width: FxSettingsLayout.dividerThickness,
+                              ),
+                            )
+                            : null,
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: TokensStrip.s3,
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            label,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: FxSettingsLayout.rowLabel(color: inkMuted),
+                          ),
+                        ),
+                        if (value.isNotEmpty) ...[
+                          const SizedBox(width: TokensStrip.s2),
+                          Flexible(
+                            child: Text(
+                              value,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              textAlign: TextAlign.end,
+                              style: FxSettingsLayout.rowValue(
+                                color: danger ? ink : mute,
+                              ),
+                            ),
+                          ),
+                        ],
+                        if (!danger) ...[
+                          const SizedBox(width: TokensStrip.s1),
+                          Icon(
+                            locked
+                                ? Icons.lock_outline_rounded
+                                : picker
+                                ? Icons.unfold_more
+                                : Icons.chevron_right,
+                            size: FxSettingsLayout.chevronSize,
+                            color: mute,
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}

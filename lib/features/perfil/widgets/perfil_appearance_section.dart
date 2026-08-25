@@ -2,15 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/theme/brand_palette.dart';
-import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/theme_provider.dart';
-import '../../../core/theme/tokens_strip.dart';
-import '../../../core/widgets/fx_shell_scaffold.dart';
-import '../../dashboard/utils/dashboard_readability.dart';
+import '../../../core/widgets/fx_home_sheet.dart';
+import '../../../core/widgets/fx_settings_group.dart';
+import '../../../core/widgets/fx_settings_tile.dart';
 
-/// Aparência do app — só no Perfil. Padrão: modo do celular.
+/// Aparência — linha iOS/ChatGPT com valor à direita e picker.
 class PerfilAppearanceSection extends ConsumerWidget {
   const PerfilAppearanceSection({super.key, required this.isDark});
 
@@ -22,118 +21,92 @@ class PerfilAppearanceSection extends ConsumerWidget {
     (ThemeMode.dark, 'Escuro'),
   ];
 
+  static String labelFor(ThemeMode mode) {
+    for (final option in _options) {
+      if (option.$1 == mode) return option.$2;
+    }
+    return 'Sistema';
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final mode = ref.watch(themeModeProvider);
     final chrome = ShellChrome.forDark(isDark);
-    final primary = Theme.of(context).colorScheme.primary;
-    final heading = BrandPalette.sectionHeading(primary, dark: isDark);
-    final caption = dashboardReadableCaption(context, isDark: isDark);
-    final fill = isDark ? EagleTokens.darkCardHi : EagleTokens.lightCardHi;
+    final mute = chrome.mute;
+    final line = chrome.line;
 
-    return DecoratedBox(
-      decoration: fxStripCardDecoration(
-        context,
-        radius: TokensStrip.rCard,
-        glowStrength: 0.03,
-      ),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Aparência',
-              style: FocuxHubTypography.bodyMuted(
-                color: heading,
-                fontWeight: FontWeight.w700,
-                height: 1.25,
-              ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              mode == ThemeMode.system
-                  ? 'Segue o claro ou escuro do celular.'
-                  : 'Travado neste aparelho. Sistema volta a seguir o celular.',
-              style: FocuxHubTypography.bodyMuted(
-                color: caption,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            SizedBox(height: TokensStrip.s3),
-            DecoratedBox(
-              decoration: BoxDecoration(
-                color: fill,
-                borderRadius: BorderRadius.circular(TokensStrip.rXl),
-                border: Border.all(color: chrome.lineStrong),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(4),
-                child: Row(
-                  children: [
-                    for (final option in _options)
-                      Expanded(
-                        child: Semantics(
-                          button: true,
-                          selected: mode == option.$1,
-                          label: 'Aparência: ${option.$2}',
-                          child: Material(
-                            color: fxTransparent,
-                            child: InkWell(
-                              onTap: () {
-                                HapticFeedback.selectionClick();
-                                ref
-                                    .read(themeModeProvider.notifier)
-                                    .setMode(option.$1);
-                              },
-                              borderRadius: BorderRadius.circular(12),
-                              child: ConstrainedBox(
-                                constraints: const BoxConstraints(
-                                  minHeight: 48,
-                                ),
-                                child: Ink(
-                                  decoration: BoxDecoration(
-                                    color:
-                                        mode == option.$1
-                                            ? BrandPalette.soft(
-                                              primary,
-                                              dark: isDark,
-                                            )
-                                            : fxTransparent,
-                                    borderRadius: BorderRadius.circular(12),
-                                    border:
-                                        mode == option.$1
-                                            ? Border.all(
-                                              color: primary.withValues(
-                                                alpha: 0.42,
-                                              ),
-                                            )
-                                            : null,
-                                  ),
-                                  child: Center(
-                                    child: Text(
-                                      option.$2,
-                                      style: FocuxHubTypography.cardTitle(
-                                        color:
-                                            mode == option.$1
-                                                ? primary
-                                                : caption,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-            ),
-          ],
+    return FxSettingsGroup(
+      header: 'Tema',
+      caption:
+          mode == ThemeMode.system
+              ? 'Segue o claro ou escuro do celular.'
+              : 'Travado neste aparelho. Sistema volta a seguir o celular.',
+      children: [
+        FxSettingsTile(
+          icon: Icons.dark_mode_outlined,
+          label: 'Aparência',
+          value: labelFor(mode),
+          mute: mute,
+          line: line,
+          picker: true,
+          showDivider: false,
+          onTap: () => _openPicker(context, ref, mode),
         ),
-      ),
+      ],
+    );
+  }
+
+  Future<void> _openPicker(
+    BuildContext context,
+    WidgetRef ref,
+    ThemeMode current,
+  ) async {
+    await showFxHomeSheet<void>(
+      context,
+      builder: (ctx) {
+        final dark = Theme.of(ctx).brightness == Brightness.dark;
+        final chrome = ShellChrome.forDark(dark);
+        final ink = chrome.ink;
+        return FxHomeSheetSurface(
+          isDark: dark,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              FxHomeSheetHandle(isDark: dark),
+              FxHomeSheetHeader(
+                leading: Icon(
+                  Icons.dark_mode_outlined,
+                  color: ink,
+                ),
+                title: 'Aparência',
+                isDark: dark,
+              ),
+              for (final option in _options)
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(
+                    option.$2,
+                    style: FxSettingsLayout.rowLabel(color: ink),
+                  ),
+                  trailing:
+                      current == option.$1
+                          ? Icon(
+                            Icons.check,
+                            color: Theme.of(ctx).colorScheme.primary,
+                            size: FxSettingsLayout.iconSize,
+                          )
+                          : null,
+                  onTap: () {
+                    HapticFeedback.selectionClick();
+                    ref.read(themeModeProvider.notifier).setMode(option.$1);
+                    Navigator.of(ctx).pop();
+                  },
+                  minTileHeight: FxSettingsLayout.rowMinHeight,
+                ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

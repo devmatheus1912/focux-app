@@ -25,7 +25,7 @@ abstract final class FocuxHubTypography {
     );
   }
 
-  /// Título de seção / card (PerfilCardSection).
+  /// Título de seção / card (FxSettingsGroup e hubs).
   static TextStyle sectionTitle(BuildContext context, {required Color color}) {
     return Theme.of(context).textTheme.titleMedium!.copyWith(
       fontWeight: FontWeight.w800,

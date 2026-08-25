@@ -20,8 +20,10 @@ void main() {
     expect(screen, isNot(contains('CircularProgressIndicator')));
 
     // Tokens em vez de literais e navegação segura ao voltar.
-    expect(screen, contains('TokensStrip.'));
+    expect(screen, contains('FxSettingsLayout.'));
     expect(screen, contains('BrandPalette.'));
+    expect(screen, contains('FxSettingsGroup'));
+    expect(screen, contains('FxSettingsTile'));
     expect(screen, contains('safePopOrGo'));
     expect(screen, isNot(contains('Color(0x')));
   });

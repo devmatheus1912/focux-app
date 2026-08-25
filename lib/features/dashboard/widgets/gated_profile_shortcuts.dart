@@ -1,33 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../planos/data/planos_repository.dart';
 import '../../planos/utils/effective_plano_features.dart';
 import '../data/dashboard_tool_shortcuts.dart';
 import '../utils/dashboard_shortcut_navigation.dart';
 
 /// Atalhos de crescimento no Perfil — respeitam o plano ativo.
 class GatedProfileShortcuts extends ConsumerWidget {
-  const GatedProfileShortcuts({
-    super.key,
-    required this.accent,
-    required this.actionInk,
-    required this.mute,
-    required this.line,
-    required this.tileBuilder,
-  });
+  const GatedProfileShortcuts({super.key, required this.tileBuilder});
 
-  final Color accent;
-  final Color actionInk;
-  final Color mute;
-  final Color line;
-
-  /// Builder para reutilizar [_ActionTile] do perfil sem acoplamento circular.
+  /// Builder para reutilizar tiles do perfil sem acoplamento circular.
   final Widget Function({
     required IconData icon,
     required String label,
     required String value,
     required VoidCallback onTap,
     required bool locked,
+    required bool showDivider,
     String? upgradeTierLabel,
   })
   tileBuilder;
@@ -50,33 +40,51 @@ class GatedProfileShortcuts extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final features = effectivePlanoFeatures(ref);
-
     return Column(
       children: [
-        for (final entry in _entries) ...[
-          Builder(
-            builder: (context) {
-              final shortcut = _shortcutFor(entry.$4);
-              final locked = shortcut != null && !shortcut.isUnlocked(features);
-              final tier = locked ? shortcut.tierBadgeLabel() : null;
-              final value = locked ? 'Plano $tier' : entry.$3;
-
-              return tileBuilder(
-                icon: entry.$1,
-                label: entry.$2,
-                value: value,
-                locked: locked,
-                upgradeTierLabel: tier,
-                onTap: () {
-                  if (shortcut != null) {
-                    openDashboardShortcut(context, ref, shortcut);
-                  }
-                },
-              );
-            },
+        for (var i = 0; i < _entries.length; i++)
+          _tileFor(
+            context,
+            ref,
+            features,
+            _entries[i],
+            showDivider: i != _entries.length - 1,
           ),
-        ],
       ],
+    );
+  }
+
+  Widget _tileFor(
+    BuildContext context,
+    WidgetRef ref,
+    PlanoFeatures features,
+    (IconData, String, String, String) entry, {
+    required bool showDivider,
+  }) {
+    final shortcut = _shortcutFor(entry.$4);
+    if (shortcut == null) {
+      return tileBuilder(
+        icon: entry.$1,
+        label: entry.$2,
+        value: entry.$3,
+        locked: false,
+        showDivider: showDivider,
+        upgradeTierLabel: null,
+        onTap: () {},
+      );
+    }
+    final locked = !shortcut.isUnlocked(features);
+    final tier = locked ? shortcut.tierBadgeLabel() : null;
+    final value = locked ? 'Plano $tier' : entry.$3;
+
+    return tileBuilder(
+      icon: entry.$1,
+      label: entry.$2,
+      value: value,
+      locked: locked,
+      showDivider: showDivider,
+      upgradeTierLabel: tier,
+      onTap: () => openDashboardShortcut(context, ref, shortcut),
     );
   }
 }

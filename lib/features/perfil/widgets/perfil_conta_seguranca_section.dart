@@ -1,25 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../../core/legal/focux_legal.dart';
 import '../../../core/theme/design_tokens.dart';
-import 'perfil_action_tile.dart';
+import '../../../core/theme/fx_settings_layout.dart';
+import '../../../core/widgets/fx_settings_group.dart';
+import '../../../core/widgets/fx_settings_tile.dart';
 
-/// Itens de Conta e segurança (conteúdo; o colapso fica no pai).
+/// Conta e segurança — grupo + sair em card separado (ChatGPT).
 class PerfilContaSegurancaSection extends StatelessWidget {
   const PerfilContaSegurancaSection({
     super.key,
-    required this.isDark,
-    required this.accent,
-    required this.actionInk,
     required this.mute,
     required this.line,
     required this.onLogout,
     required this.onDeleteAccount,
   });
 
-  final bool isDark;
-  final Color accent;
-  final Color actionInk;
   final Color mute;
   final Color line;
   final VoidCallback onLogout;
@@ -28,47 +25,64 @@ class PerfilContaSegurancaSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        PerfilActionTile(
-          icon: Icons.gavel_outlined,
-          label: 'Termos de uso',
-          value: '',
-          accent: accent,
-          actionInk: actionInk,
-          mute: mute,
-          line: line,
-          onTap: () => FocuxLegal.openTerms(),
+        FxSettingsGroup(
+          header: 'Conta e segurança',
+          children: [
+            FxSettingsTile(
+              icon: Icons.gavel_outlined,
+              label: 'Termos de uso',
+              value: '',
+              mute: mute,
+              line: line,
+              onTap: () => FocuxLegal.openTerms(),
+            ),
+            FxSettingsTile(
+              icon: Icons.shield_outlined,
+              label: 'Política de privacidade',
+              value: '',
+              mute: mute,
+              line: line,
+              showDivider: false,
+              onTap: () => FocuxLegal.openPrivacy(),
+            ),
+          ],
         ),
-        PerfilActionTile(
-          icon: Icons.shield_outlined,
-          label: 'Política de privacidade',
-          value: '',
-          accent: accent,
-          actionInk: actionInk,
-          mute: mute,
-          line: line,
-          onTap: () => FocuxLegal.openPrivacy(),
+        const SizedBox(height: FxSettingsLayout.groupGap),
+        FxSettingsGroup(
+          children: [
+            FxSettingsTile(
+              icon: Icons.logout,
+              label: 'Sair da conta',
+              value: '',
+              mute: mute,
+              line: line,
+              danger: true,
+              showDivider: false,
+              onTap: onLogout,
+            ),
+          ],
         ),
-        PerfilActionTile(
-          icon: Icons.logout,
-          label: 'Sair da conta',
-          value: '',
-          accent: EagleTokens.bad,
-          mute: mute,
-          line: line,
-          danger: true,
-          onTap: onLogout,
-        ),
-        PerfilActionTile(
-          icon: Icons.delete_forever_outlined,
-          label: 'Excluir minha conta',
-          value: '',
-          accent: EagleTokens.bad,
-          mute: mute,
-          line: line,
-          danger: true,
-          showDivider: false,
-          onTap: onDeleteAccount,
+        const SizedBox(height: FxSettingsLayout.footerAfterGroup),
+        Center(
+          child: Semantics(
+            button: true,
+            label: 'Excluir minha conta. Ação destrutiva',
+            hint: 'Confirmação será solicitada',
+            child: TextButton(
+              onPressed: () {
+                HapticFeedback.selectionClick();
+                onDeleteAccount();
+              },
+              style: TextButton.styleFrom(
+                foregroundColor: EagleTokens.bad,
+                minimumSize: const Size(48, 48),
+                textStyle: FxSettingsLayout.footer(color: EagleTokens.bad),
+              ),
+              child: const Text('Excluir minha conta'),
+            ),
+          ),
         ),
       ],
     );
