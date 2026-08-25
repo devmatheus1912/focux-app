@@ -28,6 +28,10 @@ void main() {
     expect(screen, contains('PerfilAppearanceSection'));
     expect(screen, contains('PerfilOperacaoSection'));
     expect(screen, contains('PerfilContaSegurancaSection'));
+    expect(
+      File('lib/core/widgets/fx_settings_tile.dart').readAsStringSync(),
+      contains('BrandPalette.softened'),
+    );
     expect(screen, contains('if (!profileComplete)'));
     expect(screen, isNot(contains('_PerfilGrowthSection')));
     expect(conta, contains('Conta e segurança'));
@@ -46,6 +50,10 @@ void main() {
     expect(screen, isNot(contains('_PerfilBottomActions')));
     expect(screen, isNot(contains('Conta e plano')));
     expect(screen, isNot(contains('Nao informado')));
-    expect(screen, isNot(contains('Politica de privacidade')));
+    expect(
+      File('lib/features/perfil/utils/perfil_plan_labels.dart')
+          .readAsStringSync(),
+      isNot(contains('perfilPlanSectionLabel')),
+    );
   });
 }

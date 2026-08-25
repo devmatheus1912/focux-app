@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../theme/brand_palette.dart';
 import '../theme/design_tokens.dart';
 import '../theme/fx_settings_layout.dart';
 import '../theme/shell_chrome.dart';
@@ -48,13 +49,22 @@ class FxSettingsTile extends StatelessWidget {
     final chrome = ShellChrome.of(context);
     final mute = this.mute ?? chrome.mute;
     final line = this.line ?? chrome.line;
+    final brand =
+        accent ??
+        BrandPalette.softened(Theme.of(context).colorScheme.primary);
     final ink =
         danger
             ? EagleTokens.bad
-            : highlight && accent != null
-            ? accent!
+            : highlight
+            ? brand
             : chrome.ink;
     final inkMuted = locked ? ink.withValues(alpha: 0.55) : ink;
+    final iconColor =
+        danger
+            ? EagleTokens.bad
+            : locked
+            ? brand.withValues(alpha: 0.55)
+            : brand;
     final a11y =
         danger
             ? '$label. Ação destrutiva'
@@ -87,7 +97,7 @@ class FxSettingsTile extends StatelessWidget {
               Icon(
                 icon,
                 size: FxSettingsLayout.iconSize,
-                color: inkMuted,
+                color: iconColor,
               ),
               const SizedBox(width: FxSettingsLayout.iconGap),
               Expanded(

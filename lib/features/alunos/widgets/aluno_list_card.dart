@@ -18,7 +18,7 @@ import '../utils/alunos_list_utils.dart';
 import 'aluno_avatar.dart';
 import 'aluno_list_outreach_actions.dart';
 
-/// Badge de status quiet — paridade Home/Perfil [`_HeroMetaPill`]: fill soft, sem borda.
+/// Badge de status quiet — fill soft, sem borda (paridade Home).
 class AlunoStatusPill extends StatelessWidget {
   const AlunoStatusPill({
     super.key,

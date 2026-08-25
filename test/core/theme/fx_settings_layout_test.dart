@@ -20,5 +20,13 @@ void main() {
       File('lib/core/theme/fx_settings_layout.dart').readAsStringSync(),
       contains('FocuxHubTypography.cardTitle'),
     );
+    expect(
+      File('lib/core/widgets/fx_settings_tile.dart').readAsStringSync(),
+      contains('BrandPalette.softened'),
+    );
+    expect(
+      File('lib/core/theme/fx_settings_layout.dart').readAsStringSync(),
+      isNot(contains('007AFF')),
+    );
   });
 }

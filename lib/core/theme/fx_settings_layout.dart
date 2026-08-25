@@ -8,13 +8,16 @@ import 'tokens_strip.dart';
 /// Identidade, tipografia e cor: os mesmos papéis do Planos/Home
 /// (`FocuxHubTypography`). **Não** copia o tema preto/azul do ChatGPT.
 ///
+/// Referência 80 pilares: `D:/Focux Personal/docs/PERFIL_DESIGN_REFERENCE.md`.
+///
 /// ## O que é ChatGPT/iOS (estrutura)
 /// Página inset, grupo arredondado, linha com ícone outline + chevron,
 /// divisor depois do ícone, Sair em grupo separado, picker com check.
 ///
-/// ## O que é Planos/Home (tamanho)
-/// Nome = `sectionTitle` (headline do Planos). Linha = `cardTitle`.
-/// Subtítulo/footer = `bodyMuted`. Score = métrica `fontBodySm`.
+/// ## O que é Planos/Home (tamanho + cor)
+/// Nome = `sectionTitle`. Linha = `cardTitle`. Subtítulo = `bodyMuted`.
+/// Score = métrica `fontBodySm`. Ícone leading = cor da marca.
+/// Chevron muted. Sair: vermelho.
 abstract final class FxSettingsLayout {
   FxSettingsLayout._();
 

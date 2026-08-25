@@ -2,9 +2,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/perfil/utils/perfil_plan_labels.dart';
 
 void main() {
-  test('ENTERPRISE_PRO alias cai no pill ENTERPRISE', () {
+  test('ENTERPRISE_PRO alias cai no código ENTERPRISE', () {
     expect(perfilPlanPillLabel('ENTERPRISE_PRO'), 'ENTERPRISE');
-    expect(perfilPlanSectionLabel('ENTERPRISE_PRO'), 'ENTERPRISE');
   });
 
   test('PREMIUM alias cai no pill PRO', () {
