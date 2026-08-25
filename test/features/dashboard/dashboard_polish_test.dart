@@ -166,4 +166,23 @@ void main() {
     expect(group, contains('dashboardShortcutSemanticsLabel'));
     expect(group, contains('homeOverride: homePlanoFeatures'));
   });
+
+  test('alerta de ativação da Home é faixa inset', () {
+    final setup = File(
+      'lib/features/onboarding/screens/setup_onboarding_widget.dart',
+    ).readAsStringSync();
+    final cta = File(
+      'lib/features/subscription/widgets/dashboard_activation_cta.dart',
+    ).readAsStringSync();
+    expect(setup, contains('Sua ativação'));
+    expect(setup, contains('FxSettingsLayout.rowMinHeight'));
+    expect(setup, contains('minHeight: 4'));
+    expect(setup, isNot(contains('dashboardSetupPreview')));
+    expect(setup, isNot(contains('Ver tudo')));
+    expect(setup, isNot(contains('SetupStepCard')));
+    expect(setup, isNot(contains('SetupProgressHeader')));
+    expect(cta, contains('FxSettingsLayout.rowMinHeight'));
+    expect(cta, contains('FxSettingsLayout.pageInset'));
+    expect(cta, isNot(contains('TokensStrip.s5')));
+  });
 }

@@ -134,7 +134,6 @@ class SetupProgressHeader extends StatelessWidget {
     required this.completedCount,
     required this.totalCount,
     this.nextActionLabel,
-    this.compact = false,
     this.animateValue = true,
   });
 
@@ -142,7 +141,6 @@ class SetupProgressHeader extends StatelessWidget {
   final int completedCount;
   final int totalCount;
   final String? nextActionLabel;
-  final bool compact;
   final bool animateValue;
 
   @override
@@ -197,9 +195,7 @@ class SetupProgressHeader extends StatelessWidget {
             ],
           ),
           const SizedBox(height: TokensStrip.s2),
-          if (!compact &&
-              nextActionLabel != null &&
-              nextActionLabel!.isNotEmpty)
+          if (nextActionLabel != null && nextActionLabel!.isNotEmpty)
             Text(
               'Próximo: $nextActionLabel',
               style: FocuxHubTypography.bodyMuted(
@@ -207,12 +203,6 @@ class SetupProgressHeader extends StatelessWidget {
                 fontWeight: FontWeight.w600,
               ),
             ),
-          if (compact) ...[
-            Text(
-              '$completedCount de $totalCount passos · complete para liberar todo o fluxo.',
-              style: FocuxHubTypography.bodyMuted(color: chrome.mute),
-            ),
-          ],
           const SizedBox(height: TokensStrip.s3),
           progressBar,
         ],
@@ -220,8 +210,6 @@ class SetupProgressHeader extends StatelessWidget {
     );
   }
 }
-
-enum SetupStepCardVariant { full, compact }
 
 class SetupStepCard extends StatelessWidget {
   const SetupStepCard({
@@ -232,7 +220,6 @@ class SetupStepCard extends StatelessWidget {
     this.description,
     this.estimatedMinutes,
     this.onTap,
-    this.variant = SetupStepCardVariant.full,
     this.isLead = false,
     this.showDivider = true,
   });
@@ -243,21 +230,11 @@ class SetupStepCard extends StatelessWidget {
   final String? description;
   final int? estimatedMinutes;
   final VoidCallback? onTap;
-  final SetupStepCardVariant variant;
   final bool isLead;
   final bool showDivider;
 
   @override
   Widget build(BuildContext context) {
-    if (variant == SetupStepCardVariant.compact) {
-      return _SetupStepCompactRow(
-        title: title,
-        icon: icon,
-        completed: completed,
-        onTap: completed ? null : onTap,
-      );
-    }
-
     final chrome = ShellChrome.of(context);
     final brand = BrandPalette.softened(Theme.of(context).colorScheme.primary);
     final highlight = isLead && !completed;
@@ -372,79 +349,6 @@ class SetupStepCard extends StatelessWidget {
   }
 }
 
-class _SetupStepCompactRow extends StatelessWidget {
-  const _SetupStepCompactRow({
-    required this.title,
-    required this.icon,
-    required this.completed,
-    this.onTap,
-  });
-
-  final String title;
-  final String icon;
-  final bool completed;
-  final VoidCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final chrome = ShellChrome.of(context);
-    final brand = BrandPalette.softened(Theme.of(context).colorScheme.primary);
-
-    return Semantics(
-      button: !completed,
-      enabled: !completed,
-      label: completed ? '$title, concluído' : title,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap:
-              completed
-                  ? null
-                  : () {
-                    HapticFeedback.selectionClick();
-                    onTap?.call();
-                  },
-          borderRadius: BorderRadius.circular(TokensStrip.rInput),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              minHeight: FxSettingsLayout.rowMinHeight,
-            ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: TokensStrip.s1),
-              child: Row(
-                children: [
-                  _SetupStepLeadingIcon(
-                    icon: icon,
-                    completed: completed,
-                    color: completed ? brand.withValues(alpha: 0.7) : brand,
-                  ),
-                  const SizedBox(width: FxSettingsLayout.iconGap),
-                  Expanded(
-                    child: Text(
-                      title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: FocuxHubTypography.cardTitle(
-                        color: completed ? chrome.mute : chrome.ink,
-                      ),
-                    ),
-                  ),
-                  if (!completed)
-                    Icon(
-                      Icons.chevron_right,
-                      size: FxSettingsLayout.chevronSize,
-                      color: chrome.mute,
-                    ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _SetupStepLeadingIcon extends StatelessWidget {
   const _SetupStepLeadingIcon({
     required this.icon,
@@ -511,20 +415,24 @@ class SetupWizardSkeleton extends StatelessWidget {
             const SizedBox(height: 10),
             Container(
               width: double.infinity,
-              height: 8,
+              height: compact ? 4 : 8,
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(4),
               ),
             ),
-            const SizedBox(height: 18),
-            Container(
-              height: compact ? 132 : 220,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(FxSettingsLayout.groupRadius),
+            if (!compact) ...[
+              const SizedBox(height: 18),
+              Container(
+                height: 220,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(
+                    FxSettingsLayout.groupRadius,
+                  ),
+                ),
               ),
-            ),
+            ],
           ],
         ),
       ),

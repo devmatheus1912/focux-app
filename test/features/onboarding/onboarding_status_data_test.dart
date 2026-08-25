@@ -80,7 +80,7 @@ void main() {
       expect(nextSetupStep(data)?.id, 'pacote');
     });
 
-    test('dashboardSetupPreview limita passos pendentes visíveis', () {
+    test('pendingSetupSteps lista só os pendentes', () {
       final data = OnboardingStatusData(
         perfilCompleto: true,
         primeiroAlunoAdicionado: true,
@@ -93,26 +93,10 @@ void main() {
         progressoPercentual: 71,
       );
 
-      expect(pendingSetupSteps(data).length, 2);
-      expect(dashboardSetupPreview(data).length, 2);
-      expect(hiddenPendingSetupCount(data), 0);
-    });
-
-    test('dashboardSetupPreview oculta passos além do limite', () {
-      final data = OnboardingStatusData(
-        perfilCompleto: false,
-        primeiroAlunoAdicionado: false,
-        primeiroTreinoCriado: false,
-        pagamentoConfigurado: false,
-        primeiroPagamentoRecebido: false,
-        pacoteCriado: false,
-        habitoConfigurado: false,
-        linkBioConfigurado: false,
-        progressoPercentual: 0,
-      );
-
-      expect(dashboardSetupPreview(data).length, dashboardSetupPreviewLimit);
-      expect(hiddenPendingSetupCount(data), 4);
+      expect(pendingSetupSteps(data).map((s) => s.id), [
+        'pacote',
+        'habito',
+      ]);
     });
   });
 }

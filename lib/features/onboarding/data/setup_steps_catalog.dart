@@ -100,18 +100,6 @@ SetupStepCatalogEntry? nextSetupStep(OnboardingStatusData data) {
   return null;
 }
 
-const dashboardSetupPreviewLimit = 3;
-
 List<SetupStepCatalogEntry> pendingSetupSteps(OnboardingStatusData data) {
   return setupStepCatalog.where((step) => !step.isDone(data)).toList();
-}
-
-List<SetupStepCatalogEntry> dashboardSetupPreview(OnboardingStatusData data) {
-  return pendingSetupSteps(data).take(dashboardSetupPreviewLimit).toList();
-}
-
-int hiddenPendingSetupCount(OnboardingStatusData data) {
-  final pending = pendingSetupSteps(data).length;
-  final hidden = pending - dashboardSetupPreviewLimit;
-  return hidden > 0 ? hidden : 0;
 }
