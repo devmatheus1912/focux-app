@@ -20,11 +20,13 @@ class _Avatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const size = FxSettingsLayout.avatarSize;
-    final inner = size - 4;
+    final inner = size - TokensStrip.s1;
+    final chrome = ShellChrome.of(context);
+    final ring = chrome.cardFill;
     Widget avatarContent() {
       return Text(
         _initials(nome),
-        style: FxSettingsLayout.profileName(color: primaryColor),
+        style: FxSettingsLayout.avatarInitials(context, color: primaryColor),
       );
     }
 
@@ -43,20 +45,20 @@ class _Avatar extends StatelessWidget {
               child: Container(
                 width: size,
                 height: size,
-                padding: const EdgeInsets.all(2.5),
+                padding: const EdgeInsets.all(TokensStrip.s1 / 2),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Colors.white.withValues(alpha: 0.92),
+                  color: ring,
                   boxShadow: const [
                     BoxShadow(
                       color: EagleTokens.shadowSoft,
-                      blurRadius: 16,
-                      offset: Offset(0, 8),
+                      blurRadius: TokensStrip.blurLight,
+                      offset: Offset(0, TokensStrip.s2),
                     ),
                   ],
                 ),
                 child: CircleAvatar(
-                  backgroundColor: Colors.white,
+                  backgroundColor: ring,
                   child:
                       logoUrl != null && logoUrl!.isNotEmpty
                           ? ClipOval(
@@ -78,14 +80,14 @@ class _Avatar extends StatelessWidget {
             bottom: 1,
             child: InkWell(
               onTap: loading ? null : onTap,
-              borderRadius: BorderRadius.circular(26),
+              borderRadius: BorderRadius.circular(FxSettingsLayout.editBadge),
               child: Container(
                 width: FxSettingsLayout.editBadge,
                 height: FxSettingsLayout.editBadge,
                 decoration: BoxDecoration(
                   color: primaryColor,
                   shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white, width: 2.5),
+                  border: Border.all(color: ring, width: TokensStrip.s1 / 2),
                 ),
                 child:
                     loading

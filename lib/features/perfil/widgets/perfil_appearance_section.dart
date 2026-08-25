@@ -82,26 +82,33 @@ class PerfilAppearanceSection extends ConsumerWidget {
                 isDark: dark,
               ),
               for (final option in _options)
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: Text(
-                    option.$2,
-                    style: FxSettingsLayout.rowLabel(color: ink),
-                  ),
-                  trailing:
-                      current == option.$1
-                          ? Icon(
-                            Icons.check,
-                            color: Theme.of(ctx).colorScheme.primary,
-                            size: FxSettingsLayout.iconSize,
-                          )
-                          : null,
+                InkWell(
                   onTap: () {
                     HapticFeedback.selectionClick();
                     ref.read(themeModeProvider.notifier).setMode(option.$1);
                     Navigator.of(ctx).pop();
                   },
-                  minTileHeight: FxSettingsLayout.rowMinHeight,
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(
+                      minHeight: FxSettingsLayout.rowMinHeight,
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            option.$2,
+                            style: FxSettingsLayout.rowLabel(color: ink),
+                          ),
+                        ),
+                        if (current == option.$1)
+                          Icon(
+                            Icons.check,
+                            color: Theme.of(ctx).colorScheme.primary,
+                            size: FxSettingsLayout.iconSize,
+                          ),
+                      ],
+                    ),
+                  ),
                 ),
             ],
           ),

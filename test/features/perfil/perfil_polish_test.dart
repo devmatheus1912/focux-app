@@ -21,7 +21,8 @@ void main() {
     expect(screen, isNot(contains('_PlanPill')));
     expect(screen, isNot(contains('_BrandPreview')));
     expect(screen, contains('PerfilProfessionalSummary'));
-    expect(screen, contains('FxSettingsLayout'));
+    expect(screen, contains('FxSettingsLayout.profileName'));
+    expect(screen, contains('numeric: true'));
     expect(screen, contains('FxSettingsGroup'));
     expect(screen, contains('FxSettingsTile'));
     expect(screen, contains('PerfilAppearanceSection'));

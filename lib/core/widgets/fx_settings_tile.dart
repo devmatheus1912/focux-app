@@ -3,52 +3,58 @@ import 'package:flutter/services.dart';
 
 import '../theme/design_tokens.dart';
 import '../theme/fx_settings_layout.dart';
+import '../theme/shell_chrome.dart';
 import '../theme/tokens_strip.dart';
 
-/// Linha de ajustes inset — ícone 22, body 17, chevron muted.
+/// Linha de ajustes inset — anatomia ChatGPT/iOS, pele da Home.
 class FxSettingsTile extends StatelessWidget {
   const FxSettingsTile({
     super.key,
     required this.icon,
     required this.label,
     required this.value,
-    required this.mute,
-    required this.line,
     required this.onTap,
+    this.mute,
+    this.line,
     this.accent,
     this.danger = false,
     this.showDivider = true,
     this.locked = false,
     this.highlight = false,
     this.picker = false,
+    this.numeric = false,
+    this.onLongPress,
     this.upgradeTierLabel,
   });
 
   final IconData icon;
   final String label;
   final String value;
-  final Color mute;
-  final Color line;
   final VoidCallback onTap;
+  final VoidCallback? onLongPress;
+  final Color? mute;
+  final Color? line;
   final Color? accent;
   final bool danger;
   final bool showDivider;
   final bool locked;
   final bool highlight;
   final bool picker;
+  final bool numeric;
   final String? upgradeTierLabel;
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final chrome = ShellChrome.of(context);
+    final mute = this.mute ?? chrome.mute;
+    final line = this.line ?? chrome.line;
     final ink =
         danger
             ? EagleTokens.bad
             : highlight && accent != null
             ? accent!
-            : (isDark ? EagleTokens.darkInk : TokensStrip.textPrimary);
+            : chrome.ink;
     final inkMuted = locked ? ink.withValues(alpha: 0.55) : ink;
-    final iconColor = inkMuted;
     final a11y =
         danger
             ? '$label. Ação destrutiva'
@@ -65,6 +71,13 @@ class FxSettingsTile extends StatelessWidget {
           HapticFeedback.selectionClick();
           onTap();
         },
+        onLongPress:
+            onLongPress == null
+                ? null
+                : () {
+                  HapticFeedback.selectionClick();
+                  onLongPress!();
+                },
         child: ConstrainedBox(
           constraints: const BoxConstraints(
             minHeight: FxSettingsLayout.rowMinHeight,
@@ -74,7 +87,7 @@ class FxSettingsTile extends StatelessWidget {
               Icon(
                 icon,
                 size: FxSettingsLayout.iconSize,
-                color: iconColor,
+                color: inkMuted,
               ),
               const SizedBox(width: FxSettingsLayout.iconGap),
               Expanded(
@@ -112,9 +125,14 @@ class FxSettingsTile extends StatelessWidget {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               textAlign: TextAlign.end,
-                              style: FxSettingsLayout.rowValue(
-                                color: danger ? ink : mute,
-                              ),
+                              style:
+                                  numeric
+                                      ? FxSettingsLayout.rowMetric(
+                                        color: danger ? ink : mute,
+                                      )
+                                      : FxSettingsLayout.rowValue(
+                                        color: danger ? ink : mute,
+                                      ),
                             ),
                           ),
                         ],

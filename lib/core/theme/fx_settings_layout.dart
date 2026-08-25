@@ -1,152 +1,71 @@
 import 'package:flutter/material.dart';
 
-import 'app_typography.dart';
+import 'focux_hub_typography.dart';
+import 'tokens_strip.dart';
 
-/// Layout de **ajustes inset** (ChatGPT iOS / `UITableView.insetGrouped`).
+/// Arquitetura de **ajustes inset** (ChatGPT iOS / `UITableView.insetGrouped`).
 ///
-/// Fonte: Inter (Focux). Cor: marca teal + `ShellChrome` da Home.
-/// **Não** copia o tema preto/azul do ChatGPT.
-/// Tamanhos: Dynamic Type iOS no degrau Large (padrão do app ChatGPT).
+/// Identidade, tipografia e cor: Home (`FocuxHubTypography`, `ShellChrome`,
+/// `BrandPalette`). **Não** copia o tema preto/azul do ChatGPT nem a escala
+/// Dynamic Type como família própria.
 ///
-/// ## Tipografia (pt, degrau Large)
-/// | Papel iOS | pt | Peso | Uso Focux |
-/// | largeTitle | 34 | regular | não usar em ajustes |
-/// | title1 | 28 | regular | não usar em ajustes |
-/// | title2 | 22 | regular/semibold | nome no hero |
-/// | title3 | 20 | regular | raro |
-/// | headline | 17 | semibold | título de navegação |
-/// | body | 17 | regular | label da linha |
-/// | callout | 16 | regular | valor secundário opcional |
-/// | subheadline | 15 | regular | subtítulo do hero |
-/// | footnote | 13 | regular | header de grupo, footer, freshness |
-/// | caption1 | 12 | regular | chips |
-/// | caption2 | 11 | regular | micro |
+/// ## O que é ChatGPT/iOS (estrutura)
+/// Página inset, grupo arredondado, linha com ícone outline + chevron,
+/// divisor depois do ícone, Sair em grupo separado, picker com check.
 ///
-/// ## Espaço e forma
-/// - Margem da página: 16
-/// - Raio do grupo: 20 (ChatGPT custom; iOS nativo ~10)
-/// - Padding interno H: 16
-/// - Altura mínima da linha: 52 (iOS 44 + respiro ChatGPT)
-/// - Ícone outline: 22, cor = tinta do texto (não poço colorido)
-/// - Gap ícone → texto: 12
-/// - Chevron: 17, muted
-/// - Divider: 0.5pt, começa depois do ícone
-/// - Gap entre grupos: 24
-/// - Header → card: 8
-/// - Avatar: 80; badge editar: 28
-///
-/// ## Cor (Focux, não ChatGPT)
-/// - Superfície: `fxListCardDecoration` / mesh da Home
-/// - Texto: ink / mute do `ShellChrome`
-/// - Acento (upgrade, sticky, selected): teal da marca
-/// - Destrutivo: `EagleTokens.bad`
-/// - Ícones de linha: ink (ChatGPT é branco no dark; aqui ink no claro)
-///
-/// ## O que não copiar
-/// Tema #000 / card #212121, CTA azul #007AFF, botão X de modal,
-/// wells coloridos, cards de KPI, accordion.
+/// ## O que é Home (pele)
+/// Inter/roles do hub, ink/mute/line do chrome, teal da marca, números em
+/// métrica (JetBrains Mono) quando o valor é score/%.
 abstract final class FxSettingsLayout {
   FxSettingsLayout._();
 
-  static const double fontNavTitle = 17;
-  static const double fontProfileName = 22;
-  static const double fontTitle3 = 20;
-  static const double fontRow = 17;
-  static const double fontCallout = 16;
-  static const double fontSubhead = 15;
-  static const double fontSection = 13;
-  static const double fontFooter = 13;
-  static const double fontCaption = 12;
-  static const double fontMicro = 11;
-
-  static const FontWeight weightNav = FontWeight.w600;
-  static const FontWeight weightName = FontWeight.w700;
-  static const FontWeight weightRow = FontWeight.w400;
-  static const FontWeight weightSection = FontWeight.w400;
-
-  static const double leadingTight = 1.15;
-  static const double leadingBody = 1.25;
-  static const double trackingBody = -0.24;
-  static const double trackingSection = -0.08;
-
-  static const double pageInset = 16;
+  static const double pageInset = TokensStrip.s4;
   static const double groupRadius = 20;
-  static const double groupPadH = 16;
+  static const double groupPadH = TokensStrip.s4;
   static const double groupPadV = 2;
-  static const double headerToGroup = 8;
-  static const double groupGap = 24;
-  static const double captionAfterHeader = 4;
-  static const double footerAfterGroup = 8;
+  static const double headerToGroup = TokensStrip.s2;
+  static const double groupGap = TokensStrip.s5;
+  static const double captionAfterHeader = TokensStrip.s1;
+  static const double footerAfterGroup = TokensStrip.s2;
 
   static const double rowMinHeight = 52;
   static const double iconSize = 22;
-  static const double iconGap = 12;
+  static const double iconGap = TokensStrip.s3;
   static const double chevronSize = 17;
   static const double dividerThickness = 0.5;
-  static const double closeButton = 32;
-  static const double avatarSize = 80;
+  static const double avatarSize = TokensStrip.s9;
   static const double editBadge = 28;
-  static const double segmentedMinHeight = 36;
 
-  static TextStyle navTitle({required Color color}) => AppTypography.inter(
-    fontSize: fontNavTitle,
-    fontWeight: weightNav,
-    color: color,
-    height: leadingTight,
-    letterSpacing: trackingBody,
-  );
+  static TextStyle profileName(BuildContext context, {required Color color}) =>
+      FocuxHubTypography.pageTitle(context, color: color);
 
-  static TextStyle profileName({required Color color}) => AppTypography.inter(
-    fontSize: fontProfileName,
-    fontWeight: weightName,
-    color: color,
-    height: 1.1,
-    letterSpacing: -0.26,
-  );
+  static TextStyle avatarInitials(BuildContext context, {required Color color}) =>
+      FocuxHubTypography.cardTitle(color: color);
 
-  static TextStyle rowLabel({required Color color}) => AppTypography.inter(
-    fontSize: fontRow,
-    fontWeight: weightRow,
-    color: color,
-    height: leadingBody,
-    letterSpacing: trackingBody,
-  );
+  static TextStyle rowLabel({required Color color}) =>
+      FocuxHubTypography.body(color: color).copyWith(
+        fontWeight: FontWeight.w700,
+        letterSpacing: -0.15,
+      );
 
-  static TextStyle rowValue({required Color color}) => AppTypography.inter(
-    fontSize: fontRow,
-    fontWeight: weightRow,
-    color: color,
-    height: leadingBody,
-    letterSpacing: trackingBody,
-  );
+  static TextStyle rowValue({required Color color}) =>
+      FocuxHubTypography.bodyMuted(color: color);
 
-  static TextStyle sectionHeader({required Color color}) => AppTypography.inter(
-    fontSize: fontSection,
-    fontWeight: weightSection,
-    color: color,
-    height: leadingTight,
-    letterSpacing: trackingSection,
-  );
+  static TextStyle rowMetric({required Color color}) =>
+      FocuxHubTypography.metric(
+        color: color,
+        fontSize: TokensStrip.fontBody,
+      );
 
-  static TextStyle footer({required Color color}) => AppTypography.inter(
-    fontSize: fontFooter,
-    fontWeight: weightRow,
-    color: color,
-    height: 1.3,
-    letterSpacing: trackingSection,
-  );
+  static TextStyle sectionHeader({required Color color}) =>
+      FocuxHubTypography.bodyMuted(
+        color: color,
+        fontWeight: FontWeight.w600,
+      );
 
-  static TextStyle subhead({required Color color}) => AppTypography.inter(
-    fontSize: fontSubhead,
-    fontWeight: weightRow,
-    color: color,
-    height: 1.3,
-  );
+  static TextStyle footer({required Color color}) =>
+      FocuxHubTypography.bodyMuted(color: color);
 
-  static TextStyle caption({required Color color}) => AppTypography.inter(
-    fontSize: fontCaption,
-    fontWeight: FontWeight.w600,
-    color: color,
-    height: 1.1,
-  );
+  static TextStyle subhead({required Color color}) =>
+      FocuxHubTypography.body(color: color);
 }

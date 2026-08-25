@@ -143,7 +143,10 @@ class _PerfilBodyState extends State<_PerfilBody> {
                               textAlign: TextAlign.center,
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
-                              style: FxSettingsLayout.profileName(color: ink),
+                              style: FxSettingsLayout.profileName(
+                                context,
+                                color: ink,
+                              ),
                             ),
                             const SizedBox(height: TokensStrip.s1),
                             Text(

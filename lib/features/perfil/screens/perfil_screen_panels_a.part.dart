@@ -31,7 +31,20 @@ class _PerfilVitrineTiles extends StatelessWidget {
           value: '$score%',
           mute: mute,
           line: line,
+          numeric: true,
           onTap: () => context.push('/identidade-visual'),
+          onLongPress: () {
+            unawaited(
+              AnalyticsService.instance.track(
+                ProductEvents.perfilMarcaHintOpened,
+                props: {'score': score},
+              ),
+            );
+            FeedbackHelper.showInfo(
+              context,
+              'Marca $score% — foto, CREF, especialidade, bio, Instagram, paleta e PIX.',
+            );
+          },
         ),
         if (!hasSlug)
           FxSettingsTile(
