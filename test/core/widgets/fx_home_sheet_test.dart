@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/core/widgets/fx_home_sheet.dart';
@@ -86,5 +88,13 @@ void main() {
     await tester.tap(find.byTooltip('Fechar'));
     await tester.pumpAndSettle();
     expect(find.byType(FxHomeSheetScaffold), findsNothing);
+  });
+
+  test('sheet header is ícone 22 + título ink, sem poço colorido', () {
+    final src = File('lib/core/widgets/fx_home_sheet.dart').readAsStringSync();
+    expect(src, contains('FocuxHubTypography.sectionTitle'));
+    expect(src, contains('FxSettingsLayout.iconSize'));
+    expect(src, isNot(contains('BrandPalette.soft')));
+    expect(src, isNot(contains('TokensStrip.h2')));
   });
 }

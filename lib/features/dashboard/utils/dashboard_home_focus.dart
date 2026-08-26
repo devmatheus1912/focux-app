@@ -6,7 +6,6 @@ class DashboardHomeFocusRules {
     required this.focusMode,
     required this.dayFocusCoversRetention,
     required this.collapseAttention,
-    required this.collapseRadar,
     required this.collapseAderencia,
     required this.collapseFinance,
     required this.hideSecondaryRiskCtas,
@@ -22,20 +21,23 @@ class DashboardHomeFocusRules {
   final bool focusMode;
   final bool dayFocusCoversRetention;
   final bool collapseAttention;
-  /// Radar começa recolhido em foco/retenção — peso abaixo do fold.
-  final bool collapseRadar;
   final bool collapseAderencia;
   final bool collapseFinance;
   final bool hideSecondaryRiskCtas;
   final bool hidePromoBanners;
+
   /// Esconde CTAs de empty (aderência/pulso) que competem com o P1.
   final bool suppressSecondaryEmptyCtas;
+
   /// Sticky da Central mais compacto (menos título duplicado).
   final bool compactCommandSticky;
+
   /// No modo foco, some o grid “featured” de Mais ferramentas (só header).
   final bool hideFeaturedTools;
+
   /// No foco/dense: não monta Aderência / Financeiro / Mais ferramentas.
   final bool omitSecondarySections;
+
   /// No foco: Pulso só header (sparkline/tendência recolhidos).
   final bool collapsePulseBody;
   final int maxVisibleNextActions;
@@ -101,7 +103,6 @@ class DashboardHomeFocusRules {
       focusMode: focusMode,
       dayFocusCoversRetention: covers,
       collapseAttention: focusMode || covers || riscoAlto > 3,
-      collapseRadar: focusMode || covers,
       // Retenção: ranking vazio compete com o Foco — começa recolhido.
       collapseAderencia: focusMode || covers,
       collapseFinance: focusMode || covers || receitaAtual <= 0,

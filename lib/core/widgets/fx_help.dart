@@ -7,7 +7,6 @@ import '../theme/shell_chrome.dart';
 import '../theme/tokens_strip.dart';
 import 'fx_home_sheet.dart';
 import 'fx_icon.dart';
-import 'fx_settings_group.dart';
 
 /// Chrome canônico do ícone de ajuda — paridade Home (`DashboardHomeHeader` 36pt).
 abstract final class FxHelpChrome {
@@ -144,34 +143,19 @@ class FxHelpSheetFrame extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   if (tips.isNotEmpty)
-                    FxSettingsGroup(
-                      footer:
-                          hasFootnote
-                              ? Text(
-                                footnote,
-                                style: FxSettingsLayout.footer(
-                                  color: chrome.mute,
-                                ),
-                              )
-                              : null,
-                      children: [
-                        for (var i = 0; i < tips.length; i++)
-                          FxHelpTipRow(
-                            tip: tips[i],
-                            showDivider: i < tips.length - 1,
-                          ),
-                      ],
-                    ),
-                  if (tips.isEmpty && hasFootnote)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: FxSettingsLayout.groupPadH,
+                    for (var i = 0; i < tips.length; i++)
+                      FxHelpTipRow(
+                        tip: tips[i],
+                        showDivider: i < tips.length - 1,
                       ),
-                      child: Text(
-                        footnote,
-                        style: FxSettingsLayout.footer(color: chrome.mute),
-                      ),
+                  if (hasFootnote) ...[
+                    if (tips.isNotEmpty)
+                      SizedBox(height: FxSettingsLayout.footerAfterGroup),
+                    Text(
+                      footnote,
+                      style: FxSettingsLayout.footer(color: chrome.mute),
                     ),
+                  ],
                   if ((tips.isNotEmpty || hasFootnote) && extra.isNotEmpty)
                     SizedBox(height: TokensStrip.s3),
                   ...extra,

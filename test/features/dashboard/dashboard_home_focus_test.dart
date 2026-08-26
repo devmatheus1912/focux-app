@@ -50,7 +50,6 @@ void main() {
       expect(rules.omitSecondarySections, isTrue);
       expect(rules.collapsePulseBody, isTrue);
       expect(rules.collapseAderencia, isTrue);
-      expect(rules.collapseRadar, isTrue);
       expect(rules.maxVisibleNextActions, 2);
     });
 
@@ -74,7 +73,6 @@ void main() {
       expect(rules.hideFeaturedTools, isFalse);
       expect(rules.collapsePulseBody, isFalse);
       expect(rules.collapseAderencia, isTrue);
-      expect(rules.collapseRadar, isTrue);
       expect(rules.maxVisibleNextActions, 2);
     });
 

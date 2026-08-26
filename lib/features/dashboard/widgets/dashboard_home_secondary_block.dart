@@ -73,12 +73,7 @@ class DashboardHomeSecondaryBlock extends StatelessWidget {
       children: [
         if (alunosScore.isNotEmpty) ...[
           SizedBox(height: DashboardLayout.sliverSectionGap),
-          DashboardBaseRadarStrip(
-            isDark: isDark,
-            scores: alunosScore,
-            initiallyExpanded: !focusRules.collapseRadar,
-            quietChrome: true,
-          ),
+          DashboardBaseRadarStrip(scores: alunosScore),
         ],
         SizedBox(height: DashboardLayout.sliverSectionGap),
         DashboardCollapsibleSection(

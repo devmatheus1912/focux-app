@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:focux_app/features/dashboard/data/command_center_data.dart';
@@ -29,6 +31,28 @@ void main() {
       expect(top, hasLength(3));
       expect(top.first.alunoId, 0);
       expect(top.last.alunoId, 2);
+    });
+
+    test('radar icon is triangle only on high risk', () {
+      expect(dashboardRadarIcon('Risco alto'), 'alert-triangle');
+      expect(dashboardRadarIcon('Risco médio'), 'trend');
+      expect(dashboardRadarIcon('Risco baixo'), 'target');
+    });
+
+    test('radar caption is PT-BR and countable', () {
+      expect(dashboardRadarCaption(1), contains('1 aluno'));
+      expect(dashboardRadarCaption(3), contains('3 alunos'));
+    });
+
+    test('radar strip is inset group, not accordion', () {
+      final src =
+          File(
+            'lib/features/dashboard/widgets/dashboard_base_radar_strip.dart',
+          ).readAsStringSync();
+      expect(src, contains('FxSettingsGroup'));
+      expect(src, contains('FxSettingsTile'));
+      expect(src, isNot(contains('DashboardCollapsibleSection')));
+      expect(src, isNot(contains('DashboardHorizontalScrollPeek')));
     });
   });
 

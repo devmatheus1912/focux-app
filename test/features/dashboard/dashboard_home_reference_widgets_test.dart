@@ -10,19 +10,14 @@ import 'package:focux_app/features/dashboard/widgets/dashboard_home_activation_s
 import 'package:focux_app/features/dashboard/widgets/dashboard_home_coach_banner.dart';
 
 void main() {
-  testWidgets('finance empty é tile inset, sem chip in-card', (
-    tester,
-  ) async {
+  testWidgets('finance empty é tile inset, sem chip in-card', (tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF00BFA5)),
         ),
         home: Scaffold(
-          body: DashboardFinanceEmptyState(
-            mes: 'agosto',
-            onOpen: () {},
-          ),
+          body: DashboardFinanceEmptyState(mes: 'agosto', onOpen: () {}),
         ),
       ),
     );
@@ -71,7 +66,6 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: DashboardBaseRadarStrip(
-            isDark: true,
             scores: [
               AlunoScoreResumo(
                 alunoId: 1,
@@ -95,6 +89,7 @@ void main() {
     expect(find.text(DashboardMicrocopy.radarDaBase), findsOneWidget);
     expect(find.textContaining('Carla'), findsOneWidget);
     expect(find.text('72'), findsOneWidget);
+    expect(find.textContaining('Risco médio'), findsOneWidget);
   });
 
   testWidgets('coach banner dismissível', (tester) async {
@@ -145,4 +140,3 @@ void main() {
 }
 
 void _noop() {}
-

@@ -15,6 +15,7 @@ class FxSettingsTile extends StatelessWidget {
     this.icon,
     this.fxIcon,
     required this.label,
+    this.subtitle,
     required this.value,
     required this.onTap,
     this.mute,
@@ -34,6 +35,7 @@ class FxSettingsTile extends StatelessWidget {
   final IconData? icon;
   final String? fxIcon;
   final String label;
+  final String? subtitle;
   final String value;
   final VoidCallback onTap;
   final VoidCallback? onLongPress;
@@ -55,8 +57,7 @@ class FxSettingsTile extends StatelessWidget {
     final mute = this.mute ?? chrome.mute;
     final line = this.line ?? chrome.line;
     final brand =
-        accent ??
-        BrandPalette.softened(Theme.of(context).colorScheme.primary);
+        accent ?? BrandPalette.softened(Theme.of(context).colorScheme.primary);
     final ink =
         danger
             ? EagleTokens.bad
@@ -70,7 +71,9 @@ class FxSettingsTile extends StatelessWidget {
             : locked
             ? brand.withValues(alpha: 0.55)
             : brand;
-    final spoken = semanticsLabel ?? label;
+    final detail = subtitle?.trim();
+    final hasSubtitle = detail != null && detail.isNotEmpty;
+    final spoken = semanticsLabel ?? (hasSubtitle ? '$label. $detail' : label);
     final a11y =
         danger
             ? '$spoken. Ação destrutiva'
@@ -132,11 +135,29 @@ class FxSettingsTile extends StatelessWidget {
                     child: Row(
                       children: [
                         Expanded(
-                          child: Text(
-                            label,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: FxSettingsLayout.rowLabel(color: inkMuted),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                label,
+                                maxLines: hasSubtitle ? 1 : 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: FxSettingsLayout.rowLabel(
+                                  color: inkMuted,
+                                ),
+                              ),
+                              if (hasSubtitle) ...[
+                                const SizedBox(
+                                  height: FxSettingsLayout.captionAfterHeader,
+                                ),
+                                Text(
+                                  detail,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: FxSettingsLayout.subhead(color: mute),
+                                ),
+                              ],
+                            ],
                           ),
                         ),
                         if (value.isNotEmpty) ...[

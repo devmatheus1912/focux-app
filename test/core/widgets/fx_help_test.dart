@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/core/theme/fx_settings_layout.dart';
 import 'package:focux_app/core/widgets/fx_help.dart';
-import 'package:focux_app/core/widgets/fx_settings_group.dart';
 import 'package:focux_app/features/dashboard/utils/dashboard_microcopy.dart';
 
 void main() {
@@ -19,7 +18,7 @@ void main() {
     expect(block, contains('Offset(12, 12), 9'));
     expect(block, contains('Offset(12, 16.5)'));
     expect(help, contains('HapticFeedback.selectionClick()'));
-    expect(help, contains('FxSettingsGroup'));
+    expect(help, isNot(contains('FxSettingsGroup')));
     expect(help, contains('FxHelpTipRow'));
     expect(FxHelpChrome.glyphSize, FxSettingsLayout.iconSize);
     expect(FxHelpChrome.iconName, 'help');
@@ -76,7 +75,6 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(FxHelpSheetFrame), findsOneWidget);
-    expect(find.byType(FxSettingsGroup), findsOneWidget);
     expect(find.byType(FxHelpTipRow), findsOneWidget);
     expect(find.text('Como montar este treino'), findsOneWidget);
     expect(find.text('Adicionar'), findsOneWidget);

@@ -2,8 +2,8 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-import '../theme/brand_palette.dart';
 import '../theme/focux_hub_typography.dart';
+import '../theme/fx_settings_layout.dart';
 import '../theme/hero_teal.dart';
 import '../theme/shell_chrome.dart';
 import '../theme/tokens_strip.dart';
@@ -213,25 +213,21 @@ class FxHomeSheetHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dark = isDark ?? Theme.of(context).brightness == Brightness.dark;
-    final primary = Theme.of(context).colorScheme.primary;
-    final caption = ShellChrome.forDark(dark).mute;
+    final chrome = ShellChrome.forDark(dark);
+    final caption = chrome.mute;
     final subtitleText = subtitle?.trim();
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         ExcludeSemantics(
-          child: Container(
-            width: FxHomeSheetChrome.leadingSize,
-            height: FxHomeSheetChrome.leadingSize,
-            decoration: BoxDecoration(
-              color: BrandPalette.soft(primary, dark: dark),
-              borderRadius: BorderRadius.circular(15),
-            ),
+          child: SizedBox(
+            width: FxSettingsLayout.iconSize,
+            height: FxSettingsLayout.iconSize,
             child: Center(child: leading),
           ),
         ),
-        SizedBox(width: TokensStrip.s3),
+        SizedBox(width: FxSettingsLayout.iconGap),
         Expanded(
           child: Semantics(
             header: true,
@@ -246,10 +242,9 @@ class FxHomeSheetHeader extends StatelessWidget {
                   title,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: TokensStrip.h2(
-                    color: primary,
-                    fontFamily:
-                        Theme.of(context).textTheme.bodyLarge?.fontFamily,
+                  style: FocuxHubTypography.sectionTitle(
+                    context,
+                    color: chrome.ink,
                   ),
                 ),
                 if (subtitleText != null && subtitleText.isNotEmpty) ...[
@@ -281,7 +276,7 @@ class FxHomeSheetHeader extends StatelessWidget {
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 foregroundColor: caption,
               ),
-              icon: const Icon(Icons.close_rounded, size: 22),
+              icon: Icon(Icons.close_rounded, size: FxSettingsLayout.iconSize),
             ),
       ],
     );

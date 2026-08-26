@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/router/safe_navigation.dart';
-import '../../../core/theme/tokens_strip.dart';
 import '../../financeiro/data/financeiro_repository.dart';
 import '../../onboarding/data/onboarding_status_data.dart';
 import '../../onboarding/screens/setup_onboarding_widget.dart';
@@ -193,19 +192,7 @@ List<Widget> buildDashboardHomePrimarySlivers({
     ],
     if (focusRules.omitSecondarySections && alunosScore.isNotEmpty)
       SliverToBoxAdapter(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(
-            TokensStrip.s4,
-            TokensStrip.s3,
-            TokensStrip.s4,
-            0,
-          ),
-          child: DashboardBaseRadarStrip(
-            isDark: isDark,
-            scores: alunosScore,
-            initiallyExpanded: true,
-          ),
-        ),
+        child: DashboardBaseRadarStrip(scores: alunosScore),
       ),
     SliverToBoxAdapter(
       child: Padding(
