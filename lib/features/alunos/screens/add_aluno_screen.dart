@@ -441,6 +441,15 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                           FxSettingsGroup(
                             header: 'Identidade',
                             caption: 'Acesso e contato.',
+                            footer: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: FxSettingsLayout.groupPadH,
+                              ),
+                              child: Text(
+                                'WhatsApp opcional — se preencher, o convite abre pronto.',
+                                style: FxSettingsLayout.footer(color: chrome.mute),
+                              ),
+                            ),
                             children: [
                               Semantics(
                                 label: 'Nome completo',
@@ -486,8 +495,6 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                                 child: _FxFormField(
                                   controller: _whatsappCtrl,
                                   label: 'WhatsApp',
-                                  helper:
-                                      'Opcional. Se preencher, abrimos o WhatsApp com a mensagem pronta.',
                                   hint: '(11) 99999-9999',
                                   icon: Icons.phone_iphone_rounded,
                                   keyboardType: TextInputType.phone,
@@ -500,33 +507,34 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                           const SizedBox(height: FxSettingsLayout.groupGap),
                           FxSettingsGroup(
                             header: 'Perfil inicial',
-                            caption: 'Filtros e atendimento.',
+                            caption: 'Opcional — melhora filtros e atendimento.',
                             children: [
-                              _LabelRow(label: 'Objetivo', isDark: isDark),
-                              const SizedBox(height: TokensStrip.s2),
-                              Wrap(
-                                spacing: TokensStrip.s2,
-                                runSpacing: TokensStrip.s2,
-                                children: [
-                                  ..._objetivosRapidos.map((objetivo) {
-                                    final selected =
-                                        !_objetivoLivre &&
-                                        _objetivoCtrl.text.trim() == objetivo;
-                                    return _OptionChip(
-                                      label: objetivo,
-                                      selected: selected,
+                              _ChoiceSection(
+                                label: 'Objetivo',
+                                isDark: isDark,
+                                child: _ChipWrap(
+                                  children: [
+                                    ..._objetivosRapidos.map((objetivo) {
+                                      final selected =
+                                          !_objetivoLivre &&
+                                          _objetivoCtrl.text.trim() == objetivo;
+                                      return _OptionChip(
+                                        label: objetivo,
+                                        selected: selected,
+                                        isDark: isDark,
+                                        onTap:
+                                            () =>
+                                                _selectObjetivoPreset(objetivo),
+                                      );
+                                    }),
+                                    _OptionChip(
+                                      label: 'Outro',
+                                      selected: _objetivoLivre,
                                       isDark: isDark,
-                                      onTap:
-                                          () => _selectObjetivoPreset(objetivo),
-                                    );
-                                  }),
-                                  _OptionChip(
-                                    label: 'Outro',
-                                    selected: _objetivoLivre,
-                                    isDark: isDark,
-                                    onTap: _toggleObjetivoLivre,
-                                  ),
-                                ],
+                                      onTap: _toggleObjetivoLivre,
+                                    ),
+                                  ],
+                                ),
                               ),
                               if (_objetivoLivre) ...[
                                 const SizedBox(height: TokensStrip.s2),
@@ -538,49 +546,49 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                                   textCapitalization: TextCapitalization.words,
                                 ),
                               ],
-                              const SizedBox(height: TokensStrip.s3),
-                              _LabelRow(label: 'Gênero', isDark: isDark),
-                              const SizedBox(height: TokensStrip.s2),
-                              Wrap(
-                                spacing: TokensStrip.s2,
-                                runSpacing: TokensStrip.s2,
-                                children:
-                                    _generos.map((g) {
-                                      return _OptionChip(
-                                        label: g,
-                                        selected: _genero == g,
-                                        isDark: isDark,
-                                        onTap:
-                                            () => setState(
-                                              () =>
-                                                  _genero =
-                                                      _genero == g ? null : g,
-                                            ),
-                                      );
-                                    }).toList(),
+                              _ChoiceSection(
+                                label: 'Gênero',
+                                isDark: isDark,
+                                showDividerAbove: true,
+                                child: _SegmentedChoice(
+                                  isDark: isDark,
+                                  options: [
+                                    for (final g in _generos)
+                                      (value: g, label: g),
+                                  ],
+                                  selected: _genero,
+                                  onSelect: (value) {
+                                    HapticFeedback.selectionClick();
+                                    setState(
+                                      () =>
+                                          _genero =
+                                              _genero == value ? null : value,
+                                    );
+                                  },
+                                ),
                               ),
-                              const SizedBox(height: TokensStrip.s3),
-                              _LabelRow(label: 'Consultoria', isDark: isDark),
-                              const SizedBox(height: TokensStrip.s2),
-                              Wrap(
-                                spacing: TokensStrip.s2,
-                                runSpacing: TokensStrip.s2,
-                                children: List.generate(
-                                  _tiposConsultoria.length,
-                                  (i) {
-                                    final value = _tiposConsultoria[i];
-                                    return _OptionChip(
+                              _ChoiceSection(
+                                label: 'Consultoria',
+                                isDark: isDark,
+                                showDividerAbove: true,
+                                child: _SegmentedChoice(
+                                  isDark: isDark,
+                                  options: List.generate(
+                                    _tiposConsultoria.length,
+                                    (i) => (
+                                      value: _tiposConsultoria[i],
                                       label: _tiposConsultoriaLabel[i],
-                                      selected: _tipoConsultoria == value,
-                                      isDark: isDark,
-                                      onTap:
-                                          () => setState(
-                                            () =>
-                                                _tipoConsultoria =
-                                                    _tipoConsultoria == value
-                                                        ? null
-                                                        : value,
-                                          ),
+                                    ),
+                                  ),
+                                  selected: _tipoConsultoria,
+                                  onSelect: (value) {
+                                    HapticFeedback.selectionClick();
+                                    setState(
+                                      () =>
+                                          _tipoConsultoria =
+                                              _tipoConsultoria == value
+                                                  ? null
+                                                  : value,
                                     );
                                   },
                                 ),

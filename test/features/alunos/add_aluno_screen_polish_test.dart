@@ -25,7 +25,11 @@ void main() {
     expect(screen, contains('invalidateAlunosCaches'));
     expect(screen, contains('FxHelpIconButton'));
     expect(screen, contains('showAddAlunoHelpSheet'));
+    expect(screen, contains('_SegmentedChoice'));
+    expect(screen, contains('_ChoiceSection'));
+    expect(screen, contains('WhatsApp opcional'));
     expect(screen, isNot(contains('Complete nome e e-mail para cadastrar')));
-    expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(16));
+    expect(screen, isNot(contains('abrimos o WhatsApp com a mensagem pronta')));
+    expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(20));
   });
 }

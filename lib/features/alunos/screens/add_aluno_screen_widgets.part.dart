@@ -87,7 +87,6 @@ class _FxFormField extends StatelessWidget {
   final String label;
   final IconData icon;
   final String? hint;
-  final String? helper;
   final TextInputType? keyboardType;
   final TextCapitalization textCapitalization;
   final String? Function(String?)? validator;
@@ -98,7 +97,6 @@ class _FxFormField extends StatelessWidget {
     required this.label,
     required this.icon,
     this.hint,
-    this.helper,
     this.keyboardType,
     this.textCapitalization = TextCapitalization.none,
     this.validator,
@@ -109,54 +107,165 @@ class _FxFormField extends StatelessWidget {
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
 
+    return TextFormField(
+      controller: controller,
+      keyboardType: keyboardType,
+      textCapitalization: textCapitalization,
+      inputFormatters: inputFormatters,
+      validator: validator,
+      decoration: FxInputDeco.build(
+        context,
+        label,
+        icon: icon,
+        hint: hint,
+        iconColor: BrandPalette.softened(primary),
+        iconSize: FxSettingsLayout.iconSize,
+      ),
+    );
+  }
+}
+
+class _ChoiceSection extends StatelessWidget {
+  final String label;
+  final bool isDark;
+  final bool showDividerAbove;
+  final Widget child;
+
+  const _ChoiceSection({
+    required this.label,
+    required this.isDark,
+    required this.child,
+    this.showDividerAbove = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
+
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        TextFormField(
-          controller: controller,
-          keyboardType: keyboardType,
-          textCapitalization: textCapitalization,
-          inputFormatters: inputFormatters,
-          validator: validator,
-          decoration: FxInputDeco.build(
-            context,
-            label,
-            icon: icon,
-            hint: hint,
-            iconColor: BrandPalette.softened(primary),
-            iconSize: FxSettingsLayout.iconSize,
+        if (showDividerAbove) ...[
+          const SizedBox(height: TokensStrip.s3),
+          Divider(
+            height: 1,
+            thickness: FxSettingsLayout.dividerThickness,
+            color: line.withValues(alpha: isDark ? 0.55 : 0.7),
           ),
+          const SizedBox(height: TokensStrip.s3),
+        ] else
+          const SizedBox(height: TokensStrip.s2),
+        Text(
+          label,
+          style: FxSettingsLayout.subhead(
+            color: mute,
+          ).copyWith(fontWeight: FontWeight.w800, fontSize: 11),
         ),
-        if (helper != null) ...[
-          const SizedBox(height: 6),
-          Text(
-            helper!,
-            style: FxSettingsLayout.subhead(
-              color:
-                  Theme.of(context).brightness == Brightness.dark
-                      ? EagleTokens.darkInkMute
-                      : TokensStrip.textSecondary,
-            ),
-          ),
-        ],
+        const SizedBox(height: TokensStrip.s2),
+        child,
+        const SizedBox(height: TokensStrip.s2),
       ],
     );
   }
 }
 
-class _LabelRow extends StatelessWidget {
-  final String label;
-  final bool isDark;
+class _ChipWrap extends StatelessWidget {
+  final List<Widget> children;
 
-  const _LabelRow({required this.label, required this.isDark});
+  const _ChipWrap({required this.children});
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      label,
-      style: FxSettingsLayout.subhead(
-        color: isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
-      ).copyWith(fontWeight: FontWeight.w800),
+    return Wrap(
+      spacing: TokensStrip.s2,
+      runSpacing: TokensStrip.s2,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: children,
+    );
+  }
+}
+
+class _SegmentedChoice extends StatelessWidget {
+  final List<({String value, String label})> options;
+  final String? selected;
+  final bool isDark;
+  final ValueChanged<String> onSelect;
+
+  const _SegmentedChoice({
+    required this.options,
+    required this.selected,
+    required this.isDark,
+    required this.onSelect,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    final action = BrandPalette.sectionAction(primary, dark: isDark);
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(TokensStrip.rSm),
+        border: Border.all(color: line.withValues(alpha: isDark ? 0.7 : 0.85)),
+      ),
+      child: SizedBox(
+        height: 40,
+        child: Row(
+          children: [
+            for (var i = 0; i < options.length; i++) ...[
+              if (i > 0)
+                VerticalDivider(
+                  width: 1,
+                  thickness: FxSettingsLayout.dividerThickness,
+                  color: line.withValues(alpha: isDark ? 0.55 : 0.7),
+                ),
+              Expanded(
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () => onSelect(options[i].value),
+                    borderRadius: BorderRadius.horizontal(
+                      left: i == 0
+                          ? Radius.circular(TokensStrip.rSm - 1)
+                          : Radius.zero,
+                      right: i == options.length - 1
+                          ? Radius.circular(TokensStrip.rSm - 1)
+                          : Radius.zero,
+                    ),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 160),
+                      curve: Curves.easeOutCubic,
+                      alignment: Alignment.center,
+                      color:
+                          selected == options[i].value
+                              ? action.withValues(alpha: isDark ? 0.16 : 0.10)
+                              : Colors.transparent,
+                      child: Text(
+                        options[i].label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
+                        style: FocuxHubTypography.chip(
+                          selected == options[i].value ? action : ink,
+                        ).copyWith(
+                          fontSize: 12,
+                          fontWeight:
+                              selected == options[i].value
+                                  ? FontWeight.w800
+                                  : FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
     );
   }
 }
@@ -181,41 +290,44 @@ class _OptionChip extends StatelessWidget {
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
 
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(TokensStrip.rPill),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 160),
-        curve: Curves.easeOutCubic,
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: BoxDecoration(
-          color: Colors.transparent,
-          borderRadius: BorderRadius.circular(TokensStrip.rPill),
-          border: Border.all(
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: label,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(TokensStrip.rPill),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 160),
+          curve: Curves.easeOutCubic,
+          height: 36,
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
             color:
                 selected
-                    ? action.withValues(alpha: 0.55)
-                    : line.withValues(alpha: 0.85),
-            width: selected ? 1.4 : 1,
-          ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (selected) ...[
-              Icon(Icons.check_rounded, size: 14, color: action),
-              const SizedBox(width: 5),
-            ],
-            Text(
-              label,
-              style: FocuxHubTypography.chip(
-                selected ? action : ink,
-              ).copyWith(
-                fontSize: 12,
-                fontWeight: selected ? FontWeight.w800 : FontWeight.w700,
-              ),
+                    ? action.withValues(alpha: isDark ? 0.16 : 0.10)
+                    : Colors.transparent,
+            borderRadius: BorderRadius.circular(TokensStrip.rPill),
+            border: Border.all(
+              color:
+                  selected
+                      ? action.withValues(alpha: 0.5)
+                      : line.withValues(alpha: 0.85),
+              width: selected ? 1.3 : 1,
             ),
-          ],
+          ),
+          child: Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: FocuxHubTypography.chip(
+              selected ? action : ink,
+            ).copyWith(
+              fontSize: 12,
+              fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
+            ),
+          ),
         ),
       ),
     );
