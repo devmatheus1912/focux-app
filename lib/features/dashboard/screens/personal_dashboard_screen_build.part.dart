@@ -3,7 +3,6 @@ part of 'personal_dashboard_screen.dart';
 extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
   Widget buildPersonalDashboardBody(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    final heroPrimary = BrandPalette.softened(primary, amount: 0.06);
     final homeAsync = ref.watch(dashboardHomeProvider);
     final reduceMotion = TokensStrip.prefersReducedMotion(context);
     final themeDark = Theme.of(context).brightness == Brightness.dark;
@@ -93,12 +92,9 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                 final receitaAtual = snap.receitaAtual;
                 final progressRaw = snap.progressRaw;
                 final metaSuperada = snap.metaSuperada;
-                final receitaTrend = snap.receitaTrend;
                 final riskDominante = snap.riskDominante;
                 final dayFocus = snap.dayFocus;
                 final focusRules = snap.focusRules;
-                final attentionRiskItems = snap.attentionRiskItems;
-                final attentionVencItems = snap.attentionVencItems;
                 final dashboardNextActions = snap.dashboardNextActions;
                 final prioritiesSheetActions = snap.prioritiesSheetActions;
                 final showPrioritiesLink = snap.showPrioritiesLink;
@@ -150,18 +146,6 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                 }
                 const commandCenterSubtitle =
                     DashboardMicrocopy.commandCenterSubtitle;
-
-                void openAttentionReview() {
-                  if (attentionRiskItems.isNotEmpty) {
-                    context.push('/alunos/${attentionRiskItems.first.id}');
-                    return;
-                  }
-                  if (attentionVencItems.isNotEmpty) {
-                    context.go('/financeiro');
-                    return;
-                  }
-                  goPersonalShellTab(context, '/alunos?filtro=risco');
-                }
 
                 // Sticky: painel off-screen, com prioridades, e tools fora da
                 // faixa do chip (não cobre catálogo / grid).
@@ -232,9 +216,6 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                             kpiFade: _kpiFade,
                             isCommandPreparing: false,
                             commandUnavailable: false,
-                            attentionSectionResetToken:
-                                _attentionSectionResetToken,
-                            onReviewAttention: openAttentionReview,
                             onboardingIncomplete: onboardingIncomplete,
                             primeiroTreinoCriado: primeiroTreinoCriado,
                             onboardingFromHome: onboardingFromHome,
@@ -277,18 +258,13 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                               child: DashboardHomeSecondaryBlock(
                                 focusRules: focusRules,
                                 isDark: themeDark,
-                                heroPrimary: heroPrimary,
                                 mes: mes,
                                 receitaAtual: receitaAtual,
                                 pendente: pendente,
                                 progressRaw: progressRaw,
                                 metaSuperada: metaSuperada,
                                 loadingFin: false,
-                                counterAnim: _counterAnim,
                                 finData: home.financeiro,
-                                receitaTrend: receitaTrend,
-                                reduceMotion: reduceMotion,
-                                heroFade: _heroFade,
                                 topAderencia: home.topAderencia,
                                 alunosScore: home.commandCenter.alunosScore,
                                 homePlanoFeatures: home.planoFeatures,

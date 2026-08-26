@@ -48,16 +48,14 @@ void main() {
     expect(widget, isNot(contains('atalhoKicker')));
     expect(widget, contains('if (hasTrend)'));
     expect(widget, contains('expand: true'));
-    expect(widget, contains('scrollDirection: Axis.horizontal'));
     expect(widget, contains('Shimmer.fromColors'));
     expect(widget, contains('maxLines: 2'));
     expect(widget, contains('TextOverflow.ellipsis'));
     expect(widget, contains('class DashboardDayPulseStrip'));
-    expect(widget, contains('class DashboardPulseChip'));
+    expect(widget, contains('FxSettingsTile'));
     expect(widget, contains('pulsoOperacional'));
-    expect(widget, contains('BoxConstraints(minHeight: 48)'));
     expect(widget, contains('hideRiscoChip'));
-    expect(widget, contains("collapsedActionLabel: 'Revisar'"));
+    expect(widget, contains('dashboardAttentionSplit'));
     expect(widget, contains('class DashboardPrioritiesOverlay'));
     expect(widget, contains('dashboardPanelIsOffscreen'));
     expect(
@@ -99,7 +97,7 @@ void main() {
     expect(widget, contains('attentionRiskLimit'));
     expect(widget, contains('dashboardChatShortcutSubtitle'));
     expect(widget, contains('dashboardChatUnreadCount'));
-    expect(widget, contains('tendenciaVaziaChip'));
+    expect(widget, contains('tendenciaVaziaBase'));
     expect(widget, contains('dashboardPulseEmptyHint'));
     expect(widget, contains('pulseAgendaAccent'));
     expect(widget, contains('dashboardShowsInlinePrioritiesLink'));

@@ -10,10 +10,6 @@ class _PersonalDashboardScreenState
   final GlobalKey _toolsSectionKey = GlobalKey();
   bool _prioritiesPanelOffscreen = false;
   bool _toolsBlocksSticky = false;
-  int _attentionSectionResetToken = 0;
-  String? _lastTrackedLocation;
-  VoidCallback? _routeListener;
-  RouteInformationProvider? _routeInformationProvider;
   bool _motionConfigured = false;
   bool? _persistedFocusMode;
   bool _focusMode = true;
@@ -28,31 +24,16 @@ class _PersonalDashboardScreenState
   bool _coachLoaded = false;
   bool _deepLinkApplied = false;
 
-  late AnimationController _counterCtrl;
   late AnimationController _entryCtrl;
-  late Animation<double> _counterAnim;
-  late Animation<double> _heroFade;
   late Animation<double> _kpiFade;
   late Animation<double> _commandFade;
 
   @override
   void initState() {
     super.initState();
-    _counterCtrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1200),
-    );
     _entryCtrl = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 900),
-    );
-    _counterAnim = Tween<double>(
-      begin: 0,
-      end: 0,
-    ).animate(CurvedAnimation(parent: _counterCtrl, curve: Curves.easeOut));
-    _heroFade = CurvedAnimation(
-      parent: _entryCtrl,
-      curve: const Interval(0.32, 0.78, curve: Curves.easeOutCubic),
     );
     _kpiFade = CurvedAnimation(
       parent: _entryCtrl,
@@ -69,7 +50,6 @@ class _PersonalDashboardScreenState
     _loadCoachPreference();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _maybeShowOnboardingWizard();
-      _bindDashboardReturnListener();
     });
   }
 
@@ -162,7 +142,6 @@ class _PersonalDashboardScreenState
       _persistedFocusMode = next;
       _sessionFocusTouched = true;
       _autoFocusApplied = true;
-      _attentionSectionResetToken++;
     });
     AnalyticsService.instance.track(
       ProductEvents.homeFocusToggled,
@@ -243,28 +222,6 @@ class _PersonalDashboardScreenState
     }
   }
 
-  void _bindDashboardReturnListener() {
-    if (!mounted || _routeListener != null) return;
-    final GoRouter router;
-    try {
-      router = GoRouter.of(context);
-    } catch (_) {
-      return;
-    }
-    _lastTrackedLocation = router.routeInformationProvider.value.uri.path;
-    _routeInformationProvider = router.routeInformationProvider;
-    _routeListener = () {
-      final path = _routeInformationProvider!.value.uri.path;
-      if (_lastTrackedLocation != null &&
-          path == '/dashboard/personal' &&
-          _lastTrackedLocation != '/dashboard/personal') {
-        setState(() => _attentionSectionResetToken++);
-      }
-      _lastTrackedLocation = path;
-    };
-    router.routeInformationProvider.addListener(_routeListener!);
-  }
-
   Future<void> _maybeShowOnboardingWizard() async {
     try {
       final w =
@@ -282,14 +239,8 @@ class _PersonalDashboardScreenState
 
   @override
   void dispose() {
-    final listener = _routeListener;
-    final provider = _routeInformationProvider;
-    if (listener != null && provider != null) {
-      provider.removeListener(listener);
-    }
     _homeScrollController.removeListener(_onHomeScroll);
     _homeScrollController.dispose();
-    _counterCtrl.dispose();
     _entryCtrl.dispose();
     super.dispose();
   }
@@ -312,15 +263,6 @@ class _PersonalDashboardScreenState
     setState(() {
       _finData = data;
     });
-    _counterAnim = Tween<double>(
-      begin: 0,
-      end: data.receitaMes,
-    ).animate(CurvedAnimation(parent: _counterCtrl, curve: Curves.easeOut));
-    if (TokensStrip.prefersReducedMotion(context)) {
-      _counterCtrl.value = 1.0;
-    } else {
-      _counterCtrl.forward(from: 0);
-    }
   }
 
   @override

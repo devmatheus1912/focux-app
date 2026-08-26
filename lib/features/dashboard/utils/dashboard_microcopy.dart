@@ -15,7 +15,6 @@ abstract final class DashboardMicrocopy {
 
   static String atualizadoHa(Duration age) => FxHubFreshness.atualizadoHa(age);
 
-  static const scrollPeekHint = 'Deslize horizontalmente para ver mais';
   static const precisaDeAtencao = 'Precisa de atenção';
   static const aderenciaDaSemana = 'Aderência da semana';
   static const maisFerramentas = 'Mais ferramentas';
@@ -26,7 +25,6 @@ abstract final class DashboardMicrocopy {
       'Ferramentas do plano. Bloqueadas abrem o upgrade.';
   static const buscarFerramenta = 'Buscar ferramenta...';
   static const tendencia7Dias = 'Tendência 7 dias';
-  static const tendenciaVaziaChip = 'Sem treinos';
   static const checkinsPulseLabel = 'Check-ins';
   static const tendenciaVaziaBase =
       'Base ativa · nenhum treino nos últimos 7 dias';
@@ -94,11 +92,7 @@ abstract final class DashboardMicrocopy {
 
   /// Chip no banner: ação para entrar no modo foco.
   static const modoFocoChipOff = 'Focar';
-  static const toqueParaExpandir = 'toque para expandir';
-  static const toqueParaVer = 'toque para ver';
   static const abrirFinanceiro = 'Abrir financeiro';
-  static const rankingSemanalHint = 'Ranking semanal · toque para ver';
-  static const treinosRankingHint = 'Treinos e ranking · toque para ver';
   static const abrirCatalogo = 'Abrir catálogo';
   static const nenhumaFerramenta = 'Nenhuma ferramenta encontrada.';
   static const modoFocoChipOnHint = 'Toque para desligar o foco';

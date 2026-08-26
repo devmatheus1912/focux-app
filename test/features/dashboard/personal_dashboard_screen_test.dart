@@ -184,7 +184,7 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
       expect(find.text(DashboardMicrocopy.helpHomeTitle), findsOneWidget);
-      expect(find.textContaining('Índice Focux'), findsOneWidget);
+      expect(find.text('Índice Focux'), findsOneWidget);
     },
   );
 }

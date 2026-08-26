@@ -26,7 +26,7 @@ class FxSettingsGroup extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (header != null) ...[
+        if (header != null)
           Padding(
             padding: const EdgeInsets.symmetric(
               horizontal: FxSettingsLayout.groupPadH,
@@ -36,20 +36,21 @@ class FxSettingsGroup extends StatelessWidget {
               style: FxSettingsLayout.sectionHeader(color: mute),
             ),
           ),
-          if (caption != null) ...[
+        if (caption != null) ...[
+          if (header != null)
             const SizedBox(height: FxSettingsLayout.captionAfterHeader),
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: FxSettingsLayout.groupPadH,
-              ),
-              child: Text(
-                caption!,
-                style: FxSettingsLayout.footer(color: mute),
-              ),
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: FxSettingsLayout.groupPadH,
             ),
-          ],
-          const SizedBox(height: FxSettingsLayout.headerToGroup),
+            child: Text(
+              caption!,
+              style: FxSettingsLayout.footer(color: mute),
+            ),
+          ),
         ],
+        if (header != null || caption != null)
+          const SizedBox(height: FxSettingsLayout.headerToGroup),
         DecoratedBox(
           decoration: fxListCardDecoration(
             context,

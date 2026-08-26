@@ -81,7 +81,6 @@ void main() {
     const dashboardWidgets = [
       'lib/features/dashboard/widgets/dashboard_tool_shortcut_group.dart',
       'lib/features/dashboard/widgets/dashboard_attention_rail.dart',
-      'lib/features/dashboard/widgets/dashboard_collapsible_section.dart',
     ];
     for (final path in dashboardWidgets) {
       expect(

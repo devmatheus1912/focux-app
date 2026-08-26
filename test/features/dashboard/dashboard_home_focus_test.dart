@@ -36,12 +36,8 @@ void main() {
       final rules = DashboardHomeFocusRules.resolve(
         focusMode: true,
         dayFocus: focus,
-        riscoAlto: 8,
-        receitaAtual: 0,
       );
 
-      expect(rules.collapseAttention, isTrue);
-      expect(rules.collapseFinance, isTrue);
       expect(rules.hidePromoBanners, isTrue);
       expect(rules.hideSecondaryRiskCtas, isTrue);
       expect(rules.suppressSecondaryEmptyCtas, isTrue);
@@ -49,7 +45,6 @@ void main() {
       expect(rules.hideFeaturedTools, isTrue);
       expect(rules.omitSecondarySections, isTrue);
       expect(rules.collapsePulseBody, isTrue);
-      expect(rules.collapseAderencia, isTrue);
       expect(rules.maxVisibleNextActions, 2);
     });
 
@@ -62,8 +57,6 @@ void main() {
       final rules = DashboardHomeFocusRules.resolve(
         focusMode: false,
         dayFocus: focus,
-        riscoAlto: 8,
-        receitaAtual: 0,
       );
       expect(rules.hidePromoBanners, isTrue);
       expect(rules.suppressSecondaryEmptyCtas, isTrue);
@@ -72,7 +65,6 @@ void main() {
       expect(rules.omitSecondarySections, isFalse);
       expect(rules.hideFeaturedTools, isFalse);
       expect(rules.collapsePulseBody, isFalse);
-      expect(rules.collapseAderencia, isTrue);
       expect(rules.maxVisibleNextActions, 2);
     });
 
@@ -85,8 +77,6 @@ void main() {
       final rules = DashboardHomeFocusRules.resolve(
         focusMode: false,
         dayFocus: focus,
-        riscoAlto: 0,
-        receitaAtual: 1000,
       );
       expect(rules.hidePromoBanners, isFalse);
       expect(rules.hideFeaturedTools, isFalse);

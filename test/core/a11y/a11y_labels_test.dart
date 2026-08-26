@@ -17,14 +17,17 @@ void main() {
     );
   });
 
-  test('dashboard collapsible semantics reflects expanded state', () {
+  test('dashboard attention item semantics includes rank', () {
     expect(
-      dashboardCollapsibleSemanticsLabel('Ferramentas', true),
-      contains('expandido'),
-    );
-    expect(
-      dashboardCollapsibleSemanticsLabel('Ferramentas', false),
-      contains('recolhido'),
+      dashboardAttentionItemSemantics(
+        index: 1,
+        total: 2,
+        nome: 'Ana',
+        titulo: 'Inadimplente',
+        subt: 'R\$ 200 pendente',
+        acao: 'Cobrar',
+      ),
+      '1 de 2. Ana, Inadimplente. R\$ 200 pendente. Toque para Cobrar',
     );
   });
 

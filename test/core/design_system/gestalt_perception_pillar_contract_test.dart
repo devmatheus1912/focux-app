@@ -45,7 +45,7 @@ void main() {
     ];
     const dashboardWidgets = [
       'lib/features/dashboard/widgets/dashboard_command_center_section.dart',
-      'lib/features/dashboard/widgets/dashboard_collapsible_section.dart',
+      'lib/features/dashboard/widgets/dashboard_section_header.dart',
       'lib/features/dashboard/utils/dashboard_screen_helpers.dart',
     ];
 
@@ -86,10 +86,9 @@ void main() {
   });
 
   test('horizontal continuity uses FxHorizontalScrollPeek', () {
-    final dashboard =
-        File('lib/features/dashboard/widgets/dashboard_horizontal_scroll_peek.dart')
-            .readAsStringSync();
-    expect(dashboard, contains('FxHorizontalScrollPeek'));
+    final peek =
+        File('lib/core/widgets/fx_horizontal_scroll_peek.dart').readAsStringSync();
+    expect(peek, contains('FxHorizontalScrollPeek'));
   });
 
   test('financeiro groups content with TabBar sections', () {

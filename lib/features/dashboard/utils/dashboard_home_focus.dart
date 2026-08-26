@@ -5,9 +5,6 @@ class DashboardHomeFocusRules {
   const DashboardHomeFocusRules({
     required this.focusMode,
     required this.dayFocusCoversRetention,
-    required this.collapseAttention,
-    required this.collapseAderencia,
-    required this.collapseFinance,
     required this.hideSecondaryRiskCtas,
     required this.hidePromoBanners,
     required this.suppressSecondaryEmptyCtas,
@@ -20,9 +17,6 @@ class DashboardHomeFocusRules {
 
   final bool focusMode;
   final bool dayFocusCoversRetention;
-  final bool collapseAttention;
-  final bool collapseAderencia;
-  final bool collapseFinance;
   final bool hideSecondaryRiskCtas;
   final bool hidePromoBanners;
 
@@ -32,7 +26,7 @@ class DashboardHomeFocusRules {
   /// Sticky da Central mais compacto (menos título duplicado).
   final bool compactCommandSticky;
 
-  /// No modo foco, some o grid “featured” de Mais ferramentas (só header).
+  /// No modo foco, some o destaque e deixa só o atalho do catálogo.
   final bool hideFeaturedTools;
 
   /// No foco/dense: não monta Aderência / Financeiro / Mais ferramentas.
@@ -42,7 +36,7 @@ class DashboardHomeFocusRules {
   final bool collapsePulseBody;
   final int maxVisibleNextActions;
 
-  /// Quantos cards de risco "Precisa de atenção" pode mostrar.
+  /// Quantos alunos de risco cabem em "Precisa de atenção" (sheet + fold).
   static int attentionRiskLimit({
     required bool dayFocusCoversRetention,
     required bool focusMode,
@@ -94,20 +88,13 @@ class DashboardHomeFocusRules {
   static DashboardHomeFocusRules resolve({
     required bool focusMode,
     required DashboardDayFocus dayFocus,
-    required int riscoAlto,
-    required double receitaAtual,
   }) {
     final covers = coversRetention(dayFocus);
-    final retentionGuard = covers;
     return DashboardHomeFocusRules(
       focusMode: focusMode,
       dayFocusCoversRetention: covers,
-      collapseAttention: focusMode || covers || riscoAlto > 3,
-      // Retenção: ranking vazio compete com o Foco — começa recolhido.
-      collapseAderencia: focusMode || covers,
-      collapseFinance: focusMode || covers || receitaAtual <= 0,
       hideSecondaryRiskCtas: focusMode || covers,
-      hidePromoBanners: retentionGuard || focusMode,
+      hidePromoBanners: covers || focusMode,
       suppressSecondaryEmptyCtas: focusMode || covers,
       compactCommandSticky: focusMode,
       hideFeaturedTools: focusMode,

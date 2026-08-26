@@ -27,12 +27,12 @@ class DashboardFinanceEmptyState extends StatelessWidget {
       children: [
         FxSettingsTile(
           fxIcon: 'dollar-sign',
-          label: 'Receita · $mes',
+          label: 'Recebido · $mes',
           value: 'R\$ 0',
           onTap: onOpen,
           showDivider: false,
           semanticsLabel:
-              'Receita de $mes zerada. $cta',
+              'Recebido de $mes zerado. $cta',
         ),
       ],
     );

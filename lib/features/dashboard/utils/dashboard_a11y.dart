@@ -15,29 +15,6 @@ String dashboardShortcutSemanticsLabel(DashboardToolShortcut shortcut) {
   };
 }
 
-/// Rótulo de seção colapsável (TalkBack / VoiceOver).
-String dashboardCollapsibleSemanticsLabel(
-  String title,
-  bool expanded, {
-  String? collapsedHint,
-  String? collapsedActionLabel,
-}) {
-  if (expanded) {
-    return '$title, expandido. Toque para recolher';
-  }
-  if (collapsedActionLabel != null && collapsedActionLabel.trim().isNotEmpty) {
-    final hint =
-        collapsedHint != null && collapsedHint.trim().isNotEmpty
-            ? collapsedHint
-            : 'Toque em $collapsedActionLabel para agir ou no ícone para expandir';
-    return '$title, recolhido. $hint';
-  }
-  if (collapsedHint != null && collapsedHint.trim().isNotEmpty) {
-    return '$title, recolhido. $collapsedHint';
-  }
-  return '$title, recolhido. Toque para expandir';
-}
-
 String dashboardAttentionItemSemantics({
   required int index,
   required int total,
@@ -47,12 +24,4 @@ String dashboardAttentionItemSemantics({
   required String acao,
 }) {
   return '$index de $total. $nome, $titulo. $subt. Toque para $acao';
-}
-
-String dashboardAttentionCarouselSemantics(int total) {
-  if (total <= 0) {
-    return 'Nenhum item precisa de atenção';
-  }
-  return 'Carrossel horizontal, $total '
-      '${total == 1 ? 'item' : 'itens'}. Deslize para ver mais';
 }

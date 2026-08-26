@@ -70,10 +70,8 @@ class DashboardDayPulseStrip extends StatelessWidget {
   Widget build(BuildContext context) {
     final riscoAccent = riscoAlto > 0 ? EagleTokens.warn : primary;
     final width = MediaQuery.sizeOf(context).width;
-    final tight = DashboardLayout.isCompact(width);
     final comfortable = DashboardLayout.isComfortable(width);
     final caption = dashboardReadableCaption(context, isDark: isDark);
-    final ativosAccent = alunosAtivos > 0 ? primary : caption;
     final checkinsAccent = pulseCheckinsAccent(
       checkinsHoje: checkinsHoje,
       neutralAccent: caption,
@@ -103,67 +101,58 @@ class DashboardDayPulseStrip extends StatelessWidget {
         header: DashboardMicrocopy.pulsoOperacional,
         accent: primary,
         children: [
-          ConstrainedBox(
-            constraints: const BoxConstraints(minHeight: 48),
-            child: Row(
-              children: [
-                Expanded(
-                  child: DashboardPulseChip(
-                    icon: 'users',
-                    value: alunosAtivos.toString(),
-                    label: 'Ativos',
-                    accent: ativosAccent,
-                    isDark: isDark,
-                    empty: alunosAtivos == 0,
-                    showTrailingDivider: true,
-                    onTap: onAtivos,
-                  ),
-                ),
-                Expanded(
-                  child: DashboardPulseChip(
-                    icon: 'circle-check',
-                    value: checkinsHoje.toString(),
-                    label:
-                        tight
-                            ? 'Checks'
-                            : DashboardMicrocopy.checkinsPulseLabel,
-                    accent: checkinsAccent,
-                    isDark: isDark,
-                    empty: checkinsHoje == 0,
-                    showTrailingDivider: true,
-                    onTap: onCheckins,
-                  ),
-                ),
-                Expanded(
-                  child:
-                      hideRiscoChip
-                          ? DashboardPulseChip(
-                            icon: 'calendar',
-                            value: agendaHoje.toString(),
-                            label: 'Agenda',
-                            accent: agendaAccent,
-                            isDark: isDark,
-                            empty: agendaHoje == 0,
-                            showTrailingDivider: false,
-                            onTap: onAgenda,
-                          )
-                          : DashboardPulseChip(
-                            icon:
-                                riscoAlto > 0
-                                    ? 'alert-triangle'
-                                    : 'circle-check',
-                            value: riscoAlto.toString(),
-                            label: 'Risco',
-                            accent: riscoAccent,
-                            isDark: isDark,
-                            empty: riscoAlto == 0,
-                            showTrailingDivider: false,
-                            onTap: onRisco,
-                          ),
-                ),
-              ],
-            ),
+          FxSettingsTile(
+            fxIcon: 'users',
+            label: 'Ativos',
+            value: '$alunosAtivos',
+            numeric: true,
+            showDivider: true,
+            semanticsLabel:
+                alunosAtivos == 0
+                    ? '0 ativos, sem movimento hoje'
+                    : '$alunosAtivos ativos',
+            onTap: onAtivos,
           ),
+          FxSettingsTile(
+            fxIcon: 'circle-check',
+            label: DashboardMicrocopy.checkinsPulseLabel,
+            value: '$checkinsHoje',
+            numeric: true,
+            showDivider: true,
+            accent: checkinsAccent,
+            semanticsLabel:
+                checkinsHoje == 0
+                    ? '0 check-ins, sem movimento hoje'
+                    : '$checkinsHoje check-ins',
+            onTap: onCheckins,
+          ),
+          hideRiscoChip
+              ? FxSettingsTile(
+                fxIcon: 'calendar',
+                label: 'Agenda',
+                value: '$agendaHoje',
+                numeric: true,
+                showDivider: showTrendRow || showCta,
+                accent: agendaAccent,
+                semanticsLabel:
+                    agendaHoje == 0
+                        ? '0 na agenda, sem movimento hoje'
+                        : '$agendaHoje na agenda',
+                onTap: onAgenda,
+              )
+              : FxSettingsTile(
+                fxIcon: riscoAlto > 0 ? 'alert-triangle' : 'circle-check',
+                label: 'Risco',
+                value: '$riscoAlto',
+                numeric: true,
+                showDivider: showTrendRow || showCta,
+                accent: riscoAccent,
+                semanticsLabel:
+                    riscoAlto == 0
+                        ? '0 em risco, sem movimento hoje'
+                        : '$riscoAlto em risco',
+                onTap: onRisco,
+              ),
           if (showTrendRow)
             _PulseTrendRow(
               isDark: isDark,
@@ -186,7 +175,7 @@ class DashboardDayPulseStrip extends StatelessWidget {
                   ? 'calendar'
                   : 'dumbbell',
               label: emptyTrendCtaLabel!,
-              value: '',
+              value: 'Abrir',
               onTap: onEmptyTrendCta!,
               showDivider: false,
             ),
@@ -359,96 +348,3 @@ class _PulseTrendRow extends StatelessWidget {
   }
 }
 
-class DashboardPulseChip extends StatelessWidget {
-  const DashboardPulseChip({
-    super.key,
-    required this.icon,
-    required this.value,
-    required this.label,
-    required this.accent,
-    required this.isDark,
-    required this.onTap,
-    this.empty = false,
-    this.showTrailingDivider = false,
-  });
-
-  final String icon;
-  final String value;
-  final String label;
-  final Color accent;
-  final bool isDark;
-  final bool empty;
-  final bool showTrailingDivider;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final chrome = ShellChrome.of(context);
-    return Semantics(
-      button: true,
-      label: empty ? '$value $label, sem movimento hoje' : '$value $label',
-      child: InkWell(
-        onTap: () {
-          HapticFeedback.selectionClick();
-          onTap();
-        },
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(
-            minHeight: FxSettingsLayout.rowMinHeight,
-          ),
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              border:
-                  showTrailingDivider
-                      ? Border(
-                        right: BorderSide(
-                          color: chrome.line,
-                          width: FxSettingsLayout.dividerThickness,
-                        ),
-                      )
-                      : null,
-            ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: TokensStrip.s2),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  FxIcon(
-                    name: icon,
-                    size: FxSettingsLayout.iconSize,
-                    color: accent,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    value,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: FocuxHubTypography.metric(
-                      fontSize: TokensStrip.fontBodySm,
-                      color: chrome.ink,
-                      height: 1,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.center,
-                    style: FocuxHubTypography.bodyMuted(
-                      color: dashboardReadableCaption(
-                        context,
-                        isDark: isDark,
-                      ),
-                      height: 1.1,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}

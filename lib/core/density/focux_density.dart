@@ -22,7 +22,7 @@ abstract final class FocuxDensity {
     'lib/core/theme/app_theme.dart',
     'lib/core/theme/tokens_strip.dart',
     'lib/features/alunos/data/aluno_list_preferences_store.dart',
-    'lib/features/dashboard/widgets/dashboard_collapsible_section.dart',
+    'lib/core/widgets/fx_settings_group.dart',
     'lib/features/dashboard/constants/dashboard_layout.dart',
     'lib/features/alunos/constants/aluno_360_layout.dart',
   ];
@@ -30,8 +30,8 @@ abstract final class FocuxDensity {
   static const List<String> hubDensityPatterns = [
     'maxLines',
     'TextOverflow.ellipsis',
-    'DashboardCollapsibleSection',
-    'collapsedHint',
+    'FxSettingsGroup',
+    'dashboardRadarFoldLimit',
     'AlunoListPreferences',
     '_listaCompacta',
     'compact:',

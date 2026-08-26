@@ -24,7 +24,7 @@ void main() {
 
     expect(find.byType(DashboardHomeActionChip), findsNothing);
     expect(find.byType(FilledButton), findsNothing);
-    expect(find.textContaining('Receita · agosto'), findsOneWidget);
+    expect(find.textContaining('Recebido · agosto'), findsOneWidget);
     expect(find.text(DashboardMicrocopy.abrirFinanceiro), findsNothing);
   });
 
@@ -47,11 +47,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: DashboardAgendaHojeStrip(
-            items: items,
-            isDark: true,
-            primary: const Color(0xFF00D4E8),
-          ),
+          body: DashboardAgendaHojeStrip(items: items),
         ),
       ),
     );

@@ -10,6 +10,8 @@ import '../../subscription/widgets/plan_usage_banner.dart';
 import '../../subscription/widgets/trial_countdown_banner.dart';
 import '../data/command_center_data.dart';
 import '../constants/dashboard_layout.dart';
+import '../../../core/widgets/fx_settings_group.dart';
+import '../../../core/widgets/fx_settings_tile.dart';
 import '../utils/dashboard_day_focus.dart';
 import '../utils/dashboard_entry_motion.dart';
 import '../utils/dashboard_home_focus.dart';
@@ -49,8 +51,6 @@ List<Widget> buildDashboardHomePrimarySlivers({
   required Animation<double> kpiFade,
   required bool isCommandPreparing,
   required bool commandUnavailable,
-  required int attentionSectionResetToken,
-  required VoidCallback onReviewAttention,
   required bool onboardingIncomplete,
   required bool primeiroTreinoCriado,
   OnboardingStatusData? onboardingFromHome,
@@ -153,38 +153,33 @@ List<Widget> buildDashboardHomePrimarySlivers({
     ),
     if (agendaItems.isNotEmpty)
       SliverToBoxAdapter(
-        child: DashboardAgendaHojeStrip(
-          items: agendaItems,
-          isDark: isDark,
-          primary: primary,
-        ),
+        child: DashboardAgendaHojeStrip(items: agendaItems),
       ),
     if (riscoAlto > 0 &&
         !snap.attentionVisible &&
         !focusRules.hideSecondaryRiskCtas)
       SliverToBoxAdapter(
-        child: Align(
-          alignment: Alignment.centerRight,
-          child: TextButton(
-            onPressed: () => context.push('/retencao'),
-            child: const Text('Ver saúde da base'),
+        child: Padding(
+          padding: DashboardLayout.foldCard,
+          child: FxSettingsGroup(
+            children: [
+              FxSettingsTile(
+                fxIcon: 'alert-triangle',
+                label: 'Saúde da base',
+                subtitle: 'Alunos em risco pedem contato',
+                value: 'Ver',
+                showDivider: false,
+                onTap: () => context.push('/retencao'),
+              ),
+            ],
           ),
         ),
       ),
     if (snap.attentionVisible) ...[
       SliverToBoxAdapter(
         child: DashboardAttentionRail(
-          isDark: isDark,
-          riskDominante: snap.riskDominante,
-          riscoAlto: riscoAlto,
-          alunosAtivos: alunosAtivos,
-          dayFocusCoversRetention: focusRules.dayFocusCoversRetention,
-          collapseAttention: focusRules.collapseAttention,
           attentionRiskItems: snap.attentionRiskItems,
           attentionVencItems: snap.attentionVencItems,
-          attentionCollapsedPreview: snap.attentionCollapsedPreview,
-          resetToken: attentionSectionResetToken,
-          onReview: onReviewAttention,
         ),
       ),
       const SliverToBoxAdapter(

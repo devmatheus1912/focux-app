@@ -81,7 +81,7 @@ void main() {
     expect(theme, contains('VisualDensity.compact'));
   });
 
-  test('dashboard uses collapsible sections for progressive disclosure', () {
+  test('dashboard uses inset groups and fold limits for density', () {
     final dashboard = [
       readScreenSourceBundle(
         'lib/features/dashboard/screens/personal_dashboard_screen.dart',
@@ -93,11 +93,14 @@ void main() {
         'lib/features/dashboard/widgets/dashboard_attention_rail.dart',
       ).readAsStringSync(),
       File(
-        'lib/features/dashboard/widgets/dashboard_collapsible_section.dart',
+        'lib/features/dashboard/utils/dashboard_radar_items.dart',
+      ).readAsStringSync(),
+      File(
+        'lib/features/dashboard/widgets/dashboard_pulse_strip.dart',
       ).readAsStringSync(),
     ].join('\n');
-    expect(dashboard, contains('DashboardCollapsibleSection'));
-    expect(dashboard, contains('collapsedHint'));
+    expect(dashboard, contains('FxSettingsGroup'));
+    expect(dashboard, contains('dashboardRadarFoldLimit'));
     expect(dashboard, contains('maxLines'));
   });
 

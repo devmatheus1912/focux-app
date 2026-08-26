@@ -34,7 +34,6 @@ class DashboardHomeSnapshot {
     required this.attentionRiskItems,
     required this.attentionVencItems,
     required this.attentionVisible,
-    required this.attentionCollapsedPreview,
     required this.unreadCount,
     required this.cobrancasPendentes,
     required this.dashboardNextActions,
@@ -62,7 +61,6 @@ class DashboardHomeSnapshot {
   final List<Aluno> attentionRiskItems;
   final List<VencimentoItem> attentionVencItems;
   final bool attentionVisible;
-  final String? attentionCollapsedPreview;
   final int unreadCount;
   final int cobrancasPendentes;
   final List<CommandActionItem> dashboardNextActions;
@@ -156,8 +154,6 @@ class DashboardHomeSnapshot {
     final focusRules = DashboardHomeFocusRules.resolve(
       focusMode: focusMode,
       dayFocus: dayFocus,
-      riscoAlto: riscoAlto,
-      receitaAtual: receitaAtual,
     );
     final dayFocusCoversRetention = focusRules.dayFocusCoversRetention;
 
@@ -183,17 +179,6 @@ class DashboardHomeSnapshot {
             .toList(growable: false);
     final attentionVisible =
         attentionRiskItems.isNotEmpty || attentionVencItems.isNotEmpty;
-
-    String? attentionCollapsedPreview;
-    if (attentionRiskItems.isNotEmpty) {
-      final first = attentionRiskItems.first;
-      attentionCollapsedPreview =
-          '${first.nome} · ${attentionSignalLabel(first)}';
-    } else if (attentionVencItems.isNotEmpty) {
-      final first = attentionVencItems.first;
-      attentionCollapsedPreview =
-          '${first.alunoNome} · R\$ ${first.valor.toStringAsFixed(0)} pendente';
-    }
 
     final filaAcoes = commandCenter?.filaAcoes ?? const <FilaAcaoResumo>[];
     // Chat unread = pulse BFF. Notificações de app usam notificacoesNaoLidas.
@@ -278,7 +263,6 @@ class DashboardHomeSnapshot {
       attentionRiskItems: attentionRiskItems,
       attentionVencItems: attentionVencItems,
       attentionVisible: attentionVisible,
-      attentionCollapsedPreview: attentionCollapsedPreview,
       unreadCount: unreadCount,
       cobrancasPendentes: cobrancasPendentes,
       dashboardNextActions: dashboardNextActions,

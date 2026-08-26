@@ -2,44 +2,37 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/analytics/analytics_service.dart';
-import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/tokens_strip.dart';
-import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/fx_settings_group.dart';
+import '../../../core/widgets/fx_settings_tile.dart';
 import '../../planos/data/planos_repository.dart';
 import '../../planos/utils/effective_plano_features.dart';
 import '../data/dashboard_tool_shortcuts.dart';
 import '../utils/dashboard_haptic.dart';
 import '../utils/dashboard_microcopy.dart';
-import '../utils/dashboard_readability.dart';
 import '../utils/dashboard_shortcut_navigation.dart';
+import 'dashboard_section_header.dart';
 import 'dashboard_tool_shortcut_group.dart';
 import 'dashboard_tools_catalog_sheet.dart';
 
 export 'dashboard_tools_catalog_sheet.dart';
 
-class DashboardCollapsibleToolsSection extends ConsumerWidget {
-  const DashboardCollapsibleToolsSection({
+class DashboardHomeToolsSection extends ConsumerWidget {
+  const DashboardHomeToolsSection({
     super.key,
     required this.isDark,
     this.hideFeaturedTools = false,
     this.homePlanoFeatures,
-    this.quietChrome = false,
   });
 
   final bool isDark;
-  /// Modo foco: só header que abre o catálogo (sem lista em destaque).
+  /// Modo foco: só a linha do catálogo (sem lista em destaque).
   final bool hideFeaturedTools;
   final PlanoFeatures? homePlanoFeatures;
-  /// Home secundária: chrome alinhado aos collapsibles quiet.
-  final bool quietChrome;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final primary = Theme.of(context).colorScheme.primary;
-    final heading = BrandPalette.sectionHeading(primary, dark: isDark);
-    final mute = dashboardReadableMuted(context, isDark: isDark);
-    final link = BrandPalette.sectionLink(primary, dark: isDark);
     final features = effectivePlanoFeatures(
       ref,
       homeOverride: homePlanoFeatures,
@@ -52,7 +45,7 @@ class DashboardCollapsibleToolsSection extends ConsumerWidget {
     final featuredShortcuts = DashboardToolShortcut.featuredTools;
     final featuredCount = featuredShortcuts.length;
     final hideFeatured = hideFeaturedTools;
-    final collapsedHint =
+    final caption =
         hideFeatured
             ? (lockedCount > 0
                 ? '$totalTools no catálogo · $lockedCount no upgrade'
@@ -80,126 +73,40 @@ class DashboardCollapsibleToolsSection extends ConsumerWidget {
         TokensStrip.s4,
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Material(
-            color: Colors.transparent,
-            child: Semantics(
-              button: true,
-              label:
-                  '${DashboardMicrocopy.maisFerramentas}. $collapsedHint. '
-                  '${DashboardMicrocopy.abrirCatalogo}',
-              child: InkWell(
-                onTap: openCatalog,
-                borderRadius: BorderRadius.circular(
-                  FxSettingsLayout.groupRadius,
+          if (hideFeatured)
+            FxSettingsGroup(
+              children: [
+                FxSettingsTile(
+                  fxIcon: 'spark',
+                  label: DashboardMicrocopy.maisFerramentas,
+                  subtitle: caption,
+                  value: DashboardMicrocopy.abrirCatalogo,
+                  showDivider: false,
+                  onTap: openCatalog,
                 ),
-                child: Ink(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: quietChrome ? 12 : 14,
-                    vertical: quietChrome ? 10 : 13,
-                  ),
-                  decoration: fxStripCardDecoration(
+              ],
+            )
+          else ...[
+            DashboardSectionHeader(
+              title: DashboardMicrocopy.maisFerramentas,
+              actionLabel: DashboardMicrocopy.verCatalogoCompleto,
+              onAction: openCatalog,
+            ),
+            const SizedBox(height: FxSettingsLayout.headerToGroup),
+            DashboardToolShortcutGroup(
+              shortcuts: featuredShortcuts,
+              homePlanoFeatures: homePlanoFeatures,
+              onShortcut:
+                  (shortcut) => openDashboardShortcut(
                     context,
-                    radius: FxSettingsLayout.groupRadius,
-                    glowStrength: quietChrome ? 0.03 : 0.06,
+                    ref,
+                    shortcut,
+                    homeOverride: homePlanoFeatures,
                   ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              DashboardMicrocopy.maisFerramentas,
-                              style:
-                                  quietChrome
-                                      ? FocuxHubTypography.bodyMuted(
-                                        color: mute,
-                                        fontWeight: FontWeight.w700,
-                                        height: 1.25,
-                                      )
-                                      : FocuxHubTypography.sectionTitle(
-                                        context,
-                                        color: heading,
-                                      ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              collapsedHint,
-                              style: FocuxHubTypography.bodyMuted(
-                                color: mute,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Icon(
-                        Icons.chevron_right_rounded,
-                        size: FxSettingsLayout.chevronSize,
-                        color: mute,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
             ),
-          ),
-          if (!hideFeatured)
-            Padding(
-              padding: const EdgeInsets.only(
-                top: FxSettingsLayout.headerToGroup,
-              ),
-              child: DashboardToolShortcutGroup(
-                shortcuts: featuredShortcuts,
-                homePlanoFeatures: homePlanoFeatures,
-                onShortcut:
-                    (shortcut) => openDashboardShortcut(
-                      context,
-                      ref,
-                      shortcut,
-                      homeOverride: homePlanoFeatures,
-                    ),
-                footer: Align(
-                  alignment: Alignment.centerRight,
-                  child: Material(
-                    color: Colors.transparent,
-                    child: Semantics(
-                      button: true,
-                      label: DashboardMicrocopy.verCatalogoCompleto,
-                      child: InkWell(
-                        onTap: openCatalog,
-                        borderRadius: BorderRadius.circular(
-                          TokensStrip.rInput,
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 6,
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                DashboardMicrocopy.verCatalogoCompleto,
-                                style: FocuxHubTypography.chip(link),
-                              ),
-                              const SizedBox(width: 4),
-                              Icon(
-                                Icons.chevron_right_rounded,
-                                size: FxSettingsLayout.chevronSize,
-                                color: link,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
+          ],
         ],
       ),
     );

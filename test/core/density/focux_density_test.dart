@@ -36,10 +36,9 @@ void main() {
     final theme = File('lib/core/theme/app_theme.dart').readAsStringSync();
     expect(theme, contains('VisualDensity.compact'));
 
-    final collapsible =
-        File('lib/features/dashboard/widgets/dashboard_collapsible_section.dart')
-            .readAsStringSync();
-    expect(collapsible, contains('collapsedHint'));
+    final group =
+        File('lib/core/widgets/fx_settings_group.dart').readAsStringSync();
+    expect(group, contains('FxSettingsGroup'));
 
     final prefs =
         File('lib/features/alunos/data/aluno_list_preferences_store.dart')

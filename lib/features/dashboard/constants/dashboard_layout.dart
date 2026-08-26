@@ -9,9 +9,6 @@ abstract final class DashboardLayout {
 
   static const double compactWidth = 390;
   static const double comfortableWidth = 600;
-  static const double attentionRailHeight = 184;
-  static const double attentionCardWidth = 268;
-  static const double attentionCardWidthCompact = 240;
   /// Folga extra no fim do scroll. O [MainShell] já aplica
   /// `FxDock.shellClearance` — aqui só respiração de conteúdo,
   /// não um segundo “dock fantasma”.

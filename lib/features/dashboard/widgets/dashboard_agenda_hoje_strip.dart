@@ -1,115 +1,69 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/router/safe_navigation.dart';
-import '../../../core/theme/brand_palette.dart';
-import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/fx_settings_layout.dart';
-import '../../../core/theme/tokens_strip.dart';
-import '../../../core/widgets/fx_icon.dart';
+import '../../../core/utils/fx_utils.dart';
+import '../../../core/widgets/fx_settings_group.dart';
+import '../../../core/widgets/fx_settings_tile.dart';
 import '../constants/dashboard_layout.dart';
 import '../data/command_center_data.dart';
 import '../utils/dashboard_microcopy.dart';
-import '../utils/dashboard_readability.dart';
+import 'dashboard_section_header.dart';
 
-/// Strip compacto: próximos compromissos de hoje (BFF agendaHoje).
+/// Próximos compromissos de hoje — grupo inset, top 3.
 class DashboardAgendaHojeStrip extends StatelessWidget {
   const DashboardAgendaHojeStrip({
     super.key,
     required this.items,
-    required this.isDark,
-    required this.primary,
   });
 
   final List<AgendamentoResumo> items;
-  final bool isDark;
-  final Color primary;
 
   @override
   Widget build(BuildContext context) {
     if (items.isEmpty) return const SizedBox.shrink();
     final visible = items.take(3).toList(growable: false);
-    final mute = dashboardReadableCaption(context, isDark: isDark);
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
 
     return Padding(
       padding: DashboardLayout.foldCard,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
+          DashboardSectionHeader(
+            title: DashboardMicrocopy.agendaHoje,
+            actionLabel: DashboardMicrocopy.verAgenda,
+            onAction: () => goPersonalShellTab(context, '/agenda'),
+          ),
+          const SizedBox(height: FxSettingsLayout.headerToGroup),
+          FxSettingsGroup(
             children: [
-              Text(
-                DashboardMicrocopy.agendaHoje,
-                style: FxSettingsLayout.sectionHeader(color: mute),
-              ),
-              const Spacer(),
-              TextButton(
-                onPressed: () => goPersonalShellTab(context, '/agenda'),
-                child: Text(DashboardMicrocopy.verAgenda),
-              ),
+              for (var i = 0; i < visible.length; i++)
+                FxSettingsTile(
+                  fxIcon: 'calendar',
+                  label: fxTitleCaseName(visible[i].nomeAluno),
+                  subtitle: _agendaStatusLabel(visible[i].status),
+                  value: visible[i].horario,
+                  numeric: true,
+                  showDivider: i < visible.length - 1,
+                  semanticsLabel:
+                      '${visible[i].horario}. ${visible[i].nomeAluno}. '
+                      'Status ${_agendaStatusLabel(visible[i].status)}. Abrir agenda',
+                  onTap: () => goPersonalShellTab(context, '/agenda'),
+                ),
             ],
           ),
-          const SizedBox(height: 6),
-          ...visible.map((a) {
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: Semantics(
-                button: true,
-                label:
-                    '${a.horario}. ${a.nomeAluno}. Status ${a.status}. Abrir agenda',
-                child: Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    onTap: () => goPersonalShellTab(context, '/agenda'),
-                    borderRadius: BorderRadius.circular(
-                      FxSettingsLayout.groupRadius,
-                    ),
-                    child: Ink(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(
-                          FxSettingsLayout.groupRadius,
-                        ),
-                        border: Border.all(
-                          color: primary.withValues(alpha: isDark ? 0.28 : 0.18),
-                        ),
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 10,
-                      ),
-                      child: Row(
-                        children: [
-                          FxIcon(
-                            name: 'calendar',
-                            size: 18,
-                            color: BrandPalette.sectionAccent(primary, dark: isDark),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Text(
-                              '${a.horario} · ${a.nomeAluno}',
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: dashboardCardTitleStyle(ink),
-                            ),
-                          ),
-                          Text(
-                            a.status,
-                            style: dashboardCardSubtitleStyle(
-                              context,
-                              isDark: isDark,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            );
-          }),
         ],
       ),
     );
   }
+}
+
+String _agendaStatusLabel(String status) {
+  return switch (status.trim().toUpperCase()) {
+    'CONFIRMADO' => 'Confirmado',
+    'PENDENTE' => 'Pendente',
+    'CANCELADO' => 'Cancelado',
+    'CONCLUIDO' || 'CONCLUÍDO' => 'Concluído',
+    _ => fxTitleCaseName(status.replaceAll('_', ' ')),
+  };
 }

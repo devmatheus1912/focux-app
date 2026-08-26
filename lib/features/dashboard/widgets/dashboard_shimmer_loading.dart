@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/motion_preferences.dart';
 
@@ -27,7 +28,12 @@ class DashboardShimmerLoading extends StatelessWidget {
 
     final content = SingleChildScrollView(
         physics: const NeverScrollableScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 6, 16, 20),
+        padding: const EdgeInsets.fromLTRB(
+          TokensStrip.s4,
+          TokensStrip.s2,
+          TokensStrip.s4,
+          TokensStrip.s5,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -76,17 +82,26 @@ class DashboardShimmerLoading extends StatelessWidget {
               ),
             ],
             const SizedBox(height: 18),
-            bone(double.infinity, 200, radius: 28),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(child: bone(double.infinity, 52, radius: 12)),
-                const SizedBox(width: 8),
-                Expanded(child: bone(double.infinity, 52, radius: 12)),
-                const SizedBox(width: 8),
-                Expanded(child: bone(double.infinity, 52, radius: 12)),
-              ],
-            ),
+            bone(120, 12, radius: 8),
+            const SizedBox(height: 8),
+            for (int i = 0; i < 3; i++) ...[
+              Padding(
+                padding: EdgeInsets.only(bottom: i < 2 ? 2 : 0),
+                child: Row(
+                  children: [
+                    bone(FxSettingsLayout.iconSize, FxSettingsLayout.iconSize, radius: 6),
+                    const SizedBox(width: FxSettingsLayout.iconGap),
+                    Expanded(
+                      child: bone(
+                        double.infinity,
+                        FxSettingsLayout.rowMinHeight,
+                        radius: FxSettingsLayout.groupRadius,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
             const SizedBox(height: 20),
             bone(120, 16),
             const SizedBox(height: 14),

@@ -43,8 +43,6 @@ void main() {
       'lib/features/dashboard/screens/personal_dashboard_screen.dart',
       'lib/features/dashboard/screens/personal_dashboard_screen_build.part.dart',
       'lib/features/dashboard/utils/dashboard_screen_helpers.dart',
-      'lib/features/dashboard/widgets/dashboard_horizontal_scroll_peek.dart',
-      'lib/core/widgets/fx_horizontal_scroll_peek.dart',
       'lib/features/dashboard/widgets/dashboard_pulse_strip.dart',
       'lib/features/dashboard/widgets/dashboard_command_center_section.dart',
       'lib/features/dashboard/widgets/command_action_panel.dart',
@@ -65,34 +63,34 @@ void main() {
       'lib/features/dashboard/widgets/dashboard_home_header.dart',
       'lib/features/dashboard/widgets/dashboard_command_center_sticky_header.dart',
       'lib/features/dashboard/widgets/dashboard_attention_rail.dart',
-      'lib/features/dashboard/widgets/dashboard_collapsible_section.dart',
+      'lib/features/dashboard/widgets/dashboard_section_header.dart',
       'lib/features/dashboard/utils/dashboard_a11y.dart',
       'lib/features/dashboard/utils/dashboard_home_snapshot.dart',
+      'lib/features/dashboard/utils/dashboard_readability.dart',
+      'lib/features/dashboard/widgets/dashboard_aderencia_semana_widget.dart',
     ];
     final screen = paths.map((p) => File(p).readAsStringSync()).join('\n');
 
     expect(screen, contains('dashboardSectionKickerStyle'));
     expect(screen, contains('panoramaFinanceiro'));
     expect(screen, contains('receitaAtual > 0'));
-    expect(screen, contains(r'R\$ 0 recebido · meta do mês'));
+    expect(screen, contains(r'Recebido · $mes'));
     expect(screen, contains('pulsoOperacional'));
     expect(screen, contains('impactoHoje'));
     expect(screen, contains('financeInadimplLabel'));
     expect(screen, contains('financePercentLabel'));
     expect(screen, contains('Meta batida'));
     expect(screen, contains('pulseCheckinsAccent'));
-    expect(screen, contains('DashboardHorizontalScrollPeek'));
-    expect(screen, contains('scrollPeekHint'));
+    expect(screen, contains('DashboardSectionHeader'));
     expect(screen, contains('Pendente'));
-    expect(screen, contains('Ticket médio'));
-    expect(screen, contains('_showTicketMedio'));
+    expect(screen, contains('Ticket'));
     expect(screen, contains('DashboardHomeActionChip'));
     expect(screen, contains('BrandPalette.sectionLink'));
     expect(screen, contains('showPrioritiesLink'));
     expect(screen, contains('verPrioridades'));
     expect(screen, contains('CommandPrioritiesSheet'));
     expect(screen, contains('Ações por aluno'));
-    expect(screen, contains('dashboardCollapsibleSemanticsLabel'));
+    expect(screen, contains('DashboardSectionHeader'));
     expect(screen, contains('dashboard_entry_motion.dart'));
     expect(screen, contains('DashboardDayFocusBanner'));
     expect(screen, contains('DashboardHomeFocusRules'));
@@ -157,7 +155,7 @@ void main() {
     expect(catalog, isNot(contains('DashboardExpandableToolGroups')));
     expect(catalog, isNot(contains('shortcutAspectRatio')));
     expect(tools, contains('DashboardToolShortcutGroup'));
-    expect(tools, contains('FxSettingsLayout.groupRadius'));
+    expect(tools, contains('FxSettingsLayout.pageInset'));
     expect(tools, isNot(contains('DashboardShortcutGrid')));
     expect(tools, isNot(contains('shortcutAspectRatio')));
     expect(tools, isNot(contains('AspectRatio')));
@@ -230,6 +228,6 @@ void main() {
     expect(pulse, contains('header: DashboardMicrocopy.pulsoOperacional'));
     expect(pulse, isNot(contains('fxStripCardDecoration')));
     expect(pulse, isNot(contains('_PulseChipEntrance')));
-    expect(pulse, contains('class DashboardPulseChip'));
+    expect(pulse, contains('FxSettingsTile'));
   });
 }

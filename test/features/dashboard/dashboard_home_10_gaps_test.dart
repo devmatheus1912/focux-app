@@ -7,6 +7,7 @@ import 'package:focux_app/features/dashboard/utils/dashboard_day_focus.dart';
 import 'package:focux_app/features/dashboard/utils/dashboard_home_focus.dart';
 import 'package:focux_app/features/dashboard/utils/dashboard_microcopy.dart';
 import 'package:focux_app/features/dashboard/utils/dashboard_radar_items.dart';
+import 'package:focux_app/features/dashboard/utils/dashboard_attention_items.dart';
 
 void main() {
   group('dashboardRadarSplit', () {
@@ -130,6 +131,26 @@ void main() {
       expect(src, contains('radarVerTodos'));
       expect(src, isNot(contains('DashboardCollapsibleSection')));
       expect(src, isNot(contains('DashboardHorizontalScrollPeek')));
+    });
+  });
+
+  group('dashboardAttentionSplit', () {
+    test('fold keeps 2 and overflows the rest', () {
+      final items = List.generate(
+        4,
+        (i) => DashboardAttentionEntry(
+          nome: 'A$i',
+          titulo: 'Prioridade hoje',
+          subt: 'Contato',
+          acao: 'Revisar',
+          route: '/alunos/$i',
+          icon: 'alert-triangle',
+        ),
+      );
+      final split = dashboardAttentionSplit(items);
+      expect(split.fold, hasLength(2));
+      expect(split.more, hasLength(2));
+      expect(split.fold.first.nome, 'A0');
     });
   });
 
