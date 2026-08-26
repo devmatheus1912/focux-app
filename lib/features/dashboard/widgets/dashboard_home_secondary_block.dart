@@ -7,6 +7,7 @@ import '../data/dashboard_repository.dart';
 import '../providers/aderencia_provider.dart';
 import '../utils/dashboard_entry_motion.dart';
 import '../utils/dashboard_home_focus.dart';
+import '../utils/dashboard_radar_items.dart';
 import '../utils/dashboard_microcopy.dart';
 import 'dashboard_aderencia_semana_widget.dart';
 import 'dashboard_base_radar_strip.dart';
@@ -71,7 +72,7 @@ class DashboardHomeSecondaryBlock extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (alunosScore.isNotEmpty) ...[
+        if (dashboardRadarVisibleOnHome(alunosScore)) ...[
           SizedBox(height: DashboardLayout.sliverSectionGap),
           DashboardBaseRadarStrip(scores: alunosScore),
         ],

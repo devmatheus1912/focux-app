@@ -92,6 +92,75 @@ void main() {
     expect(find.textContaining('Risco médio'), findsOneWidget);
   });
 
+  testWidgets('radar some com só pendência de cadastro', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DashboardBaseRadarStrip(
+            scores: [
+              AlunoScoreResumo(
+                alunoId: 1,
+                alunoNome: 'Nathalia',
+                score: 40,
+                ritmo: 'ok',
+                risco: 'Risco alto',
+                proximaAcao: 'Completar mapa corporal',
+                narrativa: '',
+                objetivo: '',
+                acaoUrl: '/alunos/1',
+                prioridade: 'P0',
+                iaSugerida: false,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text(DashboardMicrocopy.radarDaBase), findsNothing);
+    expect(find.textContaining('Nathalia'), findsNothing);
+  });
+
+  testWidgets('radar mostra 2 no fold e Ver todos no overflow', (tester) async {
+    AlunoScoreResumo retomar(int id, String nome) => AlunoScoreResumo(
+      alunoId: id,
+      alunoNome: nome,
+      score: 50,
+      ritmo: 'ok',
+      risco: 'Risco alto',
+      proximaAcao: 'Retomar treino com mensagem curta',
+      narrativa: '',
+      objetivo: '',
+      acaoUrl: '/alunos/$id',
+      prioridade: 'P0',
+      iaSugerida: false,
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DashboardBaseRadarStrip(
+            scores: [
+              retomar(1, 'Ana'),
+              retomar(2, 'Bruno'),
+              retomar(3, 'Carla'),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(find.textContaining('Ana'), findsOneWidget);
+    expect(find.textContaining('Bruno'), findsOneWidget);
+    expect(find.textContaining('Carla'), findsNothing);
+    expect(find.text(DashboardMicrocopy.radarVerTodos), findsOneWidget);
+
+    await tester.tap(find.text(DashboardMicrocopy.radarVerTodos));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('Carla'), findsWidgets);
+  });
+
   testWidgets('coach banner dismissível', (tester) async {
     var dismissed = false;
     await tester.pumpWidget(

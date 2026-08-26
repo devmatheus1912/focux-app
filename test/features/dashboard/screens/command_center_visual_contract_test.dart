@@ -64,7 +64,12 @@ void main() {
       File(
         'lib/features/dashboard/widgets/dashboard_base_radar_strip.dart',
       ).readAsStringSync(),
-      contains('SingleChildScrollView'),
+      allOf(
+        contains('FxSettingsGroup'),
+        contains('dashboardRadarSplit'),
+        contains('radarVerTodos'),
+        isNot(contains('SingleChildScrollView')),
+      ),
     );
     expect(
       File(

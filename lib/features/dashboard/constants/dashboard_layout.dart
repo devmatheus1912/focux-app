@@ -50,16 +50,6 @@ abstract final class DashboardLayout {
 
   static bool isComfortable(double width) => width >= comfortableWidth;
 
-  static bool isLandscape(BuildContext context) =>
-      MediaQuery.orientationOf(context) == Orientation.landscape;
-
-  /// Em landscape confortável, abre mais cards no radar/rails.
-  static int radarCardLimit(BuildContext context) {
-    final width = MediaQuery.sizeOf(context).width;
-    if (isLandscape(context) || isComfortable(width)) return 5;
-    return 3;
-  }
-
   static double headerActionSize(double width) =>
       width < 430 ? headerActionCompact : headerActionComfort;
 

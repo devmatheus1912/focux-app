@@ -14,6 +14,7 @@ import '../utils/dashboard_day_focus.dart';
 import '../utils/dashboard_entry_motion.dart';
 import '../utils/dashboard_home_focus.dart';
 import '../utils/dashboard_home_snapshot.dart';
+import '../utils/dashboard_radar_items.dart';
 import '../utils/dashboard_scroll_logic.dart';
 import '../utils/dashboard_screen_helpers.dart';
 import 'dashboard_agenda_hoje_strip.dart';
@@ -190,7 +191,8 @@ List<Widget> buildDashboardHomePrimarySlivers({
         child: SizedBox(height: DashboardLayout.sliverSectionGap),
       ),
     ],
-    if (focusRules.omitSecondarySections && alunosScore.isNotEmpty)
+    if (focusRules.omitSecondarySections &&
+        dashboardRadarVisibleOnHome(alunosScore))
       SliverToBoxAdapter(
         child: DashboardBaseRadarStrip(scores: alunosScore),
       ),

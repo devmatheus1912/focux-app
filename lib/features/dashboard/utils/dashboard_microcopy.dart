@@ -66,7 +66,7 @@ abstract final class DashboardMicrocopy {
       'Lista 1-toque abaixo do Foco. Desça até as ferramentas e o sticky some.';
   static const helpHomeRadarTitle = 'Radar e pulso';
   static const helpHomeRadarBody =
-      'Saúde da base, aderência e financeiro — recorte do dia, não a lista completa.';
+      'Até 2 no Hoje — quem pede contato. Cadastro e ficha incompleta ficam no aluno.';
   static const helpHomeSearchTitle = 'Busca e catálogo';
   static const helpHomeSearchBody =
       'A lupa acha aluno ou ferramenta. Mais ferramentas abre o catálogo do plano.';
@@ -74,6 +74,9 @@ abstract final class DashboardMicrocopy {
       'Sugestão opcional — você decide se aplica. IA só na aba IA, nunca sozinha.';
   static const helpHomeOpen = 'Ajuda';
   static const radarDaBase = 'Radar da base';
+  static const radarVerTodos = 'Ver todos';
+  static const radarSheetSubtitle =
+      'Contato hoje — cadastro e ficha ficam no aluno.';
   static const coachCatalogHint =
       'Abra o catálogo em Mais ferramentas para achar qualquer recurso.';
   static const coachEntendi = 'Entendi';
