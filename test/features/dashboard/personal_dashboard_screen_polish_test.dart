@@ -11,14 +11,7 @@ void main() {
     expect(screen, anyOf(contains('FxLoading'), contains('SkeletonLoader'), contains('SkeletonList'), contains('DashboardShimmer'), contains('Shimmer'), contains('IaCopilotInsightsLoading'), contains('_loading')));
     expect(screen, contains('RefreshIndicator'));
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(16));
-    expect(screen, contains('if (onboardingFromHome != null)'));
-    expect(
-      screen,
-      matches(
-        RegExp(
-          r'if \(onboardingFromHome != null\)[\s\S]*?else \{[\s\S]*?ref\.watch\(onboardingStatusProvider\)',
-        ),
-      ),
-    );
+    expect(screen, contains('onboardingFromHome'));
+    expect(screen, isNot(contains('onboardingStatusProvider')));
   });
 }

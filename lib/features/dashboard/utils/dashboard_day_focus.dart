@@ -49,16 +49,6 @@ class DashboardDayFocus {
   final bool? coversRetention;
   final bool? riskDominante;
 
-  /// Gap de contrato: BFF omitiu `dayFocus`. Só release; debug falha no assert do snapshot.
-  static const estavelSsotGap = DashboardDayFocus(
-    kind: DashboardDayFocusKind.estavel,
-    coversRetention: false,
-    riskDominante: false,
-    headline: 'Operação sob controle',
-    detail: 'Veja as próximas ações abaixo e escolha por onde começar.',
-    semanticLabel: 'Foco do dia: operação sob controle.',
-  );
-
   factory DashboardDayFocus.fromJson(Map<String, dynamic> json) {
     return DashboardDayFocus(
       kind: dashboardDayFocusKindFromApi(json['kind'] as String?),

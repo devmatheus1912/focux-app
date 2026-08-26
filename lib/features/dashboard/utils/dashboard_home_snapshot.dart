@@ -144,12 +144,13 @@ class DashboardHomeSnapshot {
     final receitaTrend = dashboardReceitaSparklineMensal(
       finData?.evolucaoMensal ?? const [],
     );
-    final agendaHoje = commandCenter?.agendaHoje.length ?? 0;
-    assert(
-      home.dayFocus != null,
-      'BFF GET /api/dashboard/home deve enviar dayFocus (SSOT)',
-    );
-    final dayFocus = home.dayFocus ?? DashboardDayFocus.estavelSsotGap;
+    final agendaHoje = commandCenter?.agendaHojeCount ??
+        commandCenter?.agendaHoje.length ??
+        0;
+    final dayFocus = home.dayFocus;
+    if (dayFocus == null) {
+      throw StateError('BFF GET /api/dashboard/home omitiu dayFocus');
+    }
     final riskDominante = dayFocus.riskDominante ?? false;
     final focusRules = DashboardHomeFocusRules.resolve(
       focusMode: focusMode,

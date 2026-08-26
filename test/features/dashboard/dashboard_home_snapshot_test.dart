@@ -99,5 +99,47 @@ void main() {
       expect(snap.dashboardNextActions.first.priorityBadge, 'P0');
       expect(snap.dashboardNextActions.first.route, '/retencao');
     });
+
+    test('throws when BFF omits dayFocus', () {
+      final home = DashboardHomeBundle(
+        personal: DashboardData(
+          totalAlunos: 1,
+          alunosAtivos: 1,
+          planoAtual: 'PRO',
+          limiteAlunos: 50,
+        ),
+        commandCenter: CommandCenterData(
+          agendaHoje: const [],
+          alunosEmRisco: const [],
+          alunosScore: const [],
+          cobrancasPendentes: const [],
+          autonomiaGargalos: const [],
+          modoOperacao: const [],
+          filaAcoes: const [],
+        ),
+        financeiro: FinanceiroDashboard(
+          receitaMes: 0,
+          receitaAcumulada: 0,
+          ticketMedio: 0,
+          totalInadimplentes: 0,
+          previsaoReceita: 0,
+          vencimentosProximos: const [],
+          topAlunos: const [],
+          evolucaoMensal: const [],
+        ),
+      );
+      expect(
+        () => DashboardHomeSnapshot.build(
+          home: home,
+          finData: home.financeiro,
+          alunos: null,
+          historicoCheckins: null,
+          commandCenter: home.commandCenter,
+          focusMode: false,
+          isCommandPreparing: false,
+        ),
+        throwsA(isA<StateError>()),
+      );
+    });
   });
 }

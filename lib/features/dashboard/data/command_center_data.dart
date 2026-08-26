@@ -1,5 +1,6 @@
 class CommandCenterData {
   final List<AgendamentoResumo> agendaHoje;
+  final int agendaHojeCount;
   final List<AlertaResumo> alunosEmRisco;
   final List<AlunoScoreResumo> alunosScore;
   final List<FilaAcaoResumo> filaAcoes;
@@ -9,23 +10,26 @@ class CommandCenterData {
 
   CommandCenterData({
     required this.agendaHoje,
+    int? agendaHojeCount,
     required this.alunosEmRisco,
     required this.alunosScore,
     required this.filaAcoes,
     required this.cobrancasPendentes,
     required this.autonomiaGargalos,
     required this.modoOperacao,
-  });
+  }) : agendaHojeCount = agendaHojeCount ?? agendaHoje.length;
 
   factory CommandCenterData.fromJson(Map<String, dynamic> json) {
-    return CommandCenterData(
-      agendaHoje:
+    final agenda =
           (json['agendaHoje'] as List?)
               ?.map(
                 (e) => AgendamentoResumo.fromJson(e as Map<String, dynamic>),
               )
               .toList() ??
-          [],
+          [];
+    return CommandCenterData(
+      agendaHoje: agenda,
+      agendaHojeCount: (json['agendaHojeCount'] as num?)?.toInt(),
       alunosEmRisco:
           (json['alunosEmRisco'] as List?)
               ?.map((e) => AlertaResumo.fromJson(e as Map<String, dynamic>))

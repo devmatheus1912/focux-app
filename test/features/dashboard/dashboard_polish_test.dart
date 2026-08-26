@@ -132,8 +132,9 @@ void main() {
     expect(screen, contains('checkinsTrend'));
     expect(screen, contains('showDashboardToolsCatalogSheet'));
     expect(screen, contains('alunoFromAlertaResumo'));
-    expect(screen, contains('if (onboardingFromHome != null)'));
+    expect(screen, contains('onboardingFromHome'));
     expect(screen, contains('statusFromHome: onboardingFromHome'));
+    expect(screen, isNot(contains('onboardingStatusProvider')));
 
     final semanticsCount = 'Semantics('.allMatches(screen).length;
     expect(semanticsCount, greaterThanOrEqualTo(10));

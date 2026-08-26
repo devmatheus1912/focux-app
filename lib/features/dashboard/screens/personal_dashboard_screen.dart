@@ -13,7 +13,6 @@ import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/theme/tokens_strip.dart';
-import '../../onboarding/providers/onboarding_provider.dart';
 import '../../planos/providers/plano_features_provider.dart';
 import '../utils/dashboard_home_coach_store.dart';
 import '../utils/dashboard_home_focus.dart';

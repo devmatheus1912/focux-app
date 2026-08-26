@@ -107,23 +107,11 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                 }
 
                 final onboardingFromHome = home.onboardingResumo;
-                late final bool onboardingIncomplete;
-                late final bool primeiroTreinoCriado;
-                if (onboardingFromHome != null) {
-                  onboardingIncomplete = !onboardingFromHome.ativacaoCompleta;
-                  primeiroTreinoCriado =
-                      onboardingFromHome.primeiroTreinoCriado;
-                } else {
-                  final onboardingAsync = ref.watch(onboardingStatusProvider);
-                  onboardingIncomplete = onboardingAsync.maybeWhen(
-                    data: (s) => !s.ativacaoCompleta,
-                    orElse: () => false,
-                  );
-                  primeiroTreinoCriado = onboardingAsync.maybeWhen(
-                    data: (s) => s.primeiroTreinoCriado,
-                    orElse: () => false,
-                  );
-                }
+                final onboardingIncomplete =
+                    onboardingFromHome != null &&
+                    !onboardingFromHome.ativacaoCompleta;
+                final primeiroTreinoCriado =
+                    onboardingFromHome?.primeiroTreinoCriado ?? false;
                 if (_focusPreferenceLoaded &&
                     !_autoFocusApplied &&
                     !_sessionFocusTouched) {
