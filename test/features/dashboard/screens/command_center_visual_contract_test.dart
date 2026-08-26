@@ -54,7 +54,8 @@ void main() {
     expect(widget, contains('class DashboardDayPulseStrip'));
     expect(widget, contains('FxSettingsTile'));
     expect(widget, contains('pulsoOperacional'));
-    expect(widget, contains('hideRiscoChip'));
+    expect(widget, isNot(contains('hideRiscoChip')));
+    expect(widget, contains("label: 'Risco'"));
     expect(widget, contains('dashboardAttentionSplit'));
     expect(widget, contains('class DashboardPrioritiesOverlay'));
     expect(widget, contains('dashboardPanelIsOffscreen'));
@@ -99,7 +100,7 @@ void main() {
     expect(widget, contains('dashboardChatUnreadCount'));
     expect(widget, contains('tendenciaVaziaBase'));
     expect(widget, contains('dashboardPulseEmptyHint'));
-    expect(widget, contains('pulseAgendaAccent'));
+    expect(widget, isNot(contains('pulseAgendaAccent')));
     expect(widget, contains('dashboardShowsInlinePrioritiesLink'));
     expect(widget, contains('mensagensNaoLidas'));
     expect(widget, contains('notificacoesNaoLidas'));

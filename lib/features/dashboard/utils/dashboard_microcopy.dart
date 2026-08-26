@@ -24,11 +24,9 @@ abstract final class DashboardMicrocopy {
   static const catalogoSubtitle =
       'Ferramentas do plano. Bloqueadas abrem o upgrade.';
   static const buscarFerramenta = 'Buscar ferramenta...';
-  static const tendencia7Dias = 'Tendência 7 dias';
+  static const tendencia7Dias = '7 dias';
   static const checkinsPulseLabel = 'Check-ins';
-  static const tendenciaVaziaBase =
-      'Base ativa · nenhum treino nos últimos 7 dias';
-  static const tendenciaVaziaGeral = 'Sem check-ins nos últimos 7 dias';
+  static const tendenciaVaziaBase = 'Sem treinos';
   static const abrirMensagens = 'Abrir mensagens';
   static const proximasAcoes = 'Próximas ações';
   static const agendaHoje = 'Agenda de hoje';

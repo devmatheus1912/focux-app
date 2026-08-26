@@ -25,12 +25,9 @@ class DashboardDayPulseStrip extends StatelessWidget {
     required this.checkinsHoje,
     required this.checkinsTrend,
     required this.riscoAlto,
-    required this.agendaHoje,
-    required this.hideRiscoChip,
     required this.primary,
     required this.onAtivos,
     required this.onCheckins,
-    required this.onAgenda,
     required this.onRisco,
     this.showEmptyTrendCta = false,
     this.hideEmptyTrend = false,
@@ -47,15 +44,12 @@ class DashboardDayPulseStrip extends StatelessWidget {
   final int checkinsHoje;
   final List<double> checkinsTrend;
   final int riscoAlto;
-  final int agendaHoje;
-  final bool hideRiscoChip;
   final Color primary;
   final VoidCallback onAtivos;
   final VoidCallback onCheckins;
-  final VoidCallback onAgenda;
   final VoidCallback onRisco;
   final bool showEmptyTrendCta;
-  /// Esconde “Tendência 7 dias” vazia quando Foco/aderência já narram o zero.
+  /// Esconde “7 dias” vazia quando Foco/aderência já narram o zero.
   final bool hideEmptyTrend;
   final String? emptyTrendCtaLabel;
   final VoidCallback? onEmptyTrendCta;
@@ -76,11 +70,6 @@ class DashboardDayPulseStrip extends StatelessWidget {
       checkinsHoje: checkinsHoje,
       neutralAccent: caption,
       emptyAccent: alunosAtivos > 0 ? EagleTokens.warn : caption,
-    );
-    final agendaAccent = pulseAgendaAccent(
-      agendaHoje: agendaHoje,
-      primary: primary,
-      caption: caption,
     );
     final trendReady = checkinsTrend.length >= 7;
     final hasTrend = trendReady && checkinsTrend.any((v) => v > 0);
@@ -126,33 +115,19 @@ class DashboardDayPulseStrip extends StatelessWidget {
                     : '$checkinsHoje check-ins',
             onTap: onCheckins,
           ),
-          hideRiscoChip
-              ? FxSettingsTile(
-                fxIcon: 'calendar',
-                label: 'Agenda',
-                value: '$agendaHoje',
-                numeric: true,
-                showDivider: showTrendRow || showCta,
-                accent: agendaAccent,
-                semanticsLabel:
-                    agendaHoje == 0
-                        ? '0 na agenda, sem movimento hoje'
-                        : '$agendaHoje na agenda',
-                onTap: onAgenda,
-              )
-              : FxSettingsTile(
-                fxIcon: riscoAlto > 0 ? 'alert-triangle' : 'circle-check',
-                label: 'Risco',
-                value: '$riscoAlto',
-                numeric: true,
-                showDivider: showTrendRow || showCta,
-                accent: riscoAccent,
-                semanticsLabel:
-                    riscoAlto == 0
-                        ? '0 em risco, sem movimento hoje'
-                        : '$riscoAlto em risco',
-                onTap: onRisco,
-              ),
+          FxSettingsTile(
+            fxIcon: riscoAlto > 0 ? 'alert-triangle' : 'circle-check',
+            label: 'Risco',
+            value: '$riscoAlto',
+            numeric: true,
+            showDivider: showTrendRow || showCta,
+            accent: riscoAccent,
+            semanticsLabel:
+                riscoAlto == 0
+                    ? '0 em risco, sem movimento hoje'
+                    : '$riscoAlto em risco',
+            onTap: onRisco,
+          ),
           if (showTrendRow)
             _PulseTrendRow(
               isDark: isDark,
@@ -163,7 +138,6 @@ class DashboardDayPulseStrip extends StatelessWidget {
               checkinsHoje: checkinsHoje,
               checkinsTrend: checkinsTrend,
               emptyHint: emptyHint,
-              alunosAtivos: alunosAtivos,
               comfortable: comfortable,
               trailingReserve: trailingReserve,
               onTap: onCheckins,
@@ -195,7 +169,6 @@ class _PulseTrendRow extends StatelessWidget {
     required this.checkinsHoje,
     required this.checkinsTrend,
     required this.emptyHint,
-    required this.alunosAtivos,
     required this.comfortable,
     required this.trailingReserve,
     required this.onTap,
@@ -210,7 +183,6 @@ class _PulseTrendRow extends StatelessWidget {
   final int checkinsHoje;
   final List<double> checkinsTrend;
   final String? emptyHint;
-  final int alunosAtivos;
   final bool comfortable;
   final double trailingReserve;
   final VoidCallback onTap;
@@ -220,19 +192,14 @@ class _PulseTrendRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final chrome = ShellChrome.of(context);
     final caption = dashboardReadableCaption(context, isDark: isDark);
-    final emptyDetail =
-        alunosAtivos > 0
-            ? DashboardMicrocopy.tendenciaVaziaBase
-            : DashboardMicrocopy.tendenciaVaziaGeral;
     final hint = dashboardPulseEmptyHint(
       checkinsHoje: checkinsHoje,
       checkinsTrend: checkinsTrend,
       fromApi: emptyHint,
     );
+    final emptyValue = hint ?? DashboardMicrocopy.tendenciaVaziaBase;
     final sparkW = comfortable ? 88.0 : 72.0;
     final sparkH = comfortable ? 24.0 : 20.0;
-    final subtitle =
-        trendReady && !hasTrend && !hideEmptyTrend ? emptyDetail : null;
 
     return Semantics(
       button: true,
@@ -241,7 +208,7 @@ class _PulseTrendRow extends StatelessWidget {
               ? 'Tendência de check-ins carregando'
               : hasTrend
               ? 'Tendência de check-ins nos últimos 7 dias'
-              : hint ?? emptyDetail,
+              : emptyValue,
       child: InkWell(
         onTap: () {
           HapticFeedback.selectionClick();
@@ -282,29 +249,13 @@ class _PulseTrendRow extends StatelessWidget {
                     child: Row(
                       children: [
                         Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                DashboardMicrocopy.tendencia7Dias,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: FocuxHubTypography.cardTitle(
-                                  color: chrome.ink,
-                                ),
-                              ),
-                              if (subtitle != null) ...[
-                                const SizedBox(height: 2),
-                                Text(
-                                  subtitle,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: FocuxHubTypography.bodyMuted(
-                                    color: caption,
-                                  ),
-                                ),
-                              ],
-                            ],
+                          child: Text(
+                            DashboardMicrocopy.tendencia7Dias,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: FocuxHubTypography.cardTitle(
+                              color: chrome.ink,
+                            ),
                           ),
                         ),
                         if (hasTrend)
@@ -324,7 +275,9 @@ class _PulseTrendRow extends StatelessWidget {
                             !hideEmptyTrend &&
                             trailingReserve <= 0)
                           Text(
-                            '—',
+                            emptyValue,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                             style: FocuxHubTypography.metric(
                               color: caption,
                               fontSize: TokensStrip.fontBodySm,

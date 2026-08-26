@@ -201,8 +201,6 @@ List<Widget> buildDashboardHomePrimarySlivers({
           checkinsHoje: checkinsHoje,
           checkinsTrend: checkinsTrend,
           riscoAlto: riscoAlto,
-          agendaHoje: agendaHoje,
-          hideRiscoChip: snap.alunosEmRisco.isNotEmpty,
           primary: primary,
           collapseBody: focusRules.collapsePulseBody,
           trailingReserve: 0,
@@ -214,7 +212,6 @@ List<Widget> buildDashboardHomePrimarySlivers({
           onAtivos:
               () => goPersonalShellTab(context, '/alunos?filtro=ativos'),
           onCheckins: () => goPersonalShellTab(context, '/checkin/historico'),
-          onAgenda: () => goPersonalShellTab(context, '/agenda'),
           onRisco:
               riscoAlto > 0
                   ? () => goPersonalShellTab(context, '/alunos?filtro=risco')
