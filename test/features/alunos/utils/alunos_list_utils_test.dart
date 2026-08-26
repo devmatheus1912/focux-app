@@ -227,12 +227,28 @@ void main() {
       expect(
         showAlunosBulkPayCta([
           Aluno(id: 1, nome: 'Ana', email: 'a@test.com', status: 'ATIVO'),
-        ]),
+        ], temFinanceiro: true),
         isFalse,
       );
     });
 
-    test('mostra se algum selecionado está inadimplente', () {
+    test('FREE nunca mostra, mesmo com inadimplente', () {
+      expect(
+        showAlunosBulkPayCta([
+          Aluno(
+            id: 1,
+            nome: 'Bia',
+            email: 'b@test.com',
+            status: 'ATIVO',
+            inadimplente: true,
+            statusFinanceiro: 'INADIMPLENTE',
+          ),
+        ], temFinanceiro: false),
+        isFalse,
+      );
+    });
+
+    test('mostra se o plano tem financeiro e algum está inadimplente', () {
       expect(
         showAlunosBulkPayCta([
           Aluno(id: 1, nome: 'Ana', email: 'a@test.com', status: 'ATIVO'),
@@ -244,7 +260,7 @@ void main() {
             inadimplente: true,
             statusFinanceiro: 'INADIMPLENTE',
           ),
-        ]),
+        ], temFinanceiro: true),
         isTrue,
       );
     });

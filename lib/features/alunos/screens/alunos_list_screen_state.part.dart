@@ -235,8 +235,24 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
     }
   }
 
+  bool get _temFinanceiro {
+    final home = ref.read(alunosHomeProvider).valueOrNull;
+    return (home?.planoFeatures ?? ref.read(planoFeaturesProvider).valueOrNull)
+            ?.normalizeForTier()
+            .financeiro ==
+        true;
+  }
+
   Future<void> _marcarPagosSelecionados() async {
     if (_selecionados.isEmpty) return;
+    if (!_temFinanceiro) {
+      await UpgradePromptSheet.show(
+        context: context,
+        featureName: 'Financeiro',
+        capability: 'financeiro',
+      );
+      return;
+    }
     try {
       await ref
           .read(apiClientProvider)
@@ -257,9 +273,16 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
         });
       }
     } catch (e) {
-      if (mounted) {
-        FeedbackHelper.showError(context, friendlyError(e));
+      if (!mounted) return;
+      if (e is DioException && e.response?.statusCode == 403) {
+        await UpgradePromptSheet.show(
+          context: context,
+          featureName: 'Financeiro',
+          capability: 'financeiro',
+        );
+        return;
       }
+      FeedbackHelper.showError(context, friendlyError(e));
     }
   }
 
@@ -301,6 +324,7 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
     ];
     final mostrarMarcarPago = showAlunosBulkPayCta(
       alunos.where((a) => _selecionados.contains(a.id)),
+      temFinanceiro: _temFinanceiro,
     );
     showFxHomeSheet<void>(
       context,

@@ -1,8 +1,11 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../features/auth/providers/auth_provider.dart';
+import '../../planos/providers/plano_features_provider.dart';
+import '../../subscription/widgets/upgrade_prompt_sheet.dart';
 import '../constants/alunos_list_filters.dart';
 import '../data/aluno_contact_utils.dart';
 import '../data/aluno_repository.dart';
@@ -53,6 +56,10 @@ class _AcoesMassaScreenState extends ConsumerState<AcoesMassaScreen> {
     });
   }
 
+  bool get _temFinanceiro =>
+      ref.read(planoFeaturesProvider).valueOrNull?.normalizeForTier().financeiro ==
+      true;
+
   void _mostrarAcoes(BuildContext context) {
     if (_selecionados.isEmpty) {
       FeedbackHelper.showError(context, 'Selecione pelo menos um aluno');
@@ -63,6 +70,7 @@ class _AcoesMassaScreenState extends ConsumerState<AcoesMassaScreen> {
       builder:
           (sheetContext) => _BottomSheetAcoes(
             qtd: _selecionados.length,
+            mostrarMarcarPago: _temFinanceiro,
             onMarcarPagos: () {
               Navigator.pop(sheetContext);
               _marcarPagos();
@@ -121,6 +129,14 @@ class _AcoesMassaScreenState extends ConsumerState<AcoesMassaScreen> {
   }
 
   Future<void> _marcarPagos() async {
+    if (!_temFinanceiro) {
+      await UpgradePromptSheet.show(
+        context: context,
+        featureName: 'Financeiro',
+        capability: 'financeiro',
+      );
+      return;
+    }
     setState(() => _processando = true);
     try {
       await ref
@@ -138,7 +154,14 @@ class _AcoesMassaScreenState extends ConsumerState<AcoesMassaScreen> {
         setState(() => _selecionados.clear());
       }
     } catch (e) {
-      if (mounted) {
+      if (!mounted) return;
+      if (e is DioException && e.response?.statusCode == 403) {
+        await UpgradePromptSheet.show(
+          context: context,
+          featureName: 'Financeiro',
+          capability: 'financeiro',
+        );
+      } else {
         FeedbackHelper.showError(context, friendlyError(e));
       }
     }
@@ -277,12 +300,14 @@ class _AcoesMassaScreenState extends ConsumerState<AcoesMassaScreen> {
 
 class _BottomSheetAcoes extends StatefulWidget {
   final int qtd;
+  final bool mostrarMarcarPago;
   final VoidCallback onMarcarPagos;
   final void Function(String) onAtualizarStatus;
   final VoidCallback onExcluir;
 
   const _BottomSheetAcoes({
     required this.qtd,
+    required this.mostrarMarcarPago,
     required this.onMarcarPagos,
     required this.onAtualizarStatus,
     required this.onExcluir,
@@ -314,12 +339,14 @@ class _BottomSheetAcoesState extends State<_BottomSheetAcoes> {
             leading: Icon(Icons.checklist_rounded, color: primary, size: 18),
           ),
           const SizedBox(height: 16),
-          FxLiquidPrimaryButton(
-            icon: Icons.attach_money,
-            label: 'Marcar mensalidade como paga',
-            onPressed: widget.onMarcarPagos,
-          ),
-          const SizedBox(height: TokensStrip.s4),
+          if (widget.mostrarMarcarPago) ...[
+            FxLiquidPrimaryButton(
+              icon: Icons.attach_money,
+              label: 'Marcar mensalidade como paga',
+              onPressed: widget.onMarcarPagos,
+            ),
+            const SizedBox(height: TokensStrip.s4),
+          ],
           Text(
             'Atualizar status',
             style: Theme.of(context).textTheme.titleSmall,

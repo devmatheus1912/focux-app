@@ -34,6 +34,7 @@ void main() {
     expect(screen, contains('FxHomeSheetHeader'));
     expect(screen, isNot(contains('Atalhos de foco')));
     expect(screen, contains('showAlunosBulkPayCta'));
+    expect(screen, contains('temFinanceiro:'));
     expect(screen, contains('ListenableBuilder'));
     expect(screen, isNot(contains('_searchFocusNode.addListener')));
     expect(screen, contains('AlunoListPreferencesStore'));

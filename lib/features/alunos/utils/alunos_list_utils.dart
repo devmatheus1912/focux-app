@@ -31,12 +31,15 @@ Color alunoListSecondaryInk(bool isDark) =>
   };
 }
 
-/// Pagar em lote só se algum selecionado está em atraso.
+/// Pagar em lote só se o plano tem financeiro e algum selecionado está em atraso.
 bool alunoListIsOverdue(Aluno aluno) =>
     aluno.inadimplente || aluno.statusFinanceiro == 'INADIMPLENTE';
 
-bool showAlunosBulkPayCta(Iterable<Aluno> selected) =>
-    selected.any(alunoListIsOverdue);
+bool showAlunosBulkPayCta(
+  Iterable<Aluno> selected, {
+  required bool temFinanceiro,
+}) =>
+    temFinanceiro && selected.any(alunoListIsOverdue);
 
 /// Banner de contato — some se a base inteira já é o foco (eco do chip).
 bool showAlunosContatoBanner({
