@@ -2,15 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../theme/brand_palette.dart';
-import '../theme/focux_hub_typography.dart';
 import '../theme/fx_settings_layout.dart';
 import '../theme/shell_chrome.dart';
 import '../theme/tokens_strip.dart';
 import 'fx_home_sheet.dart';
 import 'fx_icon.dart';
+import 'fx_settings_group.dart';
 
 /// Chrome canônico do ícone de ajuda — paridade Home (`DashboardHomeHeader` 36pt).
-/// Glifo = `?` outline (Perfil). O círculo é só o well do header.
 abstract final class FxHelpChrome {
   FxHelpChrome._();
 
@@ -22,10 +21,11 @@ abstract final class FxHelpChrome {
 }
 
 class FxHelpTip {
-  const FxHelpTip(this.title, this.body);
+  const FxHelpTip(this.title, this.body, {this.icon});
 
   final String title;
   final String body;
+  final String? icon;
 }
 
 /// `?` no well circular da Home. Use em todo header e ajuda inline.
@@ -70,6 +70,7 @@ Future<void> showFxHelpSheet(
   required String title,
   required String subtitle,
   List<FxHelpTip> tips = const [],
+  String? footer,
   List<Widget> extra = const [],
 }) {
   HapticFeedback.selectionClick();
@@ -82,6 +83,7 @@ Future<void> showFxHelpSheet(
         title: title,
         subtitle: subtitle,
         tips: tips,
+        footer: footer,
         extra: extra,
       );
     },
@@ -95,6 +97,7 @@ class FxHelpSheetFrame extends StatelessWidget {
     required this.title,
     required this.subtitle,
     this.tips = const [],
+    this.footer,
     this.extra = const [],
   });
 
@@ -102,6 +105,7 @@ class FxHelpSheetFrame extends StatelessWidget {
   final String title;
   final String subtitle;
   final List<FxHelpTip> tips;
+  final String? footer;
   final List<Widget> extra;
 
   @override
@@ -110,6 +114,8 @@ class FxHelpSheetFrame extends StatelessWidget {
     final brand = BrandPalette.softened(Theme.of(context).colorScheme.primary);
     final maxHeight =
         MediaQuery.sizeOf(context).height * FxHomeSheetChrome.maxHeightFactor;
+    final footnote = footer?.trim();
+    final hasFootnote = footnote != null && footnote.isNotEmpty;
 
     return FxHomeSheetSurface(
       isDark: isDark,
@@ -135,28 +141,38 @@ class FxHelpSheetFrame extends StatelessWidget {
             child: SingleChildScrollView(
               physics: const BouncingScrollPhysics(),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  for (var i = 0; i < tips.length; i++) ...[
-                    Text(
-                      tips[i].title,
-                      style: FocuxHubTypography.sectionTitle(
-                        context,
-                        color: chrome.ink,
+                  if (tips.isNotEmpty)
+                    FxSettingsGroup(
+                      footer:
+                          hasFootnote
+                              ? Text(
+                                footnote,
+                                style: FxSettingsLayout.footer(
+                                  color: chrome.mute,
+                                ),
+                              )
+                              : null,
+                      children: [
+                        for (var i = 0; i < tips.length; i++)
+                          FxHelpTipRow(
+                            tip: tips[i],
+                            showDivider: i < tips.length - 1,
+                          ),
+                      ],
+                    ),
+                  if (tips.isEmpty && hasFootnote)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: FxSettingsLayout.groupPadH,
+                      ),
+                      child: Text(
+                        footnote,
+                        style: FxSettingsLayout.footer(color: chrome.mute),
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      tips[i].body,
-                      style: FocuxHubTypography.bodyMuted(
-                        color: chrome.mute,
-                        height: 1.35,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    if (i < tips.length - 1) SizedBox(height: TokensStrip.s3),
-                  ],
-                  if (tips.isNotEmpty && extra.isNotEmpty)
+                  if ((tips.isNotEmpty || hasFootnote) && extra.isNotEmpty)
                     SizedBox(height: TokensStrip.s3),
                   ...extra,
                 ],
@@ -164,6 +180,81 @@ class FxHelpSheetFrame extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Linha de ajuda inset — título + caption, sem chevron (não navega).
+class FxHelpTipRow extends StatelessWidget {
+  const FxHelpTipRow({super.key, required this.tip, required this.showDivider});
+
+  final FxHelpTip tip;
+  final bool showDivider;
+
+  @override
+  Widget build(BuildContext context) {
+    final chrome = ShellChrome.of(context);
+    final brand = BrandPalette.softened(Theme.of(context).colorScheme.primary);
+    final iconName = tip.icon;
+
+    return Semantics(
+      container: true,
+      label: '${tip.title}. ${tip.body}',
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(
+          minHeight: FxSettingsLayout.rowMinHeight,
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (iconName != null) ...[
+              Padding(
+                padding: const EdgeInsets.only(top: 2),
+                child: FxIcon(
+                  name: iconName,
+                  size: FxSettingsLayout.iconSize,
+                  color: brand,
+                ),
+              ),
+              const SizedBox(width: FxSettingsLayout.iconGap),
+            ],
+            Expanded(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  border:
+                      showDivider
+                          ? Border(
+                            bottom: BorderSide(
+                              color: chrome.line,
+                              width: FxSettingsLayout.dividerThickness,
+                            ),
+                          )
+                          : null,
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: TokensStrip.s3),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        tip.title,
+                        style: FxSettingsLayout.rowLabel(color: chrome.ink),
+                      ),
+                      const SizedBox(
+                        height: FxSettingsLayout.captionAfterHeader,
+                      ),
+                      Text(
+                        tip.body,
+                        style: FxSettingsLayout.subhead(color: chrome.mute),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

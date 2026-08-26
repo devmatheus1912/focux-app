@@ -127,7 +127,7 @@ class _PersonalDashboardScreenState
         return;
       }
       if (sheet == 'help') {
-        showDashboardHomeHelpSheet(context, isDark: isDark);
+        showDashboardHomeHelpSheet(context);
         return;
       }
       if (sheet == 'catalog') {

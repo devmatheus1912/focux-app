@@ -33,7 +33,7 @@ class ExerciseVideoSpecTips extends StatelessWidget {
       subtitle: summary,
       tips: [
         for (final tip in ExerciseVideoUploadSpec.tips)
-          FxHelpTip(tip.title, tip.body),
+          FxHelpTip(tip.title, tip.body, icon: tip.icon),
       ],
     );
   }

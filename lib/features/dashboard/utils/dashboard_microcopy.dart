@@ -44,6 +44,7 @@ abstract final class DashboardMicrocopy {
   static const headerRailFocoHint = 'Menos distrações';
   static const headerRailNotif = 'Notificações';
   static const headerRailNotifHint = 'Novidades e alertas';
+
   /// Personalidade da marca — fora do header (evita eco com «Foco do dia»).
   static const headerTaglineLead = '';
   static const headerTaglineAccent = 'Resultado';
@@ -54,16 +55,29 @@ abstract final class DashboardMicrocopy {
   static const scoreComoCalculamos =
       'Índice Focux (0–100): perfil, consistência de treinos (7d), evolução (30d), '
       'medida recente, chat recente e status financeiro. Risco sobe com dias sem treino.';
-  static const helpHomeTitle = 'Ajuda da Home';
+  static const helpHomeTitle = 'Como usar o Hoje';
   static const helpHomeBody =
-      'Foco do dia prioriza o que importa. Próximas ações são o 1-toque. '
-      'Radar mostra saúde da base. Use busca ou o catálogo em Mais ferramentas. '
-      'Modo Foco esconde o secundário em dia de crise.';
+      'Cobrar, retomar e a agenda do dia — um toque no que importa agora.';
+  static const helpHomeFocusTitle = 'Foco do dia';
+  static const helpHomeFocusBody =
+      'O banner é a prioridade do dia. Toque para agir. O chip Foco esconde o resto quando o dia aperta.';
+  static const helpHomeActionsTitle = 'Próximas ações';
+  static const helpHomeActionsBody =
+      'Lista 1-toque abaixo do Foco. Desça até as ferramentas e o sticky some.';
+  static const helpHomeRadarTitle = 'Radar e pulso';
+  static const helpHomeRadarBody =
+      'Saúde da base, aderência e financeiro — recorte do dia, não a lista completa.';
+  static const helpHomeSearchTitle = 'Busca e catálogo';
+  static const helpHomeSearchBody =
+      'A lupa acha aluno ou ferramenta. Mais ferramentas abre o catálogo do plano.';
+  static const helpHomeFooter =
+      'Sugestão opcional — você decide se aplica. IA só na aba IA, nunca sozinha.';
   static const helpHomeOpen = 'Ajuda';
   static const radarDaBase = 'Radar da base';
   static const coachCatalogHint =
       'Abra o catálogo em Mais ferramentas para achar qualquer recurso.';
   static const coachEntendi = 'Entendi';
+
   /// Alias estável de [proximasAcoes] (contratos/source-scan).
   static const commandCenterTitle = proximasAcoes;
   static const commandCenterSubtitle =
@@ -71,8 +85,10 @@ abstract final class DashboardMicrocopy {
   static const modoFoco = 'Modo foco';
   static const modoFocoOn = 'Modo foco ligado';
   static const modoFocoOff = 'Modo foco desligado';
+
   /// Chip no banner: estado ativo.
   static const modoFocoChipOn = 'Foco';
+
   /// Chip no banner: ação para entrar no modo foco.
   static const modoFocoChipOff = 'Focar';
   static const toqueParaExpandir = 'toque para expandir';

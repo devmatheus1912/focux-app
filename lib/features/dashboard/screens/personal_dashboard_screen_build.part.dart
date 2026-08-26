@@ -270,11 +270,7 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                                   isDark: themeDark,
                                   primary: primary,
                                 ),
-                            onHelp:
-                                () => showDashboardHomeHelpSheet(
-                                  context,
-                                  isDark: themeDark,
-                                ),
+                            onHelp: () => showDashboardHomeHelpSheet(context),
                           ),
                           if (!focusRules.omitSecondarySections)
                             SliverToBoxAdapter(

@@ -188,17 +188,17 @@ class _FxIconPainter extends CustomPainter {
         break;
 
       case 'help':
-        // `?` outline — o poço circular fica no ShellHeaderIconButton, não no glifo.
+        canvas.drawCircle(const Offset(12, 12), 9, paint);
+        canvas.drawLine(const Offset(12, 16.5), const Offset(12, 17.2), paint);
         canvas.drawPath(
           Path()
-            ..moveTo(7.6, 9.0)
-            ..cubicTo(7.6, 5.7, 9.55, 3.7, 12, 3.7)
-            ..cubicTo(15.05, 3.7, 17.1, 6.15, 17.1, 9.05)
-            ..cubicTo(17.1, 11.55, 14.85, 12.75, 13.05, 13.95)
-            ..cubicTo(12.35, 14.4, 12, 15.15, 12, 16.35),
+            ..moveTo(9.2, 10.2)
+            ..cubicTo(9.2, 8.2, 10.5, 7.2, 12, 7.2)
+            ..cubicTo(13.5, 7.2, 14.8, 8.2, 14.8, 9.8)
+            ..cubicTo(14.8, 11.2, 13.6, 11.8, 12.6, 12.6)
+            ..cubicTo(12.2, 12.9, 12, 13.3, 12, 14),
           paint,
         );
-        canvas.drawCircle(const Offset(12, 19.55), 1.05, paint);
         break;
 
       case 'bell':

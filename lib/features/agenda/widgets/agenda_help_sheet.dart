@@ -10,19 +10,23 @@ Future<void> showAgendaHelpSheet(BuildContext context) {
     tips: const [
       FxHelpTip(
         'Próximo',
-        'O card verde é o próximo atendimento de hoje. Toque para abrir, confirmar ou concluir.',
+        'O card em destaque é o próximo atendimento de hoje. Toque para abrir, confirmar ou concluir.',
+        icon: 'spark',
       ),
       FxHelpTip(
         'Lacuna',
-        'Faixas “min livres” são buracos na agenda. Toque em Encaixar para preencher.',
+        'Faixas “min livres” são buracos na agenda. Encaixar preenche o espaço.',
+        icon: 'calendar',
       ),
       FxHelpTip(
         'Atendimento',
         'Toque no aluno para abrir a ficha, remarcar, WhatsApp, confirmar ou concluir.',
+        icon: 'users',
       ),
       FxHelpTip(
-        'iCal',
-        'O ícone de calendário no topo copia o link para o Google Calendar ou o Apple Calendar.',
+        'Calendário',
+        'O ícone no topo copia o link iCal para o Google Calendar ou o Apple Calendar.',
+        icon: 'article',
       ),
     ],
   );

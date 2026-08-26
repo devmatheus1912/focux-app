@@ -7,27 +7,32 @@ Future<void> showTreinoDetailHelpSheet(BuildContext context) {
     context,
     title: 'Como montar este treino',
     subtitle:
-        'Adicione, ajuste a prescrição e atribua quando o plano estiver pronto.',
+        'Inclua exercícios, ajuste a prescrição e atribua quando o plano estiver pronto.',
     tips: const [
       FxHelpTip(
         'Adicionar',
         'O botão principal inclui da biblioteca. O menu do topo também chega lá.',
+        icon: 'plus',
       ),
       FxHelpTip(
         'Prescrição',
         'Toque no exercício para séries, reps, carga e o vídeo de execução.',
+        icon: 'dumbbell',
       ),
       FxHelpTip(
         'Vídeo',
-        'O aluno vê a mesma gravação. Toque no ? ao lado de Como filmar para as specs.',
+        'O aluno vê a mesma gravação. O ? ao lado de Como filmar mostra as specs.',
+        icon: 'spark',
       ),
       FxHelpTip(
         'Reordenar',
         'Segure o card e arraste. A ordem é salva neste treino.',
+        icon: 'route',
       ),
       FxHelpTip(
         'Ações',
         'O menu do exercício duplica, substitui ou remove. O do treino atribui ou exclui.',
+        icon: 'article',
       ),
     ],
   );

@@ -4,9 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/core/theme/fx_settings_layout.dart';
 import 'package:focux_app/core/widgets/fx_help.dart';
+import 'package:focux_app/core/widgets/fx_settings_group.dart';
+import 'package:focux_app/features/dashboard/utils/dashboard_microcopy.dart';
 
 void main() {
-  test('glifo help é ? outline, sem poço circular', () {
+  test('glifo help continua o ? no círculo', () {
     final icon = File('lib/core/widgets/fx_icon.dart').readAsStringSync();
     final help = File('lib/core/widgets/fx_help.dart').readAsStringSync();
     final helpStart = icon.indexOf("case 'help':");
@@ -14,16 +16,32 @@ void main() {
     expect(helpStart, greaterThanOrEqualTo(0));
     expect(nextCase, greaterThan(helpStart));
     final block = icon.substring(helpStart, nextCase);
-    expect(block, isNot(contains('Offset(12, 12), 9')));
-    expect(block, contains('Offset(12, 19.55)'));
+    expect(block, contains('Offset(12, 12), 9'));
+    expect(block, contains('Offset(12, 16.5)'));
     expect(help, contains('HapticFeedback.selectionClick()'));
-    expect(help, contains('FxHelpChrome.glyphSize'));
-    expect(help, contains('BrandPalette.softened'));
+    expect(help, contains('FxSettingsGroup'));
+    expect(help, contains('FxHelpTipRow'));
     expect(FxHelpChrome.glyphSize, FxSettingsLayout.iconSize);
     expect(FxHelpChrome.iconName, 'help');
   });
 
-  testWidgets('FxHelpIconButton abre a sheet canônica sem Entendi', (
+  test('Home help tem tips inset e footnote, sem muro no subtítulo', () {
+    final home =
+        File(
+          'lib/features/dashboard/widgets/dashboard_home_help_sheet.dart',
+        ).readAsStringSync();
+    expect(home, contains('FxHelpTip'));
+    expect(home, contains('footer:'));
+    expect(home, isNot(contains('extra:')));
+    expect(DashboardMicrocopy.helpHomeTitle, 'Como usar o Hoje');
+    expect(
+      DashboardMicrocopy.helpHomeBody.contains('Foco do dia prioriza'),
+      isFalse,
+    );
+    expect(DashboardMicrocopy.helpHomeFooter, contains('aba IA'));
+  });
+
+  testWidgets('FxHelpIconButton abre a sheet com grupo inset e sem Entendi', (
     tester,
   ) async {
     await tester.pumpWidget(
@@ -39,8 +57,13 @@ void main() {
                         title: 'Como montar este treino',
                         subtitle: 'Adicione e ajuste a prescrição.',
                         tips: const [
-                          FxHelpTip('Adicionar', 'O botão principal inclui.'),
+                          FxHelpTip(
+                            'Adicionar',
+                            'O botão principal inclui.',
+                            icon: 'plus',
+                          ),
                         ],
+                        footer: 'Sugestão opcional — você decide se aplica.',
                       ),
                 ),
           ),
@@ -53,8 +76,15 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(FxHelpSheetFrame), findsOneWidget);
+    expect(find.byType(FxSettingsGroup), findsOneWidget);
+    expect(find.byType(FxHelpTipRow), findsOneWidget);
     expect(find.text('Como montar este treino'), findsOneWidget);
     expect(find.text('Adicionar'), findsOneWidget);
+    expect(find.text('O botão principal inclui.'), findsOneWidget);
+    expect(
+      find.text('Sugestão opcional — você decide se aplica.'),
+      findsOneWidget,
+    );
     expect(find.text('Entendi'), findsNothing);
     expect(find.byTooltip('Fechar'), findsOneWidget);
   });
