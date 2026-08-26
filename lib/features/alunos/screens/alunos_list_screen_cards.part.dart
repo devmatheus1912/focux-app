@@ -18,8 +18,6 @@ class _FxChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    final chipBg = dashboardPrioritiesChipBackground(primary, isDark: isDark);
-    final chipFg = dashboardPrioritiesChipForeground(primary, isDark: isDark);
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
 
@@ -40,20 +38,20 @@ class _FxChip extends StatelessWidget {
         decoration: BoxDecoration(
           color:
               isSelected
-                  ? chipBg
+                  ? Colors.transparent
                   : (isDark
                       ? Colors.white.withValues(alpha: 0.05)
-                      : BrandPalette.soft(primary, dark: false)),
+                      : Colors.white.withValues(alpha: 0.72)),
           borderRadius: BorderRadius.circular(TokensStrip.rPill),
-          border:
-              isSelected
-                  ? null
-                  : Border.all(
-                    color:
-                        isDark
-                            ? Colors.white.withValues(alpha: 0.07)
-                            : primary.withValues(alpha: 0.08),
-                  ),
+          border: Border.all(
+            color:
+                isSelected
+                    ? primary.withValues(alpha: isDark ? 0.55 : 0.42)
+                    : (isDark
+                        ? Colors.white.withValues(alpha: 0.07)
+                        : primary.withValues(alpha: 0.10)),
+            width: isSelected ? 1.4 : 1,
+          ),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -65,7 +63,7 @@ class _FxChip extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.clip,
               style: dashboardChipLabelStyle(
-                isSelected ? chipFg : ink,
+                isSelected ? primary : ink,
               ).copyWith(fontSize: 12, fontWeight: FontWeight.w800),
             ),
             const SizedBox(width: 6),
@@ -75,17 +73,17 @@ class _FxChip extends StatelessWidget {
               decoration: BoxDecoration(
                 color:
                     isSelected
-                        ? chipFg.withValues(alpha: isDark ? 0.14 : 0.18)
+                        ? primary.withValues(alpha: isDark ? 0.14 : 0.10)
                         : (isDark
                             ? Colors.white.withValues(alpha: 0.08)
-                            : Colors.white.withValues(alpha: 0.72)),
+                            : Colors.black.withValues(alpha: 0.04)),
                 borderRadius: BorderRadius.circular(TokensStrip.rPill),
               ),
               alignment: Alignment.center,
               child: Text(
                 '$count',
                 style: dashboardChipLabelStyle(
-                  isSelected ? chipFg : mute,
+                  isSelected ? primary : mute,
                 ).copyWith(fontSize: 10.5, fontWeight: FontWeight.w900),
               ),
             ),

@@ -4,9 +4,11 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
+import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/fx_utils.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../constants/alunos_layout.dart';
 import '../constants/alunos_list_filters.dart';
 import '../data/aluno_contact_utils.dart';
@@ -158,13 +160,20 @@ class AlunoListCard extends ConsumerWidget {
         onTap:
             modoSelecao ? onToggle : () => context.push('/alunos/${aluno.id}'),
         onLongPress: onLongPress,
-        borderRadius: BorderRadius.circular(TokensStrip.rCard),
+        borderRadius: BorderRadius.circular(FxSettingsLayout.groupRadius),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 150),
-          padding: EdgeInsets.all(cardPadding),
-          decoration: ShellChrome.forDark(isDark).listCard(
-            primary: primary,
-            radius: TokensStrip.rCard,
+          constraints: const BoxConstraints(
+            minHeight: FxSettingsLayout.rowMinHeight,
+          ),
+          padding: EdgeInsets.symmetric(
+            horizontal: cardPadding,
+            vertical: compact ? 8 : 10,
+          ),
+          decoration: fxListCardDecoration(
+            context,
+            accent: primary,
+            radius: FxSettingsLayout.groupRadius,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,

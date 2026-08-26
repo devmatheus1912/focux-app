@@ -37,15 +37,7 @@ class _AlunosTriageBanner extends StatelessWidget {
           ),
           child: Row(
             children: [
-              Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: warn.withValues(alpha: isDark ? 0.18 : 0.12),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(Icons.warning_amber_rounded, size: 18, color: warn),
-              ),
+              Icon(Icons.warning_amber_rounded, size: 22, color: warn),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
@@ -77,7 +69,7 @@ class _AlunosTriageBanner extends StatelessWidget {
               ),
               Icon(
                 Icons.chevron_right_rounded,
-                size: 18,
+                size: FxSettingsLayout.chevronSize,
                 color: BrandPalette.sectionLink(primary, dark: isDark),
               ),
             ],
@@ -241,45 +233,30 @@ class _ExcluirAlunosSheet extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 22),
-          SizedBox(
-            width: double.infinity,
-            height: AlunosLayout.touchTarget,
-            child: ElevatedButton.icon(
+          Align(
+            alignment: Alignment.center,
+            child: DashboardHomeActionChip(
+              label: 'Excluir $count ${count == 1 ? 'aluno' : 'alunos'}',
+              accent: EagleTokens.bad,
+              isDark: isDark,
               onPressed: () {
                 HapticFeedback.heavyImpact();
                 Navigator.of(context).pop(true);
               },
-              icon: const Icon(Icons.delete_outline_rounded, size: 18),
-              label: Text('Excluir $count ${count == 1 ? 'aluno' : 'alunos'}'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: EagleTokens.bad,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                elevation: 0,
-              ),
             ),
           ),
           const SizedBox(height: 10),
-          SizedBox(
-            width: double.infinity,
-            height: AlunosLayout.touchTarget,
-            child: TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              style: TextButton.styleFrom(
-                minimumSize: const Size(
-                  FxHomeSheetChrome.touchTarget,
-                  FxHomeSheetChrome.touchTarget,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            style: TextButton.styleFrom(
+              minimumSize: const Size(
+                FxHomeSheetChrome.touchTarget,
+                FxHomeSheetChrome.touchTarget,
               ),
-              child: Text(
-                'Cancelar',
-                style: TextStyle(color: mute, fontWeight: FontWeight.w700),
-              ),
+            ),
+            child: Text(
+              'Cancelar',
+              style: TextStyle(color: mute, fontWeight: FontWeight.w700),
             ),
           ),
         ],

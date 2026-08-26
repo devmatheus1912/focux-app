@@ -15,8 +15,6 @@ class _AccessProgressStrip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final primary = Theme.of(context).colorScheme.primary;
-    final action = BrandPalette.sectionAction(primary, dark: isDark);
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final ready = hasName && hasEmail;
@@ -44,20 +42,9 @@ class _AccessProgressStrip extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 10),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: action.withValues(alpha: isDark ? 0.18 : 0.10),
-                  borderRadius: BorderRadius.circular(999),
-                ),
-                child: Text(
-                  '$progress/2',
-                  style: TextStyle(
-                    color: action,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
+              Text(
+                '$progress/2',
+                style: FxSettingsLayout.rowMetric(color: mute),
               ),
             ],
           ),
@@ -252,18 +239,14 @@ class _OptionChip extends StatelessWidget {
         curve: Curves.easeOutCubic,
         padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 9),
         decoration: BoxDecoration(
-          color:
-              selected
-                  ? action.withValues(alpha: isDark ? 0.18 : 0.11)
-                  : (isDark
-                      ? Colors.white.withValues(alpha: 0.05)
-                      : BrandPalette.soft(primary, dark: false)),
+          color: Colors.transparent,
           borderRadius: BorderRadius.circular(TokensStrip.rPill),
           border: Border.all(
             color:
                 selected
-                    ? action.withValues(alpha: 0.42)
+                    ? action.withValues(alpha: 0.55)
                     : line.withValues(alpha: 0.85),
+            width: selected ? 1.4 : 1,
           ),
         ),
         child: Row(
@@ -284,43 +267,6 @@ class _OptionChip extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-
-class _ErrorCard extends StatelessWidget {
-  final String message;
-  final bool isDark;
-
-  const _ErrorCard({required this.message, required this.isDark});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: EagleTokens.bad.withValues(alpha: isDark ? 0.16 : 0.1),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: EagleTokens.bad.withValues(alpha: 0.25)),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Icon(Icons.error_outline, color: EagleTokens.bad, size: 18),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              message,
-              style: const TextStyle(
-                color: EagleTokens.bad,
-                fontSize: 13,
-                height: 1.35,
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }

@@ -13,6 +13,12 @@ void main() {
     expect(screen, anyOf(contains('FxLoading'), contains('SkeletonLoader'), contains('SkeletonList'), contains('DashboardShimmer'), contains('Shimmer'), contains('IaCopilotInsightsLoading'), contains('_loading')));
     expect(screen, contains('copySensitiveToClipboard'));
     expect(screen, contains('Outro objetivo'));
+    expect(screen, contains('DashboardHomeActionChip'));
+    expect(screen, contains('SafeArea'));
+    expect(screen, contains('enabled: _canSubmit && !_loading'));
+    expect(screen, contains('FxErrorState'));
+    expect(screen, isNot(contains('_ErrorCard')));
+    expect(screen, contains('FxSettingsGroup'));
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(16));
   });
 }

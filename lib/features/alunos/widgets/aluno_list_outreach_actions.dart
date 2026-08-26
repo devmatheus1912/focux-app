@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/brand_palette.dart';
+import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../constants/alunos_layout.dart';
 import '../data/aluno_contact_utils.dart';
@@ -125,8 +126,7 @@ class _AlunoQuickActionIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final visual = compact ? 36.0 : 40.0;
-    final iconSize = compact ? 17.0 : 20.0;
+    final iconSize = compact ? 17.0 : FxSettingsLayout.iconSize;
 
     return Semantics(
       label: tooltip,
@@ -140,18 +140,7 @@ class _AlunoQuickActionIcon extends StatelessWidget {
             onTap: onTap,
             customBorder: const CircleBorder(),
             child: Center(
-              child: Container(
-                width: visual,
-                height: visual,
-                alignment: Alignment.center,
-                decoration: compact
-                    ? null
-                    : BoxDecoration(
-                      color: color.withValues(alpha: 0.12),
-                      shape: BoxShape.circle,
-                    ),
-                child: Icon(icon, size: iconSize, color: color),
-              ),
+              child: Icon(icon, size: iconSize, color: color),
             ),
           ),
         ),

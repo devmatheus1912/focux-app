@@ -14,6 +14,7 @@ import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/theme/fx_settings_layout.dart';
+import '../../../core/widgets/fx_error_state.dart';
 import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../providers/alunos_provider.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
@@ -574,24 +575,17 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                               ],
                             ),
                           ],
-                          if (!_canSubmit) ...[
-                            const SizedBox(height: TokensStrip.s4),
-                            Text(
-                              'Complete nome e e-mail para cadastrar',
-                              textAlign: TextAlign.center,
-                              style: FocuxHubTypography.bodyMuted(
-                                color: chrome.mute,
-                              ),
-                            ),
-                          ],
                           if (_error != null) ...[
                             const SizedBox(height: 14),
                             Semantics(
                               liveRegion: true,
                               label: _error!,
-                              child: _ErrorCard(
+                              child: FxErrorState(
+                                chromeOnDark: isDark,
+                                primary: primary,
                                 message: _error!,
-                                isDark: isDark,
+                                onRetry: _submit,
+                                title: 'Não foi possível cadastrar',
                               ),
                             ),
                           ],
@@ -601,9 +595,9 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                   ),
                 ),
               ),
-              if (_canSubmit)
-                Align(
-                  alignment: AlignmentDirectional.bottomEnd,
+              Align(
+                alignment: AlignmentDirectional.bottomEnd,
+                child: SafeArea(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(
                       TokensStrip.s4,
@@ -616,7 +610,9 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         Text(
-                          'O convite de $_firstName será preparado após o cadastro.',
+                          _canSubmit
+                              ? 'O convite de $_firstName será preparado após o cadastro.'
+                              : 'Complete nome e e-mail para cadastrar',
                           style: FocuxHubTypography.bodyMuted(
                             color: chrome.mute,
                           ).copyWith(fontSize: 11),
@@ -626,13 +622,14 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                           label: _loading ? 'Cadastrando…' : 'Cadastrar',
                           accent: primary,
                           isDark: isDark,
-                          enabled: !_loading,
+                          enabled: _canSubmit && !_loading,
                           onPressed: _submit,
                         ),
                       ],
                     ),
                   ),
                 ),
+              ),
             ],
           ),
         ),

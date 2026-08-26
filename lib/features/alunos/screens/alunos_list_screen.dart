@@ -45,6 +45,7 @@ import '../../../core/widgets/fx_premium_entrance.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
+import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 
 export '../constants/alunos_list_filters.dart';
 

@@ -228,83 +228,50 @@ extension AlunosListScreenBody on _AlunosListScreenState {
                                   ),
                                   child: Row(
                                     children: [
-                                      Expanded(
-                                        child: OutlinedButton.icon(
-                                          onPressed: () {
-                                            setState(() {
-                                              if (_selecionados.length ==
-                                                  filtrados.length) {
-                                                _selecionados.clear();
-                                              } else {
-                                                _selecionados.addAll(
-                                                  filtrados.map((a) => a.id),
-                                                );
-                                              }
-                                            });
-                                          },
-                                          icon: Icon(
-                                            _selecionados.length ==
-                                                    filtrados.length
-                                                ? Icons.deselect_rounded
-                                                : Icons.done_all_rounded,
-                                            size: 18,
+                                      TextButton(
+                                        onPressed: () {
+                                          setState(() {
+                                            if (_selecionados.length ==
+                                                filtrados.length) {
+                                              _selecionados.clear();
+                                            } else {
+                                              _selecionados.addAll(
+                                                filtrados.map((a) => a.id),
+                                              );
+                                            }
+                                          });
+                                        },
+                                        style: TextButton.styleFrom(
+                                          minimumSize: const Size(
+                                            AlunosLayout.touchTarget,
+                                            AlunosLayout.touchTarget,
                                           ),
-                                          label: Text(
-                                            _selecionados.length ==
-                                                    filtrados.length
-                                                ? 'Limpar'
-                                                : 'Todos',
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
+                                          foregroundColor: ink,
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 12,
                                           ),
-                                          style: OutlinedButton.styleFrom(
-                                            minimumSize: const Size(
-                                              AlunosLayout.touchTarget,
-                                              AlunosLayout.touchTarget,
-                                            ),
-                                            side: BorderSide(
-                                              color:
-                                                  isDark
-                                                      ? EagleTokens.darkLine
-                                                      : primary.withValues(
-                                                        alpha: 0.18,
-                                                      ),
-                                            ),
-                                            foregroundColor: ink,
-                                            shape: const StadiumBorder(),
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 14,
-                                            ),
+                                        ),
+                                        child: Text(
+                                          _selecionados.length ==
+                                                  filtrados.length
+                                              ? 'Limpar'
+                                              : 'Todos',
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: FocuxHubTypography.chip(
+                                            ink,
+                                          ).copyWith(
+                                            fontWeight: FontWeight.w800,
                                           ),
                                         ),
                                       ),
-                                      const SizedBox(width: 10),
-                                      Expanded(
-                                        child: ElevatedButton.icon(
-                                          onPressed: _showBulkActionsSheet,
-                                          icon: const Icon(
-                                            Icons.bolt_rounded,
-                                            size: 18,
-                                          ),
-                                          label: Text(
+                                      const Spacer(),
+                                      DashboardHomeActionChip(
+                                        label:
                                             'Ações (${_selecionados.length})',
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                          style: ElevatedButton.styleFrom(
-                                            minimumSize: const Size(
-                                              AlunosLayout.touchTarget,
-                                              AlunosLayout.touchTarget,
-                                            ),
-                                            backgroundColor: primary,
-                                            foregroundColor: Colors.white,
-                                            shape: const StadiumBorder(),
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 14,
-                                            ),
-                                            elevation: 0,
-                                          ),
-                                        ),
+                                        accent: primary,
+                                        isDark: isDark,
+                                        onPressed: _showBulkActionsSheet,
                                       ),
                                     ],
                                   ),

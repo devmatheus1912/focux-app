@@ -256,21 +256,10 @@ extension AlunosListScreenHeader on _AlunosListScreenState {
                           listenable: _searchFocusNode,
                           builder: (context, _) {
                             final focused = _searchFocusNode.hasFocus;
-                            return Container(
-                              width: 26,
-                              height: 26,
-                              decoration: BoxDecoration(
-                                color:
-                                    focused
-                                        ? primary.withValues(alpha: 0.08)
-                                        : Colors.transparent,
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon(
-                                Icons.search_rounded,
-                                size: 18,
-                                color: focused ? primary : mute,
-                              ),
+                            return Icon(
+                              Icons.search_rounded,
+                              size: 18,
+                              color: focused ? primary : mute,
                             );
                           },
                         ),
@@ -323,22 +312,16 @@ extension AlunosListScreenHeader on _AlunosListScreenState {
                             child: InkWell(
                               onTap: _showListOptions,
                               borderRadius: BorderRadius.circular(999),
-                              child: Container(
+                              child: SizedBox(
                                 width: 34,
                                 height: 34,
-                                alignment: Alignment.center,
-                                decoration: BoxDecoration(
-                                  color: primary.withValues(
-                                    alpha: isDark ? 0.14 : 0.07,
-                                  ),
-                                  shape: BoxShape.circle,
-                                ),
                                 child: Stack(
+                                  alignment: Alignment.center,
                                   clipBehavior: Clip.none,
                                   children: [
                                     Icon(
                                       Icons.tune_rounded,
-                                      size: 18,
+                                      size: FxSettingsLayout.iconSize,
                                       color: primary,
                                     ),
                                     if (_ordenacao !=
@@ -405,13 +388,15 @@ extension AlunosListScreenHeader on _AlunosListScreenState {
                         count: ativosCount,
                         isDark: isDark,
                       ),
-                      const SizedBox(width: 8),
-                      _alunosFilterChip(
-                        filtro: AlunoFiltro.inadimplentes,
-                        label: context.alunosL10n.alunosFilterOverdue,
-                        count: inadCount,
-                        isDark: isDark,
-                      ),
+                      if (_temFinanceiro) ...[
+                        const SizedBox(width: 8),
+                        _alunosFilterChip(
+                          filtro: AlunoFiltro.inadimplentes,
+                          label: context.alunosL10n.alunosFilterOverdue,
+                          count: inadCount,
+                          isDark: isDark,
+                        ),
+                      ],
                       const SizedBox(width: 8),
                       _alunosFilterChip(
                         filtro: AlunoFiltro.risco,

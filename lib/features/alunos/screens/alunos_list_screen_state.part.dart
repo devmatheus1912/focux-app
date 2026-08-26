@@ -118,13 +118,17 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
   }
 
   void _setFiltro(AlunoFiltro filtro, {bool track = true}) {
-    setState(() => _filtro = filtro);
+    final next =
+        filtro == AlunoFiltro.inadimplentes && !_temFinanceiro
+            ? AlunoFiltro.todos
+            : filtro;
+    setState(() => _filtro = next);
     _syncHomeQuery();
-    _scrollChipIntoView(filtro);
+    _scrollChipIntoView(next);
     if (track) {
       AnalyticsService.instance.track(
         ProductEvents.alunosFilterChanged,
-        props: {'filtro': filtro.name},
+        props: {'filtro': next.name},
       );
     }
   }
