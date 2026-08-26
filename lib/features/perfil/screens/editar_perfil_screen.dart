@@ -269,6 +269,8 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
                         index: 0,
                         child: FxSettingsGroup(
                           header: 'Dados pessoais',
+                          caption:
+                              'Usado no perfil comercial e na ficha do aluno.',
                           children: [
                             Semantics(
                               label: 'Nome completo',

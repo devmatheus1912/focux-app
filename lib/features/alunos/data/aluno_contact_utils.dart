@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../core/utils/clipboard_sensitive.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import 'aluno_followup_store.dart';
 import 'aluno_repository.dart';
@@ -125,7 +126,7 @@ Future<void> openAlunoWhatsappOutreach(
     await launchUrl(uri, mode: LaunchMode.externalApplication);
     return;
   }
-  await Clipboard.setData(ClipboardData(text: mensagem));
+  await copySensitiveToClipboard(mensagem);
   if (context.mounted) {
     FeedbackHelper.showSuccess(
       context,

@@ -21,6 +21,10 @@ import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 import 'package:focux_app/core/utils/friendly_error.dart';
+import '../../../core/utils/clipboard_sensitive.dart';
+import '../../../core/widgets/fx_settings_tile.dart';
+import '../data/aluno_repository.dart';
+import '../utils/aluno_invite_copy.dart';
 
 part 'add_aluno_screen_widgets.part.dart';
 
@@ -56,6 +60,7 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
 
   String? _genero;
   String? _tipoConsultoria;
+  bool _objetivoLivre = false;
   bool _loading = false;
   String? _error;
 
@@ -119,6 +124,30 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
 
   void _refreshSubmitState() {
     if (mounted) setState(() {});
+  }
+
+  void _selectObjetivoPreset(String objetivo) {
+    HapticFeedback.selectionClick();
+    setState(() {
+      _objetivoLivre = false;
+      _objetivoCtrl.text =
+          _objetivoCtrl.text.trim() == objetivo ? '' : objetivo;
+    });
+  }
+
+  void _toggleObjetivoLivre() {
+    HapticFeedback.selectionClick();
+    setState(() {
+      final next = !_objetivoLivre;
+      _objetivoLivre = next;
+      if (next) {
+        if (_objetivosRapidos.contains(_objetivoCtrl.text.trim())) {
+          _objetivoCtrl.clear();
+        }
+      } else {
+        _objetivoCtrl.clear();
+      }
+    });
   }
 
   @override
@@ -201,213 +230,136 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
     }
   }
 
-  void _showSenhaBottomSheet(final aluno) {
+  void _showSenhaBottomSheet(Aluno aluno) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final primary = Theme.of(context).colorScheme.primary;
-    final whatsappNumber = (aluno.whatsapp as String? ?? '').replaceAll(
-      RegExp(r'\D'),
-      '',
-    );
+    final chrome = ShellChrome.forDark(isDark);
+    final senha = aluno.senhaProvisoria ?? '';
+    final whatsappNumber = (aluno.whatsapp ?? '').replaceAll(RegExp(r'\D'), '');
     final hasWhatsapp = whatsappNumber.isNotEmpty;
+    final convite = alunoInviteMessage(
+      nome: aluno.nome,
+      email: aluno.email,
+      senhaProvisoria: senha,
+    );
+
+    Future<void> copyConvite() async {
+      await copySensitiveToClipboard(convite);
+      HapticFeedback.mediumImpact();
+    }
 
     showFxHomeSheet<void>(
       context,
       isDismissible: false,
       enableDrag: false,
       builder: (ctx) {
-        return FxHomeSheetSurface(
+        return FxHomeSheetScaffold(
           isDark: isDark,
+          leading: Icon(
+            Icons.check_rounded,
+            color: EagleTokens.good,
+            size: 22,
+          ),
+          title: 'Aluno cadastrado',
+          subtitle: 'Compartilhe o convite para o aluno acessar o app.',
+          trailing: const SizedBox.shrink(),
           child: Column(
-            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              FxHomeSheetHandle(isDark: isDark),
-              SizedBox(height: TokensStrip.s4),
-              FxHomeSheetHeader(
-                isDark: isDark,
-                title: 'Aluno cadastrado',
-                subtitle: 'Compartilhe o convite para o aluno acessar o app.',
-                leading: Icon(
-                  Icons.check_rounded,
-                  color: EagleTokens.good,
-                  size: 18,
-                ),
-                trailing: const SizedBox.shrink(),
+              FxSettingsGroup(
+                header: 'Senha provisória',
+                caption: 'O aluno deve trocar a senha no primeiro acesso.',
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: TokensStrip.s3,
+                    ),
+                    child: Center(
+                      child: Text(
+                        senha,
+                        textAlign: TextAlign.center,
+                        style: FxSettingsLayout.rowLabel(
+                          color: chrome.ink,
+                        ).copyWith(
+                          fontSize: 28,
+                          letterSpacing: 4,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 16),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.fromLTRB(18, 15, 18, 14),
-                decoration: BoxDecoration(
-                  color: primary.withValues(alpha: 0.08),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: primary.withValues(alpha: 0.2)),
-                ),
-                child: Column(
-                  children: [
-                    Text(
-                      'Senha provisória',
-                      style: TextStyle(
-                        color:
-                            isDark
-                                ? EagleTokens.darkInkMute
-                                : TokensStrip.textSecondary,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      aluno.senhaProvisoria!,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 31,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 5.5,
-                        color: isDark ? Colors.white : TokensStrip.textPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: 9),
-                    Text(
-                      'O aluno deve trocar a senha no primeiro acesso.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color:
-                            isDark
-                                ? EagleTokens.darkInkMute
-                                : TokensStrip.textSecondary,
-                        fontSize: 11.8,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 18),
-              SizedBox(
-                width: double.infinity,
-                height: 52,
-                child: ElevatedButton.icon(
-                  onPressed: () async {
-                    final texto = _inviteMessage(aluno);
-                    HapticFeedback.mediumImpact();
-                    if (hasWhatsapp) {
-                      final uri = Uri.parse(
-                        'https://wa.me/55$whatsappNumber?text=${Uri.encodeComponent(texto)}',
-                      );
-                      if (await canLaunchUrl(uri)) {
-                        await launchUrl(
-                          uri,
-                          mode: LaunchMode.externalApplication,
+              const SizedBox(height: FxSettingsLayout.groupGap),
+              FxSettingsGroup(
+                children: [
+                  if (hasWhatsapp)
+                    FxSettingsTile(
+                      icon: Icons.send_rounded,
+                      label: 'Enviar no WhatsApp',
+                      value: '',
+                      highlight: true,
+                      showDivider: true,
+                      onTap: () async {
+                        HapticFeedback.mediumImpact();
+                        final uri = Uri.parse(
+                          'https://wa.me/55$whatsappNumber?text=${Uri.encodeComponent(convite)}',
                         );
+                        if (await canLaunchUrl(uri)) {
+                          await launchUrl(
+                            uri,
+                            mode: LaunchMode.externalApplication,
+                          );
+                          if (ctx.mounted) Navigator.of(ctx).pop();
+                          if (mounted) context.pop(true);
+                          return;
+                        }
+                        await copyConvite();
                         if (ctx.mounted) Navigator.of(ctx).pop();
-                        if (mounted) context.pop(true);
-                        return;
-                      }
-                    }
-                    await Clipboard.setData(ClipboardData(text: texto));
-                    if (ctx.mounted) Navigator.of(ctx).pop();
-                    if (mounted) {
-                      FeedbackHelper.showSuccess(
-                        context,
-                        hasWhatsapp
-                            ? 'Mensagem copiada. Abra o WhatsApp e envie ao aluno.'
-                            : 'Convite copiado.',
-                      );
-                      context.pop(true);
-                    }
-                  },
-                  icon: Icon(
-                    hasWhatsapp ? Icons.send_rounded : Icons.copy_rounded,
-                    size: 18,
-                  ),
-                  label: Text(
-                    hasWhatsapp ? 'Enviar no WhatsApp' : 'Copiar convite',
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: primary,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
+                        if (mounted) {
+                          FeedbackHelper.showSuccess(
+                            context,
+                            'Mensagem copiada. Abra o WhatsApp e envie ao aluno.',
+                          );
+                          context.pop(true);
+                        }
+                      },
                     ),
-                    elevation: 0,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 10),
-              if (hasWhatsapp) ...[
-                SizedBox(
-                  width: double.infinity,
-                  height: 48,
-                  child: OutlinedButton.icon(
-                    onPressed: () async {
-                      await Clipboard.setData(
-                        ClipboardData(text: _inviteMessage(aluno)),
-                      );
-                      HapticFeedback.mediumImpact();
+                  FxSettingsTile(
+                    icon: Icons.copy_rounded,
+                    label: 'Copiar convite',
+                    value: '',
+                    showDivider: false,
+                    onTap: () async {
+                      await copyConvite();
                       if (ctx.mounted) Navigator.of(ctx).pop();
                       if (mounted) {
                         FeedbackHelper.showSuccess(
                           context,
-                          'Mensagem copiada.',
+                          'Convite copiado.',
                         );
                         context.pop(true);
                       }
                     },
-                    icon: Icon(
-                      Icons.copy_rounded,
-                      size: 18,
-                      color:
-                          isDark
-                              ? EagleTokens.darkInk
-                              : TokensStrip.textPrimary,
-                    ),
-                    label: Text(
-                      'Copiar convite',
-                      style: TextStyle(
-                        color:
-                            isDark
-                                ? EagleTokens.darkInk
-                                : TokensStrip.textPrimary,
-                      ),
-                    ),
-                    style: OutlinedButton.styleFrom(
-                      side: BorderSide(
-                        color:
-                            isDark
-                                ? EagleTokens.darkLine
-                                : TokensStrip.borderDefault,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: TokensStrip.s3),
+              TextButton(
+                style: TextButton.styleFrom(
+                  minimumSize: const Size(
+                    FxHomeSheetChrome.touchTarget,
+                    FxHomeSheetChrome.touchTarget,
                   ),
                 ),
-                const SizedBox(height: 6),
-              ],
-              const SizedBox(height: 6),
-              SizedBox(
-                width: double.infinity,
-                height: FxHomeSheetChrome.touchTarget,
-                child: TextButton(
-                  style: TextButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                  ),
-                  onPressed: () {
-                    Navigator.of(ctx).pop();
-                    if (mounted) context.pop(true);
-                  },
-                  child: Text(
-                    'Fechar',
-                    style: TextStyle(
-                      color:
-                          isDark
-                              ? EagleTokens.darkInkMute
-                              : TokensStrip.textSecondary,
-                      fontWeight: FontWeight.w700,
-                    ),
+                onPressed: () {
+                  Navigator.of(ctx).pop();
+                  if (mounted) context.pop(true);
+                },
+                child: Text(
+                  'Fechar',
+                  style: TextStyle(
+                    color: chrome.mute,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ),
@@ -416,13 +368,6 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
         );
       },
     );
-  }
-
-  String _inviteMessage(dynamic aluno) {
-    return 'Olá ${aluno.nome.split(' ').first}! Seu perfil no Focux foi criado.\n\n'
-        'Acesse com seu e-mail: ${aluno.email}\n'
-        'Senha provisória: ${aluno.senhaProvisoria}\n\n'
-        'Altere a senha no primeiro acesso.';
   }
 
   @override
@@ -528,25 +473,38 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                               Wrap(
                                 spacing: 8,
                                 runSpacing: 8,
-                                children:
-                                    _objetivosRapidos.map((objetivo) {
-                                      final selected =
-                                          _objetivoCtrl.text.trim() ==
-                                          objetivo;
-                                      return _OptionChip(
-                                        label: objetivo,
-                                        selected: selected,
-                                        isDark: isDark,
-                                        onTap: () {
-                                          HapticFeedback.selectionClick();
-                                          setState(() {
-                                            _objetivoCtrl.text =
-                                                selected ? '' : objetivo;
-                                          });
-                                        },
-                                      );
-                                    }).toList(),
+                                children: [
+                                  ..._objetivosRapidos.map((objetivo) {
+                                    final selected =
+                                        !_objetivoLivre &&
+                                        _objetivoCtrl.text.trim() == objetivo;
+                                    return _OptionChip(
+                                      label: objetivo,
+                                      selected: selected,
+                                      isDark: isDark,
+                                      onTap:
+                                          () => _selectObjetivoPreset(objetivo),
+                                    );
+                                  }),
+                                  _OptionChip(
+                                    label: 'Outro',
+                                    selected: _objetivoLivre,
+                                    isDark: isDark,
+                                    onTap: _toggleObjetivoLivre,
+                                  ),
+                                ],
                               ),
+                              if (_objetivoLivre) ...[
+                                const SizedBox(height: 10),
+                                _FxFormField(
+                                  controller: _objetivoCtrl,
+                                  label: 'Outro objetivo',
+                                  hint: 'Ex.: Reabilitação',
+                                  icon: Icons.flag_outlined,
+                                  isDark: isDark,
+                                  textCapitalization: TextCapitalization.words,
+                                ),
+                              ],
                               const SizedBox(height: 18),
                               _LabelRow(label: 'Gênero', isDark: isDark),
                               const SizedBox(height: 8),
