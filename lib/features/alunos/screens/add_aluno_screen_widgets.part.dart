@@ -34,11 +34,9 @@ class _AccessProgressStrip extends StatelessWidget {
                       : 'Preencha nome e e-mail',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
+                  style: FxSettingsLayout.subhead(
                     color: ready ? ink : mute,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w800,
-                  ),
+                  ).copyWith(fontWeight: FontWeight.w800),
                 ),
               ),
               const SizedBox(width: 10),
@@ -48,11 +46,11 @@ class _AccessProgressStrip extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 9),
+          const SizedBox(height: TokensStrip.s2),
           Row(
             children: [
               Expanded(child: _ProgressStep(done: hasName, isDark: isDark)),
-              const SizedBox(width: 8),
+              const SizedBox(width: TokensStrip.s2),
               Expanded(child: _ProgressStep(done: hasEmail, isDark: isDark)),
             ],
           ),
@@ -75,7 +73,7 @@ class _ProgressStep extends StatelessWidget {
     final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
 
     return Container(
-      height: 4,
+      height: 3,
       decoration: BoxDecoration(
         color: done ? action : line.withValues(alpha: isDark ? 0.7 : 0.75),
         borderRadius: BorderRadius.circular(TokensStrip.rPill),
@@ -88,103 +86,57 @@ class _FxFormField extends StatelessWidget {
   final TextEditingController controller;
   final String label;
   final IconData icon;
-  final bool isDark;
   final String? hint;
   final String? helper;
   final TextInputType? keyboardType;
   final TextCapitalization textCapitalization;
   final String? Function(String?)? validator;
+  final List<TextInputFormatter>? inputFormatters;
 
   const _FxFormField({
     required this.controller,
     required this.label,
     required this.icon,
-    required this.isDark,
     this.hint,
     this.helper,
     this.keyboardType,
     this.textCapitalization = TextCapitalization.none,
     this.validator,
+    this.inputFormatters,
   });
 
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-    final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: TextStyle(
-            color: mute,
-            fontSize: 11,
-            fontWeight: FontWeight.w800,
-          ),
-        ),
-        const SizedBox(height: 7),
         TextFormField(
           controller: controller,
           keyboardType: keyboardType,
           textCapitalization: textCapitalization,
+          inputFormatters: inputFormatters,
           validator: validator,
-          style: TextStyle(
-            color: ink,
-            fontSize: 15,
-            fontWeight: FontWeight.w600,
-          ),
-          cursorColor: primary,
-          decoration: InputDecoration(
-            hintText: hint,
-            prefixIcon: Icon(
-              icon,
-              size: 22,
-              color: BrandPalette.softened(primary),
-            ),
-            filled: true,
-            fillColor:
-                isDark
-                    ? EagleTokens.darkCardHi
-                    : TokensStrip.pageBg.withValues(alpha: 0.78),
-            hintStyle: TextStyle(color: mute.withValues(alpha: 0.62)),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 15,
-            ),
-            border: FxInputDeco.outlineBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide: BorderSide(color: line),
-            ),
-            enabledBorder: FxInputDeco.outlineBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide: BorderSide(color: line),
-            ),
-            focusedBorder: FxInputDeco.outlineBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide: BorderSide(
-                color: primary.withValues(alpha: 0.68),
-                width: 1.5,
-              ),
-            ),
-            errorBorder: FxInputDeco.outlineBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide: const BorderSide(color: EagleTokens.bad),
-            ),
-            focusedErrorBorder: FxInputDeco.outlineBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide: const BorderSide(color: EagleTokens.bad, width: 1.3),
-            ),
-            errorStyle: const TextStyle(color: EagleTokens.bad, fontSize: 11),
+          decoration: FxInputDeco.build(
+            context,
+            label,
+            icon: icon,
+            hint: hint,
+            iconColor: BrandPalette.softened(primary),
+            iconSize: FxSettingsLayout.iconSize,
           ),
         ),
         if (helper != null) ...[
           const SizedBox(height: 6),
           Text(
             helper!,
-            style: TextStyle(color: mute, fontSize: 11.5, height: 1.25),
+            style: FxSettingsLayout.subhead(
+              color:
+                  Theme.of(context).brightness == Brightness.dark
+                      ? EagleTokens.darkInkMute
+                      : TokensStrip.textSecondary,
+            ),
           ),
         ],
       ],
@@ -202,11 +154,9 @@ class _LabelRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       label,
-      style: TextStyle(
+      style: FxSettingsLayout.subhead(
         color: isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
-        fontSize: 11,
-        fontWeight: FontWeight.w800,
-      ),
+      ).copyWith(fontWeight: FontWeight.w800),
     );
   }
 }
@@ -237,7 +187,7 @@ class _OptionChip extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 160),
         curve: Curves.easeOutCubic,
-        padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 9),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
           color: Colors.transparent,
           borderRadius: BorderRadius.circular(TokensStrip.rPill),

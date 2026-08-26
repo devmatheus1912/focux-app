@@ -19,6 +19,9 @@ void main() {
     expect(screen, contains('FxErrorState'));
     expect(screen, isNot(contains('_ErrorCard')));
     expect(screen, contains('FxSettingsGroup'));
+    expect(screen, contains('BrPhone'));
+    expect(screen, contains('FxInputDeco.build'));
+    expect(screen, isNot(contains('Complete nome e e-mail para cadastrar')));
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(16));
   });
 }

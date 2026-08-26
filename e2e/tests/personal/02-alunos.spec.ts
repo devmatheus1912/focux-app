@@ -13,16 +13,16 @@ test.describe('@p0 personal alunos', () => {
     await expect(page).toHaveURL(/alunos\/novo/);
   });
 
-  test('rota /alunos/acoes-massa abre', async ({ page }) => {
+  test('rota /alunos/acoes-massa redireciona para lista', async ({ page }) => {
     await page.goto('/alunos/acoes-massa');
     await page.waitForLoadState('networkidle');
-    await expect(page).toHaveURL(/acoes-massa/);
+    await expect(page).toHaveURL(/\/alunos$/);
   });
 
-  test('alias /kanban redireciona para acoes-massa', async ({ page }) => {
+  test('alias /kanban redireciona para leads kanban', async ({ page }) => {
     await page.goto('/kanban');
     await page.waitForLoadState('networkidle');
-    await expect(page).toHaveURL(/acoes-massa/);
+    await expect(page).toHaveURL(/leads\/kanban/);
   });
 
   test('rota /alunos/:id detalhe abre', async ({ page }) => {

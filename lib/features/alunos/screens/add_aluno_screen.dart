@@ -22,6 +22,7 @@ import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 import 'package:focux_app/core/utils/friendly_error.dart';
+import '../../../core/utils/br_phone.dart';
 import '../../../core/utils/clipboard_sensitive.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
 import '../data/aluno_repository.dart';
@@ -181,14 +182,14 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
 
     try {
       final objetivo = _objetivoCtrl.text.trim();
-      final whatsapp = _whatsappCtrl.text.trim();
+      final whatsapp = BrPhone.normalizeOrNull(_whatsappCtrl.text);
       final novoAluno = await ref
           .read(alunoRepositoryProvider)
           .criar(
             nome: _nomeCtrl.text.trim(),
             email: _emailCtrl.text.trim(),
             objetivo: objetivo.isEmpty ? null : objetivo,
-            whatsapp: whatsapp.isEmpty ? null : whatsapp,
+            whatsapp: whatsapp,
             genero: _genero,
             tipoConsultoria: _tipoConsultoria,
           );
@@ -395,11 +396,11 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                 child: SlideTransition(
                   position: _entrySlide,
                   child: SingleChildScrollView(
-                    padding: const EdgeInsets.fromLTRB(
+                    padding: EdgeInsets.fromLTRB(
                       TokensStrip.s4,
-                      8,
+                      6,
                       TokensStrip.s4,
-                      96,
+                      88 + MediaQuery.paddingOf(context).bottom,
                     ),
                     child: Form(
                       key: _formKey,
@@ -414,53 +415,63 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                             ).hasMatch(_emailCtrl.text.trim()),
                             isDark: isDark,
                           ),
-                          const SizedBox(height: TokensStrip.s4),
+                          const SizedBox(height: TokensStrip.s3),
                           FxSettingsGroup(
                             header: 'Identidade',
                             caption: 'Acesso e contato.',
                             children: [
-                              _FxFormField(
-                                controller: _nomeCtrl,
+                              Semantics(
                                 label: 'Nome completo',
-                                hint: 'Ex.: Beatriz Andrade',
-                                icon: Icons.person_outline_rounded,
-                                isDark: isDark,
-                                validator:
-                                    (v) =>
-                                        v == null || v.trim().isEmpty
-                                            ? 'Informe o nome completo.'
-                                            : null,
-                                textCapitalization: TextCapitalization.words,
+                                child: _FxFormField(
+                                  controller: _nomeCtrl,
+                                  label: 'Nome completo',
+                                  hint: 'Ex.: Beatriz Andrade',
+                                  icon: Icons.person_outline_rounded,
+                                  validator:
+                                      (v) =>
+                                          v == null || v.trim().isEmpty
+                                              ? 'Informe o nome completo.'
+                                              : null,
+                                  textCapitalization: TextCapitalization.words,
+                                ),
                               ),
-                              const SizedBox(height: 14),
-                              _FxFormField(
-                                controller: _emailCtrl,
+                              const SizedBox(height: TokensStrip.s2),
+                              Semantics(
                                 label: 'E-mail',
-                                hint: 'aluno@email.com',
-                                icon: Icons.alternate_email_rounded,
-                                isDark: isDark,
-                                keyboardType: TextInputType.emailAddress,
-                                validator: (v) {
-                                  final value = v?.trim() ?? '';
-                                  if (value.isEmpty) {
-                                    return 'Informe o e-mail.';
-                                  }
-                                  if (!RegExp(_emailPattern).hasMatch(value)) {
-                                    return 'Informe um e-mail válido.';
-                                  }
-                                  return null;
-                                },
+                                child: _FxFormField(
+                                  controller: _emailCtrl,
+                                  label: 'E-mail',
+                                  hint: 'aluno@email.com',
+                                  icon: Icons.alternate_email_rounded,
+                                  keyboardType: TextInputType.emailAddress,
+                                  validator: (v) {
+                                    final value = v?.trim() ?? '';
+                                    if (value.isEmpty) {
+                                      return 'Informe o e-mail.';
+                                    }
+                                    if (!RegExp(
+                                      _emailPattern,
+                                    ).hasMatch(value)) {
+                                      return 'Informe um e-mail válido.';
+                                    }
+                                    return null;
+                                  },
+                                ),
                               ),
-                              const SizedBox(height: 14),
-                              _FxFormField(
-                                controller: _whatsappCtrl,
+                              const SizedBox(height: TokensStrip.s2),
+                              Semantics(
                                 label: 'WhatsApp',
-                                helper:
-                                    'Opcional. Se preencher, abrimos o WhatsApp com a mensagem pronta.',
-                                hint: '(11) 99999-9999',
-                                icon: Icons.phone_outlined,
-                                isDark: isDark,
-                                keyboardType: TextInputType.phone,
+                                child: _FxFormField(
+                                  controller: _whatsappCtrl,
+                                  label: 'WhatsApp',
+                                  helper:
+                                      'Opcional. Se preencher, abrimos o WhatsApp com a mensagem pronta.',
+                                  hint: '(11) 99999-9999',
+                                  icon: Icons.phone_iphone_rounded,
+                                  keyboardType: TextInputType.phone,
+                                  inputFormatters: [BrPhone.formatter()],
+                                  validator: BrPhone.validateOptional,
+                                ),
                               ),
                             ],
                           ),
@@ -470,10 +481,10 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                             caption: 'Filtros e atendimento.',
                             children: [
                               _LabelRow(label: 'Objetivo', isDark: isDark),
-                              const SizedBox(height: 8),
+                              const SizedBox(height: TokensStrip.s2),
                               Wrap(
-                                spacing: 8,
-                                runSpacing: 8,
+                                spacing: TokensStrip.s2,
+                                runSpacing: TokensStrip.s2,
                                 children: [
                                   ..._objetivosRapidos.map((objetivo) {
                                     final selected =
@@ -496,22 +507,21 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                                 ],
                               ),
                               if (_objetivoLivre) ...[
-                                const SizedBox(height: 10),
+                                const SizedBox(height: TokensStrip.s2),
                                 _FxFormField(
                                   controller: _objetivoCtrl,
                                   label: 'Outro objetivo',
                                   hint: 'Ex.: Reabilitação',
                                   icon: Icons.flag_outlined,
-                                  isDark: isDark,
                                   textCapitalization: TextCapitalization.words,
                                 ),
                               ],
-                              const SizedBox(height: 18),
+                              const SizedBox(height: TokensStrip.s3),
                               _LabelRow(label: 'Gênero', isDark: isDark),
-                              const SizedBox(height: 8),
+                              const SizedBox(height: TokensStrip.s2),
                               Wrap(
-                                spacing: 8,
-                                runSpacing: 8,
+                                spacing: TokensStrip.s2,
+                                runSpacing: TokensStrip.s2,
                                 children:
                                     _generos.map((g) {
                                       return _OptionChip(
@@ -527,12 +537,12 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                                       );
                                     }).toList(),
                               ),
-                              const SizedBox(height: 18),
+                              const SizedBox(height: TokensStrip.s3),
                               _LabelRow(label: 'Consultoria', isDark: isDark),
-                              const SizedBox(height: 8),
+                              const SizedBox(height: TokensStrip.s2),
                               Wrap(
-                                spacing: 8,
-                                runSpacing: 8,
+                                spacing: TokensStrip.s2,
+                                runSpacing: TokensStrip.s2,
                                 children: List.generate(
                                   _tiposConsultoria.length,
                                   (i) {
@@ -576,7 +586,7 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                             ),
                           ],
                           if (_error != null) ...[
-                            const SizedBox(height: 14),
+                            const SizedBox(height: TokensStrip.s3),
                             Semantics(
                               liveRegion: true,
                               label: _error!,
@@ -605,27 +615,22 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                       TokensStrip.s4,
                       12,
                     ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text(
+                    child: Semantics(
+                      button: true,
+                      enabled: _canSubmit && !_loading,
+                      label:
                           _canSubmit
-                              ? 'O convite de $_firstName será preparado após o cadastro.'
-                              : 'Complete nome e e-mail para cadastrar',
-                          style: FocuxHubTypography.bodyMuted(
-                            color: chrome.mute,
-                          ).copyWith(fontSize: 11),
-                        ),
-                        const SizedBox(height: 8),
-                        DashboardHomeActionChip(
-                          label: _loading ? 'Cadastrando…' : 'Cadastrar',
-                          accent: primary,
-                          isDark: isDark,
-                          enabled: _canSubmit && !_loading,
-                          onPressed: _submit,
-                        ),
-                      ],
+                              ? (_loading
+                                  ? 'Cadastrando aluno'
+                                  : 'Cadastrar $_firstName. O convite será preparado após o cadastro.')
+                              : 'Cadastrar. Complete nome e e-mail para habilitar',
+                      child: DashboardHomeActionChip(
+                        label: _loading ? 'Cadastrando…' : 'Cadastrar',
+                        accent: primary,
+                        isDark: isDark,
+                        enabled: _canSubmit && !_loading,
+                        onPressed: _submit,
+                      ),
                     ),
                   ),
                 ),

@@ -51,7 +51,6 @@ import '../../features/perfil/screens/landing_editor_screen.dart';
 import '../../features/dunning/screens/dunning_ops_screen.dart';
 import '../../features/winback/screens/winback_screen.dart';
 import '../../features/evolucao/screens/engajamento_screen.dart';
-import '../../features/alunos/screens/acoes_massa_screen.dart';
 import '../../features/ia/screens/ia_aluno_screen.dart';
 import '../../features/financeiro/screens/financeiro_aluno_screen.dart';
 import '../../features/suporte/screens/suporte_screen.dart';
@@ -126,7 +125,7 @@ RouteBase buildChromeShellRoute() {
           ),
           GoRoute(
             path: '/alunos/acoes-massa',
-            builder: (context, state) => const AcoesMassaScreen(),
+            redirect: (context, state) => '/alunos',
           ),
           GoRoute(
             path: '/kanban',

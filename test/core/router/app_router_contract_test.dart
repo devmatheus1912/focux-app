@@ -194,10 +194,8 @@ void main() {
     final alunosList = readScreenSourceBundle(
       'lib/features/alunos/screens/alunos_list_screen.dart',
     );
-    final acoesMassa =
-        File(
-          'lib/features/alunos/screens/acoes_massa_screen.dart',
-        ).readAsStringSync();
+    final alunosChromeRoutes =
+        File('lib/core/router/app_router_chrome_routes.dart').readAsStringSync();
     final exerciciosList =
         File(
           'lib/features/exercicios/screens/exercicios_list_screen.dart',
@@ -219,7 +217,18 @@ void main() {
       contains('safePopOr(context, () => goToRoleHome(context, ref))'),
     );
     expect(alunosList, contains("safePopOrGo(context, '/dashboard/personal')"));
-    expect(acoesMassa, contains("safePopOrGo(context, '/alunos')"));
+    expect(
+      alunosChromeRoutes,
+      contains("path: '/alunos/acoes-massa'"),
+    );
+    expect(
+      alunosChromeRoutes,
+      contains("redirect: (context, state) => '/alunos'"),
+    );
+    expect(
+      alunosChromeRoutes,
+      isNot(contains('AcoesMassaScreen')),
+    );
     expect(
       exerciciosList,
       contains("safePopOrGo(context, '/dashboard/personal')"),

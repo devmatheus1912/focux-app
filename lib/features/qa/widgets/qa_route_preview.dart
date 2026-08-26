@@ -5,7 +5,6 @@ import '../../../core/widgets/mesh_scope.dart';
 import '../data/qa_smoke_catalog.dart';
 import '../../agenda/screens/agenda_screen.dart';
 import '../../alertas/screens/alertas_screen.dart';
-import '../../alunos/screens/acoes_massa_screen.dart';
 import '../../alunos/screens/add_aluno_screen.dart';
 import '../../alunos/screens/alunos_list_screen.dart';
 import '../../analytics/screens/analytics_screen.dart';
@@ -100,7 +99,7 @@ Widget _buildQaRouteScreen(Uri uri) {
     '/planos' => const AssinaturaScreen(),
     '/paywall' => const AssinaturaScreen(),
     '/assinatura' => const AssinaturaScreen(),
-    '/kanban' => const AcoesMassaScreen(),
+    '/kanban' => const AlunosListScreen(),
     '/alertas' => const AlertasScreen(),
     '/dashboard/aluno' => const AlunoDashboardScreen(),
     '/checkin/treinos' => const MeusTreinosScreen(),
