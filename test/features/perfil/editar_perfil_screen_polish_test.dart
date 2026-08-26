@@ -25,6 +25,7 @@ void main() {
     expect(screen, contains('Salvando alterações do perfil'));
     expect(screen, contains('FxHelpIconButton'));
     expect(screen, contains('showEditarPerfilHelpSheet'));
+    expect(screen, contains('ProductEvents.perfilUpdated'));
     expect(screen, contains('_canSubmit'));
     expect(screen, contains('invalidatePacotesCaches'));
     expect(screen, contains('ref.invalidate(perfilProvider)'));

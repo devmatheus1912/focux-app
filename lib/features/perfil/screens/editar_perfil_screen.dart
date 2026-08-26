@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../core/analytics/analytics_service.dart';
 import '../../../core/api/media_upload_service.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
@@ -204,6 +207,15 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
           );
       if (!mounted) return;
       _invalidateAfterSave();
+      unawaited(
+        AnalyticsService.instance.track(
+          ProductEvents.perfilUpdated,
+          props: {
+            'has_photo': (_logoUrl ?? '').isNotEmpty,
+            'has_bio': _bioCtrl.text.trim().isNotEmpty,
+          },
+        ),
+      );
       HapticFeedback.heavyImpact();
       context.pop(true);
     } catch (e) {
