@@ -8,25 +8,29 @@ import '../../../core/api/media_upload_service.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
-import '../../../core/theme/focux_hub_typography.dart';
-import '../../../core/theme/focux_typography.dart';
+import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/br_phone.dart';
+import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_settings_group.dart';
-import '../../../core/theme/fx_settings_layout.dart';
-import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../features/auth/providers/auth_provider.dart';
+import '../../dashboard/providers/dashboard_provider.dart';
+import '../../dashboard/widgets/dashboard_home_action_chip.dart';
+import '../../pacotes/providers/pacotes_provider.dart';
 import '../data/perfil_repository.dart';
 import '../providers/perfil_provider.dart';
-import '../../../core/utils/friendly_error.dart';
+import '../widgets/editar_perfil_help_sheet.dart';
+
+part 'editar_perfil_screen_widgets.part.dart';
 
 class EditarPerfilScreen extends ConsumerStatefulWidget {
   final PerfilPersonal perfil;
@@ -53,6 +57,27 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
   String? _logoUrl;
   String? _error;
 
+  bool get _nomeOk => _nomeCtrl.text.trim().isNotEmpty;
+
+  bool get _isDirty {
+    final baseline = widget.perfil;
+    final telNow = BrPhone.normalizeOrNull(_telefoneCtrl.text) ?? '';
+    final telBase = BrPhone.normalizeOrNull(baseline.telefone) ?? '';
+    return _nomeCtrl.text.trim() != baseline.nome.trim() ||
+        telNow != telBase ||
+        _crefCtrl.text.trim() != (baseline.cref ?? '').trim() ||
+        _especialidadeCtrl.text.trim() !=
+            (baseline.especialidade ?? '').trim() ||
+        _especialidadesCtrl.text.trim() !=
+            (baseline.especialidades ?? '').trim() ||
+        _instagramCtrl.text.trim() != (baseline.instagram ?? '').trim() ||
+        _bioCtrl.text.trim() !=
+            (baseline.descricaoProfissional ?? '').trim() ||
+        (_logoUrl ?? '') != (baseline.logoUrl ?? '');
+  }
+
+  bool get _canSubmit => _nomeOk && _isDirty && !_loading && !_uploadingPhoto;
+
   @override
   void initState() {
     super.initState();
@@ -72,17 +97,39 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
       text: widget.perfil.descricaoProfissional ?? '',
     );
     _logoUrl = widget.perfil.logoUrl;
+
+    for (final c in [
+      _nomeCtrl,
+      _telefoneCtrl,
+      _crefCtrl,
+      _especialidadeCtrl,
+      _especialidadesCtrl,
+      _instagramCtrl,
+      _bioCtrl,
+    ]) {
+      c.addListener(_onFieldChanged);
+    }
+  }
+
+  void _onFieldChanged() {
+    if (mounted) setState(() {});
   }
 
   @override
   void dispose() {
-    _nomeCtrl.dispose();
-    _telefoneCtrl.dispose();
-    _crefCtrl.dispose();
-    _especialidadeCtrl.dispose();
-    _especialidadesCtrl.dispose();
-    _instagramCtrl.dispose();
-    _bioCtrl.dispose();
+    for (final c in [
+      _nomeCtrl,
+      _telefoneCtrl,
+      _crefCtrl,
+      _especialidadeCtrl,
+      _especialidadesCtrl,
+      _instagramCtrl,
+      _bioCtrl,
+    ]) {
+      c
+        ..removeListener(_onFieldChanged)
+        ..dispose();
+    }
     super.dispose();
   }
 
@@ -116,7 +163,16 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
     }
   }
 
+  void _invalidateAfterSave() {
+    ref.invalidate(perfilProvider);
+    ref.invalidate(dashboardHomeProvider);
+    ref.invalidate(dashboardProvider);
+    invalidatePacotesCaches(ref);
+  }
+
   Future<void> _submit() async {
+    FocusScope.of(context).unfocus();
+    if (!_canSubmit) return;
     if (!_formKey.currentState!.validate()) return;
     HapticFeedback.mediumImpact();
     setState(() {
@@ -146,7 +202,10 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
             descricaoProfissional:
                 _bioCtrl.text.trim().isEmpty ? null : _bioCtrl.text.trim(),
           );
-      if (mounted) context.pop(true);
+      if (!mounted) return;
+      _invalidateAfterSave();
+      HapticFeedback.heavyImpact();
+      context.pop(true);
     } catch (e) {
       if (mounted) setState(() => _error = friendlyError(e));
     } finally {
@@ -159,7 +218,7 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
     final chrome = ShellChrome.of(context);
     final isDark = chrome.isDark;
     final primary = Theme.of(context).colorScheme.primary;
-    final mute = chrome.mute;
+    final soft = BrandPalette.softened(primary);
 
     return fxScreenA11yScope(
       label: 'Editar Perfil',
@@ -167,125 +226,79 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
         useMesh: true,
         appBar: FxShellAppBar(
           title: 'Editar Perfil',
+          subtitle: 'Conta e marca comercial',
           onBack: () => safePopOrGo(context, '/perfil'),
+          actions: [
+            FxHelpIconButton(
+              tooltip: 'Como editar o perfil',
+              onTap: () => showEditarPerfilHelpSheet(context),
+            ),
+            const SizedBox(width: TokensStrip.s2),
+          ],
         ),
         body: Stack(
           children: [
             SafeArea(
               bottom: false,
               child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(
+                padding: EdgeInsets.fromLTRB(
                   TokensStrip.s4,
                   6,
                   TokensStrip.s4,
-                  88,
+                  88 + MediaQuery.paddingOf(context).bottom,
                 ),
                 child: Form(
                   key: _formKey,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Semantics(
-                        button: true,
-                        enabled: !_uploadingPhoto,
-                        label:
-                            _uploadingPhoto
-                                ? 'Enviando foto do perfil'
-                                : 'Foto do perfil. Toque no ícone da câmera para trocar a foto',
-                        child: Center(
-                          child: Stack(
-                            alignment: Alignment.bottomRight,
-                            children: [
-                              CircleAvatar(
-                                radius: 44,
-                                backgroundColor: primary.withValues(
-                                  alpha: 0.12,
-                                ),
-                                backgroundImage:
-                                    _logoUrl != null
-                                        ? NetworkImage(_logoUrl!)
-                                        : null,
-                                child:
-                                    _logoUrl == null
-                                        ? Text(
-                                          widget.perfil.nome.isNotEmpty
-                                              ? widget.perfil.nome[0]
-                                                  .toUpperCase()
-                                              : '?',
-                                          style: FocuxTypography.display(
-                                            color: primary,
-                                          ).copyWith(fontSize: 36),
-                                        )
-                                        : null,
-                              ),
-                              GestureDetector(
-                                onTap:
-                                    _uploadingPhoto
-                                        ? null
-                                        : _pickAndUploadPhoto,
-                                child: Container(
-                                  width: 34,
-                                  height: 34,
-                                  decoration: BoxDecoration(
-                                    color: primary,
-                                    shape: BoxShape.circle,
-                                    border: Border.all(
-                                      color:
-                                          isDark
-                                              ? EagleTokens.darkBg
-                                              : TokensStrip.pageBg,
-                                      width: 2,
-                                    ),
-                                  ),
-                                  child:
-                                      _uploadingPhoto
-                                          ? const Padding(
-                                            padding: EdgeInsets.all(7),
-                                            child: FxLoading(
-                                              strokeWidth: 2,
-                                              color: Colors.white,
-                                            ),
-                                          )
-                                          : const Icon(
-                                            Icons.camera_alt_rounded,
-                                            size: 16,
-                                            color: Colors.white,
-                                          ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Center(
-                        child: Text(
-                          'Toque no ícone para trocar a foto',
-                          style: FocuxHubTypography.bodyMuted(color: mute),
-                        ),
-                      ),
-                      const SizedBox(height: TokensStrip.s3),
                       FxStaggerItem(
                         index: 0,
                         child: FxSettingsGroup(
+                          header: 'Foto',
+                          caption: 'Aparece no app e na página pública.',
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                vertical: TokensStrip.s3,
+                              ),
+                              child: _PerfilPhotoEditor(
+                                logoUrl: _logoUrl,
+                                nome: _nomeCtrl.text.isNotEmpty
+                                    ? _nomeCtrl.text
+                                    : widget.perfil.nome,
+                                uploading: _uploadingPhoto,
+                                isDark: isDark,
+                                primary: primary,
+                                onTap: _pickAndUploadPhoto,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: FxSettingsLayout.groupGap),
+                      FxStaggerItem(
+                        index: 1,
+                        child: FxSettingsGroup(
                           header: 'Dados pessoais',
                           caption:
-                              'Usado no perfil comercial e na ficha do aluno.',
+                              'Usado no perfil comercial e no contato com alunos.',
                           children: [
                             Semantics(
                               label: 'Nome completo',
                               child: TextFormField(
                                 controller: _nomeCtrl,
+                                textCapitalization: TextCapitalization.words,
                                 decoration: FxInputDeco.build(
                                   context,
                                   'Nome completo',
                                   icon: Icons.person_outline_rounded,
-                                  iconColor: BrandPalette.softened(primary),
+                                  iconColor: soft,
                                   iconSize: FxSettingsLayout.iconSize,
                                 ),
                                 validator:
                                     (v) =>
-                                        v == null || v.isEmpty
+                                        v == null || v.trim().isEmpty
                                             ? 'Informe o nome'
                                             : null,
                               ),
@@ -302,7 +315,7 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
                                   'Telefone / WhatsApp',
                                   icon: Icons.phone_iphone_rounded,
                                   hint: '(11) 99999-0000',
-                                  iconColor: BrandPalette.softened(primary),
+                                  iconColor: soft,
                                   iconSize: FxSettingsLayout.iconSize,
                                 ),
                                 validator: BrPhone.validateOptional,
@@ -313,9 +326,10 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
                       ),
                       const SizedBox(height: FxSettingsLayout.groupGap),
                       FxStaggerItem(
-                        index: 1,
+                        index: 2,
                         child: FxSettingsGroup(
                           header: 'Dados profissionais',
+                          caption: 'Credenciais e presença na vitrine.',
                           children: [
                             Semantics(
                               label: 'CREF opcional',
@@ -325,8 +339,8 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
                                   context,
                                   'CREF (opcional)',
                                   icon: Icons.badge_outlined,
-                                  hint: 'Ex: 012345-G/SP',
-                                  iconColor: BrandPalette.softened(primary),
+                                  hint: 'Ex.: 012345-G/SP',
+                                  iconColor: soft,
                                   iconSize: FxSettingsLayout.iconSize,
                                 ),
                               ),
@@ -336,12 +350,13 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
                               label: 'Especialidade principal',
                               child: TextFormField(
                                 controller: _especialidadeCtrl,
+                                textCapitalization: TextCapitalization.sentences,
                                 decoration: FxInputDeco.build(
                                   context,
                                   'Especialidade principal',
                                   icon: Icons.fitness_center_outlined,
-                                  hint: 'Ex: Musculação',
-                                  iconColor: BrandPalette.softened(primary),
+                                  hint: 'Ex.: Musculação',
+                                  iconColor: soft,
                                   iconSize: FxSettingsLayout.iconSize,
                                 ),
                               ),
@@ -351,12 +366,13 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
                               label: 'Áreas de atuação opcional',
                               child: TextFormField(
                                 controller: _especialidadesCtrl,
+                                textCapitalization: TextCapitalization.sentences,
                                 decoration: FxInputDeco.build(
                                   context,
                                   'Áreas de atuação (opcional)',
                                   icon: Icons.category_outlined,
-                                  hint: 'Ex: Funcional, Hipertrofia',
-                                  iconColor: BrandPalette.softened(primary),
+                                  hint: 'Ex.: Funcional, Hipertrofia',
+                                  iconColor: soft,
                                   iconSize: FxSettingsLayout.iconSize,
                                 ),
                               ),
@@ -371,7 +387,7 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
                                   'Instagram (opcional)',
                                   icon: Icons.alternate_email_rounded,
                                   hint: 'seuusuario',
-                                  iconColor: BrandPalette.softened(primary),
+                                  iconColor: soft,
                                   iconSize: FxSettingsLayout.iconSize,
                                 ),
                               ),
@@ -381,9 +397,10 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
                       ),
                       const SizedBox(height: FxSettingsLayout.groupGap),
                       FxStaggerItem(
-                        index: 2,
+                        index: 3,
                         child: FxSettingsGroup(
-                          header: 'Bio / Apresentação',
+                          header: 'Bio',
+                          caption: 'Apresentação curta na landing (até 500).',
                           children: [
                             Semantics(
                               label: 'Sobre você, até 500 caracteres',
@@ -391,13 +408,15 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
                                 controller: _bioCtrl,
                                 maxLines: 4,
                                 maxLength: 500,
+                                textCapitalization:
+                                    TextCapitalization.sentences,
                                 decoration: FxInputDeco.build(
                                   context,
                                   'Sobre você (opcional)',
                                   icon: Icons.notes_rounded,
                                   hint:
-                                      'Conte sua história, metodologia e diferenciais...',
-                                  iconColor: BrandPalette.softened(primary),
+                                      'Metodologia, público e diferenciais…',
+                                  iconColor: soft,
                                   iconSize: FxSettingsLayout.iconSize,
                                 ),
                               ),
@@ -407,12 +426,16 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
                       ),
                       if (_error != null) ...[
                         const SizedBox(height: TokensStrip.s3),
-                        FxErrorState(
-                          chromeOnDark: chrome.isDark,
-                          primary: primary,
-                          message: _error!,
-                          onRetry: _submit,
-                          title: 'Não foi possível salvar',
+                        Semantics(
+                          liveRegion: true,
+                          label: _error!,
+                          child: FxErrorState(
+                            chromeOnDark: chrome.isDark,
+                            primary: primary,
+                            message: _error!,
+                            onRetry: _submit,
+                            title: 'Não foi possível salvar',
+                          ),
                         ),
                       ],
                     ],
@@ -432,16 +455,18 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
                   ),
                   child: Semantics(
                     button: true,
-                    enabled: !_loading,
+                    enabled: _canSubmit,
                     label:
                         _loading
                             ? 'Salvando alterações do perfil'
-                            : 'Salvar alterações do perfil',
+                            : _canSubmit
+                            ? 'Salvar alterações do perfil'
+                            : 'Salvar. Faça uma alteração para habilitar',
                     child: DashboardHomeActionChip(
                       label: _loading ? 'Salvando…' : 'Salvar',
                       accent: primary,
                       isDark: isDark,
-                      enabled: !_loading,
+                      enabled: _canSubmit,
                       onPressed: _submit,
                     ),
                   ),
@@ -454,4 +479,3 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
     );
   }
 }
-
