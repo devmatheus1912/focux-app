@@ -21,6 +21,10 @@ void main() {
     expect(screen, contains('FxSettingsGroup'));
     expect(screen, contains('BrPhone'));
     expect(screen, contains('FxInputDeco.build'));
+    expect(screen, contains('ProductEvents.alunoCreated'));
+    expect(screen, contains('invalidateAlunosCaches'));
+    expect(screen, contains('FxHelpIconButton'));
+    expect(screen, contains('showAddAlunoHelpSheet'));
     expect(screen, isNot(contains('Complete nome e e-mail para cadastrar')));
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(16));
   });

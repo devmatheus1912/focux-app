@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -24,9 +26,12 @@ import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 import 'package:focux_app/core/utils/friendly_error.dart';
 import '../../../core/utils/br_phone.dart';
 import '../../../core/utils/clipboard_sensitive.dart';
+import '../../../core/analytics/analytics_service.dart';
+import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
 import '../data/aluno_repository.dart';
 import '../utils/aluno_invite_copy.dart';
+import '../widgets/add_aluno_help_sheet.dart';
 
 part 'add_aluno_screen_widgets.part.dart';
 
@@ -195,6 +200,13 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
           );
 
       if (!mounted) return;
+      invalidateAlunosCaches(ref);
+      unawaited(
+        AnalyticsService.instance.track(
+          ProductEvents.alunoCreated,
+          props: {'has_whatsapp': whatsapp != null},
+        ),
+      );
       if (novoAluno.senhaProvisoria != null) {
         _showSenhaBottomSheet(novoAluno);
       } else {
@@ -386,6 +398,16 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
           title: 'Novo aluno',
           subtitle: 'Cadastro rápido',
           onBack: () => safePopOrGo(context, '/alunos'),
+          actions: [
+            FxHelpIconButton(
+              tooltip: 'Como cadastrar',
+              onTap: () {
+                AnalyticsService.instance.track(ProductEvents.alunosHelpOpened);
+                showAddAlunoHelpSheet(context);
+              },
+            ),
+            const SizedBox(width: TokensStrip.s2),
+          ],
         ),
         body: SafeArea(
           bottom: false,
