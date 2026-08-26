@@ -123,11 +123,11 @@ class AlunoListCard extends ConsumerWidget {
       aderenciaPercent: aderenciaPercent,
       filtro: activeFiltro,
     );
-    final showOpsLine = opsText.isNotEmpty;
     final opsIsDays = adherenceLabel.isNotEmpty;
     final meaningfulPercent = alunoListHasMeaningfulPercent(aderenciaPercent);
     final needsOutreach =
         !modoSelecao && activeFiltro == AlunoFiltro.contatoHoje;
+    final showOpsLine = opsText.isNotEmpty;
     final whatsappNumber = (aluno.whatsapp ?? '').replaceAll(RegExp(r'\D'), '');
     final hasWhatsapp = whatsappNumber.isNotEmpty;
     final outreach = AlunoListOutreachActions(
@@ -163,7 +163,6 @@ class AlunoListCard extends ConsumerWidget {
           duration: const Duration(milliseconds: 150),
           padding: EdgeInsets.all(cardPadding),
           decoration: ShellChrome.forDark(isDark).listCard(
-            selected: isSelected,
             primary: primary,
             radius: TokensStrip.rCard,
           ),
@@ -327,17 +326,17 @@ class AlunoListCard extends ConsumerWidget {
                       ],
                     ),
                   ),
-                  if (needsOutreach && !compact)
+                  if (!modoSelecao && needsOutreach)
                     outreach
-                  else if (!needsOutreach && (compact || triageContextActive))
+                  else if (!modoSelecao && (compact || triageContextActive))
                     ExcludeSemantics(
                       child: Icon(
                         Icons.chevron_right_rounded,
-                        size: 18,
+                        size: 17,
                         color: secondaryInk.withValues(alpha: 0.9),
                       ),
                     )
-                  else if (!needsOutreach)
+                  else if (!modoSelecao)
                     Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.end,
@@ -355,7 +354,7 @@ class AlunoListCard extends ConsumerWidget {
                         ExcludeSemantics(
                           child: Icon(
                             Icons.chevron_right_rounded,
-                            size: 18,
+                            size: 17,
                             color: secondaryInk.withValues(alpha: 0.9),
                           ),
                         ),
@@ -363,14 +362,6 @@ class AlunoListCard extends ConsumerWidget {
                     ),
                 ],
               ),
-              if (needsOutreach && compact)
-                Padding(
-                  padding: const EdgeInsets.only(top: 2),
-                  child: Align(
-                    alignment: Alignment.centerRight,
-                    child: outreach,
-                  ),
-                ),
             ],
           ),
         ),

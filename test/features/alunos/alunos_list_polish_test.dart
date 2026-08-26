@@ -27,8 +27,8 @@ void main() {
     expect(screen, contains("label: 'Ativo'"));
     expect(screen, contains("label: 'Inativo'"));
     expect(screen, contains("label: 'Bloqueado'"));
-    expect(screen, contains('_SheetShortcutChip'));
-    expect(screen, contains('Lista compacta'));
+    expect(screen, contains('FxSettingsGroup'));
+    expect(screen, contains('AlunosMicrocopy.densityTitle'));
     expect(screen, contains('showFxHomeSheet'));
     expect(screen, contains('FxHomeSheetSurface'));
     expect(screen, contains('FxHomeSheetHeader'));

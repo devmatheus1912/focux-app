@@ -12,8 +12,10 @@ import '../../../core/theme/shell_chrome.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/fx_settings_group.dart';
+import '../../../core/theme/fx_settings_layout.dart';
+import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../providers/alunos_provider.dart';
-import 'package:focux_app/core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -440,217 +442,239 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
         ),
         body: SafeArea(
           bottom: false,
-          child: Column(
+          child: Stack(
             children: [
-              Expanded(
-                child: FadeTransition(
-                  opacity: _entryFade,
-                  child: SlideTransition(
-                    position: _entrySlide,
-                    child: SingleChildScrollView(
-                      padding: const EdgeInsets.fromLTRB(
-                        TokensStrip.s5,
-                        8,
-                        20,
-                        132,
-                      ),
-                      child: Form(
-                        key: _formKey,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            _AccessProgressStrip(
-                              name: _firstName,
-                              hasName: _nomeCtrl.text.trim().isNotEmpty,
-                              hasEmail: RegExp(
-                                _emailPattern,
-                              ).hasMatch(_emailCtrl.text.trim()),
-                              isDark: isDark,
-                            ),
-                            const SizedBox(height: TokensStrip.s4),
-                            _SectionCard(
-                              icon: Icons.person_outline_rounded,
-                              title: 'Identidade',
-                              subtitle: 'Acesso e contato.',
-                              isDark: isDark,
-                              children: [
-                                _FxFormField(
-                                  controller: _nomeCtrl,
-                                  label: 'Nome completo',
-                                  hint: 'Ex.: Beatriz Andrade',
-                                  icon: Icons.person_outline_rounded,
-                                  isDark: isDark,
-                                  validator:
-                                      (v) =>
-                                          v == null || v.trim().isEmpty
-                                              ? 'Informe o nome completo.'
-                                              : null,
-                                  textCapitalization: TextCapitalization.words,
-                                ),
-                                const SizedBox(height: 14),
-                                _FxFormField(
-                                  controller: _emailCtrl,
-                                  label: 'E-mail',
-                                  hint: 'aluno@email.com',
-                                  icon: Icons.alternate_email_rounded,
-                                  isDark: isDark,
-                                  keyboardType: TextInputType.emailAddress,
-                                  validator: (v) {
-                                    final value = v?.trim() ?? '';
-                                    if (value.isEmpty) {
-                                      return 'Informe o e-mail.';
-                                    }
-                                    if (!RegExp(
-                                      _emailPattern,
-                                    ).hasMatch(value)) {
-                                      return 'Informe um e-mail válido.';
-                                    }
-                                    return null;
-                                  },
-                                ),
-                                const SizedBox(height: 14),
-                                _FxFormField(
-                                  controller: _whatsappCtrl,
-                                  label: 'WhatsApp',
-                                  helper:
-                                      'Opcional. Se preencher, abrimos o WhatsApp com a mensagem pronta.',
-                                  hint: '(11) 99999-9999',
-                                  icon: Icons.phone_outlined,
-                                  isDark: isDark,
-                                  keyboardType: TextInputType.phone,
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 14),
-                            _SectionCard(
-                              icon: Icons.tune_rounded,
-                              title: 'Perfil inicial',
-                              subtitle: 'Filtros e atendimento.',
-                              isDark: isDark,
-                              children: [
-                                _FxFormField(
-                                  controller: _objetivoCtrl,
-                                  label: 'Objetivo',
-                                  hint: 'Ex.: Hipertrofia',
-                                  icon: Icons.flag_outlined,
-                                  isDark: isDark,
-                                  textCapitalization: TextCapitalization.words,
-                                ),
-                                const SizedBox(height: 10),
-                                Wrap(
-                                  spacing: 8,
-                                  runSpacing: 8,
-                                  children:
-                                      _objetivosRapidos.map((objetivo) {
-                                        final selected =
-                                            _objetivoCtrl.text.trim() ==
-                                            objetivo;
-                                        return _OptionChip(
-                                          label: objetivo,
-                                          selected: selected,
-                                          isDark: isDark,
-                                          onTap: () {
-                                            HapticFeedback.selectionClick();
-                                            setState(() {
-                                              _objetivoCtrl.text =
-                                                  selected ? '' : objetivo;
-                                            });
-                                          },
-                                        );
-                                      }).toList(),
-                                ),
-                                const SizedBox(height: 18),
-                                _LabelRow(label: 'Gênero', isDark: isDark),
-                                const SizedBox(height: 8),
-                                Wrap(
-                                  spacing: 8,
-                                  runSpacing: 8,
-                                  children:
-                                      _generos.map((g) {
-                                        return _OptionChip(
-                                          label: g,
-                                          selected: _genero == g,
-                                          isDark: isDark,
-                                          onTap:
-                                              () => setState(
-                                                () =>
-                                                    _genero =
-                                                        _genero == g ? null : g,
-                                              ),
-                                        );
-                                      }).toList(),
-                                ),
-                                const SizedBox(height: 18),
-                                _LabelRow(label: 'Consultoria', isDark: isDark),
-                                const SizedBox(height: 8),
-                                Wrap(
-                                  spacing: 8,
-                                  runSpacing: 8,
-                                  children: List.generate(
-                                    _tiposConsultoria.length,
-                                    (i) {
-                                      final value = _tiposConsultoria[i];
+              FadeTransition(
+                opacity: _entryFade,
+                child: SlideTransition(
+                  position: _entrySlide,
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.fromLTRB(
+                      TokensStrip.s4,
+                      8,
+                      TokensStrip.s4,
+                      96,
+                    ),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          _AccessProgressStrip(
+                            name: _firstName,
+                            hasName: _nomeCtrl.text.trim().isNotEmpty,
+                            hasEmail: RegExp(
+                              _emailPattern,
+                            ).hasMatch(_emailCtrl.text.trim()),
+                            isDark: isDark,
+                          ),
+                          const SizedBox(height: TokensStrip.s4),
+                          FxSettingsGroup(
+                            header: 'Identidade',
+                            caption: 'Acesso e contato.',
+                            children: [
+                              _FxFormField(
+                                controller: _nomeCtrl,
+                                label: 'Nome completo',
+                                hint: 'Ex.: Beatriz Andrade',
+                                icon: Icons.person_outline_rounded,
+                                isDark: isDark,
+                                validator:
+                                    (v) =>
+                                        v == null || v.trim().isEmpty
+                                            ? 'Informe o nome completo.'
+                                            : null,
+                                textCapitalization: TextCapitalization.words,
+                              ),
+                              const SizedBox(height: 14),
+                              _FxFormField(
+                                controller: _emailCtrl,
+                                label: 'E-mail',
+                                hint: 'aluno@email.com',
+                                icon: Icons.alternate_email_rounded,
+                                isDark: isDark,
+                                keyboardType: TextInputType.emailAddress,
+                                validator: (v) {
+                                  final value = v?.trim() ?? '';
+                                  if (value.isEmpty) {
+                                    return 'Informe o e-mail.';
+                                  }
+                                  if (!RegExp(_emailPattern).hasMatch(value)) {
+                                    return 'Informe um e-mail válido.';
+                                  }
+                                  return null;
+                                },
+                              ),
+                              const SizedBox(height: 14),
+                              _FxFormField(
+                                controller: _whatsappCtrl,
+                                label: 'WhatsApp',
+                                helper:
+                                    'Opcional. Se preencher, abrimos o WhatsApp com a mensagem pronta.',
+                                hint: '(11) 99999-9999',
+                                icon: Icons.phone_outlined,
+                                isDark: isDark,
+                                keyboardType: TextInputType.phone,
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: FxSettingsLayout.groupGap),
+                          FxSettingsGroup(
+                            header: 'Perfil inicial',
+                            caption: 'Filtros e atendimento.',
+                            children: [
+                              _LabelRow(label: 'Objetivo', isDark: isDark),
+                              const SizedBox(height: 8),
+                              Wrap(
+                                spacing: 8,
+                                runSpacing: 8,
+                                children:
+                                    _objetivosRapidos.map((objetivo) {
+                                      final selected =
+                                          _objetivoCtrl.text.trim() ==
+                                          objetivo;
                                       return _OptionChip(
-                                        label: _tiposConsultoriaLabel[i],
-                                        selected: _tipoConsultoria == value,
+                                        label: objetivo,
+                                        selected: selected,
+                                        isDark: isDark,
+                                        onTap: () {
+                                          HapticFeedback.selectionClick();
+                                          setState(() {
+                                            _objetivoCtrl.text =
+                                                selected ? '' : objetivo;
+                                          });
+                                        },
+                                      );
+                                    }).toList(),
+                              ),
+                              const SizedBox(height: 18),
+                              _LabelRow(label: 'Gênero', isDark: isDark),
+                              const SizedBox(height: 8),
+                              Wrap(
+                                spacing: 8,
+                                runSpacing: 8,
+                                children:
+                                    _generos.map((g) {
+                                      return _OptionChip(
+                                        label: g,
+                                        selected: _genero == g,
                                         isDark: isDark,
                                         onTap:
                                             () => setState(
                                               () =>
-                                                  _tipoConsultoria =
-                                                      _tipoConsultoria == value
-                                                          ? null
-                                                          : value,
+                                                  _genero =
+                                                      _genero == g ? null : g,
                                             ),
                                       );
-                                    },
+                                    }).toList(),
+                              ),
+                              const SizedBox(height: 18),
+                              _LabelRow(label: 'Consultoria', isDark: isDark),
+                              const SizedBox(height: 8),
+                              Wrap(
+                                spacing: 8,
+                                runSpacing: 8,
+                                children: List.generate(
+                                  _tiposConsultoria.length,
+                                  (i) {
+                                    final value = _tiposConsultoria[i];
+                                    return _OptionChip(
+                                      label: _tiposConsultoriaLabel[i],
+                                      selected: _tipoConsultoria == value,
+                                      isDark: isDark,
+                                      onTap:
+                                          () => setState(
+                                            () =>
+                                                _tipoConsultoria =
+                                                    _tipoConsultoria == value
+                                                        ? null
+                                                        : value,
+                                          ),
+                                    );
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                          if (_canSubmit) ...[
+                            const SizedBox(height: FxSettingsLayout.groupGap),
+                            FxSettingsGroup(
+                              header: 'Depois do cadastro',
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: TokensStrip.s3,
+                                  ),
+                                  child: Text(
+                                    '$_firstName entra na lista com senha provisória'
+                                    '${_whatsappCtrl.text.trim().isNotEmpty ? ' e WhatsApp pronto pra enviar.' : '. Você copia o convite.'}',
+                                    style: FxSettingsLayout.subhead(
+                                      color: chrome.mute,
+                                    ),
                                   ),
                                 ),
                               ],
                             ),
-                            if (_canSubmit) ...[
-                              const SizedBox(height: 14),
-                              _InvitePreviewCard(
-                                isDark: isDark,
-                                name: _firstName,
-                                hasWhatsapp:
-                                    _whatsappCtrl.text.trim().isNotEmpty,
-                                consultoriaLabel:
-                                    _tipoConsultoria == null
-                                        ? null
-                                        : _tiposConsultoriaLabel[_tiposConsultoria
-                                            .indexOf(_tipoConsultoria!)],
-                              ),
-                            ],
-                            if (_error != null) ...[
-                              const SizedBox(height: 14),
-                              Semantics(
-                                liveRegion: true,
-                                label: _error!,
-                                child: _ErrorCard(
-                                  message: _error!,
-                                  isDark: isDark,
-                                ),
-                              ),
-                            ],
                           ],
-                        ),
+                          if (!_canSubmit) ...[
+                            const SizedBox(height: TokensStrip.s4),
+                            Text(
+                              'Complete nome e e-mail para cadastrar',
+                              textAlign: TextAlign.center,
+                              style: FocuxHubTypography.bodyMuted(
+                                color: chrome.mute,
+                              ),
+                            ),
+                          ],
+                          if (_error != null) ...[
+                            const SizedBox(height: 14),
+                            Semantics(
+                              liveRegion: true,
+                              label: _error!,
+                              child: _ErrorCard(
+                                message: _error!,
+                                isDark: isDark,
+                              ),
+                            ),
+                          ],
+                        ],
                       ),
                     ),
                   ),
                 ),
               ),
-              _BottomSubmitBar(
-                isDark: isDark,
-                primary: primary,
-                canSubmit: _canSubmit,
-                loading: _loading,
-                helper:
-                    _canSubmit
-                        ? 'O convite de $_firstName será preparado após o cadastro.'
-                        : 'Complete nome e e-mail para cadastrar',
-                onSubmit: _submit,
-              ),
+              if (_canSubmit)
+                Align(
+                  alignment: AlignmentDirectional.bottomEnd,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      TokensStrip.s4,
+                      0,
+                      TokensStrip.s4,
+                      12,
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          'O convite de $_firstName será preparado após o cadastro.',
+                          style: FocuxHubTypography.bodyMuted(
+                            color: chrome.mute,
+                          ).copyWith(fontSize: 11),
+                        ),
+                        const SizedBox(height: 8),
+                        DashboardHomeActionChip(
+                          label: _loading ? 'Cadastrando…' : 'Cadastrar',
+                          accent: primary,
+                          isDark: isDark,
+                          enabled: !_loading,
+                          onPressed: _submit,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
             ],
           ),
         ),

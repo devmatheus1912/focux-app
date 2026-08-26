@@ -13,12 +13,14 @@ class DashboardHomeActionChip extends StatelessWidget {
     required this.accent,
     required this.isDark,
     required this.onPressed,
+    this.enabled = true,
   });
 
   final String label;
   final Color accent;
   final bool isDark;
   final VoidCallback onPressed;
+  final bool enabled;
 
   @override
   Widget build(BuildContext context) {
@@ -27,6 +29,7 @@ class DashboardHomeActionChip extends StatelessWidget {
 
     return Semantics(
       button: true,
+      enabled: enabled,
       label: label,
       child: UnconstrainedBox(
         child: Material(
@@ -35,10 +38,13 @@ class DashboardHomeActionChip extends StatelessWidget {
           shadowColor: accent.withValues(alpha: isDark ? 0.38 : 0.14),
           shape: const StadiumBorder(),
           child: InkWell(
-            onTap: () {
-              HapticFeedback.selectionClick();
-              onPressed();
-            },
+            onTap:
+                enabled
+                    ? () {
+                      HapticFeedback.selectionClick();
+                      onPressed();
+                    }
+                    : null,
             customBorder: const StadiumBorder(),
             child: ConstrainedBox(
               constraints: const BoxConstraints(minHeight: 48, minWidth: 48),

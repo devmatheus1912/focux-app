@@ -252,8 +252,8 @@ extension AlunosListScreenBody on _AlunosListScreenState {
                                           label: Text(
                                             _selecionados.length ==
                                                     filtrados.length
-                                                ? 'Desmarcar todos'
-                                                : 'Selecionar todos',
+                                                ? 'Limpar'
+                                                : 'Todos',
                                             maxLines: 1,
                                             overflow: TextOverflow.ellipsis,
                                           ),

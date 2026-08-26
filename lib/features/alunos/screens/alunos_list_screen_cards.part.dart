@@ -97,50 +97,170 @@ class _FxChip extends StatelessWidget {
   }
 }
 
-class _SheetShortcutChip extends StatelessWidget {
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  const _SheetShortcutChip({
+class _AlunosSheetCheckRow extends StatelessWidget {
+  const _AlunosSheetCheckRow({
+    required this.icon,
     required this.label,
     required this.selected,
     required this.onTap,
+    this.subtitle,
+    this.showDivider = true,
   });
+
+  final IconData icon;
+  final String label;
+  final String? subtitle;
+  final bool selected;
+  final bool showDivider;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final primary = Theme.of(context).colorScheme.primary;
-    final chipBg = dashboardPrioritiesChipBackground(primary, isDark: isDark);
-    final chipFg = dashboardPrioritiesChipForeground(primary, isDark: isDark);
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
+    final chrome = ShellChrome.of(context);
+    final brand = BrandPalette.softened(Theme.of(context).colorScheme.primary);
+    final detail = subtitle?.trim();
+    final hasSubtitle = detail != null && detail.isNotEmpty;
 
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(TokensStrip.rPill),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 160),
-        padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 8),
-        decoration: BoxDecoration(
-          color:
-              selected
-                  ? chipBg
-                  : (isDark
-                      ? Colors.white.withValues(alpha: 0.05)
-                      : BrandPalette.soft(primary, dark: false)),
-          borderRadius: BorderRadius.circular(TokensStrip.rPill),
-          border:
-              selected
-                  ? null
-                  : Border.all(color: line.withValues(alpha: 0.75)),
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: hasSubtitle ? '$label. $detail' : label,
+      child: InkWell(
+        onTap: () {
+          HapticFeedback.selectionClick();
+          onTap();
+        },
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(
+            minHeight: FxSettingsLayout.rowMinHeight,
+          ),
+          child: Row(
+            children: [
+              Icon(icon, size: FxSettingsLayout.iconSize, color: brand),
+              const SizedBox(width: FxSettingsLayout.iconGap),
+              Expanded(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    border:
+                        showDivider
+                            ? Border(
+                              bottom: BorderSide(
+                                color: chrome.line,
+                                width: FxSettingsLayout.dividerThickness,
+                              ),
+                            )
+                            : null,
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: TokensStrip.s3,
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                label,
+                                maxLines: hasSubtitle ? 1 : 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: FxSettingsLayout.rowLabel(
+                                  color: chrome.ink,
+                                ),
+                              ),
+                              if (hasSubtitle) ...[
+                                const SizedBox(
+                                  height: FxSettingsLayout.captionAfterHeader,
+                                ),
+                                Text(
+                                  detail,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: FxSettingsLayout.subhead(
+                                    color: chrome.mute,
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                        if (selected)
+                          Icon(
+                            Icons.check,
+                            color: brand,
+                            size: FxSettingsLayout.iconSize,
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
-        child: Text(
-          label,
-          style: dashboardChipLabelStyle(
-            selected ? chipFg : ink,
-          ).copyWith(fontSize: TokensStrip.fontBodySm, fontWeight: FontWeight.w800),
+      ),
+    );
+  }
+}
+
+class _AlunosCompactToggleRow extends StatelessWidget {
+  const _AlunosCompactToggleRow({required this.value, required this.onTap});
+
+  final bool value;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final chrome = ShellChrome.of(context);
+    final brand = BrandPalette.softened(Theme.of(context).colorScheme.primary);
+
+    return Semantics(
+      button: true,
+      toggled: value,
+      label: AlunosMicrocopy.densityTitle,
+      child: InkWell(
+        onTap: onTap,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(
+            minHeight: FxSettingsLayout.rowMinHeight,
+          ),
+          child: Row(
+            children: [
+              Icon(
+                Icons.density_small_rounded,
+                size: FxSettingsLayout.iconSize,
+                color: brand,
+              ),
+              const SizedBox(width: FxSettingsLayout.iconGap),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: TokensStrip.s3),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        AlunosMicrocopy.densityTitle,
+                        style: FxSettingsLayout.rowLabel(color: chrome.ink),
+                      ),
+                      const SizedBox(
+                        height: FxSettingsLayout.captionAfterHeader,
+                      ),
+                      Text(
+                        AlunosMicrocopy.densitySubtitle,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: FxSettingsLayout.subhead(color: chrome.mute),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              IgnorePointer(
+                child: Switch.adaptive(value: value, onChanged: (_) {}),
+              ),
+            ],
+          ),
         ),
       ),
     );

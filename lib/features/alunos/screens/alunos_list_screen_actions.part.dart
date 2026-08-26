@@ -121,125 +121,73 @@ class _AlunosBulkActionsSheetState extends State<_AlunosBulkActionsSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final ink = widget.isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final primary = Theme.of(context).colorScheme.primary;
-    final maxHeight =
-        MediaQuery.sizeOf(context).height * FxHomeSheetChrome.maxHeightFactor;
 
-    return FxHomeSheetSurface(
-      isDark: widget.isDark,
-      maxHeight: maxHeight,
-      child: SingleChildScrollView(
+    return Semantics(
+      label: alunosSelectionTitle(widget.count),
+      child: FxHomeSheetScaffold(
+        isDark: widget.isDark,
+        leading: Icon(Icons.checklist_rounded, color: primary, size: 22),
+        title: 'Ações',
+        subtitle: 'Status, pagamento ou exclusão.',
         child: Column(
-          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            FxHomeSheetHandle(isDark: widget.isDark),
-            SizedBox(height: TokensStrip.s4),
-            FxHomeSheetHeader(
-              isDark: widget.isDark,
-              title: alunosSelectionTitle(widget.count),
-              subtitle: 'Ações em lote para os alunos selecionados.',
-              leading: Icon(Icons.checklist_rounded, color: primary, size: 18),
-            ),
-            const SizedBox(height: 18),
             if (widget.mostrarMarcarPago) ...[
-              Semantics(
-                button: true,
-                label: 'Marcar mensalidade como paga',
-                child: SizedBox(
-                  height: AlunosLayout.touchTarget,
-                  child: FilledButton.icon(
-                    onPressed: widget.onMarcarPagos,
-                    icon: const Icon(Icons.payments_rounded, size: 18),
-                    label: const Text('Marcar mensalidade como paga'),
-                    style: FilledButton.styleFrom(
-                      backgroundColor: primary,
-                      foregroundColor: Colors.white,
-                      shape: const StadiumBorder(),
-                    ),
+              FxSettingsGroup(
+                children: [
+                  FxSettingsTile(
+                    icon: Icons.payments_rounded,
+                    label: 'Marcar mensalidade como paga',
+                    value: '',
+                    highlight: true,
+                    showDivider: false,
+                    onTap: widget.onMarcarPagos,
                   ),
-                ),
+                ],
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: FxSettingsLayout.groupGap),
             ],
-            Text(
-              'Atualizar status',
-              style: FocuxHubTypography.eyebrow(
-                context,
-                color: ink,
-                fontWeight: FontWeight.w700,
-              ).copyWith(fontSize: TokensStrip.fontBodySm),
-            ),
-            const SizedBox(height: 10),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
+            FxSettingsGroup(
+              header: 'Status',
               children: [
-                for (final option in _statusOptions)
-                  Semantics(
-                    button: true,
-                    selected: _statusSelecionado == option.value,
-                    label: 'Status ${option.label}',
-                    child: _SheetShortcutChip(
-                      label: option.label,
-                      selected: _statusSelecionado == option.value,
-                      onTap:
-                          () =>
-                              setState(() => _statusSelecionado = option.value),
-                    ),
+                for (var i = 0; i < _statusOptions.length; i++)
+                  _AlunosSheetCheckRow(
+                    icon: switch (_statusOptions[i].value) {
+                      'INATIVO' => Icons.pause_circle_outline_rounded,
+                      'BLOQUEADO' => Icons.block_rounded,
+                      _ => Icons.check_circle_outline_rounded,
+                    },
+                    label: _statusOptions[i].label,
+                    selected: _statusSelecionado == _statusOptions[i].value,
+                    showDivider: true,
+                    onTap:
+                        () => setState(
+                          () => _statusSelecionado = _statusOptions[i].value,
+                        ),
                   ),
+                FxSettingsTile(
+                  icon: Icons.done_all_rounded,
+                  label: 'Aplicar status',
+                  value: '',
+                  highlight: !widget.mostrarMarcarPago,
+                  showDivider: false,
+                  onTap: () => widget.onAtualizarStatus(_statusSelecionado),
+                ),
               ],
             ),
-            const SizedBox(height: 14),
-            SizedBox(
-              height: AlunosLayout.touchTarget,
-              child:
-                  widget.mostrarMarcarPago
-                      ? OutlinedButton.icon(
-                        onPressed:
-                            () => widget.onAtualizarStatus(_statusSelecionado),
-                        icon: const Icon(Icons.check_rounded, size: 18),
-                        label: const Text('Aplicar status'),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: primary,
-                          side: BorderSide(
-                            color: primary.withValues(alpha: 0.28),
-                          ),
-                          shape: const StadiumBorder(),
-                        ),
-                      )
-                      : FilledButton.icon(
-                        onPressed:
-                            () => widget.onAtualizarStatus(_statusSelecionado),
-                        icon: const Icon(Icons.check_rounded, size: 18),
-                        label: const Text('Aplicar status'),
-                        style: FilledButton.styleFrom(
-                          backgroundColor: primary,
-                          foregroundColor: Colors.white,
-                          shape: const StadiumBorder(),
-                        ),
-                      ),
-            ),
-            const SizedBox(height: 10),
-            Semantics(
-              button: true,
-              label: 'Excluir alunos selecionados',
-              child: SizedBox(
-                height: AlunosLayout.touchTarget,
-                child: OutlinedButton.icon(
-                  onPressed: widget.onExcluir,
-                  icon: const Icon(Icons.delete_outline_rounded, size: 18),
-                  label: const Text('Excluir selecionados'),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: EagleTokens.bad,
-                    side: BorderSide(
-                      color: EagleTokens.bad.withValues(alpha: 0.45),
-                    ),
-                    shape: const StadiumBorder(),
-                  ),
+            const SizedBox(height: FxSettingsLayout.groupGap),
+            FxSettingsGroup(
+              children: [
+                FxSettingsTile(
+                  icon: Icons.delete_outline_rounded,
+                  label: 'Excluir selecionados',
+                  value: '',
+                  danger: true,
+                  showDivider: false,
+                  onTap: widget.onExcluir,
                 ),
-              ),
+              ],
             ),
           ],
         ),

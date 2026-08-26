@@ -144,10 +144,12 @@ class _AlunoQuickActionIcon extends StatelessWidget {
                 width: visual,
                 height: visual,
                 alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: compact ? 0.1 : 0.12),
-                  shape: BoxShape.circle,
-                ),
+                decoration: compact
+                    ? null
+                    : BoxDecoration(
+                      color: color.withValues(alpha: 0.12),
+                      shape: BoxShape.circle,
+                    ),
                 child: Icon(icon, size: iconSize, color: color),
               ),
             ),

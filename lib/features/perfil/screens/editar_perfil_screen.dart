@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../../core/api/media_upload_service.dart';
 import '../../../core/router/safe_navigation.dart';
+import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/focux_typography.dart';
@@ -17,8 +18,10 @@ import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_motion.dart';
-import '../../../core/widgets/fx_premium_entrance.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
+import '../../../core/widgets/fx_settings_group.dart';
+import '../../../core/theme/fx_settings_layout.dart';
+import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/perfil_repository.dart';
@@ -164,69 +167,32 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
         useMesh: true,
         appBar: FxShellAppBar(
           title: 'Editar Perfil',
-          subtitle: 'PERFIL',
           onBack: () => safePopOrGo(context, '/perfil'),
         ),
-        bottomNavigationBar: Material(
-          color: Colors.transparent,
-          child: Container(
-            decoration: BoxDecoration(
-              color: chrome.cardFill,
-              border: Border(top: BorderSide(color: chrome.line)),
-            ),
-            padding: const EdgeInsets.fromLTRB(
-              TokensStrip.s5,
-              12,
-              TokensStrip.s5,
-              12,
-            ),
-            child: SafeArea(
-              top: false,
-              child: Semantics(
-                button: true,
-                enabled: !_loading,
-                label:
-                    _loading
-                        ? 'Salvando alterações do perfil'
-                        : 'Salvar alterações do perfil',
-                child: FxLiquidPrimaryButton(
-                  label: 'Salvar alterações',
-                  loadingLabel: 'Salvando…',
-                  loading: _loading,
-                  onPressed: _loading ? null : _submit,
+        body: Stack(
+          children: [
+            SafeArea(
+              bottom: false,
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(
+                  TokensStrip.s4,
+                  6,
+                  TokensStrip.s4,
+                  88,
                 ),
-              ),
-            ),
-          ),
-        ),
-        body: FxPremiumEntrance(
-          child: SafeArea(
-            bottom: false,
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(
-                TokensStrip.s4,
-                6,
-                TokensStrip.s4,
-                20,
-              ),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Semantics(
-                      button: true,
-                      enabled: !_uploadingPhoto,
-                      label:
-                          _uploadingPhoto
-                              ? 'Enviando foto do perfil'
-                              : 'Foto do perfil. Toque no ícone da câmera para trocar a foto',
-                      child: Center(
-                        child: FxGlowSurface(
-                          color: primary,
-                          enabled: true,
-                          intensity: 0.7,
-                          borderRadius: 999,
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Semantics(
+                        button: true,
+                        enabled: !_uploadingPhoto,
+                        label:
+                            _uploadingPhoto
+                                ? 'Enviando foto do perfil'
+                                : 'Foto do perfil. Toque no ícone da câmera para trocar a foto',
+                        child: Center(
                           child: Stack(
                             alignment: Alignment.bottomRight,
                             children: [
@@ -291,21 +257,18 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
                           ),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 6),
-                    Center(
-                      child: Text(
-                        'Toque no ícone para trocar a foto',
-                        style: FocuxHubTypography.bodyMuted(color: mute),
+                      const SizedBox(height: 6),
+                      Center(
+                        child: Text(
+                          'Toque no ícone para trocar a foto',
+                          style: FocuxHubTypography.bodyMuted(color: mute),
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: TokensStrip.s3),
-                    FxStaggerItem(
-                      index: 0,
-                      child: _SectionCard(
-                        title: 'Dados pessoais',
-                        showHint: false,
-                        child: Column(
+                      const SizedBox(height: TokensStrip.s3),
+                      FxStaggerItem(
+                        index: 0,
+                        child: FxSettingsGroup(
+                          header: 'Dados pessoais',
                           children: [
                             Semantics(
                               label: 'Nome completo',
@@ -315,6 +278,8 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
                                   context,
                                   'Nome completo',
                                   icon: Icons.person_outline_rounded,
+                                  iconColor: BrandPalette.softened(primary),
+                                  iconSize: FxSettingsLayout.iconSize,
                                 ),
                                 validator:
                                     (v) =>
@@ -335,6 +300,8 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
                                   'Telefone / WhatsApp',
                                   icon: Icons.phone_iphone_rounded,
                                   hint: '(11) 99999-0000',
+                                  iconColor: BrandPalette.softened(primary),
+                                  iconSize: FxSettingsLayout.iconSize,
                                 ),
                                 validator: BrPhone.validateOptional,
                               ),
@@ -342,13 +309,11 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
                           ],
                         ),
                       ),
-                    ),
-                    const SizedBox(height: TokensStrip.s3),
-                    FxStaggerItem(
-                      index: 1,
-                      child: _SectionCard(
-                        title: 'Dados profissionais',
-                        child: Column(
+                      const SizedBox(height: FxSettingsLayout.groupGap),
+                      FxStaggerItem(
+                        index: 1,
+                        child: FxSettingsGroup(
+                          header: 'Dados profissionais',
                           children: [
                             Semantics(
                               label: 'CREF opcional',
@@ -359,6 +324,8 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
                                   'CREF (opcional)',
                                   icon: Icons.badge_outlined,
                                   hint: 'Ex: 012345-G/SP',
+                                  iconColor: BrandPalette.softened(primary),
+                                  iconSize: FxSettingsLayout.iconSize,
                                 ),
                               ),
                             ),
@@ -372,6 +339,8 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
                                   'Especialidade principal',
                                   icon: Icons.fitness_center_outlined,
                                   hint: 'Ex: Musculação',
+                                  iconColor: BrandPalette.softened(primary),
+                                  iconSize: FxSettingsLayout.iconSize,
                                 ),
                               ),
                             ),
@@ -385,6 +354,8 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
                                   'Áreas de atuação (opcional)',
                                   icon: Icons.category_outlined,
                                   hint: 'Ex: Funcional, Hipertrofia',
+                                  iconColor: BrandPalette.softened(primary),
+                                  iconSize: FxSettingsLayout.iconSize,
                                 ),
                               ),
                             ),
@@ -398,110 +369,87 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
                                   'Instagram (opcional)',
                                   icon: Icons.alternate_email_rounded,
                                   hint: 'seuusuario',
+                                  iconColor: BrandPalette.softened(primary),
+                                  iconSize: FxSettingsLayout.iconSize,
                                 ),
                               ),
                             ),
                           ],
                         ),
                       ),
-                    ),
-                    const SizedBox(height: TokensStrip.s3),
-                    FxStaggerItem(
-                      index: 2,
-                      child: _SectionCard(
-                        title: 'Bio / Apresentação',
-                        child: Semantics(
-                          label: 'Sobre você, até 500 caracteres',
-                          child: TextFormField(
-                            controller: _bioCtrl,
-                            maxLines: 4,
-                            maxLength: 500,
-                            decoration: FxInputDeco.build(
-                              context,
-                              'Sobre você (opcional)',
-                              icon: Icons.notes_rounded,
-                              hint:
-                                  'Conte sua história, metodologia e diferenciais...',
+                      const SizedBox(height: FxSettingsLayout.groupGap),
+                      FxStaggerItem(
+                        index: 2,
+                        child: FxSettingsGroup(
+                          header: 'Bio / Apresentação',
+                          children: [
+                            Semantics(
+                              label: 'Sobre você, até 500 caracteres',
+                              child: TextFormField(
+                                controller: _bioCtrl,
+                                maxLines: 4,
+                                maxLength: 500,
+                                decoration: FxInputDeco.build(
+                                  context,
+                                  'Sobre você (opcional)',
+                                  icon: Icons.notes_rounded,
+                                  hint:
+                                      'Conte sua história, metodologia e diferenciais...',
+                                  iconColor: BrandPalette.softened(primary),
+                                  iconSize: FxSettingsLayout.iconSize,
+                                ),
+                              ),
                             ),
-                          ),
+                          ],
                         ),
                       ),
-                    ),
-                    if (_error != null) ...[
-                      const SizedBox(height: TokensStrip.s3),
-                      FxErrorState(
-                        chromeOnDark: chrome.isDark,
-                        primary: primary,
-                        message: _error!,
-                        onRetry: _submit,
-                        title: 'Não foi possível salvar',
-                      ),
+                      if (_error != null) ...[
+                        const SizedBox(height: TokensStrip.s3),
+                        FxErrorState(
+                          chromeOnDark: chrome.isDark,
+                          primary: primary,
+                          message: _error!,
+                          onRetry: _submit,
+                          title: 'Não foi possível salvar',
+                        ),
+                      ],
                     ],
-                  ],
+                  ),
                 ),
               ),
             ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _SectionCard extends StatelessWidget {
-  const _SectionCard({
-    required this.title,
-    required this.child,
-    this.showHint = false,
-  });
-
-  final String title;
-  final Widget child;
-  final bool showHint;
-
-  static const _hintCopy =
-      'Campos usados no perfil comercial e na experiência do aluno.';
-
-  @override
-  Widget build(BuildContext context) {
-    final chrome = ShellChrome.of(context);
-    final ink = chrome.ink;
-    final mute = chrome.mute;
-    final a11y = showHint ? '$title. $_hintCopy' : title;
-
-    return Semantics(
-      container: true,
-      label: a11y,
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(
-          TokensStrip.s3,
-          TokensStrip.s3,
-          TokensStrip.s3,
-          TokensStrip.s3,
-        ),
-        decoration: fxListCardDecoration(context),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              style: FocuxHubTypography.cardTitle(color: ink),
-            ),
-            if (showHint) ...[
-              const SizedBox(height: 3),
-              Text(
-                _hintCopy,
-                style: FocuxHubTypography.bodyMuted(
-                  color: mute,
-                  height: 1.25,
+            Align(
+              alignment: AlignmentDirectional.bottomEnd,
+              child: SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    TokensStrip.s4,
+                    0,
+                    TokensStrip.s4,
+                    12,
+                  ),
+                  child: Semantics(
+                    button: true,
+                    enabled: !_loading,
+                    label:
+                        _loading
+                            ? 'Salvando alterações do perfil'
+                            : 'Salvar alterações do perfil',
+                    child: DashboardHomeActionChip(
+                      label: _loading ? 'Salvando…' : 'Salvar',
+                      accent: primary,
+                      isDark: isDark,
+                      enabled: !_loading,
+                      onPressed: _submit,
+                    ),
+                  ),
                 ),
               ),
-            ],
-            const SizedBox(height: TokensStrip.s2),
-            child,
+            ),
           ],
         ),
       ),
     );
   }
 }
+

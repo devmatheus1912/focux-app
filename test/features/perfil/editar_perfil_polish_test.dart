@@ -8,11 +8,11 @@ void main() {
       'lib/features/perfil/screens/editar_perfil_screen.dart',
     ).readAsStringSync();
 
-    expect(screen, contains("subtitle: 'PERFIL'"));
-    expect(screen, contains("loadingLabel: 'Salvando…'"));
+    expect(screen, contains('FxSettingsGroup'));
+    expect(screen, contains("'Salvando…'"));
     expect(screen, contains('Semantics('));
     expect(screen, contains('Salvando alterações do perfil'));
-    expect(screen, contains('showHint: false'));
+    expect(screen, contains('DashboardHomeActionChip'));
     expect(screen, isNot(contains('google_fonts')));
   });
 }

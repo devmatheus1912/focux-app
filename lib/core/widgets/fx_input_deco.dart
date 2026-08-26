@@ -22,6 +22,8 @@ class FxInputDeco {
     IconData? icon,
     String? hint,
     Widget? suffix,
+    Color? iconColor,
+    double iconSize = 20,
   }) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
@@ -42,7 +44,10 @@ class FxInputDeco {
       hintStyle: FocuxHubTypography.bodyMuted(
         color: mute.withValues(alpha: 0.5),
       ),
-      prefixIcon: icon != null ? Icon(icon, size: 20, color: mute) : null,
+      prefixIcon:
+          icon != null
+              ? Icon(icon, size: iconSize, color: iconColor ?? mute)
+              : null,
       suffixIcon: suffix,
       filled: true,
       fillColor: fillColor,

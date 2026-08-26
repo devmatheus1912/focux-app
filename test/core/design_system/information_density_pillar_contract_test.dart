@@ -111,7 +111,11 @@ void main() {
         File('lib/features/alunos/screens/alunos_list_screen_state.part.dart')
             .readAsStringSync();
     expect(source, contains('AlunoListPreferences'));
-    expect(source, contains('Lista compacta'));
+    expect(source, contains('AlunosMicrocopy.densityTitle'));
+    expect(
+      File('lib/features/alunos/utils/alunos_microcopy.dart').readAsStringSync(),
+      contains('Lista compacta'),
+    );
     expect(source, contains('compact:'));
   });
 
