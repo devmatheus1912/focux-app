@@ -403,13 +403,27 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                 left: 0,
                 right: 0,
                 bottom: 0,
-                child: Aluno360OperacaoStickyCtaBar(
-                  aluno: resolvedAlunoAsync.value!,
-                  alunoId: alunoId,
-                  proximaAcao360: proximaAcao360,
-                  hasOpenCopilotTask360:
-                      aluno360Async.valueOrNull?.hasOpenCopilotTask ?? false,
-                  isDark: isDark,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        chrome.sheetFill.withValues(alpha: 0),
+                        chrome.sheetFill.withValues(alpha: 0.82),
+                        chrome.sheetFill.withValues(alpha: 0.96),
+                      ],
+                      stops: const [0, 0.35, 1],
+                    ),
+                  ),
+                  child: Aluno360OperacaoStickyCtaBar(
+                    aluno: resolvedAlunoAsync.value!,
+                    alunoId: alunoId,
+                    proximaAcao360: proximaAcao360,
+                    hasOpenCopilotTask360:
+                        aluno360Async.valueOrNull?.hasOpenCopilotTask ?? false,
+                    isDark: isDark,
+                  ),
                 ),
               ),
           ],

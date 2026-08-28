@@ -22,7 +22,8 @@ abstract final class Aluno360Layout {
     vertical: 10,
   );
   /// Chip overlay (paridade Perfil/Home) — uma linha de chips alinhados à direita.
-  static const double stickyBarContentHeight = 56;
+  static const double stickyBarContentHeight = 64;
+  static const double stickyBarScrimHeight = 28;
   static const double snackbarStickyReserve = 76;
   static const double operacaoTopSnackHeight = 52;
   static const double operacaoMaxContentWidth = 720;
@@ -47,7 +48,7 @@ abstract final class Aluno360Layout {
     bool compactContactPriority = false,
   }) {
     final textScale = MediaQuery.textScalerOf(context).scale(1).clamp(1.0, 2.0);
-    final base = compactContactPriority ? 124.0 : 212.0;
+    final base = compactContactPriority ? 196.0 : 220.0;
     return base + ((textScale - 1) * 32);
   }
 
@@ -79,10 +80,9 @@ abstract final class Aluno360Layout {
     BuildContext context, {
     bool focusMode = false,
   }) {
-    if (focusMode) {
-      return stickyBarTotalHeight(context);
-    }
-    return stickyBarTotalHeight(context) + 8;
+    final base = stickyBarTotalHeight(context) + stickyBarScrimHeight + 16;
+    if (focusMode) return base;
+    return base + 8;
   }
 
   /// Centers Operação tab content on wide screens.

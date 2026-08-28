@@ -28,56 +28,52 @@ class Aluno360DetailTabBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final chrome = ShellChrome.of(context);
     final scheme = Theme.of(context).colorScheme;
 
-    return Material(
-      color: chrome.sheetFill,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(
-          Aluno360Layout.screenPadding,
-          0,
-          Aluno360Layout.screenPadding,
-          6,
-        ),
-        child: AnimatedBuilder(
-          animation: tabController,
-          builder: (context, _) {
-            return Semantics(
-              container: true,
-              label: 'Abas do perfil do aluno',
-              child: Container(
-                padding: const EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  color: scheme.surfaceContainerHighest.withValues(alpha: 0.55),
-                  borderRadius: BorderRadius.circular(TokensStrip.rMd),
-                  border: Border.all(
-                    color: line.withValues(alpha: 0.45),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    for (var i = 0; i < _labels.length; i++)
-                      Expanded(
-                        child: _Aluno360TabChip(
-                          label: _labels[i],
-                          selected: tabController.index == i,
-                          primary: primary,
-                          mute: mute,
-                          onTap: () {
-                            if (tabController.index != i) {
-                              HapticFeedback.selectionClick();
-                            }
-                            tabController.animateTo(i);
-                          },
-                        ),
-                      ),
-                  ],
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        Aluno360Layout.screenPadding,
+        0,
+        Aluno360Layout.screenPadding,
+        4,
+      ),
+      child: AnimatedBuilder(
+        animation: tabController,
+        builder: (context, _) {
+          return Semantics(
+            container: true,
+            label: 'Abas do perfil do aluno',
+            child: Container(
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                color: scheme.surfaceContainerHighest.withValues(alpha: 0.55),
+                borderRadius: BorderRadius.circular(TokensStrip.rMd),
+                border: Border.all(
+                  color: line.withValues(alpha: 0.45),
                 ),
               ),
-            );
-          },
-        ),
+              child: Row(
+                children: [
+                  for (var i = 0; i < _labels.length; i++)
+                    Expanded(
+                      child: _Aluno360TabChip(
+                        label: _labels[i],
+                        selected: tabController.index == i,
+                        primary: primary,
+                        mute: mute,
+                        onTap: () {
+                          if (tabController.index != i) {
+                            HapticFeedback.selectionClick();
+                          }
+                          tabController.animateTo(i);
+                        },
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          );
+        },
       ),
     );
   }

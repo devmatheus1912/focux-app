@@ -50,7 +50,7 @@ void main() {
       harness(
         isDark: false,
         child: SizedBox(
-          height: 112,
+          height: 220,
           child: AlunoDetailHeroCard(
             aluno: alunoRisco,
             isDark: false,

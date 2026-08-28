@@ -10,6 +10,8 @@ String _alunoDetailLibrarySource() {
       'lib/features/alunos/providers/aluno_detail_providers.dart';
   const heroWidgetFile =
       'lib/features/alunos/widgets/aluno_detail_hero_card.dart';
+  const heroRiskStyleFile =
+      'lib/features/alunos/utils/aluno360_hero_risk_style.dart';
   const operacaoTabFile =
       'lib/features/alunos/widgets/aluno360_operacao_tab.dart';
   const headerWidgetFile =
@@ -28,6 +30,10 @@ String _alunoDetailLibrarySource() {
       'lib/features/alunos/widgets/aluno_outreach_message_sheet.dart';
   const copilotCardFile =
       'lib/features/alunos/widgets/aluno360_copilot_card.dart';
+  const copilotLockedSectionFile =
+      'lib/features/alunos/widgets/aluno360_copilot_locked_section.dart';
+  const copilotUpgradeSheetFile =
+      'lib/features/alunos/widgets/aluno360_copilot_upgrade_sheet.dart';
   const operationalSectionFile =
       'lib/features/alunos/widgets/aluno360_operational_status_section.dart';
   const focusToggleFile =
@@ -80,6 +86,7 @@ String _alunoDetailLibrarySource() {
   final statePart = File(statePartFile).readAsStringSync();
   final providers = File(providersFile).readAsStringSync();
   final heroWidget = File(heroWidgetFile).readAsStringSync();
+  final heroRiskStyle = File(heroRiskStyleFile).readAsStringSync();
   final headerWidget = File(headerWidgetFile).readAsStringSync();
   final operacaoTab = File(operacaoTabFile).readAsStringSync();
   final operacaoLogic = File(operacaoLogicFile).readAsStringSync();
@@ -91,6 +98,10 @@ String _alunoDetailLibrarySource() {
   final copilotTextLogic = File(copilotTextLogicFile).readAsStringSync();
   final outreachSheet = File(outreachSheetFile).readAsStringSync();
   final copilotCard = File(copilotCardFile).readAsStringSync();
+  final copilotLockedSection =
+      File(copilotLockedSectionFile).readAsStringSync();
+  final copilotUpgradeSheet =
+      File(copilotUpgradeSheetFile).readAsStringSync();
   final operationalSection = File(operationalSectionFile).readAsStringSync();
   final focusToggle = File(focusToggleFile).readAsStringSync();
   final copilotSupport = File(copilotSupportFile).readAsStringSync();
@@ -118,7 +129,7 @@ String _alunoDetailLibrarySource() {
   final detailLoadingSkeleton =
       File(detailLoadingSkeletonFile).readAsStringSync();
   final alunoRepository = File(alunoRepositoryFile).readAsStringSync();
-  return '$main\n$statePart\n$providers\n$heroWidget\n$headerWidget\n$operacaoTab\n$operacaoLogic\n$copilotLogic\n$copilotExecutarLogic\n$copilotOutreachLogic\n$copilotTextLogic\n$outreachSheet\n$copilotCard\n$operationalSection\n$focusToggle\n$copilotSupport\n$stickyCta\n$followUp\n$copilotTaskActions\n$executarButton\n$financeBanner\n$ferramentasModules\n$timelineCard\n$actionEmptyPanel\n$alunoActions\n$deleteConfirmSheet\n$quickActions\n$evolucaoCard\n$adherenceLegend\n$profileGapsSheet\n$iaRepository\n$detailOperacaoTab\n$detailEvolucaoTab\n$detailFerramentasTab\n$recoveryInsight\n$weightActivity\n$detailLoadingSkeleton\n$alunoRepository';
+  return '$main\n$statePart\n$providers\n$heroWidget\n$heroRiskStyle\n$headerWidget\n$operacaoTab\n$operacaoLogic\n$copilotLogic\n$copilotExecutarLogic\n$copilotOutreachLogic\n$copilotTextLogic\n$outreachSheet\n$copilotCard\n$copilotLockedSection\n$copilotUpgradeSheet\n$operationalSection\n$focusToggle\n$copilotSupport\n$stickyCta\n$followUp\n$copilotTaskActions\n$executarButton\n$financeBanner\n$ferramentasModules\n$timelineCard\n$actionEmptyPanel\n$alunoActions\n$deleteConfirmSheet\n$quickActions\n$evolucaoCard\n$adherenceLegend\n$profileGapsSheet\n$iaRepository\n$detailOperacaoTab\n$detailEvolucaoTab\n$detailFerramentasTab\n$recoveryInsight\n$weightActivity\n$detailLoadingSkeleton\n$alunoRepository';
 }
 
 void main() {
@@ -276,9 +287,9 @@ void main() {
       expect(screen, isNot(contains('operational_metrics.part.dart')));
       expect(screen, contains('class AlunoDetailHeroCard'));
       expect(screen, contains('aluno360_hero_card'));
-      expect(screen, contains('_HeroRiskBand'));
-      expect(screen, contains('_CompactRiskChip'));
-      expect(screen, contains('alunoHeroRiscoMetricBadgeColors'));
+      expect(screen, contains('_HeroRiskNotice'));
+      expect(screen, contains('Aluno360CopilotUpgradeSheet'));
+      expect(screen, contains('Aluno360HeroRiskStyle'));
       expect(screen, contains('copySensitiveToClipboard'));
       expect(
         screen,
@@ -431,7 +442,7 @@ void main() {
       File(
         'lib/features/alunos/widgets/aluno360_copilot_locked_section.dart',
       ).readAsStringSync(),
-      contains('UpgradePromptSheet.show'),
+      contains('Aluno360CopilotUpgradeSheet.show'),
     );
     expect(
       File(

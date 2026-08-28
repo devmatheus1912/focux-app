@@ -8,8 +8,8 @@ import '../constants/aluno_360_layout.dart';
 import '../data/aluno_contact_utils.dart';
 import '../data/aluno_repository.dart';
 import '../utils/aluno_display_utils.dart';
+import '../utils/aluno360_hero_risk_style.dart';
 import '../utils/aluno_hero_signal.dart';
-import '../utils/alunos_list_utils.dart';
 import 'aluno_avatar.dart';
 
 class AlunoDetailHeroCard extends StatelessWidget {
@@ -49,11 +49,9 @@ class AlunoDetailHeroCard extends StatelessWidget {
       signal: signal,
       status: status,
     );
-    final showRiskBand = aluno.emRisco && signal.label == 'Risco operacional';
-    final avatarVariant =
-        compactContactPriority
-            ? AlunoAvatarVariant.strip
-            : AlunoAvatarVariant.profile;
+    final showRiskNotice =
+        aluno.emRisco && signal.label == 'Risco operacional';
+    final nivel = formatRiscoNivel(aluno.riscoNivel);
 
     return Semantics(
       container: true,
@@ -67,7 +65,7 @@ class AlunoDetailHeroCard extends StatelessWidget {
           width: double.infinity,
           padding: EdgeInsets.symmetric(
             horizontal: 4,
-            vertical: compactContactPriority ? 2 : 6,
+            vertical: compactContactPriority ? 4 : 8,
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -75,20 +73,17 @@ class AlunoDetailHeroCard extends StatelessWidget {
               AlunoAvatar(
                 name: displayName,
                 photoUrl: aluno.fotoUrl,
-                variant: avatarVariant,
+                variant: AlunoAvatarVariant.profile,
               ),
-              SizedBox(height: compactContactPriority ? 6 : 10),
+              SizedBox(height: compactContactPriority ? 8 : 12),
               Text(
                 displayName,
                 textAlign: TextAlign.center,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style:
-                    compactContactPriority
-                        ? Aluno360Layout.identityNameStyle(context, ink)
-                        : FxSettingsLayout.profileName(context, color: ink),
+                style: FxSettingsLayout.profileName(context, color: ink),
               ),
-              SizedBox(height: compactContactPriority ? 2 : 4),
+              SizedBox(height: compactContactPriority ? 3 : 5),
               if (!objectiveDefined && onDefineObjective != null)
                 _IdentityObjectiveRow(
                   label: objective,
@@ -101,26 +96,21 @@ class AlunoDetailHeroCard extends StatelessWidget {
                 Text(
                   subtitle,
                   textAlign: TextAlign.center,
-                  maxLines: 2,
+                  maxLines: compactContactPriority ? 1 : 2,
                   overflow: TextOverflow.ellipsis,
                   style: FxSettingsLayout.subhead(color: mute).copyWith(
                     fontWeight: FontWeight.w600,
                     height: 1.3,
                   ),
                 ),
-              if (showRiskBand) ...[
-                SizedBox(height: compactContactPriority ? 4 : 8),
-                if (compactContactPriority)
-                  _CompactRiskChip(
-                    nivel: formatRiscoNivel(aluno.riscoNivel),
-                    isDark: isDark,
-                  )
-                else
-                  _HeroRiskBand(
-                    nivel: formatRiscoNivel(aluno.riscoNivel),
-                    detail: contextLine,
-                    isDark: isDark,
-                  ),
+              if (showRiskNotice) ...[
+                SizedBox(height: compactContactPriority ? 6 : 10),
+                _HeroRiskNotice(
+                  nivel: nivel,
+                  detail: compactContactPriority ? '' : contextLine,
+                  isDark: isDark,
+                  compact: compactContactPriority,
+                ),
               ] else if (showStatusBadge) ...[
                 SizedBox(height: compactContactPriority ? 6 : 8),
                 _IdentityStatusChip(status: status, isDark: isDark),
@@ -133,77 +123,73 @@ class AlunoDetailHeroCard extends StatelessWidget {
   }
 }
 
-class _CompactRiskChip extends StatelessWidget {
-  const _CompactRiskChip({required this.nivel, required this.isDark});
-
-  final String nivel;
-  final bool isDark;
-
-  @override
-  Widget build(BuildContext context) {
-    final (ink, bg) = alunoHeroRiscoMetricBadgeColors(isDark, nivel);
-    return Semantics(
-      label: 'Risco ${nivel.toLowerCase()}',
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-        decoration: BoxDecoration(
-          color: bg,
-          borderRadius: BorderRadius.circular(999),
-          border: Border.all(color: ink.withValues(alpha: isDark ? 0.42 : 0.32)),
-        ),
-        child: Text(
-          'Risco ${nivel.toLowerCase()}',
-          style: Aluno360Layout.badgeMicroStyle(context, ink).copyWith(
-            fontWeight: FontWeight.w700,
-            fontSize: 11,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _HeroRiskBand extends StatelessWidget {
-  const _HeroRiskBand({
+class _HeroRiskNotice extends StatelessWidget {
+  const _HeroRiskNotice({
     required this.nivel,
     required this.detail,
     required this.isDark,
+    required this.compact,
   });
 
   final String nivel;
   final String detail;
   final bool isDark;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
-    final (ink, bg) = alunoHeroRiscoMetricBadgeColors(isDark, nivel);
+    final style = Aluno360HeroRiskStyle.resolve(
+      context,
+      nivel: nivel,
+      isDark: isDark,
+    );
     final mute = fxScreenMute(context);
+    final ink = fxScreenInk(context);
+    final label = 'Risco ${nivel.toLowerCase()}';
 
     return Semantics(
-      label: 'Risco ${nivel.toLowerCase()}${detail.isEmpty ? '' : ', $detail'}',
+      label: '$label${detail.isEmpty ? '' : ', $detail'}',
       child: Container(
         width: double.infinity,
-        constraints: const BoxConstraints(maxWidth: 320),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        constraints: const BoxConstraints(maxWidth: 340),
+        padding: EdgeInsets.symmetric(
+          horizontal: compact ? 10 : 12,
+          vertical: compact ? 7 : 9,
+        ),
         decoration: BoxDecoration(
-          color: bg,
+          color: style.surfaceColor,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: ink.withValues(alpha: isDark ? 0.42 : 0.32)),
+          border: Border.all(color: style.borderColor),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: isDark ? 0.12 : 0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.warning_amber_rounded, size: 17, color: ink),
-            const SizedBox(width: 6),
+            Container(
+              width: 8,
+              height: 8,
+              decoration: BoxDecoration(
+                color: style.dotColor,
+                shape: BoxShape.circle,
+              ),
+            ),
+            const SizedBox(width: 8),
             Flexible(
               child: Text(
-                'Risco ${nivel.toLowerCase()}',
+                label,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 textAlign: TextAlign.center,
-                style: Aluno360Layout.badgeMicroStyle(context, ink).copyWith(
+                style: Aluno360Layout.metaStyle(context).copyWith(
+                  color: ink,
                   fontWeight: FontWeight.w700,
-                  fontSize: 12,
+                  fontSize: compact ? 11.5 : 12,
                 ),
               ),
             ),
@@ -221,7 +207,7 @@ class _HeroRiskBand extends StatelessWidget {
                   textAlign: TextAlign.center,
                   style: Aluno360Layout.metaStyle(context).copyWith(
                     color: mute,
-                    fontSize: 12,
+                    fontSize: compact ? 11 : 12,
                   ),
                 ),
               ),
