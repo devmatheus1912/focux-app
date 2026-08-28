@@ -113,18 +113,9 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
       label: 'Aluno Detail',
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        bottomNavigationBar:
-            showOperacaoSticky
-                ? Aluno360OperacaoStickyCtaBar(
-                  aluno: resolvedAlunoAsync.value!,
-                  alunoId: alunoId,
-                  proximaAcao360: proximaAcao360,
-                  hasOpenCopilotTask360:
-                      aluno360Async.valueOrNull?.hasOpenCopilotTask ?? false,
-                  isDark: isDark,
-                )
-                : null,
-        body:
+        body: Stack(
+          fit: StackFit.expand,
+          children: [
             loadingPrimary || loadingFallback
                 ? AlunoDetailLoadingSkeleton(
                   tabController: _tabController,
@@ -379,6 +370,22 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                     );
                   },
                 ),
+            if (showOperacaoSticky)
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: Aluno360OperacaoStickyCtaBar(
+                  aluno: resolvedAlunoAsync.value!,
+                  alunoId: alunoId,
+                  proximaAcao360: proximaAcao360,
+                  hasOpenCopilotTask360:
+                      aluno360Async.valueOrNull?.hasOpenCopilotTask ?? false,
+                  isDark: isDark,
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }

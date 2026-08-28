@@ -314,10 +314,9 @@ class FxHomeSheetScaffold extends StatelessWidget {
     return FxHomeSheetSurface(
       isDark: isDark,
       maxHeight: maxHeight,
-      expand: scroll,
       padding: padding,
       child: Column(
-        mainAxisSize: scroll ? MainAxisSize.max : MainAxisSize.min,
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           FxHomeSheetHandle(isDark: isDark),
@@ -331,7 +330,10 @@ class FxHomeSheetScaffold extends StatelessWidget {
           ),
           SizedBox(height: TokensStrip.s3),
           if (scroll)
-            Expanded(child: SingleChildScrollView(child: child))
+            Flexible(
+              fit: FlexFit.loose,
+              child: SingleChildScrollView(child: child),
+            )
           else
             child,
         ],

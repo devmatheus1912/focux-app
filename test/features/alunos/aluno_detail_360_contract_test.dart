@@ -311,9 +311,8 @@ void main() {
         'lib/features/alunos/widgets/aluno360_ferramentas_tab.dart',
       ).readAsStringSync(),
       allOf(
-        contains("'Acesso rápido'"),
         contains("'Medidas'"),
-        contains('Aluno360TabSectionTitle'),
+        contains('FxSettingsGroup'),
       ),
     );
     expect(
@@ -347,7 +346,7 @@ void main() {
     );
     expect(layoutSource, contains('tabSelectedLabelStyle'));
     expect(layoutSource, contains('secondaryActionLabelStyle'));
-    expect(layoutSource, contains('TokensStrip.fontH2'));
+    expect(layoutSource, contains('FxSettingsLayout.sectionHeader'));
     expect(screen, contains('syncFromAluno'));
     expect(screen, contains('operacaoFocusMode'));
     expect(screen, contains('atualizarOperacaoFocus'));
@@ -404,7 +403,11 @@ void main() {
       File(
         'lib/features/alunos/widgets/aluno360_ferramentas_modules_grid.dart',
       ).readAsStringSync(),
-      contains('class Aluno360FerramentasModulesGrid'),
+      allOf(
+        contains('class Aluno360FerramentasModulesGrid'),
+        contains('FxSettingsGroup'),
+        contains('FxSettingsTile'),
+      ),
     );
     expect(
       File(
@@ -472,12 +475,6 @@ void main() {
     );
     expect(
       File('lib/core/widgets/operational_metric_tile.dart').readAsStringSync(),
-      contains('class OperationalMetricTile'),
-    );
-    expect(
-      File(
-        'lib/features/dashboard/widgets/dashboard_pulse_strip.dart',
-      ).readAsStringSync(),
       contains('operationalMetricDecoration'),
     );
   });

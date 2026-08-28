@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/brand/focux_microcopy.dart';
 import '../constants/aluno_360_layout.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
@@ -15,6 +16,46 @@ import '../../dashboard/providers/dashboard_provider.dart';
 import '../data/aluno_repository.dart';
 import '../providers/aluno_detail_providers.dart';
 import '../utils/aluno360_copilot_logic.dart';
+
+/// Grid 2×2 com altura intrínseca — sem aspect-ratio fixo (evita truncar texto).
+class Aluno360CopilotSignalsGrid extends StatelessWidget {
+  const Aluno360CopilotSignalsGrid({super.key, required this.signals});
+
+  final List<Aluno360CopilotSignal> signals;
+
+  @override
+  Widget build(BuildContext context) {
+    final tiles =
+        signals
+            .map((signal) => Aluno360CopilotSignalTile(signal: signal))
+            .toList();
+    final rows = <Widget>[];
+    for (var i = 0; i < tiles.length; i += 2) {
+      final hasPair = i + 1 < tiles.length;
+      rows.add(
+        IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(child: tiles[i]),
+              if (hasPair) ...[
+                const SizedBox(width: 8),
+                Expanded(child: tiles[i + 1]),
+              ],
+            ],
+          ),
+        ),
+      );
+      if (i + 2 < tiles.length) {
+        rows.add(const SizedBox(height: 8));
+      }
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: rows,
+    );
+  }
+}
 
 class Aluno360CopilotSignalTile extends StatelessWidget {
   final Aluno360CopilotSignal signal;
@@ -33,57 +74,40 @@ class Aluno360CopilotSignalTile extends StatelessWidget {
       child: Tooltip(
         message: signal.detail,
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+          padding: const EdgeInsets.fromLTRB(10, 9, 10, 9),
           decoration: BoxDecoration(
-            color: signal.color.withValues(alpha: isDark ? 0.14 : 0.08),
-            borderRadius: BorderRadius.circular(14),
+            color: signal.color.withValues(alpha: isDark ? 0.12 : 0.06),
+            borderRadius: BorderRadius.circular(12),
+            border: Border(
+              left: BorderSide(color: signal.color, width: 3),
+            ),
           ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Container(
-                width: 4,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: signal.color,
-                  borderRadius: BorderRadius.circular(999),
-                ),
+              Text(
+                signal.label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: FxSettingsLayout.sectionHeader(color: mute),
               ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      signal.label,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: Aluno360Layout.metaStyle(context),
-                    ),
-                    const SizedBox(height: 1),
-                    Text(
-                      signal.value,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: Aluno360Layout.inlineMetricStyle(context, ink),
-                    ),
-                    if (signal.detail.isNotEmpty) ...[
-                      const SizedBox(height: 1),
-                      Text(
-                        signal.detail,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: Aluno360Layout.metaStyle(
-                          context,
-                        ).copyWith(color: mute, height: 1.2),
-                      ),
-                    ],
-                  ],
-                ),
+              const SizedBox(height: 2),
+              Text(
+                signal.value,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: FxSettingsLayout.rowMetric(color: ink),
               ),
+              if (signal.detail.isNotEmpty) ...[
+                const SizedBox(height: 2),
+                Text(
+                  signal.detail,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: FxSettingsLayout.subhead(color: mute),
+                ),
+              ],
             ],
           ),
         ),

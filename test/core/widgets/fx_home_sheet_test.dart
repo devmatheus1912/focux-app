@@ -90,6 +90,45 @@ void main() {
     expect(find.byType(FxHomeSheetScaffold), findsNothing);
   });
 
+  testWidgets('FxHomeSheetScaffold encolhe com conteúdo curto', (
+    tester,
+  ) async {
+    const screenH = 800.0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(size: Size(400, screenH)),
+          child: Scaffold(
+            body: Builder(
+              builder:
+                  (context) => TextButton(
+                    onPressed:
+                        () => showFxHomeSheet<void>(
+                          context,
+                          builder:
+                              (ctx) => FxHomeSheetScaffold(
+                                isDark: false,
+                                title: 'Ações',
+                                subtitle: 'Status, pagamento ou exclusão.',
+                                leading: const Icon(Icons.checklist_rounded),
+                                child: const Text('Item curto'),
+                              ),
+                        ),
+                    child: const Text('abrir'),
+                  ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('abrir'));
+    await tester.pumpAndSettle();
+
+    final surface = tester.getSize(find.byType(FxHomeSheetSurface));
+    expect(surface.height, lessThan(screenH * 0.45));
+  });
+
   test('sheet header is ícone 22 + título ink, sem poço colorido', () {
     final src = File('lib/core/widgets/fx_home_sheet.dart').readAsStringSync();
     expect(src, contains('FocuxHubTypography.sectionTitle'));

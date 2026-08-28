@@ -298,7 +298,7 @@ void main() {
 
       expect(find.byKey(const ValueKey('aluno360_ferramentas_modulos')), findsOneWidget);
       expect(find.text('Medidas'), findsOneWidget);
-      expect(find.text('Composição'), findsOneWidget);
+      expect(find.text('Composição corporal'), findsOneWidget);
       expect(find.text('Treino & evolução'), findsOneWidget);
       expect(find.text('Perfil & gestão'), findsOneWidget);
       expect(find.text('Treinos'), findsOneWidget);

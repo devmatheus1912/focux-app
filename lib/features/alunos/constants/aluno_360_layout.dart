@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/focux_hub_typography.dart';
-import '../../../core/theme/focux_typography.dart';
+import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../utils/aluno360_readability.dart';
 
 /// Layout tokens for Aluno 360 (hero, sticky CTA, scroll insets).
@@ -73,9 +73,13 @@ abstract final class Aluno360Layout {
     return MediaQuery.paddingOf(context).top + kToolbarHeight + tabBarHeight;
   }
 
-  /// Bottom padding so Operação content clears the sticky CTA bar.
+  /// Bottom padding so Operação content clears the sticky overlay CTA.
+  static double stickyBarTotalHeight(BuildContext context) {
+    return stickyBarContentHeight + MediaQuery.paddingOf(context).bottom;
+  }
+
   static double operacaoScrollBottomReserve(BuildContext context) {
-    return stickyBarContentHeight + MediaQuery.paddingOf(context).bottom + 40;
+    return stickyBarTotalHeight(context) + 8;
   }
 
   /// Centers Operação tab content on wide screens.
@@ -116,20 +120,15 @@ abstract final class Aluno360Layout {
     );
   }
 
-  /// Inset surface shared by Operação follow-up + status cards (teal tint).
+  /// Inset surface — paridade Perfil (`fxListCardDecoration` + raio 20).
   static BoxDecoration operacaoInsetSectionDecoration(
     BuildContext context, {
     required Color primary,
     required bool isDark,
   }) {
-    final line = ShellChrome.of(context).line;
-    return BoxDecoration(
-      color:
-          isDark
-              ? Colors.white.withValues(alpha: 0.04)
-              : primary.withValues(alpha: 0.035),
-      borderRadius: BorderRadius.circular(insetCardRadius),
-      border: Border.all(color: isDark ? line : line.withValues(alpha: 0.85)),
+    return fxListCardDecoration(
+      context,
+      radius: FxSettingsLayout.groupRadius,
     );
   }
 
@@ -245,15 +244,14 @@ abstract final class Aluno360Layout {
     );
   }
 
-  /// H2 on tab surfaces — same scale as Home/Dashboard section headings.
+  /// Tab section eyebrows — mesmo token do Perfil inset.
   static TextStyle tabSectionTitleStyle(
     BuildContext context, {
     required Color primary,
     required bool isDark,
   }) {
-    return FocuxTypography.headline(
-      color: BrandPalette.sectionHeading(primary, dark: isDark),
-    );
+    final mute = fxScreenMute(context);
+    return FxSettingsLayout.sectionHeader(color: mute);
   }
 
   /// Card section titles — same weight as Alunos list card names.

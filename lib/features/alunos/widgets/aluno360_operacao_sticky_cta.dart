@@ -112,21 +112,22 @@ class Aluno360OperacaoStickyCtaBar extends ConsumerWidget {
       child: Semantics(
         container: true,
         label: 'Ações rápidas da aba operação',
-        child: Container(
+        child: DecoratedBox(
           key: const ValueKey('aluno360_operacao_sticky_cta'),
           decoration: BoxDecoration(
-            color: ShellChrome.of(context).sheetFill,
-            border: Border(top: BorderSide(color: line)),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.08),
-                blurRadius: 16,
-                offset: const Offset(0, -4),
-              ),
-            ],
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                ShellChrome.of(context).sheetFill.withValues(alpha: 0),
+                ShellChrome.of(context).sheetFill,
+              ],
+            ),
+            border: Border(top: BorderSide(color: line.withValues(alpha: 0.5))),
           ),
-          padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
-          child: Row(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 6, 16, 10),
+            child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Expanded(
@@ -171,6 +172,7 @@ class Aluno360OperacaoStickyCtaBar extends ConsumerWidget {
                 ),
               ],
             ],
+          ),
           ),
         ),
       ),

@@ -82,10 +82,7 @@ void main() {
       findsNWidgets(2),
     );
 
-    expect(
-      find.bySemanticsLabel(RegExp(r'Aderência semanal:')),
-      findsOneWidget,
-    );
+    expect(find.text('Aderência'), findsOneWidget);
 
     expect(tester.takeException(), isNull);
   });

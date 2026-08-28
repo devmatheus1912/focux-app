@@ -244,20 +244,7 @@ class Aluno360CopilotCard extends ConsumerWidget {
             ],
             if (!hasOpenTask) ...[
               const SizedBox(height: 10),
-              GridView.count(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                crossAxisCount: 2,
-                crossAxisSpacing: 8,
-                mainAxisSpacing: 8,
-                childAspectRatio: 1.38,
-                children:
-                    signals
-                        .map(
-                          (signal) => Aluno360CopilotSignalTile(signal: signal),
-                        )
-                        .toList(),
-              ),
+              Aluno360CopilotSignalsGrid(signals: signals),
             ],
             if (!hasOpenTask) const SizedBox(height: 10),
             if (shouldShowCopilotProfileGapsButton(

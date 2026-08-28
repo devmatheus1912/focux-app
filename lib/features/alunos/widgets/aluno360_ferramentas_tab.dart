@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_settings_group.dart';
 import '../constants/aluno_360_layout.dart';
 import '../utils/aluno360_ferramentas_logic.dart';
 import 'aluno360_operacao_tab.dart';
-import 'aluno360_tab_section_title.dart';
 
 /// Ferramentas tab layout: measurements grid + modules grid.
 class Aluno360FerramentasTab extends StatelessWidget {
@@ -33,38 +34,21 @@ class Aluno360FerramentasTab extends StatelessWidget {
     );
   }
 
-  Widget _sectionHeader(String title) {
-    return Aluno360TabSectionTitle(
-      title: title,
-      primary: primary,
-      isDark: isDark,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final measurements = _section(
       0,
-      Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      FxSettingsGroup(
+        header: 'Medidas',
         children: [
-          _sectionHeader('Medidas'),
-          const SizedBox(height: Aluno360FerramentasLogic.sectionHeaderGap),
-          measurementsSection,
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: TokensStrip.s2),
+            child: measurementsSection,
+          ),
         ],
       ),
     );
-    final modules = _section(
-      1,
-      Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _sectionHeader('Acesso rápido'),
-          const SizedBox(height: Aluno360FerramentasLogic.sectionHeaderGap),
-          modulesSection,
-        ],
-      ),
-    );
+    final modules = _section(1, modulesSection);
 
     return Semantics(
       container: true,
