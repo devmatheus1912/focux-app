@@ -64,6 +64,7 @@ void main() {
           File(
             'lib/features/treinos/data/treino_repository.dart',
           ).readAsStringSync();
+      expect(repo, contains('TreinoPickerUiHints'));
       expect(repo, contains('/picker/home'));
       expect(repo, contains('getPickerHome'));
     },

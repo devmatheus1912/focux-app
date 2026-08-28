@@ -1,4 +1,4 @@
-part of 'add_exercicio_to_treino_screen.dart';
+﻿part of 'add_exercicio_to_treino_screen.dart';
 
 class _ExercisePickerCard extends StatelessWidget {
   final Exercicio? exercicio;
@@ -88,7 +88,7 @@ class _ExercisePickerCard extends StatelessWidget {
                                   child: Text(
                                     selected
                                         ? exercicio!.nomeDisplay
-                                        : 'Escolher exercício',
+                                        : 'Escolher exercÃ­cio',
                                     maxLines: selected ? 2 : 1,
                                     overflow: TextOverflow.ellipsis,
                                     style: FocuxHubTypography.body(color: ink)
@@ -179,7 +179,7 @@ class _ExercisePickerCard extends StatelessWidget {
                   Expanded(
                     child: Text(
                       selected
-                          ? 'Revise a prescrição abaixo antes de adicionar.'
+                          ? 'Revise a prescriÃ§Ã£o abaixo antes de adicionar.'
                           : 'Busque acima ou explore por movimento/grupo.',
                       style: FocuxHubTypography.bodyMuted(
                         color: mute,
@@ -210,7 +210,7 @@ class _ExercisePickerCard extends StatelessWidget {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'Vídeo do exercício (opcional)',
+                      'VÃ­deo do exercÃ­cio (opcional)',
                       style: FocuxHubTypography.bodyMuted(
                         color: mute,
                         fontWeight: FontWeight.w700,
@@ -297,14 +297,14 @@ class _RemoveExerciseVideoSheet extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Remover vídeo?',
+                          'Remover vÃ­deo?',
                           style: FocuxHubTypography.body(color: ink).copyWith(
                             fontWeight: FontWeight.w900,
                           ),
                         ),
                         const SizedBox(height: 5),
                         Text(
-                          '"${exercicio.nomeDisplay}" continua na biblioteca. Só a mídia de demonstração será removida.',
+                          '"${exercicio.nomeDisplay}" continua na biblioteca. SÃ³ a mÃ­dia de demonstraÃ§Ã£o serÃ¡ removida.',
                           style: FocuxHubTypography.bodyMuted(
                             color: mute,
                             height: 1.35,
@@ -353,303 +353,4 @@ class _RemoveExerciseVideoSheet extends StatelessWidget {
       ),
     );
   }
-}
-
-class _ExerciseVideoPreviewSheet extends StatefulWidget {
-  final Exercicio exercicio;
-  final String url;
-
-  const _ExerciseVideoPreviewSheet({
-    required this.exercicio,
-    required this.url,
-  });
-
-  @override
-  State<_ExerciseVideoPreviewSheet> createState() =>
-      _ExerciseVideoPreviewSheetState();
-}
-
-class _ExerciseVideoPreviewSheetState
-    extends State<_ExerciseVideoPreviewSheet> {
-  VideoPlayerController? _controller;
-  bool _ready = false;
-  bool _failed = false;
-  int _attempt = 0;
-  static const int _maxProcessingAttempts = 10;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadPreview();
-  }
-
-  Future<void> _loadPreview() async {
-    final controller = VideoPlayerController.networkUrl(
-      Uri.parse(_cloudinaryH264VideoUrl(widget.url)),
-    );
-    _controller = controller;
-    if (mounted) {
-      setState(() {
-        _ready = false;
-        _failed = false;
-      });
-    }
-
-    try {
-      await controller.initialize();
-      if (!mounted || _controller != controller) return;
-      setState(() => _ready = true);
-      await controller.play();
-    } catch (_) {
-      await controller.dispose();
-      if (!mounted || _controller != controller) return;
-      _controller = null;
-      if (_attempt < _maxProcessingAttempts) {
-        _attempt += 1;
-        final delaySeconds = (2 + _attempt).clamp(3, 12);
-        await Future<void>.delayed(Duration(seconds: delaySeconds));
-        if (mounted) await _loadPreview();
-        return;
-      }
-      if (mounted) setState(() => _failed = true);
-    }
-  }
-
-  @override
-  void dispose() {
-    _controller?.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final primary = Theme.of(context).colorScheme.primary;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-    final bottom = MediaQuery.of(context).padding.bottom;
-
-    return SafeArea(
-      top: false,
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(12, 0, 12, bottom + 10),
-        child: Container(
-          padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 10, 16, 16),
-          decoration: fxListCardDecoration(context, accent: primary),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Center(
-                child: Container(
-                  width: 36,
-                  height: 4,
-                  margin: const EdgeInsets.only(bottom: 16),
-                  decoration: BoxDecoration(
-                    color:
-                        isDark
-                            ? Colors.white.withValues(alpha: 0.16)
-                            : TokensStrip.borderDefault,
-                    borderRadius: BorderRadius.circular(99),
-                  ),
-                ),
-              ),
-              Row(
-                children: [
-                  Container(
-                    width: 38,
-                    height: 38,
-                    decoration: BoxDecoration(
-                      color: EagleTokens.brandSofter,
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: Icon(
-                      Icons.play_circle_outline_rounded,
-                      color: primary,
-                      size: 21,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          widget.exercicio.nomeDisplay,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: FocuxHubTypography.body(color: ink).copyWith(
-                            fontWeight: FontWeight.w900,
-                          ),
-                        ),
-                        const SizedBox(height: 3),
-                        Text(
-                          'Confira se a demonstração está correta.',
-                          style: FocuxHubTypography.bodyMuted(
-                            color: mute,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: () => Navigator.pop(context),
-                    icon: Icon(Icons.close_rounded, color: mute),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 14),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(20),
-                child: Container(
-                  color: Colors.black,
-                  child:
-                      _failed
-                          ? const _VideoPreviewFallback()
-                          : !_ready
-                          ? const SizedBox(
-                            height: 210,
-                            child: Center(child: _VideoPreparingPreview()),
-                          )
-                          : AspectRatio(
-                            aspectRatio: _controller!.value.aspectRatio,
-                            child: VideoPlayer(_controller!),
-                          ),
-                ),
-              ),
-              if (_ready && !_failed && _controller != null) ...[
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    Expanded(
-                      child: FilledButton.icon(
-                        onPressed:
-                            () => setState(() {
-                              _controller!.value.isPlaying
-                                  ? _controller!.pause()
-                                  : _controller!.play();
-                            }),
-                        icon: Icon(
-                          _controller!.value.isPlaying
-                              ? Icons.pause_rounded
-                              : Icons.play_arrow_rounded,
-                        ),
-                        label: Text(
-                          _controller!.value.isPlaying
-                              ? 'Pausar'
-                              : 'Reproduzir',
-                        ),
-                        style: FilledButton.styleFrom(
-                          backgroundColor: primary,
-                          minimumSize: const Size.fromHeight(44),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: () => Navigator.pop(context),
-                        icon: const Icon(Icons.check_rounded),
-                        label: const Text('Está certo'),
-                        style: OutlinedButton.styleFrom(
-                          minimumSize: const Size.fromHeight(44),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _VideoPreparingPreview extends StatelessWidget {
-  const _VideoPreparingPreview();
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(18),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const SizedBox(
-            width: 26,
-            height: 26,
-            child: FxLoading(color: Colors.white, strokeWidth: 2.8),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            'Preparando prévia do vídeo...',
-            textAlign: TextAlign.center,
-            style: FocuxHubTypography.cardTitle(color: Colors.white),
-          ),
-          const SizedBox(height: 5),
-          Text(
-            'Na primeira abertura, o Cloudinary pode levar até um minuto.',
-            textAlign: TextAlign.center,
-            style: FocuxHubTypography.bodyMuted(color: Colors.white70),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _VideoPreviewFallback extends StatelessWidget {
-  const _VideoPreviewFallback();
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 210,
-      child: Padding(
-        padding: const EdgeInsets.all(18),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.video_file_rounded, color: Colors.white, size: 34),
-            const SizedBox(height: 10),
-            Text(
-              'Vídeo enviado, mas a prévia ainda não ficou disponível.',
-              textAlign: TextAlign.center,
-              style: FocuxHubTypography.cardTitle(color: Colors.white),
-            ),
-            const SizedBox(height: 5),
-            Text(
-              'Tente abrir novamente em instantes. Se persistir, envie um MP4 H.264.',
-              textAlign: TextAlign.center,
-              style: FocuxHubTypography.bodyMuted(color: Colors.white70),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-String _cloudinaryH264VideoUrl(String rawUrl) {
-  final url = rawUrl.trim();
-  const marker = '/video/upload/';
-  if (!url.contains(marker)) return url;
-
-  final delivery = url.substring(url.indexOf(marker) + marker.length);
-  if (delivery.startsWith('f_mp4') ||
-      delivery.startsWith('vc_h264') ||
-      delivery.startsWith('vc_auto')) {
-    return url;
-  }
-
-  return url.replaceFirst(marker, '${marker}f_mp4,vc_h264/');
 }

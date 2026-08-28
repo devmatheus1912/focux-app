@@ -195,6 +195,7 @@ extension AddExercicioToTreinoScreenActionsB
   Future<void> _openExercisePicker(
     List<Exercicio> exercicios, {
     required Set<int> alreadyInTreinoIds,
+    String? searchPlaceholder,
   }) async {
     HapticFeedback.selectionClick();
     setState(() => _bottomBarHidden = true);
@@ -208,6 +209,8 @@ extension AddExercicioToTreinoScreenActionsB
               selected: _selecionado,
               alreadyInTreinoIds: alreadyInTreinoIds,
               initialQuery: _buscaQuery,
+              searchPlaceholder:
+                  searchPlaceholder ?? 'Buscar por nome, músculo ou equipamento',
               onUploadVideo:
                   (exercicio) => _uploadExerciseVideo(
                     exercicio,
@@ -377,6 +380,7 @@ extension AddExercicioToTreinoScreenActionsB
     required List<Exercicio> exercicios,
     required List<Exercicio> allExercicios,
     required int totalLibraryCount,
+    required TreinoPickerUiHints uiHints,
     required bool isDark,
     required Color primary,
     required Set<int> alreadyInTreinoIds,
@@ -397,12 +401,24 @@ extension AddExercicioToTreinoScreenActionsB
                 isDark: isDark,
                 primary: primary,
                 templateCount: templateSplits.length,
+                title: uiHints.templateCtaLabel,
               ),
-              const SizedBox(height: 8),
-              _CreateExerciseButton(
-                primary: primary,
-                expand: true,
-                onPressed: _openCreateExercise,
+              const SizedBox(height: FxSettingsLayout.groupGap),
+              FxSettingsGroup(
+                accent: primary,
+                caption: uiHints.libraryCaption,
+                children: [
+                  FxSettingsTile(
+                    icon: Icons.add_rounded,
+                    accent: primary,
+                    label: uiHints.createCtaLabel,
+                    subtitle: 'Cadastre um exercício com vídeo seu',
+                    value: '',
+                    highlight: true,
+                    showDivider: false,
+                    onTap: _openCreateExercise,
+                  ),
+                ],
               ),
               const SizedBox(height: 10),
               if (_alunoFilterNome != null && _pickerFilter.filtrarPorAluno)
@@ -527,7 +543,7 @@ extension AddExercicioToTreinoScreenActionsB
               TextField(
                 controller: _buscaCtrl,
                 decoration: InputDecoration(
-                  hintText: 'Buscar supino, agachamento, remada...',
+                  hintText: uiHints.searchPlaceholder,
                   prefixIcon: Icon(Icons.search_rounded, color: primary),
                   suffixIcon:
                       _buscaQuery.isEmpty
@@ -674,12 +690,15 @@ extension AddExercicioToTreinoScreenActionsB
               _BrowseLibraryCta(
                 totalCount: totalLibraryCount,
                 libraryLines: libraryLines,
+                libraryCaption: uiHints.libraryCaption,
+                createLabel: uiHints.createCtaLabel,
                 isDark: isDark,
                 primary: primary,
                 onOpenPicker:
                     () => _openExercisePicker(
                       allExercicios,
                       alreadyInTreinoIds: alreadyInTreinoIds,
+                      searchPlaceholder: uiHints.searchPlaceholder,
                     ),
                 onCreate: _openCreateExercise,
               ),

@@ -202,23 +202,79 @@ class TreinosHomeBundle {
   }
 }
 
+class TreinoPickerUiHints {
+  final String searchPlaceholder;
+  final String libraryCaption;
+  final String createCtaLabel;
+  final String templateCtaLabel;
+  final String? emptyLibraryHint;
+
+  const TreinoPickerUiHints({
+    required this.searchPlaceholder,
+    required this.libraryCaption,
+    required this.createCtaLabel,
+    required this.templateCtaLabel,
+    this.emptyLibraryHint,
+  });
+
+  factory TreinoPickerUiHints.fromJson(Map<String, dynamic> j) =>
+      TreinoPickerUiHints(
+        searchPlaceholder: j['searchPlaceholder'] as String? ??
+            'Buscar supino, agachamento, remada…',
+        libraryCaption: j['libraryCaption'] as String? ?? '',
+        createCtaLabel: j['createCtaLabel'] as String? ?? 'Novo exercício',
+        templateCtaLabel:
+            j['templateCtaLabel'] as String? ?? 'Montar com modelo',
+        emptyLibraryHint: j['emptyLibraryHint'] as String?,
+      );
+
+  factory TreinoPickerUiHints.fallback({
+    required int librarySize,
+    required int jaNoTreino,
+  }) =>
+      TreinoPickerUiHints(
+        searchPlaceholder: 'Buscar supino, agachamento, remada…',
+        libraryCaption: librarySize == 0
+            ? 'Biblioteca vazia'
+            : '$librarySize exercícios'
+                '${jaNoTreino > 0 ? ' · $jaNoTreino já no plano' : ''}',
+        createCtaLabel: 'Novo exercício',
+        templateCtaLabel: 'Montar com modelo',
+        emptyLibraryHint: librarySize == 0
+            ? 'Importe a biblioteca ou crie seu primeiro exercício.'
+            : null,
+      );
+}
+
 class TreinoPickerHomeBundle {
   final Treino treino;
   final List<Exercicio> exercicios;
+  final TreinoPickerUiHints uiHints;
 
   const TreinoPickerHomeBundle({
     required this.treino,
     required this.exercicios,
+    required this.uiHints,
   });
 
-  factory TreinoPickerHomeBundle.fromJson(Map<String, dynamic> j) =>
-      TreinoPickerHomeBundle(
-        treino: Treino.fromJson(j['treino'] as Map<String, dynamic>),
-        exercicios:
-            ((j['exercicios'] as List?) ?? const [])
-                .map((e) => Exercicio.fromJson(e as Map<String, dynamic>))
-                .toList(),
-      );
+  factory TreinoPickerHomeBundle.fromJson(Map<String, dynamic> j) {
+    final exercicios =
+        ((j['exercicios'] as List?) ?? const [])
+            .map((e) => Exercicio.fromJson(e as Map<String, dynamic>))
+            .toList();
+    final hintsRaw = j['uiHints'] as Map<String, dynamic>?;
+    final treino = Treino.fromJson(j['treino'] as Map<String, dynamic>);
+    return TreinoPickerHomeBundle(
+      treino: treino,
+      exercicios: exercicios,
+      uiHints: hintsRaw == null
+          ? TreinoPickerUiHints.fallback(
+              librarySize: exercicios.length,
+              jaNoTreino: treino.exercicios.length,
+            )
+          : TreinoPickerUiHints.fromJson(hintsRaw),
+    );
+  }
 }
 
 class TreinoRepository {

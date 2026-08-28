@@ -180,51 +180,24 @@ class _SuggestionList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final wide = constraints.maxWidth > 560;
-        if (!wide) {
-          return Column(
-            children: [
-              for (final exercicio in exercicios)
-                _QuickSearchResultTile(
-                  exercicio: exercicio,
-                  highlightQuery: query,
-                  alreadyInTreino: alreadyInTreinoIds.contains(exercicio.id),
-                  primary: primary,
-                  isDark: isDark,
-                  onTap: () => onSelect(exercicio),
-                  onPreviewThumb:
-                      canPreviewExerciseMedia(exercicio)
-                          ? () => onPreview(exercicio)
-                          : null,
-                ),
-            ],
-          );
-        }
-        return Wrap(
-          spacing: 8,
-          runSpacing: 0,
-          children: [
-            for (final exercicio in exercicios)
-              SizedBox(
-                width: (constraints.maxWidth - 8) / 2,
-                child: _QuickSearchResultTile(
-                  exercicio: exercicio,
-                  highlightQuery: query,
-                  alreadyInTreino: alreadyInTreinoIds.contains(exercicio.id),
-                  primary: primary,
-                  isDark: isDark,
-                  onTap: () => onSelect(exercicio),
-                  onPreviewThumb:
-                      canPreviewExerciseMedia(exercicio)
-                          ? () => onPreview(exercicio)
-                          : null,
-                ),
-              ),
-          ],
-        );
-      },
+    return FxSettingsGroup(
+      accent: primary,
+      children: [
+        for (var i = 0; i < exercicios.length; i++)
+          _QuickSearchResultTile(
+            exercicio: exercicios[i],
+            highlightQuery: query,
+            alreadyInTreino: alreadyInTreinoIds.contains(exercicios[i].id),
+            primary: primary,
+            isDark: isDark,
+            showDivider: i < exercicios.length - 1,
+            onTap: () => onSelect(exercicios[i]),
+            onPreviewThumb:
+                canPreviewExerciseMedia(exercicios[i])
+                    ? () => onPreview(exercicios[i])
+                    : null,
+          ),
+      ],
     );
   }
 }
@@ -327,6 +300,7 @@ class _QuickSearchResultTile extends StatelessWidget {
     required this.onTap,
     this.highlightQuery = '',
     this.onPreviewThumb,
+    this.showDivider = true,
   });
 
   final Exercicio exercicio;
@@ -336,65 +310,41 @@ class _QuickSearchResultTile extends StatelessWidget {
   final VoidCallback onTap;
   final String highlightQuery;
   final VoidCallback? onPreviewThumb;
+  final bool showDivider;
+
+  String get _subtitle {
+    final meta = [
+      if (exercicio.musculoAlvo?.trim().isNotEmpty == true)
+        exercicio.musculoAlvo!.trim(),
+      if (exercicio.equipamento?.trim().isNotEmpty == true)
+        exercicio.equipamento!.trim(),
+    ].join(' · ');
+    if (alreadyInTreino) {
+      return meta.isEmpty ? 'Já está neste treino' : '$meta · Já no plano';
+    }
+    return meta;
+  }
 
   @override
   Widget build(BuildContext context) {
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 6),
-      child: Semantics(
-        button: true,
-        label: exercicio.nomeDisplay,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(14),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            decoration: fxListCardDecoration(context, accent: primary),
-            child: Row(
-              children: [
-                if (onPreviewThumb != null)
-                  GestureDetector(
-                    onTap: onPreviewThumb,
-                    child: ExerciseMediaThumb.fromExercicio(
-                      exercicio,
-                      size: 40,
-                    ),
-                  )
-                else
-                  ExerciseMediaThumb.fromExercicio(exercicio, size: 40),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      highlightedExerciseName(
-                        name: exercicio.nomeDisplay,
-                        query: highlightQuery,
-                        baseStyle: FocuxHubTypography.cardTitle(
-                          color: isDark
-                              ? EagleTokens.darkInk
-                              : TokensStrip.textPrimary,
-                        ),
-                        highlightColor: primary,
-                      ),
-                      if (alreadyInTreino)
-                        Text(
-                          'Já está neste treino',
-                          style: FocuxHubTypography.bodyMuted(
-                            color: mute,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-                Icon(Icons.chevron_right_rounded, color: mute, size: 20),
-              ],
-            ),
-          ),
-        ),
-      ),
+    return FxSettingsTile(
+      icon: Icons.fitness_center_rounded,
+      accent: primary,
+      label: exercicio.nomeDisplay,
+      subtitle: _subtitle.isEmpty ? null : _subtitle,
+      value: '',
+      showDivider: showDivider,
+      onTap: onTap,
+      accessory:
+          onPreviewThumb != null
+              ? GestureDetector(
+                onTap: () {
+                  HapticFeedback.selectionClick();
+                  onPreviewThumb!();
+                },
+                child: ExerciseMediaThumb.fromExercicio(exercicio, size: 36),
+              )
+              : null,
     );
   }
 }
@@ -405,67 +355,34 @@ class _MontarComModeloCard extends StatelessWidget {
     required this.isDark,
     required this.primary,
     required this.templateCount,
+    required this.title,
   });
 
   final VoidCallback onTap;
   final bool isDark;
   final Color primary;
   final int templateCount;
+  final String title;
 
   @override
   Widget build(BuildContext context) {
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: InkWell(
-        onTap: () {
-          HapticFeedback.selectionClick();
-          onTap();
-        },
-        borderRadius: BorderRadius.circular(18),
-        child: Container(
-          padding: const EdgeInsets.all(14),
-          decoration: fxListCardDecoration(context, accent: primary),
-          child: Row(
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: primary.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: Icon(Icons.view_agenda_rounded, color: primary),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Montar com modelo',
-                      style: FocuxHubTypography.cardTitle(
-                        color: isDark
-                            ? EagleTokens.darkInk
-                            : TokensStrip.textPrimary,
-                      ).copyWith(fontWeight: FontWeight.w900),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'Full body, PPL, bro split e mais — $templateCount modelos.',
-                      style: FocuxHubTypography.bodyMuted(
-                        color: mute,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(Icons.arrow_forward_rounded, color: mute, size: 20),
-            ],
-          ),
+    return FxSettingsGroup(
+      accent: primary,
+      children: [
+        FxSettingsTile(
+          icon: Icons.view_agenda_outlined,
+          accent: primary,
+          label: title,
+          subtitle:
+              'Full body, PPL, bro split e mais — $templateCount modelos.',
+          value: '',
+          showDivider: false,
+          onTap: () {
+            HapticFeedback.selectionClick();
+            onTap();
+          },
         ),
-      ),
+      ],
     );
   }
 }

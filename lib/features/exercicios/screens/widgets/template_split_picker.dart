@@ -7,6 +7,9 @@ import '../../../../core/theme/focux_hub_typography.dart';
 import '../../../../core/theme/tokens_strip.dart';
 import '../../../../core/widgets/feedback_helper.dart';
 import '../../../../core/widgets/fx_bottom_sheet.dart';
+import '../../../../core/widgets/fx_settings_group.dart';
+import '../../../../core/widgets/fx_settings_tile.dart';
+import '../../../../core/theme/fx_settings_layout.dart';
 import '../../../../core/widgets/fx_shell_scaffold.dart';
 import '../../data/exercicio_repository.dart';
 import '../../data/template_splits.dart';
@@ -24,29 +27,35 @@ class TemplateSplitPicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
     return ListView(
       padding: const EdgeInsets.fromLTRB(12, 2, 12, 10),
       children: [
         const _TemplateIntro(),
-        const SizedBox(height: 12),
-        for (var index = 0; index < templateSplits.length; index++) ...[
-          _TemplateCard(
-            template: templateSplits[index],
-            onTap:
-                () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder:
-                        (_) => _TemplateSlotEditor(
-                          template: templateSplits[index],
-                          alreadyInTreinoIds: alreadyInTreinoIds,
-                          onAdicionar: onAdicionar,
-                        ),
-                  ),
-                ),
-          ),
-          if (index != templateSplits.length - 1) const SizedBox(height: 10),
-        ],
+        const SizedBox(height: FxSettingsLayout.groupGap),
+        FxSettingsGroup(
+          accent: primary,
+          children: [
+            for (var index = 0; index < templateSplits.length; index++)
+              _TemplateTile(
+                template: templateSplits[index],
+                accent: primary,
+                showDivider: index < templateSplits.length - 1,
+                onTap:
+                    () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder:
+                            (_) => _TemplateSlotEditor(
+                              template: templateSplits[index],
+                              alreadyInTreinoIds: alreadyInTreinoIds,
+                              onAdicionar: onAdicionar,
+                            ),
+                      ),
+                    ),
+              ),
+          ],
+        ),
       ],
     );
   }
@@ -110,82 +119,37 @@ class _TemplateIntro extends StatelessWidget {
   }
 }
 
-class _TemplateCard extends StatelessWidget {
+class _TemplateTile extends StatelessWidget {
   final TemplateSplit template;
+  final Color accent;
+  final bool showDivider;
   final VoidCallback onTap;
 
-  const _TemplateCard({required this.template, required this.onTap});
+  const _TemplateTile({
+    required this.template,
+    required this.accent,
+    required this.showDivider,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final primary = scheme.primary;
     final slots = template.dias.fold<int>(
       0,
       (sum, day) => sum + day.slots.length,
     );
     final dias = template.dias.length;
-    return Material(
-      color: scheme.surface,
-      borderRadius: BorderRadius.circular(18),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(18),
-        child: Container(
-          padding: const EdgeInsets.fromLTRB(14, 14, 12, 14),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(
-              color: scheme.outlineVariant.withValues(alpha: 0.82),
-            ),
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 42,
-                height: 42,
-                decoration: BoxDecoration(
-                  color: scheme.surfaceContainerHighest.withValues(alpha: 0.8),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: Icon(Icons.view_week_rounded, color: primary, size: 20),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      template.nome,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: FocuxHubTypography.cardTitle(
-                        color: scheme.onSurface,
-                      ).copyWith(fontWeight: FontWeight.w900),
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
-                      template.descricao,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: FocuxHubTypography.bodyMuted(
-                        color: scheme.onSurfaceVariant,
-                        height: 1.25,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      '$dias ${dias == 1 ? 'dia' : 'dias'} · $slots slots',
-                      style: FocuxHubTypography.chip(primary),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(Icons.chevron_right_rounded, color: scheme.onSurfaceVariant),
-            ],
-          ),
-        ),
-      ),
+    return FxSettingsTile(
+      icon: Icons.view_week_rounded,
+      accent: accent,
+      label: template.nome,
+      subtitle: template.descricao,
+      value: '$dias ${dias == 1 ? 'dia' : 'dias'} · $slots slots',
+      showDivider: showDivider,
+      onTap: () {
+        HapticFeedback.selectionClick();
+        onTap();
+      },
     );
   }
 }

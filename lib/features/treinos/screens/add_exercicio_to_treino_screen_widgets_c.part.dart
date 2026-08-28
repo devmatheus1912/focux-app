@@ -5,6 +5,7 @@ class _ExercisePickerSheet extends StatefulWidget {
   final Exercicio? selected;
   final Set<int> alreadyInTreinoIds;
   final String initialQuery;
+  final String searchPlaceholder;
   final Future<Exercicio?> Function(Exercicio exercicio)? onUploadVideo;
 
   const _ExercisePickerSheet({
@@ -12,6 +13,7 @@ class _ExercisePickerSheet extends StatefulWidget {
     required this.selected,
     this.alreadyInTreinoIds = const {},
     this.initialQuery = '',
+    this.searchPlaceholder = 'Buscar por nome, músculo ou equipamento',
     this.onUploadVideo,
   });
 
@@ -103,8 +105,8 @@ class _ExercisePickerSheetState extends State<_ExercisePickerSheet> {
     return FxHomeSheetSurface(
       isDark: isDark,
       maxHeight: maxHeight,
-      expand: true,
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           FxHomeSheetHandle(isDark: isDark),
           SizedBox(height: TokensStrip.s4),
@@ -124,7 +126,7 @@ class _ExercisePickerSheetState extends State<_ExercisePickerSheet> {
             autofocus: widget.initialQuery.isEmpty,
             textInputAction: TextInputAction.search,
             decoration: InputDecoration(
-              hintText: 'Buscar por nome, músculo ou equipamento',
+              hintText: widget.searchPlaceholder,
               prefixIcon: Icon(Icons.search_rounded, color: primary),
               suffixIcon:
                   _searchCtrl.text.isEmpty
@@ -160,73 +162,80 @@ class _ExercisePickerSheetState extends State<_ExercisePickerSheet> {
             ),
           ),
           const SizedBox(height: 12),
-          Expanded(
-            child:
-                filtered.isEmpty
-                    ? FxEmptyState(
-                      icon: 'search',
-                      title:
-                          _query.trim().isNotEmpty
-                              ? 'Nada encontrado para "${_query.trim()}"'
-                              : 'Nenhum exercício nesta lista',
-                      subtitle:
-                          _query.trim().isNotEmpty
-                              ? 'Tente outro termo ou limpe a busca.'
-                              : 'Ajuste os filtros na tela anterior.',
-                      action:
-                          _query.trim().isNotEmpty
-                              ? FxEmptyAction(
-                                label: 'Limpar busca',
-                                onTap: () {
-                                  _searchCtrl.clear();
-                                  setState(() {
-                                    _query = '';
-                                    _highlightQuery = '';
-                                  });
-                                },
-                              )
-                              : null,
-                    )
-                    : ListView.separated(
-                      keyboardDismissBehavior:
-                          ScrollViewKeyboardDismissBehavior.onDrag,
-                      padding: const EdgeInsets.only(bottom: 8),
-                      itemCount: filtered.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 8),
-                      itemBuilder: (context, index) {
-                        final exercicio = _resolve(filtered[index]);
-                        final selected = widget.selected?.id == exercicio.id;
-                        return _ExercisePickerTile(
-                          exercicio: exercicio,
-                          selected: selected,
-                          alreadyInTreino: widget.alreadyInTreinoIds.contains(
-                            exercicio.id,
-                          ),
-                          highlightQuery: _highlightQuery,
-                          primary: primary,
-                          isDark: isDark,
-                          uploadEnabled:
-                              widget.onUploadVideo != null &&
-                              !_uploadingInSheet,
+          if (filtered.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              child: FxEmptyState(
+                icon: 'search',
+                title:
+                    _query.trim().isNotEmpty
+                        ? 'Nada encontrado para "${_query.trim()}"'
+                        : 'Nenhum exercício nesta lista',
+                subtitle:
+                    _query.trim().isNotEmpty
+                        ? 'Tente outro termo ou limpe a busca.'
+                        : 'Ajuste os filtros na tela anterior.',
+                action:
+                    _query.trim().isNotEmpty
+                        ? FxEmptyAction(
+                          label: 'Limpar busca',
                           onTap: () {
-                            HapticFeedback.selectionClick();
-                            Navigator.pop(context, exercicio);
+                            _searchCtrl.clear();
+                            setState(() {
+                              _query = '';
+                              _highlightQuery = '';
+                            });
                           },
-                          onPreviewThumb:
-                              canPreviewExerciseMedia(exercicio)
-                                  ? () => showExerciseMediaPreview(
-                                    context,
-                                    exercicio: exercicio,
-                                  )
-                                  : null,
-                          onUploadVideo:
-                              widget.onUploadVideo == null
-                                  ? null
-                                  : () => _handleUpload(exercicio),
-                        );
-                      },
-                    ),
-          ),
+                        )
+                        : null,
+              ),
+            )
+          else
+            ConstrainedBox(
+              constraints: BoxConstraints(
+                maxHeight: (maxHeight - 220).clamp(220.0, 480.0),
+              ),
+              child: SingleChildScrollView(
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
+                child: FxSettingsGroup(
+                  accent: primary,
+                  children: [
+                    for (var i = 0; i < filtered.length; i++)
+                      _ExercisePickerTile(
+                        exercicio: _resolve(filtered[i]),
+                        selected: widget.selected?.id == filtered[i].id,
+                        alreadyInTreino: widget.alreadyInTreinoIds.contains(
+                          filtered[i].id,
+                        ),
+                        highlightQuery: _highlightQuery,
+                        primary: primary,
+                        isDark: isDark,
+                        showDivider: i < filtered.length - 1,
+                        uploadEnabled:
+                            widget.onUploadVideo != null &&
+                            !_uploadingInSheet,
+                        onTap: () {
+                          HapticFeedback.selectionClick();
+                          Navigator.pop(context, filtered[i]);
+                        },
+                        onPreviewThumb:
+                            canPreviewExerciseMedia(filtered[i])
+                                ? () => showExerciseMediaPreview(
+                                  context,
+                                  exercicio: filtered[i],
+                                )
+                                : null,
+                        onUploadVideo:
+                            widget.onUploadVideo == null
+                                ? null
+                                : () => _handleUpload(filtered[i]),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          const SizedBox(height: FxSettingsLayout.footerAfterGroup),
         ],
       ),
     );
@@ -244,6 +253,7 @@ class _ExercisePickerTile extends StatelessWidget {
   final VoidCallback? onPreviewThumb;
   final VoidCallback? onUploadVideo;
   final bool uploadEnabled;
+  final bool showDivider;
 
   const _ExercisePickerTile({
     required this.exercicio,
@@ -256,108 +266,52 @@ class _ExercisePickerTile extends StatelessWidget {
     this.onPreviewThumb,
     this.onUploadVideo,
     this.uploadEnabled = true,
+    this.showDivider = true,
   });
 
   @override
   Widget build(BuildContext context) {
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-    final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
+    final subtitle =
+        alreadyInTreino
+            ? 'Já está neste treino · ${_exerciseMeta(exercicio)}'
+            : _exerciseMeta(exercicio);
 
-    return Semantics(
-      button: true,
-      selected: selected,
+    return FxSettingsTile(
+      icon: Icons.fitness_center_rounded,
+      accent: primary,
       label: exercicio.nomeDisplay,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(18),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 160),
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color:
-                selected
-                    ? EagleTokens.brandSofter
-                    : isDark
-                    ? Colors.white.withValues(alpha: 0.03)
-                    : Colors.white,
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(
-              color:
-                  selected
-                      ? primary.withValues(alpha: 0.30)
-                      : line.withValues(alpha: 0.9),
-            ),
-          ),
-          child: Row(
-            children: [
-              if (onPreviewThumb != null)
-                GestureDetector(
-                  onTap: () {
-                    HapticFeedback.selectionClick();
-                    onPreviewThumb!();
-                  },
-                  child: ExerciseMediaThumb.fromExercicio(
-                    exercicio,
-                    size: 44,
-                    radius: 14,
-                  ),
-                )
-              else
-                ExerciseMediaThumb.fromExercicio(
-                  exercicio,
-                  size: 44,
-                  radius: 14,
-                ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    highlightedExerciseName(
-                      name: exercicio.nomeDisplay,
-                      query: highlightQuery,
-                      baseStyle: FocuxHubTypography.cardTitle(
-                        color: isDark
-                            ? EagleTokens.darkInk
-                            : TokensStrip.textPrimary,
-                      ).copyWith(fontWeight: FontWeight.w900),
-                      highlightColor: primary,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      alreadyInTreino
-                          ? 'Já está neste treino · ${_exerciseMeta(exercicio)}'
-                          : _exerciseMeta(exercicio),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: FocuxHubTypography.bodyMuted(
-                        color: _metaTextColor(isDark),
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ],
-                ),
+      subtitle: subtitle,
+      value: '',
+      highlight: selected,
+      showDivider: showDivider,
+      onTap: onTap,
+      accessory: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (onUploadVideo != null)
+            IconButton(
+              tooltip:
+                  exercicioHasPersonalVideo(exercicio)
+                      ? 'Trocar vídeo do personal'
+                      : 'Enviar vídeo do personal',
+              onPressed: uploadEnabled ? onUploadVideo : null,
+              icon: Icon(
+                exercicioHasPersonalVideo(exercicio)
+                    ? Icons.swap_horiz_rounded
+                    : Icons.video_call_outlined,
+                color: primary,
+                size: 20,
               ),
-              if (onUploadVideo != null) ...[
-                IconButton(
-                  tooltip:
-                      exercicioHasPersonalVideo(exercicio)
-                          ? 'Trocar vídeo do personal'
-                          : 'Enviar vídeo do personal',
-                  onPressed: uploadEnabled ? onUploadVideo : null,
-                  icon: Icon(
-                    exercicioHasPersonalVideo(exercicio)
-                        ? Icons.swap_horiz_rounded
-                        : Icons.video_call_outlined,
-                    color: primary,
-                    size: 22,
-                  ),
-                ),
-              ],
-              Icon(Icons.chevron_right_rounded, color: mute, size: 20),
-            ],
-          ),
-        ),
+            ),
+          if (onPreviewThumb != null)
+            GestureDetector(
+              onTap: () {
+                HapticFeedback.selectionClick();
+                onPreviewThumb!();
+              },
+              child: ExerciseMediaThumb.fromExercicio(exercicio, size: 34),
+            ),
+        ],
       ),
     );
   }

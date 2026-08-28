@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:video_player/video_player.dart';
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
@@ -20,6 +19,9 @@ import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_motion.dart';
+import '../../../core/widgets/fx_settings_group.dart';
+import '../../../core/widgets/fx_settings_tile.dart';
+import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/skeleton_loader.dart';
@@ -50,7 +52,6 @@ import '../services/recent_exercise_usage_store.dart';
 import '../utils/exercise_picker_filter.dart';
 import '../utils/exercise_picker_sort.dart';
 import '../utils/exercise_picker_suggestions.dart';
-import '../utils/exercise_search_highlight.dart';
 import '../utils/exercise_picker_library_label.dart';
 
 part 'add_exercicio_to_treino_screen_widgets_a.part.dart';
@@ -147,6 +148,14 @@ class _AddExercicioToTreinoScreenState
   @override
   Widget build(BuildContext context) {
     final pickerAsync = ref.watch(treinoPickerHomeProvider(widget.treinoId));
+    final pickerHints = pickerAsync.maybeWhen(
+      data: (home) => home.uiHints,
+      orElse:
+          () => TreinoPickerUiHints.fallback(
+            librarySize: 0,
+            jaNoTreino: 0,
+          ),
+    );
     final exerciciosAsync = pickerAsync.whenData((h) => h.exercicios);
     final treinoAsync = pickerAsync.whenData((h) => h.treino);
     final alreadyInTreinoIds = _treinoExercicioIds(treinoAsync);
@@ -334,6 +343,7 @@ class _AddExercicioToTreinoScreenState
                                             allExercicios: exercicios,
                                             totalLibraryCount:
                                                 exercicios.length,
+                                            uiHints: pickerHints,
                                             isDark: isDark,
                                             primary: primary,
                                             alreadyInTreinoIds:

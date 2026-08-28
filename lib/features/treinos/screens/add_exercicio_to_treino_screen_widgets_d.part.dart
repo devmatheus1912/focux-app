@@ -131,6 +131,8 @@ class _BrowseLibraryCta extends StatelessWidget {
   const _BrowseLibraryCta({
     required this.totalCount,
     required this.libraryLines,
+    required this.libraryCaption,
+    required this.createLabel,
     required this.isDark,
     required this.primary,
     required this.onOpenPicker,
@@ -139,6 +141,8 @@ class _BrowseLibraryCta extends StatelessWidget {
 
   final int totalCount;
   final ExercisePickerLibraryLines libraryLines;
+  final String libraryCaption;
+  final String createLabel;
   final bool isDark;
   final Color primary;
   final VoidCallback onOpenPicker;
@@ -146,54 +150,29 @@ class _BrowseLibraryCta extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final narrow = constraints.maxWidth < 360;
-        final libraryButton = OutlinedButton.icon(
-          onPressed: onOpenPicker,
-          style: OutlinedButton.styleFrom(
-            minimumSize: const Size.fromHeight(48),
-            side: BorderSide(color: primary.withValues(alpha: 0.35)),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-          ),
-          icon: Icon(Icons.library_books_outlined, color: primary, size: 20),
-          label: Text(
-            'Ver biblioteca ($totalCount)',
-            style: FocuxHubTypography.cardTitle(color: primary).copyWith(
-              fontWeight: FontWeight.w900,
-            ),
-          ),
-        );
-
-        if (narrow) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              libraryButton,
-              const SizedBox(height: 8),
-              _CreateExerciseButton(
-                primary: primary,
-                expand: true,
-                onPressed: onCreate,
-              ),
-            ],
-          );
-        }
-
-        return Row(
-          children: [
-            Expanded(child: libraryButton),
-            const SizedBox(width: 10),
-            _CreateExerciseButton(
-              primary: primary,
-              compact: true,
-              onPressed: onCreate,
-            ),
-          ],
-        );
-      },
+    return FxSettingsGroup(
+      accent: primary,
+      caption: libraryCaption,
+      children: [
+        FxSettingsTile(
+          icon: Icons.library_books_outlined,
+          accent: primary,
+          label: 'Ver biblioteca ($totalCount)',
+          subtitle: libraryLines.primary,
+          value: '',
+          onTap: onOpenPicker,
+        ),
+        FxSettingsTile(
+          icon: Icons.add_rounded,
+          accent: primary,
+          label: createLabel,
+          subtitle: 'Cadastre e envie vídeo de demonstração',
+          value: '',
+          highlight: true,
+          showDivider: false,
+          onTap: onCreate,
+        ),
+      ],
     );
   }
 }
