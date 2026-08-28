@@ -73,7 +73,7 @@ class _FxChip extends StatelessWidget {
         decoration: BoxDecoration(
           color:
               isSelected
-                  ? Colors.transparent
+                  ? primary.withValues(alpha: isDark ? 0.10 : 0.06)
                   : (isDark
                       ? Colors.white.withValues(alpha: 0.05)
                       : Colors.white.withValues(alpha: 0.72)),

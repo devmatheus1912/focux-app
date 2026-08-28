@@ -127,12 +127,12 @@ class _AlunosBulkActionsSheetState extends State<_AlunosBulkActionsSheet> {
           children: [
             if (widget.mostrarMarcarPago) ...[
               FxSettingsGroup(
+                header: 'Pagamento',
                 children: [
                   FxSettingsTile(
                     icon: Icons.payments_rounded,
                     label: 'Marcar mensalidade como paga',
                     value: '',
-                    highlight: true,
                     showDivider: false,
                     onTap: widget.onMarcarPagos,
                   ),
@@ -142,6 +142,7 @@ class _AlunosBulkActionsSheetState extends State<_AlunosBulkActionsSheet> {
             ],
             FxSettingsGroup(
               header: 'Status',
+              caption: 'Escolha e confirme abaixo.',
               children: [
                 for (var i = 0; i < _statusOptions.length; i++)
                   _AlunosSheetCheckRow(
@@ -162,7 +163,6 @@ class _AlunosBulkActionsSheetState extends State<_AlunosBulkActionsSheet> {
                   icon: Icons.done_all_rounded,
                   label: 'Aplicar status',
                   value: '',
-                  highlight: !widget.mostrarMarcarPago,
                   showDivider: false,
                   onTap: () => widget.onAtualizarStatus(_statusSelecionado),
                 ),

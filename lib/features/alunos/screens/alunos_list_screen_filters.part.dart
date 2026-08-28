@@ -41,6 +41,8 @@ extension AlunosListScreenFilters on _AlunosListScreenState {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               FxSettingsGroup(
+                header: 'Ordenação',
+                caption: 'Como a lista é priorizada.',
                 children: [
                   _AlunosSheetCheckRow(
                     icon: Icons.priority_high_rounded,
