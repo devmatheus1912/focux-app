@@ -45,8 +45,7 @@ extension AlunosListScreenFilters on _AlunosListScreenState {
                   _AlunosSheetCheckRow(
                     icon: Icons.priority_high_rounded,
                     label: 'Prioridade do dia',
-                    subtitle:
-                        'Risco, inadimplência e convites aparecem primeiro.',
+                    subtitle: 'Risco, inadimplência e convites primeiro.',
                     selected: _ordenacao == AlunoOrdenacao.prioridade,
                     onTap: () {
                       _setOrdenacao(AlunoOrdenacao.prioridade);
@@ -56,7 +55,7 @@ extension AlunosListScreenFilters on _AlunosListScreenState {
                   _AlunosSheetCheckRow(
                     icon: Icons.sort_by_alpha_rounded,
                     label: 'Nome A-Z',
-                    subtitle: 'Lista alfabética para encontrar alunos rápido.',
+                    subtitle: 'Ordem alfabética.',
                     selected: _ordenacao == AlunoOrdenacao.nome,
                     onTap: () {
                       _setOrdenacao(AlunoOrdenacao.nome);
@@ -66,8 +65,7 @@ extension AlunosListScreenFilters on _AlunosListScreenState {
                   _AlunosSheetCheckRow(
                     icon: Icons.no_photography_outlined,
                     label: 'Sem foto primeiro',
-                    subtitle:
-                        'Ajuda a completar perfis que ainda parecem genéricos.',
+                    subtitle: 'Perfis genéricos no topo.',
                     selected: _ordenacao == AlunoOrdenacao.semFoto,
                     onTap: () {
                       _setOrdenacao(AlunoOrdenacao.semFoto);

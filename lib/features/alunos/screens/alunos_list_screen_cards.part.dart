@@ -1,5 +1,40 @@
 part of 'alunos_list_screen.dart';
 
+class _AlunosListRefreshing extends StatelessWidget {
+  const _AlunosListRefreshing({
+    required this.isDark,
+    required this.compact,
+  });
+
+  final bool isDark;
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context) {
+    final itemHeight = compact ? 56.0 : 88.0;
+    final gap =
+        compact ? AlunosLayout.listItemGapCompact : AlunosLayout.listItemGap;
+
+    return ListView.separated(
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: const EdgeInsets.only(
+        left: AlunosLayout.screenPadding,
+        right: AlunosLayout.screenPadding,
+        top: 8,
+        bottom: 8,
+      ),
+      itemCount: 4,
+      separatorBuilder: (_, __) => SizedBox(height: gap),
+      itemBuilder:
+          (_, __) => FxLoading.sectionShimmer(
+            context,
+            height: itemHeight,
+            showHeader: false,
+          ),
+    );
+  }
+}
+
 class _FxChip extends StatelessWidget {
   final String label;
   final int count;

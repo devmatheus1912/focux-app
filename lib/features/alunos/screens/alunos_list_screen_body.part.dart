@@ -1,7 +1,10 @@
 part of 'alunos_list_screen.dart';
 
 extension AlunosListScreenBody on _AlunosListScreenState {
-  Widget _buildAlunosHomeData(AlunosHomeBundle home) {
+  Widget _buildAlunosHomeData(
+    AlunosHomeBundle home, {
+    bool listRefreshing = false,
+  }) {
               final chrome = ShellChrome.of(context);
               final isDark = chrome.isDark;
               final primary = Theme.of(context).colorScheme.primary;
@@ -110,7 +113,12 @@ extension AlunosListScreenBody on _AlunosListScreenState {
                     // List
                     Expanded(
                       child:
-                          filtrados.isEmpty
+                          listRefreshing
+                              ? _AlunosListRefreshing(
+                                isDark: isDark,
+                                compact: _listaCompacta,
+                              )
+                              : filtrados.isEmpty
                               ? _EmptyAlunosState(
                                 hasQuery: _query.trim().isNotEmpty,
                                 hasActiveFilter: _hasActiveFilter,

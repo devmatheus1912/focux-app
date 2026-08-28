@@ -21,7 +21,7 @@ Future<void> showEditarPerfilHelpSheet(BuildContext context) {
       ),
       FxHelpTip(
         'Profissional',
-        'CREF, especialidade e Instagram reforçam confiança na landing.',
+        'Comece pela especialidade. CREF e Instagram reforçam confiança na landing.',
         icon: 'star',
       ),
       FxHelpTip(

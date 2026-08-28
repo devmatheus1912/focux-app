@@ -13,6 +13,8 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
   bool _ignoredDeepLinkFiltro = false;
   bool _listaCompacta = true;
   DateTime? _fetchedAt;
+  AlunosHomeBundle? _displayHome;
+  bool _listRefreshing = false;
   final Map<AlunoFiltro, GlobalKey> _chipKeys = {
     for (final filtro in AlunoFiltro.values) filtro: GlobalKey(),
   };
@@ -122,7 +124,17 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
         filtro == AlunoFiltro.inadimplentes && !_temFinanceiro
             ? AlunoFiltro.todos
             : filtro;
-    setState(() => _filtro = next);
+    final query = AlunosHomeQuery(
+      q: _query,
+      filtro: next,
+      ordenacao: _ordenacao,
+    );
+    final cached = AlunosHomeClientCache.getIfFresh(query);
+    setState(() {
+      _filtro = next;
+      _listRefreshing = cached == null;
+      if (cached != null) _displayHome = cached;
+    });
     _syncHomeQuery();
     _scrollChipIntoView(next);
     if (track) {
@@ -147,7 +159,17 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
   }
 
   void _setOrdenacao(AlunoOrdenacao ordenacao) {
-    setState(() => _ordenacao = ordenacao);
+    final query = AlunosHomeQuery(
+      q: _query,
+      filtro: _filtro,
+      ordenacao: ordenacao,
+    );
+    final cached = AlunosHomeClientCache.getIfFresh(query);
+    setState(() {
+      _ordenacao = ordenacao;
+      _listRefreshing = cached == null;
+      if (cached != null) _displayHome = cached;
+    });
     _syncHomeQuery();
   }
 
@@ -164,6 +186,16 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
     _searchDebounce?.cancel();
     _searchDebounce = Timer(const Duration(milliseconds: 350), () {
       if (!mounted) return;
+      final query = AlunosHomeQuery(
+        q: _query,
+        filtro: _filtro,
+        ordenacao: _ordenacao,
+      );
+      final cached = AlunosHomeClientCache.getIfFresh(query);
+      setState(() {
+        _listRefreshing = cached == null;
+        if (cached != null) _displayHome = cached;
+      });
       _syncHomeQuery();
       AnalyticsService.instance.track(ProductEvents.alunosSearchUsed);
     });
@@ -384,11 +416,37 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
     ref.listen<AsyncValue<AlunosHomeBundle>>(alunosHomeProvider, (_, next) {
       next.whenData((home) {
         ref.read(alunosHomeTailProvider.notifier).reset(home.page);
-        setState(
-          () => _fetchedAt = AlunosHomeClientCache.fetchedAt ?? DateTime.now(),
-        );
+        if (mounted) {
+          setState(() {
+            _displayHome = home;
+            _listRefreshing = false;
+            _fetchedAt = AlunosHomeClientCache.fetchedAt ?? DateTime.now();
+          });
+        }
       });
     });
+
+    if (_displayHome != null) {
+      return fxScreenA11yScope(
+        label: AlunosMicrocopy.screenA11y,
+        child: PopScope(
+          canPop: !_hasActiveFilter,
+          onPopInvokedWithResult: (didPop, result) {
+            if (didPop) return;
+            if (_hasActiveFilter) _handleHeaderBack();
+          },
+          child: Scaffold(
+            backgroundColor: Colors.transparent,
+            body: FxContentWidthLimiter(
+              child: _buildAlunosHomeData(
+                _displayHome!,
+                listRefreshing: _listRefreshing || homeAsync.isLoading,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
 
     return fxScreenA11yScope(
       label: AlunosMicrocopy.screenA11y,
@@ -408,7 +466,9 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
                   onRetry: () => invalidateAlunosCaches(ref),
                 ),
             data: (home) {
-              return FxContentWidthLimiter(child: _buildAlunosHomeData(home));
+              return FxContentWidthLimiter(
+                child: _buildAlunosHomeData(home),
+              );
             },
           ),
         ),

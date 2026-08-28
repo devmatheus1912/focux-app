@@ -4,6 +4,7 @@ import '../../ia/providers/ia_copilot_providers.dart';
 import '../../planos/providers/plano_features_provider.dart';
 import '../data/aluno_repository.dart';
 import '../utils/alunos_home_client_cache.dart';
+import '../utils/alunos_home_prefetch.dart';
 
 final alunoRepositoryProvider = Provider<AlunoRepository>(
   (ref) => AlunoRepository(ref.read(apiClientProvider)),
@@ -85,10 +86,17 @@ final alunosHomeTailProvider =
     );
 
 final alunosHomeProvider = FutureProvider<AlunosHomeBundle>((ref) async {
-  ref.onDispose(AlunosHomeClientCache.clear);
   final query = ref.watch(alunosHomeQueryProvider);
   final cached = AlunosHomeClientCache.getIfFresh(query);
-  if (cached != null) return cached;
+  if (cached != null) {
+    prefetchAlunosHomeFilterVariants(
+      ref,
+      base: query,
+      includeFinanceFilter:
+          cached.planoFeatures?.normalizeForTier().financeiro == true,
+    );
+    return cached;
+  }
   final fresh = await ref.read(alunoRepositoryProvider).getHome(
     page: 0,
     size: AlunosHomeQuery.pageSize,
@@ -101,6 +109,11 @@ final alunosHomeProvider = FutureProvider<AlunosHomeBundle>((ref) async {
   if (plano != null) {
     ref.read(planoFeaturesProvider.notifier).seedFromHome(plano);
   }
+  prefetchAlunosHomeFilterVariants(
+    ref,
+    base: query,
+    includeFinanceFilter: plano?.normalizeForTier().financeiro == true,
+  );
   return fresh;
 });
 

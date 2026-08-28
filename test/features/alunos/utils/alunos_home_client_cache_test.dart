@@ -7,13 +7,13 @@ import 'package:focux_app/features/alunos/utils/alunos_home_client_cache.dart';
 void main() {
   setUp(AlunosHomeClientCache.clear);
 
-  AlunosHomeBundle bundle() => AlunosHomeBundle(
+  AlunosHomeBundle bundle({int total = 1}) => AlunosHomeBundle(
     alunos: [
       Aluno(id: 1, nome: 'Ana', email: 'a***@test.com', status: 'ATIVO'),
     ],
-    stats: const AlunosStats(
-      total: 1,
-      totalAtivos: 1,
+    stats: AlunosStats(
+      total: total,
+      totalAtivos: total,
       totalInadimplentes: 0,
       totalRiscoAlto: 0,
       totalConvites: 0,
@@ -45,14 +45,16 @@ void main() {
     );
   });
 
-  test('cache miss when filtro changes', () {
+  test('cache hit when filtro changes if entry exists', () {
     final t0 = DateTime(2026, 8, 17, 12);
-    AlunosHomeClientCache.put(const AlunosHomeQuery(), bundle(), now: t0);
+    const riscoQuery = AlunosHomeQuery(filtro: AlunoFiltro.risco);
+    AlunosHomeClientCache.put(riscoQuery, bundle(total: 2), now: t0);
     expect(
-      AlunosHomeClientCache.getIfFresh(
-        const AlunosHomeQuery(filtro: AlunoFiltro.risco),
-        now: t0,
-      ),
+      AlunosHomeClientCache.getIfFresh(riscoQuery, now: t0),
+      isNotNull,
+    );
+    expect(
+      AlunosHomeClientCache.getIfFresh(const AlunosHomeQuery(), now: t0),
       isNull,
     );
   });
