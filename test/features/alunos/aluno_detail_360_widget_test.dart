@@ -300,15 +300,14 @@ void main() {
     await tester.pump();
 
     expect(find.byKey(const ValueKey('aluno360_evolucao_empty')), findsOneWidget);
-    expect(find.text('Histórico ainda vazio'), findsOneWidget);
     expect(find.text('Pedir check-in'), findsWidgets);
     expect(find.text('Ver treinos'), findsWidgets);
+    expect(find.text('Abrir chat'), findsWidgets);
 
     await tester.ensureVisible(find.byKey(const ValueKey('aluno360_timeline_empty')));
     await tester.pump();
 
     expect(find.byKey(const ValueKey('aluno360_timeline_empty')), findsOneWidget);
-    expect(find.text('Linha do tempo ainda vazia'), findsOneWidget);
 
     await tester.pump(const Duration(milliseconds: 300));
   });

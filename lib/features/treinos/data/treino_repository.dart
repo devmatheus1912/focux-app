@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
 import '../../exercicios/data/exercicio_repository.dart';
+import '../utils/treinos_list_labels.dart';
 
 class TreinoExercicioItem {
   final int id;
@@ -128,21 +129,77 @@ class TreinosHomeResumo {
   );
 }
 
+class TreinosHomeUiHints {
+  final String? emptyTitle;
+  final String? emptySubtitle;
+  final String libraryCaption;
+  final String createCtaLabel;
+  final String? emMontagemHint;
+
+  const TreinosHomeUiHints({
+    this.emptyTitle,
+    this.emptySubtitle,
+    required this.libraryCaption,
+    required this.createCtaLabel,
+    this.emMontagemHint,
+  });
+
+  factory TreinosHomeUiHints.fromJson(Map<String, dynamic> j) => TreinosHomeUiHints(
+    emptyTitle: j['emptyTitle'] as String?,
+    emptySubtitle: j['emptySubtitle'] as String?,
+    libraryCaption: j['libraryCaption'] as String? ?? '',
+    createCtaLabel: j['createCtaLabel'] as String? ?? 'Criar treino',
+    emMontagemHint: j['emMontagemHint'] as String?,
+  );
+
+  factory TreinosHomeUiHints.fallback({required TreinosHomeResumo resumo}) =>
+      TreinosHomeUiHints(
+        emptyTitle:
+            resumo.totalPlanos == 0 ? 'Sua biblioteca começa aqui' : null,
+        emptySubtitle:
+            resumo.totalPlanos == 0
+                ? 'Crie um plano base, adicione exercícios e use como ponto de partida para seus alunos.'
+                : null,
+        libraryCaption:
+            '${TreinosListLabels.readyCount(resumo.prontos)} · ${resumo.totalExercicios} exercícios',
+        createCtaLabel: 'Criar treino',
+        emMontagemHint:
+            resumo.emMontagem > 0
+                ? (resumo.emMontagem == 1
+                    ? '1 plano ainda em montagem — adicione exercícios.'
+                    : '${resumo.emMontagem} planos ainda em montagem — adicione exercícios.')
+                : null,
+      );
+}
+
 class TreinosHomeBundle {
   final List<Treino> treinos;
   final TreinosHomeResumo resumo;
+  final TreinosHomeUiHints uiHints;
 
-  const TreinosHomeBundle({required this.treinos, required this.resumo});
+  const TreinosHomeBundle({
+    required this.treinos,
+    required this.resumo,
+    required this.uiHints,
+  });
 
-  factory TreinosHomeBundle.fromJson(Map<String, dynamic> j) => TreinosHomeBundle(
-    treinos:
-        ((j['treinos'] as List?) ?? const [])
-            .map((e) => Treino.fromHomeItemJson(e as Map<String, dynamic>))
-            .toList(),
-    resumo: TreinosHomeResumo.fromJson(
+  factory TreinosHomeBundle.fromJson(Map<String, dynamic> j) {
+    final resumo = TreinosHomeResumo.fromJson(
       (j['resumo'] as Map<String, dynamic>?) ?? const {},
-    ),
-  );
+    );
+    final hintsRaw = j['uiHints'] as Map<String, dynamic>?;
+    return TreinosHomeBundle(
+      treinos:
+          ((j['treinos'] as List?) ?? const [])
+              .map((e) => Treino.fromHomeItemJson(e as Map<String, dynamic>))
+              .toList(),
+      resumo: resumo,
+      uiHints:
+          hintsRaw == null
+              ? TreinosHomeUiHints.fallback(resumo: resumo)
+              : TreinosHomeUiHints.fromJson(hintsRaw),
+    );
+  }
 }
 
 class TreinoPickerHomeBundle {

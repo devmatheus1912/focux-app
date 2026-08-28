@@ -21,11 +21,17 @@ void main() {
         'templates': 0,
         'totalExercicios': 12,
       },
+      'uiHints': {
+        'libraryCaption': '1 pronto · 12 exercícios',
+        'createCtaLabel': 'Criar treino',
+      },
     });
     expect(bundle.treinos, hasLength(1));
     expect(bundle.treinos.first.exerciciosCount, 12);
     expect(bundle.treinos.first.seriesTotal, 36);
     expect(bundle.treinos.first.pronto, isTrue);
     expect(bundle.resumo.prontos, 1);
+    expect(bundle.uiHints.libraryCaption, '1 pronto · 12 exercícios');
+    expect(bundle.uiHints.createCtaLabel, 'Criar treino');
   });
 }

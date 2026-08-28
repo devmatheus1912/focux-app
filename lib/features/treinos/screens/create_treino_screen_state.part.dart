@@ -205,45 +205,42 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen>
                           onTap: _applyPreset,
                         ),
                         const SizedBox(height: 20),
-                        _SectionKicker(
-                          title: 'Dados essenciais',
-                          action: canSubmit ? 'Pronto' : 'Nome obrigatório',
-                          isDark: isDark,
-                        ),
-                        const SizedBox(height: 10),
-                        _FxField(
-                          key: _nomeFieldKey,
-                          controller: _nomeCtrl,
-                          focusNode: _nomeFocusNode,
-                          label: 'Nome do treino',
-                          icon: Icons.edit_outlined,
-                          isDark: isDark,
-                          validator:
-                              (v) =>
-                                  v == null || v.trim().isEmpty
-                                      ? 'Informe o nome'
-                                      : null,
-                        ),
-                        const SizedBox(height: TokensStrip.s4),
-                        _LevelSelector(
-                          selected: _nivel,
-                          isDark: isDark,
-                          onChanged: (value) => setState(() => _nivel = value),
-                        ),
-                        const SizedBox(height: 18),
-                        _FxField(
-                          controller: _objetivoCtrl,
-                          label: 'Objetivo (opcional)',
-                          icon: Icons.flag_outlined,
-                          isDark: isDark,
-                        ),
-                        const SizedBox(height: 14),
-                        _FxField(
-                          controller: _descricaoCtrl,
-                          label: 'Descrição (opcional)',
-                          icon: Icons.notes_rounded,
-                          isDark: isDark,
-                          maxLines: 2,
+                        FxSettingsGroup(
+                          header: 'Dados essenciais',
+                          caption: canSubmit ? null : 'Nome obrigatório',
+                          accent: primary,
+                          children: [
+                            AlunoInsetFormField(
+                              key: _nomeFieldKey,
+                              controller: _nomeCtrl,
+                              focusNode: _nomeFocusNode,
+                              label: 'Nome do treino',
+                              icon: Icons.edit_outlined,
+                              validator:
+                                  (v) =>
+                                      v == null || v.trim().isEmpty
+                                          ? 'Informe o nome'
+                                          : null,
+                            ),
+                            _LevelSelector(
+                              selected: _nivel,
+                              isDark: isDark,
+                              onChanged:
+                                  (value) => setState(() => _nivel = value),
+                            ),
+                            AlunoInsetFormField(
+                              controller: _objetivoCtrl,
+                              label: 'Objetivo (opcional)',
+                              icon: Icons.flag_outlined,
+                            ),
+                            AlunoInsetFormField(
+                              controller: _descricaoCtrl,
+                              label: 'Descrição (opcional)',
+                              icon: Icons.notes_rounded,
+                              maxLines: 2,
+                              showDivider: false,
+                            ),
+                          ],
                         ),
                         if (_error != null) ...[
                           const SizedBox(height: TokensStrip.s4),

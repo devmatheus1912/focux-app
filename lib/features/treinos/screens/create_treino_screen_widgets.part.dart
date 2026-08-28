@@ -302,7 +302,7 @@ class _PresetRail extends StatelessWidget {
               onTap: () => onTap(preset),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 180),
-                width: 132,
+                width: 148,
                 padding: const EdgeInsets.all(12),
                 decoration: fxListCardDecoration(
                   context,
@@ -368,164 +368,91 @@ class _LevelSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: List.generate(3, (i) {
-        final sel = selected == _niveis[i];
-        final idleInk =
-            isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-        final idleBorder =
-            isDark
-                ? EagleTokens.darkLine
-                : TokensStrip.textSecondary.withValues(alpha: 0.22);
-        final idleFill =
-            isDark
-                ? EagleTokens.darkCardHi.withValues(alpha: 0.7)
-                : Colors.white.withValues(alpha: 0.9);
-        return Expanded(
-          child: Semantics(
-            button: true,
-            selected: sel,
-            label: 'Nível ${_niveisLabel[i]}',
-            child: GestureDetector(
-              onTap: () {
-                HapticFeedback.selectionClick();
-                onChanged(_niveis[i]);
-              },
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 180),
-                margin: EdgeInsets.only(right: i < 2 ? 8 : 0),
-                padding: const EdgeInsets.symmetric(
-                  vertical: 11,
-                  horizontal: 8,
-                ),
-                decoration: BoxDecoration(
-                  color:
-                      sel
-                          ? _niveisCor[i].withValues(
-                            alpha: isDark ? 0.15 : 0.10,
-                          )
-                          : idleFill,
-                  borderRadius: BorderRadius.circular(TokensStrip.rCard),
-                  border: Border.all(
-                    color:
-                        sel
-                            ? _niveisCor[i].withValues(alpha: 0.42)
-                            : idleBorder,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(
-                        alpha: isDark ? 0.10 : 0.035,
-                      ),
-                      blurRadius: 14,
-                      offset: const Offset(0, 8),
-                      spreadRadius: -14,
-                    ),
-                  ],
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      _niveisIcon[i],
-                      color: sel ? _niveisCor[i] : idleInk,
-                      size: 16,
-                    ),
-                    const SizedBox(width: 5),
-                    Flexible(
-                      child: Text(
-                        _niveisLabel[i],
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: FocuxHubTypography.bodyMuted(
-                          color: sel ? _niveisCor[i] : idleInk,
-                          fontWeight: sel ? FontWeight.w800 : FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+    final chrome = ShellChrome.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Divider(
+          height: 1,
+          thickness: FxSettingsLayout.dividerThickness,
+          color: chrome.line,
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          child: Row(
+            children: List.generate(3, (i) => Expanded(child: _levelChip(i))),
           ),
-        );
-      }),
+        ),
+        Divider(
+          height: 1,
+          thickness: FxSettingsLayout.dividerThickness,
+          color: chrome.line,
+        ),
+      ],
     );
   }
-}
 
-class _FxField extends StatelessWidget {
-  final TextEditingController controller;
-  final FocusNode? focusNode;
-  final String label;
-  final IconData icon;
-  final bool isDark;
-  final int maxLines;
-  final String? Function(String?)? validator;
-
-  const _FxField({
-    super.key,
-    required this.controller,
-    this.focusNode,
-    required this.label,
-    required this.icon,
-    required this.isDark,
-    this.maxLines = 1,
-    this.validator,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final primary = Theme.of(context).colorScheme.primary;
-    return TextFormField(
-      controller: controller,
-      focusNode: focusNode,
-      maxLines: maxLines,
-      validator: validator,
-      style: FocuxHubTypography.body(
-        color: isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
-      ).copyWith(fontWeight: FontWeight.w700),
-      cursorColor: primary,
-      decoration: InputDecoration(
-        labelText: label,
-        prefixIcon: Icon(
-          icon,
-          size: 20,
-          color: isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
-        ),
-        filled: true,
-        fillColor: isDark ? EagleTokens.darkCardHi : TokensStrip.cardBg,
-        labelStyle: FocuxHubTypography.bodyMuted(
-          color: isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
-          fontWeight: FontWeight.w600,
-        ),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 14,
-        ),
-        border: FxInputDeco.outlineBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(
-            color: isDark ? EagleTokens.darkLine : TokensStrip.borderDefault,
+  Widget _levelChip(int i) {
+    final sel = selected == _niveis[i];
+    final idleInk =
+        isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final idleBorder =
+        isDark
+            ? EagleTokens.darkLine
+            : TokensStrip.textSecondary.withValues(alpha: 0.22);
+    final idleFill =
+        isDark
+            ? EagleTokens.darkCardHi.withValues(alpha: 0.7)
+            : Colors.white.withValues(alpha: 0.9);
+    return Padding(
+      padding: EdgeInsets.only(right: i < 2 ? 8 : 0),
+      child: Semantics(
+        button: true,
+        selected: sel,
+        label: 'Nível ${_niveisLabel[i]}',
+        child: GestureDetector(
+          onTap: () {
+            HapticFeedback.selectionClick();
+            onChanged(_niveis[i]);
+          },
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 180),
+            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 6),
+            decoration: BoxDecoration(
+              color:
+                  sel
+                      ? _niveisCor[i].withValues(alpha: isDark ? 0.15 : 0.10)
+                      : idleFill,
+              borderRadius: BorderRadius.circular(TokensStrip.rCard),
+              border: Border.all(
+                color:
+                    sel
+                        ? _niveisCor[i].withValues(alpha: 0.42)
+                        : idleBorder,
+              ),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  _niveisIcon[i],
+                  color: sel ? _niveisCor[i] : idleInk,
+                  size: 18,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  _niveisShortLabel[i],
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                  style: FocuxHubTypography.bodyMuted(
+                    color: sel ? _niveisCor[i] : idleInk,
+                    fontWeight: sel ? FontWeight.w800 : FontWeight.w700,
+                  ).copyWith(fontSize: 11.5),
+                ),
+              ],
+            ),
           ),
-        ),
-        enabledBorder: FxInputDeco.outlineBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(
-            color: isDark ? EagleTokens.darkLine : TokensStrip.borderDefault,
-          ),
-        ),
-        focusedBorder: FxInputDeco.outlineBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(color: primary.withValues(alpha: 0.68)),
-        ),
-        errorBorder: FxInputDeco.outlineBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: EagleTokens.bad),
-        ),
-        errorStyle: FocuxHubTypography.bodyMuted(
-          color: EagleTokens.bad,
-          fontWeight: FontWeight.w700,
         ),
       ),
     );

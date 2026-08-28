@@ -50,8 +50,8 @@ String _alunoDetailLibrarySource() {
       'lib/features/alunos/widgets/aluno360_ferramentas_modules_grid.dart';
   const timelineCardFile =
       'lib/features/alunos/widgets/aluno360_timeline_card.dart';
-  const actionEmptyPanelFile =
-      'lib/features/alunos/widgets/aluno360_action_empty_panel.dart';
+  const insetEmptyActionsFile =
+      'lib/features/alunos/widgets/aluno360_inset_empty_actions.dart';
   const alunoActionsFile =
       'lib/features/alunos/utils/aluno_detail_aluno_actions.dart';
   const deleteConfirmSheetFile =
@@ -112,7 +112,7 @@ String _alunoDetailLibrarySource() {
   final financeBanner = File(financeBannerFile).readAsStringSync();
   final ferramentasModules = File(ferramentasModulesFile).readAsStringSync();
   final timelineCard = File(timelineCardFile).readAsStringSync();
-  final actionEmptyPanel = File(actionEmptyPanelFile).readAsStringSync();
+  final insetEmptyActions = File(insetEmptyActionsFile).readAsStringSync();
   final alunoActions = File(alunoActionsFile).readAsStringSync();
   final deleteConfirmSheet = File(deleteConfirmSheetFile).readAsStringSync();
   final quickActions = File(quickActionsFile).readAsStringSync();
@@ -129,7 +129,7 @@ String _alunoDetailLibrarySource() {
   final detailLoadingSkeleton =
       File(detailLoadingSkeletonFile).readAsStringSync();
   final alunoRepository = File(alunoRepositoryFile).readAsStringSync();
-  return '$main\n$statePart\n$providers\n$heroWidget\n$heroRiskStyle\n$headerWidget\n$operacaoTab\n$operacaoLogic\n$copilotLogic\n$copilotExecutarLogic\n$copilotOutreachLogic\n$copilotTextLogic\n$outreachSheet\n$copilotCard\n$copilotLockedSection\n$copilotUpgradeSheet\n$operationalSection\n$focusToggle\n$copilotSupport\n$stickyCta\n$followUp\n$copilotTaskActions\n$executarButton\n$financeBanner\n$ferramentasModules\n$timelineCard\n$actionEmptyPanel\n$alunoActions\n$deleteConfirmSheet\n$quickActions\n$evolucaoCard\n$adherenceLegend\n$profileGapsSheet\n$iaRepository\n$detailOperacaoTab\n$detailEvolucaoTab\n$detailFerramentasTab\n$recoveryInsight\n$weightActivity\n$detailLoadingSkeleton\n$alunoRepository';
+  return '$main\n$statePart\n$providers\n$heroWidget\n$heroRiskStyle\n$headerWidget\n$operacaoTab\n$operacaoLogic\n$copilotLogic\n$copilotExecutarLogic\n$copilotOutreachLogic\n$copilotTextLogic\n$outreachSheet\n$copilotCard\n$copilotLockedSection\n$copilotUpgradeSheet\n$operationalSection\n$focusToggle\n$copilotSupport\n$stickyCta\n$followUp\n$copilotTaskActions\n$executarButton\n$financeBanner\n$ferramentasModules\n$timelineCard\n$insetEmptyActions\n$alunoActions\n$deleteConfirmSheet\n$quickActions\n$evolucaoCard\n$adherenceLegend\n$profileGapsSheet\n$iaRepository\n$detailOperacaoTab\n$detailEvolucaoTab\n$detailFerramentasTab\n$recoveryInsight\n$weightActivity\n$detailLoadingSkeleton\n$alunoRepository';
 }
 
 void main() {
@@ -498,7 +498,7 @@ void main() {
       ).readAsStringSync(),
       contains('ValueKey(\'aluno360_ferramentas_modulos\')'),
     );
-    expect(screen, contains('class Aluno360ActionEmptyPanel'));
+    expect(screen, contains('aluno360InsetEmptyActionTiles'));
     expect(screen, contains('class Aluno360StudentQuickActions'));
     expect(screen, contains('AlunoOperacaoAdherenceLegend'));
     expect(screen, contains('fonteLabel'));
@@ -549,8 +549,9 @@ void main() {
       ),
     );
     expect(screen, contains('showAluno360CopilotProfileGapsSheet'));
-    expect(screen, contains('Histórico ainda vazio'));
-    expect(screen, contains('Linha do tempo ainda vazia'));
+    expect(screen, contains('aluno360InsetEmptyActionTiles'));
+    expect(screen, contains('Peça um check-in'));
+    expect(screen, contains('Quando houver check-in ou chat'));
     expect(
       screen,
       contains('friendlyError(e, fallback: \'Não foi possível gerar senha.\')'),

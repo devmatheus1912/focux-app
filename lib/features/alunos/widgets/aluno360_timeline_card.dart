@@ -13,8 +13,8 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../constants/aluno_360_layout.dart';
 import '../data/aluno_repository.dart';
 import '../utils/aluno360_timeline_logic.dart';
-import 'aluno360_action_empty_panel.dart';
 import 'aluno360_help_sheets.dart';
+import 'aluno360_inset_empty_actions.dart';
 import 'aluno360_timeline_full_sheet.dart';
 import 'aluno360_timeline_sheet_motion.dart';
 import 'aluno_outreach_message_sheet.dart';
@@ -216,6 +216,13 @@ class Aluno360TimelineCard extends StatelessWidget {
       label: 'Linha do tempo 360, últimos sinais do aluno',
       child: FxSettingsGroup(
         header: 'Linha do tempo 360',
+        caption:
+            allItems.isEmpty && !loading && !error
+                ? (compactEmpty
+                    ? 'Quando houver check-in ou chat, os sinais aparecem aqui em ordem cronológica.'
+                    : '${aluno.nome.split(' ').first} ainda não tem sinais suficientes. '
+                        'Peça um check-in ou abra o chat para registrar a próxima interação.')
+                : null,
         helpTooltip: 'Ajuda sobre a linha do tempo',
         onHelpTap: () => showAluno360TimelineHelpSheet(context),
         accent: primary,
@@ -252,56 +259,39 @@ class Aluno360TimelineCard extends StatelessWidget {
               ),
             )
           else if (allItems.isEmpty)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4),
-              child: Aluno360ActionEmptyPanel(
-                key: const ValueKey('aluno360_timeline_empty'),
-                compact: true,
-                icon: Icons.history_toggle_off_outlined,
-                title: 'Linha do tempo ainda vazia',
-                subtitle:
-                    compactEmpty
-                        ? 'Quando houver check-in ou chat, os sinais aparecem aqui em ordem cronológica.'
-                        : '${aluno.nome.split(' ').first} ainda não tem sinais suficientes. '
-                            'Peça um check-in ou abra o chat para registrar a próxima interação.',
-                showPrimary: !compactEmpty,
-                primaryLabel: compactEmpty ? null : 'Pedir check-in',
-                primaryIcon: compactEmpty ? null : Icons.message_outlined,
-                onPrimary:
-                    compactEmpty ? null : () => _openTimelineCheckin(context),
-                secondaryActions:
-                    compactEmpty
-                        ? [
-                          Aluno360SecondaryAction(
-                            label: 'Abrir chat',
-                            icon: Icons.chat_bubble_outline,
-                            onTap:
-                                () => context.push(
-                                  '/alunos/${aluno.id}/chat',
-                                  extra: aluno.nome,
-                                ),
+            KeyedSubtree(
+              key: const ValueKey('aluno360_timeline_empty'),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: aluno360InsetEmptyActionTiles([
+                  if (!compactEmpty)
+                    Aluno360InsetEmptyActionSpec(
+                      icon: Icons.message_outlined,
+                      label: 'Pedir check-in',
+                      subtitle: 'Mensagem pronta para enviar',
+                      highlight: true,
+                      onTap: () => _openTimelineCheckin(context),
+                    ),
+                  Aluno360InsetEmptyActionSpec(
+                    icon: Icons.chat_bubble_outline,
+                    label: 'Abrir chat',
+                    onTap:
+                        () => context.push(
+                          '/alunos/${aluno.id}/chat',
+                          extra: aluno.nome,
+                        ),
+                  ),
+                  if (!compactEmpty)
+                    Aluno360InsetEmptyActionSpec(
+                      icon: Icons.fitness_center_rounded,
+                      label: 'Ver treinos',
+                      onTap:
+                          () => context.push(
+                            '/alunos/${aluno.id}/treinos-list',
+                            extra: aluno.nome,
                           ),
-                        ]
-                        : [
-                          Aluno360SecondaryAction(
-                            label: 'Abrir chat',
-                            icon: Icons.chat_bubble_outline,
-                            onTap:
-                                () => context.push(
-                                  '/alunos/${aluno.id}/chat',
-                                  extra: aluno.nome,
-                                ),
-                          ),
-                          Aluno360SecondaryAction(
-                            label: 'Ver treinos',
-                            icon: Icons.fitness_center_rounded,
-                            onTap:
-                                () => context.push(
-                                  '/alunos/${aluno.id}/treinos-list',
-                                  extra: aluno.nome,
-                                ),
-                          ),
-                        ],
+                    ),
+                ]),
               ),
             )
           else

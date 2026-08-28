@@ -15,6 +15,7 @@ class AlunoInsetFormField extends StatelessWidget {
     required this.label,
     required this.icon,
     this.hint,
+    this.focusNode,
     this.keyboardType,
     this.textCapitalization = TextCapitalization.none,
     this.inputFormatters,
@@ -27,6 +28,7 @@ class AlunoInsetFormField extends StatelessWidget {
   final String label;
   final IconData icon;
   final String? hint;
+  final FocusNode? focusNode;
   final TextInputType? keyboardType;
   final TextCapitalization textCapitalization;
   final List<TextInputFormatter>? inputFormatters;
@@ -48,6 +50,7 @@ class AlunoInsetFormField extends StatelessWidget {
           label: label,
           child: TextFormField(
             controller: controller,
+            focusNode: focusNode,
             keyboardType: keyboardType,
             textCapitalization: textCapitalization,
             inputFormatters: inputFormatters,

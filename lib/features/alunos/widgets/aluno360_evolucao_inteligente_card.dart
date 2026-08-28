@@ -13,8 +13,8 @@ import '../../../core/widgets/fx_sparkline.dart';
 import '../constants/aluno_360_layout.dart';
 import '../data/aluno_repository.dart';
 import '../utils/aluno360_evolucao_inteligente_logic.dart';
-import 'aluno360_action_empty_panel.dart';
 import 'aluno360_help_sheets.dart';
+import 'aluno360_inset_empty_actions.dart';
 import 'aluno_outreach_message_sheet.dart';
 
 class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
@@ -141,6 +141,14 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
           label: 'Evolução inteligente, sinal ${sinalLabel(ev.sinal)}',
           child: FxSettingsGroup(
             header: 'Evolução inteligente',
+            caption:
+                isEmptySignal
+                    ? (timelineHasSignals
+                        ? '$firstName já aparece na linha do tempo. '
+                            'Peça um check-in para liberar volume e tendência.'
+                        : 'Peça um check-in a $firstName para começar '
+                            'a montar volume, tendência e próximos passos.')
+                    : null,
             helpTooltip: 'Ajuda sobre evolução inteligente',
             onHelpTap: () => showAluno360EvolucaoInteligenteHelpSheet(context),
             accent: primary,
@@ -167,59 +175,45 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
                         ? KeyedSubtree(
                           key: const ValueKey('evolucao_empty'),
                           child: Column(
+                            key: const ValueKey('aluno360_evolucao_empty'),
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 4),
-                                child: Aluno360ActionEmptyPanel(
-                                  key: const ValueKey(
-                                    'aluno360_evolucao_empty',
-                                  ),
-                                  compact: true,
-                                  icon: Icons.insights_outlined,
-                                  title: 'Histórico ainda vazio',
-                                  subtitle:
-                                      timelineHasSignals
-                                          ? '$firstName já aparece na linha do tempo. '
-                                              'Peça um check-in para liberar volume e tendência.'
-                                          : 'Peça um check-in a $firstName para começar '
-                                              'a montar volume, tendência e próximos passos.',
-                                  primaryLabel: 'Pedir check-in',
-                                  primaryIcon: Icons.message_outlined,
-                                  onPrimary: () => _openCheckinMessage(context),
-                                  secondaryActions: [
-                                    Aluno360SecondaryAction(
-                                      label: 'Abrir chat',
-                                      icon: Icons.chat_bubble_outline,
-                                      onTap:
-                                          () => context.push(
-                                            '/alunos/$alunoId/chat',
-                                            extra: alunoNome,
-                                          ),
-                                    ),
-                                    if (!timelineHasSignals)
-                                      Aluno360SecondaryAction(
-                                        label: 'Ver treinos',
-                                        icon: Icons.fitness_center_rounded,
-                                        onTap: () => _openTreinos(context),
-                                      ),
-                                  ],
+                              ...aluno360InsetEmptyActionTiles([
+                                Aluno360InsetEmptyActionSpec(
+                                  icon: Icons.message_outlined,
+                                  label: 'Pedir check-in',
+                                  subtitle: 'Mensagem pronta para enviar',
+                                  highlight: true,
+                                  onTap: () => _openCheckinMessage(context),
                                 ),
-                              ),
-                              if (hasRadarP0 && !timelineHasSignals)
-                                FxSettingsTile(
-                                  icon: Icons.radar_outlined,
-                                  accent: EagleTokens.warn,
-                                  label: 'Radar pede mapa corporal',
-                                  subtitle: 'Prioridade P0 na evolução corporal',
-                                  value: 'P0',
-                                  showDivider: false,
+                                Aluno360InsetEmptyActionSpec(
+                                  icon: Icons.chat_bubble_outline,
+                                  label: 'Abrir chat',
                                   onTap:
                                       () => context.push(
-                                        '/alunos/$alunoId/evolucao',
+                                        '/alunos/$alunoId/chat',
                                         extra: alunoNome,
                                       ),
                                 ),
+                                if (!timelineHasSignals)
+                                  Aluno360InsetEmptyActionSpec(
+                                    icon: Icons.fitness_center_rounded,
+                                    label: 'Ver treinos',
+                                    onTap: () => _openTreinos(context),
+                                  ),
+                                if (hasRadarP0 && !timelineHasSignals)
+                                  Aluno360InsetEmptyActionSpec(
+                                    icon: Icons.radar_outlined,
+                                    accent: EagleTokens.warn,
+                                    label: 'Radar pede mapa corporal',
+                                    subtitle: 'Prioridade P0 na evolução corporal',
+                                    onTap:
+                                        () => context.push(
+                                          '/alunos/$alunoId/evolucao',
+                                          extra: alunoNome,
+                                        ),
+                                  ),
+                              ]),
                             ],
                           ),
                         )

@@ -276,6 +276,9 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
             ? treinosProvider
             : treinosDoAlunoProvider(widget.alunoId!);
     final treinosAsync = ref.watch(treinosSource);
+    final homeBundle =
+        widget.alunoId == null ? ref.watch(treinosHomeProvider).valueOrNull : null;
+    final uiHints = homeBundle?.uiHints;
     ref.listen<AsyncValue<List<Treino>>>(treinosSource, (_, next) {
       if (!next.isLoading && next.hasValue) {
         setState(() => _fetchedAt = DateTime.now());
@@ -416,21 +419,81 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
                           if (treinos.isEmpty)
                             SliverFillRemaining(
                               hasScrollBody: false,
-                              child: FxEmptyState(
-                                icon: 'dumbbell',
-                                title: TreinosListLabels.emptyTitle(
-                                  alunoNome: widget.alunoNome,
+                              child: Padding(
+                                padding: EdgeInsets.fromLTRB(
+                                  TreinosLayout.screenPadding,
+                                  8,
+                                  TreinosLayout.screenPadding,
+                                  32,
                                 ),
-                                subtitle: TreinosListLabels.emptySubtitle(
-                                  alunoNome: widget.alunoNome,
-                                ),
-                                action: FxEmptyAction(
-                                  label: 'Criar treino',
-                                  onTap: createWorkout,
+                                child: Align(
+                                  alignment: Alignment.topCenter,
+                                  child: FxSettingsGroup(
+                                    header:
+                                        widget.alunoId == null
+                                            ? 'Biblioteca'
+                                            : 'Plano do aluno',
+                                    caption:
+                                        widget.alunoId == null
+                                            ? (uiHints?.emptySubtitle ??
+                                                TreinosListLabels.emptySubtitle(
+                                                  alunoNome: widget.alunoNome,
+                                                ))
+                                            : TreinosListLabels.emptySubtitle(
+                                              alunoNome: widget.alunoNome,
+                                            ),
+                                    accent: primary,
+                                    children: [
+                                      FxSettingsTile(
+                                        icon: Icons.add_rounded,
+                                        label:
+                                            widget.alunoId == null
+                                                ? (uiHints?.createCtaLabel ??
+                                                    'Criar treino')
+                                                : 'Criar treino',
+                                        subtitle:
+                                            widget.alunoId == null
+                                                ? (uiHints?.emptyTitle ??
+                                                    TreinosListLabels.emptyTitle(
+                                                      alunoNome:
+                                                          widget.alunoNome,
+                                                    ))
+                                                : TreinosListLabels.emptyTitle(
+                                                  alunoNome: widget.alunoNome,
+                                                ),
+                                        value: '',
+                                        highlight: true,
+                                        showDivider: false,
+                                        onTap: createWorkout,
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                             )
                           else ...[
+                            if (!_selectionMode &&
+                                uiHints?.emMontagemHint != null)
+                              SliverToBoxAdapter(
+                                child: Padding(
+                                  padding: const EdgeInsets.fromLTRB(
+                                    TreinosLayout.screenPadding,
+                                    0,
+                                    TreinosLayout.screenPadding,
+                                    10,
+                                  ),
+                                  child: Text(
+                                    uiHints!.emMontagemHint!,
+                                    style: FocuxHubTypography.bodyMuted(
+                                      color:
+                                          isDark
+                                              ? EagleTokens.darkInkMute
+                                              : TokensStrip.textSecondary,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                              ),
                             if (!_selectionMode)
                               SliverToBoxAdapter(
                                 child: Padding(
@@ -466,17 +529,18 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
                                             : 'Plano do aluno',
                                     action:
                                         _query.trim().isEmpty
-                                            ? TreinosListLabels.libraryCaption(
-                                              prontos:
-                                                  treinos
-                                                      .where((t) => t.pronto)
-                                                      .length,
-                                              exercises: treinos.fold<int>(
-                                                0,
-                                                (sum, t) =>
-                                                    sum + t.exerciciosCount,
-                                              ),
-                                            )
+                                            ? (uiHints?.libraryCaption ??
+                                                TreinosListLabels.libraryCaption(
+                                                  prontos:
+                                                      treinos
+                                                          .where((t) => t.pronto)
+                                                          .length,
+                                                  exercises: treinos.fold<int>(
+                                                    0,
+                                                    (sum, t) =>
+                                                        sum + t.exerciciosCount,
+                                                  ),
+                                                ))
                                             : '${filteredTreinos.length} de ${treinos.length}',
                                     isDark: isDark,
                                   ),
