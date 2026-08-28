@@ -81,7 +81,12 @@ void main() {
     expect(screen, contains('treino_detail_grouping.dart'));
     expect(screen, contains('treinoDetailMetaLine'));
     expect(screen, contains('treinoDetailExerciseLine'));
-    expect(screen, contains('TreinoSheetChromeHeader'));
+    expect(screen, contains('FxSettingsGroup'));
+    expect(screen, contains('treino_inset_sheet.dart'));
+    expect(screen, contains('TreinoInsetActionSheet'));
+    expect(screen, isNot(contains('_DetailActionTile')));
+    expect(screen, isNot(contains('_TreinoHeroActions')));
+    expect(screen, isNot(contains('FxEmptyState')));
     expect(screen, contains('FxHomeSheetHandle'));
     expect(screen, contains('expand: true'));
     expect(screen, contains('TreinoPrescriptionVideoBlock'));

@@ -176,91 +176,43 @@ class _ExerciseActionsSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final chrome = ShellChrome.forDark(isDark);
-    final primary = Theme.of(context).colorScheme.primary;
     final maxHeight = MediaQuery.sizeOf(context).height * 0.72;
-    final actions = <_DetailActionTile>[
-      _DetailActionTile(
-        icon: Icons.edit_note_rounded,
-        label: 'Editar prescrição',
-        semanticsContext: title,
-        showChevron: true,
-        onTap: () => Navigator.pop(context, 'edit'),
-      ),
-      _DetailActionTile(
-        icon: Icons.copy_rounded,
-        label: 'Duplicar item',
-        semanticsContext: title,
-        onTap: () => Navigator.pop(context, 'duplicate'),
-      ),
-      _DetailActionTile(
-        icon: Icons.swap_horiz_rounded,
-        label: 'Substituir exercício',
-        semanticsContext: title,
-        showChevron: true,
-        onTap: () => Navigator.pop(context, 'substitute'),
-      ),
-      _DetailActionTile(
-        icon: Icons.remove_circle_outline_rounded,
-        label: 'Remover do treino',
-        semanticsContext: title,
-        color: EagleTokens.bad,
-        onTap: () => Navigator.pop(context, 'remove'),
-      ),
-    ];
-
-    return TreinoHomeSheetSurface(
+    return TreinoInsetActionSheet(
       isDark: isDark,
       maxHeight: maxHeight,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Center(
-            child: Container(
-              width: 42,
-              height: 4,
-              decoration: BoxDecoration(
-                color: chrome.line,
-                borderRadius: BorderRadius.circular(999),
-              ),
-            ),
-          ),
-          SizedBox(height: TokensStrip.s4),
-          TreinoSheetChromeHeader(
-            icon: Icons.fitness_center_rounded,
-            title: 'Ações do exercício',
-            subtitle: title,
-            isDark: isDark,
-          ),
-          const SizedBox(height: TokensStrip.s4),
-          Flexible(
-            child: SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              child: DecoratedBox(
-                decoration: fxListCardDecoration(context, accent: primary),
-                child: Material(
-                  color: Colors.transparent,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      for (var i = 0; i < actions.length; i++) ...[
-                        if (i > 0)
-                          Divider(
-                            height: 1,
-                            thickness: 1,
-                            color: chrome.line.withValues(alpha: 0.7),
-                          ),
-                        actions[i],
-                      ],
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
+      expand: true,
+      headerIcon: Icons.fitness_center_rounded,
+      title: 'Ações do exercício',
+      subtitle: title,
+      actions: [
+        TreinoInsetActionSpec(
+          icon: Icons.edit_note_rounded,
+          label: 'Editar prescrição',
+          subtitle: title,
+          showChevron: true,
+          onTap: () => Navigator.pop(context, 'edit'),
+        ),
+        TreinoInsetActionSpec(
+          icon: Icons.copy_rounded,
+          label: 'Duplicar item',
+          subtitle: title,
+          onTap: () => Navigator.pop(context, 'duplicate'),
+        ),
+        TreinoInsetActionSpec(
+          icon: Icons.swap_horiz_rounded,
+          label: 'Substituir exercício',
+          subtitle: title,
+          showChevron: true,
+          onTap: () => Navigator.pop(context, 'substitute'),
+        ),
+        TreinoInsetActionSpec(
+          icon: Icons.remove_circle_outline_rounded,
+          label: 'Remover do treino',
+          subtitle: title,
+          danger: true,
+          onTap: () => Navigator.pop(context, 'remove'),
+        ),
+      ],
     );
   }
 }

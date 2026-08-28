@@ -261,83 +261,6 @@ class _TreinoExerciseReorderListState
   }
 }
 
-class _DetailActionTile extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String? semanticsContext;
-  final Color? color;
-  final bool showChevron;
-  final VoidCallback onTap;
-
-  const _DetailActionTile({
-    required this.icon,
-    required this.label,
-    this.semanticsContext,
-    this.color,
-    this.showChevron = false,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final chrome = ShellChrome.of(context);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final primary = Theme.of(context).colorScheme.primary;
-    final tint = color ?? primary;
-    final spoken =
-        semanticsContext == null || semanticsContext!.trim().isEmpty
-            ? label
-            : '$label. $semanticsContext';
-
-    return Semantics(
-      button: true,
-      label: spoken,
-      child: InkWell(
-        onTap: () {
-          HapticFeedback.selectionClick();
-          onTap();
-        },
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(
-            minHeight: TreinosLayout.touchTarget,
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            child: Row(
-              children: [
-                Container(
-                  width: 34,
-                  height: 34,
-                  decoration: BoxDecoration(
-                    color: BrandPalette.soft(tint, dark: isDark),
-                    borderRadius: BorderRadius.circular(13),
-                  ),
-                  child: Icon(icon, color: tint, size: 18),
-                ),
-                SizedBox(width: TokensStrip.s3),
-                Expanded(
-                  child: Text(
-                    label,
-                    style: FocuxHubTypography.cardTitle(
-                      color: color ?? chrome.ink,
-                    ),
-                  ),
-                ),
-                if (showChevron)
-                  Icon(
-                    Icons.chevron_right_rounded,
-                    color: chrome.mute,
-                    size: 18,
-                  ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _AssignWorkoutSheet extends StatefulWidget {
   final List<Aluno> alunos;
   final bool isDark;
@@ -361,226 +284,138 @@ class _AssignWorkoutSheetState extends State<_AssignWorkoutSheet> {
   Widget build(BuildContext context) {
     final isDark = widget.isDark;
     final primary = Theme.of(context).colorScheme.primary;
-    final chrome = ShellChrome.forDark(isDark);
+    final soft = BrandPalette.softened(primary);
+    final mute = fxScreenMute(context);
 
     return TreinoHomeSheetSurface(
       isDark: isDark,
+      expand: true,
       child: Column(
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Container(
-            width: 42,
-            height: 4,
-            decoration: BoxDecoration(
-              color: chrome.mute.withValues(alpha: 0.26),
-              borderRadius: BorderRadius.circular(999),
-            ),
-          ),
-          SizedBox(height: TokensStrip.s4),
-          TreinoSheetChromeHeader(
-            icon: Icons.person_add_alt_1_rounded,
+          FxHomeSheetHandle(isDark: isDark),
+          FxHomeSheetHeader(
+            isDark: isDark,
             title: 'Atribuir treino',
             subtitle:
                 widget.alunos.isEmpty
                     ? 'Cadastre um aluno antes.'
                     : 'Escolha quem recebe este plano.',
-            isDark: isDark,
+            leading: Icon(
+              Icons.person_add_alt_1_rounded,
+              color: soft,
+              size: FxSettingsLayout.iconSize,
+            ),
           ),
-          const SizedBox(height: TokensStrip.s4),
+          const SizedBox(height: FxSettingsLayout.headerToGroup),
           if (widget.alunos.isEmpty)
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: isDark ? heroTealSurface(0.04) : TokensStrip.cardBg,
-                borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: chrome.line),
-              ),
-              child: Text(
-                'Cadastre um aluno antes de atribuir este treino.',
-                style: FocuxHubTypography.bodyMuted(
-                  color: chrome.mute,
-                  fontWeight: FontWeight.w600,
-                  height: 1.35,
+            FxSettingsGroup(
+              accent: primary,
+              caption: 'Cadastre um aluno antes de atribuir este treino.',
+              children: [
+                FxSettingsTile(
+                  icon: Icons.person_outline_rounded,
+                  accent: soft,
+                  label: 'Nenhum aluno cadastrado',
+                  value: '',
+                  showDivider: false,
+                  locked: true,
+                  onTap: () {},
                 ),
-              ),
+              ],
             )
           else
-            ConstrainedBox(
-              constraints: const BoxConstraints(maxHeight: 300),
-              child: ListView.separated(
-                shrinkWrap: true,
-                itemCount: widget.alunos.length,
-                separatorBuilder: (_, __) => SizedBox(height: TokensStrip.s2),
-                itemBuilder: (context, index) {
-                  final aluno = widget.alunos[index];
-                  final selected = selectedAlunoId == aluno.id;
-                  final initials =
-                      aluno.nome.trim().isEmpty
-                          ? '?'
-                          : aluno.nome
-                              .trim()
-                              .split(RegExp(r'\s+'))
-                              .take(2)
-                              .map((part) => part[0].toUpperCase())
-                              .join();
-
-                  return InkWell(
-                    onTap: () {
-                      HapticFeedback.selectionClick();
-                      setState(() => selectedAlunoId = aluno.id);
-                    },
-                    borderRadius: BorderRadius.circular(18),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 160),
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color:
-                            selected
-                                ? BrandPalette.soft(primary, dark: isDark)
-                                : isDark
-                                ? heroTealSurface(0.03)
-                                : heroTealInk(),
-                        borderRadius: BorderRadius.circular(18),
-                        border: Border.all(
-                          color:
-                              selected
-                                  ? primary.withValues(alpha: 0.30)
-                                  : chrome.line,
-                        ),
+            Expanded(
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                child: FxSettingsGroup(
+                  accent: primary,
+                  children: [
+                    for (var i = 0; i < widget.alunos.length; i++)
+                      _assignAlunoTile(
+                        aluno: widget.alunos[i],
+                        selected: selectedAlunoId == widget.alunos[i].id,
+                        accent: soft,
+                        primary: primary,
+                        showDivider: i < widget.alunos.length - 1,
+                        onTap: () {
+                          HapticFeedback.selectionClick();
+                          setState(() => selectedAlunoId = widget.alunos[i].id);
+                        },
                       ),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 38,
-                            height: 38,
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              color: selected ? primary : chrome.line,
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            child: Text(
-                              initials,
-                              style: FocuxHubTypography.cardTitle(
-                                color: selected ? heroTealInk() : chrome.ink,
-                              ),
-                            ),
-                          ),
-                          SizedBox(width: TokensStrip.s3),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  aluno.nome,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: FocuxHubTypography.cardTitle(
-                                    color: chrome.ink,
-                                  ),
-                                ),
-                                SizedBox(height: TokensStrip.s1),
-                                Text(
-                                  aluno.objetivo?.trim().isNotEmpty == true
-                                      ? aluno.objetivo!.trim()
-                                      : 'Objetivo não definido',
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: FocuxHubTypography.bodyMuted(
-                                    color: chrome.mute,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Icon(
-                            selected
-                                ? Icons.check_circle_rounded
-                                : Icons.radio_button_unchecked_rounded,
-                            color:
-                                selected
-                                    ? primary
-                                    : chrome.mute.withValues(alpha: 0.7),
-                            size: 20,
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
+                  ],
+                ),
               ),
             ),
-          const SizedBox(height: TokensStrip.s4),
-          Row(
+          const SizedBox(height: FxSettingsLayout.groupGap),
+          FxSettingsGroup(
+            accent: primary,
             children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: () => Navigator.pop(context),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: chrome.ink,
-                    side: BorderSide(color: chrome.line),
-                    minimumSize: const Size(0, TreinosLayout.touchTarget),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                  ),
-                  child: const Text(
-                    'Cancelar',
-                    style: TextStyle(fontWeight: FontWeight.w800),
-                  ),
-                ),
-              ),
-              SizedBox(width: TokensStrip.s3),
-              Expanded(
-                child: FilledButton(
-                  onPressed:
-                      selectedAlunoId == null
-                          ? null
-                          : () => Navigator.pop(context, selectedAlunoId),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: primary,
-                    foregroundColor: heroTealInk(),
-                    minimumSize: const Size(0, TreinosLayout.touchTarget),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                  ),
-                  child: const Text(
-                    'Atribuir',
-                    style: TextStyle(fontWeight: FontWeight.w800),
-                  ),
-                ),
+              FxSettingsTile(
+                icon: Icons.check_rounded,
+                accent: soft,
+                label: 'Atribuir',
+                value: '',
+                highlight: true,
+                locked: selectedAlunoId == null,
+                showDivider: false,
+                onTap: () {
+                  if (selectedAlunoId == null) return;
+                  Navigator.pop(context, selectedAlunoId);
+                },
               ),
             ],
+          ),
+          const SizedBox(height: FxSettingsLayout.footerAfterGroup),
+          Center(
+            child: Semantics(
+              button: true,
+              label: 'Cancelar',
+              child: TextButton(
+                onPressed: () => Navigator.pop(context),
+                style: TextButton.styleFrom(
+                  foregroundColor: mute,
+                  minimumSize: const Size(
+                    TreinosLayout.touchTarget,
+                    TreinosLayout.touchTarget,
+                  ),
+                  textStyle: FxSettingsLayout.footer(color: mute),
+                ),
+                child: const Text('Cancelar'),
+              ),
+            ),
           ),
         ],
       ),
     );
   }
-}
 
-class _TreinoHeroActions extends StatelessWidget {
-  final VoidCallback onAdd;
+  Widget _assignAlunoTile({
+    required Aluno aluno,
+    required bool selected,
+    required Color accent,
+    required Color primary,
+    required bool showDivider,
+    required VoidCallback onTap,
+  }) {
+    final objetivo =
+        aluno.objetivo?.trim().isNotEmpty == true
+            ? aluno.objetivo!.trim()
+            : 'Objetivo não definido';
 
-  const _TreinoHeroActions({required this.onAdd});
-
-  @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      button: true,
-      label: 'Adicionar exercício',
-      child: FilledButton.icon(
-        onPressed: onAdd,
-        icon: const Icon(Icons.add_rounded, size: 20),
-        label: const Text('Adicionar exercício'),
-        style: FilledButton.styleFrom(
-          minimumSize: const Size.fromHeight(TreinosLayout.touchTarget),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-        ),
-      ),
+    return FxSettingsTile(
+      icon: Icons.person_outline_rounded,
+      accent: accent,
+      label: aluno.nome,
+      subtitle: objetivo,
+      value: '',
+      showDivider: showDivider,
+      onTap: onTap,
+      accessory:
+          selected
+              ? Icon(Icons.check, color: primary, size: FxSettingsLayout.iconSize)
+              : null,
     );
   }
 }

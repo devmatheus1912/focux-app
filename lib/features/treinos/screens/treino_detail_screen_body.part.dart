@@ -53,101 +53,51 @@ class _TreinoDetailBody extends StatelessWidget {
     final action = await _showTreinoSheet<String>(
       context: context,
       builder: (sheetContext) {
-        final chrome = ShellChrome.forDark(isDark);
-        final primary = Theme.of(sheetContext).colorScheme.primary;
         final maxHeight = MediaQuery.sizeOf(sheetContext).height * 0.82;
-        final actions = <_DetailActionTile>[
-          _DetailActionTile(
-            icon: Icons.add_rounded,
-            label: 'Adicionar exercício',
-            showChevron: true,
-            onTap: () => Navigator.pop(sheetContext, 'add'),
-          ),
-          _DetailActionTile(
-            icon: Icons.person_add_alt_1_rounded,
-            label: 'Atribuir a aluno',
-            showChevron: true,
-            onTap: () => Navigator.pop(sheetContext, 'assign'),
-          ),
-          _DetailActionTile(
-            icon: Icons.assignment_ind_rounded,
-            label: 'Copiar para aluno',
-            showChevron: true,
-            onTap: () => Navigator.pop(sheetContext, 'clone'),
-          ),
-          _DetailActionTile(
-            icon: Icons.control_point_duplicate_rounded,
-            label: 'Duplicar treino',
-            onTap: () => Navigator.pop(sheetContext, 'duplicate'),
-          ),
-          _DetailActionTile(
-            icon: Icons.bookmark_border_rounded,
-            label: 'Salvar como template',
-            onTap: () => Navigator.pop(sheetContext, 'template'),
-          ),
-          _DetailActionTile(
-            icon: Icons.delete_outline_rounded,
-            label: 'Excluir treino',
-            color: EagleTokens.bad,
-            onTap: () => Navigator.pop(sheetContext, 'delete'),
-          ),
-        ];
-
-        return TreinoHomeSheetSurface(
+        return TreinoInsetActionSheet(
           isDark: isDark,
           maxHeight: maxHeight,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Center(
-                child: Container(
-                  width: 42,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: chrome.line,
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                ),
-              ),
-              SizedBox(height: TokensStrip.s4),
-              TreinoSheetChromeHeader(
-                icon: Icons.fitness_center_rounded,
-                title: 'Ações do treino',
-                subtitle: _displayWorkoutName(treino.nome),
-                isDark: isDark,
-              ),
-              const SizedBox(height: TokensStrip.s4),
-              Flexible(
-                child: SingleChildScrollView(
-                  physics: const BouncingScrollPhysics(),
-                  child: DecoratedBox(
-                    decoration: fxListCardDecoration(
-                      sheetContext,
-                      accent: primary,
-                    ),
-                    child: Material(
-                      color: Colors.transparent,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          for (var i = 0; i < actions.length; i++) ...[
-                            if (i > 0)
-                              Divider(
-                                height: 1,
-                                thickness: 1,
-                                color: chrome.line.withValues(alpha: 0.7),
-                              ),
-                            actions[i],
-                          ],
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
+          expand: true,
+          headerIcon: Icons.fitness_center_rounded,
+          title: 'Ações do treino',
+          subtitle: _displayWorkoutName(treino.nome),
+          accent: Theme.of(sheetContext).colorScheme.primary,
+          actions: [
+            TreinoInsetActionSpec(
+              icon: Icons.add_rounded,
+              label: 'Adicionar exercício',
+              showChevron: true,
+              onTap: () => Navigator.pop(sheetContext, 'add'),
+            ),
+            TreinoInsetActionSpec(
+              icon: Icons.person_add_alt_1_rounded,
+              label: 'Atribuir a aluno',
+              showChevron: true,
+              onTap: () => Navigator.pop(sheetContext, 'assign'),
+            ),
+            TreinoInsetActionSpec(
+              icon: Icons.assignment_ind_rounded,
+              label: 'Copiar para aluno',
+              showChevron: true,
+              onTap: () => Navigator.pop(sheetContext, 'clone'),
+            ),
+            TreinoInsetActionSpec(
+              icon: Icons.control_point_duplicate_rounded,
+              label: 'Duplicar treino',
+              onTap: () => Navigator.pop(sheetContext, 'duplicate'),
+            ),
+            TreinoInsetActionSpec(
+              icon: Icons.bookmark_border_rounded,
+              label: 'Salvar como template',
+              onTap: () => Navigator.pop(sheetContext, 'template'),
+            ),
+            TreinoInsetActionSpec(
+              icon: Icons.delete_outline_rounded,
+              label: 'Excluir treino',
+              danger: true,
+              onTap: () => Navigator.pop(sheetContext, 'delete'),
+            ),
+          ],
         );
       },
     );
@@ -295,6 +245,7 @@ class _TreinoDetailBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final repo = ref.read(treinoRepositoryProvider);
     final primary = Theme.of(context).colorScheme.primary;
+    final soft = BrandPalette.softened(primary);
     final chrome = ShellChrome.forDark(isDark);
     final contextLabel = _workoutContextLabel(treino, alunoNome);
     final displayName = _displayWorkoutName(treino.nome);
@@ -388,9 +339,9 @@ class _TreinoDetailBody extends StatelessWidget {
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(
-                  TokensStrip.s5,
+                  FxSettingsLayout.pageInset,
                   TokensStrip.s2,
-                  TokensStrip.s5,
+                  FxSettingsLayout.pageInset,
                   TokensStrip.s3,
                 ),
                 child: Column(
@@ -444,20 +395,33 @@ class _TreinoDetailBody extends StatelessWidget {
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(
-                  TokensStrip.s5,
+                  FxSettingsLayout.pageInset,
                   TokensStrip.s2,
-                  TokensStrip.s5,
+                  FxSettingsLayout.pageInset,
                   TokensStrip.s3,
                 ),
-                child: _TreinoHeroActions(onAdd: openAdd),
+                child: FxSettingsGroup(
+                  accent: primary,
+                  children: [
+                    FxSettingsTile(
+                      icon: Icons.add_rounded,
+                      accent: soft,
+                      label: 'Adicionar exercício',
+                      value: '',
+                      highlight: true,
+                      showDivider: false,
+                      onTap: () => openAdd(),
+                    ),
+                  ],
+                ),
               ),
             ),
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(
-                  TokensStrip.s5,
+                  FxSettingsLayout.pageInset,
                   TokensStrip.s3,
-                  TokensStrip.s5,
+                  FxSettingsLayout.pageInset,
                   TokensStrip.s2,
                 ),
                 child: Row(
@@ -487,14 +451,32 @@ class _TreinoDetailBody extends StatelessWidget {
             if (treino.exercicios.isEmpty)
               SliverFillRemaining(
                 hasScrollBody: false,
-                child: FxEmptyState(
-                  icon: 'dumbbell',
-                  title: 'Nenhum exercício ainda',
-                  subtitle:
-                      'Adicione exercícios da biblioteca curada para montar este treino.',
-                  action: FxEmptyAction(
-                    label: 'Adicionar exercício',
-                    onTap: () => openAdd(source: 'empty'),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    FxSettingsLayout.pageInset,
+                    0,
+                    FxSettingsLayout.pageInset,
+                    32,
+                  ),
+                  child: Align(
+                    alignment: Alignment.topCenter,
+                    child: FxSettingsGroup(
+                      caption:
+                          'Adicione exercícios da biblioteca curada para montar este treino.',
+                      accent: primary,
+                      children: [
+                        FxSettingsTile(
+                          icon: Icons.fitness_center_rounded,
+                          accent: soft,
+                          label: 'Nenhum exercício ainda',
+                          subtitle: 'Adicionar exercício',
+                          value: '',
+                          highlight: true,
+                          showDivider: false,
+                          onTap: () => openAdd(source: 'empty'),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               )
