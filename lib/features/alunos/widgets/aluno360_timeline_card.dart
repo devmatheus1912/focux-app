@@ -3,19 +3,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/design_tokens.dart';
-import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/fx_settings_group.dart';
+import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../constants/aluno_360_layout.dart';
 import '../data/aluno_repository.dart';
 import '../utils/aluno360_timeline_logic.dart';
 import 'aluno360_action_empty_panel.dart';
-import 'aluno360_mini_autonomy_chip.dart';
-import 'aluno360_section_header.dart';
-import 'aluno360_timeline_priority_badge.dart';
 import 'aluno360_timeline_full_sheet.dart';
 import 'aluno360_timeline_sheet_motion.dart';
 import 'aluno_outreach_message_sheet.dart';
@@ -129,6 +127,75 @@ class Aluno360TimelineCard extends StatelessWidget {
     );
   }
 
+  void _onTimelineItemTap(BuildContext context, Timeline360Item item) {
+    final link = item.deepLink;
+    final previewBody =
+        item.kind == 'Chat'
+            ? timeline360ChatPreviewBody(
+              item.body,
+              alunoFirstName: aluno.nome.split(' ').first,
+            )
+            : item.kind == 'Autonomia'
+            ? timeline360LocalizeAutonomiaActionCode(item.body)
+            : item.body;
+    final expandable = timeline360BodyExpandable(
+      item.body,
+      kind: item.kind,
+      previewBody: previewBody,
+    );
+    if (expandable) {
+      showTimeline360BodySheet(
+        context,
+        item,
+        accent: Theme.of(context).colorScheme.primary,
+        isDark: isDark,
+      );
+      return;
+    }
+    if (link != null && link.isNotEmpty) {
+      context.push(link);
+    }
+  }
+
+  String _timelineTileLabel(Timeline360Item item) {
+    final kindHeader = timeline360KindHeader(
+      kind: item.kind,
+      title: item.title,
+      meta: item.meta,
+    );
+    if (timeline360ShowTitleRow(
+      kind: item.kind,
+      title: item.title,
+      meta: item.meta,
+    )) {
+      return item.title;
+    }
+    return kindHeader;
+  }
+
+  String? _timelineTileSubtitle(Timeline360Item item) {
+    final previewBody =
+        item.kind == 'Chat'
+            ? timeline360ChatPreviewBody(
+              item.body,
+              alunoFirstName: aluno.nome.split(' ').first,
+            )
+            : item.kind == 'Autonomia'
+            ? timeline360LocalizeAutonomiaActionCode(item.body)
+            : item.body;
+    final showMeta = timeline360ShouldShowMetaChip(
+      kind: item.kind,
+      meta: item.meta,
+      priority: item.priority,
+      title: item.title,
+    );
+    final showPriority = timeline360ShouldShowPriorityBadge(kind: item.kind);
+    final parts = <String>[previewBody];
+    if (showPriority) parts.add(item.priority);
+    if (showMeta && item.meta.isNotEmpty) parts.add(item.meta);
+    return parts.join(' · ');
+  }
+
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
@@ -146,24 +213,15 @@ class Aluno360TimelineCard extends StatelessWidget {
     return Semantics(
       container: true,
       label: 'Linha do tempo 360, últimos sinais do aluno',
-      child: Container(
-        padding: const EdgeInsets.all(Aluno360Layout.cardPadding),
-        decoration: Aluno360Layout.operacaoInsetSectionDecoration(
-          context,
-          primary: primary,
-          isDark: isDark,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Aluno360SectionHeader(
-              icon: Icons.timeline_rounded,
-              title: 'Linha do tempo 360',
-              subtitle: 'Últimos sinais consolidados do aluno.',
-              isDark: isDark,
-            ),
-            if (refreshing && !loading) ...[
-              ClipRRect(
+      child: FxSettingsGroup(
+        header: 'Linha do tempo 360',
+        caption: 'Últimos sinais consolidados do aluno.',
+        accent: primary,
+        children: [
+          if (refreshing && !loading) ...[
+            Padding(
+              padding: const EdgeInsets.only(top: 4, bottom: 8),
+              child: ClipRRect(
                 borderRadius: BorderRadius.circular(999),
                 child: LinearProgressIndicator(
                   minHeight: 3,
@@ -171,14 +229,17 @@ class Aluno360TimelineCard extends StatelessWidget {
                   color: primary,
                 ),
               ),
-              const SizedBox(height: 10),
-            ],
-            if (loading) ...[
-              const SizedBox(height: 14),
-              FxLoading.sectionShimmer(context, height: 140),
-            ] else if (error) ...[
-              const SizedBox(height: 14),
-              Text(
+            ),
+          ],
+          if (loading)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: FxLoading.sectionShimmer(context, height: 140),
+            )
+          else if (error)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Text(
                 friendlyError(
                   timelineApiAsync.error!,
                   fallback: 'Não foi possível carregar a linha do tempo.',
@@ -187,9 +248,11 @@ class Aluno360TimelineCard extends StatelessWidget {
                   context,
                 ).copyWith(color: mute, height: 1.35),
               ),
-            ] else if (allItems.isEmpty) ...[
-              const SizedBox(height: 14),
-              Aluno360ActionEmptyPanel(
+            )
+          else if (allItems.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: Aluno360ActionEmptyPanel(
                 key: const ValueKey('aluno360_timeline_empty'),
                 icon: Icons.history_toggle_off_outlined,
                 title: 'Linha do tempo ainda vazia',
@@ -237,43 +300,31 @@ class Aluno360TimelineCard extends StatelessWidget {
                           ),
                         ],
               ),
-            ] else ...[
-              const SizedBox(height: 14),
-              for (var i = 0; i < visibleItems.length; i++) ...[
-                Aluno360TimelineTileEntrance(
-                  index: i,
-                  child: Timeline360Tile(
-                    item: visibleItems[i],
-                    isDark: isDark,
-                    accent: primary,
-                    alunoFirstName: aluno.nome.split(' ').first,
-                    showSpineBelow: i < visibleItems.length - 1,
-                  ),
+            )
+          else
+            for (var i = 0; i < visibleItems.length; i++)
+              Aluno360TimelineTileEntrance(
+                index: i,
+                child: FxSettingsTile(
+                  icon: visibleItems[i].icon,
+                  accent: visibleItems[i].color,
+                  label: _timelineTileLabel(visibleItems[i]),
+                  subtitle: _timelineTileSubtitle(visibleItems[i]),
+                  value: formatTimeline360Date(visibleItems[i].at),
+                  onTap: () => _onTimelineItemTap(context, visibleItems[i]),
+                  showDivider: i < visibleItems.length - 1 || hasMore,
                 ),
-                if (i < visibleItems.length - 1) const SizedBox(height: 10),
-              ],
-              if (hasMore) ...[
-                const SizedBox(height: 6),
-                Semantics(
-                  button: true,
-                  label:
-                      'Ver todos os ${allItems.length} sinais da linha do tempo',
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton(
-                      onPressed: () => _showFullTimeline(context, primary),
-                      style: Aluno360Layout.operacaoOutlinedButtonStyle(
-                        context,
-                        primary,
-                      ),
-                      child: Text('Ver todos os ${allItems.length} sinais'),
-                    ),
-                  ),
-                ),
-              ],
-            ],
-          ],
-        ),
+              ),
+          if (!loading && !error && allItems.isNotEmpty && hasMore)
+            FxSettingsTile(
+              icon: Icons.unfold_more_rounded,
+              label: 'Ver todos os ${allItems.length} sinais',
+              subtitle: 'Linha do tempo completa',
+              value: '',
+              showDivider: false,
+              onTap: () => _showFullTimeline(context, primary),
+            ),
+        ],
       ),
     );
   }
@@ -410,6 +461,7 @@ void showTimeline360BodySheet(
   );
 }
 
+/// Mantido para a sheet completa e testes de contrato da timeline.
 class Timeline360Tile extends StatelessWidget {
   const Timeline360Tile({
     super.key,
@@ -432,9 +484,6 @@ class Timeline360Tile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-    final link = item.deepLink;
     final previewBody =
         item.kind == 'Chat'
             ? timeline360ChatPreviewBody(
@@ -449,161 +498,19 @@ class Timeline360Tile extends StatelessWidget {
       kind: item.kind,
       previewBody: previewBody,
     );
-    final showMeta = timeline360ShouldShowMetaChip(
-      kind: item.kind,
-      meta: item.meta,
-      priority: item.priority,
-      title: item.title,
-    );
-    final showPriority = timeline360ShouldShowPriorityBadge(kind: item.kind);
     final kindHeader = timeline360KindHeader(
       kind: item.kind,
       title: item.title,
       meta: item.meta,
     );
-    final showTitle = timeline360ShowTitleRow(
-      kind: item.kind,
-      title: item.title,
-      meta: item.meta,
-    );
-    final hasFooterChips = timeline360HasFooterChips(
-      kind: item.kind,
-      meta: item.meta,
-      priority: item.priority,
-      title: item.title,
-    );
-    final linkColor = Aluno360Layout.timelineLinkForeground(
-      accent,
-      isDark: isDark,
-    );
-    final expandLabel = timeline360ExpandLinkLabel(kind: item.kind);
-    final spineColor = ShellChrome.of(context).line.withValues(alpha: 0.55);
-    final iconSize = Aluno360Layout.timelineTileIconSize;
-    final child = Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(
-          width: iconSize,
-          child: Stack(
-            clipBehavior: Clip.none,
-            children: [
-              if (showSpineBelow)
-                Positioned(
-                  top: iconSize - 2,
-                  left: iconSize / 2 - Aluno360Layout.timelineSpineWidth / 2,
-                  bottom: -12,
-                  width: Aluno360Layout.timelineSpineWidth,
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: spineColor,
-                      borderRadius: BorderRadius.circular(1),
-                    ),
-                  ),
-                ),
-              Container(
-                width: iconSize,
-                height: iconSize,
-                decoration: BoxDecoration(
-                  color: item.color.withValues(alpha: isDark ? 0.16 : 0.10),
-                  borderRadius: BorderRadius.circular(
-                    Aluno360Layout.timelineTileIconRadius,
-                  ),
-                ),
-                child: Icon(
-                  item.icon,
-                  color: item.color,
-                  size: Aluno360Layout.timelineTileIconGlyphSize,
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Text(
-                    kindHeader,
-                    style: Aluno360Layout.timelineTileTitleStyle(
-                      context,
-                      item.color,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      formatTimeline360Date(item.at),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: Aluno360Layout.timelineMetaStyle(context),
-                    ),
-                  ),
-                ],
-              ),
-              if (showTitle) ...[
-                const SizedBox(height: 3),
-                Text(
-                  item.title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: Aluno360Layout.timelineTileTitleStyle(context, ink),
-                ),
-              ],
-              const SizedBox(height: 3),
-              Text(
-                previewBody,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: Aluno360Layout.captionStyle(
-                  context,
-                ).copyWith(color: mute, height: 1.35),
-              ),
-              if (expandable) ...[
-                const SizedBox(height: 4),
-                Text(
-                  expandLabel,
-                  style: Aluno360Layout.chipLabelStyle(
-                    context,
-                    color: linkColor,
-                  ).copyWith(
-                    decoration: TextDecoration.underline,
-                    decorationColor: linkColor.withValues(alpha: 0.55),
-                  ),
-                ),
-              ],
-              if (hasFooterChips) ...[
-                SizedBox(height: expandable ? 10 : 8),
-                Wrap(
-                  spacing: 6,
-                  runSpacing: 4,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  children: [
-                    if (showPriority)
-                      Aluno360TimelinePriorityBadge(
-                        priority: item.priority,
-                        accent: accent,
-                        isDark: isDark,
-                      ),
-                    if (showMeta)
-                      Aluno360MiniAutonomyChip(
-                        label: item.meta,
-                        color: item.color,
-                        isDark: isDark,
-                      ),
-                  ],
-                ),
-              ],
-            ],
-          ),
-        ),
-      ],
-    );
-
-    final semanticsLabel =
-        '${item.kind}: $kindHeader. ${formatTimeline360Date(item.at)}. $previewBody';
+    final label =
+        timeline360ShowTitleRow(
+          kind: item.kind,
+          title: item.title,
+          meta: item.meta,
+        )
+            ? item.title
+            : kindHeader;
 
     void onTap() {
       if (expandable) {
@@ -619,40 +526,20 @@ class Timeline360Tile extends StatelessWidget {
         }
         return;
       }
+      final link = item.deepLink;
       if (link != null && link.isNotEmpty) {
         context.push(link);
       }
     }
 
-    final tappable = expandable || (link != null && link.isNotEmpty);
-    if (!tappable) {
-      return Semantics(label: semanticsLabel, child: child);
-    }
-    final padded = Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
-      child: child,
-    );
-    if (!inkWell) {
-      return Semantics(
-        button: true,
-        label:
-            expandable
-                ? '$semanticsLabel. Toque para $expandLabel'
-                : semanticsLabel,
-        child: GestureDetector(onTap: onTap, child: padded),
-      );
-    }
-    return Semantics(
-      button: true,
-      label:
-          expandable
-              ? '$semanticsLabel. Toque para $expandLabel'
-              : semanticsLabel,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: onTap,
-        child: padded,
-      ),
+    return FxSettingsTile(
+      icon: item.icon,
+      accent: item.color,
+      label: label,
+      subtitle: previewBody,
+      value: formatTimeline360Date(item.at),
+      onTap: onTap,
+      showDivider: showSpineBelow,
     );
   }
 }

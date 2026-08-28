@@ -464,6 +464,33 @@ void main() {
     expect(screen, contains('alunoCopilotIaRefreshingProvider'));
     expect(screen, contains('operacaoOutlinedButtonStyle'));
     expect(screen, contains('class Aluno360EvolucaoInteligenteCard'));
+    expect(
+      File(
+        'lib/features/alunos/widgets/aluno360_evolucao_inteligente_card.dart',
+      ).readAsStringSync(),
+      allOf(
+        contains('FxSettingsGroup'),
+        contains('FxSettingsTile'),
+      ),
+    );
+    expect(
+      File(
+        'lib/features/alunos/widgets/aluno360_timeline_card.dart',
+      ).readAsStringSync(),
+      allOf(
+        contains('FxSettingsGroup'),
+        contains('FxSettingsTile'),
+      ),
+    );
+    expect(
+      File(
+        'lib/features/alunos/widgets/aluno360_weight_activity_card.dart',
+      ).readAsStringSync(),
+      allOf(
+        contains('FxSettingsGroup'),
+        contains('FxSettingsTile'),
+      ),
+    );
     expect(screen, contains('showAluno360CopilotProfileGapsSheet'));
     expect(screen, contains('Sem sinais de evolução ainda'));
     expect(screen, contains('Linha do tempo ainda vazia'));
