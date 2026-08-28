@@ -63,7 +63,9 @@ void main() {
     await tester.pumpAndSettle();
 
     final heroBox = tester.renderObject<RenderBox>(find.byKey(heroKey));
-    final tabBarBox = tester.renderObject<RenderBox>(find.byType(TabBar));
+    final tabBarBox = tester.renderObject<RenderBox>(
+      find.byType(Aluno360DetailTabBar),
+    );
 
     final heroBottom = heroBox.localToGlobal(Offset.zero).dy + heroBox.size.height;
     final tabTop = tabBarBox.localToGlobal(Offset.zero).dy;

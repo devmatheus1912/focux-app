@@ -239,9 +239,7 @@ void main() {
       expect(screen, contains('friendlyError'));
       expect(screen, contains('class Aluno360OperacaoTab'));
       expect(screen, contains('class Aluno360CompositeHeaderDelegate'));
-      expect(screen, contains("Tab(text: 'Operação')"));
-      expect(screen, contains("Tab(text: 'Evolução')"));
-      expect(screen, contains("Tab(text: 'Ferramentas')"));
+      expect(screen, contains("static const _labels = ['Operação', 'Evolução', 'Ferramentas']"));
       expect(screen, contains('class Aluno360DetailOperacaoTab'));
       expect(screen, contains('class Aluno360DetailEvolucaoTab'));
       expect(screen, contains('class Aluno360DetailFerramentasTab'));
@@ -278,7 +276,8 @@ void main() {
       expect(screen, isNot(contains('operational_metrics.part.dart')));
       expect(screen, contains('class AlunoDetailHeroCard'));
       expect(screen, contains('aluno360_hero_card'));
-      expect(screen, contains('_IdentityRiskChip'));
+      expect(screen, contains('_HeroRiskBand'));
+      expect(screen, contains('_CompactRiskChip'));
       expect(screen, contains('alunoHeroRiscoMetricBadgeColors'));
       expect(screen, contains('copySensitiveToClipboard'));
       expect(

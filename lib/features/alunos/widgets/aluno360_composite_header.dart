@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
+import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../constants/aluno_360_layout.dart';
 
@@ -23,35 +24,123 @@ class Aluno360DetailTabBar extends StatelessWidget {
   final Color mute;
   final Color line;
 
+  static const _labels = ['Operação', 'Evolução', 'Ferramentas'];
+
   @override
   Widget build(BuildContext context) {
     final chrome = ShellChrome.of(context);
+    final scheme = Theme.of(context).colorScheme;
+
     return Material(
       color: chrome.sheetFill,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: chrome.sheetFill,
-          border: Border(
-            bottom: BorderSide(color: line.withValues(alpha: 0.65)),
-          ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(
+          Aluno360Layout.screenPadding,
+          0,
+          Aluno360Layout.screenPadding,
+          6,
         ),
-        child: Semantics(
-          container: true,
-          label: 'Abas do perfil do aluno',
-          child: TabBar(
-            controller: tabController,
-            indicatorColor: primary,
-            labelColor: primary,
-            unselectedLabelColor: mute,
-            indicatorWeight: 2,
-            dividerColor: Colors.transparent,
-            labelStyle: Aluno360Layout.tabSelectedLabelStyle(),
-            unselectedLabelStyle: Aluno360Layout.tabUnselectedLabelStyle(),
-            tabs: const [
-              Tab(text: 'Operação'),
-              Tab(text: 'Evolução'),
-              Tab(text: 'Ferramentas'),
-            ],
+        child: AnimatedBuilder(
+          animation: tabController,
+          builder: (context, _) {
+            return Semantics(
+              container: true,
+              label: 'Abas do perfil do aluno',
+              child: Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: scheme.surfaceContainerHighest.withValues(alpha: 0.55),
+                  borderRadius: BorderRadius.circular(TokensStrip.rMd),
+                  border: Border.all(
+                    color: line.withValues(alpha: 0.45),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    for (var i = 0; i < _labels.length; i++)
+                      Expanded(
+                        child: _Aluno360TabChip(
+                          label: _labels[i],
+                          selected: tabController.index == i,
+                          primary: primary,
+                          mute: mute,
+                          onTap: () {
+                            if (tabController.index != i) {
+                              HapticFeedback.selectionClick();
+                            }
+                            tabController.animateTo(i);
+                          },
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+class _Aluno360TabChip extends StatelessWidget {
+  const _Aluno360TabChip({
+    required this.label,
+    required this.selected,
+    required this.primary,
+    required this.mute,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final Color primary;
+  final Color mute;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: label,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(TokensStrip.rMd - 2),
+          onTap: onTap,
+          focusColor: primary.withValues(alpha: 0.14),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 220),
+            curve: Curves.easeOutCubic,
+            padding: const EdgeInsets.symmetric(vertical: 9),
+            decoration: BoxDecoration(
+              color: selected ? primary : Colors.transparent,
+              borderRadius: BorderRadius.circular(TokensStrip.rMd - 2),
+              boxShadow:
+                  selected
+                      ? [
+                        BoxShadow(
+                          color: primary.withValues(alpha: 0.28),
+                          blurRadius: 10,
+                          offset: const Offset(0, 3),
+                        ),
+                      ]
+                      : null,
+            ),
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                label,
+                maxLines: 1,
+                textAlign: TextAlign.center,
+                style: Aluno360Layout.tabSelectedLabelStyle().copyWith(
+                  color: selected ? Colors.white : mute,
+                  fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
+                  fontSize: 13,
+                ),
+              ),
+            ),
           ),
         ),
       ),

@@ -43,14 +43,14 @@ void main() {
     );
   }
 
-  testWidgets('hero risk chip fits compact hero slot without overflow', (
+  testWidgets('hero risk band fits compact hero slot without overflow', (
     tester,
   ) async {
     await tester.pumpWidget(
       harness(
         isDark: false,
         child: SizedBox(
-          height: 58,
+          height: 112,
           child: AlunoDetailHeroCard(
             aluno: alunoRisco,
             isDark: false,

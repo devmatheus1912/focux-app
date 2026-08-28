@@ -15,7 +15,7 @@ abstract final class Aluno360Layout {
   static const double sectionGap = TokensStrip.s4;
   static const double cardPadding = TokensStrip.s4;
   static const double insetCardRadius = TokensStrip.rCard;
-  static const double tabBarHeight = 44;
+  static const double tabBarHeight = 52;
   static const double tabContentGap = TokensStrip.s4;
   static const EdgeInsets moduleTilePadding = EdgeInsets.symmetric(
     horizontal: 12,
@@ -47,8 +47,8 @@ abstract final class Aluno360Layout {
     bool compactContactPriority = false,
   }) {
     final textScale = MediaQuery.textScalerOf(context).scale(1).clamp(1.0, 2.0);
-    final base = compactContactPriority ? 72.0 : 96.0;
-    return base + ((textScale - 1) * 24);
+    final base = compactContactPriority ? 124.0 : 212.0;
+    return base + ((textScale - 1) * 32);
   }
 
   /// Status bar + toolbar + tab bar (header collapsed).

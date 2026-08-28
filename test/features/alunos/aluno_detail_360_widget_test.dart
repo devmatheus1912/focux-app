@@ -266,7 +266,7 @@ void main() {
     });
   }
 
-  testWidgets('contact priority auto-enables focus mode and hides status grid', (
+  testWidgets('contact priority keeps operational status visible', (
     tester,
   ) async {
     SharedPreferences.setMockInitialValues({});
@@ -281,8 +281,8 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
 
     expect(find.text('Prioridade do dia'), findsOneWidget);
-    expect(find.byKey(const ValueKey('aluno360_operacao_status')), findsNothing);
-    expect(find.text('Status operacional'), findsNothing);
+    expect(find.byKey(const ValueKey('aluno360_operacao_status')), findsOneWidget);
+    expect(find.text('Status operacional'), findsOneWidget);
     expect(find.text('Gerar com IA'), findsOneWidget);
 
     await tester.pump(const Duration(milliseconds: 300));

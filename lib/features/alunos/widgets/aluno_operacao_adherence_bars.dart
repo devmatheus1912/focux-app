@@ -6,7 +6,7 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../constants/aluno_360_layout.dart';
 import '../utils/aluno360_operacao_logic.dart';
 
-/// Semana de check-ins — faixa compacta de 7 células (paridade Perfil inset).
+/// Semana de check-ins — 7 células com dia do mês + estado visual.
 class AlunoOperacaoAdherenceBars extends StatelessWidget {
   const AlunoOperacaoAdherenceBars({
     super.key,
@@ -25,7 +25,7 @@ class AlunoOperacaoAdherenceBars extends StatelessWidget {
   final Color todayRingColor;
   final bool emptyWeek;
 
-  static const _cellHeight = 34.0;
+  static const _cellHeight = 40.0;
   static const _gap = 4.0;
 
   @override
@@ -88,9 +88,9 @@ class _AdherenceWeekCell extends StatelessWidget {
   Widget build(BuildContext context) {
     final hasActivity = point.checkins > 0;
     final isToday = isIsoDateToday(point.date);
-    final dayLabel = adherenceDayLetter(point);
-    final semanticsValue = hasActivity ? 'Com check-in' : 'Sem registro';
+    final dayLabel = adherenceDayCellLabel(point);
     final weekday = weekdayNameFromIso(point.date);
+    final semanticsValue = hasActivity ? 'Com check-in' : 'Sem registro';
     final tooltip =
         weekday.isEmpty
             ? semanticsValue
@@ -106,7 +106,7 @@ class _AdherenceWeekCell extends StatelessWidget {
             : hasActivity
             ? activeColor.withValues(alpha: 0.42)
             : missColor.withValues(alpha: 0.28);
-    final letterColor =
+    final numberColor =
         isToday
             ? todayRingColor
             : hasActivity
@@ -115,15 +115,15 @@ class _AdherenceWeekCell extends StatelessWidget {
 
     return Semantics(
       label:
-          dayLabel.isEmpty
+          weekday.isEmpty
               ? semanticsValue
-              : '$dayLabel · $semanticsValue${isToday ? ' · hoje' : ''}',
+              : '$weekday · $semanticsValue${isToday ? ' · hoje' : ''}',
       child: Tooltip(
         message: tooltip,
         child: Material(
           color: Colors.transparent,
           child: InkWell(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(10),
             onTap: () => fxAnnounce(context, tooltip),
             child: AnimatedContainer(
               duration: Duration(milliseconds: fxMotionDurationMs(context)),
@@ -131,7 +131,7 @@ class _AdherenceWeekCell extends StatelessWidget {
               height: cellHeight,
               decoration: BoxDecoration(
                 color: fill,
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(10),
                 border: Border.all(
                   color: borderColor,
                   width: isToday ? 1.5 : 1,
@@ -141,19 +141,26 @@ class _AdherenceWeekCell extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   if (hasActivity)
-                    Icon(Icons.check_rounded, size: 12, color: activeColor)
+                    Icon(Icons.check_rounded, size: 13, color: activeColor)
                   else
-                    const SizedBox(height: 12),
-                  const SizedBox(height: 2),
+                    Container(
+                      width: 5,
+                      height: 5,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: missColor.withValues(alpha: 0.45),
+                      ),
+                    ),
+                  const SizedBox(height: 3),
                   Text(
                     dayLabel,
                     maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
                     style: Aluno360Layout.metaStyle(context).copyWith(
-                      color: letterColor,
-                      fontSize: 10,
+                      color: numberColor,
+                      fontSize: 11,
                       fontWeight: FontWeight.w700,
-                      letterSpacing: 0.1,
+                      letterSpacing: 0,
                       height: 1,
                     ),
                   ),

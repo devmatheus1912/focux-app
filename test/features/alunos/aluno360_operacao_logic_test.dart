@@ -714,6 +714,17 @@ void main() {
     });
   });
 
+  group('adherenceDayCellLabel', () {
+    test('uses day of month for compact cells', () {
+      expect(
+        adherenceDayCellLabel(
+          const AderenciaWeekPoint(checkins: 0, date: '2026-06-04'),
+        ),
+        '4',
+      );
+    });
+  });
+
   group('checkinMensagemPronta', () {
     test('uses first name in outreach copy', () {
       expect(
@@ -939,23 +950,23 @@ void main() {
   });
 
   group('shouldDefaultOperacaoFocusMode', () {
-    test('enabled for contact priority with zero adherence', () {
+    test('disabled for contact priority with zero adherence', () {
       expect(
         shouldDefaultOperacaoFocusMode(
           aluno: _aluno(aderenciaPercent: 0),
           contactPriority: true,
         ),
-        isTrue,
+        isFalse,
       );
     });
 
-    test('enabled for contact priority regardless of adherence', () {
+    test('disabled for contact priority regardless of adherence', () {
       expect(
         shouldDefaultOperacaoFocusMode(
           aluno: _aluno(aderenciaPercent: 55),
           contactPriority: true,
         ),
-        isTrue,
+        isFalse,
       );
     });
 

@@ -403,6 +403,13 @@ bool isIsoDateToday(String? isoDate) {
 String adherenceDayLetter(AderenciaWeekPoint point) =>
     weekdayLetterFromIso(point.date);
 
+/// Compact cell label — dia do mês (cabe em células estreitas).
+String adherenceDayCellLabel(AderenciaWeekPoint point) {
+  final parsed = parseIsoDateLocal(point.date);
+  if (parsed == null) return '';
+  return '${parsed.day}';
+}
+
 /// Staggered entrance delay for Operação sections (finance banner shifts timeline).
 Duration operacaoSectionDelay({
   required bool financeRisk,
@@ -460,8 +467,9 @@ bool shouldDefaultOperacaoFocusMode({
   required Aluno aluno,
   required bool contactPriority,
 }) {
+  // Contato prioritário mantém diagnóstico visível; foco só manual.
+  if (contactPriority) return false;
   final aderencia = aluno.aderenciaPercent ?? 0;
-  if (contactPriority) return true;
   return aluno.emRisco && aderencia <= 0;
 }
 

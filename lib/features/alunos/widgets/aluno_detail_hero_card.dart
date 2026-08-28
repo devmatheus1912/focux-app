@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/brand_palette.dart';
+import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../constants/aluno_360_layout.dart';
@@ -44,13 +45,15 @@ class AlunoDetailHeroCard extends StatelessWidget {
       objective: objective,
       contextLine: contextLine,
     );
-    const subtitleMaxLines = 2;
     final showStatusBadge = alunoHeroShouldShowStatusBadge(
       signal: signal,
       status: status,
     );
-    final showRiskChip = aluno.emRisco && signal.label == 'Risco operacional';
-    final nameStyle = Aluno360Layout.identityNameStyle(context, ink);
+    final showRiskBand = aluno.emRisco && signal.label == 'Risco operacional';
+    final avatarVariant =
+        compactContactPriority
+            ? AlunoAvatarVariant.strip
+            : AlunoAvatarVariant.profile;
 
     return Semantics(
       container: true,
@@ -64,71 +67,64 @@ class AlunoDetailHeroCard extends StatelessWidget {
           width: double.infinity,
           padding: EdgeInsets.symmetric(
             horizontal: 4,
-            vertical: compactContactPriority ? 2 : 4,
+            vertical: compactContactPriority ? 2 : 6,
           ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
               AlunoAvatar(
                 name: displayName,
                 photoUrl: aluno.fotoUrl,
-                variant:
+                variant: avatarVariant,
+              ),
+              SizedBox(height: compactContactPriority ? 6 : 10),
+              Text(
+                displayName,
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style:
                     compactContactPriority
-                        ? AlunoAvatarVariant.strip
-                        : AlunoAvatarVariant.hero,
+                        ? Aluno360Layout.identityNameStyle(context, ink)
+                        : FxSettingsLayout.profileName(context, color: ink),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Wrap(
-                      spacing: 6,
-                      runSpacing: 4,
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      children: [
-                        Text(
-                          displayName,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: nameStyle,
-                        ),
-                        if (showStatusBadge)
-                          _IdentityStatusChip(
-                            status: status,
-                            isDark: isDark,
-                          ),
-                        if (showRiskChip)
-                          _IdentityRiskChip(
-                            nivel: formatRiscoNivel(aluno.riscoNivel),
-                            isDark: isDark,
-                          ),
-                      ],
-                    ),
-                    SizedBox(height: compactContactPriority ? 2 : 4),
-                    if (!objectiveDefined && onDefineObjective != null)
-                      _IdentityObjectiveRow(
-                        label: objective,
-                        primary: primary,
-                        isDark: isDark,
-                        mute: mute,
-                        onDefineObjective: onDefineObjective!,
-                      )
-                    else
-                      Text(
-                        subtitle,
-                        maxLines: subtitleMaxLines,
-                        overflow: TextOverflow.ellipsis,
-                        style: Aluno360Layout.captionStyle(context).copyWith(
-                          color: mute,
-                          fontWeight: FontWeight.w600,
-                          height: 1.3,
-                        ),
-                      ),
-                  ],
+              SizedBox(height: compactContactPriority ? 2 : 4),
+              if (!objectiveDefined && onDefineObjective != null)
+                _IdentityObjectiveRow(
+                  label: objective,
+                  primary: primary,
+                  isDark: isDark,
+                  mute: mute,
+                  onDefineObjective: onDefineObjective!,
+                )
+              else
+                Text(
+                  subtitle,
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: FxSettingsLayout.subhead(color: mute).copyWith(
+                    fontWeight: FontWeight.w600,
+                    height: 1.3,
+                  ),
                 ),
-              ),
+              if (showRiskBand) ...[
+                SizedBox(height: compactContactPriority ? 4 : 8),
+                if (compactContactPriority)
+                  _CompactRiskChip(
+                    nivel: formatRiscoNivel(aluno.riscoNivel),
+                    isDark: isDark,
+                  )
+                else
+                  _HeroRiskBand(
+                    nivel: formatRiscoNivel(aluno.riscoNivel),
+                    detail: contextLine,
+                    isDark: isDark,
+                  ),
+              ] else if (showStatusBadge) ...[
+                SizedBox(height: compactContactPriority ? 6 : 8),
+                _IdentityStatusChip(status: status, isDark: isDark),
+              ],
             ],
           ),
         ),
@@ -137,8 +133,8 @@ class AlunoDetailHeroCard extends StatelessWidget {
   }
 }
 
-class _IdentityRiskChip extends StatelessWidget {
-  const _IdentityRiskChip({required this.nivel, required this.isDark});
+class _CompactRiskChip extends StatelessWidget {
+  const _CompactRiskChip({required this.nivel, required this.isDark});
 
   final String nivel;
   final bool isDark;
@@ -149,7 +145,7 @@ class _IdentityRiskChip extends StatelessWidget {
     return Semantics(
       label: 'Risco ${nivel.toLowerCase()}',
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         decoration: BoxDecoration(
           color: bg,
           borderRadius: BorderRadius.circular(999),
@@ -159,7 +155,78 @@ class _IdentityRiskChip extends StatelessWidget {
           'Risco ${nivel.toLowerCase()}',
           style: Aluno360Layout.badgeMicroStyle(context, ink).copyWith(
             fontWeight: FontWeight.w700,
+            fontSize: 11,
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _HeroRiskBand extends StatelessWidget {
+  const _HeroRiskBand({
+    required this.nivel,
+    required this.detail,
+    required this.isDark,
+  });
+
+  final String nivel;
+  final String detail;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    final (ink, bg) = alunoHeroRiscoMetricBadgeColors(isDark, nivel);
+    final mute = fxScreenMute(context);
+
+    return Semantics(
+      label: 'Risco ${nivel.toLowerCase()}${detail.isEmpty ? '' : ', $detail'}',
+      child: Container(
+        width: double.infinity,
+        constraints: const BoxConstraints(maxWidth: 320),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: bg,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: ink.withValues(alpha: isDark ? 0.42 : 0.32)),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.warning_amber_rounded, size: 17, color: ink),
+            const SizedBox(width: 6),
+            Flexible(
+              child: Text(
+                'Risco ${nivel.toLowerCase()}',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                style: Aluno360Layout.badgeMicroStyle(context, ink).copyWith(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 12,
+                ),
+              ),
+            ),
+            if (detail.isNotEmpty) ...[
+              Text(
+                ' · ',
+                style: Aluno360Layout.metaStyle(context).copyWith(color: mute),
+              ),
+              Flexible(
+                flex: 2,
+                child: Text(
+                  detail,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                  style: Aluno360Layout.metaStyle(context).copyWith(
+                    color: mute,
+                    fontSize: 12,
+                  ),
+                ),
+              ),
+            ],
+          ],
         ),
       ),
     );
@@ -183,38 +250,38 @@ class _IdentityObjectiveRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return Wrap(
+      alignment: WrapAlignment.center,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      spacing: 4,
+      runSpacing: 4,
       children: [
-        Flexible(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-            decoration: BoxDecoration(
-              color: BrandPalette.soft(primary, dark: isDark),
-              borderRadius: BorderRadius.circular(999),
-              border: Border.all(
-                color: primary.withValues(alpha: isDark ? 0.24 : 0.18),
-              ),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+          decoration: BoxDecoration(
+            color: BrandPalette.soft(primary, dark: isDark),
+            borderRadius: BorderRadius.circular(999),
+            border: Border.all(
+              color: primary.withValues(alpha: isDark ? 0.24 : 0.18),
             ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.flag_outlined, size: 11, color: mute),
-                const SizedBox(width: 4),
-                Flexible(
-                  child: Text(
-                    label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: mute,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      fontStyle: FontStyle.italic,
-                    ),
-                  ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.flag_outlined, size: 11, color: mute),
+              const SizedBox(width: 4),
+              Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: mute,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  fontStyle: FontStyle.italic,
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
         Semantics(
@@ -251,7 +318,7 @@ class _IdentityStatusChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
         color: status.background.withValues(alpha: isDark ? 0.35 : 0.18),
         borderRadius: BorderRadius.circular(999),
