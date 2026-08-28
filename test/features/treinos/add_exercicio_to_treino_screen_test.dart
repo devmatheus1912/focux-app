@@ -66,9 +66,9 @@ void main() {
 
     expect(find.bySemanticsLabel('Adicionar exercício'), findsOneWidget);
     expect(find.text('Treino Emagrecimento'), findsWidgets);
-    expect(find.text('Ver biblioteca (187)'), findsOneWidget);
-    expect(find.text('187 exercícios'), findsWidgets);
-    expect(find.text('Novo exercício'), findsOneWidget);
+    expect(find.text('Biblioteca completa (187)'), findsOneWidget);
+    expect(find.textContaining('187 exercícios'), findsWidgets);
+    expect(find.text('Cadastrar exercício'), findsOneWidget);
     expect(find.text('0 exercícios'), findsNothing);
   });
 

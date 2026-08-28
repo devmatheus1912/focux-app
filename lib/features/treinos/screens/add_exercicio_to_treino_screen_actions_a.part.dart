@@ -194,8 +194,8 @@ extension AddExercicioToTreinoScreenActionsA
             (_) => FxShellScaffold(
               useMesh: true,
               appBar: FxShellAppBar(
-                title: 'Montar com modelo',
-                subtitle: 'Preencha os slots do treino',
+                title: 'Montar por modelo',
+                subtitle: 'Preencha os slots do treino com modelos prontos',
                 onBack: () => Navigator.pop(context),
               ),
               body: TemplateSplitPicker(

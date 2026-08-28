@@ -429,6 +429,9 @@ extension AddExercicioToTreinoScreenActionsB
             children: [
               FxSettingsGroup(
                 accent: primary,
+                header: 'Atalhos',
+                helpTooltip: 'Ajuda sobre explorar exercícios',
+                onHelpTap: () => showAddExercicioHelpSheet(context),
                 caption: uiHints.libraryCaption,
                 children: [
                   FxSettingsTile(
@@ -436,7 +439,7 @@ extension AddExercicioToTreinoScreenActionsB
                     accent: primary,
                     label: uiHints.templateCtaLabel,
                     subtitle:
-                        'Full body, PPL, bro split e mais — ${templateSplits.length} modelos.',
+                        'Full body, PPL, upper/lower — ${templateSplits.length} modelos prontos.',
                     value: '',
                     onTap: () {
                       HapticFeedback.selectionClick();
@@ -447,7 +450,7 @@ extension AddExercicioToTreinoScreenActionsB
                     FxSettingsTile(
                       icon: Icons.library_books_outlined,
                       accent: primary,
-                      label: 'Ver biblioteca ($libraryCount)',
+                      label: 'Biblioteca completa ($libraryCount)',
                       subtitle: libraryLines.primary,
                       value: '',
                       onTap:
@@ -460,7 +463,7 @@ extension AddExercicioToTreinoScreenActionsB
                     icon: Icons.add_rounded,
                     accent: primary,
                     label: uiHints.createCtaLabel,
-                    subtitle: 'Cadastre um exercício com vídeo seu',
+                    subtitle: 'Grave o vídeo de execução para o aluno',
                     value: '',
                     highlight: true,
                     showDivider: false,
@@ -582,17 +585,10 @@ extension AddExercicioToTreinoScreenActionsB
               const SizedBox(height: 10),
             ],
             if (!compact) ...[
-              Padding(
-                padding: const EdgeInsets.only(bottom: FxSettingsLayout.headerToGroup),
-                child: Text(
-                  'Buscar na biblioteca',
-                  style: FxSettingsLayout.sectionHeader(
-                    color:
-                        isDark
-                            ? EagleTokens.darkInkMute
-                            : TokensStrip.textSecondary,
-                  ),
-                ),
+              _AddExerciseSectionHeader(
+                title: 'Buscar na biblioteca',
+                subtitle: 'Digite 2+ letras ou use favoritos e filtros.',
+                onHelp: () => showAddExercicioHelpSheet(context),
               ),
               TextField(
                 controller: _buscaCtrl,
@@ -670,8 +666,8 @@ extension AddExercicioToTreinoScreenActionsB
               const SizedBox(height: 12),
               Text(
                 _recentIds.isNotEmpty
-                    ? 'Seus recentes e mais usados'
-                    : 'Mais usados pelos personais',
+                    ? 'Recentes e mais prescritos'
+                    : 'Populares na biblioteca',
                 style: FocuxHubTypography.bodyMuted(
                   fontWeight: FontWeight.w800,
                   color:
@@ -699,7 +695,7 @@ extension AddExercicioToTreinoScreenActionsB
                 favoriteShortcuts.isNotEmpty) ...[
               const SizedBox(height: 12),
               Text(
-                'Seus favoritos',
+                'Favoritos',
                 style: FocuxHubTypography.bodyMuted(
                   fontWeight: FontWeight.w800,
                   color:

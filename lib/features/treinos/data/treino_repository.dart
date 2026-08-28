@@ -233,13 +233,13 @@ class TreinoPickerUiHints {
     required int jaNoTreino,
   }) =>
       TreinoPickerUiHints(
-        searchPlaceholder: 'Buscar supino, agachamento, remada…',
+        searchPlaceholder: 'Supino, agachamento, remada…',
         libraryCaption: librarySize == 0
             ? 'Biblioteca vazia'
-            : '$librarySize exercícios'
-                '${jaNoTreino > 0 ? ' · $jaNoTreino já no plano' : ''}',
-        createCtaLabel: 'Novo exercício',
-        templateCtaLabel: 'Montar com modelo',
+            : 'Biblioteca · $librarySize exercícios'
+                '${jaNoTreino > 0 ? ' · $jaNoTreino no treino' : ''}',
+        createCtaLabel: 'Cadastrar exercício',
+        templateCtaLabel: 'Montar por modelo',
         emptyLibraryHint: librarySize == 0
             ? 'Importe a biblioteca ou crie seu primeiro exercício.'
             : null,

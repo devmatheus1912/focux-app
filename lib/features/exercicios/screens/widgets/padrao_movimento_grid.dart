@@ -15,6 +15,7 @@ import '../../data/exercicio_taxonomy_labels.dart';
 import '../../../treinos/utils/exercise_picker_filter.dart';
 import '../../providers/exercicio_picker_provider.dart';
 import '../../../../core/widgets/fx_bottom_sheet.dart';
+import '../../../treinos/widgets/add_exercicio_help_sheet.dart';
 import 'padrao_exercicios_bottom_sheet.dart';
 
 enum PadraoGridMode { padrao, grupo }
@@ -113,7 +114,9 @@ class _PadraoMovimentoGridState extends ConsumerState<PadraoMovimentoGrid> {
           children: [
             FxSettingsGroup(
               accent: primary,
-              caption: 'Como explorar',
+              header: 'Como explorar',
+              helpTooltip: 'Ajuda sobre categorias',
+              onHelpTap: () => showAddExercicioHelpSheet(context),
               children: [
                 FxSettingsTile(
                   icon: Icons.account_tree_outlined,
@@ -182,7 +185,7 @@ class _PadraoMovimentoGridState extends ConsumerState<PadraoMovimentoGrid> {
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 4),
                       child: Text(
-                        'Toque em uma categoria para ver exercícios e prescrever.',
+                        'Toque em uma categoria para ver a lista e prescrever.',
                         style: FocuxHubTypography.bodyMuted(
                           color: mute,
                           height: 1.35,

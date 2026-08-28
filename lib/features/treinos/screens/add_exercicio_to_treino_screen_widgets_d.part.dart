@@ -43,8 +43,8 @@ class _PrescriptionSectionHeader extends StatelessWidget {
               const SizedBox(height: 3),
               Text(
                 globalPresetMode
-                    ? 'Vale para explorar, modelos e adições rápidas.'
-                    : 'Ajuste séries, carga, descanso e observações antes de salvar.',
+                    ? 'Vale para buscar, explorar e adições rápidas.'
+                    : 'Ajuste séries, carga e descanso antes de salvar.',
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: FocuxHubTypography.bodyMuted(
@@ -56,6 +56,55 @@ class _PrescriptionSectionHeader extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _AddExerciseSectionHeader extends StatelessWidget {
+  const _AddExerciseSectionHeader({
+    required this.title,
+    this.subtitle,
+    this.onHelp,
+  });
+
+  final String title;
+  final String? subtitle;
+  final VoidCallback? onHelp;
+
+  @override
+  Widget build(BuildContext context) {
+    final mute = fxScreenMute(context);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: FxSettingsLayout.headerToGroup),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: FxSettingsLayout.sectionHeader(color: mute),
+                ),
+                if (subtitle != null) ...[
+                  const SizedBox(height: FxSettingsLayout.captionAfterHeader),
+                  Text(
+                    subtitle!,
+                    style: FxSettingsLayout.footer(color: mute),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          if (onHelp != null)
+            FxHelpIconButton(
+              tooltip: 'Ajuda sobre $title',
+              onTap: onHelp!,
+              size: 28,
+            ),
+        ],
+      ),
     );
   }
 }
@@ -73,59 +122,83 @@ class _AddExerciseTabStrip extends StatelessWidget {
     required this.onChanged,
   });
 
-  static const _labels = ['Buscar', 'Explorar'];
-  static const _semanticsLabels = [
-    'Buscar, buscar por nome',
-    'Explorar, explorar por movimento',
+  static const _tabs = [
+    (
+      label: 'Buscar',
+      icon: Icons.search_rounded,
+      semantics: 'Buscar exercício pelo nome',
+    ),
+    (
+      label: 'Explorar',
+      icon: Icons.explore_outlined,
+      semantics: 'Explorar por categoria',
+    ),
   ];
 
   @override
   Widget build(BuildContext context) {
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-    final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
     final tabMotionMs = fxMotionDurationMs(context, normal: 180);
 
     return Semantics(
       container: true,
-      label: 'Abas de adicionar exercício',
+      label: 'Como adicionar: buscar ou explorar',
       child: Container(
-        decoration: BoxDecoration(
-          border: Border(bottom: BorderSide(color: line.withValues(alpha: 0.72))),
+        padding: const EdgeInsets.all(4),
+        decoration: fxListCardDecoration(
+          context,
+          accent: primary,
+          radius: FxSettingsLayout.groupRadius,
         ),
         child: Row(
           children: [
-            for (var i = 0; i < _labels.length; i++)
+            for (var i = 0; i < _tabs.length; i++)
               Expanded(
                 child: Semantics(
                   button: true,
                   selected: selectedIndex == i,
-                  label: _semanticsLabels[i],
-                  child: InkWell(
+                  label: _tabs[i].semantics,
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
                     onTap: () => onChanged(i),
-                    borderRadius: BorderRadius.circular(12),
-                    child: Padding(
-                      padding: const EdgeInsets.only(top: 12),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
+                    child: AnimatedContainer(
+                      duration: Duration(milliseconds: tabMotionMs),
+                      curve: Curves.easeOutCubic,
+                      height: 42,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: selectedIndex == i ? primary : Colors.transparent,
+                        borderRadius: BorderRadius.circular(14),
+                        boxShadow:
+                            selectedIndex == i
+                                ? [
+                                  BoxShadow(
+                                    color: primary.withValues(alpha: 0.22),
+                                    blurRadius: 14,
+                                    offset: const Offset(0, 5),
+                                  ),
+                                ]
+                                : null,
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
+                          Icon(
+                            _tabs[i].icon,
+                            size: 18,
+                            color: selectedIndex == i ? Colors.white : mute,
+                          ),
+                          const SizedBox(width: 6),
                           Text(
-                            _labels[i],
-                            style: FocuxHubTypography.bodyMuted(
-                              color: selectedIndex == i ? primary : mute,
+                            _tabs[i].label,
+                            style: FocuxHubTypography.body(
+                              color: selectedIndex == i ? Colors.white : mute,
+                            ).copyWith(
                               fontWeight:
                                   selectedIndex == i
-                                      ? FontWeight.w800
-                                      : FontWeight.w600,
-                            ).copyWith(letterSpacing: -0.1),
-                          ),
-                          const SizedBox(height: 10),
-                          AnimatedContainer(
-                            duration: Duration(milliseconds: tabMotionMs),
-                            width: selectedIndex == i ? 40 : 0,
-                            height: 3.5,
-                            decoration: BoxDecoration(
-                              color: primary,
-                              borderRadius: BorderRadius.circular(999),
+                                      ? FontWeight.w900
+                                      : FontWeight.w700,
+                              letterSpacing: -0.1,
                             ),
                           ),
                         ],
@@ -167,14 +240,17 @@ class _BrowseLibraryCta extends StatelessWidget {
     return FxSettingsGroup(
       accent: primary,
       caption: libraryCaption,
+      header: 'Mais opções',
+      helpTooltip: 'Ajuda sobre a biblioteca',
+      onHelpTap: () => showAddExercicioHelpSheet(context),
       children: [
         FxSettingsTile(
           icon: Icons.library_books_outlined,
           accent: primary,
-          label: 'Ver biblioteca ($totalCount)',
+          label: 'Biblioteca completa ($totalCount)',
           subtitle: libraryLines.primary,
           semanticsLabel:
-              'Ver biblioteca com $totalCount exercícios. ${libraryLines.primary}',
+              'Biblioteca completa com $totalCount exercícios. ${libraryLines.primary}',
           value: '',
           onTap: onOpenPicker,
         ),
@@ -182,8 +258,8 @@ class _BrowseLibraryCta extends StatelessWidget {
           icon: Icons.add_rounded,
           accent: primary,
           label: createLabel,
-          subtitle: 'Cadastre e envie vídeo de demonstração',
-          semanticsLabel: '$createLabel. Cadastre e envie vídeo de demonstração',
+          subtitle: 'Grave o vídeo de execução para o aluno',
+          semanticsLabel: '$createLabel. Grave o vídeo de execução para o aluno',
           value: '',
           highlight: true,
           showDivider: false,

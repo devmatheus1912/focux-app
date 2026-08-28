@@ -23,8 +23,10 @@ import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/theme/fx_settings_layout.dart';
+import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
+import '../widgets/add_exercicio_help_sheet.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -188,6 +190,13 @@ class _AddExercicioToTreinoScreenState
               orElse: () => 'Montando treino',
             ),
             onBack: () => safePopOrGo(context, '/treinos/${widget.treinoId}'),
+            actions: [
+              FxHelpIconButton(
+                tooltip: 'Ajuda para adicionar exercícios',
+                onTap: () => showAddExercicioHelpSheet(context),
+              ),
+              const SizedBox(width: 8),
+            ],
           ),
           body: SafeArea(
             bottom: false,
