@@ -11,6 +11,7 @@ import '../../../core/widgets/fx_sparkline.dart';
 import '../constants/aluno_360_layout.dart';
 import '../data/aluno_repository.dart';
 import '../providers/aluno_detail_providers.dart';
+import 'aluno360_help_sheets.dart';
 
 List<double> resolveWeightSeriesForAluno(
   List<double> avaliacoes,
@@ -29,6 +30,7 @@ class Aluno360WeightActivityCard extends ConsumerWidget {
     required this.isDark,
     required this.ink,
     this.hasRadarP0 = false,
+    this.suppressRadarHint = false,
   });
 
   final Aluno aluno;
@@ -36,6 +38,7 @@ class Aluno360WeightActivityCard extends ConsumerWidget {
   final bool isDark;
   final Color ink;
   final bool hasRadarP0;
+  final bool suppressRadarHint;
 
   void _openEvolucao(BuildContext context) {
     context.push('/alunos/$alunoId/evolucao', extra: aluno.nome);
@@ -46,26 +49,22 @@ class Aluno360WeightActivityCard extends ConsumerWidget {
     final pesoHistoricoAsync = ref.watch(alunoPesoHistoricoProvider(alunoId));
     final primary = Theme.of(context).colorScheme.primary;
     final trendColor = primary;
-    final caption =
-        aluno.peso == null
-            ? 'Nenhuma avaliação ainda'
-            : 'Última medida registrada';
+    final showRadarHint = hasRadarP0 && !suppressRadarHint && aluno.peso == null;
 
     return Semantics(
       container: true,
       label: 'Peso e tendência corporal',
       child: FxSettingsGroup(
         header: 'Peso · tendência',
-        caption: caption,
+        helpTooltip: 'Ajuda sobre peso e tendência',
+        onHelpTap: () => showAluno360PesoHelpSheet(context),
         accent: primary,
         children: [
           FxSettingsTile(
             icon: Icons.monitor_weight_outlined,
             label: 'Peso atual',
             subtitle:
-                hasRadarP0 && aluno.peso == null
-                    ? 'Radar pede mapa corporal (P0)'
-                    : null,
+                showRadarHint ? 'Mapa corporal pendente no radar' : null,
             value:
                 aluno.peso == null
                     ? '—'
@@ -100,10 +99,7 @@ class Aluno360WeightActivityCard extends ConsumerWidget {
                 return FxSettingsTile(
                   icon: Icons.add_chart_outlined,
                   label: 'Registrar primeira medida',
-                  subtitle:
-                      hasRadarP0
-                          ? 'Mapa corporal (P0) pendente no radar'
-                          : 'Abrir evolução corporal',
+                  subtitle: 'Abrir evolução corporal',
                   value: '',
                   showDivider: false,
                   onTap: () => _openEvolucao(context),

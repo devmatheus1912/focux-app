@@ -71,17 +71,13 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Medidas'), findsOneWidget);
+    expect(find.text('Resumo corporal'), findsOneWidget);
+    expect(find.text('2 pend.'), findsOneWidget);
     expect(find.text('Treino & evolução'), findsOneWidget);
     expect(find.text('Perfil & gestão'), findsOneWidget);
-    expect(find.text('Gordura'), findsOneWidget);
-    expect(find.text('Massa magra'), findsOneWidget);
+    expect(find.text('Gordura'), findsNothing);
+    expect(find.text('Massa magra'), findsNothing);
     expect(find.text('IA Progresso'), findsOneWidget);
-
-    expect(
-      find.bySemanticsLabel(RegExp(r'Toque para Registrar')),
-      findsNWidgets(2),
-    );
-
     expect(find.text('Aderência'), findsOneWidget);
 
     expect(tester.takeException(), isNull);

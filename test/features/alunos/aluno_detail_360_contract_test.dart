@@ -233,7 +233,12 @@ void main() {
       expect(screen, contains('summarizeAderenciaWeek'));
       expect(screen, contains('class Aluno360WeightTrendSparkline'));
       expect(screen, contains('FxSparkline'));
-      expect(screen, contains('formatAlturaDisplay'));
+      expect(
+        File(
+          'lib/features/alunos/utils/aluno360_ferramentas_logic.dart',
+        ).readAsStringSync(),
+        contains('measurementsSummary'),
+      );
       expect(screen, contains('friendlyError'));
       expect(screen, contains('class Aluno360OperacaoTab'));
       expect(screen, contains('class Aluno360CompositeHeaderDelegate'));
@@ -408,6 +413,12 @@ void main() {
         contains('FxSettingsGroup'),
         contains('FxSettingsTile'),
       ),
+    );
+    expect(
+      File(
+        'lib/features/alunos/widgets/aluno360_help_sheets.dart',
+      ).readAsStringSync(),
+      contains('showAluno360CopilotHelpSheet'),
     );
     expect(
       File(

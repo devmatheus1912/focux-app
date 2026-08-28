@@ -15,6 +15,7 @@ import '../utils/aluno360_operacao_logic.dart';
 import '../widgets/aluno_operacao_adherence_bars.dart';
 import '../widgets/aluno_operacao_adherence_legend.dart';
 import '../widgets/aluno_outreach_message_sheet.dart';
+import 'aluno360_help_sheets.dart';
 
 class Aluno360OperationalStatusSection extends ConsumerWidget {
   const Aluno360OperationalStatusSection({
@@ -148,6 +149,8 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
       key: const ValueKey('aluno360_operacao_status'),
       header: 'Status operacional',
       caption: statusSubtitle,
+      helpTooltip: 'Ajuda sobre status operacional',
+      onHelpTap: () => showAluno360StatusOperacionalHelpSheet(context),
       accent: primary,
       children: [
         Padding(

@@ -14,6 +14,7 @@ import '../constants/aluno_360_layout.dart';
 import '../data/aluno_repository.dart';
 import '../utils/aluno360_evolucao_inteligente_logic.dart';
 import 'aluno360_action_empty_panel.dart';
+import 'aluno360_help_sheets.dart';
 import 'aluno_outreach_message_sheet.dart';
 
 class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
@@ -97,7 +98,8 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
             label: 'Evolução inteligente, carregando',
             child: FxSettingsGroup(
               header: 'Evolução inteligente',
-              caption: 'Sinais a partir de check-ins concluídos e volume.',
+              helpTooltip: 'Ajuda sobre evolução inteligente',
+              onHelpTap: () => showAluno360EvolucaoInteligenteHelpSheet(context),
               accent: primary,
               children: [
                 Padding(
@@ -117,6 +119,8 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
                 e,
                 fallback: 'Evolução inteligente indisponível.',
               ),
+              helpTooltip: 'Ajuda sobre evolução inteligente',
+              onHelpTap: () => showAluno360EvolucaoInteligenteHelpSheet(context),
               accent: primary,
               children: const [SizedBox.shrink()],
             ),
@@ -137,7 +141,8 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
           label: 'Evolução inteligente, sinal ${sinalLabel(ev.sinal)}',
           child: FxSettingsGroup(
             header: 'Evolução inteligente',
-            caption: 'Sinais a partir de check-ins concluídos e volume.',
+            helpTooltip: 'Ajuda sobre evolução inteligente',
+            onHelpTap: () => showAluno360EvolucaoInteligenteHelpSheet(context),
             accent: primary,
             children: [
               if (refreshing) ...[
@@ -170,6 +175,7 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
                                   key: const ValueKey(
                                     'aluno360_evolucao_empty',
                                   ),
+                                  compact: true,
                                   icon: Icons.hourglass_empty_rounded,
                                   title: 'Sem sinais de evolução ainda',
                                   subtitle:

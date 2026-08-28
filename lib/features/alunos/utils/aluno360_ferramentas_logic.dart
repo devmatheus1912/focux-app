@@ -26,17 +26,46 @@ abstract final class Aluno360FerramentasLogic {
     required Aluno aluno,
     List<Map<String, dynamic>>? aderenciaSemanal,
   }) {
-    if (aluno.aderenciaPercent != null) {
-      return '${aluno.aderenciaPercent}%';
-    }
     final summary = summarizeAderenciaWeek(
       parseAderenciaSemanal(aderenciaSemanal),
     );
     if (summary.hasAnyCheckin) {
       final n = summary.totalCheckins;
-      return '$n chk';
+      return '$n check-in${n == 1 ? '' : 's'} na semana';
     }
-    return 'Sem dados de check-in';
+    final dias = aluno.diasSemTreino;
+    if (dias != null && dias >= 7) {
+      return '$dias dias sem treino';
+    }
+    return 'Sem check-ins nesta semana';
+  }
+
+  static int measurementsPendingCount({
+    required Aluno aluno,
+    String? bf,
+    String? massaMagra,
+  }) {
+    var pending = 0;
+    if (aluno.idade == null) pending++;
+    if (aluno.altura == null) pending++;
+    if (bf == null) pending++;
+    if (massaMagra == null) pending++;
+    return pending;
+  }
+
+  static String measurementsSummary({
+    required Aluno aluno,
+    String? bf,
+    String? massaMagra,
+  }) {
+    final pending = measurementsPendingCount(
+      aluno: aluno,
+      bf: bf,
+      massaMagra: massaMagra,
+    );
+    if (pending == 0) return 'Perfil e composição completos';
+    if (pending == 4) return 'Nenhuma medida registrada ainda';
+    return '$pending de 4 campos pendentes';
   }
 
   static String aderenciaSparkSemanticsLabel(

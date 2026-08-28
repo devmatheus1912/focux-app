@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/brand/focux_microcopy.dart';
+import '../../../core/widgets/fx_help.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../constants/aluno_360_layout.dart';
 import '../data/aluno_repository.dart';
@@ -18,6 +19,7 @@ import '../widgets/aluno360_copilot_executar_button.dart';
 import '../widgets/aluno360_copilot_ia_refresh_button.dart';
 import '../widgets/aluno360_copilot_prescription.dart';
 import '../widgets/aluno360_copilot_support.dart';
+import 'aluno360_help_sheets.dart';
 import 'aluno360_operacao_focus_toggle.dart';
 import 'aluno360_section_header.dart';
 import '../widgets/aluno_outreach_message_sheet.dart';
@@ -222,6 +224,11 @@ class Aluno360CopilotCard extends ConsumerWidget {
                           primary: primary,
                           iconOnly: true,
                         ),
+                      FxHelpIconButton(
+                        tooltip: 'Ajuda sobre prioridade do dia',
+                        onTap: () => showAluno360CopilotHelpSheet(context),
+                        size: 28,
+                      ),
                       Aluno360CopilotIaRefreshButton(
                         alunoId: aluno.id,
                         primary: primary,
@@ -242,11 +249,12 @@ class Aluno360CopilotCard extends ConsumerWidget {
                 ),
               ),
             ],
-            if (!hasOpenTask) ...[
+            if (!hasOpenTask && !focusMode && !operacao.contactPriority) ...[
               const SizedBox(height: 10),
               Aluno360CopilotSignalsGrid(signals: signals),
             ],
-            if (!hasOpenTask) const SizedBox(height: 10),
+            if (!hasOpenTask && !focusMode && !operacao.contactPriority)
+              const SizedBox(height: 10),
             if (shouldShowCopilotProfileGapsButton(
               aluno,
               profileCompletion,

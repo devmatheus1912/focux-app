@@ -27,6 +27,7 @@ class Aluno360ActionEmptyPanel extends StatelessWidget {
     this.onPrimary,
     this.showPrimary = true,
     this.secondaryActions = const [],
+    this.compact = false,
   }) : assert(
          !showPrimary ||
              (primaryLabel != null && primaryIcon != null && onPrimary != null),
@@ -40,6 +41,7 @@ class Aluno360ActionEmptyPanel extends StatelessWidget {
   final VoidCallback? onPrimary;
   final bool showPrimary;
   final List<Aluno360SecondaryAction> secondaryActions;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
@@ -47,6 +49,74 @@ class Aluno360ActionEmptyPanel extends StatelessWidget {
     final ink = fxScreenInk(context);
     final mute = fxScreenMute(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    if (compact) {
+      return Semantics(
+        container: true,
+        label: '$title. $subtitle',
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: Aluno360Layout.panelTitleStyle(context, ink),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                subtitle,
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+                style: Aluno360Layout.captionStyle(context).copyWith(
+                  color: mute,
+                  height: 1.35,
+                ),
+              ),
+              if (showPrimary) ...[
+                const SizedBox(height: 10),
+                SizedBox(
+                  height: 40,
+                  child: OutlinedButton.icon(
+                    onPressed: onPrimary,
+                    icon: Icon(primaryIcon, size: 16),
+                    label: Text(primaryLabel!),
+                    style: Aluno360Layout.operacaoOutlinedButtonStyle(
+                      context,
+                      primary,
+                    ),
+                  ),
+                ),
+              ],
+              if (secondaryActions.isNotEmpty) ...[
+                const SizedBox(height: 4),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 4,
+                  children: [
+                    for (final action in secondaryActions)
+                      TextButton.icon(
+                        onPressed: action.onTap,
+                        style: TextButton.styleFrom(
+                          minimumSize: const Size(48, 36),
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          foregroundColor: primary,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                        icon: Icon(action.icon, size: 15),
+                        label: Text(
+                          action.label,
+                          style: Aluno360Layout.secondaryActionLabelStyle(),
+                        ),
+                      ),
+                  ],
+                ),
+              ],
+            ],
+          ),
+        ),
+      );
+    }
 
     return Semantics(
       container: true,

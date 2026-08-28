@@ -72,6 +72,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 400));
 
     expect(find.textContaining('linha do tempo abaixo'), findsOneWidget);
-    expect(find.text('Radar pede mapa corporal (P0)'), findsOneWidget);
+    expect(find.text('Radar pede mapa corporal (P0)'), findsNothing);
+    expect(find.textContaining('Radar Focux'), findsOneWidget);
   });
 }

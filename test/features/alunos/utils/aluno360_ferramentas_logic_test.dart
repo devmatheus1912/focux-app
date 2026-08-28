@@ -42,17 +42,18 @@ void main() {
       expect(values, padded.map((p) => p.checkins).toList(growable: false));
     });
 
-    test('aderenciaModuleSub prefers percent then checkins', () {
+    test('aderenciaModuleSub describes weekly context not duplicate percent', () {
       final aluno = Aluno(
         id: 1,
         nome: 'Ana',
         email: 'a@test.com',
         status: 'ATIVO',
         aderenciaPercent: 42,
+        diasSemTreino: 10,
       );
       expect(
         Aluno360FerramentasLogic.aderenciaModuleSub(aluno: aluno),
-        '42%',
+        '10 dias sem treino',
       );
 
       final today = DateTime.now();
@@ -71,7 +72,25 @@ void main() {
             {'data': _isoDay(anchor), 'checkins': 2},
           ],
         ),
-        '2 chk',
+        '2 check-ins na semana',
+      );
+    });
+
+    test('measurementsSummary counts pending fields', () {
+      final aluno = Aluno(
+        id: 3,
+        nome: 'C',
+        email: 'c@test.com',
+        status: 'ATIVO',
+        dataNascimento: '1998-01-15',
+      );
+      expect(
+        Aluno360FerramentasLogic.measurementsPendingCount(aluno: aluno),
+        3,
+      );
+      expect(
+        Aluno360FerramentasLogic.measurementsSummary(aluno: aluno),
+        '3 de 4 campos pendentes',
       );
     });
 

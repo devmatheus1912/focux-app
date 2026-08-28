@@ -81,6 +81,7 @@ class Aluno360DetailEvolucaoTab extends StatelessWidget {
         isDark: isDark,
         ink: ink,
         hasRadarP0: hasRadarP0,
+        suppressRadarHint: timelineHasSignals,
       ),
     );
   }

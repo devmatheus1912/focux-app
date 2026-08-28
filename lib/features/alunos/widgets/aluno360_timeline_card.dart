@@ -14,6 +14,7 @@ import '../constants/aluno_360_layout.dart';
 import '../data/aluno_repository.dart';
 import '../utils/aluno360_timeline_logic.dart';
 import 'aluno360_action_empty_panel.dart';
+import 'aluno360_help_sheets.dart';
 import 'aluno360_timeline_full_sheet.dart';
 import 'aluno360_timeline_sheet_motion.dart';
 import 'aluno_outreach_message_sheet.dart';
@@ -215,7 +216,8 @@ class Aluno360TimelineCard extends StatelessWidget {
       label: 'Linha do tempo 360, últimos sinais do aluno',
       child: FxSettingsGroup(
         header: 'Linha do tempo 360',
-        caption: 'Últimos sinais consolidados do aluno.',
+        helpTooltip: 'Ajuda sobre a linha do tempo',
+        onHelpTap: () => showAluno360TimelineHelpSheet(context),
         accent: primary,
         children: [
           if (refreshing && !loading) ...[
@@ -254,6 +256,7 @@ class Aluno360TimelineCard extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 4),
               child: Aluno360ActionEmptyPanel(
                 key: const ValueKey('aluno360_timeline_empty'),
+                compact: true,
                 icon: Icons.history_toggle_off_outlined,
                 title: 'Linha do tempo ainda vazia',
                 subtitle:

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../theme/fx_settings_layout.dart';
+import 'fx_help.dart';
 import 'fx_shell_scaffold.dart';
 
 /// Grupo inset (ChatGPT/iOS) — superfície da Home, tamanhos de [FxSettingsLayout].
@@ -12,6 +13,8 @@ class FxSettingsGroup extends StatelessWidget {
     required this.children,
     this.footer,
     this.accent,
+    this.helpTooltip,
+    this.onHelpTap,
   });
 
   final String? header;
@@ -19,6 +22,8 @@ class FxSettingsGroup extends StatelessWidget {
   final List<Widget> children;
   final Widget? footer;
   final Color? accent;
+  final String? helpTooltip;
+  final VoidCallback? onHelpTap;
 
   @override
   Widget build(BuildContext context) {
@@ -31,9 +36,21 @@ class FxSettingsGroup extends StatelessWidget {
             padding: const EdgeInsets.symmetric(
               horizontal: FxSettingsLayout.groupPadH,
             ),
-            child: Text(
-              header!,
-              style: FxSettingsLayout.sectionHeader(color: mute),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    header!,
+                    style: FxSettingsLayout.sectionHeader(color: mute),
+                  ),
+                ),
+                if (onHelpTap != null)
+                  FxHelpIconButton(
+                    tooltip: helpTooltip ?? 'Ajuda sobre $header',
+                    onTap: onHelpTap!,
+                    size: 28,
+                  ),
+              ],
             ),
           ),
         if (caption != null) ...[

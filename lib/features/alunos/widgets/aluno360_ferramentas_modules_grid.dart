@@ -6,6 +6,7 @@ import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
 import '../data/aluno_repository.dart';
 import '../utils/aluno360_ferramentas_logic.dart';
+import 'aluno360_help_sheets.dart';
 
 /// Módulos Ferramentas em grupos inset — paridade Perfil (`FxSettingsGroup`).
 class Aluno360FerramentasModulesGrid extends StatelessWidget {
@@ -40,6 +41,8 @@ class Aluno360FerramentasModulesGrid extends StatelessWidget {
         children: [
           FxSettingsGroup(
             header: 'Treino & evolução',
+            helpTooltip: 'Ajuda sobre treino e evolução',
+            onHelpTap: () => showAluno360FerramentasHelpSheet(context),
             children: [
               FxSettingsTile(
                 icon: Icons.fitness_center,
@@ -71,7 +74,7 @@ class Aluno360FerramentasModulesGrid extends StatelessWidget {
                 icon: Icons.auto_awesome,
                 label: 'IA Progresso',
                 subtitle: 'Carga sugerida pela IA',
-                value: 'IA',
+                value: '',
                 onTap:
                     () => context.push(
                       '/alunos/$alunoId/ia/progressao',
