@@ -123,6 +123,15 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen> {
     final selectedPreset = CreateTreinoLogic.matchingPresetTitle(
       _objetivoCtrl.text,
     );
+    final hasNome = _nomeCtrl.text.trim().isNotEmpty;
+    final previewTitle =
+        hasNome
+            ? displayWorkoutName(_nomeCtrl.text.trim())
+            : 'Plano sem nome';
+    final previewMeta = CreateTreinoLogic.previewMeta(
+      objetivo: _objetivoCtrl.text,
+      nivel: _nivel,
+    );
 
     return fxScreenA11yScope(
       label: widget.alunoId == null ? 'Novo treino' : 'Treino vinculado',
@@ -130,7 +139,12 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen> {
         useMesh: true,
         appBar: FxShellAppBar(
           title: widget.alunoId == null ? 'Novo Treino' : 'Treino vinculado',
-          subtitle: widget.alunoId == null ? 'PLANO BASE' : 'PLANO DO ALUNO',
+          subtitle:
+              widget.alunoId != null
+                  ? widget.alunoNome?.trim().isNotEmpty == true
+                      ? widget.alunoNome!.trim()
+                      : 'Vincular ao aluno'
+                  : null,
           onBack: () => safePopOrGo(context, '/treinos'),
           actions: [
             FxHelpIconButton(
@@ -205,12 +219,29 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen> {
                         index: 1,
                         child: FxSettingsGroup(
                           header: 'Plano base',
-                          caption:
-                              canSubmit
-                                  ? 'Próximo passo: adicionar exercícios.'
-                                  : 'Nome obrigatório para criar o plano.',
+                          caption: CreateTreinoLogic.planoBaseCaption(
+                            hasNome: hasNome,
+                          ),
                           accent: primary,
                           children: [
+                            _PlanoBaseSummary(
+                              title: previewTitle,
+                              meta: previewMeta,
+                              primary: primary,
+                              soft: soft,
+                              onTap: () {
+                                _nomeFocusNode.requestFocus();
+                                final fieldContext = _nomeFieldKey.currentContext;
+                                if (fieldContext != null) {
+                                  Scrollable.ensureVisible(
+                                    fieldContext,
+                                    alignment: 0.2,
+                                    duration: const Duration(milliseconds: 280),
+                                    curve: Curves.easeOutCubic,
+                                  );
+                                }
+                              },
+                            ),
                             AlunoInsetFormField(
                               key: _nomeFieldKey,
                               controller: _nomeCtrl,
@@ -223,20 +254,19 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen> {
                                           ? 'Informe o nome'
                                           : null,
                             ),
-                            FxSettingsTile(
-                              icon: Icons.tune_rounded,
-                              accent: soft,
-                              label: 'Nível',
-                              subtitle: 'Opcional — ajuda na biblioteca',
-                              value: CreateTreinoLogic.nivelLabel(_nivel),
-                              picker: true,
-                              showDivider: true,
-                              onTap: _openNivelPicker,
-                            ),
                             AlunoInsetFormField(
                               controller: _objetivoCtrl,
                               label: 'Objetivo (opcional)',
                               icon: Icons.flag_outlined,
+                            ),
+                            FxSettingsTile(
+                              icon: Icons.tune_rounded,
+                              accent: soft,
+                              label: 'Nível',
+                              value: CreateTreinoLogic.nivelLabel(_nivel),
+                              picker: true,
+                              showDivider: true,
+                              onTap: _openNivelPicker,
                             ),
                             AlunoInsetFormField(
                               controller: _descricaoCtrl,

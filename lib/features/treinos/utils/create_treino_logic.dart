@@ -62,4 +62,24 @@ abstract final class CreateTreinoLogic {
     }
     return null;
   }
+
+  static String planoBaseCaption({required bool hasNome}) {
+    if (!hasNome) {
+      return 'Comece pelo nome. Exercícios entram no passo seguinte.';
+    }
+    return 'Revise os dados e toque em Criar para montar os exercícios.';
+  }
+
+  static String previewMeta({
+    required String objetivo,
+    required String? nivel,
+  }) {
+    final parts = <String>[];
+    final trimmedObjetivo = objetivo.trim();
+    if (trimmedObjetivo.isNotEmpty) {
+      parts.add(trimmedObjetivo);
+    }
+    parts.add(nivelLabel(nivel));
+    return parts.join(' · ');
+  }
 }

@@ -14,6 +14,17 @@ void main() {
     expect(CreateTreinoLogic.nivelLabel('INTERMEDIARIO'), 'Intermediário');
   });
 
+  test('CreateTreinoLogic previewMeta', () {
+    expect(
+      CreateTreinoLogic.previewMeta(objetivo: 'Hipertrofia', nivel: 'INICIANTE'),
+      'Hipertrofia · Iniciante',
+    );
+    expect(
+      CreateTreinoLogic.previewMeta(objetivo: '', nivel: null),
+      'Em aberto',
+    );
+  });
+
   test('create treino screen polish', () {
     final screen = readScreenSourceBundle(
       'lib/features/treinos/screens/create_treino_screen.dart',
@@ -22,7 +33,9 @@ void main() {
     expect(screen, contains("displayWorkoutName('Treino \${preset.title}')"));
     expect(screen, contains('DashboardHomeActionChip'));
     expect(screen, contains('FxSettingsGroup'));
-    expect(screen, contains('CreateTreinoLogic.presets'));
+    expect(screen, contains('_PlanoBaseSummary'));
+    expect(screen, contains('CreateTreinoLogic.planoBaseCaption'));
+    expect(screen, isNot(contains('PLANO BASE')));
     expect(screen, contains('showCreateTreinoNivelPicker'));
     expect(screen, contains('exercicios/add'));
     expect(screen, contains('Scrollable.ensureVisible'));
