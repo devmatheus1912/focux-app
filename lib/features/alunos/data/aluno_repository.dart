@@ -374,6 +374,24 @@ class Timeline360Page {
       );
 }
 
+class OperacaoUiHints {
+  final bool contactPriority;
+  final bool defaultFocusMode;
+  final bool compactFollowUp;
+
+  const OperacaoUiHints({
+    required this.contactPriority,
+    required this.defaultFocusMode,
+    required this.compactFollowUp,
+  });
+
+  factory OperacaoUiHints.fromJson(Map<String, dynamic> json) => OperacaoUiHints(
+    contactPriority: json['contactPriority'] as bool? ?? false,
+    defaultFocusMode: json['defaultFocusMode'] as bool? ?? false,
+    compactFollowUp: json['compactFollowUp'] as bool? ?? false,
+  );
+}
+
 class Aluno360 {
   final Aluno aluno;
   final AlunoAutonomiaResumo autonomiaResumo;
@@ -385,6 +403,7 @@ class Aluno360 {
   final bool? hasWearableHistory;
   final RecoverySnapshot? recoverySnapshot;
   final RiscoResumo? riscoResumo;
+  final OperacaoUiHints? operacaoUiHints;
 
   const Aluno360({
     required this.aluno,
@@ -397,6 +416,7 @@ class Aluno360 {
     this.hasWearableHistory,
     this.recoverySnapshot,
     this.riscoResumo,
+    this.operacaoUiHints,
   });
 
   factory Aluno360.fromJson(Map<String, dynamic> json) => Aluno360(
@@ -426,6 +446,12 @@ class Aluno360 {
     riscoResumo:
         json['riscoResumo'] != null
             ? RiscoResumo.fromJson(json['riscoResumo'] as Map<String, dynamic>)
+            : null,
+    operacaoUiHints:
+        json['operacaoUiHints'] != null
+            ? OperacaoUiHints.fromJson(
+              json['operacaoUiHints'] as Map<String, dynamic>,
+            )
             : null,
   );
 }

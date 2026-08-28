@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/analytics/analytics_service.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/utils/friendly_error.dart';
@@ -18,6 +19,7 @@ import '../utils/aluno_detail_aluno_actions.dart';
 import '../utils/aluno_detail_aluno_resolution.dart';
 import '../utils/aluno_display_utils.dart';
 import '../widgets/aluno360_composite_header.dart';
+import '../widgets/aluno360_help_sheets.dart';
 import '../widgets/aluno360_detail_evolucao_tab.dart';
 import '../widgets/aluno360_detail_ferramentas_tab.dart';
 import '../widgets/aluno360_detail_operacao_tab.dart';

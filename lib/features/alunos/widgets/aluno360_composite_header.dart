@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
+import '../../../core/widgets/fx_help.dart';
 import '../constants/aluno_360_layout.dart';
 
 /// Tab bar for Aluno 360 (Operação · Evolução · Ferramentas).
@@ -68,6 +69,7 @@ class Aluno360HeaderToolbar extends StatelessWidget {
     required this.ink,
     required this.onBack,
     this.onDelete,
+    this.onHelp,
     this.actionsEnabled = true,
   });
 
@@ -76,6 +78,7 @@ class Aluno360HeaderToolbar extends StatelessWidget {
   final Color ink;
   final VoidCallback onBack;
   final VoidCallback? onDelete;
+  final VoidCallback? onHelp;
   final bool actionsEnabled;
 
   @override
@@ -106,6 +109,11 @@ class Aluno360HeaderToolbar extends StatelessWidget {
           )
         else
           const Spacer(),
+        if (onHelp != null && actionsEnabled)
+          FxHelpIconButton(
+            tooltip: 'Ajuda sobre esta aba',
+            onTap: onHelp!,
+          ),
         if (onDelete != null && actionsEnabled)
           PopupMenuButton<String>(
             icon: Icon(Icons.more_horiz_rounded, color: ink),
@@ -169,6 +177,7 @@ class Aluno360CompositeHeaderDelegate extends SliverPersistentHeaderDelegate {
     required this.isDark,
     required this.onBack,
     this.onDelete,
+    this.onHelp,
     this.actionsEnabled = true,
   });
 
@@ -184,6 +193,7 @@ class Aluno360CompositeHeaderDelegate extends SliverPersistentHeaderDelegate {
   final bool isDark;
   final VoidCallback onBack;
   final VoidCallback? onDelete;
+  final VoidCallback? onHelp;
   final bool actionsEnabled;
 
   @override
@@ -230,6 +240,7 @@ class Aluno360CompositeHeaderDelegate extends SliverPersistentHeaderDelegate {
                   ink: ink,
                   onBack: onBack,
                   onDelete: onDelete,
+                  onHelp: onHelp,
                   actionsEnabled: actionsEnabled,
                 ),
               ),
@@ -282,6 +293,7 @@ class Aluno360CompositeHeaderDelegate extends SliverPersistentHeaderDelegate {
         displayName != oldDelegate.displayName ||
         ink != oldDelegate.ink ||
         isDark != oldDelegate.isDark ||
-        actionsEnabled != oldDelegate.actionsEnabled;
+        actionsEnabled != oldDelegate.actionsEnabled ||
+        onHelp != oldDelegate.onHelp;
   }
 }

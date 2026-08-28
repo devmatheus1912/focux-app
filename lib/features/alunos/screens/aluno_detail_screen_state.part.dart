@@ -153,25 +153,28 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                       ),
                   data: (aluno) {
                     final perfilCompletion = copilotProfileCompletion(aluno);
-                    final operacao = ref.watch(
-                      aluno360OperacaoProvider(alunoId),
+                    final uiHints = aluno360Async.valueOrNull?.operacaoUiHints;
+                    final proximaForPriority = proximaAcao360;
+                    final contactPriority = resolveOperacaoContactPriority(
+                      aluno: aluno,
+                      proximaAcao: proximaForPriority,
+                      uiHints: uiHints,
                     );
-                    final compactHero =
-                        operacao?.contactPriority ??
-                        isOperacaoContatoPrioritario(aluno: aluno);
+                    final compactHero = contactPriority;
+                    final focusMode = ref.watch(
+                      alunoOperacaoFocusModeProvider(alunoId),
+                    );
                     final topInset = MediaQuery.paddingOf(context).top;
                     final heroBodyHeight = Aluno360Layout.heroBodyHeight(
                       context,
                       compactContactPriority: compactHero,
                     );
                     final displayName = fxTitleCaseName(aluno.nome);
-                    final contactPriority =
-                        operacao?.contactPriority ??
-                        isOperacaoContatoPrioritario(aluno: aluno);
 
                     final focusSignature =
                         '${aluno.id}|${aluno.operacaoFocusMode}|$contactPriority|'
-                        '${aluno.emRisco}|${aluno.aderenciaPercent}';
+                        '${uiHints?.defaultFocusMode}|${aluno.emRisco}|'
+                        '${aluno.aderenciaPercent}';
                     if (_lastFocusSyncSignature != focusSignature) {
                       _lastFocusSyncSignature = focusSignature;
                       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -182,12 +185,34 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                             )
                             .syncFromAluno(
                               aluno,
-                              autoDefault: shouldDefaultOperacaoFocusMode(
+                              autoDefault: resolveDefaultOperacaoFocusMode(
                                 aluno: aluno,
                                 contactPriority: contactPriority,
+                                uiHints: uiHints,
                               ),
                             );
                       });
+                    }
+
+                    void openTabHelp() {
+                      AnalyticsService.instance.track(
+                        ProductEvents.aluno360HelpOpened,
+                        props: {
+                          'tab': switch (tabIndex) {
+                            0 => 'operacao',
+                            1 => 'evolucao',
+                            _ => 'ferramentas',
+                          },
+                        },
+                      );
+                      switch (tabIndex) {
+                        case 0:
+                          showAluno360OperacaoHelpSheet(context);
+                        case 1:
+                          showAluno360EvolucaoHelpSheet(context);
+                        default:
+                          showAluno360FerramentasHelpSheet(context);
+                      }
                     }
 
                     return RefreshIndicator(
@@ -231,6 +256,7 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                               ink: ink,
                               isDark: isDark,
                               onBack: () => safePopOrGo(context, '/alunos'),
+                              onHelp: openTabHelp,
                               onDelete:
                                   () => confirmarExclusaoAlunoDetail(
                                     context,
@@ -249,6 +275,8 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                                     showOperacaoSticky
                                         ? Aluno360Layout.operacaoScrollBottomReserve(
                                           context,
+                                          focusMode:
+                                              tabIndex == 0 && focusMode,
                                         )
                                         : MediaQuery.paddingOf(context).bottom +
                                             8,

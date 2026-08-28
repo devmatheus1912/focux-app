@@ -79,7 +79,13 @@ abstract final class Aluno360Layout {
     return stickyBarContentHeight + MediaQuery.paddingOf(context).bottom;
   }
 
-  static double operacaoScrollBottomReserve(BuildContext context) {
+  static double operacaoScrollBottomReserve(
+    BuildContext context, {
+    bool focusMode = false,
+  }) {
+    if (focusMode) {
+      return stickyBarTotalHeight(context);
+    }
     return stickyBarTotalHeight(context) + 8;
   }
 

@@ -2,6 +2,31 @@ import 'package:flutter/material.dart';
 
 import '../../../core/widgets/fx_help.dart';
 
+Future<void> showAluno360EvolucaoHelpSheet(BuildContext context) {
+  return showFxHelpSheet(
+    context,
+    title: 'Aba Evolução',
+    subtitle: 'Sinais de progresso, timeline e peso — sem repetir alertas.',
+    tips: const [
+      FxHelpTip(
+        'Evolução inteligente',
+        'Gráfico de volume após check-ins. Peça check-in se ainda estiver vazio.',
+        icon: 'trend',
+      ),
+      FxHelpTip(
+        'Linha do tempo',
+        'Radar, check-ins, chat e medidas recentes. Toque para ver detalhe ou ir ao destino.',
+        icon: 'article',
+      ),
+      FxHelpTip(
+        'Peso · tendência',
+        'Última balança e sparkline. Radar P0 some aqui se a timeline já mostrar o mapa pendente.',
+        icon: 'dumbbell',
+      ),
+    ],
+  );
+}
+
 Future<void> showAluno360OperacaoHelpSheet(BuildContext context) {
   return showFxHelpSheet(
     context,

@@ -417,8 +417,39 @@ Duration operacaoSectionDelay({
 bool operacaoHeroShowsRisco(Aluno aluno) =>
     alunoHeroPrimarySignal(aluno).label == 'Risco operacional';
 
-bool shouldCompactFollowUpForContactPriority({required bool contactPriority}) =>
-    contactPriority;
+bool shouldCompactFollowUpForContactPriority({
+  required bool contactPriority,
+  OperacaoUiHints? uiHints,
+}) => uiHints?.compactFollowUp ?? contactPriority;
+
+/// Prefer BE hints when bundled in /360; fallback to local heuristics.
+bool resolveOperacaoContactPriority({
+  required Aluno aluno,
+  ProximaAcaoResumo? proximaAcao,
+  OperacaoUiHints? uiHints,
+}) => uiHints?.contactPriority ??
+    isOperacaoContatoPrioritario(aluno: aluno, proximaAcao: proximaAcao);
+
+bool resolveDefaultOperacaoFocusMode({
+  required Aluno aluno,
+  required bool contactPriority,
+  OperacaoUiHints? uiHints,
+}) =>
+    uiHints?.defaultFocusMode ??
+    shouldDefaultOperacaoFocusMode(
+      aluno: aluno,
+      contactPriority: contactPriority,
+    );
+
+/// Hide follow-up row when focus mode + sticky already owns contact outreach.
+bool shouldHideFollowUpInFocusContactMode({
+  required bool focusMode,
+  required bool contactPriority,
+  required OperacaoStickyAction sticky,
+}) {
+  if (!focusMode || !contactPriority) return false;
+  return sticky.isChatAction;
+}
 
 /// Auto-enable focus mode for high-friction operational profiles.
 bool shouldDefaultOperacaoFocusMode({
@@ -744,6 +775,7 @@ Aluno360OperacaoSnapshot resolveAluno360OperacaoSnapshot({
   required bool hasOpenTask,
   required bool followUpDue,
   bool wearableRelevant = true,
+  OperacaoUiHints? uiHints,
 }) {
   var effectiveProxima = resolveCopilotProximaAcaoResumo(
     proximaAcao360: proximaAcao360,
@@ -765,9 +797,10 @@ Aluno360OperacaoSnapshot resolveAluno360OperacaoSnapshot({
     wearableRelevant: wearableRelevant,
   );
   final acao = effectiveProxima?.acao ?? '';
-  final contactPriority = isOperacaoContatoPrioritario(
+  final contactPriority = resolveOperacaoContactPriority(
     aluno: aluno,
     proximaAcao: effectiveProxima,
+    uiHints: uiHints,
   );
   sticky = applyContactPriorityStickyOverride(
     sticky: sticky,

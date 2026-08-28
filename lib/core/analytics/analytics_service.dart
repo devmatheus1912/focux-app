@@ -123,6 +123,7 @@ class ProductEvents {
   static const aluno360CopilotExecutarAcao = 'aluno360_copilot_executar_acao';
   static const aluno360OutreachPrepared = 'aluno360_outreach_prepared';
   static const aluno360OutreachChatOpened = 'aluno360_outreach_chat_opened';
+  static const aluno360HelpOpened = 'aluno360_help_opened';
 
   static const homeViewed = 'home_viewed';
   static const homeRefreshed = 'home_refreshed';

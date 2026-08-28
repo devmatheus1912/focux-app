@@ -173,6 +173,7 @@ final aluno360OperacaoProvider =
         hasOpenTask: hasOpenTask,
         followUpDue: isAlunoFollowUpDue(aluno),
         wearableRelevant: wearableRelevant,
+        uiHints: bundle.operacaoUiHints,
       );
     });
 

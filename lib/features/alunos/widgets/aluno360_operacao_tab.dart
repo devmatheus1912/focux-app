@@ -52,6 +52,7 @@ class Aluno360OperacaoTab extends ConsumerWidget {
     required this.alunoId,
     required this.showFinanceRisk,
     required this.followUpCard,
+    required this.showFollowUp,
     required this.operationalSection,
     required this.copilotCard,
     required this.quickActions,
@@ -65,6 +66,7 @@ class Aluno360OperacaoTab extends ConsumerWidget {
   final bool showFinanceRisk;
   final Widget? financeRiskBanner;
   final Widget followUpCard;
+  final bool showFollowUp;
   final Widget operationalSection;
   final Widget copilotCard;
   final Widget? recoveryCard;
@@ -129,8 +131,10 @@ class Aluno360OperacaoTab extends ConsumerWidget {
               section(0, financeRiskBanner!),
               const SizedBox(height: Aluno360Layout.sectionGap),
             ],
-            section(1, followUpCard),
-            const SizedBox(height: Aluno360Layout.sectionGap),
+            if (showFollowUp) ...[
+              section(1, followUpCard),
+              const SizedBox(height: Aluno360Layout.sectionGap),
+            ],
             AnimatedSize(
               duration: Duration(milliseconds: motionMs),
               curve: Curves.easeOutCubic,

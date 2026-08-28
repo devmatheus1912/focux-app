@@ -872,6 +872,69 @@ void main() {
         isFalse,
       );
     });
+
+    test('prefers BE uiHints compactFollowUp', () {
+      expect(
+        shouldCompactFollowUpForContactPriority(
+          contactPriority: false,
+          uiHints: const OperacaoUiHints(
+            contactPriority: false,
+            defaultFocusMode: false,
+            compactFollowUp: true,
+          ),
+        ),
+        isTrue,
+      );
+    });
+  });
+
+  group('resolveOperacaoContactPriority', () {
+    test('prefers BE uiHints over local heuristics', () {
+      expect(
+        resolveOperacaoContactPriority(
+          aluno: _aluno(emRisco: false, aderenciaPercent: 80),
+          proximaAcao: null,
+          uiHints: const OperacaoUiHints(
+            contactPriority: true,
+            defaultFocusMode: true,
+            compactFollowUp: true,
+          ),
+        ),
+        isTrue,
+      );
+    });
+  });
+
+  group('shouldHideFollowUpInFocusContactMode', () {
+    test('hides when focus + contact sticky chat', () {
+      expect(
+        shouldHideFollowUpInFocusContactMode(
+          focusMode: true,
+          contactPriority: true,
+          sticky: const OperacaoStickyAction(
+            label: 'Retomar contato',
+            icon: Icons.chat_rounded,
+            destination: OperacaoStickyDestination.chat,
+          ),
+        ),
+        isTrue,
+      );
+    });
+
+    test('shows when not in focus mode', () {
+      expect(
+        shouldHideFollowUpInFocusContactMode(
+          focusMode: false,
+          contactPriority: true,
+          sticky: const OperacaoStickyAction(
+            label: 'Retomar contato',
+            icon: Icons.chat_rounded,
+            destination: OperacaoStickyDestination.chat,
+          ),
+        ),
+        isFalse,
+      );
+    });
   });
 
   group('shouldDefaultOperacaoFocusMode', () {
