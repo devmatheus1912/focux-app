@@ -4,12 +4,12 @@ import 'package:flutter/services.dart';
 import '../theme/brand_palette.dart';
 import '../theme/fx_settings_layout.dart';
 import '../theme/shell_chrome.dart';
-import '../theme/tokens_strip.dart';
+import 'fx_input_deco.dart';
 import 'fx_shell_scaffold.dart';
 
-/// Picker inset dentro de [FxSettingsGroup] — ícone alinhado a
-/// [FxInputDeco.insetGrouped] / [AlunoInsetFormField].
-class FxInsetPickerRow extends StatelessWidget {
+/// Picker inset dentro de [FxSettingsGroup] — paridade pixel-perfect com
+/// [AlunoInsetFormField] via [FxInputDeco.insetGrouped].
+class FxInsetPickerRow extends StatefulWidget {
   const FxInsetPickerRow({
     super.key,
     required this.icon,
@@ -30,13 +30,40 @@ class FxInsetPickerRow extends StatelessWidget {
   final String? semanticsLabel;
 
   @override
+  State<FxInsetPickerRow> createState() => _FxInsetPickerRowState();
+}
+
+class _FxInsetPickerRowState extends State<FxInsetPickerRow> {
+  late final TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.value);
+  }
+
+  @override
+  void didUpdateWidget(covariant FxInsetPickerRow oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.value != widget.value && _controller.text != widget.value) {
+      _controller.text = widget.value;
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final chrome = ShellChrome.of(context);
     final mute = chrome.mute;
     final primary = Theme.of(context).colorScheme.primary;
-    final soft = iconColor ?? BrandPalette.softened(primary);
+    final soft = widget.iconColor ?? BrandPalette.softened(primary);
     final ink = fxScreenInk(context);
-    final spoken = semanticsLabel ?? '$label. $value';
+    final spoken = widget.semanticsLabel ?? '${widget.label}. ${widget.value}';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -44,67 +71,31 @@ class FxInsetPickerRow extends StatelessWidget {
         Semantics(
           button: true,
           label: spoken,
-          child: InkWell(
+          child: TextFormField(
+            readOnly: true,
+            showCursor: false,
+            enableInteractiveSelection: false,
+            controller: _controller,
             onTap: () {
               HapticFeedback.selectionClick();
-              onTap();
+              FocusScope.of(context).unfocus();
+              widget.onTap();
             },
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                SizedBox(
-                  width: FxSettingsLayout.insetPrefixWidth,
-                  child: Align(
-                    alignment: Alignment.center,
-                    child: Icon(
-                      icon,
-                      size: FxSettingsLayout.iconSize,
-                      color: soft,
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: TokensStrip.s3,
-                    ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            label,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: FxSettingsLayout.rowLabel(color: ink),
-                          ),
-                        ),
-                        if (value.isNotEmpty) ...[
-                          const SizedBox(width: TokensStrip.s2),
-                          Flexible(
-                            child: Text(
-                              value,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              textAlign: TextAlign.end,
-                              style: FxSettingsLayout.rowValue(color: mute),
-                            ),
-                          ),
-                        ],
-                        const SizedBox(width: TokensStrip.s1),
-                        Icon(
-                          Icons.unfold_more,
-                          size: FxSettingsLayout.chevronSize,
-                          color: mute,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
+            style: FxSettingsLayout.rowLabel(color: ink),
+            decoration: FxInputDeco.insetGrouped(
+              context,
+              icon: widget.icon,
+              hint: widget.label,
+              iconColor: soft,
+              suffix: Icon(
+                Icons.unfold_more,
+                size: FxSettingsLayout.chevronSize,
+                color: mute,
+              ),
             ),
           ),
         ),
-        if (showDivider)
+        if (widget.showDivider)
           Divider(
             height: 1,
             thickness: FxSettingsLayout.dividerThickness,

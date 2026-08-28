@@ -107,6 +107,10 @@ class FxInputDeco {
         minHeight: FxSettingsLayout.insetPrefixWidth,
       ),
       suffixIcon: suffix,
+      suffixIconConstraints: const BoxConstraints(
+        minWidth: 28,
+        minHeight: FxSettingsLayout.insetPrefixWidth,
+      ),
       filled: false,
       isDense: true,
       contentPadding: const EdgeInsets.symmetric(
