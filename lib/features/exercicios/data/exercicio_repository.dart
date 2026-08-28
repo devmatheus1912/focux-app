@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/utils/pt_br_display.dart';
 import 'enums.dart';
+import 'exercicio_page.dart';
 
 class Exercicio {
   final int id;
@@ -498,6 +499,121 @@ class ExercicioRepository {
     }
 
     return all;
+  }
+
+  /// Uma página da biblioteca — sem loop client-side.
+  Future<ExercicioPage> listarPagina({
+    String? nome,
+    String? busca,
+    String? categoria,
+    String? tag,
+    String? musculoAlvo,
+    String? equipamento,
+    String? nivel,
+    String? mecanica,
+    String? objetivo,
+    bool? hasVideo,
+    String? videoSource,
+    String? licenseStatus,
+    String? editorialStatus,
+    bool? favoritos,
+    String? padraoMovimento,
+    String? grupoMuscularPrimario,
+    String? modalidade,
+    String? dificuldade,
+    int page = 0,
+    int size = 40,
+  }) async {
+    final queryParams = <String, dynamic>{
+      'page': page,
+      'size': size,
+      'sort': 'nome,asc',
+    };
+    void put(String key, String? value) {
+      if (value != null && value.isNotEmpty) queryParams[key] = value;
+    }
+
+    put('nome', nome);
+    put('busca', busca);
+    put('categoria', categoria);
+    put('tag', tag);
+    put('musculoAlvo', musculoAlvo);
+    put('equipamento', equipamento);
+    put('nivel', nivel);
+    put('mecanica', mecanica);
+    put('objetivo', objetivo);
+    put('videoSource', videoSource);
+    put('licenseStatus', licenseStatus);
+    put('editorialStatus', editorialStatus);
+    put('padraoMovimento', padraoMovimento);
+    put('grupoMuscularPrimario', grupoMuscularPrimario);
+    put('modalidade', modalidade);
+    put('dificuldade', dificuldade);
+    if (hasVideo == true) queryParams['hasVideo'] = 'true';
+    if (favoritos == true) queryParams['favoritos'] = 'true';
+
+    final response = await _dio.get(
+      '/api/exercicios/v2',
+      queryParameters: queryParams,
+    );
+    final data = response.data as Map<String, dynamic>;
+    final list = (data['content'] as List? ?? const [])
+        .map((e) => Exercicio.fromJson(e as Map<String, dynamic>))
+        .toList();
+    return ExercicioPage(
+      content: list,
+      meta: ExercicioPageMeta.fromSpringPage(data),
+    );
+  }
+
+  Future<ExercicioPickerPage> listarPickerPagina({
+    String? busca,
+    String? padraoMovimento,
+    String? grupoMuscularPrimario,
+    String? modalidade,
+    String? dificuldade,
+    bool? hasVideo,
+    bool? favoritos,
+    int page = 0,
+    int size = 30,
+  }) async {
+    final queryParams = <String, dynamic>{
+      'page': page,
+      'size': size,
+      'sort': 'nome,asc',
+    };
+    void put(String key, String? value) {
+      if (value != null && value.isNotEmpty) queryParams[key] = value;
+    }
+
+    put('busca', busca);
+    put('padraoMovimento', padraoMovimento);
+    put('grupoMuscularPrimario', grupoMuscularPrimario);
+    put('modalidade', modalidade);
+    put('dificuldade', dificuldade);
+    if (hasVideo == true) queryParams['hasVideo'] = 'true';
+    if (favoritos == true) queryParams['favoritos'] = 'true';
+
+    final response = await _dio.get(
+      '/api/exercicios/picker',
+      queryParameters: queryParams,
+    );
+    final data = response.data as Map<String, dynamic>;
+    final list = (data['content'] as List? ?? const [])
+        .map((e) => exercicioFromPickerJson(e as Map<String, dynamic>))
+        .toList();
+    final pageMeta = data['page'] as Map<String, dynamic>? ?? const {};
+    return ExercicioPickerPage(
+      content: list,
+      meta: ExercicioPageMeta.fromJson(pageMeta),
+    );
+  }
+
+  Future<ExercicioPickerStats> buscarPickerStats() async {
+    final response = await _dio.get('/api/exercicios/picker/stats');
+    return ExercicioPickerStats.fromJson(
+      response.data as Map<String, dynamic>,
+    );
   }
 
   Future<Exercicio> buscar(int id) async {

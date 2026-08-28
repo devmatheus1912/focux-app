@@ -248,28 +248,41 @@ class TreinoPickerUiHints {
 
 class TreinoPickerHomeBundle {
   final Treino treino;
-  final List<Exercicio> exercicios;
+  final int libraryCount;
+  final List<Exercicio> shortcuts;
   final TreinoPickerUiHints uiHints;
 
   const TreinoPickerHomeBundle({
     required this.treino,
-    required this.exercicios,
+    required this.libraryCount,
+    required this.shortcuts,
     required this.uiHints,
   });
 
+  /// Atalho legado — shortcuts do BFF (não carrega biblioteca inteira).
+  List<Exercicio> get exercicios => shortcuts;
+
   factory TreinoPickerHomeBundle.fromJson(Map<String, dynamic> j) {
-    final exercicios =
-        ((j['exercicios'] as List?) ?? const [])
+    final treino = Treino.fromJson(j['treino'] as Map<String, dynamic>);
+    final hintsRaw = j['uiHints'] as Map<String, dynamic>?;
+    final shortcutsRaw = j['shortcuts'] as List?;
+    final legacyRaw = j['exercicios'] as List?;
+    final shortcutsSource = shortcutsRaw ?? legacyRaw ?? const [];
+    final shortcuts =
+        shortcutsSource
             .map((e) => Exercicio.fromJson(e as Map<String, dynamic>))
             .toList();
-    final hintsRaw = j['uiHints'] as Map<String, dynamic>?;
-    final treino = Treino.fromJson(j['treino'] as Map<String, dynamic>);
+    final libraryCount =
+        (j['libraryCount'] as num?)?.toInt() ??
+        legacyRaw?.length ??
+        shortcuts.length;
     return TreinoPickerHomeBundle(
       treino: treino,
-      exercicios: exercicios,
+      libraryCount: libraryCount,
+      shortcuts: shortcuts,
       uiHints: hintsRaw == null
           ? TreinoPickerUiHints.fallback(
-              librarySize: exercicios.length,
+              librarySize: libraryCount,
               jaNoTreino: treino.exercicios.length,
             )
           : TreinoPickerUiHints.fromJson(hintsRaw),

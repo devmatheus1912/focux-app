@@ -29,7 +29,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../exercicios/data/enums.dart';
 import '../../exercicios/data/exercicio_taxonomy_labels.dart';
+import '../../exercicios/data/exercicio_page.dart';
 import '../../exercicios/data/exercicio_repository.dart';
+import '../../exercicios/providers/exercicio_picker_provider.dart';
 import '../../exercicios/providers/exercicios_provider.dart';
 import '../../exercicios/screens/widgets/padrao_movimento_grid.dart';
 import '../../exercicios/data/template_splits.dart';
@@ -156,8 +158,13 @@ class _AddExercicioToTreinoScreenState
             jaNoTreino: 0,
           ),
     );
-    final exerciciosAsync = pickerAsync.whenData((h) => h.exercicios);
     final treinoAsync = pickerAsync.whenData((h) => h.treino);
+    final usesPickerApi = _usesPickerApi();
+    final pickerApiQuery = _buildPickerApiQuery();
+    final pickerPageAsync =
+        usesPickerApi
+            ? ref.watch(exercicioPickerPageProvider(pickerApiQuery))
+            : null;
     final alreadyInTreinoIds = _treinoExercicioIds(treinoAsync);
     final chrome = ShellChrome.of(context);
     final isDark = chrome.isDark;
@@ -212,7 +219,7 @@ class _AddExercicioToTreinoScreenState
                       },
                     ),
                     Expanded(
-                      child: exerciciosAsync.when(
+                      child: pickerAsync.when(
                         loading:
                             () => const Padding(
                               padding: EdgeInsets.only(top: 16),
@@ -229,8 +236,8 @@ class _AddExercicioToTreinoScreenState
                                     treinoPickerHomeProvider(widget.treinoId),
                                   ),
                             ),
-                        data: (exercicios) {
-                          if (exercicios.isEmpty) {
+                        data: (home) {
+                          if (home.libraryCount == 0) {
                             if (_seedingBiblioteca) {
                               return const SkeletonList(count: 4);
                             }
@@ -238,6 +245,7 @@ class _AddExercicioToTreinoScreenState
                               icon: 'dumbbell',
                               title: 'Biblioteca padrão pronta para usar',
                               subtitle:
+                                  pickerHints.emptyLibraryHint ??
                                   'Importe ~190 exercícios curados (supino, agachamento, remada...) com vídeos padrão. Depois você personaliza com os seus.',
                               action: FxEmptyAction(
                                 label: 'Importar biblioteca',
@@ -251,6 +259,7 @@ class _AddExercicioToTreinoScreenState
                                       treinoPickerHomeProvider(widget.treinoId),
                                     );
                                     ref.invalidate(exerciciosProvider);
+                                    ref.invalidate(exercicioPickerStatsProvider);
                                   } catch (e) {
                                     if (!context.mounted) return;
                                     FeedbackHelper.showError(
@@ -268,6 +277,21 @@ class _AddExercicioToTreinoScreenState
                               ),
                             );
                           }
+
+                          if (usesPickerApi &&
+                              pickerPageAsync != null &&
+                              pickerPageAsync.isLoading &&
+                              pickerPageAsync.valueOrNull == null) {
+                            return const Padding(
+                              padding: EdgeInsets.only(top: 16),
+                              child: SkeletonList(count: 4),
+                            );
+                          }
+
+                          final visibleExercicios = _resolveVisibleExercicios(
+                            home: home,
+                            pickerPage: pickerPageAsync?.valueOrNull,
+                          );
 
                           return Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -337,12 +361,8 @@ class _AddExercicioToTreinoScreenState
                                           key: ValueKey(_tabIndex),
                                           child: _buildTabContent(
                                             context: context,
-                                            exercicios: _visibleExercicios(
-                                              exercicios,
-                                            ),
-                                            allExercicios: exercicios,
-                                            totalLibraryCount:
-                                                exercicios.length,
+                                            exercicios: visibleExercicios,
+                                            libraryCount: home.libraryCount,
                                             uiHints: pickerHints,
                                             isDark: isDark,
                                             primary: primary,

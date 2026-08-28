@@ -159,7 +159,7 @@ extension AddExercicioToTreinoScreenActionsB
     }
   }
 
-  Future<void> _openSimilarPicker(List<Exercicio> exercicios) async {
+  Future<void> _openSimilarPicker() async {
     final alvo = _selecionado;
     if (alvo == null) return;
     Exercicio? replacement;
@@ -188,12 +188,41 @@ extension AddExercicioToTreinoScreenActionsB
     }
   }
 
-  List<Exercicio> _visibleExercicios(List<Exercicio> exercicios) {
-    return applyExercisePickerFilter(exercicios, _pickerFilter);
+  bool _usesPickerApi() {
+    return _buscaQuery.trim().length >= 2 ||
+        _pickerFilter.somenteFavoritos ||
+        _pickerFilter.somenteComVideo;
   }
 
-  Future<void> _openExercisePicker(
-    List<Exercicio> exercicios, {
+  ExercicioPickerQuery _buildPickerApiQuery() {
+    return ExercicioPickerQuery(
+      busca: _buscaQuery.trim().isEmpty ? null : _buscaQuery.trim(),
+      somenteFavoritos: _pickerFilter.somenteFavoritos,
+      somenteComVideo: _pickerFilter.somenteComVideo,
+    );
+  }
+
+  List<Exercicio> _resolveVisibleExercicios({
+    required TreinoPickerHomeBundle home,
+    ExercicioPickerPage? pickerPage,
+  }) {
+    final base =
+        _usesPickerApi() && pickerPage != null
+            ? pickerPage.content
+            : home.shortcuts;
+    return applyExercisePickerFilter(base, _pickerFilter);
+  }
+
+  Future<ExercicioPickerPage> _loadPickerPage(String busca, int page) {
+    return ref.read(exercicioRepositoryProvider).listarPickerPagina(
+      busca: busca.trim().isEmpty ? null : busca.trim(),
+      favoritos: _pickerFilter.somenteFavoritos ? true : null,
+      hasVideo: _pickerFilter.somenteComVideo ? true : null,
+      page: page,
+    );
+  }
+
+  Future<void> _openExercisePicker({
     required Set<int> alreadyInTreinoIds,
     String? searchPlaceholder,
   }) async {
@@ -205,12 +234,12 @@ extension AddExercicioToTreinoScreenActionsB
         context: context,
         builder:
             (sheetContext) => _ExercisePickerSheet(
-              exercicios: exercicios,
               selected: _selecionado,
               alreadyInTreinoIds: alreadyInTreinoIds,
               initialQuery: _buscaQuery,
               searchPlaceholder:
                   searchPlaceholder ?? 'Buscar por nome, músculo ou equipamento',
+              onLoadPage: _loadPickerPage,
               onUploadVideo:
                   (exercicio) => _uploadExerciseVideo(
                     exercicio,
@@ -227,13 +256,11 @@ extension AddExercicioToTreinoScreenActionsB
   }
 
   Future<Exercicio?> _freshExercicio(int exercicioId) async {
-    final home = await ref.read(
-      treinoPickerHomeProvider(widget.treinoId).future,
-    );
-    for (final exercicio in home.exercicios) {
-      if (exercicio.id == exercicioId) return exercicio;
+    try {
+      return await ref.read(exercicioRepositoryProvider).buscar(exercicioId);
+    } catch (_) {
+      return null;
     }
-    return null;
   }
 
   Future<void> _scheduleMediaRefresh(int exercicioId) async {
@@ -378,8 +405,7 @@ extension AddExercicioToTreinoScreenActionsB
   Widget _buildTabContent({
     required BuildContext context,
     required List<Exercicio> exercicios,
-    required List<Exercicio> allExercicios,
-    required int totalLibraryCount,
+    required int libraryCount,
     required TreinoPickerUiHints uiHints,
     required bool isDark,
     required Color primary,
@@ -463,7 +489,7 @@ extension AddExercicioToTreinoScreenActionsB
         final query = _buscaQuery.trim().toLowerCase();
         final libraryLines = exercisePickerLibraryLines(
           filteredCount: exercicios.length,
-          totalCount: totalLibraryCount,
+          totalCount: libraryCount,
           filter: _pickerFilter,
         );
         final showFilterEmpty =
@@ -516,7 +542,6 @@ extension AddExercicioToTreinoScreenActionsB
                 celebrateVideoSuccess: _celebrateVideoSuccess,
                 onChange:
                     () => _openExercisePicker(
-                      allExercicios,
                       alreadyInTreinoIds: alreadyInTreinoIds,
                     ),
                 onPreview:
@@ -603,7 +628,6 @@ extension AddExercicioToTreinoScreenActionsB
                   onTap:
                       _pickerFilter.somenteFavoritos
                           ? () => _openExercisePicker(
-                            allExercicios,
                             alreadyInTreinoIds: alreadyInTreinoIds,
                           )
                           : () => setState(() {
@@ -688,7 +712,7 @@ extension AddExercicioToTreinoScreenActionsB
             if (!compact && hasBrowseShortcuts) ...[
               const SizedBox(height: 12),
               _BrowseLibraryCta(
-                totalCount: totalLibraryCount,
+                totalCount: libraryCount,
                 libraryLines: libraryLines,
                 libraryCaption: uiHints.libraryCaption,
                 createLabel: uiHints.createCtaLabel,
@@ -696,7 +720,6 @@ extension AddExercicioToTreinoScreenActionsB
                 primary: primary,
                 onOpenPicker:
                     () => _openExercisePicker(
-                      allExercicios,
                       alreadyInTreinoIds: alreadyInTreinoIds,
                       searchPlaceholder: uiHints.searchPlaceholder,
                     ),
@@ -713,7 +736,6 @@ extension AddExercicioToTreinoScreenActionsB
                 showBrowseHint: !hasBrowseShortcuts,
                 onTap:
                     () => _openExercisePicker(
-                      allExercicios,
                       alreadyInTreinoIds: alreadyInTreinoIds,
                     ),
                 mediaLoading: _mediaLoading,
@@ -730,7 +752,7 @@ extension AddExercicioToTreinoScreenActionsB
               Align(
                 alignment: Alignment.centerLeft,
                 child: TextButton.icon(
-                  onPressed: () => _openSimilarPicker(allExercicios),
+                  onPressed: _openSimilarPicker,
                   icon: Icon(
                     Icons.swap_horiz_rounded,
                     color: primary,

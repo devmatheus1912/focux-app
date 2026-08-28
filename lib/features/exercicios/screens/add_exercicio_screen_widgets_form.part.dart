@@ -161,117 +161,37 @@ class _SectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
-    final collapsed = onToggle != null && !expanded;
-    final header = Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          width: 32,
-          height: 32,
-          decoration: BoxDecoration(
-            color: primary.withValues(alpha: collapsed ? 0.07 : 0.1),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Icon(icon, color: primary, size: 17),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                subtitle,
-                style: TextStyle(
-                  color:
-                      isDark
-                          ? EagleTokens.darkInkMute
-                          : TokensStrip.textSecondary,
-                  fontSize: 12,
-                  height: 1.25,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-        ),
-        if (onToggle != null) ...[
-          const SizedBox(width: 8),
-          AnimatedRotation(
-            turns: expanded ? 0.5 : 0,
-            duration: const Duration(milliseconds: 180),
-            curve: Curves.easeOutCubic,
-            child: Icon(
-              Icons.keyboard_arrow_down_rounded,
-              color:
-                  isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
-            ),
-          ),
-        ],
-      ],
-    );
 
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 180),
-      curve: Curves.easeOutCubic,
-      padding: EdgeInsets.all(collapsed ? 12 : 14),
-      decoration: fxListCardDecoration(context),
-      child: Column(
+    if (onToggle != null) {
+      return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (onToggle == null)
-            header
-          else
-            Semantics(
-              button: true,
-              expanded: expanded,
-              label:
-                  expanded ? 'Recolher $title' : 'Expandir $title. $subtitle',
-              child: InkWell(
-                onTap: onToggle,
-                borderRadius: BorderRadius.circular(14),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 2),
-                  child: header,
-                ),
+          FxSettingsGroup(
+            accent: primary,
+            children: [
+              FxSettingsTile(
+                icon: icon,
+                accent: primary,
+                label: title,
+                subtitle: subtitle,
+                value: '',
+                picker: true,
+                showDivider: expanded,
+                onTap: onToggle!,
               ),
-            ),
-          AnimatedSize(
-            duration: const Duration(milliseconds: 180),
-            curve: Curves.easeOutCubic,
-            alignment: Alignment.topCenter,
-            child:
-                expanded
-                    ? Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        const SizedBox(height: 12),
-                        Divider(
-                          height: 1,
-                          color:
-                              isDark
-                                  ? EagleTokens.darkLine
-                                  : TokensStrip.borderDefault.withValues(
-                                    alpha: 0.58,
-                                  ),
-                        ),
-                        const SizedBox(height: 14),
-                        child,
-                      ],
-                    )
-                    : const SizedBox.shrink(),
+              if (expanded) child,
+            ],
           ),
         ],
-      ),
+      );
+    }
+
+    return FxSettingsGroup(
+      header: title,
+      caption: subtitle,
+      accent: primary,
+      children: [child],
     );
   }
 }

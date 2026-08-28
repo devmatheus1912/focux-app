@@ -3,10 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/focux_hub_typography.dart';
 import '../../data/enums.dart';
+import '../../data/exercicio_page.dart';
 import '../../data/exercicio_repository.dart';
 import '../../data/exercicio_taxonomy_labels.dart';
 import '../../../treinos/utils/exercise_picker_filter.dart';
-import '../../providers/exercicios_provider.dart';
+import '../../providers/exercicio_picker_provider.dart';
 import '../../../../core/widgets/fx_bottom_sheet.dart';
 import 'padrao_exercicios_bottom_sheet.dart';
 
@@ -47,47 +48,54 @@ class _PadraoMovimentoGridState extends ConsumerState<PadraoMovimentoGrid> {
     PadraoMovimento.cardioHiit,
   ];
 
-  List<_GridItemData> _itemsForMode(List<Exercicio> all) {
-    final candidates =
-        _mode == PadraoGridMode.padrao
-            ? [
-              for (final padrao in _padroes)
-                _GridItemData(
-                  label: TaxonomyLabels.padrao[padrao] ?? padrao.name,
-                  count: all.where((ex) => ex.padraoMovimento == padrao).length,
-                  icon: Icons.account_tree_rounded,
-                  onTap: () => _open(padrao: padrao),
-                ),
-            ]
-            : [
-              for (final grupo in GrupoMuscular.values)
-                _GridItemData(
-                  label: TaxonomyLabels.grupo[grupo] ?? grupo.name,
-                  count:
-                      all
-                          .where((ex) => ex.grupoMuscularPrimario == grupo)
-                          .length,
-                  icon: Icons.fitness_center_rounded,
-                  onTap: () => _open(grupo: grupo),
-                ),
-            ];
-
-    return candidates.where((item) => item.count > 0).toList()
-      ..sort((a, b) => b.count.compareTo(a.count));
+  List<_GridItemData> _itemsForMode(PadraoGridMode mode, ExercicioPickerStats stats) {
+    if (mode == PadraoGridMode.padrao) {
+      return [
+        for (final padrao in _padroes)
+          if ((stats.porPadrao[padrao.name] ?? 0) > 0)
+            _GridItemData(
+              label: TaxonomyLabels.padrao[padrao] ?? padrao.name,
+              count: stats.porPadrao[padrao.name] ?? 0,
+              icon: Icons.account_tree_rounded,
+              onTap: () => _open(padrao: padrao),
+            ),
+      ]..sort((a, b) => b.count.compareTo(a.count));
+    }
+    return [
+      for (final grupo in GrupoMuscular.values)
+        if ((stats.porGrupo[grupo.name] ?? 0) > 0)
+          _GridItemData(
+            label: TaxonomyLabels.grupo[grupo] ?? grupo.name,
+            count: stats.porGrupo[grupo.name] ?? 0,
+            icon: Icons.fitness_center_rounded,
+            onTap: () => _open(grupo: grupo),
+          ),
+    ]..sort((a, b) => b.count.compareTo(a.count));
   }
 
   @override
   Widget build(BuildContext context) {
-    final all = ref
-        .watch(exerciciosProvider)
-        .maybeWhen(data: (value) => value, orElse: () => const <Exercicio>[]);
-    final filtered = applyExercisePickerFilter(all, widget.pickerFilter);
-    final items = _itemsForMode(filtered);
+    final statsAsync = ref.watch(exercicioPickerStatsProvider);
     final mute = Theme.of(context).colorScheme.onSurfaceVariant;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
+    return statsAsync.when(
+      loading:
+          () => const Center(child: Padding(
+            padding: EdgeInsets.all(24),
+            child: CircularProgressIndicator(),
+          )),
+      error:
+          (_, __) => Center(
+            child: Text(
+              'Não foi possível carregar categorias.',
+              style: FocuxHubTypography.bodyMuted(color: mute),
+            ),
+          ),
+      data: (stats) {
+        final items = _itemsForMode(_mode, stats);
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
         const _CategoryIntro(),
         Padding(
           padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
@@ -159,7 +167,9 @@ class _PadraoMovimentoGridState extends ConsumerState<PadraoMovimentoGrid> {
                         ),
                   ),
         ),
-      ],
+          ],
+        );
+      },
     );
   }
 

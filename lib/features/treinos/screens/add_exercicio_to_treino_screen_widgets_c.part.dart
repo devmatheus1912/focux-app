@@ -1,16 +1,16 @@
 part of 'add_exercicio_to_treino_screen.dart';
 
 class _ExercisePickerSheet extends StatefulWidget {
-  final List<Exercicio> exercicios;
   final Exercicio? selected;
   final Set<int> alreadyInTreinoIds;
   final String initialQuery;
   final String searchPlaceholder;
+  final Future<ExercicioPickerPage> Function(String busca, int page) onLoadPage;
   final Future<Exercicio?> Function(Exercicio exercicio)? onUploadVideo;
 
   const _ExercisePickerSheet({
-    required this.exercicios,
     required this.selected,
+    required this.onLoadPage,
     this.alreadyInTreinoIds = const {},
     this.initialQuery = '',
     this.searchPlaceholder = 'Buscar por nome, músculo ou equipamento',
@@ -23,16 +23,18 @@ class _ExercisePickerSheet extends StatefulWidget {
 
 class _ExercisePickerSheetState extends State<_ExercisePickerSheet> {
   late final TextEditingController _searchCtrl;
-  late String _query;
+  late final ScrollController _scrollCtrl;
   Timer? _searchDebounce;
-  String _highlightQuery = '';
+  String _committedQuery = '';
   final Map<int, Exercicio> _localUpdates = {};
+  final List<Exercicio> _items = [];
   bool _uploadingInSheet = false;
-
-  List<Exercicio> get _exercicios =>
-      widget.exercicios
-          .map((exercicio) => _localUpdates[exercicio.id] ?? exercicio)
-          .toList();
+  bool _loading = true;
+  bool _loadingMore = false;
+  bool _hasNext = false;
+  int _page = 0;
+  int _totalElements = 0;
+  String? _error;
 
   Exercicio _resolve(Exercicio exercicio) =>
       _localUpdates[exercicio.id] ?? exercicio;
@@ -54,25 +56,78 @@ class _ExercisePickerSheetState extends State<_ExercisePickerSheet> {
   @override
   void initState() {
     super.initState();
-    _query = widget.initialQuery;
-    _highlightQuery = widget.initialQuery.trim();
+    _committedQuery = widget.initialQuery.trim();
     _searchCtrl = TextEditingController(text: widget.initialQuery);
+    _scrollCtrl = ScrollController()..addListener(_onScroll);
     _searchCtrl.addListener(_onSearchChanged);
+    _fetchPage(reset: true);
+  }
+
+  void _onScroll() {
+    if (!_hasNext || _loadingMore || _loading) return;
+    if (_scrollCtrl.position.pixels >=
+        _scrollCtrl.position.maxScrollExtent - 120) {
+      _fetchPage(reset: false);
+    }
   }
 
   void _onSearchChanged() {
-    final text = _searchCtrl.text;
-    setState(() => _query = text);
     _searchDebounce?.cancel();
-    _searchDebounce = Timer(const Duration(milliseconds: 220), () {
+    _searchDebounce = Timer(const Duration(milliseconds: 260), () {
       if (!mounted) return;
-      setState(() => _highlightQuery = text.trim());
+      final next = _searchCtrl.text.trim();
+      if (next == _committedQuery) return;
+      setState(() => _committedQuery = next);
+      _fetchPage(reset: true);
     });
+  }
+
+  Future<void> _fetchPage({required bool reset}) async {
+    if (reset) {
+      setState(() {
+        _loading = true;
+        _error = null;
+        _page = 0;
+        _items.clear();
+      });
+    } else {
+      if (_loadingMore) return;
+      setState(() => _loadingMore = true);
+    }
+
+    try {
+      final result = await widget.onLoadPage(_committedQuery, _page);
+      if (!mounted) return;
+      setState(() {
+        if (reset) {
+          _items
+            ..clear()
+            ..addAll(result.content);
+        } else {
+          _items.addAll(result.content);
+        }
+        _totalElements = result.meta.totalElements;
+        _hasNext = result.meta.hasNext;
+        _page = result.meta.page + 1;
+        _loading = false;
+        _loadingMore = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = friendlyError(e);
+        _loading = false;
+        _loadingMore = false;
+      });
+    }
   }
 
   @override
   void dispose() {
     _searchDebounce?.cancel();
+    _scrollCtrl
+      ..removeListener(_onScroll)
+      ..dispose();
     _searchCtrl
       ..removeListener(_onSearchChanged)
       ..dispose();
@@ -84,17 +139,8 @@ class _ExercisePickerSheetState extends State<_ExercisePickerSheet> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
     final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
-    final normalized = _query.trim().toLowerCase();
-    final filtered = sortExerciciosForPicker(
-      normalized.isEmpty
-          ? _exercicios
-          : _exercicios.where((exercicio) {
-            final haystack =
-                '${exercicio.nome} ${exercicio.musculoAlvo ?? ''} '
-                        '${exercicio.equipamento ?? ''} ${exercicio.nivel ?? ''}'
-                    .toLowerCase();
-            return haystack.contains(normalized);
-          }),
+    final sorted = sortExerciciosForPicker(
+      _items.map(_resolve),
       alreadyInTreinoIds: widget.alreadyInTreinoIds,
     );
 
@@ -113,7 +159,10 @@ class _ExercisePickerSheetState extends State<_ExercisePickerSheet> {
           FxHomeSheetHeader(
             isDark: isDark,
             title: 'Biblioteca de exercícios',
-            subtitle: '${filtered.length} de ${_exercicios.length} disponíveis',
+            subtitle:
+                _totalElements == 0
+                    ? 'Carregando...'
+                    : '${sorted.length} de $_totalElements disponíveis',
             leading: Icon(
               Icons.fitness_center_rounded,
               color: primary,
@@ -134,10 +183,8 @@ class _ExercisePickerSheetState extends State<_ExercisePickerSheet> {
                       : IconButton(
                         onPressed: () {
                           _searchCtrl.clear();
-                          setState(() {
-                            _query = '';
-                            _highlightQuery = '';
-                          });
+                          setState(() => _committedQuery = '');
+                          _fetchPage(reset: true);
                         },
                         icon: const Icon(Icons.close_rounded),
                       ),
@@ -162,29 +209,39 @@ class _ExercisePickerSheetState extends State<_ExercisePickerSheet> {
             ),
           ),
           const SizedBox(height: 12),
-          if (filtered.isEmpty)
+          if (_loading)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 24),
+              child: FxLoading(),
+            )
+          else if (_error != null)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              child: FxErrorState(
+                chromeOnDark: isDark,
+                primary: primary,
+                message: _error!,
+                onRetry: () => _fetchPage(reset: true),
+              ),
+            )
+          else if (sorted.isEmpty)
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 12),
               child: FxEmptyState(
                 icon: 'search',
                 title:
-                    _query.trim().isNotEmpty
-                        ? 'Nada encontrado para "${_query.trim()}"'
+                    _committedQuery.isNotEmpty
+                        ? 'Nada encontrado para "$_committedQuery"'
                         : 'Nenhum exercício nesta lista',
-                subtitle:
-                    _query.trim().isNotEmpty
-                        ? 'Tente outro termo ou limpe a busca.'
-                        : 'Ajuste os filtros na tela anterior.',
+                subtitle: 'Tente outro termo ou limpe a busca.',
                 action:
-                    _query.trim().isNotEmpty
+                    _committedQuery.isNotEmpty
                         ? FxEmptyAction(
                           label: 'Limpar busca',
                           onTap: () {
                             _searchCtrl.clear();
-                            setState(() {
-                              _query = '';
-                              _highlightQuery = '';
-                            });
+                            setState(() => _committedQuery = '');
+                            _fetchPage(reset: true);
                           },
                         )
                         : null,
@@ -195,44 +252,52 @@ class _ExercisePickerSheetState extends State<_ExercisePickerSheet> {
               constraints: BoxConstraints(
                 maxHeight: (maxHeight - 220).clamp(220.0, 480.0),
               ),
-              child: SingleChildScrollView(
+              child: ListView(
+                controller: _scrollCtrl,
                 keyboardDismissBehavior:
                     ScrollViewKeyboardDismissBehavior.onDrag,
-                child: FxSettingsGroup(
-                  accent: primary,
-                  children: [
-                    for (var i = 0; i < filtered.length; i++)
-                      _ExercisePickerTile(
-                        exercicio: _resolve(filtered[i]),
-                        selected: widget.selected?.id == filtered[i].id,
-                        alreadyInTreino: widget.alreadyInTreinoIds.contains(
-                          filtered[i].id,
+                children: [
+                  FxSettingsGroup(
+                    accent: primary,
+                    children: [
+                      for (var i = 0; i < sorted.length; i++)
+                        _ExercisePickerTile(
+                          exercicio: sorted[i],
+                          selected: widget.selected?.id == sorted[i].id,
+                          alreadyInTreino: widget.alreadyInTreinoIds.contains(
+                            sorted[i].id,
+                          ),
+                          highlightQuery: _committedQuery,
+                          primary: primary,
+                          isDark: isDark,
+                          showDivider: i < sorted.length - 1,
+                          uploadEnabled:
+                              widget.onUploadVideo != null &&
+                              !_uploadingInSheet,
+                          onTap: () {
+                            HapticFeedback.selectionClick();
+                            Navigator.pop(context, sorted[i]);
+                          },
+                          onPreviewThumb:
+                              canPreviewExerciseMedia(sorted[i])
+                                  ? () => showExerciseMediaPreview(
+                                    context,
+                                    exercicio: sorted[i],
+                                  )
+                                  : null,
+                          onUploadVideo:
+                              widget.onUploadVideo == null
+                                  ? null
+                                  : () => _handleUpload(sorted[i]),
                         ),
-                        highlightQuery: _highlightQuery,
-                        primary: primary,
-                        isDark: isDark,
-                        showDivider: i < filtered.length - 1,
-                        uploadEnabled:
-                            widget.onUploadVideo != null &&
-                            !_uploadingInSheet,
-                        onTap: () {
-                          HapticFeedback.selectionClick();
-                          Navigator.pop(context, filtered[i]);
-                        },
-                        onPreviewThumb:
-                            canPreviewExerciseMedia(filtered[i])
-                                ? () => showExerciseMediaPreview(
-                                  context,
-                                  exercicio: filtered[i],
-                                )
-                                : null,
-                        onUploadVideo:
-                            widget.onUploadVideo == null
-                                ? null
-                                : () => _handleUpload(filtered[i]),
-                      ),
-                  ],
-                ),
+                    ],
+                  ),
+                  if (_loadingMore)
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                      child: Center(child: FxLoading(size: 22)),
+                    ),
+                ],
               ),
             ),
           const SizedBox(height: FxSettingsLayout.footerAfterGroup),

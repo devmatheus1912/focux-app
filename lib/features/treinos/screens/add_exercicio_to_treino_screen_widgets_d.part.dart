@@ -182,13 +182,11 @@ class _CreateExerciseButton extends StatelessWidget {
     required this.primary,
     required this.onPressed,
     this.compact = false,
-    this.expand = false,
   });
 
   final Color primary;
   final VoidCallback onPressed;
   final bool compact;
-  final bool expand;
 
   @override
   Widget build(BuildContext context) {
@@ -196,7 +194,7 @@ class _CreateExerciseButton extends StatelessWidget {
     final button = OutlinedButton.icon(
       onPressed: onPressed,
       style: OutlinedButton.styleFrom(
-        minimumSize: Size(expand ? double.infinity : 0, 48),
+        minimumSize: const Size(0, 48),
         padding: EdgeInsets.symmetric(horizontal: compact ? 12 : 14),
         foregroundColor: primary,
         side: BorderSide(color: primary.withValues(alpha: 0.42)),
@@ -222,8 +220,7 @@ class _CreateExerciseButton extends StatelessWidget {
       child: Tooltip(
         message: 'Criar exercício personalizado',
         preferBelow: false,
-        child:
-            expand ? SizedBox(width: double.infinity, child: button) : button,
+        child: button,
       ),
     );
   }

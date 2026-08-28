@@ -5,17 +5,20 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/design_tokens.dart';
 import '../../../../core/theme/focux_hub_typography.dart';
 import '../../../../core/theme/tokens_strip.dart';
+import '../../../../core/utils/friendly_error.dart';
 import '../../../../core/widgets/fx_home_sheet.dart';
 import '../../../../core/widgets/fx_loading.dart';
+import '../../../../core/widgets/fx_settings_group.dart';
+import '../../../../core/widgets/fx_settings_tile.dart';
+import '../../providers/exercicios_provider.dart';
 import '../../data/enums.dart';
 import '../../data/exercicio_repository.dart';
 import '../../data/exercicio_taxonomy_labels.dart';
 import '../../data/substituicao_engine.dart';
-import '../../providers/exercicios_provider.dart';
 import 'exercise_media_thumb.dart';
 import 'exercise_video_preview_sheet.dart';
 
-class SubstituirExercicioBottomSheet extends ConsumerWidget {
+class SubstituirExercicioBottomSheet extends ConsumerStatefulWidget {
   const SubstituirExercicioBottomSheet({
     super.key,
     required this.alvo,
@@ -30,8 +33,106 @@ class SubstituirExercicioBottomSheet extends ConsumerWidget {
   final VoidCallback? onCriarNovo;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final asyncList = ref.watch(exerciciosProvider);
+  ConsumerState<SubstituirExercicioBottomSheet> createState() =>
+      _SubstituirExercicioBottomSheetState();
+}
+
+class _SubstituirExercicioBottomSheetState
+    extends ConsumerState<SubstituirExercicioBottomSheet> {
+  final ScrollController _scrollCtrl = ScrollController();
+  final List<Exercicio> _candidatos = [];
+  List<AlternativaResultado> _alternativas = const [];
+  bool _loading = true;
+  bool _loadingMore = false;
+  bool _hasNext = false;
+  int _page = 0;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollCtrl.addListener(_onScroll);
+    _fetchPage(reset: true);
+  }
+
+  @override
+  void dispose() {
+    _scrollCtrl.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (!_hasNext || _loadingMore || _loading) return;
+    if (_scrollCtrl.position.pixels >=
+        _scrollCtrl.position.maxScrollExtent - 120) {
+      _fetchPage(reset: false);
+    }
+  }
+
+  void _recomputeAlternativas() {
+    _alternativas =
+        SubstituicaoEngine()
+            .encontrarAlternativas(
+              alvo: widget.alvo,
+              candidatos: _candidatos,
+              equipamentosAluno: widget.equipamentosAluno,
+            )
+            .where((item) => item.exercicio.id != widget.alvo.id)
+            .toList();
+  }
+
+  Future<void> _fetchPage({required bool reset}) async {
+    if (reset) {
+      setState(() {
+        _loading = true;
+        _error = null;
+        _page = 0;
+        _candidatos.clear();
+        _alternativas = const [];
+      });
+    } else {
+      if (_loadingMore) return;
+      setState(() => _loadingMore = true);
+    }
+
+    try {
+      final result = await ref
+          .read(exercicioRepositoryProvider)
+          .listarPickerPagina(
+            padraoMovimento: widget.alvo.padraoMovimento?.name,
+            grupoMuscularPrimario: widget.alvo.grupoMuscularPrimario?.name,
+            page: _page,
+            size: 40,
+          );
+      if (!mounted) return;
+      setState(() {
+        if (reset) {
+          _candidatos
+            ..clear()
+            ..addAll(result.content.where((ex) => ex.id != widget.alvo.id));
+        } else {
+          _candidatos.addAll(
+            result.content.where((ex) => ex.id != widget.alvo.id),
+          );
+        }
+        _hasNext = result.meta.hasNext;
+        _page = result.meta.page + 1;
+        _loading = false;
+        _loadingMore = false;
+        _recomputeAlternativas();
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = friendlyError(e);
+        _loading = false;
+        _loadingMore = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
@@ -50,100 +151,114 @@ class SubstituirExercicioBottomSheet extends ConsumerWidget {
           FxHomeSheetHeader(
             isDark: isDark,
             title: 'Trocar por similar',
-            subtitle: 'Substituindo ${alvo.nomeDisplay}',
+            subtitle: 'Substituindo ${widget.alvo.nomeDisplay}',
             leading: Icon(Icons.swap_horiz_rounded, color: primary, size: 18),
           ),
           Expanded(
-            child: asyncList.when(
-              loading:
-                  () => Padding(
-                    padding: const EdgeInsets.only(top: 8),
-                    child: FxLoading.sectionShimmer(context, height: 180),
-                  ),
-              error:
-                  (_, __) => Center(
-                    child: Text(
-                      'Não foi possível buscar alternativas.',
-                      style: FocuxHubTypography.bodyMuted(color: mute),
-                    ),
-                  ),
-              data: (todos) {
-                final alternativas = SubstituicaoEngine().encontrarAlternativas(
-                  alvo: alvo,
-                  candidatos: todos,
-                  equipamentosAluno: equipamentosAluno,
-                );
-
-                return Column(
-                  children: [
-                    if (alternativas.isNotEmpty)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 8, top: 4),
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            '${alternativas.length} opções por padrão de movimento e equipamento',
-                            style: FocuxHubTypography.bodyMuted(
-                              color: primary,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ),
+            child:
+                _loading
+                    ? Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: FxLoading.sectionShimmer(context, height: 180),
+                    )
+                    : _error != null
+                    ? Center(
+                      child: Text(
+                        _error!,
+                        style: FocuxHubTypography.bodyMuted(color: mute),
                       ),
-                    Expanded(
-                      child:
-                          alternativas.isEmpty
-                              ? _EmptyState(
-                                onCriarNovo:
-                                    onCriarNovo == null
-                                        ? null
-                                        : () {
-                                          Navigator.of(context).pop();
-                                          onCriarNovo!();
-                                        },
-                              )
-                              : ListView.separated(
-                                padding: const EdgeInsets.only(bottom: 8),
-                                itemCount: alternativas.length,
-                                separatorBuilder:
-                                    (_, __) => const SizedBox(height: 8),
-                                itemBuilder: (context, index) {
-                                  final item = alternativas[index];
-                                  return _AlternativaTile(
-                                    item: item,
-                                    primary: primary,
-                                    isDark: isDark,
-                                    onTap: () {
-                                      HapticFeedback.selectionClick();
-                                      Navigator.of(context).pop();
-                                      onEscolher(item.exercicio);
-                                    },
-                                  );
-                                },
+                    )
+                    : Column(
+                      children: [
+                        if (_alternativas.isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 8, top: 4),
+                            child: Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                '${_alternativas.length} opções por padrão de movimento e equipamento',
+                                style: FocuxHubTypography.bodyMuted(
+                                  color: primary,
+                                  fontWeight: FontWeight.w700,
+                                ),
                               ),
-                    ),
-                    if (alternativas.isNotEmpty && onCriarNovo != null)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 8),
-                        child: OutlinedButton.icon(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                            onCriarNovo!();
-                          },
-                          style: OutlinedButton.styleFrom(
-                            minimumSize: const Size.fromHeight(46),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
                             ),
                           ),
-                          icon: const Icon(Icons.add_rounded, size: 18),
-                          label: const Text('Criar exercício personalizado'),
+                        Expanded(
+                          child:
+                              _alternativas.isEmpty
+                                  ? _EmptyState(
+                                    onCriarNovo:
+                                        widget.onCriarNovo == null
+                                            ? null
+                                            : () {
+                                              Navigator.of(context).pop();
+                                              widget.onCriarNovo!();
+                                            },
+                                  )
+                                  : ListView(
+                                    controller: _scrollCtrl,
+                                    padding: const EdgeInsets.only(bottom: 8),
+                                    children: [
+                                      FxSettingsGroup(
+                                        accent: primary,
+                                        children: [
+                                          for (
+                                            var i = 0;
+                                            i < _alternativas.length;
+                                            i++
+                                          )
+                                            _AlternativaTile(
+                                              item: _alternativas[i],
+                                              primary: primary,
+                                              isDark: isDark,
+                                              showDivider:
+                                                  i < _alternativas.length - 1,
+                                              onTap: () {
+                                                HapticFeedback.selectionClick();
+                                                Navigator.of(context).pop();
+                                                widget.onEscolher(
+                                                  _alternativas[i].exercicio,
+                                                );
+                                              },
+                                            ),
+                                        ],
+                                      ),
+                                      if (_loadingMore)
+                                        const Padding(
+                                          padding: EdgeInsets.symmetric(
+                                            vertical: 16,
+                                          ),
+                                          child: Center(
+                                            child: FxLoading(size: 22),
+                                          ),
+                                        ),
+                                    ],
+                                  ),
                         ),
-                      ),
-                  ],
-                );
-              },
-            ),
+                        if (_alternativas.isNotEmpty &&
+                            widget.onCriarNovo != null)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8),
+                            child: OutlinedButton.icon(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                                widget.onCriarNovo!();
+                              },
+                              style: OutlinedButton.styleFrom(
+                                minimumSize: const Size.fromHeight(46),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                              ),
+                              icon: const Icon(Icons.add_rounded, size: 18),
+                              label: const Text(
+                                'Criar exercício personalizado',
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
           ),
         ],
       ),
@@ -157,99 +272,41 @@ class _AlternativaTile extends StatelessWidget {
     required this.primary,
     required this.isDark,
     required this.onTap,
+    this.showDivider = true,
   });
 
   final AlternativaResultado item;
   final Color primary;
   final bool isDark;
   final VoidCallback onTap;
+  final bool showDivider;
 
   @override
   Widget build(BuildContext context) {
     final exercicio = item.exercicio;
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-    final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
     final meta = _metaParts(exercicio);
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(18),
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: isDark ? EagleTokens.darkCardHi : Colors.white,
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: line.withValues(alpha: 0.9)),
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              GestureDetector(
-                onTap:
-                    exercicio.hasPlayableMedia
-                        ? () {
-                          HapticFeedback.selectionClick();
-                          showExerciseMediaPreview(
-                            context,
-                            exercicio: exercicio,
-                          );
-                        }
-                        : null,
+    return FxSettingsTile(
+      icon: Icons.fitness_center_rounded,
+      accent: primary,
+      label: exercicio.nomeDisplay,
+      subtitle: meta,
+      value: '${item.score.clamp(0, 100)}%',
+      showDivider: showDivider,
+      onTap: onTap,
+      accessory:
+          exercicio.hasPlayableMedia
+              ? GestureDetector(
+                onTap: () {
+                  HapticFeedback.selectionClick();
+                  showExerciseMediaPreview(context, exercicio: exercicio);
+                },
                 child: ExerciseMediaThumb.fromExercicio(
                   exercicio,
-                  size: 44,
-                  radius: 14,
+                  size: 34,
                 ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: Text(
-                            exercicio.nomeDisplay,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: FocuxHubTypography.cardTitle(
-                              color: ink,
-                            ).copyWith(fontWeight: FontWeight.w900),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        _MatchBadge(score: item.score, primary: primary),
-                      ],
-                    ),
-                    if (meta.isNotEmpty) ...[
-                      const SizedBox(height: 5),
-                      Text(
-                        meta,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: FocuxHubTypography.bodyMuted(
-                          color: mute,
-                          fontWeight: FontWeight.w600,
-                          height: 1.25,
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 10),
-                child: Icon(Icons.chevron_right_rounded, color: mute, size: 20),
-              ),
-            ],
-          ),
-        ),
-      ),
+              )
+              : null,
     );
   }
 
@@ -272,30 +329,6 @@ class _AlternativaTile extends StatelessWidget {
       if (label != null) parts.add(label);
     }
     return parts.take(4).join(' · ');
-  }
-}
-
-class _MatchBadge extends StatelessWidget {
-  const _MatchBadge({required this.score, required this.primary});
-
-  final int score;
-  final Color primary;
-
-  @override
-  Widget build(BuildContext context) {
-    final clamped = score.clamp(0, 100);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-      decoration: BoxDecoration(
-        color: primary.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: primary.withValues(alpha: 0.22)),
-      ),
-      child: Text(
-        '$clamped%',
-        style: FocuxHubTypography.chip(primary),
-      ),
-    );
   }
 }
 

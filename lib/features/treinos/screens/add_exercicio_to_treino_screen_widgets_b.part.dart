@@ -37,7 +37,6 @@ class _ExercisePickerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final selected = exercicio != null;
     final hasMediaIssue = selected && exercicio!.showMediaBadgeInWorkoutList;
@@ -45,154 +44,61 @@ class _ExercisePickerCard extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Row(
+        FxSettingsGroup(
+          accent: primary,
           children: [
-            Expanded(
-              child: InkWell(
-                onTap: onTap,
-                borderRadius: BorderRadius.circular(TokensStrip.rCard),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 180),
-                  padding: const EdgeInsets.all(14),
-                  decoration: fxListCardDecoration(
-                    context,
-                    accent: selected ? primary : null,
-                    selected: selected,
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 44,
-                        height: 44,
-                        decoration: BoxDecoration(
-                          color:
-                              selected
-                                  ? primary
-                                  : primary.withValues(alpha: 0.10),
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Icon(
-                          selected ? Icons.check_rounded : Icons.search_rounded,
-                          color: selected ? Colors.white : primary,
-                          size: 22,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    selected
-                                        ? exercicio!.nomeDisplay
-                                        : 'Escolher exercÃ­cio',
-                                    maxLines: selected ? 2 : 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: FocuxHubTypography.body(color: ink)
-                                        .copyWith(
-                                      height: 1.12,
-                                      fontWeight: FontWeight.w900,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 4),
-                            if (selected)
-                              Text(
-                                _exerciseMeta(exercicio!),
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                style: FocuxHubTypography.bodyMuted(
-                                  color: _metaTextColor(isDark),
-                                  height: 1.18,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              )
-                            else
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    libraryLines.primary,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: FocuxHubTypography.bodyMuted(
-                                      color: _metaTextColor(isDark),
-                                      height: 1.18,
-                                      fontWeight: FontWeight.w800,
-                                    ),
-                                  ),
-                                  if (libraryLines.secondary != null)
-                                    Text(
-                                      libraryLines.secondary!,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: FocuxHubTypography.bodyMuted(
-                                        color: _metaTextColor(isDark),
-                                        height: 1.15,
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                    ),
-                                ],
-                              ),
-                          ],
-                        ),
-                      ),
-                      Icon(Icons.expand_more_rounded, color: mute, size: 22),
-                    ],
-                  ),
-                ),
-              ),
+            FxSettingsTile(
+              icon: selected ? Icons.check_rounded : Icons.search_rounded,
+              accent: primary,
+              label: selected ? exercicio!.nomeDisplay : 'Escolher exercício',
+              subtitle:
+                  selected
+                      ? _exerciseMeta(exercicio!)
+                      : [
+                        libraryLines.primary,
+                        if (libraryLines.secondary != null)
+                          libraryLines.secondary!,
+                      ].join(' · '),
+              value: '',
+              highlight: selected,
+              showDivider:
+                  !compactMode &&
+                  (showBrowseHint && (!selected || (showPrescriptionHint && !hasMediaIssue))),
+              onTap: onTap,
+              accessory: Icon(Icons.expand_more_rounded, color: mute, size: 22),
             ),
-            const SizedBox(width: 10),
-            _CreateExerciseButton(
-              primary: primary,
-              compact: true,
-              onPressed: onCreate,
-            ),
-          ],
-        ),
-        if (!compactMode &&
-            showBrowseHint &&
-            (!selected || (showPrescriptionHint && !hasMediaIssue))) ...[
-          const SizedBox(height: 12),
-          AnimatedSize(
-            duration: const Duration(milliseconds: 200),
-            curve: Curves.easeOutCubic,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-              decoration: fxListCardDecoration(context, accent: primary),
-              child: Row(
-                children: [
-                  Icon(
+            if (!compactMode &&
+                showBrowseHint &&
+                (!selected || (showPrescriptionHint && !hasMediaIssue)))
+              FxSettingsTile(
+                icon:
                     selected
                         ? Icons.edit_note_rounded
                         : Icons.auto_awesome_motion_rounded,
-                    color: primary,
-                    size: 17,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      selected
-                          ? 'Revise a prescriÃ§Ã£o abaixo antes de adicionar.'
-                          : 'Busque acima ou explore por movimento/grupo.',
-                      style: FocuxHubTypography.bodyMuted(
-                        color: mute,
-                        height: 1.25,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                ],
+                accent: primary,
+                label:
+                    selected
+                        ? 'Revise a prescrição abaixo'
+                        : 'Explore por movimento ou grupo',
+                subtitle:
+                    selected
+                        ? 'Confira séries, carga e descanso antes de salvar.'
+                        : 'Use a aba Explorar ou busque pelo nome.',
+                value: '',
+                showDivider: false,
+                onTap: onTap,
               ),
-            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        Align(
+          alignment: Alignment.centerRight,
+          child: _CreateExerciseButton(
+            primary: primary,
+            compact: true,
+            onPressed: onCreate,
           ),
-        ],
+        ),
         if (selected && !compactMode) ...[
           const SizedBox(height: 8),
           InkWell(

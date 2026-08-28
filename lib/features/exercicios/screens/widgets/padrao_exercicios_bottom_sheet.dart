@@ -4,18 +4,21 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/focux_hub_typography.dart';
 import '../../../../core/theme/tokens_strip.dart';
+import '../../../../core/utils/friendly_error.dart';
 import '../../../../core/widgets/fx_home_sheet.dart';
+import '../../../../core/widgets/fx_loading.dart';
+import '../../../../core/widgets/fx_settings_group.dart';
+import '../../../../core/widgets/fx_settings_tile.dart';
+import '../../providers/exercicios_provider.dart';
+import '../../../treinos/utils/exercise_picker_filter.dart';
 import '../../../treinos/utils/exercise_picker_sort.dart';
 import '../../data/enums.dart';
 import '../../data/exercicio_repository.dart';
 import '../../data/exercicio_taxonomy_labels.dart';
-import '../../providers/exercicios_provider.dart';
-import '../../../treinos/utils/exercise_picker_filter.dart';
-import '../../../../core/widgets/skeleton_loader.dart';
 import 'exercise_media_thumb.dart';
 import 'exercise_video_preview_sheet.dart';
 
-class PadraoExerciciosBottomSheet extends ConsumerWidget {
+class PadraoExerciciosBottomSheet extends ConsumerStatefulWidget {
   const PadraoExerciciosBottomSheet({
     super.key,
     this.padrao,
@@ -32,12 +35,96 @@ class PadraoExerciciosBottomSheet extends ConsumerWidget {
   final ExercisePickerFilter pickerFilter;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final asyncList = ref.watch(exerciciosProvider);
+  ConsumerState<PadraoExerciciosBottomSheet> createState() =>
+      _PadraoExerciciosBottomSheetState();
+}
+
+class _PadraoExerciciosBottomSheetState
+    extends ConsumerState<PadraoExerciciosBottomSheet> {
+  final ScrollController _scrollCtrl = ScrollController();
+  final List<Exercicio> _items = [];
+  bool _loading = true;
+  bool _loadingMore = false;
+  bool _hasNext = false;
+  int _page = 0;
+  int _totalElements = 0;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollCtrl.addListener(_onScroll);
+    _fetchPage(reset: true);
+  }
+
+  @override
+  void dispose() {
+    _scrollCtrl.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (!_hasNext || _loadingMore || _loading) return;
+    if (_scrollCtrl.position.pixels >=
+        _scrollCtrl.position.maxScrollExtent - 120) {
+      _fetchPage(reset: false);
+    }
+  }
+
+  Future<void> _fetchPage({required bool reset}) async {
+    if (reset) {
+      setState(() {
+        _loading = true;
+        _error = null;
+        _page = 0;
+        _items.clear();
+      });
+    } else {
+      if (_loadingMore) return;
+      setState(() => _loadingMore = true);
+    }
+
+    try {
+      final result = await ref
+          .read(exercicioRepositoryProvider)
+          .listarPickerPagina(
+            padraoMovimento: widget.padrao?.name,
+            grupoMuscularPrimario: widget.grupo?.name,
+            favoritos: widget.pickerFilter.somenteFavoritos ? true : null,
+            hasVideo: widget.pickerFilter.somenteComVideo ? true : null,
+            page: _page,
+          );
+      if (!mounted) return;
+      setState(() {
+        if (reset) {
+          _items
+            ..clear()
+            ..addAll(result.content);
+        } else {
+          _items.addAll(result.content);
+        }
+        _totalElements = result.meta.totalElements;
+        _hasNext = result.meta.hasNext;
+        _page = result.meta.page + 1;
+        _loading = false;
+        _loadingMore = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = friendlyError(e);
+        _loading = false;
+        _loadingMore = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final title =
-        padrao != null
-            ? TaxonomyLabels.padrao[padrao!] ?? 'Padrão'
-            : TaxonomyLabels.grupo[grupo!] ?? 'Grupo';
+        widget.padrao != null
+            ? TaxonomyLabels.padrao[widget.padrao!] ?? 'Padrão'
+            : TaxonomyLabels.grupo[widget.grupo!] ?? 'Grupo';
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
     final scheme = Theme.of(context).colorScheme;
@@ -45,7 +132,13 @@ class PadraoExerciciosBottomSheet extends ConsumerWidget {
         MediaQuery.sizeOf(context).height *
         FxHomeSheetChrome.expandHeightFactor;
 
-    Widget header({int count = 0}) {
+    final sorted = sortExerciciosForPicker(
+      _items,
+      alreadyInTreinoIds: widget.alreadyInTreinoIds,
+    );
+    final count = _totalElements > 0 ? _totalElements : sorted.length;
+
+    Widget header() {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -81,231 +174,141 @@ class PadraoExerciciosBottomSheet extends ConsumerWidget {
       isDark: isDark,
       expand: true,
       maxHeight: maxHeight,
-      child: asyncList.when(
-        loading:
-            () => Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                header(),
-                const SizedBox(height: 10),
-                Expanded(
-                  child: ListView.separated(
-                    padding: EdgeInsets.zero,
-                    itemCount: 6,
-                    separatorBuilder: (_, __) => const SizedBox(height: 10),
-                    itemBuilder:
-                        (_, __) => const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 6),
-                          child: Row(
-                            children: [
-                              SkeletonLoader(
-                                width: 44,
-                                height: 44,
-                                borderRadius: 14,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          header(),
+          const SizedBox(height: 10),
+          Expanded(
+            child:
+                _loading
+                    ? Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: FxLoading.sectionShimmer(context, height: 180),
+                    )
+                    : _error != null
+                    ? Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(24),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              _error!,
+                              textAlign: TextAlign.center,
+                              style: FocuxHubTypography.bodyMuted(
+                                color: scheme.onSurfaceVariant,
+                                fontWeight: FontWeight.w600,
                               ),
-                              SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    SkeletonLoader(height: 14, borderRadius: 8),
-                                    SizedBox(height: 8),
-                                    SkeletonLoader(
-                                      height: 11,
-                                      width: 120,
-                                      borderRadius: 8,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
+                            ),
+                            const SizedBox(height: 12),
+                            FilledButton.tonal(
+                              onPressed: () => _fetchPage(reset: true),
+                              child: const Text('Tentar novamente'),
+                            ),
+                          ],
                         ),
-                  ),
-                ),
-              ],
-            ),
-        error:
-            (e, _) => Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                header(),
-                Expanded(
-                  child: Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(24),
+                      ),
+                    )
+                    : sorted.isEmpty
+                    ? Center(
                       child: Text(
-                        'Não foi possível carregar os exercícios.',
-                        textAlign: TextAlign.center,
+                        'Nenhum exercício nesta categoria.',
                         style: FocuxHubTypography.bodyMuted(
                           color: scheme.onSurfaceVariant,
-                          fontWeight: FontWeight.w600,
                         ),
                       ),
+                    )
+                    : ListView(
+                      controller: _scrollCtrl,
+                      padding: EdgeInsets.zero,
+                      children: [
+                        FxSettingsGroup(
+                          accent: primary,
+                          children: [
+                            for (var i = 0; i < sorted.length; i++)
+                              _ExerciseChoiceTile(
+                                exercicio: sorted[i],
+                                primary: primary,
+                                alreadyInTreino: widget.alreadyInTreinoIds
+                                    .contains(sorted[i].id),
+                                showDivider: i < sorted.length - 1,
+                                onTap: () {
+                                  HapticFeedback.selectionClick();
+                                  Navigator.pop(context);
+                                  widget.onAdicionar(sorted[i]);
+                                },
+                              ),
+                          ],
+                        ),
+                        if (_loadingMore)
+                          const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 16),
+                            child: Center(child: FxLoading(size: 22)),
+                          ),
+                      ],
                     ),
-                  ),
-                ),
-              ],
-            ),
-        data: (all) {
-          final filtered = applyExercisePickerFilter(all, pickerFilter);
-          final items = sortExerciciosForPicker(
-            filtered.where((ex) {
-              if (padrao != null) {
-                return ex.padraoMovimento == padrao;
-              }
-              if (grupo != null) {
-                return ex.grupoMuscularPrimario == grupo;
-              }
-              return false;
-            }),
-            alreadyInTreinoIds: alreadyInTreinoIds,
-          );
-
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              header(count: items.length),
-              const SizedBox(height: 10),
-              Expanded(
-                child: ListView.separated(
-                  padding: EdgeInsets.zero,
-                  itemCount: items.length,
-                  separatorBuilder:
-                      (context, index) => Divider(
-                        height: 1,
-                        color: scheme.outlineVariant.withValues(alpha: 0.6),
-                      ),
-                  itemBuilder: (context, index) {
-                    final ex = items[index];
-                    final subtitle = [
-                      if (ex.grupoMuscularPrimario != null)
-                        TaxonomyLabels.grupo[ex.grupoMuscularPrimario!],
-                      if (ex.equipamentos.isNotEmpty)
-                        ex.equipamentos
-                            .take(2)
-                            .map((e) => TaxonomyLabels.equipamento[e])
-                            .whereType<String>()
-                            .join(' / '),
-                    ].whereType<String>().join(' · ');
-                    return _ExerciseChoiceTile(
-                      exercicio: ex,
-                      subtitle: subtitle,
-                      alreadyInTreino: alreadyInTreinoIds.contains(ex.id),
-                      onPreview:
-                          ex.hasPlayableMedia
-                              ? () => showExerciseMediaPreview(
-                                context,
-                                exercicio: ex,
-                              )
-                              : null,
-                      onTap: () {
-                        HapticFeedback.selectionClick();
-                        Navigator.pop(context);
-                        onAdicionar(ex);
-                      },
-                    );
-                  },
-                ),
-              ),
-            ],
-          );
-        },
+          ),
+        ],
       ),
     );
   }
 }
 
 class _ExerciseChoiceTile extends StatelessWidget {
-  final Exercicio exercicio;
-  final String subtitle;
-  final VoidCallback onTap;
-  final VoidCallback? onPreview;
-  final bool alreadyInTreino;
-
   const _ExerciseChoiceTile({
     required this.exercicio,
-    required this.subtitle,
+    required this.primary,
     required this.onTap,
-    this.onPreview,
     this.alreadyInTreino = false,
+    this.showDivider = true,
   });
+
+  final Exercicio exercicio;
+  final Color primary;
+  final VoidCallback onTap;
+  final bool alreadyInTreino;
+  final bool showDivider;
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final nome = exercicio.nomeDisplay;
-    final muted = alreadyInTreino;
-    return InkWell(
+    final subtitle = [
+      if (alreadyInTreino) 'Já está neste treino',
+      if (exercicio.grupoMuscularPrimario != null)
+        TaxonomyLabels.grupo[exercicio.grupoMuscularPrimario!],
+      if (exercicio.equipamentos.isNotEmpty)
+        exercicio.equipamentos
+            .take(2)
+            .map((e) => TaxonomyLabels.equipamento[e])
+            .whereType<String>()
+            .join(' / '),
+    ].whereType<String>().join(' · ');
+
+    return FxSettingsTile(
+      icon: Icons.fitness_center_rounded,
+      accent: primary,
+      label: exercicio.nomeDisplay,
+      subtitle: subtitle,
+      value: '',
+      showDivider: showDivider,
       onTap: onTap,
-      borderRadius: BorderRadius.circular(14),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 11),
-        child: Row(
-          children: [
+      accessory: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (exercicio.hasPlayableMedia)
             GestureDetector(
-              onTap:
-                  onPreview == null
-                      ? null
-                      : () {
-                        HapticFeedback.selectionClick();
-                        onPreview!();
-                      },
+              onTap: () {
+                HapticFeedback.selectionClick();
+                showExerciseMediaPreview(context, exercicio: exercicio);
+              },
               child: ExerciseMediaThumb.fromExercicio(
                 exercicio,
-                size: 44,
-                radius: 14,
+                size: 34,
               ),
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    nome,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: FocuxHubTypography.cardTitle(
-                      color: muted
-                          ? scheme.onSurfaceVariant
-                          : scheme.onSurface,
-                    ),
-                  ),
-                  if (alreadyInTreino) ...[
-                    const SizedBox(height: 2),
-                    Text(
-                      'Já está neste treino',
-                      style: FocuxHubTypography.chip(scheme.onSurfaceVariant),
-                    ),
-                  ] else if (subtitle.isNotEmpty) ...[
-                    const SizedBox(height: 2),
-                    Text(
-                      subtitle,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: FocuxHubTypography.bodyMuted(
-                        color: scheme.onSurfaceVariant,
-                        fontWeight: FontWeight.w600,
-                        height: 1.2,
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-            const SizedBox(width: 10),
-            Container(
-              width: 34,
-              height: 34,
-              decoration: BoxDecoration(
-                color: scheme.primary.withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(Icons.add_rounded, color: scheme.primary, size: 20),
-            ),
-          ],
-        ),
+          const SizedBox(width: 6),
+          Icon(Icons.add_rounded, color: primary, size: 20),
+        ],
       ),
     );
   }

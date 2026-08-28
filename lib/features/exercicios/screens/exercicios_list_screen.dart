@@ -19,6 +19,7 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../data/exercicio_repository.dart';
 import '../data/exercicio_taxonomy_labels.dart';
+import '../providers/exercicio_picker_provider.dart';
 import '../providers/exercicios_provider.dart';
 import 'widgets/exercicios_batch_actions.dart';
 import 'widgets/exercicios_filter_bar.dart';
@@ -36,50 +37,100 @@ class ExerciciosListScreen extends ConsumerStatefulWidget {
 
 class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
   final _picker = ImagePicker();
+  final _scrollCtrl = ScrollController();
   ExerciciosUiFilter _filter = const ExerciciosUiFilter();
   final Set<int> _selected = {};
   DateTime? _fetchedAt;
+  final List<Exercicio> _items = [];
+  bool _loading = true;
+  bool _loadingMore = false;
+  bool _hasNext = false;
+  int _page = 0;
+  int _totalElements = 0;
+  String? _error;
 
-  List<Exercicio> _applyFilter(List<Exercicio> input) {
-    final query = _filter.query.trim().toLowerCase();
-    final filtered =
-        input.where((exercicio) {
-            if (query.isNotEmpty &&
-                !exercicio.nome.toLowerCase().contains(query)) {
-              return false;
-            }
-            if (_filter.modalidade != null &&
-                exercicio.modalidade != _filter.modalidade) {
-              return false;
-            }
-            if (_filter.grupo != null &&
-                exercicio.grupoMuscularPrimario != _filter.grupo) {
-              return false;
-            }
-            if (_filter.equipamento != null &&
-                !exercicio.equipamentos.contains(_filter.equipamento)) {
-              return false;
-            }
-            if (_filter.dificuldade != null &&
-                exercicio.dificuldade != _filter.dificuldade) {
-              return false;
-            }
-            if (_filter.favoritos && !exercicio.favoritado) return false;
-            if (_filter.comVideo && !exercicio.hasPlayableMedia) return false;
-            if (_filter.semVideo && exercicio.hasPlayableMedia) return false;
-            return true;
-          }).toList()
-          ..sort((a, b) {
-            final fav = (b.favoritado ? 1 : 0).compareTo(a.favoritado ? 1 : 0);
-            if (fav != 0) return fav;
-            return a.nome.compareTo(b.nome);
-          });
-    return filtered;
+  List<Exercicio> get _visibleItems {
+    if (!_filter.semVideo || _filter.comVideo) return _items;
+    return _items.where((exercicio) => !exercicio.hasPlayableMedia).toList();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollCtrl.addListener(_onScroll);
+    _fetchPage(reset: true);
+  }
+
+  @override
+  void dispose() {
+    _scrollCtrl.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (!_hasNext || _loadingMore || _loading) return;
+    if (_scrollCtrl.position.pixels >=
+        _scrollCtrl.position.maxScrollExtent - 120) {
+      _fetchPage(reset: false);
+    }
+  }
+
+  Future<void> _fetchPage({required bool reset}) async {
+    if (reset) {
+      setState(() {
+        _loading = true;
+        _error = null;
+        _page = 0;
+        _items.clear();
+      });
+    } else {
+      if (_loadingMore) return;
+      setState(() => _loadingMore = true);
+    }
+
+    try {
+      final result = await ref
+          .read(exercicioRepositoryProvider)
+          .listarPagina(
+            busca: _filter.query.trim().isEmpty ? null : _filter.query.trim(),
+            modalidade: _filter.modalidade?.name,
+            grupoMuscularPrimario: _filter.grupo?.name,
+            equipamento: _filter.equipamento?.name,
+            dificuldade: _filter.dificuldade?.name,
+            favoritos: _filter.favoritos ? true : null,
+            hasVideo: _filter.comVideo ? true : null,
+            page: _page,
+          );
+      if (!mounted) return;
+      setState(() {
+        if (reset) {
+          _items
+            ..clear()
+            ..addAll(result.content);
+          _fetchedAt = DateTime.now();
+        } else {
+          _items.addAll(result.content);
+        }
+        _totalElements = result.meta.totalElements;
+        _hasNext = result.meta.hasNext;
+        _page = result.meta.page + 1;
+        _loading = false;
+        _loadingMore = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = friendlyError(e);
+        _loading = false;
+        _loadingMore = false;
+      });
+    }
   }
 
   void _refresh() {
-    ref.invalidate(exerciciosProvider);
     ref.invalidate(exerciciosCuradoriaProvider);
+    ref.invalidate(exercicioPickerStatsProvider);
+    _fetchPage(reset: true);
   }
 
   Future<void> _uploadVideo(Exercicio exercicio) async {
@@ -145,26 +196,26 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
     }
   }
 
-  Future<void> _favoriteBatch(List<Exercicio> exercicios) async {
+  Future<void> _favoriteBatch() async {
     final repo = ref.read(exercicioRepositoryProvider);
     final ids = _selected.toList();
     for (final id in ids) {
-      final ex = exercicios.firstWhere((item) => item.id == id);
+      final ex = _items.firstWhere((item) => item.id == id);
       if (!ex.favoritado) await repo.favoritarExercicio(id);
     }
     setState(_selected.clear);
     _refresh();
   }
 
-  void _selectAllVisible(List<Exercicio> exercicios) {
+  void _selectAllVisible() {
     setState(() {
       _selected
         ..clear()
-        ..addAll(exercicios.map((e) => e.id));
+        ..addAll(_visibleItems.map((e) => e.id));
     });
   }
 
-  Future<void> _deleteBatch(List<Exercicio> exercicios) async {
+  Future<void> _deleteBatch() async {
     final count = _selected.length;
     if (count == 0) return;
     final ok = await showFxConfirmSheet(
@@ -180,7 +231,7 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
     );
     if (!ok) return;
     final repo = ref.read(exercicioRepositoryProvider);
-    final byId = {for (final ex in exercicios) ex.id: ex};
+    final byId = {for (final ex in _items) ex.id: ex};
     final deleted = <int>[];
     final blocked = <_DeleteFailure>[];
     final selectedIds = _selected.toList();
@@ -246,17 +297,16 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final asyncList = ref.watch(exerciciosProvider);
-    ref.listen<AsyncValue<List<Exercicio>>>(exerciciosProvider, (_, next) {
-      if (!next.isLoading && next.hasValue) {
-        setState(() => _fetchedAt = DateTime.now());
-      }
-    });
+    final visible = _visibleItems;
     final chrome = ShellChrome.of(context);
     final isDark = chrome.isDark;
     final mute = chrome.mute;
     final primary = Theme.of(context).colorScheme.primary;
     final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
+    final totalLabel =
+        _filter.semVideo && !_filter.comVideo
+            ? '${visible.length} sem vídeo (nesta página)'
+            : '$_totalElements exercicios';
 
     return fxScreenA11yScope(
       label: 'Exercicios',
@@ -272,12 +322,10 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
                     IconButton(
                       tooltip: 'Selecionar exercicios',
                       icon: const Icon(Icons.checklist_rounded),
-                      onPressed:
-                          () => asyncList.whenData((value) {
-                            final filtered = _applyFilter(value);
-                            if (filtered.isEmpty) return;
-                            setState(() => _selected.add(filtered.first.id));
-                          }),
+                      onPressed: () {
+                        if (visible.isEmpty) return;
+                        setState(() => _selected.add(visible.first.id));
+                      },
                     ),
                     IconButton(
                       tooltip: 'Carregar biblioteca completa',
@@ -317,125 +365,124 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
                 ExerciciosBatchActions(
                   count: _selected.length,
                   onCancel: () => setState(_selected.clear),
-                  onSelectAll:
-                      () => asyncList.whenData(
-                        (value) => _selectAllVisible(_applyFilter(value)),
-                      ),
-                  onFavorite:
-                      () =>
-                          asyncList.whenData((value) => _favoriteBatch(value)),
-                  onDelete:
-                      () => asyncList.whenData(
-                        (value) => _deleteBatch(_applyFilter(value)),
-                      ),
+                  onSelectAll: _selectAllVisible,
+                  onFavorite: _favoriteBatch,
+                  onDelete: _deleteBatch,
                 )
               else
                 const SizedBox.shrink(),
               ExerciciosFilterBar(
                 filter: _filter,
-                onChanged: (value) => setState(() => _filter = value),
-                onClear:
-                    () => setState(() => _filter = const ExerciciosUiFilter()),
+                onChanged: (value) {
+                  setState(() => _filter = value);
+                  _fetchPage(reset: true);
+                },
+                onClear: () {
+                  setState(() => _filter = const ExerciciosUiFilter());
+                  _fetchPage(reset: true);
+                },
               ),
               Expanded(
-                child: asyncList.when(
-                  loading: () => const SkeletonList(count: 6),
-                  error:
-                      (e, _) => FxErrorState(
-                        chromeOnDark: isDark,
-                        primary: primary,
-                        message: friendlyError(e),
-                        onRetry: _refresh,
-                        title: 'Não conseguimos carregar os exercícios',
-                      ),
-                  data: (exercicios) {
-                    final filtered = _applyFilter(exercicios);
-                    if (exercicios.isEmpty) {
-                      return FxEmptyState(
-                        icon: 'dumbbell',
-                        title: 'Sua biblioteca está vazia',
-                        subtitle:
-                            'Carregue a biblioteca curada ou cadastre o primeiro exercício.',
-                        action: FxEmptyAction(
-                          label: 'Carregar biblioteca',
-                          onTap: () async {
-                            final imported = await context.push<bool>(
-                              '/exercicios/biblioteca-wizard',
-                            );
-                            if (imported == true) _refresh();
-                          },
-                        ),
-                      );
-                    }
-                    if (filtered.isEmpty) {
-                      return FxEmptyState(
-                        icon: 'search',
-                        title: 'Nenhum exercício encontrado',
-                        subtitle:
-                            'Ajuste os filtros ou a busca para ver outros exercícios.',
-                        action: FxEmptyAction(
-                          label: 'Limpar filtros',
-                          onTap:
-                              () => setState(
-                                () => _filter = const ExerciciosUiFilter(),
-                              ),
-                        ),
-                      );
-                    }
-                    return Column(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(
-                            TokensStrip.s4,
-                            0,
-                            16,
-                            10,
-                          ),
-                          child: Row(
-                            children: [
-                              Text(
-                                '${filtered.length} exercicios',
-                                style: TextStyle(
-                                  color: mute,
-                                  fontWeight: FontWeight.w800,
-                                ),
-                              ),
-                              const Spacer(),
-                              if (_filter.grupo != null)
-                                Text(
-                                  TaxonomyLabels.grupo[_filter.grupo!] ?? '',
-                                  style: TextStyle(color: mute),
-                                ),
-                            ],
-                          ),
-                        ),
-                        Expanded(
-                          child: ExerciciosListView(
-                            exercicios: filtered,
-                            selectedIds: _selected,
-                            onTap: (exercicio) {
-                              if (_selected.isNotEmpty) {
-                                setState(() {
-                                  _selected.contains(exercicio.id)
-                                      ? _selected.remove(exercicio.id)
-                                      : _selected.add(exercicio.id);
-                                });
-                                return;
-                              }
-                              context.push('/exercicios/${exercicio.id}');
+                child:
+                    _loading
+                        ? const SkeletonList(count: 6)
+                        : _error != null
+                        ? FxErrorState(
+                          chromeOnDark: isDark,
+                          primary: primary,
+                          message: _error!,
+                          onRetry: _refresh,
+                          title: 'Não conseguimos carregar os exercícios',
+                        )
+                        : _totalElements == 0 && !_filter.hasActive
+                        ? FxEmptyState(
+                          icon: 'dumbbell',
+                          title: 'Sua biblioteca está vazia',
+                          subtitle:
+                              'Carregue a biblioteca curada ou cadastre o primeiro exercício.',
+                          action: FxEmptyAction(
+                            label: 'Carregar biblioteca',
+                            onTap: () async {
+                              final imported = await context.push<bool>(
+                                '/exercicios/biblioteca-wizard',
+                              );
+                              if (imported == true) _refresh();
                             },
-                            onLongPress:
-                                (exercicio) =>
-                                    setState(() => _selected.add(exercicio.id)),
-                            onFavorite: _favorite,
-                            onUploadVideo: _uploadVideo,
-                            onDelete: _deleteOne,
                           ),
+                        )
+                        : visible.isEmpty
+                        ? FxEmptyState(
+                          icon: 'search',
+                          title: 'Nenhum exercício encontrado',
+                          subtitle:
+                              'Ajuste os filtros ou a busca para ver outros exercícios.',
+                          action: FxEmptyAction(
+                            label: 'Limpar filtros',
+                            onTap: () {
+                              setState(
+                                () => _filter = const ExerciciosUiFilter(),
+                              );
+                              _fetchPage(reset: true);
+                            },
+                          ),
+                        )
+                        : Column(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(
+                                TokensStrip.s4,
+                                0,
+                                16,
+                                10,
+                              ),
+                              child: Row(
+                                children: [
+                                  Text(
+                                    totalLabel,
+                                    style: TextStyle(
+                                      color: mute,
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  ),
+                                  const Spacer(),
+                                  if (_filter.grupo != null)
+                                    Text(
+                                      TaxonomyLabels.grupo[_filter.grupo!] ??
+                                          '',
+                                      style: TextStyle(color: mute),
+                                    ),
+                                ],
+                              ),
+                            ),
+                            Expanded(
+                              child: ExerciciosListView(
+                                controller: _scrollCtrl,
+                                exercicios: visible,
+                                selectedIds: _selected,
+                                accent: primary,
+                                loadingMore: _loadingMore,
+                                onTap: (exercicio) {
+                                  if (_selected.isNotEmpty) {
+                                    setState(() {
+                                      _selected.contains(exercicio.id)
+                                          ? _selected.remove(exercicio.id)
+                                          : _selected.add(exercicio.id);
+                                    });
+                                    return;
+                                  }
+                                  context.push('/exercicios/${exercicio.id}');
+                                },
+                                onLongPress:
+                                    (exercicio) => setState(
+                                      () => _selected.add(exercicio.id),
+                                    ),
+                                onFavorite: _favorite,
+                                onUploadVideo: _uploadVideo,
+                                onDelete: _deleteOne,
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
-                    );
-                  },
-                ),
               ),
             ],
           ),
