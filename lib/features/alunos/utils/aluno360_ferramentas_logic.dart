@@ -1,13 +1,43 @@
+import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../data/aluno_repository.dart';
 import 'aluno360_operacao_logic.dart';
+
+/// Campo de medida corporal na aba Ferramentas.
+enum Aluno360MeasurementField { idade, altura, gordura, massaMagra }
+
+/// Linha de medida para tiles inset.
+class Aluno360MeasurementRow {
+  const Aluno360MeasurementRow({
+    required this.field,
+    required this.label,
+    required this.subtitle,
+    required this.value,
+    required this.complete,
+    required this.highlight,
+  });
+
+  final Aluno360MeasurementField field;
+  final String label;
+  final String subtitle;
+  final String value;
+  final bool complete;
+  final bool highlight;
+}
 
 /// Layout + copy helpers for the Ferramentas tab (Aluno 360).
 abstract final class Aluno360FerramentasLogic {
   Aluno360FerramentasLogic._();
 
   static const double sectionHeaderGap = TokensStrip.s2;
-  static const double sectionDividerGap = TokensStrip.s3;
+  static const double sectionDividerGap = FxSettingsLayout.groupGap;
+
+  static const String medidasCaption =
+      'Idade, altura e composição para acompanhar evolução.';
+  static const String treinoCaption =
+      'Treinos, equipamentos e marcos do aluno.';
+  static const String perfilCaption =
+      'Cadastro, financeiro e comunicação.';
 
   static List<double> aderenciaSparklineValues(
     List<Map<String, dynamic>>? raw,
@@ -61,6 +91,93 @@ abstract final class Aluno360FerramentasLogic {
     if (pending == 0) return 'Perfil e composição completos';
     if (pending == 4) return 'Nenhuma medida registrada ainda';
     return '$pending de 4 campos pendentes';
+  }
+
+  static String pendingFieldValue({required bool complete}) {
+    return complete ? 'OK' : 'Pendente';
+  }
+
+  static List<Aluno360MeasurementRow> measurementRows({
+    required Aluno aluno,
+    String? bf,
+    String? massaMagra,
+  }) {
+    final idadeOk = aluno.idade != null;
+    final alturaOk = aluno.altura != null;
+    final gorduraOk = bf != null;
+    final massaOk = massaMagra != null;
+
+    return [
+      Aluno360MeasurementRow(
+        field: Aluno360MeasurementField.idade,
+        label: 'Idade',
+        subtitle:
+            idadeOk ? '${aluno.idade} anos' : 'Informar data de nascimento',
+        value: pendingFieldValue(complete: idadeOk),
+        complete: idadeOk,
+        highlight: !idadeOk,
+      ),
+      Aluno360MeasurementRow(
+        field: Aluno360MeasurementField.altura,
+        label: 'Altura',
+        subtitle:
+            alturaOk
+                ? '${(aluno.altura! * 100).round()} cm'
+                : 'Cadastrar no perfil',
+        value: pendingFieldValue(complete: alturaOk),
+        complete: alturaOk,
+        highlight: !alturaOk,
+      ),
+      Aluno360MeasurementRow(
+        field: Aluno360MeasurementField.gordura,
+        label: 'Gordura corporal',
+        subtitle: gorduraOk ? '$bf%' : 'Registrar na evolução',
+        value: pendingFieldValue(complete: gorduraOk),
+        complete: gorduraOk,
+        highlight: !gorduraOk,
+      ),
+      Aluno360MeasurementRow(
+        field: Aluno360MeasurementField.massaMagra,
+        label: 'Massa magra',
+        subtitle: massaOk ? '$massaMagra kg' : 'Registrar na evolução',
+        value: pendingFieldValue(complete: massaOk),
+        complete: massaOk,
+        highlight: !massaOk,
+      ),
+    ];
+  }
+
+  static String composicaoCorporalValue({
+    String? bf,
+    String? massaMagra,
+  }) {
+    if (bf != null && massaMagra != null) return 'OK';
+    if (bf != null || massaMagra != null) return 'Parcial';
+    return 'Pendente';
+  }
+
+  static bool composicaoCorporalPending({
+    String? bf,
+    String? massaMagra,
+  }) {
+    return bf == null || massaMagra == null;
+  }
+
+  static String anamneseValue(int perfilCompletion) {
+    if (perfilCompletion >= 85) return 'OK';
+    return '$perfilCompletion%';
+  }
+
+  static bool aderenciaNeedsAttention({
+    required Aluno aluno,
+    List<Map<String, dynamic>>? aderenciaSemanal,
+  }) {
+    final percent = aluno.aderenciaPercent ?? 0;
+    if (percent > 0) return false;
+    final summary = summarizeAderenciaWeek(
+      parseAderenciaSemanal(aderenciaSemanal),
+    );
+    return !summary.hasAnyCheckin;
   }
 
   static String aderenciaSparkSemanticsLabel(

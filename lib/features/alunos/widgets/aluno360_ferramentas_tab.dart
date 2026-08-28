@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
@@ -10,7 +11,7 @@ import '../utils/aluno360_ferramentas_logic.dart';
 import 'aluno360_help_sheets.dart';
 import 'aluno360_operacao_tab.dart';
 
-/// Ferramentas tab: resumo de medidas + módulos inset.
+/// Ferramentas tab: medidas inset + módulos de ação.
 class Aluno360FerramentasTab extends StatelessWidget {
   const Aluno360FerramentasTab({
     super.key,
@@ -37,14 +38,34 @@ class Aluno360FerramentasTab extends StatelessWidget {
   final bool animateEntrance;
   final VoidCallback? onEntrancePlayed;
 
-  void _openMeasurements(BuildContext context) {
+  void _openMeasurementField(
+    BuildContext context,
+    Aluno360MeasurementField field, {
+    required bool complete,
+  }) {
     final editarRoute = '/alunos/$alunoId/editar';
     final evolucaoRoute = '/alunos/$alunoId/evolucao';
-    if (aluno.idade == null || aluno.altura == null) {
-      context.push(editarRoute, extra: aluno);
-      return;
+    switch (field) {
+      case Aluno360MeasurementField.idade:
+      case Aluno360MeasurementField.altura:
+        if (!complete) {
+          context.push(editarRoute, extra: aluno);
+          return;
+        }
+        context.push(evolucaoRoute, extra: aluno.nome);
+      case Aluno360MeasurementField.gordura:
+      case Aluno360MeasurementField.massaMagra:
+        context.push(evolucaoRoute, extra: aluno.nome);
     }
-    context.push(evolucaoRoute, extra: aluno.nome);
+  }
+
+  IconData _measurementIcon(Aluno360MeasurementField field) {
+    return switch (field) {
+      Aluno360MeasurementField.idade => Icons.cake_outlined,
+      Aluno360MeasurementField.altura => Icons.height_outlined,
+      Aluno360MeasurementField.gordura => Icons.pie_chart_outline_outlined,
+      Aluno360MeasurementField.massaMagra => Icons.monitor_weight_outlined,
+    };
   }
 
   Widget _section(int step, Widget child) {
@@ -58,12 +79,7 @@ class Aluno360FerramentasTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final pending = Aluno360FerramentasLogic.measurementsPendingCount(
-      aluno: aluno,
-      bf: bf,
-      massaMagra: massaMagra,
-    );
-    final summary = Aluno360FerramentasLogic.measurementsSummary(
+    final rows = Aluno360FerramentasLogic.measurementRows(
       aluno: aluno,
       bf: bf,
       massaMagra: massaMagra,
@@ -73,6 +89,7 @@ class Aluno360FerramentasTab extends StatelessWidget {
       0,
       FxSettingsGroup(
         header: 'Medidas',
+        caption: Aluno360FerramentasLogic.medidasCaption,
         helpTooltip: 'Ajuda sobre medidas corporais',
         onHelpTap: () => showAluno360FerramentasHelpSheet(context),
         accent: primary,
@@ -87,14 +104,24 @@ class Aluno360FerramentasTab extends StatelessWidget {
               ),
             )
           else
-            FxSettingsTile(
-              icon: Icons.straighten_outlined,
-              label: 'Resumo corporal',
-              subtitle: summary,
-              value: pending == 0 ? 'OK' : '$pending pend.',
-              showDivider: false,
-              onTap: () => _openMeasurements(context),
-            ),
+            ...rows.asMap().entries.map((entry) {
+              final index = entry.key;
+              final row = entry.value;
+              return FxSettingsTile(
+                icon: _measurementIcon(row.field),
+                label: row.label,
+                subtitle: row.subtitle,
+                value: row.value,
+                highlight: row.highlight,
+                showDivider: index < rows.length - 1,
+                onTap:
+                    () => _openMeasurementField(
+                      context,
+                      row.field,
+                      complete: row.complete,
+                    ),
+              );
+            }),
         ],
       ),
     );
@@ -108,7 +135,7 @@ class Aluno360FerramentasTab extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             measurements,
-            const SizedBox(height: Aluno360FerramentasLogic.sectionDividerGap),
+            const SizedBox(height: FxSettingsLayout.groupGap),
             modules,
           ],
         ),

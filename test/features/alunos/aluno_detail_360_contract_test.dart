@@ -400,7 +400,8 @@ void main() {
         'lib/features/alunos/widgets/aluno360_ferramentas_tab.dart',
       ).readAsStringSync(),
       allOf(
-        contains("'Resumo corporal'"),
+        contains("'Medidas'"),
+        contains('measurementRows'),
         contains('FxSettingsGroup'),
       ),
     );

@@ -14,6 +14,7 @@ class Aluno360FerramentasModulesGrid extends StatelessWidget {
     super.key,
     required this.aluno,
     required this.alunoId,
+    required this.primary,
     required this.isDark,
     required this.perfilCompletion,
     this.bf,
@@ -23,6 +24,7 @@ class Aluno360FerramentasModulesGrid extends StatelessWidget {
 
   final Aluno aluno;
   final int alunoId;
+  final Color primary;
   final bool isDark;
   final int perfilCompletion;
   final String? bf;
@@ -33,6 +35,14 @@ class Aluno360FerramentasModulesGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     final evolucaoRoute = '/alunos/$alunoId/evolucao';
     final aderenciaPercent = (aluno.aderenciaPercent ?? 0).toDouble();
+    final composicaoPending = Aluno360FerramentasLogic.composicaoCorporalPending(
+      bf: bf,
+      massaMagra: massaMagra,
+    );
+    final aderenciaAttention = Aluno360FerramentasLogic.aderenciaNeedsAttention(
+      aluno: aluno,
+      aderenciaSemanal: aderenciaSemanal,
+    );
 
     return KeyedSubtree(
       key: const ValueKey('aluno360_ferramentas_modulos'),
@@ -41,11 +51,13 @@ class Aluno360FerramentasModulesGrid extends StatelessWidget {
         children: [
           FxSettingsGroup(
             header: 'Treino & evolução',
+            caption: Aluno360FerramentasLogic.treinoCaption,
             helpTooltip: 'Ajuda sobre treino e evolução',
             onHelpTap: () => showAluno360FerramentasHelpSheet(context),
+            accent: primary,
             children: [
               FxSettingsTile(
-                icon: Icons.fitness_center,
+                icon: Icons.fitness_center_outlined,
                 label: 'Treinos',
                 subtitle:
                     aluno.diasSemTreino == null
@@ -71,7 +83,7 @@ class Aluno360FerramentasModulesGrid extends StatelessWidget {
                 onTap: () => context.push('/alunos/$alunoId/equipamentos'),
               ),
               FxSettingsTile(
-                icon: Icons.auto_awesome,
+                icon: Icons.auto_awesome_outlined,
                 label: 'IA Progresso',
                 subtitle: 'Carga sugerida pela IA',
                 value: '',
@@ -82,13 +94,17 @@ class Aluno360FerramentasModulesGrid extends StatelessWidget {
                     ),
               ),
               FxSettingsTile(
-                icon: Icons.show_chart,
+                icon: Icons.show_chart_outlined,
                 label: 'Composição corporal',
                 subtitle:
                     bf != null || massaMagra != null
                         ? 'Última avaliação registrada'
                         : 'Registrar medidas',
-                value: bf == null && massaMagra == null ? 'Pend.' : '',
+                value: Aluno360FerramentasLogic.composicaoCorporalValue(
+                  bf: bf,
+                  massaMagra: massaMagra,
+                ),
+                highlight: composicaoPending,
                 onTap: () => context.push(evolucaoRoute, extra: aluno.nome),
               ),
               FxSettingsTile(
@@ -100,6 +116,7 @@ class Aluno360FerramentasModulesGrid extends StatelessWidget {
                 ),
                 value: '${aderenciaPercent.toInt()}%',
                 numeric: true,
+                highlight: aderenciaAttention,
                 onTap:
                     () => context.push(
                       '/alunos/$alunoId/relatorio',
@@ -123,20 +140,25 @@ class Aluno360FerramentasModulesGrid extends StatelessWidget {
           const SizedBox(height: FxSettingsLayout.groupGap),
           FxSettingsGroup(
             header: 'Perfil & gestão',
+            caption: Aluno360FerramentasLogic.perfilCaption,
+            helpTooltip: 'Ajuda sobre perfil e gestão',
+            onHelpTap: () => showAluno360FerramentasHelpSheet(context),
+            accent: primary,
             children: [
               FxSettingsTile(
-                icon: Icons.people,
+                icon: Icons.people_outline,
                 label: 'Anamnese',
                 subtitle:
                     perfilCompletion >= 85
                         ? 'Perfil completo'
                         : 'Completar cadastro',
-                value: perfilCompletion >= 85 ? '✓' : '$perfilCompletion%',
+                value: Aluno360FerramentasLogic.anamneseValue(perfilCompletion),
                 numeric: perfilCompletion < 85,
+                highlight: perfilCompletion < 85,
                 onTap: () => context.push('/alunos/$alunoId/anamnese'),
               ),
               FxSettingsTile(
-                icon: Icons.attach_money,
+                icon: Icons.attach_money_outlined,
                 label: 'Mensalidades',
                 subtitle:
                     aluno.statusFinanceiro == 'INADIMPLENTE'
@@ -148,7 +170,7 @@ class Aluno360FerramentasModulesGrid extends StatelessWidget {
                 onTap: () => context.push('/financeiro?alunoId=$alunoId'),
               ),
               FxSettingsTile(
-                icon: Icons.chat,
+                icon: Icons.chat_bubble_outline,
                 label: 'Chat',
                 subtitle: 'Conversa direta com o aluno',
                 value: '',
@@ -159,7 +181,7 @@ class Aluno360FerramentasModulesGrid extends StatelessWidget {
                     ),
               ),
               FxSettingsTile(
-                icon: Icons.restaurant_menu,
+                icon: Icons.restaurant_menu_outlined,
                 label: 'Dieta',
                 subtitle: 'Plano alimentar atual',
                 value: '',
@@ -170,7 +192,7 @@ class Aluno360FerramentasModulesGrid extends StatelessWidget {
                     ),
               ),
               FxSettingsTile(
-                icon: Icons.video_camera_back,
+                icon: Icons.videocam_outlined,
                 label: 'Feedback em vídeo',
                 subtitle: 'Correções e análise de execução',
                 value: '',

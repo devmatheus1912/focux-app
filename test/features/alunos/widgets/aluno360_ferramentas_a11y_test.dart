@@ -71,12 +71,14 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Medidas'), findsOneWidget);
-    expect(find.text('Resumo corporal'), findsOneWidget);
-    expect(find.text('2 pend.'), findsOneWidget);
+    expect(find.text('Idade'), findsOneWidget);
+    expect(find.text('Altura'), findsOneWidget);
+    expect(find.text('Pendente'), findsNWidgets(3));
     expect(find.text('Treino & evolução'), findsOneWidget);
     expect(find.text('Perfil & gestão'), findsOneWidget);
     expect(find.text('Gordura'), findsNothing);
-    expect(find.text('Massa magra'), findsNothing);
+    expect(find.text('Gordura corporal'), findsOneWidget);
+    expect(find.text('Massa magra'), findsOneWidget);
     expect(find.text('IA Progresso'), findsOneWidget);
     expect(find.text('Aderência'), findsOneWidget);
 

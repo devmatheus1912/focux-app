@@ -54,6 +54,7 @@ class Aluno360DetailFerramentasTab extends ConsumerWidget {
       modulesSection: Aluno360FerramentasModulesGrid(
         aluno: aluno,
         alunoId: alunoId,
+        primary: primary,
         isDark: isDark,
         perfilCompletion: perfilCompletion,
         bf: bf,

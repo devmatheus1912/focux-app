@@ -324,14 +324,16 @@ void main() {
 
       expect(find.byKey(const ValueKey('aluno360_ferramentas_modulos')), findsOneWidget);
       expect(find.text('Medidas'), findsOneWidget);
-      expect(find.text('Resumo corporal'), findsOneWidget);
+      expect(find.text('Idade'), findsOneWidget);
+      expect(find.text('Gordura corporal'), findsOneWidget);
       expect(find.text('Composição corporal'), findsOneWidget);
       expect(find.text('Treino & evolução'), findsOneWidget);
       expect(find.text('Perfil & gestão'), findsOneWidget);
       expect(find.text('Treinos'), findsOneWidget);
       expect(find.text('IA Progresso'), findsOneWidget);
       expect(find.text('Gordura'), findsNothing);
-      expect(find.text('Massa magra'), findsNothing);
+      expect(find.text('Gordura corporal'), findsOneWidget);
+      expect(find.text('Massa magra'), findsOneWidget);
       expect(find.text('Registrar'), findsNothing);
       expect(
         find.descendant(

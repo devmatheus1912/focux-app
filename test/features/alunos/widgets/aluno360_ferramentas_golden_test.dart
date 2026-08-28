@@ -96,7 +96,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Medidas'), findsOneWidget);
-    expect(find.text('Resumo corporal'), findsOneWidget);
+    expect(find.text('Idade'), findsOneWidget);
     expect(find.text('IA Progresso'), findsOneWidget);
     expect(find.text('Gordura'), findsNothing);
     expect(tester.takeException(), isNull);

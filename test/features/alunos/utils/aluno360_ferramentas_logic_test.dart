@@ -13,7 +13,7 @@ void main() {
   group('Aluno360FerramentasLogic', () {
     test('spacing tokens keep sections visually grouped', () {
       expect(Aluno360FerramentasLogic.sectionHeaderGap, lessThan(12));
-      expect(Aluno360FerramentasLogic.sectionDividerGap, lessThan(16));
+      expect(Aluno360FerramentasLogic.sectionDividerGap, greaterThan(16));
     });
 
     test('aderenciaSparklineValues maps weekly checkins', () {
@@ -71,7 +71,7 @@ void main() {
       );
     });
 
-    test('measurementsSummary counts pending fields', () {
+    test('measurementRows lists each field with pending state', () {
       final aluno = Aluno(
         id: 3,
         nome: 'C',
@@ -79,6 +79,12 @@ void main() {
         status: 'ATIVO',
         dataNascimento: '1998-01-15',
       );
+      final rows = Aluno360FerramentasLogic.measurementRows(aluno: aluno);
+      expect(rows, hasLength(4));
+      expect(rows[0].label, 'Idade');
+      expect(rows[0].complete, isTrue);
+      expect(rows[1].complete, isFalse);
+      expect(rows[1].value, 'Pendente');
       expect(
         Aluno360FerramentasLogic.measurementsPendingCount(aluno: aluno),
         3,
@@ -87,6 +93,26 @@ void main() {
         Aluno360FerramentasLogic.measurementsSummary(aluno: aluno),
         '3 de 4 campos pendentes',
       );
+    });
+
+    test('composicaoCorporalValue and anamneseValue use consistent labels', () {
+      expect(
+        Aluno360FerramentasLogic.composicaoCorporalValue(),
+        'Pendente',
+      );
+      expect(
+        Aluno360FerramentasLogic.composicaoCorporalValue(bf: '18.2'),
+        'Parcial',
+      );
+      expect(
+        Aluno360FerramentasLogic.composicaoCorporalValue(
+          bf: '18.2',
+          massaMagra: '52.0',
+        ),
+        'OK',
+      );
+      expect(Aluno360FerramentasLogic.anamneseValue(90), 'OK');
+      expect(Aluno360FerramentasLogic.anamneseValue(62), '62%');
     });
 
     test('aderenciaSparkSemanticsLabel names each weekday', () {
