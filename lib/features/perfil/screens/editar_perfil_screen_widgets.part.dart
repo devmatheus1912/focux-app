@@ -1,5 +1,77 @@
 part of 'editar_perfil_screen.dart';
 
+class _PerfilFormField extends StatelessWidget {
+  const _PerfilFormField({
+    required this.controller,
+    required this.label,
+    required this.icon,
+    required this.soft,
+    this.hint,
+    this.keyboardType,
+    this.textCapitalization = TextCapitalization.none,
+    this.inputFormatters,
+    this.validator,
+    this.maxLines = 1,
+    this.maxLength,
+    this.showDivider = true,
+  });
+
+  final TextEditingController controller;
+  final String label;
+  final IconData icon;
+  final Color soft;
+  final String? hint;
+  final TextInputType? keyboardType;
+  final TextCapitalization textCapitalization;
+  final List<TextInputFormatter>? inputFormatters;
+  final String? Function(String?)? validator;
+  final int maxLines;
+  final int? maxLength;
+  final bool showDivider;
+
+  @override
+  Widget build(BuildContext context) {
+    final chrome = ShellChrome.of(context);
+    final line = chrome.line;
+    final fieldHint = hint ?? label;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Semantics(
+          label: label,
+          child: TextFormField(
+            controller: controller,
+            keyboardType: keyboardType,
+            textCapitalization: textCapitalization,
+            inputFormatters: inputFormatters,
+            validator: validator,
+            maxLines: maxLines,
+            maxLength: maxLength,
+            style: FxSettingsLayout.rowLabel(
+              color: fxScreenInk(context),
+            ),
+            decoration: FxInputDeco.insetGrouped(
+              context,
+              icon: icon,
+              hint: fieldHint,
+              iconColor: soft,
+            ).copyWith(
+              counterStyle: FxSettingsLayout.rowValue(color: fxScreenMute(context)),
+            ),
+          ),
+        ),
+        if (showDivider)
+          Divider(
+            height: 1,
+            thickness: FxSettingsLayout.dividerThickness,
+            color: line,
+          ),
+      ],
+    );
+  }
+}
+
 class _PerfilPhotoEditor extends StatelessWidget {
   final String? logoUrl;
   final String nome;

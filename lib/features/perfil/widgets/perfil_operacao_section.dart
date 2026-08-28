@@ -29,7 +29,6 @@ class PerfilOperacaoSection extends StatelessWidget {
           label: 'Planos e assinatura',
           value: planoLabel,
           accent: accent,
-          highlight: true,
           mute: mute,
           line: line,
           onTap: () => context.push('/assinatura'),

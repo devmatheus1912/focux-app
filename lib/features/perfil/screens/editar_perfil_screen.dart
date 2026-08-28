@@ -296,42 +296,28 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
                           caption:
                               'Usado no perfil comercial e no contato com alunos.',
                           children: [
-                            Semantics(
+                            _PerfilFormField(
+                              controller: _nomeCtrl,
                               label: 'Nome completo',
-                              child: TextFormField(
-                                controller: _nomeCtrl,
-                                textCapitalization: TextCapitalization.words,
-                                decoration: FxInputDeco.build(
-                                  context,
-                                  'Nome completo',
-                                  icon: Icons.person_outline_rounded,
-                                  iconColor: soft,
-                                  iconSize: FxSettingsLayout.iconSize,
-                                ),
-                                validator:
-                                    (v) =>
-                                        v == null || v.trim().isEmpty
-                                            ? 'Informe o nome'
-                                            : null,
-                              ),
+                              icon: Icons.person_outline_rounded,
+                              soft: soft,
+                              validator:
+                                  (v) =>
+                                      v == null || v.trim().isEmpty
+                                          ? 'Informe o nome'
+                                          : null,
+                              textCapitalization: TextCapitalization.words,
                             ),
-                            const SizedBox(height: TokensStrip.s2),
-                            Semantics(
-                              label: 'Telefone ou WhatsApp',
-                              child: TextFormField(
-                                controller: _telefoneCtrl,
-                                keyboardType: TextInputType.phone,
-                                inputFormatters: [BrPhone.formatter()],
-                                decoration: FxInputDeco.build(
-                                  context,
-                                  'Telefone / WhatsApp',
-                                  icon: Icons.phone_iphone_rounded,
-                                  hint: '(11) 99999-0000',
-                                  iconColor: soft,
-                                  iconSize: FxSettingsLayout.iconSize,
-                                ),
-                                validator: BrPhone.validateOptional,
-                              ),
+                            _PerfilFormField(
+                              controller: _telefoneCtrl,
+                              label: 'Telefone / WhatsApp',
+                              hint: '(11) 99999-0000',
+                              icon: Icons.phone_iphone_rounded,
+                              soft: soft,
+                              keyboardType: TextInputType.phone,
+                              inputFormatters: [BrPhone.formatter()],
+                              validator: BrPhone.validateOptional,
+                              showDivider: false,
                             ),
                           ],
                         ),
@@ -343,66 +329,36 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
                           header: 'Dados profissionais',
                           caption: 'Credenciais e presença na vitrine.',
                           children: [
-                            Semantics(
-                              label: 'CREF opcional',
-                              child: TextFormField(
-                                controller: _crefCtrl,
-                                decoration: FxInputDeco.build(
-                                  context,
-                                  'CREF (opcional)',
-                                  icon: Icons.badge_outlined,
-                                  hint: 'Ex.: 012345-G/SP',
-                                  iconColor: soft,
-                                  iconSize: FxSettingsLayout.iconSize,
-                                ),
-                              ),
+                            _PerfilFormField(
+                              controller: _crefCtrl,
+                              label: 'CREF (opcional)',
+                              hint: 'Ex.: 012345-G/SP',
+                              icon: Icons.badge_outlined,
+                              soft: soft,
                             ),
-                            const SizedBox(height: TokensStrip.s2),
-                            Semantics(
+                            _PerfilFormField(
+                              controller: _especialidadeCtrl,
                               label: 'Especialidade principal',
-                              child: TextFormField(
-                                controller: _especialidadeCtrl,
-                                textCapitalization: TextCapitalization.sentences,
-                                decoration: FxInputDeco.build(
-                                  context,
-                                  'Especialidade principal',
-                                  icon: Icons.fitness_center_outlined,
-                                  hint: 'Ex.: Musculação',
-                                  iconColor: soft,
-                                  iconSize: FxSettingsLayout.iconSize,
-                                ),
-                              ),
+                              hint: 'Ex.: Musculação',
+                              icon: Icons.fitness_center_outlined,
+                              soft: soft,
+                              textCapitalization: TextCapitalization.sentences,
                             ),
-                            const SizedBox(height: TokensStrip.s2),
-                            Semantics(
-                              label: 'Áreas de atuação opcional',
-                              child: TextFormField(
-                                controller: _especialidadesCtrl,
-                                textCapitalization: TextCapitalization.sentences,
-                                decoration: FxInputDeco.build(
-                                  context,
-                                  'Áreas de atuação (opcional)',
-                                  icon: Icons.category_outlined,
-                                  hint: 'Ex.: Funcional, Hipertrofia',
-                                  iconColor: soft,
-                                  iconSize: FxSettingsLayout.iconSize,
-                                ),
-                              ),
+                            _PerfilFormField(
+                              controller: _especialidadesCtrl,
+                              label: 'Áreas de atuação (opcional)',
+                              hint: 'Ex.: Funcional, Hipertrofia',
+                              icon: Icons.category_outlined,
+                              soft: soft,
+                              textCapitalization: TextCapitalization.sentences,
                             ),
-                            const SizedBox(height: TokensStrip.s2),
-                            Semantics(
-                              label: 'Instagram opcional',
-                              child: TextFormField(
-                                controller: _instagramCtrl,
-                                decoration: FxInputDeco.build(
-                                  context,
-                                  'Instagram (opcional)',
-                                  icon: Icons.alternate_email_rounded,
-                                  hint: 'seuusuario',
-                                  iconColor: soft,
-                                  iconSize: FxSettingsLayout.iconSize,
-                                ),
-                              ),
+                            _PerfilFormField(
+                              controller: _instagramCtrl,
+                              label: 'Instagram (opcional)',
+                              hint: 'seuusuario',
+                              icon: Icons.alternate_email_rounded,
+                              soft: soft,
+                              showDivider: false,
                             ),
                           ],
                         ),
@@ -414,24 +370,16 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
                           header: 'Bio',
                           caption: 'Apresentação curta na landing (até 500).',
                           children: [
-                            Semantics(
-                              label: 'Sobre você, até 500 caracteres',
-                              child: TextFormField(
-                                controller: _bioCtrl,
-                                maxLines: 4,
-                                maxLength: 500,
-                                textCapitalization:
-                                    TextCapitalization.sentences,
-                                decoration: FxInputDeco.build(
-                                  context,
-                                  'Sobre você (opcional)',
-                                  icon: Icons.notes_rounded,
-                                  hint:
-                                      'Metodologia, público e diferenciais…',
-                                  iconColor: soft,
-                                  iconSize: FxSettingsLayout.iconSize,
-                                ),
-                              ),
+                            _PerfilFormField(
+                              controller: _bioCtrl,
+                              label: 'Sobre você (opcional)',
+                              hint: 'Metodologia, público e diferenciais…',
+                              icon: Icons.notes_rounded,
+                              soft: soft,
+                              maxLines: 4,
+                              maxLength: 500,
+                              showDivider: false,
+                              textCapitalization: TextCapitalization.sentences,
                             ),
                           ],
                         ),

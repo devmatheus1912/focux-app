@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../theme/design_tokens.dart';
 import '../theme/focux_hub_typography.dart';
+import '../theme/fx_settings_layout.dart';
 import '../theme/tokens_strip.dart';
 
 /// Premium input decoration factory — TOKENS STRIP Liquid Glass.
@@ -75,6 +76,44 @@ class FxInputDeco {
         borderRadius: BorderRadius.circular(TokensStrip.rSm),
         borderSide: const BorderSide(color: EagleTokens.bad, width: 1.5),
       ),
+    );
+  }
+
+  /// Campo borderless dentro de [FxSettingsGroup] — sem caixa aninhada nem label
+  /// flutuante (evita clip no topo do card inset).
+  static InputDecoration insetGrouped(
+    BuildContext context, {
+    IconData? icon,
+    String? hint,
+    Widget? suffix,
+    Color? iconColor,
+    double iconSize = FxSettingsLayout.iconSize,
+  }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+
+    return InputDecoration(
+      hintText: hint,
+      floatingLabelBehavior: FloatingLabelBehavior.never,
+      hintStyle: FocuxHubTypography.bodyMuted(
+        color: mute.withValues(alpha: 0.62),
+      ),
+      prefixIcon:
+          icon != null
+              ? Icon(icon, size: iconSize, color: iconColor ?? mute)
+              : null,
+      suffixIcon: suffix,
+      filled: false,
+      isDense: true,
+      contentPadding: const EdgeInsets.symmetric(
+        horizontal: 0,
+        vertical: TokensStrip.s3,
+      ),
+      border: InputBorder.none,
+      enabledBorder: InputBorder.none,
+      focusedBorder: InputBorder.none,
+      errorBorder: InputBorder.none,
+      focusedErrorBorder: InputBorder.none,
     );
   }
 }

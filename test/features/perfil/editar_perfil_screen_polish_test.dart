@@ -30,6 +30,8 @@ void main() {
     expect(screen, contains('invalidatePacotesCaches'));
     expect(screen, contains('ref.invalidate(perfilProvider)'));
     expect(screen, contains('_PerfilPhotoEditor'));
+    expect(screen, contains('_PerfilFormField'));
+    expect(screen, contains('FxInputDeco.insetGrouped'));
     expect(screen, isNot(contains('google_fonts')));
     expect(screen, isNot(contains('FocuxTypography')));
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(8));
