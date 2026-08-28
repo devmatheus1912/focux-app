@@ -194,6 +194,9 @@ String? operacaoStatusSubtitle(
   bool compactFollowUpVisible = false,
 }) {
   if (compactFollowUpVisible) return null;
+  if (heroShowsRisco) {
+    return 'Resumo da semana · aderência, treinos e check-ins';
+  }
   return 'Próximo contato: ${formatProximoContato(aluno)}';
 }
 
@@ -236,15 +239,22 @@ OperacaoAdherenceEmptyState? resolveOperacaoAdherenceEmptyState({
 
   return const OperacaoAdherenceEmptyState(
     message: 'Nenhum check-in nos últimos 7 dias.',
-    hint: 'Envie um lembrete rápido ao aluno.',
+    hint: 'Peça um check-in com mensagem pronta.',
     showCheckinCta: true,
   );
 }
 
 /// Human-readable idle days for operational tiles.
 String formatDiasSemTreinoDisplay(int? dias) {
-  if (dias == null) return 'Sem registro';
+  if (dias == null) return '—';
+  if (dias <= 0) return 'Hoje';
   return '${dias}d';
+}
+
+String semTreinoOperacaoSubtitle(int? dias) {
+  if (dias == null) return 'Ainda sem histórico no app';
+  if (dias <= 0) return 'Treinou recentemente';
+  return '$dias ${dias == 1 ? 'dia' : 'dias'} sem treinar';
 }
 
 OperacaoDominantMetric resolveOperacaoDominantMetric(Aluno aluno) {

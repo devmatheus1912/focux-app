@@ -154,7 +154,7 @@ void main() {
         heroShowsRisco: true,
       );
       expect(subtitle, isNotNull);
-      expect(subtitle, contains('Próximo contato'));
+      expect(subtitle, contains('Resumo da semana'));
       expect(subtitle, isNot(contains('priorize contato')));
       expect(subtitle, isNot(contains('risco alto')));
     });
@@ -217,7 +217,7 @@ void main() {
       );
       expect(state, isNotNull);
       expect(state!.showCheckinCta, isTrue);
-      expect(state.compactLine, contains('Envie um lembrete rápido'));
+      expect(state.compactLine, contains('Peça um check-in'));
     });
 
     test('offers check-in CTA when outreach is not on copilot', () {
@@ -246,12 +246,26 @@ void main() {
   });
 
   group('formatDiasSemTreinoDisplay', () {
-    test('null shows sem registro', () {
-      expect(formatDiasSemTreinoDisplay(null), 'Sem registro');
+    test('null shows em dash', () {
+      expect(formatDiasSemTreinoDisplay(null), '—');
     });
 
-    test('zero shows 0d', () {
-      expect(formatDiasSemTreinoDisplay(0), '0d');
+    test('zero shows hoje', () {
+      expect(formatDiasSemTreinoDisplay(0), 'Hoje');
+    });
+
+    test('positive shows days suffix', () {
+      expect(formatDiasSemTreinoDisplay(3), '3d');
+    });
+  });
+
+  group('semTreinoOperacaoSubtitle', () {
+    test('null explains missing history', () {
+      expect(semTreinoOperacaoSubtitle(null), contains('sem histórico'));
+    });
+
+    test('positive shows idle days', () {
+      expect(semTreinoOperacaoSubtitle(2), '2 dias sem treinar');
     });
   });
 

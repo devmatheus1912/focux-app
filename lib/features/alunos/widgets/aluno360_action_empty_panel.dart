@@ -74,9 +74,10 @@ class Aluno360ActionEmptyPanel extends StatelessWidget {
                 ),
               ),
               if (showPrimary) ...[
-                const SizedBox(height: 10),
+                const SizedBox(height: 12),
                 SizedBox(
-                  height: 40,
+                  width: double.infinity,
+                  height: 44,
                   child: OutlinedButton.icon(
                     onPressed: onPrimary,
                     icon: Icon(primaryIcon, size: 16),

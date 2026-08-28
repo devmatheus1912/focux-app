@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
@@ -90,6 +91,7 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
     );
     final dias = aluno.diasSemTreino;
     final semTreinoDisplay = formatDiasSemTreinoDisplay(dias);
+    final semTreinoSubtitle = semTreinoOperacaoSubtitle(dias);
     final semTreinoAccent =
         (dias ?? 0) >= diasLimite ? EagleTokens.warn : fxScreenMute(context);
     final showLegend = shouldShowOperacaoAdherenceLegend(
@@ -129,7 +131,7 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
           icon: Icons.percent_rounded,
           accent: aderenciaColor,
           label: 'Aderência',
-          subtitle: 'Semana atual',
+          subtitle: 'Treinos concluídos na semana',
           value: aluno.aderenciaPercent == null ? '—' : '${aluno.aderenciaPercent}%',
           numeric: aluno.aderenciaPercent != null,
           highlight: (aluno.aderenciaPercent ?? 0) <= 0,
@@ -141,7 +143,7 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
           icon: Icons.pause_circle_outline_rounded,
           accent: semTreinoAccent,
           label: 'Sem treino',
-          subtitle: dias == null ? 'Sem histórico recente' : 'Dias parados',
+          subtitle: semTreinoSubtitle,
           value: semTreinoDisplay,
           highlight: (dias ?? 0) >= diasLimite,
           onTap: () => _openTreinos(context),
@@ -162,7 +164,7 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
           icon: Icons.percent_rounded,
           accent: aderenciaColor,
           label: 'Aderência',
-          subtitle: 'Semana atual',
+          subtitle: 'Treinos concluídos na semana',
           value: aluno.aderenciaPercent == null ? '—' : '${aluno.aderenciaPercent}%',
           numeric: aluno.aderenciaPercent != null,
           highlight: (aluno.aderenciaPercent ?? 0) <= 0,
@@ -172,7 +174,7 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
           icon: Icons.pause_circle_outline_rounded,
           accent: semTreinoAccent,
           label: 'Sem treino',
-          subtitle: dias == null ? 'Sem histórico recente' : 'Dias parados',
+          subtitle: semTreinoSubtitle,
           value: semTreinoDisplay,
           highlight: (dias ?? 0) >= diasLimite,
           onTap: () => _openTreinos(context),
@@ -194,7 +196,7 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
         icon: Icons.calendar_view_week_rounded,
         accent: week.hasAnyCheckin ? aderenciaColor : EagleTokens.warn,
         label: 'Check-ins · 7 dias',
-        subtitle: adherenceEmpty?.compactLine ?? week.caption,
+        subtitle: adherenceEmpty?.message ?? week.caption,
         value: weekValue,
         numeric: week.points.isNotEmpty,
         highlight: !week.hasAnyCheckin && week.points.isNotEmpty,
@@ -202,6 +204,9 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
         onTap: () => _openTreinos(context),
       ),
     );
+
+    final firstName = aluno.nome.split(' ').first;
+    final line = ShellChrome.of(context).line;
 
     return FxSettingsGroup(
       key: const ValueKey('aluno360_operacao_status'),
@@ -213,7 +218,29 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
       children: [
         ...tiles,
         Padding(
-          padding: const EdgeInsets.fromLTRB(0, 4, 0, 4),
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Divider(
+            height: 1,
+            thickness: 1,
+            color: line.withValues(alpha: 0.45),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(bottom: 6),
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              'Calendário da semana',
+              style: Aluno360Layout.metaStyle(context).copyWith(
+                color: fxScreenMute(context),
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.2,
+              ),
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(bottom: 4),
           child: Semantics(
             label: 'Check-ins dos últimos 7 dias',
             child: AlunoOperacaoAdherenceBars(
@@ -236,28 +263,19 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
             ),
           ),
         if (showCheckinCta && (adherenceEmpty?.showCheckinCta ?? true))
-          Padding(
-            padding: const EdgeInsets.only(top: 4, bottom: 4),
-            child: SizedBox(
-              width: double.infinity,
-              child: OutlinedButton.icon(
-                onPressed:
-                    () => showAlunoCheckinMessageSheet(
-                      context,
-                      alunoId: alunoId,
-                      alunoNome: aluno.nome,
-                    ),
-                icon: Icon(Icons.message_outlined, size: 16, color: primary),
-                label: Text(
-                  'Pedir check-in',
-                  style: Aluno360Layout.chipLabelStyle(context, color: primary),
-                ),
-                style: Aluno360Layout.operacaoOutlinedButtonStyle(
+          FxSettingsTile(
+            icon: Icons.message_outlined,
+            accent: primary,
+            label: 'Pedir check-in',
+            subtitle: 'Mensagem pronta para $firstName',
+            value: '',
+            showDivider: false,
+            onTap:
+                () => showAlunoCheckinMessageSheet(
                   context,
-                  primary,
+                  alunoId: alunoId,
+                  alunoNome: aluno.nome,
                 ),
-              ),
-            ),
           ),
       ],
     );

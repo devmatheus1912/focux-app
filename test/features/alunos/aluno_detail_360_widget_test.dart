@@ -300,7 +300,7 @@ void main() {
     await tester.pump();
 
     expect(find.byKey(const ValueKey('aluno360_evolucao_empty')), findsOneWidget);
-    expect(find.text('Sem sinais de evolução ainda'), findsOneWidget);
+    expect(find.text('Histórico ainda vazio'), findsOneWidget);
     expect(find.text('Pedir check-in'), findsWidgets);
     expect(find.text('Ver treinos'), findsWidgets);
 

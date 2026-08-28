@@ -176,14 +176,14 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
                                     'aluno360_evolucao_empty',
                                   ),
                                   compact: true,
-                                  icon: Icons.hourglass_empty_rounded,
-                                  title: 'Sem sinais de evolução ainda',
+                                  icon: Icons.insights_outlined,
+                                  title: 'Histórico ainda vazio',
                                   subtitle:
                                       timelineHasSignals
-                                          ? '$firstName já tem interações na linha do tempo abaixo. '
-                                              'Peça um check-in para liberar o gráfico de volume.'
-                                          : 'Peça um check-in a $firstName ou revise o treino '
-                                              'para começar a formar o histórico.',
+                                          ? '$firstName já aparece na linha do tempo. '
+                                              'Peça um check-in para liberar volume e tendência.'
+                                          : 'Peça um check-in a $firstName para começar '
+                                              'a montar volume, tendência e próximos passos.',
                                   primaryLabel: 'Pedir check-in',
                                   primaryIcon: Icons.message_outlined,
                                   onPrimary: () => _openCheckinMessage(context),

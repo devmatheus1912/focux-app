@@ -544,7 +544,7 @@ void main() {
       ),
     );
     expect(screen, contains('showAluno360CopilotProfileGapsSheet'));
-    expect(screen, contains('Sem sinais de evolução ainda'));
+    expect(screen, contains('Histórico ainda vazio'));
     expect(screen, contains('Linha do tempo ainda vazia'));
     expect(
       screen,

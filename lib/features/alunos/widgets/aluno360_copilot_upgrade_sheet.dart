@@ -61,40 +61,43 @@ class Aluno360CopilotUpgradeSheet {
               ),
               const SizedBox(height: TokensStrip.s3),
               Text(
-                'Prioridade com IA Copiloto',
+                'IA Copiloto no Aluno 360',
                 textAlign: TextAlign.center,
                 style: Aluno360Layout.sectionTitleStyle(ctx, ink),
               ),
               const SizedBox(height: TokensStrip.s1),
               Text(
-                'Gere a sugestão do dia para cada aluno com base no perfil '
-                'operacional — disponível no plano $planLabel.',
+                'Monte a prioridade do dia com contexto real de cada aluno — '
+                'aderência, risco e próximo passo. Incluso no plano $planLabel.',
                 textAlign: TextAlign.center,
                 style: Aluno360Layout.captionStyle(ctx).copyWith(
                   color: mute,
-                  height: 1.4,
+                  height: 1.45,
                 ),
               ),
               const SizedBox(height: TokensStrip.s4),
               _UpgradeBenefitRow(
                 icon: Icons.bolt_rounded,
-                label: 'Prioridade do dia personalizada',
+                label: 'Prioridade do dia sob medida',
+                detail: 'O que fazer hoje com este aluno',
                 mute: mute,
                 ink: ink,
                 accent: primary,
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 10),
               _UpgradeBenefitRow(
                 icon: Icons.psychology_outlined,
-                label: 'Sugestões com contexto do Aluno 360',
+                label: 'Leitura do perfil operacional',
+                detail: 'Treinos, check-ins e risco no contexto',
                 mute: mute,
                 ink: ink,
                 accent: primary,
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 10),
               _UpgradeBenefitRow(
                 icon: Icons.task_alt_rounded,
-                label: 'Crie tarefas em um toque',
+                label: 'Tarefas e mensagens em um toque',
+                detail: 'Transforme a sugestão em ação',
                 mute: mute,
                 ink: ink,
                 accent: primary,
@@ -150,6 +153,7 @@ class _UpgradeBenefitRow extends StatelessWidget {
   const _UpgradeBenefitRow({
     required this.icon,
     required this.label,
+    required this.detail,
     required this.mute,
     required this.ink,
     required this.accent,
@@ -157,6 +161,7 @@ class _UpgradeBenefitRow extends StatelessWidget {
 
   final IconData icon;
   final String label;
+  final String detail;
   final Color mute;
   final Color ink;
   final Color accent;
@@ -164,6 +169,7 @@ class _UpgradeBenefitRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
           width: 32,
@@ -176,12 +182,25 @@ class _UpgradeBenefitRow extends StatelessWidget {
         ),
         const SizedBox(width: 10),
         Expanded(
-          child: Text(
-            label,
-            style: Aluno360Layout.metaStyle(context).copyWith(
-              color: ink,
-              fontWeight: FontWeight.w600,
-            ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: Aluno360Layout.metaStyle(context).copyWith(
+                  color: ink,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                detail,
+                style: Aluno360Layout.captionStyle(context).copyWith(
+                  color: mute,
+                  height: 1.3,
+                ),
+              ),
+            ],
           ),
         ),
       ],

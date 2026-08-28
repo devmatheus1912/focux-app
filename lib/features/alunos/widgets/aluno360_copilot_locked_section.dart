@@ -30,23 +30,22 @@ class Aluno360CopilotLockedSection extends StatelessWidget {
       label: 'Prioridade do dia indisponível no seu plano',
       child: FxSettingsGroup(
         header: 'Prioridade do dia',
-        caption: 'Sugestão gerada com IA Copiloto',
+        caption: 'Sugestão diária com IA Copiloto',
         accent: primary,
         footer: Padding(
           padding: const EdgeInsets.symmetric(
             horizontal: FxSettingsLayout.groupPadH,
           ),
           child: Text(
-            'Toque para conhecer o plano $planLabel e assinar.',
+            'Disponível no plano $planLabel · toque para assinar.',
             style: FxSettingsLayout.footer(color: mute),
           ),
         ),
         children: [
           FxSettingsTile(
             icon: Icons.auto_awesome_outlined,
-            label: 'Recurso do plano $planLabel',
-            subtitle:
-                'Gere a prioridade do dia com IA Copiloto para cada aluno.',
+            label: 'Prioridade com IA',
+            subtitle: 'Sugestão personalizada com contexto do aluno.',
             value: planLabel,
             locked: true,
             upgradeTierLabel: planLabel,
