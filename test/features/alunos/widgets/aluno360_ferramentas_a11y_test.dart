@@ -1,11 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:focux_app/core/api/api_client.dart';
 import 'package:focux_app/features/alunos/data/aluno_repository.dart';
 import 'package:focux_app/features/alunos/providers/aluno_detail_providers.dart';
 import 'package:focux_app/features/alunos/widgets/aluno360_detail_ferramentas_tab.dart';
+import 'package:focux_app/features/alunos/widgets/aluno360_module_tile.dart';
+import 'package:focux_app/features/avaliacao/data/avaliacao_repository.dart';
+import 'package:focux_app/features/planos/data/planos_repository.dart';
+import 'package:focux_app/features/planos/providers/plano_features_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+Override _ferramentasPlanoOverride() {
+  final notifier = PlanoFeaturesNotifier(
+    PlanosRepository(ApiClient()),
+  );
+  notifier.seedFromHome(PlanoFeatures.optimisticEnterprise);
+  return planoFeaturesProvider.overrideWith((ref) => notifier);
+}
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  setUpAll(() {
+    SharedPreferences.setMockInitialValues({});
+  });
   final aluno = Aluno(
     id: 42,
     nome: 'Beatriz Costa',
@@ -30,6 +49,7 @@ void main() {
   Widget harness(Widget child) {
     return ProviderScope(
       overrides: [
+        _ferramentasPlanoOverride(),
         alunoMedidasResumoProvider(42).overrideWith((ref) async => null),
         alunoAderenciaSemanalProvider(42).overrideWith(
           (ref) async => aderenciaSemanaEndingToday(),
@@ -81,7 +101,59 @@ void main() {
     expect(find.text('Massa magra'), findsOneWidget);
     expect(find.text('IA Progresso'), findsOneWidget);
     expect(find.text('Aderência'), findsOneWidget);
+    expect(find.byType(Aluno360FerramentasMiniSparkline), findsOneWidget);
 
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('ferramentas tab shows complete measurements inset', (
+    tester,
+  ) async {
+    final alunoCompleto = Aluno(
+      id: 99,
+      nome: 'Carla',
+      email: 'carla@test.com',
+      status: 'ATIVO',
+      dataNascimento: '1990-02-10',
+      altura: 1.70,
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          _ferramentasPlanoOverride(),
+          alunoMedidasResumoProvider(99).overrideWith(
+            (ref) async => SnapshotAvaliacao(
+              percGordura: 18.4,
+              massaMuscular: 52.1,
+            ),
+          ),
+          alunoAderenciaSemanalProvider(99).overrideWith((ref) async => []),
+        ],
+        child: MaterialApp(
+          home: MediaQuery(
+            data: const MediaQueryData(size: Size(390, 1200)),
+            child: Scaffold(
+              body: SingleChildScrollView(
+                child: Aluno360DetailFerramentasTab(
+              aluno: alunoCompleto,
+              alunoId: 99,
+              isDark: false,
+              primary: const Color(0xFF2563EB),
+              perfilCompletion: 100,
+              animateEntrance: false,
+              onEntrancePlayed: () {},
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Medidas em dia'), findsOneWidget);
+    expect(find.text('Gordura 18.4% · Massa magra 52.1 kg'), findsOneWidget);
+    expect(find.text('Idade'), findsNothing);
   });
 }

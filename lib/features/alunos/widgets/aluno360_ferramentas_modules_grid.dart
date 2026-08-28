@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
+import '../../planos/utils/effective_plano_features.dart';
+import '../../subscription/widgets/upgrade_prompt_sheet.dart';
 import '../data/aluno_repository.dart';
 import '../utils/aluno360_ferramentas_logic.dart';
 import 'aluno360_help_sheets.dart';
+import 'aluno360_module_tile.dart';
 
 /// Módulos Ferramentas em grupos inset — paridade Perfil (`FxSettingsGroup`).
-class Aluno360FerramentasModulesGrid extends StatelessWidget {
+class Aluno360FerramentasModulesGrid extends ConsumerWidget {
   const Aluno360FerramentasModulesGrid({
     super.key,
     required this.aluno,
@@ -31,9 +35,36 @@ class Aluno360FerramentasModulesGrid extends StatelessWidget {
   final String? massaMagra;
   final List<Map<String, dynamic>>? aderenciaSemanal;
 
+  void _openGated(
+    BuildContext context, {
+    required Aluno360FerramentasGatedModule module,
+    required String featureName,
+    required bool locked,
+    required VoidCallback onUnlocked,
+  }) {
+    if (locked) {
+      UpgradePromptSheet.show(
+        context: context,
+        featureName: featureName,
+        capability: Aluno360FerramentasLogic.gatedModuleCapability(module),
+      );
+      return;
+    }
+    onUnlocked();
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final evolucaoRoute = '/alunos/$alunoId/evolucao';
+    final features = effectivePlanoFeatures(ref);
+    final iaLocked = Aluno360FerramentasLogic.isGatedModuleLocked(
+      features: features,
+      module: Aluno360FerramentasGatedModule.iaProgresso,
+    );
+    final feedbackLocked = Aluno360FerramentasLogic.isGatedModuleLocked(
+      features: features,
+      module: Aluno360FerramentasGatedModule.feedbackVideo,
+    );
     final aderenciaPercent = (aluno.aderenciaPercent ?? 0).toDouble();
     final composicaoPending = Aluno360FerramentasLogic.composicaoCorporalPending(
       bf: bf,
@@ -43,6 +74,13 @@ class Aluno360FerramentasModulesGrid extends StatelessWidget {
       aluno: aluno,
       aderenciaSemanal: aderenciaSemanal,
     );
+    final sparklineValues = Aluno360FerramentasLogic.aderenciaSparklineValues(
+      aderenciaSemanal,
+    );
+    final sparklineSemantics =
+        Aluno360FerramentasLogic.aderenciaSparkSemanticsLabel(
+          aderenciaSemanal,
+        );
 
     return KeyedSubtree(
       key: const ValueKey('aluno360_ferramentas_modulos'),
@@ -87,10 +125,24 @@ class Aluno360FerramentasModulesGrid extends StatelessWidget {
                 label: 'IA Progresso',
                 subtitle: 'Carga sugerida pela IA',
                 value: '',
+                locked: iaLocked,
+                upgradeTierLabel:
+                    iaLocked
+                        ? Aluno360FerramentasLogic.gatedModulePlanLabel(
+                          Aluno360FerramentasGatedModule.iaProgresso,
+                        )
+                        : null,
                 onTap:
-                    () => context.push(
-                      '/alunos/$alunoId/ia/progressao',
-                      extra: aluno.nome,
+                    () => _openGated(
+                      context,
+                      module: Aluno360FerramentasGatedModule.iaProgresso,
+                      featureName: 'IA Progresso',
+                      locked: iaLocked,
+                      onUnlocked:
+                          () => context.push(
+                            '/alunos/$alunoId/ia/progressao',
+                            extra: aluno.nome,
+                          ),
                     ),
               ),
               FxSettingsTile(
@@ -117,6 +169,14 @@ class Aluno360FerramentasModulesGrid extends StatelessWidget {
                 value: '${aderenciaPercent.toInt()}%',
                 numeric: true,
                 highlight: aderenciaAttention,
+                accessory:
+                    sparklineValues.isNotEmpty
+                        ? Aluno360FerramentasMiniSparkline(
+                          data: sparklineValues,
+                          color: primary,
+                          semanticsLabel: sparklineSemantics,
+                        )
+                        : null,
                 onTap:
                     () => context.push(
                       '/alunos/$alunoId/relatorio',
@@ -196,11 +256,25 @@ class Aluno360FerramentasModulesGrid extends StatelessWidget {
                 label: 'Feedback em vídeo',
                 subtitle: 'Correções e análise de execução',
                 value: '',
+                locked: feedbackLocked,
+                upgradeTierLabel:
+                    feedbackLocked
+                        ? Aluno360FerramentasLogic.gatedModulePlanLabel(
+                          Aluno360FerramentasGatedModule.feedbackVideo,
+                        )
+                        : null,
                 showDivider: false,
                 onTap:
-                    () => context.push(
-                      '/alunos/$alunoId/feedback-video',
-                      extra: aluno.nome,
+                    () => _openGated(
+                      context,
+                      module: Aluno360FerramentasGatedModule.feedbackVideo,
+                      featureName: 'Feedback em vídeo',
+                      locked: feedbackLocked,
+                      onUnlocked:
+                          () => context.push(
+                            '/alunos/$alunoId/feedback-video',
+                            extra: aluno.nome,
+                          ),
                     ),
               ),
             ],

@@ -9,6 +9,7 @@ import '../constants/aluno_360_layout.dart';
 import '../data/aluno_repository.dart';
 import '../utils/aluno360_ferramentas_logic.dart';
 import 'aluno360_help_sheets.dart';
+import 'aluno360_measurements_complete_tile.dart';
 import 'aluno360_operacao_tab.dart';
 
 /// Ferramentas tab: medidas inset + módulos de ação.
@@ -84,6 +85,17 @@ class Aluno360FerramentasTab extends StatelessWidget {
       bf: bf,
       massaMagra: massaMagra,
     );
+    final allComplete = Aluno360FerramentasLogic.measurementsAllComplete(
+      aluno: aluno,
+      bf: bf,
+      massaMagra: massaMagra,
+    );
+    final completeSummary = Aluno360FerramentasLogic.measurementsCompleteSummary(
+      aluno: aluno,
+      bf: bf,
+      massaMagra: massaMagra,
+    );
+    final evolucaoRoute = '/alunos/$alunoId/evolucao';
 
     final measurements = _section(
       0,
@@ -102,6 +114,12 @@ class Aluno360FerramentasTab extends StatelessWidget {
                 height: 52,
                 showHeader: false,
               ),
+            )
+          else if (allComplete)
+            Aluno360MeasurementsCompleteTile(
+              summary: completeSummary,
+              primary: primary,
+              onTap: () => context.push(evolucaoRoute, extra: aluno.nome),
             )
           else
             ...rows.asMap().entries.map((entry) {

@@ -31,6 +31,7 @@ class FxSettingsTile extends StatelessWidget {
     this.onLongPress,
     this.upgradeTierLabel,
     this.semanticsLabel,
+    this.accessory,
   }) : assert(icon != null || fxIcon != null);
 
   final IconData? icon;
@@ -51,6 +52,7 @@ class FxSettingsTile extends StatelessWidget {
   final bool numeric;
   final String? upgradeTierLabel;
   final String? semanticsLabel;
+  final Widget? accessory;
 
   @override
   Widget build(BuildContext context) {
@@ -161,6 +163,10 @@ class FxSettingsTile extends StatelessWidget {
                             ],
                           ),
                         ),
+                        if (accessory != null) ...[
+                          const SizedBox(width: TokensStrip.s2),
+                          accessory!,
+                        ],
                         if (value.isNotEmpty && !locked) ...[
                           const SizedBox(width: TokensStrip.s2),
                           Flexible(

@@ -402,6 +402,7 @@ void main() {
       allOf(
         contains("'Medidas'"),
         contains('measurementRows'),
+        contains('Aluno360MeasurementsCompleteTile'),
         contains('FxSettingsGroup'),
       ),
     );
@@ -417,6 +418,9 @@ void main() {
       ).readAsStringSync(),
       allOf(
         contains('class Aluno360FerramentasModulesGrid'),
+        contains('ConsumerWidget'),
+        contains('UpgradePromptSheet'),
+        contains('Aluno360FerramentasMiniSparkline'),
         contains('FxSettingsGroup'),
         contains('FxSettingsTile'),
       ),

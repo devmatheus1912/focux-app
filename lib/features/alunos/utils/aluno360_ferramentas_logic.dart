@@ -1,7 +1,13 @@
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../planos/data/planos_repository.dart';
+import '../../planos/utils/plano_capability.dart';
+import '../../subscription/plan_entitlements.dart';
 import '../data/aluno_repository.dart';
 import 'aluno360_operacao_logic.dart';
+
+/// Módulos da aba Ferramentas sujeitos a gate de plano.
+enum Aluno360FerramentasGatedModule { iaProgresso, feedbackVideo }
 
 /// Campo de medida corporal na aba Ferramentas.
 enum Aluno360MeasurementField { idade, altura, gordura, massaMagra }
@@ -178,6 +184,58 @@ abstract final class Aluno360FerramentasLogic {
       parseAderenciaSemanal(aderenciaSemanal),
     );
     return !summary.hasAnyCheckin;
+  }
+
+  static bool measurementsAllComplete({
+    required Aluno aluno,
+    String? bf,
+    String? massaMagra,
+  }) {
+    return measurementsPendingCount(
+          aluno: aluno,
+          bf: bf,
+          massaMagra: massaMagra,
+        ) ==
+        0;
+  }
+
+  static String measurementsCompleteSummary({
+    required Aluno aluno,
+    String? bf,
+    String? massaMagra,
+  }) {
+    if (bf != null && massaMagra != null) {
+      return 'Gordura $bf% · Massa magra $massaMagra kg';
+    }
+    final parts = <String>[];
+    if (aluno.idade != null) parts.add('${aluno.idade} anos');
+    if (aluno.altura != null) {
+      parts.add('${(aluno.altura! * 100).round()} cm');
+    }
+    if (parts.isEmpty) return 'Perfil e composição completos';
+    return parts.join(' · ');
+  }
+
+  static String? gatedModuleCapability(Aluno360FerramentasGatedModule module) {
+    return switch (module) {
+      Aluno360FerramentasGatedModule.iaProgresso => 'iaCopiloto',
+      Aluno360FerramentasGatedModule.feedbackVideo => 'poseCoach',
+    };
+  }
+
+  static bool isGatedModuleLocked({
+    required PlanoFeatures features,
+    required Aluno360FerramentasGatedModule module,
+  }) {
+    final capability = gatedModuleCapability(module);
+    if (capability == null) return false;
+    return !PlanoCapability.has(features, capability);
+  }
+
+  static String gatedModulePlanLabel(Aluno360FerramentasGatedModule module) {
+    final capability = gatedModuleCapability(module);
+    final plan = PlanEntitlements.targetPlan(capability: capability);
+    return PlanEntitlements.displayPlanName(plan);
   }
 
   static String aderenciaSparkSemanticsLabel(

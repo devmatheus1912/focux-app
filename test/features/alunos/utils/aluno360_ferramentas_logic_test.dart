@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/alunos/data/aluno_repository.dart';
 import 'package:focux_app/features/alunos/utils/aluno360_ferramentas_logic.dart';
 import 'package:focux_app/features/alunos/utils/aluno360_operacao_logic.dart';
+import 'package:focux_app/features/planos/data/planos_repository.dart';
 
 String _isoDay(DateTime day) {
   return '${day.year.toString().padLeft(4, '0')}-'
@@ -113,6 +114,47 @@ void main() {
       );
       expect(Aluno360FerramentasLogic.anamneseValue(90), 'OK');
       expect(Aluno360FerramentasLogic.anamneseValue(62), '62%');
+    });
+
+    test('measurements complete and gated modules helpers', () {
+      final aluno = Aluno(
+        id: 4,
+        nome: 'D',
+        email: 'd@test.com',
+        status: 'ATIVO',
+        dataNascimento: '1990-01-01',
+        altura: 1.72,
+      );
+      expect(
+        Aluno360FerramentasLogic.measurementsAllComplete(
+          aluno: aluno,
+          bf: '20.0',
+          massaMagra: '50.0',
+        ),
+        isTrue,
+      );
+      expect(
+        Aluno360FerramentasLogic.measurementsCompleteSummary(
+          aluno: aluno,
+          bf: '20.0',
+          massaMagra: '50.0',
+        ),
+        'Gordura 20.0% · Massa magra 50.0 kg',
+      );
+      expect(
+        Aluno360FerramentasLogic.isGatedModuleLocked(
+          features: PlanoFeatures.free,
+          module: Aluno360FerramentasGatedModule.iaProgresso,
+        ),
+        isTrue,
+      );
+      expect(
+        Aluno360FerramentasLogic.isGatedModuleLocked(
+          features: PlanoFeatures.optimisticEnterprise,
+          module: Aluno360FerramentasGatedModule.feedbackVideo,
+        ),
+        isFalse,
+      );
     });
 
     test('aderenciaSparkSemanticsLabel names each weekday', () {
