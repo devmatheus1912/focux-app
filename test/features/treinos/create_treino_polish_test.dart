@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/core/utils/pt_br_display.dart';
+import 'package:focux_app/features/treinos/utils/create_treino_logic.dart';
 
 import '../../support/screen_source_bundle.dart';
 
@@ -8,18 +9,26 @@ void main() {
     expect(displayWorkoutName('Treino Forca'), 'Treino Força');
   });
 
+  test('CreateTreinoLogic nivelLabel', () {
+    expect(CreateTreinoLogic.nivelLabel(null), 'Em aberto');
+    expect(CreateTreinoLogic.nivelLabel('INTERMEDIARIO'), 'Intermediário');
+  });
+
   test('create treino screen polish', () {
     final screen = readScreenSourceBundle(
       'lib/features/treinos/screens/create_treino_screen.dart',
     );
 
-    expect(screen, contains('displayWorkoutName(_nomeCtrl.text.trim())'));
-    expect(screen, contains('Deslize para ver mais modelos'));
-    expect(screen, contains('BouncingScrollPhysics'));
+    expect(screen, contains("displayWorkoutName('Treino \${preset.title}')"));
+    expect(screen, contains('DashboardHomeActionChip'));
+    expect(screen, contains('FxSettingsGroup'));
+    expect(screen, contains('CreateTreinoLogic.presets'));
+    expect(screen, contains('showCreateTreinoNivelPicker'));
     expect(screen, contains('exercicios/add'));
     expect(screen, contains('Scrollable.ensureVisible'));
-    expect(screen, contains("label: 'Modelo \${preset.title}"));
-    expect(screen, contains("label: 'Nível \${_niveisLabel[i]}'"));
-    expect(screen, contains("label: loading ? 'Criando treino' : 'Criar treino'"));
+    expect(screen, isNot(contains("label: 'Modelo \${preset.title}")));
+    expect(screen, isNot(contains('BouncingScrollPhysics')));
+    expect(screen, isNot(contains('FxLiquidPrimaryButton')));
+    expect(screen, contains("label: _loading ? 'Criando…' : 'Criar'"));
   });
 }

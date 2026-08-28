@@ -1,8 +1,6 @@
 part of 'create_treino_screen.dart';
 
-
-class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen>
-    with SingleTickerProviderStateMixin {
+class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nomeCtrl = TextEditingController();
   final _descricaoCtrl = TextEditingController();
@@ -13,18 +11,12 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen>
   bool _loading = false;
   String? _error;
 
-  late final AnimationController _entryCtrl;
-
   @override
   void initState() {
     super.initState();
     _nomeCtrl.addListener(_onFormChanged);
     _objetivoCtrl.addListener(_onFormChanged);
     _descricaoCtrl.addListener(_onFormChanged);
-    _entryCtrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 500),
-    )..forward();
   }
 
   void _onFormChanged() {
@@ -37,7 +29,6 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen>
     _descricaoCtrl.dispose();
     _objetivoCtrl.dispose();
     _nomeFocusNode.dispose();
-    _entryCtrl.dispose();
     super.dispose();
   }
 
@@ -103,7 +94,7 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen>
     }
   }
 
-  void _applyPreset(_TreinoPreset preset) {
+  void _applyPreset(TreinoCreatePreset preset) {
     HapticFeedback.selectionClick();
     setState(() {
       _objetivoCtrl.text = preset.title;
@@ -114,111 +105,110 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen>
     });
   }
 
+  Future<void> _openNivelPicker() {
+    return showCreateTreinoNivelPicker(
+      context,
+      selected: _nivel,
+      onSelected: (value) => setState(() => _nivel = value),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final chrome = ShellChrome.of(context);
     final isDark = chrome.isDark;
     final primary = Theme.of(context).colorScheme.primary;
+    final soft = BrandPalette.softened(primary);
     final canSubmit = _nomeCtrl.text.trim().isNotEmpty && !_loading;
-    final previewTitle =
-        _nomeCtrl.text.trim().isEmpty
-            ? 'Plano sem nome'
-            : displayWorkoutName(_nomeCtrl.text.trim());
-    final previewGoal =
-        _objetivoCtrl.text.trim().isEmpty
-            ? 'Escolha um objetivo'
-            : displayPtBr(_objetivoCtrl.text.trim());
-    final previewLevel =
-        _nivel == null
-            ? 'Nível em aberto'
-            : _niveisLabel[_niveis.indexOf(_nivel!)];
+    final selectedPreset = CreateTreinoLogic.matchingPresetTitle(
+      _objetivoCtrl.text,
+    );
 
     return fxScreenA11yScope(
       label: widget.alunoId == null ? 'Novo treino' : 'Treino vinculado',
       child: FxShellScaffold(
-      useMesh: true,
-      appBar: FxShellAppBar(
-        title: widget.alunoId == null ? 'Novo Treino' : 'Treino vinculado',
-        subtitle: widget.alunoId == null ? 'PLANO BASE' : 'PLANO DO ALUNO',
-        onBack: () => safePopOrGo(context, '/treinos'),
-      ),
-      bottomNavigationBar: _StickyCreateBar(
-        canSubmit: canSubmit,
-        loading: _loading,
-        onSubmit: _submit,
-      ),
-      body: SafeArea(
-        bottom: false,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+        useMesh: true,
+        appBar: FxShellAppBar(
+          title: widget.alunoId == null ? 'Novo Treino' : 'Treino vinculado',
+          subtitle: widget.alunoId == null ? 'PLANO BASE' : 'PLANO DO ALUNO',
+          onBack: () => safePopOrGo(context, '/treinos'),
+          actions: [
+            FxHelpIconButton(
+              tooltip: 'Ajuda sobre novo treino',
+              onTap: () => showCreateTreinoHelpSheet(context),
+            ),
+            const SizedBox(width: TokensStrip.s2),
+          ],
+        ),
+        body: Stack(
           children: [
-            Expanded(
-              child: FadeTransition(
-                opacity: CurvedAnimation(
-                  parent: _entryCtrl,
-                  curve: Curves.easeOut,
+            SafeArea(
+              bottom: false,
+              child: SingleChildScrollView(
+                padding: EdgeInsets.fromLTRB(
+                  FxSettingsLayout.pageInset,
+                  6,
+                  FxSettingsLayout.pageInset,
+                  88 + MediaQuery.paddingOf(context).bottom,
                 ),
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(22, 8, 22, 116),
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _CreationPreviewGroup(
-                          title: previewTitle,
-                          goal: previewGoal,
-                          level: previewLevel,
-                          primary: primary,
-                          onFocusName: () {
-                            final fieldContext = _nomeFieldKey.currentContext;
-                            if (fieldContext != null) {
-                              Scrollable.ensureVisible(
-                                fieldContext,
-                                alignment: 0.2,
-                                duration: const Duration(milliseconds: 280),
-                                curve: Curves.easeOutCubic,
-                              );
-                            }
-                            _nomeFocusNode.requestFocus();
-                          },
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      FxStaggerItem(
+                        index: 0,
+                        child: FxSettingsGroup(
+                          header: 'Modelos rápidos',
+                          caption:
+                              'Toque em um modelo para pré-preencher nome e objetivo.',
+                          accent: primary,
+                          children: [
+                            for (var i = 0; i < CreateTreinoLogic.presets.length; i++)
+                              FxSettingsTile(
+                                icon: CreateTreinoLogic.presets[i].icon,
+                                accent: soft,
+                                label: CreateTreinoLogic.presets[i].title,
+                                subtitle: CreateTreinoLogic.presets[i].subtitle,
+                                value:
+                                    selectedPreset ==
+                                            CreateTreinoLogic.presets[i].title
+                                        ? 'Ativo'
+                                        : '',
+                                highlight:
+                                    selectedPreset ==
+                                    CreateTreinoLogic.presets[i].title,
+                                showDivider:
+                                    i < CreateTreinoLogic.presets.length - 1 ||
+                                    widget.alunoId == null,
+                                onTap:
+                                    () => _applyPreset(
+                                      CreateTreinoLogic.presets[i],
+                                    ),
+                              ),
+                            if (widget.alunoId == null)
+                              FxSettingsTile(
+                                icon: Icons.grid_view_rounded,
+                                accent: soft,
+                                label: 'Abrir biblioteca',
+                                subtitle: 'Planos já salvos na sua conta',
+                                value: '',
+                                showDivider: false,
+                                onTap:
+                                    () => safePopOrGo(context, '/treinos'),
+                              ),
+                          ],
                         ),
-                        const SizedBox(height: 18),
-                        _SectionKicker(
-                          title: 'Comece por um modelo',
-                          action:
-                              widget.alunoId == null
-                                  ? 'Biblioteca'
-                                  : widget.alunoNome ?? 'Aluno',
-                          isDark: isDark,
-                          onAction:
-                              widget.alunoId == null
-                                  ? () => safePopOrGo(context, '/treinos')
-                                  : null,
-                        ),
-                        const SizedBox(height: 10),
-                        Text(
-                          'Deslize para ver mais modelos',
-                          style: FocuxHubTypography.bodyMuted(
-                            color:
-                                isDark
-                                    ? EagleTokens.darkInkMute
-                                    : TokensStrip.textSecondary,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        _PresetRail(
-                          presets: _objetivoPresets,
-                          selected: _objetivoCtrl.text.trim(),
-                          isDark: isDark,
-                          primary: primary,
-                          onTap: _applyPreset,
-                        ),
-                        const SizedBox(height: 20),
-                        FxSettingsGroup(
-                          header: 'Dados essenciais',
-                          caption: canSubmit ? null : 'Nome obrigatório',
+                      ),
+                      const SizedBox(height: FxSettingsLayout.groupGap),
+                      FxStaggerItem(
+                        index: 1,
+                        child: FxSettingsGroup(
+                          header: 'Plano base',
+                          caption:
+                              canSubmit
+                                  ? 'Próximo passo: adicionar exercícios.'
+                                  : 'Nome obrigatório para criar o plano.',
                           accent: primary,
                           children: [
                             AlunoInsetFormField(
@@ -233,11 +223,15 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen>
                                           ? 'Informe o nome'
                                           : null,
                             ),
-                            _LevelSelector(
-                              selected: _nivel,
-                              isDark: isDark,
-                              onChanged:
-                                  (value) => setState(() => _nivel = value),
+                            FxSettingsTile(
+                              icon: Icons.tune_rounded,
+                              accent: soft,
+                              label: 'Nível',
+                              subtitle: 'Opcional — ajuda na biblioteca',
+                              value: CreateTreinoLogic.nivelLabel(_nivel),
+                              picker: true,
+                              showDivider: true,
+                              onTap: _openNivelPicker,
                             ),
                             AlunoInsetFormField(
                               controller: _objetivoCtrl,
@@ -253,17 +247,50 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen>
                             ),
                           ],
                         ),
-                        if (_error != null) ...[
-                          const SizedBox(height: TokensStrip.s4),
-                          FxErrorState(
+                      ),
+                      if (_error != null) ...[
+                        const SizedBox(height: FxSettingsLayout.groupGap),
+                        FxStaggerItem(
+                          index: 2,
+                          child: FxErrorState(
                             chromeOnDark: isDark,
                             primary: primary,
                             title: 'Não foi possível criar o treino',
                             message: _error!,
                             onRetry: _submit,
                           ),
-                        ],
+                        ),
                       ],
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            Align(
+              alignment: AlignmentDirectional.bottomEnd,
+              child: SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    TokensStrip.s4,
+                    0,
+                    TokensStrip.s4,
+                    12,
+                  ),
+                  child: Semantics(
+                    button: true,
+                    enabled: canSubmit,
+                    label:
+                        _loading
+                            ? 'Criando treino'
+                            : canSubmit
+                            ? 'Criar treino'
+                            : 'Criar treino. Informe o nome para habilitar',
+                    child: DashboardHomeActionChip(
+                      label: _loading ? 'Criando…' : 'Criar',
+                      accent: primary,
+                      isDark: isDark,
+                      enabled: canSubmit,
+                      onPressed: _submit,
                     ),
                   ),
                 ),
@@ -271,7 +298,6 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen>
             ),
           ],
         ),
-      ),
       ),
     );
   }
