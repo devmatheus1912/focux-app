@@ -46,7 +46,12 @@ class AlunoDetailHeroCard extends StatelessWidget {
       objective: objective,
       contextLine: contextLine,
     );
-    final subtitleMaxLines = 1;
+    const subtitleMaxLines = 2;
+    final showStatusBadge = alunoHeroShouldShowStatusBadge(
+      signal: signal,
+      status: status,
+    );
+    final nameStyle = Aluno360Layout.identityNameStyle(context, ink);
 
     return Semantics(
       container: true,
@@ -60,7 +65,7 @@ class AlunoDetailHeroCard extends StatelessWidget {
           width: double.infinity,
           padding: EdgeInsets.symmetric(
             horizontal: 12,
-            vertical: compactContactPriority ? 6 : 8,
+            vertical: compactContactPriority ? 8 : 10,
           ),
           decoration: Aluno360Layout.operacaoInsetSectionDecoration(
             context,
@@ -69,140 +74,67 @@ class AlunoDetailHeroCard extends StatelessWidget {
           ),
           clipBehavior: Clip.antiAlias,
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    // FittedBox absorve excedente de altura no slot fixo do
-                    // header. Sem LayoutBuilder interno (quebra intrinsics) —
-                    // a largura vem deste builder externo.
-                    return FittedBox(
-                      fit: BoxFit.scaleDown,
-                      alignment: Alignment.centerLeft,
-                      child: SizedBox(
-                        width: constraints.maxWidth,
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            AlunoAvatar(
-                              name: displayName,
-                              photoUrl: aluno.fotoUrl,
-                              variant:
-                                  compactContactPriority
-                                      ? AlunoAvatarVariant.strip
-                                      : AlunoAvatarVariant.hero,
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Builder(
-                                    builder: (context) {
-                                      final showStatusBadge =
-                                          alunoHeroShouldShowStatusBadge(
-                                            signal: signal,
-                                            status: status,
-                                          );
-                                      final avatarSize =
-                                          compactContactPriority
-                                              ? AlunoAvatar.stripSize
-                                              : AlunoAvatar.heroSize;
-                                      final nameMaxWidth = (constraints
-                                                  .maxWidth -
-                                              avatarSize -
-                                              12)
-                                          .clamp(0.0, constraints.maxWidth);
-                                      final stackStatusBadge =
-                                          showStatusBadge && nameMaxWidth < 140;
-                                      final nameStyle =
-                                          Aluno360Layout.identityNameStyle(
-                                            context,
-                                            ink,
-                                          );
-                                      if (stackStatusBadge) {
-                                        return Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Text(
-                                              displayName,
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: nameStyle,
-                                            ),
-                                            const SizedBox(height: 2),
-                                            _IdentityStatusChip(
-                                              status: status,
-                                              isDark: isDark,
-                                            ),
-                                          ],
-                                        );
-                                      }
-                                      return Row(
-                                        children: [
-                                          Expanded(
-                                            child: Text(
-                                              displayName,
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: nameStyle,
-                                            ),
-                                          ),
-                                          if (showStatusBadge) ...[
-                                            const SizedBox(width: 4),
-                                            _IdentityStatusChip(
-                                              status: status,
-                                              isDark: isDark,
-                                            ),
-                                          ],
-                                        ],
-                                      );
-                                    },
-                                  ),
-                                  SizedBox(
-                                    height: compactContactPriority ? 2 : 4,
-                                  ),
-                                  if (!objectiveDefined &&
-                                      onDefineObjective != null)
-                                    _IdentityObjectiveRow(
-                                      label: objective,
-                                      primary: primary,
-                                      isDark: isDark,
-                                      mute: mute,
-                                      onDefineObjective: onDefineObjective!,
-                                    )
-                                  else
-                                    Text(
-                                      subtitle,
-                                      maxLines: subtitleMaxLines,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: Aluno360Layout.captionStyle(
-                                        context,
-                                      ).copyWith(
-                                        color: mute,
-                                        fontWeight: FontWeight.w600,
-                                        height: 1.3,
-                                      ),
-                                    ),
-                                ],
-                              ),
-                            ),
-                          ],
+              AlunoAvatar(
+                name: displayName,
+                photoUrl: aluno.fotoUrl,
+                variant:
+                    compactContactPriority
+                        ? AlunoAvatarVariant.strip
+                        : AlunoAvatarVariant.hero,
+              ),
+              const SizedBox(width: 12),
+              Flexible(
+                fit: FlexFit.loose,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Wrap(
+                      spacing: 4,
+                      runSpacing: 2,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        Text(
+                          displayName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: nameStyle,
+                        ),
+                        if (showStatusBadge)
+                          _IdentityStatusChip(
+                            status: status,
+                            isDark: isDark,
+                          ),
+                      ],
+                    ),
+                    SizedBox(height: compactContactPriority ? 2 : 4),
+                    if (!objectiveDefined && onDefineObjective != null)
+                      _IdentityObjectiveRow(
+                        label: objective,
+                        primary: primary,
+                        isDark: isDark,
+                        mute: mute,
+                        onDefineObjective: onDefineObjective!,
+                      )
+                    else
+                      Text(
+                        subtitle,
+                        maxLines: subtitleMaxLines,
+                        overflow: TextOverflow.ellipsis,
+                        style: Aluno360Layout.captionStyle(context).copyWith(
+                          color: mute,
+                          fontWeight: FontWeight.w600,
+                          height: 1.3,
                         ),
                       ),
-                    );
-                  },
+                  ],
                 ),
               ),
               const SizedBox(width: 8),
-              FittedBox(
-                fit: BoxFit.scaleDown,
-                alignment: Alignment.centerRight,
+              Padding(
+                padding: const EdgeInsets.only(top: 2),
                 child: _IdentityMetricChip(
                   signal: signal,
                   isDark: isDark,

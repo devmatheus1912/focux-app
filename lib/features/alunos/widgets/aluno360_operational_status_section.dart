@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/operational_metric_tile.dart';
 import '../constants/aluno_360_layout.dart';
@@ -14,7 +15,6 @@ import '../utils/aluno360_operacao_logic.dart';
 import '../widgets/aluno_operacao_adherence_bars.dart';
 import '../widgets/aluno_operacao_adherence_legend.dart';
 import '../widgets/aluno_outreach_message_sheet.dart';
-import 'aluno360_section_header.dart';
 
 class Aluno360OperationalStatusSection extends ConsumerWidget {
   const Aluno360OperationalStatusSection({
@@ -144,25 +144,18 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
       compactFollowUpVisible: compactFollowUpVisible,
     );
 
-    return Container(
+    return FxSettingsGroup(
       key: const ValueKey('aluno360_operacao_status'),
-      decoration: Aluno360Layout.operacaoInsetSectionDecoration(
-        context,
-        primary: primary,
-        isDark: isDark,
-      ),
-      padding: const EdgeInsets.all(Aluno360Layout.cardPadding),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Aluno360SectionHeader(
-            icon: Icons.insights_rounded,
-            title: 'Status operacional',
-            subtitle: statusSubtitle,
-            isDark: isDark,
-          ),
-          SizedBox(height: statusSubtitle != null ? 12 : 8),
-          if (!heroShowsRisco) ...[
+      header: 'Status operacional',
+      caption: statusSubtitle,
+      accent: primary,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (!heroShowsRisco) ...[
             OperationalMetricTile(
               label: dominant.label,
               value: dominant.value,
@@ -458,8 +451,10 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
               },
             ),
           ],
-        ],
-      ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

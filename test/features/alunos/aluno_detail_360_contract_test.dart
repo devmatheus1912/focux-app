@@ -379,7 +379,7 @@ void main() {
       File(
         'lib/features/alunos/widgets/aluno360_operational_status_section.dart',
       ).readAsStringSync(),
-      contains('Aluno360SectionHeader'),
+      contains('FxSettingsGroup'),
     );
     expect(
       File(
@@ -423,7 +423,27 @@ void main() {
     );
     expect(screen, contains('Abas do perfil do aluno'));
     expect(screen, contains('ValueKey(\'aluno360_operacao_status\')'));
-    expect(screen, contains('ValueKey(\'aluno360_operacao_sticky_cta\')'));
+    expect(
+      File(
+        'lib/features/alunos/widgets/aluno360_operacao_sticky_cta.dart',
+      ).readAsStringSync(),
+      allOf(
+        contains('DashboardHomeActionChip'),
+        contains('Ações rápidas da aba operação'),
+      ),
+    );
+    expect(
+      File(
+        'lib/features/alunos/utils/aluno360_ia_upgrade.dart',
+      ).readAsStringSync(),
+      contains('UpgradePromptSheet.show'),
+    );
+    expect(
+      File(
+        'lib/features/alunos/widgets/aluno_detail_hero_card.dart',
+      ).readAsStringSync(),
+      isNot(contains('FittedBox')),
+    );
     expect(screen, contains('aluno360_evolucao_empty'));
     expect(screen, contains('ValueKey(\'aluno360_timeline_empty\')'));
     expect(

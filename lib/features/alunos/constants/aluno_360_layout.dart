@@ -25,7 +25,8 @@ abstract final class Aluno360Layout {
     horizontal: 12,
     vertical: 10,
   );
-  static const double stickyBarContentHeight = 60;
+  /// Chip overlay (paridade Perfil/Home) — uma linha de chips alinhados à direita.
+  static const double stickyBarContentHeight = 56;
   static const double snackbarStickyReserve = 76;
   static const double operacaoTopSnackHeight = 52;
   static const double operacaoMaxContentWidth = 720;
@@ -50,8 +51,8 @@ abstract final class Aluno360Layout {
     bool compactContactPriority = false,
   }) {
     final textScale = MediaQuery.textScalerOf(context).scale(1).clamp(1.0, 2.0);
-    final base = compactContactPriority ? 58.0 : 70.0;
-    return base + ((textScale - 1) * 20);
+    final base = compactContactPriority ? 72.0 : 96.0;
+    return base + ((textScale - 1) * 24);
   }
 
   /// Status bar + toolbar + tab bar (header collapsed).

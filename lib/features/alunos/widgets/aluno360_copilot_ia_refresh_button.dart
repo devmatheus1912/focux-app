@@ -11,6 +11,7 @@ import '../../ia/data/ia_repository.dart';
 import '../constants/aluno_360_layout.dart';
 import '../data/aluno_copilot_ia_cache_store.dart';
 import '../providers/aluno_detail_providers.dart';
+import '../utils/aluno360_ia_upgrade.dart';
 
 class Aluno360CopilotIaRefreshButton extends ConsumerStatefulWidget {
   const Aluno360CopilotIaRefreshButton({
@@ -59,6 +60,10 @@ class Aluno360CopilotIaRefreshButtonState
     } catch (e) {
       ref.read(alunoCopilotoForceIaProvider(widget.alunoId).notifier).state =
           false;
+      if (!mounted) return;
+      if (await surfaceAluno360IaUpgradeIfNeeded(context, e)) {
+        return;
+      }
       if (!mounted) return;
       if (_shouldSurfaceIaRefreshError(e)) {
         FeedbackHelper.showOperacaoWarn(

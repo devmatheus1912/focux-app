@@ -240,10 +240,18 @@ class Aluno360CompositeHeaderDelegate extends SliverPersistentHeaderDelegate {
                     padding: const EdgeInsets.symmetric(
                       horizontal: Aluno360Layout.screenPadding,
                     ),
-                    child: Align(
-                      alignment: Alignment.bottomCenter,
-                      child: heroChild,
-                    ),
+                    child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      return FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.bottomCenter,
+                        child: SizedBox(
+                          width: constraints.maxWidth,
+                          child: heroChild,
+                        ),
+                      );
+                    },
+                  ),
                   ),
                 ),
               SizedBox(

@@ -14,6 +14,7 @@ import '../constants/aluno_360_layout.dart';
 import '../providers/aluno_detail_providers.dart';
 import '../providers/alunos_provider.dart';
 import '../utils/aluno360_copilot_logic.dart';
+import '../utils/aluno360_ia_upgrade.dart';
 import 'aluno360_copilot_executar_confirm.dart';
 
 class Aluno360CopilotExecutarAcaoButton extends ConsumerStatefulWidget {
@@ -86,6 +87,10 @@ class _Aluno360CopilotExecutarAcaoButtonState
         FeedbackHelper.showOperacaoWarn(context, resp.mensagem);
       }
     } catch (e) {
+      if (!mounted) return;
+      if (await surfaceAluno360IaUpgradeIfNeeded(context, e)) {
+        return;
+      }
       if (!mounted) return;
       if (_shouldSurfaceIaError(e)) {
         FeedbackHelper.showOperacaoWarn(
