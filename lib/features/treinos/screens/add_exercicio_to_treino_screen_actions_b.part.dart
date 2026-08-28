@@ -411,10 +411,6 @@ extension AddExercicioToTreinoScreenActionsB
     required Color primary,
     required Set<int> alreadyInTreinoIds,
   }) {
-    final browseHeight =
-        (MediaQuery.sizeOf(context).height - 280)
-            .clamp(430.0, 620.0)
-            .toDouble();
     final libraryLines = exercisePickerLibraryLines(
       filteredCount: libraryCount,
       totalCount: libraryCount,
@@ -422,11 +418,10 @@ extension AddExercicioToTreinoScreenActionsB
     );
     switch (_tabIndex) {
       case 1:
-        return SizedBox(
-          height: browseHeight,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
+          children: [
               FxSettingsGroup(
                 accent: primary,
                 header: 'Atalhos',
@@ -495,19 +490,16 @@ extension AddExercicioToTreinoScreenActionsB
                         setState(() => _pickerFilter = next),
               ),
               const SizedBox(height: 10),
-              Expanded(
-                child: PadraoMovimentoGrid(
-                  alreadyInTreinoIds: alreadyInTreinoIds,
-                  pickerFilter: _pickerFilter,
-                  onAdicionar: _selectExercise,
-                  onClearFilters:
-                      () => setState(
-                        () => _pickerFilter = const ExercisePickerFilter(),
-                      ),
-                ),
+              PadraoMovimentoGrid(
+                alreadyInTreinoIds: alreadyInTreinoIds,
+                pickerFilter: _pickerFilter,
+                onAdicionar: _selectExercise,
+                onClearFilters:
+                    () => setState(
+                      () => _pickerFilter = const ExercisePickerFilter(),
+                    ),
               ),
             ],
-          ),
         );
       default:
         final compact = _selecionado != null;

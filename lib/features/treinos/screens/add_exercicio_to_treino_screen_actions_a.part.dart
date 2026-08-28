@@ -25,6 +25,18 @@ extension AddExercicioToTreinoScreenActionsA
   bool get _showPrescriptionPanel =>
       _tabIndex == 0 && (_selecionado != null || _prescriptionEditorOpen);
 
+  /// Espaço inferior do scroll para não ficar sob faixas fixas.
+  double _scrollBottomInset(BuildContext context) {
+    final safe = MediaQuery.paddingOf(context).bottom;
+    if (_showPrescriptionPanel) {
+      return (_selecionado != null ? 152 : 48) + safe;
+    }
+    if (_tabIndex != 0) {
+      return 108 + safe;
+    }
+    return 12;
+  }
+
   void _openPrescriptionEditor() {
     HapticFeedback.selectionClick();
     setState(() {

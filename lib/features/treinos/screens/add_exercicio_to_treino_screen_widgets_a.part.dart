@@ -385,30 +385,48 @@ class _ActivePrescriptionStrip extends StatelessWidget {
     };
     final bottom = MediaQuery.paddingOf(context).bottom;
 
-    return Padding(
-      padding: EdgeInsets.fromLTRB(
-        FxSettingsLayout.groupPadH,
-        8,
-        FxSettingsLayout.groupPadH,
-        bottom > 0 ? 6 : 12,
-      ),
-      child: FxSettingsGroup(
-        accent: primary,
-        caption: 'Prescrição ativa',
-        children: [
-          FxSettingsTile(
-            icon: Icons.tune_rounded,
-            accent: primary,
-            label: preset.label,
-            subtitle: '$series×$repeticoes · ${descanso}s descanso$tipoLabel',
-            value: 'Editar',
-            highlight: true,
-            showDivider: false,
-            semanticsLabel:
-                'Prescrição ativa ${preset.label}. $series séries de $repeticoes repetições, $descanso segundos de descanso. Toque para editar.',
-            onTap: onEdit,
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.96),
+        border: Border(
+          top: BorderSide(
+            color: (isDark ? EagleTokens.darkLine : TokensStrip.borderDefault)
+                .withValues(alpha: 0.8),
+          ),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.22 : 0.05),
+            blurRadius: 12,
+            offset: const Offset(0, -4),
           ),
         ],
+      ),
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(
+          FxSettingsLayout.groupPadH,
+          8,
+          FxSettingsLayout.groupPadH,
+          bottom > 0 ? 6 : 12,
+        ),
+        child: FxSettingsGroup(
+          accent: primary,
+          caption: 'Prescrição ativa',
+          children: [
+            FxSettingsTile(
+              icon: Icons.tune_rounded,
+              accent: primary,
+              label: preset.label,
+              subtitle: '$series×$repeticoes · ${descanso}s descanso$tipoLabel',
+              value: 'Editar',
+              highlight: true,
+              showDivider: false,
+              semanticsLabel:
+                  'Prescrição ativa ${preset.label}. $series séries de $repeticoes repetições, $descanso segundos de descanso. Toque para editar.',
+              onTap: onEdit,
+            ),
+          ],
+        ),
       ),
     );
   }

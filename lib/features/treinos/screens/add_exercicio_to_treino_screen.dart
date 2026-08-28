@@ -329,10 +329,7 @@ class _AddExercicioToTreinoScreenState
                                     FxSettingsLayout.groupPadH,
                                     FxSettingsLayout.groupPadH,
                                     FxSettingsLayout.groupPadH,
-                                    _showPrescriptionPanel
-                                        ? (_selecionado != null ? 152 : 48) +
-                                            MediaQuery.paddingOf(context).bottom
-                                        : 12,
+                                    _scrollBottomInset(context),
                                   ),
                                   child: Column(
                                     crossAxisAlignment:

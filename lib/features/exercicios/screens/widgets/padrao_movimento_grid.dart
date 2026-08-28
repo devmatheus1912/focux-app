@@ -111,6 +111,7 @@ class _PadraoMovimentoGridState extends ConsumerState<PadraoMovimentoGrid> {
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
           children: [
             FxSettingsGroup(
               accent: primary,
@@ -159,42 +160,36 @@ class _PadraoMovimentoGridState extends ConsumerState<PadraoMovimentoGrid> {
                         )
                         : null,
               )
-            else
-              Expanded(
-                child: ListView(
-                  padding: EdgeInsets.zero,
-                  children: [
-                    FxSettingsGroup(
+            else ...[
+              FxSettingsGroup(
+                accent: primary,
+                caption: '$modeCaption · ${items.length}',
+                children: [
+                  for (var i = 0; i < items.length; i++)
+                    FxSettingsTile(
+                      icon: items[i].icon,
                       accent: primary,
-                      caption: '$modeCaption · ${items.length}',
-                      children: [
-                        for (var i = 0; i < items.length; i++)
-                          FxSettingsTile(
-                            icon: items[i].icon,
-                            accent: primary,
-                            label: items[i].label,
-                            subtitle: '${items[i].count} exercícios',
-                            value: '${items[i].count}',
-                            numeric: true,
-                            showDivider: i < items.length - 1,
-                            onTap: items[i].onTap,
-                          ),
-                      ],
+                      label: items[i].label,
+                      subtitle: '${items[i].count} exercícios',
+                      value: '${items[i].count}',
+                      numeric: true,
+                      showDivider: i < items.length - 1,
+                      onTap: items[i].onTap,
                     ),
-                    const SizedBox(height: 8),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4),
-                      child: Text(
-                        'Toque em uma categoria para ver a lista e prescrever.',
-                        style: FocuxHubTypography.bodyMuted(
-                          color: mute,
-                          height: 1.35,
-                        ),
-                      ),
-                    ),
-                  ],
+                ],
+              ),
+              const SizedBox(height: 8),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                child: Text(
+                  'Toque em uma categoria para ver a lista e prescrever.',
+                  style: FocuxHubTypography.bodyMuted(
+                    color: mute,
+                    height: 1.35,
+                  ),
                 ),
               ),
+            ],
           ],
         );
       },
