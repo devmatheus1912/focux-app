@@ -17,12 +17,14 @@ class Aluno360DetailTabBar extends StatelessWidget {
     required this.primary,
     required this.mute,
     required this.line,
+    this.tabBackdropOpaque = false,
   });
 
   final TabController tabController;
   final Color primary;
   final Color mute;
   final Color line;
+  final bool tabBackdropOpaque;
 
   static const _labels = ['Operação', 'Evolução', 'Ferramentas'];
 
@@ -46,7 +48,9 @@ class Aluno360DetailTabBar extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.all(4),
               decoration: BoxDecoration(
-                color: scheme.surfaceContainerHighest.withValues(alpha: 0.55),
+                color: scheme.surfaceContainerHighest.withValues(
+                  alpha: tabBackdropOpaque ? 0.92 : 0.55,
+                ),
                 borderRadius: BorderRadius.circular(TokensStrip.rMd),
                 border: Border.all(
                   color: line.withValues(alpha: 0.45),
@@ -270,7 +274,14 @@ class Aluno360CompositeHeaderDelegate extends SliverPersistentHeaderDelegate {
       0.0,
       currentExtent - topInset - kToolbarHeight - Aluno360Layout.tabBarHeight,
     );
-    final collapsed = shrinkOffset >= heroBodyHeight * 0.85;
+    final collapseT =
+        heroBodyHeight <= 0
+            ? 1.0
+            : (shrinkOffset / heroBodyHeight).clamp(0.0, 1.0);
+    final collapsed = collapseT >= 0.92;
+    final heroOpacity = (1.0 - collapseT * 1.1).clamp(0.0, 1.0);
+    final showHero = heroOpacity > 0.02 && heroSlot > 6;
+    final tabBackdropOpaque = collapseT > 0.04 || overlapsContent;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle(
@@ -279,49 +290,69 @@ class Aluno360CompositeHeaderDelegate extends SliverPersistentHeaderDelegate {
         statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
       ),
       child: Material(
-        color: collapsed ? chrome.sheetFill : Colors.transparent,
+        color:
+            collapsed || overlapsContent
+                ? chrome.sheetFill
+                : Colors.transparent,
         elevation: overlapsContent && collapsed ? 1 : 0,
         shadowColor: Colors.black.withValues(alpha: isDark ? 0.35 : 0.12),
         child: SizedBox(
           height: currentExtent,
-          child: Column(
-            children: [
-              SizedBox(height: topInset),
-              SizedBox(
-                height: kToolbarHeight,
-                child: Aluno360HeaderToolbar(
-                  displayName: displayName,
-                  showTitle: collapsed,
-                  ink: ink,
-                  onBack: onBack,
-                  onDelete: onDelete,
-                  onHelp: onHelp,
-                  actionsEnabled: actionsEnabled,
-                ),
-              ),
-              if (heroSlot > 0)
+          child: ClipRect(
+            child: Column(
+              children: [
+                SizedBox(height: topInset),
                 SizedBox(
-                  height: heroSlot,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: Aluno360Layout.screenPadding,
+                  height: kToolbarHeight,
+                  child: Aluno360HeaderToolbar(
+                    displayName: displayName,
+                    showTitle: collapsed,
+                    ink: ink,
+                    onBack: onBack,
+                    onDelete: onDelete,
+                    onHelp: onHelp,
+                    actionsEnabled: actionsEnabled,
+                  ),
+                ),
+                if (showHero)
+                  SizedBox(
+                    height: heroSlot,
+                    child: ClipRect(
+                      child: Align(
+                        alignment: Alignment.bottomCenter,
+                        heightFactor: 1,
+                        child: Opacity(
+                          opacity: heroOpacity,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: Aluno360Layout.screenPadding,
+                            ),
+                            child: heroChild,
+                          ),
+                        ),
+                      ),
                     ),
-                    child: Align(
-                      alignment: Alignment.bottomCenter,
-                      child: heroChild,
+                  ),
+                DecoratedBox(
+                  decoration: BoxDecoration(
+                    color:
+                        tabBackdropOpaque
+                            ? chrome.sheetFill
+                            : Colors.transparent,
+                  ),
+                  child: SizedBox(
+                    height: Aluno360Layout.tabBarHeight,
+                    child: Aluno360DetailTabBar(
+                      tabController: tabController,
+                      primary: primary,
+                      mute: mute,
+                      line: line,
+                      tabBackdropOpaque: tabBackdropOpaque,
                     ),
                   ),
                 ),
-              SizedBox(
-                height: Aluno360Layout.tabBarHeight,
-                child: Aluno360DetailTabBar(
-                  tabController: tabController,
-                  primary: primary,
-                  mute: mute,
-                  line: line,
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
