@@ -1,9 +1,6 @@
 /// TalkBack / VoiceOver labels for Aluno 360 (PT-BR).
-String aluno360FollowUpSemantics({
-  required String subtitle,
-  required bool expanded,
-}) =>
-    'Próximo contato. $subtitle. ${expanded ? 'Recolher' : 'Expandir'} opções de follow-up';
+String aluno360FollowUpSemantics({required String subtitle}) =>
+    'Próximo contato. $subtitle';
 
 String aluno360ModuleTileSemantics({
   required String label,

@@ -42,10 +42,10 @@ void main() {
     );
   });
 
-  test('aluno360 follow-up semantics reflects expand state', () {
+  test('aluno360 follow-up semantics includes subtitle', () {
     expect(
-      aluno360FollowUpSemantics(subtitle: 'Ligar hoje', expanded: false),
-      contains('Expandir'),
+      aluno360FollowUpSemantics(subtitle: 'Ligar hoje'),
+      'Próximo contato. Ligar hoje',
     );
   });
 }

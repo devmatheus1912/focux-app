@@ -499,7 +499,18 @@ void main() {
     expect(screen, contains('fonteLabel'));
     expect(screen, contains('AderenciaSemanalBundle'));
     expect(screen, contains('recoverySnapshot'));
-    expect(screen, contains('operacaoFilledButtonStyle'));
+    expect(
+      File(
+        'lib/features/alunos/widgets/aluno360_follow_up_card.dart',
+      ).readAsStringSync(),
+      allOf(contains('FxSettingsTile'), contains('FxSettingsGroup')),
+    );
+    expect(
+      File(
+        'lib/features/alunos/widgets/aluno360_copilot_locked_section.dart',
+      ).readAsStringSync(),
+      allOf(contains('FxSettingsTile'), contains('locked: true')),
+    );
     expect(screen, contains('operacaoContentWidthLimiter'));
     expect(screen, contains('ValueKey(\'aluno360_follow_up\')'));
     expect(screen, contains('alunoCopilotIaRefreshingProvider'));
