@@ -64,7 +64,6 @@ class TreinoInsetActionSheet extends StatelessWidget {
     required this.actions,
     this.accent,
     this.maxHeight,
-    this.expand = false,
   });
 
   final bool isDark;
@@ -74,7 +73,6 @@ class TreinoInsetActionSheet extends StatelessWidget {
   final List<TreinoInsetActionSpec> actions;
   final Color? accent;
   final double? maxHeight;
-  final bool expand;
 
   @override
   Widget build(BuildContext context) {
@@ -88,7 +86,6 @@ class TreinoInsetActionSheet extends StatelessWidget {
     return TreinoHomeSheetSurface(
       isDark: isDark,
       maxHeight: maxHeight,
-      expand: expand,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -105,15 +102,7 @@ class TreinoInsetActionSheet extends StatelessWidget {
             ),
           ),
           const SizedBox(height: FxSettingsLayout.headerToGroup),
-          if (expand)
-            Expanded(
-              child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                child: group,
-              ),
-            )
-          else
-            group,
+          group,
         ],
       ),
     );

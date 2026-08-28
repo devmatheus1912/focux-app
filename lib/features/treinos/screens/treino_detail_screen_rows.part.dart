@@ -180,7 +180,6 @@ class _ExerciseActionsSheet extends StatelessWidget {
     return TreinoInsetActionSheet(
       isDark: isDark,
       maxHeight: maxHeight,
-      expand: true,
       headerIcon: Icons.fitness_center_rounded,
       title: 'Ações do exercício',
       subtitle: title,

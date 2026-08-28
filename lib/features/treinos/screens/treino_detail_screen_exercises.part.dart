@@ -289,7 +289,7 @@ class _AssignWorkoutSheetState extends State<_AssignWorkoutSheet> {
 
     return TreinoHomeSheetSurface(
       isDark: isDark,
-      expand: true,
+      maxHeight: MediaQuery.sizeOf(context).height * 0.72,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -326,7 +326,8 @@ class _AssignWorkoutSheetState extends State<_AssignWorkoutSheet> {
               ],
             )
           else
-            Expanded(
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxHeight: 280),
               child: SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
                 child: FxSettingsGroup(
