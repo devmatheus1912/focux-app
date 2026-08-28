@@ -18,7 +18,6 @@ import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../providers/alunos_provider.dart';
-import 'package:focux_app/core/widgets/fx_input_deco.dart';
 import '../../../core/theme/tokens_strip.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 import 'package:focux_app/core/utils/friendly_error.dart';
@@ -32,16 +31,17 @@ import '../data/aluno_repository.dart';
 import '../utils/aluno_invite_copy.dart';
 import '../widgets/add_aluno_help_sheet.dart';
 import '../widgets/aluno_form_choices.dart';
+import '../widgets/aluno_inset_form_field.dart';
 
 part 'add_aluno_screen_widgets.part.dart';
 
 const _generos = ['Masculino', 'Feminino', 'Outro'];
 const _tiposConsultoria = ['ONLINE', 'PRESENCIAL', 'HIBRIDO'];
-const _tiposConsultoriaLabel = ['Online', 'Presencial', 'HÃ­brido'];
+const _tiposConsultoriaLabel = ['Online', 'Presencial', 'Híbrido'];
 const _objetivosRapidos = [
   'Hipertrofia',
   'Emagrecimento',
-  'ForÃ§a',
+  'Força',
   'Condicionamento',
 ];
 
@@ -217,7 +217,7 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
       HapticFeedback.heavyImpact();
       var errorMsg = friendlyError(
         e,
-        fallback: 'NÃ£o foi possÃ­vel cadastrar o aluno. Revise os dados.',
+        fallback: 'Não foi possível cadastrar o aluno. Revise os dados.',
       );
       String? requestId;
 
@@ -280,7 +280,7 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               FxSettingsGroup(
-                header: 'Senha provisÃ³ria',
+                header: 'Senha provisória',
                 caption: 'O aluno deve trocar a senha no primeiro acesso.',
                 children: [
                   Padding(
@@ -396,7 +396,7 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
         useMesh: true,
         appBar: FxShellAppBar(
           title: 'Novo aluno',
-          subtitle: 'Cadastro rÃ¡pido',
+          subtitle: 'Cadastro rápido',
           onBack: () => safePopOrGo(context, '/alunos'),
           actions: [
             FxHelpIconButton(
@@ -432,11 +432,11 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                     _canSubmit
                         ? (_loading
                             ? 'Cadastrando aluno'
-                            : 'Cadastrar $_firstName. O convite serÃ¡ preparado apÃ³s o cadastro.')
+                            : 'Cadastrar $_firstName. O convite será preparado após o cadastro.')
                         : 'Cadastrar. Complete nome e e-mail para habilitar',
                 child: FxLiquidPrimaryButton(
-                  label: _loading ? 'Cadastrandoâ€¦' : 'Cadastrar',
-                  loadingLabel: 'Cadastrandoâ€¦',
+                  label: _loading ? 'Cadastrando…' : 'Cadastrar',
+                  loadingLabel: 'Cadastrando…',
                   loading: _loading,
                   onPressed: _canSubmit && !_loading ? _submit : null,
                 ),
@@ -479,68 +479,56 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                                 horizontal: FxSettingsLayout.groupPadH,
                               ),
                               child: Text(
-                                'WhatsApp opcional â€” se preencher, o convite abre pronto.',
+                                'WhatsApp opcional — se preencher, o convite abre pronto.',
                                 style: FxSettingsLayout.footer(color: chrome.mute),
                               ),
                             ),
                             children: [
-                              Semantics(
+                              AlunoInsetFormField(
+                                controller: _nomeCtrl,
                                 label: 'Nome completo',
-                                child: _FxFormField(
-                                  controller: _nomeCtrl,
-                                  label: 'Nome completo',
-                                  hint: 'Ex.: Beatriz Andrade',
-                                  icon: Icons.person_outline_rounded,
-                                  validator:
-                                      (v) =>
-                                          v == null || v.trim().isEmpty
-                                              ? 'Informe o nome completo.'
-                                              : null,
-                                  textCapitalization: TextCapitalization.words,
-                                ),
+                                hint: 'Ex.: Beatriz Andrade',
+                                icon: Icons.person_outline_rounded,
+                                validator:
+                                    (v) =>
+                                        v == null || v.trim().isEmpty
+                                            ? 'Informe o nome completo.'
+                                            : null,
+                                textCapitalization: TextCapitalization.words,
                               ),
-                              const SizedBox(height: TokensStrip.s2),
-                              Semantics(
+                              AlunoInsetFormField(
+                                controller: _emailCtrl,
                                 label: 'E-mail',
-                                child: _FxFormField(
-                                  controller: _emailCtrl,
-                                  label: 'E-mail',
-                                  hint: 'aluno@email.com',
-                                  icon: Icons.alternate_email_rounded,
-                                  keyboardType: TextInputType.emailAddress,
-                                  validator: (v) {
-                                    final value = v?.trim() ?? '';
-                                    if (value.isEmpty) {
-                                      return 'Informe o e-mail.';
-                                    }
-                                    if (!RegExp(
-                                      _emailPattern,
-                                    ).hasMatch(value)) {
-                                      return 'Informe um e-mail vÃ¡lido.';
-                                    }
-                                    return null;
-                                  },
-                                ),
+                                hint: 'aluno@email.com',
+                                icon: Icons.alternate_email_rounded,
+                                keyboardType: TextInputType.emailAddress,
+                                validator: (v) {
+                                  final value = v?.trim() ?? '';
+                                  if (value.isEmpty) {
+                                    return 'Informe o e-mail.';
+                                  }
+                                  if (!RegExp(_emailPattern).hasMatch(value)) {
+                                    return 'Informe um e-mail válido.';
+                                  }
+                                  return null;
+                                },
                               ),
-                              const SizedBox(height: TokensStrip.s2),
-                              Semantics(
+                              AlunoInsetFormField(
+                                controller: _whatsappCtrl,
                                 label: 'WhatsApp',
-                                child: _FxFormField(
-                                  controller: _whatsappCtrl,
-                                  label: 'WhatsApp',
-                                  hint: '(11) 99999-9999',
-                                  icon: Icons.phone_iphone_rounded,
-                                  keyboardType: TextInputType.phone,
-                                  inputFormatters: [BrPhone.formatter()],
-                                  validator: BrPhone.validateOptional,
-                                ),
+                                hint: '(11) 99999-9999',
+                                icon: Icons.phone_iphone_rounded,
+                                keyboardType: TextInputType.phone,
+                                inputFormatters: [BrPhone.formatter()],
+                                validator: BrPhone.validateOptional,
+                                showDivider: false,
                               ),
                             ],
                           ),
                           const SizedBox(height: FxSettingsLayout.groupGap),
                           FxSettingsGroup(
                             header: 'Perfil inicial',
-                            caption: 'Opcional â€” melhora filtros e atendimento.',
+                            caption: 'Opcional — melhora filtros e atendimento.',
                             children: [
                               AlunoChoiceSection(
                                 label: 'Objetivo',
@@ -571,16 +559,17 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                               ),
                               if (_objetivoLivre) ...[
                                 const SizedBox(height: TokensStrip.s2),
-                                _FxFormField(
+                                AlunoInsetFormField(
                                   controller: _objetivoCtrl,
                                   label: 'Outro objetivo',
-                                  hint: 'Ex.: ReabilitaÃ§Ã£o',
+                                  hint: 'Ex.: Reabilitação',
                                   icon: Icons.flag_outlined,
-                                  textCapitalization: TextCapitalization.words,
+                                  textCapitalization: TextCapitalization.sentences,
+                                  showDivider: false,
                                 ),
                               ],
                               AlunoChoiceSection(
-                                label: 'GÃªnero',
+                                label: 'Gênero',
                                 isDark: isDark,
                                 showDividerAbove: true,
                                 child: AlunoSegmentedChoice(
@@ -636,8 +625,8 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                                     vertical: TokensStrip.s3,
                                   ),
                                   child: Text(
-                                    '$_firstName entra na lista com senha provisÃ³ria'
-                                    '${_whatsappCtrl.text.trim().isNotEmpty ? ' e WhatsApp pronto pra enviar.' : '. VocÃª copia o convite.'}',
+                                    '$_firstName entra na lista com senha provisória'
+                                    '${_whatsappCtrl.text.trim().isNotEmpty ? ' e WhatsApp pronto pra enviar.' : '. Você copia o convite.'}',
                                     style: FxSettingsLayout.subhead(
                                       color: chrome.mute,
                                     ),
@@ -656,7 +645,7 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                                 primary: primary,
                                 message: _error!,
                                 onRetry: _submit,
-                                title: 'NÃ£o foi possÃ­vel cadastrar',
+                                title: 'Não foi possível cadastrar',
                               ),
                             ),
                           ],

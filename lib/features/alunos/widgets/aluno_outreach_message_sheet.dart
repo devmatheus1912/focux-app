@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/analytics/analytics_service.dart';
+import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
@@ -13,8 +14,7 @@ import '../../../core/utils/clipboard_sensitive.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
-import '../../../core/widgets/fx_settings_group.dart';
-import '../../../core/widgets/fx_settings_tile.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../utils/aluno360_operacao_logic.dart';
 
 /// Opens a polished outreach sheet with copy + chat actions.
@@ -56,7 +56,7 @@ Future<void> showAlunoCheckinMessageSheet(
     alunoNome: alunoNome,
     message: checkinMensagemPronta(alunoNome),
     title: 'Mensagem de check-in',
-    subtitle: 'Revise o texto antes de enviar a $alunoNome.',
+    subtitle: 'Revise o texto antes de enviar.',
     icon: Icons.fact_check_outlined,
   );
 }
@@ -82,99 +82,178 @@ class _AlunoOutreachMessageSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final displayName = fxTitleCaseName(alunoNome);
     final firstName = alunoPrimeiroNome(alunoNome);
+    final checkin = icon == Icons.fact_check_outlined;
 
     return FxHomeSheetScaffold(
       isDark: isDark,
       leading: Icon(icon, color: primary, size: 18),
       title: title,
-      subtitle: subtitle,
+      subtitle: checkin ? 'Para $firstName · pronta para enviar' : subtitle,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          FxSettingsGroup(
-            header: 'Prévia',
-            caption: 'Para $firstName',
-            accent: primary,
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: TokensStrip.s3),
-                child: Semantics(
-                  label: 'Mensagem sugerida para $displayName',
-                  readOnly: true,
-                  child: Text(
-                    message,
-                    style: FocuxHubTypography.body(color: ink).copyWith(
-                      fontWeight: FontWeight.w500,
-                      height: 1.45,
-                    ),
-                  ),
-                ),
-              ),
-            ],
+          _OutreachMessageQuote(
+            message: message,
+            displayName: displayName,
+            firstName: firstName,
+            primary: primary,
+            isDark: isDark,
           ),
-          const SizedBox(height: FxSettingsLayout.groupGap),
-          FxSettingsGroup(
-            header: 'Enviar',
-            children: [
-              FxSettingsTile(
-                icon: Icons.chat_bubble_outline_rounded,
-                label: 'Abrir chat',
-                subtitle: 'Mensagem já preenchida no rascunho',
-                value: '',
-                highlight: true,
-                accent: primary,
-                onTap: () {
-                  unawaited(
-                    AnalyticsService.instance.track(
-                      ProductEvents.aluno360OutreachChatOpened,
-                      props: {'aluno_id': alunoId},
-                    ),
-                  );
-                  Navigator.of(context).pop();
-                  context.push(
-                    '/alunos/$alunoId/chat',
-                    extra: alunoChatRouteExtra(
-                      nome: alunoNome,
-                      draft: message,
-                    ),
-                  );
-                },
-              ),
-              FxSettingsTile(
-                icon: Icons.copy_rounded,
-                label: 'Copiar mensagem',
-                subtitle: 'Cole no WhatsApp ou outro app',
-                value: '',
-                showDivider: false,
-                onTap: () async {
+          const SizedBox(height: TokensStrip.s4),
+          FxLiquidPrimaryButton(
+            icon: Icons.chat_bubble_outline_rounded,
+            label: 'Abrir chat',
+            onPressed: () {
+              unawaited(
+                AnalyticsService.instance.track(
+                  ProductEvents.aluno360OutreachChatOpened,
+                  props: {'aluno_id': alunoId},
+                ),
+              );
+              Navigator.of(context).pop();
+              context.push(
+                '/alunos/$alunoId/chat',
+                extra: alunoChatRouteExtra(
+                  nome: alunoNome,
+                  draft: message,
+                ),
+              );
+            },
+          ),
+          const SizedBox(height: TokensStrip.s2),
+          Semantics(
+            button: true,
+            label: 'Copiar mensagem sugerida',
+            child: SizedBox(
+              width: double.infinity,
+              height: 46,
+              child: OutlinedButton.icon(
+                onPressed: () async {
                   await copySensitiveToClipboard(message);
                   if (!context.mounted) return;
                   Navigator.of(context).pop();
-                  FeedbackHelper.showSuccess(
-                    context,
-                    'Mensagem copiada.',
-                  );
+                  FeedbackHelper.showSuccess(context, 'Mensagem copiada.');
                 },
+                icon: Icon(Icons.copy_rounded, size: 17, color: primary),
+                label: Text(
+                  'Copiar mensagem',
+                  style: FocuxHubTypography.cardTitle(color: primary),
+                ),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: primary,
+                  side: BorderSide(
+                    color: primary.withValues(alpha: isDark ? 0.30 : 0.22),
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
               ),
-            ],
+            ),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(
-              FxSettingsLayout.groupPadH,
-              TokensStrip.s2,
-              FxSettingsLayout.groupPadH,
-              0,
-            ),
+            padding: const EdgeInsets.only(top: TokensStrip.s3),
             child: Text(
               'Ajuste o tom se precisar antes de enviar.',
+              textAlign: TextAlign.center,
               style: FxSettingsLayout.footer(color: mute),
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _OutreachMessageQuote extends StatelessWidget {
+  const _OutreachMessageQuote({
+    required this.message,
+    required this.displayName,
+    required this.firstName,
+    required this.primary,
+    required this.isDark,
+  });
+
+  final String message;
+  final String displayName;
+  final String firstName;
+  final Color primary;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final deep = BrandPalette.deep(primary);
+    final soft = BrandPalette.softer(primary, dark: isDark);
+
+    return Semantics(
+      label: 'Mensagem sugerida para $displayName',
+      readOnly: true,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(18),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              soft.withValues(alpha: isDark ? 0.55 : 0.92),
+              (isDark ? EagleTokens.darkCard : Colors.white).withValues(
+                alpha: isDark ? 0.88 : 0.98,
+              ),
+            ],
+          ),
+          border: Border.all(
+            color: primary.withValues(alpha: isDark ? 0.22 : 0.14),
+          ),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(18),
+          child: IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Container(width: 4, color: deep),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: deep.withValues(alpha: isDark ? 0.88 : 1),
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                          child: Text(
+                            'Para $firstName',
+                            style: FocuxHubTypography.chip(Colors.white)
+                                .copyWith(letterSpacing: 0.2),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          message,
+                          style: FocuxHubTypography.body(color: ink).copyWith(
+                            fontWeight: FontWeight.w500,
+                            height: 1.5,
+                            fontSize: 15,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

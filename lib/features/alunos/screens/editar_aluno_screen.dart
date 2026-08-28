@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/router/safe_navigation.dart';
-import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
@@ -12,7 +11,6 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../../core/widgets/feedback_helper.dart';
-import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_premium_entrance.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
@@ -24,6 +22,7 @@ import '../data/aluno_repository.dart';
 import '../providers/aluno_detail_providers.dart';
 import '../providers/alunos_provider.dart';
 import '../widgets/aluno_form_choices.dart';
+import '../widgets/aluno_inset_form_field.dart';
 
 class EditarAlunoScreen extends ConsumerStatefulWidget {
   final Aluno aluno;
@@ -173,130 +172,126 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    ListenableBuilder(
-                      listenable: Listenable.merge([_nome, _objetivo]),
-                      builder: (context, _) {
-                        final displayName =
-                            _nome.text.trim().isEmpty
-                                ? widget.aluno.nome
-                                : _nome.text.trim();
-                        final objetivoPreview =
-                            _objetivo.text.trim().isNotEmpty
-                                ? _objetivo.text.trim()
-                                : (widget.aluno.objetivo ?? '').trim();
-                        return Semantics(
-                          label: 'Aluno $displayName',
-                          child: Center(
-                            child: Column(
-                              children: [
-                                CircleAvatar(
-                                  radius: 36,
-                                  backgroundColor: primary.withValues(
-                                    alpha: 0.12,
-                                  ),
-                                  child: Text(
-                                    fxInitials(displayName),
-                                    style: FocuxHubTypography.pageTitle(
-                                      context,
-                                      color: primary,
-                                    ).copyWith(fontWeight: FontWeight.w800),
-                                  ),
-                                ),
-                                const SizedBox(height: 10),
-                                Text(
-                                  displayName,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                  textAlign: TextAlign.center,
-                                  style: FocuxHubTypography.body(
-                                    color: chrome.ink,
-                                  ).copyWith(
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: FocuxHubTypography.metricEm,
-                                  ),
-                                ),
-                                if (objetivoPreview.isNotEmpty)
-                                  Padding(
-                                    padding: const EdgeInsets.only(top: 4),
-                                    child: Text(
-                                      objetivoPreview,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: FocuxHubTypography.bodyMuted(
-                                        color: chrome.mute,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                  ),
-                              ],
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                    const SizedBox(height: TokensStrip.s4),
                     FxSettingsGroup(
-                      header: 'Informações básicas',
-                      caption:
-                          'Contato e identificação usados no atendimento e no Copiloto.',
                       accent: primary,
                       children: [
-                        Semantics(
-                          label: 'Nome completo obrigatório',
-                          child: _EditField(
-                            controller: _nome,
-                            label: 'Nome completo',
-                            icon: Icons.person_outline_rounded,
-                            textCapitalization: TextCapitalization.words,
-                            validator:
-                                (v) =>
-                                    v == null || v.trim().isEmpty
-                                        ? 'Informe o nome'
-                                        : null,
-                          ),
+                        ListenableBuilder(
+                          listenable: Listenable.merge([_nome, _objetivo]),
+                          builder: (context, _) {
+                            final displayName =
+                                _nome.text.trim().isEmpty
+                                    ? widget.aluno.nome
+                                    : _nome.text.trim();
+                            final objetivoPreview =
+                                _objetivo.text.trim().isNotEmpty
+                                    ? _objetivo.text.trim()
+                                    : (widget.aluno.objetivo ?? '').trim();
+                            return Semantics(
+                              label: 'Aluno $displayName',
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: TokensStrip.s3,
+                                ),
+                                child: Row(
+                                  children: [
+                                    CircleAvatar(
+                                      radius: 28,
+                                      backgroundColor: primary.withValues(
+                                        alpha: 0.12,
+                                      ),
+                                      child: Text(
+                                        fxInitials(displayName),
+                                        style: FocuxHubTypography.cardTitle(
+                                          color: primary,
+                                        ).copyWith(fontWeight: FontWeight.w800),
+                                      ),
+                                    ),
+                                    const SizedBox(width: TokensStrip.s3),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            displayName,
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: FxSettingsLayout.rowLabel(
+                                              color: chrome.ink,
+                                            ),
+                                          ),
+                                          if (objetivoPreview.isNotEmpty)
+                                            Padding(
+                                              padding: const EdgeInsets.only(
+                                                top: 2,
+                                              ),
+                                              child: Text(
+                                                objetivoPreview,
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: FxSettingsLayout.subhead(
+                                                  color: chrome.mute,
+                                                ),
+                                              ),
+                                            ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
                         ),
-                        const SizedBox(height: TokensStrip.s2),
-                        Semantics(
-                          label: 'E-mail obrigatório',
-                          child: _EditField(
-                            controller: _email,
-                            label: 'E-mail',
-                            icon: Icons.alternate_email_rounded,
-                            keyboardType: TextInputType.emailAddress,
-                            validator: (v) {
-                              if (v == null || v.trim().isEmpty) {
-                                return 'Informe o e-mail';
-                              }
-                              if (!v.contains('@')) {
-                                return 'E-mail inválido';
-                              }
-                              return null;
-                            },
-                          ),
+                        Divider(
+                          height: 1,
+                          thickness: FxSettingsLayout.dividerThickness,
+                          color: chrome.line,
                         ),
-                        const SizedBox(height: TokensStrip.s2),
-                        Semantics(
-                          label: 'Telefone opcional',
-                          child: _EditField(
-                            controller: _telefone,
-                            label: 'Telefone',
-                            icon: Icons.phone_outlined,
-                            hint: 'DDD + número',
-                            keyboardType: TextInputType.phone,
-                          ),
+                        AlunoInsetFormField(
+                          controller: _nome,
+                          label: 'Nome completo',
+                          hint: 'Nome do aluno',
+                          icon: Icons.person_outline_rounded,
+                          textCapitalization: TextCapitalization.words,
+                          validator:
+                              (v) =>
+                                  v == null || v.trim().isEmpty
+                                      ? 'Informe o nome'
+                                      : null,
                         ),
-                        const SizedBox(height: TokensStrip.s2),
-                        Semantics(
-                          label: 'WhatsApp opcional',
-                          child: _EditField(
-                            controller: _whatsapp,
-                            label: 'WhatsApp',
-                            icon: Icons.chat_bubble_outline_rounded,
-                            hint: 'DDD + número',
-                            keyboardType: TextInputType.phone,
-                            inputFormatters: [BrPhone.formatter()],
-                            validator: BrPhone.validateOptional,
-                          ),
+                        AlunoInsetFormField(
+                          controller: _email,
+                          label: 'E-mail',
+                          hint: 'aluno@email.com',
+                          icon: Icons.alternate_email_rounded,
+                          keyboardType: TextInputType.emailAddress,
+                          validator: (v) {
+                            if (v == null || v.trim().isEmpty) {
+                              return 'Informe o e-mail';
+                            }
+                            if (!v.contains('@')) {
+                              return 'E-mail inválido';
+                            }
+                            return null;
+                          },
+                        ),
+                        AlunoInsetFormField(
+                          controller: _telefone,
+                          label: 'Telefone',
+                          hint: 'DDD + número',
+                          icon: Icons.phone_outlined,
+                          keyboardType: TextInputType.phone,
+                        ),
+                        AlunoInsetFormField(
+                          controller: _whatsapp,
+                          label: 'WhatsApp',
+                          hint: 'DDD + número',
+                          icon: Icons.chat_bubble_outline_rounded,
+                          keyboardType: TextInputType.phone,
+                          inputFormatters: [BrPhone.formatter()],
+                          validator: BrPhone.validateOptional,
+                          showDivider: false,
                         ),
                       ],
                     ),
@@ -307,16 +302,14 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen> {
                           'Objetivo, gênero e consultoria alimentam prescrição e Copiloto.',
                       accent: primary,
                       children: [
-                        Semantics(
-                          label: 'Objetivo do aluno',
-                          child: _EditField(
-                            controller: _objetivo,
-                            label: 'Objetivo',
-                            icon: Icons.flag_outlined,
-                            hint: 'Ex.: Hipertrofia, emagrecimento',
-                            textCapitalization: TextCapitalization.sentences,
-                            maxLines: 2,
-                          ),
+                        AlunoInsetFormField(
+                          controller: _objetivo,
+                          label: 'Objetivo',
+                          hint: 'Ex.: Hipertrofia, emagrecimento',
+                          icon: Icons.flag_outlined,
+                          textCapitalization: TextCapitalization.sentences,
+                          maxLines: 2,
+                          showDivider: true,
                         ),
                         AlunoChoiceSection(
                           label: 'Gênero',
@@ -380,52 +373,6 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen> {
             ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _EditField extends StatelessWidget {
-  const _EditField({
-    required this.controller,
-    required this.label,
-    required this.icon,
-    this.hint,
-    this.keyboardType,
-    this.textCapitalization = TextCapitalization.none,
-    this.validator,
-    this.inputFormatters,
-    this.maxLines = 1,
-  });
-
-  final TextEditingController controller;
-  final String label;
-  final IconData icon;
-  final String? hint;
-  final TextInputType? keyboardType;
-  final TextCapitalization textCapitalization;
-  final String? Function(String?)? validator;
-  final List<TextInputFormatter>? inputFormatters;
-  final int maxLines;
-
-  @override
-  Widget build(BuildContext context) {
-    final primary = Theme.of(context).colorScheme.primary;
-
-    return TextFormField(
-      controller: controller,
-      keyboardType: keyboardType,
-      textCapitalization: textCapitalization,
-      inputFormatters: inputFormatters,
-      validator: validator,
-      maxLines: maxLines,
-      decoration: FxInputDeco.build(
-        context,
-        label,
-        icon: icon,
-        hint: hint,
-        iconColor: BrandPalette.softened(primary),
-        iconSize: FxSettingsLayout.iconSize,
       ),
     );
   }

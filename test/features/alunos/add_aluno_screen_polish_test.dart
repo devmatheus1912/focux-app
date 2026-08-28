@@ -20,7 +20,7 @@ void main() {
     expect(screen, isNot(contains('_ErrorCard')));
     expect(screen, contains('FxSettingsGroup'));
     expect(screen, contains('BrPhone'));
-    expect(screen, contains('FxInputDeco.build'));
+    expect(screen, contains('AlunoInsetFormField'));
     expect(screen, contains('ProductEvents.alunoCreated'));
     expect(screen, contains('invalidateAlunosCaches'));
     expect(screen, contains('FxHelpIconButton'));

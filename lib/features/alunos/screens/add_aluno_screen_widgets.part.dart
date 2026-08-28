@@ -82,49 +82,6 @@ class _ProgressStep extends StatelessWidget {
   }
 }
 
-class _FxFormField extends StatelessWidget {
-  final TextEditingController controller;
-  final String label;
-  final IconData icon;
-  final String? hint;
-  final TextInputType? keyboardType;
-  final TextCapitalization textCapitalization;
-  final String? Function(String?)? validator;
-  final List<TextInputFormatter>? inputFormatters;
-
-  const _FxFormField({
-    required this.controller,
-    required this.label,
-    required this.icon,
-    this.hint,
-    this.keyboardType,
-    this.textCapitalization = TextCapitalization.none,
-    this.validator,
-    this.inputFormatters,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final primary = Theme.of(context).colorScheme.primary;
-
-    return TextFormField(
-      controller: controller,
-      keyboardType: keyboardType,
-      textCapitalization: textCapitalization,
-      inputFormatters: inputFormatters,
-      validator: validator,
-      decoration: FxInputDeco.build(
-        context,
-        label,
-        icon: icon,
-        hint: hint,
-        iconColor: BrandPalette.softened(primary),
-        iconSize: FxSettingsLayout.iconSize,
-      ),
-    );
-  }
-}
-
 class _ChipWrap extends StatelessWidget {
   final List<Widget> children;
 
