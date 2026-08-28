@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -17,10 +17,8 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/widgets/fx_error_state.dart';
-import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../providers/alunos_provider.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
-import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 import 'package:focux_app/core/utils/friendly_error.dart';
@@ -28,20 +26,22 @@ import '../../../core/utils/br_phone.dart';
 import '../../../core/utils/clipboard_sensitive.dart';
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/widgets/fx_help.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
 import '../data/aluno_repository.dart';
 import '../utils/aluno_invite_copy.dart';
 import '../widgets/add_aluno_help_sheet.dart';
+import '../widgets/aluno_form_choices.dart';
 
 part 'add_aluno_screen_widgets.part.dart';
 
 const _generos = ['Masculino', 'Feminino', 'Outro'];
 const _tiposConsultoria = ['ONLINE', 'PRESENCIAL', 'HIBRIDO'];
-const _tiposConsultoriaLabel = ['Online', 'Presencial', 'Híbrido'];
+const _tiposConsultoriaLabel = ['Online', 'Presencial', 'HÃ­brido'];
 const _objetivosRapidos = [
   'Hipertrofia',
   'Emagrecimento',
-  'Força',
+  'ForÃ§a',
   'Condicionamento',
 ];
 
@@ -217,7 +217,7 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
       HapticFeedback.heavyImpact();
       var errorMsg = friendlyError(
         e,
-        fallback: 'Não foi possível cadastrar o aluno. Revise os dados.',
+        fallback: 'NÃ£o foi possÃ­vel cadastrar o aluno. Revise os dados.',
       );
       String? requestId;
 
@@ -280,7 +280,7 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               FxSettingsGroup(
-                header: 'Senha provisória',
+                header: 'Senha provisÃ³ria',
                 caption: 'O aluno deve trocar a senha no primeiro acesso.',
                 children: [
                   Padding(
@@ -396,7 +396,7 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
         useMesh: true,
         appBar: FxShellAppBar(
           title: 'Novo aluno',
-          subtitle: 'Cadastro rápido',
+          subtitle: 'Cadastro rÃ¡pido',
           onBack: () => safePopOrGo(context, '/alunos'),
           actions: [
             FxHelpIconButton(
@@ -409,26 +409,59 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
             const SizedBox(width: TokensStrip.s2),
           ],
         ),
+        bottomNavigationBar: Material(
+          color: Colors.transparent,
+          child: Container(
+            decoration: BoxDecoration(
+              color: (isDark ? EagleTokens.darkCard : TokensStrip.cardBg)
+                  .withValues(alpha: 0.96),
+              border: Border(top: BorderSide(color: chrome.line)),
+            ),
+            padding: const EdgeInsets.fromLTRB(
+              TokensStrip.s4,
+              12,
+              TokensStrip.s4,
+              12,
+            ),
+            child: SafeArea(
+              top: false,
+              child: Semantics(
+                button: true,
+                enabled: _canSubmit && !_loading,
+                label:
+                    _canSubmit
+                        ? (_loading
+                            ? 'Cadastrando aluno'
+                            : 'Cadastrar $_firstName. O convite serÃ¡ preparado apÃ³s o cadastro.')
+                        : 'Cadastrar. Complete nome e e-mail para habilitar',
+                child: FxLiquidPrimaryButton(
+                  label: _loading ? 'Cadastrandoâ€¦' : 'Cadastrar',
+                  loadingLabel: 'Cadastrandoâ€¦',
+                  loading: _loading,
+                  onPressed: _canSubmit && !_loading ? _submit : null,
+                ),
+              ),
+            ),
+          ),
+        ),
         body: SafeArea(
           bottom: false,
-          child: Stack(
-            children: [
-              FadeTransition(
-                opacity: _entryFade,
-                child: SlideTransition(
-                  position: _entrySlide,
-                  child: SingleChildScrollView(
-                    padding: EdgeInsets.fromLTRB(
-                      TokensStrip.s4,
-                      6,
-                      TokensStrip.s4,
-                      88 + MediaQuery.paddingOf(context).bottom,
-                    ),
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
+          child: FadeTransition(
+            opacity: _entryFade,
+            child: SlideTransition(
+              position: _entrySlide,
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(
+                  TokensStrip.s4,
+                  6,
+                  TokensStrip.s4,
+                  24,
+                ),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
                           _AccessProgressStrip(
                             name: _firstName,
                             hasName: _nomeCtrl.text.trim().isNotEmpty,
@@ -446,7 +479,7 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                                 horizontal: FxSettingsLayout.groupPadH,
                               ),
                               child: Text(
-                                'WhatsApp opcional — se preencher, o convite abre pronto.',
+                                'WhatsApp opcional â€” se preencher, o convite abre pronto.',
                                 style: FxSettingsLayout.footer(color: chrome.mute),
                               ),
                             ),
@@ -483,7 +516,7 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                                     if (!RegExp(
                                       _emailPattern,
                                     ).hasMatch(value)) {
-                                      return 'Informe um e-mail válido.';
+                                      return 'Informe um e-mail vÃ¡lido.';
                                     }
                                     return null;
                                   },
@@ -507,9 +540,9 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                           const SizedBox(height: FxSettingsLayout.groupGap),
                           FxSettingsGroup(
                             header: 'Perfil inicial',
-                            caption: 'Opcional — melhora filtros e atendimento.',
+                            caption: 'Opcional â€” melhora filtros e atendimento.',
                             children: [
-                              _ChoiceSection(
+                              AlunoChoiceSection(
                                 label: 'Objetivo',
                                 isDark: isDark,
                                 child: _ChipWrap(
@@ -518,7 +551,7 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                                       final selected =
                                           !_objetivoLivre &&
                                           _objetivoCtrl.text.trim() == objetivo;
-                                      return _OptionChip(
+                                      return AlunoOptionChip(
                                         label: objetivo,
                                         selected: selected,
                                         isDark: isDark,
@@ -527,7 +560,7 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                                                 _selectObjetivoPreset(objetivo),
                                       );
                                     }),
-                                    _OptionChip(
+                                    AlunoOptionChip(
                                       label: 'Outro',
                                       selected: _objetivoLivre,
                                       isDark: isDark,
@@ -541,16 +574,16 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                                 _FxFormField(
                                   controller: _objetivoCtrl,
                                   label: 'Outro objetivo',
-                                  hint: 'Ex.: Reabilitação',
+                                  hint: 'Ex.: ReabilitaÃ§Ã£o',
                                   icon: Icons.flag_outlined,
                                   textCapitalization: TextCapitalization.words,
                                 ),
                               ],
-                              _ChoiceSection(
-                                label: 'Gênero',
+                              AlunoChoiceSection(
+                                label: 'GÃªnero',
                                 isDark: isDark,
                                 showDividerAbove: true,
-                                child: _SegmentedChoice(
+                                child: AlunoSegmentedChoice(
                                   isDark: isDark,
                                   options: [
                                     for (final g in _generos)
@@ -558,7 +591,6 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                                   ],
                                   selected: _genero,
                                   onSelect: (value) {
-                                    HapticFeedback.selectionClick();
                                     setState(
                                       () =>
                                           _genero =
@@ -567,11 +599,11 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                                   },
                                 ),
                               ),
-                              _ChoiceSection(
+                              AlunoChoiceSection(
                                 label: 'Consultoria',
                                 isDark: isDark,
                                 showDividerAbove: true,
-                                child: _SegmentedChoice(
+                                child: AlunoSegmentedChoice(
                                   isDark: isDark,
                                   options: List.generate(
                                     _tiposConsultoria.length,
@@ -582,7 +614,6 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                                   ),
                                   selected: _tipoConsultoria,
                                   onSelect: (value) {
-                                    HapticFeedback.selectionClick();
                                     setState(
                                       () =>
                                           _tipoConsultoria =
@@ -605,8 +636,8 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                                     vertical: TokensStrip.s3,
                                   ),
                                   child: Text(
-                                    '$_firstName entra na lista com senha provisória'
-                                    '${_whatsappCtrl.text.trim().isNotEmpty ? ' e WhatsApp pronto pra enviar.' : '. Você copia o convite.'}',
+                                    '$_firstName entra na lista com senha provisÃ³ria'
+                                    '${_whatsappCtrl.text.trim().isNotEmpty ? ' e WhatsApp pronto pra enviar.' : '. VocÃª copia o convite.'}',
                                     style: FxSettingsLayout.subhead(
                                       color: chrome.mute,
                                     ),
@@ -625,7 +656,7 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                                 primary: primary,
                                 message: _error!,
                                 onRetry: _submit,
-                                title: 'Não foi possível cadastrar',
+                                title: 'NÃ£o foi possÃ­vel cadastrar',
                               ),
                             ),
                           ],
@@ -635,40 +666,8 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                   ),
                 ),
               ),
-              Align(
-                alignment: AlignmentDirectional.bottomEnd,
-                child: SafeArea(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(
-                      TokensStrip.s4,
-                      0,
-                      TokensStrip.s4,
-                      12,
-                    ),
-                    child: Semantics(
-                      button: true,
-                      enabled: _canSubmit && !_loading,
-                      label:
-                          _canSubmit
-                              ? (_loading
-                                  ? 'Cadastrando aluno'
-                                  : 'Cadastrar $_firstName. O convite será preparado após o cadastro.')
-                              : 'Cadastrar. Complete nome e e-mail para habilitar',
-                      child: DashboardHomeActionChip(
-                        label: _loading ? 'Cadastrando…' : 'Cadastrar',
-                        accent: primary,
-                        isDark: isDark,
-                        enabled: _canSubmit && !_loading,
-                        onPressed: _submit,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
-        ),
-      ),
     );
   }
 }

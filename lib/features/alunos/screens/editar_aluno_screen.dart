@@ -3,8 +3,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/router/safe_navigation.dart';
+import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
+import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
@@ -14,11 +16,14 @@ import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_premium_entrance.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
+import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/utils/br_phone.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/aluno_repository.dart';
 import '../providers/aluno_detail_providers.dart';
 import '../providers/alunos_provider.dart';
+import '../widgets/aluno_form_choices.dart';
 
 class EditarAlunoScreen extends ConsumerStatefulWidget {
   final Aluno aluno;
@@ -109,7 +114,6 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final chrome = ShellChrome.forDark(isDark);
 
     return fxScreenA11yScope(
@@ -130,9 +134,9 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen> {
               border: Border(top: BorderSide(color: chrome.line)),
             ),
             padding: const EdgeInsets.fromLTRB(
-              TokensStrip.s5,
+              TokensStrip.s4,
               12,
-              TokensStrip.s5,
+              TokensStrip.s4,
               12,
             ),
             child: SafeArea(
@@ -159,9 +163,9 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen> {
             bottom: false,
             child: SingleChildScrollView(
               padding: const EdgeInsets.fromLTRB(
-                TokensStrip.s5,
+                TokensStrip.s4,
                 8,
-                TokensStrip.s5,
+                TokensStrip.s4,
                 24,
               ),
               child: Form(
@@ -169,362 +173,259 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                  ListenableBuilder(
-                    listenable: Listenable.merge([_nome, _objetivo]),
-                    builder: (context, _) {
-                      final displayName =
-                          _nome.text.trim().isEmpty
-                              ? widget.aluno.nome
-                              : _nome.text.trim();
-                      final objetivoPreview =
-                          _objetivo.text.trim().isNotEmpty
-                              ? _objetivo.text.trim()
-                              : (widget.aluno.objetivo ?? '').trim();
-                      return Semantics(
-                        label: 'Aluno $displayName',
-                        child: Center(
-                          child: Column(
-                            children: [
-                              CircleAvatar(
-                                radius: 36,
-                                backgroundColor: primary.withValues(
-                                  alpha: 0.12,
-                                ),
-                                child: Text(
-                                  fxInitials(displayName),
-                                  style: FocuxHubTypography.pageTitle(
-                                    context,
-                                    color: primary,
-                                  ).copyWith(fontWeight: FontWeight.w800),
-                                ),
-                              ),
-                              const SizedBox(height: 10),
-                              Text(
-                                displayName,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                textAlign: TextAlign.center,
-                                style: FocuxHubTypography.body(
-                                  color:
-                                      isDark
-                                          ? EagleTokens.darkInk
-                                          : TokensStrip.textPrimary,
-                                ).copyWith(
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: FocuxHubTypography.metricEm,
-                                ),
-                              ),
-                              if (objetivoPreview.isNotEmpty)
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 4),
+                    ListenableBuilder(
+                      listenable: Listenable.merge([_nome, _objetivo]),
+                      builder: (context, _) {
+                        final displayName =
+                            _nome.text.trim().isEmpty
+                                ? widget.aluno.nome
+                                : _nome.text.trim();
+                        final objetivoPreview =
+                            _objetivo.text.trim().isNotEmpty
+                                ? _objetivo.text.trim()
+                                : (widget.aluno.objetivo ?? '').trim();
+                        return Semantics(
+                          label: 'Aluno $displayName',
+                          child: Center(
+                            child: Column(
+                              children: [
+                                CircleAvatar(
+                                  radius: 36,
+                                  backgroundColor: primary.withValues(
+                                    alpha: 0.12,
+                                  ),
                                   child: Text(
-                                    objetivoPreview,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: FocuxHubTypography.bodyMuted(
-                                      color: mute,
-                                      fontWeight: FontWeight.w600,
-                                    ),
+                                    fxInitials(displayName),
+                                    style: FocuxHubTypography.pageTitle(
+                                      context,
+                                      color: primary,
+                                    ).copyWith(fontWeight: FontWeight.w800),
                                   ),
                                 ),
-                            ],
+                                const SizedBox(height: 10),
+                                Text(
+                                  displayName,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  textAlign: TextAlign.center,
+                                  style: FocuxHubTypography.body(
+                                    color: chrome.ink,
+                                  ).copyWith(
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: FocuxHubTypography.metricEm,
+                                  ),
+                                ),
+                                if (objetivoPreview.isNotEmpty)
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 4),
+                                    child: Text(
+                                      objetivoPreview,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: FocuxHubTypography.bodyMuted(
+                                        color: chrome.mute,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: TokensStrip.s4),
+                    FxSettingsGroup(
+                      header: 'Informações básicas',
+                      caption:
+                          'Contato e identificação usados no atendimento e no Copiloto.',
+                      accent: primary,
+                      children: [
+                        Semantics(
+                          label: 'Nome completo obrigatório',
+                          child: _EditField(
+                            controller: _nome,
+                            label: 'Nome completo',
+                            icon: Icons.person_outline_rounded,
+                            textCapitalization: TextCapitalization.words,
+                            validator:
+                                (v) =>
+                                    v == null || v.trim().isEmpty
+                                        ? 'Informe o nome'
+                                        : null,
                           ),
                         ),
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 22),
-                  FxStaggerItem(
-                    index: 0,
-                    child: _SectionCard(
-                      title: 'Informações básicas',
-                      showHint: true,
-                      hint:
-                          'Contato e identificação usados no atendimento e no Copiloto.',
-                      child: Column(
-                        children: [
-                          Semantics(
-                            label: 'Nome completo obrigatório',
-                            child: TextFormField(
-                              controller: _nome,
-                              textCapitalization: TextCapitalization.words,
-                              decoration: FxInputDeco.build(
-                                context,
-                                'Nome completo *',
-                                icon: Icons.person_outline_rounded,
-                              ),
-                              validator:
-                                  (v) =>
-                                      v == null || v.trim().isEmpty
-                                          ? 'Informe o nome'
-                                          : null,
-                            ),
+                        const SizedBox(height: TokensStrip.s2),
+                        Semantics(
+                          label: 'E-mail obrigatório',
+                          child: _EditField(
+                            controller: _email,
+                            label: 'E-mail',
+                            icon: Icons.alternate_email_rounded,
+                            keyboardType: TextInputType.emailAddress,
+                            validator: (v) {
+                              if (v == null || v.trim().isEmpty) {
+                                return 'Informe o e-mail';
+                              }
+                              if (!v.contains('@')) {
+                                return 'E-mail inválido';
+                              }
+                              return null;
+                            },
                           ),
-                          const SizedBox(height: 12),
-                          Semantics(
-                            label: 'E-mail obrigatório',
-                            child: TextFormField(
-                              controller: _email,
-                              keyboardType: TextInputType.emailAddress,
-                              decoration: FxInputDeco.build(
-                                context,
-                                'E-mail *',
-                                icon: Icons.alternate_email_rounded,
-                              ),
-                              validator: (v) {
-                                if (v == null || v.trim().isEmpty) {
-                                  return 'Informe o e-mail';
-                                }
-                                if (!v.contains('@')) {
-                                  return 'E-mail inválido';
-                                }
-                                return null;
-                              },
-                            ),
+                        ),
+                        const SizedBox(height: TokensStrip.s2),
+                        Semantics(
+                          label: 'Telefone opcional',
+                          child: _EditField(
+                            controller: _telefone,
+                            label: 'Telefone',
+                            icon: Icons.phone_outlined,
+                            hint: 'DDD + número',
+                            keyboardType: TextInputType.phone,
                           ),
-                          const SizedBox(height: 12),
-                          Semantics(
-                            label: 'Telefone opcional',
-                            child: TextFormField(
-                              controller: _telefone,
-                              keyboardType: TextInputType.phone,
-                              decoration: FxInputDeco.build(
-                                context,
-                                'Telefone',
-                                icon: Icons.phone_outlined,
-                                hint: 'DDD + número',
-                              ),
-                            ),
+                        ),
+                        const SizedBox(height: TokensStrip.s2),
+                        Semantics(
+                          label: 'WhatsApp opcional',
+                          child: _EditField(
+                            controller: _whatsapp,
+                            label: 'WhatsApp',
+                            icon: Icons.chat_bubble_outline_rounded,
+                            hint: 'DDD + número',
+                            keyboardType: TextInputType.phone,
+                            inputFormatters: [BrPhone.formatter()],
+                            validator: BrPhone.validateOptional,
                           ),
-                          const SizedBox(height: 12),
-                          Semantics(
-                            label: 'WhatsApp opcional',
-                            child: TextFormField(
-                              controller: _whatsapp,
-                              keyboardType: TextInputType.phone,
-                              decoration: FxInputDeco.build(
-                                context,
-                                'WhatsApp',
-                                icon: Icons.chat_bubble_outline_rounded,
-                                hint: 'DDD + número',
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                  ),
-                  const SizedBox(height: 14),
-                  FxStaggerItem(
-                    index: 1,
-                    child: _SectionCard(
-                      title: 'Perfil do aluno',
-                      hint:
+                    const SizedBox(height: FxSettingsLayout.groupGap),
+                    FxSettingsGroup(
+                      header: 'Perfil do aluno',
+                      caption:
                           'Objetivo, gênero e consultoria alimentam prescrição e Copiloto.',
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Semantics(
-                            label: 'Objetivo do aluno',
-                            child: TextFormField(
-                              controller: _objetivo,
-                              maxLines: 2,
-                              textCapitalization: TextCapitalization.sentences,
-                              decoration: FxInputDeco.build(
-                                context,
-                                'Objetivo',
-                                icon: Icons.flag_outlined,
-                                hint: 'Ex: Hipertrofia, emagrecimento',
-                              ),
-                            ),
+                      accent: primary,
+                      children: [
+                        Semantics(
+                          label: 'Objetivo do aluno',
+                          child: _EditField(
+                            controller: _objetivo,
+                            label: 'Objetivo',
+                            icon: Icons.flag_outlined,
+                            hint: 'Ex.: Hipertrofia, emagrecimento',
+                            textCapitalization: TextCapitalization.sentences,
+                            maxLines: 2,
                           ),
-                          const SizedBox(height: 16),
-                          _ChipGroup(
-                            label: 'Gênero',
+                        ),
+                        AlunoChoiceSection(
+                          label: 'Gênero',
+                          isDark: isDark,
+                          showDividerAbove: true,
+                          child: AlunoSegmentedChoice(
+                            isDark: isDark,
                             options: const [
-                              _ChipOption(
-                                value: 'MASCULINO',
-                                label: 'Masculino',
-                              ),
-                              _ChipOption(value: 'FEMININO', label: 'Feminino'),
-                              _ChipOption(value: 'OUTRO', label: 'Outro'),
+                              (value: 'MASCULINO', label: 'Masculino'),
+                              (value: 'FEMININO', label: 'Feminino'),
+                              (value: 'OUTRO', label: 'Outro'),
                             ],
                             selected: _genero,
-                            onSelected:
-                                (value) => setState(() => _genero = value),
+                            onSelect:
+                                (value) => setState(
+                                  () => _genero = _genero == value ? null : value,
+                                ),
                           ),
-                          const SizedBox(height: 14),
-                          _ChipGroup(
-                            label: 'Consultoria',
+                        ),
+                        AlunoChoiceSection(
+                          label: 'Consultoria',
+                          isDark: isDark,
+                          showDividerAbove: true,
+                          child: AlunoSegmentedChoice(
+                            isDark: isDark,
                             options: const [
-                              _ChipOption(value: 'ONLINE', label: 'Online'),
-                              _ChipOption(
-                                value: 'PRESENCIAL',
-                                label: 'Presencial',
-                              ),
-                              _ChipOption(value: 'HIBRIDO', label: 'Híbrido'),
+                              (value: 'ONLINE', label: 'Online'),
+                              (value: 'PRESENCIAL', label: 'Presencial'),
+                              (value: 'HIBRIDO', label: 'Híbrido'),
                             ],
                             selected: _tipoConsultoria,
-                            onSelected:
-                                (value) =>
-                                    setState(() => _tipoConsultoria = value),
+                            onSelect:
+                                (value) => setState(
+                                  () =>
+                                      _tipoConsultoria =
+                                          _tipoConsultoria == value
+                                              ? null
+                                              : value,
+                                ),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                  ),
-                  if (_error != null) ...[
-                    const SizedBox(height: 12),
-                    Semantics(
-                      liveRegion: true,
-                      label: _error!,
-                      child: Text(
-                        _error!,
-                        style: TextStyle(color: EagleTokens.bad, height: 1.35),
+                    if (_error != null) ...[
+                      const SizedBox(height: TokensStrip.s3),
+                      Semantics(
+                        liveRegion: true,
+                        label: _error!,
+                        child: Text(
+                          _error!,
+                          style: TextStyle(
+                            color: EagleTokens.bad,
+                            height: 1.35,
+                          ),
+                        ),
                       ),
-                    ),
+                    ],
                   ],
-                ],
+                ),
               ),
             ),
           ),
         ),
       ),
-      ),
     );
   }
 }
 
-class _ChipOption {
-  const _ChipOption({required this.value, required this.label});
-
-  final String value;
-  final String label;
-}
-
-class _ChipGroup extends StatelessWidget {
-  const _ChipGroup({
+class _EditField extends StatelessWidget {
+  const _EditField({
+    required this.controller,
     required this.label,
-    required this.options,
-    required this.selected,
-    required this.onSelected,
-  });
-
-  final String label;
-  final List<_ChipOption> options;
-  final String? selected;
-  final ValueChanged<String> onSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final primary = Theme.of(context).colorScheme.primary;
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-
-    return Semantics(
-      container: true,
-      label: label,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: TextStyle(
-              color: mute,
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children:
-                options.map((option) {
-                  final sel = selected == option.value;
-                  return Semantics(
-                    button: true,
-                    selected: sel,
-                    label: '${option.label}${sel ? ', selecionado' : ''}',
-                    child: ChoiceChip(
-                      label: Text(option.label),
-                      selected: sel,
-                      onSelected: (_) => onSelected(option.value),
-                      selectedColor: primary.withValues(alpha: 0.15),
-                      labelStyle: TextStyle(
-                        color:
-                            sel
-                                ? primary
-                                : (isDark
-                                    ? EagleTokens.darkInkMute
-                                    : TokensStrip.textSecondary),
-                        fontWeight: sel ? FontWeight.w700 : FontWeight.w500,
-                      ),
-                      side: BorderSide(
-                        color:
-                            sel
-                                ? primary.withValues(alpha: 0.42)
-                                : (isDark
-                                    ? EagleTokens.darkLine
-                                    : TokensStrip.borderDefault),
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                  );
-                }).toList(),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _SectionCard extends StatelessWidget {
-  const _SectionCard({
-    required this.title,
-    required this.child,
-    this.showHint = false,
+    required this.icon,
     this.hint,
+    this.keyboardType,
+    this.textCapitalization = TextCapitalization.none,
+    this.validator,
+    this.inputFormatters,
+    this.maxLines = 1,
   });
 
-  final String title;
-  final Widget child;
-  final bool showHint;
+  final TextEditingController controller;
+  final String label;
+  final IconData icon;
   final String? hint;
+  final TextInputType? keyboardType;
+  final TextCapitalization textCapitalization;
+  final String? Function(String?)? validator;
+  final List<TextInputFormatter>? inputFormatters;
+  final int maxLines;
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-    final a11y = showHint && hint != null ? '$title. $hint' : title;
+    final primary = Theme.of(context).colorScheme.primary;
 
-    return Semantics(
-      container: true,
-      label: a11y,
-      child: Container(
-        padding: const EdgeInsets.all(TokensStrip.s4),
-        decoration: fxListCardDecoration(context),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              style: FocuxHubTypography.cardTitle(color: ink),
-            ),
-            if (showHint && hint != null) ...[
-              const SizedBox(height: 4),
-              Text(
-                hint!,
-                style: FocuxHubTypography.bodyMuted(color: mute, height: 1.3),
-              ),
-            ],
-            const SizedBox(height: 14),
-            child,
-          ],
-        ),
+    return TextFormField(
+      controller: controller,
+      keyboardType: keyboardType,
+      textCapitalization: textCapitalization,
+      inputFormatters: inputFormatters,
+      validator: validator,
+      maxLines: maxLines,
+      decoration: FxInputDeco.build(
+        context,
+        label,
+        icon: icon,
+        hint: hint,
+        iconColor: BrandPalette.softened(primary),
+        iconSize: FxSettingsLayout.iconSize,
       ),
     );
   }

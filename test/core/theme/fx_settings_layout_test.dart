@@ -25,6 +25,10 @@ void main() {
       contains('BrandPalette.softened'),
     );
     expect(
+      File('lib/core/widgets/fx_settings_tile.dart').readAsStringSync(),
+      contains('FxPlanLockTrailing'),
+    );
+    expect(
       File('lib/core/theme/fx_settings_layout.dart').readAsStringSync(),
       isNot(contains('007AFF')),
     );

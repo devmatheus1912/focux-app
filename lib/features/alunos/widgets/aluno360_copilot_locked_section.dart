@@ -45,8 +45,8 @@ class Aluno360CopilotLockedSection extends StatelessWidget {
           FxSettingsTile(
             icon: Icons.auto_awesome_outlined,
             label: 'Prioridade com IA',
-            subtitle: 'Sugestão personalizada com contexto do aluno.',
-            value: planLabel,
+            subtitle: 'Sugestão personalizada com contexto do aluno',
+            value: '',
             locked: true,
             upgradeTierLabel: planLabel,
             showDivider: false,

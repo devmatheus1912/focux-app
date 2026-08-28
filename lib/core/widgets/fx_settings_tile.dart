@@ -7,6 +7,7 @@ import '../theme/fx_settings_layout.dart';
 import '../theme/shell_chrome.dart';
 import '../theme/tokens_strip.dart';
 import 'fx_icon.dart';
+import 'fx_plan_lock_badge.dart';
 
 /// Linha de ajustes inset — anatomia ChatGPT/iOS, pele da Home.
 class FxSettingsTile extends StatelessWidget {
@@ -160,7 +161,7 @@ class FxSettingsTile extends StatelessWidget {
                             ],
                           ),
                         ),
-                        if (value.isNotEmpty) ...[
+                        if (value.isNotEmpty && !locked) ...[
                           const SizedBox(width: TokensStrip.s2),
                           Flexible(
                             child: Text(
@@ -181,15 +182,20 @@ class FxSettingsTile extends StatelessWidget {
                         ],
                         if (!danger) ...[
                           const SizedBox(width: TokensStrip.s1),
-                          Icon(
-                            locked
-                                ? Icons.lock_outline_rounded
-                                : picker
-                                ? Icons.unfold_more
-                                : Icons.chevron_right,
-                            size: FxSettingsLayout.chevronSize,
-                            color: mute,
-                          ),
+                          if (locked)
+                            FxPlanLockTrailing(
+                              tier: upgradeTierLabel ?? 'Pro',
+                              brand: brand,
+                              mute: mute,
+                            )
+                          else
+                            Icon(
+                              picker
+                                  ? Icons.unfold_more
+                                  : Icons.chevron_right,
+                              size: FxSettingsLayout.chevronSize,
+                              color: mute,
+                            ),
                         ],
                       ],
                     ),

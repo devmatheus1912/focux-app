@@ -11,6 +11,8 @@ void main() {
     expect(screen, contains("subtitle: 'ALUNO'"));
     expect(screen, contains("loadingLabel: 'Salvando…'"));
     expect(screen, contains('FxLiquidPrimaryButton'));
+    expect(screen, contains('FxSettingsGroup'));
+    expect(screen, contains('AlunoSegmentedChoice'));
     expect(screen, contains('invalidateAluno360Providers'));
     expect(screen, contains('ListenableBuilder'));
     expect(screen, contains('Salvando alterações do aluno'));

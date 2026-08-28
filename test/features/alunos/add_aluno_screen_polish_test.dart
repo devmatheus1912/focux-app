@@ -13,8 +13,8 @@ void main() {
     expect(screen, anyOf(contains('FxLoading'), contains('SkeletonLoader'), contains('SkeletonList'), contains('DashboardShimmer'), contains('Shimmer'), contains('IaCopilotInsightsLoading'), contains('_loading')));
     expect(screen, contains('copySensitiveToClipboard'));
     expect(screen, contains('Outro objetivo'));
-    expect(screen, contains('DashboardHomeActionChip'));
-    expect(screen, contains('SafeArea'));
+    expect(screen, contains('FxLiquidPrimaryButton'));
+    expect(screen, isNot(contains('DashboardHomeActionChip')));
     expect(screen, contains('enabled: _canSubmit && !_loading'));
     expect(screen, contains('FxErrorState'));
     expect(screen, isNot(contains('_ErrorCard')));
@@ -25,8 +25,8 @@ void main() {
     expect(screen, contains('invalidateAlunosCaches'));
     expect(screen, contains('FxHelpIconButton'));
     expect(screen, contains('showAddAlunoHelpSheet'));
-    expect(screen, contains('_SegmentedChoice'));
-    expect(screen, contains('_ChoiceSection'));
+    expect(screen, contains('AlunoSegmentedChoice'));
+    expect(screen, contains('AlunoChoiceSection'));
     expect(screen, contains('WhatsApp opcional'));
     expect(screen, isNot(contains('Complete nome e e-mail para cadastrar')));
     expect(screen, isNot(contains('abrimos o WhatsApp com a mensagem pronta')));
