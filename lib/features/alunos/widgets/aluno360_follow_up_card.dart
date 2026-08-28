@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/utils/motion_preferences.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
-import '../../../core/widgets/fx_shell_scaffold.dart';
-import '../constants/aluno_360_layout.dart';
 import '../data/aluno_repository.dart';
 import '../providers/aluno_followup_provider.dart';
 import '../utils/aluno360_a11y.dart';
@@ -34,6 +32,7 @@ class Aluno360FollowUpCard extends ConsumerStatefulWidget {
 
 class _Aluno360FollowUpCardState extends ConsumerState<Aluno360FollowUpCard> {
   bool _busy = false;
+  bool _expanded = false;
 
   Aluno get aluno => widget.aluno;
 
@@ -102,6 +101,9 @@ class _Aluno360FollowUpCardState extends ConsumerState<Aluno360FollowUpCard> {
           when == null
               ? 'Contato registrado'
               : 'Contato registrado em ${_formatDate(when)}';
+      if (widget.compactContactPriority) {
+        setState(() => _expanded = false);
+      }
       FeedbackHelper.showOperacaoSuccess(context, msg);
     } catch (e) {
       if (!mounted) return;
@@ -137,68 +139,51 @@ class _Aluno360FollowUpCardState extends ConsumerState<Aluno360FollowUpCard> {
   Future<void> _showSnoozeSheet(dynamic actions) async {
     if (_busy) return;
     final sheetDark = Theme.of(context).brightness == Brightness.dark;
-    final ink = fxScreenInk(context);
-    final mute = fxScreenMute(context);
+    final primary = Theme.of(context).colorScheme.primary;
 
     await showFxHomeSheet<void>(
       context,
-      builder: (ctx) {
-        return FxHomeSheetSurface(
-          isDark: sheetDark,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              FxHomeSheetHandle(isDark: sheetDark),
-              const SizedBox(height: TokensStrip.s3),
-              Text(
-                'Adiar follow-up',
-                textAlign: TextAlign.center,
-                style: Aluno360Layout.sectionTitleStyle(ctx, ink),
-              ),
-              const SizedBox(height: TokensStrip.s1),
-              Text(
-                'Escolha por quanto tempo adiar o contato com ${aluno.nome}.',
-                textAlign: TextAlign.center,
-                style: Aluno360Layout.captionStyle(ctx).copyWith(
-                  color: mute,
-                  height: 1.35,
+      builder:
+          (ctx) => FxHomeSheetScaffold(
+            isDark: sheetDark,
+            leading: Icon(Icons.snooze_rounded, color: primary, size: 18),
+            title: 'Adiar follow-up',
+            subtitle: 'Escolha por quanto tempo adiar o contato com ${aluno.nome}.',
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                FxSettingsTile(
+                  icon: Icons.snooze_rounded,
+                  label: 'Adiar 24 horas',
+                  value: '',
+                  showDivider: true,
+                  onTap: () {
+                    Navigator.pop(ctx);
+                    _runAction(
+                      () => actions.snooze(aluno.id),
+                      'Follow-up adiado por 24h',
+                    );
+                  },
                 ),
-              ),
-              const SizedBox(height: TokensStrip.s4),
-              FxSettingsTile(
-                icon: Icons.snooze_rounded,
-                label: 'Adiar 24 horas',
-                value: '',
-                showDivider: true,
-                onTap: () {
-                  Navigator.pop(ctx);
-                  _runAction(
-                    () => actions.snooze(aluno.id),
-                    'Follow-up adiado por 24h',
-                  );
-                },
-              ),
-              FxSettingsTile(
-                icon: Icons.date_range_rounded,
-                label: 'Adiar 3 dias',
-                value: '',
-                showDivider: false,
-                onTap: () {
-                  Navigator.pop(ctx);
-                  _runAction(
-                    () => actions.snooze(
-                      aluno.id,
-                      duration: const Duration(days: 3),
-                    ),
-                    'Follow-up adiado por 3 dias',
-                  );
-                },
-              ),
-            ],
+                FxSettingsTile(
+                  icon: Icons.date_range_rounded,
+                  label: 'Adiar 3 dias',
+                  value: '',
+                  showDivider: false,
+                  onTap: () {
+                    Navigator.pop(ctx);
+                    _runAction(
+                      () => actions.snooze(
+                        aluno.id,
+                        duration: const Duration(days: 3),
+                      ),
+                      'Follow-up adiado por 3 dias',
+                    );
+                  },
+                ),
+              ],
+            ),
           ),
-        );
-      },
     );
   }
 
@@ -222,13 +207,7 @@ class _Aluno360FollowUpCardState extends ConsumerState<Aluno360FollowUpCard> {
     required bool isSnoozed,
     required DateTime? snoozedUntil,
   }) {
-    if (compact) {
-      return _compactFollowUpSubtitle(
-        followUpDate: followUpDate,
-        isSnoozed: isSnoozed,
-        snoozedUntil: snoozedUntil,
-      );
-    }
+    if (compact) return null;
 
     final parts = <String>[];
     if (aluno.ultimoContatoDate != null) {
@@ -312,16 +291,34 @@ class _Aluno360FollowUpCardState extends ConsumerState<Aluno360FollowUpCard> {
         snoozedUntil != null && snoozedUntil.isAfter(DateTime.now());
     final actions = ref.read(alunoFollowUpActionsProvider);
     final compact = widget.compactContactPriority;
+    final motionMs = fxMotionDurationMs(context);
+    final summarySubtitle = _compactFollowUpSubtitle(
+      followUpDate: followUpDate,
+      isSnoozed: isSnoozed,
+      snoozedUntil: snoozedUntil,
+    );
     final caption = _groupCaption(
       compact: compact,
       followUpDate: followUpDate,
       isSnoozed: isSnoozed,
       snoozedUntil: snoozedUntil,
     );
+    final showActions = !compact || _expanded;
+    final tiles = _buildFollowUpTiles(
+      primary: primary,
+      followUpDate: followUpDate,
+      isSnoozed: isSnoozed,
+      snoozedUntil: snoozedUntil,
+      actions: actions,
+      highlightContactDone: !compact,
+    );
 
     return Semantics(
       container: true,
-      label: aluno360FollowUpSemantics(subtitle: caption ?? ''),
+      label: aluno360FollowUpSemantics(
+        subtitle: compact ? summarySubtitle : (caption ?? ''),
+        expanded: compact && _expanded,
+      ),
       child: FxSettingsGroup(
         key:
             compact
@@ -330,14 +327,30 @@ class _Aluno360FollowUpCardState extends ConsumerState<Aluno360FollowUpCard> {
         header: compact ? 'Próximo contato' : 'Follow-up do personal',
         caption: caption,
         accent: primary,
-        children: _buildFollowUpTiles(
-          primary: primary,
-          followUpDate: followUpDate,
-          isSnoozed: isSnoozed,
-          snoozedUntil: snoozedUntil,
-          actions: actions,
-          highlightContactDone: !compact,
-        ),
+        children: [
+          if (compact)
+            FxSettingsTile(
+              icon: Icons.event_available_rounded,
+              label: 'Registrar ou agendar',
+              subtitle: summarySubtitle,
+              value: followUpDate == null ? '' : _formatDate(followUpDate),
+              picker: true,
+              showDivider: showActions,
+              onTap: () => setState(() => _expanded = !_expanded),
+            ),
+          AnimatedSize(
+            duration: Duration(milliseconds: motionMs),
+            curve: Curves.easeOutCubic,
+            alignment: Alignment.topCenter,
+            child:
+                showActions
+                    ? Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: tiles,
+                    )
+                    : const SizedBox.shrink(),
+          ),
+        ],
       ),
     );
   }

@@ -106,23 +106,16 @@ void showAlunoNovaSenhaProvisoriaSheet(
     context,
     builder: (ctx) {
       final isDark = Theme.of(ctx).brightness == Brightness.dark;
-      return FxHomeSheetSurface(
+      return FxHomeSheetScaffold(
         isDark: isDark,
+        leading: Icon(Icons.key_rounded, color: primary, size: 18),
+        title: 'Senha provisória gerada',
+        subtitle:
+            'A senha anterior de $firstName não vale mais. '
+            'No primeiro acesso, peça para definir uma senha nova.',
         child: Column(
-          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            FxHomeSheetHandle(isDark: isDark),
-            const SizedBox(height: TokensStrip.s3),
-            FxHomeSheetHeader(
-              isDark: isDark,
-              title: 'Senha provisória gerada',
-              subtitle:
-                  'A senha anterior de $firstName não vale mais. '
-                  'No primeiro acesso, peça para definir uma senha nova.',
-              leading: Icon(Icons.key_rounded, color: primary, size: 18),
-            ),
-            const SizedBox(height: TokensStrip.s4),
             DecoratedBox(
               decoration: BoxDecoration(
                 color: primary.withValues(alpha: isDark ? 0.12 : 0.06),

@@ -111,58 +111,38 @@ class FxHelpSheetFrame extends StatelessWidget {
   Widget build(BuildContext context) {
     final chrome = ShellChrome.forDark(isDark);
     final brand = BrandPalette.softened(Theme.of(context).colorScheme.primary);
-    final maxHeight =
-        MediaQuery.sizeOf(context).height * FxHomeSheetChrome.maxHeightFactor;
     final footnote = footer?.trim();
     final hasFootnote = footnote != null && footnote.isNotEmpty;
 
-    return FxHomeSheetSurface(
+    return FxHomeSheetScaffold(
       isDark: isDark,
-      maxHeight: maxHeight,
+      leading: FxIcon(
+        name: FxHelpChrome.iconName,
+        color: brand,
+        size: FxHelpChrome.glyphSize,
+      ),
+      title: title,
+      subtitle: subtitle,
       child: Column(
-        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          FxHomeSheetHandle(isDark: isDark),
-          SizedBox(height: TokensStrip.s4),
-          FxHomeSheetHeader(
-            isDark: isDark,
-            title: title,
-            subtitle: subtitle,
-            leading: FxIcon(
-              name: FxHelpChrome.iconName,
-              color: brand,
-              size: FxHelpChrome.glyphSize,
-            ),
-          ),
-          SizedBox(height: TokensStrip.s4),
-          Flexible(
-            child: SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  if (tips.isNotEmpty)
-                    for (var i = 0; i < tips.length; i++)
-                      FxHelpTipRow(
-                        tip: tips[i],
-                        showDivider: i < tips.length - 1,
-                      ),
-                  if (hasFootnote) ...[
-                    if (tips.isNotEmpty)
-                      SizedBox(height: FxSettingsLayout.footerAfterGroup),
-                    Text(
-                      footnote,
-                      style: FxSettingsLayout.footer(color: chrome.mute),
-                    ),
-                  ],
-                  if ((tips.isNotEmpty || hasFootnote) && extra.isNotEmpty)
-                    SizedBox(height: TokensStrip.s3),
-                  ...extra,
-                ],
+          if (tips.isNotEmpty)
+            for (var i = 0; i < tips.length; i++)
+              FxHelpTipRow(
+                tip: tips[i],
+                showDivider: i < tips.length - 1,
               ),
+          if (hasFootnote) ...[
+            if (tips.isNotEmpty)
+              SizedBox(height: FxSettingsLayout.footerAfterGroup),
+            Text(
+              footnote,
+              style: FxSettingsLayout.footer(color: chrome.mute),
             ),
-          ),
+          ],
+          if ((tips.isNotEmpty || hasFootnote) && extra.isNotEmpty)
+            SizedBox(height: TokensStrip.s3),
+          ...extra,
         ],
       ),
     );

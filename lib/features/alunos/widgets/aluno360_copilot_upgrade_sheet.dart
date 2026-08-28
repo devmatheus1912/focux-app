@@ -33,49 +33,31 @@ class Aluno360CopilotUpgradeSheet {
       context,
       builder: (ctx) {
         final sheetDark = Theme.of(ctx).brightness == Brightness.dark;
-        return FxHomeSheetSurface(
+        return FxHomeSheetScaffold(
           isDark: sheetDark,
+          leading: Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              color: primary.withValues(alpha: sheetDark ? 0.18 : 0.12),
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: primary.withValues(alpha: sheetDark ? 0.28 : 0.2),
+              ),
+            ),
+            child: Icon(
+              Icons.auto_awesome_rounded,
+              color: primary,
+              size: 20,
+            ),
+          ),
+          title: 'IA Copiloto no Aluno 360',
+          subtitle:
+              'Monte a prioridade do dia com contexto real de cada aluno — '
+              'aderência, risco e próximo passo. Incluso no plano $planLabel.',
           child: Column(
-            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              FxHomeSheetHandle(isDark: sheetDark),
-              const SizedBox(height: TokensStrip.s3),
-              Center(
-                child: Container(
-                  width: 52,
-                  height: 52,
-                  decoration: BoxDecoration(
-                    color: primary.withValues(alpha: sheetDark ? 0.18 : 0.12),
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: primary.withValues(alpha: sheetDark ? 0.28 : 0.2),
-                    ),
-                  ),
-                  child: Icon(
-                    Icons.auto_awesome_rounded,
-                    color: primary,
-                    size: 26,
-                  ),
-                ),
-              ),
-              const SizedBox(height: TokensStrip.s3),
-              Text(
-                'IA Copiloto no Aluno 360',
-                textAlign: TextAlign.center,
-                style: Aluno360Layout.sectionTitleStyle(ctx, ink),
-              ),
-              const SizedBox(height: TokensStrip.s1),
-              Text(
-                'Monte a prioridade do dia com contexto real de cada aluno — '
-                'aderência, risco e próximo passo. Incluso no plano $planLabel.',
-                textAlign: TextAlign.center,
-                style: Aluno360Layout.captionStyle(ctx).copyWith(
-                  color: mute,
-                  height: 1.45,
-                ),
-              ),
-              const SizedBox(height: TokensStrip.s4),
               _UpgradeBenefitRow(
                 icon: Icons.bolt_rounded,
                 label: 'Prioridade do dia sob medida',
