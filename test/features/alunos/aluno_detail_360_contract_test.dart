@@ -278,7 +278,7 @@ void main() {
       expect(screen, isNot(contains('operational_metrics.part.dart')));
       expect(screen, contains('class AlunoDetailHeroCard'));
       expect(screen, contains('aluno360_hero_card'));
-      expect(screen, contains('class _HeroRiscoMetricBadge'));
+      expect(screen, contains('_IdentityRiskChip'));
       expect(screen, contains('alunoHeroRiscoMetricBadgeColors'));
       expect(screen, contains('copySensitiveToClipboard'));
       expect(
@@ -430,9 +430,9 @@ void main() {
     );
     expect(
       File(
-        'lib/features/alunos/widgets/aluno360_copilot_card.dart',
+        'lib/features/alunos/widgets/aluno360_copilot_locked_section.dart',
       ).readAsStringSync(),
-      contains('FxSettingsGroup'),
+      contains('UpgradePromptSheet.show'),
     );
     expect(
       File(

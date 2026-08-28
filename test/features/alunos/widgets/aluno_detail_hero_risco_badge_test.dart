@@ -43,7 +43,7 @@ void main() {
     );
   }
 
-  testWidgets('hero risco badge fits compact hero slot without overflow', (
+  testWidgets('hero risk chip fits compact hero slot without overflow', (
     tester,
   ) async {
     await tester.pumpWidget(
@@ -63,11 +63,10 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(tester.takeException(), isNull);
-    expect(find.text('Risco'), findsOneWidget);
-    expect(find.text('Alto'), findsOneWidget);
+    expect(find.text('Risco alto'), findsOneWidget);
   });
 
-  testWidgets('hero risco badge shows legible copy outside scaled identity', (
+  testWidgets('hero risk chip shows legible copy outside scaled identity', (
     tester,
   ) async {
     await tester.pumpWidget(
@@ -82,9 +81,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Risco'), findsOneWidget);
-    expect(find.text('Alto'), findsOneWidget);
-    expect(find.text('RISCO'), findsNothing);
+    expect(find.text('Risco alto'), findsOneWidget);
     expect(find.text('Nathalia'), findsOneWidget);
     expect(find.textContaining('Musculação'), findsOneWidget);
 

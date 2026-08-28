@@ -7,6 +7,8 @@ import 'package:go_router/go_router.dart';
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/brand/focux_microcopy.dart';
 import '../../../core/widgets/fx_settings_group.dart';
+import '../../planos/utils/effective_plano_features.dart';
+import '../../planos/utils/plano_capability.dart';
 import '../constants/aluno_360_layout.dart';
 import '../data/aluno_repository.dart';
 import '../providers/aluno_detail_providers.dart';
@@ -20,6 +22,8 @@ import '../widgets/aluno360_copilot_prescription.dart';
 import '../widgets/aluno360_copilot_support.dart';
 import 'aluno360_help_sheets.dart';
 import 'aluno360_operacao_focus_toggle.dart';
+import 'aluno360_copilot_locked_section.dart';
+import 'aluno360_copilot_ia_prompt_section.dart';
 import '../widgets/aluno_outreach_message_sheet.dart';
 
 class Aluno360CopilotCard extends ConsumerWidget {
@@ -107,6 +111,11 @@ class Aluno360CopilotCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final primary = Theme.of(context).colorScheme.primary;
+    final features = effectivePlanoFeatures(ref);
+    if (!PlanoCapability.has(features, 'iaCopiloto')) {
+      return Aluno360CopilotLockedSection(primary: primary);
+    }
+
     final forceIa = ref.watch(alunoCopilotoForceIaProvider(aluno.id));
     final iaAsync =
         forceIa ? ref.watch(alunoCopilotoActionProvider(aluno.id)) : null;
@@ -127,6 +136,20 @@ class Aluno360CopilotCard extends ConsumerWidget {
     final iaLoading =
         iaRefreshing ||
         (forceIa && iaAsync != null && iaAsync.isLoading && !iaAsync.hasValue);
+    final hasIaContent = aluno360CopilotHasIaGeneratedContent(
+      proximaAcao360: proximaAcao360,
+      forceIa: forceIa,
+      iaHasValue: iaAsync?.hasValue ?? false,
+      hasOpenTask: hasOpenTask,
+    );
+    if (!hasIaContent && !iaLoading) {
+      return Aluno360CopilotIaPromptSection(
+        alunoId: alunoId,
+        primary: primary,
+        contactPriority: operacao.contactPriority,
+      );
+    }
+
     final resumo = resumoAsync.valueOrNull;
     final profileCompletion = copilotProfileCompletion(aluno);
     final signals = resolveCopilotSignals(

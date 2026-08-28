@@ -18,10 +18,12 @@ class Aluno360CopilotIaRefreshButton extends ConsumerStatefulWidget {
     super.key,
     required this.alunoId,
     required this.primary,
+    this.prominent = false,
   });
 
   final int alunoId;
   final Color primary;
+  final bool prominent;
 
   @override
   ConsumerState<Aluno360CopilotIaRefreshButton> createState() =>
@@ -96,6 +98,35 @@ class Aluno360CopilotIaRefreshButtonState
 
   @override
   Widget build(BuildContext context) {
+    if (widget.prominent) {
+      return Semantics(
+        button: true,
+        label:
+            _refreshing
+                ? 'Gerando prioridade com IA'
+                : 'Gerar prioridade com IA',
+        child: SizedBox(
+          width: double.infinity,
+          child: FilledButton.icon(
+            onPressed: _refreshing ? null : _refreshIa,
+            icon:
+                _refreshing
+                    ? FxLoading(
+                      size: 18,
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    )
+                    : const Icon(Icons.auto_awesome_rounded, size: 18),
+            label: Text(_refreshing ? 'Gerando…' : 'Gerar com IA'),
+            style: Aluno360Layout.operacaoFilledButtonStyle(
+              context,
+              widget.primary,
+            ),
+          ),
+        ),
+      );
+    }
+
     final wideHeader = MediaQuery.sizeOf(context).width >= 400;
     final iconSize = wideHeader ? 20.0 : 18.0;
 

@@ -2,13 +2,37 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/core/widgets/fx_settings_tile.dart';
+import 'package:focux_app/features/auth/providers/auth_provider.dart';
 import 'package:focux_app/features/alunos/data/aluno_repository.dart';
 import 'package:focux_app/features/ia/models/ia_copilot_proxima_acao.dart';
 import 'package:focux_app/features/alunos/providers/aluno_detail_providers.dart';
 import 'package:focux_app/features/alunos/providers/alunos_provider.dart';
 import 'package:focux_app/features/alunos/screens/aluno_detail_screen.dart';
+import 'package:focux_app/features/planos/data/planos_repository.dart';
+import 'package:focux_app/features/planos/providers/plano_features_provider.dart';
+import 'package:focux_app/features/subscription/models/subscription_plan.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+const _proPlanoFeatures = PlanoFeatures(
+  plano: SubscriptionPlan.PRO,
+  financeiro: true,
+  agenda: true,
+  relatorios: true,
+  whiteLabel: false,
+  iaCopiloto: true,
+  migracaoFoto: false,
+);
+
+Override _proPlanoFeaturesOverride() {
+  return planoFeaturesProvider.overrideWith((ref) {
+    final notifier = PlanoFeaturesNotifier(
+      PlanosRepository(ref.read(apiClientProvider)),
+    );
+    notifier.seedFromHome(_proPlanoFeatures);
+    return notifier;
+  });
+}
 
 const _alunoId = 42;
 const _contactPriorityAlunoId = 7;
@@ -61,6 +85,7 @@ final _beatriz360Fixture = Aluno360(
 
 List<Override> _beatrizOverrides() {
   return [
+    _proPlanoFeaturesOverride(),
     aluno360Provider(_contactPriorityAlunoId)
         .overrideWith((ref) async => _beatriz360Fixture),
     alunoProvider(_contactPriorityAlunoId)
@@ -155,6 +180,7 @@ final _aluno360Fixture = Aluno360(
 
 List<Override> _aluno360Overrides() {
   return [
+    _proPlanoFeaturesOverride(),
     aluno360Provider(_alunoId).overrideWith((ref) async => _aluno360Fixture),
     alunoProvider(_alunoId).overrideWith((ref) async => _alunoFixture),
     alunoRecoveryProvider(_alunoId).overrideWith((ref) async => null),
@@ -257,7 +283,7 @@ void main() {
     expect(find.text('Prioridade do dia'), findsOneWidget);
     expect(find.byKey(const ValueKey('aluno360_operacao_status')), findsNothing);
     expect(find.text('Status operacional'), findsNothing);
-    expect(find.byIcon(Icons.visibility_off_outlined), findsOneWidget);
+    expect(find.text('Gerar com IA'), findsOneWidget);
 
     await tester.pump(const Duration(milliseconds: 300));
   });

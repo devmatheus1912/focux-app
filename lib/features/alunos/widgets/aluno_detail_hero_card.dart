@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/brand_palette.dart';
-import '../../../core/theme/design_tokens.dart';
-import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
-import '../../../core/widgets/operational_metric_tile.dart';
 import '../constants/aluno_360_layout.dart';
+import '../data/aluno_contact_utils.dart';
 import '../data/aluno_repository.dart';
 import '../utils/aluno_display_utils.dart';
 import '../utils/aluno_hero_signal.dart';
@@ -51,6 +49,7 @@ class AlunoDetailHeroCard extends StatelessWidget {
       signal: signal,
       status: status,
     );
+    final showRiskChip = aluno.emRisco && signal.label == 'Risco operacional';
     final nameStyle = Aluno360Layout.identityNameStyle(context, ink);
 
     return Semantics(
@@ -64,17 +63,11 @@ class AlunoDetailHeroCard extends StatelessWidget {
           key: const ValueKey('aluno360_hero_card'),
           width: double.infinity,
           padding: EdgeInsets.symmetric(
-            horizontal: 12,
-            vertical: compactContactPriority ? 8 : 10,
+            horizontal: 4,
+            vertical: compactContactPriority ? 2 : 4,
           ),
-          decoration: Aluno360Layout.operacaoInsetSectionDecoration(
-            context,
-            primary: primary,
-            isDark: isDark,
-          ),
-          clipBehavior: Clip.antiAlias,
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               AlunoAvatar(
                 name: displayName,
@@ -85,15 +78,14 @@ class AlunoDetailHeroCard extends StatelessWidget {
                         : AlunoAvatarVariant.hero,
               ),
               const SizedBox(width: 12),
-              Flexible(
-                fit: FlexFit.loose,
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Wrap(
-                      spacing: 4,
-                      runSpacing: 2,
+                      spacing: 6,
+                      runSpacing: 4,
                       crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
                         Text(
@@ -105,6 +97,11 @@ class AlunoDetailHeroCard extends StatelessWidget {
                         if (showStatusBadge)
                           _IdentityStatusChip(
                             status: status,
+                            isDark: isDark,
+                          ),
+                        if (showRiskChip)
+                          _IdentityRiskChip(
+                            nivel: formatRiscoNivel(aluno.riscoNivel),
                             isDark: isDark,
                           ),
                       ],
@@ -132,17 +129,36 @@ class AlunoDetailHeroCard extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(width: 8),
-              Padding(
-                padding: const EdgeInsets.only(top: 2),
-                child: _IdentityMetricChip(
-                  signal: signal,
-                  isDark: isDark,
-                  primary: primary,
-                  compact: compactContactPriority,
-                ),
-              ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _IdentityRiskChip extends StatelessWidget {
+  const _IdentityRiskChip({required this.nivel, required this.isDark});
+
+  final String nivel;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    final (ink, bg) = alunoHeroRiscoMetricBadgeColors(isDark, nivel);
+    return Semantics(
+      label: 'Risco ${nivel.toLowerCase()}',
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+        decoration: BoxDecoration(
+          color: bg,
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(color: ink.withValues(alpha: isDark ? 0.42 : 0.32)),
+        ),
+        child: Text(
+          'Risco ${nivel.toLowerCase()}',
+          style: Aluno360Layout.badgeMicroStyle(context, ink).copyWith(
+            fontWeight: FontWeight.w700,
           ),
         ),
       ),
@@ -244,286 +260,6 @@ class _IdentityStatusChip extends StatelessWidget {
       child: Text(
         status.label,
         style: Aluno360Layout.badgeMicroStyle(context, status.foreground),
-      ),
-    );
-  }
-}
-
-class _IdentityMetricChip extends StatelessWidget {
-  const _IdentityMetricChip({
-    required this.signal,
-    required this.isDark,
-    required this.primary,
-    this.compact = false,
-  });
-
-  final AlunoHeroPrimarySignal signal;
-  final bool isDark;
-  final Color primary;
-  final bool compact;
-
-  Color _accentColor() {
-    return switch (signal.label) {
-      'Risco operacional' => EagleTokens.bad,
-      'Aderência semanal' => EagleTokens.aderenciaColor(
-        double.tryParse(signal.value) ?? 0,
-        isDark: isDark,
-      ),
-      'Sem treino' => EagleTokens.warn,
-      _ => primary,
-    };
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (signal.label == 'Risco operacional') {
-      return _HeroRiscoMetricBadge(
-        nivel: signal.value,
-        isDark: isDark,
-        compact: compact,
-      );
-    }
-
-    final ink = fxScreenInk(context);
-    final accent = _accentColor();
-    final eyebrow = alunoHeroMetricEyebrow(signal);
-    final emphasis =
-        signal.label == 'Sem treino'
-            ? OperationalMetricEmphasis.alert
-            : OperationalMetricEmphasis.normal;
-    final eyebrowColor =
-        emphasis == OperationalMetricEmphasis.alert
-            ? (isDark
-                ? accent.withValues(alpha: 0.95)
-                : Color.lerp(accent, EagleTokens.riskDeep, 0.35)!)
-            : Color.lerp(ink, accent, 0.35)!;
-    final valueColor =
-        emphasis == OperationalMetricEmphasis.alert
-            ? (isDark ? ink : Color.lerp(accent, EagleTokens.riskDeeper, 0.55)!)
-            : ink;
-
-    final semanticsLabel =
-        '${eyebrow ?? signal.label} ${signal.value}${signal.suffix ?? ''}';
-
-    if (compact) {
-      return Semantics(
-        label: semanticsLabel,
-        child: Container(
-          constraints: const BoxConstraints(minWidth: 58),
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          decoration: operationalMetricDecoration(
-            accent: accent,
-            isDark: isDark,
-            emphasis: emphasis,
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            textBaseline: TextBaseline.alphabetic,
-            children: [
-              if (eyebrow != null) ...[
-                Text(
-                  eyebrow,
-                  style: FocuxHubTypography.chip(eyebrowColor).copyWith(
-                    fontWeight: FontWeight.w700,
-                    height: 1.05,
-                  ),
-                ),
-                const SizedBox(width: 4),
-              ],
-              Text(
-                signal.value,
-                style: AppTypography.condensed(
-                  color: valueColor,
-                  fontSize: 15,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: -0.3,
-                  height: 1.05,
-                ),
-              ),
-              if (signal.suffix != null)
-                Text(
-                  signal.suffix!,
-                  style: FocuxHubTypography.chip(fxScreenMute(context)).copyWith(
-                    fontWeight: FontWeight.w700,
-                    height: 1.05,
-                  ),
-                ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    return Semantics(
-      label: semanticsLabel,
-      child: Container(
-        constraints: const BoxConstraints(minWidth: 62),
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-        decoration: operationalMetricDecoration(
-          accent: accent,
-          isDark: isDark,
-          emphasis: emphasis,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (eyebrow != null)
-              Text(
-                eyebrow,
-                style: Aluno360Layout.eyebrowLabelStyle(context, eyebrowColor),
-              ),
-            if (eyebrow != null) const SizedBox(height: 3),
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.baseline,
-              textBaseline: TextBaseline.alphabetic,
-              children: [
-                Text(
-                  signal.value,
-                  style: FocuxHubTypography.kpi(
-                    color: valueColor,
-                    fontSize: FocuxHubTypography.metricEm,
-                  ).copyWith(
-                    letterSpacing: -0.4,
-                    height: 1.1,
-                  ),
-                ),
-                if (signal.suffix != null)
-                  Padding(
-                    padding: const EdgeInsets.only(left: 1),
-                    child: Text(
-                      signal.suffix!,
-                      style: FocuxHubTypography.bodyMuted(
-                        color: fxScreenMute(context),
-                        fontWeight: FontWeight.w700,
-                        height: 1.1,
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// Badge de risco no hero — contraste AA, cabe no slot compacto (52px).
-class _HeroRiscoMetricBadge extends StatelessWidget {
-  const _HeroRiscoMetricBadge({
-    required this.nivel,
-    required this.isDark,
-    this.compact = false,
-  });
-
-  final String nivel;
-  final bool isDark;
-  final bool compact;
-
-  @override
-  Widget build(BuildContext context) {
-    final (ink, bg) = alunoHeroRiscoMetricBadgeColors(isDark, nivel);
-    final valueInk =
-        isDark
-            ? EagleTokens.warmPaper
-            : Color.lerp(ink, EagleTokens.inkWarmDark, 0.22)!;
-    final contentPadding =
-        compact
-            ? const EdgeInsets.fromLTRB(7, 5, 9, 5)
-            : const EdgeInsets.fromLTRB(8, 7, 10, 7);
-    final accentHeight = compact ? 22.0 : 30.0;
-
-    return Semantics(
-      label: 'Risco ${nivel.toLowerCase()}',
-      child: Container(
-        constraints: BoxConstraints(minWidth: compact ? 64 : 68),
-        decoration: BoxDecoration(
-          color: bg,
-          borderRadius: BorderRadius.circular(compact ? 9 : 10),
-          border: Border.all(
-            color: ink.withValues(alpha: isDark ? 0.42 : 0.32),
-          ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Padding(
-              padding: EdgeInsets.only(
-                left: 6,
-                top: contentPadding.top,
-                bottom: contentPadding.bottom,
-              ),
-              child: Container(
-                width: 3,
-                height: accentHeight,
-                decoration: BoxDecoration(
-                  color: ink,
-                  borderRadius: BorderRadius.circular(999),
-                ),
-              ),
-            ),
-            Padding(
-              padding: contentPadding.copyWith(left: 5),
-              child:
-                  compact
-                      ? Row(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.baseline,
-                        textBaseline: TextBaseline.alphabetic,
-                        children: [
-                          Text(
-                            'Risco',
-                            style: FocuxHubTypography.chip(ink).copyWith(
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: 0.15,
-                              height: 1.1,
-                            ),
-                          ),
-                          const SizedBox(width: 5),
-                          Text(
-                            nivel,
-                            style: AppTypography.condensed(
-                              color: valueInk,
-                              fontSize: 15,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: -0.15,
-                              height: 1.05,
-                            ),
-                          ),
-                        ],
-                      )
-                      : Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            'Risco',
-                            style: FocuxHubTypography.chip(ink).copyWith(
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: 0.2,
-                              height: 1.1,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            nivel,
-                            style: AppTypography.condensed(
-                              color: valueInk,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: -0.2,
-                              height: 1.05,
-                            ),
-                          ),
-                        ],
-                      ),
-            ),
-          ],
-        ),
       ),
     );
   }

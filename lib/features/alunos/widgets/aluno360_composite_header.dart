@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../core/theme/design_tokens.dart';
-import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../constants/aluno_360_layout.dart';
@@ -115,46 +114,17 @@ class Aluno360HeaderToolbar extends StatelessWidget {
             onTap: onHelp!,
           ),
         if (onDelete != null && actionsEnabled)
-          PopupMenuButton<String>(
-            icon: Icon(Icons.more_horiz_rounded, color: ink),
-            tooltip: 'Mais opções',
-            offset: const Offset(0, 8),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(14),
-            ),
-            onSelected: (value) {
-              if (value == 'excluir') onDelete!();
-            },
-            itemBuilder:
-                (ctx) => [
-                  PopupMenuItem<String>(
-                    value: 'excluir',
-                    height: 44,
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.delete_outline_rounded,
-                          size: 20,
-                          color: EagleTokens.bad,
-                        ),
-                        const SizedBox(width: 10),
-                        Text(
-                          'Excluir aluno',
-                          style: FocuxHubTypography.body(
-                            color: EagleTokens.bad,
-                          ).copyWith(fontWeight: FontWeight.w700),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+          IconButton(
+            tooltip: 'Excluir aluno',
+            onPressed: onDelete,
+            icon: Icon(Icons.delete_outline_rounded, color: EagleTokens.bad),
           )
         else if (onDelete != null)
           IconButton(
             onPressed: null,
             icon: Icon(
-              Icons.more_horiz_rounded,
-              color: ink.withValues(alpha: 0.45),
+              Icons.delete_outline_rounded,
+              color: EagleTokens.bad.withValues(alpha: 0.45),
             ),
           ),
       ],
@@ -251,18 +221,10 @@ class Aluno360CompositeHeaderDelegate extends SliverPersistentHeaderDelegate {
                     padding: const EdgeInsets.symmetric(
                       horizontal: Aluno360Layout.screenPadding,
                     ),
-                    child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      return FittedBox(
-                        fit: BoxFit.scaleDown,
-                        alignment: Alignment.bottomCenter,
-                        child: SizedBox(
-                          width: constraints.maxWidth,
-                          child: heroChild,
-                        ),
-                      );
-                    },
-                  ),
+                    child: Align(
+                      alignment: Alignment.bottomCenter,
+                      child: heroChild,
+                    ),
                   ),
                 ),
               SizedBox(

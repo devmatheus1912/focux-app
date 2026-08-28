@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/alunos/data/aluno_repository.dart';
+import 'package:focux_app/features/alunos/utils/aluno360_copilot_logic.dart';
 import 'package:focux_app/features/alunos/utils/aluno360_operacao_logic.dart';
 import 'package:focux_app/features/dashboard/data/command_center_data.dart';
 
@@ -1094,6 +1095,54 @@ void main() {
       expect(shouldShowOperacaoAdherenceLegend(weekHasAnyCheckin: true), isTrue);
       expect(
         shouldShowOperacaoAdherenceLegend(weekHasAnyCheckin: false),
+        isFalse,
+      );
+    });
+  });
+
+  group('aluno360CopilotHasIaGeneratedContent', () {
+    test('true for open task', () {
+      expect(
+        aluno360CopilotHasIaGeneratedContent(
+          proximaAcao360: null,
+          forceIa: false,
+          iaHasValue: false,
+          hasOpenTask: true,
+        ),
+        isTrue,
+      );
+    });
+
+    test('true when proxima fonte is IA', () {
+      expect(
+        aluno360CopilotHasIaGeneratedContent(
+          proximaAcao360: ProximaAcaoResumo(
+            acao: 'Retomar contato',
+            motivo: 'teste',
+            fonte: 'IA',
+            prioridade: 'P1',
+          ),
+          forceIa: false,
+          iaHasValue: false,
+          hasOpenTask: false,
+        ),
+        isTrue,
+      );
+    });
+
+    test('false for non-IA proxima acao', () {
+      expect(
+        aluno360CopilotHasIaGeneratedContent(
+          proximaAcao360: ProximaAcaoResumo(
+            acao: 'Pedir check-in',
+            motivo: 'teste',
+            fonte: 'RADAR',
+            prioridade: 'P2',
+          ),
+          forceIa: false,
+          iaHasValue: false,
+          hasOpenTask: false,
+        ),
         isFalse,
       );
     });
