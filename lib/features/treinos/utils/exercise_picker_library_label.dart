@@ -37,21 +37,6 @@ ExercisePickerLibraryLines exercisePickerLibraryLines({
   );
 }
 
-/// Uma linha para CTAs compactos.
-String exercisePickerLibrarySubtitle({
-  required int filteredCount,
-  required int totalCount,
-  required ExercisePickerFilter filter,
-}) {
-  final lines = exercisePickerLibraryLines(
-    filteredCount: filteredCount,
-    totalCount: totalCount,
-    filter: filter,
-  );
-  if (lines.secondary == null) return lines.primary;
-  return '${lines.primary} · ${lines.secondary}';
-}
-
 String buscarTabEmptyTitle({
   required ExercisePickerFilter filter,
   required String query,

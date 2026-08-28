@@ -13,6 +13,7 @@ import '../../providers/exercicios_provider.dart';
 import '../../../treinos/utils/exercise_picker_filter.dart';
 import '../../../treinos/utils/exercise_picker_sort.dart';
 import '../../data/enums.dart';
+import '../../data/exercise_enum_api.dart';
 import '../../data/exercicio_repository.dart';
 import '../../data/exercicio_taxonomy_labels.dart';
 import 'exercise_media_thumb.dart';
@@ -88,8 +89,8 @@ class _PadraoExerciciosBottomSheetState
       final result = await ref
           .read(exercicioRepositoryProvider)
           .listarPickerPagina(
-            padraoMovimento: widget.padrao?.name,
-            grupoMuscularPrimario: widget.grupo?.name,
+            padraoMovimento: enumQueryParam(widget.padrao),
+            grupoMuscularPrimario: enumQueryParam(widget.grupo),
             favoritos: widget.pickerFilter.somenteFavoritos ? true : null,
             hasVideo: widget.pickerFilter.somenteComVideo ? true : null,
             page: _page,

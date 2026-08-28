@@ -10,6 +10,7 @@ import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/utils/motion_preferences.dart';
 import '../../../core/utils/pt_br_display.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_bottom_sheet.dart';
@@ -95,7 +96,6 @@ class _AddExercicioToTreinoScreenState
   String? _error;
   final _buscaCtrl = TextEditingController();
   String _buscaQuery = '';
-  bool _videoExpanded = false;
   bool _seedingBiblioteca = false;
   bool _bottomBarHidden = false;
   bool _prescriptionEditorOpen = false;
@@ -300,9 +300,9 @@ class _AddExercicioToTreinoScreenState
                                   (_tabIndex != 0 || _selecionado == null))
                                 Padding(
                                   padding: const EdgeInsets.fromLTRB(
-                                    20,
+                                    FxSettingsLayout.groupPadH,
                                     0,
-                                    20,
+                                    FxSettingsLayout.groupPadH,
                                     8,
                                   ),
                                   child: FxErrorState(
@@ -317,9 +317,9 @@ class _AddExercicioToTreinoScreenState
                                 child: SingleChildScrollView(
                                   controller: _scrollCtrl,
                                   padding: EdgeInsets.fromLTRB(
-                                    20,
-                                    20,
-                                    20,
+                                    FxSettingsLayout.groupPadH,
+                                    FxSettingsLayout.groupPadH,
+                                    FxSettingsLayout.groupPadH,
                                     _showPrescriptionPanel
                                         ? (_selecionado != null ? 152 : 48) +
                                             MediaQuery.paddingOf(context).bottom
@@ -340,12 +340,22 @@ class _AddExercicioToTreinoScreenState
                                       ),
                                       const SizedBox(height: TokensStrip.s4),
                                       AnimatedSwitcher(
-                                        duration: const Duration(
-                                          milliseconds: 220,
+                                        duration: Duration(
+                                          milliseconds: fxMotionDurationMs(
+                                            context,
+                                            normal: 220,
+                                          ),
                                         ),
                                         switchInCurve: Curves.easeOutCubic,
                                         switchOutCurve: Curves.easeInCubic,
                                         transitionBuilder: (child, animation) {
+                                          final fade = FadeTransition(
+                                            opacity: animation,
+                                            child: child,
+                                          );
+                                          if (reduceMotionOf(context)) {
+                                            return fade;
+                                          }
                                           return FadeTransition(
                                             opacity: animation,
                                             child: SlideTransition(

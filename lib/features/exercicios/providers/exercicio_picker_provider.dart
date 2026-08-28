@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../data/exercise_enum_api.dart';
 import '../data/enums.dart';
 import '../data/exercicio_page.dart';
 import 'exercicios_provider.dart';
@@ -65,92 +66,10 @@ final exercicioPickerPageProvider =
     ) async {
       return ref.read(exercicioRepositoryProvider).listarPickerPagina(
         busca: query.busca,
-        padraoMovimento: query.padraoMovimento?.name,
-        grupoMuscularPrimario: query.grupoMuscularPrimario?.name,
+        padraoMovimento: enumQueryParam(query.padraoMovimento),
+        grupoMuscularPrimario: enumQueryParam(query.grupoMuscularPrimario),
         hasVideo: query.somenteComVideo ? true : null,
         favoritos: query.somenteFavoritos ? true : null,
-        page: query.page,
-      );
-    });
-
-/// Query paginada para lista admin de exercícios — GET /api/exercicios/v2.
-class ExercicioListQuery {
-  final String? busca;
-  final Modalidade? modalidade;
-  final GrupoMuscular? grupo;
-  final Equipamento? equipamento;
-  final Dificuldade? dificuldade;
-  final bool favoritos;
-  final bool comVideo;
-  final bool semVideo;
-  final int page;
-
-  const ExercicioListQuery({
-    this.busca,
-    this.modalidade,
-    this.grupo,
-    this.equipamento,
-    this.dificuldade,
-    this.favoritos = false,
-    this.comVideo = false,
-    this.semVideo = false,
-    this.page = 0,
-  });
-
-  ExercicioListQuery nextPage() => ExercicioListQuery(
-    busca: busca,
-    modalidade: modalidade,
-    grupo: grupo,
-    equipamento: equipamento,
-    dificuldade: dificuldade,
-    favoritos: favoritos,
-    comVideo: comVideo,
-    semVideo: semVideo,
-    page: page + 1,
-  );
-
-  @override
-  bool operator ==(Object other) =>
-      other is ExercicioListQuery &&
-      other.busca == busca &&
-      other.modalidade == modalidade &&
-      other.grupo == grupo &&
-      other.equipamento == equipamento &&
-      other.dificuldade == dificuldade &&
-      other.favoritos == favoritos &&
-      other.comVideo == comVideo &&
-      other.semVideo == semVideo &&
-      other.page == page;
-
-  @override
-  int get hashCode => Object.hash(
-    busca,
-    modalidade,
-    grupo,
-    equipamento,
-    dificuldade,
-    favoritos,
-    comVideo,
-    semVideo,
-    page,
-  );
-}
-
-final exercicioListPageProvider =
-    FutureProvider.family<ExercicioPage, ExercicioListQuery>((ref, query) async {
-      return ref.read(exercicioRepositoryProvider).listarPagina(
-        busca: query.busca,
-        modalidade: query.modalidade?.name,
-        grupoMuscularPrimario: query.grupo?.name,
-        equipamento: query.equipamento?.name,
-        dificuldade: query.dificuldade?.name,
-        favoritos: query.favoritos ? true : null,
-        hasVideo:
-            query.comVideo
-                ? true
-                : query.semVideo
-                ? false
-                : null,
         page: query.page,
       );
     });

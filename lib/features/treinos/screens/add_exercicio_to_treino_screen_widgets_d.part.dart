@@ -74,54 +74,68 @@ class _AddExerciseTabStrip extends StatelessWidget {
   });
 
   static const _labels = ['Buscar', 'Explorar'];
+  static const _semanticsLabels = [
+    'Buscar, buscar por nome',
+    'Explorar, explorar por movimento',
+  ];
 
   @override
   Widget build(BuildContext context) {
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
+    final tabMotionMs = fxMotionDurationMs(context, normal: 180);
 
-    return Container(
-      decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: line.withValues(alpha: 0.72))),
-      ),
-      child: Row(
-        children: [
-          for (var i = 0; i < _labels.length; i++)
-            Expanded(
-              child: InkWell(
-                onTap: () => onChanged(i),
-                borderRadius: BorderRadius.circular(12),
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 12),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        _labels[i],
-                        style: FocuxHubTypography.bodyMuted(
-                          color: selectedIndex == i ? primary : mute,
-                          fontWeight:
-                              selectedIndex == i
-                                  ? FontWeight.w800
-                                  : FontWeight.w600,
-                        ).copyWith(letterSpacing: -0.1),
+    return Semantics(
+      container: true,
+      label: 'Abas de adicionar exercício',
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border(bottom: BorderSide(color: line.withValues(alpha: 0.72))),
+        ),
+        child: Row(
+          children: [
+            for (var i = 0; i < _labels.length; i++)
+              Expanded(
+                child: Semantics(
+                  button: true,
+                  selected: selectedIndex == i,
+                  label: _semanticsLabels[i],
+                  child: InkWell(
+                    onTap: () => onChanged(i),
+                    borderRadius: BorderRadius.circular(12),
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 12),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            _labels[i],
+                            style: FocuxHubTypography.bodyMuted(
+                              color: selectedIndex == i ? primary : mute,
+                              fontWeight:
+                                  selectedIndex == i
+                                      ? FontWeight.w800
+                                      : FontWeight.w600,
+                            ).copyWith(letterSpacing: -0.1),
+                          ),
+                          const SizedBox(height: 10),
+                          AnimatedContainer(
+                            duration: Duration(milliseconds: tabMotionMs),
+                            width: selectedIndex == i ? 40 : 0,
+                            height: 3.5,
+                            decoration: BoxDecoration(
+                              color: primary,
+                              borderRadius: BorderRadius.circular(999),
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 10),
-                      AnimatedContainer(
-                        duration: const Duration(milliseconds: 180),
-                        width: selectedIndex == i ? 40 : 0,
-                        height: 3.5,
-                        decoration: BoxDecoration(
-                          color: primary,
-                          borderRadius: BorderRadius.circular(999),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
               ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -159,6 +173,8 @@ class _BrowseLibraryCta extends StatelessWidget {
           accent: primary,
           label: 'Ver biblioteca ($totalCount)',
           subtitle: libraryLines.primary,
+          semanticsLabel:
+              'Ver biblioteca com $totalCount exercícios. ${libraryLines.primary}',
           value: '',
           onTap: onOpenPicker,
         ),
@@ -167,61 +183,13 @@ class _BrowseLibraryCta extends StatelessWidget {
           accent: primary,
           label: createLabel,
           subtitle: 'Cadastre e envie vídeo de demonstração',
+          semanticsLabel: '$createLabel. Cadastre e envie vídeo de demonstração',
           value: '',
           highlight: true,
           showDivider: false,
           onTap: onCreate,
         ),
       ],
-    );
-  }
-}
-
-class _CreateExerciseButton extends StatelessWidget {
-  const _CreateExerciseButton({
-    required this.primary,
-    required this.onPressed,
-    this.compact = false,
-  });
-
-  final Color primary;
-  final VoidCallback onPressed;
-  final bool compact;
-
-  @override
-  Widget build(BuildContext context) {
-    final label = compact ? 'Novo' : 'Novo exercício';
-    final button = OutlinedButton.icon(
-      onPressed: onPressed,
-      style: OutlinedButton.styleFrom(
-        minimumSize: const Size(0, 48),
-        padding: EdgeInsets.symmetric(horizontal: compact ? 12 : 14),
-        foregroundColor: primary,
-        side: BorderSide(color: primary.withValues(alpha: 0.42)),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      ),
-      icon: Icon(Icons.add_rounded, color: primary, size: compact ? 20 : 21),
-      label: Text(
-        label,
-        style: compact
-            ? FocuxHubTypography.bodyMuted(
-                color: primary,
-                fontWeight: FontWeight.w900,
-              )
-            : FocuxHubTypography.cardTitle(color: primary).copyWith(
-                fontWeight: FontWeight.w900,
-              ),
-      ),
-    );
-
-    return Semantics(
-      button: true,
-      label: 'Criar exercício personalizado',
-      child: Tooltip(
-        message: 'Criar exercício personalizado',
-        preferBelow: false,
-        child: button,
-      ),
     );
   }
 }

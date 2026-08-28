@@ -16,7 +16,12 @@ class _BibliotecaSyncBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+      padding: EdgeInsets.fromLTRB(
+        FxSettingsLayout.groupPadH,
+        8,
+        FxSettingsLayout.groupPadH,
+        0,
+      ),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
@@ -349,44 +354,6 @@ class _QuickSearchResultTile extends StatelessWidget {
   }
 }
 
-class _MontarComModeloCard extends StatelessWidget {
-  const _MontarComModeloCard({
-    required this.onTap,
-    required this.isDark,
-    required this.primary,
-    required this.templateCount,
-    required this.title,
-  });
-
-  final VoidCallback onTap;
-  final bool isDark;
-  final Color primary;
-  final int templateCount;
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    return FxSettingsGroup(
-      accent: primary,
-      children: [
-        FxSettingsTile(
-          icon: Icons.view_agenda_outlined,
-          accent: primary,
-          label: title,
-          subtitle:
-              'Full body, PPL, bro split e mais — $templateCount modelos.',
-          value: '',
-          showDivider: false,
-          onTap: () {
-            HapticFeedback.selectionClick();
-            onTap();
-          },
-        ),
-      ],
-    );
-  }
-}
-
 class _ActivePrescriptionStrip extends StatelessWidget {
   const _ActivePrescriptionStrip({
     required this.presetId,
@@ -411,73 +378,37 @@ class _ActivePrescriptionStrip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final preset = workoutBuilderPresetById(presetId);
-    final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final tipoLabel = switch (tipoSerie) {
       'SUPERSET' => ' · Superset',
       'DROPSET' => ' · Drop set',
       _ => '',
     };
+    final bottom = MediaQuery.paddingOf(context).bottom;
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onEdit,
-        child: Container(
-          padding: EdgeInsets.fromLTRB(
-            20,
-            12,
-            20,
-            MediaQuery.paddingOf(context).bottom > 0 ? 8 : 14,
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+        FxSettingsLayout.groupPadH,
+        8,
+        FxSettingsLayout.groupPadH,
+        bottom > 0 ? 6 : 12,
+      ),
+      child: FxSettingsGroup(
+        accent: primary,
+        caption: 'Prescrição ativa',
+        children: [
+          FxSettingsTile(
+            icon: Icons.tune_rounded,
+            accent: primary,
+            label: preset.label,
+            subtitle: '$series×$repeticoes · ${descanso}s descanso$tipoLabel',
+            value: 'Editar',
+            highlight: true,
+            showDivider: false,
+            semanticsLabel:
+                'Prescrição ativa ${preset.label}. $series séries de $repeticoes repetições, $descanso segundos de descanso. Toque para editar.',
+            onTap: onEdit,
           ),
-          decoration: BoxDecoration(
-            color: Theme.of(
-              context,
-            ).colorScheme.surface.withValues(alpha: 0.94),
-            border: Border(top: BorderSide(color: line.withValues(alpha: 0.8))),
-          ),
-          child: Row(
-            children: [
-              Icon(Icons.tune_rounded, color: primary, size: 18),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Prescrição ativa: ${preset.label}',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: FocuxHubTypography.bodyMuted(
-                        color: isDark
-                            ? EagleTokens.darkInk
-                            : TokensStrip.textPrimary,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      '$series×$repeticoes · ${descanso}s descanso$tipoLabel',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: FocuxHubTypography.bodyMuted(
-                        color: mute,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Text(
-                'Editar',
-                style: FocuxHubTypography.bodyMuted(
-                  color: primary,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ],
-          ),
-        ),
+        ],
       ),
     );
   }
@@ -505,7 +436,12 @@ class _StickyAddExerciseBar extends StatelessWidget {
     final primary = Theme.of(context).colorScheme.primary;
 
     return Container(
-      padding: EdgeInsets.fromLTRB(20, 12, 20, bottom + 12),
+      padding: EdgeInsets.fromLTRB(
+        FxSettingsLayout.groupPadH,
+        12,
+        FxSettingsLayout.groupPadH,
+        bottom + 12,
+      ),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.96),
         border: Border(top: BorderSide(color: line.withValues(alpha: 0.8))),

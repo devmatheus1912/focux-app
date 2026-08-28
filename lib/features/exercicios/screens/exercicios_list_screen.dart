@@ -17,6 +17,7 @@ import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
+import '../data/exercise_enum_api.dart';
 import '../data/exercicio_repository.dart';
 import '../data/exercicio_taxonomy_labels.dart';
 import '../providers/exercicio_picker_provider.dart';
@@ -96,10 +97,10 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
           .read(exercicioRepositoryProvider)
           .listarPagina(
             busca: _filter.query.trim().isEmpty ? null : _filter.query.trim(),
-            modalidade: _filter.modalidade?.name,
-            grupoMuscularPrimario: _filter.grupo?.name,
-            equipamento: _filter.equipamento?.name,
-            dificuldade: _filter.dificuldade?.name,
+            modalidade: enumQueryParam(_filter.modalidade),
+            grupoMuscularPrimario: enumQueryParam(_filter.grupo),
+            equipamento: enumQueryParam(_filter.equipamento),
+            dificuldade: enumQueryParam(_filter.dificuldade),
             favoritos: _filter.favoritos ? true : null,
             hasVideo: _hasVideoFilter,
             page: _page,

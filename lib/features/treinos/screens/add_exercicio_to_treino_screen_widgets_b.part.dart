@@ -1,152 +1,5 @@
 ﻿part of 'add_exercicio_to_treino_screen.dart';
 
-class _ExercisePickerCard extends StatelessWidget {
-  final Exercicio? exercicio;
-  final bool isDark;
-  final Color primary;
-  final ExercisePickerLibraryLines libraryLines;
-  final bool showPrescriptionHint;
-  final bool showBrowseHint;
-  final bool compactMode;
-  final VoidCallback onTap;
-  final bool mediaLoading;
-  final bool videoExpanded;
-  final VoidCallback onToggleVideo;
-  final VoidCallback onPreviewVideo;
-  final VoidCallback onUploadVideo;
-  final VoidCallback onRemoveVideo;
-  final VoidCallback onCreate;
-
-  const _ExercisePickerCard({
-    required this.exercicio,
-    required this.isDark,
-    required this.primary,
-    required this.libraryLines,
-    this.showPrescriptionHint = true,
-    this.showBrowseHint = true,
-    this.compactMode = false,
-    required this.onTap,
-    required this.mediaLoading,
-    required this.videoExpanded,
-    required this.onToggleVideo,
-    required this.onPreviewVideo,
-    required this.onUploadVideo,
-    required this.onRemoveVideo,
-    required this.onCreate,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-    final selected = exercicio != null;
-    final hasMediaIssue = selected && exercicio!.showMediaBadgeInWorkoutList;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        FxSettingsGroup(
-          accent: primary,
-          children: [
-            FxSettingsTile(
-              icon: selected ? Icons.check_rounded : Icons.search_rounded,
-              accent: primary,
-              label: selected ? exercicio!.nomeDisplay : 'Escolher exercício',
-              subtitle:
-                  selected
-                      ? _exerciseMeta(exercicio!)
-                      : [
-                        libraryLines.primary,
-                        if (libraryLines.secondary != null)
-                          libraryLines.secondary!,
-                      ].join(' · '),
-              value: '',
-              highlight: selected,
-              showDivider:
-                  !compactMode &&
-                  (showBrowseHint && (!selected || (showPrescriptionHint && !hasMediaIssue))),
-              onTap: onTap,
-              accessory: Icon(Icons.expand_more_rounded, color: mute, size: 22),
-            ),
-            if (!compactMode &&
-                showBrowseHint &&
-                (!selected || (showPrescriptionHint && !hasMediaIssue)))
-              FxSettingsTile(
-                icon:
-                    selected
-                        ? Icons.edit_note_rounded
-                        : Icons.auto_awesome_motion_rounded,
-                accent: primary,
-                label:
-                    selected
-                        ? 'Revise a prescrição abaixo'
-                        : 'Explore por movimento ou grupo',
-                subtitle:
-                    selected
-                        ? 'Confira séries, carga e descanso antes de salvar.'
-                        : 'Use a aba Explorar ou busque pelo nome.',
-                value: '',
-                showDivider: false,
-                onTap: onTap,
-              ),
-          ],
-        ),
-        const SizedBox(height: 10),
-        Align(
-          alignment: Alignment.centerRight,
-          child: _CreateExerciseButton(
-            primary: primary,
-            compact: true,
-            onPressed: onCreate,
-          ),
-        ),
-        if (selected && !compactMode) ...[
-          const SizedBox(height: 8),
-          InkWell(
-            onTap: onToggleVideo,
-            borderRadius: BorderRadius.circular(12),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4),
-              child: Row(
-                children: [
-                  Icon(
-                    videoExpanded ? Icons.expand_less : Icons.videocam_outlined,
-                    color: mute,
-                    size: 18,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'VÃ­deo do exercÃ­cio (opcional)',
-                      style: FocuxHubTypography.bodyMuted(
-                        color: mute,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          if (videoExpanded) ...[
-            const SizedBox(height: 6),
-            ExerciseVideoUploadStrip(
-              exercicio: exercicio!,
-              isDark: isDark,
-              primary: primary,
-              mediaLoading: mediaLoading,
-              quietCta: true,
-              onPreview: onPreviewVideo,
-              onUpload: onUploadVideo,
-              onRemove: onRemoveVideo,
-              footer: ExerciseVideoSpecTips(isDark: isDark, embedded: true),
-            ),
-          ],
-        ],
-      ],
-    );
-  }
-}
-
 class _RemoveExerciseVideoSheet extends StatelessWidget {
   final Exercicio exercicio;
 
@@ -203,14 +56,14 @@ class _RemoveExerciseVideoSheet extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Remover vÃ­deo?',
+                          'Remover vídeo?',
                           style: FocuxHubTypography.body(color: ink).copyWith(
                             fontWeight: FontWeight.w900,
                           ),
                         ),
                         const SizedBox(height: 5),
                         Text(
-                          '"${exercicio.nomeDisplay}" continua na biblioteca. SÃ³ a mÃ­dia de demonstraÃ§Ã£o serÃ¡ removida.',
+                          '"${exercicio.nomeDisplay}" continua na biblioteca. Só a mídia de demonstração será removida.',
                           style: FocuxHubTypography.bodyMuted(
                             color: mute,
                             height: 1.35,

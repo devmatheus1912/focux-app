@@ -415,6 +415,11 @@ extension AddExercicioToTreinoScreenActionsB
         (MediaQuery.sizeOf(context).height - 280)
             .clamp(430.0, 620.0)
             .toDouble();
+    final libraryLines = exercisePickerLibraryLines(
+      filteredCount: libraryCount,
+      totalCount: libraryCount,
+      filter: _pickerFilter,
+    );
     switch (_tabIndex) {
       case 1:
         return SizedBox(
@@ -422,18 +427,35 @@ extension AddExercicioToTreinoScreenActionsB
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              _MontarComModeloCard(
-                onTap: _openTemplateBuilder,
-                isDark: isDark,
-                primary: primary,
-                templateCount: templateSplits.length,
-                title: uiHints.templateCtaLabel,
-              ),
-              const SizedBox(height: FxSettingsLayout.groupGap),
               FxSettingsGroup(
                 accent: primary,
                 caption: uiHints.libraryCaption,
                 children: [
+                  FxSettingsTile(
+                    icon: Icons.view_agenda_outlined,
+                    accent: primary,
+                    label: uiHints.templateCtaLabel,
+                    subtitle:
+                        'Full body, PPL, bro split e mais — ${templateSplits.length} modelos.',
+                    value: '',
+                    onTap: () {
+                      HapticFeedback.selectionClick();
+                      _openTemplateBuilder();
+                    },
+                  ),
+                  if (libraryCount > 0)
+                    FxSettingsTile(
+                      icon: Icons.library_books_outlined,
+                      accent: primary,
+                      label: 'Ver biblioteca ($libraryCount)',
+                      subtitle: libraryLines.primary,
+                      value: '',
+                      onTap:
+                          () => _openExercisePicker(
+                            alreadyInTreinoIds: alreadyInTreinoIds,
+                            searchPlaceholder: uiHints.searchPlaceholder,
+                          ),
+                    ),
                   FxSettingsTile(
                     icon: Icons.add_rounded,
                     accent: primary,
@@ -446,7 +468,7 @@ extension AddExercicioToTreinoScreenActionsB
                   ),
                 ],
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: FxSettingsLayout.groupGap),
               if (_alunoFilterNome != null && _pickerFilter.filtrarPorAluno)
                 _AlunoEquipmentFilterBanner(
                   alunoNome: _alunoFilterNome!,
@@ -487,8 +509,10 @@ extension AddExercicioToTreinoScreenActionsB
       default:
         final compact = _selecionado != null;
         final query = _buscaQuery.trim().toLowerCase();
+        final pickerFiltered =
+            _pickerFilter.isActive || query.length >= 2 || _usesPickerApi();
         final libraryLines = exercisePickerLibraryLines(
-          filteredCount: exercicios.length,
+          filteredCount: pickerFiltered ? exercicios.length : libraryCount,
           totalCount: libraryCount,
           filter: _pickerFilter,
         );
@@ -524,13 +548,6 @@ extension AddExercicioToTreinoScreenActionsB
                   recentIds: _recentIds,
                 )
                 : const <Exercicio>[];
-        final hasBrowseShortcuts =
-            !showFilterEmpty &&
-            !compact &&
-            (curatedSuggestions.isNotEmpty ||
-                favoriteShortcuts.isNotEmpty ||
-                quickMatches.isNotEmpty);
-
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -565,6 +582,18 @@ extension AddExercicioToTreinoScreenActionsB
               const SizedBox(height: 10),
             ],
             if (!compact) ...[
+              Padding(
+                padding: const EdgeInsets.only(bottom: FxSettingsLayout.headerToGroup),
+                child: Text(
+                  'Buscar na biblioteca',
+                  style: FxSettingsLayout.sectionHeader(
+                    color:
+                        isDark
+                            ? EagleTokens.darkInkMute
+                            : TokensStrip.textSecondary,
+                  ),
+                ),
+              ),
               TextField(
                 controller: _buscaCtrl,
                 decoration: InputDecoration(
@@ -709,7 +738,7 @@ extension AddExercicioToTreinoScreenActionsB
               ),
               const SizedBox(height: 8),
             ],
-            if (!compact && hasBrowseShortcuts) ...[
+            if (!showFilterEmpty && !compact && libraryCount > 0) ...[
               const SizedBox(height: 12),
               _BrowseLibraryCta(
                 totalCount: libraryCount,
@@ -725,28 +754,7 @@ extension AddExercicioToTreinoScreenActionsB
                     ),
                 onCreate: _openCreateExercise,
               ),
-            ] else if (!compact)
-              _ExercisePickerCard(
-                exercicio: _selecionado,
-                isDark: isDark,
-                primary: primary,
-                libraryLines: libraryLines,
-                compactMode: false,
-                showPrescriptionHint: !_prescriptionInView,
-                showBrowseHint: !hasBrowseShortcuts,
-                onTap:
-                    () => _openExercisePicker(
-                      alreadyInTreinoIds: alreadyInTreinoIds,
-                    ),
-                mediaLoading: _mediaLoading,
-                videoExpanded: _videoExpanded,
-                onToggleVideo:
-                    () => setState(() => _videoExpanded = !_videoExpanded),
-                onPreviewVideo: _previewSelectedExerciseVideo,
-                onUploadVideo: _uploadSelectedExerciseVideo,
-                onRemoveVideo: _removeSelectedExerciseVideo,
-                onCreate: _openCreateExercise,
-              ),
+            ],
             if (_selecionado != null) ...[
               const SizedBox(height: 8),
               Align(

@@ -23,17 +23,46 @@ void main() {
       expect(lines.primary, '38 filtrados');
       expect(lines.secondary, '141 no total');
     });
+
+    test('sem filtro usa total da biblioteca', () {
+      final lines = exercisePickerLibraryLines(
+        filteredCount: 187,
+        totalCount: 187,
+        filter: const ExercisePickerFilter(),
+      );
+      expect(lines.primary, '187 exercícios');
+      expect(lines.secondary, isNull);
+    });
   });
 
-  group('exercisePickerLibrarySubtitle', () {
-    test('concatena linhas quando há secondary', () {
+  group('buscarTabEmptyTitle', () {
+    test('favoritos vazio', () {
       expect(
-        exercisePickerLibrarySubtitle(
-          filteredCount: 0,
-          totalCount: 141,
+        buscarTabEmptyTitle(
           filter: const ExercisePickerFilter(somenteFavoritos: true),
+          query: '',
         ),
-        'Sem favoritos · 141 no total',
+        'Nenhum exercício favorito',
+      );
+    });
+
+    test('busca sem resultado', () {
+      expect(
+        buscarTabEmptyTitle(
+          filter: const ExercisePickerFilter(),
+          query: 'xyz',
+        ),
+        'Nada encontrado para "xyz"',
+      );
+    });
+
+    test('filtro com vídeo', () {
+      expect(
+        buscarTabEmptyTitle(
+          filter: const ExercisePickerFilter(somenteComVideo: true),
+          query: '',
+        ),
+        'Nenhum exercício com vídeo',
       );
     });
   });

@@ -11,6 +11,7 @@ import '../../../../core/widgets/fx_loading.dart';
 import '../../../../core/widgets/fx_settings_group.dart';
 import '../../../../core/widgets/fx_settings_tile.dart';
 import '../../providers/exercicios_provider.dart';
+import '../../data/exercise_enum_api.dart';
 import '../../data/enums.dart';
 import '../../data/exercicio_repository.dart';
 import '../../data/exercicio_taxonomy_labels.dart';
@@ -99,8 +100,8 @@ class _SubstituirExercicioBottomSheetState
       final result = await ref
           .read(exercicioRepositoryProvider)
           .listarPickerPagina(
-            padraoMovimento: widget.alvo.padraoMovimento?.name,
-            grupoMuscularPrimario: widget.alvo.grupoMuscularPrimario?.name,
+            padraoMovimento: enumQueryParam(widget.alvo.padraoMovimento),
+            grupoMuscularPrimario: enumQueryParam(widget.alvo.grupoMuscularPrimario),
             page: _page,
             size: 40,
           );

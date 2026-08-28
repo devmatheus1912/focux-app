@@ -59,7 +59,7 @@ void main() {
       'lib/features/treinos/screens/treino_detail_screen.dart',
     );
 
-    expect(builder, contains('_ExercisePickerCard'));
+    expect(builder, contains('_BrowseLibraryCta'));
     expect(builder, contains('onUploadVideo'));
     expect(builder, contains('canPreviewExerciseMedia'));
     expect(detail, contains('_PrescriptionReadinessPanel'));
