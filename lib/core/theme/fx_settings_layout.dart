@@ -32,6 +32,8 @@ abstract final class FxSettingsLayout {
 
   static const double rowMinHeight = 52;
   static const double iconSize = 22;
+  /// Largura do slot de ícone em campos/pickers inset (paridade `prefixIcon`).
+  static const double insetPrefixWidth = 48;
   static const double iconGap = TokensStrip.s3;
   static const double chevronSize = 17;
   static const double dividerThickness = 0.5;

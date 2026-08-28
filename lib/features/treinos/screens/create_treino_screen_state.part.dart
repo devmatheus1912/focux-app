@@ -259,13 +259,11 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen> {
                               label: 'Objetivo (opcional)',
                               icon: Icons.flag_outlined,
                             ),
-                            FxSettingsTile(
+                            FxInsetPickerRow(
                               icon: Icons.tune_rounded,
-                              accent: soft,
+                              iconColor: soft,
                               label: 'Nível',
                               value: CreateTreinoLogic.nivelLabel(_nivel),
-                              picker: true,
-                              showDivider: true,
                               onTap: _openNivelPicker,
                             ),
                             AlunoInsetFormField(

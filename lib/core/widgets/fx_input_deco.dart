@@ -102,6 +102,10 @@ class FxInputDeco {
           icon != null
               ? Icon(icon, size: iconSize, color: iconColor ?? mute)
               : null,
+      prefixIconConstraints: const BoxConstraints(
+        minWidth: FxSettingsLayout.insetPrefixWidth,
+        minHeight: FxSettingsLayout.insetPrefixWidth,
+      ),
       suffixIcon: suffix,
       filled: false,
       isDense: true,
