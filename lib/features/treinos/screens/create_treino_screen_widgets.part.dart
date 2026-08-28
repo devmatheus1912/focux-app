@@ -70,145 +70,37 @@ class _StickyCreateBar extends StatelessWidget {
   }
 }
 
-class _CreationHero extends StatelessWidget {
+class _CreationPreviewGroup extends StatelessWidget {
   final String title;
   final String goal;
   final String level;
-  final bool isDark;
   final Color primary;
+  final VoidCallback onFocusName;
 
-  const _CreationHero({
+  const _CreationPreviewGroup({
     required this.title,
     required this.goal,
     required this.level,
-    required this.isDark,
     required this.primary,
+    required this.onFocusName,
   });
 
   @override
   Widget build(BuildContext context) {
-    final primaryDeep = BrandPalette.deep(primary);
-
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [primary, primaryDeep],
+    return FxSettingsGroup(
+      header: 'Criação guiada',
+      caption: 'Monte a base agora. Os exercícios entram no próximo passo.',
+      accent: primary,
+      children: [
+        FxSettingsTile(
+          icon: Icons.fitness_center_rounded,
+          label: title,
+          subtitle: goal,
+          value: level,
+          showDivider: false,
+          onTap: onFocusName,
         ),
-        borderRadius: BorderRadius.circular(26),
-        boxShadow: [
-          BoxShadow(
-            color: primary.withValues(alpha: isDark ? 0.08 : 0.14),
-            blurRadius: 22,
-            offset: const Offset(0, 12),
-            spreadRadius: -20,
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.16),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: const Icon(
-                  Icons.fitness_center_rounded,
-                  color: Colors.white,
-                  size: 20,
-                ),
-              ),
-              const Spacer(),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 7,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.14),
-                  borderRadius: BorderRadius.circular(999),
-                ),
-                child: Text(
-                  'Criação guiada',
-                  style: FocuxHubTypography.chip(Colors.white),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 14),
-          Text(
-            title,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: FocuxHubTypography.sectionTitle(
-              context,
-              color: Colors.white,
-            ),
-          ),
-          const SizedBox(height: 5),
-          Text(
-            'Monte a base agora. Os exercícios entram no próximo passo.',
-            style: FocuxHubTypography.bodyMuted(
-              color: Colors.white.withValues(alpha: 0.72),
-              height: 1.25,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: 14),
-          Row(
-            children: [
-              Expanded(child: _HeroPill(label: goal, icon: Icons.flag_rounded)),
-              const SizedBox(width: 8),
-              Expanded(
-                child: _HeroPill(label: level, icon: Icons.tune_rounded),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _HeroPill extends StatelessWidget {
-  final String label;
-  final IconData icon;
-
-  const _HeroPill({required this.label, required this.icon});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.13),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.10)),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, color: Colors.white.withValues(alpha: 0.82), size: 15),
-          const SizedBox(width: 6),
-          Expanded(
-            child: Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: FocuxHubTypography.bodyMuted(
-                color: Colors.white.withValues(alpha: 0.88),
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-        ],
-      ),
+      ],
     );
   }
 }

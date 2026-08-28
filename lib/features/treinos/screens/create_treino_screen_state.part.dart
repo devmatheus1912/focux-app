@@ -165,12 +165,23 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen>
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _CreationHero(
+                        _CreationPreviewGroup(
                           title: previewTitle,
                           goal: previewGoal,
                           level: previewLevel,
-                          isDark: isDark,
                           primary: primary,
+                          onFocusName: () {
+                            final fieldContext = _nomeFieldKey.currentContext;
+                            if (fieldContext != null) {
+                              Scrollable.ensureVisible(
+                                fieldContext,
+                                alignment: 0.2,
+                                duration: const Duration(milliseconds: 280),
+                                curve: Curves.easeOutCubic,
+                              );
+                            }
+                            _nomeFocusNode.requestFocus();
+                          },
                         ),
                         const SizedBox(height: 18),
                         _SectionKicker(
