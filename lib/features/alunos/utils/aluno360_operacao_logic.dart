@@ -217,6 +217,10 @@ class OperacaoAdherenceEmptyState {
   }
 }
 
+/// Legend only when the week has at least one check-in (empty week is self-evident).
+bool shouldShowOperacaoAdherenceLegend({required bool weekHasAnyCheckin}) =>
+    weekHasAnyCheckin;
+
 OperacaoAdherenceEmptyState? resolveOperacaoAdherenceEmptyState({
   required AderenciaWeekSummary week,
   required Aluno360OperacaoSnapshot? operacao,

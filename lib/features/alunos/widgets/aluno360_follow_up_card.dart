@@ -7,13 +7,14 @@ import '../../../core/utils/motion_preferences.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/fx_settings_group.dart';
+import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../constants/aluno_360_layout.dart';
 import '../utils/aluno360_a11y.dart';
 import '../data/aluno_repository.dart';
 import '../providers/aluno_followup_provider.dart';
 import '../utils/aluno360_operacao_logic.dart';
-import 'aluno360_section_header.dart';
 
 class Aluno360FollowUpCard extends ConsumerStatefulWidget {
   const Aluno360FollowUpCard({
@@ -197,135 +198,8 @@ class _Aluno360FollowUpCardState extends ConsumerState<Aluno360FollowUpCard> {
     );
   }
 
-  BoxDecoration _compactFollowUpDecoration({
-    required BuildContext context,
-    required Color primary,
-    required bool isDark,
-  }) {
-    return Aluno360Layout.operacaoInsetSectionDecoration(
-      context,
-      primary: primary,
-      isDark: isDark,
-    );
-  }
-
-  Widget _buildCompactContactPriorityCard({
-    required BuildContext context,
-    required Color primary,
-    required Color ink,
-    required DateTime? followUpDate,
-    required bool isSnoozed,
-    required DateTime? snoozedUntil,
-    required dynamic actions,
-  }) {
-    final mute = fxScreenMute(context);
-    final isDark = widget.isDark;
-    final subtitle = _compactFollowUpSubtitle(
-      followUpDate: followUpDate,
-      isSnoozed: isSnoozed,
-      snoozedUntil: snoozedUntil,
-    );
-    final motionMs = fxMotionDurationMs(context);
-
-    return DecoratedBox(
-      key: const ValueKey('aluno360_followup_compact'),
-      decoration: _compactFollowUpDecoration(
-        context: context,
-        primary: primary,
-        isDark: isDark,
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Semantics(
-              button: true,
-              label: aluno360FollowUpSemantics(
-                subtitle: subtitle,
-                expanded: _expanded,
-              ),
-              child: MouseRegion(
-                cursor: SystemMouseCursors.click,
-                child: InkWell(
-                  onTap: () => setState(() => _expanded = !_expanded),
-                  borderRadius: BorderRadius.vertical(
-                    top: const Radius.circular(16),
-                    bottom: Radius.circular(_expanded ? 0 : 16),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(12, 12, 10, 12),
-                    child: Aluno360SectionHeader(
-                      icon: Icons.event_available_rounded,
-                      title: 'Próximo contato',
-                      subtitle: subtitle,
-                      compact: true,
-                      trailing: Container(
-                        width: 30,
-                        height: 30,
-                        decoration: BoxDecoration(
-                          color:
-                              isDark
-                                  ? Colors.white.withValues(alpha: 0.06)
-                                  : Colors.black.withValues(alpha: 0.04),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          _expanded
-                              ? Icons.expand_less_rounded
-                              : Icons.expand_more_rounded,
-                          size: 20,
-                          color: mute,
-                        ),
-                      ),
-                      trailingSemanticsLabel:
-                          _expanded ? 'Recolher' : 'Expandir',
-                      isDark: isDark,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            AnimatedSize(
-              duration: Duration(milliseconds: motionMs),
-              curve: Curves.easeOutCubic,
-              alignment: Alignment.topCenter,
-              child:
-                  _expanded
-                      ? Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Divider(
-                            height: 1,
-                            thickness: 1,
-                            color: mute.withValues(alpha: isDark ? 0.14 : 0.12),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
-                            child: _buildFollowUpActions(
-                              context,
-                              primary: primary,
-                              ink: ink,
-                              followUpDate: followUpDate,
-                              isSnoozed: isSnoozed,
-                              snoozedUntil: snoozedUntil,
-                              actions: actions,
-                              contactPrimaryOutlined: true,
-                            ),
-                          ),
-                        ],
-                      )
-                      : const SizedBox.shrink(),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    final ink = fxScreenInk(context);
     final primary = Theme.of(context).colorScheme.primary;
     final followUpDate = aluno.followUpDate;
     final snoozedUntil = aluno.snoozedUntilDate;
@@ -333,69 +207,105 @@ class _Aluno360FollowUpCardState extends ConsumerState<Aluno360FollowUpCard> {
         snoozedUntil != null && snoozedUntil.isAfter(DateTime.now());
     final actions = ref.read(alunoFollowUpActionsProvider);
     final compact = widget.compactContactPriority;
+    final motionMs = fxMotionDurationMs(context);
 
     if (compact) {
-      return _buildCompactContactPriorityCard(
-        context: context,
-        primary: primary,
-        ink: ink,
+      final subtitle = _compactFollowUpSubtitle(
         followUpDate: followUpDate,
         isSnoozed: isSnoozed,
         snoozedUntil: snoozedUntil,
-        actions: actions,
+      );
+      return FxSettingsGroup(
+        key: const ValueKey('aluno360_followup_compact'),
+        header: 'Próximo contato',
+        accent: primary,
+        children: [
+          Semantics(
+            label: aluno360FollowUpSemantics(
+              subtitle: subtitle,
+              expanded: _expanded,
+            ),
+            child: FxSettingsTile(
+              icon: Icons.event_available_rounded,
+              label: 'Registrar ou agendar',
+              subtitle: subtitle,
+              value: '',
+              picker: true,
+              showDivider: _expanded,
+              onTap: () => setState(() => _expanded = !_expanded),
+            ),
+          ),
+          AnimatedSize(
+            duration: Duration(milliseconds: motionMs),
+            curve: Curves.easeOutCubic,
+            alignment: Alignment.topCenter,
+            child:
+                _expanded
+                    ? Padding(
+                      padding: const EdgeInsets.fromLTRB(0, 4, 0, 4),
+                      child: _buildFollowUpActions(
+                        context,
+                        primary: primary,
+                        ink: fxScreenInk(context),
+                        followUpDate: followUpDate,
+                        isSnoozed: isSnoozed,
+                        snoozedUntil: snoozedUntil,
+                        actions: actions,
+                        contactPrimaryOutlined: true,
+                      ),
+                    )
+                    : const SizedBox.shrink(),
+          ),
+        ],
       );
     }
 
-    return Container(
+    final caption =
+        followUpDate == null
+            ? 'Agendar próximo contato · sincronizado com a nuvem'
+            : 'Próximo contato: ${_formatDate(followUpDate)}';
+
+    return FxSettingsGroup(
       key: const ValueKey('aluno360_follow_up'),
-      decoration: Aluno360Layout.operacaoInsetSectionDecoration(
-        context,
-        primary: primary,
-        isDark: widget.isDark,
-      ),
-      padding: const EdgeInsets.all(Aluno360Layout.cardPadding),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Aluno360SectionHeader(
-            icon: Icons.event_available_rounded,
-            title: 'Follow-up do personal',
-            subtitle:
-                followUpDate == null
-                    ? 'Agendar próximo contato · sincronizado com a nuvem'
-                    : 'Próximo contato: ${_formatDate(followUpDate)}',
-            isDark: widget.isDark,
-          ),
-          const SizedBox(height: 6),
-          if (aluno.ultimoContatoDate != null) ...[
-            const SizedBox(height: 4),
-            Text(
-              'Último contato: ${_formatDate(aluno.ultimoContatoDate!)}',
-              style: Aluno360Layout.metaStyle(context),
+      header: 'Follow-up do personal',
+      caption: caption,
+      accent: primary,
+      children: [
+        if (aluno.ultimoContatoDate != null)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Último contato: ${_formatDate(aluno.ultimoContatoDate!)}',
+                style: Aluno360Layout.metaStyle(context),
+              ),
             ),
-          ],
-          if (isSnoozed) ...[
-            const SizedBox(height: 6),
-            Text(
-              'Adiado até ${_formatDate(snoozedUntil)} ${_formatTime(snoozedUntil)}',
-              style: Aluno360Layout.metaStyle(
-                context,
-              ).copyWith(color: EagleTokens.warn),
-            ),
-          ],
-          const SizedBox(height: 10),
-          _buildFollowUpActions(
-            context,
-            primary: primary,
-            ink: ink,
-            followUpDate: followUpDate,
-            isSnoozed: isSnoozed,
-            snoozedUntil: snoozedUntil,
-            actions: actions,
-            contactPrimaryOutlined: false,
           ),
-        ],
-      ),
+        if (isSnoozed)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Adiado até ${_formatDate(snoozedUntil)} ${_formatTime(snoozedUntil)}',
+                style: Aluno360Layout.metaStyle(
+                  context,
+                ).copyWith(color: EagleTokens.warn),
+              ),
+            ),
+          ),
+        _buildFollowUpActions(
+          context,
+          primary: primary,
+          ink: fxScreenInk(context),
+          followUpDate: followUpDate,
+          isSnoozed: isSnoozed,
+          snoozedUntil: snoozedUntil,
+          actions: actions,
+          contactPrimaryOutlined: false,
+        ),
+      ],
     );
   }
 

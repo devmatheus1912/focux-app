@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/design_tokens.dart';
-import '../../../core/theme/shell_chrome.dart';
-import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_settings_group.dart';
+import '../../../core/widgets/fx_settings_tile.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../constants/aluno_360_layout.dart';
 import '../../health/data/health_repository.dart';
 import '../../health/widgets/recovery_score_ring.dart';
@@ -31,136 +32,111 @@ class _Aluno360RecoveryInsightCardState
 
   @override
   Widget build(BuildContext context) {
-    final chrome = ShellChrome.forDark(widget.isDark);
+    final ink = fxScreenInk(context);
+    final mute = fxScreenMute(context);
+
     return widget.recoveryAsync.when(
       loading: () => const SizedBox.shrink(),
       error:
           (_, __) => Semantics(
             label: 'Wearable indisponível',
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-              decoration: chrome.panel(radius: TokensStrip.rCard),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.watch_off_outlined,
-                    color: EagleTokens.warn,
-                    size: 18,
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      'Wearable indisponível',
-                      style: Aluno360Layout.panelTitleStyle(
-                        context,
-                        chrome.mute,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+            child: FxSettingsGroup(
+              header: 'Wearable',
+              accent: widget.primary,
+              children: [
+                FxSettingsTile(
+                  icon: Icons.watch_off_outlined,
+                  accent: EagleTokens.warn,
+                  label: 'Wearable indisponível',
+                  subtitle: 'Não foi possível carregar os dados agora',
+                  value: '',
+                  showDivider: false,
+                  onTap: () => setState(() {}),
+                ),
+              ],
             ),
           ),
       data: (snapshot) {
         if (snapshot == null) {
           return Semantics(
-            button: true,
             label:
                 _expanded
                     ? 'Recolher wearable não conectado'
                     : 'Wearable não conectado — toque para expandir',
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: () => setState(() => _expanded = !_expanded),
-                borderRadius: BorderRadius.circular(TokensStrip.rCard),
-                child: Container(
-                  constraints: const BoxConstraints(minHeight: 52),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 14,
-                  ),
-                  decoration: chrome.panel(radius: TokensStrip.rCard),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.watch_outlined,
-                        color: widget.primary.withValues(alpha: 0.75),
-                        size: 18,
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          _expanded
-                              ? 'Aluno ainda não conectou Apple Health ou Google Fit. Peça para conectar no app se fizer sentido.'
-                              : 'Wearable · não conectado',
-                          style: Aluno360Layout.captionStyle(
-                            context,
-                          ).copyWith(color: chrome.mute, height: 1.35),
-                        ),
-                      ),
-                      Icon(
-                        _expanded
-                            ? Icons.expand_less_rounded
-                            : Icons.expand_more_rounded,
-                        color: chrome.mute,
-                        size: 20,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          );
-        }
-        return Semantics(
-          label: 'Prontidão wearable ${snapshot.recoveryLabel}',
-          child: Container(
-            padding: const EdgeInsets.all(TokensStrip.s4),
-            decoration: chrome.panel(
-              radius: TokensStrip.rCard,
+            child: FxSettingsGroup(
+              header: 'Wearable',
               accent: widget.primary,
-            ),
-            child: Row(
               children: [
-                RecoveryScoreRing(
-                  score: snapshot.recoveryScore,
-                  color: widget.primary,
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Prontidão wearable',
-                        style: Aluno360Layout.captionStyle(context).copyWith(
-                          color: chrome.mute,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(height: 3),
-                      Text(
-                        snapshot.recoveryLabel,
-                        style: Aluno360Layout.sectionTitleStyle(
-                          context,
-                          chrome.ink,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        snapshot.recoveryHint,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: Aluno360Layout.captionStyle(
-                          context,
-                        ).copyWith(color: chrome.mute, height: 1.3),
-                      ),
-                    ],
-                  ),
+                FxSettingsTile(
+                  icon: Icons.watch_outlined,
+                  label: 'Não conectado',
+                  subtitle:
+                      _expanded
+                          ? 'Peça para conectar Apple Health ou Google Fit no app do aluno, se fizer sentido.'
+                          : 'Apple Health ou Google Fit ainda não vinculados',
+                  value: '',
+                  picker: true,
+                  showDivider: false,
+                  onTap: () => setState(() => _expanded = !_expanded),
                 ),
               ],
             ),
+          );
+        }
+
+        return Semantics(
+          label: 'Prontidão wearable ${snapshot.recoveryLabel}',
+          child: FxSettingsGroup(
+            header: 'Wearable',
+            caption: snapshot.recoveryHint,
+            accent: widget.primary,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    ExcludeSemantics(
+                      child: RecoveryScoreRing(
+                        score: snapshot.recoveryScore,
+                        color: widget.primary,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Prontidão wearable',
+                            style: Aluno360Layout.metaStyle(
+                              context,
+                            ).copyWith(color: ink),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            snapshot.recoveryLabel,
+                            style: Aluno360Layout.sectionTitleStyle(
+                              context,
+                              ink,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            snapshot.recoveryHint,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: Aluno360Layout.captionStyle(
+                              context,
+                            ).copyWith(color: mute, height: 1.3),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         );
       },

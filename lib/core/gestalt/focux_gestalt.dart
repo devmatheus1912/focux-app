@@ -21,13 +21,13 @@ abstract final class FocuxGestalt {
     'lib/core/theme/focux_hub_typography.dart',
     'lib/core/widgets/fx_shell_scaffold.dart',
     'lib/core/widgets/fx_horizontal_scroll_peek.dart',
-    'lib/features/alunos/widgets/aluno360_section_header.dart',
+    'lib/core/widgets/fx_settings_group.dart',
     'lib/features/dashboard/utils/dashboard_screen_helpers.dart',
   ];
 
   static const List<String> hubGestaltPatterns = [
-    'Aluno360SectionHeader',
-    'aluno360_section_header',
+    'FxSettingsGroup',
+    'fx_settings_group',
     'dashboardSectionKickerStyle',
     'FxSettingsGroup',
     'FxHorizontalScrollPeek',

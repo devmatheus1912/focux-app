@@ -6,8 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/brand/focux_microcopy.dart';
-import '../../../core/widgets/fx_help.dart';
-import '../../../core/theme/design_tokens.dart';
+import '../../../core/widgets/fx_settings_group.dart';
 import '../constants/aluno_360_layout.dart';
 import '../data/aluno_repository.dart';
 import '../providers/aluno_detail_providers.dart';
@@ -21,7 +20,6 @@ import '../widgets/aluno360_copilot_prescription.dart';
 import '../widgets/aluno360_copilot_support.dart';
 import 'aluno360_help_sheets.dart';
 import 'aluno360_operacao_focus_toggle.dart';
-import 'aluno360_section_header.dart';
 import '../widgets/aluno_outreach_message_sheet.dart';
 
 class Aluno360CopilotCard extends ConsumerWidget {
@@ -163,92 +161,80 @@ class Aluno360CopilotCard extends ConsumerWidget {
       fallback: fallback,
     );
     final showPrepareInPrescription = operacao.showPrepareMessage;
-    final cardPadding = hasOpenTask ? 10.0 : 14.0;
     final wearableRelevant =
         effectiveProxima?.wearableRelevant ??
         bundle?.hasWearableHistory ??
         alunoTemHistoricoWearable(bundle?.recoverySnapshot);
     final compactSubtitle = MediaQuery.sizeOf(context).width < 400;
+    final subtitle = copilotCardSubtitle(
+      forceIa: forceIa,
+      iaAsync: iaAsync,
+      resumoLoading: resumoAsync.isLoading && !resumoAsync.hasValue,
+      compact: compactSubtitle,
+      iaRefreshing: iaRefreshing,
+      bundleLoading: bundleLoading,
+      bundleRefreshing: bundleRefreshing,
+    );
+    final showContactBadge = shouldShowCopilotContactBadge(
+      contactPriority: operacao.contactPriority,
+      sticky: stickyAction,
+    );
+    final caption =
+        showContactBadge ? '$subtitle · Contato prioritário' : subtitle;
 
     return Semantics(
       container: true,
       label: 'Prioridade do dia, copiloto operacional',
-      child: Container(
-        padding: EdgeInsets.all(cardPadding),
-        decoration: Aluno360Layout.operacaoInsetSectionDecoration(
-          context,
-          primary: primary,
-          isDark: isDark,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Aluno360SectionHeader(
-                    icon: Icons.hub_outlined,
-                    title: copilotCardTitle(
-                      contactPriority: operacao.contactPriority,
+      child: FxSettingsGroup(
+        header: copilotCardTitle(contactPriority: operacao.contactPriority),
+        caption: caption,
+        helpTooltip: 'Ajuda sobre prioridade do dia',
+        onHelpTap: () => showAluno360CopilotHelpSheet(context),
+        accent: primary,
+        children: [
+          if (showFocusToggle)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 4),
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Aluno360OperacaoFocusModeToggle(
+                      alunoId: alunoId,
+                      primary: primary,
+                      iconOnly: true,
                     ),
-                    subtitle: copilotCardSubtitle(
-                      forceIa: forceIa,
-                      iaAsync: iaAsync,
-                      resumoLoading:
-                          resumoAsync.isLoading && !resumoAsync.hasValue,
-                      compact: compactSubtitle,
-                      iaRefreshing: iaRefreshing,
-                      bundleLoading: bundleLoading,
-                      bundleRefreshing: bundleRefreshing,
+                    Aluno360CopilotIaRefreshButton(
+                      alunoId: aluno.id,
+                      primary: primary,
                     ),
-                    subtitleTrailing:
-                        shouldShowCopilotContactBadge(
-                              contactPriority: operacao.contactPriority,
-                              sticky: stickyAction,
-                            )
-                            ? Aluno360ContactPriorityBadge(primary: primary)
-                            : null,
-                    isDark: isDark,
-                  ),
-                ),
-                FittedBox(
-                  fit: BoxFit.scaleDown,
-                  alignment: Alignment.topRight,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (showFocusToggle)
-                        Aluno360OperacaoFocusModeToggle(
-                          alunoId: alunoId,
-                          primary: primary,
-                          iconOnly: true,
-                        ),
-                      FxHelpIconButton(
-                        tooltip: 'Ajuda sobre prioridade do dia',
-                        onTap: () => showAluno360CopilotHelpSheet(context),
-                        size: 28,
-                      ),
-                      Aluno360CopilotIaRefreshButton(
-                        alunoId: aluno.id,
-                        primary: primary,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            if (iaLoading) ...[
-              const SizedBox(height: 8),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(999),
-                child: LinearProgressIndicator(
-                  minHeight: iaRefreshing ? 4 : 3,
-                  backgroundColor: primary.withValues(alpha: 0.12),
-                  color: primary,
+                  ],
                 ),
               ),
-            ],
+            )
+          else
+            Padding(
+              padding: const EdgeInsets.only(bottom: 4),
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: Aluno360CopilotIaRefreshButton(
+                  alunoId: aluno.id,
+                  primary: primary,
+                ),
+              ),
+            ),
+          if (iaLoading) ...[
+            ClipRRect(
+              borderRadius: BorderRadius.circular(999),
+              child: LinearProgressIndicator(
+                minHeight: iaRefreshing ? 4 : 3,
+                backgroundColor: primary.withValues(alpha: 0.12),
+                color: primary,
+              ),
+            ),
+            const SizedBox(height: 8),
+          ],
             if (!hasOpenTask && !focusMode && !operacao.contactPriority) ...[
               const SizedBox(height: 10),
               Aluno360CopilotSignalsGrid(signals: signals),
@@ -354,36 +340,7 @@ class Aluno360CopilotCard extends ConsumerWidget {
                     ),
                 onPrepareMessage: (acao) => _prepararMensagem(context, acao),
               ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class Aluno360ContactPriorityBadge extends StatelessWidget {
-  const Aluno360ContactPriorityBadge({super.key, required this.primary});
-
-  final Color primary;
-
-  @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      label: 'Prioridade de contato',
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        decoration: BoxDecoration(
-          color: EagleTokens.bad.withValues(alpha: 0.10),
-          borderRadius: BorderRadius.circular(999),
-          border: Border.all(color: EagleTokens.bad.withValues(alpha: 0.22)),
-        ),
-        child: Text(
-          'Contato',
-          style: Aluno360Layout.chipLabelStyle(
-            context,
-            color: EagleTokens.bad,
-          ).copyWith(letterSpacing: 0.2),
-        ),
+        ],
       ),
     );
   }

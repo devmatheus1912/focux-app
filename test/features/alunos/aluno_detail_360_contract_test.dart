@@ -272,7 +272,7 @@ void main() {
       expect(screen, isNot(contains('Score API')));
       expect(screen, contains('confirmarExclusaoAlunoDetail'));
       expect(screen, contains('riscoMetricIcon'));
-      expect(screen, contains('OperationalMetricTile'));
+      expect(screen, contains('FxSettingsTile'));
       expect(screen, contains('copySensitiveToClipboard'));
       expect(screen, isNot(contains('Erro: \$e')));
       expect(screen, isNot(contains('operational_metrics.part.dart')));
@@ -354,15 +354,12 @@ void main() {
     expect(layoutSource, contains('insetCardRadius'));
     expect(
       File(
-        'lib/features/alunos/widgets/aluno360_section_header.dart',
-      ).readAsStringSync(),
-      contains('aluno360SectionHeaderSemantics'),
-    );
-    expect(
-      File(
         'lib/features/alunos/widgets/aluno360_follow_up_card.dart',
       ).readAsStringSync(),
-      contains('aluno360FollowUpSemantics'),
+      allOf(
+        contains('aluno360FollowUpSemantics'),
+        contains('FxSettingsGroup'),
+      ),
     );
     expect(
       File(
@@ -424,6 +421,24 @@ void main() {
         'lib/features/alunos/widgets/aluno360_help_sheets.dart',
       ).readAsStringSync(),
       contains('showAluno360EvolucaoHelpSheet'),
+    );
+    expect(
+      File(
+        'lib/features/alunos/widgets/aluno360_recovery_insight_card.dart',
+      ).readAsStringSync(),
+      contains('FxSettingsGroup'),
+    );
+    expect(
+      File(
+        'lib/features/alunos/widgets/aluno360_copilot_card.dart',
+      ).readAsStringSync(),
+      contains('FxSettingsGroup'),
+    );
+    expect(
+      File(
+        'lib/features/alunos/widgets/aluno360_student_quick_actions.dart',
+      ).readAsStringSync(),
+      contains('FxSettingsGroup'),
     );
     expect(
       File(

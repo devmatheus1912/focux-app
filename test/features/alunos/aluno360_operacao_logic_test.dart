@@ -1089,6 +1089,16 @@ void main() {
     });
   });
 
+  group('shouldShowOperacaoAdherenceLegend', () {
+    test('shows legend only when week has check-ins', () {
+      expect(shouldShowOperacaoAdherenceLegend(weekHasAnyCheckin: true), isTrue);
+      expect(
+        shouldShowOperacaoAdherenceLegend(weekHasAnyCheckin: false),
+        isFalse,
+      );
+    });
+  });
+
   group('isIsoDateToday', () {
     test('returns true for today ISO date', () {
       final now = DateTime.now();

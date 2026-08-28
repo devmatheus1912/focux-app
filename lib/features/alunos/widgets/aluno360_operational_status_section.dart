@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/widgets/fx_settings_group.dart';
-import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/operational_metric_tile.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../constants/aluno_360_layout.dart';
 import '../data/aluno_repository.dart';
 import '../data/aluno_contact_utils.dart';
@@ -33,70 +35,12 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
   final Color primary;
   final List<Map<String, dynamic>>? aderenciaSemanal;
 
-  Color _dominantColor(
-    OperacaoDominantMetric metric,
-    Color aderenciaColor,
-    Color riscoColor,
-  ) {
-    return switch (metric.kind) {
-      OperacaoDominantMetricKind.risco => riscoColor,
-      OperacaoDominantMetricKind.aderencia => aderenciaColor,
-      OperacaoDominantMetricKind.prontidao => primary,
-    };
-  }
-
-  Widget _semTreinoTile({
-    required Color mute,
-    required int diasLimite,
-    required bool heroShowsRisco,
-  }) {
-    final dias = aluno.diasSemTreino;
-    final display = formatDiasSemTreinoDisplay(dias);
-    final emphasis = switch (dias) {
-      null =>
-        heroShowsRisco
-            ? OperationalMetricEmphasis.alert
-            : OperationalMetricEmphasis.muted,
-      final d when d >= diasLimite => OperationalMetricEmphasis.alert,
-      _ => OperationalMetricEmphasis.normal,
-    };
-    return OperationalMetricTile(
-      label: 'Sem treino',
-      value: display,
-      hint: dias == null ? 'Sem histórico recente' : 'Dias parados',
-      color: (dias ?? 0) >= diasLimite ? EagleTokens.warn : mute,
-      isDark: isDark,
-      emphasis: emphasis,
-      semanticsLabel:
-          dias == null ? 'Sem treino, sem registro' : 'Sem treino $dias dias',
-    );
-  }
-
-  Widget _aderenciaTile({required Color aderenciaColor}) {
-    final pct = aluno.aderenciaPercent;
-    final emphasis =
-        pct == null
-            ? OperationalMetricEmphasis.muted
-            : pct <= 0
-            ? OperationalMetricEmphasis.alert
-            : OperationalMetricEmphasis.normal;
-    return OperationalMetricTile(
-      label: 'Aderência',
-      value: pct == null ? '—' : '$pct%',
-      hint: 'Semana atual',
-      color: aderenciaColor,
-      isDark: isDark,
-      emphasis: emphasis,
-      semanticsLabel:
-          aluno.aderenciaPercent == null
-              ? 'Aderência indisponível'
-              : 'Aderência ${aluno.aderenciaPercent} por cento',
-    );
+  void _openTreinos(BuildContext context) {
+    context.push('/alunos/$alunoId/treinos-list', extra: aluno.nome);
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final ink = fxScreenInk(context);
     final homeInitialized = ref.exists(alunosHomeProvider);
     final cachedDias =
         homeInitialized
@@ -144,6 +88,120 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
       heroShowsRisco: heroShowsRisco,
       compactFollowUpVisible: compactFollowUpVisible,
     );
+    final dias = aluno.diasSemTreino;
+    final semTreinoDisplay = formatDiasSemTreinoDisplay(dias);
+    final semTreinoAccent =
+        (dias ?? 0) >= diasLimite ? EagleTokens.warn : fxScreenMute(context);
+    final showLegend = shouldShowOperacaoAdherenceLegend(
+      weekHasAnyCheckin: week.hasAnyCheckin,
+    );
+    final weekPoints =
+        week.points.isNotEmpty
+            ? week.points
+            : summarizeAderenciaWeek(
+              padAderenciaWeekToSevenDays(const []),
+            ).points;
+    final daysWithCheckin = week.points.where((p) => p.checkins > 0).length;
+    final weekValue =
+        week.points.isEmpty
+            ? '—'
+            : '$daysWithCheckin/${week.points.length}';
+
+    final tiles = <Widget>[];
+
+    if (!heroShowsRisco) {
+      tiles.add(
+        FxSettingsTile(
+          icon: riscoMetricIcon(dominant.riscoNivel ?? aluno.riscoNivel),
+          accent: _dominantAccent(dominant, aderenciaColor, riscoColor, primary),
+          label: dominant.label,
+          subtitle: dominant.hint,
+          value: dominant.value,
+          highlight: dominant.kind == OperacaoDominantMetricKind.risco,
+          onTap: () => _openTreinos(context),
+        ),
+      );
+    }
+
+    if (heroShowsRisco) {
+      tiles.add(
+        FxSettingsTile(
+          icon: Icons.percent_rounded,
+          accent: aderenciaColor,
+          label: 'Aderência',
+          subtitle: 'Semana atual',
+          value: aluno.aderenciaPercent == null ? '—' : '${aluno.aderenciaPercent}%',
+          numeric: aluno.aderenciaPercent != null,
+          highlight: (aluno.aderenciaPercent ?? 0) <= 0,
+          onTap: () => _openTreinos(context),
+        ),
+      );
+      tiles.add(
+        FxSettingsTile(
+          icon: Icons.pause_circle_outline_rounded,
+          accent: semTreinoAccent,
+          label: 'Sem treino',
+          subtitle: dias == null ? 'Sem histórico recente' : 'Dias parados',
+          value: semTreinoDisplay,
+          highlight: (dias ?? 0) >= diasLimite,
+          onTap: () => _openTreinos(context),
+        ),
+      );
+    } else {
+      tiles.addAll([
+        FxSettingsTile(
+          icon: Icons.speed_rounded,
+          accent: primary,
+          label: 'Prontidão',
+          subtitle: 'Índice operacional',
+          value: aluno.scoreProntidao == null ? '—' : '${aluno.scoreProntidao}',
+          numeric: aluno.scoreProntidao != null,
+          onTap: () => _openTreinos(context),
+        ),
+        FxSettingsTile(
+          icon: Icons.percent_rounded,
+          accent: aderenciaColor,
+          label: 'Aderência',
+          subtitle: 'Semana atual',
+          value: aluno.aderenciaPercent == null ? '—' : '${aluno.aderenciaPercent}%',
+          numeric: aluno.aderenciaPercent != null,
+          highlight: (aluno.aderenciaPercent ?? 0) <= 0,
+          onTap: () => _openTreinos(context),
+        ),
+        FxSettingsTile(
+          icon: Icons.pause_circle_outline_rounded,
+          accent: semTreinoAccent,
+          label: 'Sem treino',
+          subtitle: dias == null ? 'Sem histórico recente' : 'Dias parados',
+          value: semTreinoDisplay,
+          highlight: (dias ?? 0) >= diasLimite,
+          onTap: () => _openTreinos(context),
+        ),
+        FxSettingsTile(
+          icon: riscoMetricIcon(aluno.riscoNivel),
+          accent: riscoColor,
+          label: 'Risco',
+          subtitle: aluno.emRisco ? 'Em risco' : 'Estável',
+          value: formatRiscoNivel(aluno.riscoNivel),
+          highlight: aluno.emRisco,
+          onTap: () => _openTreinos(context),
+        ),
+      ]);
+    }
+
+    tiles.add(
+      FxSettingsTile(
+        icon: Icons.calendar_view_week_rounded,
+        accent: week.hasAnyCheckin ? aderenciaColor : EagleTokens.warn,
+        label: 'Check-ins · 7 dias',
+        subtitle: adherenceEmpty?.compactLine ?? week.caption,
+        value: weekValue,
+        numeric: week.points.isNotEmpty,
+        highlight: !week.hasAnyCheckin && week.points.isNotEmpty,
+        showDivider: false,
+        onTap: () => _openTreinos(context),
+      ),
+    );
 
     return FxSettingsGroup(
       key: const ValueKey('aluno360_operacao_status'),
@@ -153,311 +211,68 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
       onHelpTap: () => showAluno360StatusOperacionalHelpSheet(context),
       accent: primary,
       children: [
+        ...tiles,
         Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (!heroShowsRisco) ...[
-            OperationalMetricTile(
-              label: dominant.label,
-              value: dominant.value,
-              hint: dominant.hint,
-              color: _dominantColor(dominant, aderenciaColor, riscoColor),
-              isDark: isDark,
-              leadingIcon:
-                  dominant.kind == OperacaoDominantMetricKind.risco
-                      ? riscoMetricIcon(dominant.riscoNivel)
-                      : null,
-              semanticsLabel: dominant.semanticsLabel,
+          padding: const EdgeInsets.fromLTRB(0, 4, 0, 4),
+          child: Semantics(
+            label: 'Check-ins dos últimos 7 dias',
+            child: AlunoOperacaoAdherenceBars(
+              points: weekPoints,
+              activeColor: EagleTokens.good,
+              idleColor: neutralIdle,
+              missColor: isDark ? EagleTokens.warn : EagleTokens.riskCoral,
+              todayRingColor: primary,
+              emptyWeek: !week.hasAnyCheckin,
             ),
-            const SizedBox(height: 8),
-          ],
-          if (heroShowsRisco)
-            Row(
-              children: [
-                Expanded(child: _aderenciaTile(aderenciaColor: aderenciaColor)),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: _semTreinoTile(
-                    mute: fxScreenMute(context),
-                    diasLimite: diasLimite,
-                    heroShowsRisco: heroShowsRisco,
-                  ),
-                ),
-              ],
-            )
-          else ...[
-            Row(
-              children: [
-                Expanded(
-                  child: OperationalMetricTile(
-                    label: 'Prontidão',
-                    value:
-                        aluno.scoreProntidao == null
-                            ? '—'
-                            : '${aluno.scoreProntidao}',
-                    hint: 'Índice operacional',
-                    color: primary,
-                    isDark: isDark,
-                    semanticsLabel:
-                        'Prontidão ${aluno.scoreProntidao ?? 'indisponível'}',
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(child: _aderenciaTile(aderenciaColor: aderenciaColor)),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Expanded(
-                  child: _semTreinoTile(
-                    mute: fxScreenMute(context),
-                    diasLimite: diasLimite,
-                    heroShowsRisco: heroShowsRisco,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: OperationalMetricTile(
-                    label: 'Risco',
-                    value: formatRiscoNivel(aluno.riscoNivel),
-                    hint: aluno.emRisco ? 'Em risco' : 'Estável',
-                    color: riscoColor,
-                    isDark: isDark,
-                    leadingIcon: riscoMetricIcon(aluno.riscoNivel),
-                    semanticsLabel:
-                        'Risco ${formatRiscoNivel(aluno.riscoNivel)}',
-                  ),
-                ),
-              ],
-            ),
-          ],
-          if (week.points.isNotEmpty) ...[
-            const SizedBox(height: 14),
-            Builder(
-              builder: (context) {
-                final sparkMute = fxScreenMute(context);
-                final sparkAccent =
-                    week.hasAnyCheckin ? aderenciaColor : sparkMute;
-                return Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
-                  decoration: BoxDecoration(
-                    color: sparkAccent.withValues(alpha: isDark ? 0.1 : 0.06),
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(
-                      color: sparkAccent.withValues(
-                        alpha: isDark ? 0.22 : 0.14,
-                      ),
-                    ),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Aderência · últimos 7 dias',
-                                  style: Aluno360Layout.metaStyle(
-                                    context,
-                                  ).copyWith(color: ink),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  week.caption,
-                                  style: Aluno360Layout.captionStyle(context),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                      if (adherenceEmpty != null) ...[
-                        const SizedBox(height: 8),
-                        Semantics(
-                          label: adherenceEmpty.compactLine,
-                          child: Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 6,
-                            ),
-                            decoration: BoxDecoration(
-                              color: EagleTokens.warn.withValues(
-                                alpha: isDark ? 0.12 : 0.08,
-                              ),
-                              borderRadius: BorderRadius.circular(10),
-                              border: Border.all(
-                                color: EagleTokens.warn.withValues(
-                                  alpha: isDark ? 0.28 : 0.2,
-                                ),
-                              ),
-                            ),
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.event_busy_rounded,
-                                  size: 14,
-                                  color:
-                                      isDark
-                                          ? EagleTokens.warnAccent
-                                          : EagleTokens.warn,
-                                ),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Text(
-                                    adherenceEmpty.compactLine,
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: Aluno360Layout.captionStyle(
-                                      context,
-                                    ).copyWith(
-                                      fontWeight: FontWeight.w600,
-                                      color:
-                                          isDark
-                                              ? EagleTokens.warnAccent
-                                              : EagleTokens.warnDeep,
-                                      height: 1.3,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                      const SizedBox(height: 12),
-                      Semantics(
-                        label: 'Check-ins dos últimos 7 dias',
-                        child: AlunoOperacaoAdherenceBars(
-                          points: week.points,
-                          activeColor: EagleTokens.good,
-                          idleColor: neutralIdle,
-                          missColor:
-                              isDark
-                                  ? EagleTokens.warn
-                                  : EagleTokens.riskCoral,
-                          todayRingColor: primary,
-                          emptyWeek: !week.hasAnyCheckin,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      AlunoOperacaoAdherenceLegend(
-                        activeColor: EagleTokens.good,
-                        missColor:
-                            isDark ? EagleTokens.warn : EagleTokens.riskCoral,
-                        todayRingColor: primary,
-                      ),
-                      if (showCheckinCta &&
-                          (adherenceEmpty?.showCheckinCta ?? true)) ...[
-                        const SizedBox(height: 10),
-                        SizedBox(
-                          width: double.infinity,
-                          child: OutlinedButton.icon(
-                            onPressed:
-                                () => showAlunoCheckinMessageSheet(
-                                  context,
-                                  alunoId: alunoId,
-                                  alunoNome: aluno.nome,
-                                ),
-                            icon: Icon(
-                              Icons.message_outlined,
-                              size: 16,
-                              color: primary,
-                            ),
-                            label: Text(
-                              'Pedir check-in',
-                              style: Aluno360Layout.chipLabelStyle(
-                                context,
-                                color: primary,
-                              ),
-                            ),
-                            style: Aluno360Layout.operacaoOutlinedButtonStyle(
-                              context,
-                              primary,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                );
-              },
-            ),
-          ] else ...[
-            const SizedBox(height: 14),
-            Builder(
-              builder: (context) {
-                final emptyWeek = summarizeAderenciaWeek(
-                  padAderenciaWeekToSevenDays(const []),
-                );
-                final sparkMute = fxScreenMute(context);
-                final sparkAccent = sparkMute;
-                return Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
-                  decoration: BoxDecoration(
-                    color: sparkAccent.withValues(alpha: isDark ? 0.1 : 0.06),
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(
-                      color: sparkAccent.withValues(
-                        alpha: isDark ? 0.22 : 0.14,
-                      ),
-                    ),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Aderência · últimos 7 dias',
-                        style: Aluno360Layout.metaStyle(
-                          context,
-                        ).copyWith(color: ink),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        emptyWeek.caption,
-                        style: Aluno360Layout.captionStyle(context),
-                      ),
-                      const SizedBox(height: 12),
-                      Semantics(
-                        label: 'Check-ins dos últimos 7 dias',
-                        child: AlunoOperacaoAdherenceBars(
-                          points: emptyWeek.points,
-                          activeColor: EagleTokens.good,
-                          idleColor: neutralIdle,
-                          missColor:
-                              isDark
-                                  ? EagleTokens.warn
-                                  : EagleTokens.riskCoral,
-                          todayRingColor: primary,
-                          emptyWeek: true,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      AlunoOperacaoAdherenceLegend(
-                        activeColor: EagleTokens.good,
-                        missColor:
-                            isDark ? EagleTokens.warn : EagleTokens.riskCoral,
-                        todayRingColor: primary,
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
-          ],
-            ],
           ),
         ),
+        if (showLegend)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 4),
+            child: AlunoOperacaoAdherenceLegend(
+              activeColor: EagleTokens.good,
+              missColor: isDark ? EagleTokens.warn : EagleTokens.riskCoral,
+              todayRingColor: primary,
+            ),
+          ),
+        if (showCheckinCta && (adherenceEmpty?.showCheckinCta ?? true))
+          Padding(
+            padding: const EdgeInsets.only(top: 4, bottom: 4),
+            child: SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed:
+                    () => showAlunoCheckinMessageSheet(
+                      context,
+                      alunoId: alunoId,
+                      alunoNome: aluno.nome,
+                    ),
+                icon: Icon(Icons.message_outlined, size: 16, color: primary),
+                label: Text(
+                  'Pedir check-in',
+                  style: Aluno360Layout.chipLabelStyle(context, color: primary),
+                ),
+                style: Aluno360Layout.operacaoOutlinedButtonStyle(
+                  context,
+                  primary,
+                ),
+              ),
+            ),
+          ),
       ],
     );
+  }
+
+  Color _dominantAccent(
+    OperacaoDominantMetric metric,
+    Color aderenciaColor,
+    Color riscoColor,
+    Color primary,
+  ) {
+    return switch (metric.kind) {
+      OperacaoDominantMetricKind.risco => riscoColor,
+      OperacaoDominantMetricKind.aderencia => aderenciaColor,
+      OperacaoDominantMetricKind.prontidao => primary,
+    };
   }
 }
