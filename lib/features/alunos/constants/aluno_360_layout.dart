@@ -17,10 +17,6 @@ abstract final class Aluno360Layout {
   static const double insetCardRadius = TokensStrip.rCard;
   static const double tabBarHeight = 44;
   static const double tabContentGap = TokensStrip.s4;
-  static const EdgeInsets emptyMiniStatePadding = EdgeInsets.symmetric(
-    horizontal: 14,
-    vertical: 12,
-  );
   static const EdgeInsets moduleTilePadding = EdgeInsets.symmetric(
     horizontal: 12,
     vertical: 10,
@@ -249,16 +245,6 @@ abstract final class Aluno360Layout {
       fontWeight: FontWeight.w600,
       height: 1.2,
     );
-  }
-
-  /// Tab section eyebrows — mesmo token do Perfil inset.
-  static TextStyle tabSectionTitleStyle(
-    BuildContext context, {
-    required Color primary,
-    required bool isDark,
-  }) {
-    final mute = fxScreenMute(context);
-    return FxSettingsLayout.sectionHeader(color: mute);
   }
 
   /// Card section titles — same weight as Alunos list card names.

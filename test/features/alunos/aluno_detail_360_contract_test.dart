@@ -73,8 +73,6 @@ String _alunoDetailLibrarySource() {
       'lib/features/alunos/widgets/aluno360_recovery_insight_card.dart';
   const weightActivityFile =
       'lib/features/alunos/widgets/aluno360_weight_activity_card.dart';
-  const emptyMiniStateFile =
-      'lib/features/alunos/widgets/aluno360_empty_mini_state.dart';
   const detailLoadingSkeletonFile =
       'lib/features/alunos/widgets/aluno_detail_loading_skeleton.dart';
   const alunoRepositoryFile = 'lib/features/alunos/data/aluno_repository.dart';
@@ -117,11 +115,10 @@ String _alunoDetailLibrarySource() {
       File(detailFerramentasTabFile).readAsStringSync();
   final recoveryInsight = File(recoveryInsightFile).readAsStringSync();
   final weightActivity = File(weightActivityFile).readAsStringSync();
-  final emptyMiniState = File(emptyMiniStateFile).readAsStringSync();
   final detailLoadingSkeleton =
       File(detailLoadingSkeletonFile).readAsStringSync();
   final alunoRepository = File(alunoRepositoryFile).readAsStringSync();
-  return '$main\n$statePart\n$providers\n$heroWidget\n$headerWidget\n$operacaoTab\n$operacaoLogic\n$copilotLogic\n$copilotExecutarLogic\n$copilotOutreachLogic\n$copilotTextLogic\n$outreachSheet\n$copilotCard\n$operationalSection\n$focusToggle\n$copilotSupport\n$stickyCta\n$followUp\n$copilotTaskActions\n$executarButton\n$financeBanner\n$ferramentasModules\n$timelineCard\n$actionEmptyPanel\n$alunoActions\n$deleteConfirmSheet\n$quickActions\n$evolucaoCard\n$adherenceLegend\n$profileGapsSheet\n$iaRepository\n$detailOperacaoTab\n$detailEvolucaoTab\n$detailFerramentasTab\n$recoveryInsight\n$weightActivity\n$emptyMiniState\n$detailLoadingSkeleton\n$alunoRepository';
+  return '$main\n$statePart\n$providers\n$heroWidget\n$headerWidget\n$operacaoTab\n$operacaoLogic\n$copilotLogic\n$copilotExecutarLogic\n$copilotOutreachLogic\n$copilotTextLogic\n$outreachSheet\n$copilotCard\n$operationalSection\n$focusToggle\n$copilotSupport\n$stickyCta\n$followUp\n$copilotTaskActions\n$executarButton\n$financeBanner\n$ferramentasModules\n$timelineCard\n$actionEmptyPanel\n$alunoActions\n$deleteConfirmSheet\n$quickActions\n$evolucaoCard\n$adherenceLegend\n$profileGapsSheet\n$iaRepository\n$detailOperacaoTab\n$detailEvolucaoTab\n$detailFerramentasTab\n$recoveryInsight\n$weightActivity\n$detailLoadingSkeleton\n$alunoRepository';
 }
 
 void main() {
@@ -330,7 +327,6 @@ void main() {
         File(
           'lib/features/alunos/constants/aluno_360_layout.dart',
         ).readAsStringSync();
-    expect(layoutSource, contains('tabSectionTitleStyle'));
     expect(layoutSource, contains('compactSectionTitleStyle'));
     expect(layoutSource, contains('panelTitleStyle'));
     expect(layoutSource, contains('moduleTileTitleStyle'));
@@ -351,7 +347,7 @@ void main() {
     );
     expect(layoutSource, contains('tabSelectedLabelStyle'));
     expect(layoutSource, contains('secondaryActionLabelStyle'));
-    expect(layoutSource, contains('FxSettingsLayout.sectionHeader'));
+    expect(layoutSource, contains('FxSettingsLayout.groupRadius'));
     expect(screen, contains('syncFromAluno'));
     expect(screen, contains('operacaoFocusMode'));
     expect(screen, contains('atualizarOperacaoFocus'));
@@ -394,9 +390,12 @@ void main() {
     );
     expect(
       File(
-        'lib/features/alunos/widgets/aluno360_ferramentas_measurements_row.dart',
+        'lib/features/alunos/widgets/aluno360_ferramentas_tab.dart',
       ).readAsStringSync(),
-      contains('class Aluno360FerramentasMeasurementsRow'),
+      allOf(
+        contains("'Resumo corporal'"),
+        contains('FxSettingsGroup'),
+      ),
     );
     expect(
       File(
@@ -416,9 +415,15 @@ void main() {
     );
     expect(
       File(
+        'lib/features/alunos/widgets/aluno360_composite_header.dart',
+      ).readAsStringSync(),
+      contains('FxHelpIconButton'),
+    );
+    expect(
+      File(
         'lib/features/alunos/widgets/aluno360_help_sheets.dart',
       ).readAsStringSync(),
-      contains('showAluno360CopilotHelpSheet'),
+      contains('showAluno360EvolucaoHelpSheet'),
     );
     expect(
       File(

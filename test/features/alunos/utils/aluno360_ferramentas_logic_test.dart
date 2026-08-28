@@ -11,11 +11,6 @@ String _isoDay(DateTime day) {
 
 void main() {
   group('Aluno360FerramentasLogic', () {
-    test('measurementCrossAxisCount switches at 360px', () {
-      expect(Aluno360FerramentasLogic.measurementCrossAxisCount(359), 2);
-      expect(Aluno360FerramentasLogic.measurementCrossAxisCount(360), 4);
-    });
-
     test('spacing tokens keep sections visually grouped', () {
       expect(Aluno360FerramentasLogic.sectionHeaderGap, lessThan(12));
       expect(Aluno360FerramentasLogic.sectionDividerGap, lessThan(16));

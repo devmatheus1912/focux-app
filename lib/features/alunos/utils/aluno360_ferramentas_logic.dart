@@ -6,13 +6,8 @@ import 'aluno360_operacao_logic.dart';
 abstract final class Aluno360FerramentasLogic {
   Aluno360FerramentasLogic._();
 
-  static const double narrowBreakpoint = 360;
   static const double sectionHeaderGap = TokensStrip.s2;
   static const double sectionDividerGap = TokensStrip.s3;
-  static const double measurementRowGap = 10;
-
-  static int measurementCrossAxisCount(double maxWidth) =>
-      maxWidth < narrowBreakpoint ? 2 : 4;
 
   static List<double> aderenciaSparklineValues(
     List<Map<String, dynamic>>? raw,
