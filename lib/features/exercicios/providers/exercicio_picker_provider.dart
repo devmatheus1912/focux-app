@@ -145,7 +145,12 @@ final exercicioListPageProvider =
         equipamento: query.equipamento?.name,
         dificuldade: query.dificuldade?.name,
         favoritos: query.favoritos ? true : null,
-        hasVideo: query.comVideo ? true : null,
+        hasVideo:
+            query.comVideo
+                ? true
+                : query.semVideo
+                ? false
+                : null,
         page: query.page,
       );
     });

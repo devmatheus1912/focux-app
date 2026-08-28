@@ -49,9 +49,12 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
   int _totalElements = 0;
   String? _error;
 
-  List<Exercicio> get _visibleItems {
-    if (!_filter.semVideo || _filter.comVideo) return _items;
-    return _items.where((exercicio) => !exercicio.hasPlayableMedia).toList();
+  List<Exercicio> get _visibleItems => _items;
+
+  bool? get _hasVideoFilter {
+    if (_filter.comVideo) return true;
+    if (_filter.semVideo) return false;
+    return null;
   }
 
   @override
@@ -98,7 +101,7 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
             equipamento: _filter.equipamento?.name,
             dificuldade: _filter.dificuldade?.name,
             favoritos: _filter.favoritos ? true : null,
-            hasVideo: _filter.comVideo ? true : null,
+            hasVideo: _hasVideoFilter,
             page: _page,
           );
       if (!mounted) return;
@@ -303,10 +306,7 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
     final mute = chrome.mute;
     final primary = Theme.of(context).colorScheme.primary;
     final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
-    final totalLabel =
-        _filter.semVideo && !_filter.comVideo
-            ? '${visible.length} sem vídeo (nesta página)'
-            : '$_totalElements exercicios';
+    final totalLabel = '$_totalElements exercicios';
 
     return fxScreenA11yScope(
       label: 'Exercicios',

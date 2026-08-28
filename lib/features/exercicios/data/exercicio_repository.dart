@@ -451,8 +451,8 @@ class ExercicioRepository {
     if (objetivo != null && objetivo.isNotEmpty) {
       queryParams['objetivo'] = objetivo;
     }
-    if (hasVideo == true) {
-      queryParams['hasVideo'] = 'true';
+    if (hasVideo != null) {
+      queryParams['hasVideo'] = hasVideo ? 'true' : 'false';
     }
     if (videoSource != null && videoSource.isNotEmpty) {
       queryParams['videoSource'] = videoSource;
@@ -549,7 +549,9 @@ class ExercicioRepository {
     put('grupoMuscularPrimario', grupoMuscularPrimario);
     put('modalidade', modalidade);
     put('dificuldade', dificuldade);
-    if (hasVideo == true) queryParams['hasVideo'] = 'true';
+    if (hasVideo != null) {
+      queryParams['hasVideo'] = hasVideo ? 'true' : 'false';
+    }
     if (favoritos == true) queryParams['favoritos'] = 'true';
 
     final response = await _dio.get(
@@ -591,7 +593,9 @@ class ExercicioRepository {
     put('grupoMuscularPrimario', grupoMuscularPrimario);
     put('modalidade', modalidade);
     put('dificuldade', dificuldade);
-    if (hasVideo == true) queryParams['hasVideo'] = 'true';
+    if (hasVideo != null) {
+      queryParams['hasVideo'] = hasVideo ? 'true' : 'false';
+    }
     if (favoritos == true) queryParams['favoritos'] = 'true';
 
     final response = await _dio.get(
@@ -902,7 +906,7 @@ class ExercicioRepository {
       if (nivel != null && nivel.isNotEmpty) 'nivel': nivel,
       if (mecanica != null && mecanica.isNotEmpty) 'mecanica': mecanica,
       if (objetivo != null && objetivo.isNotEmpty) 'objetivo': objetivo,
-      if (hasVideo == true) 'hasVideo': true,
+      if (hasVideo != null) 'hasVideo': hasVideo,
       if (videoSource != null && videoSource.isNotEmpty)
         'videoSource': videoSource,
       if (licenseStatus != null && licenseStatus.isNotEmpty)
