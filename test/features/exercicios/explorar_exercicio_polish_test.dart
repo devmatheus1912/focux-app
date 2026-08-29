@@ -20,10 +20,12 @@ void main() {
     expect(panel, isNot(contains('PadraoExerciciosBottomSheet')));
 
     expect(templates, contains('FxSettingsLayout.pageInset'));
-    expect(templates, contains('_templateTileSubtitle'));
+    expect(templates, contains('buildTemplateSplitSections'));
+    expect(templates, contains('templateSplitTileSubtitle'));
     expect(templates, contains("value: ''"));
     expect(templates, isNot(contains(r"value: '$dias")));
     expect(templates, contains('FxSettingsGroup('));
+    expect(templates, contains('header: sections[s].header'));
     expect(templates, contains('header: _templateDayTitle'));
     expect(templates, isNot(contains('child: InkWell(')));
   });

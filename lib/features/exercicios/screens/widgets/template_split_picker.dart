@@ -5,14 +5,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/brand_palette.dart';
 import '../../../../core/theme/design_tokens.dart';
 import '../../../../core/theme/focux_hub_typography.dart';
+import '../../../../core/theme/fx_settings_layout.dart';
 import '../../../../core/widgets/feedback_helper.dart';
 import '../../../../core/widgets/fx_bottom_sheet.dart';
 import '../../../../core/widgets/fx_settings_group.dart';
 import '../../../../core/widgets/fx_settings_tile.dart';
-import '../../../../core/theme/fx_settings_layout.dart';
 import '../../../../core/widgets/fx_shell_scaffold.dart';
 import '../../data/exercicio_repository.dart';
 import '../../data/template_splits.dart';
+import '../../utils/template_split_catalog.dart';
 import 'padrao_exercicios_bottom_sheet.dart';
 
 class TemplateSplitPicker extends StatelessWidget {
@@ -25,10 +26,26 @@ class TemplateSplitPicker extends StatelessWidget {
   final Future<void> Function(Exercicio exercicio) onAdicionar;
   final Set<int> alreadyInTreinoIds;
 
+  void _openTemplate(BuildContext context, TemplateSplit template) {
+    HapticFeedback.selectionClick();
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder:
+            (_) => _TemplateSlotEditor(
+              template: template,
+              alreadyInTreinoIds: alreadyInTreinoIds,
+              onAdicionar: onAdicionar,
+            ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
     final soft = BrandPalette.softened(primary);
+    final sections = buildTemplateSplitSections();
     return ListView(
       padding: const EdgeInsets.fromLTRB(
         FxSettingsLayout.pageInset,
@@ -39,29 +56,24 @@ class TemplateSplitPicker extends StatelessWidget {
       children: [
         const _TemplateIntro(),
         const SizedBox(height: FxSettingsLayout.groupGap),
-        FxSettingsGroup(
-          accent: primary,
-          children: [
-            for (var index = 0; index < templateSplits.length; index++)
-              _TemplateTile(
-                template: templateSplits[index],
-                accent: soft,
-                showDivider: index < templateSplits.length - 1,
-                onTap:
-                    () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder:
-                            (_) => _TemplateSlotEditor(
-                              template: templateSplits[index],
-                              alreadyInTreinoIds: alreadyInTreinoIds,
-                              onAdicionar: onAdicionar,
-                            ),
-                      ),
-                    ),
-              ),
-          ],
-        ),
+        for (var s = 0; s < sections.length; s++) ...[
+          FxSettingsGroup(
+            accent: primary,
+            header: sections[s].header,
+            caption: sections[s].caption,
+            children: [
+              for (var i = 0; i < sections[s].items.length; i++)
+                _TemplateTile(
+                  template: sections[s].items[i],
+                  accent: soft,
+                  showDivider: i < sections[s].items.length - 1,
+                  onTap: () => _openTemplate(context, sections[s].items[i]),
+                ),
+            ],
+          ),
+          if (s < sections.length - 1)
+            const SizedBox(height: FxSettingsLayout.groupGap),
+        ],
       ],
     );
   }
@@ -74,44 +86,39 @@ class _TemplateIntro extends StatelessWidget {
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
     final scheme = Theme.of(context).colorScheme;
+    final mute = scheme.onSurfaceVariant;
     return Container(
       padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
       decoration: BoxDecoration(
         color: primary.withValues(alpha: 0.06),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: primary.withValues(alpha: 0.22),
-          style: BorderStyle.solid,
-        ),
+        borderRadius: BorderRadius.circular(FxSettingsLayout.groupRadius),
+        border: Border.all(color: primary.withValues(alpha: 0.22)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.lightbulb_outline_rounded, color: primary, size: 20),
+          Icon(
+            Icons.calendar_view_week_rounded,
+            color: BrandPalette.softened(primary),
+            size: FxSettingsLayout.iconSize,
+          ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Dica',
-                  style: FocuxHubTypography.chip(primary).copyWith(
-                    letterSpacing: 0.3,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  'Comece por uma estrutura',
+                  'Pela agenda do aluno',
                   style: FocuxHubTypography.body(
                     color: scheme.onSurface,
                   ).copyWith(fontWeight: FontWeight.w900),
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  'Escolha um modelo e adicione exercícios sugeridos (${templateSplits.length} opções).',
+                  'Escolha quantos dias ele treina. Cada modelo traz slots sugeridos — troque o exercício em cada linha.',
                   maxLines: 3,
                   style: FocuxHubTypography.bodyMuted(
-                    color: scheme.onSurfaceVariant,
+                    color: mute,
                     fontWeight: FontWeight.w600,
                     height: 1.25,
                   ),
@@ -140,33 +147,16 @@ class _TemplateTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final slots = template.dias.fold<int>(
-      0,
-      (sum, day) => sum + day.slots.length,
-    );
-    final dias = template.dias.length;
     return FxSettingsTile(
       icon: Icons.view_week_rounded,
       accent: accent,
       label: template.nome,
-      subtitle: _templateTileSubtitle(template.descricao, dias, slots),
+      subtitle: templateSplitTileSubtitle(template),
       value: '',
       showDivider: showDivider,
-      onTap: () {
-        HapticFeedback.selectionClick();
-        onTap();
-      },
+      onTap: onTap,
     );
   }
-}
-
-String _templateTileSubtitle(String descricao, int dias, int slots) {
-  final meta =
-      '$dias ${dias == 1 ? 'dia' : 'dias'} · $slots '
-      '${slots == 1 ? 'exercício' : 'exercícios'}';
-  final desc = descricao.trim();
-  if (desc.isEmpty) return meta;
-  return '$desc · $meta';
 }
 
 class _TemplateSlotEditor extends ConsumerStatefulWidget {

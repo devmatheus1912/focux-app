@@ -28,7 +28,7 @@ Future<void> openMontarPorModelo({
             useMesh: true,
             appBar: FxShellAppBar(
               title: 'Montar por modelo',
-              subtitle: 'Preencha o treino com modelos prontos',
+              subtitle: 'Escolha pela frequência semanal do aluno',
               onBack: () => Navigator.pop(context),
             ),
             body: TemplateSplitPicker(
