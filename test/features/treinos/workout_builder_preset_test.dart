@@ -38,7 +38,7 @@ void main() {
     expect(repository, contains('observacoes'));
     expect(prescription, contains('PrescriptionEditorSheet'));
     expect(prescription, contains('Carga (kg)'));
-    expect(prescription, contains('Observações'));
+    expect(prescription, contains('Adicionar observações'));
     expect(screen, contains('showPrescriptionEditorSheet'));
   });
 
