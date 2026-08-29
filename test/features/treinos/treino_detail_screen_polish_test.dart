@@ -64,13 +64,13 @@ void main() {
     expect(screen, contains('treino_home_sheet.dart'));
     expect(
       File(
-        'lib/features/treinos/widgets/treino_prescription_form.dart',
+        'lib/features/treinos/widgets/prescription_editor_sheet.dart',
       ).readAsStringSync(),
       allOf(
-        contains('FxInputDeco.outlineBorder'),
-        contains('Semantics('),
-        contains('textField: true'),
-        contains('selected: value == option.\$1'),
+        contains('FxSettingsGroup'),
+        contains('stickyFooter'),
+        contains('contextSubtitle'),
+        contains('AlunoSegmentedChoice'),
       ),
     );
     expect(screen, isNot(contains('ChoiceChip')));
@@ -93,25 +93,32 @@ void main() {
     expect(screen, contains('expand: true'));
     expect(screen, contains('TreinoPrescriptionVideoBlock'));
     expect(screen, contains('treino_prescription_video_block.dart'));
-    expect(screen, contains('treino_prescription_form.dart'));
-    expect(screen, contains('TreinoPrescriptionField'));
-    expect(screen, contains('TreinoTipoSeriePicker'));
+    expect(screen, contains('prescription_editor_sheet.dart'));
+    expect(screen, contains('PrescriptionEditorSheet'));
+    expect(screen, contains('matchWorkoutBuilderPresetId'));
+    expect(screen, isNot(contains('treino_prescription_form.dart')));
+    expect(screen, isNot(contains('TreinoPrescriptionField')));
+    expect(screen, isNot(contains('TreinoTipoSeriePicker')));
     expect(screen, contains('FxLiquidPrimaryButton'));
-    expect(screen, contains('height * 0.82'));
+    expect(screen, contains('heightFactor: 0.88'));
+    final videoBlock =
+        File(
+          'lib/features/treinos/widgets/treino_prescription_video_block.dart',
+        ).readAsStringSync();
     expect(
-      File(
-        'lib/features/treinos/widgets/treino_prescription_video_block.dart',
-      ).readAsStringSync(),
+      videoBlock,
       allOf(
         contains('ExerciseVideoSpecTips.open'),
         contains('FxHelpIconButton'),
         contains('Semantics('),
         contains('liveRegion: locked'),
+        contains('Demo da biblioteca ou envie o seu'),
         isNot(contains('Celular em pé')),
-        isNot(contains('Ver seu vídeo')),
         isNot(contains('ExerciseVideoUploadStrip')),
       ),
     );
+    expect(videoBlock, isNot(contains('Ver seu vídeo')));
+    expect(videoBlock, isNot(contains('Opcional · vertical')));
     expect(
       File(
         'lib/features/treinos/widgets/treino_detail_help_sheet.dart',

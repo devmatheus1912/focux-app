@@ -19,6 +19,22 @@ void main() {
       greaterThan(90),
     );
     expect(workoutBuilderRepShortcuts('hypertrophy'), contains('8-12'));
+    expect(
+      matchWorkoutBuilderPresetId(
+        series: 4,
+        repeticoes: '8-12',
+        descansoSegundos: 75,
+      ),
+      'hypertrophy',
+    );
+    expect(
+      matchWorkoutBuilderPresetId(
+        series: 5,
+        repeticoes: '3-6',
+        descansoSegundos: 150,
+      ),
+      'strength',
+    );
   });
 
   test('workout builder sends premium prescription fields to backend', () {

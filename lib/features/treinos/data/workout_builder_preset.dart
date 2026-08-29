@@ -63,6 +63,36 @@ WorkoutBuilderPreset workoutBuilderPresetById(String id) {
   );
 }
 
+/// Escolhe o preset mais próximo da prescrição já salva (edição no detalhe).
+String matchWorkoutBuilderPresetId({
+  required int series,
+  required String repeticoes,
+  required int descansoSegundos,
+}) {
+  final reps = repeticoes.trim().toLowerCase();
+  for (final preset in workoutBuilderPresets) {
+    if (preset.series == series &&
+        preset.repeticoes.toLowerCase() == reps &&
+        preset.descansoSegundos == descansoSegundos) {
+      return preset.id;
+    }
+  }
+
+  var best = workoutBuilderPresets.first;
+  var bestScore = 1 << 30;
+  for (final preset in workoutBuilderPresets) {
+    var score =
+        (preset.series - series).abs() * 10 +
+        (preset.descansoSegundos - descansoSegundos).abs();
+    if (preset.repeticoes.toLowerCase() == reps) score -= 20;
+    if (score < bestScore) {
+      bestScore = score;
+      best = preset;
+    }
+  }
+  return best.id;
+}
+
 /// Atalhos de repetição por objetivo — 1 toque no sheet.
 List<String> workoutBuilderRepShortcuts(String presetId) {
   return switch (presetId) {

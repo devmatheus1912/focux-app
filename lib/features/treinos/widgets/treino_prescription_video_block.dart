@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/focux_hub_typography.dart';
+import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
@@ -328,13 +329,13 @@ class _TreinoPrescriptionVideoBlockState
             ? 'Enviando vídeo…'
             : hasPersonal
             ? 'Seu vídeo está pronto'
-            : 'Vídeo (opcional)';
+            : 'Vídeo';
     final subtitle =
         locked
             ? 'Não feche o app enquanto o envio termina.'
             : hasPersonal
             ? 'Toque em Ver para revisar ou Trocar para enviar outro.'
-            : 'Opcional · vertical · toque em ? para as specs';
+            : 'Demo da biblioteca ou envie o seu · ? para detalhes';
 
     return Semantics(
       container: true,
@@ -353,8 +354,8 @@ class _TreinoPrescriptionVideoBlockState
               Row(
                 children: [
                   Container(
-                    width: FxHomeSheetChrome.leadingSize,
-                    height: FxHomeSheetChrome.leadingSize,
+                    width: FxSettingsLayout.iconSize + 10,
+                    height: FxSettingsLayout.iconSize + 10,
                     decoration: BoxDecoration(
                       color: BrandPalette.soft(primary, dark: widget.isDark),
                       borderRadius: BorderRadius.circular(15),
@@ -365,8 +366,8 @@ class _TreinoPrescriptionVideoBlockState
                           : hasPersonal
                           ? Icons.play_circle_fill_rounded
                           : Icons.videocam_outlined,
-                      color: primary,
-                      size: 18,
+                      color: BrandPalette.softened(primary),
+                      size: FxSettingsLayout.iconSize,
                     ),
                   ),
                   SizedBox(width: TokensStrip.s3),

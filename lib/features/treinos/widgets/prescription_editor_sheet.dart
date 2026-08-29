@@ -85,6 +85,15 @@ class PrescriptionEditorSheet extends StatefulWidget {
     required this.onPresetSelected,
     required this.onTipoSerieChanged,
     required this.onApplyLastPrescription,
+    this.title,
+    this.contextSubtitle,
+    this.showPresets = true,
+    this.belowFields,
+    this.stickyFooter,
+    this.expand = false,
+    this.heightFactor,
+    this.canPop = true,
+    this.enabled = true,
   });
 
   final bool isDark;
@@ -103,6 +112,19 @@ class PrescriptionEditorSheet extends StatefulWidget {
   final ValueChanged<String> onPresetSelected;
   final ValueChanged<String> onTipoSerieChanged;
   final VoidCallback onApplyLastPrescription;
+
+  /// Override do título (ex.: Editar prescrição).
+  final String? title;
+
+  /// Nome do exercício — header; o preview de volume vai para o caption do grupo.
+  final String? contextSubtitle;
+  final bool showPresets;
+  final Widget? belowFields;
+  final Widget? stickyFooter;
+  final bool expand;
+  final double? heightFactor;
+  final bool canPop;
+  final bool enabled;
 
   @override
   State<PrescriptionEditorSheet> createState() => _PrescriptionEditorSheetState();
@@ -192,7 +214,7 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
     final ink = fxScreenInk(context);
     final maxHeight =
         MediaQuery.sizeOf(context).height *
-        FxHomeSheetChrome.expandHeightFactor;
+        (widget.heightFactor ?? FxHomeSheetChrome.expandHeightFactor);
     final keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
     final selectedPreset = _selectedPreset;
     final seriesValue = parsePrescriptionInt(
@@ -203,219 +225,276 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
       widget.descansoCtrl.text,
       fallback: selectedPreset.descansoSegundos,
     );
+    final headerTitle =
+        widget.title ??
+        (widget.globalPresetMode
+            ? 'Prescrição padrão'
+            : 'Prescrição do exercício');
+    final headerSubtitle = widget.contextSubtitle ?? _previewLine();
+    final volumeCaption =
+        widget.contextSubtitle != null ? _previewLine() : selectedPreset.summary;
+    final enabled = widget.enabled;
 
-    return FxHomeSheetSurface(
-      isDark: widget.isDark,
-      maxHeight: maxHeight,
-      expand: false,
-      padding: EdgeInsets.fromLTRB(
-        FxSettingsLayout.pageInset,
-        8,
-        FxSettingsLayout.pageInset,
-        12,
+    final fields = <Widget>[
+      if (widget.lastPrescription != null) ...[
+        _RepeatPrescriptionTile(
+          memory: widget.lastPrescription!,
+          primary: widget.primary,
+          brand: brand,
+          isDark: widget.isDark,
+          line: line,
+          onApply: enabled ? widget.onApplyLastPrescription : () {},
+        ),
+        const SizedBox(height: TokensStrip.s3),
+      ],
+      FxSettingsGroup(
+        header: 'Volume',
+        caption: volumeCaption,
+        accent: widget.primary,
+        children: [
+          if (widget.showPresets)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(4, 6, 4, 8),
+              child: AlunoSegmentedChoice(
+                options: [
+                  for (final preset in workoutBuilderPresets)
+                    (value: preset.id, label: preset.label),
+                ],
+                selected: _presetId,
+                isDark: widget.isDark,
+                onSelect: (value) {
+                  if (!enabled) return;
+                  HapticFeedback.selectionClick();
+                  setState(() => _presetId = value);
+                  widget.onPresetSelected(value);
+                },
+              ),
+            ),
+          _PrescriptionStepperRow(
+            label: 'Séries',
+            icon: Icons.format_list_numbered_rounded,
+            iconColor: brand,
+            value: '$seriesValue',
+            line: line,
+            ink: ink,
+            mute: mute,
+            onDecrement:
+                enabled
+                    ? () => _setSeries(
+                      adjustPrescriptionSeries(seriesValue, -1),
+                    )
+                    : () {},
+            onIncrement:
+                enabled
+                    ? () => _setSeries(
+                      adjustPrescriptionSeries(seriesValue, 1),
+                    )
+                    : () {},
+          ),
+          _PrescriptionRepsRow(
+            label: 'Repetições',
+            icon: Icons.fitness_center_rounded,
+            iconColor: brand,
+            controller: widget.repCtrl,
+            hint: selectedPreset.repeticoes,
+            line: line,
+            ink: ink,
+            mute: mute,
+            brand: brand,
+            shortcuts: workoutBuilderRepShortcuts(_presetId),
+            onShortcut: (value) {
+              if (!enabled) return;
+              widget.repCtrl.text = value;
+              HapticFeedback.selectionClick();
+              setState(() {});
+            },
+          ),
+          _PrescriptionStepperRow(
+            label: 'Descanso',
+            icon: Icons.timer_outlined,
+            iconColor: brand,
+            value: '${restValue}s',
+            line: line,
+            ink: ink,
+            mute: mute,
+            onDecrement:
+                enabled
+                    ? () => _setRest(
+                      adjustPrescriptionRestSeconds(restValue, -15),
+                    )
+                    : () {},
+            onIncrement:
+                enabled
+                    ? () => _setRest(
+                      adjustPrescriptionRestSeconds(restValue, 15),
+                    )
+                    : () {},
+            showDivider: _showCarga,
+          ),
+          if (_showCarga)
+            _PrescriptionValueRow(
+              label: 'Carga (kg)',
+              icon: Icons.scale_rounded,
+              iconColor: brand,
+              controller: widget.cargaCtrl,
+              hint: 'Opcional',
+              line: line,
+              ink: ink,
+              mute: mute,
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
+              showDivider: false,
+            )
+          else
+            _PrescriptionExpandRow(
+              label: 'Adicionar carga (kg)',
+              icon: Icons.scale_rounded,
+              iconColor: brand,
+              line: line,
+              mute: mute,
+              onTap: () {
+                if (!enabled) return;
+                HapticFeedback.selectionClick();
+                setState(() => _showCarga = true);
+              },
+              showDivider: false,
+            ),
+        ],
       ),
-      child: SingleChildScrollView(
+      const SizedBox(height: FxSettingsLayout.groupGap),
+      FxSettingsGroup(
+        header: 'Tipo de série',
+        accent: widget.primary,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(4, 6, 4, 8),
+            child: AlunoSegmentedChoice(
+              options: const [
+                (value: 'NORMAL', label: 'Normal'),
+                (value: 'SUPERSET', label: 'Superset'),
+                (value: 'DROPSET', label: 'Drop set'),
+              ],
+              selected: _tipoSerie,
+              isDark: widget.isDark,
+              onSelect: (value) {
+                if (!enabled) return;
+                HapticFeedback.selectionClick();
+                setState(() => _tipoSerie = value);
+                widget.onTipoSerieChanged(value);
+              },
+            ),
+          ),
+          if (_tipoSerie == 'SUPERSET')
+            _PrescriptionValueRow(
+              label: 'Grupo superset',
+              icon: Icons.link_rounded,
+              iconColor: brand,
+              controller: widget.grupoSupersetCtrl,
+              hint: 'Nº em comum',
+              line: line,
+              ink: ink,
+              mute: mute,
+              keyboardType: TextInputType.number,
+            ),
+          if (_tipoSerie == 'DROPSET')
+            Padding(
+              padding: const EdgeInsets.fromLTRB(4, 0, 4, 8),
+              child: Text(
+                'Registre reduções de carga nas observações.',
+                style: FxSettingsLayout.footer(color: mute),
+              ),
+            ),
+          if (_showNotes)
+            _PrescriptionNotesField(
+              controller: widget.observacoesCtrl,
+              iconColor: brand,
+              ink: ink,
+            )
+          else
+            _PrescriptionExpandRow(
+              label: 'Adicionar observações',
+              icon: Icons.notes_rounded,
+              iconColor: brand,
+              line: line,
+              mute: mute,
+              onTap: () {
+                if (!enabled) return;
+                HapticFeedback.selectionClick();
+                setState(() => _showNotes = true);
+              },
+              showDivider: false,
+            ),
+        ],
+      ),
+      if (widget.belowFields != null) ...[
+        const SizedBox(height: FxSettingsLayout.groupGap),
+        widget.belowFields!,
+      ],
+    ];
+
+    final headerWidgets = <Widget>[
+      FxHomeSheetHandle(isDark: widget.isDark),
+      const SizedBox(height: 6),
+      FxHomeSheetHeader(
+        isDark: widget.isDark,
+        title: headerTitle,
+        subtitle: headerSubtitle,
+        leading: Icon(
+          Icons.edit_note_rounded,
+          color: brand,
+          size: FxSettingsLayout.iconSize,
+        ),
+      ),
+      const SizedBox(height: TokensStrip.s3),
+    ];
+
+    final Widget surfaceChild;
+    if (widget.stickyFooter == null) {
+      surfaceChild = SingleChildScrollView(
         padding: EdgeInsets.only(bottom: keyboardInset + 8),
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            FxHomeSheetHandle(isDark: widget.isDark),
-            const SizedBox(height: 6),
-            FxHomeSheetHeader(
-              isDark: widget.isDark,
-              title:
-                  widget.globalPresetMode
-                      ? 'Prescrição padrão'
-                      : 'Prescrição do exercício',
-              subtitle: _previewLine(),
-              leading: Icon(
-                Icons.edit_note_rounded,
-                color: brand,
-                size: FxSettingsLayout.iconSize,
-              ),
-            ),
-            const SizedBox(height: TokensStrip.s3),
-            if (widget.lastPrescription != null) ...[
-              _RepeatPrescriptionTile(
-                memory: widget.lastPrescription!,
-                primary: widget.primary,
-                brand: brand,
-                isDark: widget.isDark,
-                line: line,
-                onApply: widget.onApplyLastPrescription,
-              ),
-              const SizedBox(height: TokensStrip.s3),
-            ],
-            FxSettingsGroup(
-              header: 'Volume',
-              caption: selectedPreset.summary,
-              accent: widget.primary,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(4, 6, 4, 8),
-                  child: AlunoSegmentedChoice(
-                    options: [
-                      for (final preset in workoutBuilderPresets)
-                        (value: preset.id, label: preset.label),
-                    ],
-                    selected: _presetId,
-                    isDark: widget.isDark,
-                    onSelect: (value) {
-                      HapticFeedback.selectionClick();
-                      setState(() => _presetId = value);
-                      widget.onPresetSelected(value);
-                    },
-                  ),
-                ),
-                _PrescriptionStepperRow(
-                  label: 'Séries',
-                  icon: Icons.format_list_numbered_rounded,
-                  iconColor: brand,
-                  value: '$seriesValue',
-                  line: line,
-                  ink: ink,
-                  mute: mute,
-                  onDecrement:
-                      () => _setSeries(
-                        adjustPrescriptionSeries(seriesValue, -1),
-                      ),
-                  onIncrement:
-                      () => _setSeries(
-                        adjustPrescriptionSeries(seriesValue, 1),
-                      ),
-                ),
-                _PrescriptionRepsRow(
-                  label: 'Repetições',
-                  icon: Icons.fitness_center_rounded,
-                  iconColor: brand,
-                  controller: widget.repCtrl,
-                  hint: selectedPreset.repeticoes,
-                  line: line,
-                  ink: ink,
-                  mute: mute,
-                  brand: brand,
-                  shortcuts: workoutBuilderRepShortcuts(_presetId),
-                  onShortcut: (value) {
-                    widget.repCtrl.text = value;
-                    HapticFeedback.selectionClick();
-                    setState(() {});
-                  },
-                ),
-                _PrescriptionStepperRow(
-                  label: 'Descanso',
-                  icon: Icons.timer_outlined,
-                  iconColor: brand,
-                  value: '${restValue}s',
-                  line: line,
-                  ink: ink,
-                  mute: mute,
-                  onDecrement:
-                      () => _setRest(
-                        adjustPrescriptionRestSeconds(restValue, -15),
-                      ),
-                  onIncrement:
-                      () => _setRest(
-                        adjustPrescriptionRestSeconds(restValue, 15),
-                      ),
-                  showDivider: _showCarga,
-                ),
-                if (_showCarga)
-                  _PrescriptionValueRow(
-                    label: 'Carga (kg)',
-                    icon: Icons.scale_rounded,
-                    iconColor: brand,
-                    controller: widget.cargaCtrl,
-                    hint: 'Opcional',
-                    line: line,
-                    ink: ink,
-                    mute: mute,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    showDivider: false,
-                  )
-                else
-                  _PrescriptionExpandRow(
-                    label: 'Adicionar carga (kg)',
-                    icon: Icons.scale_rounded,
-                    iconColor: brand,
-                    line: line,
-                    mute: mute,
-                    onTap: () {
-                      HapticFeedback.selectionClick();
-                      setState(() => _showCarga = true);
-                    },
-                    showDivider: false,
-                  ),
-              ],
-            ),
-            const SizedBox(height: FxSettingsLayout.groupGap),
-            FxSettingsGroup(
-              header: 'Tipo de série',
-              accent: widget.primary,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(4, 6, 4, 8),
-                  child: AlunoSegmentedChoice(
-                    options: const [
-                      (value: 'NORMAL', label: 'Normal'),
-                      (value: 'SUPERSET', label: 'Superset'),
-                      (value: 'DROPSET', label: 'Drop set'),
-                    ],
-                    selected: _tipoSerie,
-                    isDark: widget.isDark,
-                    onSelect: (value) {
-                      HapticFeedback.selectionClick();
-                      setState(() => _tipoSerie = value);
-                      widget.onTipoSerieChanged(value);
-                    },
-                  ),
-                ),
-                if (_tipoSerie == 'SUPERSET')
-                  _PrescriptionValueRow(
-                    label: 'Grupo superset',
-                    icon: Icons.link_rounded,
-                    iconColor: brand,
-                    controller: widget.grupoSupersetCtrl,
-                    hint: 'Nº em comum',
-                    line: line,
-                    ink: ink,
-                    mute: mute,
-                    keyboardType: TextInputType.number,
-                  ),
-                if (_tipoSerie == 'DROPSET')
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(4, 0, 4, 8),
-                    child: Text(
-                      'Registre reduções de carga nas observações.',
-                      style: FxSettingsLayout.footer(color: mute),
-                    ),
-                  ),
-                if (_showNotes)
-                  _PrescriptionNotesField(
-                    controller: widget.observacoesCtrl,
-                    iconColor: brand,
-                    ink: ink,
-                  )
-                else
-                  _PrescriptionExpandRow(
-                    label: 'Adicionar observações',
-                    icon: Icons.notes_rounded,
-                    iconColor: brand,
-                    line: line,
-                    mute: mute,
-                    onTap: () {
-                      HapticFeedback.selectionClick();
-                      setState(() => _showNotes = true);
-                    },
-                    showDivider: false,
-                  ),
-              ],
-            ),
-          ],
+          children: [...headerWidgets, ...fields],
         ),
+      );
+    } else {
+      surfaceChild = Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          ...headerWidgets,
+          Expanded(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.only(bottom: keyboardInset + 8),
+              keyboardDismissBehavior:
+                  ScrollViewKeyboardDismissBehavior.onDrag,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: fields,
+              ),
+            ),
+          ),
+          widget.stickyFooter!,
+        ],
+      );
+    }
+
+    return PopScope(
+      canPop: widget.canPop,
+      child: FxHomeSheetSurface(
+        isDark: widget.isDark,
+        maxHeight: maxHeight,
+        expand: widget.expand || widget.stickyFooter != null,
+        padding: EdgeInsets.fromLTRB(
+          FxSettingsLayout.pageInset,
+          8,
+          FxSettingsLayout.pageInset,
+          12,
+        ),
+        child: surfaceChild,
       ),
     );
   }

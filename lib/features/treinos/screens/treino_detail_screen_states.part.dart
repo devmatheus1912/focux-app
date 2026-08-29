@@ -25,6 +25,7 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
   late final TextEditingController _obsCtrl;
   late final TextEditingController _supersetCtrl;
   late String _tipoSerie;
+  late String _presetId;
   bool _saving = false;
   bool _videoBusy = false;
 
@@ -46,6 +47,11 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
     _obsCtrl = TextEditingController(text: item.observacoes ?? '');
     _supersetCtrl = TextEditingController(text: '${item.grupoSuperset ?? 1}');
     _tipoSerie = item.tipoSerie;
+    _presetId = matchWorkoutBuilderPresetId(
+      series: item.series,
+      repeticoes: item.repeticoes,
+      descansoSegundos: item.descansoSegundos ?? 60,
+    );
   }
 
   @override
@@ -57,6 +63,16 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
     _obsCtrl.dispose();
     _supersetCtrl.dispose();
     super.dispose();
+  }
+
+  void _applyPreset(String id) {
+    final preset = workoutBuilderPresetById(id);
+    setState(() {
+      _presetId = id;
+      _seriesCtrl.text = '${preset.series}';
+      _repCtrl.text = preset.repeticoes;
+      _descansoCtrl.text = '${preset.descansoSegundos}';
+    });
   }
 
   Future<void> _save() async {
@@ -105,171 +121,60 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
     final chrome = ShellChrome.forDark(widget.isDark);
+    final busy = _saving || _videoBusy;
 
-    Widget pair(Widget left, Widget right) {
-      return Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(child: left),
-          SizedBox(width: TokensStrip.s3),
-          Expanded(child: right),
-        ],
-      );
-    }
-
-    return PopScope(
-      canPop: !_saving && !_videoBusy,
-      child: TreinoHomeSheetSurface(
+    return PrescriptionEditorSheet(
+      isDark: widget.isDark,
+      primary: primary,
+      ink: chrome.ink,
+      title: 'Editar prescrição',
+      contextSubtitle: widget.item.exercicio.nomeDisplay,
+      presetId: _presetId,
+      tipoSerie: _tipoSerie,
+      globalPresetMode: false,
+      lastPrescription: null,
+      seriesCtrl: _seriesCtrl,
+      repCtrl: _repCtrl,
+      descansoCtrl: _descansoCtrl,
+      cargaCtrl: _cargaCtrl,
+      observacoesCtrl: _obsCtrl,
+      grupoSupersetCtrl: _supersetCtrl,
+      onPresetSelected: _applyPreset,
+      onTipoSerieChanged: (value) => setState(() => _tipoSerie = value),
+      onApplyLastPrescription: () {},
+      expand: true,
+      heightFactor: 0.88,
+      canPop: !busy,
+      enabled: !busy,
+      belowFields: TreinoPrescriptionVideoBlock(
+        treinoId: widget.treinoId,
+        exercicio: widget.item.exercicio,
         isDark: widget.isDark,
-        expand: true,
-        maxHeight: MediaQuery.sizeOf(context).height * 0.82,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            FxHomeSheetHandle(isDark: widget.isDark),
-            SizedBox(height: TokensStrip.s4),
-            TreinoSheetChromeHeader(
-              icon: Icons.edit_note_rounded,
-              title: 'Editar prescrição',
-              subtitle: widget.item.exercicio.nomeDisplay,
-              isDark: widget.isDark,
-            ),
-            SizedBox(height: TokensStrip.s3),
-            Expanded(
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    pair(
-                      TreinoPrescriptionField(
-                        label: 'Séries',
-                        isDark: widget.isDark,
-                        controller: _seriesCtrl,
-                        keyboardType: TextInputType.number,
-                        textInputAction: TextInputAction.next,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly,
-                          LengthLimitingTextInputFormatter(2),
-                        ],
-                      ),
-                      TreinoPrescriptionField(
-                        label: 'Repetições',
-                        isDark: widget.isDark,
-                        controller: _repCtrl,
-                        hint: '10-12',
-                        textInputAction: TextInputAction.next,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.allow(
-                            RegExp(r'[0-9\-xX/ ]'),
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: TokensStrip.s4),
-                    pair(
-                      TreinoPrescriptionField(
-                        label: 'Descanso (s)',
-                        isDark: widget.isDark,
-                        controller: _descansoCtrl,
-                        keyboardType: TextInputType.number,
-                        textInputAction: TextInputAction.next,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly,
-                          LengthLimitingTextInputFormatter(3),
-                        ],
-                      ),
-                      TreinoPrescriptionField(
-                        label: 'Carga (kg)',
-                        isDark: widget.isDark,
-                        controller: _cargaCtrl,
-                        hint: 'Opcional',
-                        keyboardType: const TextInputType.numberWithOptions(
-                          decimal: true,
-                        ),
-                        textInputAction: TextInputAction.next,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.allow(
-                            RegExp(r'^\d+[.,]?\d{0,2}'),
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: TokensStrip.s4),
-                    TreinoTipoSeriePicker(
-                      value: _tipoSerie,
-                      isDark: widget.isDark,
-                      enabled: !_saving && !_videoBusy,
-                      onChanged: (value) => setState(() => _tipoSerie = value),
-                    ),
-                    if (_tipoSerie == 'SUPERSET') ...[
-                      SizedBox(height: TokensStrip.s4),
-                      TreinoPrescriptionField(
-                        label: 'Grupo superset',
-                        isDark: widget.isDark,
-                        controller: _supersetCtrl,
-                        hint: 'Mesmo número = juntos',
-                        keyboardType: TextInputType.number,
-                        textInputAction: TextInputAction.next,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly,
-                          LengthLimitingTextInputFormatter(2),
-                        ],
-                      ),
-                    ],
-                    if (_tipoSerie == 'DROPSET') ...[
-                      SizedBox(height: TokensStrip.s2),
-                      Text(
-                        'Anote a queda de carga nas observações.',
-                        style: FocuxHubTypography.bodyMuted(
-                          color: dashboardReadableCaption(
-                            context,
-                            isDark: widget.isDark,
-                          ),
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                    SizedBox(height: TokensStrip.s4),
-                    TreinoPrescriptionField(
-                      label: 'Observações',
-                      isDark: widget.isDark,
-                      controller: _obsCtrl,
-                      hint: 'Cadência, pausa, execução…',
-                      textInputAction: TextInputAction.done,
-                      minLines: 1,
-                      maxLines: 3,
-                    ),
-                    SizedBox(height: TokensStrip.s4),
-                    TreinoPrescriptionVideoBlock(
-                      treinoId: widget.treinoId,
-                      exercicio: widget.item.exercicio,
-                      isDark: widget.isDark,
-                      busy: _saving,
-                      onBusyChanged: (busy) {
-                        if (mounted) setState(() => _videoBusy = busy);
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            Divider(height: 1, color: chrome.line.withValues(alpha: 0.8)),
-            SizedBox(height: TokensStrip.s4),
-            FxLiquidPrimaryButton(
-              label: 'Salvar prescrição',
-              loading: _saving,
-              onPressed:
-                  _saving || _videoBusy
-                      ? null
-                      : () {
-                        HapticFeedback.mediumImpact();
-                        _save();
-                      },
-            ),
-          ],
-        ),
+        busy: _saving,
+        onBusyChanged: (value) {
+          if (mounted) setState(() => _videoBusy = value);
+        },
+      ),
+      stickyFooter: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Divider(height: 1, color: chrome.line.withValues(alpha: 0.8)),
+          SizedBox(height: TokensStrip.s4),
+          FxLiquidPrimaryButton(
+            label: 'Salvar prescrição',
+            loading: _saving,
+            onPressed:
+                busy
+                    ? null
+                    : () {
+                      HapticFeedback.mediumImpact();
+                      _save();
+                    },
+          ),
+        ],
       ),
     );
   }

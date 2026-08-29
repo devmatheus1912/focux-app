@@ -19,7 +19,6 @@ import '../../../core/utils/friendly_error.dart';
 import '../../../core/utils/pt_br_display.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/tokens_strip.dart';
-import '../../dashboard/utils/dashboard_readability.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
@@ -38,8 +37,9 @@ import '../widgets/montar_por_modelo.dart';
 import '../widgets/treino_detail_help_sheet.dart';
 import '../widgets/treino_home_sheet.dart';
 import '../widgets/treino_inset_sheet.dart';
-import '../widgets/treino_prescription_form.dart';
+import '../widgets/prescription_editor_sheet.dart';
 import '../widgets/treino_prescription_video_block.dart';
+import '../data/workout_builder_preset.dart';
 
 part 'treino_detail_screen_body.part.dart';
 part 'treino_detail_screen_exercises.part.dart';
