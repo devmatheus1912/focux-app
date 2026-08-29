@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/theme/brand_palette.dart';
 import '../../../../core/theme/focux_hub_typography.dart';
 import '../../../../core/theme/fx_settings_layout.dart';
 import '../../../../core/widgets/fx_empty_state.dart';
+import '../../../../core/widgets/fx_inset_picker_option.dart';
 import '../../../../core/widgets/fx_settings_group.dart';
 import '../../../../core/widgets/fx_settings_tile.dart';
 import '../../../../core/widgets/skeleton_loader.dart';
@@ -108,6 +110,7 @@ class _PadraoMovimentoGridState extends ConsumerState<PadraoMovimentoGrid> {
             _mode == PadraoGridMode.padrao
                 ? 'Padrões de movimento'
                 : 'Grupos musculares';
+        final soft = BrandPalette.softened(primary);
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -118,27 +121,26 @@ class _PadraoMovimentoGridState extends ConsumerState<PadraoMovimentoGrid> {
               header: 'Como explorar',
               helpTooltip: 'Ajuda sobre categorias',
               onHelpTap: () => showAddExercicioHelpSheet(context),
-              children: [
-                FxSettingsTile(
-                  icon: Icons.account_tree_outlined,
-                  accent: primary,
-                  label: 'Por movimento',
-                  subtitle: 'Empurrar, puxar, agachar, core…',
-                  value: '',
-                  highlight: _mode == PadraoGridMode.padrao,
-                  onTap: () => setState(() => _mode = PadraoGridMode.padrao),
-                ),
-                FxSettingsTile(
-                  icon: Icons.fitness_center_outlined,
-                  accent: primary,
-                  label: 'Por grupo muscular',
-                  subtitle: 'Peito, costas, pernas, ombro…',
-                  value: '',
-                  highlight: _mode == PadraoGridMode.grupo,
-                  showDivider: false,
-                  onTap: () => setState(() => _mode = PadraoGridMode.grupo),
-                ),
-              ],
+              edgeToEdgeRows: true,
+              children: FxInsetPickerOption.list(
+                accent: soft,
+                items: [
+                  FxInsetPickerOptionSpec(
+                    label: 'Por movimento',
+                    subtitle: 'Empurrar, puxar, agachar, core…',
+                    icon: Icons.account_tree_outlined,
+                    selected: _mode == PadraoGridMode.padrao,
+                    onTap: () => setState(() => _mode = PadraoGridMode.padrao),
+                  ),
+                  FxInsetPickerOptionSpec(
+                    label: 'Por grupo muscular',
+                    subtitle: 'Peito, costas, pernas, ombro…',
+                    icon: Icons.fitness_center_outlined,
+                    selected: _mode == PadraoGridMode.grupo,
+                    onTap: () => setState(() => _mode = PadraoGridMode.grupo),
+                  ),
+                ],
+              ),
             ),
             const SizedBox(height: FxSettingsLayout.groupGap),
             if (items.isEmpty)
@@ -168,11 +170,10 @@ class _PadraoMovimentoGridState extends ConsumerState<PadraoMovimentoGrid> {
                   for (var i = 0; i < items.length; i++)
                     FxSettingsTile(
                       icon: items[i].icon,
-                      accent: primary,
+                      accent: soft,
                       label: items[i].label,
-                      subtitle: '${items[i].count} exercícios',
-                      value: '${items[i].count}',
-                      numeric: true,
+                      subtitle: items[i].countLabel,
+                      value: '',
                       showDivider: i < items.length - 1,
                       onTap: items[i].onTap,
                     ),
@@ -223,4 +224,7 @@ class _GridItemData {
   final int count;
   final IconData icon;
   final VoidCallback onTap;
+
+  String get countLabel =>
+      count == 1 ? '1 exercício' : '$count exercícios';
 }

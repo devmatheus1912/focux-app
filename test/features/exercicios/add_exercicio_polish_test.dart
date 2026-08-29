@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../support/screen_source_bundle.dart';
@@ -7,6 +9,9 @@ void main() {
     final screen = readScreenSourceBundle(
       'lib/features/exercicios/screens/add_exercicio_screen.dart',
     );
+    final enumPicker = File(
+      'lib/features/exercicios/widgets/add_exercicio_enum_picker_sheet.dart',
+    ).readAsStringSync();
 
     expect(screen, contains('Semantics('));
     expect(screen, contains('Perfil rápido'));
@@ -22,7 +27,7 @@ void main() {
     expect(screen, contains('FxInsetPickerRow'));
     expect(screen, contains('FxHelpIconButton'));
     expect(screen, contains('showNovoExercicioHelpSheet'));
-    expect(screen, contains('edgeToEdgeRows: true'));
-    expect(screen, contains('FxInsetPickerOption.list'));
+    expect(enumPicker, contains('edgeToEdgeRows: true'));
+    expect(enumPicker, contains('FxInsetPickerOption.list'));
   });
 }

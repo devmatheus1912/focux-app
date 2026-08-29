@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/theme/brand_palette.dart';
 import '../../../../core/theme/design_tokens.dart';
 import '../../../../core/theme/focux_hub_typography.dart';
 import '../../../../core/theme/tokens_strip.dart';
@@ -28,8 +29,14 @@ class TemplateSplitPicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
+    final soft = BrandPalette.softened(primary);
     return ListView(
-      padding: const EdgeInsets.fromLTRB(12, 2, 12, 10),
+      padding: const EdgeInsets.fromLTRB(
+        FxSettingsLayout.pageInset,
+        2,
+        FxSettingsLayout.pageInset,
+        FxSettingsLayout.footerAfterGroup,
+      ),
       children: [
         const _TemplateIntro(),
         const SizedBox(height: FxSettingsLayout.groupGap),
@@ -39,7 +46,7 @@ class TemplateSplitPicker extends StatelessWidget {
             for (var index = 0; index < templateSplits.length; index++)
               _TemplateTile(
                 template: templateSplits[index],
-                accent: primary,
+                accent: soft,
                 showDivider: index < templateSplits.length - 1,
                 onTap:
                     () => Navigator.push(
@@ -143,8 +150,8 @@ class _TemplateTile extends StatelessWidget {
       icon: Icons.view_week_rounded,
       accent: accent,
       label: template.nome,
-      subtitle: template.descricao,
-      value: '$dias ${dias == 1 ? 'dia' : 'dias'} · $slots exercícios',
+      subtitle: _templateTileSubtitle(template.descricao, dias, slots),
+      value: '',
       showDivider: showDivider,
       onTap: () {
         HapticFeedback.selectionClick();
@@ -152,6 +159,15 @@ class _TemplateTile extends StatelessWidget {
       },
     );
   }
+}
+
+String _templateTileSubtitle(String descricao, int dias, int slots) {
+  final meta =
+      '$dias ${dias == 1 ? 'dia' : 'dias'} · $slots '
+      '${slots == 1 ? 'exercício' : 'exercícios'}';
+  final desc = descricao.trim();
+  if (desc.isEmpty) return meta;
+  return '$desc · $meta';
 }
 
 class _TemplateSlotEditor extends ConsumerStatefulWidget {
