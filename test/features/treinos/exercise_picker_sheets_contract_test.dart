@@ -19,6 +19,9 @@ void main() {
     expect(filters, contains('StatefulWidget'));
     expect(filters, contains('Icons.check_rounded'));
     expect(prescription, contains('AlunoSegmentedChoice'));
+    expect(prescription, contains('FxSettingsGroup'));
+    expect(prescription, contains('activePrescriptionStripDecoration'));
+    expect(prescription, contains('activePrescriptionMetricStyle'));
     expect(
       File(
         'lib/features/treinos/screens/widgets/exercise_picker_filter_bar.dart',

@@ -367,12 +367,9 @@ class _AddExerciseBottomDock extends StatelessWidget {
                     },
                     borderRadius: BorderRadius.circular(14),
                     child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: brand.withValues(alpha: isDark ? 0.12 : 0.06),
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(
-                          color: brand.withValues(alpha: 0.22),
-                        ),
+                      decoration: activePrescriptionStripDecoration(
+                        brand: brand,
+                        isDark: isDark,
                       ),
                       child: Padding(
                         padding: const EdgeInsets.symmetric(

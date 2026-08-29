@@ -8,7 +8,6 @@ import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_settings_group.dart';
-import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../alunos/widgets/aluno_form_choices.dart';
 import '../data/exercise_prescription_memory.dart';
 import '../data/workout_builder_preset.dart';
@@ -129,20 +128,6 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
     super.dispose();
   }
 
-  String get _previewLabel {
-    final preset = workoutBuilderPresetById(_presetId);
-    final series = widget.seriesCtrl.text.trim().isEmpty
-        ? '${preset.series}'
-        : widget.seriesCtrl.text.trim();
-    final reps = widget.repCtrl.text.trim().isEmpty
-        ? preset.repeticoes
-        : widget.repCtrl.text.trim();
-    final rest = widget.descansoCtrl.text.trim().isEmpty
-        ? '${preset.descansoSegundos}'
-        : widget.descansoCtrl.text.trim();
-    return '$series×$reps · ${rest}s';
-  }
-
   @override
   Widget build(BuildContext context) {
     final brand = BrandPalette.softened(widget.primary);
@@ -157,15 +142,38 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
         FxHomeSheetChrome.expandHeightFactor;
     final keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
     final selectedPreset = workoutBuilderPresetById(_presetId);
-    final fieldStyle = FocuxHubTypography.body(color: widget.ink).copyWith(
-      fontWeight: FontWeight.w700,
+    final previewSeries = widget.seriesCtrl.text.trim().isEmpty
+        ? '${selectedPreset.series}'
+        : widget.seriesCtrl.text.trim();
+    final previewReps = widget.repCtrl.text.trim().isEmpty
+        ? selectedPreset.repeticoes
+        : widget.repCtrl.text.trim();
+    final previewRest = widget.descansoCtrl.text.trim().isEmpty
+        ? '${selectedPreset.descansoSegundos}'
+        : widget.descansoCtrl.text.trim();
+    final previewLine = formatActivePrescriptionLine(
+      presetLabel: selectedPreset.label,
+      series: previewSeries,
+      repeticoes: previewReps,
+      descansoSegundos: previewRest,
+      tipoSerie: _tipoSerie,
+    );
+    final metricStyle = activePrescriptionMetricStyle(ink: widget.ink);
+    final notesStyle = FocuxHubTypography.body(color: widget.ink).copyWith(
+      fontWeight: FontWeight.w600,
+      height: 1.35,
     );
 
     return FxHomeSheetSurface(
       isDark: widget.isDark,
       maxHeight: maxHeight,
       expand: true,
-      padding: const EdgeInsets.fromLTRB(18, 8, 18, 10),
+      padding: EdgeInsets.fromLTRB(
+        FxSettingsLayout.pageInset,
+        10,
+        FxSettingsLayout.pageInset,
+        FxSettingsLayout.pageInset,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -181,16 +189,19 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
                 widget.globalPresetMode
                     ? 'Vale para buscar, explorar e adições rápidas.'
                     : 'Ajuste séries, carga e descanso antes de salvar.',
-            leading: Icon(Icons.edit_note_rounded, color: brand, size: 20),
+            leading: Icon(
+              Icons.edit_note_rounded,
+              color: brand,
+              size: FxSettingsLayout.iconSize,
+            ),
           ),
           const SizedBox(height: 10),
           _PreviewStrip(
-            presetLabel: selectedPreset.label,
-            summary: _previewLabel,
+            line: previewLine,
             brand: brand,
             isDark: widget.isDark,
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: FxSettingsLayout.groupGap),
           Expanded(
             child: SingleChildScrollView(
               padding: EdgeInsets.only(bottom: keyboardInset + 20),
@@ -202,25 +213,22 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
                     _RepeatPrescriptionTile(
                       memory: widget.lastPrescription!,
                       primary: widget.primary,
+                      brand: brand,
                       isDark: widget.isDark,
+                      line: line,
                       onApply: widget.onApplyLastPrescription,
                     ),
                     const SizedBox(height: FxSettingsLayout.groupGap),
                   ],
-                  Text(
-                    'Objetivo',
-                    style: FxSettingsLayout.sectionHeader(color: mute),
-                  ),
-                  const SizedBox(height: 8),
-                  DecoratedBox(
-                    decoration: fxListCardDecoration(
-                      context,
-                      accent: widget.primary,
-                      radius: FxSettingsLayout.groupRadius,
+                  FxSettingsGroup(
+                    header: 'Objetivo',
+                    accent: widget.primary,
+                    footer: Text(
+                      selectedPreset.summary,
+                      style: FxSettingsLayout.footer(color: mute),
                     ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(10),
-                      child: AlunoSegmentedChoice(
+                    children: [
+                      AlunoSegmentedChoice(
                         options: [
                           for (final preset in workoutBuilderPresets)
                             (value: preset.id, label: preset.label),
@@ -233,22 +241,12 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
                           widget.onPresetSelected(value);
                         },
                       ),
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: FxSettingsLayout.groupPadH,
-                    ),
-                    child: Text(
-                      selectedPreset.summary,
-                      style: FxSettingsLayout.footer(color: mute),
-                    ),
+                    ],
                   ),
                   const SizedBox(height: FxSettingsLayout.groupGap),
                   FxSettingsGroup(
+                    header: 'Séries, repetições e descanso',
                     accent: widget.primary,
-                    caption: 'Séries, repetições e descanso',
                     children: [
                       Row(
                         children: [
@@ -257,9 +255,10 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
                               label: 'Séries',
                               controller: widget.seriesCtrl,
                               keyboardType: TextInputType.number,
-                              style: fieldStyle,
+                              style: metricStyle,
                               isDark: widget.isDark,
                               line: line,
+                              mute: mute,
                             ),
                           ),
                           const SizedBox(width: 10),
@@ -267,9 +266,10 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
                             child: _VolumeField(
                               label: 'Repetições',
                               controller: widget.repCtrl,
-                              style: fieldStyle,
+                              style: metricStyle,
                               isDark: widget.isDark,
                               line: line,
+                              mute: mute,
                             ),
                           ),
                         ],
@@ -282,9 +282,10 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
                               label: 'Descanso (s)',
                               controller: widget.descansoCtrl,
                               keyboardType: TextInputType.number,
-                              style: fieldStyle,
+                              style: metricStyle,
                               isDark: widget.isDark,
                               line: line,
+                              mute: mute,
                             ),
                           ),
                           const SizedBox(width: 10),
@@ -297,9 +298,10 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
                                   const TextInputType.numberWithOptions(
                                     decimal: true,
                                   ),
-                              style: fieldStyle,
+                              style: metricStyle,
                               isDark: widget.isDark,
                               line: line,
+                              mute: mute,
                             ),
                           ),
                         ],
@@ -307,20 +309,11 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
                     ],
                   ),
                   const SizedBox(height: FxSettingsLayout.groupGap),
-                  Text(
-                    'Tipo de série',
-                    style: FxSettingsLayout.sectionHeader(color: mute),
-                  ),
-                  const SizedBox(height: 8),
-                  DecoratedBox(
-                    decoration: fxListCardDecoration(
-                      context,
-                      accent: widget.primary,
-                      radius: FxSettingsLayout.groupRadius,
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(10),
-                      child: AlunoSegmentedChoice(
+                  FxSettingsGroup(
+                    header: 'Tipo de série',
+                    accent: widget.primary,
+                    children: [
+                      AlunoSegmentedChoice(
                         options: const [
                           (value: 'NORMAL', label: 'Normal'),
                           (value: 'SUPERSET', label: 'Superset'),
@@ -334,34 +327,39 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
                           widget.onTipoSerieChanged(value);
                         },
                       ),
-                    ),
+                      if (_tipoSerie == 'SUPERSET') ...[
+                        const SizedBox(height: 10),
+                        _VolumeField(
+                          label: 'Grupo do superset',
+                          controller: widget.grupoSupersetCtrl,
+                          hint: 'Mesmo número em exercícios juntos',
+                          keyboardType: TextInputType.number,
+                          style: metricStyle,
+                          isDark: widget.isDark,
+                          line: line,
+                          mute: mute,
+                        ),
+                      ],
+                      if (_tipoSerie == 'DROPSET') ...[
+                        const SizedBox(height: 10),
+                        _ModeHint(
+                          icon: Icons.trending_down_rounded,
+                          text:
+                              'Drop set: registre reduções de carga nas observações.',
+                          color: EagleTokens.warn,
+                          isDark: widget.isDark,
+                        ),
+                      ],
+                    ],
                   ),
-                  if (_tipoSerie == 'SUPERSET') ...[
-                    const SizedBox(height: 10),
-                    _VolumeField(
-                      label: 'Grupo do superset',
-                      controller: widget.grupoSupersetCtrl,
-                      hint: 'Mesmo número em exercícios juntos',
-                      keyboardType: TextInputType.number,
-                      style: fieldStyle,
-                      isDark: widget.isDark,
-                      line: line,
-                    ),
-                  ],
-                  if (_tipoSerie == 'DROPSET') ...[
-                    const SizedBox(height: 10),
-                    _ModeHint(
-                      icon: Icons.trending_down_rounded,
-                      text:
-                          'Drop set: registre reduções de carga nas observações.',
-                      color: EagleTokens.warn,
-                      isDark: widget.isDark,
-                    ),
-                  ],
                   const SizedBox(height: FxSettingsLayout.groupGap),
                   FxSettingsGroup(
+                    header: 'Observações de execução',
                     accent: widget.primary,
-                    caption: 'Observações de execução',
+                    footer: Text(
+                      'Dica: orientações curtas ajudam o aluno na execução.',
+                      style: FxSettingsLayout.footer(color: mute),
+                    ),
                     children: [
                       TextFormField(
                         controller: widget.observacoesCtrl,
@@ -372,19 +370,9 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
                         ),
                         minLines: 2,
                         maxLines: 4,
-                        style: fieldStyle,
+                        style: notesStyle,
                       ),
                     ],
-                  ),
-                  const SizedBox(height: 6),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: FxSettingsLayout.groupPadH,
-                    ),
-                    child: Text(
-                      'Dica: ${selectedPreset.observacoes}',
-                      style: FxSettingsLayout.footer(color: mute),
-                    ),
                   ),
                 ],
               ),
@@ -398,40 +386,43 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
 
 class _PreviewStrip extends StatelessWidget {
   const _PreviewStrip({
-    required this.presetLabel,
-    required this.summary,
+    required this.line,
     required this.brand,
     required this.isDark,
   });
 
-  final String presetLabel;
-  final String summary;
+  final String line;
   final Color brand;
   final bool isDark;
 
   @override
   Widget build(BuildContext context) {
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+
     return DecoratedBox(
-      decoration: BoxDecoration(
-        color: brand.withValues(alpha: isDark ? 0.14 : 0.08),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: brand.withValues(alpha: 0.22)),
+      decoration: activePrescriptionStripDecoration(
+        brand: brand,
+        isDark: isDark,
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
         child: Row(
           children: [
-            Icon(Icons.bolt_rounded, color: brand, size: 18),
+            Icon(Icons.tune_rounded, color: brand, size: 18),
             const SizedBox(width: 10),
             Expanded(
               child: Text(
-                '$presetLabel · $summary',
+                line,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: activePrescriptionLineStyle(brand: brand),
               ),
             ),
-            Icon(Icons.unfold_more_rounded, color: brand, size: 18),
+            Icon(
+              Icons.chevron_right_rounded,
+              color: mute,
+              size: FxSettingsLayout.chevronSize,
+            ),
           ],
         ),
       ),
@@ -446,6 +437,7 @@ class _VolumeField extends StatelessWidget {
     required this.style,
     required this.isDark,
     required this.line,
+    required this.mute,
     this.hint,
     this.keyboardType,
   });
@@ -455,12 +447,12 @@ class _VolumeField extends StatelessWidget {
   final TextStyle style;
   final bool isDark;
   final Color line;
+  final Color mute;
   final String? hint;
   final TextInputType? keyboardType;
 
   @override
   Widget build(BuildContext context) {
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final fill = isDark ? EagleTokens.darkCardHi : TokensStrip.cardBg;
 
     return Column(
@@ -468,10 +460,7 @@ class _VolumeField extends StatelessWidget {
       children: [
         Text(
           label,
-          style: FxSettingsLayout.subhead(color: mute).copyWith(
-            fontWeight: FontWeight.w800,
-            fontSize: 11,
-          ),
+          style: FxSettingsLayout.sectionHeader(color: mute),
         ),
         const SizedBox(height: 5),
         TextFormField(
@@ -516,20 +505,28 @@ class _RepeatPrescriptionTile extends StatelessWidget {
   const _RepeatPrescriptionTile({
     required this.memory,
     required this.primary,
+    required this.brand,
     required this.isDark,
+    required this.line,
     required this.onApply,
   });
 
   final ExercisePrescriptionMemory memory;
   final Color primary;
+  final Color brand;
   final bool isDark;
+  final Color line;
   final VoidCallback onApply;
 
   @override
   Widget build(BuildContext context) {
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     return DecoratedBox(
-      decoration: fxListCardDecoration(context, accent: primary),
+      decoration: BoxDecoration(
+        color: brand.withValues(alpha: isDark ? 0.10 : 0.05),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: line.withValues(alpha: 0.55)),
+      ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         child: Row(
@@ -550,7 +547,7 @@ class _RepeatPrescriptionTile extends StatelessWidget {
               child: Text(
                 'Aplicar',
                 style: FocuxHubTypography.body(color: primary).copyWith(
-                  fontWeight: FontWeight.w900,
+                  fontWeight: FontWeight.w800,
                 ),
               ),
             ),
@@ -582,7 +579,7 @@ class _ModeHint extends StatelessWidget {
       decoration: BoxDecoration(
         color: color.withValues(alpha: isDark ? 0.16 : 0.10),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: line),
+        border: Border.all(color: line.withValues(alpha: 0.55)),
       ),
       child: Row(
         children: [

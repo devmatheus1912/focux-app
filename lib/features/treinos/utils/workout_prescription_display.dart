@@ -29,3 +29,19 @@ TextStyle activePrescriptionLineStyle({required Color brand}) =>
       color: brand,
       fontWeight: FontWeight.w800,
     );
+
+/// Strip inset da prescrição — sem glow (paridade dock + Perfil inset).
+BoxDecoration activePrescriptionStripDecoration({
+  required Color brand,
+  required bool isDark,
+}) {
+  return BoxDecoration(
+    color: brand.withValues(alpha: isDark ? 0.12 : 0.06),
+    borderRadius: BorderRadius.circular(14),
+    border: Border.all(color: brand.withValues(alpha: 0.22)),
+  );
+}
+
+/// Métricas de volume (séries, reps, descanso, carga).
+TextStyle activePrescriptionMetricStyle({required Color ink}) =>
+    FxSettingsLayout.rowMetric(color: ink).copyWith(fontWeight: FontWeight.w800);
