@@ -241,7 +241,7 @@ extension _AddExercicioToTreinoScreenActions
           );
       await _persistAfterAdd(exercicioId);
       AnalyticsService.instance.track(
-        'quick_add_padrao',
+        'quick_add_exercicio',
         props: {'exId': exercicio.id, 'treinoId': widget.treinoId},
       );
       if (mounted) {

@@ -24,7 +24,7 @@ void main() {
     ),
     libraryCount: 187,
     shortcuts: const [],
-    uiHints: TreinoPickerUiHints.fallback(librarySize: 187, jaNoTreino: 0),
+    uiHints: TreinoPickerUiHints.fallback(librarySize: 187),
   );
 
   final pickerPage = ExercicioPickerPage(

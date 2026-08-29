@@ -108,10 +108,7 @@ class _AddExercicioToTreinoScreenState
     final pickerHints = pickerAsync.maybeWhen(
       data: (home) => home.uiHints,
       orElse:
-          () => TreinoPickerUiHints.fallback(
-            librarySize: 0,
-            jaNoTreino: 0,
-          ),
+          () => TreinoPickerUiHints.fallback(librarySize: 0),
     );
     final treinoAsync = pickerAsync.whenData((h) => h.treino);
     final alreadyInTreinoIds = _treinoExercicioIds(treinoAsync);

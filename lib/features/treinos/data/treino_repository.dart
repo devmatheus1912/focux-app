@@ -204,16 +204,12 @@ class TreinosHomeBundle {
 
 class TreinoPickerUiHints {
   final String searchPlaceholder;
-  final String libraryCaption;
   final String createCtaLabel;
-  final String templateCtaLabel;
   final String? emptyLibraryHint;
 
   const TreinoPickerUiHints({
     required this.searchPlaceholder,
-    required this.libraryCaption,
     required this.createCtaLabel,
-    required this.templateCtaLabel,
     this.emptyLibraryHint,
   });
 
@@ -221,25 +217,14 @@ class TreinoPickerUiHints {
       TreinoPickerUiHints(
         searchPlaceholder: j['searchPlaceholder'] as String? ??
             'Supino, agachamento, remada…',
-        libraryCaption: j['libraryCaption'] as String? ?? '',
         createCtaLabel: j['createCtaLabel'] as String? ?? 'Novo exercício',
-        templateCtaLabel:
-            j['templateCtaLabel'] as String? ?? 'Montar com modelo',
         emptyLibraryHint: j['emptyLibraryHint'] as String?,
       );
 
-  factory TreinoPickerUiHints.fallback({
-    required int librarySize,
-    required int jaNoTreino,
-  }) =>
+  factory TreinoPickerUiHints.fallback({required int librarySize}) =>
       TreinoPickerUiHints(
         searchPlaceholder: 'Supino, agachamento, remada…',
-        libraryCaption: librarySize == 0
-            ? 'Biblioteca vazia'
-            : '$librarySize exercícios'
-                '${jaNoTreino > 0 ? ' · $jaNoTreino no treino' : ''}',
         createCtaLabel: 'Cadastrar exercício',
-        templateCtaLabel: 'Montar por modelo',
         emptyLibraryHint: librarySize == 0
             ? 'Importe a biblioteca ou crie seu primeiro exercício.'
             : null,
@@ -281,10 +266,7 @@ class TreinoPickerHomeBundle {
       libraryCount: libraryCount,
       shortcuts: shortcuts,
       uiHints: hintsRaw == null
-          ? TreinoPickerUiHints.fallback(
-              librarySize: libraryCount,
-              jaNoTreino: treino.exercicios.length,
-            )
+          ? TreinoPickerUiHints.fallback(librarySize: libraryCount)
           : TreinoPickerUiHints.fromJson(hintsRaw),
     );
   }
