@@ -13,7 +13,7 @@ String dartEnumNameToBackendKey(String dartEnumName) {
   return buffer.toString();
 }
 
-/// Lê contagem de stats do picker (`porPadrao` / `porGrupo`).
+/// Lê contagem de stats do picker (`porGrupo`).
 int exercisePickerStatCount(Map<String, int> stats, String dartEnumName) {
   final backendKey = dartEnumNameToBackendKey(dartEnumName);
   return stats[dartEnumName] ?? stats[backendKey] ?? 0;

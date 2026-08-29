@@ -48,7 +48,6 @@ void main() {
   Override statsOverride() => exercicioPickerStatsProvider.overrideWith(
     (ref) async => const ExercicioPickerStats(
       total: 187,
-      porPadrao: {'SQUAT': 12, 'PUSH_HORIZONTAL': 8},
       porGrupo: {'PEITO': 10},
     ),
   );

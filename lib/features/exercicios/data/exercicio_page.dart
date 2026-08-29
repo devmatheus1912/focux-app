@@ -50,12 +50,10 @@ class ExercicioPickerPage {
 
 class ExercicioPickerStats {
   final int total;
-  final Map<String, int> porPadrao;
   final Map<String, int> porGrupo;
 
   const ExercicioPickerStats({
     required this.total,
-    required this.porPadrao,
     required this.porGrupo,
   });
 
@@ -72,7 +70,6 @@ class ExercicioPickerStats {
 
     return ExercicioPickerStats(
       total: (j['total'] as num?)?.toInt() ?? 0,
-      porPadrao: parseMap(j['porPadrao']),
       porGrupo: parseMap(j['porGrupo']),
     );
   }
