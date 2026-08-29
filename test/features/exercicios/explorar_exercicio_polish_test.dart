@@ -20,5 +20,8 @@ void main() {
     expect(templates, contains('_templateTileSubtitle'));
     expect(templates, contains("value: ''"));
     expect(templates, isNot(contains(r"value: '$dias")));
+    expect(templates, contains('FxSettingsGroup('));
+    expect(templates, contains('header: _templateDayTitle'));
+    expect(templates, isNot(contains('child: InkWell(')));
   });
 }

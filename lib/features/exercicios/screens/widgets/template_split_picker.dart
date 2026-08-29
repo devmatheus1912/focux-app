@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/brand_palette.dart';
 import '../../../../core/theme/design_tokens.dart';
 import '../../../../core/theme/focux_hub_typography.dart';
-import '../../../../core/theme/tokens_strip.dart';
 import '../../../../core/widgets/feedback_helper.dart';
 import '../../../../core/widgets/fx_bottom_sheet.dart';
 import '../../../../core/widgets/fx_settings_group.dart';
@@ -199,6 +198,8 @@ class _TemplateSlotEditorState extends ConsumerState<_TemplateSlotEditor> {
     final done = _done.length;
     final scheme = Theme.of(context).colorScheme;
     final mute = scheme.onSurfaceVariant;
+    final primary = scheme.primary;
+    final soft = BrandPalette.softened(primary);
 
     return FxShellScaffold(
       useMesh: true,
@@ -209,61 +210,42 @@ class _TemplateSlotEditorState extends ConsumerState<_TemplateSlotEditor> {
       ),
       body: ListView(
         padding: EdgeInsets.fromLTRB(
-          16,
-          12,
-          16,
-          MediaQuery.paddingOf(context).bottom + 18,
+          FxSettingsLayout.pageInset,
+          FxSettingsLayout.groupGap,
+          FxSettingsLayout.pageInset,
+          MediaQuery.paddingOf(context).bottom + FxSettingsLayout.footerAfterGroup,
         ),
         children: [
           _TemplateProgressCard(done: done, total: slotsTotal),
-          const SizedBox(height: 18),
+          const SizedBox(height: FxSettingsLayout.groupGap),
           for (final (dayIndex, day) in widget.template.dias.indexed) ...[
-            Text(
-              _templateDayTitle(day.nome, dayIndex),
-              style: FocuxHubTypography.body(color: scheme.onSurface).copyWith(
-                fontWeight: FontWeight.w900,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Container(
-              decoration: BoxDecoration(
-                color: scheme.surface,
-                borderRadius: BorderRadius.circular(TokensStrip.rCard),
-                border: Border.all(
-                  color: scheme.outlineVariant.withValues(alpha: 0.7),
-                ),
-              ),
-              child: Column(
-                children: [
-                  for (var i = 0; i < day.slots.length; i++) ...[
-                    _SlotTile(
-                      done: _done.contains('${day.nome}-$i'),
-                      slot: day.slots[i],
-                      saving: _saving,
-                      alreadyInTreinoIds: widget.alreadyInTreinoIds,
-                      onChoose: (ex) async {
-                        setState(() => _saving = true);
-                        try {
-                          await widget.onAdicionar(ex);
-                          if (mounted) {
-                            setState(() => _done.add('${day.nome}-$i'));
-                          }
-                        } finally {
-                          if (mounted) setState(() => _saving = false);
+            FxSettingsGroup(
+              accent: primary,
+              header: _templateDayTitle(day.nome, dayIndex),
+              children: [
+                for (var i = 0; i < day.slots.length; i++)
+                  _SlotTile(
+                    done: _done.contains('${day.nome}-$i'),
+                    slot: day.slots[i],
+                    saving: _saving,
+                    accent: soft,
+                    showDivider: i < day.slots.length - 1,
+                    alreadyInTreinoIds: widget.alreadyInTreinoIds,
+                    onChoose: (ex) async {
+                      setState(() => _saving = true);
+                      try {
+                        await widget.onAdicionar(ex);
+                        if (mounted) {
+                          setState(() => _done.add('${day.nome}-$i'));
                         }
-                      },
-                    ),
-                    if (i != day.slots.length - 1)
-                      Divider(
-                        height: 1,
-                        indent: 56,
-                        color: scheme.outlineVariant.withValues(alpha: 0.52),
-                      ),
-                  ],
-                ],
-              ),
+                      } finally {
+                        if (mounted) setState(() => _saving = false);
+                      }
+                    },
+                  ),
+              ],
             ),
-            const SizedBox(height: 18),
+            const SizedBox(height: FxSettingsLayout.groupGap),
           ],
           if (_saving)
             Padding(
@@ -423,6 +405,8 @@ class _SlotTile extends StatelessWidget {
     required this.done,
     required this.slot,
     required this.saving,
+    required this.accent,
+    required this.showDivider,
     required this.onChoose,
     this.alreadyInTreinoIds = const {},
   });
@@ -430,16 +414,27 @@ class _SlotTile extends StatelessWidget {
   final bool done;
   final TemplateSlot slot;
   final bool saving;
+  final Color accent;
+  final bool showDivider;
   final ValueChanged<Exercicio> onChoose;
   final Set<int> alreadyInTreinoIds;
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return InkWell(
+    final good = EagleTokens.good;
+    return FxSettingsTile(
+      icon:
+          done
+              ? Icons.check_circle_rounded
+              : Icons.add_circle_outline_rounded,
+      accent: done ? good : accent,
+      label: slot.label,
+      subtitle: done ? 'Adicionado ao treino' : 'Escolher exercício',
+      value: '',
+      showDivider: showDivider,
       onTap:
           saving
-              ? null
+              ? () {}
               : () => showFxBottomSheet(
                 context: context,
                 builder:
@@ -450,43 +445,6 @@ class _SlotTile extends StatelessWidget {
                       onAdicionar: onChoose,
                     ),
               ),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(14, 13, 12, 13),
-        child: Row(
-          children: [
-            Icon(
-              done
-                  ? Icons.check_circle_rounded
-                  : Icons.add_circle_outline_rounded,
-              color: done ? EagleTokens.good : scheme.primary,
-              size: 21,
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    slot.label,
-                    style: FocuxHubTypography.cardTitle(
-                      color: scheme.onSurface,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    done ? 'Adicionado ao treino' : 'Escolher exercício',
-                    style: FocuxHubTypography.bodyMuted(
-                      color: scheme.onSurfaceVariant,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Icon(Icons.chevron_right_rounded, color: scheme.onSurfaceVariant),
-          ],
-        ),
-      ),
     );
   }
 }
