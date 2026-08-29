@@ -62,15 +62,20 @@ void main() {
     expect(screen, contains('TreinosLayout.touchTarget'));
     expect(screen, contains('TreinoHomeSheetSurface'));
     expect(screen, contains('treino_home_sheet.dart'));
+    final editor =
+        File(
+          'lib/features/treinos/widgets/prescription_editor_sheet.dart',
+        ).readAsStringSync();
     expect(
-      File(
-        'lib/features/treinos/widgets/prescription_editor_sheet.dart',
-      ).readAsStringSync(),
+      editor,
       allOf(
         contains('FxSettingsGroup'),
         contains('stickyFooter'),
         contains('contextSubtitle'),
-        contains('AlunoSegmentedChoice'),
+        contains('showFxInsetPickerSheet'),
+        contains("header: 'Prescrição'"),
+        contains("header: 'Mais detalhes'"),
+        isNot(contains('AlunoSegmentedChoice')),
       ),
     );
     expect(screen, isNot(contains('ChoiceChip')));
@@ -109,14 +114,17 @@ void main() {
       videoBlock,
       allOf(
         contains('ExerciseVideoSpecTips.open'),
-        contains('FxHelpIconButton'),
+        contains('FxSettingsGroup'),
+        contains("header: 'Vídeo'"),
+        contains('onHelpTap'),
         contains('Semantics('),
         contains('liveRegion: locked'),
         contains('Demo da biblioteca ou envie o seu'),
-        isNot(contains('Celular em pé')),
-        isNot(contains('ExerciseVideoUploadStrip')),
       ),
     );
+    expect(videoBlock, isNot(contains('Celular em pé')));
+    expect(videoBlock, isNot(contains('ExerciseVideoUploadStrip')));
+    expect(videoBlock, isNot(contains('fxStripCardDecoration')));
     expect(videoBlock, isNot(contains('Ver seu vídeo')));
     expect(videoBlock, isNot(contains('Opcional · vertical')));
     expect(

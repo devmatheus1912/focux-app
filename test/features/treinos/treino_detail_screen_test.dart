@@ -26,9 +26,9 @@ void main() {
           nome: 'Supino reto',
           grupoMuscularPrimario: GrupoMuscular.peito,
         ),
-        series: 3,
-        repeticoes: '10-12',
-        descansoSegundos: 60,
+        series: 4,
+        repeticoes: '8-12',
+        descansoSegundos: 75,
         ordem: 0,
       ),
     ],
@@ -72,8 +72,8 @@ void main() {
     expect(find.bySemanticsLabel('Detalhe do treino'), findsOneWidget);
     expect(find.text('Treino Força'), findsWidgets);
     expect(find.text('Template base'), findsOneWidget);
-    expect(find.text('1 exercício · 3 séries · 1 grupo'), findsOneWidget);
-    expect(find.text('3×10-12 · 60s'), findsOneWidget);
+    expect(find.text('1 exercício · 4 séries · 1 grupo'), findsOneWidget);
+    expect(find.text('4×8-12 · 75s'), findsOneWidget);
     expect(find.text('Atualizado agora'), findsOneWidget);
     expect(find.byTooltip('Como montar este treino'), findsOneWidget);
     expect(find.text('Adicionar exercício'), findsWidgets);
@@ -118,8 +118,11 @@ void main() {
     await tester.pump(const Duration(milliseconds: 400));
 
     expect(find.text('Editar prescrição'), findsOneWidget);
-    expect(find.text('Volume'), findsOneWidget);
+    expect(find.text('Prescrição'), findsOneWidget);
+    expect(find.text('Mais detalhes'), findsOneWidget);
+    expect(find.text('Objetivo'), findsOneWidget);
     expect(find.text('Tipo de série'), findsOneWidget);
+    expect(find.text('Vídeo'), findsOneWidget);
     expect(find.text('Salvar prescrição'), findsOneWidget);
     expect(find.text('Hipertrofia'), findsOneWidget);
   });

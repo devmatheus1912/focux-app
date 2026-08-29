@@ -93,11 +93,27 @@ String matchWorkoutBuilderPresetId({
   return best.id;
 }
 
-/// Atalhos de repetição por objetivo — 1 toque no sheet.
+/// Atalhos de repetição por objetivo — 1 toque no sheet de reps.
 List<String> workoutBuilderRepShortcuts(String presetId) {
   return switch (presetId) {
     'strength' => const ['3-6', '4-6', '5'],
     'endurance' => const ['15-20', '12-20', 'AMRAP'],
     _ => const ['8-12', '10-15', '12-15'],
+  };
+}
+
+String workoutTipoSerieLabel(String tipoSerie) {
+  return switch (tipoSerie.trim().toUpperCase()) {
+    'SUPERSET' => 'Superset',
+    'DROPSET' => 'Drop set',
+    _ => 'Normal',
+  };
+}
+
+String? workoutTipoSerieSubtitle(String tipoSerie) {
+  return switch (tipoSerie.trim().toUpperCase()) {
+    'SUPERSET' => 'Dois exercícios sem pausa entre eles.',
+    'DROPSET' => 'Reduza a carga nas observações.',
+    _ => 'Séries isoladas com descanso.',
   };
 }

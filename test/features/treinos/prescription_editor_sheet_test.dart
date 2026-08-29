@@ -96,7 +96,9 @@ void main() {
     expect(find.byType(PrescriptionEditorSheet), findsOneWidget);
     expect(find.text('Editar prescrição'), findsOneWidget);
     expect(find.text('Supino declinado máquina'), findsOneWidget);
-    expect(find.text('Volume'), findsOneWidget);
+    expect(find.text('Prescrição'), findsOneWidget);
+    expect(find.text('Mais detalhes'), findsOneWidget);
+    expect(find.text('Objetivo'), findsOneWidget);
     expect(find.text('Tipo de série'), findsOneWidget);
     expect(find.text('Hipertrofia'), findsOneWidget);
     expect(find.text('Salvar prescrição'), findsOneWidget);

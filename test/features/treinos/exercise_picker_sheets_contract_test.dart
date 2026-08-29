@@ -21,11 +21,15 @@ void main() {
     expect(filters, contains('FxInsetPickerOption.list'));
     expect(filters, contains('edgeToEdgeRows: true'));
     expect(filters, isNot(contains('_FilterPickerTile')));
-    expect(prescription, contains('AlunoSegmentedChoice'));
+    expect(prescription, contains('showFxInsetPickerSheet'));
+    expect(prescription, contains('FxSettingsTile'));
     expect(prescription, contains('FxSettingsGroup'));
-    expect(prescription, contains('_PrescriptionRepsRow'));
-    expect(prescription, contains("header: 'Volume'"));
-    expect(prescription, contains("header: 'Tipo de série'"));
+    expect(prescription, contains("header: 'Prescrição'"));
+    expect(prescription, contains("header: 'Mais detalhes'"));
+    expect(prescription, contains('_openRepsSheet'));
+    expect(prescription, isNot(contains('AlunoSegmentedChoice')));
+    expect(prescription, isNot(contains('_PrescriptionRepsRow')));
+    expect(prescription, isNot(contains("header: 'Volume'")));
     expect(prescription, isNot(contains('Ajustes rápidos')));
     expect(prescription, isNot(contains('explorar')));
     expect(

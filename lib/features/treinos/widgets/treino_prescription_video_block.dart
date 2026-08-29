@@ -11,8 +11,8 @@ import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
-import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
+import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../exercicios/data/exercicio_repository.dart';
 import '../../exercicios/providers/exercicios_provider.dart';
@@ -321,116 +321,92 @@ class _TreinoPrescriptionVideoBlockState
   Widget build(BuildContext context) {
     final chrome = ShellChrome.forDark(widget.isDark);
     final primary = Theme.of(context).colorScheme.primary;
+    final brand = BrandPalette.softened(primary);
     final locked = widget.busy || _mediaLoading;
     final hasPersonal = exercicioHasPersonalVideo(_exercicio);
     final canPreview = canPreviewExerciseMedia(_exercicio);
     final title =
         locked
-            ? 'Enviando vídeo…'
+            ? 'Enviando…'
             : hasPersonal
-            ? 'Seu vídeo está pronto'
-            : 'Vídeo';
-    final subtitle =
+            ? 'Seu vídeo'
+            : 'Demonstração';
+    final caption =
         locked
             ? 'Não feche o app enquanto o envio termina.'
             : hasPersonal
             ? 'Toque em Ver para revisar ou Trocar para enviar outro.'
-            : 'Demo da biblioteca ou envie o seu · ? para detalhes';
+            : 'Demo da biblioteca ou envie o seu.';
 
     return Semantics(
       container: true,
       liveRegion: locked,
-      label: '$title. $subtitle',
-      child: DecoratedBox(
-        decoration: fxStripCardDecoration(
-          context,
-          accent: hasPersonal || locked ? primary : null,
-        ),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(12, 10, 4, 8),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Row(
+      label: '$title. $caption',
+      child: FxSettingsGroup(
+        header: 'Vídeo',
+        caption: caption,
+        accent: primary,
+        helpTooltip: 'Como filmar',
+        onHelpTap: () => ExerciseVideoSpecTips.open(context),
+        children: [
+          if (locked)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: TokensStrip.s3),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Container(
-                    width: FxSettingsLayout.iconSize + 10,
-                    height: FxSettingsLayout.iconSize + 10,
-                    decoration: BoxDecoration(
-                      color: BrandPalette.soft(primary, dark: widget.isDark),
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    child: Icon(
-                      locked
-                          ? Icons.hourglass_top_rounded
-                          : hasPersonal
-                          ? Icons.play_circle_fill_rounded
-                          : Icons.videocam_outlined,
-                      color: BrandPalette.softened(primary),
-                      size: FxSettingsLayout.iconSize,
-                    ),
-                  ),
-                  SizedBox(width: TokensStrip.s3),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.hourglass_top_rounded,
+                        size: FxSettingsLayout.iconSize,
+                        color: brand,
+                      ),
+                      SizedBox(width: FxSettingsLayout.iconGap),
+                      Expanded(
+                        child: Text(
                           title,
-                          style: FocuxHubTypography.cardTitle(
-                            color: chrome.ink,
-                          ),
+                          style: FxSettingsLayout.rowLabel(color: chrome.ink),
                         ),
-                        const SizedBox(height: 2),
-                        Text(
-                          subtitle,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: FocuxHubTypography.bodyMuted(
-                            color: chrome.mute,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                  FxHelpIconButton(
-                    tooltip: 'Como filmar',
-                    onTap: () => ExerciseVideoSpecTips.open(context),
-                    expandHitTarget: true,
+                  SizedBox(height: TokensStrip.s3),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: LinearProgressIndicator(
+                      minHeight: 6,
+                      backgroundColor: primary.withValues(alpha: 0.12),
+                      color: primary,
+                    ),
                   ),
                 ],
               ),
-              if (locked) ...[
-                SizedBox(height: TokensStrip.s3),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: LinearProgressIndicator(
-                    minHeight: 6,
-                    backgroundColor: primary.withValues(alpha: 0.12),
-                    color: primary,
+            )
+          else
+            ConstrainedBox(
+              constraints: const BoxConstraints(
+                minHeight: FxSettingsLayout.rowMinHeight,
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    hasPersonal
+                        ? Icons.play_circle_fill_rounded
+                        : Icons.videocam_outlined,
+                    size: FxSettingsLayout.iconSize,
+                    color: brand,
                   ),
-                ),
-              ] else
-                Row(
-                  children: [
-                    if (canPreview)
-                      TextButton(
-                        onPressed: _preview,
-                        style: TextButton.styleFrom(
-                          minimumSize: const Size(
-                            FxHomeSheetChrome.touchTarget,
-                            FxHomeSheetChrome.touchTarget,
-                          ),
-                          foregroundColor: primary,
-                          textStyle: const TextStyle(
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                        child: Text(hasPersonal ? 'Ver' : 'Demo'),
-                      ),
+                  SizedBox(width: FxSettingsLayout.iconGap),
+                  Expanded(
+                    child: Text(
+                      title,
+                      style: FxSettingsLayout.rowLabel(color: chrome.ink),
+                    ),
+                  ),
+                  if (canPreview)
                     TextButton(
-                      onPressed: _upload,
+                      onPressed: _preview,
                       style: TextButton.styleFrom(
                         minimumSize: const Size(
                           FxHomeSheetChrome.touchTarget,
@@ -439,28 +415,37 @@ class _TreinoPrescriptionVideoBlockState
                         foregroundColor: primary,
                         textStyle: const TextStyle(fontWeight: FontWeight.w800),
                       ),
-                      child: Text(hasPersonal ? 'Trocar' : 'Enviar'),
+                      child: Text(hasPersonal ? 'Ver' : 'Demo'),
                     ),
-                    if (hasPersonal)
-                      TextButton(
-                        onPressed: _remove,
-                        style: TextButton.styleFrom(
-                          minimumSize: const Size(
-                            FxHomeSheetChrome.touchTarget,
-                            FxHomeSheetChrome.touchTarget,
-                          ),
-                          foregroundColor: chrome.mute,
-                          textStyle: const TextStyle(
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        child: const Text('Remover'),
+                  TextButton(
+                    onPressed: _upload,
+                    style: TextButton.styleFrom(
+                      minimumSize: const Size(
+                        FxHomeSheetChrome.touchTarget,
+                        FxHomeSheetChrome.touchTarget,
                       ),
-                  ],
-                ),
-            ],
-          ),
-        ),
+                      foregroundColor: primary,
+                      textStyle: const TextStyle(fontWeight: FontWeight.w800),
+                    ),
+                    child: Text(hasPersonal ? 'Trocar' : 'Enviar'),
+                  ),
+                  if (hasPersonal)
+                    TextButton(
+                      onPressed: _remove,
+                      style: TextButton.styleFrom(
+                        minimumSize: const Size(
+                          FxHomeSheetChrome.touchTarget,
+                          FxHomeSheetChrome.touchTarget,
+                        ),
+                        foregroundColor: chrome.mute,
+                        textStyle: const TextStyle(fontWeight: FontWeight.w700),
+                      ),
+                      child: const Text('Remover'),
+                    ),
+                ],
+              ),
+            ),
+        ],
       ),
     );
   }

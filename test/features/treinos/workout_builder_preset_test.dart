@@ -35,6 +35,9 @@ void main() {
       ),
       'strength',
     );
+    expect(workoutTipoSerieLabel('SUPERSET'), 'Superset');
+    expect(workoutTipoSerieLabel('DROPSET'), 'Drop set');
+    expect(workoutTipoSerieLabel('NORMAL'), 'Normal');
   });
 
   test('workout builder sends premium prescription fields to backend', () {
