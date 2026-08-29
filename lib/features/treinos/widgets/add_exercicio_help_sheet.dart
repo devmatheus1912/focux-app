@@ -16,7 +16,7 @@ Future<void> showAddExercicioHelpSheet(BuildContext context) {
       ),
       FxHelpTip(
         'Categorias',
-        'Todos lista A–Z. Movimento e Músculo abrem as categorias da biblioteca.',
+        'Todos lista A–Z. Músculo abre peito, costas, pernas… — busque pelo nome quando souber o exercício.',
         icon: 'route',
       ),
       FxHelpTip(

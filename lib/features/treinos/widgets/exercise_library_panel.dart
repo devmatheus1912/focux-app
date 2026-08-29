@@ -41,9 +41,9 @@ typedef ExerciseLibraryPageLoader =
       GrupoMuscular? grupo,
     });
 
-enum ExerciseLibraryBrowseMode { todos, movimento, musculo }
+enum ExerciseLibraryBrowseMode { todos, musculo }
 
-/// Biblioteca paginada: busca, filtros, segmentos e lista A–Z.
+/// Biblioteca paginada: busca, filtros, músculo e lista A–Z.
 class ExerciseLibraryPanel extends ConsumerStatefulWidget {
   const ExerciseLibraryPanel({
     super.key,
@@ -89,7 +89,6 @@ class _ExerciseLibraryPanelState extends ConsumerState<ExerciseLibraryPanel> {
   late ExercisePickerFilter _filter;
   String _committedQuery = '';
   ExerciseLibraryBrowseMode _browse = ExerciseLibraryBrowseMode.todos;
-  PadraoMovimento? _padrao;
   GrupoMuscular? _grupo;
   final Map<int, Exercicio> _localUpdates = {};
   final List<Exercicio> _items = [];
@@ -101,19 +100,6 @@ class _ExerciseLibraryPanelState extends ConsumerState<ExerciseLibraryPanel> {
   int _totalElements = 0;
   String? _error;
 
-  static const _padroes = [
-    PadraoMovimento.pushHorizontal,
-    PadraoMovimento.pushVertical,
-    PadraoMovimento.pullHorizontal,
-    PadraoMovimento.pullVertical,
-    PadraoMovimento.squat,
-    PadraoMovimento.hinge,
-    PadraoMovimento.lunge,
-    PadraoMovimento.coreAntiExtensao,
-    PadraoMovimento.coreAntiRotacao,
-    PadraoMovimento.cardioHiit,
-  ];
-
   Exercicio _resolve(Exercicio exercicio) =>
       _localUpdates[exercicio.id] ?? exercicio;
 
@@ -121,24 +107,18 @@ class _ExerciseLibraryPanelState extends ConsumerState<ExerciseLibraryPanel> {
 
   bool get _showCategoryTiles =>
       !_searching &&
-      ((_browse == ExerciseLibraryBrowseMode.movimento && _padrao == null) ||
-          (_browse == ExerciseLibraryBrowseMode.musculo && _grupo == null));
+      _browse == ExerciseLibraryBrowseMode.musculo &&
+      _grupo == null;
 
   bool get _showRecents =>
       !_searching &&
       _browse == ExerciseLibraryBrowseMode.todos &&
-      _padrao == null &&
       _grupo == null &&
       widget.recentIds.isNotEmpty;
 
   String? get _categoryChipLabel {
-    if (_padrao != null) {
-      return TaxonomyLabels.padrao[_padrao] ?? _padrao!.name;
-    }
-    if (_grupo != null) {
-      return TaxonomyLabels.grupo[_grupo] ?? _grupo!.name;
-    }
-    return null;
+    if (_grupo == null) return null;
+    return TaxonomyLabels.grupo[_grupo] ?? _grupo!.name;
   }
 
   @override
@@ -189,11 +169,10 @@ class _ExerciseLibraryPanelState extends ConsumerState<ExerciseLibraryPanel> {
   }
 
   void _setBrowse(ExerciseLibraryBrowseMode mode) {
-    if (_browse == mode && _padrao == null && _grupo == null) return;
+    if (_browse == mode && _grupo == null) return;
     HapticFeedback.selectionClick();
     setState(() {
       _browse = mode;
-      _padrao = null;
       _grupo = null;
     });
     if (!_showCategoryTiles) {
@@ -201,32 +180,18 @@ class _ExerciseLibraryPanelState extends ConsumerState<ExerciseLibraryPanel> {
     }
   }
 
-  void _selectPadrao(PadraoMovimento padrao) {
-    HapticFeedback.selectionClick();
-    setState(() {
-      _browse = ExerciseLibraryBrowseMode.movimento;
-      _padrao = padrao;
-      _grupo = null;
-    });
-    _fetchPage(reset: true);
-  }
-
   void _selectGrupo(GrupoMuscular grupo) {
     HapticFeedback.selectionClick();
     setState(() {
       _browse = ExerciseLibraryBrowseMode.musculo;
       _grupo = grupo;
-      _padrao = null;
     });
     _fetchPage(reset: true);
   }
 
   void _clearCategory() {
     HapticFeedback.selectionClick();
-    setState(() {
-      _padrao = null;
-      _grupo = null;
-    });
+    setState(() => _grupo = null);
     if (_browse == ExerciseLibraryBrowseMode.todos) {
       _fetchPage(reset: true);
     }
@@ -274,7 +239,7 @@ class _ExerciseLibraryPanelState extends ConsumerState<ExerciseLibraryPanel> {
         busca: _committedQuery,
         page: _page,
         filter: _filter,
-        padrao: _padrao,
+        padrao: null,
         grupo: _grupo,
       );
       if (!mounted) return;
@@ -444,10 +409,7 @@ class _ExerciseLibraryPanelState extends ConsumerState<ExerciseLibraryPanel> {
   ) {
     if (_showCategoryTiles) {
       return _CategoryTilesBody(
-        mode: _browse,
-        padroes: _padroes,
         primary: primary,
-        onSelectPadrao: _selectPadrao,
         onSelectGrupo: _selectGrupo,
       );
     }
@@ -563,11 +525,6 @@ class _BrowseSegmentStrip extends StatelessWidget {
       semantics: 'Todos os exercícios',
     ),
     (
-      mode: ExerciseLibraryBrowseMode.movimento,
-      label: 'Movimento',
-      semantics: 'Filtrar por padrão de movimento',
-    ),
-    (
       mode: ExerciseLibraryBrowseMode.musculo,
       label: 'Músculo',
       semantics: 'Filtrar por grupo muscular',
@@ -583,7 +540,7 @@ class _BrowseSegmentStrip extends StatelessWidget {
 
     return Semantics(
       container: true,
-      label: 'Ver todos, por movimento ou por músculo',
+      label: 'Ver todos ou por músculo',
       child: DecoratedBox(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(TokensStrip.rSm),
@@ -707,17 +664,11 @@ class _CategoryClearChip extends StatelessWidget {
 
 class _CategoryTilesBody extends ConsumerWidget {
   const _CategoryTilesBody({
-    required this.mode,
-    required this.padroes,
     required this.primary,
-    required this.onSelectPadrao,
     required this.onSelectGrupo,
   });
 
-  final ExerciseLibraryBrowseMode mode;
-  final List<PadraoMovimento> padroes;
   final Color primary;
-  final ValueChanged<PadraoMovimento> onSelectPadrao;
   final ValueChanged<GrupoMuscular> onSelectGrupo;
 
   @override
@@ -755,37 +706,15 @@ class _CategoryTilesBody extends ConsumerWidget {
             ),
           ),
       data: (stats) {
-        final isMovimento = mode == ExerciseLibraryBrowseMode.movimento;
-        final items =
-            isMovimento
-                ? [
-                  for (final padrao in padroes)
-                    if (exercisePickerStatCount(stats.porPadrao, padrao.name) >
-                        0)
-                      (
-                        label: TaxonomyLabels.padrao[padrao] ?? padrao.name,
-                        count: exercisePickerStatCount(
-                          stats.porPadrao,
-                          padrao.name,
-                        ),
-                        icon: Icons.account_tree_outlined,
-                        onTap: () => onSelectPadrao(padrao),
-                      ),
-                ]
-                : [
-                  for (final grupo in GrupoMuscular.values)
-                    if (exercisePickerStatCount(stats.porGrupo, grupo.name) > 0)
-                      (
-                        label: TaxonomyLabels.grupo[grupo] ?? grupo.name,
-                        count: exercisePickerStatCount(
-                          stats.porGrupo,
-                          grupo.name,
-                        ),
-                        icon: Icons.fitness_center_outlined,
-                        onTap: () => onSelectGrupo(grupo),
-                      ),
-                ]
-              ..sort((a, b) => b.count.compareTo(a.count));
+        final items = [
+          for (final grupo in GrupoMuscular.values)
+            if (exercisePickerStatCount(stats.porGrupo, grupo.name) > 0)
+              (
+                label: TaxonomyLabels.grupo[grupo] ?? grupo.name,
+                count: exercisePickerStatCount(stats.porGrupo, grupo.name),
+                onTap: () => onSelectGrupo(grupo),
+              ),
+        ]..sort((a, b) => b.count.compareTo(a.count));
 
         if (items.isEmpty) {
           return const Padding(
@@ -797,7 +726,7 @@ class _CategoryTilesBody extends ConsumerWidget {
             ),
             child: FxEmptyState(
               icon: 'search',
-              title: 'Sem categorias nesta visão',
+              title: 'Sem grupos musculares',
               subtitle: 'Volte para Todos ou busque pelo nome.',
             ),
           );
@@ -813,14 +742,11 @@ class _CategoryTilesBody extends ConsumerWidget {
           children: [
             FxSettingsGroup(
               accent: primary,
-              caption:
-                  isMovimento
-                      ? 'Padrões de movimento · ${items.length}'
-                      : 'Grupos musculares · ${items.length}',
+              caption: 'Grupos musculares · ${items.length}',
               children: [
                 for (var i = 0; i < items.length; i++)
                   FxSettingsTile(
-                    icon: items[i].icon,
+                    icon: Icons.fitness_center_outlined,
                     accent: soft,
                     label: items[i].label,
                     subtitle:

@@ -111,7 +111,7 @@ void main() {
     expect(find.bySemanticsLabel('Adicionar exercício'), findsOneWidget);
     expect(find.text('Treino Emagrecimento'), findsWidgets);
     expect(find.text('Todos'), findsOneWidget);
-    expect(find.text('Movimento'), findsOneWidget);
+    expect(find.text('Movimento'), findsNothing);
     expect(find.text('Músculo'), findsOneWidget);
     expect(find.text('Cadastrar exercício'), findsOneWidget);
     expect(find.text('Buscar'), findsNothing);
@@ -121,18 +121,18 @@ void main() {
     expect(find.textContaining('×'), findsWidgets);
   });
 
-  testWidgets('segmento Movimento mostra tiles sem aba Explorar', (
-    tester,
-  ) async {
+  testWidgets('segmento Músculo mostra grupos sem Explorar', (tester) async {
     await pumpScreen(tester, reduceMotion: true);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 80));
 
-    await tester.tap(find.text('Movimento'));
+    await tester.tap(find.text('Músculo'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 80));
 
     expect(find.text('Explorar'), findsNothing);
+    expect(find.text('Grupos musculares · 1'), findsOneWidget);
+    expect(find.text('Peito'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 }

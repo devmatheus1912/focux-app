@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('explorar por movimento segue picker inset e tiles de navegação', () {
+  test('biblioteca: músculo + lista inset; sem segmento Movimento', () {
     final panel = File(
       'lib/features/treinos/widgets/exercise_library_panel.dart',
     ).readAsStringSync();
@@ -11,10 +11,11 @@ void main() {
       'lib/features/exercicios/screens/widgets/template_split_picker.dart',
     ).readAsStringSync();
 
-    expect(panel, contains('ExerciseLibraryBrowseMode'));
+    expect(panel, contains('ExerciseLibraryBrowseMode.musculo'));
     expect(panel, contains('exercicioPickerStatsProvider'));
-    expect(panel, contains('FxSettingsGroup'));
-    expect(panel, contains('FxSettingsTile'));
+    expect(panel, contains('Grupos musculares'));
+    expect(panel, isNot(contains('ExerciseLibraryBrowseMode.movimento')));
+    expect(panel, isNot(contains("label: 'Movimento'")));
     expect(panel, isNot(contains('numeric: true')));
     expect(panel, isNot(contains('PadraoExerciciosBottomSheet')));
 
