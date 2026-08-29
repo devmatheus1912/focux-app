@@ -24,6 +24,10 @@ void main() {
     expect(prescription, contains('AlunoSegmentedChoice'));
     expect(prescription, contains('FxSettingsGroup'));
     expect(prescription, contains('_PrescriptionRepsRow'));
+    expect(prescription, contains("header: 'Volume'"));
+    expect(prescription, contains("header: 'Tipo de série'"));
+    expect(prescription, isNot(contains('Ajustes rápidos')));
+    expect(prescription, isNot(contains('explorar')));
     expect(
       File(
         'lib/features/treinos/screens/widgets/exercise_picker_filter_bar.dart',

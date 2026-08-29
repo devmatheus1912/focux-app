@@ -229,24 +229,11 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
                   widget.globalPresetMode
                       ? 'Prescrição padrão'
                       : 'Prescrição do exercício',
-              subtitle:
-                  widget.globalPresetMode
-                      ? 'Vale para as próximas adições rápidas nesta tela.'
-                      : 'Ajuste séries, carga e descanso antes de salvar.',
+              subtitle: _previewLine(),
               leading: Icon(
                 Icons.edit_note_rounded,
                 color: brand,
                 size: FxSettingsLayout.iconSize,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Padding(
-              padding: const EdgeInsets.only(left: _prescriptionLeadingWidth),
-              child: Text(
-                _previewLine(),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: activePrescriptionLineStyle(brand: brand),
               ),
             ),
             const SizedBox(height: TokensStrip.s3),
@@ -262,27 +249,24 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
               const SizedBox(height: TokensStrip.s3),
             ],
             FxSettingsGroup(
-              header: 'Ajustes rápidos',
+              header: 'Volume',
+              caption: selectedPreset.summary,
               accent: widget.primary,
               children: [
-                AlunoSegmentedChoice(
-                  options: [
-                    for (final preset in workoutBuilderPresets)
-                      (value: preset.id, label: preset.label),
-                  ],
-                  selected: _presetId,
-                  isDark: widget.isDark,
-                  onSelect: (value) {
-                    HapticFeedback.selectionClick();
-                    setState(() => _presetId = value);
-                    widget.onPresetSelected(value);
-                  },
-                ),
                 Padding(
-                  padding: const EdgeInsets.only(top: 6, bottom: 2),
-                  child: Text(
-                    selectedPreset.summary,
-                    style: FxSettingsLayout.footer(color: mute),
+                  padding: const EdgeInsets.fromLTRB(4, 6, 4, 8),
+                  child: AlunoSegmentedChoice(
+                    options: [
+                      for (final preset in workoutBuilderPresets)
+                        (value: preset.id, label: preset.label),
+                    ],
+                    selected: _presetId,
+                    isDark: widget.isDark,
+                    onSelect: (value) {
+                      HapticFeedback.selectionClick();
+                      setState(() => _presetId = value);
+                      widget.onPresetSelected(value);
+                    },
                   ),
                 ),
                 _PrescriptionStepperRow(
@@ -335,6 +319,7 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
                       () => _setRest(
                         adjustPrescriptionRestSeconds(restValue, 15),
                       ),
+                  showDivider: _showCarga,
                 ),
                 if (_showCarga)
                   _PrescriptionValueRow(
@@ -349,6 +334,7 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
                     keyboardType: const TextInputType.numberWithOptions(
                       decimal: true,
                     ),
+                    showDivider: false,
                   )
                 else
                   _PrescriptionExpandRow(
@@ -361,32 +347,31 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
                       HapticFeedback.selectionClick();
                       setState(() => _showCarga = true);
                     },
+                    showDivider: false,
                   ),
-                Divider(
-                  height: 1,
-                  thickness: FxSettingsLayout.dividerThickness,
-                  color: line,
-                ),
+              ],
+            ),
+            const SizedBox(height: FxSettingsLayout.groupGap),
+            FxSettingsGroup(
+              header: 'Tipo de série',
+              accent: widget.primary,
+              children: [
                 Padding(
-                  padding: const EdgeInsets.only(top: 2, bottom: 4),
-                  child: Text(
-                    'Tipo de série',
-                    style: FxSettingsLayout.sectionHeader(color: mute),
+                  padding: const EdgeInsets.fromLTRB(4, 6, 4, 8),
+                  child: AlunoSegmentedChoice(
+                    options: const [
+                      (value: 'NORMAL', label: 'Normal'),
+                      (value: 'SUPERSET', label: 'Superset'),
+                      (value: 'DROPSET', label: 'Drop set'),
+                    ],
+                    selected: _tipoSerie,
+                    isDark: widget.isDark,
+                    onSelect: (value) {
+                      HapticFeedback.selectionClick();
+                      setState(() => _tipoSerie = value);
+                      widget.onTipoSerieChanged(value);
+                    },
                   ),
-                ),
-                AlunoSegmentedChoice(
-                  options: const [
-                    (value: 'NORMAL', label: 'Normal'),
-                    (value: 'SUPERSET', label: 'Superset'),
-                    (value: 'DROPSET', label: 'Drop set'),
-                  ],
-                  selected: _tipoSerie,
-                  isDark: widget.isDark,
-                  onSelect: (value) {
-                    HapticFeedback.selectionClick();
-                    setState(() => _tipoSerie = value);
-                    widget.onTipoSerieChanged(value);
-                  },
                 ),
                 if (_tipoSerie == 'SUPERSET')
                   _PrescriptionValueRow(
@@ -402,7 +387,7 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
                   ),
                 if (_tipoSerie == 'DROPSET')
                   Padding(
-                    padding: const EdgeInsets.only(top: 4),
+                    padding: const EdgeInsets.fromLTRB(4, 0, 4, 8),
                     child: Text(
                       'Registre reduções de carga nas observações.',
                       style: FxSettingsLayout.footer(color: mute),
@@ -447,6 +432,7 @@ class _PrescriptionStepperRow extends StatelessWidget {
     required this.mute,
     required this.onDecrement,
     required this.onIncrement,
+    this.showDivider = true,
   });
 
   final String label;
@@ -458,11 +444,13 @@ class _PrescriptionStepperRow extends StatelessWidget {
   final Color mute;
   final VoidCallback onDecrement;
   final VoidCallback onIncrement;
+  final bool showDivider;
 
   @override
   Widget build(BuildContext context) {
     return _PrescriptionRowDivider(
       line: line,
+      showDivider: showDivider,
       child: SizedBox(
         height: 44,
         child: Row(
@@ -549,6 +537,7 @@ class _PrescriptionValueRow extends StatelessWidget {
     required this.ink,
     required this.mute,
     this.keyboardType,
+    this.showDivider = true,
   });
 
   final String label;
@@ -560,11 +549,13 @@ class _PrescriptionValueRow extends StatelessWidget {
   final Color ink;
   final Color mute;
   final TextInputType? keyboardType;
+  final bool showDivider;
 
   @override
   Widget build(BuildContext context) {
     return _PrescriptionRowDivider(
       line: line,
+      showDivider: showDivider,
       child: SizedBox(
         height: 44,
         child: Row(
@@ -730,14 +721,14 @@ class _RepChip extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(TokensStrip.rSm),
           child: DecoratedBox(
             decoration: BoxDecoration(
               color:
                   selected
                       ? brand.withValues(alpha: 0.12)
                       : Colors.transparent,
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(TokensStrip.rSm),
               border: Border.all(
                 color:
                     selected

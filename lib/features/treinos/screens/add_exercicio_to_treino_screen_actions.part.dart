@@ -186,7 +186,7 @@ extension _AddExercicioToTreinoScreenActions
       _repCtrl.text = preset.repeticoes;
       _descansoCtrl.text = preset.descansoSegundos.toString();
       _tipoSerie = preset.tipoSerie;
-      _observacoesCtrl.text = preset.observacoes;
+      // Observações ficam com o personal — tip de coaching do preset não polui o sheet.
       if (preset.grupoSuperset != null) {
         _grupoSupersetCtrl.text = preset.grupoSuperset.toString();
       }
