@@ -170,41 +170,46 @@ class _ExercisePickerSheetState extends State<_ExercisePickerSheet> {
             ),
           ),
           const SizedBox(height: 14),
-          TextField(
-            controller: _searchCtrl,
-            autofocus: widget.initialQuery.isEmpty,
-            textInputAction: TextInputAction.search,
-            decoration: InputDecoration(
-              hintText: widget.searchPlaceholder,
-              prefixIcon: Icon(Icons.search_rounded, color: primary),
-              suffixIcon:
-                  _searchCtrl.text.isEmpty
-                      ? null
-                      : IconButton(
-                        onPressed: () {
-                          _searchCtrl.clear();
-                          setState(() => _committedQuery = '');
-                          _fetchPage(reset: true);
-                        },
-                        icon: const Icon(Icons.close_rounded),
-                      ),
-              filled: true,
-              fillColor: isDark ? EagleTokens.darkCardHi : TokensStrip.cardBg,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 14,
-                vertical: 14,
-              ),
-              border: FxInputDeco.outlineBorder(
-                borderRadius: BorderRadius.circular(18),
-                borderSide: BorderSide(color: line),
-              ),
-              enabledBorder: FxInputDeco.outlineBorder(
-                borderRadius: BorderRadius.circular(18),
-                borderSide: BorderSide(color: line),
-              ),
-              focusedBorder: FxInputDeco.outlineBorder(
-                borderRadius: BorderRadius.circular(18),
-                borderSide: BorderSide(color: primary, width: 1.4),
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: FxSettingsLayout.groupPadH,
+            ),
+            child: TextField(
+              controller: _searchCtrl,
+              autofocus: widget.initialQuery.isEmpty,
+              textInputAction: TextInputAction.search,
+              decoration: InputDecoration(
+                hintText: widget.searchPlaceholder,
+                prefixIcon: Icon(Icons.search_rounded, color: primary),
+                suffixIcon:
+                    _searchCtrl.text.isEmpty
+                        ? null
+                        : IconButton(
+                          onPressed: () {
+                            _searchCtrl.clear();
+                            setState(() => _committedQuery = '');
+                            _fetchPage(reset: true);
+                          },
+                          icon: const Icon(Icons.close_rounded),
+                        ),
+                filled: true,
+                fillColor: isDark ? EagleTokens.darkCardHi : TokensStrip.cardBg,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 12,
+                ),
+                border: FxInputDeco.outlineBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: BorderSide(color: line),
+                ),
+                enabledBorder: FxInputDeco.outlineBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: BorderSide(color: line),
+                ),
+                focusedBorder: FxInputDeco.outlineBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: BorderSide(color: primary, width: 1.3),
+                ),
               ),
             ),
           ),
@@ -248,56 +253,67 @@ class _ExercisePickerSheetState extends State<_ExercisePickerSheet> {
               ),
             )
           else
-            ConstrainedBox(
-              constraints: BoxConstraints(
-                maxHeight: (maxHeight - 220).clamp(220.0, 480.0),
-              ),
-              child: ListView(
-                controller: _scrollCtrl,
-                keyboardDismissBehavior:
-                    ScrollViewKeyboardDismissBehavior.onDrag,
-                children: [
-                  FxSettingsGroup(
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: FxSettingsLayout.groupPadH,
+                ),
+                child: DecoratedBox(
+                  decoration: fxListCardDecoration(
+                    context,
                     accent: primary,
-                    children: [
-                      for (var i = 0; i < sorted.length; i++)
-                        _ExercisePickerTile(
-                          exercicio: sorted[i],
-                          selected: widget.selected?.id == sorted[i].id,
+                    radius: FxSettingsLayout.groupRadius,
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(
+                      FxSettingsLayout.groupRadius,
+                    ),
+                    child: ListView.builder(
+                      controller: _scrollCtrl,
+                      keyboardDismissBehavior:
+                          ScrollViewKeyboardDismissBehavior.onDrag,
+                      padding: const EdgeInsets.symmetric(
+                        vertical: FxSettingsLayout.groupPadV,
+                      ),
+                      itemCount: sorted.length + (_loadingMore ? 1 : 0),
+                      itemBuilder: (context, index) {
+                        if (index >= sorted.length) {
+                          return const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 16),
+                            child: Center(child: FxLoading(size: 22)),
+                          );
+                        }
+                        final exercicio = sorted[index];
+                        return ExerciseLibraryRow(
+                          exercicio: exercicio,
+                          selected: widget.selected?.id == exercicio.id,
                           alreadyInTreino: widget.alreadyInTreinoIds.contains(
-                            sorted[i].id,
+                            exercicio.id,
                           ),
-                          highlightQuery: _committedQuery,
-                          primary: primary,
-                          isDark: isDark,
-                          showDivider: i < sorted.length - 1,
+                          showDivider: index < sorted.length - 1,
                           uploadEnabled:
                               widget.onUploadVideo != null &&
                               !_uploadingInSheet,
                           onTap: () {
                             HapticFeedback.selectionClick();
-                            Navigator.pop(context, sorted[i]);
+                            Navigator.pop(context, exercicio);
                           },
                           onPreviewThumb:
-                              canPreviewExerciseMedia(sorted[i])
+                              canPreviewExerciseMedia(exercicio)
                                   ? () => showExerciseMediaPreview(
                                     context,
-                                    exercicio: sorted[i],
+                                    exercicio: exercicio,
                                   )
                                   : null,
                           onUploadVideo:
                               widget.onUploadVideo == null
                                   ? null
-                                  : () => _handleUpload(sorted[i]),
-                        ),
-                    ],
-                  ),
-                  if (_loadingMore)
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 16),
-                      child: Center(child: FxLoading(size: 22)),
+                                  : () => _handleUpload(exercicio),
+                        );
+                      },
                     ),
-                ],
+                  ),
+                ),
               ),
             ),
           const SizedBox(height: FxSettingsLayout.footerAfterGroup),
@@ -306,118 +322,6 @@ class _ExercisePickerSheetState extends State<_ExercisePickerSheet> {
     );
   }
 }
-
-class _ExercisePickerTile extends StatelessWidget {
-  final Exercicio exercicio;
-  final bool selected;
-  final bool alreadyInTreino;
-  final String highlightQuery;
-  final Color primary;
-  final bool isDark;
-  final VoidCallback onTap;
-  final VoidCallback? onPreviewThumb;
-  final VoidCallback? onUploadVideo;
-  final bool uploadEnabled;
-  final bool showDivider;
-
-  const _ExercisePickerTile({
-    required this.exercicio,
-    required this.selected,
-    this.alreadyInTreino = false,
-    this.highlightQuery = '',
-    required this.primary,
-    required this.isDark,
-    required this.onTap,
-    this.onPreviewThumb,
-    this.onUploadVideo,
-    this.uploadEnabled = true,
-    this.showDivider = true,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final subtitle =
-        alreadyInTreino
-            ? 'Já está neste treino · ${_exerciseMeta(exercicio)}'
-            : _exerciseMeta(exercicio);
-
-    return FxSettingsTile(
-      icon: Icons.fitness_center_rounded,
-      accent: primary,
-      label: exercicio.nomeDisplay,
-      subtitle: subtitle,
-      value: '',
-      highlight: selected,
-      showDivider: showDivider,
-      onTap: onTap,
-      accessory: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (onUploadVideo != null)
-            IconButton(
-              tooltip:
-                  exercicioHasPersonalVideo(exercicio)
-                      ? 'Trocar vídeo do personal'
-                      : 'Enviar vídeo do personal',
-              onPressed: uploadEnabled ? onUploadVideo : null,
-              icon: Icon(
-                exercicioHasPersonalVideo(exercicio)
-                    ? Icons.swap_horiz_rounded
-                    : Icons.video_call_outlined,
-                color: primary,
-                size: 20,
-              ),
-            ),
-          if (onPreviewThumb != null)
-            GestureDetector(
-              onTap: () {
-                HapticFeedback.selectionClick();
-                onPreviewThumb!();
-              },
-              child: ExerciseMediaThumb.fromExercicio(exercicio, size: 34),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-String _exerciseMeta(Exercicio exercicio) {
-  final parts = <String>[
-    if (exercicio.grupoMuscularPrimario != null)
-      TaxonomyLabels.grupo[exercicio.grupoMuscularPrimario!] ??
-          _humanizeMetaToken(exercicio.grupoMuscularPrimario!.backendName),
-    if (exercicio.grupoMuscularPrimario == null &&
-        exercicio.primaryGroupLabel?.trim().isNotEmpty == true)
-      _humanizeMetaToken(exercicio.primaryGroupLabel!),
-    if (exercicio.equipamentos.isNotEmpty)
-      exercicio.equipamentos
-          .take(2)
-          .map((e) => TaxonomyLabels.equipamento[e])
-          .whereType<String>()
-          .join(' / '),
-    if (exercicio.equipamentos.isEmpty &&
-        exercicio.equipamento?.trim().isNotEmpty == true)
-      _humanizeMetaToken(exercicio.equipamento!),
-    if (exercicio.dificuldade != null)
-      TaxonomyLabels.dificuldade[exercicio.dificuldade!] ??
-          _humanizeMetaToken(exercicio.dificuldade!.backendName),
-    if (exercicio.dificuldade == null &&
-        exercicio.nivel?.trim().isNotEmpty == true)
-      _humanizeMetaToken(exercicio.nivel!),
-  ];
-  final clean = parts.whereType<String>().where((e) => e.isNotEmpty).toList();
-  return clean.isEmpty ? 'Sem detalhes' : clean.take(3).join(' · ');
-}
-
-Color _metaTextColor(bool isDark, {bool muted = true}) {
-  final base = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-  if (isDark) return base;
-  final lerp = muted ? 0.55 : 0.38;
-  return Color.lerp(base, TokensStrip.textPrimary, lerp)!;
-}
-
-String _humanizeMetaToken(String value) => displayMetaToken(value);
 
 class _ModeHint extends StatelessWidget {
   final IconData icon;

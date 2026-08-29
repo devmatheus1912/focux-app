@@ -5,9 +5,9 @@ extension AddExercicioToTreinoScreenActionsA
   /// Espaço inferior do scroll para não ficar sob faixas fixas.
   double _scrollBottomInset(BuildContext context) {
     final safe = MediaQuery.paddingOf(context).bottom;
-    var inset = 108 + safe;
+    var inset = 92 + safe;
     if (_tabIndex == 0 && _selecionado != null && !_bottomBarHidden) {
-      inset += 118;
+      inset += 108;
     }
     return inset;
   }

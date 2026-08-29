@@ -27,6 +27,7 @@ import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../widgets/add_exercicio_help_sheet.dart';
+import '../widgets/exercise_library_row.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -59,6 +60,7 @@ import '../utils/exercise_picker_filter.dart';
 import '../utils/exercise_picker_sort.dart';
 import '../utils/exercise_picker_suggestions.dart';
 import '../utils/exercise_picker_library_label.dart';
+import '../utils/exercise_library_meta.dart';
 
 part 'add_exercicio_to_treino_screen_widgets_a.part.dart';
 part 'add_exercicio_to_treino_screen_widgets_b.part.dart';
@@ -392,25 +394,23 @@ class _AddExercicioToTreinoScreenState
                                   ),
                                 ),
                               ),
-                              if (_tabIndex == 0 &&
-                                  _selecionado != null &&
-                                  !_bottomBarHidden)
-                                _StickyAddExerciseBar(
-                                  error: _error,
-                                  loading: _loading,
-                                  isDark: isDark,
-                                  onSubmit: _submit,
-                                  onContinue: _submitAndContinue,
-                                ),
-                              _ActivePrescriptionStrip(
+                              _AddExerciseBottomDock(
+                                showActions:
+                                    _tabIndex == 0 &&
+                                    _selecionado != null &&
+                                    !_bottomBarHidden,
+                                error: _error,
+                                loading: _loading,
+                                isDark: isDark,
+                                primary: primary,
                                 presetId: _presetId,
                                 series: _seriesCtrl.text,
                                 repeticoes: _repCtrl.text,
                                 descanso: _descansoCtrl.text,
                                 tipoSerie: _tipoSerie,
-                                isDark: isDark,
-                                primary: primary,
-                                onEdit: _openPrescriptionEditor,
+                                onEditPrescription: _openPrescriptionEditor,
+                                onSubmit: _submit,
+                                onContinue: _submitAndContinue,
                               ),
                             ],
                           );

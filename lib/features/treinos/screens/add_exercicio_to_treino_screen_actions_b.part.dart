@@ -630,7 +630,7 @@ extension AddExercicioToTreinoScreenActionsB
                   fillColor:
                       isDark ? EagleTokens.darkCardHi : TokensStrip.cardBg,
                   border: FxInputDeco.outlineBorder(
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(14),
                     borderSide: BorderSide.none,
                   ),
                 ),
