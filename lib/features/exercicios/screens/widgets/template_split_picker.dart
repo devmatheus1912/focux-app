@@ -108,15 +108,15 @@ class _TemplateIntro extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Pela agenda do aluno',
+                  'Quantos dias o aluno treina?',
                   style: FocuxHubTypography.body(
                     color: scheme.onSurface,
                   ).copyWith(fontWeight: FontWeight.w900),
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  'Escolha quantos dias ele treina. Cada modelo traz slots sugeridos — troque o exercício em cada linha.',
-                  maxLines: 3,
+                  'Toque no modelo e escolha os exercícios de cada slot.',
+                  maxLines: 2,
                   style: FocuxHubTypography.bodyMuted(
                     color: mute,
                     fontWeight: FontWeight.w600,

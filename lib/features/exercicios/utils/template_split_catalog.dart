@@ -31,15 +31,11 @@ List<TemplateSplitSection> buildTemplateSplitSections([
   ];
 }
 
-/// Linha do tile: benefício curto + frequência + contagem.
+/// Linha do tile — escaneável: frequência · qtd · quando usar.
 String templateSplitTileSubtitle(TemplateSplit template) {
-  final dias = template.dias.length;
   final slots = template.slotsCount;
-  final meta =
-      '${template.diasSemana}x/sem · '
-      '$dias ${dias == 1 ? 'bloco' : 'blocos'} · '
-      '$slots ${slots == 1 ? 'exercício' : 'exercícios'}';
-  final desc = template.descricao.trim();
-  if (desc.isEmpty) return meta;
-  return '$desc · $meta';
+  final meta = '${template.diasSemana}x · $slots ex.';
+  final when = template.descricao.trim();
+  if (when.isEmpty) return meta;
+  return '$meta · $when';
 }

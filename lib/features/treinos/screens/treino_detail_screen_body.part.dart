@@ -492,7 +492,7 @@ class _TreinoDetailBody extends StatelessWidget {
                           icon: Icons.view_agenda_outlined,
                           accent: soft,
                           label: 'Montar por modelo',
-                          subtitle: 'ABC, full body, superior/inferior…',
+                          subtitle: 'ABC, full body, PPL…',
                           value: '',
                           showDivider: false,
                           onTap: () => openMontarPorModelo(

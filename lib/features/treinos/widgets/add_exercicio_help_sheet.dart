@@ -31,7 +31,7 @@ Future<void> showAddExercicioHelpSheet(BuildContext context) {
       ),
       FxHelpTip(
         'Modelos',
-        'No detalhe do treino, Montar por modelo organiza por dias na semana (ABC, full body, superior/inferior…).',
+        'No detalhe do treino, Montar por modelo lista estruturas por dias na semana.',
         icon: 'spark',
       ),
     ],

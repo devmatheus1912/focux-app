@@ -26,20 +26,17 @@ enum TemplateSplitGroup {
 
 extension TemplateSplitGroupX on TemplateSplitGroup {
   String get header => switch (this) {
-    TemplateSplitGroup.ate3Dias => '2–3 dias na semana',
-    TemplateSplitGroup.quatroDias => '4 dias na semana',
-    TemplateSplitGroup.cincoSeisDias => '5–6 dias na semana',
-    TemplateSplitGroup.foco => 'Foco do aluno',
+    TemplateSplitGroup.ate3Dias => '2–3 dias',
+    TemplateSplitGroup.quatroDias => '4 dias',
+    TemplateSplitGroup.cincoSeisDias => '5–6 dias',
+    TemplateSplitGroup.foco => 'Foco',
   };
 
   String get caption => switch (this) {
-    TemplateSplitGroup.ate3Dias =>
-      'Iniciante, rotina apertada ou retorno pós-pausa',
-    TemplateSplitGroup.quatroDias =>
-      'Melhor equilíbrio volume × recuperação (mais pedido em 2025–26)',
-    TemplateSplitGroup.cincoSeisDias =>
-      'Hipertrofia com frequência alta — ABC e PPL nas academias BR',
-    TemplateSplitGroup.foco => 'Quando o objetivo é um grupo ou contexto específico',
+    TemplateSplitGroup.ate3Dias => 'Iniciante ou pouco tempo',
+    TemplateSplitGroup.quatroDias => 'Equilíbrio de volume',
+    TemplateSplitGroup.cincoSeisDias => 'ABC e PPL de academia',
+    TemplateSplitGroup.foco => 'Prioridade específica',
   };
 }
 
@@ -72,7 +69,7 @@ const templateSplits = <TemplateSplit>[
   TemplateSplit(
     id: 'fullbody-iniciante',
     nome: 'Full body',
-    descricao: 'Corpo inteiro em cada sessão — base do iniciante',
+    descricao: 'Tudo em um dia',
     grupo: TemplateSplitGroup.ate3Dias,
     diasSemana: 3,
     dias: [
@@ -94,7 +91,7 @@ const templateSplits = <TemplateSplit>[
   TemplateSplit(
     id: 'fullbody-ab',
     nome: 'Full body A/B',
-    descricao: 'Dois dias alternados com mais volume por sessão',
+    descricao: 'Dois dias alternados',
     grupo: TemplateSplitGroup.ate3Dias,
     diasSemana: 3,
     dias: [
@@ -133,8 +130,8 @@ const templateSplits = <TemplateSplit>[
   ),
   TemplateSplit(
     id: 'casa-sem-equipo',
-    nome: 'Em casa · sem equipamento',
-    descricao: 'Peso corporal — aluno remoto ou viagem',
+    nome: 'Em casa',
+    descricao: 'Sem aparelhos',
     grupo: TemplateSplitGroup.ate3Dias,
     diasSemana: 3,
     dias: [
@@ -155,7 +152,7 @@ const templateSplits = <TemplateSplit>[
   TemplateSplit(
     id: 'upper-lower',
     nome: 'Superior / Inferior',
-    descricao: '4x semana — equilíbrio clássico de volume e recuperação',
+    descricao: 'Clássico de 4x',
     grupo: TemplateSplitGroup.quatroDias,
     diasSemana: 4,
     dias: [
@@ -187,8 +184,8 @@ const templateSplits = <TemplateSplit>[
   // ── 5–6 dias ──────────────────────────────────────────────────────────
   TemplateSplit(
     id: 'bro-split',
-    nome: 'ABC clássico',
-    descricao: 'Peito · costas · pernas — o mais comum nas academias BR',
+    nome: 'ABC',
+    descricao: 'Peito, costas, pernas',
     grupo: TemplateSplitGroup.cincoSeisDias,
     diasSemana: 6,
     dias: [
@@ -230,8 +227,8 @@ const templateSplits = <TemplateSplit>[
   ),
   TemplateSplit(
     id: 'ppl',
-    nome: 'Empurrar / Puxar / Pernas',
-    descricao: 'PPL — hipertrofia com 2 ciclos na semana',
+    nome: 'PPL',
+    descricao: 'Empurrar, puxar, pernas',
     grupo: TemplateSplitGroup.cincoSeisDias,
     diasSemana: 6,
     dias: [
@@ -277,7 +274,7 @@ const templateSplits = <TemplateSplit>[
   TemplateSplit(
     id: 'lower-focus',
     nome: 'Glúteo e pernas',
-    descricao: 'Prioridade inferior — comum em alunas e fases de base',
+    descricao: 'Prioridade inferior',
     grupo: TemplateSplitGroup.foco,
     diasSemana: 2,
     dias: [
@@ -307,7 +304,7 @@ const templateSplits = <TemplateSplit>[
   TemplateSplit(
     id: 'torso-arms',
     nome: 'Torso e braços',
-    descricao: 'Só superiores — dia sem pernas ou prioridade de tronco',
+    descricao: 'Só superiores',
     grupo: TemplateSplitGroup.foco,
     diasSemana: 2,
     dias: [
@@ -327,7 +324,7 @@ const templateSplits = <TemplateSplit>[
   TemplateSplit(
     id: 'mobilidade-forca',
     nome: 'Mobilidade + força',
-    descricao: 'Aquecimento funcional com blocos leves de força',
+    descricao: 'Aquecimento e força leve',
     grupo: TemplateSplitGroup.foco,
     diasSemana: 2,
     dias: [
