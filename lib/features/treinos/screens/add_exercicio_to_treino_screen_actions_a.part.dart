@@ -95,12 +95,17 @@ extension AddExercicioToTreinoScreenActionsA
       if (!mounted || aluno.equipamentosDisponiveis.isEmpty) return;
       setState(() {
         _alunoFilterNome = aluno.nome;
+        _alunoFilterWarning = null;
         _pickerFilter = ExercisePickerFilter.fromAlunoEquipamentos(
           aluno.equipamentosDisponiveis,
         );
       });
-    } catch (_) {
-      // Mantém filtros manuais se o perfil do aluno não carregar.
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _alunoFilterWarning =
+            'Não carregamos o equipamento do aluno. Filtre manualmente.';
+      });
     }
   }
 

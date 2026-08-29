@@ -6,12 +6,14 @@ class _BibliotecaSyncBanner extends StatelessWidget {
     required this.isDark,
     required this.primary,
     this.showProgress = true,
+    this.warning = false,
   });
 
   final String message;
   final bool isDark;
   final Color primary;
   final bool showProgress;
+  final bool warning;
 
   @override
   Widget build(BuildContext context) {
@@ -25,9 +27,17 @@ class _BibliotecaSyncBanner extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
-          color: primary.withValues(alpha: isDark ? 0.14 : 0.08),
+          color:
+              warning
+                  ? EagleTokens.warn.withValues(alpha: isDark ? 0.16 : 0.1)
+                  : primary.withValues(alpha: isDark ? 0.14 : 0.08),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: primary.withValues(alpha: 0.2)),
+          border: Border.all(
+            color:
+                warning
+                    ? EagleTokens.warn.withValues(alpha: 0.28)
+                    : primary.withValues(alpha: 0.2),
+          ),
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -39,7 +49,11 @@ class _BibliotecaSyncBanner extends StatelessWidget {
                 child: FxLoading(size: 16, strokeWidth: 2, color: primary),
               )
             else
-              Icon(Icons.sync_rounded, color: primary, size: 18),
+              Icon(
+                warning ? Icons.info_outline_rounded : Icons.sync_rounded,
+                color: warning ? EagleTokens.warn : primary,
+                size: 18,
+              ),
             const SizedBox(width: 10),
             Expanded(
               child: Text(
@@ -54,6 +68,31 @@ class _BibliotecaSyncBanner extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _InlineWarningBanner extends StatelessWidget {
+  const _InlineWarningBanner({
+    required this.message,
+    required this.isDark,
+    required this.primary,
+    this.onDismiss,
+  });
+
+  final String message;
+  final bool isDark;
+  final Color primary;
+  final VoidCallback? onDismiss;
+
+  @override
+  Widget build(BuildContext context) {
+    return _BibliotecaSyncBanner(
+      message: message,
+      isDark: isDark,
+      primary: primary,
+      showProgress: false,
+      warning: true,
     );
   }
 }

@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/core/theme/design_tokens.dart';
 import 'package:focux_app/features/treinos/data/treino_repository.dart';
+import 'package:focux_app/features/exercicios/data/exercicio_page.dart';
 import 'package:focux_app/features/treinos/providers/treinos_provider.dart';
+import 'package:focux_app/features/exercicios/providers/exercicio_picker_provider.dart';
 import 'package:focux_app/features/treinos/screens/add_exercicio_to_treino_screen.dart';
 import 'package:focux_app/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
@@ -22,6 +24,22 @@ void main() {
     shortcuts: const [],
     uiHints: TreinoPickerUiHints.fallback(librarySize: 187, jaNoTreino: 0),
   );
+
+  final pickerPage = ExercicioPickerPage(
+    content: const [],
+    meta: const ExercicioPageMeta(
+      page: 0,
+      size: 30,
+      totalElements: 187,
+      totalPages: 7,
+      hasNext: true,
+    ),
+  );
+
+  Override pickerPageOverride() =>
+      exercicioPickerPageProvider.overrideWith(
+        (ref, query) async => pickerPage,
+      );
 
   setUp(() {
     GoogleFonts.config.allowRuntimeFetching = false;
@@ -46,6 +64,7 @@ void main() {
       ProviderScope(
         overrides: [
           treinoPickerHomeProvider(12).overrideWith((ref) async => pickerHome),
+          pickerPageOverride(),
         ],
         child: MaterialApp.router(
           theme: ThemeData(
@@ -96,6 +115,7 @@ void main() {
         child: ProviderScope(
           overrides: [
             treinoPickerHomeProvider(12).overrideWith((ref) async => pickerHome),
+            pickerPageOverride(),
           ],
           child: MaterialApp.router(
             theme: ThemeData(

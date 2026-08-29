@@ -2,6 +2,23 @@ part of 'add_exercicio_to_treino_screen.dart';
 
 extension AddExercicioToTreinoScreenActionsB
     on _AddExercicioToTreinoScreenState {
+  AddExercisePrescriptionInput? _resolvePrescriptionOrSetError() {
+    final resolved = resolveAddExercisePrescription(
+      seriesText: _seriesCtrl.text,
+      repeticoesText: _repCtrl.text,
+      descansoText: _descansoCtrl.text,
+      cargaText: _cargaCtrl.text,
+      observacoesText: _observacoesCtrl.text,
+      tipoSerie: _tipoSerie,
+      grupoSupersetText: _grupoSupersetCtrl.text,
+    );
+    if (resolved.error != null) {
+      setState(() => _error = resolved.error);
+      return null;
+    }
+    return resolved.values;
+  }
+
   Future<void> _submit() async {
     if (_selecionado == null) {
       setState(() {
@@ -9,6 +26,8 @@ extension AddExercicioToTreinoScreenActionsB
       });
       return;
     }
+    final prescription = _resolvePrescriptionOrSetError();
+    if (prescription == null) return;
     setState(() {
       _loading = true;
       _error = null;
@@ -20,16 +39,13 @@ extension AddExercicioToTreinoScreenActionsB
           .adicionarExercicio(
             widget.treinoId,
             exercicioId,
-            series: int.tryParse(_seriesCtrl.text) ?? 3,
-            repeticoes: _repCtrl.text,
-            descanso: int.tryParse(_descansoCtrl.text) ?? 60,
-            cargaKg: double.tryParse(_cargaCtrl.text.replaceAll(',', '.')),
-            observacoes: _observacoesCtrl.text,
-            tipoSerie: _tipoSerie,
-            grupoSuperset:
-                _tipoSerie == 'SUPERSET'
-                    ? int.tryParse(_grupoSupersetCtrl.text)
-                    : null,
+            series: prescription.series,
+            repeticoes: prescription.repeticoes,
+            descanso: prescription.descansoSegundos,
+            cargaKg: prescription.cargaKg,
+            observacoes: prescription.observacoes,
+            tipoSerie: prescription.tipoSerie,
+            grupoSuperset: prescription.grupoSuperset,
           );
       await _persistAfterAdd(exercicioId);
       if (mounted) {
@@ -61,6 +77,8 @@ extension AddExercicioToTreinoScreenActionsB
       setState(() => _error = 'Selecione um exercício.');
       return;
     }
+    final prescription = _resolvePrescriptionOrSetError();
+    if (prescription == null) return;
     setState(() {
       _loading = true;
       _error = null;
@@ -73,16 +91,13 @@ extension AddExercicioToTreinoScreenActionsB
           .adicionarExercicio(
             widget.treinoId,
             exercicioId,
-            series: int.tryParse(_seriesCtrl.text) ?? 3,
-            repeticoes: _repCtrl.text,
-            descanso: int.tryParse(_descansoCtrl.text) ?? 60,
-            cargaKg: double.tryParse(_cargaCtrl.text.replaceAll(',', '.')),
-            observacoes: _observacoesCtrl.text,
-            tipoSerie: _tipoSerie,
-            grupoSuperset:
-                _tipoSerie == 'SUPERSET'
-                    ? int.tryParse(_grupoSupersetCtrl.text)
-                    : null,
+            series: prescription.series,
+            repeticoes: prescription.repeticoes,
+            descanso: prescription.descansoSegundos,
+            cargaKg: prescription.cargaKg,
+            observacoes: prescription.observacoes,
+            tipoSerie: prescription.tipoSerie,
+            grupoSuperset: prescription.grupoSuperset,
           );
       await _persistAfterAdd(exercicioId);
       if (!mounted) return;
@@ -109,6 +124,8 @@ extension AddExercicioToTreinoScreenActionsB
   }
 
   Future<void> _adicionarRapido(Exercicio exercicio) async {
+    final prescription = _resolvePrescriptionOrSetError();
+    if (prescription == null) return;
     setState(() {
       _loading = true;
       _error = null;
@@ -120,16 +137,13 @@ extension AddExercicioToTreinoScreenActionsB
           .adicionarExercicio(
             widget.treinoId,
             exercicioId,
-            series: int.tryParse(_seriesCtrl.text) ?? 3,
-            repeticoes: _repCtrl.text,
-            descanso: int.tryParse(_descansoCtrl.text) ?? 60,
-            cargaKg: double.tryParse(_cargaCtrl.text.replaceAll(',', '.')),
-            observacoes: _observacoesCtrl.text,
-            tipoSerie: _tipoSerie,
-            grupoSuperset:
-                _tipoSerie == 'SUPERSET'
-                    ? int.tryParse(_grupoSupersetCtrl.text)
-                    : null,
+            series: prescription.series,
+            repeticoes: prescription.repeticoes,
+            descanso: prescription.descansoSegundos,
+            cargaKg: prescription.cargaKg,
+            observacoes: prescription.observacoes,
+            tipoSerie: prescription.tipoSerie,
+            grupoSuperset: prescription.grupoSuperset,
           );
       await _persistAfterAdd(exercicioId);
       AnalyticsService.instance.track(
@@ -188,10 +202,7 @@ extension AddExercicioToTreinoScreenActionsB
     }
   }
 
-  bool _usesPickerApi() => usesExercisePickerApi(
-    buscaQuery: _buscaQuery,
-    filter: _pickerFilter,
-  );
+  bool _usesPickerApi() => true;
 
   ExercicioPickerQuery _buildPickerApiQuery() {
     return ExercicioPickerQuery(
@@ -209,12 +220,11 @@ extension AddExercicioToTreinoScreenActionsB
     required TreinoPickerHomeBundle home,
     ExercicioPickerPage? pickerPage,
   }) {
-    final usesApi = _usesPickerApi() && pickerPage != null;
-    final base = usesApi ? pickerPage.content : home.shortcuts;
+    if (pickerPage == null) return const [];
     return applyExercisePickerFilter(
-      base,
+      pickerPage.content,
       _pickerFilter,
-      serverFiltered: usesApi,
+      serverFiltered: true,
     );
   }
 
@@ -444,7 +454,7 @@ extension AddExercicioToTreinoScreenActionsB
       ).take(8).toList();
     }
 
-    if (_pickerFilter.isActive || _usesPickerApi()) {
+    if (_pickerFilter.isActive) {
       return sortExerciciosForPicker(
         exercicios,
         alreadyInTreinoIds: alreadyInTreinoIds,
@@ -476,7 +486,7 @@ extension AddExercicioToTreinoScreenActionsB
     if (displayItems.isEmpty) return null;
     final normalized = query.trim();
     if (normalized.length >= 2) return 'Resultados';
-    if (_pickerFilter.isActive || _usesPickerApi()) return null;
+    if (_pickerFilter.isActive) return null;
     return _recentIds.isNotEmpty
         ? 'Recentes e mais prescritos'
         : 'Sugestões';
@@ -620,78 +630,63 @@ extension AddExercicioToTreinoScreenActionsB
               const SizedBox(height: 10),
             ],
             if (!compact) ...[
-              DecoratedBox(
-                decoration: fxListCardDecoration(
+              TextField(
+                controller: _buscaCtrl,
+                decoration: FxInputDeco.build(
                   context,
-                  accent: primary,
-                  radius: FxSettingsLayout.groupRadius,
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      TextField(
-                        controller: _buscaCtrl,
-                        decoration: InputDecoration(
-                          hintText: uiHints.searchPlaceholder,
-                          prefixIcon: Icon(Icons.search_rounded, color: primary),
-                          suffixIcon:
-                              _buscaQuery.isEmpty
-                                  ? null
-                                  : IconButton(
-                                    onPressed: () => _buscaCtrl.clear(),
-                                    icon: const Icon(Icons.close_rounded),
-                                    tooltip: 'Limpar busca',
-                                  ),
-                          filled: true,
-                          fillColor:
-                              isDark
-                                  ? EagleTokens.darkCardHi
-                                  : TokensStrip.cardBg,
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 12,
+                  'Buscar exercício',
+                  icon: Icons.search_rounded,
+                  hint: uiHints.searchPlaceholder,
+                ).copyWith(
+                  suffixIcon:
+                      _buscaQuery.isEmpty
+                          ? null
+                          : IconButton(
+                            onPressed: () => _buscaCtrl.clear(),
+                            icon: const Icon(Icons.close_rounded),
+                            tooltip: 'Limpar busca',
                           ),
-                          border: FxInputDeco.outlineBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide.none,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      if (_alunoFilterNome != null &&
-                          _pickerFilter.filtrarPorAluno) ...[
-                        _AlunoEquipmentFilterBanner(
-                          alunoNome: _alunoFilterNome!,
-                          equipamentos: _pickerFilter.equipamentosAluno,
-                          isDark: isDark,
-                          primary: primary,
-                          onClear:
-                              () => setState(
-                                () =>
-                                    _pickerFilter = _pickerFilter.copyWith(
-                                      clearAluno: true,
-                                    ),
-                              ),
-                        ),
-                        const SizedBox(height: 8),
-                      ],
-                      ExercisePickerFilterBar(
-                        filter: _pickerFilter,
-                        isDark: isDark,
-                        primary: primary,
-                        resultCaption:
-                            _pickerFilter.isActive || query.length >= 2
-                                ? libraryLines
-                                : null,
-                        onChanged:
-                            (ExercisePickerFilter next) =>
-                                setState(() => _pickerFilter = next),
-                      ),
-                    ],
-                  ),
                 ),
+              ),
+              const SizedBox(height: 10),
+              if (_alunoFilterWarning != null) ...[
+                _InlineWarningBanner(
+                  message: _alunoFilterWarning!,
+                  isDark: isDark,
+                  primary: primary,
+                  onDismiss:
+                      () => setState(() => _alunoFilterWarning = null),
+                ),
+                const SizedBox(height: 8),
+              ],
+              if (_alunoFilterNome != null &&
+                  _pickerFilter.filtrarPorAluno) ...[
+                _AlunoEquipmentFilterBanner(
+                  alunoNome: _alunoFilterNome!,
+                  equipamentos: _pickerFilter.equipamentosAluno,
+                  isDark: isDark,
+                  primary: primary,
+                  onClear:
+                      () => setState(
+                        () =>
+                            _pickerFilter = _pickerFilter.copyWith(
+                              clearAluno: true,
+                            ),
+                      ),
+                ),
+                const SizedBox(height: 8),
+              ],
+              ExercisePickerFilterBar(
+                filter: _pickerFilter,
+                isDark: isDark,
+                primary: primary,
+                resultCaption:
+                    _pickerFilter.isActive || query.length >= 2
+                        ? libraryLines
+                        : null,
+                onChanged:
+                    (ExercisePickerFilter next) =>
+                        setState(() => _pickerFilter = next),
               ),
             ],
             if (showFilterEmpty) ...[

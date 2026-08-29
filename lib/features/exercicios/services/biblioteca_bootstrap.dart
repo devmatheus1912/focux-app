@@ -52,6 +52,9 @@ class BibliotecaBootstrap {
 
       BibliotecaSyncStatus.instance.stop(pendingMediaCount: 0);
     } catch (_) {
+      BibliotecaSyncStatus.instance.warn(
+        'Não foi possível preparar a biblioteca agora. Tente novamente depois.',
+      );
       BibliotecaSyncStatus.instance.stop();
     } finally {
       _running = false;

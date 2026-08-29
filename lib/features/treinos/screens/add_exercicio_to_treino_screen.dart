@@ -63,10 +63,10 @@ import '../utils/exercise_picker_sort.dart';
 import '../utils/exercise_picker_suggestions.dart';
 import '../utils/exercise_picker_library_label.dart';
 import '../utils/exercise_library_meta.dart';
+import '../utils/add_exercise_prescription_input.dart';
 
 part 'add_exercicio_to_treino_screen_widgets_a.part.dart';
 part 'add_exercicio_to_treino_screen_widgets_b.part.dart';
-part 'add_exercicio_to_treino_screen_widgets_c.part.dart';
 part 'add_exercicio_to_treino_screen_widgets_d.part.dart';
 part 'add_exercicio_to_treino_screen_actions_a.part.dart';
 part 'add_exercicio_to_treino_screen_actions_b.part.dart';
@@ -107,6 +107,7 @@ class _AddExercicioToTreinoScreenState
   bool _bottomBarHidden = false;
   ExercisePickerFilter _pickerFilter = const ExercisePickerFilter();
   String? _alunoFilterNome;
+  String? _alunoFilterWarning;
   final _scrollCtrl = ScrollController();
   Timer? _searchDebounce;
   Timer? _celebrateVideoTimer;
@@ -160,12 +161,8 @@ class _AddExercicioToTreinoScreenState
           ),
     );
     final treinoAsync = pickerAsync.whenData((h) => h.treino);
-    final usesPickerApi = _usesPickerApi();
     final pickerApiQuery = _buildPickerApiQuery();
-    final pickerPageAsync =
-        usesPickerApi
-            ? ref.watch(exercicioPickerPageProvider(pickerApiQuery))
-            : null;
+    final pickerPageAsync = ref.watch(exercicioPickerPageProvider(pickerApiQuery));
     final alreadyInTreinoIds = _treinoExercicioIds(treinoAsync);
     final chrome = ShellChrome.of(context);
     final isDark = chrome.isDark;
@@ -216,13 +213,25 @@ class _AddExercicioToTreinoScreenState
                       listenable: BibliotecaSyncStatus.instance,
                       builder: (context, _) {
                         final sync = BibliotecaSyncStatus.instance;
-                        if (!sync.syncing) return const SizedBox.shrink();
-                        return _BibliotecaSyncBanner(
-                          message: sync.message ?? 'Preparando biblioteca...',
-                          isDark: isDark,
-                          primary: primary,
-                          showProgress: true,
-                        );
+                        if (sync.syncing) {
+                          return _BibliotecaSyncBanner(
+                            message: sync.message ?? 'Preparando biblioteca...',
+                            isDark: isDark,
+                            primary: primary,
+                            showProgress: true,
+                          );
+                        }
+                        final warning = sync.warningMessage;
+                        if (warning != null && warning.isNotEmpty) {
+                          return _BibliotecaSyncBanner(
+                            message: warning,
+                            isDark: isDark,
+                            primary: primary,
+                            showProgress: false,
+                            warning: true,
+                          );
+                        }
+                        return const SizedBox.shrink();
                       },
                     ),
                     Expanded(
@@ -285,9 +294,7 @@ class _AddExercicioToTreinoScreenState
                             );
                           }
 
-                          if (usesPickerApi &&
-                              pickerPageAsync != null &&
-                              pickerPageAsync.isLoading &&
+                          if (pickerPageAsync.isLoading &&
                               pickerPageAsync.valueOrNull == null) {
                             return const Padding(
                               padding: EdgeInsets.only(top: 16),
@@ -295,9 +302,28 @@ class _AddExercicioToTreinoScreenState
                             );
                           }
 
+                          if (pickerPageAsync.hasError &&
+                              pickerPageAsync.valueOrNull == null) {
+                            return Padding(
+                              padding: const EdgeInsets.only(top: 16),
+                              child: FxErrorState(
+                                chromeOnDark: isDark,
+                                primary: primary,
+                                title: 'Não conseguimos buscar exercícios',
+                                message: friendlyError(pickerPageAsync.error!),
+                                onRetry:
+                                    () => ref.invalidate(
+                                      exercicioPickerPageProvider(
+                                        pickerApiQuery,
+                                      ),
+                                    ),
+                              ),
+                            );
+                          }
+
                           final visibleExercicios = _resolveVisibleExercicios(
                             home: home,
-                            pickerPage: pickerPageAsync?.valueOrNull,
+                            pickerPage: pickerPageAsync.valueOrNull,
                           );
 
                           return Column(
@@ -378,12 +404,10 @@ class _AddExercicioToTreinoScreenState
                                             exercicios: visibleExercicios,
                                             libraryCount: home.libraryCount,
                                             filteredPickerCount:
-                                                usesPickerApi
-                                                    ? pickerPageAsync
-                                                        ?.valueOrNull
-                                                        ?.meta
-                                                        .totalElements
-                                                    : null,
+                                                pickerPageAsync
+                                                    .valueOrNull
+                                                    ?.meta
+                                                    .totalElements,
                                             uiHints: pickerHints,
                                             isDark: isDark,
                                             primary: primary,
