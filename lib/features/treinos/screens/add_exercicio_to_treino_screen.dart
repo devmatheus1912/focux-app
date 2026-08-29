@@ -55,6 +55,7 @@ import '../../exercicios/services/biblioteca_media_config.dart';
 import '../../exercicios/services/biblioteca_sync_status.dart';
 import '../../exercicios/screens/widgets/exercise_video_preview_sheet.dart';
 import '../../exercicios/screens/widgets/exercise_video_spec_tips.dart';
+import '../../exercicios/utils/exercise_video_upload_spec.dart';
 import '../data/exercise_prescription_memory.dart';
 import '../data/exercise_prescription_memory_store.dart';
 import '../screens/widgets/exercise_picker_filter_bar.dart';

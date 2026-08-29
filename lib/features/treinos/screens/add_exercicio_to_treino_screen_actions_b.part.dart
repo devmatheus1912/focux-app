@@ -601,7 +601,6 @@ extension AddExercicioToTreinoScreenActionsB
             if (compact && _selecionado != null) ...[
               _SelectedExerciseInsetGroup(
                 exercicio: _selecionado!,
-                isDark: isDark,
                 primary: primary,
                 mediaLoading: _mediaLoading,
                 celebrateVideoSuccess: _celebrateVideoSuccess,
@@ -610,10 +609,6 @@ extension AddExercicioToTreinoScreenActionsB
                       alreadyInTreinoIds: alreadyInTreinoIds,
                       libraryTotalCount: libraryCount,
                     ),
-                onPreviewThumb:
-                    canPreviewExerciseMedia(_selecionado!)
-                        ? _previewSelectedExerciseVideo
-                        : null,
                 onPreview: _previewSelectedExerciseVideo,
                 onUpload: _uploadSelectedExerciseVideo,
                 onRemove: _removeSelectedExerciseVideo,

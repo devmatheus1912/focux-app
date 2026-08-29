@@ -57,11 +57,14 @@ void main() {
         'lib/features/treinos/screens/add_exercicio_to_treino_screen.dart',
       );
       expect(screen, contains('treinoPickerHomeProvider'));
-      expect(screen, contains('ExerciseVideoSpecTips'));
+      expect(screen, contains('ExerciseVideoSpecTips.open'));
       expect(screen, contains('_SelectedExerciseInsetGroup'));
+      expect(screen, contains("header: 'Exercício selecionado'"));
       expect(screen, contains('FxSettingsLayout.pageInset'));
       expect(screen, isNot(contains('_CompactSelectedExerciseBar')));
       expect(screen, isNot(contains('ExerciseVideoUploadStrip')));
+      expect(screen, isNot(contains('ExerciseMediaThumb.fromExercicio')));
+      expect(screen, contains('helpTooltip: \'Como filmar o vídeo\''));
       expect(screen, contains('ref.watch(treinoPickerHomeProvider'));
       expect(screen, isNot(contains('ref.watch(exerciciosProvider)')));
       expect(screen, isNot(contains('ref.watch(treinoProvider(')));

@@ -200,7 +200,6 @@ class _SuggestionList extends StatelessWidget {
 class _SelectedExerciseInsetGroup extends StatelessWidget {
   const _SelectedExerciseInsetGroup({
     required this.exercicio,
-    required this.isDark,
     required this.primary,
     required this.mediaLoading,
     required this.celebrateVideoSuccess,
@@ -209,11 +208,9 @@ class _SelectedExerciseInsetGroup extends StatelessWidget {
     required this.onUpload,
     required this.onRemove,
     required this.onSimilar,
-    this.onPreviewThumb,
   });
 
   final Exercicio exercicio;
-  final bool isDark;
   final Color primary;
   final bool mediaLoading;
   final bool celebrateVideoSuccess;
@@ -222,7 +219,6 @@ class _SelectedExerciseInsetGroup extends StatelessWidget {
   final VoidCallback onUpload;
   final VoidCallback onRemove;
   final VoidCallback onSimilar;
-  final VoidCallback? onPreviewThumb;
 
   @override
   Widget build(BuildContext context) {
@@ -237,69 +233,54 @@ class _SelectedExerciseInsetGroup extends StatelessWidget {
     final videoTitle =
         mediaLoading
             ? 'Enviando vídeo...'
+            : celebrateVideoSuccess
+            ? 'Vídeo enviado'
             : hasPersonalVideo
-            ? 'Seu vídeo está pronto'
+            ? 'Seu vídeo'
             : hasLibraryDemo
-            ? 'Demonstração da biblioteca'
+            ? 'Demo da biblioteca'
             : 'Vídeo (opcional)';
     final videoSubtitle =
         mediaLoading
-            ? 'Não feche o app. A miniatura atualiza em instantes.'
+            ? 'Não feche o app'
+            : celebrateVideoSuccess
+            ? 'Miniatura atualizada'
             : hasPersonalVideo
-            ? 'Prévia, troca ou remoção a qualquer momento.'
+            ? 'Toque para trocar o arquivo'
             : hasLibraryDemo
-            ? 'Assista à demo ou envie sua gravação.'
-            : (kBibliotecaLibraryVideosStandby
-                ? 'Envie sua demonstração. A demo oficial Focux chega em breve.'
-                : 'Envie sua demonstração antes de prescrever.');
+            ? 'Assista ou envie a sua gravação'
+            : 'Envie sua demonstração · ${ExerciseVideoUploadSpec.sizeLabel}';
     final videoIcon =
         mediaLoading
             ? Icons.hourglass_top_rounded
-            : hasPersonalVideo
+            : celebrateVideoSuccess || hasPersonalVideo
             ? Icons.play_circle_fill_rounded
             : hasLibraryDemo
             ? Icons.video_library_rounded
-            : Icons.video_call_outlined;
+            : Icons.videocam_outlined;
     final videoCta =
         mediaLoading
             ? ''
-            : hasPersonalVideo
+            : hasPersonalVideo || celebrateVideoSuccess
             ? 'Trocar'
             : 'Enviar';
+    final meta = exerciseLibraryMeta(exercicio);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         FxSettingsGroup(
           accent: primary,
+          header: 'Exercício selecionado',
+          helpTooltip: 'Como filmar o vídeo',
+          onHelpTap: () => ExerciseVideoSpecTips.open(context),
           children: [
             FxSettingsTile(
               icon: Icons.fitness_center_outlined,
               accent: soft,
               label: exercicio.nomeDisplay,
-              subtitle: exerciseLibraryMeta(exercicio),
+              subtitle: meta.isEmpty ? 'Toque para trocar' : meta,
               value: 'Trocar',
-              accessory:
-                  onPreviewThumb != null
-                      ? GestureDetector(
-                        onTap: onPreviewThumb,
-                        child: ExerciseMediaThumb.fromExercicio(
-                          exercicio,
-                          size: 40,
-                          celebrateSuccess: celebrateVideoSuccess,
-                          key: ValueKey(
-                            'thumb-${exercicio.id}-${exercicio.videoUrl}-${exercicio.thumbnailUrl}',
-                          ),
-                        ),
-                      )
-                      : ExerciseMediaThumb.fromExercicio(
-                        exercicio,
-                        size: 40,
-                        celebrateSuccess: celebrateVideoSuccess,
-                        key: ValueKey(
-                          'thumb-${exercicio.id}-${exercicio.videoUrl}-${exercicio.thumbnailUrl}',
-                        ),
-                      ),
               onTap: onChange,
             ),
             if (!kBibliotecaLibraryVideosStandby || !hasLibraryDemo)
@@ -309,6 +290,7 @@ class _SelectedExerciseInsetGroup extends StatelessWidget {
                 label: videoTitle,
                 subtitle: videoSubtitle,
                 value: videoCta,
+                highlight: celebrateVideoSuccess,
                 onTap: mediaLoading ? () {} : onUpload,
               ),
             if (canPreview && !mediaLoading)
@@ -350,10 +332,6 @@ class _SelectedExerciseInsetGroup extends StatelessWidget {
             ),
           ),
         ],
-        Padding(
-          padding: const EdgeInsets.only(top: 6, left: 2, right: 2),
-          child: ExerciseVideoSpecTips(isDark: isDark, embedded: true),
-        ),
       ],
     );
   }
