@@ -90,9 +90,20 @@ class _QuickSetupStrip extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(4, 6, 4, 6),
-          child: Text(
-            'Perfil rápido',
-            style: FxSettingsLayout.sectionHeader(color: mute),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'Perfil rápido',
+                  style: FxSettingsLayout.sectionHeader(color: mute),
+                ),
+              ),
+              FxHelpIconButton(
+                tooltip: 'Ajuda sobre perfil rápido',
+                onTap: () => showNovoExercicioPerfilRapidoHelpSheet(context),
+                size: 28,
+              ),
+            ],
           ),
         ),
         Padding(
@@ -143,6 +154,8 @@ class _CollapsibleSection extends StatelessWidget {
   final Widget child;
   final bool expanded;
   final VoidCallback onToggle;
+  final String? helpTooltip;
+  final VoidCallback? onHelpTap;
 
   const _CollapsibleSection({
     required this.icon,
@@ -151,6 +164,8 @@ class _CollapsibleSection extends StatelessWidget {
     required this.child,
     required this.expanded,
     required this.onToggle,
+    this.helpTooltip,
+    this.onHelpTap,
   });
 
   @override
@@ -159,13 +174,20 @@ class _CollapsibleSection extends StatelessWidget {
     final soft = BrandPalette.softened(primary);
 
     return FxSettingsGroup(
+      header: title,
+      caption: subtitle,
+      helpTooltip: helpTooltip,
+      onHelpTap: onHelpTap,
       accent: primary,
       children: [
         FxSettingsTile(
           icon: icon,
           accent: soft,
-          label: title,
-          subtitle: subtitle,
+          label: expanded ? 'Recolher campos' : 'Adicionar orientação',
+          subtitle:
+              expanded
+                  ? 'Toque para esconder descrição, erros e contraindicações.'
+                  : 'Opcional — aparece para o aluno na ficha do exercício.',
           value: '',
           picker: true,
           showDivider: expanded,

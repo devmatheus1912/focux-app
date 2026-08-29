@@ -28,6 +28,7 @@ import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
+import '../../../core/widgets/fx_inset_picker_option.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
 import '../constants/treinos_layout.dart';

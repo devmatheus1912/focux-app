@@ -130,48 +130,50 @@ class _ExercisePickerFilterSheetState extends State<_ExercisePickerFilterSheet> 
                 children: [
                   FxSettingsGroup(
                     accent: primary,
+                    edgeToEdgeRows: true,
                     caption: 'Onde o aluno treina',
-                    children: [
-                      for (var i = 0; i < _espacos.length; i++)
-                        FxInsetPickerOption(
-                          label: _espacoLabel(_espacos[i]),
-                          selected: _filter.espaco == _espacos[i],
-                          accent: brand,
-                          showDivider: i < _espacos.length - 1,
-                          onTap: () {
-                            HapticFeedback.selectionClick();
-                            _apply(
-                              _filter.espaco == _espacos[i]
-                                  ? _filter.copyWith(clearEspaco: true)
-                                  : _filter.copyWith(espaco: _espacos[i]),
-                            );
-                          },
-                        ),
-                    ],
+                    children: FxInsetPickerOption.list(
+                      accent: brand,
+                      items: [
+                        for (final espaco in _espacos)
+                          FxInsetPickerOptionSpec(
+                            label: _espacoLabel(espaco),
+                            selected: _filter.espaco == espaco,
+                            onTap: () {
+                              _apply(
+                                _filter.espaco == espaco
+                                    ? _filter.copyWith(clearEspaco: true)
+                                    : _filter.copyWith(espaco: espaco),
+                              );
+                            },
+                          ),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: FxSettingsLayout.groupGap),
                   FxSettingsGroup(
                     accent: primary,
+                    edgeToEdgeRows: true,
                     caption: 'Equipamento principal',
-                    children: [
-                      for (var i = 0; i < _equipamentos.length; i++)
-                        FxInsetPickerOption(
-                          label: _equipamentoLabel(_equipamentos[i]),
-                          selected: _filter.equipamento == _equipamentos[i],
-                          accent: brand,
-                          showDivider: i < _equipamentos.length - 1,
-                          onTap: () {
-                            HapticFeedback.selectionClick();
-                            _apply(
-                              _filter.equipamento == _equipamentos[i]
-                                  ? _filter.copyWith(clearEquipamento: true)
-                                  : _filter.copyWith(
-                                    equipamento: _equipamentos[i],
-                                  ),
-                            );
-                          },
-                        ),
-                    ],
+                    children: FxInsetPickerOption.list(
+                      accent: brand,
+                      items: [
+                        for (final equipamento in _equipamentos)
+                          FxInsetPickerOptionSpec(
+                            label: _equipamentoLabel(equipamento),
+                            selected: _filter.equipamento == equipamento,
+                            onTap: () {
+                              _apply(
+                                _filter.equipamento == equipamento
+                                    ? _filter.copyWith(clearEquipamento: true)
+                                    : _filter.copyWith(
+                                      equipamento: equipamento,
+                                    ),
+                              );
+                            },
+                          ),
+                      ],
+                    ),
                   ),
                 ],
               ),

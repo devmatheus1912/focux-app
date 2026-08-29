@@ -12,7 +12,7 @@ import '../../../core/utils/friendly_error.dart';
 import '../../../core/utils/pt_br_display.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
-import '../../../core/widgets/fx_home_sheet.dart';
+import '../../../core/widgets/fx_inset_picker_sheet.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_settings_group.dart';

@@ -72,6 +72,9 @@ void main() {
     expect(screen, contains('FxHelpIconButton'));
     expect(screen, isNot(contains('ShellThemeToggle')));
     expect(screen, contains('showAlunosListHelpSheet'));
+    expect(screen, isNot(contains('_AlunosSheetCheckRow')));
+    expect(screen, contains('FxInsetPickerOption.list'));
+    expect(screen, contains('edgeToEdgeRows: true'));
     expect(
       File(
         'lib/features/alunos/widgets/alunos_list_help_sheet.dart',

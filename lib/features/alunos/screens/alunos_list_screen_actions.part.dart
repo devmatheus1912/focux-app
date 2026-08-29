@@ -143,26 +143,42 @@ class _AlunosBulkActionsSheetState extends State<_AlunosBulkActionsSheet> {
             FxSettingsGroup(
               header: 'Status',
               caption: 'Escolha e confirme abaixo.',
+              edgeToEdgeRows: true,
+              accent: Theme.of(context).colorScheme.primary,
+              children: FxInsetPickerOption.list(
+                accent: BrandPalette.softened(
+                  Theme.of(context).colorScheme.primary,
+                ),
+                items: [
+                  for (var i = 0; i < _statusOptions.length; i++)
+                    FxInsetPickerOptionSpec(
+                      label: _statusOptions[i].label,
+                      icon: switch (_statusOptions[i].value) {
+                        'INATIVO' => Icons.pause_circle_outline_rounded,
+                        'BLOQUEADO' => Icons.block_rounded,
+                        _ => Icons.check_circle_outline_rounded,
+                      },
+                      selected: _statusSelecionado == _statusOptions[i].value,
+                      onTap:
+                          () => setState(
+                            () => _statusSelecionado = _statusOptions[i].value,
+                          ),
+                    ),
+                ],
+              ),
+            ),
+            const SizedBox(height: FxSettingsLayout.groupGap),
+            FxSettingsGroup(
+              accent: Theme.of(context).colorScheme.primary,
               children: [
-                for (var i = 0; i < _statusOptions.length; i++)
-                  _AlunosSheetCheckRow(
-                    icon: switch (_statusOptions[i].value) {
-                      'INATIVO' => Icons.pause_circle_outline_rounded,
-                      'BLOQUEADO' => Icons.block_rounded,
-                      _ => Icons.check_circle_outline_rounded,
-                    },
-                    label: _statusOptions[i].label,
-                    selected: _statusSelecionado == _statusOptions[i].value,
-                    showDivider: true,
-                    onTap:
-                        () => setState(
-                          () => _statusSelecionado = _statusOptions[i].value,
-                        ),
-                  ),
                 FxSettingsTile(
                   icon: Icons.done_all_rounded,
+                  accent: BrandPalette.softened(
+                    Theme.of(context).colorScheme.primary,
+                  ),
                   label: 'Aplicar status',
                   value: '',
+                  highlight: true,
                   showDivider: false,
                   onTap: () => widget.onAtualizarStatus(_statusSelecionado),
                 ),

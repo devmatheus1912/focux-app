@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/fx_settings_layout.dart';
@@ -106,19 +105,18 @@ class _AddExercicioEnumPickerSheetState<T extends Enum>
 
     return FxSettingsGroup(
       accent: primary,
-      children: [
-        for (var i = 0; i < filtered.length; i++)
-          FxInsetPickerOption(
-            label: widget.labels[filtered[i]] ?? filtered[i].backendName,
-            selected: filtered[i] == widget.selected,
-            accent: soft,
-            showDivider: i < filtered.length - 1,
-            onTap: () {
-              HapticFeedback.selectionClick();
-              Navigator.of(context).pop(filtered[i]);
-            },
-          ),
-      ],
+      edgeToEdgeRows: true,
+      children: FxInsetPickerOption.list(
+        accent: soft,
+        items: [
+          for (final item in filtered)
+            FxInsetPickerOptionSpec(
+              label: widget.labels[item] ?? item.backendName,
+              selected: item == widget.selected,
+              onTap: () => Navigator.of(context).pop(item),
+            ),
+        ],
+      ),
     );
   }
 

@@ -246,6 +246,13 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
         appBar: FxShellAppBar(
           title: screenTitle,
           onBack: () => safePopOrGo(context, '/exercicios'),
+          actions: [
+            FxHelpIconButton(
+              tooltip: 'Como cadastrar',
+              onTap: () => showNovoExercicioHelpSheet(context),
+            ),
+            const SizedBox(width: TokensStrip.s2),
+          ],
         ),
         body: loadingEdit
             ? const SafeArea(child: SkeletonList(count: 6))
@@ -271,6 +278,9 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
                           header: 'Identidade',
                           caption:
                               'Nome, grupo muscular e intenção principal do movimento.',
+                          helpTooltip: 'Ajuda sobre identidade',
+                          onHelpTap:
+                              () => showNovoExercicioIdentidadeHelpSheet(context),
                           accent: primary,
                           children: [
                             AlunoInsetFormField(
@@ -345,6 +355,11 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
                       FxStaggerItem(
                         index: 1,
                         child: FxSettingsGroup(
+                          header: 'Execução',
+                          caption: 'Como o movimento entra na série prescrita.',
+                          helpTooltip: 'Ajuda sobre execução',
+                          onHelpTap:
+                              () => showNovoExercicioExecucaoHelpSheet(context),
                           accent: primary,
                           children: [
                             FxSettingsTile(
@@ -369,6 +384,12 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
                       FxStaggerItem(
                         index: 2,
                         child: FxSettingsGroup(
+                          header: 'Ambiente',
+                          caption:
+                              'Onde e com o quê o aluno pode executar este exercício.',
+                          helpTooltip: 'Ajuda sobre ambiente',
+                          onHelpTap:
+                              () => showNovoExercicioAmbienteHelpSheet(context),
                           accent: primary,
                           children: [
                             FxSettingsTile(
@@ -397,6 +418,9 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
                               _showGuidance
                                   ? 'Detalhes úteis para o aluno executar com segurança.'
                                   : 'Execução, erros comuns e restrições quando precisar.',
+                          helpTooltip: 'Ajuda sobre orientação',
+                          onHelpTap:
+                              () => showNovoExercicioOrientacaoHelpSheet(context),
                           expanded: _showGuidance,
                           onToggle:
                               () =>

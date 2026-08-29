@@ -20,6 +20,9 @@ void main() {
     expect(screen, contains('atualizar'));
     expect(screen, contains('DashboardHomeActionChip'));
     expect(screen, contains('FxInsetPickerRow'));
-    expect(screen, contains('AlunoInsetFormField'));
+    expect(screen, contains('FxHelpIconButton'));
+    expect(screen, contains('showNovoExercicioHelpSheet'));
+    expect(screen, contains('edgeToEdgeRows: true'));
+    expect(screen, contains('FxInsetPickerOption.list'));
   });
 }

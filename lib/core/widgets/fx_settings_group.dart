@@ -15,6 +15,7 @@ class FxSettingsGroup extends StatelessWidget {
     this.accent,
     this.helpTooltip,
     this.onHelpTap,
+    this.edgeToEdgeRows = false,
   });
 
   final String? header;
@@ -24,6 +25,9 @@ class FxSettingsGroup extends StatelessWidget {
   final Color? accent;
   final String? helpTooltip;
   final VoidCallback? onHelpTap;
+
+  /// Linhas de picker/check — fundo de seleção até a borda do card (sem recuo).
+  final bool edgeToEdgeRows;
 
   @override
   Widget build(BuildContext context) {
@@ -74,14 +78,18 @@ class FxSettingsGroup extends StatelessWidget {
             accent: accent,
             radius: FxSettingsLayout.groupRadius,
           ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: FxSettingsLayout.groupPadH,
-              vertical: FxSettingsLayout.groupPadV,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: children,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(FxSettingsLayout.groupRadius),
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal:
+                    edgeToEdgeRows ? 0 : FxSettingsLayout.groupPadH,
+                vertical: edgeToEdgeRows ? 0 : FxSettingsLayout.groupPadV,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: children,
+              ),
             ),
           ),
         ),

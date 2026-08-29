@@ -43,37 +43,48 @@ extension AlunosListScreenFilters on _AlunosListScreenState {
               FxSettingsGroup(
                 header: 'Ordenação',
                 caption: 'Como a lista é priorizada.',
+                edgeToEdgeRows: true,
+                accent: primary,
+                children: FxInsetPickerOption.list(
+                  accent: brand,
+                  items: [
+                    FxInsetPickerOptionSpec(
+                      label: 'Prioridade do dia',
+                      subtitle: 'Risco, inadimplência e convites primeiro.',
+                      icon: Icons.priority_high_rounded,
+                      selected: _ordenacao == AlunoOrdenacao.prioridade,
+                      onTap: () {
+                        _setOrdenacao(AlunoOrdenacao.prioridade);
+                        Navigator.pop(ctx);
+                      },
+                    ),
+                    FxInsetPickerOptionSpec(
+                      label: 'Nome A-Z',
+                      subtitle: 'Ordem alfabética.',
+                      icon: Icons.sort_by_alpha_rounded,
+                      selected: _ordenacao == AlunoOrdenacao.nome,
+                      onTap: () {
+                        _setOrdenacao(AlunoOrdenacao.nome);
+                        Navigator.pop(ctx);
+                      },
+                    ),
+                    FxInsetPickerOptionSpec(
+                      label: 'Sem foto primeiro',
+                      subtitle: 'Perfis genéricos no topo.',
+                      icon: Icons.no_photography_outlined,
+                      selected: _ordenacao == AlunoOrdenacao.semFoto,
+                      onTap: () {
+                        _setOrdenacao(AlunoOrdenacao.semFoto);
+                        Navigator.pop(ctx);
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: FxSettingsLayout.groupGap),
+              FxSettingsGroup(
+                accent: primary,
                 children: [
-                  _AlunosSheetCheckRow(
-                    icon: Icons.priority_high_rounded,
-                    label: 'Prioridade do dia',
-                    subtitle: 'Risco, inadimplência e convites primeiro.',
-                    selected: _ordenacao == AlunoOrdenacao.prioridade,
-                    onTap: () {
-                      _setOrdenacao(AlunoOrdenacao.prioridade);
-                      Navigator.pop(ctx);
-                    },
-                  ),
-                  _AlunosSheetCheckRow(
-                    icon: Icons.sort_by_alpha_rounded,
-                    label: 'Nome A-Z',
-                    subtitle: 'Ordem alfabética.',
-                    selected: _ordenacao == AlunoOrdenacao.nome,
-                    onTap: () {
-                      _setOrdenacao(AlunoOrdenacao.nome);
-                      Navigator.pop(ctx);
-                    },
-                  ),
-                  _AlunosSheetCheckRow(
-                    icon: Icons.no_photography_outlined,
-                    label: 'Sem foto primeiro',
-                    subtitle: 'Perfis genéricos no topo.',
-                    selected: _ordenacao == AlunoOrdenacao.semFoto,
-                    onTap: () {
-                      _setOrdenacao(AlunoOrdenacao.semFoto);
-                      Navigator.pop(ctx);
-                    },
-                  ),
                   _AlunosCompactToggleRow(
                     value: _listaCompacta,
                     onTap: () async {

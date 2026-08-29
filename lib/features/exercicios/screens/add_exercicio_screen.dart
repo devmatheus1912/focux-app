@@ -9,7 +9,9 @@ import '../../../core/theme/shell_chrome.dart';
 import '../../../core/widgets/fx_toggle_chip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_inset_picker_row.dart';
+import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
@@ -25,6 +27,7 @@ import '../data/exercicio_taxonomy_labels.dart';
 import '../providers/exercicios_provider.dart';
 import '../widgets/add_exercicio_enum_picker_sheet.dart';
 import '../widgets/add_exercicio_filters_sheet.dart';
+import '../widgets/novo_exercicio_help_sheets.dart';
 
 part 'add_exercicio_screen_state.part.dart';
 part 'add_exercicio_screen_widgets_form.part.dart';

@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/theme/brand_palette.dart';
-import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/theme_provider.dart';
-import '../../../core/widgets/fx_home_sheet.dart';
+import '../../../core/widgets/fx_inset_picker_sheet.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
 
@@ -62,61 +59,20 @@ class PerfilAppearanceSection extends ConsumerWidget {
     WidgetRef ref,
     ThemeMode current,
   ) async {
-    await showFxHomeSheet<void>(
+    final picked = await showFxInsetPickerSheet<ThemeMode>(
       context,
-      builder: (ctx) {
-        final dark = Theme.of(ctx).brightness == Brightness.dark;
-        final chrome = ShellChrome.forDark(dark);
-        final ink = chrome.ink;
-        return FxHomeSheetSurface(
-          isDark: dark,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              FxHomeSheetHandle(isDark: dark),
-              FxHomeSheetHeader(
-                leading: Icon(
-                  Icons.dark_mode_outlined,
-                  color: BrandPalette.softened(
-                    Theme.of(ctx).colorScheme.primary,
-                  ),
-                ),
-                title: 'Aparência',
-                isDark: dark,
-              ),
-              for (final option in _options)
-                InkWell(
-                  onTap: () {
-                    HapticFeedback.selectionClick();
-                    ref.read(themeModeProvider.notifier).setMode(option.$1);
-                    Navigator.of(ctx).pop();
-                  },
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(
-                      minHeight: FxSettingsLayout.rowMinHeight,
-                    ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            option.$2,
-                            style: FxSettingsLayout.rowLabel(color: ink),
-                          ),
-                        ),
-                        if (current == option.$1)
-                          Icon(
-                            Icons.check,
-                            color: Theme.of(ctx).colorScheme.primary,
-                            size: FxSettingsLayout.iconSize,
-                          ),
-                      ],
-                    ),
-                  ),
-                ),
-            ],
+      title: 'Aparência',
+      headerIcon: Icons.dark_mode_outlined,
+      selected: current,
+      items: [
+        for (final option in _options)
+          FxInsetPickerSheetItem(
+            value: option.$1,
+            label: option.$2,
           ),
-        );
-      },
+      ],
     );
+    if (picked == null) return;
+    ref.read(themeModeProvider.notifier).setMode(picked);
   }
 }

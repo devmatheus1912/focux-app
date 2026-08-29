@@ -332,20 +332,28 @@ class _AssignWorkoutSheetState extends State<_AssignWorkoutSheet> {
                 physics: const BouncingScrollPhysics(),
                 child: FxSettingsGroup(
                   accent: primary,
-                  children: [
-                    for (var i = 0; i < widget.alunos.length; i++)
-                      _assignAlunoTile(
-                        aluno: widget.alunos[i],
-                        selected: selectedAlunoId == widget.alunos[i].id,
-                        accent: soft,
-                        primary: primary,
-                        showDivider: i < widget.alunos.length - 1,
-                        onTap: () {
-                          HapticFeedback.selectionClick();
-                          setState(() => selectedAlunoId = widget.alunos[i].id);
-                        },
-                      ),
-                  ],
+                  edgeToEdgeRows: true,
+                  children: FxInsetPickerOption.list(
+                    accent: soft,
+                    items: [
+                      for (var i = 0; i < widget.alunos.length; i++)
+                        FxInsetPickerOptionSpec(
+                          label: widget.alunos[i].nome,
+                          subtitle:
+                              widget.alunos[i].objetivo?.trim().isNotEmpty ==
+                                      true
+                                  ? widget.alunos[i].objetivo!.trim()
+                                  : 'Objetivo não definido',
+                          icon: Icons.person_outline_rounded,
+                          selected: selectedAlunoId == widget.alunos[i].id,
+                          onTap: () {
+                            setState(
+                              () => selectedAlunoId = widget.alunos[i].id,
+                            );
+                          },
+                        ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -389,34 +397,6 @@ class _AssignWorkoutSheetState extends State<_AssignWorkoutSheet> {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _assignAlunoTile({
-    required Aluno aluno,
-    required bool selected,
-    required Color accent,
-    required Color primary,
-    required bool showDivider,
-    required VoidCallback onTap,
-  }) {
-    final objetivo =
-        aluno.objetivo?.trim().isNotEmpty == true
-            ? aluno.objetivo!.trim()
-            : 'Objetivo não definido';
-
-    return FxSettingsTile(
-      icon: Icons.person_outline_rounded,
-      accent: accent,
-      label: aluno.nome,
-      subtitle: objetivo,
-      value: '',
-      showDivider: showDivider,
-      onTap: onTap,
-      accessory:
-          selected
-              ? Icon(Icons.check, color: primary, size: FxSettingsLayout.iconSize)
-              : null,
     );
   }
 }

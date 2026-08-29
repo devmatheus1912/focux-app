@@ -16,7 +16,8 @@ void main() {
 
     expect(library, contains('showExerciseLibrarySheet'));
     expect(library, contains('FxSettingsGroup'));
-    expect(filters, contains('FxInsetPickerOption'));
+    expect(filters, contains('FxInsetPickerOption.list'));
+    expect(filters, contains('edgeToEdgeRows: true'));
     expect(filters, isNot(contains('_FilterPickerTile')));
     expect(prescription, contains('AlunoSegmentedChoice'));
     expect(prescription, contains('FxSettingsGroup'));
