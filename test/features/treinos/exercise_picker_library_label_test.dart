@@ -20,7 +20,7 @@ void main() {
         totalCount: 141,
         filter: const ExercisePickerFilter(somenteComVideo: true),
       );
-      expect(lines.primary, '38 filtrados');
+      expect(lines.primary, '38 com filtros');
       expect(lines.secondary, '141 no total');
     });
 

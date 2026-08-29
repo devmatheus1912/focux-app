@@ -188,13 +188,10 @@ extension AddExercicioToTreinoScreenActionsB
     }
   }
 
-  bool _usesPickerApi() {
-    return _buscaQuery.trim().length >= 2 ||
-        _pickerFilter.somenteFavoritos ||
-        _pickerFilter.somenteComVideo ||
-        _pickerFilter.espaco != null ||
-        _pickerFilter.equipamento != null;
-  }
+  bool _usesPickerApi() => usesExercisePickerApi(
+    buscaQuery: _buscaQuery,
+    filter: _pickerFilter,
+  );
 
   ExercicioPickerQuery _buildPickerApiQuery() {
     return ExercicioPickerQuery(
@@ -635,25 +632,14 @@ extension AddExercicioToTreinoScreenActionsB
                 filter: _pickerFilter,
                 isDark: isDark,
                 primary: primary,
+                resultCaption:
+                    _pickerFilter.isActive || query.length >= 2
+                        ? libraryLines
+                        : null,
                 onChanged:
                     (ExercisePickerFilter next) =>
                         setState(() => _pickerFilter = next),
               ),
-              if (_pickerFilter.isActive || query.length >= 2) ...[
-                const SizedBox(height: 8),
-                Text(
-                  libraryLines.secondary == null
-                      ? libraryLines.primary
-                      : '${libraryLines.primary} · ${libraryLines.secondary}',
-                  style: FocuxHubTypography.bodyMuted(
-                    color:
-                        isDark
-                            ? EagleTokens.darkInkMute
-                            : TokensStrip.textSecondary,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ],
             ],
             if (showFilterEmpty) ...[
               const SizedBox(height: 16),

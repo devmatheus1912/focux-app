@@ -57,6 +57,18 @@ class ExercisePickerFilter {
   }
 }
 
+/// Dispara paginação server-side do picker (biblioteca inteira).
+bool usesExercisePickerApi({
+  required String buscaQuery,
+  required ExercisePickerFilter filter,
+}) {
+  return buscaQuery.trim().length >= 2 ||
+      filter.somenteFavoritos ||
+      filter.somenteComVideo ||
+      filter.espaco != null ||
+      filter.equipamento != null;
+}
+
 List<Exercicio> applyExercisePickerFilter(
   Iterable<Exercicio> items,
   ExercisePickerFilter filter, {

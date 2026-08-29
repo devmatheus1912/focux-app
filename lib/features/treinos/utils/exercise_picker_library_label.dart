@@ -27,7 +27,7 @@ ExercisePickerLibraryLines exercisePickerLibraryLines({
   }
   if (filter.isActive && filteredCount != totalCount) {
     return ExercisePickerLibraryLines(
-      primary: '$filteredCount filtrados',
+      primary: '$filteredCount com filtros',
       secondary: '$totalCount no total',
     );
   }

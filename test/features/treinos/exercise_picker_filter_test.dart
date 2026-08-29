@@ -77,4 +77,37 @@ void main() {
       expect(filtered.map((e) => e.id), [4]);
     });
   });
+
+  group('usesExercisePickerApi', () {
+    test('espaco ou equipamento disparam API', () {
+      expect(
+        usesExercisePickerApi(
+          buscaQuery: '',
+          filter: const ExercisePickerFilter(espaco: Espaco.casaSemEquipo),
+        ),
+        isTrue,
+      );
+      expect(
+        usesExercisePickerApi(
+          buscaQuery: '',
+          filter: const ExercisePickerFilter(
+            equipamento: Equipamento.pesoCorporal,
+          ),
+        ),
+        isTrue,
+      );
+    });
+
+    test('somente filtro do aluno fica local', () {
+      expect(
+        usesExercisePickerApi(
+          buscaQuery: '',
+          filter: ExercisePickerFilter.fromAlunoEquipamentos(
+            const {Equipamento.halter},
+          ),
+        ),
+        isFalse,
+      );
+    });
+  });
 }

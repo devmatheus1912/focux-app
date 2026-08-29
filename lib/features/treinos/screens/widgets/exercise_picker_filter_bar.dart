@@ -9,6 +9,7 @@ import '../../../../core/widgets/fx_settings_group.dart';
 import '../../../exercicios/data/enums.dart';
 import '../../../exercicios/data/exercicio_taxonomy_labels.dart';
 import '../../utils/exercise_picker_filter.dart';
+import '../../utils/exercise_picker_library_label.dart';
 
 class ExercisePickerFilterBar extends StatefulWidget {
   const ExercisePickerFilterBar({
@@ -17,12 +18,14 @@ class ExercisePickerFilterBar extends StatefulWidget {
     required this.isDark,
     required this.primary,
     required this.onChanged,
+    this.resultCaption,
   });
 
   final ExercisePickerFilter filter;
   final bool isDark;
   final Color primary;
   final ValueChanged<ExercisePickerFilter> onChanged;
+  final ExercisePickerLibraryLines? resultCaption;
 
   @override
   State<ExercisePickerFilterBar> createState() =>
@@ -66,6 +69,16 @@ class _ExercisePickerFilterBarState extends State<ExercisePickerFilterBar> {
     return TaxonomyLabels.equipamento[equipamento] ?? equipamento.name;
   }
 
+  void _applyFilter(ExercisePickerFilter next) {
+    widget.onChanged(next);
+    if (_expanded &&
+        next.espaco == null &&
+        next.equipamento == null &&
+        !next.filtrarPorAluno) {
+      setState(() => _expanded = false);
+    }
+  }
+
   Widget _chipRow(List<Widget> chips) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
@@ -74,106 +87,135 @@ class _ExercisePickerFilterBarState extends State<ExercisePickerFilterBar> {
     );
   }
 
+  String? get _resultCaptionText {
+    final lines = widget.resultCaption;
+    if (lines == null) return null;
+    if (lines.secondary == null) return lines.primary;
+    return '${lines.primary} · ${lines.secondary}';
+  }
+
   @override
   Widget build(BuildContext context) {
     final mute =
         widget.isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final caption = _resultCaptionText;
 
     if (!_expanded) {
-      return SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.only(right: 12),
-        child: Row(
+      return Semantics(
+        container: true,
+        label: 'Filtros rápidos da biblioteca',
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            if (widget.filter.filtrarPorAluno &&
-                widget.filter.equipamentosAluno.isNotEmpty) ...[
-              _FilterChip(
-                label: 'Do aluno',
-                icon: Icons.person_rounded,
-                selected: true,
-                primary: widget.primary,
-                isDark: widget.isDark,
-                onTap:
-                    () => widget.onChanged(
-                      widget.filter.copyWith(clearAluno: true),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.only(right: 12),
+              child: Row(
+                children: [
+                  if (widget.filter.filtrarPorAluno &&
+                      widget.filter.equipamentosAluno.isNotEmpty) ...[
+                    _FilterChip(
+                      label: 'Do aluno',
+                      icon: Icons.person_rounded,
+                      selected: true,
+                      primary: widget.primary,
+                      isDark: widget.isDark,
+                      onTap:
+                          () => _applyFilter(
+                            widget.filter.copyWith(clearAluno: true),
+                          ),
                     ),
-              ),
-              const SizedBox(width: 8),
-            ],
-            _FilterChip(
-              label: 'Favoritos',
-              icon: Icons.star_rounded,
-              selected: widget.filter.somenteFavoritos,
-              primary: widget.primary,
-              isDark: widget.isDark,
-              onTap: () {
-                HapticFeedback.selectionClick();
-                widget.onChanged(
-                  widget.filter.copyWith(
-                    somenteFavoritos: !widget.filter.somenteFavoritos,
+                    const SizedBox(width: 8),
+                  ],
+                  _FilterChip(
+                    label: 'Favoritos',
+                    icon: Icons.star_rounded,
+                    selected: widget.filter.somenteFavoritos,
+                    primary: widget.primary,
+                    isDark: widget.isDark,
+                    onTap: () {
+                      HapticFeedback.selectionClick();
+                      _applyFilter(
+                        widget.filter.copyWith(
+                          somenteFavoritos: !widget.filter.somenteFavoritos,
+                        ),
+                      );
+                    },
                   ),
-                );
-              },
-            ),
-            const SizedBox(width: 8),
-            _FilterChip(
-              label: 'Com vídeo',
-              icon: Icons.play_circle_outline_rounded,
-              selected: widget.filter.somenteComVideo,
-              primary: widget.primary,
-              isDark: widget.isDark,
-              onTap: () {
-                HapticFeedback.selectionClick();
-                widget.onChanged(
-                  widget.filter.copyWith(
-                    somenteComVideo: !widget.filter.somenteComVideo,
+                  const SizedBox(width: 8),
+                  _FilterChip(
+                    label: 'Com vídeo',
+                    icon: Icons.play_circle_outline_rounded,
+                    selected: widget.filter.somenteComVideo,
+                    primary: widget.primary,
+                    isDark: widget.isDark,
+                    onTap: () {
+                      HapticFeedback.selectionClick();
+                      _applyFilter(
+                        widget.filter.copyWith(
+                          somenteComVideo: !widget.filter.somenteComVideo,
+                        ),
+                      );
+                    },
                   ),
-                );
-              },
-            ),
-            const SizedBox(width: 8),
-            if (widget.filter.espaco != null) ...[
-              _FilterChip(
-                label: _espacoLabel(widget.filter.espaco!),
-                selected: true,
-                primary: widget.primary,
-                isDark: widget.isDark,
-                onTap: () {
-                  HapticFeedback.selectionClick();
-                  widget.onChanged(widget.filter.copyWith(clearEspaco: true));
-                },
+                  const SizedBox(width: 8),
+                  if (widget.filter.espaco != null) ...[
+                    _FilterChip(
+                      label: _espacoLabel(widget.filter.espaco!),
+                      selected: true,
+                      primary: widget.primary,
+                      isDark: widget.isDark,
+                      onTap: () {
+                        HapticFeedback.selectionClick();
+                        _applyFilter(widget.filter.copyWith(clearEspaco: true));
+                      },
+                    ),
+                    const SizedBox(width: 8),
+                  ],
+                  if (widget.filter.equipamento != null) ...[
+                    _FilterChip(
+                      label: _equipamentoLabel(widget.filter.equipamento!),
+                      selected: true,
+                      primary: widget.primary,
+                      isDark: widget.isDark,
+                      onTap: () {
+                        HapticFeedback.selectionClick();
+                        _applyFilter(
+                          widget.filter.copyWith(clearEquipamento: true),
+                        );
+                      },
+                    ),
+                    const SizedBox(width: 8),
+                  ],
+                  _FilterChip(
+                    label:
+                        _advancedActiveCount > 0
+                            ? 'Filtros ($_advancedActiveCount)'
+                            : 'Filtros',
+                    icon: Icons.tune_rounded,
+                    selected: _advancedActiveCount > 0,
+                    primary: widget.primary,
+                    isDark: widget.isDark,
+                    onTap: () {
+                      HapticFeedback.selectionClick();
+                      setState(() => _expanded = true);
+                    },
+                  ),
+                ],
               ),
-              const SizedBox(width: 8),
-            ],
-            if (widget.filter.equipamento != null) ...[
-              _FilterChip(
-                label: _equipamentoLabel(widget.filter.equipamento!),
-                selected: true,
-                primary: widget.primary,
-                isDark: widget.isDark,
-                onTap: () {
-                  HapticFeedback.selectionClick();
-                  widget.onChanged(
-                    widget.filter.copyWith(clearEquipamento: true),
-                  );
-                },
-              ),
-              const SizedBox(width: 8),
-            ],
-            _FilterChip(
-              label:
-                  _advancedActiveCount > 0
-                      ? 'Filtros ($_advancedActiveCount)'
-                      : 'Filtros',
-              icon: Icons.tune_rounded,
-              selected: _advancedActiveCount > 0,
-              primary: widget.primary,
-              isDark: widget.isDark,
-              onTap: () {
-                HapticFeedback.selectionClick();
-                setState(() => _expanded = true);
-              },
             ),
+            if (caption != null) ...[
+              const SizedBox(height: 8),
+              Semantics(
+                label: 'Resultado dos filtros: $caption',
+                child: Text(
+                  caption,
+                  style: FxSettingsLayout.footer(color: mute).copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
           ],
         ),
       );
@@ -183,50 +225,65 @@ class _ExercisePickerFilterBarState extends State<ExercisePickerFilterBar> {
       accent: widget.primary,
       header: 'Filtros avançados',
       caption: 'Espaço e equipamento filtram a biblioteca inteira.',
-      footer: Row(
+      footer: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (widget.filter.espaco != null || widget.filter.equipamento != null)
-            TextButton(
-              onPressed: () {
-                HapticFeedback.selectionClick();
-                widget.onChanged(
-                  widget.filter.copyWith(
-                    clearEspaco: true,
-                    clearEquipamento: true,
-                  ),
-                );
-              },
+          if (caption != null) ...[
+            Semantics(
+              label: 'Resultado dos filtros: $caption',
               child: Text(
-                'Limpar avançados',
-                style: FocuxHubTypography.bodyMuted(
-                  color: widget.primary,
+                caption,
+                style: FxSettingsLayout.footer(color: mute).copyWith(
                   fontWeight: FontWeight.w700,
                 ),
               ),
             ),
-          const Spacer(),
-          TextButton(
-            onPressed: () {
-              HapticFeedback.selectionClick();
-              setState(() => _expanded = false);
-            },
-            child: Text(
-              'Recolher',
-              style: FocuxHubTypography.bodyMuted(
-                color: mute,
-                fontWeight: FontWeight.w700,
+            const SizedBox(height: 4),
+          ],
+          Row(
+            children: [
+              if (widget.filter.espaco != null ||
+                  widget.filter.equipamento != null)
+                TextButton(
+                  onPressed: () {
+                    HapticFeedback.selectionClick();
+                    _applyFilter(
+                      widget.filter.copyWith(
+                        clearEspaco: true,
+                        clearEquipamento: true,
+                      ),
+                    );
+                  },
+                  child: Text(
+                    'Limpar avançados',
+                    style: FocuxHubTypography.bodyMuted(
+                      color: widget.primary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              const Spacer(),
+              TextButton(
+                onPressed: () {
+                  HapticFeedback.selectionClick();
+                  setState(() => _expanded = false);
+                },
+                child: Text(
+                  'Recolher',
+                  style: FocuxHubTypography.bodyMuted(
+                    color: mute,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
         ],
       ),
       children: [
         Text(
           'Espaço',
-          style: FocuxHubTypography.bodyMuted(
-            color: mute,
-            fontWeight: FontWeight.w800,
-          ).copyWith(letterSpacing: 0.35),
+          style: FxSettingsLayout.sectionHeader(color: mute),
         ),
         const SizedBox(height: 8),
         _chipRow([
@@ -238,7 +295,7 @@ class _ExercisePickerFilterBarState extends State<ExercisePickerFilterBar> {
               isDark: widget.isDark,
               onTap: () {
                 HapticFeedback.selectionClick();
-                widget.onChanged(
+                _applyFilter(
                   widget.filter.espaco == espaco
                       ? widget.filter.copyWith(clearEspaco: true)
                       : widget.filter.copyWith(espaco: espaco),
@@ -251,10 +308,7 @@ class _ExercisePickerFilterBarState extends State<ExercisePickerFilterBar> {
         const SizedBox(height: FxSettingsLayout.groupGap),
         Text(
           'Equipamento',
-          style: FocuxHubTypography.bodyMuted(
-            color: mute,
-            fontWeight: FontWeight.w800,
-          ).copyWith(letterSpacing: 0.35),
+          style: FxSettingsLayout.sectionHeader(color: mute),
         ),
         const SizedBox(height: 8),
         _chipRow([
@@ -266,7 +320,7 @@ class _ExercisePickerFilterBarState extends State<ExercisePickerFilterBar> {
               isDark: widget.isDark,
               onTap: () {
                 HapticFeedback.selectionClick();
-                widget.onChanged(
+                _applyFilter(
                   widget.filter.equipamento == equipamento
                       ? widget.filter.copyWith(clearEquipamento: true)
                       : widget.filter.copyWith(equipamento: equipamento),
@@ -303,8 +357,9 @@ class _FilterChip extends StatelessWidget {
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     return Semantics(
       button: true,
-      selected: selected,
-      label: selected ? '$label, ativo' : label,
+      toggled: selected,
+      label: selected ? '$label, filtro ativo' : label,
+      hint: selected ? 'Toque para remover' : 'Toque para ativar',
       child: Material(
         color: Colors.transparent,
         child: InkWell(
@@ -313,7 +368,8 @@ class _FilterChip extends StatelessWidget {
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 160),
             curve: Curves.easeOutCubic,
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            constraints: const BoxConstraints(minHeight: 44),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             decoration: BoxDecoration(
               color:
                   selected
