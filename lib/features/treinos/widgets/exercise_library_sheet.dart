@@ -3,15 +3,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/fx_settings_layout.dart';
-import '../../../core/theme/shell_chrome.dart';
-import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
-import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../exercicios/data/exercicio_page.dart';
@@ -334,6 +331,7 @@ class _ExerciseLibrarySheetState extends State<_ExerciseLibrarySheet> {
       selected: widget.selected,
       alreadyInTreinoIds: widget.alreadyInTreinoIds,
       uploadingInSheet: _uploadingInSheet,
+      primary: primary,
       onUploadVideo: widget.onUploadVideo,
       onSelect: (exercicio) {
         HapticFeedback.selectionClick();
@@ -353,6 +351,7 @@ class _GroupedExerciseList extends StatelessWidget {
     required this.selected,
     required this.alreadyInTreinoIds,
     required this.uploadingInSheet,
+    required this.primary,
     required this.onSelect,
     required this.onUpload,
     this.onUploadVideo,
@@ -365,6 +364,7 @@ class _GroupedExerciseList extends StatelessWidget {
   final Exercicio? selected;
   final Set<int> alreadyInTreinoIds;
   final bool uploadingInSheet;
+  final Color primary;
   final ValueChanged<Exercicio> onSelect;
   final Future<void> Function(Exercicio) onUpload;
   final Future<Exercicio?> Function(Exercicio exercicio)? onUploadVideo;
@@ -372,59 +372,57 @@ class _GroupedExerciseList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final mute = ShellChrome.of(context).mute;
-    final entries = <Object>[];
-    for (final section in sections) {
-      entries.add(section.letter);
-      entries.addAll(section.items);
-    }
-
     return ListView.builder(
       controller: controller,
       physics: const BouncingScrollPhysics(),
       keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-      padding: const EdgeInsets.only(bottom: 8),
-      itemCount: entries.length + (loadingMore ? 1 : 0),
-      itemBuilder: (context, index) {
-        if (index >= entries.length) {
+      padding: const EdgeInsets.only(bottom: 12),
+      itemCount: sections.length + (loadingMore ? 1 : 0),
+      itemBuilder: (context, sectionIndex) {
+        if (sectionIndex >= sections.length) {
           return const Padding(
             padding: EdgeInsets.symmetric(vertical: 16),
             child: Center(child: FxLoading(size: 22)),
           );
         }
 
-        final entry = entries[index];
-        if (entry is String) {
-          return Padding(
-            padding: const EdgeInsets.fromLTRB(4, 14, 4, 6),
-            child: Text(
-              entry,
-              style: FxSettingsLayout.sectionHeader(color: mute),
-            ),
-          );
-        }
-
-        final exercicio = entry as Exercicio;
-        final next = index + 1 < entries.length ? entries[index + 1] : null;
-        final showDivider = next is Exercicio;
-
-        return ExerciseLibraryRow(
-          exercicio: exercicio,
-          searchQuery: searchQuery,
-          selected: selected?.id == exercicio.id,
-          alreadyInTreino: alreadyInTreinoIds.contains(exercicio.id),
-          showDivider: showDivider,
-          uploadEnabled: onUploadVideo != null && !uploadingInSheet,
-          onTap: () => onSelect(exercicio),
-          onPreviewThumb:
-              canPreviewExerciseMedia(exercicio)
-                  ? () => showExerciseMediaPreview(
-                    context,
-                    exercicio: exercicio,
-                  )
-                  : null,
-          onUploadVideo:
-              onUploadVideo == null ? null : () => onUpload(exercicio),
+        final section = sections[sectionIndex];
+        return Padding(
+          padding: EdgeInsets.only(
+            bottom: sectionIndex < sections.length - 1
+                ? FxSettingsLayout.groupGap
+                : 0,
+          ),
+          child: FxSettingsGroup(
+            header: section.letter,
+            accent: primary,
+            children: [
+              for (var i = 0; i < section.items.length; i++)
+                ExerciseLibraryRow(
+                  exercicio: section.items[i],
+                  searchQuery: searchQuery,
+                  selected: selected?.id == section.items[i].id,
+                  alreadyInTreino: alreadyInTreinoIds.contains(
+                    section.items[i].id,
+                  ),
+                  showDivider: i < section.items.length - 1,
+                  insetGroup: true,
+                  uploadEnabled: onUploadVideo != null && !uploadingInSheet,
+                  onTap: () => onSelect(section.items[i]),
+                  onPreviewThumb:
+                      canPreviewExerciseMedia(section.items[i])
+                          ? () => showExerciseMediaPreview(
+                            context,
+                            exercicio: section.items[i],
+                          )
+                          : null,
+                  onUploadVideo:
+                      onUploadVideo == null
+                          ? null
+                          : () => onUpload(section.items[i]),
+                ),
+            ],
+          ),
         );
       },
     );
@@ -482,58 +480,38 @@ class _LibrarySearchPanelState extends State<_LibrarySearchPanel> {
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: fxListCardDecoration(
-        context,
-        accent: widget.primary,
-        radius: FxSettingsLayout.groupRadius,
-      ),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            TextField(
-              controller: widget.searchCtrl,
-              focusNode: _focusNode,
-              textInputAction: TextInputAction.search,
-              decoration: InputDecoration(
-                hintText: widget.searchPlaceholder,
-                prefixIcon: Icon(Icons.search_rounded, color: widget.primary),
-                suffixIcon:
-                    widget.searchCtrl.text.isEmpty
-                        ? null
-                        : IconButton(
-                          onPressed: widget.onClearSearch,
-                          icon: const Icon(Icons.close_rounded),
-                          tooltip: 'Limpar busca',
-                        ),
-                filled: true,
-                fillColor:
-                    widget.isDark
-                        ? EagleTokens.darkCardHi
-                        : TokensStrip.cardBg,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 12,
-                ),
-                border: FxInputDeco.outlineBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-            ),
-            const SizedBox(height: 10),
-            ExercisePickerFilterBar(
-              filter: widget.filter,
-              isDark: widget.isDark,
-              primary: widget.primary,
-              resultCaption: widget.resultCaption,
-              onChanged: widget.onFilterChanged,
-            ),
-          ],
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        TextField(
+          controller: widget.searchCtrl,
+          focusNode: _focusNode,
+          textInputAction: TextInputAction.search,
+          decoration: FxInputDeco.build(
+            context,
+            'Buscar exercício',
+            icon: Icons.search_rounded,
+            hint: widget.searchPlaceholder,
+          ).copyWith(
+            suffixIcon:
+                widget.searchCtrl.text.isEmpty
+                    ? null
+                    : IconButton(
+                      onPressed: widget.onClearSearch,
+                      icon: const Icon(Icons.close_rounded),
+                      tooltip: 'Limpar busca',
+                    ),
+          ),
         ),
-      ),
+        const SizedBox(height: 10),
+        ExercisePickerFilterBar(
+          filter: widget.filter,
+          isDark: widget.isDark,
+          primary: widget.primary,
+          resultCaption: widget.resultCaption,
+          onChanged: widget.onFilterChanged,
+        ),
+      ],
     );
   }
 }

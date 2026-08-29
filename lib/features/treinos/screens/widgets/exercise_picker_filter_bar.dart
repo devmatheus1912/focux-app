@@ -148,7 +148,9 @@ class ExercisePickerFilterBar extends StatelessWidget {
                 const SizedBox(width: 8),
                 _FilterChip(
                   label:
-                      advancedCount > 0 ? 'Mais ($advancedCount)' : 'Mais',
+                      advancedCount > 0
+                          ? 'Filtros ($advancedCount)'
+                          : 'Filtros',
                   icon: Icons.tune_rounded,
                   selected: advancedCount > 0,
                   primary: primary,

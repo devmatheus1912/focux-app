@@ -285,7 +285,11 @@ class _AddExerciseBottomDock extends StatelessWidget {
       _ => '',
     };
     final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
-    final bottom = MediaQuery.paddingOf(context).bottom;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final fg = dashboardPrioritiesChipForeground(primary, isDark: isDark);
+    final bg = dashboardPrioritiesChipBackground(primary, isDark: isDark);
+    final summary =
+        '${preset.label} · $series×$repeticoes · ${descanso}s$tipoLabel';
 
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -302,28 +306,68 @@ class _AddExerciseBottomDock extends StatelessWidget {
       child: SafeArea(
         top: false,
         child: Padding(
-          padding: EdgeInsets.fromLTRB(
+          padding: const EdgeInsets.fromLTRB(
             FxSettingsLayout.groupPadH,
             8,
             FxSettingsLayout.groupPadH,
-            bottom > 0 ? 6 : 10,
+            8,
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Semantics(
-                  button: true,
-                  label:
-                      'Prescrição ativa ${preset.label}. $series séries de $repeticoes, $descanso segundos. Toque para editar.',
-                  child: DashboardHomeActionChip(
-                    label:
-                        '${preset.label} · $series×$repeticoes · ${descanso}s$tipoLabel',
-                    accent: primary,
-                    isDark: isDark,
-                    onPressed: onEditPrescription,
+              Semantics(
+                button: true,
+                label:
+                    'Prescrição ativa ${preset.label}. $series séries de $repeticoes, $descanso segundos. Toque para editar.',
+                child: Material(
+                  color: bg,
+                  borderRadius: BorderRadius.circular(14),
+                  child: InkWell(
+                    onTap: () {
+                      HapticFeedback.selectionClick();
+                      onEditPrescription();
+                    },
+                    borderRadius: BorderRadius.circular(14),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 11,
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.tune_rounded, color: fg, size: 18),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Prescrição padrão',
+                                  style: FxSettingsLayout.subhead(
+                                    color: mute,
+                                  ).copyWith(fontWeight: FontWeight.w800),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  summary,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: FocuxHubTypography.body(
+                                    color: fg,
+                                  ).copyWith(fontWeight: FontWeight.w800),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Icon(
+                            Icons.chevron_right_rounded,
+                            color: mute,
+                            size: FxSettingsLayout.chevronSize,
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
               ),

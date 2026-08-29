@@ -22,6 +22,7 @@ class ExerciseLibraryRow extends StatelessWidget {
     this.uploadEnabled = true,
     this.picker = true,
     this.searchQuery = '',
+    this.insetGroup = false,
   });
 
   final Exercicio exercicio;
@@ -34,6 +35,7 @@ class ExerciseLibraryRow extends StatelessWidget {
   final bool uploadEnabled;
   final bool picker;
   final String searchQuery;
+  final bool insetGroup;
 
   bool get _hasThumbMedia => exercisePreviewMediaUrlFor(exercicio) != null;
 
@@ -48,9 +50,10 @@ class ExerciseLibraryRow extends StatelessWidget {
     final brand = BrandPalette.softened(Theme.of(context).colorScheme.primary);
     final meta = exerciseLibraryMeta(exercicio);
     final hasPreview = onPreviewThumb != null && canPreviewExerciseMedia(exercicio);
-    final dividerInset =
-        (_hasThumbMedia ? 36.0 : 0.0) +
-        (_hasThumbMedia ? FxSettingsLayout.iconGap : 0.0);
+    final dividerInset = insetGroup
+        ? 0.0
+        : (_hasThumbMedia ? 36.0 : 0.0) +
+            (_hasThumbMedia ? FxSettingsLayout.iconGap : 0.0);
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -77,7 +80,9 @@ class ExerciseLibraryRow extends StatelessWidget {
                       if (uploadEnabled) onUploadVideo!();
                     },
             child: ConstrainedBox(
-              constraints: BoxConstraints(minHeight: _rowMinHeight),
+              constraints: BoxConstraints(
+                minHeight: insetGroup ? 44 : _rowMinHeight,
+              ),
               child: Row(
                 children: [
                   if (_hasThumbMedia) ...[

@@ -5,10 +5,8 @@ import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
-import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
-import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../alunos/widgets/aluno_form_choices.dart';
@@ -141,7 +139,7 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
     final rest = widget.descansoCtrl.text.trim().isEmpty
         ? '${preset.descansoSegundos}'
         : widget.descansoCtrl.text.trim();
-    return '${preset.label} · $series×$reps · ${rest}s';
+    return '$series×$reps · ${rest}s';
   }
 
   @override
@@ -150,19 +148,23 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
     final mute = widget.isDark
         ? EagleTokens.darkInkMute
         : TokensStrip.textSecondary;
+    final line = widget.isDark
+        ? EagleTokens.darkLine
+        : TokensStrip.borderDefault;
     final maxHeight =
         MediaQuery.sizeOf(context).height *
         FxHomeSheetChrome.expandHeightFactor;
+    final keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
+    final selectedPreset = workoutBuilderPresetById(_presetId);
     final fieldStyle = FocuxHubTypography.body(color: widget.ink).copyWith(
       fontWeight: FontWeight.w700,
     );
-    final selectedPreset = workoutBuilderPresetById(_presetId);
 
     return FxHomeSheetSurface(
       isDark: widget.isDark,
       maxHeight: maxHeight,
       expand: true,
-      padding: const EdgeInsets.fromLTRB(18, 8, 18, 14),
+      padding: const EdgeInsets.fromLTRB(18, 8, 18, 10),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -181,27 +183,17 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
             leading: Icon(Icons.edit_note_rounded, color: brand, size: 20),
           ),
           const SizedBox(height: 10),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: brand.withValues(alpha: widget.isDark ? 0.18 : 0.1),
-                borderRadius: BorderRadius.circular(999),
-              ),
-              child: Text(
-                _previewLabel,
-                style: FocuxHubTypography.bodyMuted(
-                  color: brand,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ),
+          _PreviewStrip(
+            presetLabel: selectedPreset.label,
+            summary: _previewLabel,
+            brand: brand,
+            isDark: widget.isDark,
           ),
           const SizedBox(height: 12),
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.only(bottom: 8),
+              padding: EdgeInsets.only(bottom: keyboardInset + 20),
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -214,92 +206,102 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
                     ),
                     const SizedBox(height: FxSettingsLayout.groupGap),
                   ],
-                  FxSettingsGroup(
-                    accent: widget.primary,
-                    caption: selectedPreset.summary,
-                    children: [
-                      for (var i = 0; i < workoutBuilderPresets.length; i++)
-                        _PickerRow(
-                          label: workoutBuilderPresets[i].label,
-                          selected: workoutBuilderPresets[i].id == _presetId,
-                          accent: brand,
-                          showDivider: i < workoutBuilderPresets.length - 1,
-                          onTap: () {
-                            HapticFeedback.selectionClick();
-                            setState(() => _presetId = workoutBuilderPresets[i].id);
-                            widget.onPresetSelected(workoutBuilderPresets[i].id);
-                          },
-                        ),
-                    ],
+                  Text(
+                    'Objetivo',
+                    style: FxSettingsLayout.sectionHeader(color: mute),
+                  ),
+                  const SizedBox(height: 8),
+                  DecoratedBox(
+                    decoration: fxListCardDecoration(
+                      context,
+                      accent: widget.primary,
+                      radius: FxSettingsLayout.groupRadius,
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(10),
+                      child: AlunoSegmentedChoice(
+                        options: [
+                          for (final preset in workoutBuilderPresets)
+                            (value: preset.id, label: preset.label),
+                        ],
+                        selected: _presetId,
+                        isDark: widget.isDark,
+                        onSelect: (value) {
+                          HapticFeedback.selectionClick();
+                          setState(() => _presetId = value);
+                          widget.onPresetSelected(value);
+                        },
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: FxSettingsLayout.groupPadH,
+                    ),
+                    child: Text(
+                      selectedPreset.summary,
+                      style: FxSettingsLayout.footer(color: mute),
+                    ),
                   ),
                   const SizedBox(height: FxSettingsLayout.groupGap),
                   FxSettingsGroup(
                     accent: widget.primary,
                     caption: 'Séries, repetições e descanso',
                     children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        child: Column(
-                          children: [
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: TextFormField(
-                                    controller: widget.seriesCtrl,
-                                    decoration: FxInputDeco.build(
-                                      context,
-                                      'Séries',
-                                    ),
-                                    keyboardType: TextInputType.number,
-                                    style: fieldStyle,
-                                  ),
-                                ),
-                                const SizedBox(width: 10),
-                                Expanded(
-                                  child: TextFormField(
-                                    controller: widget.repCtrl,
-                                    decoration: FxInputDeco.build(
-                                      context,
-                                      'Repetições',
-                                    ),
-                                    style: fieldStyle,
-                                  ),
-                                ),
-                              ],
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _VolumeField(
+                              label: 'Séries',
+                              controller: widget.seriesCtrl,
+                              keyboardType: TextInputType.number,
+                              style: fieldStyle,
+                              isDark: widget.isDark,
+                              line: line,
                             ),
-                            const SizedBox(height: 10),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: TextFormField(
-                                    controller: widget.descansoCtrl,
-                                    decoration: FxInputDeco.build(
-                                      context,
-                                      'Descanso (s)',
-                                    ),
-                                    keyboardType: TextInputType.number,
-                                    style: fieldStyle,
-                                  ),
-                                ),
-                                const SizedBox(width: 10),
-                                Expanded(
-                                  child: TextFormField(
-                                    controller: widget.cargaCtrl,
-                                    decoration: FxInputDeco.build(
-                                      context,
-                                      'Carga (kg)',
-                                    ).copyWith(helperText: 'Opcional'),
-                                    keyboardType:
-                                        const TextInputType.numberWithOptions(
-                                          decimal: true,
-                                        ),
-                                    style: fieldStyle,
-                                  ),
-                                ),
-                              ],
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: _VolumeField(
+                              label: 'Repetições',
+                              controller: widget.repCtrl,
+                              style: fieldStyle,
+                              isDark: widget.isDark,
+                              line: line,
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _VolumeField(
+                              label: 'Descanso (s)',
+                              controller: widget.descansoCtrl,
+                              keyboardType: TextInputType.number,
+                              style: fieldStyle,
+                              isDark: widget.isDark,
+                              line: line,
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: _VolumeField(
+                              label: 'Carga (kg)',
+                              controller: widget.cargaCtrl,
+                              hint: 'Opcional',
+                              keyboardType:
+                                  const TextInputType.numberWithOptions(
+                                    decimal: true,
+                                  ),
+                              style: fieldStyle,
+                              isDark: widget.isDark,
+                              line: line,
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -316,7 +318,7 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
                       radius: FxSettingsLayout.groupRadius,
                     ),
                     child: Padding(
-                      padding: const EdgeInsets.all(12),
+                      padding: const EdgeInsets.all(10),
                       child: AlunoSegmentedChoice(
                         options: const [
                           (value: 'NORMAL', label: 'Normal'),
@@ -335,17 +337,14 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
                   ),
                   if (_tipoSerie == 'SUPERSET') ...[
                     const SizedBox(height: 10),
-                    TextFormField(
+                    _VolumeField(
+                      label: 'Grupo do superset',
                       controller: widget.grupoSupersetCtrl,
-                      decoration: FxInputDeco.build(
-                        context,
-                        'Grupo do superset',
-                      ).copyWith(
-                        helperText:
-                            'Mesmo número em exercícios que ficam juntos.',
-                      ),
+                      hint: 'Mesmo número em exercícios juntos',
                       keyboardType: TextInputType.number,
                       style: fieldStyle,
+                      isDark: widget.isDark,
+                      line: line,
                     ),
                   ],
                   if (_tipoSerie == 'DROPSET') ...[
@@ -359,20 +358,32 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
                     ),
                   ],
                   const SizedBox(height: FxSettingsLayout.groupGap),
-                  TextFormField(
-                    controller: widget.observacoesCtrl,
-                    decoration: FxInputDeco.build(
-                      context,
-                      'Observações de execução',
-                    ),
-                    minLines: 2,
-                    maxLines: 4,
-                    style: fieldStyle,
+                  FxSettingsGroup(
+                    accent: widget.primary,
+                    caption: 'Observações de execução',
+                    children: [
+                      TextFormField(
+                        controller: widget.observacoesCtrl,
+                        decoration: const InputDecoration(
+                          border: InputBorder.none,
+                          isDense: true,
+                          contentPadding: EdgeInsets.zero,
+                        ),
+                        minLines: 2,
+                        maxLines: 4,
+                        style: fieldStyle,
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Dica: ${selectedPreset.observacoes}',
-                    style: FxSettingsLayout.footer(color: mute),
+                  const SizedBox(height: 6),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: FxSettingsLayout.groupPadH,
+                    ),
+                    child: Text(
+                      'Dica: ${selectedPreset.observacoes}',
+                      style: FxSettingsLayout.footer(color: mute),
+                    ),
                   ),
                 ],
               ),
@@ -384,69 +395,121 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
   }
 }
 
-class _PickerRow extends StatelessWidget {
-  const _PickerRow({
-    required this.label,
-    required this.selected,
-    required this.accent,
-    required this.onTap,
-    this.showDivider = true,
+class _PreviewStrip extends StatelessWidget {
+  const _PreviewStrip({
+    required this.presetLabel,
+    required this.summary,
+    required this.brand,
+    required this.isDark,
   });
 
-  final String label;
-  final bool selected;
-  final Color accent;
-  final VoidCallback onTap;
-  final bool showDivider;
+  final String presetLabel;
+  final String summary;
+  final Color brand;
+  final bool isDark;
 
   @override
   Widget build(BuildContext context) {
-    final chrome = ShellChrome.of(context);
-    final ink = selected ? accent : chrome.ink;
-    final line = chrome.line;
-
-    return InkWell(
-      onTap: onTap,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(
-          minHeight: FxSettingsLayout.rowMinHeight,
-        ),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color:
-                selected ? accent.withValues(alpha: 0.08) : Colors.transparent,
-            border:
-                showDivider
-                    ? Border(
-                      bottom: BorderSide(
-                        color: line,
-                        width: FxSettingsLayout.dividerThickness,
-                      ),
-                    )
-                    : null,
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 4,
-              vertical: TokensStrip.s3,
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    label,
-                    style: FxSettingsLayout.rowLabel(color: ink).copyWith(
-                      fontWeight: selected ? FontWeight.w800 : null,
-                    ),
-                  ),
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: brand.withValues(alpha: isDark ? 0.14 : 0.08),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: brand.withValues(alpha: 0.22)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+        child: Row(
+          children: [
+            Icon(Icons.bolt_rounded, color: brand, size: 18),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                '$presetLabel · $summary',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: FocuxHubTypography.bodyMuted(
+                  color: brand,
+                  fontWeight: FontWeight.w800,
                 ),
-                if (selected)
-                  Icon(Icons.check_rounded, color: accent, size: 20),
-              ],
+              ),
             ),
-          ),
+            Icon(Icons.unfold_more_rounded, color: brand, size: 18),
+          ],
         ),
       ),
+    );
+  }
+}
+
+class _VolumeField extends StatelessWidget {
+  const _VolumeField({
+    required this.label,
+    required this.controller,
+    required this.style,
+    required this.isDark,
+    required this.line,
+    this.hint,
+    this.keyboardType,
+  });
+
+  final String label;
+  final TextEditingController controller;
+  final TextStyle style;
+  final bool isDark;
+  final Color line;
+  final String? hint;
+  final TextInputType? keyboardType;
+
+  @override
+  Widget build(BuildContext context) {
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final fill = isDark ? EagleTokens.darkCardHi : TokensStrip.cardBg;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          label,
+          style: FxSettingsLayout.subhead(color: mute).copyWith(
+            fontWeight: FontWeight.w800,
+            fontSize: 11,
+          ),
+        ),
+        const SizedBox(height: 5),
+        TextFormField(
+          controller: controller,
+          keyboardType: keyboardType,
+          style: style,
+          decoration: InputDecoration(
+            hintText: hint,
+            hintStyle: FocuxHubTypography.bodyMuted(
+              color: mute.withValues(alpha: 0.55),
+            ),
+            filled: true,
+            fillColor: fill,
+            isDense: true,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 11,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: line.withValues(alpha: 0.65)),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: line.withValues(alpha: 0.65)),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: Theme.of(context).colorScheme.primary,
+                width: 1.5,
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
