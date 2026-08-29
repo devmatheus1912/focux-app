@@ -29,76 +29,95 @@ class _AddExerciseTabStrip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-    final tabMotionMs = fxMotionDurationMs(context, normal: 180);
+    final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
+    final action = BrandPalette.sectionAction(primary, dark: isDark);
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final tabMotionMs = fxMotionDurationMs(context, normal: 160);
 
     return Semantics(
       container: true,
       label: 'Como adicionar: buscar ou explorar',
-      child: Container(
-        padding: const EdgeInsets.all(4),
-        decoration: fxListCardDecoration(
-          context,
-          accent: primary,
-          radius: FxSettingsLayout.groupRadius,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(TokensStrip.rSm),
+          border: Border.all(
+            color: line.withValues(alpha: isDark ? 0.7 : 0.85),
+          ),
+          color: isDark ? EagleTokens.darkCardHi : TokensStrip.cardBg,
         ),
-        child: Row(
-          children: [
-            for (var i = 0; i < _tabs.length; i++)
-              Expanded(
-                child: Semantics(
-                  button: true,
-                  selected: selectedIndex == i,
-                  label: _tabs[i].semantics,
-                  child: GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onTap: () => onChanged(i),
-                    child: AnimatedContainer(
-                      duration: Duration(milliseconds: tabMotionMs),
-                      curve: Curves.easeOutCubic,
-                      height: 42,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: selectedIndex == i ? primary : Colors.transparent,
-                        borderRadius: BorderRadius.circular(14),
-                        boxShadow:
-                            selectedIndex == i
-                                ? [
-                                  BoxShadow(
-                                    color: primary.withValues(alpha: 0.22),
-                                    blurRadius: 14,
-                                    offset: const Offset(0, 5),
-                                  ),
-                                ]
-                                : null,
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            _tabs[i].icon,
-                            size: 18,
-                            color: selectedIndex == i ? Colors.white : mute,
+        child: SizedBox(
+          height: 40,
+          child: Row(
+            children: [
+              for (var i = 0; i < _tabs.length; i++) ...[
+                if (i > 0)
+                  VerticalDivider(
+                    width: 1,
+                    thickness: FxSettingsLayout.dividerThickness,
+                    color: line.withValues(alpha: isDark ? 0.55 : 0.7),
+                  ),
+                Expanded(
+                  child: Semantics(
+                    button: true,
+                    selected: selectedIndex == i,
+                    label: _tabs[i].semantics,
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: () => onChanged(i),
+                        borderRadius: BorderRadius.horizontal(
+                          left:
+                              i == 0
+                                  ? Radius.circular(TokensStrip.rSm - 1)
+                                  : Radius.zero,
+                          right:
+                              i == _tabs.length - 1
+                                  ? Radius.circular(TokensStrip.rSm - 1)
+                                  : Radius.zero,
+                        ),
+                        child: AnimatedContainer(
+                          duration: Duration(milliseconds: tabMotionMs),
+                          curve: Curves.easeOutCubic,
+                          alignment: Alignment.center,
+                          color:
+                              selectedIndex == i
+                                  ? action.withValues(
+                                    alpha: isDark ? 0.18 : 0.10,
+                                  )
+                                  : Colors.transparent,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                _tabs[i].icon,
+                                size: 17,
+                                color:
+                                    selectedIndex == i ? action : mute,
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                _tabs[i].label,
+                                style: FocuxHubTypography.chip(
+                                  selectedIndex == i ? action : ink,
+                                ).copyWith(
+                                  fontSize: 12,
+                                  fontWeight:
+                                      selectedIndex == i
+                                          ? FontWeight.w800
+                                          : FontWeight.w600,
+                                  letterSpacing: -0.1,
+                                ),
+                              ),
+                            ],
                           ),
-                          const SizedBox(width: 6),
-                          Text(
-                            _tabs[i].label,
-                            style: FocuxHubTypography.body(
-                              color: selectedIndex == i ? Colors.white : mute,
-                            ).copyWith(
-                              fontWeight:
-                                  selectedIndex == i
-                                      ? FontWeight.w900
-                                      : FontWeight.w700,
-                              letterSpacing: -0.1,
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-          ],
+              ],
+            ],
+          ),
         ),
       ),
     );

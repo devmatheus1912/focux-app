@@ -16,6 +16,8 @@ void main() {
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(screen, contains('FxShellScaffold'));
     expect(screen, isNot(contains('centerTitle: true')));
+    expect(screen, contains('BrandPalette.sectionAction'));
+    expect(screen, isNot(contains('dashboardPrioritiesChipBackground')));
     expect(
       screen,
       anyOf(

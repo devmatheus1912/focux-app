@@ -21,9 +21,9 @@ void main() {
     expect(prescription, contains('AlunoSegmentedChoice'));
     expect(
       File(
-        'lib/features/treinos/utils/add_exercise_prescription_input.dart',
+        'lib/features/treinos/screens/widgets/exercise_picker_filter_bar.dart',
       ).readAsStringSync(),
-      contains('resolveAddExercisePrescription'),
+      allOf(contains('Expanded('), contains('expanded: true')),
     );
   });
 }

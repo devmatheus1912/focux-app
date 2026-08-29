@@ -58,11 +58,51 @@ class ExercisePickerFilterBar extends StatelessWidget {
     );
   }
 
+  List<Widget> _activeFilterChips() {
+    final chips = <Widget>[];
+    if (filter.filtrarPorAluno && filter.equipamentosAluno.isNotEmpty) {
+      chips.add(
+        _FilterChip(
+          label: 'Do aluno',
+          icon: Icons.person_outline_rounded,
+          selected: true,
+          primary: primary,
+          isDark: isDark,
+          onTap: () => onChanged(filter.copyWith(clearAluno: true)),
+        ),
+      );
+    }
+    if (filter.espaco != null) {
+      chips.add(
+        _FilterChip(
+          label: _espacoLabel(filter.espaco!),
+          selected: true,
+          primary: primary,
+          isDark: isDark,
+          onTap: () => onChanged(filter.copyWith(clearEspaco: true)),
+        ),
+      );
+    }
+    if (filter.equipamento != null) {
+      chips.add(
+        _FilterChip(
+          label: _equipamentoLabel(filter.equipamento!),
+          selected: true,
+          primary: primary,
+          isDark: isDark,
+          onTap: () => onChanged(filter.copyWith(clearEquipamento: true)),
+        ),
+      );
+    }
+    return chips;
+  }
+
   @override
   Widget build(BuildContext context) {
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final caption = _resultCaptionText;
     final advancedCount = _advancedActiveCount;
+    final activeChips = _activeFilterChips();
 
     return Semantics(
       container: true,
@@ -70,33 +110,34 @@ class ExercisePickerFilterBar extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          ClipRect(
-            clipBehavior: Clip.none,
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
+          if (activeChips.isNotEmpty) ...[
+            ClipRect(
               clipBehavior: Clip.none,
-              padding: const EdgeInsets.only(right: 12, bottom: 2),
-              child: Row(
-              children: [
-                if (filter.filtrarPorAluno &&
-                    filter.equipamentosAluno.isNotEmpty) ...[
-                  _FilterChip(
-                    label: 'Do aluno',
-                    icon: Icons.person_outline_rounded,
-                    selected: true,
-                    primary: primary,
-                    isDark: isDark,
-                    onTap:
-                        () => onChanged(filter.copyWith(clearAluno: true)),
-                  ),
-                  const SizedBox(width: 8),
-                ],
-                _FilterChip(
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                clipBehavior: Clip.none,
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Row(
+                  children: [
+                    for (var i = 0; i < activeChips.length; i++) ...[
+                      if (i > 0) const SizedBox(width: 8),
+                      activeChips[i],
+                    ],
+                  ],
+                ),
+              ),
+            ),
+          ],
+          Row(
+            children: [
+              Expanded(
+                child: _FilterChip(
                   label: 'Favoritos',
                   icon: Icons.star_outline_rounded,
                   selected: filter.somenteFavoritos,
                   primary: primary,
                   isDark: isDark,
+                  expanded: true,
                   onTap: () {
                     HapticFeedback.selectionClick();
                     onChanged(
@@ -106,13 +147,16 @@ class ExercisePickerFilterBar extends StatelessWidget {
                     );
                   },
                 ),
-                const SizedBox(width: 8),
-                _FilterChip(
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _FilterChip(
                   label: 'Com vídeo',
                   icon: Icons.play_circle_outline_rounded,
                   selected: filter.somenteComVideo,
                   primary: primary,
                   isDark: isDark,
+                  expanded: true,
                   onTap: () {
                     HapticFeedback.selectionClick();
                     onChanged(
@@ -122,31 +166,10 @@ class ExercisePickerFilterBar extends StatelessWidget {
                     );
                   },
                 ),
-                if (filter.espaco != null) ...[
-                  const SizedBox(width: 8),
-                  _FilterChip(
-                    label: _espacoLabel(filter.espaco!),
-                    selected: true,
-                    primary: primary,
-                    isDark: isDark,
-                    onTap:
-                        () => onChanged(filter.copyWith(clearEspaco: true)),
-                  ),
-                ],
-                if (filter.equipamento != null) ...[
-                  const SizedBox(width: 8),
-                  _FilterChip(
-                    label: _equipamentoLabel(filter.equipamento!),
-                    selected: true,
-                    primary: primary,
-                    isDark: isDark,
-                    onTap:
-                        () =>
-                            onChanged(filter.copyWith(clearEquipamento: true)),
-                  ),
-                ],
-                const SizedBox(width: 8),
-                _FilterChip(
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _FilterChip(
                   label:
                       advancedCount > 0
                           ? 'Filtros ($advancedCount)'
@@ -155,11 +178,11 @@ class ExercisePickerFilterBar extends StatelessWidget {
                   selected: advancedCount > 0,
                   primary: primary,
                   isDark: isDark,
+                  expanded: true,
                   onTap: () => _openAdvanced(context),
                 ),
-              ],
-            ),
-          ),
+              ),
+            ],
           ),
           if (caption != null) ...[
             const SizedBox(height: 8),
@@ -185,6 +208,7 @@ class _FilterChip extends StatelessWidget {
     required this.isDark,
     required this.onTap,
     this.icon,
+    this.expanded = false,
   });
 
   final String label;
@@ -193,6 +217,7 @@ class _FilterChip extends StatelessWidget {
   final Color primary;
   final bool isDark;
   final VoidCallback onTap;
+  final bool expanded;
 
   @override
   Widget build(BuildContext context) {
@@ -211,8 +236,15 @@ class _FilterChip extends StatelessWidget {
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 160),
             curve: Curves.easeOutCubic,
-            constraints: const BoxConstraints(minHeight: 40),
-            padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 8),
+            width: expanded ? double.infinity : null,
+            constraints: BoxConstraints(
+              minHeight: 40,
+              minWidth: expanded ? 0 : 0,
+            ),
+            padding: EdgeInsets.symmetric(
+              horizontal: expanded ? 6 : 11,
+              vertical: 8,
+            ),
             decoration: BoxDecoration(
               color:
                   selected
@@ -224,21 +256,27 @@ class _FilterChip extends StatelessWidget {
               ),
             ),
             child: Row(
-              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: expanded ? MainAxisSize.max : MainAxisSize.min,
               children: [
                 if (icon != null) ...[
                   Icon(
                     icon,
-                    size: 16,
+                    size: 15,
                     color: selected ? primary : ink.withValues(alpha: 0.72),
                   ),
-                  const SizedBox(width: 5),
+                  const SizedBox(width: 4),
                 ],
-                Text(
-                  label,
-                  style: FocuxHubTypography.bodyMuted(
-                    color: selected ? primary : ink,
-                    fontWeight: FontWeight.w700,
+                Flexible(
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                    style: FocuxHubTypography.bodyMuted(
+                      color: selected ? primary : ink,
+                      fontWeight: FontWeight.w700,
+                    ).copyWith(fontSize: expanded ? 12 : null),
                   ),
                 ),
               ],

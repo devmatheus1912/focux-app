@@ -325,8 +325,8 @@ class _AddExerciseBottomDock extends StatelessWidget {
     };
     final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-    final fg = dashboardPrioritiesChipForeground(primary, isDark: isDark);
-    final bg = dashboardPrioritiesChipBackground(primary, isDark: isDark);
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final brand = BrandPalette.softened(primary);
     final summary =
         '${preset.label} · $series×$repeticoes · ${descanso}s$tipoLabel';
 
@@ -360,51 +360,59 @@ class _AddExerciseBottomDock extends StatelessWidget {
                 label:
                     'Prescrição ativa ${preset.label}. $series séries de $repeticoes, $descanso segundos. Toque para editar.',
                 child: Material(
-                  color: bg,
-                  borderRadius: BorderRadius.circular(14),
+                  color: Colors.transparent,
                   child: InkWell(
                     onTap: () {
                       HapticFeedback.selectionClick();
                       onEditPrescription();
                     },
                     borderRadius: BorderRadius.circular(14),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 11,
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: brand.withValues(alpha: isDark ? 0.12 : 0.06),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                          color: brand.withValues(alpha: 0.22),
+                        ),
                       ),
-                      child: Row(
-                        children: [
-                          Icon(Icons.tune_rounded, color: fg, size: 18),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Prescrição padrão',
-                                  style: FxSettingsLayout.subhead(
-                                    color: mute,
-                                  ).copyWith(fontWeight: FontWeight.w800),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  summary,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: FocuxHubTypography.body(
-                                    color: fg,
-                                  ).copyWith(fontWeight: FontWeight.w800),
-                                ),
-                              ],
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 11,
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.tune_rounded, color: brand, size: 18),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Prescrição padrão',
+                                    style: FxSettingsLayout.subhead(
+                                      color: mute,
+                                    ).copyWith(fontWeight: FontWeight.w800),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    summary,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: FocuxHubTypography.body(
+                                      color: ink,
+                                    ).copyWith(fontWeight: FontWeight.w800),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                          Icon(
-                            Icons.chevron_right_rounded,
-                            color: mute,
-                            size: FxSettingsLayout.chevronSize,
-                          ),
-                        ],
+                            Icon(
+                              Icons.chevron_right_rounded,
+                              color: mute,
+                              size: FxSettingsLayout.chevronSize,
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
