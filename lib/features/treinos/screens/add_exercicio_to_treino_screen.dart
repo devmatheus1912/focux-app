@@ -179,7 +179,6 @@ class _AddExercicioToTreinoScreenState
         child: FxShellScaffold(
           useMesh: true,
           appBar: FxShellAppBar(
-            centerTitle: true,
             title: 'Adicionar Exercício',
             subtitle: treinoAsync.maybeWhen(
               data: (treino) => displayWorkoutName(treino.nome),

@@ -229,7 +229,6 @@ extension AddExercicioToTreinoScreenActionsA
             (_) => FxShellScaffold(
               useMesh: true,
               appBar: FxShellAppBar(
-                centerTitle: true,
                 title: 'Montar por modelo',
                 subtitle: 'Preencha o treino com modelos prontos',
                 onBack: () => Navigator.pop(context),

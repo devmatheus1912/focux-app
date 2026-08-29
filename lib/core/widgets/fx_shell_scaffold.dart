@@ -86,7 +86,13 @@ class FxShellScaffold extends StatelessWidget {
   }
 }
 
-/// Consistent back-navigation app bar over mesh.
+/// Barra de navegação canônica sobre mesh (paridade iOS 26 / toolbar).
+///
+/// **Alinhamento (padrão Focux):** título e subtítulo **à esquerda** (`centerTitle: false`).
+/// Espelha `.toolbarRole(.editor)` do iOS 26 — listas, detalhes, pickers e formulários.
+///
+/// Use `centerTitle: true` só em exceção: sheet/modal curto, sem lista densa abaixo,
+/// título curto e sem subtítulo longo (confirmar, escolher 1 opção).
 class FxShellAppBar extends StatelessWidget implements PreferredSizeWidget {
   const FxShellAppBar({
     super.key,
@@ -103,6 +109,9 @@ class FxShellAppBar extends StatelessWidget implements PreferredSizeWidget {
   final List<Widget>? actions;
   final Widget? leading;
   final VoidCallback? onBack;
+
+  /// `false` (padrão): leading — operação, listas, título + subtítulo de contexto.
+  /// `true`: centro — só modais/sheets curtos; evitar em telas com scroll denso.
   final bool centerTitle;
 
   @override

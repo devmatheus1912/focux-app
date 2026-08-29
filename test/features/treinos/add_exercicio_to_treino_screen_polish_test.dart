@@ -15,7 +15,7 @@ void main() {
     );
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(screen, contains('FxShellScaffold'));
-    expect(screen, contains('centerTitle: true'));
+    expect(screen, isNot(contains('centerTitle: true')));
     expect(
       screen,
       anyOf(
