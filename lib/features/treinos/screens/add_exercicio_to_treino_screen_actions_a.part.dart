@@ -2,59 +2,94 @@ part of 'add_exercicio_to_treino_screen.dart';
 
 extension AddExercicioToTreinoScreenActionsA
     on _AddExercicioToTreinoScreenState {
-  void _syncPrescriptionVisibility() {
-    if (_selecionado == null) {
-      if (_prescriptionInView) {
-        setState(() => _prescriptionInView = false);
-      }
-      return;
-    }
-    final ctx = _prescriptionAnchor.currentContext;
-    if (ctx == null) return;
-    final box = ctx.findRenderObject();
-    if (box is! RenderBox || !box.hasSize) return;
-
-    final top = box.localToGlobal(Offset.zero).dy;
-    final threshold = MediaQuery.sizeOf(ctx).height * 0.62;
-    final inView = top < threshold;
-    if (inView != _prescriptionInView) {
-      setState(() => _prescriptionInView = inView);
-    }
-  }
-
-  bool get _showPrescriptionPanel =>
-      _tabIndex == 0 && (_selecionado != null || _prescriptionEditorOpen);
-
   /// Espaço inferior do scroll para não ficar sob faixas fixas.
   double _scrollBottomInset(BuildContext context) {
     final safe = MediaQuery.paddingOf(context).bottom;
-    if (_showPrescriptionPanel) {
-      return (_selecionado != null ? 152 : 48) + safe;
+    var inset = 108 + safe;
+    if (_tabIndex == 0 && _selecionado != null && !_bottomBarHidden) {
+      inset += 118;
     }
-    if (_tabIndex != 0) {
-      return 108 + safe;
-    }
-    return 12;
+    return inset;
   }
 
   void _openPrescriptionEditor() {
     HapticFeedback.selectionClick();
-    setState(() {
-      _tabIndex = 0;
-      _prescriptionEditorOpen = true;
-    });
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      final ctx = _prescriptionAnchor.currentContext;
-      if (ctx == null) return;
-      Scrollable.ensureVisible(
-        ctx,
-        duration: const Duration(milliseconds: 320),
-        curve: Curves.easeOutCubic,
-        alignment: 0.06,
-      );
-      _syncPrescriptionVisibility();
-    });
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
+    final ink = ShellChrome.of(context).ink;
+    showFxHomeSheet<void>(
+      context,
+      builder:
+          (ctx) => _PrescriptionEditorSheet(
+            isDark: isDark,
+            primary: primary,
+            ink: ink,
+            presetId: _presetId,
+            tipoSerie: _tipoSerie,
+            globalPresetMode: _selecionado == null,
+            lastPrescription: _lastPrescription,
+            seriesCtrl: _seriesCtrl,
+            repCtrl: _repCtrl,
+            descansoCtrl: _descansoCtrl,
+            cargaCtrl: _cargaCtrl,
+            observacoesCtrl: _observacoesCtrl,
+            grupoSupersetCtrl: _grupoSupersetCtrl,
+            onPresetSelected: _applyPreset,
+            onTipoSerieChanged:
+                (value) => setState(() => _tipoSerie = value),
+            onApplyLastPrescription: _applyLastPrescription,
+          ),
+    );
+  }
+
+  void _openPadraoMovimentoExplorer(Set<int> alreadyInTreinoIds) {
+    HapticFeedback.selectionClick();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
+    showFxHomeSheet<void>(
+      context,
+      builder:
+          (ctx) => FxHomeSheetSurface(
+            isDark: isDark,
+            maxHeight:
+                MediaQuery.sizeOf(ctx).height *
+                FxHomeSheetChrome.expandHeightFactor,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                FxHomeSheetHandle(isDark: isDark),
+                FxHomeSheetHeader(
+                  isDark: isDark,
+                  title: 'Por movimento',
+                  subtitle: 'Empurrar, puxar, agachar, core…',
+                  leading: Icon(
+                    Icons.account_tree_outlined,
+                    color: primary,
+                    size: 18,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Flexible(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.fromLTRB(
+                      FxSettingsLayout.groupPadH,
+                      0,
+                      FxSettingsLayout.groupPadH,
+                      FxSettingsLayout.footerAfterGroup,
+                    ),
+                    child: PadraoMovimentoGrid(
+                      alreadyInTreinoIds: alreadyInTreinoIds,
+                      onAdicionar: (exercicio) {
+                        Navigator.pop(ctx);
+                        _adicionarRapido(exercicio);
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+    );
   }
 
   Future<void> _applyAlunoEquipmentFilter() async {
@@ -174,19 +209,7 @@ extension AddExercicioToTreinoScreenActionsA
     setState(() {
       _selecionado = exercicio;
       _tabIndex = 0;
-      _prescriptionEditorOpen = true;
       _error = null;
-    });
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final ctx = _prescriptionAnchor.currentContext;
-      if (ctx != null) {
-        Scrollable.ensureVisible(
-          ctx,
-          duration: const Duration(milliseconds: 280),
-          curve: Curves.easeOutCubic,
-        );
-      }
-      _syncPrescriptionVisibility();
     });
   }
 
@@ -207,7 +230,7 @@ extension AddExercicioToTreinoScreenActionsA
               useMesh: true,
               appBar: FxShellAppBar(
                 title: 'Montar por modelo',
-                subtitle: 'Preencha os slots do treino com modelos prontos',
+                subtitle: 'Preencha o treino com modelos prontos',
                 onBack: () => Navigator.pop(context),
               ),
               body: TemplateSplitPicker(

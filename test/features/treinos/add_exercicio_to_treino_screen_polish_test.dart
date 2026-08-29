@@ -59,7 +59,7 @@ void main() {
       expect(screen, contains('ref.watch(treinoPickerHomeProvider'));
       expect(screen, isNot(contains('ref.watch(exerciciosProvider)')));
       expect(screen, isNot(contains('ref.watch(treinoProvider(')));
-      expect(screen, contains('_BrowseLibraryCta'));
+      expect(screen, contains('_BuscarQuickLinks'));
       expect(screen, contains('FxSettingsLayout.groupPadH'));
       expect(screen, contains('reduceMotionOf'));
       expect(screen, contains('fxMotionDurationMs'));

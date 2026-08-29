@@ -220,7 +220,7 @@ class TreinoPickerUiHints {
   factory TreinoPickerUiHints.fromJson(Map<String, dynamic> j) =>
       TreinoPickerUiHints(
         searchPlaceholder: j['searchPlaceholder'] as String? ??
-            'Buscar supino, agachamento, remada…',
+            'Supino, agachamento, remada…',
         libraryCaption: j['libraryCaption'] as String? ?? '',
         createCtaLabel: j['createCtaLabel'] as String? ?? 'Novo exercício',
         templateCtaLabel:
@@ -236,7 +236,7 @@ class TreinoPickerUiHints {
         searchPlaceholder: 'Supino, agachamento, remada…',
         libraryCaption: librarySize == 0
             ? 'Biblioteca vazia'
-            : 'Biblioteca · $librarySize exercícios'
+            : '$librarySize exercícios'
                 '${jaNoTreino > 0 ? ' · $jaNoTreino no treino' : ''}',
         createCtaLabel: 'Cadastrar exercício',
         templateCtaLabel: 'Montar por modelo',

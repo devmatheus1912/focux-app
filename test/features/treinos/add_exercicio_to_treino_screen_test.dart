@@ -66,10 +66,14 @@ void main() {
 
     expect(find.bySemanticsLabel('Adicionar exercício'), findsOneWidget);
     expect(find.text('Treino Emagrecimento'), findsWidgets);
-    expect(find.text('Biblioteca completa (187)'), findsOneWidget);
-    expect(find.textContaining('187 exercícios'), findsWidgets);
+    expect(find.text('Biblioteca (187)'), findsOneWidget);
     expect(find.text('Cadastrar exercício'), findsOneWidget);
     expect(find.text('0 exercícios'), findsNothing);
+
+    await tester.tap(find.text('Explorar'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 80));
+    expect(find.textContaining('187 exercícios'), findsWidgets);
   });
 
   testWidgets('reduce motion desativa slide entre abas', (tester) async {

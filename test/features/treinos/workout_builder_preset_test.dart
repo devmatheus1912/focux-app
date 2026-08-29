@@ -33,7 +33,7 @@ void main() {
     expect(repository, contains('cargaKg'));
     expect(repository, contains('observacoes'));
     expect(screen, contains('_PresetSelector'));
-    expect(screen, contains('Carga alvo'));
+    expect(screen, contains('Carga (kg)'));
     expect(screen, contains('Observações de execução'));
   });
 

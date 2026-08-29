@@ -101,12 +101,9 @@ class _AddExercicioToTreinoScreenState
   String _buscaQuery = '';
   bool _seedingBiblioteca = false;
   bool _bottomBarHidden = false;
-  bool _prescriptionEditorOpen = false;
   ExercisePickerFilter _pickerFilter = const ExercisePickerFilter();
   String? _alunoFilterNome;
-  final _prescriptionAnchor = GlobalKey();
   final _scrollCtrl = ScrollController();
-  bool _prescriptionInView = false;
   Timer? _searchDebounce;
   Timer? _celebrateVideoTimer;
   bool _celebrateVideoSuccess = false;
@@ -125,7 +122,6 @@ class _AddExercicioToTreinoScreenState
         if (next != _buscaQuery) setState(() => _buscaQuery = next);
       });
     });
-    _scrollCtrl.addListener(_syncPrescriptionVisibility);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _ensureBiblioteca();
       _applyAlunoEquipmentFilter();
@@ -144,9 +140,7 @@ class _AddExercicioToTreinoScreenState
     _buscaCtrl.dispose();
     _searchDebounce?.cancel();
     _celebrateVideoTimer?.cancel();
-    _scrollCtrl
-      ..removeListener(_syncPrescriptionVisibility)
-      ..dispose();
+    _scrollCtrl.dispose();
     super.dispose();
   }
 
@@ -172,7 +166,6 @@ class _AddExercicioToTreinoScreenState
     final chrome = ShellChrome.of(context);
     final isDark = chrome.isDark;
     final primary = Theme.of(context).colorScheme.primary;
-    final ink = chrome.ink;
 
     return fxScreenA11yScope(
       label: 'Adicionar exercício',
@@ -395,204 +388,10 @@ class _AddExercicioToTreinoScreenState
                                           ),
                                         ),
                                       ),
-                                      if (_showPrescriptionPanel) ...[
-                                        KeyedSubtree(
-                                          key: _prescriptionAnchor,
-                                          child: const SizedBox(height: 0),
-                                        ),
-                                        const SizedBox(height: 18),
-                                        _PrescriptionSectionHeader(
-                                          isDark: isDark,
-                                          primary: primary,
-                                          globalPresetMode:
-                                              _selecionado == null,
-                                        ),
-                                        if (_lastPrescription != null) ...[
-                                          const SizedBox(height: 10),
-                                          _RepeatPrescriptionBanner(
-                                            memory: _lastPrescription!,
-                                            isDark: isDark,
-                                            primary: primary,
-                                            onApply: _applyLastPrescription,
-                                          ),
-                                        ],
-                                        const SizedBox(height: 12),
-                                        _PresetSelector(
-                                          selectedId: _presetId,
-                                          primary: primary,
-                                          isDark: isDark,
-                                          onSelected: _applyPreset,
-                                        ),
-                                        const SizedBox(height: 20),
-                                        LayoutBuilder(
-                                          builder: (context, constraints) {
-                                            final wide =
-                                                constraints.maxWidth > 600;
-                                            final fieldStyle =
-                                                FocuxHubTypography.body(
-                                                  color: ink,
-                                                ).copyWith(
-                                                  fontWeight: FontWeight.w700,
-                                                );
-                                            final seriesField = TextFormField(
-                                              controller: _seriesCtrl,
-                                              decoration: FxInputDeco.build(
-                                                context,
-                                                'Séries',
-                                              ),
-                                              keyboardType:
-                                                  TextInputType.number,
-                                              style: fieldStyle,
-                                            );
-                                            final repField = TextFormField(
-                                              controller: _repCtrl,
-                                              decoration: FxInputDeco.build(
-                                                context,
-                                                'Repetições',
-                                              ),
-                                              style: fieldStyle,
-                                            );
-                                            final descansoField = TextFormField(
-                                              controller: _descansoCtrl,
-                                              decoration: FxInputDeco.build(
-                                                context,
-                                                'Descanso (segundos)',
-                                              ),
-                                              keyboardType:
-                                                  TextInputType.number,
-                                              style: fieldStyle,
-                                            );
-                                            final cargaField = TextFormField(
-                                              controller: _cargaCtrl,
-                                              decoration: FxInputDeco.build(
-                                                context,
-                                                'Carga alvo (kg)',
-                                              ).copyWith(
-                                                helperText: 'Opcional',
-                                              ),
-                                              keyboardType:
-                                                  const TextInputType.numberWithOptions(
-                                                    decimal: true,
-                                                  ),
-                                              style: fieldStyle,
-                                            );
-                                            if (!wide) {
-                                              return Column(
-                                                children: [
-                                                  Row(
-                                                    children: [
-                                                      Expanded(
-                                                        child: seriesField,
-                                                      ),
-                                                      const SizedBox(width: 12),
-                                                      Expanded(child: repField),
-                                                    ],
-                                                  ),
-                                                  const SizedBox(
-                                                    height: TokensStrip.s4,
-                                                  ),
-                                                  Row(
-                                                    children: [
-                                                      Expanded(
-                                                        child: descansoField,
-                                                      ),
-                                                      const SizedBox(width: 12),
-                                                      Expanded(
-                                                        child: cargaField,
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ],
-                                              );
-                                            }
-                                            return Row(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Expanded(child: seriesField),
-                                                const SizedBox(width: 12),
-                                                Expanded(child: repField),
-                                                const SizedBox(width: 12),
-                                                Expanded(child: descansoField),
-                                                const SizedBox(width: 12),
-                                                Expanded(child: cargaField),
-                                              ],
-                                            );
-                                          },
-                                        ),
-                                        const SizedBox(height: TokensStrip.s4),
-                                        _SerieTypeSelector(
-                                          value: _tipoSerie,
-                                          primary: primary,
-                                          isDark: isDark,
-                                          onChanged:
-                                              (value) => setState(
-                                                () => _tipoSerie = value,
-                                              ),
-                                        ),
-                                        if (_tipoSerie == 'SUPERSET') ...[
-                                          const SizedBox(
-                                            height: TokensStrip.s4,
-                                          ),
-                                          TextFormField(
-                                            controller: _grupoSupersetCtrl,
-                                            decoration: FxInputDeco.build(
-                                              context,
-                                              'Grupo do superset',
-                                            ).copyWith(
-                                              helperText:
-                                                  'Use o mesmo número em exercícios que devem ficar juntos.',
-                                            ),
-                                            keyboardType: TextInputType.number,
-                                            style: FocuxHubTypography.body(
-                                              color: ink,
-                                            ).copyWith(
-                                              fontWeight: FontWeight.w700,
-                                            ),
-                                          ),
-                                        ],
-                                        if (_tipoSerie == 'DROPSET') ...[
-                                          const SizedBox(height: 12),
-                                          _ModeHint(
-                                            icon: Icons.trending_down_rounded,
-                                            text:
-                                                'Drop set: registre reduções de carga nas observações ou no acompanhamento por série.',
-                                            color: EagleTokens.warn,
-                                            isDark: isDark,
-                                          ),
-                                        ],
-                                        const SizedBox(height: TokensStrip.s4),
-                                        TextFormField(
-                                          controller: _observacoesCtrl,
-                                          decoration: FxInputDeco.build(
-                                            context,
-                                            'Observações de execução',
-                                          ),
-                                          minLines: 2,
-                                          maxLines: 4,
-                                          style: FocuxHubTypography.body(
-                                            color: ink,
-                                          ).copyWith(
-                                            fontWeight: FontWeight.w700,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 16),
-                                      ],
                                     ],
                                   ),
                                 ),
                               ),
-                              if (_tabIndex != 0)
-                                _ActivePrescriptionStrip(
-                                  presetId: _presetId,
-                                  series: _seriesCtrl.text,
-                                  repeticoes: _repCtrl.text,
-                                  descanso: _descansoCtrl.text,
-                                  tipoSerie: _tipoSerie,
-                                  isDark: isDark,
-                                  primary: primary,
-                                  onEdit: _openPrescriptionEditor,
-                                ),
                               if (_tabIndex == 0 &&
                                   _selecionado != null &&
                                   !_bottomBarHidden)
@@ -603,6 +402,16 @@ class _AddExercicioToTreinoScreenState
                                   onSubmit: _submit,
                                   onContinue: _submitAndContinue,
                                 ),
+                              _ActivePrescriptionStrip(
+                                presetId: _presetId,
+                                series: _seriesCtrl.text,
+                                repeticoes: _repCtrl.text,
+                                descanso: _descansoCtrl.text,
+                                tipoSerie: _tipoSerie,
+                                isDark: isDark,
+                                primary: primary,
+                                onEdit: _openPrescriptionEditor,
+                              ),
                             ],
                           );
                         },

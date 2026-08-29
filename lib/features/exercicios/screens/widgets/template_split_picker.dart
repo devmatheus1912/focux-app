@@ -102,7 +102,7 @@ class _TemplateIntro extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  'Escolha um modelo abaixo e preencha cada slot com exercícios da biblioteca (${templateSplits.length} opções).',
+                  'Escolha um modelo e adicione exercícios sugeridos (${templateSplits.length} opções).',
                   maxLines: 3,
                   style: FocuxHubTypography.bodyMuted(
                     color: scheme.onSurfaceVariant,
@@ -144,7 +144,7 @@ class _TemplateTile extends StatelessWidget {
       accent: accent,
       label: template.nome,
       subtitle: template.descricao,
-      value: '$dias ${dias == 1 ? 'dia' : 'dias'} · $slots slots',
+      value: '$dias ${dias == 1 ? 'dia' : 'dias'} · $slots exercícios',
       showDivider: showDivider,
       onTap: () {
         HapticFeedback.selectionClick();
@@ -188,7 +188,7 @@ class _TemplateSlotEditorState extends ConsumerState<_TemplateSlotEditor> {
       useMesh: true,
       appBar: FxShellAppBar(
         title: widget.template.nome,
-        subtitle: '$done de $slotsTotal slots',
+        subtitle: '$done de $slotsTotal exercícios',
         onBack: () => Navigator.pop(context),
       ),
       body: ListView(
@@ -316,7 +316,7 @@ class _TemplateCompleteCard extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Todos os slots foram preenchidos com a prescrição ativa.',
+            'Todos os exercícios foram adicionados com a prescrição ativa.',
             style: FocuxHubTypography.bodyMuted(
               color: scheme.onSurfaceVariant,
               fontWeight: FontWeight.w600,
@@ -363,7 +363,7 @@ class _TemplateProgressCard extends StatelessWidget {
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
-                  'Preencha os slots do modelo',
+                  'Complete o modelo',
                   style: FocuxHubTypography.body(
                     color: scheme.onSurface,
                   ).copyWith(fontWeight: FontWeight.w900),

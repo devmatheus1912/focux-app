@@ -162,7 +162,7 @@ class _ExercisePickerSheetState extends State<_ExercisePickerSheet> {
             subtitle:
                 _totalElements == 0
                     ? 'Carregando...'
-                    : '${sorted.length} de $_totalElements disponíveis',
+                    : '$_totalElements exercícios',
             leading: Icon(
               Icons.fitness_center_rounded,
               color: primary,
@@ -419,6 +419,48 @@ Color _metaTextColor(bool isDark, {bool muted = true}) {
 
 String _humanizeMetaToken(String value) => displayMetaToken(value);
 
+class _ModeHint extends StatelessWidget {
+  final IconData icon;
+  final String text;
+  final Color color;
+  final bool isDark;
+
+  const _ModeHint({
+    required this.icon,
+    required this.text,
+    required this.color,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: isDark ? 0.16 : 0.10),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: line),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: color, size: 18),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              text,
+              style: FocuxHubTypography.bodyMuted(
+                color: color,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _PresetSelector extends StatelessWidget {
   final String selectedId;
   final Color primary;
@@ -510,7 +552,7 @@ class _SerieTypeSelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-    final options = const [
+    const options = [
       ('NORMAL', Icons.fitness_center_rounded, 'Normal'),
       ('SUPERSET', Icons.link_rounded, 'Superset'),
       ('DROPSET', Icons.trending_down_rounded, 'Drop set'),
@@ -562,39 +604,193 @@ class _SerieTypeSelector extends StatelessWidget {
   }
 }
 
-class _ModeHint extends StatelessWidget {
-  final IconData icon;
-  final String text;
-  final Color color;
-  final bool isDark;
-
-  const _ModeHint({
-    required this.icon,
-    required this.text,
-    required this.color,
+class _PrescriptionEditorSheet extends StatelessWidget {
+  const _PrescriptionEditorSheet({
     required this.isDark,
+    required this.primary,
+    required this.ink,
+    required this.presetId,
+    required this.tipoSerie,
+    required this.globalPresetMode,
+    required this.lastPrescription,
+    required this.seriesCtrl,
+    required this.repCtrl,
+    required this.descansoCtrl,
+    required this.cargaCtrl,
+    required this.observacoesCtrl,
+    required this.grupoSupersetCtrl,
+    required this.onPresetSelected,
+    required this.onTipoSerieChanged,
+    required this.onApplyLastPrescription,
   });
+
+  final bool isDark;
+  final Color primary;
+  final Color ink;
+  final String presetId;
+  final String tipoSerie;
+  final bool globalPresetMode;
+  final ExercisePrescriptionMemory? lastPrescription;
+  final TextEditingController seriesCtrl;
+  final TextEditingController repCtrl;
+  final TextEditingController descansoCtrl;
+  final TextEditingController cargaCtrl;
+  final TextEditingController observacoesCtrl;
+  final TextEditingController grupoSupersetCtrl;
+  final ValueChanged<String> onPresetSelected;
+  final ValueChanged<String> onTipoSerieChanged;
+  final VoidCallback onApplyLastPrescription;
 
   @override
   Widget build(BuildContext context) {
-    final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: isDark ? 0.16 : 0.10),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: line),
-      ),
-      child: Row(
+    final maxHeight =
+        MediaQuery.sizeOf(context).height *
+        FxHomeSheetChrome.expandHeightFactor;
+    final fieldStyle = FocuxHubTypography.body(color: ink).copyWith(
+      fontWeight: FontWeight.w700,
+    );
+
+    return FxHomeSheetSurface(
+      isDark: isDark,
+      maxHeight: maxHeight,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: color, size: 18),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              text,
-              style: FocuxHubTypography.bodyMuted(
-                color: color,
-                fontWeight: FontWeight.w700,
+          FxHomeSheetHandle(isDark: isDark),
+          FxHomeSheetHeader(
+            isDark: isDark,
+            title: globalPresetMode
+                ? 'Prescrição padrão'
+                : 'Prescrição do exercício',
+            subtitle: globalPresetMode
+                ? 'Vale para buscar, explorar e adições rápidas.'
+                : 'Ajuste séries, carga e descanso antes de salvar.',
+            leading: Icon(Icons.edit_note_rounded, color: primary, size: 18),
+          ),
+          Flexible(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(
+                FxSettingsLayout.groupPadH,
+                0,
+                FxSettingsLayout.groupPadH,
+                FxSettingsLayout.footerAfterGroup,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (lastPrescription != null) ...[
+                    _RepeatPrescriptionBanner(
+                      memory: lastPrescription!,
+                      isDark: isDark,
+                      primary: primary,
+                      onApply: onApplyLastPrescription,
+                    ),
+                    const SizedBox(height: 12),
+                  ],
+                  _PresetSelector(
+                    selectedId: presetId,
+                    primary: primary,
+                    isDark: isDark,
+                    onSelected: onPresetSelected,
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextFormField(
+                          controller: seriesCtrl,
+                          decoration: FxInputDeco.build(context, 'Séries'),
+                          keyboardType: TextInputType.number,
+                          style: fieldStyle,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: TextFormField(
+                          controller: repCtrl,
+                          decoration: FxInputDeco.build(
+                            context,
+                            'Repetições',
+                          ),
+                          style: fieldStyle,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: TokensStrip.s4),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextFormField(
+                          controller: descansoCtrl,
+                          decoration: FxInputDeco.build(
+                            context,
+                            'Descanso (s)',
+                          ),
+                          keyboardType: TextInputType.number,
+                          style: fieldStyle,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: TextFormField(
+                          controller: cargaCtrl,
+                          decoration: FxInputDeco.build(
+                            context,
+                            'Carga (kg)',
+                          ).copyWith(helperText: 'Opcional'),
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
+                          style: fieldStyle,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: TokensStrip.s4),
+                  _SerieTypeSelector(
+                    value: tipoSerie,
+                    primary: primary,
+                    isDark: isDark,
+                    onChanged: onTipoSerieChanged,
+                  ),
+                  if (tipoSerie == 'SUPERSET') ...[
+                    const SizedBox(height: TokensStrip.s4),
+                    TextFormField(
+                      controller: grupoSupersetCtrl,
+                      decoration: FxInputDeco.build(
+                        context,
+                        'Grupo do superset',
+                      ).copyWith(
+                        helperText:
+                            'Mesmo número em exercícios que ficam juntos.',
+                      ),
+                      keyboardType: TextInputType.number,
+                      style: fieldStyle,
+                    ),
+                  ],
+                  if (tipoSerie == 'DROPSET') ...[
+                    const SizedBox(height: 12),
+                    _ModeHint(
+                      icon: Icons.trending_down_rounded,
+                      text:
+                          'Drop set: registre reduções de carga nas observações.',
+                      color: EagleTokens.warn,
+                      isDark: isDark,
+                    ),
+                  ],
+                  const SizedBox(height: TokensStrip.s4),
+                  TextFormField(
+                    controller: observacoesCtrl,
+                    decoration: FxInputDeco.build(
+                      context,
+                      'Observações de execução',
+                    ),
+                    minLines: 2,
+                    maxLines: 4,
+                    style: fieldStyle,
+                  ),
+                ],
               ),
             ),
           ),

@@ -413,6 +413,64 @@ extension AddExercicioToTreinoScreenActionsB
     await showExerciseMediaPreview(context, exercicio: exercicio);
   }
 
+  List<Exercicio> _buscarDisplayExercicios({
+    required List<Exercicio> exercicios,
+    required String query,
+    required Set<int> alreadyInTreinoIds,
+  }) {
+    final normalized = query.trim().toLowerCase();
+
+    if (normalized.length >= 2) {
+      return sortExerciciosForPicker(
+        exercicios.where((exercicio) {
+          final haystack =
+              '${exercicio.nome} ${exercicio.musculoAlvo ?? ''} '
+                      '${exercicio.equipamento ?? ''}'
+                  .toLowerCase();
+          return haystack.contains(normalized);
+        }),
+        alreadyInTreinoIds: alreadyInTreinoIds,
+      ).take(8).toList();
+    }
+
+    if (_pickerFilter.isActive || _usesPickerApi()) {
+      return sortExerciciosForPicker(
+        exercicios,
+        alreadyInTreinoIds: alreadyInTreinoIds,
+      ).take(12).toList();
+    }
+
+    final curated = curatedPickerSuggestions(
+      exercicios,
+      alreadyInTreinoIds: alreadyInTreinoIds,
+      recentIds: _recentIds,
+    );
+    final favorites = sortExerciciosForPicker(
+      favoriteExercises(exercicios),
+      alreadyInTreinoIds: alreadyInTreinoIds,
+    );
+    final seen = <int>{};
+    final merged = <Exercicio>[];
+    for (final exercicio in [...curated, ...favorites]) {
+      if (seen.add(exercicio.id)) merged.add(exercicio);
+      if (merged.length >= 4) break;
+    }
+    return merged;
+  }
+
+  String? _buscarListTitle({
+    required String query,
+    required List<Exercicio> displayItems,
+  }) {
+    if (displayItems.isEmpty) return null;
+    final normalized = query.trim();
+    if (normalized.length >= 2) return 'Resultados';
+    if (_pickerFilter.isActive || _usesPickerApi()) return null;
+    return _recentIds.isNotEmpty
+        ? 'Recentes e mais prescritos'
+        : 'Sugestões';
+  }
+
   Widget _buildTabContent({
     required BuildContext context,
     required List<Exercicio> exercicios,
@@ -434,84 +492,64 @@ extension AddExercicioToTreinoScreenActionsB
           crossAxisAlignment: CrossAxisAlignment.stretch,
           mainAxisSize: MainAxisSize.min,
           children: [
-              FxSettingsGroup(
-                accent: primary,
-                header: 'Atalhos',
-                helpTooltip: 'Ajuda sobre explorar exercícios',
-                onHelpTap: () => showAddExercicioHelpSheet(context),
-                caption: uiHints.libraryCaption,
-                children: [
-                  FxSettingsTile(
-                    icon: Icons.view_agenda_outlined,
-                    accent: primary,
-                    label: uiHints.templateCtaLabel,
-                    subtitle:
-                        'Full body, PPL, upper/lower — ${templateSplits.length} modelos prontos.',
-                    value: '',
-                    onTap: () {
-                      HapticFeedback.selectionClick();
-                      _openTemplateBuilder();
-                    },
-                  ),
-                  if (libraryCount > 0)
-                    FxSettingsTile(
-                      icon: Icons.library_books_outlined,
-                      accent: primary,
-                      label: 'Biblioteca completa ($libraryCount)',
-                      subtitle: libraryLines.primary,
-                      value: '',
-                      onTap:
-                          () => _openExercisePicker(
-                            alreadyInTreinoIds: alreadyInTreinoIds,
-                            searchPlaceholder: uiHints.searchPlaceholder,
-                          ),
-                    ),
-                  FxSettingsTile(
-                    icon: Icons.add_rounded,
-                    accent: primary,
-                    label: uiHints.createCtaLabel,
-                    subtitle: 'Grave o vídeo de execução para o aluno',
-                    value: '',
-                    highlight: true,
-                    showDivider: false,
-                    onTap: _openCreateExercise,
-                  ),
-                ],
-              ),
-              const SizedBox(height: FxSettingsLayout.groupGap),
-              if (_alunoFilterNome != null && _pickerFilter.filtrarPorAluno)
-                _AlunoEquipmentFilterBanner(
-                  alunoNome: _alunoFilterNome!,
-                  equipamentos: _pickerFilter.equipamentosAluno,
-                  isDark: isDark,
-                  primary: primary,
-                  onClear:
-                      () => setState(
-                        () =>
-                            _pickerFilter = _pickerFilter.copyWith(
-                              clearAluno: true,
-                            ),
-                      ),
+            FxSettingsGroup(
+              accent: primary,
+              header: 'Explorar',
+              caption: uiHints.libraryCaption,
+              children: [
+                FxSettingsTile(
+                  icon: Icons.account_tree_outlined,
+                  accent: primary,
+                  label: 'Por movimento',
+                  subtitle: 'Empurrar, puxar, agachar, core…',
+                  value: '',
+                  onTap:
+                      () => _openPadraoMovimentoExplorer(alreadyInTreinoIds),
                 ),
-              ExercisePickerFilterBar(
-                filter: _pickerFilter,
-                isDark: isDark,
-                primary: primary,
-                onChanged:
-                    (ExercisePickerFilter next) =>
-                        setState(() => _pickerFilter = next),
+                FxSettingsTile(
+                  icon: Icons.view_agenda_outlined,
+                  accent: primary,
+                  label: uiHints.templateCtaLabel,
+                  subtitle:
+                      'Full body, PPL, upper/lower — ${templateSplits.length} modelos.',
+                  value: '',
+                  onTap: () {
+                    HapticFeedback.selectionClick();
+                    _openTemplateBuilder();
+                  },
+                ),
+                if (libraryCount > 0)
+                  FxSettingsTile(
+                    icon: Icons.library_books_outlined,
+                    accent: primary,
+                    label: 'Biblioteca completa ($libraryCount)',
+                    subtitle: libraryLines.primary,
+                    value: '',
+                    showDivider: false,
+                    onTap:
+                        () => _openExercisePicker(
+                          alreadyInTreinoIds: alreadyInTreinoIds,
+                          searchPlaceholder: uiHints.searchPlaceholder,
+                        ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                onPressed: _openCreateExercise,
+                icon: Icon(Icons.add_rounded, color: primary, size: 18),
+                label: Text(
+                  uiHints.createCtaLabel,
+                  style: FocuxHubTypography.bodyMuted(
+                    color: primary,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
               ),
-              const SizedBox(height: 10),
-              PadraoMovimentoGrid(
-                alreadyInTreinoIds: alreadyInTreinoIds,
-                pickerFilter: _pickerFilter,
-                onAdicionar: _selectExercise,
-                onClearFilters:
-                    () => setState(
-                      () => _pickerFilter = const ExercisePickerFilter(),
-                    ),
-              ),
-            ],
+            ),
+          ],
         );
       default:
         final compact = _selecionado != null;
@@ -530,34 +568,17 @@ extension AddExercicioToTreinoScreenActionsB
             !compact &&
             exercicios.isEmpty &&
             (_pickerFilter.isActive || _buscaQuery.trim().length >= 2);
-        final favoriteShortcuts =
-            query.length >= 2 || _pickerFilter.somenteFavoritos
-                ? const <Exercicio>[]
-                : sortExerciciosForPicker(
-                  favoriteExercises(exercicios),
-                  alreadyInTreinoIds: alreadyInTreinoIds,
-                ).take(4).toList();
-        final quickMatches =
-            query.length < 2
-                ? const <Exercicio>[]
-                : sortExerciciosForPicker(
-                  exercicios.where((exercicio) {
-                    final haystack =
-                        '${exercicio.nome} ${exercicio.musculoAlvo ?? ''} '
-                                '${exercicio.equipamento ?? ''}'
-                            .toLowerCase();
-                    return haystack.contains(query);
-                  }),
-                  alreadyInTreinoIds: alreadyInTreinoIds,
-                ).take(6).toList();
-        final curatedSuggestions =
-            !compact && query.isEmpty && favoriteShortcuts.isEmpty
-                ? curatedPickerSuggestions(
-                  exercicios,
-                  alreadyInTreinoIds: alreadyInTreinoIds,
-                  recentIds: _recentIds,
-                )
-                : const <Exercicio>[];
+        final displayItems = compact
+            ? const <Exercicio>[]
+            : _buscarDisplayExercicios(
+              exercicios: exercicios,
+              query: query,
+              alreadyInTreinoIds: alreadyInTreinoIds,
+            );
+        final listTitle = _buscarListTitle(
+          query: query,
+          displayItems: displayItems,
+        );
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -592,11 +613,6 @@ extension AddExercicioToTreinoScreenActionsB
               const SizedBox(height: 10),
             ],
             if (!compact) ...[
-              _AddExerciseSectionHeader(
-                title: 'Buscar na biblioteca',
-                subtitle: 'Digite 2+ letras ou use favoritos e filtros.',
-                onHelp: () => showAddExercicioHelpSheet(context),
-              ),
               TextField(
                 controller: _buscaCtrl,
                 decoration: InputDecoration(
@@ -676,23 +692,23 @@ extension AddExercicioToTreinoScreenActionsB
                 ),
               ),
             ],
-            if (!showFilterEmpty && curatedSuggestions.isNotEmpty) ...[
-              const SizedBox(height: 12),
-              Text(
-                _recentIds.isNotEmpty
-                    ? 'Recentes e mais prescritos'
-                    : 'Populares na biblioteca',
-                style: FocuxHubTypography.bodyMuted(
-                  fontWeight: FontWeight.w800,
-                  color:
-                      isDark
-                          ? EagleTokens.darkInkMute
-                          : TokensStrip.textSecondary,
+            if (!showFilterEmpty && !compact && displayItems.isNotEmpty) ...[
+              if (listTitle != null) ...[
+                const SizedBox(height: 12),
+                Text(
+                  listTitle,
+                  style: FocuxHubTypography.bodyMuted(
+                    fontWeight: FontWeight.w800,
+                    color:
+                        isDark
+                            ? EagleTokens.darkInkMute
+                            : TokensStrip.textSecondary,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 8),
+                const SizedBox(height: 8),
+              ],
               _SuggestionList(
-                exercicios: curatedSuggestions,
+                exercicios: displayItems,
                 query: query,
                 isDark: isDark,
                 primary: primary,
@@ -703,59 +719,12 @@ extension AddExercicioToTreinoScreenActionsB
                   showExerciseMediaPreview(context, exercicio: ex);
                 },
               ),
-            ],
-            if (!showFilterEmpty &&
-                !compact &&
-                favoriteShortcuts.isNotEmpty) ...[
-              const SizedBox(height: 12),
-              Text(
-                'Favoritos',
-                style: FocuxHubTypography.bodyMuted(
-                  fontWeight: FontWeight.w800,
-                  color:
-                      isDark
-                          ? EagleTokens.darkInkMute
-                          : TokensStrip.textSecondary,
-                ),
-              ),
-              const SizedBox(height: 8),
-              _SuggestionList(
-                exercicios: favoriteShortcuts,
-                query: query,
-                isDark: isDark,
-                primary: primary,
-                alreadyInTreinoIds: alreadyInTreinoIds,
-                onSelect: _selectExercise,
-                onPreview: (ex) {
-                  if (!canPreviewExerciseMedia(ex)) return;
-                  showExerciseMediaPreview(context, exercicio: ex);
-                },
-              ),
-            ],
-            if (!showFilterEmpty && !compact && quickMatches.isNotEmpty) ...[
-              const SizedBox(height: 10),
-              _SuggestionList(
-                exercicios: quickMatches,
-                query: query,
-                isDark: isDark,
-                primary: primary,
-                alreadyInTreinoIds: alreadyInTreinoIds,
-                onSelect: _selectExercise,
-                onPreview: (ex) {
-                  if (!canPreviewExerciseMedia(ex)) return;
-                  showExerciseMediaPreview(context, exercicio: ex);
-                },
-              ),
-              const SizedBox(height: 8),
             ],
             if (!showFilterEmpty && !compact && libraryCount > 0) ...[
               const SizedBox(height: 12),
-              _BrowseLibraryCta(
+              _BuscarQuickLinks(
                 totalCount: libraryCount,
-                libraryLines: libraryLines,
-                libraryCaption: uiHints.libraryCaption,
                 createLabel: uiHints.createCtaLabel,
-                isDark: isDark,
                 primary: primary,
                 onOpenPicker:
                     () => _openExercisePicker(
