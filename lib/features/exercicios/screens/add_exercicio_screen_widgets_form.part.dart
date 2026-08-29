@@ -82,22 +82,21 @@ class _QuickSetupStrip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final mute = fxScreenMute(context);
+
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(
-          'Perfil rápido',
-          style: TextStyle(
-            color: isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
-            fontSize: 12,
-            fontWeight: FontWeight.w900,
+        Padding(
+          padding: const EdgeInsets.only(left: 4, bottom: 6, top: 2),
+          child: Text(
+            'Perfil rápido',
+            style: FxSettingsLayout.sectionHeader(color: mute),
           ),
         ),
-        const SizedBox(height: 8),
         Wrap(
-          spacing: 8,
-          runSpacing: 8,
+          spacing: 6,
+          runSpacing: 6,
           children: [
             for (final setup in _quickSetups)
               Semantics(
@@ -118,160 +117,104 @@ class _QuickSetupStrip extends StatelessWidget {
                   visualDensity: VisualDensity.compact,
                   materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 9,
-                    vertical: 7,
+                    horizontal: 8,
+                    vertical: 6,
                   ),
                   labelStyle: TextStyle(
                     color:
                         selectedLabel == setup.label ? Colors.white : primary,
                     fontSize: 12,
-                    fontWeight: FontWeight.w900,
+                    fontWeight: FontWeight.w800,
                   ),
                   side: BorderSide(color: primary.withValues(alpha: 0.16)),
                   selectedColor: primary,
-                  backgroundColor:
-                      isDark
-                          ? Colors.white.withValues(alpha: 0.04)
-                          : primary.withValues(alpha: 0.06),
+                  backgroundColor: primary.withValues(alpha: 0.06),
                 ),
               ),
           ],
+        ),
+        Divider(
+          height: 1,
+          thickness: FxSettingsLayout.dividerThickness,
+          color: ShellChrome.of(context).line,
         ),
       ],
     );
   }
 }
 
-class _SectionCard extends StatelessWidget {
+class _CollapsibleSection extends StatelessWidget {
   final IconData icon;
   final String title;
   final String subtitle;
   final Widget child;
   final bool expanded;
-  final VoidCallback? onToggle;
+  final VoidCallback onToggle;
 
-  const _SectionCard({
+  const _CollapsibleSection({
     required this.icon,
     required this.title,
     required this.subtitle,
     required this.child,
-    this.expanded = true,
-    this.onToggle,
+    required this.expanded,
+    required this.onToggle,
   });
 
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-
-    if (onToggle != null) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          FxSettingsGroup(
-            accent: primary,
-            children: [
-              FxSettingsTile(
-                icon: icon,
-                accent: primary,
-                label: title,
-                subtitle: subtitle,
-                value: '',
-                picker: true,
-                showDivider: expanded,
-                onTap: onToggle!,
-              ),
-              if (expanded) child,
-            ],
-          ),
-        ],
-      );
-    }
+    final soft = BrandPalette.softened(primary);
 
     return FxSettingsGroup(
-      header: title,
-      caption: subtitle,
       accent: primary,
-      children: [child],
-    );
-  }
-}
-
-class _TextInput extends StatelessWidget {
-  final TextEditingController controller;
-  final String label;
-  final String? hint;
-  final int maxLines;
-  final String? Function(String?)? validator;
-
-  const _TextInput({
-    required this.controller,
-    required this.label,
-    this.hint,
-    this.maxLines = 1,
-    this.validator,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return TextFormField(
-      controller: controller,
-      maxLines: maxLines,
-      validator: validator,
-      decoration: InputDecoration(
-        labelText: label,
-        hintText: hint,
-        alignLabelWithHint: maxLines > 1,
-        filled: true,
-        fillColor:
-            Theme.of(context).brightness == Brightness.dark
-                ? EagleTokens.darkCard
-                : Colors.white,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 14,
-          vertical: 14,
+      children: [
+        FxSettingsTile(
+          icon: icon,
+          accent: soft,
+          label: title,
+          subtitle: subtitle,
+          value: '',
+          picker: true,
+          showDivider: expanded,
+          onTap: onToggle,
         ),
-        border: FxInputDeco.outlineBorder(
-          borderRadius: BorderRadius.circular(15),
-        ),
-        enabledBorder: FxInputDeco.outlineBorder(
-          borderRadius: BorderRadius.circular(15),
-          borderSide: BorderSide(
-            color:
-                Theme.of(context).brightness == Brightness.dark
-                    ? EagleTokens.darkLine
-                    : TokensStrip.borderDefault,
+        if (expanded)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 4),
+            child: child,
           ),
-        ),
-      ),
+      ],
     );
   }
 }
 
 class _EnumDropdown<T extends Enum> extends StatelessWidget {
   final String label;
+  final IconData icon;
+  final Color? iconColor;
   final T? value;
   final List<T> values;
   final Map<T, String> labels;
   final ValueChanged<T?> onChanged;
   final String? Function(T?)? validator;
   final double? menuMaxHeight;
+  final bool showDivider;
 
   const _EnumDropdown({
     required this.label,
+    required this.icon,
+    this.iconColor,
     required this.value,
     required this.values,
     required this.labels,
     required this.onChanged,
     this.validator,
     this.menuMaxHeight,
+    this.showDivider = true,
   });
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final fillColor = isDark ? EagleTokens.darkCard : Colors.white;
-    final borderColor =
-        isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
     return FormField<T>(
       initialValue: value,
       validator: validator,
@@ -279,127 +222,100 @@ class _EnumDropdown<T extends Enum> extends StatelessWidget {
         final effectiveValue = value ?? state.value;
         final selectedLabel =
             effectiveValue == null
-                ? ''
+                ? 'Selecionar'
                 : labels[effectiveValue] ?? effectiveValue.backendName;
-        return Semantics(
-          button: true,
-          label:
-              effectiveValue == null
-                  ? '$label, não selecionado'
-                  : '$label, ${labels[effectiveValue] ?? effectiveValue.backendName}',
-          child: InkWell(
-            onTap: () async {
-              final useCompactPicker = values.length <= 4;
-              final isDark = Theme.of(context).brightness == Brightness.dark;
-              final pageBg = isDark ? EagleTokens.darkBg : TokensStrip.pageBg;
-              final picked = await showGeneralDialog<T>(
-                context: context,
-                barrierDismissible: true,
-                barrierLabel: 'Fechar seletor de $label',
-                barrierColor: Colors.black.withValues(alpha: 0.68),
-                transitionDuration: const Duration(milliseconds: 180),
-                pageBuilder:
-                    (context, _, __) => Material(
-                      color: useCompactPicker ? Colors.transparent : pageBg,
-                      child:
-                          useCompactPicker
-                              ? _EnumPickerCompact<T>(
-                                title: label,
-                                values: values,
-                                labels: labels,
-                                selected: effectiveValue,
-                              )
-                              : _EnumPickerFullScreen<T>(
-                                title: label,
-                                values: values,
-                                labels: labels,
-                                selected: effectiveValue,
-                                maxHeight: menuMaxHeight ?? 720,
-                              ),
-                    ),
-                transitionBuilder:
-                    (context, animation, secondaryAnimation, child) =>
-                        FadeTransition(
-                          opacity: CurvedAnimation(
-                            parent: animation,
-                            curve: Curves.easeOutCubic,
-                          ),
-                          child: SlideTransition(
-                            position: Tween<Offset>(
-                              begin: const Offset(0, 0.04),
-                              end: Offset.zero,
-                            ).animate(
-                              CurvedAnimation(
-                                parent: animation,
-                                curve: Curves.easeOutCubic,
-                              ),
-                            ),
-                            child: child,
-                          ),
-                        ),
-              );
-              if (picked != null) {
-                state.didChange(picked);
-                onChanged(picked);
-              }
-            },
-            borderRadius: BorderRadius.circular(15),
-            child: InputDecorator(
-              isEmpty: effectiveValue == null,
-              decoration: InputDecoration(
-                labelText: effectiveValue == null ? null : label,
-                hintText: effectiveValue == null ? label : null,
-                errorText: state.errorText,
-                filled: true,
-                fillColor: fillColor,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 14,
-                ),
-                border: FxInputDeco.outlineBorder(
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                enabledBorder: FxInputDeco.outlineBorder(
-                  borderRadius: BorderRadius.circular(15),
-                  borderSide: BorderSide(color: borderColor),
-                ),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      selectedLabel,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color:
-                            effectiveValue == null
-                                ? (isDark
-                                    ? EagleTokens.darkInkMute
-                                    : TokensStrip.textSecondary)
-                                : (isDark
-                                    ? EagleTokens.darkInk
-                                    : TokensStrip.textPrimary),
-                        fontWeight:
-                            effectiveValue == null
-                                ? FontWeight.w500
-                                : FontWeight.w800,
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            FxInsetPickerRow(
+              icon: icon,
+              iconColor: iconColor,
+              label: label,
+              value: selectedLabel,
+              showDivider: showDivider && state.errorText == null,
+              semanticsLabel:
+                  effectiveValue == null
+                      ? '$label, não selecionado'
+                      : '$label, ${labels[effectiveValue] ?? effectiveValue.backendName}',
+              onTap: () async {
+                final useCompactPicker = values.length <= 4;
+                final isDark = Theme.of(context).brightness == Brightness.dark;
+                final pageBg = isDark ? EagleTokens.darkBg : TokensStrip.pageBg;
+                final picked = await showGeneralDialog<T>(
+                  context: context,
+                  barrierDismissible: true,
+                  barrierLabel: 'Fechar seletor de $label',
+                  barrierColor: Colors.black.withValues(alpha: 0.68),
+                  transitionDuration: const Duration(milliseconds: 180),
+                  pageBuilder:
+                      (context, _, __) => Material(
+                        color: useCompactPicker ? Colors.transparent : pageBg,
+                        child:
+                            useCompactPicker
+                                ? _EnumPickerCompact<T>(
+                                  title: label,
+                                  values: values,
+                                  labels: labels,
+                                  selected: effectiveValue,
+                                )
+                                : _EnumPickerFullScreen<T>(
+                                  title: label,
+                                  values: values,
+                                  labels: labels,
+                                  selected: effectiveValue,
+                                  maxHeight: menuMaxHeight ?? 720,
+                                ),
                       ),
-                    ),
-                  ),
-                  Icon(
-                    Icons.keyboard_arrow_down_rounded,
-                    color:
-                        isDark
-                            ? EagleTokens.darkInkMute
-                            : TokensStrip.textSecondary,
-                  ),
-                ],
-              ),
+                  transitionBuilder:
+                      (context, animation, secondaryAnimation, child) =>
+                          FadeTransition(
+                            opacity: CurvedAnimation(
+                              parent: animation,
+                              curve: Curves.easeOutCubic,
+                            ),
+                            child: SlideTransition(
+                              position: Tween<Offset>(
+                                begin: const Offset(0, 0.04),
+                                end: Offset.zero,
+                              ).animate(
+                                CurvedAnimation(
+                                  parent: animation,
+                                  curve: Curves.easeOutCubic,
+                                ),
+                              ),
+                              child: child,
+                            ),
+                          ),
+                );
+                if (picked != null) {
+                  state.didChange(picked);
+                  onChanged(picked);
+                }
+              },
             ),
-          ),
+            if (state.errorText != null) ...[
+              Padding(
+                padding: const EdgeInsets.fromLTRB(4, 4, 4, 6),
+                child: Text(
+                  state.errorText!,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.error,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              if (showDivider)
+                Divider(
+                  height: 1,
+                  thickness: FxSettingsLayout.dividerThickness,
+                  color: ShellChrome.of(context).line,
+                ),
+            ],
+          ],
         );
       },
     );
   }
 }
-

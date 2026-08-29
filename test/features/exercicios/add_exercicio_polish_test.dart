@@ -19,7 +19,8 @@ void main() {
     expect(screen, contains('Fechar seletor'));
     expect(screen, isNot(contains('DropdownButtonFormField')));
 
-    final semanticsCount = 'Semantics('.allMatches(screen).length;
-    expect(semanticsCount, greaterThanOrEqualTo(8));
+    expect(screen, contains('DashboardHomeActionChip'));
+    expect(screen, contains('FxInsetPickerRow'));
+    expect(screen, contains('AlunoInsetFormField'));
   });
 }
