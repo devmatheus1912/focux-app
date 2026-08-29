@@ -11,8 +11,13 @@ Future<void> showAddExercicioHelpSheet(BuildContext context) {
     tips: const [
       FxHelpTip(
         'Buscar',
-        'Digite o nome, use favoritos ou filtre por vídeo. Toque no exercício para adicionar na hora.',
+        'Digite o nome ou filtre por vídeo. Toque no exercício para adicionar na hora.',
         icon: 'search',
+      ),
+      FxHelpTip(
+        'Favoritos',
+        'Toque na estrela do card (ou segure a linha) para favoritar. O filtro Favoritos lista só esses.',
+        icon: 'spark',
       ),
       FxHelpTip(
         'Categorias',

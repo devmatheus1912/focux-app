@@ -133,7 +133,10 @@ class ExercisePickerFilterBar extends StatelessWidget {
               Expanded(
                 child: _FilterChip(
                   label: 'Favoritos',
-                  icon: Icons.star_outline_rounded,
+                  icon:
+                      filter.somenteFavoritos
+                          ? Icons.star_rounded
+                          : Icons.star_outline_rounded,
                   selected: filter.somenteFavoritos,
                   primary: primary,
                   isDark: isDark,

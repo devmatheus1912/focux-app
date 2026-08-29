@@ -16,7 +16,7 @@ ExercisePickerLibraryLines exercisePickerLibraryLines({
   if (filter.somenteFavoritos && filteredCount == 0) {
     return ExercisePickerLibraryLines(
       primary: 'Sem favoritos',
-      secondary: '$totalCount no total',
+      secondary: 'Toque na estrela para favoritar',
     );
   }
   if (filteredCount == 0 && filter.isActive) {

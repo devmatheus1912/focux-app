@@ -73,6 +73,43 @@ class Exercicio {
     this.editorialReviewedAt,
   });
 
+  Exercicio copyWith({bool? favoritado}) {
+    return Exercicio(
+      id: id,
+      nome: nome,
+      descricao: descricao,
+      musculoAlvo: musculoAlvo,
+      gifUrl: gifUrl,
+      thumbnailUrl: thumbnailUrl,
+      videoSource: videoSource,
+      licenseStatus: licenseStatus,
+      categoria: categoria,
+      equipamento: equipamento,
+      nivel: nivel,
+      mecanica: mecanica,
+      objetivo: objetivo,
+      errosComuns: errosComuns,
+      contraindicacoes: contraindicacoes,
+      substitutos: substitutos,
+      videoUrl: videoUrl,
+      tags: tags,
+      modalidade: modalidade,
+      padraoMovimento: padraoMovimento,
+      grupoMuscularPrimario: grupoMuscularPrimario,
+      gruposSecundarios: gruposSecundarios,
+      equipamentos: equipamentos,
+      espacosCompativeis: espacosCompativeis,
+      dificuldade: dificuldade,
+      unilateral: unilateral,
+      curado: curado,
+      curatedId: curatedId,
+      favoritado: favoritado ?? this.favoritado,
+      editorialStatus: editorialStatus,
+      editorialNotes: editorialNotes,
+      editorialReviewedAt: editorialReviewedAt,
+    );
+  }
+
   factory Exercicio.fromJson(Map<String, dynamic> json) => Exercicio(
     id: json['id'] as int,
     nome: json['nome'] as String,

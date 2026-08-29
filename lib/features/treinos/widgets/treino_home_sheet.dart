@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/brand_palette.dart';
+import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 
 class TreinoHomeSheetSurface extends StatelessWidget {
@@ -46,12 +48,14 @@ class TreinoSheetChromeHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final primary = Theme.of(context).colorScheme.primary;
+    final soft = BrandPalette.softened(
+      Theme.of(context).colorScheme.primary,
+    );
     return FxHomeSheetHeader(
       isDark: isDark,
       title: title,
       subtitle: subtitle,
-      leading: Icon(icon, color: primary, size: 18),
+      leading: Icon(icon, color: soft, size: FxSettingsLayout.iconSize),
     );
   }
 }

@@ -9,6 +9,7 @@ import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_input_deco.dart';
@@ -22,6 +23,7 @@ import '../../exercicios/data/exercicio_repository.dart';
 import '../../exercicios/data/exercicio_taxonomy_labels.dart';
 import '../../exercicios/data/exercise_enum_api.dart';
 import '../../exercicios/providers/exercicio_picker_provider.dart';
+import '../../exercicios/providers/exercicios_provider.dart';
 import '../../alunos/widgets/aluno_form_choices.dart';
 import '../../exercicios/screens/widgets/exercise_media_thumb.dart';
 import '../../exercicios/screens/widgets/exercise_video_preview_sheet.dart';
@@ -208,6 +210,37 @@ class _ExerciseLibraryPanelState extends ConsumerState<ExerciseLibraryPanel> {
       }
     } finally {
       if (mounted) setState(() => _uploading = false);
+    }
+  }
+
+  Future<void> _toggleFavorite(Exercicio exercicio) async {
+    final current = _resolve(exercicio);
+    final makeFavorite = !current.favoritado;
+    try {
+      final repo = ref.read(exercicioRepositoryProvider);
+      if (makeFavorite) {
+        await repo.favoritarExercicio(current.id);
+      } else {
+        await repo.desfavoritarExercicio(current.id);
+      }
+      if (!mounted) return;
+      final updated = current.copyWith(favoritado: makeFavorite);
+      setState(() {
+        if (_filter.somenteFavoritos && !makeFavorite) {
+          _items.removeWhere((e) => e.id == updated.id);
+          _localUpdates.remove(updated.id);
+          if (_totalElements > 0) _totalElements -= 1;
+        } else {
+          _localUpdates[updated.id] = updated;
+        }
+      });
+      FeedbackHelper.showSuccess(
+        context,
+        makeFavorite ? 'Adicionado aos favoritos' : 'Removido dos favoritos',
+      );
+    } catch (e) {
+      if (!mounted) return;
+      FeedbackHelper.showError(context, friendlyError(e));
     }
   }
 
@@ -513,6 +546,7 @@ class _ExerciseLibraryPanelState extends ConsumerState<ExerciseLibraryPanel> {
       onUploadVideo: widget.onUploadVideo,
       onSelect: widget.onSelect,
       onUpload: _handleUpload,
+      onFavoriteToggle: _toggleFavorite,
       loadingMore: _loadingMore,
     );
   }
@@ -687,6 +721,7 @@ class _GroupedExerciseList extends StatelessWidget {
     required this.primary,
     required this.onSelect,
     required this.onUpload,
+    required this.onFavoriteToggle,
     this.onUploadVideo,
     this.loadingMore = false,
   });
@@ -699,6 +734,7 @@ class _GroupedExerciseList extends StatelessWidget {
   final Color primary;
   final ValueChanged<Exercicio> onSelect;
   final Future<void> Function(Exercicio) onUpload;
+  final Future<void> Function(Exercicio) onFavoriteToggle;
   final Future<Exercicio?> Function(Exercicio exercicio)? onUploadVideo;
   final bool loadingMore;
 
@@ -746,6 +782,7 @@ class _GroupedExerciseList extends StatelessWidget {
                   insetGroup: true,
                   uploadEnabled: onUploadVideo != null && !uploading,
                   onTap: () => onSelect(section.items[i]),
+                  onFavoriteToggle: () => onFavoriteToggle(section.items[i]),
                   onPreviewThumb:
                       canPreviewExerciseMedia(section.items[i])
                           ? () => showExerciseMediaPreview(

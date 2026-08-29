@@ -2,14 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/theme/design_tokens.dart';
+import '../../../../core/theme/brand_palette.dart';
 import '../../../../core/theme/focux_hub_typography.dart';
+import '../../../../core/theme/fx_settings_layout.dart';
 import '../../../../core/theme/tokens_strip.dart';
 import '../../../../core/utils/friendly_error.dart';
+import '../../../../core/widgets/fx_error_state.dart';
 import '../../../../core/widgets/fx_home_sheet.dart';
 import '../../../../core/widgets/fx_loading.dart';
 import '../../../../core/widgets/fx_settings_group.dart';
 import '../../../../core/widgets/fx_settings_tile.dart';
+import '../../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../alunos/widgets/aluno360_inset_empty_actions.dart';
 import '../../providers/exercicios_provider.dart';
 import '../../data/exercise_enum_api.dart';
 import '../../data/enums.dart';
@@ -136,7 +140,6 @@ class _SubstituirExercicioBottomSheetState
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
 
     return FxHomeSheetSurface(
       isDark: isDark,
@@ -153,7 +156,11 @@ class _SubstituirExercicioBottomSheetState
             isDark: isDark,
             title: 'Trocar por similar',
             subtitle: 'Substituindo ${widget.alvo.nomeDisplay}',
-            leading: Icon(Icons.swap_horiz_rounded, color: primary, size: 18),
+            leading: Icon(
+              Icons.swap_horiz_rounded,
+              color: BrandPalette.softened(primary),
+              size: FxSettingsLayout.iconSize,
+            ),
           ),
           Expanded(
             child:
@@ -163,10 +170,13 @@ class _SubstituirExercicioBottomSheetState
                       child: FxLoading.sectionShimmer(context, height: 180),
                     )
                     : _error != null
-                    ? Center(
-                      child: Text(
-                        _error!,
-                        style: FocuxHubTypography.bodyMuted(color: mute),
+                    ? Padding(
+                      padding: const EdgeInsets.only(top: 12),
+                      child: FxErrorState(
+                        chromeOnDark: isDark,
+                        primary: primary,
+                        message: _error!,
+                        onRetry: () => _fetchPage(reset: true),
                       ),
                     )
                     : Column(
@@ -340,37 +350,39 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
+    final primary = Theme.of(context).colorScheme.primary;
+    final mute = fxScreenMute(context);
+    const caption =
+        'Nenhuma alternativa próxima. Ajuste o equipamento do aluno ou cadastre um exercício personalizado.';
+    if (onCriarNovo == null) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Text(
+            caption,
+            textAlign: TextAlign.center,
+            style: FocuxHubTypography.bodyMuted(color: mute),
+          ),
+        ),
+      );
+    }
+    return ListView(
+      padding: const EdgeInsets.only(top: 8, bottom: 8),
       children: [
-        const Icon(
-          Icons.swap_horiz_rounded,
-          size: 36,
-          color: EagleTokens.inkMute,
+        FxSettingsGroup(
+          accent: primary,
+          caption: caption,
+          children: aluno360InsetEmptyActionTiles([
+            Aluno360InsetEmptyActionSpec(
+              icon: Icons.add_rounded,
+              accent: BrandPalette.softened(primary),
+              label: 'Criar exercício personalizado',
+              subtitle: 'Abre o cadastro e usa no lugar deste',
+              highlight: true,
+              onTap: onCriarNovo!,
+            ),
+          ]),
         ),
-        const SizedBox(height: 12),
-        Text(
-          'Nenhuma alternativa próxima encontrada.',
-          textAlign: TextAlign.center,
-          style: FocuxHubTypography.bodyMuted(
-            color: EagleTokens.inkMute,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        const SizedBox(height: 6),
-        const Text(
-          'Ajuste os filtros do aluno ou crie um exercício personalizado.',
-          textAlign: TextAlign.center,
-          style: TextStyle(color: EagleTokens.inkMute, fontSize: 12.5),
-        ),
-        if (onCriarNovo != null) ...[
-          const SizedBox(height: 16),
-          OutlinedButton.icon(
-            onPressed: onCriarNovo,
-            icon: const Icon(Icons.add_rounded),
-            label: const Text('Criar exercício personalizado'),
-          ),
-        ],
       ],
     );
   }

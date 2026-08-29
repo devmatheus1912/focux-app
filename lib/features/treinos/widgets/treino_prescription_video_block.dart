@@ -5,7 +5,6 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/theme/brand_palette.dart';
-import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -23,6 +22,7 @@ import '../../exercicios/utils/exercise_video_upload_spec.dart';
 import '../constants/treinos_layout.dart';
 import '../providers/treinos_provider.dart';
 import 'treino_home_sheet.dart';
+import 'treino_inset_sheet.dart';
 
 class TreinoPrescriptionVideoBlock extends ConsumerStatefulWidget {
   const TreinoPrescriptionVideoBlock({
@@ -303,63 +303,14 @@ class _TreinoPrescriptionVideoBlockState
       context,
       builder: (ctx) {
         final isDark = Theme.of(ctx).brightness == Brightness.dark;
-        final chrome = ShellChrome.forDark(isDark);
-        return TreinoHomeSheetSurface(
+        return TreinoInsetConfirmSheet(
           isDark: isDark,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              FxHomeSheetHandle(isDark: isDark),
-              SizedBox(height: TokensStrip.s4),
-              FxHomeSheetHeader(
-                isDark: isDark,
-                title: 'Remover seu vídeo?',
-                subtitle:
-                    'A demonstração da biblioteca volta a aparecer, se houver. '
-                    'O aluno deixa de ver a sua gravação.',
-                leading: Icon(
-                  Icons.delete_outline_rounded,
-                  color: EagleTokens.bad,
-                  size: 18,
-                ),
-              ),
-              SizedBox(height: TokensStrip.s4),
-              SizedBox(
-                height: TreinosLayout.touchTarget,
-                child: FilledButton(
-                  onPressed: () {
-                    HapticFeedback.mediumImpact();
-                    Navigator.pop(ctx, true);
-                  },
-                  style: FilledButton.styleFrom(
-                    backgroundColor: EagleTokens.bad,
-                    foregroundColor: Colors.white,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                  ),
-                  child: const Text(
-                    'Remover vídeo',
-                    style: TextStyle(fontWeight: FontWeight.w800),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 8),
-              SizedBox(
-                height: TreinosLayout.touchTarget,
-                child: TextButton(
-                  onPressed: () => Navigator.pop(ctx, false),
-                  style: TextButton.styleFrom(foregroundColor: chrome.mute),
-                  child: const Text(
-                    'Cancelar',
-                    style: TextStyle(fontWeight: FontWeight.w700),
-                  ),
-                ),
-              ),
-            ],
-          ),
+          headerIcon: Icons.delete_outline_rounded,
+          title: 'Remover seu vídeo?',
+          message:
+              'A demonstração da biblioteca volta a aparecer, se houver. '
+              'O aluno deixa de ver a sua gravação.',
+          confirmLabel: 'Remover vídeo',
         );
       },
     );
@@ -381,7 +332,9 @@ class _TreinoPrescriptionVideoBlockState
     final subtitle =
         locked
             ? 'Não feche o app enquanto o envio termina.'
-            : ExerciseVideoSpecTips.summary;
+            : hasPersonal
+            ? 'Toque em Ver para revisar ou Trocar para enviar outro.'
+            : 'Opcional · vertical · toque em ? para as specs';
 
     return Semantics(
       container: true,

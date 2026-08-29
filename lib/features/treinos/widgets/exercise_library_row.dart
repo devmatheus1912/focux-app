@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../core/theme/brand_palette.dart';
+import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../exercicios/data/exercicio_repository.dart';
@@ -19,6 +20,7 @@ class ExerciseLibraryRow extends StatelessWidget {
     this.showDivider = true,
     this.onPreviewThumb,
     this.onUploadVideo,
+    this.onFavoriteToggle,
     this.uploadEnabled = true,
     this.picker = true,
     this.searchQuery = '',
@@ -32,6 +34,8 @@ class ExerciseLibraryRow extends StatelessWidget {
   final bool showDivider;
   final VoidCallback? onPreviewThumb;
   final VoidCallback? onUploadVideo;
+  /// Segurar o card: favoritar/desfavoritar (preferido no picker).
+  final VoidCallback? onFavoriteToggle;
   final bool uploadEnabled;
   final bool picker;
   final String searchQuery;
@@ -40,6 +44,21 @@ class ExerciseLibraryRow extends StatelessWidget {
   bool get _hasThumbMedia => exercisePreviewMediaUrlFor(exercicio) != null;
 
   double get _rowMinHeight => _hasThumbMedia ? 52 : 48;
+
+  String _semanticLabel(String meta) {
+    final base =
+        selected
+            ? '${exercicio.nomeDisplay}, selecionado. $meta'
+            : alreadyInTreino
+            ? '${exercicio.nomeDisplay}. $meta. Já no treino.'
+            : '${exercicio.nomeDisplay}. $meta';
+    final fav = exercicio.favoritado ? ' Favorito.' : '';
+    final action =
+        onFavoriteToggle != null
+            ? ' Toque na estrela ou segure para ${exercicio.favoritado ? 'remover dos favoritos' : 'favoritar'}.'
+            : '';
+    return '$base$fav$action';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -61,24 +80,25 @@ class ExerciseLibraryRow extends StatelessWidget {
         Semantics(
           button: true,
           selected: selected,
-          label:
-              selected
-                  ? '${exercicio.nomeDisplay}, selecionado. $meta'
-                  : alreadyInTreino
-                  ? '${exercicio.nomeDisplay}. $meta. Já no treino.'
-                  : '${exercicio.nomeDisplay}. $meta',
+          label: _semanticLabel(meta),
           child: InkWell(
             onTap: () {
               HapticFeedback.selectionClick();
               onTap();
             },
             onLongPress:
-                onUploadVideo == null
-                    ? null
-                    : () {
+                onFavoriteToggle != null ||
+                        (onUploadVideo != null && uploadEnabled)
+                    ? () {
+                      if (onFavoriteToggle != null) {
+                        HapticFeedback.mediumImpact();
+                        onFavoriteToggle!();
+                        return;
+                      }
                       HapticFeedback.selectionClick();
-                      if (uploadEnabled) onUploadVideo!();
-                    },
+                      onUploadVideo!();
+                    }
+                    : null,
             child: ConstrainedBox(
               constraints: BoxConstraints(
                 minHeight: insetGroup ? 44 : _rowMinHeight,
@@ -134,6 +154,31 @@ class ExerciseLibraryRow extends StatelessWidget {
                       ],
                     ),
                   ),
+                  if (onFavoriteToggle != null)
+                    IconButton(
+                      visualDensity: VisualDensity.compact,
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(
+                        minWidth: 44,
+                        minHeight: 44,
+                      ),
+                      tooltip:
+                          exercicio.favoritado
+                              ? 'Remover dos favoritos'
+                              : 'Adicionar aos favoritos',
+                      onPressed: () {
+                        HapticFeedback.mediumImpact();
+                        onFavoriteToggle!();
+                      },
+                      icon: Icon(
+                        exercicio.favoritado
+                            ? Icons.star_rounded
+                            : Icons.star_outline_rounded,
+                        color:
+                            exercicio.favoritado ? EagleTokens.gold : mute,
+                        size: 22,
+                      ),
+                    ),
                   if (selected)
                     Icon(Icons.check_rounded, color: brand, size: 20)
                   else if (!picker)

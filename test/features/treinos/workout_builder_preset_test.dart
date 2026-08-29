@@ -57,7 +57,7 @@ void main() {
     expect(repository, contains('/duplicar'));
     expect(detail, contains('SliverReorderableList'));
     expect(detail, contains('ReorderableDelayedDragStartListener'));
-    expect(detail, contains('Duplicar item'));
+    expect(detail, contains("label: 'Duplicar'"));
   });
 
   test('workout detail persists order through drag reorder', () {

@@ -11,7 +11,7 @@ void main() {
         filter: const ExercisePickerFilter(somenteFavoritos: true),
       );
       expect(lines.primary, 'Sem favoritos');
-      expect(lines.secondary, '141 no total');
+      expect(lines.secondary, 'Toque na estrela para favoritar');
     });
 
     test('filtro ativo usa linhas curtas', () {
