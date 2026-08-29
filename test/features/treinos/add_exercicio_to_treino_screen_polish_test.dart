@@ -58,7 +58,10 @@ void main() {
       );
       expect(screen, contains('treinoPickerHomeProvider'));
       expect(screen, contains('ExerciseVideoSpecTips'));
-      expect(screen, contains('quietCta: true'));
+      expect(screen, contains('_SelectedExerciseInsetGroup'));
+      expect(screen, contains('FxSettingsLayout.pageInset'));
+      expect(screen, isNot(contains('_CompactSelectedExerciseBar')));
+      expect(screen, isNot(contains('ExerciseVideoUploadStrip')));
       expect(screen, contains('ref.watch(treinoPickerHomeProvider'));
       expect(screen, isNot(contains('ref.watch(exerciciosProvider)')));
       expect(screen, isNot(contains('ref.watch(treinoProvider(')));

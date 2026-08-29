@@ -197,89 +197,164 @@ class _SuggestionList extends StatelessWidget {
   }
 }
 
-class _CompactSelectedExerciseBar extends StatelessWidget {
-  const _CompactSelectedExerciseBar({
+class _SelectedExerciseInsetGroup extends StatelessWidget {
+  const _SelectedExerciseInsetGroup({
     required this.exercicio,
     required this.isDark,
     required this.primary,
+    required this.mediaLoading,
+    required this.celebrateVideoSuccess,
     required this.onChange,
-    this.onPreview,
-    this.celebrateVideoSuccess = false,
+    required this.onPreview,
+    required this.onUpload,
+    required this.onRemove,
+    required this.onSimilar,
+    this.onPreviewThumb,
   });
 
   final Exercicio exercicio;
   final bool isDark;
   final Color primary;
-  final VoidCallback onChange;
-  final VoidCallback? onPreview;
+  final bool mediaLoading;
   final bool celebrateVideoSuccess;
+  final VoidCallback onChange;
+  final VoidCallback onPreview;
+  final VoidCallback onUpload;
+  final VoidCallback onRemove;
+  final VoidCallback onSimilar;
+  final VoidCallback? onPreviewThumb;
 
   @override
   Widget build(BuildContext context) {
-    final mute = ShellChrome.of(context).mute;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: fxListCardDecoration(
-        context,
-        accent: primary,
-        selected: true,
-      ),
-      child: Row(
-        children: [
-          if (onPreview != null)
-            GestureDetector(
-              onTap: onPreview,
-              child: ExerciseMediaThumb.fromExercicio(
-                exercicio,
-                size: 44,
-                celebrateSuccess: celebrateVideoSuccess,
-                key: ValueKey(
-                  'thumb-${exercicio.id}-${exercicio.videoUrl}-${exercicio.thumbnailUrl}',
-                ),
-              ),
-            )
-          else
-            ExerciseMediaThumb.fromExercicio(
-              exercicio,
-              size: 44,
-              celebrateSuccess: celebrateVideoSuccess,
-              key: ValueKey(
-                'thumb-${exercicio.id}-${exercicio.videoUrl}-${exercicio.thumbnailUrl}',
-              ),
+    final soft = BrandPalette.softened(primary);
+    final hasPersonalVideo = exercicioHasPersonalVideo(exercicio);
+    final hasLibraryDemo =
+        !kBibliotecaLibraryVideosStandby &&
+        exercicio.hasPlayableMedia &&
+        !hasPersonalVideo &&
+        exercicioHasPublishedLibraryMedia(exercicio);
+    final canPreview = hasPersonalVideo || hasLibraryDemo;
+    final videoTitle =
+        mediaLoading
+            ? 'Enviando vídeo...'
+            : hasPersonalVideo
+            ? 'Seu vídeo está pronto'
+            : hasLibraryDemo
+            ? 'Demonstração da biblioteca'
+            : 'Vídeo (opcional)';
+    final videoSubtitle =
+        mediaLoading
+            ? 'Não feche o app. A miniatura atualiza em instantes.'
+            : hasPersonalVideo
+            ? 'Prévia, troca ou remoção a qualquer momento.'
+            : hasLibraryDemo
+            ? 'Assista à demo ou envie sua gravação.'
+            : (kBibliotecaLibraryVideosStandby
+                ? 'Envie sua demonstração. A demo oficial Focux chega em breve.'
+                : 'Envie sua demonstração antes de prescrever.');
+    final videoIcon =
+        mediaLoading
+            ? Icons.hourglass_top_rounded
+            : hasPersonalVideo
+            ? Icons.play_circle_fill_rounded
+            : hasLibraryDemo
+            ? Icons.video_library_rounded
+            : Icons.video_call_outlined;
+    final videoCta =
+        mediaLoading
+            ? ''
+            : hasPersonalVideo
+            ? 'Trocar'
+            : 'Enviar';
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        FxSettingsGroup(
+          accent: primary,
+          children: [
+            FxSettingsTile(
+              icon: Icons.fitness_center_outlined,
+              accent: soft,
+              label: exercicio.nomeDisplay,
+              subtitle: exerciseLibraryMeta(exercicio),
+              value: 'Trocar',
+              accessory:
+                  onPreviewThumb != null
+                      ? GestureDetector(
+                        onTap: onPreviewThumb,
+                        child: ExerciseMediaThumb.fromExercicio(
+                          exercicio,
+                          size: 40,
+                          celebrateSuccess: celebrateVideoSuccess,
+                          key: ValueKey(
+                            'thumb-${exercicio.id}-${exercicio.videoUrl}-${exercicio.thumbnailUrl}',
+                          ),
+                        ),
+                      )
+                      : ExerciseMediaThumb.fromExercicio(
+                        exercicio,
+                        size: 40,
+                        celebrateSuccess: celebrateVideoSuccess,
+                        key: ValueKey(
+                          'thumb-${exercicio.id}-${exercicio.videoUrl}-${exercicio.thumbnailUrl}',
+                        ),
+                      ),
+              onTap: onChange,
             ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  exercicio.nomeDisplay,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: FocuxHubTypography.cardTitle(
-                    color: isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
-                  ).copyWith(fontWeight: FontWeight.w900),
-                ),
-                Text(
-                  exerciseLibraryMeta(exercicio),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: FxSettingsLayout.subhead(color: mute),
-                ),
-              ],
-            ),
-          ),
-          TextButton(
-            onPressed: onChange,
-            child: Text(
-              'Trocar',
-              style: FocuxHubTypography.body(color: primary).copyWith(
-                fontWeight: FontWeight.w900,
+            if (!kBibliotecaLibraryVideosStandby || !hasLibraryDemo)
+              FxSettingsTile(
+                icon: videoIcon,
+                accent: soft,
+                label: videoTitle,
+                subtitle: videoSubtitle,
+                value: videoCta,
+                onTap: mediaLoading ? () {} : onUpload,
               ),
+            if (canPreview && !mediaLoading)
+              FxSettingsTile(
+                icon: Icons.play_circle_outline_rounded,
+                accent: soft,
+                label: hasPersonalVideo ? 'Ver seu vídeo' : 'Ver demonstração',
+                value: '',
+                onTap: onPreview,
+              ),
+            if (hasPersonalVideo && !mediaLoading)
+              FxSettingsTile(
+                icon: Icons.delete_outline_rounded,
+                accent: EagleTokens.bad,
+                label: 'Remover vídeo',
+                value: '',
+                danger: true,
+                onTap: onRemove,
+              ),
+            FxSettingsTile(
+              icon: Icons.swap_horiz_rounded,
+              accent: soft,
+              label: 'Trocar por similar',
+              subtitle: 'Mesmo padrão de movimento',
+              value: '',
+              showDivider: false,
+              onTap: onSimilar,
+            ),
+          ],
+        ),
+        if (mediaLoading) ...[
+          const SizedBox(height: 8),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: LinearProgressIndicator(
+              minHeight: 5,
+              backgroundColor: soft.withValues(alpha: 0.12),
+              color: soft,
             ),
           ),
         ],
-      ),
+        Padding(
+          padding: const EdgeInsets.only(top: 6, left: 2, right: 2),
+          child: ExerciseVideoSpecTips(isDark: isDark, embedded: true),
+        ),
+      ],
     );
   }
 }
@@ -326,7 +401,6 @@ class _AddExerciseBottomDock extends StatelessWidget {
       tipoSerie: tipoSerie,
     );
     final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final brand = BrandPalette.softened(primary);
 
     return DecoratedBox(
@@ -345,74 +419,28 @@ class _AddExerciseBottomDock extends StatelessWidget {
         top: false,
         child: Padding(
           padding: const EdgeInsets.fromLTRB(
-            FxSettingsLayout.groupPadH,
+            FxSettingsLayout.pageInset,
             8,
-            FxSettingsLayout.groupPadH,
+            FxSettingsLayout.pageInset,
             8,
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Semantics(
-                button: true,
-                label:
-                    'Prescrição ativa ${preset.label}. $series séries de $repeticoes, $descanso segundos. Toque para editar.',
-                child: Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    onTap: () {
-                      HapticFeedback.selectionClick();
-                      onEditPrescription();
-                    },
-                    borderRadius: BorderRadius.circular(14),
-                    child: DecoratedBox(
-                      decoration: activePrescriptionStripDecoration(
-                        brand: brand,
-                        isDark: isDark,
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 11,
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(Icons.tune_rounded, color: brand, size: 18),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Prescrição padrão',
-                                    style: activePrescriptionCaptionStyle(
-                                      mute: mute,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    summary,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: activePrescriptionLineStyle(
-                                      brand: brand,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Icon(
-                              Icons.chevron_right_rounded,
-                              color: mute,
-                              size: FxSettingsLayout.chevronSize,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
+              FxSettingsGroup(
+                accent: primary,
+                children: [
+                  FxSettingsTile(
+                    icon: Icons.tune_rounded,
+                    accent: brand,
+                    label: 'Prescrição padrão',
+                    subtitle: summary,
+                    value: '',
+                    showDivider: false,
+                    onTap: onEditPrescription,
                   ),
-                ),
+                ],
               ),
               if (showActions) ...[
                 const SizedBox(height: 10),

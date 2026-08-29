@@ -51,10 +51,10 @@ import '../../alunos/providers/alunos_provider.dart';
 import '../../exercicios/screens/widgets/substituir_exercicio_bottom_sheet.dart';
 import '../../exercicios/screens/widgets/exercise_media_thumb.dart';
 import '../../exercicios/services/biblioteca_bootstrap.dart';
+import '../../exercicios/services/biblioteca_media_config.dart';
 import '../../exercicios/services/biblioteca_sync_status.dart';
 import '../../exercicios/screens/widgets/exercise_video_preview_sheet.dart';
 import '../../exercicios/screens/widgets/exercise_video_spec_tips.dart';
-import '../../exercicios/screens/widgets/exercise_video_upload_strip.dart';
 import '../data/exercise_prescription_memory.dart';
 import '../data/exercise_prescription_memory_store.dart';
 import '../screens/widgets/exercise_picker_filter_bar.dart';
@@ -352,9 +352,9 @@ class _AddExercicioToTreinoScreenState
                                 child: SingleChildScrollView(
                                   controller: _scrollCtrl,
                                   padding: EdgeInsets.fromLTRB(
-                                    FxSettingsLayout.groupPadH,
-                                    FxSettingsLayout.groupPadH,
-                                    FxSettingsLayout.groupPadH,
+                                    FxSettingsLayout.pageInset,
+                                    FxSettingsLayout.pageInset,
+                                    FxSettingsLayout.pageInset,
                                     _scrollBottomInset(context),
                                   ),
                                   child: Column(

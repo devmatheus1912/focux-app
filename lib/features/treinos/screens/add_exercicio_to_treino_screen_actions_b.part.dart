@@ -522,7 +522,7 @@ extension AddExercicioToTreinoScreenActionsB
               children: [
                 FxSettingsTile(
                   icon: Icons.account_tree_outlined,
-                  accent: primary,
+                  accent: BrandPalette.softened(primary),
                   label: 'Por movimento',
                   subtitle: 'Empurrar, puxar, agachar, core…',
                   value: '',
@@ -531,7 +531,7 @@ extension AddExercicioToTreinoScreenActionsB
                 ),
                 FxSettingsTile(
                   icon: Icons.view_agenda_outlined,
-                  accent: primary,
+                  accent: BrandPalette.softened(primary),
                   label: uiHints.templateCtaLabel,
                   subtitle:
                       'Full body, PPL, upper/lower — ${templateSplits.length} modelos.',
@@ -544,7 +544,7 @@ extension AddExercicioToTreinoScreenActionsB
                 if (libraryCount > 0)
                   FxSettingsTile(
                     icon: Icons.library_books_outlined,
-                    accent: primary,
+                    accent: BrandPalette.softened(primary),
                     label: 'Biblioteca completa',
                     subtitle: libraryLines.primary,
                     value: '',
@@ -557,7 +557,7 @@ extension AddExercicioToTreinoScreenActionsB
                   ),
                 FxSettingsTile(
                   icon: Icons.add_rounded,
-                  accent: primary,
+                  accent: BrandPalette.softened(primary),
                   label: uiHints.createCtaLabel,
                   value: '',
                   showDivider: false,
@@ -599,35 +599,26 @@ extension AddExercicioToTreinoScreenActionsB
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             if (compact && _selecionado != null) ...[
-              _CompactSelectedExerciseBar(
+              _SelectedExerciseInsetGroup(
                 exercicio: _selecionado!,
                 isDark: isDark,
                 primary: primary,
+                mediaLoading: _mediaLoading,
                 celebrateVideoSuccess: _celebrateVideoSuccess,
                 onChange:
                     () => _openExercisePicker(
                       alreadyInTreinoIds: alreadyInTreinoIds,
                       libraryTotalCount: libraryCount,
                     ),
-                onPreview:
+                onPreviewThumb:
                     canPreviewExerciseMedia(_selecionado!)
                         ? _previewSelectedExerciseVideo
                         : null,
-              ),
-              const SizedBox(height: 8),
-              ExerciseVideoUploadStrip(
-                exercicio: _selecionado!,
-                isDark: isDark,
-                primary: primary,
-                mediaLoading: _mediaLoading,
-                dense: true,
-                quietCta: true,
                 onPreview: _previewSelectedExerciseVideo,
                 onUpload: _uploadSelectedExerciseVideo,
                 onRemove: _removeSelectedExerciseVideo,
-                footer: ExerciseVideoSpecTips(isDark: isDark, embedded: true),
+                onSimilar: _openSimilarPicker,
               ),
-              const SizedBox(height: 10),
             ],
             if (!compact) ...[
               TextField(
@@ -767,27 +758,6 @@ extension AddExercicioToTreinoScreenActionsB
                       libraryTotalCount: libraryCount,
                     ),
                 onCreate: _openCreateExercise,
-              ),
-            ],
-            if (_selecionado != null) ...[
-              const SizedBox(height: 8),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: TextButton.icon(
-                  onPressed: _openSimilarPicker,
-                  icon: Icon(
-                    Icons.swap_horiz_rounded,
-                    color: primary,
-                    size: 18,
-                  ),
-                  label: Text(
-                    'Trocar por similar',
-                    style: FocuxHubTypography.bodyMuted(
-                      color: primary,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ),
               ),
             ],
           ],

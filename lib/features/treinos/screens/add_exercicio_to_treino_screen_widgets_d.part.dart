@@ -146,7 +146,7 @@ class _BuscarQuickLinks extends StatelessWidget {
       children: [
         FxSettingsTile(
           icon: Icons.library_books_outlined,
-          accent: primary,
+          accent: BrandPalette.softened(primary),
           label: 'Biblioteca completa',
           subtitle: '$totalCount exercícios',
           value: '',
@@ -154,7 +154,7 @@ class _BuscarQuickLinks extends StatelessWidget {
         ),
         FxSettingsTile(
           icon: Icons.add_rounded,
-          accent: primary,
+          accent: BrandPalette.softened(primary),
           label: createLabel,
           value: '',
           showDivider: false,
