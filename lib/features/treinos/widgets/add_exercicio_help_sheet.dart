@@ -7,26 +7,26 @@ Future<void> showAddExercicioHelpSheet(BuildContext context) {
     context,
     title: 'Como adicionar exercícios',
     subtitle:
-        'Busque pelo nome ou explore por categoria. A prescrição ativa vale para os próximos que você incluir.',
+        'A biblioteca é a tela. Busque ou filtre, toque para incluir e siga para o próximo.',
     tips: const [
       FxHelpTip(
         'Buscar',
-        'Digite 2+ letras, use favoritos ou filtre por vídeo. Toque no resultado para prescrever.',
+        'Digite o nome, use favoritos ou filtre por vídeo. Toque no exercício para adicionar na hora.',
         icon: 'search',
       ),
       FxHelpTip(
-        'Explorar',
-        'Modelos prontos, biblioteca completa ou categorias por movimento e grupo muscular.',
+        'Categorias',
+        'Todos lista A–Z. Movimento e Músculo abrem as categorias da biblioteca.',
         icon: 'route',
       ),
       FxHelpTip(
         'Prescrição',
-        'Séries, reps e descanso ficam na faixa inferior. Edite antes de adicionar ao treino.',
+        'Séries, reps e descanso ficam no botão da barra superior. Vale para os próximos que você incluir.',
         icon: 'dumbbell',
       ),
       FxHelpTip(
-        'Vídeo',
-        'Envie sua demonstração ao selecionar um exercício — o aluno vê a mesma gravação.',
+        'Modelos',
+        'Para montar o treino inteiro de uma vez, use Montar por modelo no detalhe do treino.',
         icon: 'spark',
       ),
     ],

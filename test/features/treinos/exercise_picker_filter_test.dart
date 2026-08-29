@@ -81,39 +81,6 @@ void main() {
       );
       expect(filtered.map((e) => e.id), [1]);
     });
-  });
-
-  group('usesExercisePickerApi', () {
-    test('espaco ou equipamento disparam API', () {
-      expect(
-        usesExercisePickerApi(
-          buscaQuery: '',
-          filter: const ExercisePickerFilter(espaco: Espaco.casaSemEquipo),
-        ),
-        isTrue,
-      );
-      expect(
-        usesExercisePickerApi(
-          buscaQuery: '',
-          filter: const ExercisePickerFilter(
-            equipamento: Equipamento.pesoCorporal,
-          ),
-        ),
-        isTrue,
-      );
-    });
-
-    test('filtrarPorAluno dispara API', () {
-      expect(
-        usesExercisePickerApi(
-          buscaQuery: '',
-          filter: ExercisePickerFilter.fromAlunoEquipamentos(
-            const {Equipamento.halter},
-          ),
-        ),
-        isTrue,
-      );
-    });
 
     test('serverFiltered pula filtros ja aplicados na API', () {
       final semGif = Exercicio(

@@ -55,19 +55,27 @@ class ExercisePickerFilter {
       filtrarPorAluno: true,
     );
   }
-}
 
-/// Dispara paginação server-side do picker (biblioteca inteira).
-bool usesExercisePickerApi({
-  required String buscaQuery,
-  required ExercisePickerFilter filter,
-}) {
-  return buscaQuery.trim().length >= 2 ||
-      filter.somenteFavoritos ||
-      filter.somenteComVideo ||
-      filter.espaco != null ||
-      filter.equipamento != null ||
-      (filter.filtrarPorAluno && filter.equipamentosAluno.isNotEmpty);
+  @override
+  bool operator ==(Object other) =>
+      other is ExercisePickerFilter &&
+      other.espaco == espaco &&
+      other.equipamento == equipamento &&
+      other.filtrarPorAluno == filtrarPorAluno &&
+      other.somenteFavoritos == somenteFavoritos &&
+      other.somenteComVideo == somenteComVideo &&
+      other.equipamentosAluno.length == equipamentosAluno.length &&
+      other.equipamentosAluno.containsAll(equipamentosAluno);
+
+  @override
+  int get hashCode => Object.hash(
+    espaco,
+    equipamento,
+    filtrarPorAluno,
+    somenteFavoritos,
+    somenteComVideo,
+    Object.hashAll(equipamentosAluno.map((e) => e.name).toList()..sort()),
+  );
 }
 
 List<Exercicio> applyExercisePickerFilter(
@@ -96,8 +104,4 @@ List<Exercicio> applyExercisePickerFilter(
     }
     return true;
   }).toList();
-}
-
-List<Exercicio> favoriteExercises(Iterable<Exercicio> items) {
-  return items.where((exercicio) => exercicio.favoritado).toList();
 }

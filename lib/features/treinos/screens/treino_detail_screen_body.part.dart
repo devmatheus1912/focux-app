@@ -69,6 +69,12 @@ class _TreinoDetailBody extends StatelessWidget {
               onTap: () => Navigator.pop(sheetContext, 'add'),
             ),
             TreinoInsetActionSpec(
+              icon: Icons.view_agenda_outlined,
+              label: 'Montar por modelo',
+              showChevron: true,
+              onTap: () => Navigator.pop(sheetContext, 'template_split'),
+            ),
+            TreinoInsetActionSpec(
               icon: Icons.person_add_alt_1_rounded,
               label: 'Atribuir a aluno',
               showChevron: true,
@@ -120,6 +126,15 @@ class _TreinoDetailBody extends StatelessWidget {
         if (added == true) {
           ref.invalidate(treinoProvider(treinoId));
         }
+        break;
+      case 'template_split':
+        await openMontarPorModelo(
+          context: context,
+          ref: ref,
+          treinoId: treinoId,
+          alreadyInTreinoIds:
+              treino.exercicios.map((item) => item.exercicio.id).toSet(),
+        );
         break;
       case 'assign':
         try {
@@ -471,8 +486,21 @@ class _TreinoDetailBody extends StatelessWidget {
                           subtitle: 'Adicionar exercício',
                           value: '',
                           highlight: true,
-                          showDivider: false,
                           onTap: () => openAdd(source: 'empty'),
+                        ),
+                        FxSettingsTile(
+                          icon: Icons.view_agenda_outlined,
+                          accent: soft,
+                          label: 'Montar por modelo',
+                          subtitle: 'Full body, PPL, upper/lower',
+                          value: '',
+                          showDivider: false,
+                          onTap: () => openMontarPorModelo(
+                            context: context,
+                            ref: ref,
+                            treinoId: treinoId,
+                            alreadyInTreinoIds: const {},
+                          ),
                         ),
                       ],
                     ),

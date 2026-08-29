@@ -34,6 +34,7 @@ import '../../../core/widgets/fx_settings_tile.dart';
 import '../constants/treinos_layout.dart';
 import '../utils/treino_detail_grouping.dart';
 import '../utils/treino_prescription_rules.dart';
+import '../widgets/montar_por_modelo.dart';
 import '../widgets/treino_detail_help_sheet.dart';
 import '../widgets/treino_home_sheet.dart';
 import '../widgets/treino_inset_sheet.dart';

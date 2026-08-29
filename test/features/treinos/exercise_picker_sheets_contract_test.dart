@@ -5,7 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   test('picker sheets extraídos para widgets reutilizáveis', () {
     final library = File(
-      'lib/features/treinos/widgets/exercise_library_sheet.dart',
+      'lib/features/treinos/widgets/exercise_library_panel.dart',
     ).readAsStringSync();
     final filters = File(
       'lib/features/treinos/widgets/exercise_picker_filter_sheet.dart',
@@ -14,8 +14,10 @@ void main() {
       'lib/features/treinos/widgets/prescription_editor_sheet.dart',
     ).readAsStringSync();
 
-    expect(library, contains('showExerciseLibrarySheet'));
+    expect(library, contains('class ExerciseLibraryPanel'));
     expect(library, contains('FxSettingsGroup'));
+    expect(library, contains('ExerciseLibraryBrowseMode'));
+    expect(library, contains('Recentes'));
     expect(filters, contains('FxInsetPickerOption.list'));
     expect(filters, contains('edgeToEdgeRows: true'));
     expect(filters, isNot(contains('_FilterPickerTile')));

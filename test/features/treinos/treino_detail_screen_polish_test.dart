@@ -57,6 +57,8 @@ void main() {
     expect(screen, contains('ProductEvents.treinoPrescriptionSaved'));
     expect(screen, contains('treinoPrescriptionRejection'));
     expect(screen, contains("source: 'empty'"));
+    expect(screen, contains('Montar por modelo'));
+    expect(screen, contains('openMontarPorModelo'));
     expect(screen, contains('TreinosLayout.touchTarget'));
     expect(screen, contains('TreinoHomeSheetSurface'));
     expect(screen, contains('treino_home_sheet.dart'));

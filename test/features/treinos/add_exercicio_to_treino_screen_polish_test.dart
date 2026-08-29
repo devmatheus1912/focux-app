@@ -57,21 +57,22 @@ void main() {
         'lib/features/treinos/screens/add_exercicio_to_treino_screen.dart',
       );
       expect(screen, contains('treinoPickerHomeProvider'));
-      expect(screen, contains('ExerciseVideoSpecTips.open'));
-      expect(screen, contains('_SelectedExerciseInsetGroup'));
-      expect(screen, contains("header: 'Exercício selecionado'"));
+      expect(screen, contains('ExerciseLibraryPanel'));
+      expect(screen, contains('_adicionarRapido'));
+      expect(screen, contains('showPrescriptionEditorSheet'));
+      expect(screen, contains('formatActivePrescriptionLine'));
       expect(screen, contains('FxSettingsLayout.pageInset'));
+      expect(screen, isNot(contains('_SelectedExerciseInsetGroup')));
+      expect(screen, isNot(contains('_AddExerciseTabStrip')));
+      expect(screen, isNot(contains('_BuscarQuickLinks')));
       expect(screen, isNot(contains('_CompactSelectedExerciseBar')));
       expect(screen, isNot(contains('ExerciseVideoUploadStrip')));
       expect(screen, isNot(contains('ExerciseMediaThumb.fromExercicio')));
-      expect(screen, contains('helpTooltip: \'Como filmar o vídeo\''));
+      expect(screen, isNot(contains("header: 'Exercício selecionado'")));
       expect(screen, contains('ref.watch(treinoPickerHomeProvider'));
       expect(screen, isNot(contains('ref.watch(exerciciosProvider)')));
       expect(screen, isNot(contains('ref.watch(treinoProvider(')));
-      expect(screen, contains('_BuscarQuickLinks'));
-      expect(screen, contains('FxSettingsLayout.groupPadH'));
-      expect(screen, contains('reduceMotionOf'));
-      expect(screen, contains('fxMotionDurationMs'));
+      expect(screen, isNot(contains('ref.watch(exercicioPickerPageProvider')));
 
       final repo =
           File(

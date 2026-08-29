@@ -59,9 +59,9 @@ void main() {
       'lib/features/treinos/screens/treino_detail_screen.dart',
     );
 
-    expect(builder, contains('_BuscarQuickLinks'));
-    expect(builder, contains('onUploadVideo'));
-    expect(builder, contains('canPreviewExerciseMedia'));
+    expect(builder, contains('ExerciseLibraryPanel'));
+    expect(builder, contains('_adicionarRapido'));
+    expect(builder, contains('showPrescriptionEditorSheet'));
     expect(detail, contains('_PrescriptionReadinessPanel'));
     expect(detail, contains('mediaTrustLabel'));
     expect(treinoDetail, contains('TreinoPrescriptionVideoBlock'));

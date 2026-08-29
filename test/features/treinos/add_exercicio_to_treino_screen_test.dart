@@ -4,12 +4,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/core/theme/design_tokens.dart';
 import 'package:focux_app/features/treinos/data/treino_repository.dart';
 import 'package:focux_app/features/exercicios/data/exercicio_page.dart';
+import 'package:focux_app/features/exercicios/data/exercicio_repository.dart';
 import 'package:focux_app/features/treinos/providers/treinos_provider.dart';
 import 'package:focux_app/features/exercicios/providers/exercicio_picker_provider.dart';
 import 'package:focux_app/features/treinos/screens/add_exercicio_to_treino_screen.dart';
 import 'package:focux_app/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -26,7 +28,10 @@ void main() {
   );
 
   final pickerPage = ExercicioPickerPage(
-    content: const [],
+    content: [
+      Exercicio(id: 1, nome: 'Supino reto'),
+      Exercicio(id: 2, nome: 'Agachamento livre'),
+    ],
     meta: const ExercicioPageMeta(
       page: 0,
       size: 30,
@@ -36,18 +41,24 @@ void main() {
     ),
   );
 
-  Override pickerPageOverride() =>
-      exercicioPickerPageProvider.overrideWith(
-        (ref, query) async => pickerPage,
-      );
+  Override pickerPageOverride() => exercicioPickerPageProvider.overrideWith(
+    (ref, query) async => pickerPage,
+  );
+
+  Override statsOverride() => exercicioPickerStatsProvider.overrideWith(
+    (ref) async => const ExercicioPickerStats(
+      total: 187,
+      porPadrao: {'SQUAT': 12, 'PUSH_HORIZONTAL': 8},
+      porGrupo: {'PEITO': 10},
+    ),
+  );
 
   setUp(() {
     GoogleFonts.config.allowRuntimeFetching = false;
+    SharedPreferences.setMockInitialValues({});
   });
 
-  testWidgets('aba Buscar mostra contagem real da biblioteca e a11y', (
-    tester,
-  ) async {
+  Future<void> pumpScreen(WidgetTester tester, {bool reduceMotion = false}) {
     final router = GoRouter(
       initialLocation: '/treinos/12/exercicios/add',
       routes: [
@@ -55,91 +66,73 @@ void main() {
           path: '/treinos/:id/exercicios/add',
           builder:
               (context, state) =>
-                  AddExercicioToTreinoScreen(treinoId: 12),
+                  const AddExercicioToTreinoScreen(treinoId: 12),
         ),
       ],
     );
 
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          treinoPickerHomeProvider(12).overrideWith((ref) async => pickerHome),
-          pickerPageOverride(),
-        ],
-        child: MaterialApp.router(
-          theme: ThemeData(
-            colorScheme: ColorScheme.fromSeed(
-              seedColor: EagleTokens.brandAccent,
-            ),
-            useMaterial3: true,
+    Widget app = ProviderScope(
+      overrides: [
+        treinoPickerHomeProvider(12).overrideWith((ref) async => pickerHome),
+        pickerPageOverride(),
+        statsOverride(),
+      ],
+      child: MaterialApp.router(
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: EagleTokens.brandAccent,
           ),
-          locale: const Locale('pt'),
-          supportedLocales: S.supportedLocales,
-          localizationsDelegates: S.localizationsDelegates,
-          routerConfig: router,
+          useMaterial3: true,
         ),
+        locale: const Locale('pt'),
+        supportedLocales: S.supportedLocales,
+        localizationsDelegates: S.localizationsDelegates,
+        routerConfig: router,
       ),
     );
+
+    if (reduceMotion) {
+      app = MediaQuery(
+        data: const MediaQueryData(disableAnimations: true),
+        child: app,
+      );
+    }
+
+    return tester.pumpWidget(app);
+  }
+
+  testWidgets('biblioteca é a tela: busca, segmentos e cadastro', (
+    tester,
+  ) async {
+    await pumpScreen(tester);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 80));
 
     expect(find.bySemanticsLabel('Adicionar exercício'), findsOneWidget);
     expect(find.text('Treino Emagrecimento'), findsWidgets);
-    expect(find.text('Biblioteca completa'), findsOneWidget);
-    expect(find.text('187 exercícios'), findsOneWidget);
+    expect(find.text('Todos'), findsOneWidget);
+    expect(find.text('Movimento'), findsOneWidget);
+    expect(find.text('Músculo'), findsOneWidget);
     expect(find.text('Cadastrar exercício'), findsOneWidget);
-    expect(find.text('0 exercícios'), findsNothing);
-
-    await tester.tap(find.text('Explorar'));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 80));
-    expect(find.textContaining('187 exercícios na biblioteca'), findsOneWidget);
+    expect(find.text('Buscar'), findsNothing);
+    expect(find.text('Explorar'), findsNothing);
+    expect(find.text('Biblioteca completa'), findsNothing);
+    expect(find.text('Prescrição'), findsNothing);
+    expect(find.textContaining('×'), findsWidgets);
   });
 
-  testWidgets('reduce motion desativa slide entre abas', (tester) async {
-    final router = GoRouter(
-      initialLocation: '/treinos/12/exercicios/add',
-      routes: [
-        GoRoute(
-          path: '/treinos/:id/exercicios/add',
-          builder:
-              (context, state) =>
-                  AddExercicioToTreinoScreen(treinoId: 12),
-        ),
-      ],
-    );
-
-    await tester.pumpWidget(
-      MediaQuery(
-        data: const MediaQueryData(disableAnimations: true),
-        child: ProviderScope(
-          overrides: [
-            treinoPickerHomeProvider(12).overrideWith((ref) async => pickerHome),
-            pickerPageOverride(),
-          ],
-          child: MaterialApp.router(
-            theme: ThemeData(
-              colorScheme: ColorScheme.fromSeed(
-                seedColor: EagleTokens.brandAccent,
-              ),
-              useMaterial3: true,
-            ),
-            locale: const Locale('pt'),
-            supportedLocales: S.supportedLocales,
-            localizationsDelegates: S.localizationsDelegates,
-            routerConfig: router,
-          ),
-        ),
-      ),
-    );
+  testWidgets('segmento Movimento mostra tiles sem aba Explorar', (
+    tester,
+  ) async {
+    await pumpScreen(tester, reduceMotion: true);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 80));
 
-    await tester.tap(find.text('Explorar'));
+    await tester.tap(find.text('Movimento'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 80));
 
-    expect(find.text('Explorar'), findsWidgets);
+    expect(find.text('Explorar'), findsNothing);
     expect(tester.takeException(), isNull);
   });
 }
