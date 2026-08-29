@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/fx_settings_layout.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_empty_state.dart';
@@ -18,6 +19,7 @@ import '../../exercicios/data/exercicio_repository.dart';
 import '../../exercicios/screens/widgets/exercise_media_thumb.dart';
 import '../../exercicios/screens/widgets/exercise_video_preview_sheet.dart';
 import '../screens/widgets/exercise_picker_filter_bar.dart';
+import '../utils/exercise_library_sections.dart';
 import '../utils/exercise_picker_filter.dart';
 import '../utils/exercise_picker_library_label.dart';
 import '../utils/exercise_picker_sort.dart';
@@ -325,30 +327,95 @@ class _ExerciseLibrarySheetState extends State<_ExerciseLibrarySheet> {
       );
     }
 
-    return ListView.builder(
+    return _GroupedExerciseList(
       controller: _scrollCtrl,
+      sections: buildExerciseLibrarySections(sorted),
+      searchQuery: _committedQuery,
+      selected: widget.selected,
+      alreadyInTreinoIds: widget.alreadyInTreinoIds,
+      uploadingInSheet: _uploadingInSheet,
+      onUploadVideo: widget.onUploadVideo,
+      onSelect: (exercicio) {
+        HapticFeedback.selectionClick();
+        Navigator.pop(context, exercicio);
+      },
+      onUpload: _handleUpload,
+      loadingMore: _loadingMore,
+    );
+  }
+}
+
+class _GroupedExerciseList extends StatelessWidget {
+  const _GroupedExerciseList({
+    required this.controller,
+    required this.sections,
+    required this.searchQuery,
+    required this.selected,
+    required this.alreadyInTreinoIds,
+    required this.uploadingInSheet,
+    required this.onSelect,
+    required this.onUpload,
+    this.onUploadVideo,
+    this.loadingMore = false,
+  });
+
+  final ScrollController controller;
+  final List<ExerciseLibrarySection> sections;
+  final String searchQuery;
+  final Exercicio? selected;
+  final Set<int> alreadyInTreinoIds;
+  final bool uploadingInSheet;
+  final ValueChanged<Exercicio> onSelect;
+  final Future<void> Function(Exercicio) onUpload;
+  final Future<Exercicio?> Function(Exercicio exercicio)? onUploadVideo;
+  final bool loadingMore;
+
+  @override
+  Widget build(BuildContext context) {
+    final mute = ShellChrome.of(context).mute;
+    final entries = <Object>[];
+    for (final section in sections) {
+      entries.add(section.letter);
+      entries.addAll(section.items);
+    }
+
+    return ListView.builder(
+      controller: controller,
       physics: const BouncingScrollPhysics(),
       keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-      padding: EdgeInsets.zero,
-      itemCount: sorted.length + (_loadingMore ? 1 : 0),
+      padding: const EdgeInsets.only(bottom: 8),
+      itemCount: entries.length + (loadingMore ? 1 : 0),
       itemBuilder: (context, index) {
-        if (index >= sorted.length) {
+        if (index >= entries.length) {
           return const Padding(
             padding: EdgeInsets.symmetric(vertical: 16),
             child: Center(child: FxLoading(size: 22)),
           );
         }
-        final exercicio = sorted[index];
+
+        final entry = entries[index];
+        if (entry is String) {
+          return Padding(
+            padding: const EdgeInsets.fromLTRB(4, 14, 4, 6),
+            child: Text(
+              entry,
+              style: FxSettingsLayout.sectionHeader(color: mute),
+            ),
+          );
+        }
+
+        final exercicio = entry as Exercicio;
+        final next = index + 1 < entries.length ? entries[index + 1] : null;
+        final showDivider = next is Exercicio;
+
         return ExerciseLibraryRow(
           exercicio: exercicio,
-          selected: widget.selected?.id == exercicio.id,
-          alreadyInTreino: widget.alreadyInTreinoIds.contains(exercicio.id),
-          showDivider: index < sorted.length - 1,
-          uploadEnabled: widget.onUploadVideo != null && !_uploadingInSheet,
-          onTap: () {
-            HapticFeedback.selectionClick();
-            Navigator.pop(context, exercicio);
-          },
+          searchQuery: searchQuery,
+          selected: selected?.id == exercicio.id,
+          alreadyInTreino: alreadyInTreinoIds.contains(exercicio.id),
+          showDivider: showDivider,
+          uploadEnabled: onUploadVideo != null && !uploadingInSheet,
+          onTap: () => onSelect(exercicio),
           onPreviewThumb:
               canPreviewExerciseMedia(exercicio)
                   ? () => showExerciseMediaPreview(
@@ -357,9 +424,7 @@ class _ExerciseLibrarySheetState extends State<_ExerciseLibrarySheet> {
                   )
                   : null,
           onUploadVideo:
-              widget.onUploadVideo == null
-                  ? null
-                  : () => _handleUpload(exercicio),
+              onUploadVideo == null ? null : () => onUpload(exercicio),
         );
       },
     );

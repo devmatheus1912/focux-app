@@ -20,20 +20,28 @@ Future<void> showExercisePickerFilterSheet(
     context,
     builder:
         (ctx) => _ExercisePickerFilterSheet(
-          filter: filter,
+          initialFilter: filter,
           onChanged: onChanged,
         ),
   );
 }
 
-class _ExercisePickerFilterSheet extends StatelessWidget {
+class _ExercisePickerFilterSheet extends StatefulWidget {
   const _ExercisePickerFilterSheet({
-    required this.filter,
+    required this.initialFilter,
     required this.onChanged,
   });
 
-  final ExercisePickerFilter filter;
+  final ExercisePickerFilter initialFilter;
   final ValueChanged<ExercisePickerFilter> onChanged;
+
+  @override
+  State<_ExercisePickerFilterSheet> createState() =>
+      _ExercisePickerFilterSheetState();
+}
+
+class _ExercisePickerFilterSheetState extends State<_ExercisePickerFilterSheet> {
+  late ExercisePickerFilter _filter;
 
   static final _espacos = [
     Espaco.academiaCompleta,
@@ -51,8 +59,14 @@ class _ExercisePickerFilterSheet extends StatelessWidget {
     Equipamento.banda,
   ];
 
+  @override
+  void initState() {
+    super.initState();
+    _filter = widget.initialFilter;
+  }
+
   bool get _hasAdvanced =>
-      filter.espaco != null || filter.equipamento != null;
+      _filter.espaco != null || _filter.equipamento != null;
 
   String _espacoLabel(Espaco espaco) =>
       TaxonomyLabels.espaco[espaco] ??
@@ -61,6 +75,11 @@ class _ExercisePickerFilterSheet extends StatelessWidget {
 
   String _equipamentoLabel(Equipamento equipamento) =>
       TaxonomyLabels.equipamento[equipamento] ?? equipamento.name;
+
+  void _apply(ExercisePickerFilter next) {
+    setState(() => _filter = next);
+    widget.onChanged(next);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -89,8 +108,8 @@ class _ExercisePickerFilterSheet extends StatelessWidget {
                     ? TextButton(
                       onPressed: () {
                         HapticFeedback.selectionClick();
-                        onChanged(
-                          filter.copyWith(
+                        _apply(
+                          _filter.copyWith(
                             clearEspaco: true,
                             clearEquipamento: true,
                           ),
@@ -106,6 +125,7 @@ class _ExercisePickerFilterSheet extends StatelessWidget {
           const SizedBox(height: 12),
           Flexible(
             child: SingleChildScrollView(
+              padding: const EdgeInsets.only(bottom: 8),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -116,15 +136,15 @@ class _ExercisePickerFilterSheet extends StatelessWidget {
                       for (var i = 0; i < _espacos.length; i++)
                         _FilterPickerTile(
                           label: _espacoLabel(_espacos[i]),
-                          selected: filter.espaco == _espacos[i],
+                          selected: _filter.espaco == _espacos[i],
                           accent: brand,
                           showDivider: i < _espacos.length - 1,
                           onTap: () {
                             HapticFeedback.selectionClick();
-                            onChanged(
-                              filter.espaco == _espacos[i]
-                                  ? filter.copyWith(clearEspaco: true)
-                                  : filter.copyWith(espaco: _espacos[i]),
+                            _apply(
+                              _filter.espaco == _espacos[i]
+                                  ? _filter.copyWith(clearEspaco: true)
+                                  : _filter.copyWith(espaco: _espacos[i]),
                             );
                           },
                         ),
@@ -138,15 +158,15 @@ class _ExercisePickerFilterSheet extends StatelessWidget {
                       for (var i = 0; i < _equipamentos.length; i++)
                         _FilterPickerTile(
                           label: _equipamentoLabel(_equipamentos[i]),
-                          selected: filter.equipamento == _equipamentos[i],
+                          selected: _filter.equipamento == _equipamentos[i],
                           accent: brand,
                           showDivider: i < _equipamentos.length - 1,
                           onTap: () {
                             HapticFeedback.selectionClick();
-                            onChanged(
-                              filter.equipamento == _equipamentos[i]
-                                  ? filter.copyWith(clearEquipamento: true)
-                                  : filter.copyWith(
+                            _apply(
+                              _filter.equipamento == _equipamentos[i]
+                                  ? _filter.copyWith(clearEquipamento: true)
+                                  : _filter.copyWith(
                                     equipamento: _equipamentos[i],
                                   ),
                             );
@@ -190,16 +210,15 @@ class _FilterPickerTile extends StatelessWidget {
       selected: selected,
       label: selected ? '$label, selecionado' : label,
       child: InkWell(
-        onTap: () {
-          HapticFeedback.selectionClick();
-          onTap();
-        },
+        onTap: onTap,
         child: ConstrainedBox(
           constraints: const BoxConstraints(
             minHeight: FxSettingsLayout.rowMinHeight,
           ),
           child: DecoratedBox(
             decoration: BoxDecoration(
+              color:
+                  selected ? accent.withValues(alpha: 0.08) : Colors.transparent,
               border:
                   showDivider
                       ? Border(
@@ -211,7 +230,10 @@ class _FilterPickerTile extends StatelessWidget {
                       : null,
             ),
             child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: TokensStrip.s3),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 4,
+                vertical: TokensStrip.s3,
+              ),
               child: Row(
                 children: [
                   Expanded(
@@ -219,7 +241,9 @@ class _FilterPickerTile extends StatelessWidget {
                       label,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: FxSettingsLayout.rowLabel(color: ink),
+                      style: FxSettingsLayout.rowLabel(
+                        color: ink,
+                      ).copyWith(fontWeight: selected ? FontWeight.w800 : null),
                     ),
                   ),
                   if (selected)

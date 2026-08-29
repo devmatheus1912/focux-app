@@ -30,6 +30,7 @@ import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../widgets/add_exercicio_help_sheet.dart';
 import '../widgets/exercise_library_row.dart';
 import '../widgets/exercise_library_sheet.dart';
+import '../widgets/prescription_editor_sheet.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';

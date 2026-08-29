@@ -8,7 +8,7 @@ import '../../exercicios/data/exercicio_repository.dart';
 import '../../exercicios/screens/widgets/exercise_media_thumb.dart';
 import '../utils/exercise_library_meta.dart';
 
-/// Linha inset da biblioteca — paridade Perfil (52px, thumb opcional, check).
+/// Linha inset da biblioteca — paridade Perfil (48–52px, thumb opcional, check).
 class ExerciseLibraryRow extends StatelessWidget {
   const ExerciseLibraryRow({
     super.key,
@@ -21,6 +21,7 @@ class ExerciseLibraryRow extends StatelessWidget {
     this.onUploadVideo,
     this.uploadEnabled = true,
     this.picker = true,
+    this.searchQuery = '',
   });
 
   final Exercicio exercicio;
@@ -32,8 +33,11 @@ class ExerciseLibraryRow extends StatelessWidget {
   final VoidCallback? onUploadVideo;
   final bool uploadEnabled;
   final bool picker;
+  final String searchQuery;
 
   bool get _hasThumbMedia => exercisePreviewMediaUrlFor(exercicio) != null;
+
+  double get _rowMinHeight => _hasThumbMedia ? 52 : 48;
 
   @override
   Widget build(BuildContext context) {
@@ -73,9 +77,7 @@ class ExerciseLibraryRow extends StatelessWidget {
                       if (uploadEnabled) onUploadVideo!();
                     },
             child: ConstrainedBox(
-              constraints: const BoxConstraints(
-                minHeight: FxSettingsLayout.rowMinHeight,
-              ),
+              constraints: BoxConstraints(minHeight: _rowMinHeight),
               child: Row(
                 children: [
                   if (_hasThumbMedia) ...[
@@ -101,13 +103,11 @@ class ExerciseLibraryRow extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          exercicio.nomeDisplay,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: FxSettingsLayout.rowLabel(
-                            color: selected ? brand : ink,
-                          ),
+                        _ExerciseTitle(
+                          title: exercicio.nomeDisplay,
+                          query: searchQuery,
+                          ink: selected ? brand : ink,
+                          highlight: brand,
                         ),
                         const SizedBox(height: 2),
                         Row(
@@ -152,6 +152,67 @@ class ExerciseLibraryRow extends StatelessWidget {
             ),
           ),
       ],
+    );
+  }
+}
+
+class _ExerciseTitle extends StatelessWidget {
+  const _ExerciseTitle({
+    required this.title,
+    required this.query,
+    required this.ink,
+    required this.highlight,
+  });
+
+  final String title;
+  final String query;
+  final Color ink;
+  final Color highlight;
+
+  @override
+  Widget build(BuildContext context) {
+    final normalized = query.trim();
+    if (normalized.length < 2) {
+      return Text(
+        title,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: FxSettingsLayout.rowLabel(color: ink),
+      );
+    }
+
+    final lowerTitle = title.toLowerCase();
+    final lowerQuery = normalized.toLowerCase();
+    final index = lowerTitle.indexOf(lowerQuery);
+    if (index < 0) {
+      return Text(
+        title,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: FxSettingsLayout.rowLabel(color: ink),
+      );
+    }
+
+    final before = title.substring(0, index);
+    final match = title.substring(index, index + normalized.length);
+    final after = title.substring(index + normalized.length);
+
+    return Text.rich(
+      TextSpan(
+        style: FxSettingsLayout.rowLabel(color: ink),
+        children: [
+          if (before.isNotEmpty) TextSpan(text: before),
+          TextSpan(
+            text: match,
+            style: FxSettingsLayout.rowLabel(
+              color: highlight,
+            ).copyWith(fontWeight: FontWeight.w900),
+          ),
+          if (after.isNotEmpty) TextSpan(text: after),
+        ],
+      ),
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
     );
   }
 }

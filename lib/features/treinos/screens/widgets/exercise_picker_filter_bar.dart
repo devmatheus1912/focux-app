@@ -70,10 +70,13 @@ class ExercisePickerFilterBar extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.only(right: 4),
-            child: Row(
+          ClipRect(
+            clipBehavior: Clip.none,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              clipBehavior: Clip.none,
+              padding: const EdgeInsets.only(right: 12, bottom: 2),
+              child: Row(
               children: [
                 if (filter.filtrarPorAluno &&
                     filter.equipamentosAluno.isNotEmpty) ...[
@@ -145,9 +148,7 @@ class ExercisePickerFilterBar extends StatelessWidget {
                 const SizedBox(width: 8),
                 _FilterChip(
                   label:
-                      advancedCount > 0
-                          ? 'Mais ($advancedCount)'
-                          : 'Mais filtros',
+                      advancedCount > 0 ? 'Mais ($advancedCount)' : 'Mais',
                   icon: Icons.tune_rounded,
                   selected: advancedCount > 0,
                   primary: primary,
@@ -156,6 +157,7 @@ class ExercisePickerFilterBar extends StatelessWidget {
                 ),
               ],
             ),
+          ),
           ),
           if (caption != null) ...[
             const SizedBox(height: 8),

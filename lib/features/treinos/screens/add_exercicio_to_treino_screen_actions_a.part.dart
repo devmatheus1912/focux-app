@@ -13,32 +13,27 @@ extension AddExercicioToTreinoScreenActionsA
   }
 
   void _openPrescriptionEditor() {
-    HapticFeedback.selectionClick();
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
     final ink = ShellChrome.of(context).ink;
-    showFxHomeSheet<void>(
+    showPrescriptionEditorSheet(
       context,
-      builder:
-          (ctx) => _PrescriptionEditorSheet(
-            isDark: isDark,
-            primary: primary,
-            ink: ink,
-            presetId: _presetId,
-            tipoSerie: _tipoSerie,
-            globalPresetMode: _selecionado == null,
-            lastPrescription: _lastPrescription,
-            seriesCtrl: _seriesCtrl,
-            repCtrl: _repCtrl,
-            descansoCtrl: _descansoCtrl,
-            cargaCtrl: _cargaCtrl,
-            observacoesCtrl: _observacoesCtrl,
-            grupoSupersetCtrl: _grupoSupersetCtrl,
-            onPresetSelected: _applyPreset,
-            onTipoSerieChanged:
-                (value) => setState(() => _tipoSerie = value),
-            onApplyLastPrescription: _applyLastPrescription,
-          ),
+      isDark: isDark,
+      primary: primary,
+      ink: ink,
+      presetId: _presetId,
+      tipoSerie: _tipoSerie,
+      globalPresetMode: _selecionado == null,
+      lastPrescription: _lastPrescription,
+      seriesCtrl: _seriesCtrl,
+      repCtrl: _repCtrl,
+      descansoCtrl: _descansoCtrl,
+      cargaCtrl: _cargaCtrl,
+      observacoesCtrl: _observacoesCtrl,
+      grupoSupersetCtrl: _grupoSupersetCtrl,
+      onPresetSelected: _applyPreset,
+      onTipoSerieChanged: (value) => setState(() => _tipoSerie = value),
+      onApplyLastPrescription: _applyLastPrescription,
     );
   }
 

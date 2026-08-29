@@ -58,53 +58,6 @@ class _BibliotecaSyncBanner extends StatelessWidget {
   }
 }
 
-class _RepeatPrescriptionBanner extends StatelessWidget {
-  const _RepeatPrescriptionBanner({
-    required this.memory,
-    required this.isDark,
-    required this.primary,
-    required this.onApply,
-  });
-
-  final ExercisePrescriptionMemory memory;
-  final bool isDark;
-  final Color primary;
-  final VoidCallback onApply;
-
-  @override
-  Widget build(BuildContext context) {
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: fxListCardDecoration(context, accent: primary),
-      child: Row(
-        children: [
-          Icon(Icons.history_rounded, color: primary, size: 18),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              'Repetir última prescrição (${memory.summary})',
-              style: FocuxHubTypography.bodyMuted(
-                color: mute,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-          TextButton(
-            onPressed: onApply,
-            child: Text(
-              'Aplicar',
-              style: FocuxHubTypography.body(color: primary).copyWith(
-                fontWeight: FontWeight.w900,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _AlunoEquipmentFilterBanner extends StatelessWidget {
   const _AlunoEquipmentFilterBanner({
     required this.alunoNome,

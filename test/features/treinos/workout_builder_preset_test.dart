@@ -29,12 +29,17 @@ void main() {
     final screen = readScreenSourceBundle(
       'lib/features/treinos/screens/add_exercicio_to_treino_screen.dart',
     );
+    final prescription =
+        File(
+          'lib/features/treinos/widgets/prescription_editor_sheet.dart',
+        ).readAsStringSync();
 
     expect(repository, contains('cargaKg'));
     expect(repository, contains('observacoes'));
-    expect(screen, contains('_PresetSelector'));
-    expect(screen, contains('Carga (kg)'));
-    expect(screen, contains('Observações de execução'));
+    expect(prescription, contains('PrescriptionEditorSheet'));
+    expect(prescription, contains('Carga (kg)'));
+    expect(prescription, contains('Observações de execução'));
+    expect(screen, contains('showPrescriptionEditorSheet'));
   });
 
   test('workout detail exposes persisted reorder and duplicate actions', () {
