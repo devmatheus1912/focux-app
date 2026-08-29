@@ -18,7 +18,7 @@ void main() {
       workoutBuilderPresetById('strength').descansoSegundos,
       greaterThan(90),
     );
-    expect(workoutBuilderPresetById('hypertrophy').tipoSerie, 'NORMAL');
+    expect(workoutBuilderRepShortcuts('hypertrophy'), contains('8-12'));
   });
 
   test('workout builder sends premium prescription fields to backend', () {

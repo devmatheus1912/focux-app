@@ -62,3 +62,12 @@ WorkoutBuilderPreset workoutBuilderPresetById(String id) {
     orElse: () => workoutBuilderPresets.first,
   );
 }
+
+/// Atalhos de repetição por objetivo — 1 toque no sheet.
+List<String> workoutBuilderRepShortcuts(String presetId) {
+  return switch (presetId) {
+    'strength' => const ['3-6', '4-6', '5'],
+    'endurance' => const ['15-20', '12-20', 'AMRAP'],
+    _ => const ['8-12', '10-15', '12-15'],
+  };
+}
