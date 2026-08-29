@@ -261,11 +261,11 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
             SafeArea(
               bottom: false,
               child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(
+                padding: EdgeInsets.fromLTRB(
                   FxSettingsLayout.pageInset,
                   6,
                   FxSettingsLayout.pageInset,
-                  96,
+                  88 + MediaQuery.paddingOf(context).bottom,
                 ),
                 child: Form(
                   key: _formKey,
@@ -277,10 +277,7 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
                         child: FxSettingsGroup(
                           header: 'Identidade',
                           caption:
-                              'Nome, grupo muscular e intenção principal do movimento.',
-                          helpTooltip: 'Ajuda sobre identidade',
-                          onHelpTap:
-                              () => showNovoExercicioIdentidadeHelpSheet(context),
+                              'Nome, grupo muscular e como o movimento é prescrito.',
                           accent: primary,
                           children: [
                             AlunoInsetFormField(
@@ -346,31 +343,19 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
                               labels: TaxonomyLabels.padrao,
                               onChanged:
                                   (v) => setState(() => _padraoMovimento = v),
-                              showDivider: false,
                             ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: FxSettingsLayout.groupGap),
-                      FxStaggerItem(
-                        index: 1,
-                        child: FxSettingsGroup(
-                          header: 'Execução',
-                          caption: 'Como o movimento entra na série prescrita.',
-                          helpTooltip: 'Ajuda sobre execução',
-                          onHelpTap:
-                              () => showNovoExercicioExecucaoHelpSheet(context),
-                          accent: primary,
-                          children: [
                             FxSettingsTile(
                               icon: Icons.swap_horiz_rounded,
                               accent: soft,
                               label: 'Unilateral',
                               subtitle:
-                                  'Marque quando cada lado deve ser executado separadamente.',
+                                  'Cada lado executado separadamente (ex.: 12 por braço).',
                               value: '',
                               showDivider: false,
-                              onTap: () => setState(() => _unilateral = !_unilateral),
+                              onTap:
+                                  () => setState(
+                                    () => _unilateral = !_unilateral,
+                                  ),
                               accessory: Switch.adaptive(
                                 value: _unilateral,
                                 onChanged:
@@ -382,14 +367,11 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
                       ),
                       const SizedBox(height: FxSettingsLayout.groupGap),
                       FxStaggerItem(
-                        index: 2,
+                        index: 1,
                         child: FxSettingsGroup(
                           header: 'Ambiente',
                           caption:
                               'Onde e com o quê o aluno pode executar este exercício.',
-                          helpTooltip: 'Ajuda sobre ambiente',
-                          onHelpTap:
-                              () => showNovoExercicioAmbienteHelpSheet(context),
                           accent: primary,
                           children: [
                             FxSettingsTile(
@@ -410,17 +392,14 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
                       ),
                       const SizedBox(height: FxSettingsLayout.groupGap),
                       FxStaggerItem(
-                        index: 3,
+                        index: 2,
                         child: _CollapsibleSection(
                           icon: Icons.co_present_outlined,
                           title: 'Orientação opcional',
                           subtitle:
                               _showGuidance
                                   ? 'Detalhes úteis para o aluno executar com segurança.'
-                                  : 'Execução, erros comuns e restrições quando precisar.',
-                          helpTooltip: 'Ajuda sobre orientação',
-                          onHelpTap:
-                              () => showNovoExercicioOrientacaoHelpSheet(context),
+                                  : 'Descrição, erros comuns e restrições quando precisar.',
                           expanded: _showGuidance,
                           onToggle:
                               () =>
@@ -457,7 +436,7 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
                       if (_error != null) ...[
                         const SizedBox(height: FxSettingsLayout.groupGap),
                         FxStaggerItem(
-                          index: 4,
+                          index: 3,
                           child: FxErrorState(
                             chromeOnDark: isDark,
                             primary: primary,

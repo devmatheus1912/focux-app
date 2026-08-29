@@ -27,6 +27,12 @@ void main() {
     expect(screen, contains('FxInsetPickerRow'));
     expect(screen, contains('FxHelpIconButton'));
     expect(screen, contains('showNovoExercicioHelpSheet'));
+    expect(screen, isNot(contains('onHelpTap')));
+    expect(screen, isNot(contains('showNovoExercicioIdentidadeHelpSheet')));
+    expect(screen, isNot(contains('showNovoExercicioPerfilRapidoHelpSheet')));
+    expect(screen, contains('MediaQuery.paddingOf(context).bottom'));
+    expect(screen, contains("'Unilateral'"));
+    expect(screen, isNot(contains("header: 'Execução'")));
     expect(enumPicker, contains('edgeToEdgeRows: true'));
     expect(enumPicker, contains('FxInsetPickerOption.list'));
   });

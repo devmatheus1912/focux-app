@@ -232,7 +232,7 @@ class _FilterChip extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(TokensStrip.rSm),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 160),
             curve: Curves.easeOutCubic,
@@ -242,7 +242,7 @@ class _FilterChip extends StatelessWidget {
               minWidth: expanded ? 0 : 0,
             ),
             padding: EdgeInsets.symmetric(
-              horizontal: expanded ? 6 : 11,
+              horizontal: expanded ? 8 : 12,
               vertical: 8,
             ),
             decoration: BoxDecoration(
@@ -250,7 +250,7 @@ class _FilterChip extends StatelessWidget {
                   selected
                       ? primary.withValues(alpha: isDark ? 0.22 : 0.12)
                       : (isDark ? EagleTokens.darkCardHi : TokensStrip.cardBg),
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(TokensStrip.rSm),
               border: Border.all(
                 color: selected ? primary : line.withValues(alpha: 0.55),
               ),

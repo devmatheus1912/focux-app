@@ -113,7 +113,7 @@ void main() {
     expect(find.text('Movimento'), findsNothing);
     expect(find.text('Músculo'), findsOneWidget);
     expect(find.text('Cadastrar exercício'), findsOneWidget);
-    expect(find.text('Buscar'), findsNothing);
+    expect(find.text('Buscar'), findsOneWidget);
     expect(find.text('Explorar'), findsNothing);
     expect(find.text('Biblioteca completa'), findsNothing);
     expect(find.text('Prescrição'), findsNothing);

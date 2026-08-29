@@ -31,7 +31,6 @@ import '../widgets/novo_exercicio_help_sheets.dart';
 
 part 'add_exercicio_screen_state.part.dart';
 part 'add_exercicio_screen_widgets_form.part.dart';
-part 'add_exercicio_screen_widgets_misc.part.dart';
 
 class AddExercicioScreen extends ConsumerStatefulWidget {
   const AddExercicioScreen({super.key, this.exercicioId});

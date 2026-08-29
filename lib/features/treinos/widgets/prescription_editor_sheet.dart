@@ -231,7 +231,7 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
                       : 'Prescrição do exercício',
               subtitle:
                   widget.globalPresetMode
-                      ? 'Vale para buscar, explorar e adições rápidas.'
+                      ? 'Vale para as próximas adições rápidas nesta tela.'
                       : 'Ajuste séries, carga e descanso antes de salvar.',
               leading: Icon(
                 Icons.edit_note_rounded,

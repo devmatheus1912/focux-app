@@ -5,7 +5,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/brand_palette.dart';
-import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -23,6 +22,7 @@ import '../../exercicios/data/exercicio_repository.dart';
 import '../../exercicios/data/exercicio_taxonomy_labels.dart';
 import '../../exercicios/data/exercise_enum_api.dart';
 import '../../exercicios/providers/exercicio_picker_provider.dart';
+import '../../alunos/widgets/aluno_form_choices.dart';
 import '../../exercicios/screens/widgets/exercise_media_thumb.dart';
 import '../../exercicios/screens/widgets/exercise_video_preview_sheet.dart';
 import '../screens/widgets/exercise_picker_filter_bar.dart';
@@ -333,7 +333,7 @@ class _ExerciseLibraryPanelState extends ConsumerState<ExerciseLibraryPanel> {
                 textInputAction: TextInputAction.search,
                 decoration: FxInputDeco.build(
                   context,
-                  'Buscar exercício',
+                  'Buscar',
                   icon: Icons.search_rounded,
                   hint: widget.searchPlaceholder,
                 ).copyWith(
@@ -360,11 +360,24 @@ class _ExerciseLibraryPanelState extends ConsumerState<ExerciseLibraryPanel> {
                 onChanged: _onFilterChanged,
               ),
               const SizedBox(height: 10),
-              _BrowseSegmentStrip(
-                selected: _browse,
-                primary: primary,
-                isDark: isDark,
-                onChanged: _setBrowse,
+              Semantics(
+                container: true,
+                label: 'Ver todos ou por músculo',
+                child: AlunoSegmentedChoice(
+                  options: const [
+                    (value: 'todos', label: 'Todos'),
+                    (value: 'musculo', label: 'Músculo'),
+                  ],
+                  selected: _browse.name,
+                  isDark: isDark,
+                  onSelect: (value) {
+                    _setBrowse(
+                      value == 'musculo'
+                          ? ExerciseLibraryBrowseMode.musculo
+                          : ExerciseLibraryBrowseMode.todos,
+                    );
+                  },
+                ),
               ),
               if (_categoryChipLabel != null) ...[
                 const SizedBox(height: 10),
@@ -505,108 +518,6 @@ class _ExerciseLibraryPanelState extends ConsumerState<ExerciseLibraryPanel> {
   }
 }
 
-class _BrowseSegmentStrip extends StatelessWidget {
-  const _BrowseSegmentStrip({
-    required this.selected,
-    required this.primary,
-    required this.isDark,
-    required this.onChanged,
-  });
-
-  final ExerciseLibraryBrowseMode selected;
-  final Color primary;
-  final bool isDark;
-  final ValueChanged<ExerciseLibraryBrowseMode> onChanged;
-
-  static const _tabs = [
-    (
-      mode: ExerciseLibraryBrowseMode.todos,
-      label: 'Todos',
-      semantics: 'Todos os exercícios',
-    ),
-    (
-      mode: ExerciseLibraryBrowseMode.musculo,
-      label: 'Músculo',
-      semantics: 'Filtrar por grupo muscular',
-    ),
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-    final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
-    final action = BrandPalette.sectionAction(primary, dark: isDark);
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-
-    return Semantics(
-      container: true,
-      label: 'Ver todos ou por músculo',
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(TokensStrip.rSm),
-          border: Border.all(
-            color: line.withValues(alpha: isDark ? 0.7 : 0.85),
-          ),
-          color: isDark ? EagleTokens.darkCardHi : TokensStrip.cardBg,
-        ),
-        child: SizedBox(
-          height: 40,
-          child: Row(
-            children: [
-              for (var i = 0; i < _tabs.length; i++) ...[
-                if (i > 0)
-                  VerticalDivider(
-                    width: 1,
-                    thickness: FxSettingsLayout.dividerThickness,
-                    color: line.withValues(alpha: isDark ? 0.55 : 0.7),
-                  ),
-                Expanded(
-                  child: Semantics(
-                    button: true,
-                    selected: selected == _tabs[i].mode,
-                    label: _tabs[i].semantics,
-                    child: Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        onTap: () => onChanged(_tabs[i].mode),
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 160),
-                          curve: Curves.easeOutCubic,
-                          alignment: Alignment.center,
-                          color:
-                              selected == _tabs[i].mode
-                                  ? action.withValues(
-                                    alpha: isDark ? 0.18 : 0.10,
-                                  )
-                                  : Colors.transparent,
-                          child: Text(
-                            _tabs[i].label,
-                            style: FocuxHubTypography.chip(
-                              selected == _tabs[i].mode ? action : ink,
-                            ).copyWith(
-                              fontSize: 12,
-                              fontWeight:
-                                  selected == _tabs[i].mode
-                                      ? FontWeight.w800
-                                      : FontWeight.w600,
-                              color:
-                                  selected == _tabs[i].mode ? action : mute,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _CategoryClearChip extends StatelessWidget {
   const _CategoryClearChip({
     required this.label,
@@ -629,12 +540,12 @@ class _CategoryClearChip extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           onTap: onClear,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(TokensStrip.rSm),
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
             decoration: BoxDecoration(
               color: primary.withValues(alpha: isDark ? 0.22 : 0.12),
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(TokensStrip.rSm),
               border: Border.all(color: primary),
             ),
             child: Row(

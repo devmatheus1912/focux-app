@@ -161,7 +161,12 @@ class _AddExercicioFiltersSheetState extends State<_AddExercicioFiltersSheet> {
     return FxHomeSheetSurface(
       isDark: widget.isDark,
       maxHeight: maxHeight,
-      padding: const EdgeInsets.fromLTRB(18, 8, 18, 14),
+      padding: const EdgeInsets.fromLTRB(
+        FxSettingsLayout.pageInset,
+        8,
+        FxSettingsLayout.pageInset,
+        14,
+      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,

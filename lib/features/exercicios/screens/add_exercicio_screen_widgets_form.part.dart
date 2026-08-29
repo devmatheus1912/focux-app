@@ -89,21 +89,10 @@ class _QuickSetupStrip extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(4, 6, 4, 6),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  'Perfil rápido',
-                  style: FxSettingsLayout.sectionHeader(color: mute),
-                ),
-              ),
-              FxHelpIconButton(
-                tooltip: 'Ajuda sobre perfil rápido',
-                onTap: () => showNovoExercicioPerfilRapidoHelpSheet(context),
-                size: 28,
-              ),
-            ],
+          padding: const EdgeInsets.fromLTRB(4, 8, 4, 6),
+          child: Text(
+            'Perfil rápido',
+            style: FxSettingsLayout.sectionHeader(color: mute),
           ),
         ),
         Padding(
@@ -154,8 +143,6 @@ class _CollapsibleSection extends StatelessWidget {
   final Widget child;
   final bool expanded;
   final VoidCallback onToggle;
-  final String? helpTooltip;
-  final VoidCallback? onHelpTap;
 
   const _CollapsibleSection({
     required this.icon,
@@ -164,8 +151,6 @@ class _CollapsibleSection extends StatelessWidget {
     required this.child,
     required this.expanded,
     required this.onToggle,
-    this.helpTooltip,
-    this.onHelpTap,
   });
 
   @override
@@ -176,8 +161,6 @@ class _CollapsibleSection extends StatelessWidget {
     return FxSettingsGroup(
       header: title,
       caption: subtitle,
-      helpTooltip: helpTooltip,
-      onHelpTap: onHelpTap,
       accent: primary,
       children: [
         FxSettingsTile(
@@ -235,9 +218,10 @@ class _EnumDropdown<T extends Enum> extends StatelessWidget {
       validator: validator,
       builder: (state) {
         final effectiveValue = value ?? state.value;
+        // Valor vazio → hint do campo (label) fica visível; "Selecionar" tapava o rótulo.
         final selectedLabel =
             effectiveValue == null
-                ? 'Selecionar'
+                ? ''
                 : labels[effectiveValue] ?? effectiveValue.backendName;
 
         return Column(
