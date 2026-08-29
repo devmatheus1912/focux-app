@@ -2,14 +2,7 @@ part of 'add_exercicio_to_treino_screen.dart';
 
 extension _AddExercicioToTreinoScreenActions
     on _AddExercicioToTreinoScreenState {
-  String _prescriptionChipLabel() {
-    final series = _seriesCtrl.text.trim();
-    final reps = _repCtrl.text.trim();
-    if (series.isEmpty || reps.isEmpty) return 'Prescrição';
-    return '$series×$reps';
-  }
-
-  String _prescriptionTooltip() {
+  String _prescriptionSummaryLine() {
     final preset = workoutBuilderPresetById(_presetId);
     return formatActivePrescriptionLine(
       presetLabel: preset.label,
@@ -295,38 +288,81 @@ extension _AddExercicioToTreinoScreenActions
   }
 }
 
-class _PrescriptionAppBarChip extends StatelessWidget {
-  const _PrescriptionAppBarChip({
-    required this.label,
-    required this.tooltip,
+class _PrescriptionActiveStrip extends StatelessWidget {
+  const _PrescriptionActiveStrip({
+    required this.summary,
     required this.primary,
     required this.isDark,
     required this.onTap,
   });
 
-  final String label;
-  final String tooltip;
+  final String summary;
   final Color primary;
   final bool isDark;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final action = BrandPalette.sectionAction(primary, dark: isDark);
-    return Semantics(
-      button: true,
-      label: 'Prescrição ativa: $tooltip',
-      child: Tooltip(
-        message: tooltip,
-        child: TextButton(
-          onPressed: onTap,
-          child: Text(
-            label,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: FocuxHubTypography.bodyMuted(
-              color: action,
-              fontWeight: FontWeight.w800,
+    final brand = BrandPalette.softened(primary);
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        FxSettingsLayout.pageInset,
+        8,
+        FxSettingsLayout.pageInset,
+        0,
+      ),
+      child: Semantics(
+        button: true,
+        label: 'Prescrição padrão: $summary. Toque para editar.',
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () {
+              HapticFeedback.selectionClick();
+              onTap();
+            },
+            borderRadius: BorderRadius.circular(14),
+            child: DecoratedBox(
+              decoration: activePrescriptionStripDecoration(
+                brand: brand,
+                isDark: isDark,
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 11,
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.tune_rounded, color: brand, size: 18),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Prescrição padrão',
+                            style: activePrescriptionCaptionStyle(mute: mute),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            summary,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: activePrescriptionLineStyle(brand: brand),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Icon(
+                      Icons.chevron_right_rounded,
+                      color: mute,
+                      size: FxSettingsLayout.chevronSize,
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
         ),

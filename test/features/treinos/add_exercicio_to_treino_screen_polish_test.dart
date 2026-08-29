@@ -61,6 +61,9 @@ void main() {
       expect(screen, contains('_adicionarRapido'));
       expect(screen, contains('showPrescriptionEditorSheet'));
       expect(screen, contains('formatActivePrescriptionLine'));
+      expect(screen, contains('_PrescriptionActiveStrip'));
+      expect(screen, contains('Prescrição padrão'));
+      expect(screen, isNot(contains('_PrescriptionAppBarChip')));
       expect(screen, contains('FxSettingsLayout.pageInset'));
       expect(screen, isNot(contains('_SelectedExerciseInsetGroup')));
       expect(screen, isNot(contains('_AddExerciseTabStrip')));

@@ -138,21 +138,6 @@ class _AddExercicioToTreinoScreenState
                 tooltip: 'Ajuda para adicionar exercícios',
                 onTap: () => showAddExercicioHelpSheet(context),
               ),
-              ListenableBuilder(
-                listenable: Listenable.merge([
-                  _seriesCtrl,
-                  _repCtrl,
-                  _descansoCtrl,
-                ]),
-                builder:
-                    (context, _) => _PrescriptionAppBarChip(
-                      label: _prescriptionChipLabel(),
-                      tooltip: _prescriptionTooltip(),
-                      primary: primary,
-                      isDark: isDark,
-                      onTap: _openPrescriptionEditor,
-                    ),
-              ),
               TextButton(
                 onPressed:
                     () => safePopOrGo(context, '/treinos/${widget.treinoId}'),
@@ -179,6 +164,20 @@ class _AddExercicioToTreinoScreenState
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    ListenableBuilder(
+                      listenable: Listenable.merge([
+                        _seriesCtrl,
+                        _repCtrl,
+                        _descansoCtrl,
+                      ]),
+                      builder:
+                          (context, _) => _PrescriptionActiveStrip(
+                            summary: _prescriptionSummaryLine(),
+                            primary: primary,
+                            isDark: isDark,
+                            onTap: _openPrescriptionEditor,
+                          ),
+                    ),
                     ListenableBuilder(
                       listenable: BibliotecaSyncStatus.instance,
                       builder: (context, _) {

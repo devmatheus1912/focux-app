@@ -21,7 +21,7 @@ Future<void> showAddExercicioHelpSheet(BuildContext context) {
       ),
       FxHelpTip(
         'Prescrição',
-        'Séries, reps e descanso ficam no botão da barra superior. Vale para os próximos que você incluir.',
+        'Séries, reps e descanso ficam na faixa Prescrição padrão, abaixo do título. Vale para os próximos que você incluir.',
         icon: 'dumbbell',
       ),
       FxHelpTip(
