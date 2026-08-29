@@ -9,6 +9,7 @@ import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../data/enums.dart';
 import '../data/exercicio_taxonomy_labels.dart';
 
@@ -224,16 +225,14 @@ class _AddExercicioFiltersSheetState extends State<_AddExercicioFiltersSheet> {
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           Align(
             alignment: AlignmentDirectional.centerEnd,
-            child: Semantics(
-              button: true,
-              label: 'Aplicar filtros de equipamento e espaço',
-              child: FilledButton(
-                onPressed: _apply,
-                child: const Text('Aplicar'),
-              ),
+            child: DashboardHomeActionChip(
+              label: 'Aplicar',
+              accent: primary,
+              isDark: widget.isDark,
+              onPressed: _apply,
             ),
           ),
         ],

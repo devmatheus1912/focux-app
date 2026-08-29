@@ -197,7 +197,6 @@ class _EnumDropdown<T extends Enum> extends StatelessWidget {
   final Map<T, String> labels;
   final ValueChanged<T?> onChanged;
   final String? Function(T?)? validator;
-  final double? menuMaxHeight;
   final bool showDivider;
 
   const _EnumDropdown({
@@ -209,7 +208,6 @@ class _EnumDropdown<T extends Enum> extends StatelessWidget {
     required this.labels,
     required this.onChanged,
     this.validator,
-    this.menuMaxHeight,
     this.showDivider = true,
   });
 
@@ -239,54 +237,14 @@ class _EnumDropdown<T extends Enum> extends StatelessWidget {
                       ? '$label, não selecionado'
                       : '$label, ${labels[effectiveValue] ?? effectiveValue.backendName}',
               onTap: () async {
-                final useCompactPicker = values.length <= 4;
-                final isDark = Theme.of(context).brightness == Brightness.dark;
-                final pageBg = isDark ? EagleTokens.darkBg : TokensStrip.pageBg;
-                final picked = await showGeneralDialog<T>(
-                  context: context,
-                  barrierDismissible: true,
-                  barrierLabel: 'Fechar seletor de $label',
-                  barrierColor: Colors.black.withValues(alpha: 0.68),
-                  transitionDuration: const Duration(milliseconds: 180),
-                  pageBuilder:
-                      (context, _, __) => Material(
-                        color: useCompactPicker ? Colors.transparent : pageBg,
-                        child:
-                            useCompactPicker
-                                ? _EnumPickerCompact<T>(
-                                  title: label,
-                                  values: values,
-                                  labels: labels,
-                                  selected: effectiveValue,
-                                )
-                                : _EnumPickerFullScreen<T>(
-                                  title: label,
-                                  values: values,
-                                  labels: labels,
-                                  selected: effectiveValue,
-                                  maxHeight: menuMaxHeight ?? 720,
-                                ),
-                      ),
-                  transitionBuilder:
-                      (context, animation, secondaryAnimation, child) =>
-                          FadeTransition(
-                            opacity: CurvedAnimation(
-                              parent: animation,
-                              curve: Curves.easeOutCubic,
-                            ),
-                            child: SlideTransition(
-                              position: Tween<Offset>(
-                                begin: const Offset(0, 0.04),
-                                end: Offset.zero,
-                              ).animate(
-                                CurvedAnimation(
-                                  parent: animation,
-                                  curve: Curves.easeOutCubic,
-                                ),
-                              ),
-                              child: child,
-                            ),
-                          ),
+                final picked = await showAddExercicioEnumPicker<T>(
+                  context,
+                  title: label,
+                  icon: icon,
+                  iconColor: iconColor,
+                  values: values,
+                  labels: labels,
+                  selected: effectiveValue,
                 );
                 if (picked != null) {
                   state.didChange(picked);

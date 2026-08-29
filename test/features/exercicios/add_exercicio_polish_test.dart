@@ -15,11 +15,10 @@ void main() {
     expect(screen, contains('Cadastrar exercício'));
     expect(screen, contains('Perfil rápido'));
     expect(screen, contains('selectedColor: primary'));
-    expect(screen, contains('Colors.white'));
-    expect(screen, contains('Fechar seletor'));
     expect(screen, isNot(contains('DropdownButtonFormField')));
-
+    expect(screen, isNot(contains('_EnumPicker')));
     expect(screen, contains('showAddExercicioFiltersSheet'));
+    expect(screen, contains('showAddExercicioEnumPicker'));
     expect(screen, contains('DashboardHomeActionChip'));
     expect(screen, contains('FxInsetPickerRow'));
     expect(screen, contains('AlunoInsetFormField'));
