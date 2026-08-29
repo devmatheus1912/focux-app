@@ -62,5 +62,19 @@ void main() {
       );
       expect(filtered.map((e) => e.id), [3]);
     });
+
+    test('serverFiltered pula filtros ja aplicados na API', () {
+      final semGif = Exercicio(
+        id: 4,
+        nome: 'Leg press',
+        videoUrl: 'https://cdn.example.com/demo.mp4',
+      );
+      final filtered = applyExercisePickerFilter(
+        [semGif],
+        const ExercisePickerFilter(somenteComVideo: true),
+        serverFiltered: true,
+      );
+      expect(filtered.map((e) => e.id), [4]);
+    });
   });
 }

@@ -10,6 +10,8 @@ class ExercicioPickerQuery {
   final String? busca;
   final PadraoMovimento? padraoMovimento;
   final GrupoMuscular? grupoMuscularPrimario;
+  final Espaco? espaco;
+  final Equipamento? equipamento;
   final bool somenteFavoritos;
   final bool somenteComVideo;
   final int page;
@@ -18,6 +20,8 @@ class ExercicioPickerQuery {
     this.busca,
     this.padraoMovimento,
     this.grupoMuscularPrimario,
+    this.espaco,
+    this.equipamento,
     this.somenteFavoritos = false,
     this.somenteComVideo = false,
     this.page = 0,
@@ -27,6 +31,8 @@ class ExercicioPickerQuery {
     busca: busca,
     padraoMovimento: padraoMovimento,
     grupoMuscularPrimario: grupoMuscularPrimario,
+    espaco: espaco,
+    equipamento: equipamento,
     somenteFavoritos: somenteFavoritos,
     somenteComVideo: somenteComVideo,
     page: page + 1,
@@ -38,6 +44,8 @@ class ExercicioPickerQuery {
       other.busca == busca &&
       other.padraoMovimento == padraoMovimento &&
       other.grupoMuscularPrimario == grupoMuscularPrimario &&
+      other.espaco == espaco &&
+      other.equipamento == equipamento &&
       other.somenteFavoritos == somenteFavoritos &&
       other.somenteComVideo == somenteComVideo &&
       other.page == page;
@@ -47,6 +55,8 @@ class ExercicioPickerQuery {
     busca,
     padraoMovimento,
     grupoMuscularPrimario,
+    espaco,
+    equipamento,
     somenteFavoritos,
     somenteComVideo,
     page,
@@ -68,6 +78,8 @@ final exercicioPickerPageProvider =
         busca: query.busca,
         padraoMovimento: enumQueryParam(query.padraoMovimento),
         grupoMuscularPrimario: enumQueryParam(query.grupoMuscularPrimario),
+        espaco: enumQueryParam(query.espaco),
+        equipamento: enumQueryParam(query.equipamento),
         hasVideo: query.somenteComVideo ? true : null,
         favoritos: query.somenteFavoritos ? true : null,
         page: query.page,

@@ -66,4 +66,25 @@ void main() {
       );
     });
   });
+
+  group('buscarTabEmptyMessage', () {
+    test('favoritos usa total dinamico', () {
+      expect(
+        buscarTabEmptyMessage(
+          filter: const ExercisePickerFilter(somenteFavoritos: true),
+          totalCount: 187,
+        ),
+        contains('187'),
+      );
+    });
+
+    test('com video nao fala so de upload proprio', () {
+      expect(
+        buscarTabEmptyMessage(
+          filter: const ExercisePickerFilter(somenteComVideo: true),
+        ),
+        isNot(contains('vídeo próprio')),
+      );
+    });
+  });
 }

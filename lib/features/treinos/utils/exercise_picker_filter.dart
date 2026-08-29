@@ -59,18 +59,21 @@ class ExercisePickerFilter {
 
 List<Exercicio> applyExercisePickerFilter(
   Iterable<Exercicio> items,
-  ExercisePickerFilter filter,
-) {
+  ExercisePickerFilter filter, {
+  bool serverFiltered = false,
+}) {
   return items.where((exercicio) {
-    if (filter.somenteFavoritos && !exercicio.favoritado) return false;
-    if (filter.somenteComVideo && !exercicio.hasPlayableMedia) return false;
-    if (filter.espaco != null &&
-        !exercicio.espacosCompativeis.contains(filter.espaco)) {
-      return false;
-    }
-    if (filter.equipamento != null &&
-        !exercicio.equipamentos.contains(filter.equipamento)) {
-      return false;
+    if (!serverFiltered) {
+      if (filter.somenteFavoritos && !exercicio.favoritado) return false;
+      if (filter.somenteComVideo && !exercicio.hasPlayableMedia) return false;
+      if (filter.espaco != null &&
+          !exercicio.espacosCompativeis.contains(filter.espaco)) {
+        return false;
+      }
+      if (filter.equipamento != null &&
+          !exercicio.equipamentos.contains(filter.equipamento)) {
+        return false;
+      }
     }
     if (filter.filtrarPorAluno && filter.equipamentosAluno.isNotEmpty) {
       final compativel =

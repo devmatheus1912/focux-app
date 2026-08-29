@@ -56,14 +56,20 @@ String buscarTabEmptyTitle({
   return 'Biblioteca vazia';
 }
 
-String buscarTabEmptyMessage({required ExercisePickerFilter filter}) {
+String buscarTabEmptyMessage({
+  required ExercisePickerFilter filter,
+  int? totalCount,
+}) {
   if (filter.somenteFavoritos) {
-    return 'Favorite exercícios na biblioteca ou explore os 141 disponíveis '
+    final total = totalCount;
+    final suffix =
+        total != null ? 'os $total disponíveis' : 'a biblioteca completa';
+    return 'Favorite exercícios na biblioteca ou explore $suffix '
         'para montar sua lista rápida.';
   }
   if (filter.somenteComVideo) {
-    return 'Nenhum exercício com vídeo próprio ainda. Envie sua demonstração '
-        'ao selecionar um exercício.';
+    return 'Nenhum exercício com vídeo ou GIF nesta combinação de filtros. '
+        'Limpe os filtros ou grave sua demonstração ao selecionar um exercício.';
   }
   return 'Tente outro termo, abra a biblioteca completa ou limpe os filtros.';
 }

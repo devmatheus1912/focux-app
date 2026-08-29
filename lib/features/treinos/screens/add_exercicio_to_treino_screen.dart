@@ -33,6 +33,7 @@ import 'package:go_router/go_router.dart';
 import '../../exercicios/data/enums.dart';
 import '../../exercicios/data/exercicio_taxonomy_labels.dart';
 import '../../exercicios/data/exercicio_page.dart';
+import '../../exercicios/data/exercise_enum_api.dart';
 import '../../exercicios/data/exercicio_repository.dart';
 import '../../exercicios/providers/exercicio_picker_provider.dart';
 import '../../exercicios/providers/exercicios_provider.dart';
@@ -379,6 +380,13 @@ class _AddExercicioToTreinoScreenState
                                             context: context,
                                             exercicios: visibleExercicios,
                                             libraryCount: home.libraryCount,
+                                            filteredPickerCount:
+                                                usesPickerApi
+                                                    ? pickerPageAsync
+                                                        ?.valueOrNull
+                                                        ?.meta
+                                                        .totalElements
+                                                    : null,
                                             uiHints: pickerHints,
                                             isDark: isDark,
                                             primary: primary,

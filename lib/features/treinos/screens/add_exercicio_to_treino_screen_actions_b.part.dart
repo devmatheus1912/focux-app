@@ -191,12 +191,16 @@ extension AddExercicioToTreinoScreenActionsB
   bool _usesPickerApi() {
     return _buscaQuery.trim().length >= 2 ||
         _pickerFilter.somenteFavoritos ||
-        _pickerFilter.somenteComVideo;
+        _pickerFilter.somenteComVideo ||
+        _pickerFilter.espaco != null ||
+        _pickerFilter.equipamento != null;
   }
 
   ExercicioPickerQuery _buildPickerApiQuery() {
     return ExercicioPickerQuery(
       busca: _buscaQuery.trim().isEmpty ? null : _buscaQuery.trim(),
+      espaco: _pickerFilter.espaco,
+      equipamento: _pickerFilter.equipamento,
       somenteFavoritos: _pickerFilter.somenteFavoritos,
       somenteComVideo: _pickerFilter.somenteComVideo,
     );
@@ -206,16 +210,20 @@ extension AddExercicioToTreinoScreenActionsB
     required TreinoPickerHomeBundle home,
     ExercicioPickerPage? pickerPage,
   }) {
-    final base =
-        _usesPickerApi() && pickerPage != null
-            ? pickerPage.content
-            : home.shortcuts;
-    return applyExercisePickerFilter(base, _pickerFilter);
+    final usesApi = _usesPickerApi() && pickerPage != null;
+    final base = usesApi ? pickerPage.content : home.shortcuts;
+    return applyExercisePickerFilter(
+      base,
+      _pickerFilter,
+      serverFiltered: usesApi,
+    );
   }
 
   Future<ExercicioPickerPage> _loadPickerPage(String busca, int page) {
     return ref.read(exercicioRepositoryProvider).listarPickerPagina(
       busca: busca.trim().isEmpty ? null : busca.trim(),
+      espaco: enumQueryParam(_pickerFilter.espaco),
+      equipamento: enumQueryParam(_pickerFilter.equipamento),
       favoritos: _pickerFilter.somenteFavoritos ? true : null,
       hasVideo: _pickerFilter.somenteComVideo ? true : null,
       page: page,
@@ -406,6 +414,7 @@ extension AddExercicioToTreinoScreenActionsB
     required BuildContext context,
     required List<Exercicio> exercicios,
     required int libraryCount,
+    int? filteredPickerCount,
     required TreinoPickerUiHints uiHints,
     required bool isDark,
     required Color primary,
@@ -506,8 +515,11 @@ extension AddExercicioToTreinoScreenActionsB
         final query = _buscaQuery.trim().toLowerCase();
         final pickerFiltered =
             _pickerFilter.isActive || query.length >= 2 || _usesPickerApi();
+        final filteredCount =
+            filteredPickerCount ??
+            (pickerFiltered ? exercicios.length : libraryCount);
         final libraryLines = exercisePickerLibraryLines(
-          filteredCount: pickerFiltered ? exercicios.length : libraryCount,
+          filteredCount: filteredCount,
           totalCount: libraryCount,
           filter: _pickerFilter,
         );
@@ -627,6 +639,21 @@ extension AddExercicioToTreinoScreenActionsB
                     (ExercisePickerFilter next) =>
                         setState(() => _pickerFilter = next),
               ),
+              if (_pickerFilter.isActive || query.length >= 2) ...[
+                const SizedBox(height: 8),
+                Text(
+                  libraryLines.secondary == null
+                      ? libraryLines.primary
+                      : '${libraryLines.primary} · ${libraryLines.secondary}',
+                  style: FocuxHubTypography.bodyMuted(
+                    color:
+                        isDark
+                            ? EagleTokens.darkInkMute
+                            : TokensStrip.textSecondary,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
             ],
             if (showFilterEmpty) ...[
               const SizedBox(height: 16),
@@ -636,7 +663,10 @@ extension AddExercicioToTreinoScreenActionsB
                   filter: _pickerFilter,
                   query: _buscaQuery,
                 ),
-                subtitle: buscarTabEmptyMessage(filter: _pickerFilter),
+                subtitle: buscarTabEmptyMessage(
+                  filter: _pickerFilter,
+                  totalCount: libraryCount,
+                ),
                 action: FxEmptyAction(
                   label:
                       _pickerFilter.somenteFavoritos
