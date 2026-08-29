@@ -20,8 +20,7 @@ void main() {
     expect(filters, contains('Icons.check_rounded'));
     expect(prescription, contains('AlunoSegmentedChoice'));
     expect(prescription, contains('FxSettingsGroup'));
-    expect(prescription, contains('_RepShortcutChips'));
-    expect(prescription, contains('_PrescriptionNotesField'));
+    expect(prescription, contains('_PrescriptionRepsRow'));
     expect(
       File(
         'lib/features/treinos/screens/widgets/exercise_picker_filter_bar.dart',
