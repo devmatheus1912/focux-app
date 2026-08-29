@@ -22,3 +22,12 @@ int exercisePickerStatCount(Map<String, int> stats, String dartEnumName) {
 /// Parâmetro de query para filtros enum no backend.
 String? enumQueryParam(Enum? value) =>
     value == null ? null : dartEnumNameToBackendKey(value.name);
+
+/// CSV de enums para filtro multi (ex.: equipamentos do aluno).
+String? enumSetQueryParam(Set<Enum> values) {
+  if (values.isEmpty) return null;
+  final keys =
+      values.map((value) => dartEnumNameToBackendKey(value.name)).toList()
+        ..sort();
+  return keys.join(',');
+}

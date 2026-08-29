@@ -198,6 +198,8 @@ extension AddExercicioToTreinoScreenActionsB
       busca: _buscaQuery.trim().isEmpty ? null : _buscaQuery.trim(),
       espaco: _pickerFilter.espaco,
       equipamento: _pickerFilter.equipamento,
+      equipamentosAluno:
+          _pickerFilter.filtrarPorAluno ? _pickerFilter.equipamentosAluno : const {},
       somenteFavoritos: _pickerFilter.somenteFavoritos,
       somenteComVideo: _pickerFilter.somenteComVideo,
     );
@@ -221,6 +223,10 @@ extension AddExercicioToTreinoScreenActionsB
       busca: busca.trim().isEmpty ? null : busca.trim(),
       espaco: enumQueryParam(_pickerFilter.espaco),
       equipamento: enumQueryParam(_pickerFilter.equipamento),
+      equipamentos:
+          _pickerFilter.filtrarPorAluno
+              ? enumSetQueryParam(_pickerFilter.equipamentosAluno)
+              : null,
       favoritos: _pickerFilter.somenteFavoritos ? true : null,
       hasVideo: _pickerFilter.somenteComVideo ? true : null,
       page: page,

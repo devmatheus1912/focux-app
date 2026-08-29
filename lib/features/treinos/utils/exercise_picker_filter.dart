@@ -66,7 +66,8 @@ bool usesExercisePickerApi({
       filter.somenteFavoritos ||
       filter.somenteComVideo ||
       filter.espaco != null ||
-      filter.equipamento != null;
+      filter.equipamento != null ||
+      (filter.filtrarPorAluno && filter.equipamentosAluno.isNotEmpty);
 }
 
 List<Exercicio> applyExercisePickerFilter(
@@ -86,12 +87,12 @@ List<Exercicio> applyExercisePickerFilter(
           !exercicio.equipamentos.contains(filter.equipamento)) {
         return false;
       }
-    }
-    if (filter.filtrarPorAluno && filter.equipamentosAluno.isNotEmpty) {
-      final compativel =
-          exercicio.equipamentos.isEmpty ||
-          exercicio.equipamentos.any(filter.equipamentosAluno.contains);
-      if (!compativel) return false;
+      if (filter.filtrarPorAluno && filter.equipamentosAluno.isNotEmpty) {
+        final compativel =
+            exercicio.equipamentos.isEmpty ||
+            exercicio.equipamentos.any(filter.equipamentosAluno.contains);
+        if (!compativel) return false;
+      }
     }
     return true;
   }).toList();

@@ -1,9 +1,19 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/exercicios/data/enums.dart';
+import 'package:focux_app/features/exercicios/data/exercise_enum_api.dart';
 import 'package:focux_app/features/exercicios/data/exercicio_repository.dart';
 import 'package:focux_app/features/treinos/utils/exercise_picker_filter.dart';
 
 void main() {
+  group('enumSetQueryParam', () {
+    test('gera csv ordenado para backend', () {
+      expect(
+        enumSetQueryParam({Equipamento.halter, Equipamento.barra}),
+        'BARRA,HALTER',
+      );
+    });
+  });
+
   group('applyExercisePickerFilter', () {
     final base = Exercicio(
       id: 1,
@@ -63,18 +73,13 @@ void main() {
       expect(filtered.map((e) => e.id), [3]);
     });
 
-    test('serverFiltered pula filtros ja aplicados na API', () {
-      final semGif = Exercicio(
-        id: 4,
-        nome: 'Leg press',
-        videoUrl: 'https://cdn.example.com/demo.mp4',
-      );
+    test('serverFiltered pula filtro do aluno', () {
       final filtered = applyExercisePickerFilter(
-        [semGif],
-        const ExercisePickerFilter(somenteComVideo: true),
+        [base],
+        ExercisePickerFilter.fromAlunoEquipamentos(const {Equipamento.halter}),
         serverFiltered: true,
       );
-      expect(filtered.map((e) => e.id), [4]);
+      expect(filtered.map((e) => e.id), [1]);
     });
   });
 
@@ -98,7 +103,7 @@ void main() {
       );
     });
 
-    test('somente filtro do aluno fica local', () {
+    test('filtrarPorAluno dispara API', () {
       expect(
         usesExercisePickerApi(
           buscaQuery: '',
@@ -106,8 +111,22 @@ void main() {
             const {Equipamento.halter},
           ),
         ),
-        isFalse,
+        isTrue,
       );
+    });
+
+    test('serverFiltered pula filtros ja aplicados na API', () {
+      final semGif = Exercicio(
+        id: 4,
+        nome: 'Leg press',
+        videoUrl: 'https://cdn.example.com/demo.mp4',
+      );
+      final filtered = applyExercisePickerFilter(
+        [semGif],
+        const ExercisePickerFilter(somenteComVideo: true),
+        serverFiltered: true,
+      );
+      expect(filtered.map((e) => e.id), [4]);
     });
   });
 }

@@ -576,6 +576,7 @@ class ExercicioRepository {
     String? dificuldade,
     String? espaco,
     String? equipamento,
+    String? equipamentos,
     bool? hasVideo,
     bool? favoritos,
     int page = 0,
@@ -597,6 +598,7 @@ class ExercicioRepository {
     put('dificuldade', dificuldade);
     put('espaco', espaco);
     put('equipamento', equipamento);
+    put('equipamentos', equipamentos);
     if (hasVideo != null) {
       queryParams['hasVideo'] = hasVideo ? 'true' : 'false';
     }
