@@ -113,62 +113,86 @@ class FxShellAppBar extends StatelessWidget implements PreferredSizeWidget {
     final chrome = ShellChrome.of(context);
     final ink = chrome.ink;
     final mute = chrome.mute;
+    final titleAlign = centerTitle ? TextAlign.center : TextAlign.start;
+    final titleCrossAxis =
+        centerTitle ? CrossAxisAlignment.center : CrossAxisAlignment.start;
+
+    final backButton =
+        leading ??
+        IconButton(
+          onPressed: onBack ?? () => Navigator.maybePop(context),
+          icon: Container(
+            width: 38,
+            height: 38,
+            decoration: chrome.headerAction(radius: 12),
+            child: Center(
+              child: FxIcon(name: 'arrow-left', size: 18, color: ink),
+            ),
+          ),
+        );
+
+    final titleWidget =
+        subtitle == null
+            ? Text(
+              title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: titleAlign,
+              style: TokensStrip.h2(
+                color: ink,
+                fontFamily: Theme.of(context).textTheme.bodyLarge?.fontFamily,
+              ),
+            )
+            : Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: titleCrossAxis,
+              children: [
+                Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: titleAlign,
+                  style: TokensStrip.h2(
+                    color: ink,
+                    fontFamily:
+                        Theme.of(context).textTheme.bodyLarge?.fontFamily,
+                  ).copyWith(fontSize: 17),
+                ),
+                Text(
+                  subtitle!,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: titleAlign,
+                  style: TokensStrip.bodyMuted(
+                    color: mute,
+                    fontFamily:
+                        Theme.of(context).textTheme.bodyLarge?.fontFamily,
+                  ).copyWith(fontSize: 11.5, height: 1.1),
+                ),
+              ],
+            );
+
+    final balancedActions =
+        centerTitle && (actions == null || actions!.isEmpty)
+            ? [
+              IgnorePointer(
+                child: Opacity(
+                  opacity: 0,
+                  child: backButton,
+                ),
+              ),
+            ]
+            : [...?actions];
 
     return AppBar(
       backgroundColor: Colors.transparent,
       elevation: 0,
       scrolledUnderElevation: 0,
       centerTitle: centerTitle,
-      leading:
-          leading ??
-          IconButton(
-            onPressed: onBack ?? () => Navigator.maybePop(context),
-            icon: Container(
-              width: 38,
-              height: 38,
-              decoration: chrome.headerAction(radius: 12),
-              child: Center(
-                child: FxIcon(name: 'arrow-left', size: 18, color: ink),
-              ),
-            ),
-          ),
-      title:
-          subtitle == null
-              ? Text(
-                title,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TokensStrip.h2(
-                  color: ink,
-                  fontFamily: Theme.of(context).textTheme.bodyLarge?.fontFamily,
-                ),
-              )
-              : Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TokensStrip.h2(
-                      color: ink,
-                      fontFamily:
-                          Theme.of(context).textTheme.bodyLarge?.fontFamily,
-                    ).copyWith(fontSize: 17),
-                  ),
-                  Text(
-                    subtitle!,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: TokensStrip.bodyMuted(
-                      color: mute,
-                      fontFamily:
-                          Theme.of(context).textTheme.bodyLarge?.fontFamily,
-                    ).copyWith(fontSize: 11.5, height: 1.1),
-                  ),
-                ],
-              ),
-      actions: [...?actions],
+      automaticallyImplyLeading: false,
+      leading: backButton,
+      title: titleWidget,
+      actions: balancedActions,
     );
   }
 }
