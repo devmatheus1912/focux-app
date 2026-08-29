@@ -267,7 +267,7 @@ class FxHomeSheetHeader extends StatelessWidget {
         trailing ??
             IconButton(
               tooltip: 'Fechar',
-              onPressed: () => Navigator.of(context).pop(),
+              onPressed: () => Navigator.of(context).maybePop(),
               style: IconButton.styleFrom(
                 minimumSize: const Size(
                   FxHomeSheetChrome.touchTarget,

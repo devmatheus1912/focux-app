@@ -79,4 +79,48 @@ void main() {
     expect(find.text('Adicionar exercício'), findsWidgets);
     expect(find.text('Supino reto'), findsOneWidget);
   });
+
+  testWidgets('tap no exercício abre sheet Editar prescrição inset', (
+    tester,
+  ) async {
+    final router = GoRouter(
+      initialLocation: '/treinos/9',
+      routes: [
+        GoRoute(
+          path: '/treinos/:id',
+          builder: (context, state) => const TreinoDetailScreen(treinoId: 9),
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [treinoProvider.overrideWith((ref, id) async => treino)],
+        child: MaterialApp.router(
+          theme: ThemeData(
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: EagleTokens.brandAccent,
+            ),
+            useMaterial3: true,
+          ),
+          locale: const Locale('pt'),
+          supportedLocales: S.supportedLocales,
+          localizationsDelegates: S.localizationsDelegates,
+          routerConfig: router,
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 80));
+
+    await tester.tap(find.text('Supino reto'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+
+    expect(find.text('Editar prescrição'), findsOneWidget);
+    expect(find.text('Volume'), findsOneWidget);
+    expect(find.text('Tipo de série'), findsOneWidget);
+    expect(find.text('Salvar prescrição'), findsOneWidget);
+    expect(find.text('Hipertrofia'), findsOneWidget);
+  });
 }
