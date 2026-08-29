@@ -236,26 +236,37 @@ extension AddExercicioToTreinoScreenActionsB
   Future<void> _openExercisePicker({
     required Set<int> alreadyInTreinoIds,
     String? searchPlaceholder,
+    int? libraryTotalCount,
   }) async {
     HapticFeedback.selectionClick();
     setState(() => _bottomBarHidden = true);
+    final homeAsync = ref.read(treinoPickerHomeProvider(widget.treinoId));
+    final int total =
+        libraryTotalCount ??
+        homeAsync.when(
+          data: (home) => home.libraryCount,
+          loading: () => 0,
+          error: (_, __) => 0,
+        );
     Exercicio? selected;
     try {
-      selected = await showFxBottomSheet<Exercicio>(
-        context: context,
-        builder:
-            (sheetContext) => _ExercisePickerSheet(
-              selected: _selecionado,
-              alreadyInTreinoIds: alreadyInTreinoIds,
-              initialQuery: _buscaQuery,
-              searchPlaceholder:
-                  searchPlaceholder ?? 'Buscar por nome, músculo ou equipamento',
-              onLoadPage: _loadPickerPage,
-              onUploadVideo:
-                  (exercicio) => _uploadExerciseVideo(
-                    exercicio,
-                    origin: 'treino_library_sheet',
-                  ),
+      selected = await showExerciseLibrarySheet(
+        context,
+        selected: _selecionado,
+        alreadyInTreinoIds: alreadyInTreinoIds,
+        initialQuery: _buscaQuery,
+        searchPlaceholder:
+            searchPlaceholder ?? 'Buscar por nome, músculo ou equipamento',
+        filter: _pickerFilter,
+        libraryTotalCount: total,
+        onFilterChanged:
+            (ExercisePickerFilter next) =>
+                setState(() => _pickerFilter = next),
+        onLoadPage: _loadPickerPage,
+        onUploadVideo:
+            (exercicio) => _uploadExerciseVideo(
+              exercicio,
+              origin: 'treino_library_sheet',
             ),
       );
     } finally {
@@ -494,8 +505,10 @@ extension AddExercicioToTreinoScreenActionsB
           children: [
             FxSettingsGroup(
               accent: primary,
-              header: 'Explorar',
-              caption: uiHints.libraryCaption,
+              caption:
+                  libraryCount > 0
+                      ? '$libraryCount exercícios na biblioteca'
+                      : uiHints.libraryCaption,
               children: [
                 FxSettingsTile(
                   icon: Icons.account_tree_outlined,
@@ -522,32 +535,25 @@ extension AddExercicioToTreinoScreenActionsB
                   FxSettingsTile(
                     icon: Icons.library_books_outlined,
                     accent: primary,
-                    label: 'Biblioteca completa ($libraryCount)',
+                    label: 'Biblioteca completa',
                     subtitle: libraryLines.primary,
                     value: '',
-                    showDivider: false,
                     onTap:
                         () => _openExercisePicker(
                           alreadyInTreinoIds: alreadyInTreinoIds,
                           searchPlaceholder: uiHints.searchPlaceholder,
+                          libraryTotalCount: libraryCount,
                         ),
                   ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: TextButton.icon(
-                onPressed: _openCreateExercise,
-                icon: Icon(Icons.add_rounded, color: primary, size: 18),
-                label: Text(
-                  uiHints.createCtaLabel,
-                  style: FocuxHubTypography.bodyMuted(
-                    color: primary,
-                    fontWeight: FontWeight.w800,
-                  ),
+                FxSettingsTile(
+                  icon: Icons.add_rounded,
+                  accent: primary,
+                  label: uiHints.createCtaLabel,
+                  value: '',
+                  showDivider: false,
+                  onTap: _openCreateExercise,
                 ),
-              ),
+              ],
             ),
           ],
         );
@@ -591,6 +597,7 @@ extension AddExercicioToTreinoScreenActionsB
                 onChange:
                     () => _openExercisePicker(
                       alreadyInTreinoIds: alreadyInTreinoIds,
+                      libraryTotalCount: libraryCount,
                     ),
                 onPreview:
                     canPreviewExerciseMedia(_selecionado!)
@@ -613,54 +620,78 @@ extension AddExercicioToTreinoScreenActionsB
               const SizedBox(height: 10),
             ],
             if (!compact) ...[
-              TextField(
-                controller: _buscaCtrl,
-                decoration: InputDecoration(
-                  hintText: uiHints.searchPlaceholder,
-                  prefixIcon: Icon(Icons.search_rounded, color: primary),
-                  suffixIcon:
-                      _buscaQuery.isEmpty
-                          ? null
-                          : IconButton(
-                            onPressed: () => _buscaCtrl.clear(),
-                            icon: const Icon(Icons.close_rounded),
-                            tooltip: 'Limpar busca',
+              DecoratedBox(
+                decoration: fxListCardDecoration(
+                  context,
+                  accent: primary,
+                  radius: FxSettingsLayout.groupRadius,
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      TextField(
+                        controller: _buscaCtrl,
+                        decoration: InputDecoration(
+                          hintText: uiHints.searchPlaceholder,
+                          prefixIcon: Icon(Icons.search_rounded, color: primary),
+                          suffixIcon:
+                              _buscaQuery.isEmpty
+                                  ? null
+                                  : IconButton(
+                                    onPressed: () => _buscaCtrl.clear(),
+                                    icon: const Icon(Icons.close_rounded),
+                                    tooltip: 'Limpar busca',
+                                  ),
+                          filled: true,
+                          fillColor:
+                              isDark
+                                  ? EagleTokens.darkCardHi
+                                  : TokensStrip.cardBg,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 12,
                           ),
-                  filled: true,
-                  fillColor:
-                      isDark ? EagleTokens.darkCardHi : TokensStrip.cardBg,
-                  border: FxInputDeco.outlineBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    borderSide: BorderSide.none,
+                          border: FxInputDeco.outlineBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide.none,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      if (_alunoFilterNome != null &&
+                          _pickerFilter.filtrarPorAluno) ...[
+                        _AlunoEquipmentFilterBanner(
+                          alunoNome: _alunoFilterNome!,
+                          equipamentos: _pickerFilter.equipamentosAluno,
+                          isDark: isDark,
+                          primary: primary,
+                          onClear:
+                              () => setState(
+                                () =>
+                                    _pickerFilter = _pickerFilter.copyWith(
+                                      clearAluno: true,
+                                    ),
+                              ),
+                        ),
+                        const SizedBox(height: 8),
+                      ],
+                      ExercisePickerFilterBar(
+                        filter: _pickerFilter,
+                        isDark: isDark,
+                        primary: primary,
+                        resultCaption:
+                            _pickerFilter.isActive || query.length >= 2
+                                ? libraryLines
+                                : null,
+                        onChanged:
+                            (ExercisePickerFilter next) =>
+                                setState(() => _pickerFilter = next),
+                      ),
+                    ],
                   ),
                 ),
-              ),
-              const SizedBox(height: 10),
-              if (_alunoFilterNome != null && _pickerFilter.filtrarPorAluno)
-                _AlunoEquipmentFilterBanner(
-                  alunoNome: _alunoFilterNome!,
-                  equipamentos: _pickerFilter.equipamentosAluno,
-                  isDark: isDark,
-                  primary: primary,
-                  onClear:
-                      () => setState(
-                        () =>
-                            _pickerFilter = _pickerFilter.copyWith(
-                              clearAluno: true,
-                            ),
-                      ),
-                ),
-              ExercisePickerFilterBar(
-                filter: _pickerFilter,
-                isDark: isDark,
-                primary: primary,
-                resultCaption:
-                    _pickerFilter.isActive || query.length >= 2
-                        ? libraryLines
-                        : null,
-                onChanged:
-                    (ExercisePickerFilter next) =>
-                        setState(() => _pickerFilter = next),
               ),
             ],
             if (showFilterEmpty) ...[
@@ -684,6 +715,7 @@ extension AddExercicioToTreinoScreenActionsB
                       _pickerFilter.somenteFavoritos
                           ? () => _openExercisePicker(
                             alreadyInTreinoIds: alreadyInTreinoIds,
+                            libraryTotalCount: libraryCount,
                           )
                           : () => setState(() {
                             _pickerFilter = const ExercisePickerFilter();
@@ -720,6 +752,13 @@ extension AddExercicioToTreinoScreenActionsB
                 },
               ),
             ],
+            if (!showFilterEmpty &&
+                !compact &&
+                displayItems.isEmpty &&
+                query.isEmpty &&
+                !_pickerFilter.isActive) ...[
+              _BuscarIdleHint(primary: primary, isDark: isDark),
+            ],
             if (!showFilterEmpty && !compact && libraryCount > 0) ...[
               const SizedBox(height: 12),
               _BuscarQuickLinks(
@@ -730,6 +769,7 @@ extension AddExercicioToTreinoScreenActionsB
                     () => _openExercisePicker(
                       alreadyInTreinoIds: alreadyInTreinoIds,
                       searchPlaceholder: uiHints.searchPlaceholder,
+                      libraryTotalCount: libraryCount,
                     ),
                 onCreate: _openCreateExercise,
               ),

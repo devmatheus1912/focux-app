@@ -37,6 +37,31 @@ ExercisePickerLibraryLines exercisePickerLibraryLines({
   );
 }
 
+/// Subtitle da sheet Biblioteca — busca + filtros + total da biblioteca.
+String exerciseLibrarySheetSubtitle({
+  required int filteredCount,
+  required int totalCount,
+  required ExercisePickerFilter filter,
+  required String committedQuery,
+}) {
+  final q = committedQuery.trim();
+  if (q.isNotEmpty) {
+    return filteredCount == 1
+        ? '1 resultado para "$q"'
+        : '$filteredCount resultados para "$q"';
+  }
+  final lines = exercisePickerLibraryLines(
+    filteredCount: filteredCount,
+    totalCount: totalCount,
+    filter: filter,
+  );
+  final secondary = lines.secondary;
+  if (secondary != null && secondary.isNotEmpty) {
+    return '${lines.primary} · $secondary';
+  }
+  return lines.primary;
+}
+
 String buscarTabEmptyTitle({
   required ExercisePickerFilter filter,
   required String query,

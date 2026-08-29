@@ -122,30 +122,71 @@ class _BuscarQuickLinks extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+    return FxSettingsGroup(
+      accent: primary,
       children: [
-        TextButton(
-          onPressed: onOpenPicker,
-          child: Text(
-            'Biblioteca ($totalCount)',
-            style: FocuxHubTypography.bodyMuted(
-              color: primary,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
+        FxSettingsTile(
+          icon: Icons.library_books_outlined,
+          accent: primary,
+          label: 'Biblioteca completa',
+          subtitle: '$totalCount exercícios',
+          value: '',
+          onTap: onOpenPicker,
         ),
-        TextButton(
-          onPressed: onCreate,
-          child: Text(
-            createLabel,
-            style: FocuxHubTypography.bodyMuted(
-              color: primary,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
+        FxSettingsTile(
+          icon: Icons.add_rounded,
+          accent: primary,
+          label: createLabel,
+          value: '',
+          showDivider: false,
+          onTap: onCreate,
         ),
       ],
+    );
+  }
+}
+
+class _BuscarIdleHint extends StatelessWidget {
+  const _BuscarIdleHint({
+    required this.primary,
+    required this.isDark,
+  });
+
+  final Color primary;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+
+    return Semantics(
+      label: 'Digite para buscar exercícios ou use os atalhos abaixo',
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 28),
+        child: Column(
+          children: [
+            Icon(
+              Icons.search_rounded,
+              size: 36,
+              color: primary.withValues(alpha: isDark ? 0.42 : 0.28),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              'Busque por nome',
+              textAlign: TextAlign.center,
+              style: FocuxHubTypography.cardTitle(color: mute).copyWith(
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Ou abra a biblioteca e os filtros abaixo',
+              textAlign: TextAlign.center,
+              style: FxSettingsLayout.footer(color: mute),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

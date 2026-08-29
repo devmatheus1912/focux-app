@@ -332,8 +332,6 @@ class _AddExerciseBottomDock extends StatelessWidget {
       _ => '',
     };
     final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final bottom = MediaQuery.paddingOf(context).bottom;
 
     return DecoratedBox(
@@ -353,64 +351,26 @@ class _AddExerciseBottomDock extends StatelessWidget {
         child: Padding(
           padding: EdgeInsets.fromLTRB(
             FxSettingsLayout.groupPadH,
-            10,
+            8,
             FxSettingsLayout.groupPadH,
-            bottom > 0 ? 8 : 12,
+            bottom > 0 ? 6 : 10,
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Semantics(
-                button: true,
-                label:
-                    'Prescrição ativa ${preset.label}. $series séries de $repeticoes, $descanso segundos. Toque para editar.',
-                child: Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    onTap: onEditPrescription,
-                    borderRadius: BorderRadius.circular(14),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 10,
-                      ),
-                      decoration: fxStripCardDecoration(
-                        context,
-                        accent: primary,
-                        radius: 14,
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(Icons.tune_rounded, color: primary, size: 18),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  preset.label,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: FxSettingsLayout.rowLabel(color: ink),
-                                ),
-                                Text(
-                                  '$series×$repeticoes · ${descanso}s$tipoLabel',
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: FxSettingsLayout.subhead(color: mute),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Icon(
-                            Icons.chevron_right_rounded,
-                            color: mute,
-                            size: FxSettingsLayout.chevronSize,
-                          ),
-                        ],
-                      ),
-                    ),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Semantics(
+                  button: true,
+                  label:
+                      'Prescrição ativa ${preset.label}. $series séries de $repeticoes, $descanso segundos. Toque para editar.',
+                  child: DashboardHomeActionChip(
+                    label:
+                        '${preset.label} · $series×$repeticoes · ${descanso}s$tipoLabel',
+                    accent: primary,
+                    isDark: isDark,
+                    onPressed: onEditPrescription,
                   ),
                 ),
               ),

@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../../core/theme/design_tokens.dart';
-import '../../../core/theme/focux_hub_typography.dart';
+import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/fx_settings_layout.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
+import '../../../core/widgets/fx_settings_group.dart';
 import '../../exercicios/data/enums.dart';
 import '../../exercicios/data/exercicio_taxonomy_labels.dart';
 import '../utils/exercise_picker_filter.dart';
@@ -50,9 +51,12 @@ class _ExercisePickerFilterSheet extends StatelessWidget {
     Equipamento.banda,
   ];
 
+  bool get _hasAdvanced =>
+      filter.espaco != null || filter.equipamento != null;
+
   String _espacoLabel(Espaco espaco) =>
-      TaxonomyLabels.espacoShort[espaco] ??
       TaxonomyLabels.espaco[espaco] ??
+      TaxonomyLabels.espacoShort[espaco] ??
       espaco.name;
 
   String _equipamentoLabel(Equipamento equipamento) =>
@@ -62,119 +66,92 @@ class _ExercisePickerFilterSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final brand = BrandPalette.softened(primary);
+    final maxHeight =
+        MediaQuery.sizeOf(context).height * FxHomeSheetChrome.maxHeightFactor;
 
     return FxHomeSheetSurface(
       isDark: isDark,
+      maxHeight: maxHeight,
+      padding: const EdgeInsets.fromLTRB(18, 8, 18, 14),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           FxHomeSheetHandle(isDark: isDark),
+          const SizedBox(height: 8),
           FxHomeSheetHeader(
             isDark: isDark,
             title: 'Filtros',
-            subtitle: 'Espaço e equipamento na biblioteca inteira.',
-            leading: Icon(Icons.tune_rounded, color: primary, size: 18),
+            subtitle: 'Refina por espaço e equipamento.',
+            leading: Icon(Icons.tune_rounded, color: brand, size: 20),
+            trailing:
+                _hasAdvanced
+                    ? TextButton(
+                      onPressed: () {
+                        HapticFeedback.selectionClick();
+                        onChanged(
+                          filter.copyWith(
+                            clearEspaco: true,
+                            clearEquipamento: true,
+                          ),
+                        );
+                      },
+                      child: Text(
+                        'Limpar',
+                        style: FxSettingsLayout.rowLabel(color: brand),
+                      ),
+                    )
+                    : null,
           ),
+          const SizedBox(height: 12),
           Flexible(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(
-                FxSettingsLayout.groupPadH,
-                0,
-                FxSettingsLayout.groupPadH,
-                FxSettingsLayout.footerAfterGroup,
-              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text(
-                    'Espaço',
-                    style: FxSettingsLayout.sectionHeader(color: mute),
-                  ),
-                  const SizedBox(height: 10),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
+                  FxSettingsGroup(
+                    accent: primary,
+                    caption: 'Onde o aluno treina',
                     children: [
-                      for (final espaco in _espacos)
-                        _FilterOptionChip(
-                          label: _espacoLabel(espaco),
-                          selected: filter.espaco == espaco,
-                          primary: primary,
-                          isDark: isDark,
+                      for (var i = 0; i < _espacos.length; i++)
+                        _FilterPickerTile(
+                          label: _espacoLabel(_espacos[i]),
+                          selected: filter.espaco == _espacos[i],
+                          accent: brand,
+                          showDivider: i < _espacos.length - 1,
                           onTap: () {
                             HapticFeedback.selectionClick();
                             onChanged(
-                              filter.espaco == espaco
+                              filter.espaco == _espacos[i]
                                   ? filter.copyWith(clearEspaco: true)
-                                  : filter.copyWith(espaco: espaco),
+                                  : filter.copyWith(espaco: _espacos[i]),
                             );
                           },
                         ),
                     ],
                   ),
                   const SizedBox(height: FxSettingsLayout.groupGap),
-                  Text(
-                    'Equipamento',
-                    style: FxSettingsLayout.sectionHeader(color: mute),
-                  ),
-                  const SizedBox(height: 10),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
+                  FxSettingsGroup(
+                    accent: primary,
+                    caption: 'Equipamento principal',
                     children: [
-                      for (final equipamento in _equipamentos)
-                        _FilterOptionChip(
-                          label: _equipamentoLabel(equipamento),
-                          selected: filter.equipamento == equipamento,
-                          primary: primary,
-                          isDark: isDark,
+                      for (var i = 0; i < _equipamentos.length; i++)
+                        _FilterPickerTile(
+                          label: _equipamentoLabel(_equipamentos[i]),
+                          selected: filter.equipamento == _equipamentos[i],
+                          accent: brand,
+                          showDivider: i < _equipamentos.length - 1,
                           onTap: () {
                             HapticFeedback.selectionClick();
                             onChanged(
-                              filter.equipamento == equipamento
+                              filter.equipamento == _equipamentos[i]
                                   ? filter.copyWith(clearEquipamento: true)
-                                  : filter.copyWith(equipamento: equipamento),
+                                  : filter.copyWith(
+                                    equipamento: _equipamentos[i],
+                                  ),
                             );
                           },
                         ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  Row(
-                    children: [
-                      TextButton(
-                        onPressed:
-                            filter.espaco == null && filter.equipamento == null
-                                ? null
-                                : () {
-                                  HapticFeedback.selectionClick();
-                                  onChanged(
-                                    filter.copyWith(
-                                      clearEspaco: true,
-                                      clearEquipamento: true,
-                                    ),
-                                  );
-                                },
-                        child: Text(
-                          'Limpar',
-                          style: FocuxHubTypography.bodyMuted(
-                            color: primary,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                      ),
-                      const Spacer(),
-                      FilledButton(
-                        onPressed: () => Navigator.pop(context),
-                        style: FilledButton.styleFrom(
-                          minimumSize: const Size(120, 44),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                        ),
-                        child: const Text('Pronto'),
-                      ),
                     ],
                   ),
                 ],
@@ -187,55 +164,71 @@ class _ExercisePickerFilterSheet extends StatelessWidget {
   }
 }
 
-class _FilterOptionChip extends StatelessWidget {
-  const _FilterOptionChip({
+class _FilterPickerTile extends StatelessWidget {
+  const _FilterPickerTile({
     required this.label,
     required this.selected,
-    required this.primary,
-    required this.isDark,
+    required this.accent,
     required this.onTap,
+    this.showDivider = true,
   });
 
   final String label;
   final bool selected;
-  final Color primary;
-  final bool isDark;
+  final Color accent;
   final VoidCallback onTap;
+  final bool showDivider;
 
   @override
   Widget build(BuildContext context) {
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
+    final chrome = ShellChrome.of(context);
+    final ink = selected ? accent : chrome.ink;
+    final line = chrome.line;
 
     return Semantics(
       button: true,
-      toggled: selected,
-      label: label,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(12),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 160),
-            curve: Curves.easeOutCubic,
-            constraints: const BoxConstraints(minHeight: 40),
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      selected: selected,
+      label: selected ? '$label, selecionado' : label,
+      child: InkWell(
+        onTap: () {
+          HapticFeedback.selectionClick();
+          onTap();
+        },
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(
+            minHeight: FxSettingsLayout.rowMinHeight,
+          ),
+          child: DecoratedBox(
             decoration: BoxDecoration(
-              color:
-                  selected
-                      ? primary.withValues(alpha: isDark ? 0.22 : 0.12)
-                      : (isDark ? EagleTokens.darkCardHi : TokensStrip.cardBg),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: selected ? primary : line.withValues(alpha: 0.65),
-              ),
+              border:
+                  showDivider
+                      ? Border(
+                        bottom: BorderSide(
+                          color: line,
+                          width: FxSettingsLayout.dividerThickness,
+                        ),
+                      )
+                      : null,
             ),
-            child: Text(
-              label,
-              style: FocuxHubTypography.bodyMuted(
-                color: selected ? primary : ink,
-                fontWeight: FontWeight.w700,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: TokensStrip.s3),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      label,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: FxSettingsLayout.rowLabel(color: ink),
+                    ),
+                  ),
+                  if (selected)
+                    Icon(
+                      Icons.check_rounded,
+                      color: accent,
+                      size: FxSettingsLayout.iconSize,
+                    ),
+                ],
               ),
             ),
           ),

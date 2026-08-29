@@ -87,4 +87,30 @@ void main() {
       );
     });
   });
+
+  group('exerciseLibrarySheetSubtitle', () {
+    test('busca ativa pluraliza resultados', () {
+      expect(
+        exerciseLibrarySheetSubtitle(
+          filteredCount: 12,
+          totalCount: 187,
+          filter: const ExercisePickerFilter(),
+          committedQuery: 'supino',
+        ),
+        '12 resultados para "supino"',
+      );
+    });
+
+    test('filtro ativo combina linhas', () {
+      expect(
+        exerciseLibrarySheetSubtitle(
+          filteredCount: 38,
+          totalCount: 141,
+          filter: const ExercisePickerFilter(somenteComVideo: true),
+          committedQuery: '',
+        ),
+        '38 com filtros · 141 no total',
+      );
+    });
+  });
 }
