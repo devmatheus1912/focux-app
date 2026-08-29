@@ -19,6 +19,7 @@ void main() {
     expect(screen, contains('Fechar seletor'));
     expect(screen, isNot(contains('DropdownButtonFormField')));
 
+    expect(screen, contains('showAddExercicioFiltersSheet'));
     expect(screen, contains('DashboardHomeActionChip'));
     expect(screen, contains('FxInsetPickerRow'));
     expect(screen, contains('AlunoInsetFormField'));

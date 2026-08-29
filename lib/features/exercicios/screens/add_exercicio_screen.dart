@@ -22,6 +22,7 @@ import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../data/enums.dart';
 import '../data/exercicio_taxonomy_labels.dart';
 import '../providers/exercicios_provider.dart';
+import '../widgets/add_exercicio_filters_sheet.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
 
 part 'add_exercicio_screen_state.part.dart';

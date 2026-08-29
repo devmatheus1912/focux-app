@@ -20,7 +20,6 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
   };
   final Set<Espaco> _espacos = {Espaco.academiaCompleta, Espaco.academiaBasica};
   bool _unilateral = false;
-  bool _showFilters = false;
   bool _showGuidance = false;
   bool _loading = false;
   String? _error;
@@ -112,6 +111,23 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
       _espacos
         ..clear()
         ..addAll(setup.espacos);
+    });
+  }
+
+  Future<void> _openFiltersSheet() async {
+    final result = await showAddExercicioFiltersSheet(
+      context,
+      equipamentos: _equipamentos,
+      espacos: _espacos,
+    );
+    if (result == null || !mounted) return;
+    setState(() {
+      _equipamentos
+        ..clear()
+        ..addAll(result.equipamentos);
+      _espacos
+        ..clear()
+        ..addAll(result.espacos);
     });
   }
 
@@ -245,54 +261,23 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
                       const SizedBox(height: FxSettingsLayout.groupGap),
                       FxStaggerItem(
                         index: 2,
-                        child: _CollapsibleSection(
-                          icon: Icons.inventory_2_outlined,
-                          title: 'Equipamentos e espaços',
-                          subtitle: _filterSummary(
-                            equipamentos: _equipamentos.length,
-                            espacos: _espacos.length,
-                          ),
-                          expanded: _showFilters,
-                          onToggle:
-                              () => setState(() => _showFilters = !_showFilters),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              _GroupLabel(
-                                label: 'Equipamentos',
-                                count: _equipamentos.length,
+                        child: FxSettingsGroup(
+                          accent: primary,
+                          children: [
+                            FxSettingsTile(
+                              icon: Icons.inventory_2_outlined,
+                              accent: soft,
+                              label: 'Equipamentos e espaços',
+                              subtitle: _filterSummary(
+                                equipamentos: _equipamentos.length,
+                                espacos: _espacos.length,
                               ),
-                              const SizedBox(height: 6),
-                              _ChoiceGroup<Equipamento>(
-                                values: Equipamento.values,
-                                selected: _equipamentos,
-                                labels: TaxonomyLabels.equipamento,
-                                onToggle:
-                                    (value) => setState(() {
-                                      _equipamentos.contains(value)
-                                          ? _equipamentos.remove(value)
-                                          : _equipamentos.add(value);
-                                    }),
-                              ),
-                              const SizedBox(height: 10),
-                              _GroupLabel(
-                                label: 'Espaços',
-                                count: _espacos.length,
-                              ),
-                              const SizedBox(height: 6),
-                              _ChoiceGroup<Espaco>(
-                                values: Espaco.values,
-                                selected: _espacos,
-                                labels: TaxonomyLabels.espaco,
-                                onToggle:
-                                    (value) => setState(() {
-                                      _espacos.contains(value)
-                                          ? _espacos.remove(value)
-                                          : _espacos.add(value);
-                                    }),
-                              ),
-                            ],
-                          ),
+                              value: '',
+                              picker: true,
+                              showDivider: false,
+                              onTap: _openFiltersSheet,
+                            ),
+                          ],
                         ),
                       ),
                       const SizedBox(height: FxSettingsLayout.groupGap),
