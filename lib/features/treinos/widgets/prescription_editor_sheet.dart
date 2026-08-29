@@ -12,6 +12,7 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../alunos/widgets/aluno_form_choices.dart';
 import '../data/exercise_prescription_memory.dart';
 import '../data/workout_builder_preset.dart';
+import '../utils/workout_prescription_display.dart';
 
 Future<void> showPrescriptionEditorSheet(
   BuildContext context, {
@@ -427,10 +428,7 @@ class _PreviewStrip extends StatelessWidget {
                 '$presetLabel · $summary',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: FocuxHubTypography.bodyMuted(
-                  color: brand,
-                  fontWeight: FontWeight.w800,
-                ),
+                style: activePrescriptionLineStyle(brand: brand),
               ),
             ),
             Icon(Icons.unfold_more_rounded, color: brand, size: 18),

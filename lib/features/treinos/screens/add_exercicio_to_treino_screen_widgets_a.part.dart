@@ -318,17 +318,16 @@ class _AddExerciseBottomDock extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final preset = workoutBuilderPresetById(presetId);
-    final tipoLabel = switch (tipoSerie) {
-      'SUPERSET' => ' · Superset',
-      'DROPSET' => ' · Drop set',
-      _ => '',
-    };
+    final summary = formatActivePrescriptionLine(
+      presetLabel: preset.label,
+      series: series,
+      repeticoes: repeticoes,
+      descansoSegundos: descanso,
+      tipoSerie: tipoSerie,
+    );
     final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final brand = BrandPalette.softened(primary);
-    final summary =
-        '${preset.label} · $series×$repeticoes · ${descanso}s$tipoLabel';
 
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -390,18 +389,18 @@ class _AddExerciseBottomDock extends StatelessWidget {
                                 children: [
                                   Text(
                                     'Prescrição padrão',
-                                    style: FxSettingsLayout.subhead(
-                                      color: mute,
-                                    ).copyWith(fontWeight: FontWeight.w800),
+                                    style: activePrescriptionCaptionStyle(
+                                      mute: mute,
+                                    ),
                                   ),
                                   const SizedBox(height: 2),
                                   Text(
                                     summary,
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
-                                    style: FocuxHubTypography.body(
-                                      color: ink,
-                                    ).copyWith(fontWeight: FontWeight.w800),
+                                    style: activePrescriptionLineStyle(
+                                      brand: brand,
+                                    ),
                                   ),
                                 ],
                               ),

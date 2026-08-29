@@ -65,6 +65,7 @@ import '../utils/exercise_picker_suggestions.dart';
 import '../utils/exercise_picker_library_label.dart';
 import '../utils/exercise_library_meta.dart';
 import '../utils/add_exercise_prescription_input.dart';
+import '../utils/workout_prescription_display.dart';
 
 part 'add_exercicio_to_treino_screen_widgets_a.part.dart';
 part 'add_exercicio_to_treino_screen_widgets_b.part.dart';
