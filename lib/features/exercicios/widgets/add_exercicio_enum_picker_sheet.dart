@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/fx_settings_layout.dart';
+import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_inset_picker_option.dart';
 import '../../../core/widgets/fx_input_deco.dart';
@@ -90,20 +91,77 @@ class _AddExercicioEnumPickerSheetState<T extends Enum>
     }).toList();
   }
 
+  Widget _optionsList(List<T> filtered, Color primary, Color soft) {
+    if (filtered.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        child: Text(
+          _query.isEmpty
+              ? 'Nenhuma opção.'
+              : 'Nenhum resultado para “$_query”.',
+          style: FxSettingsLayout.footer(color: fxScreenMute(context)),
+        ),
+      );
+    }
+
+    return FxSettingsGroup(
+      accent: primary,
+      children: [
+        for (var i = 0; i < filtered.length; i++)
+          FxInsetPickerOption(
+            label: widget.labels[filtered[i]] ?? filtered[i].backendName,
+            selected: filtered[i] == widget.selected,
+            accent: soft,
+            showDivider: i < filtered.length - 1,
+            onTap: () {
+              HapticFeedback.selectionClick();
+              Navigator.of(context).pop(filtered[i]);
+            },
+          ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
     final soft = widget.iconColor ?? BrandPalette.softened(primary);
     final ink = fxScreenInk(context);
-    final mute = fxScreenMute(context);
     final filtered = _filtered;
     final showSearch = widget.values.length > 5;
+    final scrollable = widget.values.length > 8;
     final maxHeight =
         MediaQuery.sizeOf(context).height * FxHomeSheetChrome.maxHeightFactor;
 
+    Widget options = _optionsList(filtered, primary, soft);
+
+    if (showSearch) {
+      options = Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Semantics(
+            label: 'Buscar ${widget.title.toLowerCase()}',
+            child: TextField(
+              controller: _searchCtrl,
+              style: FxSettingsLayout.rowLabel(color: ink),
+              decoration: FxInputDeco.insetGrouped(
+                context,
+                icon: Icons.search_rounded,
+                hint: 'Buscar opção',
+                iconColor: soft,
+              ),
+            ),
+          ),
+          const SizedBox(height: TokensStrip.s3),
+          options,
+        ],
+      );
+    }
+
     return FxHomeSheetSurface(
       isDark: widget.isDark,
-      maxHeight: maxHeight,
+      maxHeight: scrollable ? maxHeight : null,
       padding: const EdgeInsets.fromLTRB(18, 8, 18, 14),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -117,57 +175,16 @@ class _AddExercicioEnumPickerSheetState<T extends Enum>
             subtitle: widget.contextLabel,
             leading: Icon(widget.icon, color: soft, size: 20),
           ),
-          if (showSearch) ...[
-            const SizedBox(height: 12),
-            Semantics(
-              label: 'Buscar ${widget.title.toLowerCase()}',
-              child: TextField(
-                controller: _searchCtrl,
-                style: FxSettingsLayout.rowLabel(color: ink),
-                decoration: FxInputDeco.insetGrouped(
-                  context,
-                  icon: Icons.search_rounded,
-                  hint: 'Buscar opção',
-                  iconColor: soft,
-                ),
+          const SizedBox(height: TokensStrip.s3),
+          if (scrollable)
+            Flexible(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.only(bottom: 4),
+                child: options,
               ),
-            ),
-          ],
-          const SizedBox(height: 12),
-          Flexible(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.only(bottom: 4),
-              child:
-                  filtered.isEmpty
-                      ? Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        child: Text(
-                          _query.isEmpty
-                              ? 'Nenhuma opção.'
-                              : 'Nenhum resultado para “$_query”.',
-                          style: FxSettingsLayout.footer(color: mute),
-                        ),
-                      )
-                      : FxSettingsGroup(
-                        accent: primary,
-                        children: [
-                          for (var i = 0; i < filtered.length; i++)
-                            FxInsetPickerOption(
-                              label:
-                                  widget.labels[filtered[i]] ??
-                                  filtered[i].backendName,
-                              selected: filtered[i] == widget.selected,
-                              accent: soft,
-                              showDivider: i < filtered.length - 1,
-                              onTap: () {
-                                HapticFeedback.selectionClick();
-                                Navigator.of(context).pop(filtered[i]);
-                              },
-                            ),
-                        ],
-                      ),
-            ),
-          ),
+            )
+          else
+            options,
         ],
       ),
     );

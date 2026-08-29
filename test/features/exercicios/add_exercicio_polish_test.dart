@@ -10,7 +10,7 @@ void main() {
 
     expect(screen, contains('Semantics('));
     expect(screen, contains('Perfil rápido'));
-    expect(screen, contains('selectedColor: primary'));
+    expect(screen, contains('FxToggleChip'));
     expect(screen, isNot(contains('DropdownButtonFormField')));
     expect(screen, isNot(contains('_EnumPicker')));
     expect(screen, contains('showAddExercicioFiltersSheet'));

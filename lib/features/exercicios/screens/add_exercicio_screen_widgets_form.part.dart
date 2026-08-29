@@ -81,62 +81,55 @@ class _QuickSetupStrip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final primary = Theme.of(context).colorScheme.primary;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final mute = fxScreenMute(context);
+    final line = ShellChrome.of(context).line;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Padding(
-          padding: const EdgeInsets.only(left: 4, bottom: 6, top: 2),
+          padding: const EdgeInsets.fromLTRB(4, 6, 4, 6),
           child: Text(
             'Perfil rápido',
             style: FxSettingsLayout.sectionHeader(color: mute),
           ),
         ),
-        Wrap(
-          spacing: 6,
-          runSpacing: 6,
-          children: [
-            for (final setup in _quickSetups)
-              Semantics(
-                button: true,
-                selected: selectedLabel == setup.label,
-                label: 'Perfil rápido ${setup.label}',
-                child: FilterChip(
-                  avatar: Icon(
-                    setup.icon,
-                    color:
-                        selectedLabel == setup.label ? Colors.white : primary,
-                    size: 16,
-                  ),
-                  label: Text(setup.label),
-                  selected: selectedLabel == setup.label,
-                  onSelected: (_) => onSelected(setup),
-                  showCheckmark: false,
-                  visualDensity: VisualDensity.compact,
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 6,
-                  ),
-                  labelStyle: TextStyle(
-                    color:
-                        selectedLabel == setup.label ? Colors.white : primary,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w800,
-                  ),
-                  side: BorderSide(color: primary.withValues(alpha: 0.16)),
-                  selectedColor: primary,
-                  backgroundColor: primary.withValues(alpha: 0.06),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          child: Column(
+            children: [
+              for (var row = 0; row < 2; row++) ...[
+                if (row > 0) const SizedBox(height: 6),
+                Row(
+                  children: [
+                    for (var col = 0; col < 2; col++) ...[
+                      if (col > 0) const SizedBox(width: 6),
+                      Expanded(
+                        child: FxToggleChip(
+                          expanded: true,
+                          label: _quickSetups[row * 2 + col].label,
+                          icon: _quickSetups[row * 2 + col].icon,
+                          selected:
+                              selectedLabel ==
+                              _quickSetups[row * 2 + col].label,
+                          isDark: isDark,
+                          filledWhenSelected: true,
+                          onTap:
+                              () => onSelected(_quickSetups[row * 2 + col]),
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
-              ),
-          ],
+              ],
+            ],
+          ),
         ),
         Divider(
           height: 1,
           thickness: FxSettingsLayout.dividerThickness,
-          color: ShellChrome.of(context).line,
+          color: line,
         ),
       ],
     );
