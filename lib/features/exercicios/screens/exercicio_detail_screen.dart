@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/theme/design_tokens.dart';

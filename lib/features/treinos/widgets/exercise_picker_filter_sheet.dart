@@ -3,9 +3,8 @@ import 'package:flutter/services.dart';
 
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/fx_settings_layout.dart';
-import '../../../core/theme/shell_chrome.dart';
-import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
+import '../../../core/widgets/fx_inset_picker_option.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../exercicios/data/enums.dart';
 import '../../exercicios/data/exercicio_taxonomy_labels.dart';
@@ -134,7 +133,7 @@ class _ExercisePickerFilterSheetState extends State<_ExercisePickerFilterSheet> 
                     caption: 'Onde o aluno treina',
                     children: [
                       for (var i = 0; i < _espacos.length; i++)
-                        _FilterPickerTile(
+                        FxInsetPickerOption(
                           label: _espacoLabel(_espacos[i]),
                           selected: _filter.espaco == _espacos[i],
                           accent: brand,
@@ -156,7 +155,7 @@ class _ExercisePickerFilterSheetState extends State<_ExercisePickerFilterSheet> 
                     caption: 'Equipamento principal',
                     children: [
                       for (var i = 0; i < _equipamentos.length; i++)
-                        _FilterPickerTile(
+                        FxInsetPickerOption(
                           label: _equipamentoLabel(_equipamentos[i]),
                           selected: _filter.equipamento == _equipamentos[i],
                           accent: brand,
@@ -179,84 +178,6 @@ class _ExercisePickerFilterSheetState extends State<_ExercisePickerFilterSheet> 
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _FilterPickerTile extends StatelessWidget {
-  const _FilterPickerTile({
-    required this.label,
-    required this.selected,
-    required this.accent,
-    required this.onTap,
-    this.showDivider = true,
-  });
-
-  final String label;
-  final bool selected;
-  final Color accent;
-  final VoidCallback onTap;
-  final bool showDivider;
-
-  @override
-  Widget build(BuildContext context) {
-    final chrome = ShellChrome.of(context);
-    final ink = selected ? accent : chrome.ink;
-    final line = chrome.line;
-
-    return Semantics(
-      button: true,
-      selected: selected,
-      label: selected ? '$label, selecionado' : label,
-      child: InkWell(
-        onTap: onTap,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(
-            minHeight: FxSettingsLayout.rowMinHeight,
-          ),
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              color:
-                  selected ? accent.withValues(alpha: 0.08) : Colors.transparent,
-              border:
-                  showDivider
-                      ? Border(
-                        bottom: BorderSide(
-                          color: line,
-                          width: FxSettingsLayout.dividerThickness,
-                        ),
-                      )
-                      : null,
-            ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 4,
-                vertical: TokensStrip.s3,
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      label,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: FxSettingsLayout.rowLabel(
-                        color: ink,
-                      ).copyWith(fontWeight: selected ? FontWeight.w800 : null),
-                    ),
-                  ),
-                  if (selected)
-                    Icon(
-                      Icons.check_rounded,
-                      color: accent,
-                      size: FxSettingsLayout.iconSize,
-                    ),
-                ],
-              ),
-            ),
-          ),
-        ),
       ),
     );
   }

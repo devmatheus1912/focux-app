@@ -8,17 +8,16 @@ void main() {
       'lib/features/exercicios/screens/add_exercicio_screen.dart',
     );
 
-    expect(screen, contains("'Novo exercício'"));
-    expect(screen, contains('Erro ao cadastrar exercício.'));
-    expect(screen, contains('Novo exercício'));
     expect(screen, contains('Semantics('));
-    expect(screen, contains('Cadastrar exercício'));
     expect(screen, contains('Perfil rápido'));
     expect(screen, contains('selectedColor: primary'));
     expect(screen, isNot(contains('DropdownButtonFormField')));
     expect(screen, isNot(contains('_EnumPicker')));
     expect(screen, contains('showAddExercicioFiltersSheet'));
     expect(screen, contains('showAddExercicioEnumPicker'));
+    expect(screen, contains('exercicioId'));
+    expect(screen, contains('S.of(context)'));
+    expect(screen, contains('atualizar'));
     expect(screen, contains('DashboardHomeActionChip'));
     expect(screen, contains('FxInsetPickerRow'));
     expect(screen, contains('AlunoInsetFormField'));

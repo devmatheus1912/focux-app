@@ -16,8 +16,8 @@ void main() {
 
     expect(library, contains('showExerciseLibrarySheet'));
     expect(library, contains('FxSettingsGroup'));
-    expect(filters, contains('StatefulWidget'));
-    expect(filters, contains('Icons.check_rounded'));
+    expect(filters, contains('FxInsetPickerOption'));
+    expect(filters, isNot(contains('_FilterPickerTile')));
     expect(prescription, contains('AlunoSegmentedChoice'));
     expect(prescription, contains('FxSettingsGroup'));
     expect(prescription, contains('_PrescriptionRepsRow'));

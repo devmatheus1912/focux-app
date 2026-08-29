@@ -198,6 +198,7 @@ class _EnumDropdown<T extends Enum> extends StatelessWidget {
   final ValueChanged<T?> onChanged;
   final String? Function(T?)? validator;
   final bool showDivider;
+  final String sheetContextLabel;
 
   const _EnumDropdown({
     required this.label,
@@ -207,6 +208,7 @@ class _EnumDropdown<T extends Enum> extends StatelessWidget {
     required this.values,
     required this.labels,
     required this.onChanged,
+    required this.sheetContextLabel,
     this.validator,
     this.showDivider = true,
   });
@@ -240,6 +242,7 @@ class _EnumDropdown<T extends Enum> extends StatelessWidget {
                 final picked = await showAddExercicioEnumPicker<T>(
                   context,
                   title: label,
+                  contextLabel: sheetContextLabel,
                   icon: icon,
                   iconColor: iconColor,
                   values: values,

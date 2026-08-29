@@ -118,5 +118,19 @@
   "alunosEmptySearchSubtitle": "Tente buscar por outro nome ou objetivo.",
   "alunosHelpTitle": "Lista de alunos",
   "alunosHelpIntro": "Priorize contato, filtre por status e abra a ficha com um toque.",
-  "alunosHelpLink": "Como usar a lista"
+  "alunosHelpLink": "Como usar a lista",
+  "newExerciseTitle": "Novo exercício",
+  "editExerciseTitle": "Editar exercício",
+  "exerciseRegister": "Cadastrar",
+  "exerciseCreating": "Cadastrando…",
+  "exerciseSaving": "Salvando…",
+  "exerciseCreateError": "Erro ao cadastrar exercício.",
+  "exerciseSaveError": "Erro ao salvar exercício.",
+  "exerciseCreateFailedTitle": "Não foi possível cadastrar",
+  "exerciseSaveFailedTitle": "Não foi possível salvar",
+  "exerciseCreatingSemantics": "Cadastrando exercício",
+  "exerciseSavingSemantics": "Salvando exercício",
+  "exerciseRegisterSemantics": "Cadastrar exercício",
+  "exerciseSaveSemantics": "Salvar exercício",
+  "exerciseRegisterDisabledSemantics": "Cadastrar exercício. Informe o nome para habilitar"
 }

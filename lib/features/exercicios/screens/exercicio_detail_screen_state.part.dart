@@ -118,6 +118,18 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
             data:
                 (ex) => [
                   IconButton(
+                    tooltip: 'Editar exercício',
+                    onPressed: () async {
+                      final saved = await context.push<bool>(
+                        '/exercicios/${widget.exercicioId}/editar',
+                      );
+                      if (saved == true && context.mounted) {
+                        ref.invalidate(exercicioProvider(widget.exercicioId));
+                      }
+                    },
+                    icon: Icon(Icons.edit_outlined, color: mute),
+                  ),
+                  IconButton(
                     tooltip:
                         ex.favoritado
                             ? 'Remover dos favoritos'

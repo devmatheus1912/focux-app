@@ -22,13 +22,154 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
   bool _unilateral = false;
   bool _showGuidance = false;
   bool _loading = false;
+  bool _didPrefill = false;
   String? _error;
   String? _selectedSetupLabel = 'Academia';
+
+  bool get _isEdit => widget.exercicioId != null;
 
   @override
   void initState() {
     super.initState();
     _nomeCtrl.addListener(_onFormChanged);
+    if (_isEdit) {
+      Future.microtask(_prefillFromApi);
+    }
+  }
+
+  Future<void> _prefillFromApi() async {
+    try {
+      final ex = await ref.read(exercicioProvider(widget.exercicioId!).future);
+      if (!mounted || _didPrefill) return;
+      setState(() {
+        _prefillFrom(ex);
+        _didPrefill = true;
+      });
+    } catch (e) {
+      if (mounted) {
+        setState(
+          () => _error = friendlyError(
+            e,
+            fallback: 'Erro ao carregar exercício.',
+          ),
+        );
+      }
+    }
+  }
+
+  void _prefillFrom(Exercicio ex) {
+    _nomeCtrl.text = ex.nome;
+    _descricaoCtrl.text = ex.descricao ?? '';
+    _errosComunsCtrl.text = ex.errosComuns ?? '';
+    _contraindicacoesCtrl.text = ex.contraindicacoes ?? '';
+    _modalidade = ex.modalidade ?? Modalidade.musculacao;
+    _padraoMovimento = ex.padraoMovimento;
+    _grupoMuscularPrimario = ex.grupoMuscularPrimario;
+    _dificuldade = ex.dificuldade ?? Dificuldade.iniciante;
+    _equipamentos
+      ..clear()
+      ..addAll(ex.equipamentos);
+    _espacos
+      ..clear()
+      ..addAll(ex.espacosCompativeis);
+    _unilateral = ex.unilateral;
+    _selectedSetupLabel = null;
+    _showGuidance =
+        ex.descricao?.trim().isNotEmpty == true ||
+        ex.errosComuns?.trim().isNotEmpty == true ||
+        ex.contraindicacoes?.trim().isNotEmpty == true;
+  }
+
+  Map<String, String> _formPayload() {
+    return {
+      'nome': _nomeCtrl.text.trim(),
+      'descricao': _descricaoCtrl.text.trim(),
+      'musculoAlvo': _grupoMuscularPrimario?.backendName ?? '',
+      'categoria': _modalidade?.backendName ?? '',
+      'equipamento': _equipamentos
+          .map((e) => TaxonomyLabels.equipamento[e])
+          .join(', '),
+      'nivel':
+          _dificuldade == null
+              ? ''
+              : TaxonomyLabels.dificuldade[_dificuldade!] ?? '',
+      'mecanica':
+          _padraoMovimento == null
+              ? ''
+              : TaxonomyLabels.padrao[_padraoMovimento!] ?? '',
+      'errosComuns': _errosComunsCtrl.text.trim(),
+      'contraindicacoes': _contraindicacoesCtrl.text.trim(),
+    };
+  }
+
+  Future<void> _submit() async {
+    if (!_formKey.currentState!.validate()) return;
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    final payload = _formPayload();
+    try {
+      final repo = ref.read(exercicioRepositoryProvider);
+      if (_isEdit) {
+        await repo.atualizar(
+          id: widget.exercicioId!,
+          nome: payload['nome']!,
+          descricao: payload['descricao'],
+          musculoAlvo: payload['musculoAlvo'],
+          categoria: payload['categoria'],
+          equipamento: payload['equipamento'],
+          nivel: payload['nivel'],
+          mecanica: payload['mecanica'],
+          modalidade: _modalidade,
+          padraoMovimento: _padraoMovimento,
+          grupoMuscularPrimario: _grupoMuscularPrimario,
+          equipamentos: _equipamentos.toList(),
+          espacosCompativeis: _espacos.toList(),
+          dificuldade: _dificuldade,
+          unilateral: _unilateral,
+          errosComuns: payload['errosComuns'],
+          contraindicacoes: payload['contraindicacoes'],
+        );
+        ref.invalidate(exercicioProvider(widget.exercicioId!));
+      } else {
+        await repo.criar(
+          nome: payload['nome']!,
+          descricao: payload['descricao'],
+          musculoAlvo: payload['musculoAlvo'],
+          categoria: payload['categoria'],
+          equipamento: payload['equipamento'],
+          nivel: payload['nivel'],
+          mecanica: payload['mecanica'],
+          modalidade: _modalidade,
+          padraoMovimento: _padraoMovimento,
+          grupoMuscularPrimario: _grupoMuscularPrimario,
+          equipamentos: _equipamentos.toList(),
+          espacosCompativeis: _espacos.toList(),
+          dificuldade: _dificuldade,
+          unilateral: _unilateral,
+          errosComuns: payload['errosComuns'],
+          contraindicacoes: payload['contraindicacoes'],
+        );
+      }
+      ref.invalidate(exerciciosFilteredProvider);
+      if (mounted) context.pop(true);
+    } catch (e) {
+      if (mounted) {
+        final l10n = S.of(context);
+        setState(
+          () => _error = friendlyError(
+            e,
+            fallback:
+                _isEdit
+                    ? l10n.exerciseSaveError
+                    : l10n.exerciseCreateError,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
   }
 
   void _onFormChanged() {
@@ -43,58 +184,6 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
     _errosComunsCtrl.dispose();
     _contraindicacoesCtrl.dispose();
     super.dispose();
-  }
-
-  Future<void> _submit() async {
-    if (!_formKey.currentState!.validate()) return;
-    setState(() {
-      _loading = true;
-      _error = null;
-    });
-    try {
-      await ref
-          .read(exercicioRepositoryProvider)
-          .criar(
-            nome: _nomeCtrl.text.trim(),
-            descricao: _descricaoCtrl.text.trim(),
-            musculoAlvo: _grupoMuscularPrimario?.backendName,
-            categoria: _modalidade?.backendName,
-            equipamento: _equipamentos
-                .map((e) => TaxonomyLabels.equipamento[e])
-                .join(', '),
-            nivel:
-                _dificuldade == null
-                    ? null
-                    : TaxonomyLabels.dificuldade[_dificuldade!],
-            mecanica:
-                _padraoMovimento == null
-                    ? null
-                    : TaxonomyLabels.padrao[_padraoMovimento!],
-            modalidade: _modalidade,
-            padraoMovimento: _padraoMovimento,
-            grupoMuscularPrimario: _grupoMuscularPrimario,
-            equipamentos: _equipamentos.toList(),
-            espacosCompativeis: _espacos.toList(),
-            dificuldade: _dificuldade,
-            unilateral: _unilateral,
-            errosComuns: _errosComunsCtrl.text.trim(),
-            contraindicacoes: _contraindicacoesCtrl.text.trim(),
-          );
-      ref.invalidate(exerciciosFilteredProvider);
-      if (mounted) context.pop(true);
-    } catch (e) {
-      if (mounted) {
-        setState(
-          () =>
-              _error = friendlyError(
-                e,
-                fallback: 'Erro ao cadastrar exercício.',
-              ),
-        );
-      }
-    } finally {
-      if (mounted) setState(() => _loading = false);
-    }
   }
 
   void _applyQuickSetup(_ExerciseQuickSetup setup) {
@@ -133,21 +222,34 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = S.of(context);
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
     final soft = BrandPalette.softened(primary);
     final isDark = chrome.isDark;
-    final canSubmit = !_loading && _nomeCtrl.text.trim().isNotEmpty;
+    final loadingEdit = _isEdit && !_didPrefill && _error == null;
+    final canSubmit =
+        !_loading && !loadingEdit && _nomeCtrl.text.trim().isNotEmpty;
+    final screenTitle =
+        _isEdit ? l10n.editExerciseTitle : l10n.newExerciseTitle;
+    final ctaLabel =
+        _loading
+            ? (_isEdit ? l10n.exerciseSaving : l10n.exerciseCreating)
+            : (_isEdit ? l10n.save : l10n.exerciseRegister);
+    final errorTitle =
+        _isEdit ? l10n.exerciseSaveFailedTitle : l10n.exerciseCreateFailedTitle;
 
     return fxScreenA11yScope(
-      label: 'Novo exercício',
+      label: screenTitle,
       child: FxShellScaffold(
         useMesh: true,
         appBar: FxShellAppBar(
-          title: 'Novo Exercício',
+          title: screenTitle,
           onBack: () => safePopOrGo(context, '/exercicios'),
         ),
-        body: Stack(
+        body: loadingEdit
+            ? const SafeArea(child: SkeletonList(count: 6))
+            : Stack(
           children: [
             SafeArea(
               bottom: false,
@@ -182,14 +284,16 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
                                           ? 'Informe o nome'
                                           : null,
                             ),
-                            _QuickSetupStrip(
-                              selectedLabel: _selectedSetupLabel,
-                              onSelected: _applyQuickSetup,
-                            ),
+                            if (!_isEdit)
+                              _QuickSetupStrip(
+                                selectedLabel: _selectedSetupLabel,
+                                onSelected: _applyQuickSetup,
+                              ),
                             _EnumDropdown<GrupoMuscular>(
                               label: 'Grupo principal',
                               icon: Icons.accessibility_new_rounded,
                               iconColor: soft,
+                              sheetContextLabel: screenTitle,
                               value: _grupoMuscularPrimario,
                               values: GrupoMuscular.values,
                               labels: TaxonomyLabels.grupo,
@@ -204,6 +308,7 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
                               label: 'Modalidade',
                               icon: Icons.sports_gymnastics_rounded,
                               iconColor: soft,
+                              sheetContextLabel: screenTitle,
                               value: _modalidade,
                               values: Modalidade.values,
                               labels: TaxonomyLabels.modalidade,
@@ -214,6 +319,7 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
                               label: 'Dificuldade',
                               icon: Icons.signal_cellular_alt_rounded,
                               iconColor: soft,
+                              sheetContextLabel: screenTitle,
                               value: _dificuldade,
                               values: Dificuldade.values,
                               labels: TaxonomyLabels.dificuldade,
@@ -224,6 +330,7 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
                               label: 'Padrão de movimento',
                               icon: Icons.sync_alt_rounded,
                               iconColor: soft,
+                              sheetContextLabel: screenTitle,
                               value: _padraoMovimento,
                               values: PadraoMovimento.values,
                               labels: TaxonomyLabels.padrao,
@@ -330,7 +437,7 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
                           child: FxErrorState(
                             chromeOnDark: isDark,
                             primary: primary,
-                            title: 'Não foi possível cadastrar',
+                            title: errorTitle,
                             message: _error!,
                             onRetry: _submit,
                           ),
@@ -356,12 +463,16 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
                     enabled: canSubmit,
                     label:
                         _loading
-                            ? 'Cadastrando exercício'
+                            ? (_isEdit
+                                ? l10n.exerciseSavingSemantics
+                                : l10n.exerciseCreatingSemantics)
                             : canSubmit
-                            ? 'Cadastrar exercício'
-                            : 'Cadastrar exercício. Informe o nome para habilitar',
+                            ? (_isEdit
+                                ? l10n.exerciseSaveSemantics
+                                : l10n.exerciseRegisterSemantics)
+                            : l10n.exerciseRegisterDisabledSemantics,
                     child: DashboardHomeActionChip(
-                      label: _loading ? 'Cadastrando…' : 'Cadastrar',
+                      label: ctaLabel,
                       accent: primary,
                       isDark: isDark,
                       enabled: canSubmit,

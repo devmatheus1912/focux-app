@@ -409,6 +409,16 @@ RouteBase buildChromeShellRoute() {
             builder: (context, state) => const OnboardingBibliotecaWizard(),
           ),
           GoRoute(
+            path: '/exercicios/:id/editar',
+            redirect:
+                (context, state) =>
+                    intPathParam(state, 'id') == null ? '/exercicios' : null,
+            builder:
+                (context, state) => AddExercicioScreen(
+                  exercicioId: intPathParam(state, 'id')!,
+                ),
+          ),
+          GoRoute(
             path: '/exercicios/:id',
             redirect:
                 (context, state) =>

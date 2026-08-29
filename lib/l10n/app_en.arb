@@ -118,5 +118,19 @@
   "alunosEmptySearchSubtitle": "Try another name or goal.",
   "alunosHelpTitle": "Student list",
   "alunosHelpIntro": "Prioritize outreach, filter by status, and open a profile in one tap.",
-  "alunosHelpLink": "How to use the list"
+  "alunosHelpLink": "How to use the list",
+  "newExerciseTitle": "New exercise",
+  "editExerciseTitle": "Edit exercise",
+  "exerciseRegister": "Register",
+  "exerciseCreating": "Registering…",
+  "exerciseSaving": "Saving…",
+  "exerciseCreateError": "Could not register exercise.",
+  "exerciseSaveError": "Could not save exercise.",
+  "exerciseCreateFailedTitle": "Could not register",
+  "exerciseSaveFailedTitle": "Could not save",
+  "exerciseCreatingSemantics": "Registering exercise",
+  "exerciseSavingSemantics": "Saving exercise",
+  "exerciseRegisterSemantics": "Register exercise",
+  "exerciseSaveSemantics": "Save exercise",
+  "exerciseRegisterDisabledSemantics": "Register exercise. Enter a name to enable"
 }

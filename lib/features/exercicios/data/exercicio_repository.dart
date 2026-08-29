@@ -723,6 +723,71 @@ class ExercicioRepository {
     return Exercicio.fromJson(response.data as Map<String, dynamic>);
   }
 
+  Future<Exercicio> atualizar({
+    required int id,
+    required String nome,
+    String? descricao,
+    String? musculoAlvo,
+    String? categoria,
+    String? equipamento,
+    String? nivel,
+    String? mecanica,
+    String? objetivo,
+    Modalidade? modalidade,
+    PadraoMovimento? padraoMovimento,
+    GrupoMuscular? grupoMuscularPrimario,
+    List<Equipamento> equipamentos = const [],
+    List<Espaco> espacosCompativeis = const [],
+    Dificuldade? dificuldade,
+    bool unilateral = false,
+    String? errosComuns,
+    String? contraindicacoes,
+    String? substitutos,
+    String? tags,
+    String? observacoes,
+  }) async {
+    final response = await _dio.put(
+      '/api/exercicios/$id',
+      data: {
+        'nome': nome,
+        if (descricao != null && descricao.isNotEmpty) 'descricao': descricao,
+        if (musculoAlvo != null && musculoAlvo.isNotEmpty)
+          'musculoAlvo': musculoAlvo,
+        if (categoria != null && categoria.isNotEmpty) 'categoria': categoria,
+        if (equipamento != null && equipamento.isNotEmpty)
+          'equipamento': equipamento,
+        if (nivel != null && nivel.isNotEmpty) 'nivel': nivel,
+        if (mecanica != null && mecanica.isNotEmpty) 'mecanica': mecanica,
+        if (objetivo != null && objetivo.isNotEmpty) 'objetivo': objetivo,
+        if (modalidade != null) 'modalidade': modalidade.backendName,
+        if (padraoMovimento != null)
+          'padraoMovimento': padraoMovimento.backendName,
+        if (grupoMuscularPrimario != null)
+          'grupoMuscularPrimario': grupoMuscularPrimario.backendName,
+        if (equipamentos.isNotEmpty)
+          'equipamentosCurado': equipamentos
+              .map((e) => e.backendName)
+              .join(','),
+        if (espacosCompativeis.isNotEmpty)
+          'espacosCompativeis': espacosCompativeis
+              .map((e) => e.backendName)
+              .join(','),
+        if (dificuldade != null) 'dificuldade': dificuldade.backendName,
+        'unilateral': unilateral,
+        if (errosComuns != null && errosComuns.isNotEmpty)
+          'errosComuns': errosComuns,
+        if (contraindicacoes != null && contraindicacoes.isNotEmpty)
+          'contraindicacoes': contraindicacoes,
+        if (substitutos != null && substitutos.isNotEmpty)
+          'substitutos': substitutos,
+        if (tags != null && tags.isNotEmpty) 'tags': tags,
+        if (observacoes != null && observacoes.isNotEmpty)
+          'observacoes': observacoes,
+      },
+    );
+    return Exercicio.fromJson(response.data as Map<String, dynamic>);
+  }
+
   Future<Exercicio> uploadVideo({
     required int id,
     required List<int> bytes,

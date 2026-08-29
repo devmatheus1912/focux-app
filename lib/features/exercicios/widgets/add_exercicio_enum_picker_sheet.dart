@@ -13,6 +13,7 @@ import '../data/enums.dart';
 Future<T?> showAddExercicioEnumPicker<T extends Enum>(
   BuildContext context, {
   required String title,
+  required String contextLabel,
   required IconData icon,
   Color? iconColor,
   required List<T> values,
@@ -26,6 +27,7 @@ Future<T?> showAddExercicioEnumPicker<T extends Enum>(
         (ctx) => _AddExercicioEnumPickerSheet<T>(
           isDark: isDark,
           title: title,
+          contextLabel: contextLabel,
           icon: icon,
           iconColor: iconColor,
           values: values,
@@ -39,6 +41,7 @@ class _AddExercicioEnumPickerSheet<T extends Enum> extends StatefulWidget {
   const _AddExercicioEnumPickerSheet({
     required this.isDark,
     required this.title,
+    required this.contextLabel,
     required this.icon,
     this.iconColor,
     required this.values,
@@ -48,6 +51,7 @@ class _AddExercicioEnumPickerSheet<T extends Enum> extends StatefulWidget {
 
   final bool isDark;
   final String title;
+  final String contextLabel;
   final IconData icon;
   final Color? iconColor;
   final List<T> values;
@@ -110,7 +114,7 @@ class _AddExercicioEnumPickerSheetState<T extends Enum>
           FxHomeSheetHeader(
             isDark: widget.isDark,
             title: widget.title,
-            subtitle: 'Novo exercício',
+            subtitle: widget.contextLabel,
             leading: Icon(widget.icon, color: soft, size: 20),
           ),
           if (showSearch) ...[
