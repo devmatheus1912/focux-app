@@ -9,8 +9,8 @@ import '../../planos/utils/effective_plano_features.dart';
 import '../../subscription/widgets/upgrade_prompt_sheet.dart';
 import '../data/aluno_repository.dart';
 import '../utils/aluno360_ferramentas_logic.dart';
+import 'aluno360_ferramentas_mini_sparkline.dart';
 import 'aluno360_help_sheets.dart';
-import 'aluno360_module_tile.dart';
 
 /// Módulos Ferramentas em grupos inset — paridade Perfil (`FxSettingsGroup`).
 class Aluno360FerramentasModulesGrid extends ConsumerWidget {

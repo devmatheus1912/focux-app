@@ -71,7 +71,7 @@ class Aluno360DetailOperacaoTab extends ConsumerWidget {
       onEntrancePlayed: onEntrancePlayed,
       financeRiskBanner:
           financeRisk
-              ? Aluno360FinanceRiskBanner(alunoId: alunoId, isDark: isDark)
+              ? Aluno360FinanceRiskBanner(alunoId: alunoId)
               : null,
       showFollowUp: !hideFollowUp,
       followUpCard: Aluno360FollowUpCard(

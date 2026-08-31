@@ -9,7 +9,6 @@ import '../constants/aluno_360_layout.dart';
 import '../data/aluno_repository.dart';
 import '../utils/aluno360_ferramentas_logic.dart';
 import 'aluno360_help_sheets.dart';
-import 'aluno360_measurements_complete_tile.dart';
 import 'aluno360_operacao_tab.dart';
 
 /// Ferramentas tab: medidas inset + módulos de ação.
@@ -116,9 +115,16 @@ class Aluno360FerramentasTab extends StatelessWidget {
               ),
             )
           else if (allComplete)
-            Aluno360MeasurementsCompleteTile(
-              summary: completeSummary,
-              primary: primary,
+            FxSettingsTile(
+              icon: Icons.verified_outlined,
+              label: 'Medidas em dia',
+              subtitle: completeSummary,
+              value: '',
+              accent: primary,
+              highlight: true,
+              showDivider: false,
+              semanticsLabel:
+                  'Medidas em dia. $completeSummary. Toque para ver evolução.',
               onTap: () => context.push(evolucaoRoute, extra: aluno.nome),
             )
           else

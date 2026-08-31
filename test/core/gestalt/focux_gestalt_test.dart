@@ -29,9 +29,10 @@ void main() {
 
   test('section headers use shared layout tokens', () {
     final alunoHeader =
-        File('lib/features/alunos/widgets/aluno360_section_header.dart')
+        File('lib/features/alunos/constants/aluno_360_layout.dart')
             .readAsStringSync();
     expect(alunoHeader, contains('Aluno360Layout'));
+    expect(alunoHeader, contains('FxSettingsLayout.groupRadius'));
 
     final dashboardHelpers =
         File('lib/features/dashboard/utils/dashboard_screen_helpers.dart')

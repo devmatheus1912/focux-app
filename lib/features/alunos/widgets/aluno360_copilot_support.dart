@@ -3,21 +3,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/brand/focux_microcopy.dart';
-import '../constants/aluno_360_layout.dart';
-import '../../../core/theme/design_tokens.dart';
-import '../../../core/theme/fx_settings_layout.dart';
-import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_loading.dart';
-import '../../../core/widgets/fx_motion.dart';
+import '../../../core/widgets/fx_settings_tile.dart';
 import '../../dashboard/data/command_center_data.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
 import '../data/aluno_repository.dart';
 import '../providers/aluno_detail_providers.dart';
 import '../utils/aluno360_copilot_logic.dart';
 
-/// Grid 2×2 com altura intrínseca — sem aspect-ratio fixo (evita truncar texto).
+/// Signal rows inside the copiloto inset group (not a 2×2 KPI well).
 class Aluno360CopilotSignalsGrid extends StatelessWidget {
   const Aluno360CopilotSignalsGrid({super.key, required this.signals});
 
@@ -25,102 +21,46 @@ class Aluno360CopilotSignalsGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tiles =
-        signals
-            .map((signal) => Aluno360CopilotSignalTile(signal: signal))
-            .toList();
-    final rows = <Widget>[];
-    for (var i = 0; i < tiles.length; i += 2) {
-      final hasPair = i + 1 < tiles.length;
-      rows.add(
-        IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Expanded(child: tiles[i]),
-              if (hasPair) ...[
-                const SizedBox(width: 8),
-                Expanded(child: tiles[i + 1]),
-              ],
-            ],
-          ),
-        ),
-      );
-      if (i + 2 < tiles.length) {
-        rows.add(const SizedBox(height: 8));
-      }
-    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: rows,
+      children: [
+        for (var i = 0; i < signals.length; i++)
+          Aluno360CopilotSignalTile(
+            signal: signals[i],
+            showDivider: i < signals.length - 1,
+          ),
+      ],
     );
   }
 }
 
 class Aluno360CopilotSignalTile extends StatelessWidget {
-  final Aluno360CopilotSignal signal;
+  const Aluno360CopilotSignalTile({
+    super.key,
+    required this.signal,
+    this.showDivider = true,
+  });
 
-  const Aluno360CopilotSignalTile({super.key, required this.signal});
+  final Aluno360CopilotSignal signal;
+  final bool showDivider;
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-    final semanticsLabel = '${signal.label}: ${signal.value}. ${signal.detail}';
-    return Semantics(
-      label: semanticsLabel,
-      button: signal.detail.isNotEmpty,
-      child: Tooltip(
-        message: signal.detail,
-        child: Container(
-          padding: const EdgeInsets.fromLTRB(10, 9, 10, 9),
-          decoration: BoxDecoration(
-            color: signal.color.withValues(alpha: isDark ? 0.12 : 0.06),
-            borderRadius: BorderRadius.circular(12),
-            border: Border(
-              left: BorderSide(color: signal.color, width: 3),
-            ),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                signal.label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: FxSettingsLayout.sectionHeader(color: mute),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                signal.value,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: FxSettingsLayout.rowMetric(color: ink),
-              ),
-              if (signal.detail.isNotEmpty) ...[
-                const SizedBox(height: 2),
-                Text(
-                  signal.detail,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: FxSettingsLayout.subhead(color: mute),
-                ),
-              ],
-            ],
-          ),
-        ),
-      ),
+    return FxSettingsTile(
+      icon: Icons.insights_outlined,
+      label: signal.label,
+      subtitle: signal.detail.isEmpty ? null : signal.detail,
+      value: signal.value,
+      numeric: true,
+      accent: signal.color,
+      showDivider: showDivider,
+      semanticsLabel: '${signal.label}: ${signal.value}. ${signal.detail}',
+      onTap: () {},
     );
   }
 }
 
 class Aluno360CopilotTaskStatus extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String subtitle;
-
   const Aluno360CopilotTaskStatus({
     super.key,
     required this.icon,
@@ -128,61 +68,24 @@ class Aluno360CopilotTaskStatus extends StatelessWidget {
     required this.subtitle,
   });
 
+  final IconData icon;
+  final String title;
+  final String subtitle;
+
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final primary = Theme.of(context).colorScheme.primary;
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: BoxDecoration(
-        color: primary.withValues(alpha: isDark ? 0.12 : 0.06),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: primary.withValues(alpha: 0.16)),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, color: primary, size: 17),
-          const SizedBox(width: 9),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: Aluno360Layout.panelTitleStyle(context, ink),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  subtitle,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: Aluno360Layout.captionStyle(
-                    context,
-                  ).copyWith(color: mute),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+    return FxSettingsTile(
+      icon: icon,
+      label: title,
+      subtitle: subtitle,
+      value: '',
+      showDivider: false,
+      onTap: () {},
     );
   }
 }
 
 class Aluno360CopilotActionRow extends ConsumerStatefulWidget {
-  final Aluno aluno;
-  final Color primary;
-  final FilaAcaoResumo? existingTask;
-  final bool openTaskHint;
-  final bool hidePrimaryCta;
-  final bool hideChatCta;
-  final String acao;
-  final Future<bool> Function(String acao) onAssign;
-  final void Function(String acao) onPrepareMessage;
-
   const Aluno360CopilotActionRow({
     super.key,
     required this.aluno,
@@ -195,6 +98,16 @@ class Aluno360CopilotActionRow extends ConsumerStatefulWidget {
     required this.onAssign,
     required this.onPrepareMessage,
   });
+
+  final Aluno aluno;
+  final Color primary;
+  final FilaAcaoResumo? existingTask;
+  final bool openTaskHint;
+  final bool hidePrimaryCta;
+  final bool hideChatCta;
+  final String acao;
+  final Future<bool> Function(String acao) onAssign;
+  final void Function(String acao) onPrepareMessage;
 
   @override
   ConsumerState<Aluno360CopilotActionRow> createState() =>
@@ -253,129 +166,75 @@ class _Aluno360CopilotActionRowState
     if (hidePrimary && widget.hideChatCta) {
       return const SizedBox.shrink();
     }
-    return Row(
-      children: [
-        if (!hidePrimary) ...[
-          Expanded(
-            flex: widget.hideChatCta ? 1 : 3,
-            child:
-                hasTask
-                    ? Row(
-                      children: [
-                        if (widget.existingTask != null) ...[
-                          Expanded(
-                            child: Semantics(
-                              button: true,
-                              label: 'Concluir tarefa do copiloto',
-                              child: OutlinedButton(
-                                onPressed:
-                                    _completing ? null : _completeOpenTask,
-                                style:
-                                    Aluno360Layout.operacaoOutlinedButtonStyle(
-                                      context,
-                                      widget.primary,
-                                    ),
-                                child:
-                                    _completing
-                                        ? const FxLoading(
-                                          size: 18,
-                                          strokeWidth: 2,
-                                        )
-                                        : Text(
-                                          'Concluir',
-                                          style: Aluno360Layout.chipLabelStyle(
-                                            context,
-                                            color: widget.primary,
-                                          ),
-                                        ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                        ],
-                        Expanded(
-                          child: Semantics(
-                            button: true,
-                            label: 'Abrir ${FocuxMicrocopy.commandCenter}',
-                            child: TextButton.icon(
-                              onPressed: _handlePrimary,
-                              icon: Icon(
-                                Icons.open_in_new_rounded,
-                                size: 16,
-                                color: widget.primary,
-                              ),
-                              label: Text(
-                                FocuxMicrocopy.commandCenter,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: Aluno360Layout.chipLabelStyle(
-                                  context,
-                                  color: widget.primary,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    )
-                    : FxLiquidPrimaryButton(
-                      loading: _creating,
-                      icon: Icons.task_alt_rounded,
-                      label: _creating ? 'Criando...' : 'Criar tarefa',
-                      onPressed: _creating ? null : _handlePrimary,
-                    ),
-          ),
-          const SizedBox(width: 8),
-        ],
-        if (!widget.hideChatCta)
-          Expanded(
-            flex: hidePrimary ? 1 : 2,
-            child: Semantics(
-              button: true,
-              label: 'Abrir chat com ${widget.aluno.nome}',
-              child: SizedBox(
-                height: 44,
-                child: InkWell(
-                  onTap: () {
-                    widget.onPrepareMessage(widget.acao);
-                  },
-                  borderRadius: BorderRadius.circular(14),
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: widget.primary.withValues(alpha: 0.04),
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(
-                        color: widget.primary.withValues(alpha: 0.28),
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.chat_bubble_outline,
-                          size: 15,
-                          color: widget.primary,
-                        ),
-                        const SizedBox(width: 4),
-                        Flexible(
-                          child: Text(
-                            'Abrir chat',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: Aluno360Layout.chipLabelStyle(
-                              context,
-                              color: widget.primary,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
+
+    final tiles = <Widget>[];
+    if (!hidePrimary) {
+      if (hasTask) {
+        if (widget.existingTask != null) {
+          tiles.add(
+            FxSettingsTile(
+              icon: Icons.check_circle_outline_rounded,
+              label: 'Concluir',
+              subtitle: 'Marcar a tarefa do copiloto como feita',
+              value: '',
+              accent: widget.primary,
+              showDivider: true,
+              semanticsLabel: 'Concluir tarefa do copiloto',
+              accessory:
+                  _completing
+                      ? const FxLoading(size: 18, strokeWidth: 2)
+                      : null,
+              onTap: _completing ? () {} : _completeOpenTask,
             ),
+          );
+        }
+        tiles.add(
+          FxSettingsTile(
+            icon: Icons.open_in_new_rounded,
+            label: FocuxMicrocopy.commandCenter,
+            subtitle: 'Abrir a fila de ações',
+            value: '',
+            accent: widget.primary,
+            showDivider: !widget.hideChatCta,
+            semanticsLabel: 'Abrir ${FocuxMicrocopy.commandCenter}',
+            onTap: _handlePrimary,
           ),
-      ],
+        );
+      } else {
+        tiles.add(
+          FxSettingsTile(
+            icon: Icons.task_alt_rounded,
+            label: _creating ? 'Criando...' : 'Criar tarefa',
+            subtitle: 'Mandar para o ${FocuxMicrocopy.commandCenter}',
+            value: '',
+            accent: widget.primary,
+            highlight: true,
+            showDivider: !widget.hideChatCta,
+            accessory:
+                _creating ? const FxLoading(size: 18, strokeWidth: 2) : null,
+            onTap: _creating ? () {} : _handlePrimary,
+          ),
+        );
+      }
+    }
+    if (!widget.hideChatCta) {
+      tiles.add(
+        FxSettingsTile(
+          icon: Icons.chat_bubble_outline,
+          label: 'Abrir chat',
+          subtitle: 'Mensagem sugerida com ${widget.aluno.nome}',
+          value: '',
+          accent: widget.primary,
+          showDivider: false,
+          semanticsLabel: 'Abrir chat com ${widget.aluno.nome}',
+          onTap: () => widget.onPrepareMessage(widget.acao),
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: tiles,
     );
   }
 }

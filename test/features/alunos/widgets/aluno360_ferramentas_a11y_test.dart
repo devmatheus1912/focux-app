@@ -5,7 +5,7 @@ import 'package:focux_app/core/api/api_client.dart';
 import 'package:focux_app/features/alunos/data/aluno_repository.dart';
 import 'package:focux_app/features/alunos/providers/aluno_detail_providers.dart';
 import 'package:focux_app/features/alunos/widgets/aluno360_detail_ferramentas_tab.dart';
-import 'package:focux_app/features/alunos/widgets/aluno360_module_tile.dart';
+import 'package:focux_app/features/alunos/widgets/aluno360_ferramentas_mini_sparkline.dart';
 import 'package:focux_app/features/avaliacao/data/avaliacao_repository.dart';
 import 'package:focux_app/features/planos/data/planos_repository.dart';
 import 'package:focux_app/features/planos/providers/plano_features_provider.dart';

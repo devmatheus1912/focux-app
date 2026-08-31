@@ -45,7 +45,7 @@ void main() {
         'lib/features/alunos/screens/alunos_list_screen_state.part.dart';
     const alunoDetailWidgets = [
       'lib/features/alunos/widgets/aluno_detail_hero_card.dart',
-      'lib/features/alunos/widgets/aluno360_module_tile.dart',
+      'lib/features/alunos/widgets/aluno360_ferramentas_modules_grid.dart',
     ];
     const financeiroTabs = [
       'lib/features/financeiro/screens/financeiro_dashboard_screen.dart',

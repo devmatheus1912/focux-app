@@ -5,7 +5,7 @@ import '../../../core/utils/friendly_error.dart';
 import '../../../core/utils/motion_preferences.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
-import '../../../core/widgets/fx_home_sheet.dart';
+import '../../../core/widgets/fx_inset_picker_sheet.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
 import '../data/aluno_repository.dart';
@@ -138,52 +138,37 @@ class _Aluno360FollowUpCardState extends ConsumerState<Aluno360FollowUpCard> {
 
   Future<void> _showSnoozeSheet(dynamic actions) async {
     if (_busy) return;
-    final sheetDark = Theme.of(context).brightness == Brightness.dark;
-    final primary = Theme.of(context).colorScheme.primary;
-
-    await showFxHomeSheet<void>(
+    final picked = await showFxInsetPickerSheet<Duration>(
       context,
-      builder:
-          (ctx) => FxHomeSheetScaffold(
-            isDark: sheetDark,
-            leading: Icon(Icons.snooze_rounded, color: primary, size: 18),
-            title: 'Adiar follow-up',
-            subtitle: 'Escolha por quanto tempo adiar o contato com ${aluno.nome}.',
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                FxSettingsTile(
-                  icon: Icons.snooze_rounded,
-                  label: 'Adiar 24 horas',
-                  value: '',
-                  showDivider: true,
-                  onTap: () {
-                    Navigator.pop(ctx);
-                    _runAction(
-                      () => actions.snooze(aluno.id),
-                      'Follow-up adiado por 24h',
-                    );
-                  },
-                ),
-                FxSettingsTile(
-                  icon: Icons.date_range_rounded,
-                  label: 'Adiar 3 dias',
-                  value: '',
-                  showDivider: false,
-                  onTap: () {
-                    Navigator.pop(ctx);
-                    _runAction(
-                      () => actions.snooze(
-                        aluno.id,
-                        duration: const Duration(days: 3),
-                      ),
-                      'Follow-up adiado por 3 dias',
-                    );
-                  },
-                ),
-              ],
-            ),
-          ),
+      title: 'Adiar follow-up',
+      subtitle: 'Escolha por quanto tempo adiar o contato com ${aluno.nome}.',
+      headerIcon: Icons.snooze_rounded,
+      items: const [
+        FxInsetPickerSheetItem(
+          value: Duration(hours: 24),
+          label: 'Adiar 24 horas',
+          subtitle: 'Amanhã no mesmo horário',
+          icon: Icons.snooze_rounded,
+        ),
+        FxInsetPickerSheetItem(
+          value: Duration(days: 3),
+          label: 'Adiar 3 dias',
+          subtitle: 'Reabrir daqui a 72 horas',
+          icon: Icons.date_range_rounded,
+        ),
+      ],
+    );
+    if (picked == null) return;
+    if (picked.inDays >= 3) {
+      await _runAction(
+        () => actions.snooze(aluno.id, duration: const Duration(days: 3)),
+        'Follow-up adiado por 3 dias',
+      );
+      return;
+    }
+    await _runAction(
+      () => actions.snooze(aluno.id),
+      'Follow-up adiado por 24h',
     );
   }
 

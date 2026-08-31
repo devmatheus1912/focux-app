@@ -17,10 +17,6 @@ abstract final class Aluno360Layout {
   static const double insetCardRadius = TokensStrip.rCard;
   static const double tabBarHeight = 52;
   static const double tabContentGap = TokensStrip.s4;
-  static const EdgeInsets moduleTilePadding = EdgeInsets.symmetric(
-    horizontal: 12,
-    vertical: 10,
-  );
   /// Chip overlay (paridade Perfil/Home) — uma linha de chips alinhados à direita.
   static const double stickyBarContentHeight = 64;
   static const double stickyBarScrimHeight = 28;
@@ -198,19 +194,6 @@ abstract final class Aluno360Layout {
       fontWeight: FontWeight.w600,
       height: 1.2,
     );
-  }
-
-  /// Module tile title (Ferramentas grid).
-  static TextStyle moduleTileTitleStyle(BuildContext context, Color ink) {
-    return FocuxHubTypography.cardTitle(color: ink).copyWith(
-      fontWeight: FontWeight.w600,
-      height: 1.12,
-    );
-  }
-
-  /// Module tile subtitle.
-  static TextStyle moduleTileSubtitleStyle(BuildContext context, Color mute) {
-    return captionStyle(context).copyWith(color: mute, height: 1.25);
   }
 
   /// Tab bar selected label (Operação · Evolução · Ferramentas).

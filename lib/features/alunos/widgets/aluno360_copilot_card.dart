@@ -7,9 +7,9 @@ import 'package:go_router/go_router.dart';
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/brand/focux_microcopy.dart';
 import '../../../core/widgets/fx_settings_group.dart';
+import '../../../core/widgets/fx_settings_tile.dart';
 import '../../planos/utils/effective_plano_features.dart';
 import '../../planos/utils/plano_capability.dart';
-import '../constants/aluno_360_layout.dart';
 import '../data/aluno_repository.dart';
 import '../providers/aluno_detail_providers.dart';
 import '../utils/aluno360_copilot_logic.dart';
@@ -269,17 +269,14 @@ class Aluno360CopilotCard extends ConsumerWidget {
               profileCompletion,
               sticky: stickyAction,
             )) ...[
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed: () => _completeProfile(context, aluno),
-                  icon: const Icon(Icons.person_add_alt_1_rounded, size: 16),
-                  label: Text(copilotProfileGapsButtonLabel(aluno)),
-                  style: Aluno360Layout.operacaoOutlinedButtonStyle(
-                    context,
-                    primary,
-                  ),
-                ),
+              FxSettingsTile(
+                icon: Icons.person_add_alt_1_rounded,
+                label: copilotProfileGapsButtonLabel(aluno),
+                subtitle: 'Dados que ainda afetam a prescrição',
+                value: '',
+                accent: primary,
+                showDivider: false,
+                onTap: () => _completeProfile(context, aluno),
               ),
               const SizedBox(height: 10),
             ],

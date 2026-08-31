@@ -40,7 +40,7 @@ void main() {
     const alunosStatePart =
         'lib/features/alunos/screens/alunos_list_screen_state.part.dart';
     const alunoDetailWidgets = [
-      'lib/features/alunos/widgets/aluno360_section_header.dart',
+      'lib/features/alunos/widgets/aluno360_follow_up_card.dart',
       'lib/features/alunos/widgets/aluno360_copilot_card.dart',
     ];
     const dashboardWidgets = [

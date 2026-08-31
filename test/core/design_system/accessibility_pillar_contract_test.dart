@@ -44,7 +44,7 @@ void main() {
 
   test('hub screens expose root a11y scope and labels', () {
     const alunoDetailWidgets = [
-      'lib/features/alunos/widgets/aluno360_section_header.dart',
+      'lib/features/alunos/widgets/aluno360_follow_up_card.dart',
       'lib/features/alunos/widgets/aluno_detail_hero_card.dart',
     ];
 
@@ -97,8 +97,7 @@ void main() {
       isTrue,
     );
     final widgets = [
-      'lib/features/alunos/widgets/aluno360_section_header.dart',
-      'lib/features/alunos/widgets/aluno360_module_tile.dart',
+      'lib/features/alunos/widgets/aluno360_follow_up_card.dart',
     ];
     for (final path in widgets) {
       final source = File(path).readAsStringSync();

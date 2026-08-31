@@ -190,7 +190,11 @@ void main() {
       File(
         'lib/features/alunos/widgets/aluno360_finance_risk_banner.dart',
       ).readAsStringSync(),
-      contains('class Aluno360FinanceRiskBanner'),
+      allOf(
+        contains('class Aluno360FinanceRiskBanner'),
+        contains('FxSettingsGroup'),
+        contains('FxSettingsTile'),
+      ),
     );
     expect(
       File(
@@ -339,7 +343,6 @@ void main() {
         ).readAsStringSync();
     expect(layoutSource, contains('compactSectionTitleStyle'));
     expect(layoutSource, contains('panelTitleStyle'));
-    expect(layoutSource, contains('moduleTileTitleStyle'));
     expect(layoutSource, contains('ctaLabelStyle'));
     expect(
       File('lib/features/alunos/utils/aluno360_entry_motion.dart').existsSync(),
@@ -369,11 +372,12 @@ void main() {
       allOf(
         contains('aluno360FollowUpSemantics'),
         contains('FxSettingsGroup'),
+        contains('showFxInsetPickerSheet'),
       ),
     );
     expect(
       File(
-        'lib/features/alunos/widgets/aluno360_module_tile.dart',
+        'lib/features/alunos/utils/aluno360_a11y.dart',
       ).readAsStringSync(),
       contains('aluno360ModuleTileSemantics'),
     );
@@ -402,15 +406,17 @@ void main() {
       allOf(
         contains("'Medidas'"),
         contains('measurementRows'),
-        contains('Aluno360MeasurementsCompleteTile'),
+        contains("'Medidas em dia'"),
         contains('FxSettingsGroup'),
+        contains('FxSettingsTile'),
       ),
     );
     expect(
       File(
         'lib/features/alunos/widgets/aluno360_module_tile.dart',
-      ).readAsStringSync(),
-      contains('class Aluno360ModuleTile'),
+      ).existsSync(),
+      isFalse,
+      reason: 'fold legado ModuleTile removido',
     );
     expect(
       File(
@@ -549,6 +555,12 @@ void main() {
       ),
     );
     expect(screen, contains('showAluno360CopilotProfileGapsSheet'));
+    expect(
+      File(
+        'lib/features/alunos/widgets/aluno360_copilot_profile_gaps_sheet.dart',
+      ).readAsStringSync(),
+      contains('showFxInsetPickerSheet'),
+    );
     expect(screen, contains('aluno360InsetEmptyActionTiles'));
     expect(screen, contains('Peça um check-in'));
     expect(screen, contains('Quando houver check-in ou chat'));
