@@ -1,6 +1,6 @@
 import '../../../core/utils/pt_br_display.dart';
 
-const ofertaGatilhoValues = ['MANUAL', 'CHECKIN', 'TRILHA'];
+const ofertaGatilhoValues = ['MANUAL', 'CHECKIN', 'TRILHA_CONCLUIDA'];
 
 String ofertaGatilhoLabel(String? tipo) {
   switch ((tipo ?? '').trim().toUpperCase()) {

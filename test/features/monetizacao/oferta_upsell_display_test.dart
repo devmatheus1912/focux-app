@@ -9,7 +9,7 @@ void main() {
     expect(ofertaGatilhoLabel('TRILHA_CONCLUIDA'), 'Trilha');
     expect(ofertaGatilhoLabel(''), 'Manual');
     expect(ofertaGatilhoLabel(null), 'Manual');
-    expect(ofertaGatilhoValues, ['MANUAL', 'CHECKIN', 'TRILHA']);
+    expect(ofertaGatilhoValues, ['MANUAL', 'CHECKIN', 'TRILHA_CONCLUIDA']);
   });
 
   test('ofertaSubtitle e valor', () {
