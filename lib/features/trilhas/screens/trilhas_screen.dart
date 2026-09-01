@@ -1,25 +1,33 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:focux_app/core/widgets/fx_motion.dart';
 
+import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
+import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/ux/fx_hub_freshness.dart';
+import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
-import '../../../core/widgets/fx_home_sheet.dart';
-import '../../../core/widgets/fx_input_deco.dart';
+import '../../../core/widgets/fx_form_sheet.dart';
+import '../../../core/widgets/fx_inset_picker_row.dart';
+import '../../../core/widgets/fx_inset_picker_sheet.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
+import '../../../features/alunos/widgets/aluno_inset_form_field.dart';
 import '../models/trilha.dart';
 import '../providers/trilhas_provider.dart';
+import '../utils/trilhas_display.dart';
 
-// ─── Screen ───────────────────────────────────────────────────────────────────
+part 'trilhas_screen_cards.part.dart';
 
-class TrilhasScreen extends ConsumerWidget {
+class TrilhasScreen extends ConsumerStatefulWidget {
   final int alunoId;
   final String alunoNome;
 
@@ -30,350 +38,199 @@ class TrilhasScreen extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final trilhasAsync = ref.watch(trilhasAlunoProvider(alunoId));
+  ConsumerState<TrilhasScreen> createState() => _TrilhasScreenState();
+}
 
-    return fxScreenA11yScope(
-      label: 'Trilhas de Progresso — $alunoNome',
-      child: FxShellScaffold(
-        useMesh: true,
-        appBar: FxShellAppBar(
-          title: 'Trilhas de Progresso',
-          subtitle: alunoNome,
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.add_rounded),
-              tooltip: 'Criar nova trilha',
-              onPressed: () => _showCriarTrilha(context, ref),
-            ),
-          ],
-        ),
-        body: trilhasAsync.when(
-          loading: () => const SkeletonList(count: 4),
-          error:
-              (e, _) => FxErrorState(
-                chromeOnDark: Theme.of(context).brightness == Brightness.dark,
-                primary: Theme.of(context).colorScheme.primary,
-                message: friendlyError(e),
-                onRetry: () => ref.invalidate(trilhasAlunoProvider(alunoId)),
-                title: 'Não conseguimos carregar as trilhas',
-              ),
-          data: (trilhas) {
-            if (trilhas.isEmpty) {
-              return FxEmptyState(
-                icon: 'map',
-                title: 'Nenhuma trilha criada ainda',
-                subtitle:
-                    'Crie metas com marcos para acompanhar a evolução de $alunoNome.',
-                action: FxEmptyAction(
-                  label: 'Criar primeira trilha',
-                  onTap: () => _showCriarTrilha(context, ref),
-                ),
-              );
-            }
-            return ListView.builder(
-              padding: const EdgeInsets.all(TokensStrip.s4),
-              itemCount: trilhas.length,
-              itemBuilder:
-                  (ctx, i) => _TrilhaCard(
-                    trilha: trilhas[i],
-                    alunoId: alunoId,
-                    ref: ref,
-                  ),
-            );
-          },
-        ),
-      ),
-    );
+class _TrilhasScreenState extends ConsumerState<TrilhasScreen> {
+  DateTime? _fetchedAt;
+
+  Future<void> _refresh() async {
+    ref.invalidate(trilhasAlunoProvider(widget.alunoId));
+    try {
+      await ref.read(trilhasAlunoProvider(widget.alunoId).future);
+      if (mounted) setState(() => _fetchedAt = DateTime.now());
+    } catch (_) {}
   }
 
-  void _showCriarTrilha(BuildContext context, WidgetRef ref) {
+  void _stampFreshness() {
+    if (_fetchedAt != null) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || _fetchedAt != null) return;
+      setState(() => _fetchedAt = DateTime.now());
+    });
+  }
+
+  Future<void> _criarTrilha() async {
+    HapticFeedback.selectionClick();
     final tituloCtrl = TextEditingController();
     final descCtrl = TextEditingController();
-    String metaTipo = 'TREINOS';
+    var metaTipo = 'TREINOS';
+    var created = false;
 
-    showFxHomeSheet(
-      context,
-      builder: (ctx) {
-        final isDark = Theme.of(ctx).brightness == Brightness.dark;
-        final primary = Theme.of(ctx).colorScheme.primary;
-        return StatefulBuilder(
-          builder: (ctx, setState) {
-            return FxHomeSheetSurface(
-              isDark: isDark,
-              maxHeight:
-                  MediaQuery.sizeOf(ctx).height *
-                  FxHomeSheetChrome.maxHeightFactor,
-              child: Column(
+    try {
+      if (!mounted) return;
+      final ok = await showFxFormSheet(
+        context,
+        title: 'Nova trilha',
+        subtitle: 'Defina o título e o tipo de meta.',
+        icon: Icons.flag_outlined,
+        confirmLabel: 'Criar trilha',
+        child: StatefulBuilder(
+          builder:
+              (ctx, setSheetState) => Column(
                 mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  FxHomeSheetHandle(isDark: isDark),
-                  SizedBox(height: TokensStrip.s4),
-                  FxHomeSheetHeader(
-                    isDark: isDark,
-                    title: 'Nova Trilha',
-                    subtitle: 'Defina o título e o tipo de meta.',
-                    leading: Icon(
-                      Icons.flag_outlined,
-                      color: primary,
-                      size: 18,
-                    ),
-                  ),
-                  SizedBox(height: TokensStrip.s3),
-                  TextField(
+                  AlunoInsetFormField(
                     controller: tituloCtrl,
-                    decoration: FxInputDeco.build(context, 'Título da trilha'),
+                    label: 'Título da trilha',
+                    icon: Icons.title_outlined,
                   ),
-                  const SizedBox(height: 12),
-                  TextField(
+                  AlunoInsetFormField(
                     controller: descCtrl,
-                    decoration: FxInputDeco.build(
-                      context,
-                      'Descrição (opcional)',
-                    ),
+                    label: 'Descrição (opcional)',
+                    icon: Icons.notes_outlined,
                     maxLines: 2,
                   ),
-                  const SizedBox(height: 12),
-                  DropdownButtonFormField<String>(
-                    initialValue: metaTipo,
-                    decoration: FxInputDeco.build(context, 'Tipo de meta'),
-                    items: const [
-                      DropdownMenuItem(
-                        value: 'TREINOS',
-                        child: Text('Número de treinos'),
-                      ),
-                      DropdownMenuItem(
-                        value: 'PESO',
-                        child: Text('Meta de peso'),
-                      ),
-                      DropdownMenuItem(
-                        value: 'MEDIDA',
-                        child: Text('Meta de medida'),
-                      ),
-                      DropdownMenuItem(
-                        value: 'CUSTOMIZADO',
-                        child: Text('Customizado'),
-                      ),
-                    ],
-                    onChanged: (v) => setState(() => metaTipo = v!),
-                  ),
-                  const SizedBox(height: 20),
-                  FxLiquidPrimaryButton(
-                    label: 'Criar Trilha',
-                    onPressed: () async {
-                      if (tituloCtrl.text.trim().isEmpty) return;
-                      await ref
-                          .read(trilhasRepositoryProvider)
-                          .criarTrilha(
-                            NovaTrilhaRequest(
-                              alunoId: alunoId,
-                              titulo: tituloCtrl.text.trim(),
-                              descricao:
-                                  descCtrl.text.trim().isEmpty
-                                      ? null
-                                      : descCtrl.text.trim(),
-                              metaTipo: metaTipo,
+                  FxInsetPickerRow(
+                    icon: Icons.flag_outlined,
+                    label: 'Tipo de meta',
+                    value: trilhaMetaTipoLabel(metaTipo),
+                    showDivider: false,
+                    onTap: () async {
+                      final picked = await showFxInsetPickerSheet<String>(
+                        ctx,
+                        title: 'Tipo de meta',
+                        selected: metaTipo,
+                        items: [
+                          for (final tipo in trilhaMetaTipos)
+                            FxInsetPickerSheetItem(
+                              value: tipo,
+                              label: trilhaMetaTipoLabel(tipo),
                             ),
-                          );
-                      ref.invalidate(trilhasAlunoProvider(alunoId));
-                      if (ctx.mounted) Navigator.pop(ctx);
+                        ],
+                      );
+                      if (picked == null) return;
+                      setSheetState(() => metaTipo = picked);
                     },
                   ),
                 ],
               ),
-            );
-          },
-        );
-      },
-    );
-  }
-}
-
-// ─── TrilhaCard ───────────────────────────────────────────────────────────────
-
-class _TrilhaCard extends StatelessWidget {
-  final TrilhaModel trilha;
-  final int alunoId;
-  final WidgetRef ref;
-
-  const _TrilhaCard({
-    required this.trilha,
-    required this.alunoId,
-    required this.ref,
-  });
-
-  Color _progressColor(BuildContext context) {
-    if (trilha.concluida) return EagleTokens.good;
-    if (trilha.percentualConclusao >= 70) {
-      return Theme.of(context).colorScheme.primary;
+        ),
+      );
+      if (ok != true) return;
+      if (tituloCtrl.text.trim().isEmpty) {
+        if (mounted) {
+          FeedbackHelper.showWarn(context, 'Título da trilha é obrigatório.');
+        }
+        return;
+      }
+      await ref
+          .read(trilhasRepositoryProvider)
+          .criarTrilha(
+            NovaTrilhaRequest(
+              alunoId: widget.alunoId,
+              titulo: tituloCtrl.text.trim(),
+              descricao:
+                  descCtrl.text.trim().isEmpty ? null : descCtrl.text.trim(),
+              metaTipo: metaTipo,
+            ),
+          );
+      created = true;
+    } catch (e) {
+      if (mounted) FeedbackHelper.showError(context, friendlyError(e));
+    } finally {
+      tituloCtrl.dispose();
+      descCtrl.dispose();
     }
-    if (trilha.percentualConclusao >= 30) return EagleTokens.warn;
-    return ShellChrome.of(context).mute;
+    if (created) await _refresh();
   }
 
   @override
   Widget build(BuildContext context) {
     final chrome = ShellChrome.of(context);
-    final progressColor = _progressColor(context);
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      decoration: fxListCardDecoration(
-        context,
-        accent: trilha.concluida ? EagleTokens.good : null,
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(TokensStrip.s4),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    trilha.titulo,
-                    style: TextStyle(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 15,
-                      color: chrome.ink,
-                    ),
-                  ),
-                ),
-                if (trilha.concluida)
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 3,
-                    ),
-                    decoration: BoxDecoration(
-                      color: EagleTokens.good.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      '✓ CONCLUÍDA',
-                      style: FocuxHubTypography.chip(EagleTokens.good),
-                    ),
-                  ),
-              ],
-            ),
-            if (trilha.descricao != null) ...[
-              const SizedBox(height: 4),
-              Text(
-                trilha.descricao!,
-                style: FocuxHubTypography.bodyMuted(color: chrome.mute),
-              ),
-            ],
-            const SizedBox(height: 14),
+    final primary = Theme.of(context).colorScheme.primary;
+    final trilhasAsync = ref.watch(trilhasAlunoProvider(widget.alunoId));
+    final freshness = FxHubFreshness.fromFetchedAt(_fetchedAt);
 
-            // Progress bar
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Progresso',
-                  style: FocuxHubTypography.bodyMuted(color: chrome.mute),
-                ),
-                Text(
-                  '${trilha.percentualConclusao.toStringAsFixed(0)}%',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w700,
-                    color: progressColor,
-                    fontSize: 12,
-                  ),
-                ),
-              ],
+    return fxScreenA11yScope(
+      label: 'Trilhas de Progresso — ${widget.alunoNome}',
+      child: FxShellScaffold(
+        useMesh: true,
+        appBar: FxShellAppBar(
+          title: 'Trilhas de Progresso',
+          subtitle: trilhaHubSubtitle(
+            alunoNome: widget.alunoNome,
+            freshness: freshness,
+          ),
+          onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
+          actions: [
+            ShellHeaderIconButton(
+              icon: 'plus',
+              tooltip: 'Criar nova trilha',
+              onTap: _criarTrilha,
             ),
-            const SizedBox(height: 6),
-            Semantics(
-              label:
-                  'Progresso da trilha: ${trilha.percentualConclusao.toStringAsFixed(0)} por cento',
-              child: LinearProgressIndicator(
-                value: (trilha.percentualConclusao / 100).clamp(0.0, 1.0),
-                backgroundColor: progressColor.withValues(alpha: 0.1),
-                color: progressColor,
-                minHeight: 6,
-                borderRadius: BorderRadius.circular(4),
-              ),
-            ),
-
-            // Marcos
-            if (trilha.marcos.isNotEmpty) ...[
-              const SizedBox(height: 14),
-              Text(
-                'Marcos',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: chrome.ink,
-                ),
-              ),
-              const SizedBox(height: 6),
-              ...trilha.marcos.map(
-                (m) => _MarcoTile(
-                  marco: m,
-                  trilhaId: trilha.id,
-                  alunoId: alunoId,
-                  ref: ref,
-                ),
-              ),
-            ],
           ],
+        ),
+        body: trilhasAsync.when(
+          loading:
+              () => const Padding(
+                padding: EdgeInsets.all(FxSettingsLayout.pageInset),
+                child: SkeletonList(count: 4),
+              ),
+          error:
+              (e, _) => FxErrorState(
+                chromeOnDark: chrome.isDark,
+                primary: primary,
+                message: friendlyError(e),
+                onRetry: _refresh,
+                title: 'Não conseguimos carregar as trilhas',
+              ),
+          data: (trilhas) {
+            _stampFreshness();
+            return FxContentWidthLimiter(child: _buildBody(trilhas));
+          },
         ),
       ),
     );
   }
-}
 
-class _MarcoTile extends StatelessWidget {
-  final MarcoModel marco;
-  final int trilhaId;
-  final int alunoId;
-  final WidgetRef ref;
-
-  const _MarcoTile({
-    required this.marco,
-    required this.trilhaId,
-    required this.alunoId,
-    required this.ref,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return fxListTileCardShell(
-      context: context,
-      margin: EdgeInsets.zero,
-      accent: marco.concluido ? EagleTokens.good : null,
-      child: ListTile(
-        dense: true,
-        contentPadding: EdgeInsets.zero,
-        leading: IconButton(
-          tooltip: marco.concluido ? 'Marco concluído' : 'Concluir marco',
-          icon: Icon(
-            marco.concluido ? Icons.check_circle : Icons.radio_button_unchecked,
-            color:
-                marco.concluido
-                    ? EagleTokens.good
-                    : ShellChrome.of(context).mute,
-          ),
-          onPressed:
-              marco.concluido
-                  ? null
-                  : () async {
-                    await ref
-                        .read(trilhasRepositoryProvider)
-                        .concluirMarco(trilhaId: trilhaId, marcoId: marco.id);
-                    ref.invalidate(trilhasAlunoProvider(alunoId));
-                  },
+  Widget _buildBody(List<TrilhaModel> trilhas) {
+    if (trilhas.isEmpty) {
+      return RefreshIndicator(
+        onRefresh: _refresh,
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          children: [
+            FxEmptyState(
+              icon: 'route',
+              title: 'Nenhuma trilha criada ainda',
+              subtitle:
+                  'Crie metas com marcos para acompanhar a evolução de ${widget.alunoNome}.',
+              action: FxEmptyAction(
+                label: 'Criar primeira trilha',
+                onTap: _criarTrilha,
+              ),
+            ),
+          ],
         ),
-        title: Text(
-          marco.titulo,
-          style: TextStyle(
-            fontSize: 13,
-            decoration: marco.concluido ? TextDecoration.lineThrough : null,
-            color: marco.concluido ? TokensStrip.textSecondary : null,
-          ),
+      );
+    }
+    return RefreshIndicator(
+      onRefresh: _refresh,
+      child: ListView.builder(
+        padding: const EdgeInsets.fromLTRB(
+          FxSettingsLayout.pageInset,
+          8,
+          FxSettingsLayout.pageInset,
+          32,
         ),
+        itemCount: trilhas.length,
+        itemBuilder:
+            (ctx, i) => _TrilhaCard(
+              trilha: trilhas[i],
+              alunoId: widget.alunoId,
+              ref: ref,
+            ),
       ),
     );
   }
