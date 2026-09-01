@@ -1,24 +1,31 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/brand_palette.dart';
-import '../../../core/theme/design_tokens.dart';
-import '../../../core/utils/fx_utils.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../../features/auth/providers/auth_provider.dart';
-import '../data/feedback_video_repository.dart';
-import '../../../core/utils/friendly_error.dart';
-import '../../../core/widgets/feedback_helper.dart';
-import 'package:focux_app/core/widgets/fx_error_state.dart';
-import 'package:focux_app/core/widgets/fx_motion.dart';
-import '../../../core/widgets/skeleton_loader.dart';
-import '../../../core/theme/tokens_strip.dart';
+
+import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
+import '../../../core/utils/friendly_error.dart';
+import '../../../core/ux/fx_hub_freshness.dart';
+import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_confirm_sheet.dart';
+import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
-import '../../../core/widgets/fx_home_sheet.dart';
-import '../../../core/widgets/fx_input_deco.dart';
+import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_form_sheet.dart';
+import '../../../core/widgets/fx_inset_picker_sheet.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
+import '../../../core/widgets/fx_settings_group.dart';
+import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/skeleton_loader.dart';
+import '../../../features/alunos/widgets/aluno_inset_form_field.dart';
+import '../../../features/auth/providers/auth_provider.dart';
 import '../../alunos/utils/satellite_screen_utils.dart';
-import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
+import '../data/feedback_video_repository.dart';
+import '../utils/feedback_video_display.dart';
+
+enum _FeedbackVideoAcao { abrir, deletar }
 
 class FeedbackVideoScreen extends ConsumerStatefulWidget {
   final int? alunoId;
@@ -35,6 +42,7 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
   List<FeedbackVideo> _feedbacks = [];
   bool _loading = true;
   String? _erro;
+  DateTime? _fetchedAt;
 
   @override
   void initState() {
@@ -57,6 +65,7 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
         setState(() {
           _feedbacks = r;
           _loading = false;
+          _fetchedAt = DateTime.now();
         });
       }
     } catch (e) {
@@ -70,21 +79,34 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
   }
 
   Future<void> _abrirVideo(String url) async {
-    final uri = Uri.parse(url);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri);
-    } else {
+    final uri = Uri.tryParse(url);
+    if (uri == null) {
       if (mounted) {
         FeedbackHelper.showError(context, 'Não foi possível abrir a URL');
       }
+      return;
+    }
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    } else if (mounted) {
+      FeedbackHelper.showError(context, 'Não foi possível abrir a URL');
     }
   }
 
-  Future<void> _deletar(int id) async {
+  Future<void> _deletar(FeedbackVideo item) async {
+    final ok = await showFxConfirmSheet(
+      context,
+      title: 'Remover feedback?',
+      subtitle: feedbackVideoLabel(item.comentario),
+      message: 'O vídeo some desta lista. Dá para registrar de novo depois.',
+      confirmLabel: 'Remover',
+      destructive: true,
+    );
+    if (!ok || !mounted) return;
     try {
-      await FeedbackVideoRepository(ref.read(apiClientProvider)).deletar(id);
-      _feedbacks.removeWhere((f) => f.id == id);
-      setState(() {});
+      await FeedbackVideoRepository(ref.read(apiClientProvider)).deletar(item.id);
+      if (!mounted) return;
+      setState(() => _feedbacks.removeWhere((f) => f.id == item.id));
     } catch (e) {
       if (mounted) {
         FeedbackHelper.showError(context, friendlyError(e));
@@ -92,67 +114,151 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
     }
   }
 
-  Future<void> _novoFeedback() async {
-    await showFxHomeSheet(
+  Future<void> _abrirAcoes(FeedbackVideo item) async {
+    final picked = await showFxInsetPickerSheet<_FeedbackVideoAcao>(
       context,
-      builder:
-          (ctx) => _NovoFeedbackDialog(
-            alunoIdPreenchido: widget.alunoId,
-            alunoNome: widget.alunoNome,
-            onSalvo: () {
-              Navigator.pop(ctx);
-              _load();
-            },
-          ),
+      title: feedbackVideoLabel(item.comentario),
+      items: const [
+        FxInsetPickerSheetItem(
+          value: _FeedbackVideoAcao.abrir,
+          label: 'Assistir vídeo',
+        ),
+        FxInsetPickerSheetItem(
+          value: _FeedbackVideoAcao.deletar,
+          label: 'Remover',
+        ),
+      ],
     );
+    if (picked == null || !mounted) return;
+    switch (picked) {
+      case _FeedbackVideoAcao.abrir:
+        await _abrirVideo(item.videoUrl);
+      case _FeedbackVideoAcao.deletar:
+        await _deletar(item);
+    }
+  }
+
+  Future<void> _novoFeedback() async {
+    HapticFeedback.selectionClick();
+    final alunoIdCtrl = TextEditingController(
+      text: widget.alunoId?.toString() ?? '',
+    );
+    final exercicioIdCtrl = TextEditingController();
+    final videoUrlCtrl = TextEditingController();
+    final comentarioCtrl = TextEditingController();
+    var created = false;
+
+    try {
+      if (!mounted) return;
+      final ok = await showFxFormSheet(
+        context,
+        title: 'Novo feedback de vídeo',
+        subtitle:
+            widget.alunoNome != null && widget.alunoNome!.trim().isNotEmpty
+                ? 'Para ${satelliteFirstName(widget.alunoNome)}'
+                : 'URL, exercício e comentário técnico.',
+        icon: Icons.videocam_outlined,
+        confirmLabel: 'Salvar',
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (widget.alunoId == null)
+              AlunoInsetFormField(
+                controller: alunoIdCtrl,
+                label: 'Aluno (ID interno)',
+                icon: Icons.person_outline,
+                hint: 'Somente se não veio do perfil',
+                keyboardType: TextInputType.number,
+              ),
+            AlunoInsetFormField(
+              controller: exercicioIdCtrl,
+              label: 'Exercício',
+              icon: Icons.fitness_center_outlined,
+              hint: 'ID do exercício no app',
+              keyboardType: TextInputType.number,
+            ),
+            AlunoInsetFormField(
+              controller: videoUrlCtrl,
+              label: 'URL do vídeo',
+              icon: Icons.link_outlined,
+              hint: 'Cloudinary, YouTube…',
+            ),
+            AlunoInsetFormField(
+              controller: comentarioCtrl,
+              label: 'Comentário técnico',
+              icon: Icons.notes_outlined,
+              maxLines: 3,
+              showDivider: false,
+            ),
+          ],
+        ),
+      );
+      if (ok != true) return;
+      final alunoId = widget.alunoId ?? int.tryParse(alunoIdCtrl.text);
+      final exercicioId = int.tryParse(exercicioIdCtrl.text);
+      final video = videoUrlCtrl.text.trim();
+      final com = comentarioCtrl.text.trim();
+      if (alunoId == null ||
+          exercicioId == null ||
+          video.isEmpty ||
+          com.isEmpty) {
+        if (mounted) {
+          FeedbackHelper.showError(context, 'Preencha todos os campos');
+        }
+        return;
+      }
+      await FeedbackVideoRepository(ref.read(apiClientProvider)).registrar(
+        alunoId: alunoId,
+        exercicioId: exercicioId,
+        videoUrl: video,
+        comentario: com,
+      );
+      created = true;
+    } catch (e) {
+      if (mounted) {
+        FeedbackHelper.showError(context, friendlyError(e));
+      }
+    } finally {
+      alunoIdCtrl.dispose();
+      exercicioIdCtrl.dispose();
+      videoUrlCtrl.dispose();
+      comentarioCtrl.dispose();
+    }
+    if (created) await _load();
   }
 
   @override
   Widget build(BuildContext context) {
-    final primary = Theme.of(context).colorScheme.primary;
-    final primaryDeep = BrandPalette.deep(primary);
     final chrome = ShellChrome.of(context);
+    final primary = Theme.of(context).colorScheme.primary;
+    final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
     return fxScreenA11yScope(
-      label: 'Feedback Video',
+      label: 'Feedback de vídeo',
       child: FxShellScaffold(
         useMesh: true,
-        extendBody: true,
         appBar: FxShellAppBar(
           title:
               widget.alunoNome != null
                   ? 'Feedbacks — ${widget.alunoNome}'
-                  : 'Feedbacks de Vídeo',
-          subtitle: 'Análises técnicas de execução',
+                  : 'Feedbacks de vídeo',
+          subtitle: feedbackVideoHubSubtitle(
+            alunoNome: widget.alunoNome,
+            freshness: freshnessLabel,
+          ),
           actions: [
-            IconButton(
-              icon: Icon(Icons.refresh, color: chrome.ink),
-              tooltip: 'Atualizar feedbacks',
-              onPressed: _load,
+            ShellHeaderIconButton(
+              icon: 'plus',
+              tooltip: 'Novo feedback',
+              onTap: _novoFeedback,
             ),
           ],
         ),
-        floatingActionButton: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(colors: [primary, primaryDeep]),
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: primary.withValues(alpha: 0.4),
-                blurRadius: 16,
-                offset: const Offset(0, 6),
-              ),
-            ],
-          ),
-          child: FloatingActionButton(
-            onPressed: _novoFeedback,
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            child: const Icon(Icons.add, color: Colors.white),
-          ),
-        ),
         body:
             _loading
-                ? const SkeletonList(count: 4)
+                ? const Padding(
+                  padding: EdgeInsets.all(FxSettingsLayout.pageInset),
+                  child: SkeletonList(count: 4),
+                )
                 : _erro != null
                 ? FxErrorState(
                   chromeOnDark: chrome.isDark,
@@ -161,224 +267,60 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
                   onRetry: _load,
                   title: 'Não conseguimos carregar os feedbacks',
                 )
-                : _feedbacks.isEmpty
-                ? satelliteEmptyBody(
-                  child: FxEmptyState(
-                    key: const ValueKey('feedback_video_empty'),
-                    icon: 'spark',
-                    title: 'Nenhum feedback de vídeo',
-                    subtitle:
-                        widget.alunoNome != null
-                            ? 'Peça a ${satelliteFirstName(widget.alunoNome)} um vídeo de execução ou registre o primeiro feedback técnico.'
-                            : 'Registre o primeiro feedback técnico com URL do vídeo e comentário.',
-                    action: FxEmptyAction(
-                      label: 'Novo feedback',
-                      onTap: _novoFeedback,
-                    ),
-                  ),
-                )
-                : ListView.builder(
-                  padding: const EdgeInsets.all(TokensStrip.s4),
-                  itemCount: _feedbacks.length,
-                  itemBuilder: (_, i) {
-                    final f = _feedbacks[i];
-                    return FxSatelliteListTile(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      accent: primary,
-                      titleCase: false,
-                      title: 'Exercício #${f.exercicioId}',
-                      leading: Icon(
-                        Icons.video_library_rounded,
-                        size: 32,
-                        color: primary,
-                      ),
-                      isThreeLine: true,
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const SizedBox(height: 4),
-                          Text('Comentário: ${f.comentario}'),
-                          if (f.aiScore != null) ...[
-                            const SizedBox(height: 4),
-                            Text(
-                              'Score IA: ${f.aiScore}/100 · ${f.statusAnalise ?? ''}',
-                            ),
-                          ],
-                          if (f.aiAnalise != null &&
-                              f.aiAnalise!.isNotEmpty) ...[
-                            const SizedBox(height: 4),
-                            Text(
-                              f.aiAnalise!,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                          const SizedBox(height: 4),
-                          Text('Data: ${fxDateShort(f.criadoEm)}'),
-                        ],
-                      ),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.open_in_new_rounded),
-                            tooltip: 'Assistir vídeo',
-                            onPressed: () => _abrirVideo(f.videoUrl),
-                          ),
-                          IconButton(
-                            icon: const Icon(
-                              Icons.delete_outline_rounded,
-                              color: EagleTokens.bad,
-                            ),
-                            onPressed: () => _deletar(f.id),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
+                : FxContentWidthLimiter(child: _buildBody()),
       ),
     );
   }
-}
 
-class _NovoFeedbackDialog extends ConsumerStatefulWidget {
-  final int? alunoIdPreenchido;
-  final String? alunoNome;
-  final VoidCallback onSalvo;
-
-  const _NovoFeedbackDialog({
-    this.alunoIdPreenchido,
-    this.alunoNome,
-    required this.onSalvo,
-  });
-
-  @override
-  ConsumerState<_NovoFeedbackDialog> createState() =>
-      _NovoFeedbackDialogState();
-}
-
-class _NovoFeedbackDialogState extends ConsumerState<_NovoFeedbackDialog> {
-  late TextEditingController _alunoIdCtrl;
-  final _exercicioIdCtrl = TextEditingController();
-  final _videoUrlCtrl = TextEditingController();
-  final _comentarioCtrl = TextEditingController();
-  bool _salvando = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _alunoIdCtrl = TextEditingController(
-      text: widget.alunoIdPreenchido?.toString() ?? '',
-    );
-  }
-
-  Future<void> _salvar() async {
-    final alunoId = widget.alunoIdPreenchido ?? int.tryParse(_alunoIdCtrl.text);
-    final exercicioId = int.tryParse(_exercicioIdCtrl.text);
-    final video = _videoUrlCtrl.text.trim();
-    final com = _comentarioCtrl.text.trim();
-
-    if (alunoId == null ||
-        exercicioId == null ||
-        video.isEmpty ||
-        com.isEmpty) {
-      FeedbackHelper.showError(context, 'Preencha todos os campos');
-      return;
-    }
-
-    setState(() => _salvando = true);
-    try {
-      await FeedbackVideoRepository(ref.read(apiClientProvider)).registrar(
-        alunoId: alunoId,
-        exercicioId: exercicioId,
-        videoUrl: video,
-        comentario: com,
-      );
-      widget.onSalvo();
-    } catch (e) {
-      if (mounted) {
-        FeedbackHelper.showError(context, friendlyError(e));
-      }
-    }
-    if (mounted) setState(() => _salvando = false);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final primary = Theme.of(context).colorScheme.primary;
-    return FxHomeSheetSurface(
-      isDark: isDark,
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            FxHomeSheetHandle(isDark: isDark),
-            const SizedBox(height: 16),
-            FxHomeSheetHeader(
-              isDark: isDark,
-              title: 'Novo Feedback de Vídeo',
-              leading: Icon(Icons.videocam_outlined, color: primary, size: 18),
-            ),
-            const SizedBox(height: 16),
-            if (widget.alunoIdPreenchido != null &&
-                (widget.alunoNome ?? '').trim().isNotEmpty) ...[
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Chip(
-                  label: Text('Para ${satelliteFirstName(widget.alunoNome)}'),
-                ),
-              ),
-              const SizedBox(height: 8),
-            ] else ...[
-              TextField(
-                controller: _alunoIdCtrl,
-                decoration: FxInputDeco.build(
-                  context,
-                  'Aluno (ID interno)',
-                  hint: 'Somente se não veio do perfil',
-                ),
-                keyboardType: TextInputType.number,
-              ),
-              const SizedBox(height: 8),
-            ],
-            TextField(
-              controller: _exercicioIdCtrl,
-              decoration: FxInputDeco.build(
-                context,
-                'Exercício',
-                hint: 'ID do exercício no app',
-              ),
-              keyboardType: TextInputType.number,
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _videoUrlCtrl,
-              decoration: FxInputDeco.build(
-                context,
-                'URL do Vídeo (Cloudinary, YouTube, etc)',
-              ),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _comentarioCtrl,
-              decoration: FxInputDeco.build(context, 'Comentário Técnico'),
-              maxLines: 3,
-            ),
-            const SizedBox(height: 16),
-            FxLiquidPrimaryButton(
-              label: 'Salvar',
-              loading: _salvando,
-              onPressed: _salvando ? null : _salvar,
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancelar'),
-            ),
-          ],
+  Widget _buildBody() {
+    return RefreshIndicator(
+      onRefresh: _load,
+      child: ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.fromLTRB(
+          FxSettingsLayout.pageInset,
+          8,
+          FxSettingsLayout.pageInset,
+          32,
         ),
+        children: [
+          if (_feedbacks.isEmpty)
+            FxEmptyState(
+              key: const ValueKey('feedback_video_empty'),
+              icon: 'spark',
+              title: 'Nenhum feedback de vídeo',
+              subtitle:
+                  widget.alunoNome != null
+                      ? 'Peça a ${satelliteFirstName(widget.alunoNome)} um vídeo de execução ou registre o primeiro feedback técnico.'
+                      : 'Registre o primeiro feedback técnico com URL do vídeo e comentário.',
+              action: FxEmptyAction(
+                label: 'Novo feedback',
+                onTap: _novoFeedback,
+              ),
+            )
+          else
+            FxSettingsGroup(
+              header: 'Feedbacks',
+              caption: 'Toque para assistir ou remover. Score IA quando houver.',
+              children: [
+                for (var i = 0; i < _feedbacks.length; i++)
+                  FxSettingsTile(
+                    fxIcon: feedbackVideoFxIcon(_feedbacks[i].aiScore),
+                    label: feedbackVideoLabel(_feedbacks[i].comentario),
+                    subtitle: feedbackVideoSubtitle(
+                      criadoEm: _feedbacks[i].criadoEm,
+                      aiScore: _feedbacks[i].aiScore,
+                      statusAnalise: _feedbacks[i].statusAnalise,
+                    ),
+                    value: feedbackVideoValue(_feedbacks[i].aiScore),
+                    numeric: _feedbacks[i].aiScore != null,
+                    danger: feedbackVideoDanger(_feedbacks[i].aiScore),
+                    showDivider: i != _feedbacks.length - 1,
+                    onTap: () => _abrirAcoes(_feedbacks[i]),
+                  ),
+              ],
+            ),
+        ],
       ),
     );
   }
