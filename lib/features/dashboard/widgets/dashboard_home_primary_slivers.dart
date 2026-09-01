@@ -211,7 +211,7 @@ List<Widget> buildDashboardHomePrimarySlivers({
           ),
           onAtivos:
               () => goPersonalShellTab(context, '/alunos?filtro=ativos'),
-          onCheckins: () => goPersonalShellTab(context, '/checkin/historico'),
+          onCheckins: () => goPersonalShellTab(context, '/alunos'),
           onRisco:
               riscoAlto > 0
                   ? () => goPersonalShellTab(context, '/alunos?filtro=risco')
