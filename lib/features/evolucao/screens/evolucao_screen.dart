@@ -1,29 +1,31 @@
 import 'package:flutter/material.dart';
-import '../../../core/widgets/fx_sparkline.dart';
-import '../../../core/theme/design_tokens.dart';
-import '../../../core/theme/brand_palette.dart';
-import '../../../core/utils/friendly_error.dart';
-import '../../../core/utils/fx_utils.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../features/auth/providers/auth_provider.dart';
-import '../data/evolucao_repository.dart';
-import '../../../core/widgets/feedback_helper.dart';
-import '../../../core/widgets/fx_error_state.dart';
-import '../../../core/widgets/fx_shell_scaffold.dart';
-import '../../../core/widgets/skeleton_loader.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
+import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 
 import '../../../core/router/safe_navigation.dart';
+import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
-import '../../../core/theme/tokens_strip.dart';
+import '../../../core/utils/friendly_error.dart';
+import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/theme/design_tokens.dart';
+import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
+import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_form_sheet.dart';
+import '../../../core/widgets/fx_inset_picker_sheet.dart';
+import '../../../core/widgets/fx_settings_group.dart';
+import '../../../core/widgets/fx_settings_tile.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/fx_sparkline.dart';
+import '../../../core/widgets/skeleton_loader.dart';
+import '../../../features/auth/providers/auth_provider.dart';
 import '../../alunos/utils/satellite_screen_utils.dart';
-import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
+import '../data/evolucao_repository.dart';
+import '../utils/evolucao_display.dart';
 
 part 'evolucao_screen_widgets.part.dart';
 
-// ─── Providers ───────────────────────────────────────────────────────────────
 final evolucaoHomeProvider = FutureProvider.family<EvolucaoHomeBundle, int>((
   ref,
   alunoId,
@@ -31,22 +33,6 @@ final evolucaoHomeProvider = FutureProvider.family<EvolucaoHomeBundle, int>((
   final repo = EvolucaoRepository(ref.read(apiClientProvider));
   return repo.getHome(alunoId);
 });
-
-final medidasProvider = FutureProvider.family<List<MedidaCorporal>, int>((
-  ref,
-  alunoId,
-) async {
-  return (await ref.watch(evolucaoHomeProvider(alunoId).future)).medidas;
-});
-
-final recordesProvider = FutureProvider.family<List<RecordePessoal>, int>((
-  ref,
-  alunoId,
-) async {
-  return (await ref.watch(evolucaoHomeProvider(alunoId).future)).recordes;
-});
-
-// ─── Tela principal ───────────────────────────────────────────────────────────
 
 class EvolucaoScreen extends ConsumerStatefulWidget {
   final int alunoId;
@@ -61,45 +47,38 @@ class EvolucaoScreen extends ConsumerStatefulWidget {
   ConsumerState<EvolucaoScreen> createState() => _EvolucaoScreenState();
 }
 
-class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
+class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
+  EvolucaoHubView _view = EvolucaoHubView.medidas;
 
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 2, vsync: this);
-    _tabController.addListener(() => setState(() {}));
+  Future<void> _abrirVista() async {
+    final picked = await showFxInsetPickerSheet<EvolucaoHubView>(
+      context,
+      title: 'Ver',
+      selected: _view,
+      items: [
+        for (final v in EvolucaoHubView.values)
+          FxInsetPickerSheetItem(value: v, label: evolucaoHubViewLabel(v)),
+      ],
+    );
+    if (!mounted || picked == null || picked == _view) return;
+    setState(() => _view = picked);
   }
 
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
-  }
-
-  String _variacaoPeso(List<MedidaCorporal> medidas) {
-    final comPeso = medidas.where((m) => m.peso != null).toList();
-    if (comPeso.length < 2) return '';
-    comPeso.sort((a, b) => a.data.compareTo(b.data));
-    final primeiro = comPeso.first.peso!;
-    final ultimo = comPeso.last.peso!;
-    final diff = ultimo - primeiro;
-    final sinal = diff >= 0 ? '+' : '';
-    return '$sinal${diff.toStringAsFixed(1)}kg desde o início';
+  void _registrar() {
+    if (_view == EvolucaoHubView.medidas) {
+      _mostrarDialogMedida();
+    } else {
+      _mostrarDialogRecorde();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final primary = Theme.of(context).colorScheme.primary;
-    final chrome = ShellChrome.forDark(isDark);
     final homeAsync = ref.watch(evolucaoHomeProvider(widget.alunoId));
     final medidasAsync = homeAsync.whenData((h) => h.medidas);
     final recordesAsync = homeAsync.whenData((h) => h.recordes);
-
-    final variacaoText = medidasAsync.whenOrNull(
-      data: (lista) => _variacaoPeso(lista),
+    final variacao = medidasAsync.whenOrNull(
+      data: evolucaoVariacaoPeso,
     );
 
     return fxScreenA11yScope(
@@ -108,214 +87,164 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen>
         useMesh: true,
         appBar: FxShellAppBar(
           title: 'Evolução — ${widget.alunoNome}',
+          subtitle: evolucaoHubSubtitle(view: _view, variacao: variacao),
           onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
-        ),
-        body: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            TabBar(
-              controller: _tabController,
-              indicatorColor: primary,
-              labelColor: primary,
-              unselectedLabelColor: chrome.mute,
-              indicatorWeight: 2.5,
-              tabs: const [
-                Tab(text: 'Medidas Corporais'),
-                Tab(text: 'Recordes Pessoais'),
-              ],
+          actions: [
+            ShellHeaderIconButton(
+              icon: 'trend',
+              tooltip: 'Trocar visão',
+              onTap: _abrirVista,
             ),
-            if (variacaoText != null && variacaoText.isNotEmpty)
-              _BannerVariacao(texto: variacaoText),
-            Expanded(
-              child: TabBarView(
-                controller: _tabController,
-                children: [
-                  _TabMedidas(
-                    alunoId: widget.alunoId,
-                    alunoNome: widget.alunoNome,
-                    medidasAsync: medidasAsync,
-                    onRegister: () => _mostrarDialogMedida(context),
-                    onRetry:
-                        () =>
-                            ref.invalidate(
-                              evolucaoHomeProvider(widget.alunoId),
-                            ),
-                  ),
-                  _TabRecordes(
-                    alunoId: widget.alunoId,
-                    alunoNome: widget.alunoNome,
-                    recordesAsync: recordesAsync,
-                    onRegister: () => _mostrarDialogRecorde(context),
-                    onRetry:
-                        () =>
-                            ref.invalidate(
-                              evolucaoHomeProvider(widget.alunoId),
-                            ),
-                  ),
-                ],
-              ),
+            ShellHeaderIconButton(
+              icon: 'plus',
+              tooltip:
+                  _view == EvolucaoHubView.medidas
+                      ? 'Registrar medida'
+                      : 'Registrar recorde',
+              onTap: _registrar,
             ),
           ],
         ),
-        floatingActionButton: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [primary, BrandPalette.deep(primary)],
-            ),
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: primary.withValues(alpha: 0.4),
-                blurRadius: 16,
-                offset: const Offset(0, 6),
+        body: FxContentWidthLimiter(
+          child: IndexedStack(
+            index: _view.index,
+            children: [
+              _TabMedidas(
+                alunoNome: widget.alunoNome,
+                medidasAsync: medidasAsync,
+                onRegister: _mostrarDialogMedida,
+                onRetry:
+                    () => ref.invalidate(
+                      evolucaoHomeProvider(widget.alunoId),
+                    ),
+              ),
+              _TabRecordes(
+                alunoNome: widget.alunoNome,
+                recordesAsync: recordesAsync,
+                onRegister: _mostrarDialogRecorde,
+                onRetry:
+                    () => ref.invalidate(
+                      evolucaoHomeProvider(widget.alunoId),
+                    ),
               ),
             ],
-          ),
-          child: FloatingActionButton(
-            onPressed: () {
-              if (_tabController.index == 0) {
-                _mostrarDialogMedida(context);
-              } else {
-                _mostrarDialogRecorde(context);
-              }
-            },
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            child: const Icon(Icons.add, color: Colors.white),
           ),
         ),
       ),
     );
   }
 
-  Future<void> _mostrarDialogMedida(BuildContext context) async {
+  Future<void> _mostrarDialogMedida() async {
     final pesoCtrl = TextEditingController();
-    final gorduraCtrl = TextEditingController();
-    final massaMagraCtrl = TextEditingController();
     final abdomenCtrl = TextEditingController();
-    final obsCtrl = TextEditingController();
-
-    final saved = await showFxFormSheet(
-      context,
-      title: 'Nova Medida Corporal',
-      icon: Icons.monitor_weight_outlined,
-      confirmLabel: 'Salvar',
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _CampoNumerico(controller: pesoCtrl, label: 'Peso (kg)'),
-          const SizedBox(height: 10),
-          _CampoNumerico(controller: gorduraCtrl, label: '% Gordura'),
-          const SizedBox(height: 10),
-          _CampoNumerico(
-            controller: massaMagraCtrl,
-            label: 'Massa Magra (kg)',
-          ),
-          const SizedBox(height: 10),
-          _CampoNumerico(
-            controller: abdomenCtrl,
-            label: 'Circunf. Abdômen (cm)',
-          ),
-          const SizedBox(height: 10),
-          TextField(
-            controller: obsCtrl,
-            decoration: InputDecoration(
-              labelText: 'Observação',
-              border: FxInputDeco.outlineBorder(
-                borderRadius: BorderRadius.circular(14),
-              ),
-            ),
-            maxLines: 2,
-          ),
-        ],
-      ),
-    );
-    if (!saved) return;
+    final quadrilCtrl = TextEditingController();
+    final bracoCtrl = TextEditingController();
     try {
-      final repo = EvolucaoRepository(ref.read(apiClientProvider));
-      await repo.adicionarMedida(
+      final saved = await showFxFormSheet(
+        context,
+        title: 'Nova medida',
+        icon: Icons.monitor_weight_outlined,
+        confirmLabel: 'Salvar',
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _CampoNumerico(controller: pesoCtrl, label: 'Peso (kg)'),
+            const SizedBox(height: 10),
+            _CampoNumerico(
+              controller: abdomenCtrl,
+              label: 'Circunf. abdômen (cm)',
+            ),
+            const SizedBox(height: 10),
+            _CampoNumerico(controller: quadrilCtrl, label: 'Quadril (cm)'),
+            const SizedBox(height: 10),
+            _CampoNumerico(controller: bracoCtrl, label: 'Braço (cm)'),
+          ],
+        ),
+      );
+      if (saved != true) return;
+      await EvolucaoRepository(ref.read(apiClientProvider)).adicionarMedida(
         widget.alunoId,
-        peso: double.tryParse(pesoCtrl.text),
-        cintura: double.tryParse(abdomenCtrl.text),
+        peso: double.tryParse(pesoCtrl.text.replaceAll(',', '.')),
+        cintura: double.tryParse(abdomenCtrl.text.replaceAll(',', '.')),
+        quadril: double.tryParse(quadrilCtrl.text.replaceAll(',', '.')),
+        braco: double.tryParse(bracoCtrl.text.replaceAll(',', '.')),
       );
       ref.invalidate(evolucaoHomeProvider(widget.alunoId));
-      if (context.mounted) {
-        FeedbackHelper.showSuccess(context, 'Medida adicionada!');
-      }
+      if (!mounted) return;
+      FeedbackHelper.showSuccess(context, 'Medida adicionada!');
     } catch (e) {
-      if (context.mounted) {
-        FeedbackHelper.showError(context, friendlyError(e));
-      }
+      if (!mounted) return;
+      FeedbackHelper.showError(context, friendlyError(e));
+    } finally {
+      pesoCtrl.dispose();
+      abdomenCtrl.dispose();
+      quadrilCtrl.dispose();
+      bracoCtrl.dispose();
     }
   }
 
-  Future<void> _mostrarDialogRecorde(BuildContext context) async {
+  Future<void> _mostrarDialogRecorde() async {
     final exercicioCtrl = TextEditingController();
     final cargaCtrl = TextEditingController();
     final unidadeCtrl = TextEditingController(text: 'kg');
     final obsCtrl = TextEditingController();
-
-    final saved = await showFxFormSheet(
-      context,
-      title: 'Novo Recorde Pessoal',
-      icon: Icons.emoji_events_outlined,
-      confirmLabel: 'Salvar',
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          TextField(
-            controller: exercicioCtrl,
-            decoration: InputDecoration(
-              labelText: 'Exercício',
-              border: FxInputDeco.outlineBorder(
-                borderRadius: BorderRadius.circular(14),
-              ),
-            ),
-          ),
-          const SizedBox(height: 10),
-          _CampoNumerico(controller: cargaCtrl, label: 'Carga'),
-          const SizedBox(height: 10),
-          TextField(
-            controller: unidadeCtrl,
-            decoration: InputDecoration(
-              labelText: 'Unidade (kg, reps...)',
-              border: FxInputDeco.outlineBorder(
-                borderRadius: BorderRadius.circular(14),
-              ),
-            ),
-          ),
-          const SizedBox(height: 10),
-          TextField(
-            controller: obsCtrl,
-            decoration: InputDecoration(
-              labelText: 'Observação',
-              border: FxInputDeco.outlineBorder(
-                borderRadius: BorderRadius.circular(14),
-              ),
-            ),
-            maxLines: 2,
-          ),
-        ],
-      ),
-    );
-    if (!saved) return;
     try {
-      final repo = EvolucaoRepository(ref.read(apiClientProvider));
-      await repo.adicionarRecorde(
+      final saved = await showFxFormSheet(
+        context,
+        title: 'Novo recorde',
+        icon: Icons.emoji_events_outlined,
+        confirmLabel: 'Salvar',
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: exercicioCtrl,
+              decoration: FxInputDeco.build(context, 'Exercício'),
+            ),
+            const SizedBox(height: 10),
+            _CampoNumerico(controller: cargaCtrl, label: 'Carga'),
+            const SizedBox(height: 10),
+            TextField(
+              controller: unidadeCtrl,
+              decoration: FxInputDeco.build(
+                context,
+                'Unidade (kg, reps…)',
+              ),
+            ),
+            const SizedBox(height: 10),
+            TextField(
+              controller: obsCtrl,
+              decoration: FxInputDeco.build(context, 'Observação'),
+              maxLines: 2,
+            ),
+          ],
+        ),
+      );
+      if (saved != true) return;
+      final nome = exercicioCtrl.text.trim();
+      if (nome.isEmpty) {
+        if (!mounted) return;
+        FeedbackHelper.showError(context, 'Informe o exercício.');
+        return;
+      }
+      await EvolucaoRepository(ref.read(apiClientProvider)).adicionarRecorde(
         widget.alunoId,
-        exercicioNome: exercicioCtrl.text.trim(),
-        carga: double.tryParse(cargaCtrl.text),
+        exercicioNome: nome,
+        carga: double.tryParse(cargaCtrl.text.replaceAll(',', '.')),
         unidade: unidadeCtrl.text.trim(),
         observacao: obsCtrl.text.trim(),
       );
       ref.invalidate(evolucaoHomeProvider(widget.alunoId));
-      if (context.mounted) {
-        FeedbackHelper.showSuccess(context, 'Recorde adicionado!');
-      }
+      if (!mounted) return;
+      FeedbackHelper.showSuccess(context, 'Recorde adicionado!');
     } catch (e) {
-      if (context.mounted) {
-        FeedbackHelper.showError(context, friendlyError(e));
-      }
+      if (!mounted) return;
+      FeedbackHelper.showError(context, friendlyError(e));
+    } finally {
+      exercicioCtrl.dispose();
+      cargaCtrl.dispose();
+      unidadeCtrl.dispose();
+      obsCtrl.dispose();
     }
   }
 }
