@@ -15,7 +15,7 @@ Future<void> showAlertasHelpSheet(BuildContext context) {
       ),
       FxHelpTip(
         'Limiares',
-        'Dispara se ficou sem treino além do prazo ou se a aderência caiu. Ajuste na primeira linha.',
+        'Dispara se ficou sem treino além do prazo ou se a aderência caiu. Ajuste em Quando dispara.',
         icon: 'target',
       ),
       FxHelpTip(

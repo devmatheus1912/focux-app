@@ -55,6 +55,8 @@ class AlertaDetalhe {
   final int checkIns30Dias;
   final String statusFinanceiro;
   final String sugestaoIa;
+  final String sugestaoFonte;
+  final bool podeGerarIa;
 
   AlertaDetalhe({
     required this.alunoId,
@@ -63,7 +65,21 @@ class AlertaDetalhe {
     required this.checkIns30Dias,
     required this.statusFinanceiro,
     required this.sugestaoIa,
+    this.sugestaoFonte = 'LOCAL',
+    this.podeGerarIa = false,
   });
+
+  AlertaDetalhe copyWith({String? sugestaoIa, String? sugestaoFonte}) =>
+      AlertaDetalhe(
+        alunoId: alunoId,
+        alunoNome: alunoNome,
+        ultimoTreino: ultimoTreino,
+        checkIns30Dias: checkIns30Dias,
+        statusFinanceiro: statusFinanceiro,
+        sugestaoIa: sugestaoIa ?? this.sugestaoIa,
+        sugestaoFonte: sugestaoFonte ?? this.sugestaoFonte,
+        podeGerarIa: podeGerarIa,
+      );
 
   factory AlertaDetalhe.fromJson(Map<String, dynamic> j) => AlertaDetalhe(
     alunoId: (j['alunoId'] as num).toInt(),
@@ -72,6 +88,8 @@ class AlertaDetalhe {
     checkIns30Dias: (j['checkIns30Dias'] as num?)?.toInt() ?? 0,
     statusFinanceiro: j['statusFinanceiro'] as String? ?? '',
     sugestaoIa: j['sugestaoIa'] as String? ?? '',
+    sugestaoFonte: (j['sugestaoFonte'] as String? ?? 'LOCAL').toUpperCase(),
+    podeGerarIa: j['podeGerarIa'] as bool? ?? false,
   );
 }
 
@@ -128,6 +146,15 @@ class AlertasRepository {
   Future<AlertaDetalhe> detalheAluno(int alunoId) async {
     final r = await _dio.get('/api/alertas/aluno/$alunoId/detalhe');
     return AlertaDetalhe.fromJson(r.data as Map<String, dynamic>);
+  }
+
+  Future<AlertaDetalhe> aplicarSugestaoIa(AlertaDetalhe atual, int alunoId) async {
+    final r = await _dio.post('/api/alertas/aluno/$alunoId/sugestao-ia');
+    final j = r.data as Map<String, dynamic>;
+    return atual.copyWith(
+      sugestaoIa: j['sugestaoIa'] as String? ?? atual.sugestaoIa,
+      sugestaoFonte: (j['sugestaoFonte'] as String? ?? 'LOCAL').toUpperCase(),
+    );
   }
 
   Future<void> resolver(int alunoId) async {

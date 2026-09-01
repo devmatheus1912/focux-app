@@ -32,8 +32,12 @@ void main() {
       'checkIns30Dias': 2,
       'statusFinanceiro': 'ATIVO',
       'sugestaoIa': 'Manda um oi',
+      'sugestaoFonte': 'LOCAL',
+      'podeGerarIa': true,
     });
     expect(detalhe.alunoNome, 'Ana Silva');
     expect(detalhe.sugestaoIa, 'Manda um oi');
+    expect(detalhe.sugestaoFonte, 'LOCAL');
+    expect(detalhe.podeGerarIa, isTrue);
   });
 }

@@ -93,55 +93,9 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
     }
   }
 
-  Future<void> _editarConfiguracao() async {
-    if (_config == null) return;
-    var dias = _config!.diasSemTreino;
-    var aderencia = _config!.aderenciaMinima;
-
-    final confirm = await showFxFormSheet(
-      context,
-      title: 'Quando dispara',
-      icon: Icons.tune_rounded,
-      confirmLabel: 'Salvar',
-      child: StatefulBuilder(
-        builder:
-            (ctx, set) => Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text('Dias sem treino: $dias'),
-                Slider(
-                  value: dias.toDouble(),
-                  min: 1,
-                  max: 30,
-                  divisions: 29,
-                  label: '$dias dias',
-                  onChanged: (v) => set(() => dias = v.toInt()),
-                ),
-                const SizedBox(height: 8),
-                Text('Aderência mínima: $aderencia%'),
-                Slider(
-                  value: aderencia.toDouble(),
-                  min: 10,
-                  max: 100,
-                  divisions: 18,
-                  label: '$aderencia%',
-                  onChanged: (v) => set(() => aderencia = v.toInt()),
-                ),
-              ],
-            ),
-      ),
-    );
-    if (confirm != true) return;
-    try {
-      await AlertasRepository(
-        ref.read(apiClientProvider),
-      ).atualizarConfiguracao(dias, aderencia);
-      _load();
-    } catch (e) {
-      if (mounted) {
-        FeedbackHelper.showError(context, friendlyError(e));
-      }
-    }
+  Future<void> _abrirConfig() async {
+    final changed = await context.push<bool>('/alertas/config');
+    if (changed == true && mounted) _load();
   }
 
   Future<void> _resolverAlerta(AlertaRisco alerta) async {
@@ -324,7 +278,7 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
                               ? null
                               : FxEmptyAction(
                                 label: 'Ajustar limiares',
-                                onTap: _editarConfiguracao,
+                                onTap: _abrirConfig,
                               ),
                         ),
                       ),
@@ -349,7 +303,7 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
                       value:
                           '${config.diasSemTreino}d · ${config.aderenciaMinima}%',
                       showDivider: i < rows.length - 1,
-                      onTap: _editarConfiguracao,
+                      onTap: _abrirConfig,
                     );
                   }
                   final alerta = row.alerta!;

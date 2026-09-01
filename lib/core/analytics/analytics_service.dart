@@ -178,6 +178,17 @@ class ProductEvents {
   static const alertasDetalheTtv = 'alertas_detalhe_ttv';
   static const alertasDetalheHelpOpened = 'alertas_detalhe_help_opened';
   static const alertasDetalheRefreshed = 'alertas_detalhe_refreshed';
+  static const alertasDetalheIaGenerated = 'alertas_detalhe_ia_generated';
+  static const alertasConfigViewed = 'alertas_config_viewed';
+  static const alertasConfigTtv = 'alertas_config_ttv';
+  static const alertasConfigHelpOpened = 'alertas_config_help_opened';
+  static const alertasConfigSaved = 'alertas_config_saved';
+  static const convitesHubViewed = 'convites_hub_viewed';
+  static const convitesHubTtv = 'convites_hub_ttv';
+  static const convitesHubHelpOpened = 'convites_hub_help_opened';
+  static const convitesGenerated = 'convites_generated';
+  static const convitesCopied = 'convites_copied';
+  static const convitesWhatsapp = 'convites_whatsapp';
   static const dunningMarkedRecovered = 'dunning_marked_recovered';
   static const automacaoTemplateActivated = 'automacao_template_activated';
   static const lojaCheckoutStarted = 'loja_checkout_started';

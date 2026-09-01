@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -18,6 +19,9 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/ia_safety_disclaimer.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../features/auth/providers/auth_provider.dart';
+import '../../ia/data/ia_repository.dart';
+import '../../ia/widgets/ia_quota_upgrade.dart';
+import '../../subscription/widgets/upgrade_prompt_sheet.dart';
 import '../data/alertas_repository.dart';
 import '../utils/alerta_detalhe_display.dart';
 import '../widgets/alerta_detalhe_help_sheet.dart';
@@ -46,6 +50,7 @@ class _AlertaDetalheScreenState extends ConsumerState<AlertaDetalheScreen> {
   var _viewTracked = false;
   var _ttvTracked = false;
   var _resolving = false;
+  var _gerandoIa = false;
 
   @override
   void initState() {
@@ -94,6 +99,46 @@ class _AlertaDetalheScreenState extends ConsumerState<AlertaDetalheScreen> {
           'aluno_id': widget.alunoId,
         },
       );
+    }
+  }
+
+  Future<void> _gerarIa() async {
+    final atual = _detalhe;
+    if (atual == null || _gerandoIa) return;
+    if (!atual.podeGerarIa) {
+      await UpgradePromptSheet.show(
+        context: context,
+        featureName: 'IA Copiloto',
+        capability: 'iaCopiloto',
+      );
+      return;
+    }
+    setState(() => _gerandoIa = true);
+    try {
+      final next = await AlertasRepository(
+        ref.read(apiClientProvider),
+      ).aplicarSugestaoIa(atual, widget.alunoId);
+      if (!mounted) return;
+      setState(() => _detalhe = next);
+      AnalyticsService.instance.track(
+        ProductEvents.alertasDetalheIaGenerated,
+        props: {'fonte': next.sugestaoFonte},
+      );
+    } on DioException catch (e) {
+      final ia = IaOperationalException.fromDio(e);
+      if (!mounted) return;
+      await IaQuotaUpgrade.handleError(context, ref, ia);
+      if (!mounted) return;
+      if (ia.suggestsUpgrade || ia.planUpgradeRequired || ia.quotaExhausted) {
+        return;
+      }
+      FeedbackHelper.showError(context, friendlyError(e));
+    } catch (e) {
+      if (mounted) {
+        FeedbackHelper.showError(context, friendlyError(e));
+      }
+    } finally {
+      if (mounted) setState(() => _gerandoIa = false);
     }
   }
 
@@ -231,6 +276,19 @@ class _AlertaDetalheScreenState extends ConsumerState<AlertaDetalheScreen> {
                         : _detalhe!.sugestaoIa.trim(),
                     footer: const IaSafetyDisclaimer(compact: true),
                     children: [
+                      FxSettingsTile(
+                        fxIcon: 'spark',
+                        label: _gerandoIa
+                            ? 'Gerando…'
+                            : _detalhe!.sugestaoFonte == 'IA'
+                            ? 'Gerar outra sugestão'
+                            : 'Melhorar com IA',
+                        value: '',
+                        locked: !_detalhe!.podeGerarIa,
+                        upgradeTierLabel:
+                            _detalhe!.podeGerarIa ? null : 'Pro',
+                        onTap: _gerandoIa ? () {} : _gerarIa,
+                      ),
                       FxSettingsTile(
                         fxIcon: 'message-circle',
                         label: 'Enviar mensagem',

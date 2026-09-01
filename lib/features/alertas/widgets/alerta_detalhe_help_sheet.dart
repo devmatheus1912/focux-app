@@ -15,7 +15,7 @@ Future<void> showAlertaDetalheHelpSheet(BuildContext context) {
       ),
       FxHelpTip(
         'Sugestão',
-        'Texto de reengajamento. Não muda treino nem cobra. Confira antes de mandar.',
+        'Texto local na hora. Melhorar com IA é opt-in e não muda treino nem cobra.',
         icon: 'spark',
       ),
       FxHelpTip(
