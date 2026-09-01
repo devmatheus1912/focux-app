@@ -1,22 +1,28 @@
 import 'package:flutter/material.dart';
-import '../../../core/router/safe_navigation.dart';
-import '../../../core/utils/friendly_error.dart';
-import '../../../core/theme/design_tokens.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../features/auth/providers/auth_provider.dart';
-import '../data/alimentar_repository.dart';
-import 'plano_alimentar_detail_screen.dart';
-import '../../../core/widgets/fx_empty_state.dart';
-import '../../../core/widgets/fx_error_state.dart';
-import '../../../core/widgets/fx_input_deco.dart';
-import '../../../core/widgets/feedback_helper.dart';
-import '../../../core/widgets/skeleton_loader.dart';
-import '../../../core/widgets/fx_shell_scaffold.dart';
-import 'package:focux_app/core/widgets/fx_motion.dart';
+
+import '../../../core/router/safe_navigation.dart';
+import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/utils/friendly_error.dart';
+import '../../../core/ux/fx_hub_freshness.dart';
+import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_content_width_limiter.dart';
+import '../../../core/widgets/fx_empty_state.dart';
+import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_form_sheet.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/skeleton_loader.dart';
+import '../../../features/alunos/widgets/aluno_inset_form_field.dart';
+import '../../../features/auth/providers/auth_provider.dart';
 import '../../alunos/utils/satellite_screen_utils.dart';
-import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
+import '../data/alimentar_repository.dart';
+import '../utils/alimentar_display.dart';
+import 'plano_alimentar_detail_screen.dart';
 
 class AlimentarScreen extends ConsumerStatefulWidget {
   final int alunoId;
@@ -30,6 +36,7 @@ class _AlimentarScreenState extends ConsumerState<AlimentarScreen> {
   List<PlanoAlimentar> _planos = [];
   bool _loading = true;
   String? _erro;
+  DateTime? _fetchedAt;
 
   @override
   void initState() {
@@ -52,6 +59,7 @@ class _AlimentarScreenState extends ConsumerState<AlimentarScreen> {
       setState(() {
         _planos = r;
         _loading = false;
+        _fetchedAt = DateTime.now();
       });
     } catch (e) {
       if (mounted) {
@@ -63,35 +71,143 @@ class _AlimentarScreenState extends ConsumerState<AlimentarScreen> {
     }
   }
 
+  Future<void> _novoPlano() async {
+    HapticFeedback.selectionClick();
+    final nome = TextEditingController();
+    final cal = TextEditingController();
+    final prot = TextEditingController();
+    final carb = TextEditingController();
+    final gord = TextEditingController();
+    final obs = TextEditingController();
+    var created = false;
+
+    try {
+      if (!mounted) return;
+      final ok = await showFxFormSheet(
+        context,
+        title: 'Novo plano alimentar',
+        subtitle: 'Defina metas e macros do plano.',
+        icon: Icons.restaurant_outlined,
+        confirmLabel: 'Criar plano',
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AlunoInsetFormField(
+              controller: nome,
+              label: 'Nome do plano',
+              icon: Icons.title_outlined,
+            ),
+            AlunoInsetFormField(
+              controller: cal,
+              label: 'Calorias/dia (kcal)',
+              icon: Icons.local_fire_department_outlined,
+              keyboardType: TextInputType.number,
+            ),
+            AlunoInsetFormField(
+              controller: prot,
+              label: 'Proteína (g)',
+              icon: Icons.egg_outlined,
+              keyboardType: TextInputType.number,
+            ),
+            AlunoInsetFormField(
+              controller: carb,
+              label: 'Carboidrato (g)',
+              icon: Icons.breakfast_dining_outlined,
+              keyboardType: TextInputType.number,
+            ),
+            AlunoInsetFormField(
+              controller: gord,
+              label: 'Gordura (g)',
+              icon: Icons.water_drop_outlined,
+              keyboardType: TextInputType.number,
+            ),
+            AlunoInsetFormField(
+              controller: obs,
+              label: 'Observações',
+              icon: Icons.notes_outlined,
+              maxLines: 3,
+              showDivider: false,
+            ),
+          ],
+        ),
+      );
+      if (ok != true) return;
+      if (nome.text.trim().isEmpty) {
+        if (mounted) {
+          FeedbackHelper.showWarn(context, 'Nome do plano é obrigatório.');
+        }
+        return;
+      }
+      await AlimentarRepository(ref.read(apiClientProvider)).criar(
+        widget.alunoId,
+        {
+          'nome': nome.text.trim(),
+          if (cal.text.isNotEmpty) 'caloriasDia': int.tryParse(cal.text),
+          if (prot.text.isNotEmpty) 'proteinaG': int.tryParse(prot.text),
+          if (carb.text.isNotEmpty) 'carboidratoG': int.tryParse(carb.text),
+          if (gord.text.isNotEmpty) 'gorduraG': int.tryParse(gord.text),
+          if (obs.text.isNotEmpty) 'observacoes': obs.text.trim(),
+        },
+      );
+      created = true;
+    } catch (e) {
+      if (mounted) {
+        FeedbackHelper.showError(context, friendlyError(e));
+      }
+    } finally {
+      nome.dispose();
+      cal.dispose();
+      prot.dispose();
+      carb.dispose();
+      gord.dispose();
+      obs.dispose();
+    }
+    if (created) await _load();
+  }
+
+  void _abrirPlano(PlanoAlimentar plano) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder:
+            (_) => PlanoAlimentarDetailScreen(
+              alunoId: widget.alunoId,
+              plano: plano,
+            ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
+    final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
     return fxScreenA11yScope(
       label: 'Planos Alimentares',
       child: FxShellScaffold(
         useMesh: true,
         appBar: FxShellAppBar(
           title: 'Planos Alimentares',
-          subtitle: 'Nutrição prescrita para o aluno',
+          subtitle: alimentarHubSubtitle(
+            alunoNome: widget.alunoNome,
+            freshness: freshnessLabel,
+          ),
           onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
-        ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () async {
-            await Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => _NovoPlanoScreen(alunoId: widget.alunoId),
-              ),
-            );
-            if (!context.mounted) return;
-            _load();
-          },
-          child: const Icon(Icons.add),
+          actions: [
+            ShellHeaderIconButton(
+              icon: 'plus',
+              tooltip: 'Criar plano',
+              onTap: _novoPlano,
+            ),
+          ],
         ),
         body:
             _loading
-                ? const SkeletonList(count: 5)
+                ? const Padding(
+                  padding: EdgeInsets.all(FxSettingsLayout.pageInset),
+                  child: SkeletonList(count: 5),
+                )
                 : _erro != null
                 ? FxErrorState(
                   chromeOnDark: chrome.isDark,
@@ -100,126 +216,114 @@ class _AlimentarScreenState extends ConsumerState<AlimentarScreen> {
                   onRetry: _load,
                   title: 'Não conseguimos carregar os planos',
                 )
-                : _planos.isEmpty
-                ? satelliteEmptyBody(
-                  child: FxEmptyState(
-                    key: const ValueKey('alimentar_empty'),
-                    icon: 'target',
-                    title: 'Nenhum plano alimentar',
-                    subtitle:
-                        widget.alunoNome != null
-                            ? 'Monte o primeiro plano de ${satelliteFirstName(widget.alunoNome)} com metas de calorias e macros.'
-                            : 'Crie o primeiro plano com metas de calorias e macros.',
-                    action: FxEmptyAction(
-                      label: 'Criar plano',
-                      onTap: () async {
-                        await Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder:
-                                (_) =>
-                                    _NovoPlanoScreen(alunoId: widget.alunoId),
-                          ),
-                        );
-                        if (!context.mounted) return;
-                        _load();
-                      },
-                    ),
-                  ),
-                )
-                : ListView.builder(
+                : FxContentWidthLimiter(child: _buildBody(primary)),
+      ),
+    );
+  }
+
+  Widget _buildBody(Color primary) {
+    if (_planos.isEmpty) {
+      return RefreshIndicator(
+        onRefresh: _load,
+        child: satelliteEmptyBody(
+          child: FxEmptyState(
+            key: const ValueKey('alimentar_empty'),
+            icon: 'target',
+            title: 'Nenhum plano alimentar',
+            subtitle:
+                widget.alunoNome != null
+                    ? 'Monte o primeiro plano de ${satelliteFirstName(widget.alunoNome)} com metas de calorias e macros.'
+                    : 'Crie o primeiro plano com metas de calorias e macros.',
+            action: FxEmptyAction(label: 'Criar plano', onTap: _novoPlano),
+          ),
+        ),
+      );
+    }
+    return RefreshIndicator(
+      onRefresh: _load,
+      child: ListView.builder(
+        padding: const EdgeInsets.fromLTRB(
+          FxSettingsLayout.pageInset,
+          8,
+          FxSettingsLayout.pageInset,
+          32,
+        ),
+        itemCount: _planos.length,
+        itemBuilder: (_, i) {
+          final p = _planos[i];
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: DecoratedBox(
+              decoration: fxListCardDecoration(context),
+              child: InkWell(
+                onTap: () => _abrirPlano(p),
+                child: Padding(
                   padding: const EdgeInsets.all(TokensStrip.s4),
-                  itemCount: _planos.length,
-                  itemBuilder: (_, i) {
-                    final p = _planos[i];
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: DecoratedBox(
-                        decoration: fxListCardDecoration(context),
-                        child: InkWell(
-                          onTap:
-                              () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder:
-                                      (_) => PlanoAlimentarDetailScreen(
-                                        alunoId: widget.alunoId,
-                                        plano: p,
-                                      ),
-                                ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              p.nome,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 16,
                               ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(TokensStrip.s4),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                        p.nome,
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.w700,
-                                          fontSize: 16,
-                                        ),
-                                      ),
-                                    ),
-                                    const Icon(
-                                      Icons.chevron_right,
-                                      color: TokensStrip.textSecondary,
-                                    ),
-                                  ],
-                                ),
-                                if (p.caloriasDia != null)
-                                  Text(
-                                    '${p.caloriasDia} kcal/dia',
-                                    style: TextStyle(
-                                      color:
-                                          Theme.of(context).colorScheme.primary,
-                                    ),
-                                  ),
-                                if (p.proteinaG != null ||
-                                    p.carboidratoG != null ||
-                                    p.gorduraG != null) ...[
-                                  const SizedBox(height: 10),
-                                  _MacroBar(
-                                    proteinaG: p.proteinaG,
-                                    carboidratoG: p.carboidratoG,
-                                    gorduraG: p.gorduraG,
-                                  ),
-                                ],
-                                const SizedBox(height: 8),
-                                Wrap(
-                                  spacing: 16,
-                                  children: [
-                                    if (p.proteinaG != null)
-                                      _macro(
-                                        'Proteína',
-                                        '${p.proteinaG}g',
-                                        EagleTokens.bad,
-                                      ),
-                                    if (p.carboidratoG != null)
-                                      _macro(
-                                        'Carbo',
-                                        '${p.carboidratoG}g',
-                                        EagleTokens.warn,
-                                      ),
-                                    if (p.gorduraG != null)
-                                      _macro(
-                                        'Gordura',
-                                        '${p.gorduraG}g',
-                                        EagleTokens.macroFat,
-                                      ),
-                                  ],
-                                ),
-                              ],
                             ),
                           ),
-                        ),
+                          const Icon(
+                            Icons.chevron_right,
+                            color: TokensStrip.textSecondary,
+                          ),
+                        ],
                       ),
-                    );
-                  },
+                      Text(
+                        alimentarKcalLabel(p.caloriasDia),
+                        style: TextStyle(color: primary),
+                      ),
+                      if (p.proteinaG != null ||
+                          p.carboidratoG != null ||
+                          p.gorduraG != null) ...[
+                        const SizedBox(height: 10),
+                        _MacroBar(
+                          proteinaG: p.proteinaG,
+                          carboidratoG: p.carboidratoG,
+                          gorduraG: p.gorduraG,
+                        ),
+                      ],
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 16,
+                        children: [
+                          if (p.proteinaG != null)
+                            _macro(
+                              'Proteína',
+                              '${p.proteinaG}g',
+                              EagleTokens.bad,
+                            ),
+                          if (p.carboidratoG != null)
+                            _macro(
+                              'Carbo',
+                              '${p.carboidratoG}g',
+                              EagleTokens.warn,
+                            ),
+                          if (p.gorduraG != null)
+                            _macro(
+                              'Gordura',
+                              '${p.gorduraG}g',
+                              EagleTokens.macroFat,
+                            ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
+              ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -272,99 +376,4 @@ class _MacroBar extends StatelessWidget {
       ),
     );
   }
-}
-
-class _NovoPlanoScreen extends ConsumerStatefulWidget {
-  final int alunoId;
-  const _NovoPlanoScreen({required this.alunoId});
-  @override
-  ConsumerState<_NovoPlanoScreen> createState() => _NovoPlanoScreenState();
-}
-
-class _NovoPlanoScreenState extends ConsumerState<_NovoPlanoScreen> {
-  final _nome = TextEditingController(),
-      _cal = TextEditingController(),
-      _prot = TextEditingController(),
-      _carb = TextEditingController(),
-      _gord = TextEditingController(),
-      _obs = TextEditingController();
-  bool _saving = false;
-
-  Future<void> _salvar() async {
-    if (_nome.text.isEmpty) return;
-    setState(() => _saving = true);
-    try {
-      await AlimentarRepository(
-        ref.read(apiClientProvider),
-      ).criar(widget.alunoId, {
-        'nome': _nome.text,
-        if (_cal.text.isNotEmpty) 'caloriasDia': int.tryParse(_cal.text),
-        if (_prot.text.isNotEmpty) 'proteinaG': int.tryParse(_prot.text),
-        if (_carb.text.isNotEmpty) 'carboidratoG': int.tryParse(_carb.text),
-        if (_gord.text.isNotEmpty) 'gorduraG': int.tryParse(_gord.text),
-        if (_obs.text.isNotEmpty) 'observacoes': _obs.text,
-      });
-      if (mounted) {
-        safePopOrGo(context, '/alunos/${widget.alunoId}/alimentar');
-      }
-    } catch (e) {
-      if (mounted) {
-        FeedbackHelper.showError(context, friendlyError(e));
-      }
-    }
-    if (mounted) {
-      setState(() => _saving = false);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return FxShellScaffold(
-      useMesh: true,
-      appBar: FxShellAppBar(
-        title: 'Novo Plano Alimentar',
-        subtitle: 'Defina metas e refeições do plano',
-        onBack:
-            () => safePopOrGo(context, '/alunos/${widget.alunoId}/alimentar'),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(TokensStrip.s4),
-        child: Column(
-          children: [
-            _field(_nome, 'Nome do plano *'),
-            _num(_cal, 'Calorias/dia (kcal)'),
-            _num(_prot, 'Proteína (g)'),
-            _num(_carb, 'Carboidrato (g)'),
-            _num(_gord, 'Gordura (g)'),
-            _field(_obs, 'Observações', maxLines: 3),
-            const SizedBox(height: TokensStrip.s4),
-            FxLiquidPrimaryButton(
-              label: 'Criar Plano',
-              loading: _saving,
-              onPressed: _saving ? null : _salvar,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _num(TextEditingController c, String label) => Padding(
-    padding: const EdgeInsets.only(bottom: 12),
-    child: TextFormField(
-      controller: c,
-      decoration: FxInputDeco.build(context, label),
-      keyboardType: TextInputType.number,
-    ),
-  );
-
-  Widget _field(TextEditingController c, String label, {int maxLines = 1}) =>
-      Padding(
-        padding: const EdgeInsets.only(bottom: 12),
-        child: TextFormField(
-          controller: c,
-          decoration: FxInputDeco.build(context, label),
-          maxLines: maxLines,
-        ),
-      );
 }
