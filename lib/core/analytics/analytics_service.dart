@@ -202,6 +202,10 @@ class ProductEvents {
   static const convitesGenerated = 'convites_generated';
   static const convitesCopied = 'convites_copied';
   static const convitesWhatsapp = 'convites_whatsapp';
+  static const dunningHubViewed = 'dunning_hub_viewed';
+  static const dunningHubTtv = 'dunning_hub_ttv';
+  static const dunningHubHelpOpened = 'dunning_hub_help_opened';
+  static const dunningHubRefreshed = 'dunning_hub_refreshed';
   static const dunningMarkedRecovered = 'dunning_marked_recovered';
   static const automacaoTemplateActivated = 'automacao_template_activated';
   static const lojaCheckoutStarted = 'loja_checkout_started';
