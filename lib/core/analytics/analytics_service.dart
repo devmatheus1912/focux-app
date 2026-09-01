@@ -171,6 +171,11 @@ class ProductEvents {
   static const lojaCheckoutStarted = 'loja_checkout_started';
   static const habitoCreated = 'habito_created';
   static const chatThreadOpened = 'chat_thread_opened';
+  static const financeiroViewed = 'financeiro_viewed';
+  static const financeiroTtv = 'financeiro_ttv';
+  static const financeiroHelpOpened = 'financeiro_help_opened';
+  static const financeiroRefreshed = 'financeiro_refreshed';
+  static const financeiroMensalidadesOpened = 'financeiro_mensalidades_opened';
   static const financeiroCobrarViaChat = 'financeiro_cobrar_via_chat';
 
   static const agendaViewed = 'agenda_viewed';

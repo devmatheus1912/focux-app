@@ -205,7 +205,9 @@ class _FinanceiroResumoScreenState
               value: formatBrlCurrency(r.totalRecebido, showDecimals: false),
               numeric: true,
               showDivider: true,
-              onTap: () => FinanceiroHubScope.maybeOf(context)?.goToMensalidades(),
+              onTap: () => FinanceiroHubScope.maybeOf(context)?.goToMensalidades(
+                    source: 'metricas',
+                  ),
             ),
             FxSettingsTile(
               fxIcon: 'target',
@@ -213,7 +215,9 @@ class _FinanceiroResumoScreenState
               value: formatBrlCurrency(r.totalPrevisto, showDecimals: false),
               numeric: true,
               showDivider: true,
-              onTap: () => FinanceiroHubScope.maybeOf(context)?.goToMensalidades(),
+              onTap: () => FinanceiroHubScope.maybeOf(context)?.goToMensalidades(
+                    source: 'metricas',
+                  ),
             ),
             FxSettingsTile(
               fxIcon: 'alert-triangle',
@@ -221,7 +225,9 @@ class _FinanceiroResumoScreenState
               value: '${r.inadimplentes}',
               danger: r.inadimplentes > 0,
               showDivider: true,
-              onTap: () => FinanceiroHubScope.maybeOf(context)?.goToMensalidades(),
+              onTap: () => FinanceiroHubScope.maybeOf(context)?.goToMensalidades(
+                    source: 'metricas',
+                  ),
             ),
             FxSettingsTile(
               fxIcon: 'user',
@@ -229,7 +235,9 @@ class _FinanceiroResumoScreenState
               value: formatBrlCurrency(r.ticketMedio, showDecimals: false),
               numeric: true,
               showDivider: true,
-              onTap: () => FinanceiroHubScope.maybeOf(context)?.goToMensalidades(),
+              onTap: () => FinanceiroHubScope.maybeOf(context)?.goToMensalidades(
+                    source: 'metricas',
+                  ),
             ),
             FxSettingsTile(
               fxIcon: 'dollar-sign',
@@ -237,7 +245,9 @@ class _FinanceiroResumoScreenState
               value: formatBrlCurrency(r.acumuladoAnual, showDecimals: false),
               numeric: true,
               showDivider: false,
-              onTap: () => FinanceiroHubScope.maybeOf(context)?.goToMensalidades(),
+              onTap: () => FinanceiroHubScope.maybeOf(context)?.goToMensalidades(
+                    source: 'metricas',
+                  ),
             ),
           ],
         ),

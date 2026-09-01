@@ -8,6 +8,9 @@ void main() {
     expect(screen, anyOf(contains('fxScreenA11yScope'), contains('Semantics(')));
     expect(screen, contains('FxHubFreshness'));
     expect(screen, contains('seedFromHome'));
+    expect(screen, contains('FxHelpIconButton'));
+    expect(screen, contains('financeiroViewed'));
+    expect(screen, contains('financeiroHelpOpened'));
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(16));
   });

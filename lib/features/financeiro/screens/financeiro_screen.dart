@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/analytics/analytics_service.dart';
 import '../../../core/brand/focux_microcopy.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
@@ -11,6 +12,7 @@ import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/utils/motion_preferences.dart';
 import '../../../core/widgets/feature_gate.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
+import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../alunos/providers/alunos_provider.dart';
@@ -18,6 +20,7 @@ import '../../planos/providers/plano_features_provider.dart';
 import '../../subscription/models/subscription_plan.dart';
 import '../financeiro_hub_scope.dart';
 import '../providers/financeiro_provider.dart';
+import '../widgets/financeiro_help_sheet.dart';
 import 'financeiro_dashboard_screen.dart';
 import 'financeiro_mensalidades_tab.dart';
 import 'financeiro_resumo_screen.dart';
@@ -35,6 +38,9 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   String _periodFilter = 'agora';
+  final DateTime _openedAt = DateTime.now();
+  bool _viewTracked = false;
+  bool _ttvTracked = false;
 
   static const Map<String, String> _periodLabels = {
     'agora': FocuxMicrocopy.periodoAgora,
@@ -69,7 +75,6 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen>
   }
 
   @override
-  @override
   Widget build(BuildContext context) {
     final featuresAsync = ref.watch(planoFeaturesProvider);
     final features = featuresAsync.valueOrNull;
@@ -92,6 +97,28 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen>
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         ref.read(planoFeaturesProvider.notifier).seedFromHome(planoFromHome);
+      });
+    }
+
+    if (home != null && !_viewTracked) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted || _viewTracked) return;
+        _viewTracked = true;
+        AnalyticsService.instance.track(
+          ProductEvents.financeiroViewed,
+          props: {
+            if (widget.initialAlunoId != null) 'alunoId': widget.initialAlunoId,
+          },
+        );
+        if (!_ttvTracked) {
+          _ttvTracked = true;
+          AnalyticsService.instance.track(
+            ProductEvents.financeiroTtv,
+            props: {
+              'ms': DateTime.now().difference(_openedAt).inMilliseconds,
+            },
+          );
+        }
       });
     }
 
@@ -127,6 +154,16 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen>
                   subtitle: freshnessLabel ?? FocuxMicrocopy.financeiroEsteMes,
                   onBack: () => safePopOrGo(context, '/dashboard/personal'),
                   actions: [
+                    FxHelpIconButton(
+                      tooltip: 'Como usar o financeiro',
+                      onTap: () {
+                        AnalyticsService.instance.track(
+                          ProductEvents.financeiroHelpOpened,
+                        );
+                        showFinanceiroHelpSheet(context);
+                      },
+                    ),
+                    SizedBox(width: FxHelpChrome.gap),
                     PopupMenuButton<String>(
                       initialValue: _periodFilter,
                       tooltip: 'Filtrar periodo',
@@ -203,7 +240,11 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen>
                 _FinanceiroAlunoContextBanner(alunoId: widget.initialAlunoId!),
               Expanded(
                 child: FinanceiroHubScope(
-                  goToMensalidades: () {
+                  goToMensalidades: ({String source = 'hub'}) {
+                    AnalyticsService.instance.track(
+                      ProductEvents.financeiroMensalidadesOpened,
+                      props: {'source': source},
+                    );
                     if (reduceMotionOf(context)) {
                       _tabController.index = 1;
                     } else {

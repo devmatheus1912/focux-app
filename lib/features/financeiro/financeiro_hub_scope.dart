@@ -8,7 +8,7 @@ class FinanceiroHubScope extends InheritedWidget {
     required super.child,
   });
 
-  final VoidCallback goToMensalidades;
+  final void Function({String source}) goToMensalidades;
 
   static FinanceiroHubScope? maybeOf(BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<FinanceiroHubScope>();

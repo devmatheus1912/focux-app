@@ -79,7 +79,10 @@ class _FinanceiroDashboardScreenState
     return fxScreenA11yScope(
       label: 'Dashboard financeiro',
       child: RefreshIndicator(
-        onRefresh: () => _load(force: true),
+        onRefresh: () {
+          AnalyticsService.instance.track(ProductEvents.financeiroRefreshed);
+          return _load(force: true);
+        },
         child: ListView(
           padding: const EdgeInsets.only(bottom: 110),
           children: [
