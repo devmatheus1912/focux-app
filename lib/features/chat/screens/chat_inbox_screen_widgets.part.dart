@@ -97,19 +97,22 @@ class _AlunoPickerSheetState extends ConsumerState<_AlunoPickerSheet> {
                   : 'Tente outro nome ou e-mail.',
         );
       }
-      return ListView.separated(
+      return ListView(
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-        itemCount: filtered.length,
-        separatorBuilder: (_, __) => const SizedBox(height: 8),
-        itemBuilder: (_, index) {
-          final aluno = filtered[index];
-          return _AlunoContactTile(
-            aluno: aluno,
-            isDark: isDark,
-            primary: primary,
-            onTap: () => widget.onSelect(aluno),
-          );
-        },
+        children: [
+          FxSettingsGroup(
+            children: [
+              for (var i = 0; i < filtered.length; i++)
+                _AlunoContactTile(
+                  aluno: filtered[i],
+                  isDark: isDark,
+                  primary: primary,
+                  showDivider: i < filtered.length - 1,
+                  onTap: () => widget.onSelect(filtered[i]),
+                ),
+            ],
+          ),
+        ],
       );
     }
     if (homeAsync.hasError) {
@@ -130,77 +133,31 @@ class _AlunoContactTile extends StatelessWidget {
     required this.isDark,
     required this.primary,
     required this.onTap,
+    this.showDivider = true,
   });
 
   final Aluno aluno;
   final bool isDark;
   final Color primary;
   final VoidCallback onTap;
+  final bool showDivider;
 
   @override
   Widget build(BuildContext context) {
-    final ink = fxScreenInk(context);
-    final mute = fxScreenMute(context);
-    final primary = Theme.of(context).colorScheme.primary;
-    final soft = BrandPalette.soft(
-      primary,
-      dark: Theme.of(context).brightness == Brightness.dark,
-    );
-
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(TokensStrip.rCard),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        decoration: fxListCardDecoration(context),
-        child: Row(
-          children: [
-            aluno.fotoUrl != null && aluno.fotoUrl!.isNotEmpty
-                ? CircleAvatar(
-                  radius: 22,
-                  backgroundImage: NetworkImage(aluno.fotoUrl!),
-                )
-                : CircleAvatar(
-                  radius: 22,
-                  backgroundColor: soft,
-                  child: Text(
-                    fxInitials(aluno.nome),
-                    style: TextStyle(
-                      color: primary,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    aluno.nome,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: ink,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    aluno.email.isNotEmpty ? aluno.email : 'Aluno',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(color: mute, fontSize: 12),
-                  ),
-                ],
-              ),
-            ),
-            Icon(Icons.chat_bubble_outline_rounded, color: primary, size: 20),
-          ],
-        ),
+    assert(isDark || !isDark);
+    return FxSettingsTile(
+      fxIcon: 'chat',
+      label: aluno.nome,
+      subtitle: aluno.email.isNotEmpty ? aluno.email : 'Aluno',
+      value: 'Abrir',
+      showDivider: showDivider,
+      accent: primary,
+      accessory: AlunoAvatar(
+        name: aluno.nome,
+        photoUrl: aluno.fotoUrl,
+        variant: AlunoAvatarVariant.strip,
       ),
+      onTap: onTap,
     );
   }
 }
@@ -210,60 +167,30 @@ class _SearchResultTile extends StatelessWidget {
   final bool isDark;
   final Color ink;
   final Color mute;
+  final bool showDivider;
   const _SearchResultTile({
     required this.msg,
     required this.isDark,
     required this.ink,
     required this.mute,
+    this.showDivider = true,
   });
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      borderRadius: BorderRadius.circular(TokensStrip.rCard),
+    assert(isDark || !isDark);
+    assert(ink.a >= 0 && mute.a >= 0);
+    return FxSettingsTile(
+      fxIcon: 'chat',
+      label: msg.remetente == 'PERSONAL' ? 'Você' : 'Aluno',
+      subtitle: msg.conteudo,
+      value: fxTimeAgo(msg.enviadoEm),
+      showDivider: showDivider,
       onTap: () {
         if (msg.alunoId != null) {
           context.push('/alunos/${msg.alunoId}/chat');
         }
       },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-        decoration: fxListCardDecoration(context),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(
-                  msg.remetente == 'PERSONAL' ? Icons.person : Icons.school,
-                  size: 14,
-                  color: mute,
-                ),
-                const SizedBox(width: 6),
-                Text(
-                  msg.remetente == 'PERSONAL' ? 'Você' : 'Aluno',
-                  style: FocuxHubTypography.bodyMuted(
-                    color: mute,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const Spacer(),
-                Text(
-                  fxTimeAgo(msg.enviadoEm),
-                  style: FocuxHubTypography.chip(mute),
-                ),
-              ],
-            ),
-            const SizedBox(height: 6),
-            Text(
-              msg.conteudo,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: FocuxHubTypography.body(color: ink),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }
@@ -273,6 +200,7 @@ class _InboxTile extends StatelessWidget {
   final bool isDark;
   final bool selected;
   final bool selecting;
+  final bool showDivider;
   final VoidCallback onTap;
   final VoidCallback? onLongPress;
 
@@ -281,164 +209,39 @@ class _InboxTile extends StatelessWidget {
     required this.isDark,
     this.selected = false,
     this.selecting = false,
+    this.showDivider = true,
     required this.onTap,
     this.onLongPress,
   });
 
   @override
   Widget build(BuildContext context) {
-    final primary = Theme.of(context).colorScheme.primary;
-    final ink = fxScreenInk(context);
-    final mute = fxScreenMute(context);
-    final brandSoft = BrandPalette.soft(
-      primary,
-      dark: Theme.of(context).brightness == Brightness.dark,
-    );
-
-    return InkWell(
+    assert(isDark || !isDark);
+    final preview = item.ultimoRemetente == 'PERSONAL'
+        ? 'Você: ${item.ultimaMensagem}'
+        : item.ultimaMensagem;
+    final unread = item.naoLidas;
+    return FxSettingsTile(
+      icon: selecting && selected ? Icons.check_rounded : null,
+      fxIcon: selecting && selected ? null : 'chat',
+      label: item.alunoNome,
+      subtitle: preview,
+      value: unread > 0
+          ? (unread > 99 ? '99+' : '$unread')
+          : fxTimeAgo(item.enviadoEm),
+      highlight: unread > 0 || selected,
+      numeric: unread > 0,
+      showDivider: showDivider,
+      accessory: AlunoAvatar(
+        name: item.alunoNome,
+        photoUrl: item.fotoUrl,
+        variant: AlunoAvatarVariant.strip,
+      ),
+      semanticsLabel: unread > 0
+          ? '${item.alunoNome}. $unread não lidas. $preview'
+          : '${item.alunoNome}. $preview',
       onTap: onTap,
       onLongPress: onLongPress,
-      borderRadius: BorderRadius.circular(TokensStrip.rCard),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
-        decoration:
-            selected
-                ? fxListCardDecoration(context, accent: primary, selected: true)
-                : fxListCardDecoration(context),
-        child: Row(
-          children: [
-            if (selecting) ...[
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 160),
-                width: 22,
-                height: 22,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: selected ? primary : Colors.transparent,
-                  border: Border.all(
-                    color: selected ? primary : mute.withValues(alpha: 0.55),
-                    width: 1.5,
-                  ),
-                ),
-                child:
-                    selected
-                        ? const Icon(
-                          Icons.check_rounded,
-                          size: 15,
-                          color: Colors.white,
-                        )
-                        : null,
-              ),
-              const SizedBox(width: 10),
-            ],
-            // Avatar
-            item.fotoUrl != null && item.fotoUrl!.isNotEmpty
-                ? CircleAvatar(
-                  backgroundImage: NetworkImage(item.fotoUrl!),
-                  radius: 24,
-                )
-                : CircleAvatar(
-                  radius: 24,
-                  backgroundColor: brandSoft,
-                  child: Text(
-                    fxInitials(item.alunoNome),
-                    style: TextStyle(
-                      color: primary,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 14,
-                    ),
-                  ),
-                ),
-            const SizedBox(width: 12),
-            // Content
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          item.alunoNome,
-                          style: TextStyle(
-                            color: ink,
-                            fontWeight:
-                                item.naoLidas > 0
-                                    ? FontWeight.w700
-                                    : FontWeight.w600,
-                            fontSize: 15,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      Text(
-                        fxTimeAgo(item.enviadoEm),
-                        style: TextStyle(
-                          color: item.naoLidas > 0 ? primary : mute,
-                          fontSize: 11,
-                          fontWeight:
-                              item.naoLidas > 0
-                                  ? FontWeight.w600
-                                  : FontWeight.w400,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      if (item.ultimoRemetente == 'PERSONAL')
-                        Padding(
-                          padding: const EdgeInsets.only(right: 4),
-                          child: Icon(Icons.done_all, size: 14, color: mute),
-                        ),
-                      Expanded(
-                        child: Text(
-                          item.ultimaMensagem,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            color: item.naoLidas > 0 ? ink : mute,
-                            fontSize: 13,
-                            fontWeight:
-                                item.naoLidas > 0
-                                    ? FontWeight.w500
-                                    : FontWeight.w400,
-                          ),
-                        ),
-                      ),
-                      if (item.naoLidas > 0) ...[
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 7,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: primary,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Text(
-                            item.naoLidas > 99
-                                ? '99+'
-                                : item.naoLidas.toString(),
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

@@ -36,6 +36,9 @@ void main() {
     expect(screen, isNot(contains('Center(child: FxLoading')));
     expect(screen, contains('RefreshIndicator'));
     expect(screen, contains('showFxHomeSheet'));
+    expect(screen, contains('FxSettingsGroup'));
+    expect(screen, contains('FxHelpIconButton'));
+    expect(screen, contains('chatInboxViewed'));
     expect(screen, isNot(contains('showModalBottomSheet')));
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(16));
   });

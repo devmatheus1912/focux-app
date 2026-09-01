@@ -8,6 +8,9 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
   List<ChatMsg>? _searchResults;
   final Set<int> _selectedAlunoIds = <int>{};
   DateTime? _fetchedAt;
+  final DateTime _openedAt = DateTime.now();
+  bool _viewTracked = false;
+  bool _ttvTracked = false;
 
   @override
   void initState() {
@@ -148,6 +151,29 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
     final showFreshness =
         !_isSearching && !_selectionActive && freshnessLabel != null;
 
+    final inboxAsync = ref.watch(chatInboxProvider);
+    if (inboxAsync.hasValue && !_viewTracked) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted || _viewTracked) return;
+        _viewTracked = true;
+        final items = inboxAsync.valueOrNull ?? const <ChatInboxItem>[];
+        AnalyticsService.instance.track(
+          ProductEvents.chatInboxViewed,
+          props: {'count': items.length},
+        );
+        if (!_ttvTracked) {
+          _ttvTracked = true;
+          AnalyticsService.instance.track(
+            ProductEvents.chatInboxTtv,
+            props: {
+              'ms': DateTime.now().difference(_openedAt).inMilliseconds,
+              'count': items.length,
+            },
+          );
+        }
+      });
+    }
+
     return fxScreenA11yScope(
       label: 'Mensagens',
       child: FxShellScaffold(
@@ -246,6 +272,16 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
                         onBack:
                             () => safePopOrGo(context, '/dashboard/personal'),
                         actions: [
+                          FxHelpIconButton(
+                            tooltip: 'Como usar as mensagens',
+                            onTap: () {
+                              AnalyticsService.instance.track(
+                                ProductEvents.chatInboxHelpOpened,
+                              );
+                              showChatInboxHelpSheet(context);
+                            },
+                          ),
+                          SizedBox(width: FxHelpChrome.gap),
                           IconButton(
                             icon: Icon(Icons.search_rounded, color: ink),
                             onPressed: _toggleSearch,
@@ -320,19 +356,27 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
         subtitle: 'Tente outro termo ou revise a grafia.',
       );
     }
-    return ListView.separated(
-      padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 8, 16, 110),
-      itemCount: _searchResults!.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 4),
-      itemBuilder: (context, index) {
-        final msg = _searchResults![index];
-        return _SearchResultTile(
-          msg: msg,
-          isDark: isDark,
-          ink: ink,
-          mute: mute,
-        );
-      },
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(
+        FxSettingsLayout.pageInset,
+        8,
+        FxSettingsLayout.pageInset,
+        110,
+      ),
+      children: [
+        FxSettingsGroup(
+          children: [
+            for (var i = 0; i < _searchResults!.length; i++)
+              _SearchResultTile(
+                msg: _searchResults![i],
+                isDark: isDark,
+                ink: ink,
+                mute: mute,
+                showDivider: i < _searchResults!.length - 1,
+              ),
+          ],
+        ),
+      ],
     );
   }
 
@@ -398,74 +442,74 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
         }
         return RefreshIndicator(
           color: primary,
-          onRefresh: () async => invalidateChatInboxCaches(ref),
-          child: ListView.separated(
-            padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 8, 16, 110),
-            itemCount: items.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 8),
-            itemBuilder: (context, index) {
-              final item = items[index];
-              final selected = _selectedAlunoIds.contains(item.alunoId);
-              return FxStaggerItem(
-                index: index,
-                child: Dismissible(
-                  key: Key('inbox-${item.alunoId}'),
-                  direction:
-                      _selectionActive
+          onRefresh: () async {
+            AnalyticsService.instance.track(ProductEvents.chatInboxRefreshed);
+            invalidateChatInboxCaches(ref);
+          },
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(
+              FxSettingsLayout.pageInset,
+              8,
+              FxSettingsLayout.pageInset,
+              110,
+            ),
+            children: [
+              FxSettingsGroup(
+                children: [
+                  for (var i = 0; i < items.length; i++)
+                    Dismissible(
+                      key: Key('inbox-${items[i].alunoId}'),
+                      direction: _selectionActive
                           ? DismissDirection.none
                           : DismissDirection.horizontal,
-                  confirmDismiss: (direction) async {
-                    if (direction == DismissDirection.endToStart) {
-                      // Swipe left → archive/unarchive
-                      await _conversationAction(
-                        item.alunoId,
-                        isArchived ? 'unarchive' : 'archive',
-                      );
-                      return false;
-                    } else {
-                      // Swipe right → pin/unpin
-                      await _conversationAction(item.alunoId, 'pin');
-                      return false;
-                    }
-                  },
-                  background: Container(
-                    alignment: Alignment.centerLeft,
-                    padding: const EdgeInsets.only(left: 24),
-                    decoration: BoxDecoration(
-                      color: primary.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(18),
+                      confirmDismiss: (direction) async {
+                        if (direction == DismissDirection.endToStart) {
+                          await _conversationAction(
+                            items[i].alunoId,
+                            isArchived ? 'unarchive' : 'archive',
+                          );
+                          return false;
+                        }
+                        await _conversationAction(items[i].alunoId, 'pin');
+                        return false;
+                      },
+                      background: Container(
+                        alignment: Alignment.centerLeft,
+                        padding: const EdgeInsets.only(left: 24),
+                        color: primary.withValues(alpha: 0.12),
+                        child: Icon(Icons.push_pin, color: primary),
+                      ),
+                      secondaryBackground: Container(
+                        alignment: Alignment.centerRight,
+                        padding: const EdgeInsets.only(right: 24),
+                        color: EagleTokens.warn.withValues(alpha: 0.12),
+                        child: Icon(
+                          isArchived ? Icons.unarchive : Icons.archive,
+                          color: EagleTokens.warn,
+                        ),
+                      ),
+                      child: _InboxTile(
+                        item: items[i],
+                        isDark: isDark,
+                        selected: _selectedAlunoIds.contains(items[i].alunoId),
+                        selecting: _selectionActive,
+                        showDivider: i < items.length - 1,
+                        onTap: () {
+                          if (_selectionActive) {
+                            _toggleSelection(items[i].alunoId);
+                            return;
+                          }
+                          _openThread(
+                            items[i].alunoId,
+                            extra: items[i].alunoNome,
+                          );
+                        },
+                        onLongPress: () => _toggleSelection(items[i].alunoId),
+                      ),
                     ),
-                    child: Icon(Icons.push_pin, color: primary),
-                  ),
-                  secondaryBackground: Container(
-                    alignment: Alignment.centerRight,
-                    padding: const EdgeInsets.only(right: 24),
-                    decoration: BoxDecoration(
-                      color: EagleTokens.warn.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(18),
-                    ),
-                    child: Icon(
-                      isArchived ? Icons.unarchive : Icons.archive,
-                      color: EagleTokens.warn,
-                    ),
-                  ),
-                  child: _InboxTile(
-                    item: item,
-                    isDark: isDark,
-                    selected: selected,
-                    selecting: _selectionActive,
-                    onTap: () {
-                      if (_selectionActive) {
-                        _toggleSelection(item.alunoId);
-                        return;
-                      }
-                      _openThread(item.alunoId, extra: item.alunoNome);
-                    },
-                    onLongPress: () => _toggleSelection(item.alunoId),
-                  ),
-                ),
-              );
-            },
+                ],
+              ),
+            ],
           ),
         );
       },
