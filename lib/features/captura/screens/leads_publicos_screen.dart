@@ -1,23 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/utils/friendly_error.dart';
-import '../../../core/utils/fx_utils.dart';
+import '../../../core/ux/fx_hub_freshness.dart';
+import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_inset_picker_sheet.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
+import '../../../core/widgets/fx_settings_group.dart';
+import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
-import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/captura_repository.dart';
-import '../../../core/widgets/fx_screen_a11y.dart';
+import '../utils/leads_publicos_display.dart';
 
 final _repoProvider = Provider(
   (ref) => CapturaRepository(ref.read(apiClientProvider)),
 );
+
+enum _LeadPublicoAcao { criarAluno, converter }
 
 class LeadsPublicosScreen extends ConsumerStatefulWidget {
   const LeadsPublicosScreen({super.key});
@@ -31,6 +39,7 @@ class _LeadsPublicosScreenState extends ConsumerState<LeadsPublicosScreen> {
   List<SubmissaoCaptura> _leads = [];
   bool _loading = true;
   String? _erro;
+  DateTime? _fetchedAt;
 
   @override
   void initState() {
@@ -49,6 +58,7 @@ class _LeadsPublicosScreenState extends ConsumerState<LeadsPublicosScreen> {
       setState(() {
         _leads = lista;
         _loading = false;
+        _fetchedAt = DateTime.now();
       });
     } catch (e) {
       if (!mounted) return;
@@ -59,30 +69,83 @@ class _LeadsPublicosScreenState extends ConsumerState<LeadsPublicosScreen> {
     }
   }
 
+  void _abrirNovoAluno({String? nome, String? email}) {
+    HapticFeedback.selectionClick();
+    final q = <String, String>{
+      if (email != null && email.trim().isNotEmpty) 'email': email.trim(),
+      if (nome != null && nome.trim().isNotEmpty) 'nome': nome.trim(),
+    };
+    if (q.isEmpty) {
+      context.push('/alunos/novo');
+      return;
+    }
+    context.push(Uri(path: '/alunos/novo', queryParameters: q).toString());
+  }
+
+  Future<void> _marcarConvertido(SubmissaoCaptura lead) async {
+    try {
+      await ref.read(_repoProvider).marcarConvertido(lead.id);
+      await _carregar();
+    } catch (e) {
+      if (!mounted) return;
+      FeedbackHelper.showError(context, friendlyError(e));
+    }
+  }
+
+  Future<void> _abrirAcoes(SubmissaoCaptura lead) async {
+    if (lead.convertido) return;
+    final items = <FxInsetPickerSheetItem<_LeadPublicoAcao>>[
+      if (leadPublicoPodeCriarAluno(lead.email))
+        const FxInsetPickerSheetItem(
+          value: _LeadPublicoAcao.criarAluno,
+          label: 'Criar aluno',
+        ),
+      const FxInsetPickerSheetItem(
+        value: _LeadPublicoAcao.converter,
+        label: 'Marcar como convertido',
+      ),
+    ];
+    final picked = await showFxInsetPickerSheet<_LeadPublicoAcao>(
+      context,
+      title: leadPublicoNome(lead.nome),
+      items: items,
+    );
+    if (picked == null || !mounted) return;
+    switch (picked) {
+      case _LeadPublicoAcao.criarAluno:
+        _abrirNovoAluno(nome: lead.nome, email: lead.email);
+      case _LeadPublicoAcao.converter:
+        await _marcarConvertido(lead);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
+    final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
 
     return fxScreenA11yScope(
       label: 'Leads do link público',
       child: FxShellScaffold(
         useMesh: true,
-        appBar: const FxShellAppBar(
+        appBar: FxShellAppBar(
           title: 'Leads do link público',
-          subtitle: 'Contatos captados pela sua página',
+          subtitle: leadPublicoHubSubtitle(freshnessLabel),
+          actions: [
+            ShellHeaderIconButton(
+              icon: 'plus',
+              tooltip: 'Criar aluno',
+              onTap: () => _abrirNovoAluno(),
+            ),
+          ],
         ),
-        floatingActionButton:
-            _leads.isEmpty || _loading || _erro != null
-                ? null
-                : FloatingActionButton.extended(
-                  onPressed: () => context.push('/alunos/novo'),
-                  icon: const Icon(Icons.person_add_outlined),
-                  label: const Text('Criar aluno'),
-                ),
         body:
             _loading
-                ? const SkeletonList(count: 5)
+                ? const Padding(
+                  padding: EdgeInsets.all(FxSettingsLayout.pageInset),
+                  child: SkeletonList(count: 5),
+                )
                 : _erro != null
                 ? FxErrorState(
                   chromeOnDark: chrome.isDark,
@@ -90,110 +153,52 @@ class _LeadsPublicosScreenState extends ConsumerState<LeadsPublicosScreen> {
                   message: _erro!,
                   onRetry: _carregar,
                 )
-                : RefreshIndicator(
-                  onRefresh: _carregar,
-                  child:
-                      _leads.isEmpty
-                          ? ListView(
-                            children: const [
-                              SizedBox(height: 48),
-                              FxEmptyState(
-                                icon: 'users',
-                                title: 'Nenhum lead ainda',
-                                subtitle:
-                                    'Compartilhe o link do seu storefront para começar a captar contatos.',
-                              ),
-                            ],
-                          )
-                          : ListView.builder(
-                            padding: const EdgeInsets.all(TokensStrip.s4),
-                            itemCount: _leads.length,
-                            itemBuilder: (_, i) {
-                              final l = _leads[i];
-                              final primary =
-                                  Theme.of(context).colorScheme.primary;
-                              final nome = fxTitleCaseName(l.nome);
-                              return FxSatelliteListTile(
-                                title: nome,
-                                accent:
-                                    l.convertido ? EagleTokens.good : primary,
-                                leading: CircleAvatar(
-                                  backgroundColor:
-                                      l.convertido
-                                          ? EagleTokens.goodSoft
-                                          : primary.withValues(alpha: 0.14),
-                                  foregroundColor:
-                                      l.convertido ? EagleTokens.good : primary,
-                                  child: Text(
-                                    l.nome.isEmpty ? '?' : fxInitials(nome),
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.w800,
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                ),
-                                subtitle: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    if (l.telefone != null &&
-                                        l.telefone!.isNotEmpty)
-                                      Text('Tel: ${l.telefone}'),
-                                    if (l.email != null && l.email!.isNotEmpty)
-                                      Text('E-mail: ${l.email}'),
-                                    if (l.objetivo != null &&
-                                        l.objetivo!.isNotEmpty)
-                                      Text('Objetivo: ${l.objetivo}'),
-                                  ],
-                                ),
-                                trailing:
-                                    l.convertido
-                                        ? const Icon(
-                                          Icons.check_circle_rounded,
-                                          color: EagleTokens.good,
-                                        )
-                                        : Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            if (l.email != null &&
-                                                l.email!.isNotEmpty)
-                                              IconButton(
-                                                icon: const Icon(
-                                                  Icons.person_add_outlined,
-                                                ),
-                                                tooltip: 'Criar aluno',
-                                                onPressed: () {
-                                                  final q = <String, String>{
-                                                    if (l.email != null)
-                                                      'email': l.email!,
-                                                    if (l.nome.isNotEmpty)
-                                                      'nome': l.nome,
-                                                  };
-                                                  context.push(
-                                                    Uri(
-                                                      path: '/alunos/novo',
-                                                      queryParameters: q,
-                                                    ).toString(),
-                                                  );
-                                                },
-                                              ),
-                                            IconButton(
-                                              icon: const Icon(
-                                                Icons.thumb_up_alt_outlined,
-                                              ),
-                                              tooltip: 'Marcar como convertido',
-                                              onPressed: () async {
-                                                await ref
-                                                    .read(_repoProvider)
-                                                    .marcarConvertido(l.id);
-                                                await _carregar();
-                                              },
-                                            ),
-                                          ],
-                                        ),
-                              );
-                            },
-                          ),
-                ),
+                : FxContentWidthLimiter(child: _buildBody()),
+      ),
+    );
+  }
+
+  Widget _buildBody() {
+    return RefreshIndicator(
+      onRefresh: _carregar,
+      child: ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.fromLTRB(
+          FxSettingsLayout.pageInset,
+          8,
+          FxSettingsLayout.pageInset,
+          32,
+        ),
+        children: [
+          if (_leads.isEmpty)
+            const FxEmptyState(
+              icon: 'users',
+              title: 'Nenhum lead ainda',
+              subtitle:
+                  'Compartilhe o link do seu storefront para começar a captar contatos.',
+            )
+          else
+            FxSettingsGroup(
+              header: 'Contatos captados',
+              caption: 'Toque para criar aluno ou marcar como convertido.',
+              children: [
+                for (var i = 0; i < _leads.length; i++)
+                  FxSettingsTile(
+                    fxIcon: leadPublicoFxIcon(_leads[i].convertido),
+                    label: leadPublicoNome(_leads[i].nome),
+                    subtitle: leadPublicoSubtitle(
+                      telefone: _leads[i].telefone,
+                      email: _leads[i].email,
+                      objetivo: _leads[i].objetivo,
+                    ),
+                    value: leadPublicoValue(_leads[i].convertido),
+                    highlight: !_leads[i].convertido,
+                    showDivider: i != _leads.length - 1,
+                    onTap: () => _abrirAcoes(_leads[i]),
+                  ),
+              ],
+            ),
+        ],
       ),
     );
   }
