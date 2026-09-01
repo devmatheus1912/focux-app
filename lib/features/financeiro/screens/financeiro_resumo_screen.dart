@@ -1,19 +1,24 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
+import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/utils/pt_br_display.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
+import '../../../core/widgets/fx_settings_group.dart';
+import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/financeiro_repository.dart';
+import '../financeiro_hub_scope.dart';
 import '../providers/financeiro_provider.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/skeleton_loader.dart';
-import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 
 class FinanceiroResumoScreen extends ConsumerStatefulWidget {
   const FinanceiroResumoScreen({super.key});
@@ -119,117 +124,122 @@ class _FinanceiroResumoScreenState
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final primary = Theme.of(context).colorScheme.primary;
     final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
 
     return fxScreenA11yScope(
-      label: 'Financeiro Resumo',
-      child: FxShellScaffold(
-        useMesh: true,
-        extendBody: true,
-        appBar: FxShellAppBar(
-          title: 'Resumo',
-          subtitle: freshnessLabel ?? '${_meses[_mes]} $_ano',
-        ),
-        body: Column(
-          children: [
-            // Month/year picker
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  _NavArrow(
-                    icon: Icons.chevron_left_rounded,
-                    onTap: _mesAnterior,
-                    isDark: isDark,
+      label: 'Financeiro métricas. ${freshnessLabel ?? '${_meses[_mes]} $_ano'}',
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _NavArrow(
+                  icon: Icons.chevron_left_rounded,
+                  onTap: _mesAnterior,
+                  isDark: isDark,
+                ),
+                const SizedBox(width: 16),
+                Text(
+                  '${_meses[_mes]} $_ano',
+                  style: FocuxHubTypography.sectionTitle(
+                    context,
+                    color: ink,
                   ),
-                  const SizedBox(width: 16),
-                  Text(
-                    '${_meses[_mes]} $_ano',
-                    style: FocuxHubTypography.sectionTitle(
-                      context,
-                      color: ink,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  _NavArrow(
-                    icon: Icons.chevron_right_rounded,
-                    onTap: _mesProximo,
-                    isDark: isDark,
-                  ),
-                ],
-              ),
+                ),
+                const SizedBox(width: 16),
+                _NavArrow(
+                  icon: Icons.chevron_right_rounded,
+                  onTap: _mesProximo,
+                  isDark: isDark,
+                ),
+              ],
             ),
-            Expanded(
-              child:
-                  _loading
-                      ? const SkeletonList(count: 5)
-                      : _erro != null
-                      ? FxErrorState(
-                        chromeOnDark: isDark,
-                        primary: primary,
-                        message: _erro!,
-                        onRetry: _carregar,
-                      )
-                      : _resumo == null
-                      ? const FxEmptyState(
-                        icon: 'coin',
-                        title: 'Sem dados para exibir',
-                        subtitle: 'Nenhuma mensalidade neste período.',
-                      )
-                      : _buildContent(isDark, ink, mute, primary),
-            ),
-          ],
-        ),
+          ),
+          Expanded(
+            child:
+                _loading
+                    ? const SkeletonList(count: 5)
+                    : _erro != null
+                    ? FxErrorState(
+                      chromeOnDark: isDark,
+                      primary: primary,
+                      message: _erro!,
+                      onRetry: _carregar,
+                    )
+                    : _resumo == null
+                    ? const FxEmptyState(
+                      icon: 'coin',
+                      title: 'Sem dados para exibir',
+                      subtitle: 'Nenhuma mensalidade neste período.',
+                    )
+                    : _buildContent(isDark, freshnessLabel),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildContent(bool isDark, Color ink, Color mute, Color primary) {
+  Widget _buildContent(bool isDark, String? freshnessLabel) {
     final r = _resumo!;
 
     return ListView(
-      padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 0, 16, 32),
+      padding: const EdgeInsets.fromLTRB(
+        FxSettingsLayout.pageInset,
+        0,
+        FxSettingsLayout.pageInset,
+        32,
+      ),
       children: [
         _DonutChartCard(resumo: r, isDark: isDark),
-        const SizedBox(height: TokensStrip.s4),
-        _MetricRow(
-          label: 'Total recebido',
-          value: 'R\$ ${r.totalRecebido.toStringAsFixed(0)}',
-          icon: Icons.check_circle_rounded,
-          color: EagleTokens.good,
-          isDark: isDark,
-        ),
-        _MetricRow(
-          label: 'Total previsto',
-          value: 'R\$ ${r.totalPrevisto.toStringAsFixed(0)}',
-          icon: Icons.trending_up_rounded,
-          color: primary,
-          isDark: isDark,
-        ),
-        _MetricRow(
-          label: 'Inadimplentes',
-          value: '${r.inadimplentes}',
-          icon: Icons.warning_amber_rounded,
-          color: EagleTokens.bad,
-          isDark: isDark,
-        ),
-        _MetricRow(
-          label: 'Ticket médio',
-          value: 'R\$ ${r.ticketMedio.toStringAsFixed(0)}',
-          icon: Icons.receipt_long_rounded,
-          color: primary,
-          isDark: isDark,
-        ),
-        _MetricRow(
-          label: 'Acumulado anual',
-          value: 'R\$ ${r.acumuladoAnual.toStringAsFixed(0)}',
-          icon: Icons.savings_rounded,
-          color: EagleTokens.good,
-          isDark: isDark,
-          isLast: true,
+        const SizedBox(height: FxSettingsLayout.groupGap),
+        FxSettingsGroup(
+          header: 'Do mês',
+          caption: freshnessLabel,
+          children: [
+            FxSettingsTile(
+              fxIcon: 'dollar-sign',
+              label: 'Total recebido',
+              value: formatBrlCurrency(r.totalRecebido, showDecimals: false),
+              numeric: true,
+              showDivider: true,
+              onTap: () => FinanceiroHubScope.maybeOf(context)?.goToMensalidades(),
+            ),
+            FxSettingsTile(
+              fxIcon: 'target',
+              label: 'Total previsto',
+              value: formatBrlCurrency(r.totalPrevisto, showDecimals: false),
+              numeric: true,
+              showDivider: true,
+              onTap: () => FinanceiroHubScope.maybeOf(context)?.goToMensalidades(),
+            ),
+            FxSettingsTile(
+              fxIcon: 'alert-triangle',
+              label: 'Inadimplentes',
+              value: '${r.inadimplentes}',
+              danger: r.inadimplentes > 0,
+              showDivider: true,
+              onTap: () => FinanceiroHubScope.maybeOf(context)?.goToMensalidades(),
+            ),
+            FxSettingsTile(
+              fxIcon: 'user',
+              label: 'Ticket médio',
+              value: formatBrlCurrency(r.ticketMedio, showDecimals: false),
+              numeric: true,
+              showDivider: true,
+              onTap: () => FinanceiroHubScope.maybeOf(context)?.goToMensalidades(),
+            ),
+            FxSettingsTile(
+              fxIcon: 'dollar-sign',
+              label: 'Acumulado anual',
+              value: formatBrlCurrency(r.acumuladoAnual, showDecimals: false),
+              numeric: true,
+              showDivider: false,
+              onTap: () => FinanceiroHubScope.maybeOf(context)?.goToMensalidades(),
+            ),
+          ],
         ),
       ],
     );
@@ -418,70 +428,6 @@ class _LegendDot extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-// ─── Metric row (replaces Card+ListTile) ─────────────────────────────────
-
-class _MetricRow extends StatelessWidget {
-  final String label;
-  final String value;
-  final IconData icon;
-  final Color color;
-  final bool isDark;
-  final bool isLast;
-
-  const _MetricRow({
-    required this.label,
-    required this.value,
-    required this.icon,
-    required this.color,
-    required this.isDark,
-    this.isLast = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final ink = fxScreenInk(context);
-    final mute = fxScreenMute(context);
-
-    return Container(
-      margin: EdgeInsets.only(bottom: isLast ? 0 : 8),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      decoration: fxListCardDecoration(context, accent: color, radius: 18),
-      child: Row(
-        children: [
-          Container(
-            width: 38,
-            height: 38,
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: isDark ? 0.18 : 0.10),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(icon, color: color, size: 18),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Text(
-              label,
-              style: TextStyle(
-                fontSize: 13.5,
-                fontWeight: FontWeight.w600,
-                color: mute,
-              ),
-            ),
-          ),
-          Text(
-            value,
-            style: AppTypography.mono(
-              fontSize: 15,
-              fontWeight: FontWeight.w700,
-              color: ink,
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

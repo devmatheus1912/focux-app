@@ -1,7 +1,9 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../financeiro_hub_scope.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/financeiro_repository.dart';
 import '../providers/financeiro_provider.dart';

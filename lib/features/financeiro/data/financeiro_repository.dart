@@ -55,6 +55,7 @@ class Mensalidade {
 
 class VencimentoItem {
   final int mensalidadeId;
+  final int? alunoId;
   final String alunoNome;
   final double valor;
   final String mesReferencia;
@@ -62,6 +63,7 @@ class VencimentoItem {
 
   VencimentoItem({
     required this.mensalidadeId,
+    this.alunoId,
     required this.alunoNome,
     required this.valor,
     required this.mesReferencia,
@@ -70,6 +72,7 @@ class VencimentoItem {
 
   factory VencimentoItem.fromJson(Map<String, dynamic> j) => VencimentoItem(
     mensalidadeId: j['mensalidadeId'] as int,
+    alunoId: (j['alunoId'] as num?)?.toInt(),
     alunoNome: j['alunoNome'] as String,
     valor: (j['valor'] as num).toDouble(),
     mesReferencia: j['mesReferencia'] as String,

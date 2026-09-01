@@ -16,6 +16,7 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../alunos/providers/alunos_provider.dart';
 import '../../planos/providers/plano_features_provider.dart';
 import '../../subscription/models/subscription_plan.dart';
+import '../financeiro_hub_scope.dart';
 import '../providers/financeiro_provider.dart';
 import 'financeiro_dashboard_screen.dart';
 import 'financeiro_mensalidades_tab.dart';
@@ -201,15 +202,30 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen>
               if (widget.initialAlunoId != null)
                 _FinanceiroAlunoContextBanner(alunoId: widget.initialAlunoId!),
               Expanded(
-                child: TabBarView(
-                  controller: _tabController,
-                  children: [
-                    const FinanceiroDashboardScreen(),
-                    FinanceiroMensalidadesTab(
-                      initialAlunoId: widget.initialAlunoId,
-                    ),
-                    const FinanceiroResumoScreen(),
-                  ],
+                child: FinanceiroHubScope(
+                  goToMensalidades: () {
+                    if (reduceMotionOf(context)) {
+                      _tabController.index = 1;
+                    } else {
+                      _tabController.animateTo(
+                        1,
+                        duration: fxMotionDuration(
+                          context,
+                          normal: const Duration(milliseconds: 280),
+                        ),
+                      );
+                    }
+                  },
+                  child: TabBarView(
+                    controller: _tabController,
+                    children: [
+                      const FinanceiroDashboardScreen(),
+                      FinanceiroMensalidadesTab(
+                        initialAlunoId: widget.initialAlunoId,
+                      ),
+                      const FinanceiroResumoScreen(),
+                    ],
+                  ),
                 ),
               ),
             ],

@@ -41,7 +41,7 @@ class _FinanceiroKpiGroup extends StatelessWidget {
               value: recebido,
               numeric: true,
               showDivider: true,
-              onTap: () {},
+              onTap: () => _openMensalidades(context),
             ),
             FxSettingsTile(
               fxIcon: 'alert-triangle',
@@ -52,7 +52,7 @@ class _FinanceiroKpiGroup extends StatelessWidget {
               value: pendenteLabel,
               numeric: true,
               showDivider: true,
-              onTap: () {},
+              onTap: () => _openMensalidades(context),
             ),
             FxSettingsTile(
               fxIcon: 'target',
@@ -62,7 +62,7 @@ class _FinanceiroKpiGroup extends StatelessWidget {
                   : null,
               value: metaLabel,
               showDivider: false,
-              onTap: () {},
+              onTap: () => _openMensalidades(context),
             ),
           ],
         ),
@@ -248,7 +248,7 @@ class _FinanceiroVencimentosGroup extends StatelessWidget {
               numeric: true,
               danger: items[i].status == 'ATRASADO',
               showDivider: i < items.length - 1,
-              onTap: () {},
+              onTap: () => _openAlunoOrMensalidades(context, items[i].alunoId),
             ),
         ],
       ),
@@ -284,10 +284,22 @@ class _FinanceiroTopAlunosGroup extends StatelessWidget {
               value: formatBrlCurrency(items[i].totalPago, showDecimals: false),
               numeric: true,
               showDivider: i < items.length - 1,
-              onTap: () {},
+              onTap: () => _openAlunoOrMensalidades(context, items[i].alunoId),
             ),
         ],
       ),
     );
   }
+}
+
+void _openMensalidades(BuildContext context) {
+  FinanceiroHubScope.maybeOf(context)?.goToMensalidades();
+}
+
+void _openAlunoOrMensalidades(BuildContext context, int? alunoId) {
+  if (alunoId != null) {
+    context.push('/financeiro?alunoId=$alunoId');
+    return;
+  }
+  _openMensalidades(context);
 }
