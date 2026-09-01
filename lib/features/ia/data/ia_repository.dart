@@ -204,16 +204,6 @@ class IaRepository {
     });
   }
 
-  Future<Map<String, dynamic>> resumoSemanal() async {
-    return _withIaErrorContext(() async {
-      final r = await _dio.get(
-        '/api/ia/copiloto/resumo-semanal',
-        options: _iaOpts,
-      );
-      return r.data as Map<String, dynamic>;
-    });
-  }
-
   Future<IaCopilotProximaAcao> proximaAcao(int alunoId) async {
     return _withIaErrorContext(() async {
       final r = await _dio.get(

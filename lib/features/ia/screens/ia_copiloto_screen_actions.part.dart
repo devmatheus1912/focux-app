@@ -288,7 +288,6 @@ extension IaCopilotScreenActions on _IaCopilotoScreenState {
       );
       final query = InsightsQuery(alunoId: _selectedAlunoId, mode: _mode);
       ref.invalidate(insightsProvider(query));
-      ref.invalidate(resumoSemanalProvider);
       await ref.read(insightsProvider(query).future);
       _proximaAcao = await ref.read(
         proximaAcaoProvider(_selectedAlunoId!).future,

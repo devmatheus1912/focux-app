@@ -7,10 +7,6 @@ import '../models/ia_copilot_insight.dart';
 import '../models/ia_copilot_proxima_acao.dart';
 import '../models/ia_copiloto_home.dart';
 
-final resumoSemanalProvider = FutureProvider<Map<String, dynamic>>((ref) async {
-  return IaRepository(ref.read(apiClientProvider)).resumoSemanal();
-});
-
 final iaCopilotoHomeProvider = FutureProvider<IaCopilotoHomeBundle>((ref) async {
   return IaRepository(ref.read(apiClientProvider)).copilotoHome();
 });
