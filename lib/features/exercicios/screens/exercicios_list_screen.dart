@@ -15,8 +15,10 @@ import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_form_sheet.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
+import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
+import '../utils/exercicios_filter_display.dart';
 import '../data/exercise_enum_api.dart';
 import '../data/exercicio_repository.dart';
 import '../data/exercicio_taxonomy_labels.dart';
@@ -26,8 +28,6 @@ import 'widgets/exercicios_batch_actions.dart';
 import 'widgets/exercicios_filter_bar.dart';
 import 'widgets/exercicios_list_view.dart';
 
-// "Aprovar editorialmente", "Notas editoriais padrao",
-// previewMidias(midias), importarMidias(midias).
 class ExerciciosListScreen extends ConsumerStatefulWidget {
   const ExerciciosListScreen({super.key});
 
@@ -317,17 +317,17 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
     final mute = chrome.mute;
     final primary = Theme.of(context).colorScheme.primary;
     final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
-    final totalLabel = '$_totalElements exercicios';
+    final totalLabel = exerciciosCountLabel(_totalElements);
 
     return fxScreenA11yScope(
-      label: 'Exercicios',
+      label: 'Exercícios',
       child: FxShellScaffold(
         useMesh: true,
         appBar:
             _selected.isEmpty
                 ? FxShellAppBar(
-                  title: 'Exercicios',
-                  subtitle: freshnessLabel ?? 'BIBLIOTECA',
+                  title: 'Exercícios',
+                  subtitle: freshnessLabel ?? 'Biblioteca',
                   onBack: () => safePopOrGo(context, '/dashboard/personal'),
                   actions: [
                     ShellHeaderIconButton(
@@ -353,7 +353,8 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
                 : null,
         body: SafeArea(
           bottom: false,
-          child: Column(
+          child: FxContentWidthLimiter(
+            child: Column(
             children: [
               if (_selected.isNotEmpty)
                 ExerciciosBatchActions(
@@ -479,6 +480,7 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
                         ),
               ),
             ],
+            ),
           ),
         ),
       ),
