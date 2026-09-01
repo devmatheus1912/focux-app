@@ -16,4 +16,15 @@ void main() {
     expect(screen, contains('ShellHeaderIconButton'));
     expect(screen, isNot(contains('FloatingActionButton')));
   });
+
+  test('novo plano usa form inset', () {
+    final sheet = readScreenSourceBundle(
+      'lib/features/pacotes/widgets/pacotes_storefront_widgets.dart',
+    );
+    expect(sheet, contains('AlunoInsetFormField'));
+    expect(sheet, contains('showFxInsetPickerSheet'));
+    expect(sheet, contains('FxSettingsGroup'));
+    expect(sheet, isNot(contains('ChoiceChip')));
+    expect(sheet, isNot(contains('DropdownButton')));
+  });
 }

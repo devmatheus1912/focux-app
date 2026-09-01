@@ -14,10 +14,15 @@ import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
-import '../../../core/widgets/fx_input_deco.dart';
+import '../../../core/widgets/fx_inset_picker_row.dart';
+import '../../../core/widgets/fx_inset_picker_sheet.dart';
 import '../../../core/widgets/fx_motion.dart';
+import '../../../core/widgets/fx_settings_group.dart';
+import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../alunos/widgets/aluno_inset_form_field.dart';
 import '../data/pacote_repository.dart';
+import '../utils/pacote_display.dart';
 
 part 'pacotes_storefront_widgets_private.part.dart';
 

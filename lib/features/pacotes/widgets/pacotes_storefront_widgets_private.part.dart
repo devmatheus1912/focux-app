@@ -172,7 +172,6 @@ class _NovoPacoteSheetState extends State<_NovoPacoteSheet> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final primary = Theme.of(context).colorScheme.primary;
 
     return FxHomeSheetSurface(
@@ -213,122 +212,111 @@ class _NovoPacoteSheetState extends State<_NovoPacoteSheet> {
                 ),
               ),
               const SizedBox(height: 16),
-              TextFormField(
-                controller: _tituloCtrl,
-                enabled: !_enviando,
-                textInputAction: TextInputAction.next,
-                decoration: FxInputDeco.build(
-                  context,
-                  'Título *',
-                  icon: Icons.title_rounded,
-                ),
-                validator:
-                    (v) =>
-                        v == null || v.trim().isEmpty
-                            ? 'Informe um título'
-                            : null,
-              ),
-              const SizedBox(height: 12),
-              TextFormField(
-                controller: _descCtrl,
-                enabled: !_enviando,
-                textInputAction: TextInputAction.next,
-                maxLines: 2,
-                decoration: FxInputDeco.build(
-                  context,
-                  'Descrição',
-                  icon: Icons.notes_rounded,
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextFormField(
-                controller: _valorCtrl,
-                enabled: !_enviando,
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
-                ),
-                textInputAction: TextInputAction.done,
-                decoration: FxInputDeco.build(
-                  context,
-                  'Valor que o cliente paga (R\$) *',
-                  icon: Icons.attach_money_rounded,
-                  hint: 'Ex.: 500',
-                ),
-                validator: (v) {
-                  if (v == null || v.trim().isEmpty) {
-                    return 'Informe o valor';
-                  }
-                  final valor =
-                      double.tryParse(v.trim().replaceAll(',', '.')) ?? 0;
-                  if (valor <= 0) return 'Valor deve ser maior que zero';
-                  return null;
-                },
-              ),
-              const SizedBox(height: 18),
-              _SheetSectionLabel('Duração do plano', ink: ink),
-              const SizedBox(height: 10),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
+              FxSettingsGroup(
                 children: [
-                  for (final meses in [1, 3, 6, 12])
-                    _PacoteOptionChip(
-                      label: meses == 1 ? '1 mês' : '$meses meses',
-                      selected: _duracao == meses,
-                      onTap:
-                          _enviando
-                              ? null
-                              : () {
-                                HapticFeedback.selectionClick();
-                                setState(() => _duracao = meses);
-                              },
+                  AlunoInsetFormField(
+                    controller: _tituloCtrl,
+                    label: 'Título',
+                    icon: Icons.title_outlined,
+                    validator:
+                        (v) =>
+                            v == null || v.trim().isEmpty
+                                ? 'Informe um título'
+                                : null,
+                  ),
+                  AlunoInsetFormField(
+                    controller: _descCtrl,
+                    label: 'Descrição',
+                    icon: Icons.notes_outlined,
+                    maxLines: 2,
+                  ),
+                  AlunoInsetFormField(
+                    controller: _valorCtrl,
+                    label: 'Valor que o cliente paga (R\$)',
+                    icon: Icons.payments_outlined,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
                     ),
+                    validator: (v) {
+                      if (v == null || v.trim().isEmpty) {
+                        return 'Informe o valor';
+                      }
+                      final valor =
+                          double.tryParse(v.trim().replaceAll(',', '.')) ?? 0;
+                      if (valor <= 0) return 'Valor deve ser maior que zero';
+                      return null;
+                    },
+                    showDivider: false,
+                  ),
                 ],
               ),
-              const SizedBox(height: 18),
-              _SheetSectionLabel('O que inclui', ink: ink),
-              const SizedBox(height: 10),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
+              const SizedBox(height: 16),
+              FxSettingsGroup(
+                header: 'Plano',
                 children: [
-                  _PacoteOptionChip(
+                  FxInsetPickerRow(
+                    icon: Icons.schedule_outlined,
+                    label: 'Duração',
+                    value: pacoteDuracaoLabel(_duracao),
+                    onTap: _enviando
+                        ? () {}
+                        : () async {
+                            final picked = await showFxInsetPickerSheet<int>(
+                              context,
+                              title: 'Duração',
+                              selected: _duracao,
+                              items: [
+                                for (final meses in pacoteDuracaoMesesValues)
+                                  FxInsetPickerSheetItem(
+                                    value: meses,
+                                    label: pacoteDuracaoLabel(meses),
+                                  ),
+                              ],
+                            );
+                            if (picked == null) return;
+                            setState(() => _duracao = picked);
+                          },
+                  ),
+                  FxSettingsTile(
+                    icon: Icons.fitness_center_outlined,
                     label: 'Treino',
-                    selected: _treino,
-                    onTap:
-                        _enviando
-                            ? null
-                            : () => setState(() => _treino = !_treino),
+                    value: pacoteIncluiValue(_treino),
+                    onTap: _enviando
+                        ? () {}
+                        : () => setState(() => _treino = !_treino),
                   ),
-                  _PacoteOptionChip(
+                  FxSettingsTile(
+                    icon: Icons.restaurant_outlined,
                     label: 'Nutrição',
-                    selected: _nutri,
-                    onTap:
-                        _enviando
-                            ? null
-                            : () => setState(() => _nutri = !_nutri),
+                    value: pacoteIncluiValue(_nutri),
+                    onTap: _enviando
+                        ? () {}
+                        : () => setState(() => _nutri = !_nutri),
                   ),
-                  _PacoteOptionChip(
+                  FxSettingsTile(
+                    icon: Icons.chat_bubble_outline,
                     label: 'Consultoria',
-                    selected: _consultoria,
-                    onTap:
-                        _enviando
-                            ? null
-                            : () =>
-                                setState(() => _consultoria = !_consultoria),
+                    value: pacoteIncluiValue(_consultoria),
+                    showDivider: false,
+                    onTap: _enviando
+                        ? () {}
+                        : () => setState(() => _consultoria = !_consultoria),
                   ),
                 ],
               ),
-              const SizedBox(height: 18),
-              _SheetSectionLabel('Mostrar em destaque', ink: ink),
-              const SizedBox(height: 10),
-              _PacoteOptionChip(
-                label: 'Aparecer primeiro na página',
-                selected: _destaque,
-                onTap:
-                    _enviando
-                        ? null
+              const SizedBox(height: 16),
+              FxSettingsGroup(
+                children: [
+                  FxSettingsTile(
+                    icon: Icons.star_outline_rounded,
+                    label: 'Mostrar em destaque',
+                    value: pacoteIncluiValue(_destaque),
+                    showDivider: false,
+                    onTap: _enviando
+                        ? () {}
                         : () => setState(() => _destaque = !_destaque),
+                  ),
+                ],
               ),
               const SizedBox(height: 20),
               FxLiquidPrimaryButton(
@@ -346,81 +334,6 @@ class _NovoPacoteSheetState extends State<_NovoPacoteSheet> {
   }
 }
 
-class _SheetSectionLabel extends StatelessWidget {
-  const _SheetSectionLabel(this.label, {required this.ink});
-
-  final String label;
-  final Color ink;
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      label,
-      style: TextStyle(
-        color: ink,
-        fontWeight: FontWeight.w700,
-        fontSize: 13.5,
-        letterSpacing: -0.1,
-      ),
-    );
-  }
-}
-
-class _PacoteOptionChip extends StatelessWidget {
-  const _PacoteOptionChip({
-    required this.label,
-    required this.selected,
-    this.onTap,
-  });
-
-  final String label;
-  final bool selected;
-  final VoidCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final primary = Theme.of(context).colorScheme.primary;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-
-    return Semantics(
-      button: true,
-      selected: selected,
-      label: label,
-      child: ChoiceChip(
-        label: Text(label),
-        selected: selected,
-        onSelected: onTap == null ? null : (_) => onTap!(),
-        showCheckmark: selected,
-        checkmarkColor: Colors.white,
-        visualDensity: VisualDensity.compact,
-        materialTapTargetSize: MaterialTapTargetSize.padded,
-        padding: EdgeInsets.symmetric(
-          horizontal: selected ? 10 : 9,
-          vertical: selected ? 7 : 6,
-        ),
-        labelStyle: TextStyle(
-          color: selected ? Colors.white : ink,
-          fontSize: selected ? 12 : 11.5,
-          fontWeight: selected ? FontWeight.w900 : FontWeight.w700,
-        ),
-        selectedColor: primary,
-        backgroundColor:
-            isDark ? Colors.white.withValues(alpha: 0.035) : TokensStrip.pageBg,
-        side: BorderSide(
-          color:
-              selected
-                  ? primary
-                  : (isDark
-                      ? Colors.white.withValues(alpha: 0.12)
-                      : TokensStrip.borderDefault),
-        ),
-      ),
-    );
-  }
-}
-
-/// Copia link real; toast amigável sem URL crua.
 void copyStorefrontLink(BuildContext context, String? slug) {
   if (slug == null || slug.isEmpty) {
     FeedbackHelper.showWarn(
@@ -433,7 +346,6 @@ void copyStorefrontLink(BuildContext context, String? slug) {
   FeedbackHelper.showSuccess(context, 'Link copiado!');
 }
 
-/// Abre vitrine no navegador externo.
 Future<void> openStorefrontPreview(BuildContext context, String? slug) async {
   if (slug == null || slug.isEmpty) {
     FeedbackHelper.showWarn(
@@ -456,3 +368,4 @@ Future<void> openStorefrontPreview(BuildContext context, String? slug) async {
     FeedbackHelper.showError(context, 'Não foi possível abrir a página.');
   }
 }
+
