@@ -14,16 +14,19 @@ import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
+import '../../../core/widgets/fx_inset_picker_row.dart';
+import '../../../core/widgets/fx_inset_picker_sheet.dart';
+import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import 'package:focux_app/core/widgets/fx_motion.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
 import '../../../core/theme/tokens_strip.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
+import '../../alunos/widgets/aluno_inset_form_field.dart';
+import '../utils/suporte_display.dart';
 
 part 'suporte_screen_widgets.part.dart';
-
-const _severidades = ['BAIXA', 'MEDIA', 'ALTA', 'CRITICA'];
 
 const _severidadeColors = {
   'BAIXA': EagleTokens.good,

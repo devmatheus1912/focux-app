@@ -469,85 +469,58 @@ class _NovoTicketSheetState extends ConsumerState<_NovoTicketSheet> {
                 ),
               ),
               SizedBox(height: TokensStrip.s3),
-              TextFormField(
-                controller: _tituloCtrl,
-                decoration: InputDecoration(
-                  labelText: 'Titulo *',
-                  border: FxInputDeco.outlineBorder(
-                    borderRadius: BorderRadius.circular(14),
+              FxSettingsGroup(
+                children: [
+                  AlunoInsetFormField(
+                    controller: _tituloCtrl,
+                    label: 'Título',
+                    icon: Icons.title_outlined,
+                    validator:
+                        (v) =>
+                            v == null || v.trim().isEmpty
+                                ? 'Informe um título'
+                                : null,
                   ),
-                  prefixIcon: Icon(Icons.title_rounded),
-                ),
-                validator:
-                    (v) =>
-                        v == null || v.trim().isEmpty
-                            ? 'Informe um titulo'
-                            : null,
-              ),
-              const SizedBox(height: 12),
-              TextFormField(
-                controller: _descricaoCtrl,
-                decoration: InputDecoration(
-                  labelText: 'Descricao *',
-                  border: FxInputDeco.outlineBorder(
-                    borderRadius: BorderRadius.circular(14),
+                  AlunoInsetFormField(
+                    controller: _descricaoCtrl,
+                    label: 'Descrição',
+                    icon: Icons.notes_outlined,
+                    maxLines: 4,
+                    validator:
+                        (v) =>
+                            v == null || v.trim().isEmpty
+                                ? 'Descreva o problema'
+                                : null,
                   ),
-                  prefixIcon: Icon(Icons.description_outlined),
-                  alignLabelWithHint: true,
-                ),
-                maxLines: 4,
-                validator:
-                    (v) =>
-                        v == null || v.trim().isEmpty
-                            ? 'Descreva o problema'
-                            : null,
-              ),
-              const SizedBox(height: 12),
-              DropdownButtonFormField<String>(
-                initialValue: _severidade,
-                decoration: InputDecoration(
-                  labelText: 'Severidade *',
-                  border: FxInputDeco.outlineBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  prefixIcon: Icon(Icons.warning_amber_rounded),
-                ),
-                items:
-                    _severidades
-                        .map(
-                          (s) => DropdownMenuItem(
-                            value: s,
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.circle,
-                                  size: 10,
-                                  color:
-                                      _severidadeColors[s] ??
-                                      TokensStrip.textSecondary,
-                                ),
-                                const SizedBox(width: 8),
-                                Text(s),
-                              ],
+                  FxInsetPickerRow(
+                    icon: Icons.warning_amber_outlined,
+                    label: 'Severidade',
+                    value: suporteSeveridadeLabel(_severidade),
+                    onTap: () async {
+                      final picked = await showFxInsetPickerSheet<String>(
+                        context,
+                        title: 'Severidade',
+                        selected: _severidade,
+                        items: [
+                          for (final s in suporteSeveridadeValues)
+                            FxInsetPickerSheetItem(
+                              value: s,
+                              label: suporteSeveridadeLabel(s),
                             ),
-                          ),
-                        )
-                        .toList(),
-                onChanged: (v) {
-                  if (v != null) setState(() => _severidade = v);
-                },
-              ),
-              const SizedBox(height: 12),
-              TextFormField(
-                controller: _classeCtrl,
-                decoration: InputDecoration(
-                  labelText: 'Classe afetada',
-                  border: FxInputDeco.outlineBorder(
-                    borderRadius: BorderRadius.circular(14),
+                        ],
+                      );
+                      if (picked == null) return;
+                      setState(() => _severidade = picked);
+                    },
                   ),
-                  prefixIcon: Icon(Icons.code_rounded),
-                  hintText: 'Ex: TreinoService',
-                ),
+                  AlunoInsetFormField(
+                    controller: _classeCtrl,
+                    label: 'Classe afetada',
+                    icon: Icons.code_outlined,
+                    hint: 'Ex: TreinoService',
+                    showDivider: false,
+                  ),
+                ],
               ),
               const SizedBox(height: 18),
               FxLiquidPrimaryButton(

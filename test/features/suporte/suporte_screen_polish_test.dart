@@ -9,5 +9,8 @@ void main() {
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(screen, contains('FxShellScaffold'));
     expect(screen, anyOf(contains('FxContentWidthLimiter'), isNot(contains('constrainWidth: false'))));
+    expect(screen, contains('showFxInsetPickerSheet'));
+    expect(screen, isNot(contains('DropdownButton')));
+    expect(screen, isNot(contains('FloatingActionButton')));
   });
 }
