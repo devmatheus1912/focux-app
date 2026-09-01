@@ -1,23 +1,27 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pdf/pdf.dart';
-import 'package:pdf/widgets.dart' as pw;
-import 'package:printing/printing.dart';
-import '../../../features/auth/providers/auth_provider.dart';
-import '../data/anamnese_repository.dart';
-import '../../../core/theme/focux_hub_typography.dart';
+
+import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
-import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
-import '../../../core/widgets/fx_input_deco.dart';
+import '../../../core/widgets/fx_inset_picker_sheet.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
+import '../../../core/widgets/fx_settings_group.dart';
+import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
+import '../../../features/auth/providers/auth_provider.dart';
+import '../../alunos/widgets/aluno_inset_form_field.dart';
+import '../data/anamnese_repository.dart';
+import '../utils/anamnese_display.dart';
+import '../utils/anamnese_pdf.dart';
 
 class AnamneseScreen extends ConsumerStatefulWidget {
   final int alunoId;
@@ -26,23 +30,15 @@ class AnamneseScreen extends ConsumerStatefulWidget {
   ConsumerState<AnamneseScreen> createState() => _AnamneseScreenState();
 }
 
-class _AnamneseScreenState extends ConsumerState<AnamneseScreen>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-
-  // Tab 1 — Básico
+class _AnamneseScreenState extends ConsumerState<AnamneseScreen> {
   final _objetivoCtrl = TextEditingController();
   String? _nivelAtividade;
   final _lesoesCtrl = TextEditingController();
   final _medicCtrl = TextEditingController();
   final _obsCtrl = TextEditingController();
-
-  // Tab 2 — Saúde
   final _historicoCtrl = TextEditingController();
   final _cirurgiasCtrl = TextEditingController();
   final _doresCtrl = TextEditingController();
-
-  // Tab 3 — Treino & Nutrição
   final _objDetalhadoCtrl = TextEditingController();
   int _dispSemanal = 3;
   final _prefTreinoCtrl = TextEditingController();
@@ -53,31 +49,14 @@ class _AnamneseScreenState extends ConsumerState<AnamneseScreen>
   bool _semFicha = false;
   bool _preenchendo = false;
 
-  static const _niveis = [
-    'SEDENTARIO',
-    'LEVE',
-    'MODERADO',
-    'INTENSO',
-    'MUITO_INTENSO',
-  ];
-  static const _niveisLabel = {
-    'SEDENTARIO': 'Sedentário',
-    'LEVE': 'Leve',
-    'MODERADO': 'Moderado',
-    'INTENSO': 'Intenso',
-    'MUITO_INTENSO': 'Muito Intenso',
-  };
-
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
     _load();
   }
 
   @override
   void dispose() {
-    _tabController.dispose();
     _objetivoCtrl.dispose();
     _lesoesCtrl.dispose();
     _medicCtrl.dispose();
@@ -104,8 +83,7 @@ class _AnamneseScreenState extends ConsumerState<AnamneseScreen>
         ref.read(apiClientProvider),
       ).buscar(widget.alunoId);
       _objetivoCtrl.text = a.objetivo ?? '';
-      _nivelAtividade =
-          _niveis.contains(a.nivelAtividade) ? a.nivelAtividade : null;
+      _nivelAtividade = anamneseNivelOuNulo(a.nivelAtividade);
       _lesoesCtrl.text = a.lesoes ?? '';
       _medicCtrl.text = a.medicamentos ?? '';
       _obsCtrl.text = a.observacoes ?? '';
@@ -113,12 +91,11 @@ class _AnamneseScreenState extends ConsumerState<AnamneseScreen>
       _cirurgiasCtrl.text = a.cirurgias ?? '';
       _doresCtrl.text = a.doresCronicas ?? '';
       _objDetalhadoCtrl.text = a.objetivoDetalhado ?? '';
-      _dispSemanal = a.disponibilidadeSemanal ?? 3;
+      _dispSemanal = anamneseDisponibilidadeClamp(a.disponibilidadeSemanal);
       _prefTreinoCtrl.text = a.preferenciasTreino ?? '';
       _restricoesCtrl.text = a.restricoesAlimentares ?? '';
       if (mounted) setState(() => _semFicha = false);
     } catch (e) {
-      // 404 = aluno ainda não tem ficha; empty state + formulário sob demanda.
       final semFicha = e is DioException && e.response?.statusCode == 404;
       if (mounted) {
         if (semFicha) {
@@ -131,98 +108,77 @@ class _AnamneseScreenState extends ConsumerState<AnamneseScreen>
     if (mounted) setState(() => _loading = false);
   }
 
-  Future<void> _exportarPdf() async {
-    final doc = pw.Document();
-    doc.addPage(
-      pw.MultiPage(
-        pageFormat: PdfPageFormat.a4,
-        margin: const pw.EdgeInsets.all(32),
-        build:
-            (ctx) => [
-              pw.Text(
-                'Ficha de Anamnese',
-                style: pw.TextStyle(
-                  fontSize: 22,
-                  fontWeight: pw.FontWeight.bold,
-                ),
-              ),
-              pw.SizedBox(height: 4),
-              pw.Text(
-                'Gerado em: ${DateTime.now().toString().substring(0, 16)}',
-                style: const pw.TextStyle(fontSize: 10),
-              ),
-              pw.SizedBox(height: 20),
-              _pdfSecao('Básico'),
-              _pdfCampo('Objetivo', _objetivoCtrl.text),
-              _pdfCampo('Nível de atividade', _nivelAtividade ?? '—'),
-              _pdfCampo('Lesões / Limitações', _lesoesCtrl.text),
-              _pdfCampo('Medicamentos', _medicCtrl.text),
-              _pdfCampo('Observações', _obsCtrl.text),
-              pw.SizedBox(height: 12),
-              _pdfSecao('Saúde'),
-              _pdfCampo('Histórico médico', _historicoCtrl.text),
-              _pdfCampo('Cirurgias', _cirurgiasCtrl.text),
-              _pdfCampo('Dores crônicas', _doresCtrl.text),
-              pw.SizedBox(height: 12),
-              _pdfSecao('Treino & Nutrição'),
-              _pdfCampo('Objetivo detalhado', _objDetalhadoCtrl.text),
-              _pdfCampo('Disponibilidade semanal', '$_dispSemanal dias/semana'),
-              _pdfCampo('Preferências de treino', _prefTreinoCtrl.text),
-              _pdfCampo('Restrições alimentares', _restricoesCtrl.text),
-            ],
-      ),
+  Future<void> _abrirNivel() async {
+    final picked = await showFxInsetPickerSheet<String>(
+      context,
+      title: 'Nível de atividade',
+      selected: _nivelAtividade,
+      items: [
+        for (final n in anamneseNiveis)
+          FxInsetPickerSheetItem(value: n, label: anamneseNivelLabel(n)),
+      ],
     );
-    await Printing.layoutPdf(onLayout: (_) async => doc.save());
+    if (!mounted || picked == null) return;
+    setState(() => _nivelAtividade = picked);
   }
 
-  pw.Widget _pdfSecao(String titulo) => pw.Padding(
-    padding: const pw.EdgeInsets.only(bottom: 4),
-    child: pw.Text(
-      titulo,
-      style: pw.TextStyle(
-        fontSize: 14,
-        fontWeight: pw.FontWeight.bold,
-        color: PdfColors.blueGrey700,
-      ),
-    ),
-  );
-
-  pw.Widget _pdfCampo(String label, String value) {
-    if (value.trim().isEmpty) return pw.SizedBox();
-    return pw.Padding(
-      padding: const pw.EdgeInsets.only(bottom: 6, left: 8),
-      child: pw.Column(
-        crossAxisAlignment: pw.CrossAxisAlignment.start,
-        children: [
-          pw.Text(
-            label,
-            style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold),
+  Future<void> _abrirDisponibilidade() async {
+    final picked = await showFxInsetPickerSheet<int>(
+      context,
+      title: 'Disponibilidade',
+      selected: _dispSemanal,
+      items: [
+        for (var d = 1; d <= 7; d++)
+          FxInsetPickerSheetItem(
+            value: d,
+            label: anamneseDisponibilidadeLabel(d),
           ),
-          pw.Text(value, style: const pw.TextStyle(fontSize: 11)),
-        ],
+      ],
+    );
+    if (!mounted || picked == null) return;
+    setState(() => _dispSemanal = picked);
+  }
+
+  Future<void> _exportarPdf() async {
+    await exportAnamnesePdf(
+      AnamnesePdfSnapshot(
+        objetivo: _objetivoCtrl.text,
+        nivelAtividade: _nivelAtividade,
+        lesoes: _lesoesCtrl.text,
+        medicamentos: _medicCtrl.text,
+        observacoes: _obsCtrl.text,
+        historicoMedico: _historicoCtrl.text,
+        cirurgias: _cirurgiasCtrl.text,
+        doresCronicas: _doresCtrl.text,
+        objetivoDetalhado: _objDetalhadoCtrl.text,
+        disponibilidadeSemanal: _dispSemanal,
+        preferenciasTreino: _prefTreinoCtrl.text,
+        restricoesAlimentares: _restricoesCtrl.text,
       ),
     );
   }
 
   Future<void> _salvar() async {
+    HapticFeedback.mediumImpact();
     setState(() => _saving = true);
     try {
-      await AnamneseRepository(
-        ref.read(apiClientProvider),
-      ).salvar(widget.alunoId, {
-        'objetivo': _objetivoCtrl.text,
-        if (_nivelAtividade != null) 'nivelAtividade': _nivelAtividade,
-        'lesoes': _lesoesCtrl.text,
-        'medicamentos': _medicCtrl.text,
-        'observacoes': _obsCtrl.text,
-        'historicoMedico': _historicoCtrl.text,
-        'cirurgias': _cirurgiasCtrl.text,
-        'doresCronicas': _doresCtrl.text,
-        'objetivoDetalhado': _objDetalhadoCtrl.text,
-        'disponibilidadeSemanal': _dispSemanal,
-        'preferenciasTreino': _prefTreinoCtrl.text,
-        'restricoesAlimentares': _restricoesCtrl.text,
-      });
+      await AnamneseRepository(ref.read(apiClientProvider)).salvar(
+        widget.alunoId,
+        {
+          'objetivo': _objetivoCtrl.text,
+          if (_nivelAtividade != null) 'nivelAtividade': _nivelAtividade,
+          'lesoes': _lesoesCtrl.text,
+          'medicamentos': _medicCtrl.text,
+          'observacoes': _obsCtrl.text,
+          'historicoMedico': _historicoCtrl.text,
+          'cirurgias': _cirurgiasCtrl.text,
+          'doresCronicas': _doresCtrl.text,
+          'objetivoDetalhado': _objDetalhadoCtrl.text,
+          'disponibilidadeSemanal': _dispSemanal,
+          'preferenciasTreino': _prefTreinoCtrl.text,
+          'restricoesAlimentares': _restricoesCtrl.text,
+        },
+      );
       if (mounted) {
         FeedbackHelper.showSuccess(context, 'Anamnese salva!');
         setState(() {
@@ -240,17 +196,22 @@ class _AnamneseScreenState extends ConsumerState<AnamneseScreen>
 
   @override
   Widget build(BuildContext context) {
+    final chrome = ShellChrome.of(context);
+    final primary = Theme.of(context).colorScheme.primary;
+
     if (_loading) {
       return fxScreenA11yScope(
         label: 'Anamnese',
         child: const FxShellScaffold(
           useMesh: true,
+          appBar: FxShellAppBar(
+            title: 'Anamnese',
+            subtitle: 'Ficha de saúde e objetivos do aluno',
+          ),
           body: SkeletonList(count: 5),
         ),
       );
     }
-    final chrome = ShellChrome.of(context);
-    final primary = Theme.of(context).colorScheme.primary;
     if (_erro != null) {
       return fxScreenA11yScope(
         label: 'Anamnese',
@@ -261,7 +222,7 @@ class _AnamneseScreenState extends ConsumerState<AnamneseScreen>
             subtitle: 'Ficha de saúde e objetivos do aluno',
           ),
           body: FxErrorState(
-            chromeOnDark: Theme.of(context).brightness == Brightness.dark,
+            chromeOnDark: chrome.isDark,
             primary: primary,
             message: _erro!,
             onRetry: _load,
@@ -300,10 +261,10 @@ class _AnamneseScreenState extends ConsumerState<AnamneseScreen>
           title: 'Anamnese',
           subtitle: 'Ficha de saúde e objetivos do aluno',
           actions: [
-            IconButton(
-              icon: const Icon(Icons.picture_as_pdf_outlined),
+            ShellHeaderIconButton(
+              icon: 'article',
               tooltip: 'Exportar PDF',
-              onPressed: _exportarPdf,
+              onTap: _exportarPdf,
             ),
             Semantics(
               button: true,
@@ -318,185 +279,130 @@ class _AnamneseScreenState extends ConsumerState<AnamneseScreen>
             ),
           ],
         ),
-        body: Column(
-          children: [
-            TabBar(
-              indicatorColor: primary,
-              labelColor: primary,
-              unselectedLabelColor: chrome.mute,
-              indicatorWeight: 2.5,
-              dividerColor: Colors.transparent,
-              controller: _tabController,
-              tabs: const [
-                Tab(text: 'Básico'),
-                Tab(text: 'Saúde'),
-                Tab(text: 'Treino & Nutrição'),
+        body: FxContentWidthLimiter(
+          child: RefreshIndicator(
+            onRefresh: _load,
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.fromLTRB(
+                FxSettingsLayout.pageInset,
+                8,
+                FxSettingsLayout.pageInset,
+                32,
+              ),
+              children: [
+                FxSettingsGroup(
+                  header: 'Básico',
+                  caption: 'Objetivo, atividade e limitações.',
+                  children: [
+                    AlunoInsetFormField(
+                      controller: _objetivoCtrl,
+                      label: 'Objetivo',
+                      hint: 'Ex.: hipertrofia, emagrecimento, condicionamento',
+                      icon: Icons.flag_outlined,
+                      maxLines: 2,
+                    ),
+                    FxSettingsTile(
+                      fxIcon: 'flame',
+                      label: 'Nível de atividade',
+                      value: anamneseNivelLabel(_nivelAtividade),
+                      picker: true,
+                      onTap: _abrirNivel,
+                    ),
+                    AlunoInsetFormField(
+                      controller: _lesoesCtrl,
+                      label: 'Lesões / Limitações',
+                      hint: 'Ex.: joelho, lombar, evitar impacto',
+                      icon: Icons.healing_outlined,
+                      maxLines: 3,
+                    ),
+                    AlunoInsetFormField(
+                      controller: _medicCtrl,
+                      label: 'Medicamentos em uso',
+                      hint: 'Ex.: anti-hipertensivo, tireoide',
+                      icon: Icons.medication_outlined,
+                      maxLines: 2,
+                    ),
+                    AlunoInsetFormField(
+                      controller: _obsCtrl,
+                      label: 'Observações gerais',
+                      hint: 'Rotina, sono, estresse, preferências',
+                      icon: Icons.notes_outlined,
+                      maxLines: 3,
+                      showDivider: false,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: FxSettingsLayout.groupGap),
+                FxSettingsGroup(
+                  header: 'Saúde',
+                  caption: 'Histórico que o treino precisa respeitar.',
+                  children: [
+                    AlunoInsetFormField(
+                      controller: _historicoCtrl,
+                      label: 'Histórico médico',
+                      hint: 'Doenças, diagnósticos, acompanhamentos',
+                      icon: Icons.history_outlined,
+                      maxLines: 4,
+                    ),
+                    AlunoInsetFormField(
+                      controller: _cirurgiasCtrl,
+                      label: 'Cirurgias realizadas',
+                      hint: 'Ex.: LCA, hérnia, quando ocorreu',
+                      icon: Icons.local_hospital_outlined,
+                      maxLines: 3,
+                    ),
+                    AlunoInsetFormField(
+                      controller: _doresCtrl,
+                      label: 'Dores crônicas',
+                      hint: 'Ex.: cervical, ombro direito',
+                      icon: Icons.sentiment_dissatisfied_outlined,
+                      maxLines: 3,
+                      showDivider: false,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: FxSettingsLayout.groupGap),
+                FxSettingsGroup(
+                  header: 'Treino & nutrição',
+                  caption: 'Rotina semanal e restrições.',
+                  children: [
+                    AlunoInsetFormField(
+                      controller: _objDetalhadoCtrl,
+                      label: 'Objetivo detalhado',
+                      hint: 'Meta em 8–12 semanas, eventos, prioridades',
+                      icon: Icons.flag_outlined,
+                      maxLines: 3,
+                    ),
+                    FxSettingsTile(
+                      fxIcon: 'calendar',
+                      label: 'Disponibilidade',
+                      value: anamneseDisponibilidadeLabel(_dispSemanal),
+                      picker: true,
+                      onTap: _abrirDisponibilidade,
+                    ),
+                    AlunoInsetFormField(
+                      controller: _prefTreinoCtrl,
+                      label: 'Preferências de treino',
+                      hint: 'Ex.: manhã, musculação, evitar corrida',
+                      icon: Icons.fitness_center_outlined,
+                      maxLines: 3,
+                    ),
+                    AlunoInsetFormField(
+                      controller: _restricoesCtrl,
+                      label: 'Restrições alimentares',
+                      hint: 'Ex.: lactose, vegetariano, alergias',
+                      icon: Icons.restaurant_outlined,
+                      maxLines: 3,
+                      showDivider: false,
+                    ),
+                  ],
+                ),
               ],
             ),
-            Expanded(
-              child: TabBarView(
-                controller: _tabController,
-                children: [_tabBasico(), _tabSaude(), _tabTreinoNutricao()],
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
   }
-
-  Widget _tabBasico() => SingleChildScrollView(
-    padding: const EdgeInsets.all(TokensStrip.s4),
-    child: Column(
-      children: [
-        _field(
-          _objetivoCtrl,
-          'Objetivo',
-          maxLines: 2,
-          hint: 'Ex.: hipertrofia, emagrecimento, condicionamento',
-        ),
-        const SizedBox(height: 12),
-        DropdownButtonFormField<String>(
-          initialValue: _nivelAtividade,
-          decoration: FxInputDeco.build(
-            context,
-            'Nível de atividade física',
-          ),
-          items:
-              _niveis
-                  .map(
-                    (n) => DropdownMenuItem(
-                      value: n,
-                      child: Text(_niveisLabel[n] ?? n),
-                    ),
-                  )
-                  .toList(),
-          onChanged: (v) => setState(() => _nivelAtividade = v),
-        ),
-        const SizedBox(height: 12),
-        _field(
-          _lesoesCtrl,
-          'Lesões / Limitações',
-          maxLines: 3,
-          hint: 'Ex.: joelho, lombar, evitar impacto',
-        ),
-        _field(
-          _medicCtrl,
-          'Medicamentos em uso',
-          maxLines: 2,
-          hint: 'Ex.: anti-hipertensivo, tireoide',
-        ),
-        _field(
-          _obsCtrl,
-          'Observações gerais',
-          maxLines: 3,
-          hint: 'Rotina, sono, estresse, preferências',
-        ),
-        const SizedBox(height: 80),
-      ],
-    ),
-  );
-
-  Widget _tabSaude() => SingleChildScrollView(
-    padding: const EdgeInsets.all(TokensStrip.s4),
-    child: Column(
-      children: [
-        _field(
-          _historicoCtrl,
-          'Histórico médico',
-          maxLines: 4,
-          hint: 'Doenças, diagnósticos, acompanhamentos',
-        ),
-        _field(
-          _cirurgiasCtrl,
-          'Cirurgias realizadas',
-          maxLines: 3,
-          hint: 'Ex.: LCA, hérnia, quando ocorreu',
-        ),
-        _field(
-          _doresCtrl,
-          'Dores crônicas',
-          maxLines: 3,
-          hint: 'Ex.: cervical, ombro direito',
-        ),
-        const SizedBox(height: 80),
-      ],
-    ),
-  );
-
-  Widget _tabTreinoNutricao() => SingleChildScrollView(
-    padding: const EdgeInsets.all(TokensStrip.s4),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _field(
-          _objDetalhadoCtrl,
-          'Objetivo detalhado',
-          maxLines: 3,
-          hint: 'Meta em 8–12 semanas, eventos, prioridades',
-        ),
-        const SizedBox(height: TokensStrip.s4),
-        Row(
-          children: [
-            Expanded(
-              child: Text(
-                'Disponibilidade semanal: $_dispSemanal dias/semana',
-                style: FocuxHubTypography.body(
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
-              ),
-            ),
-          ],
-        ),
-        SliderTheme(
-          data: SliderTheme.of(context).copyWith(
-            trackHeight: 5,
-            activeTrackColor: Theme.of(context).colorScheme.primary,
-            inactiveTrackColor: TokensStrip.borderDefault,
-            thumbColor: Theme.of(context).colorScheme.surface,
-            overlayColor: Theme.of(
-              context,
-            ).colorScheme.primary.withValues(alpha: 0.12),
-            thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
-          ),
-          child: Slider(
-            value: _dispSemanal.toDouble(),
-            min: 1,
-            max: 7,
-            divisions: 6,
-            label: '$_dispSemanal dias',
-            onChanged: (v) => setState(() => _dispSemanal = v.round()),
-          ),
-        ),
-        const SizedBox(height: 8),
-        _field(
-          _prefTreinoCtrl,
-          'Preferências de treino',
-          maxLines: 3,
-          hint: 'Ex.: manhã, musculação, evitar corrida',
-        ),
-        _field(
-          _restricoesCtrl,
-          'Restrições alimentares',
-          maxLines: 3,
-          hint: 'Ex.: lactose, vegetariano, alergias',
-        ),
-        const SizedBox(height: 80),
-      ],
-    ),
-  );
-
-  Widget _field(
-    TextEditingController c,
-    String label, {
-    int maxLines = 1,
-    String? hint,
-  }) => Padding(
-    padding: const EdgeInsets.only(bottom: 12),
-    child: TextFormField(
-      controller: c,
-      decoration: FxInputDeco.build(context, label, hint: hint),
-      maxLines: maxLines,
-    ),
-  );
 }
