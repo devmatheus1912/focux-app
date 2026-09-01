@@ -35,9 +35,14 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
           safeArea: false,
           appBar: FxShellAppBar(
             title: 'Copiloto',
-            subtitle: 'IA FOCUX',
+            subtitle: freshnessLabel ?? 'IA FOCUX',
             onBack: () => safePopOr(context, () => goToRoleHome(context, ref)),
             actions: [
+              FxHelpIconButton(
+                tooltip: 'Como usar o Copiloto',
+                onTap: () => showIaCopilotoHelpSheet(context),
+              ),
+              SizedBox(width: FxHelpChrome.gap),
               IaCopilotHeaderStatus(
                 dark: dark,
                 brand: brand,
@@ -68,9 +73,9 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
 
                   Padding(
                     padding: const EdgeInsets.fromLTRB(
-                      TokensStrip.s4,
+                      FxSettingsLayout.pageInset,
                       0,
-                      16,
+                      FxSettingsLayout.pageInset,
                       12,
                     ),
                     child:
@@ -141,9 +146,9 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
                   // Safety disclaimer
                   Padding(
                     padding: const EdgeInsets.fromLTRB(
-                      TokensStrip.s4,
+                      FxSettingsLayout.pageInset,
                       0,
-                      16,
+                      FxSettingsLayout.pageInset,
                       12,
                     ),
                     child: IaCopilotSafetyNote(
@@ -296,167 +301,60 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
                             }
                             return Padding(
                               padding: const EdgeInsets.fromLTRB(
-                                TokensStrip.s4,
+                                FxSettingsLayout.pageInset,
                                 0,
-                                16,
+                                FxSettingsLayout.pageInset,
                                 16,
                               ),
-                              child: Container(
-                                decoration: fxListCardDecoration(
-                                  context,
-                                  accent: primary,
-                                  radius: 22,
-                                ),
-                                clipBehavior: Clip.antiAlias,
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Container(
-                                      width: double.infinity,
-                                      padding: const EdgeInsets.fromLTRB(
-                                        18,
-                                        18,
-                                        18,
-                                        16,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        gradient: LinearGradient(
-                                          begin: Alignment.topLeft,
-                                          end: Alignment.bottomRight,
-                                          colors:
-                                              dark
-                                                  ? [
-                                                    primaryDeep,
-                                                    BrandPalette.deep(
-                                                      primaryDeep,
-                                                    ),
-                                                  ]
-                                                  : [primary, primaryDeep],
-                                        ),
-                                      ),
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            'INSIGHTS · ${_mode.toUpperCase()}',
-                                            style: TextStyle(
-                                              color: Colors.white.withValues(
-                                                alpha: 0.7,
-                                              ),
-                                              fontSize: 10.5,
-                                              fontWeight: FontWeight.w600,
-                                              letterSpacing: 1.2,
-                                            ),
-                                          ),
-                                          SizedBox(height: TokensStrip.s2),
-                                          Text(
-                                            '${insights.length} recomendações geradas',
-                                            style:
-                                                FocuxHubTypography.cardTitle(
-                                              color: Colors.white,
-                                            ).copyWith(height: 1.2),
-                                          ),
-                                        ],
-                                      ),
+                              child: FxSettingsGroup(
+                                header: 'Insights · $_modeDisplay',
+                                caption: degraded
+                                    ? 'A IA respondeu fora do formato ideal. Mantivemos as recomendações para revisão manual.'
+                                    : '${insights.length} recomendações geradas',
+                                children: [
+                                  for (final e in insights.asMap().entries)
+                                    IaCopilotInsightItem(
+                                      index: e.key,
+                                      insight: e.value,
+                                      isLast: e.key == insights.length - 1,
+                                      highlighted: e.key == 0,
+                                      line: line,
+                                      primarySoft: primarySoft,
+                                      brand: brand,
+                                      ink: ink,
+                                      mute: mute,
+                                      chipBg:
+                                          dark
+                                              ? Colors.white.withValues(
+                                                alpha: 0.06,
+                                              )
+                                              : TokensStrip.borderDefault,
                                     ),
-                                    if (degraded)
-                                      Container(
-                                        width: double.infinity,
-                                        padding: const EdgeInsets.fromLTRB(
-                                          16,
-                                          12,
-                                          16,
-                                          12,
-                                        ),
-                                        color: const Color(
-                                          0xFFFFB020,
-                                        ).withValues(alpha: 0.12),
-                                        child: Text(
-                                          'A IA respondeu fora do formato ideal. Mantivemos as recomendações para revisão manual.',
-                                          style: TextStyle(
-                                            color: ink,
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                      ),
-                                    ...insights.asMap().entries.map((e) {
-                                      final ins = e.value;
-                                      return IaCopilotInsightItem(
-                                        index: e.key,
-                                        insight: ins,
-                                        isLast: e.key == insights.length - 1,
-                                        highlighted: e.key == 0,
-                                        line: line,
-                                        primarySoft: primarySoft,
-                                        brand: brand,
-                                        ink: ink,
-                                        mute: mute,
-                                        chipBg:
-                                            dark
-                                                ? Colors.white.withValues(
-                                                  alpha: 0.06,
-                                                )
-                                                : TokensStrip.borderDefault,
-                                      );
-                                    }),
-                                  ],
-                                ),
+                                ],
                               ),
                             );
                           },
                         );
                       },
                     ),
-                    Container(
-                      margin: const EdgeInsets.fromLTRB(
-                        TokensStrip.s4,
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(
+                        FxSettingsLayout.pageInset,
                         0,
-                        16,
+                        FxSettingsLayout.pageInset,
                         12,
                       ),
-                      padding: const EdgeInsets.all(14),
-                      decoration: fxListCardDecoration(
-                        context,
-                        accent: brand,
-                        radius: 14,
-                      ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      child: FxSettingsGroup(
+                        caption: freshnessLabel,
                         children: [
-                          Icon(Icons.auto_awesome, size: 16, color: brand),
-                          SizedBox(width: TokensStrip.s2),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  _resultNote,
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    color:
-                                        dark
-                                            ? EagleTokens.darkInk
-                                            : EagleTokens.inkSoft,
-                                    height: 1.45,
-                                  ),
-                                ),
-                                if (freshnessLabel != null) ...[
-                                  SizedBox(height: TokensStrip.s2),
-                                  Text(
-                                    freshnessLabel,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                      fontSize: 11.5,
-                                      fontWeight: FontWeight.w600,
-                                      color: mute,
-                                    ),
-                                  ),
-                                ],
-                              ],
-                            ),
+                          FxSettingsTile(
+                            icon: Icons.auto_awesome,
+                            label: _resultNote,
+                            value: '',
+                            showDivider: false,
+                            accent: brand,
+                            mute: mute,
+                            onTap: () {},
                           ),
                         ],
                       ),
@@ -464,95 +362,59 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
                     if (_tarefaCriada && _proximaAcao != null)
                       Padding(
                         padding: const EdgeInsets.fromLTRB(
-                          TokensStrip.s4,
+                          FxSettingsLayout.pageInset,
                           12,
-                          16,
+                          FxSettingsLayout.pageInset,
                           0,
                         ),
-                        child: Container(
-                          padding: const EdgeInsets.all(13),
-                          decoration: fxListCardDecoration(
-                            context,
-                            accent: brand,
-                            radius: 14,
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                        child: FxSettingsGroup(
+                          header: _tarefaPersistida
+                              ? 'Tarefa salva no ${FocuxMicrocopy.commandCenter}'
+                              : 'Tarefa criada, verifique a lista',
+                          footer: Row(
                             children: [
-                              Row(
-                                children: [
-                                  Icon(
-                                    _tarefaPersistida
-                                        ? Icons.check_circle_outline
-                                        : Icons.sync_problem_outlined,
-                                    color: brand,
-                                    size: 17,
+                              Expanded(
+                                child: OutlinedButton.icon(
+                                  onPressed: () => context.push(
+                                    '/dashboard/command-center/copiloto',
                                   ),
-                                  SizedBox(width: TokensStrip.s2),
-                                  Expanded(
-                                    child: Text(
-                                      _tarefaPersistida
-                                          ? 'Tarefa salva no ${FocuxMicrocopy.commandCenter}'
-                                          : 'Tarefa criada, verifique a lista',
-                                      style: TextStyle(
-                                        color: ink,
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w900,
-                                      ),
-                                    ),
+                                  icon: const Icon(
+                                    Icons.space_dashboard_outlined,
+                                    size: 16,
                                   ),
-                                  IaCopilotTinyTypeChip(
-                                    label: _proximaAcao!.statusLabel,
-                                    color: brand,
-                                    background: Colors.white.withValues(
-                                      alpha: 0.72,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              SizedBox(height: TokensStrip.s2),
-                              Text(
-                                _proximaAcao!.displayText,
-                                style: TextStyle(
-                                  color: mute,
-                                  fontSize: 12.3,
-                                  height: 1.35,
+                                  label: const Text('Ver tarefa'),
                                 ),
                               ),
-                              SizedBox(height: TokensStrip.s3),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: OutlinedButton.icon(
-                                      onPressed:
-                                          () => context.push(
-                                            '/dashboard/command-center/copiloto',
+                              SizedBox(width: TokensStrip.s2),
+                              Expanded(
+                                child: FxLiquidPrimaryButton(
+                                  label: 'Abrir aluno',
+                                  icon: Icons.person_outline,
+                                  expand: true,
+                                  onPressed: _selectedAlunoId == null
+                                      ? null
+                                      : () => context.push(
+                                            '/alunos/$_selectedAlunoId',
                                           ),
-                                      icon: const Icon(
-                                        Icons.space_dashboard_outlined,
-                                        size: 16,
-                                      ),
-                                      label: const Text('Ver tarefa'),
-                                    ),
-                                  ),
-                                  SizedBox(width: TokensStrip.s2),
-                                  Expanded(
-                                    child: FxLiquidPrimaryButton(
-                                      label: 'Abrir aluno',
-                                      icon: Icons.person_outline,
-                                      expand: true,
-                                      onPressed:
-                                          _selectedAlunoId == null
-                                              ? null
-                                              : () => context.push(
-                                                '/alunos/$_selectedAlunoId',
-                                              ),
-                                    ),
-                                  ),
-                                ],
+                                ),
                               ),
                             ],
                           ),
+                          children: [
+                            FxSettingsTile(
+                              icon: _tarefaPersistida
+                                  ? Icons.check_circle_outline
+                                  : Icons.sync_problem_outlined,
+                              label: _proximaAcao!.displayText,
+                              value: _proximaAcao!.statusLabel,
+                              showDivider: false,
+                              accent: brand,
+                              mute: mute,
+                              onTap: () => context.push(
+                                '/dashboard/command-center/copiloto',
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                   ],

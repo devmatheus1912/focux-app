@@ -25,6 +25,8 @@ void main() {
 
     expect(screen, contains('FxShellScaffold'));
     expect(screen, contains('FxShellAppBar'));
+    expect(screen, contains('FxHelpIconButton'));
+    expect(screen, contains('FxSettingsGroup'));
     expect(shellWidgets, contains('IaCopilotResultActionBar'));
     expect(actionsPart, contains('explicitChildNodes: true'));
     expect(shellWidgets, contains('Como funciona'));

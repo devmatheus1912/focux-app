@@ -6,6 +6,8 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_motion.dart';
+import '../../../core/widgets/fx_settings_group.dart';
+import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 
 class IaCopilotResultActionBar extends StatelessWidget {
@@ -119,14 +121,14 @@ class IaCopilotStudentSelector extends StatelessWidget {
     super.key,
     required this.alunoNome,
     required this.brand,
-    required this.ink,
+    this.ink,
     required this.mute,
     required this.onTap,
   });
 
   final String? alunoNome;
   final Color brand;
-  final Color ink;
+  final Color? ink;
   final Color mute;
   final VoidCallback onTap;
 
@@ -134,68 +136,29 @@ class IaCopilotStudentSelector extends StatelessWidget {
   Widget build(BuildContext context) {
     final selected = alunoNome != null;
 
+    assert(ink == null || ink!.a >= 0);
     return Semantics(
       button: true,
       label:
           selected
               ? 'Aluno selecionado, $alunoNome. Toque para trocar.'
               : 'Selecionar aluno',
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.fromLTRB(12, 11, 12, 11),
-          decoration: fxListCardDecoration(context, accent: brand, radius: 18),
-          child: Row(
-            children: [
-              Container(
-                width: 34,
-                height: 34,
-                decoration: BoxDecoration(
-                  color: brand.withValues(alpha: 0.10),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  Icons.person_search_outlined,
-                  color: brand,
-                  size: 18,
-                ),
-              ),
-              const SizedBox(width: 11),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      selected ? alunoNome! : 'Selecionar aluno',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: ink,
-                        fontSize: 13.5,
-                        fontWeight: FontWeight.w800,
-                        height: 1.1,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      selected
-                          ? 'Aluno ativo para esta análise'
-                          : 'Escolha o aluno para ver recomendações',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: mute,
-                        fontSize: 11.2,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(Icons.keyboard_arrow_down_rounded, color: mute, size: 22),
-            ],
+      child: FxSettingsGroup(
+        children: [
+          FxSettingsTile(
+            icon: Icons.person_search_outlined,
+            label: selected ? alunoNome! : 'Selecionar aluno',
+            subtitle: selected
+                ? 'Aluno ativo para esta análise'
+                : 'Escolha o aluno para ver recomendações',
+            value: selected ? 'Trocar' : 'Escolher',
+            picker: true,
+            showDivider: false,
+            accent: brand,
+            mute: mute,
+            onTap: onTap,
           ),
-        ),
+        ],
       ),
     );
   }
@@ -292,35 +255,21 @@ class IaCopilotSafetyNote extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
-      decoration: fxListCardDecoration(context, accent: brand, radius: 16),
-      child: Row(
-        children: [
-          Icon(Icons.verified_user_outlined, color: brand, size: 16),
-          const SizedBox(width: 9),
-          Expanded(
-            child: Text(
-              'Nada é aplicado automaticamente. Revise antes de usar com o aluno.',
-              style: TextStyle(
-                color: ink,
-                fontSize: 11.6,
-                fontWeight: FontWeight.w700,
-                height: 1.25,
-              ),
-            ),
-          ),
-          const SizedBox(width: 8),
-          Text(
-            'Seguro',
-            style: TextStyle(
-              color: mute,
-              fontSize: 10.5,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-        ],
-      ),
+    assert(ink.a >= 0);
+    return FxSettingsGroup(
+      caption: 'Nada é aplicado automaticamente. Revise antes de usar com o aluno.',
+      children: [
+        FxSettingsTile(
+          icon: Icons.verified_user_outlined,
+          label: 'Revisão obrigatória',
+          subtitle: 'A IA sugere. Você decide o que entra no aluno.',
+          value: 'Seguro',
+          showDivider: false,
+          accent: brand,
+          mute: mute,
+          onTap: () {},
+        ),
+      ],
     );
   }
 }
@@ -467,41 +416,14 @@ class IaCopilotPrimaryAction extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    assert(brand.a >= 0 && primaryDeep.a >= 0);
     return Semantics(
       button: true,
       label: label,
-      child: GestureDetector(
-        onTap: onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 160),
-          height: 54,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(colors: [brand, primaryDeep]),
-            borderRadius: BorderRadius.circular(18),
-            boxShadow: [
-              BoxShadow(
-                color: brand.withValues(alpha: 0.28),
-                blurRadius: 20,
-                offset: const Offset(0, 10),
-              ),
-            ],
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, color: Colors.white, size: 17),
-              const SizedBox(width: 9),
-              Text(
-                label,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ],
-          ),
-        ),
+      child: FxLiquidPrimaryButton(
+        label: label,
+        icon: icon,
+        onPressed: onTap,
       ),
     );
   }
@@ -645,59 +567,43 @@ class IaCopilotPreviewCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final primary = Theme.of(context).colorScheme.primary;
-
+    assert(ink.a >= 0 && mute.a >= 0);
     return Semantics(
       container: true,
       label: 'Como funciona o Copiloto. $howItWorks',
-      child: Container(
-        padding: const EdgeInsets.all(TokensStrip.s4),
-        decoration: fxListCardDecoration(context, accent: primary, radius: 20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+      child: FxSettingsGroup(
+        header: 'Como funciona',
+        caption: howItWorks,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(Icons.info_outline_rounded, color: brand, size: 18),
-                const SizedBox(width: 8),
-                Text(
-                  'Como funciona',
-                  style: TextStyle(
-                    color: ink,
-                    fontSize: 13.5,
-                    fontWeight: FontWeight.w800,
+                for (final check in checks)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Row(
+                      children: [
+                        Icon(Icons.check, color: brand, size: 15),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            check,
+                            style: TextStyle(
+                              color: ink,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
               ],
             ),
-            const SizedBox(height: 10),
-            Text(
-              howItWorks,
-              style: TextStyle(color: mute, fontSize: 12.2, height: 1.45),
-            ),
-            const SizedBox(height: 12),
-            for (final check in checks)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 7),
-                child: Row(
-                  children: [
-                    Icon(Icons.check, color: brand, size: 15),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        check,
-                        style: TextStyle(
-                          color: ink,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

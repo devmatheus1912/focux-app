@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_settings_group.dart';
+import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../health/data/health_repository.dart';
 import '../copilot_insight_text.dart';
@@ -47,145 +48,31 @@ class _IaCopilotInsightItemState extends State<IaCopilotInsightItem> {
     final detalhe = copilotInsightDetalhe(widget.insight);
     final tipo = copilotInsightTipo(widget.insight);
 
+    assert(
+      widget.line.a >= 0 &&
+          widget.primarySoft.a >= 0 &&
+          widget.ink.a >= 0 &&
+          widget.chipBg.a >= 0,
+    );
+    final shown = _expanded || detalhe.length <= 150
+        ? detalhe
+        : '${detalhe.substring(0, 150).trim()}…';
     return Semantics(
       button: detalhe.length > 150,
       label: '$titulo. $tipo. $detalhe',
-      child: InkWell(
-        onTap:
-            detalhe.length > 150
-                ? () => setState(() => _expanded = !_expanded)
-                : null,
-        child: Container(
-          margin:
-              widget.highlighted
-                  ? const EdgeInsets.fromLTRB(10, 10, 10, 8)
-                  : EdgeInsets.zero,
-          padding:
-              widget.highlighted
-                  ? const EdgeInsets.all(14)
-                  : const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
-          decoration: BoxDecoration(
-            color:
-                widget.highlighted
-                    ? widget.primarySoft.withValues(alpha: 0.38)
-                    : Colors.transparent,
-            borderRadius: BorderRadius.circular(widget.highlighted ? 16 : 0),
-            border:
-                widget.highlighted
-                    ? Border.all(color: widget.brand.withValues(alpha: 0.18))
-                    : Border(
-                      bottom:
-                          widget.isLast
-                              ? BorderSide.none
-                              : BorderSide(color: widget.line, width: 0.5),
-                    ),
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: widget.highlighted ? 38 : 30,
-                height: widget.highlighted ? 38 : 30,
-                decoration: BoxDecoration(
-                  color:
-                      widget.highlighted
-                          ? widget.brand.withValues(alpha: 0.12)
-                          : widget.primarySoft,
-                  borderRadius: BorderRadius.circular(
-                    widget.highlighted ? 12 : 9,
-                  ),
-                ),
-                child: Center(
-                  child: Text(
-                    '${widget.index + 1}',
-                    style: TextStyle(
-                      color: widget.brand,
-                      fontSize: widget.highlighted ? 13 : 12,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              if (widget.highlighted) ...[
-                                Text(
-                                  'Mais importante',
-                                  style: TextStyle(
-                                    color: widget.brand,
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w900,
-                                    letterSpacing: 0.7,
-                                  ),
-                                ),
-                                const SizedBox(height: 3),
-                              ],
-                              Text(
-                                titulo,
-                                style: TextStyle(
-                                  color: widget.ink,
-                                  fontSize: widget.highlighted ? 14 : 13,
-                                  fontWeight: FontWeight.w900,
-                                  height: 1.2,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        if (tipo.isNotEmpty) ...[
-                          const SizedBox(width: 8),
-                          IaCopilotTinyTypeChip(
-                            label: tipo,
-                            color: widget.mute,
-                            background: widget.chipBg,
-                          ),
-                        ],
-                      ],
-                    ),
-                    if (detalhe.isNotEmpty) ...[
-                      const SizedBox(height: 6),
-                      Text(
-                        detalhe,
-                        maxLines:
-                            _expanded ? null : (widget.highlighted ? 4 : 2),
-                        overflow:
-                            _expanded
-                                ? TextOverflow.visible
-                                : TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: widget.mute,
-                          fontSize: widget.highlighted ? 12.7 : 12.2,
-                          height: widget.highlighted ? 1.42 : 1.34,
-                        ),
-                      ),
-                      if (detalhe.length > 150) ...[
-                        const SizedBox(height: 7),
-                        Text(
-                          _expanded ? 'Ver menos' : 'Ver detalhe',
-                          style: TextStyle(
-                            color: widget.brand,
-                            fontSize: 11.5,
-                            fontWeight: FontWeight.w900,
-                          ),
-                        ),
-                      ],
-                    ],
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
+      child: FxSettingsTile(
+        fxIcon: 'spark',
+        label: widget.highlighted ? 'Mais importante · $titulo' : titulo,
+        subtitle: shown.isEmpty ? null : shown,
+        value: tipo.isNotEmpty ? tipo : '${widget.index + 1}',
+        highlight: widget.highlighted,
+        showDivider: !widget.isLast,
+        accent: widget.brand,
+        mute: widget.mute,
+        semanticsLabel: '$titulo. $tipo. $detalhe',
+        onTap: detalhe.length > 150
+            ? () => setState(() => _expanded = !_expanded)
+            : () {},
       ),
     );
   }
@@ -246,148 +133,56 @@ class IaCopilotReadinessCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final chrome = ShellChrome.of(context);
-    final dark = chrome.isDark;
     final primary = Theme.of(context).colorScheme.primary;
-    final ink = chrome.ink;
     final mute = chrome.mute;
-    final line = chrome.line;
-    final soft = BrandPalette.soft(primary, dark: dark);
     final visibleChecks = checks.take(2).toList();
+    assert(modeDisplay.isNotEmpty && chrome.ink.a >= 0);
 
-    return Container(
-      padding: const EdgeInsets.all(TokensStrip.s4),
-      decoration: chrome.panel(radius: 22),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 42,
-                height: 42,
-                decoration: BoxDecoration(
-                  color: soft,
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                child: Icon(icon, color: primary, size: 20),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      headline,
-                      style: TextStyle(
-                        color: ink,
-                        fontSize: 15,
-                        fontWeight: FontWeight.w800,
-                        height: 1.15,
-                      ),
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
-                      alunoNome == null
-                          ? 'Escolha um aluno para analisar.'
-                          : 'Personalizado para $alunoNome.',
-                      style: TextStyle(
-                        color: mute,
-                        fontSize: 11.8,
-                        height: 1.25,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
-                decoration: BoxDecoration(
-                  color: soft,
-                  borderRadius: BorderRadius.circular(999),
-                  border: Border.all(color: primary.withValues(alpha: 0.14)),
-                ),
-                child: Text(
-                  'Revisável',
-                  style: TextStyle(
-                    color: primary,
-                    fontSize: 10.5,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ),
-            ],
+    return FxSettingsGroup(
+      header: headline,
+      caption: promise,
+      children: [
+        FxSettingsTile(
+          icon: icon,
+          label: alunoNome == null
+              ? 'Escolha um aluno para analisar.'
+              : 'Personalizado para $alunoNome.',
+          subtitle: visibleChecks.isEmpty
+              ? null
+              : visibleChecks.join(' · '),
+          value: 'Revisável',
+          showDivider: recoveryAsync != null,
+          accent: primary,
+          mute: mute,
+          onTap: () {},
+        ),
+        if (recoveryAsync != null)
+          recoveryAsync!.when(
+            loading: () => FxSettingsTile(
+              icon: Icons.watch_outlined,
+              label: 'Sync wearable...',
+              value: '',
+              showDivider: false,
+              accent: primary,
+              mute: mute,
+              onTap: () {},
+            ),
+            error: (_, __) => const SizedBox.shrink(),
+            data: (snapshot) => FxSettingsTile(
+              icon: snapshot == null
+                  ? Icons.watch_off_outlined
+                  : Icons.favorite_outline,
+              label: snapshot == null
+                  ? 'Sem wearable'
+                  : '${snapshot.recoveryScore}% prontidao',
+              value: 'Análise IA',
+              showDivider: false,
+              accent: primary,
+              mute: mute,
+              onTap: () {},
+            ),
           ),
-          const SizedBox(height: 14),
-          Text(
-            promise,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(color: mute, fontSize: 12.4, height: 1.35),
-          ),
-          const SizedBox(height: 14),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              for (final check in visibleChecks)
-                IaCopilotPill(
-                  icon: Icons.check_rounded,
-                  label: check,
-                  ink: ink,
-                  mute: mute,
-                  line: line,
-                  soft: soft,
-                  brand: primary,
-                ),
-              if (recoveryAsync != null)
-                recoveryAsync!.when(
-                  loading:
-                      () => IaCopilotPill(
-                        icon: Icons.watch_outlined,
-                        label: 'Sync wearable...',
-                        ink: ink,
-                        mute: mute,
-                        line: line,
-                        soft: soft,
-                        brand: primary,
-                      ),
-                  error: (_, __) => const SizedBox.shrink(),
-                  data: (snapshot) {
-                    if (snapshot == null) {
-                      return IaCopilotPill(
-                        icon: Icons.watch_off_outlined,
-                        label: 'Sem wearable',
-                        ink: ink,
-                        mute: mute,
-                        line: line,
-                        soft: soft,
-                        brand: primary,
-                      );
-                    }
-                    return IaCopilotPill(
-                      icon: Icons.favorite_outline,
-                      label: '${snapshot.recoveryScore}% prontidao',
-                      ink: ink,
-                      mute: mute,
-                      line: line,
-                      soft: soft,
-                      brand: primary,
-                    );
-                  },
-                ),
-              IaCopilotPill(
-                icon: Icons.manage_search_outlined,
-                label: 'Análise IA',
-                ink: ink,
-                mute: mute,
-                line: line,
-                soft: soft,
-                brand: primary,
-              ),
-            ],
-          ),
-        ],
-      ),
+      ],
     );
   }
 }

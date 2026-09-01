@@ -23,6 +23,8 @@ void main() {
     expect(screen, contains('FxErrorState'));
     expect(screen, contains('FxEmptyState'));
     expect(screen, contains('IaCopilotSafetyNote'));
+    expect(screen, contains('FxHelpIconButton'));
+    expect(screen, contains('FxSettingsGroup'));
     expect(screen, contains('FxHubFreshness.fromFetchedAt'));
     expect(screen, contains('iaCopilotoHomeProvider'));
     expect(screen, contains("retryLabel:"));
