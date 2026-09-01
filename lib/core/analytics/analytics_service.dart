@@ -174,6 +174,10 @@ class ProductEvents {
   static const alertasHubTtv = 'alertas_hub_ttv';
   static const alertasHubHelpOpened = 'alertas_hub_help_opened';
   static const alertasHubRefreshed = 'alertas_hub_refreshed';
+  static const alertasDetalheViewed = 'alertas_detalhe_viewed';
+  static const alertasDetalheTtv = 'alertas_detalhe_ttv';
+  static const alertasDetalheHelpOpened = 'alertas_detalhe_help_opened';
+  static const alertasDetalheRefreshed = 'alertas_detalhe_refreshed';
   static const dunningMarkedRecovered = 'dunning_marked_recovered';
   static const automacaoTemplateActivated = 'automacao_template_activated';
   static const lojaCheckoutStarted = 'loja_checkout_started';

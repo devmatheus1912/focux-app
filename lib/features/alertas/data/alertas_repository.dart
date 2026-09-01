@@ -51,7 +51,6 @@ class AlertasConfiguracao {
 class AlertaDetalhe {
   final int alunoId;
   final String alunoNome;
-  final String alunoEmail;
   final String? ultimoTreino;
   final int checkIns30Dias;
   final String statusFinanceiro;
@@ -60,7 +59,6 @@ class AlertaDetalhe {
   AlertaDetalhe({
     required this.alunoId,
     required this.alunoNome,
-    required this.alunoEmail,
     this.ultimoTreino,
     required this.checkIns30Dias,
     required this.statusFinanceiro,
@@ -69,12 +67,11 @@ class AlertaDetalhe {
 
   factory AlertaDetalhe.fromJson(Map<String, dynamic> j) => AlertaDetalhe(
     alunoId: (j['alunoId'] as num).toInt(),
-    alunoNome: j['alunoNome'] as String,
-    alunoEmail: j['alunoEmail'] as String,
+    alunoNome: j['alunoNome'] as String? ?? '',
     ultimoTreino: j['ultimoTreino'] as String?,
-    checkIns30Dias: (j['checkIns30Dias'] as num).toInt(),
-    statusFinanceiro: j['statusFinanceiro'] as String,
-    sugestaoIa: j['sugestaoIa'] as String,
+    checkIns30Dias: (j['checkIns30Dias'] as num?)?.toInt() ?? 0,
+    statusFinanceiro: j['statusFinanceiro'] as String? ?? '',
+    sugestaoIa: j['sugestaoIa'] as String? ?? '',
   );
 }
 

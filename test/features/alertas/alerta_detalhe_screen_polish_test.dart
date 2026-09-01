@@ -4,13 +4,24 @@ import '../../support/screen_source_bundle.dart';
 
 void main() {
   test('alerta detalhe cumpre contrato Tier S+', () {
-    final screen = readScreenSourceBundle('lib/features/alertas/screens/alerta_detalhe_screen.dart');
-    expect(screen, anyOf(contains('fxScreenA11yScope'), contains('Semantics(')));
-    expect(screen, isNot(contains('CircularProgressIndicator')));
+    final screen = readScreenSourceBundle(
+      'lib/features/alertas/screens/alerta_detalhe_screen.dart',
+    );
+    expect(screen, contains('fxScreenA11yScope'));
     expect(screen, contains('FxShellScaffold'));
-    expect(screen, anyOf(contains('FxContentWidthLimiter'), isNot(contains('constrainWidth: false'))));
-    expect(screen, anyOf(contains('friendlyError'), contains('DashboardErrorState'), contains('FxEmptyState'), contains('_erro'), contains('_TrainingEmptyState'), contains('ref.invalidate')));
+    expect(screen, contains('FxHelpIconButton'));
+    expect(screen, contains('FxSettingsGroup'));
+    expect(screen, contains('FxEmptyState'));
+    expect(screen, contains('FxErrorState'));
     expect(screen, contains('SkeletonList'));
-    expect(screen, isNot(contains('FxLoading')));
+    expect(screen, contains('RefreshIndicator'));
+    expect(screen, contains('IaSafetyDisclaimer'));
+    expect(screen, contains('alertasDetalheViewed'));
+    expect(screen, contains('/alunos/\${widget.alunoId}/chat'));
+    expect(screen, isNot(contains('alunoEmail')));
+    expect(screen, isNot(contains('LinearProgressIndicator')));
+    expect(screen, isNot(contains('CircularProgressIndicator')));
+    expect(screen, isNot(contains('FxLiquidPrimaryButton')));
+    expect(screen, isNot(contains('Icons.refresh')));
   });
 }

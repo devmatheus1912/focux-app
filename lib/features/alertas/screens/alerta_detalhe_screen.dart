@@ -1,19 +1,26 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/design_tokens.dart';
-import '../../../core/theme/shell_chrome.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../../features/auth/providers/auth_provider.dart';
-import '../data/alertas_repository.dart';
+
+import '../../../core/analytics/analytics_service.dart';
 import '../../../core/router/safe_navigation.dart';
+import '../../../core/theme/fx_settings_layout.dart';
+import '../../../core/utils/friendly_error.dart';
+import '../../../core/ux/fx_hub_freshness.dart';
+import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
-import '../../../core/widgets/skeleton_loader.dart';
-import '../../../core/utils/friendly_error.dart';
-import '../../../core/widgets/fx_shell_scaffold.dart';
-import '../../../core/widgets/fx_motion.dart';
-import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
+import '../../../core/widgets/fx_settings_group.dart';
+import '../../../core/widgets/fx_settings_tile.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/ia_safety_disclaimer.dart';
+import '../../../core/widgets/skeleton_loader.dart';
+import '../../../features/auth/providers/auth_provider.dart';
+import '../data/alertas_repository.dart';
+import '../utils/alerta_detalhe_display.dart';
+import '../widgets/alerta_detalhe_help_sheet.dart';
 
 class AlertaDetalheScreen extends ConsumerStatefulWidget {
   final int alunoId;
@@ -31,9 +38,14 @@ class AlertaDetalheScreen extends ConsumerStatefulWidget {
 }
 
 class _AlertaDetalheScreenState extends ConsumerState<AlertaDetalheScreen> {
+  final _openedAt = DateTime.now();
   AlertaDetalhe? _detalhe;
-  bool _loading = true;
+  var _loading = true;
   String? _erro;
+  DateTime? _fetchedAt;
+  var _viewTracked = false;
+  var _ttvTracked = false;
+  var _resolving = false;
 
   @override
   void initState() {
@@ -47,332 +59,208 @@ class _AlertaDetalheScreenState extends ConsumerState<AlertaDetalheScreen> {
       _erro = null;
     });
     try {
-      final repo = AlertasRepository(ref.read(apiClientProvider));
-      final detalhe = await repo.detalheAluno(widget.alunoId);
-      if (mounted) {
-        setState(() {
-          _detalhe = detalhe;
-          _loading = false;
-        });
-      }
+      final detalhe = await AlertasRepository(
+        ref.read(apiClientProvider),
+      ).detalheAluno(widget.alunoId);
+      if (!mounted) return;
+      setState(() {
+        _detalhe = detalhe;
+        _loading = false;
+        _fetchedAt = DateTime.now();
+      });
+      _trackViewIfNeeded();
     } catch (e) {
-      if (mounted) {
-        setState(() {
-          _erro = friendlyError(e);
-          _loading = false;
-        });
-      }
+      if (!mounted) return;
+      setState(() {
+        _erro = friendlyError(e);
+        _loading = false;
+      });
+    }
+  }
+
+  void _trackViewIfNeeded() {
+    if (_viewTracked) return;
+    _viewTracked = true;
+    AnalyticsService.instance.track(
+      ProductEvents.alertasDetalheViewed,
+      props: {'aluno_id': widget.alunoId},
+    );
+    if (!_ttvTracked) {
+      _ttvTracked = true;
+      AnalyticsService.instance.track(
+        ProductEvents.alertasDetalheTtv,
+        props: {
+          'ms': DateTime.now().difference(_openedAt).inMilliseconds,
+          'aluno_id': widget.alunoId,
+        },
+      );
+    }
+  }
+
+  Future<void> _resolver() async {
+    if (_resolving) return;
+    setState(() => _resolving = true);
+    try {
+      await AlertasRepository(
+        ref.read(apiClientProvider),
+      ).resolver(widget.alunoId);
+      if (!mounted) return;
+      FeedbackHelper.showSuccess(context, 'Alerta resolvido.');
+      safePopOrGo(context, '/alertas');
+    } catch (e) {
+      if (!mounted) return;
+      FeedbackHelper.showError(context, friendlyError(e));
+    } finally {
+      if (mounted) setState(() => _resolving = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final chrome = ShellChrome.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
+    final nome = _detalhe?.alunoNome.isNotEmpty == true
+        ? _detalhe!.alunoNome
+        : widget.alunoNome;
 
     return fxScreenA11yScope(
-      label: 'Análise — ${widget.alunoNome}',
+      label: 'Alerta — $nome',
       child: FxShellScaffold(
         useMesh: true,
         appBar: FxShellAppBar(
-          title: 'Análise — ${widget.alunoNome}',
+          title: nome,
+          subtitle: FxHubFreshness.fromFetchedAt(_fetchedAt),
           onBack: () => safePopOrGo(context, '/alertas'),
           actions: [
-            IconButton(icon: const Icon(Icons.refresh), onPressed: _load),
+            FxHelpIconButton(
+              tooltip: 'Como usar este alerta',
+              onTap: () {
+                AnalyticsService.instance.track(
+                  ProductEvents.alertasDetalheHelpOpened,
+                );
+                showAlertaDetalheHelpSheet(context);
+              },
+            ),
           ],
         ),
-        body:
-            _loading
-                ? const Padding(
-                  padding: EdgeInsets.all(TokensStrip.s4),
-                  child: SkeletonList(count: 6),
-                )
-                : _erro != null
-                ? FxErrorState(
-                  chromeOnDark: chrome.isDark,
-                  primary: primary,
-                  message: _erro!,
-                  onRetry: _load,
-                )
-                : _detalhe == null
-                ? const FxEmptyState(
-                  icon: 'activity',
-                  title: 'Sem dados deste alerta',
-                  subtitle:
-                      'Não encontramos o detalhe deste aluno agora. Tente atualizar.',
-                )
-                : _Body(
-                  detalhe: _detalhe!,
-                  alunoId: widget.alunoId,
-                  alunoNome: widget.alunoNome,
+        body: _loading
+            ? const Padding(
+              padding: EdgeInsets.all(FxSettingsLayout.pageInset),
+              child: SkeletonList(count: 6),
+            )
+            : _erro != null
+            ? FxErrorState(
+              chromeOnDark: isDark,
+              primary: primary,
+              message: _erro!,
+              onRetry: _load,
+            )
+            : _detalhe == null
+            ? FxEmptyState(
+              icon: 'alert-triangle',
+              title: 'Sem dados deste alerta',
+              subtitle:
+                  'Não encontramos o detalhe agora. Puxe para atualizar.',
+              action: FxEmptyAction(label: 'Tentar de novo', onTap: _load),
+            )
+            : RefreshIndicator(
+              color: primary,
+              onRefresh: () async {
+                AnalyticsService.instance.track(
+                  ProductEvents.alertasDetalheRefreshed,
+                );
+                await _load();
+              },
+              child: ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.fromLTRB(
+                  FxSettingsLayout.pageInset,
+                  8,
+                  FxSettingsLayout.pageInset,
+                  110,
                 ),
-      ),
-    );
-  }
-}
-
-class _Body extends StatelessWidget {
-  final AlertaDetalhe detalhe;
-  final int alunoId;
-  final String alunoNome;
-
-  const _Body({
-    required this.detalhe,
-    required this.alunoId,
-    required this.alunoNome,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(TokensStrip.s4),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          _CardUltimoTreino(ultimoTreino: detalhe.ultimoTreino),
-          const SizedBox(height: 12),
-          _CardCheckIns(checkIns: detalhe.checkIns30Dias),
-          const SizedBox(height: 12),
-          _CardFinanceiro(status: detalhe.statusFinanceiro),
-          const SizedBox(height: 12),
-          _CardSugestaoIa(sugestao: detalhe.sugestaoIa),
-          const SizedBox(height: TokensStrip.s5),
-          Row(
-            children: [
-              Expanded(
-                child: FxLiquidPrimaryButton(
-                  label: 'Enviar mensagem',
-                  icon: Icons.message_outlined,
-                  onPressed: () => context.push('/alunos/$alunoId'),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: OutlinedButton.icon(
-                  icon: const Icon(Icons.bar_chart),
-                  label: const Text('Ver relatório'),
-                  onPressed:
-                      () => context.push(
-                        '/alunos/$alunoId/relatorio',
-                        extra: alunoNome,
-                      ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _CardUltimoTreino extends StatelessWidget {
-  final String? ultimoTreino;
-  const _CardUltimoTreino({required this.ultimoTreino});
-
-  @override
-  Widget build(BuildContext context) {
-    final primary = Theme.of(context).colorScheme.primary;
-    return DecoratedBox(
-      decoration: fxListCardDecoration(context),
-      child: Padding(
-        padding: const EdgeInsets.all(TokensStrip.s4),
-        child: Row(
-          children: [
-            Icon(Icons.fitness_center, color: primary),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Último Treino',
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      color: ShellChrome.of(context).mute,
-                    ),
+                  FxSettingsGroup(
+                    header: 'Situação',
+                    caption: 'O que esfriou neste aluno.',
+                    children: [
+                      FxSettingsTile(
+                        fxIcon: 'dumbbell',
+                        label: 'Último treino',
+                        value: alertaUltimoTreinoLabel(
+                          _detalhe!.ultimoTreino,
+                        ),
+                        onTap: () => context.push(
+                          '/alunos/${widget.alunoId}',
+                          extra: nome,
+                        ),
+                      ),
+                      FxSettingsTile(
+                        fxIcon: 'circle-check',
+                        label: 'Check-ins',
+                        value: alertaCheckinsLabel(
+                          _detalhe!.checkIns30Dias,
+                        ),
+                        onTap: () => context.push(
+                          '/alunos/${widget.alunoId}',
+                          extra: nome,
+                        ),
+                      ),
+                      FxSettingsTile(
+                        fxIcon: 'dollar-sign',
+                        label: 'Mensalidade',
+                        value: alertaStatusFinanceiroLabel(
+                          _detalhe!.statusFinanceiro,
+                        ),
+                        danger: alertaStatusFinanceiroRuim(
+                          _detalhe!.statusFinanceiro,
+                        ),
+                        showDivider: false,
+                        onTap: () => context.push(
+                          '/alunos/${widget.alunoId}',
+                          extra: nome,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    ultimoTreino ?? 'Sem treinos recentes',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color:
-                          ultimoTreino == null
-                              ? ShellChrome.of(context).mute
-                              : null,
-                    ),
+                  const SizedBox(height: FxSettingsLayout.groupGap),
+                  FxSettingsGroup(
+                    header: 'Como retomar',
+                    caption: _detalhe!.sugestaoIa.trim().isEmpty
+                        ? 'Sem sugestão agora. Fale com o aluno pelo chat.'
+                        : _detalhe!.sugestaoIa.trim(),
+                    footer: const IaSafetyDisclaimer(compact: true),
+                    children: [
+                      FxSettingsTile(
+                        fxIcon: 'message-circle',
+                        label: 'Enviar mensagem',
+                        value: 'Chat',
+                        onTap: () => context.push(
+                          '/alunos/${widget.alunoId}/chat',
+                          extra: nome,
+                        ),
+                      ),
+                      FxSettingsTile(
+                        fxIcon: 'article',
+                        label: 'Ver relatório',
+                        value: '',
+                        onTap: () => context.push(
+                          '/alunos/${widget.alunoId}/relatorio',
+                          extra: nome,
+                        ),
+                      ),
+                      FxSettingsTile(
+                        fxIcon: 'circle-check',
+                        label: _resolving ? 'Resolvendo…' : 'Resolver alerta',
+                        value: '',
+                        showDivider: false,
+                        onTap: _resolving ? () {} : _resolver,
+                      ),
+                    ],
                   ),
                 ],
               ),
             ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _CardCheckIns extends StatelessWidget {
-  final int checkIns;
-  const _CardCheckIns({required this.checkIns});
-
-  Color get _cor {
-    if (checkIns > 10) return EagleTokens.good;
-    if (checkIns > 5) return EagleTokens.warn;
-    return EagleTokens.bad;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final progress = (checkIns / 20).clamp(0.0, 1.0);
-    return DecoratedBox(
-      decoration: fxListCardDecoration(context),
-      child: Padding(
-        padding: const EdgeInsets.all(TokensStrip.s4),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(Icons.check_circle_outline, color: _cor),
-                const SizedBox(width: 12),
-                Text(
-                  'Check-ins (30d)',
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    color: ShellChrome.of(context).mute,
-                  ),
-                ),
-                const Spacer(),
-                Text(
-                  '$checkIns',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: _cor,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            LinearProgressIndicator(
-              value: progress,
-              backgroundColor: _cor.withValues(alpha: 0.15),
-              valueColor: AlwaysStoppedAnimation<Color>(_cor),
-              minHeight: 8,
-              borderRadius: BorderRadius.circular(4),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _CardFinanceiro extends StatelessWidget {
-  final String status;
-  const _CardFinanceiro({required this.status});
-
-  Color _cor(String s) {
-    final lower = s.toLowerCase();
-    if (lower.contains('em dia') ||
-        lower.contains('ok') ||
-        lower.contains('ativo')) {
-      return EagleTokens.good;
-    }
-    if (lower.contains('atraso') ||
-        lower.contains('inadimplente') ||
-        lower.contains('cancelado')) {
-      return EagleTokens.bad;
-    }
-    return EagleTokens.warn;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final cor = _cor(status);
-    return DecoratedBox(
-      decoration: fxListCardDecoration(context),
-      child: Padding(
-        padding: const EdgeInsets.all(TokensStrip.s4),
-        child: Row(
-          children: [
-            Icon(Icons.account_balance_wallet_outlined, color: cor),
-            const SizedBox(width: 12),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Situação Financeira',
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    color: ShellChrome.of(context).mute,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Chip(
-                  label: Text(
-                    status,
-                    style: TextStyle(
-                      color: cor,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 12,
-                    ),
-                  ),
-                  backgroundColor: cor.withValues(alpha: 0.12),
-                  side: BorderSide(color: cor.withValues(alpha: 0.3)),
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _CardSugestaoIa extends StatelessWidget {
-  final String sugestao;
-  const _CardSugestaoIa({required this.sugestao});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return DecoratedBox(
-      decoration: fxListCardDecoration(
-        context,
-        accent: theme.colorScheme.secondary,
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(TokensStrip.s4),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(
-                  Icons.lightbulb,
-                  color: theme.colorScheme.onSecondaryContainer,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  'Sugestão da IA',
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    color: theme.colorScheme.onSecondaryContainer,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Text(
-              sugestao,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                fontStyle: FontStyle.italic,
-                color: theme.colorScheme.onSecondaryContainer,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
