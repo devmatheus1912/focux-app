@@ -7,7 +7,7 @@ import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../health/data/health_repository.dart';
-import '../copilot_insight_text.dart';
+import '../models/ia_copilot_insight.dart';
 
 class IaCopilotInsightItem extends StatefulWidget {
   const IaCopilotInsightItem({
@@ -25,7 +25,7 @@ class IaCopilotInsightItem extends StatefulWidget {
   });
 
   final int index;
-  final Map<String, dynamic> insight;
+  final IaCopilotInsight insight;
   final bool isLast;
   final bool highlighted;
   final Color line;
@@ -44,9 +44,9 @@ class _IaCopilotInsightItemState extends State<IaCopilotInsightItem> {
 
   @override
   Widget build(BuildContext context) {
-    final titulo = copilotInsightTitulo(widget.insight, widget.index);
-    final detalhe = copilotInsightDetalhe(widget.insight);
-    final tipo = copilotInsightTipo(widget.insight);
+    final titulo = widget.insight.titulo;
+    final detalhe = widget.insight.detalhe;
+    final tipo = widget.insight.tipo;
 
     assert(
       widget.line.a >= 0 &&

@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
 import '../../subscription/models/subscription_plan.dart';
+import '../models/ia_copilot_insight.dart';
 import '../models/ia_copilot_proxima_acao.dart';
 import '../models/ia_copiloto_home.dart';
 import '../models/ia_progressao_carga_result.dart';
@@ -235,7 +236,7 @@ class IaRepository {
     });
   }
 
-  Future<List<Map<String, dynamic>>> insights({
+  Future<List<IaCopilotInsight>> insights({
     int? alunoId,
     String? mode,
   }) async {
@@ -249,7 +250,14 @@ class IaRepository {
         },
       );
       return (r.data as List)
-          .map((item) => Map<String, dynamic>.from(item as Map))
+          .asMap()
+          .entries
+          .map(
+            (e) => IaCopilotInsight.fromJson(
+              Map<String, dynamic>.from(e.value as Map),
+              index: e.key,
+            ),
+          )
           .toList();
     });
   }

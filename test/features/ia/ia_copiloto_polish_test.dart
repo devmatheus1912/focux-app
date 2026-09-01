@@ -38,8 +38,8 @@ void main() {
     expect(actionsPart, isNot(contains('DraggableScrollableSheet')));
     expect(actionsPart, contains('Semantics('));
     expect(screen, isNot(contains('rascunho editável')));
-    expect(insightWidgets, contains('copilot_insight_text.dart'));
-    expect(insightWidgets, contains('copilotInsightDetalhe'));
+    expect(insightWidgets, contains('IaCopilotInsight'));
+    expect(insightWidgets, contains('insight.detalhe'));
     expect(screen, isNot(contains('Ações do rascunho')));
     expect(actionsPart, contains('Ações das recomendações'));
   });

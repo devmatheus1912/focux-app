@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../health/data/health_repository.dart';
 import '../data/ia_repository.dart';
+import '../models/ia_copilot_insight.dart';
 import '../models/ia_copilot_proxima_acao.dart';
 import '../models/ia_copiloto_home.dart';
 
@@ -30,7 +31,7 @@ class InsightsQuery {
 }
 
 final insightsProvider =
-    FutureProvider.family<List<Map<String, dynamic>>, InsightsQuery>((
+    FutureProvider.family<List<IaCopilotInsight>, InsightsQuery>((
       ref,
       query,
     ) async {

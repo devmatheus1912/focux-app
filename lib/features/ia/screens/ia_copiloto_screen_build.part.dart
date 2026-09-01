@@ -310,11 +310,9 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
                                 ),
                               ),
                           data: (insights) {
-                            final degraded = insights.any((insight) {
-                              final status =
-                                  (insight['status'] ?? 'READY').toString();
-                              return status != 'READY';
-                            });
+                            final degraded = insights.any(
+                              (insight) => !insight.ready,
+                            );
                             if (insights.isEmpty) {
                               return Padding(
                                 padding: const EdgeInsets.fromLTRB(
