@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
@@ -6,22 +7,23 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/router/safe_navigation.dart';
-import '../../../core/theme/shell_chrome.dart';
-import '../../../core/theme/tokens_strip.dart';
+import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_form_sheet.dart';
+import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
+import '../../../core/widgets/fx_settings_grouped_list.dart';
+import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../features/auth/providers/auth_provider.dart';
+import '../../alunos/widgets/aluno_avatar.dart';
 import '../data/alertas_repository.dart';
-import '../widgets/alerta_risco_card.dart';
-import '../widgets/alertas_config_strip.dart';
-import '../widgets/alertas_summary_row.dart';
+import '../widgets/alertas_help_sheet.dart';
 
 class AlertasScreen extends ConsumerStatefulWidget {
   const AlertasScreen({super.key});
@@ -31,12 +33,14 @@ class AlertasScreen extends ConsumerStatefulWidget {
 }
 
 class _AlertasScreenState extends ConsumerState<AlertasScreen> {
+  final _openedAt = DateTime.now();
   List<AlertaRisco> _alertas = [];
   AlertasConfiguracao? _config;
-  bool _loading = true;
+  var _loading = true;
   String? _erro;
-  int? _filtroScoreMin;
   DateTime? _fetchedAt;
+  var _viewTracked = false;
+  var _ttvTracked = false;
 
   @override
   void initState() {
@@ -52,32 +56,51 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
     try {
       final home =
           await AlertasRepository(ref.read(apiClientProvider)).getHome();
-      if (mounted) {
-        setState(() {
-          _alertas = home.riscos;
-          _config = home.configuracao;
-          _loading = false;
-          _fetchedAt = DateTime.now();
-        });
-      }
+      if (!mounted) return;
+      setState(() {
+        _alertas = home.riscos;
+        _config = home.configuracao;
+        _loading = false;
+        _fetchedAt = DateTime.now();
+      });
+      _trackViewIfNeeded();
     } catch (e) {
-      if (mounted) {
-        setState(() {
-          _loading = false;
-          _erro = friendlyError(e);
-        });
-      }
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+        _erro = friendlyError(e);
+      });
+    }
+  }
+
+  void _trackViewIfNeeded() {
+    if (_viewTracked) return;
+    _viewTracked = true;
+    final altos = _alertas.where((a) => a.score >= 2).length;
+    AnalyticsService.instance.track(
+      ProductEvents.alertasHubViewed,
+      props: {'count': _alertas.length, 'altos': altos},
+    );
+    if (!_ttvTracked) {
+      _ttvTracked = true;
+      AnalyticsService.instance.track(
+        ProductEvents.alertasHubTtv,
+        props: {
+          'ms': DateTime.now().difference(_openedAt).inMilliseconds,
+          'count': _alertas.length,
+        },
+      );
     }
   }
 
   Future<void> _editarConfiguracao() async {
     if (_config == null) return;
-    int dias = _config!.diasSemTreino;
-    int aderencia = _config!.aderenciaMinima;
+    var dias = _config!.diasSemTreino;
+    var aderencia = _config!.aderenciaMinima;
 
     final confirm = await showFxFormSheet(
       context,
-      title: 'Configurar Alertas',
+      title: 'Quando dispara',
       icon: Icons.tune_rounded,
       confirmLabel: 'Salvar',
       child: StatefulBuilder(
@@ -128,7 +151,7 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
       ).resolver(alerta.alunoId);
       setState(() => _alertas.removeWhere((a) => a.alunoId == alerta.alunoId));
       if (mounted) {
-        FeedbackHelper.showSuccess(context, 'Alerta resolvido!');
+        FeedbackHelper.showSuccess(context, 'Alerta resolvido.');
       }
     } catch (e) {
       if (mounted) {
@@ -140,7 +163,7 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
   Future<void> _enviarMensagemChat(AlertaRisco alerta) async {
     final ctrl = TextEditingController(
       text:
-          'Olá ${alerta.alunoNome.split(' ').first}! Vi que faz um tempo que não treina. Que tal retomarmos hoje? 💪',
+          'Olá ${alerta.alunoNome.split(' ').first}! Vi que faz um tempo que não treina. Que tal retomarmos hoje?',
     );
 
     final confirm = await showFxFormSheet(
@@ -166,18 +189,13 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
         ref.read(apiClientProvider),
       ).enviarMensagemChat(alerta.alunoId, ctrl.text.trim());
       if (mounted) {
-        FeedbackHelper.showSuccess(context, 'Mensagem enviada!');
+        FeedbackHelper.showSuccess(context, 'Mensagem enviada.');
       }
     } catch (e) {
       if (mounted) {
         FeedbackHelper.showError(context, friendlyError(e));
       }
     }
-  }
-
-  List<AlertaRisco> get _filtrados {
-    if (_filtroScoreMin == null) return _alertas;
-    return _alertas.where((a) => a.score >= _filtroScoreMin!).toList();
   }
 
   void _openAlerta(AlertaRisco alerta) {
@@ -192,65 +210,44 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
     context.push('/alertas/aluno/${alerta.alunoId}', extra: alerta.alunoNome);
   }
 
-  void _openFiltros() {
+  void _openActions(AlertaRisco alerta) {
+    HapticFeedback.selectionClick();
     showFxHomeSheet<void>(
       context,
       builder: (sheetContext) {
         final isDark = Theme.of(sheetContext).brightness == Brightness.dark;
-        final primary = Theme.of(sheetContext).colorScheme.primary;
-        Widget option({
-          required String title,
-          required IconData icon,
-          required VoidCallback onTap,
-        }) {
-          return ListTile(
-            contentPadding: EdgeInsets.zero,
-            leading: Icon(icon, color: primary, size: 20),
-            title: Text(title),
-            onTap: onTap,
-            minVerticalPadding: 12,
-          );
-        }
-
         return FxHomeSheetSurface(
           isDark: isDark,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               FxHomeSheetHandle(isDark: isDark),
-              SizedBox(height: TokensStrip.s4),
+              const SizedBox(height: FxSettingsLayout.headerToGroup),
               FxHomeSheetHeader(
                 isDark: isDark,
-                title: 'Filtrar alertas',
-                subtitle: 'Mostre só o nível de risco que você quer ver agora.',
-                leading: Icon(
-                  Icons.filter_list_rounded,
-                  color: primary,
-                  size: 18,
-                ),
+                leading: const Icon(Icons.person_outline_rounded, size: 18),
+                title: alerta.alunoNome,
+                subtitle: alerta.motivos.isEmpty
+                    ? 'O que você quer fazer agora?'
+                    : alerta.motivos.first,
               ),
-              option(
-                title: 'Todos',
-                icon: Icons.all_inclusive_rounded,
+              FxSettingsTile(
+                fxIcon: 'message-circle',
+                label: 'Enviar mensagem',
+                value: '',
                 onTap: () {
-                  setState(() => _filtroScoreMin = null);
                   Navigator.pop(sheetContext);
+                  _enviarMensagemChat(alerta);
                 },
               ),
-              option(
-                title: 'Score ≥ 2 (alto)',
-                icon: Icons.priority_high_rounded,
+              FxSettingsTile(
+                fxIcon: 'circle-check',
+                label: 'Resolver',
+                value: '',
+                showDivider: false,
                 onTap: () {
-                  setState(() => _filtroScoreMin = 2);
                   Navigator.pop(sheetContext);
-                },
-              ),
-              option(
-                title: 'Score = 1 (médio)',
-                icon: Icons.remove_rounded,
-                onTap: () {
-                  setState(() => _filtroScoreMin = 1);
-                  Navigator.pop(sheetContext);
+                  _resolverAlerta(alerta);
                 },
               ),
             ],
@@ -262,123 +259,182 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final chrome = ShellChrome.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final brand = Theme.of(context).colorScheme.primary;
-    final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
-
-    final altos = _alertas.where((a) => a.score >= 2).length;
-    final medios = _alertas.where((a) => a.score == 1).length;
-    const saudaveis = 0;
+    final altos = _alertas.where((a) => a.score >= 2).toList();
+    final medios = _alertas.where((a) => a.score == 1).toList();
+    final rows = <_HubRow>[
+      if (_config != null) _HubRow.config(_config!),
+      for (final item in altos) _HubRow.risco(item, 'alto'),
+      for (final item in medios) _HubRow.risco(item, 'medio'),
+    ];
 
     return fxScreenA11yScope(
-      label: 'Alertas de Risco',
+      label: 'Alertas',
       child: FxShellScaffold(
         useMesh: true,
         appBar: FxShellAppBar(
-          title: 'Alertas de Risco',
-          subtitle: freshnessLabel ?? 'MOTOR ANTI-CHURN',
+          title: 'Alertas',
+          subtitle: FxHubFreshness.fromFetchedAt(_fetchedAt),
           onBack: () => safePopOrGo(context, '/dashboard/personal'),
           actions: [
-            IconButton(
-              tooltip: 'Filtrar',
-              onPressed: _openFiltros,
-              icon: Icon(Icons.filter_list, color: chrome.mute),
+            FxHelpIconButton(
+              tooltip: 'Como usar os alertas',
+              onTap: () {
+                AnalyticsService.instance.track(
+                  ProductEvents.alertasHubHelpOpened,
+                );
+                showAlertasHelpSheet(context);
+              },
             ),
           ],
         ),
-        body: SafeArea(
-          bottom: false,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              if (_loading)
-                const Expanded(
-                  child: Padding(
-                    padding: EdgeInsets.all(TokensStrip.s4),
-                    child: SkeletonList(count: 6),
-                  ),
-                )
-              else if (_erro != null)
-                Expanded(
-                  child: FxErrorState(
-                    chromeOnDark: chrome.isDark,
-                    primary: brand,
-                    message: _erro!,
-                    onRetry: _load,
-                  ),
-                )
-              else ...[
-                if (_config != null)
-                  AlertasConfigStrip(
-                    config: _config!,
-                    onEditar: _editarConfiguracao,
-                  ),
-                AlertasSummaryRow(
-                  altos: altos,
-                  medios: medios,
-                  saudaveis: saudaveis,
-                ),
-                Expanded(
-                  child: RefreshIndicator(
-                    onRefresh: _load,
-                    child:
-                        _filtrados.isEmpty
-                            ? ListView(
-                              physics: const AlwaysScrollableScrollPhysics(),
-                              children: [
-                                SizedBox(
-                                  height: 320,
-                                  child:
-                                      _filtroScoreMin != null
-                                          ? FxEmptyState(
-                                            icon: 'search',
-                                            title: 'Nenhum alerta neste filtro',
-                                            subtitle:
-                                                'Nenhum aluno bate o score selecionado. Volte para "Todos" para ver a base inteira.',
-                                            action: FxEmptyAction(
-                                              label: 'Limpar filtro',
-                                              onTap:
-                                                  () => setState(
-                                                    () =>
-                                                        _filtroScoreMin = null,
-                                                  ),
-                                            ),
-                                          )
-                                          : const FxEmptyState(
-                                            icon: 'circle-check',
-                                            title: 'Nenhum aluno em risco',
-                                            subtitle:
-                                                'Sua base está saudável. Avisamos aqui quando alguém começar a esfriar.',
-                                          ),
-                                ),
-                              ],
-                            )
-                            : ListView.builder(
-                              physics: const AlwaysScrollableScrollPhysics(),
-                              padding: const EdgeInsets.fromLTRB(
-                                TokensStrip.s4,
-                                0,
-                                16,
-                                100,
+        body: _loading
+            ? const Padding(
+              padding: EdgeInsets.all(FxSettingsLayout.pageInset),
+              child: SkeletonList(count: 6),
+            )
+            : _erro != null
+            ? FxErrorState(
+              chromeOnDark: isDark,
+              primary: brand,
+              message: _erro!,
+              onRetry: _load,
+            )
+            : RefreshIndicator(
+              color: brand,
+              onRefresh: () async {
+                AnalyticsService.instance.track(
+                  ProductEvents.alertasHubRefreshed,
+                );
+                await _load();
+              },
+              child: _alertas.isEmpty
+                  ? ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    children: [
+                      SizedBox(
+                        height: 320,
+                        child: FxEmptyState(
+                          icon: 'circle-check',
+                          title: 'Nenhum aluno em risco',
+                          subtitle:
+                              'Avisamos aqui quando alguém esfriar. Você pode apertar ou folgar os limiares.',
+                          action: _config == null
+                              ? null
+                              : FxEmptyAction(
+                                label: 'Ajustar limiares',
+                                onTap: _editarConfiguracao,
                               ),
-                              itemCount: _filtrados.length,
-                              itemBuilder: (_, i) {
-                                final a = _filtrados[i];
-                                return AlertaRiscoCard(
-                                  alerta: a,
-                                  onOpen: () => _openAlerta(a),
-                                  onMensagem: () => _enviarMensagemChat(a),
-                                  onResolver: () => _resolverAlerta(a),
-                                );
-                              },
+                        ),
+                      ),
+                    ],
+                  )
+                  : FxSettingsGroupedList(
+                header: _alertas.length == 1
+                    ? '1 em risco'
+                    : '${_alertas.length} em risco',
+                caption:
+                    'Toque para o detalhe. Segure para mensagem ou resolver.',
+                itemCount: rows.length,
+                itemBuilder: (context, i) {
+                  final row = rows[i];
+                  if (row.config != null) {
+                    final config = row.config!;
+                    return FxSettingsTile(
+                      fxIcon: 'target',
+                      label: 'Quando dispara',
+                      subtitle:
+                          'Sem treino acima de ${config.diasSemTreino} dias ou aderência abaixo de ${config.aderenciaMinima}%.',
+                      value:
+                          '${config.diasSemTreino}d · ${config.aderenciaMinima}%',
+                      showDivider: i < rows.length - 1,
+                      onTap: _editarConfiguracao,
+                    );
+                  }
+                  final alerta = row.alerta!;
+                  final showSection =
+                      i == 0 || rows[i - 1].section != row.section;
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      if (showSection && row.section == 'medio')
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(
+                            FxSettingsLayout.groupPadH,
+                            10,
+                            FxSettingsLayout.groupPadH,
+                            4,
+                          ),
+                          child: Text(
+                            'Médio',
+                            style: FxSettingsLayout.sectionHeader(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurface
+                                  .withValues(alpha: 0.55),
                             ),
-                  ),
-                ),
-              ],
-            ],
-          ),
-        ),
+                          ),
+                        ),
+                      if (showSection && row.section == 'alto' && altos.isNotEmpty)
+                        Padding(
+                          padding: EdgeInsets.fromLTRB(
+                            FxSettingsLayout.groupPadH,
+                            i == 0 ? 0 : 10,
+                            FxSettingsLayout.groupPadH,
+                            4,
+                          ),
+                          child: Text(
+                            'Alto',
+                            style: FxSettingsLayout.sectionHeader(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurface
+                                  .withValues(alpha: 0.55),
+                            ),
+                          ),
+                        ),
+                      FxSettingsTile(
+                        fxIcon: alerta.score >= 2
+                            ? 'alert-triangle'
+                            : 'bell',
+                        label: alerta.alunoNome,
+                        subtitle: alerta.motivos.isEmpty
+                            ? null
+                            : alerta.motivos.first,
+                        value: '${alerta.diasSemTreino ?? 0}d',
+                        highlight: alerta.score >= 2,
+                        showDivider: i < rows.length - 1,
+                        accessory: AlunoAvatar(
+                          name: alerta.alunoNome,
+                          variant: AlunoAvatarVariant.strip,
+                        ),
+                        semanticsLabel:
+                            '${alerta.alunoNome}. Score ${alerta.score}. '
+                            '${alerta.motivos.join('. ')}',
+                        onTap: () => _openAlerta(alerta),
+                        onLongPress: () => _openActions(alerta),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ),
       ),
     );
   }
+}
+
+class _HubRow {
+  const _HubRow._({this.config, this.alerta, required this.section});
+
+  factory _HubRow.config(AlertasConfiguracao config) =>
+      _HubRow._(config: config, section: 'config');
+
+  factory _HubRow.risco(AlertaRisco alerta, String section) =>
+      _HubRow._(alerta: alerta, section: section);
+
+  final AlertasConfiguracao? config;
+  final AlertaRisco? alerta;
+  final String section;
 }

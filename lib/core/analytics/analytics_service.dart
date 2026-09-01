@@ -170,6 +170,10 @@ class ProductEvents {
   static const treinoPrescriptionSaved = 'treino_prescription_saved';
   static const leadCreatedOrOpened = 'lead_created_or_opened';
   static const alertaRiscoOpened = 'alerta_risco_opened';
+  static const alertasHubViewed = 'alertas_hub_viewed';
+  static const alertasHubTtv = 'alertas_hub_ttv';
+  static const alertasHubHelpOpened = 'alertas_hub_help_opened';
+  static const alertasHubRefreshed = 'alertas_hub_refreshed';
   static const dunningMarkedRecovered = 'dunning_marked_recovered';
   static const automacaoTemplateActivated = 'automacao_template_activated';
   static const lojaCheckoutStarted = 'loja_checkout_started';
