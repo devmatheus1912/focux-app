@@ -1,19 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/router/safe_navigation.dart';
-import '../../../core/theme/focux_hub_typography.dart';
+import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
-import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/ux/fx_hub_freshness.dart';
+import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
+import '../../../core/widgets/fx_settings_group.dart';
+import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../data/winback_repository.dart';
-import '../../../core/widgets/fx_screen_a11y.dart';
+import '../utils/winback_display.dart';
 
 final winbackRepositoryProvider = Provider(
   (ref) => WinbackRepository(ref.read(apiClientProvider)),
@@ -30,6 +35,7 @@ class _WinbackScreenState extends ConsumerState<WinbackScreen> {
   List<WinbackLogEntry> _entries = [];
   bool _loading = true;
   String? _erro;
+  DateTime? _fetchedAt;
 
   @override
   void initState() {
@@ -48,6 +54,7 @@ class _WinbackScreenState extends ConsumerState<WinbackScreen> {
       setState(() {
         _entries = entries;
         _loading = false;
+        _fetchedAt = DateTime.now();
       });
     } catch (e) {
       if (!mounted) return;
@@ -58,20 +65,16 @@ class _WinbackScreenState extends ConsumerState<WinbackScreen> {
     }
   }
 
-  String _formatTipo(String tipo) {
-    return switch (tipo) {
-      'ALUNO_INATIVO_7D' => 'Inativo 7 dias',
-      'ALUNO_INATIVO_30D' => 'Inativo 30 dias',
-      'ALUNO_INATIVO_60D' => 'Inativo 60 dias',
-      _ => tipo.replaceAll('_', ' '),
-    };
+  void _abrirSaude() {
+    HapticFeedback.selectionClick();
+    context.push('/retencao');
   }
 
   @override
   Widget build(BuildContext context) {
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
-    final mute = chrome.mute;
+    final freshness = FxHubFreshness.fromFetchedAt(_fetchedAt);
 
     return fxScreenA11yScope(
       label: 'Win-back automático',
@@ -79,12 +82,15 @@ class _WinbackScreenState extends ConsumerState<WinbackScreen> {
         useMesh: true,
         appBar: FxShellAppBar(
           title: 'Win-back automático',
-          subtitle: 'Push de reengajamento',
+          subtitle: winbackHubSubtitle(freshness),
           onBack: () => safePopOrGo(context, '/dashboard/personal'),
         ),
         body:
             _loading
-                ? const SkeletonList(count: 5)
+                ? const Padding(
+                  padding: EdgeInsets.all(FxSettingsLayout.pageInset),
+                  child: SkeletonList(count: 5),
+                )
                 : _erro != null
                 ? FxErrorState(
                   chromeOnDark: chrome.isDark,
@@ -92,97 +98,65 @@ class _WinbackScreenState extends ConsumerState<WinbackScreen> {
                   message: _erro!,
                   onRetry: _carregar,
                 )
-                : RefreshIndicator(
-                  color: primary,
-                  onRefresh: _carregar,
-                  child: ListView(
-                    padding: const EdgeInsets.all(TokensStrip.s4),
-                    children: [
-                      FxSatellitePanel(
-                        padding: const EdgeInsets.all(20),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Icon(
-                              Icons.notifications_active_outlined,
-                              color: primary,
-                              size: 40,
-                            ),
-                            const SizedBox(height: 12),
-                            Text(
-                              'Automação FCM ativa',
-                              style: FocuxHubTypography.sectionTitle(
-                                context,
-                                color: chrome.ink,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Push de reengajamento para alunos inativos e lembretes de trial.',
-                              style: TextStyle(height: 1.45, color: mute),
-                            ),
-                            const SizedBox(height: 16),
-                            FilledButton.icon(
-                              onPressed: () => context.push('/retencao'),
-                              icon: const Icon(
-                                Icons.health_and_safety_outlined,
-                              ),
-                              label: const Text('Ver saúde da base'),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Histórico de envios (${_entries.length})',
-                        style: FocuxHubTypography.cardTitle(color: chrome.ink),
-                      ),
-                      const SizedBox(height: 10),
-                      if (_entries.isEmpty)
-                        const FxEmptyState(
-                          icon: 'send',
-                          title: 'Nenhum envio ainda',
-                          subtitle:
-                              'Quando a automação disparar, os registros aparecem aqui.',
-                        )
-                      else
-                        ..._entries.map(
-                          (entry) => FxSatelliteListTile(
-                            isThreeLine: true,
-                            leading: CircleAvatar(
-                              backgroundColor: primary.withValues(alpha: 0.12),
-                              foregroundColor: primary,
-                              child: const Icon(Icons.send_outlined, size: 20),
-                            ),
-                            title: entry.alunoNome,
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const SizedBox(height: 4),
-                                Text(_formatTipo(entry.tipo)),
-                                if (entry.mensagem.isNotEmpty) ...[
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    entry.mensagem,
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ],
-                                const SizedBox(height: 4),
-                                Text(
-                                  entry.enviadoEm,
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    color: mute.withValues(alpha: 0.85),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                    ],
+                : FxContentWidthLimiter(child: _buildBody()),
+      ),
+    );
+  }
+
+  Widget _buildBody() {
+    return RefreshIndicator(
+      onRefresh: _carregar,
+      child: ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.fromLTRB(
+          FxSettingsLayout.pageInset,
+          8,
+          FxSettingsLayout.pageInset,
+          32,
+        ),
+        children: [
+          FxSettingsGroup(
+            header: 'Automação',
+            caption:
+                'Push automático para alunos inativos. Trial do personal não entra neste log.',
+            children: [
+              FxSettingsTile(
+                fxIcon: 'bell',
+                label: 'FCM ativo',
+                subtitle: 'Reengajamento em 7, 30 e 60 dias sem treino.',
+                value: 'Saúde',
+                showDivider: false,
+                onTap: _abrirSaude,
+              ),
+            ],
+          ),
+          if (_entries.isEmpty)
+            const FxEmptyState(
+              icon: 'bell',
+              title: 'Nenhum envio ainda',
+              subtitle:
+                  'Quando a automação disparar, os registros aparecem aqui.',
+            )
+          else
+            FxSettingsGroup(
+              header: 'Envios',
+              caption: 'Push enviados pela automação de inatividade.',
+              children: [
+                for (var i = 0; i < _entries.length; i++)
+                  FxSettingsTile(
+                    fxIcon: winbackFxIcon(_entries[i].tipo),
+                    label: winbackAlunoLabel(_entries[i].alunoNome),
+                    subtitle: winbackSubtitle(
+                      tipo: _entries[i].tipo,
+                      mensagem: _entries[i].mensagem,
+                    ),
+                    value: winbackWhenLabel(_entries[i].enviadoEm),
+                    showDivider: i != _entries.length - 1,
+                    onTap: () {},
                   ),
-                ),
+              ],
+            ),
+        ],
       ),
     );
   }

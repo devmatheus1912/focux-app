@@ -3,16 +3,12 @@ import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
 
 class WinbackLogEntry {
-  final int id;
-  final int? alunoId;
   final String alunoNome;
   final String tipo;
   final String mensagem;
   final String enviadoEm;
 
   const WinbackLogEntry({
-    required this.id,
-    this.alunoId,
     required this.alunoNome,
     required this.tipo,
     required this.mensagem,
@@ -21,12 +17,10 @@ class WinbackLogEntry {
 
   factory WinbackLogEntry.fromJson(Map<String, dynamic> json) =>
       WinbackLogEntry(
-        id: (json['id'] as num).toInt(),
-        alunoId: (json['alunoId'] as num?)?.toInt(),
         alunoNome: json['alunoNome'] as String? ?? 'Aluno',
         tipo: json['tipo'] as String? ?? '',
         mensagem: json['mensagem'] as String? ?? '',
-        enviadoEm: json['enviadoEm'] as String? ?? '',
+        enviadoEm: json['enviadoEm']?.toString() ?? '',
       );
 }
 
