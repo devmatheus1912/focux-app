@@ -39,7 +39,7 @@ class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
   @override
   Widget build(BuildContext context) {
     final async = ref.watch(notificacoesProvider);
-    ref.listen<AsyncValue<List<NotificacaoApp>>>(notificacoesProvider, (
+    ref.listen<AsyncValue<NotificacoesInbox>>(notificacoesProvider, (
       _,
       next,
     ) {
@@ -52,11 +52,15 @@ class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted || _viewTracked) return;
         _viewTracked = true;
-        final items = async.requireValue;
-        final unread = items.where((item) => !item.lida).length;
+        final inbox = async.requireValue;
+        final unread = inbox.items.where((item) => !item.lida).length;
         AnalyticsService.instance.track(
           ProductEvents.notificacoesViewed,
-          props: {'count': items.length, 'unread': unread},
+          props: {
+            'count': inbox.total,
+            'loaded': inbox.items.length,
+            'unread': unread,
+          },
         );
         if (!_ttvTracked) {
           _ttvTracked = true;
@@ -76,7 +80,8 @@ class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
     final repo = ref.read(notificacoesRepositoryProvider);
     final home = roleHomePath(ref);
     final unreadCount =
-        async.valueOrNull?.where((item) => !item.lida).length ?? 0;
+        ref.watch(notificacoesNaoLidasProvider).valueOrNull ??
+        (async.valueOrNull?.items.where((item) => !item.lida).length ?? 0);
 
     Future<void> reload() async {
       AnalyticsService.instance.track(ProductEvents.notificacoesRefreshed);
@@ -156,7 +161,8 @@ class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
                 message: friendlyError(e),
                 onRetry: reload,
               ),
-          data: (items) {
+          data: (inbox) {
+            final items = inbox.items;
             final rows = _buildNotificationRows(items);
             if (rows.isEmpty) {
               return FxEmptyState(
@@ -166,7 +172,8 @@ class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
                     'Alertas, mensagens e o Radar Focux aparecem aqui quando pedem ação.',
               );
             }
-            final unread = items.where((item) => !item.lida).length;
+            final unread = unreadCount;
+            final extra = inbox.hasMore ? 1 : 0;
             return RefreshIndicator(
               color: primary,
               onRefresh: reload,
@@ -177,8 +184,26 @@ class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
                     ? '1 não lida'
                     : '$unread não lidas',
                 caption: 'Toque para abrir o destino. Ler todas zera o sino.',
-                itemCount: rows.length,
+                itemCount: rows.length + extra,
                 itemBuilder: (context, i) {
+                  if (i >= rows.length) {
+                    return FxSettingsTile(
+                      fxIcon: 'bell',
+                      label: inbox.loadingMore
+                          ? 'Carregando…'
+                          : 'Carregar mais',
+                      subtitle: inbox.loadingMore
+                          ? null
+                          : 'Mais ${inbox.total - items.length} nesta caixa.',
+                      value: '',
+                      showDivider: false,
+                      onTap: inbox.loadingMore
+                          ? () {}
+                          : () => ref
+                              .read(notificacoesProvider.notifier)
+                              .loadMore(),
+                    );
+                  }
                   final row = rows[i];
                   final showDay =
                       i == 0 || rows[i - 1].dayGroup != row.dayGroup;
@@ -209,7 +234,7 @@ class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
                         subtitle: notificationSubtitle(row.item),
                         value: notificationTimeLabel(row.item.criadaEm),
                         highlight: !row.item.lida,
-                        showDivider: i < rows.length - 1,
+                        showDivider: i < rows.length - 1 || inbox.hasMore,
                         semanticsLabel:
                             '${row.item.lida ? '' : 'Não lida. '}'
                             '${notificationHumanTitle(row.item)}. '

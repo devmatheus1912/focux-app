@@ -16,6 +16,7 @@ void main() {
     expect(screen, contains('SkeletonList'));
     expect(screen, contains('RefreshIndicator'));
     expect(screen, contains('notificacoesViewed'));
+    expect(screen, contains('Carregar mais'));
     expect(screen, isNot(contains('CircularProgressIndicator')));
   });
 }

@@ -217,10 +217,15 @@ class ChatRepository {
   }
 
   Future<List<ChatInboxItem>> inbox() async {
-    final r = await _dio.get('/api/chat/inbox');
-    return (r.data as List)
-        .map((e) => ChatInboxItem.fromJson(e as Map<String, dynamic>))
-        .toList();
+    return (await inboxPage()).items;
+  }
+
+  Future<ChatInboxPage> inboxPage({int page = 0, int size = 50}) async {
+    final r = await _dio.get(
+      '/api/chat/inbox',
+      queryParameters: {'page': page, 'size': size},
+    );
+    return ChatInboxPage.fromJson(r.data as Map<String, dynamic>);
   }
 
   /// BFF tipado — first paint da inbox (inbox + unread + archived).
@@ -442,11 +447,19 @@ class ChatInboxHomeBundle {
   final List<ChatInboxItem> inbox;
   final List<ChatInboxItem> unread;
   final List<ChatInboxItem> archived;
+  final bool inboxHasMore;
+  final int inboxTotal;
+  final int inboxPage;
+  final int inboxSize;
 
   ChatInboxHomeBundle({
     required this.inbox,
     required this.unread,
     required this.archived,
+    this.inboxHasMore = false,
+    this.inboxTotal = 0,
+    this.inboxPage = 0,
+    this.inboxSize = 50,
   });
 
   factory ChatInboxHomeBundle.fromJson(Map<String, dynamic> j) {
@@ -454,10 +467,45 @@ class ChatInboxHomeBundle {
         ((j[key] as List?) ?? const [])
             .map((e) => ChatInboxItem.fromJson(e as Map<String, dynamic>))
             .toList();
+    final inbox = parse('inbox');
     return ChatInboxHomeBundle(
-      inbox: parse('inbox'),
+      inbox: inbox,
       unread: parse('unread'),
       archived: parse('archived'),
+      inboxHasMore: j['inboxHasMore'] as bool? ?? false,
+      inboxTotal: (j['inboxTotal'] as num?)?.toInt() ?? inbox.length,
+      inboxPage: (j['inboxPage'] as num?)?.toInt() ?? 0,
+      inboxSize: (j['inboxSize'] as num?)?.toInt() ?? 50,
+    );
+  }
+}
+
+class ChatInboxPage {
+  const ChatInboxPage({
+    required this.items,
+    required this.hasMore,
+    required this.page,
+    required this.total,
+    required this.size,
+  });
+
+  final List<ChatInboxItem> items;
+  final bool hasMore;
+  final int page;
+  final int total;
+  final int size;
+
+  factory ChatInboxPage.fromJson(Map<String, dynamic> j) {
+    final raw = (j['items'] as List?) ?? const [];
+    return ChatInboxPage(
+      items:
+          raw
+              .map((e) => ChatInboxItem.fromJson(e as Map<String, dynamic>))
+              .toList(),
+      hasMore: j['hasMore'] as bool? ?? false,
+      page: (j['page'] as num?)?.toInt() ?? 0,
+      total: (j['total'] as num?)?.toInt() ?? raw.length,
+      size: (j['size'] as num?)?.toInt() ?? raw.length,
     );
   }
 }

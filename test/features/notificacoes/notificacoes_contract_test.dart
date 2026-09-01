@@ -25,6 +25,28 @@ void main() {
     expect(item.dados['tipoEvolucao'], 'CARGA');
   });
 
+  test('inbox page envelope parses items and hasMore', () {
+    final inbox = NotificacoesInbox.fromJson({
+      'items': [
+        {
+          'id': 1,
+          'titulo': 'Aluno evoluiu',
+          'mensagem': 'Carga',
+          'tipo': 'EVOLUCAO',
+          'lida': false,
+          'criadaEm': '2026-08-31T12:00:00',
+        },
+      ],
+      'page': 0,
+      'size': 30,
+      'total': 40,
+      'hasMore': true,
+    });
+    expect(inbox.items, hasLength(1));
+    expect(inbox.hasMore, isTrue);
+    expect(inbox.total, 40);
+  });
+
   test('notification center is routed and visible from dashboards', () {
     final router = readRouterSourceBundle();
     final alunoDashboard = File(

@@ -10,7 +10,7 @@ Future<void> showNotificacoesHelpSheet(BuildContext context) {
     tips: const [
       FxHelpTip(
         'Lista',
-        'Hoje, ontem e anteriores. Toque abre o aluno, o treino ou o aviso.',
+        'Hoje, ontem e anteriores. Toque abre o aluno, o treino ou o aviso. Role até o fim se a caixa crescer.',
         icon: 'bell',
       ),
       FxHelpTip(

@@ -21,5 +21,22 @@ void main() {
     expect(bundle.inbox.first.alunoId, 7);
     expect(bundle.unread, isEmpty);
     expect(bundle.archived, isEmpty);
+    expect(bundle.inboxHasMore, isFalse);
+    expect(bundle.inboxTotal, 1);
+  });
+
+  test('ChatInboxHomeBundle reads pagination meta', () {
+    final bundle = ChatInboxHomeBundle.fromJson({
+      'inbox': [],
+      'unread': [],
+      'archived': [],
+      'inboxHasMore': true,
+      'inboxTotal': 80,
+      'inboxPage': 0,
+      'inboxSize': 50,
+    });
+    expect(bundle.inboxHasMore, isTrue);
+    expect(bundle.inboxTotal, 80);
+    expect(bundle.inboxSize, 50);
   });
 }

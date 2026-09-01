@@ -11,6 +11,9 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
   final DateTime _openedAt = DateTime.now();
   bool _viewTracked = false;
   bool _ttvTracked = false;
+  final _extraInbox = <ChatInboxItem>[];
+  var _inboxHasMore = false;
+  var _loadingMoreInbox = false;
 
   @override
   void initState() {
@@ -144,7 +147,13 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
       next,
     ) {
       if (!next.isLoading && next.hasValue) {
-        setState(() => _fetchedAt = DateTime.now());
+        final home = next.requireValue;
+        setState(() {
+          _fetchedAt = DateTime.now();
+          _extraInbox.clear();
+          _inboxHasMore = home.inboxHasMore;
+          _loadingMoreInbox = false;
+        });
       }
     });
     final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
@@ -325,9 +334,14 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
                   controller: _tabCtrl,
                   children: [
                     _buildInboxTab(
-                      ref.watch(chatInboxProvider),
+                      ref.watch(chatInboxProvider).whenData(
+                        (items) => [...items, ..._extraInbox],
+                      ),
                       isDark,
                       primary,
+                      showLoadMore: _inboxHasMore,
+                      loadingMore: _loadingMoreInbox,
+                      onLoadMore: _loadMoreInbox,
                     ),
                     _buildInboxTab(
                       ref.watch(chatInboxUnreadProvider),
@@ -390,12 +404,45 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
     );
   }
 
+  Future<void> _loadMoreInbox() async {
+    if (_loadingMoreInbox || !_inboxHasMore) return;
+    final home = ref.read(chatInboxHomeProvider).valueOrNull;
+    if (home == null || home.inboxSize <= 0) return;
+    setState(() => _loadingMoreInbox = true);
+    try {
+      final loaded = home.inbox.length + _extraInbox.length;
+      final nextPage = loaded ~/ home.inboxSize;
+      final page = await ChatRepository(
+        ref.read(apiClientProvider),
+      ).inboxPage(page: nextPage, size: home.inboxSize);
+      final seen = <int>{
+        ...home.inbox.map((item) => item.alunoId),
+        ..._extraInbox.map((item) => item.alunoId),
+      };
+      if (!mounted) return;
+      setState(() {
+        _extraInbox.addAll(
+          page.items.where((item) => seen.add(item.alunoId)),
+        );
+        _inboxHasMore = page.hasMore;
+        _loadingMoreInbox = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _loadingMoreInbox = false);
+      FeedbackHelper.showError(context, friendlyError(e));
+    }
+  }
+
   Widget _buildInboxTab(
     AsyncValue<List<ChatInboxItem>> async,
     bool isDark,
     Color primary, {
     String emptyMsg = 'Nenhuma conversa ainda',
     bool isArchived = false,
+    bool showLoadMore = false,
+    bool loadingMore = false,
+    VoidCallback? onLoadMore,
   }) {
     return async.when(
       loading:
@@ -435,8 +482,20 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
             invalidateChatInboxCaches(ref);
           },
           child: FxSettingsGroupedList(
-            itemCount: items.length,
-            itemBuilder: (context, i) => Dismissible(
+            itemCount: items.length + (showLoadMore ? 1 : 0),
+            itemBuilder: (context, i) {
+              if (showLoadMore && i >= items.length) {
+                return FxSettingsTile(
+                  fxIcon: 'chat',
+                  label: loadingMore ? 'Carregando…' : 'Carregar mais',
+                  value: '',
+                  showDivider: false,
+                  onTap: loadingMore || onLoadMore == null
+                      ? () {}
+                      : onLoadMore,
+                );
+              }
+              return Dismissible(
               key: Key('inbox-${items[i].alunoId}'),
               direction: _selectionActive
                   ? DismissDirection.none
@@ -472,7 +531,7 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
                 isDark: isDark,
                 selected: _selectedAlunoIds.contains(items[i].alunoId),
                 selecting: _selectionActive,
-                showDivider: i < items.length - 1,
+                showDivider: i < items.length - 1 || showLoadMore,
                 onTap: () {
                   if (_selectionActive) {
                     _toggleSelection(items[i].alunoId);
@@ -485,7 +544,8 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
                 },
                 onLongPress: () => _toggleSelection(items[i].alunoId),
               ),
-            ),
+            );
+            },
           ),
         );
       },

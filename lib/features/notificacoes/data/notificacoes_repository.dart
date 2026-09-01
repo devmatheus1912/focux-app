@@ -8,9 +8,10 @@ final notificacoesRepositoryProvider = Provider<NotificacoesRepository>(
   (ref) => NotificacoesRepository(ref.read(apiClientProvider)),
 );
 
-final notificacoesProvider = FutureProvider<List<NotificacaoApp>>((ref) async {
-  return ref.read(notificacoesRepositoryProvider).listar();
-});
+final notificacoesProvider =
+    AsyncNotifierProvider<NotificacoesInboxNotifier, NotificacoesInbox>(
+      NotificacoesInboxNotifier.new,
+    );
 
 final notificacoesNaoLidasProvider = FutureProvider<int>((ref) async {
   return ref.read(notificacoesRepositoryProvider).totalNaoLidas();
@@ -55,16 +56,98 @@ class NotificacaoApp {
   }
 }
 
+class NotificacoesInbox {
+  const NotificacoesInbox({
+    required this.items,
+    required this.hasMore,
+    required this.page,
+    required this.total,
+    this.loadingMore = false,
+  });
+
+  final List<NotificacaoApp> items;
+  final bool hasMore;
+  final int page;
+  final int total;
+  final bool loadingMore;
+
+  NotificacoesInbox copyWith({
+    List<NotificacaoApp>? items,
+    bool? hasMore,
+    int? page,
+    int? total,
+    bool? loadingMore,
+  }) {
+    return NotificacoesInbox(
+      items: items ?? this.items,
+      hasMore: hasMore ?? this.hasMore,
+      page: page ?? this.page,
+      total: total ?? this.total,
+      loadingMore: loadingMore ?? this.loadingMore,
+    );
+  }
+
+  factory NotificacoesInbox.fromJson(Map<String, dynamic> json) {
+    final raw = json['items'] as List? ?? const [];
+    return NotificacoesInbox(
+      items:
+          raw
+              .map((item) => NotificacaoApp.fromJson(item as Map<String, dynamic>))
+              .toList(),
+      hasMore: json['hasMore'] as bool? ?? false,
+      page: (json['page'] as num?)?.toInt() ?? 0,
+      total: (json['total'] as num?)?.toInt() ?? raw.length,
+    );
+  }
+}
+
+class NotificacoesInboxNotifier extends AsyncNotifier<NotificacoesInbox> {
+  static const pageSize = 30;
+
+  @override
+  Future<NotificacoesInbox> build() {
+    return ref
+        .read(notificacoesRepositoryProvider)
+        .listar(page: 0, size: pageSize);
+  }
+
+  Future<void> loadMore() async {
+    final current = state.valueOrNull;
+    if (current == null || !current.hasMore || current.loadingMore) return;
+    state = AsyncData(current.copyWith(loadingMore: true));
+    try {
+      final next = await ref
+          .read(notificacoesRepositoryProvider)
+          .listar(page: current.page + 1, size: pageSize);
+      final seen = current.items.map((item) => item.id).toSet();
+      state = AsyncData(
+        NotificacoesInbox(
+          items: [
+            ...current.items,
+            ...next.items.where((item) => seen.add(item.id)),
+          ],
+          hasMore: next.hasMore,
+          page: next.page,
+          total: next.total,
+        ),
+      );
+    } catch (_) {
+      state = AsyncData(current.copyWith(loadingMore: false));
+    }
+  }
+}
+
 class NotificacoesRepository {
   final Dio _dio;
 
   NotificacoesRepository(ApiClient client) : _dio = client.dio;
 
-  Future<List<NotificacaoApp>> listar() async {
-    final response = await _dio.get('/api/notificacoes');
-    return (response.data as List<dynamic>)
-        .map((item) => NotificacaoApp.fromJson(item as Map<String, dynamic>))
-        .toList();
+  Future<NotificacoesInbox> listar({int page = 0, int size = 30}) async {
+    final response = await _dio.get(
+      '/api/notificacoes',
+      queryParameters: {'page': page, 'size': size},
+    );
+    return NotificacoesInbox.fromJson(response.data as Map<String, dynamic>);
   }
 
   Future<int> totalNaoLidas() async {
