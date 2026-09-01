@@ -28,6 +28,7 @@ void main() {
     expect(screen, contains('FxHelpIconButton'));
     expect(screen, contains('FxSettingsGroup'));
     expect(shellWidgets, contains('IaCopilotResultActionBar'));
+    expect(shellWidgets, contains('FxInsetPickerOption'));
     expect(actionsPart, contains('explicitChildNodes: true'));
     expect(shellWidgets, contains('Como funciona'));
     expect(screen, contains('não monta fichas de treino'));

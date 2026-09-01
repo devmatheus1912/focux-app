@@ -93,6 +93,10 @@ class ProductEvents {
   static const iaInsightRequested = 'ia_insight_requested';
   static const iaQuotaExhausted = 'ia_quota_exhausted';
   static const iaCopilotFailure = 'ia_copilot_failure';
+  static const iaCopilotoViewed = 'ia_copiloto_viewed';
+  static const iaCopilotoTtv = 'ia_copiloto_ttv';
+  static const iaCopilotoHelpOpened = 'ia_copiloto_help_opened';
+  static const iaCopilotoModeChanged = 'ia_copiloto_mode_changed';
 
   static const referralLinkShared = 'referral_link_shared';
   static const activationCtaTapped = 'activation_cta_tapped';
@@ -170,6 +174,10 @@ class ProductEvents {
   static const automacaoTemplateActivated = 'automacao_template_activated';
   static const lojaCheckoutStarted = 'loja_checkout_started';
   static const habitoCreated = 'habito_created';
+  static const chatInboxViewed = 'chat_inbox_viewed';
+  static const chatInboxTtv = 'chat_inbox_ttv';
+  static const chatInboxHelpOpened = 'chat_inbox_help_opened';
+  static const chatInboxRefreshed = 'chat_inbox_refreshed';
   static const chatThreadOpened = 'chat_thread_opened';
   static const financeiroViewed = 'financeiro_viewed';
   static const financeiroTtv = 'financeiro_ttv';

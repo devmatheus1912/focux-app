@@ -24,6 +24,27 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
     }
     final quotaLabel = _quotaHeaderLabel(planoFromHome);
 
+    if (home != null && !_viewTracked) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted || _viewTracked) return;
+        _viewTracked = true;
+        AnalyticsService.instance.track(
+          ProductEvents.iaCopilotoViewed,
+          props: {'mode': _mode},
+        );
+        if (!_ttvTracked) {
+          _ttvTracked = true;
+          AnalyticsService.instance.track(
+            ProductEvents.iaCopilotoTtv,
+            props: {
+              'ms': DateTime.now().difference(_openedAt).inMilliseconds,
+              'mode': _mode,
+            },
+          );
+        }
+      });
+    }
+
     return fxScreenA11yScope(
       label: 'Copiloto',
       child: FeatureGate(
@@ -40,7 +61,12 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
             actions: [
               FxHelpIconButton(
                 tooltip: 'Como usar o Copiloto',
-                onTap: () => showIaCopilotoHelpSheet(context),
+                onTap: () {
+                  AnalyticsService.instance.track(
+                    ProductEvents.iaCopilotoHelpOpened,
+                  );
+                  showIaCopilotoHelpSheet(context);
+                },
               ),
               SizedBox(width: FxHelpChrome.gap),
               IaCopilotHeaderStatus(
@@ -103,9 +129,9 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
                   // Mode selector
                   Padding(
                     padding: const EdgeInsets.fromLTRB(
-                      TokensStrip.s4,
+                      FxSettingsLayout.pageInset,
                       0,
-                      16,
+                      FxSettingsLayout.pageInset,
                       14,
                     ),
                     child: IaCopilotModeSelector(
@@ -115,7 +141,17 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
                       dark: dark,
                       line: line,
                       mute: mute,
-                      onSelect: (index) => setState(() => _modeIdx = index),
+                      onSelect: (index) {
+                        if (index == _modeIdx) return;
+                        AnalyticsService.instance.track(
+                          ProductEvents.iaCopilotoModeChanged,
+                          props: {
+                            'from': _mode,
+                            'to': _modes[index],
+                          },
+                        );
+                        setState(() => _modeIdx = index);
+                      },
                     ),
                   ),
 

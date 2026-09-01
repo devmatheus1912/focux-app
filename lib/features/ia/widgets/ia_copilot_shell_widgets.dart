@@ -5,6 +5,7 @@ import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_inset_picker_option.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
@@ -186,56 +187,38 @@ class IaCopilotModeSelector extends StatelessWidget {
 
   String _label(String mode) => mode == 'Progressão' ? 'Progresso' : mode;
 
+  IconData _icon(String mode) {
+    switch (mode) {
+      case 'Dieta':
+        return Icons.restaurant_menu_outlined;
+      case 'Progressão':
+        return Icons.trending_up_outlined;
+      default:
+        return Icons.fitness_center_outlined;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final chrome = ShellChrome.forDark(dark);
-    return Container(
-      padding: const EdgeInsets.all(4),
-      decoration: chrome.panel(radius: 16),
-      child: Row(
-        children:
-            modes.asMap().entries.map((e) {
-              final selected = e.key == selectedIndex;
-              return Expanded(
-                child: Semantics(
-                  button: true,
-                  selected: selected,
-                  label: 'Modo ${_label(e.value)}',
-                  child: GestureDetector(
-                    onTap: () => onSelect(e.key),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 180),
-                      curve: Curves.easeOutCubic,
-                      height: 38,
-                      decoration: BoxDecoration(
-                        color: selected ? brand : Colors.transparent,
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow:
-                            selected
-                                ? [
-                                  BoxShadow(
-                                    color: brand.withValues(alpha: 0.20),
-                                    blurRadius: 14,
-                                    offset: const Offset(0, 5),
-                                  ),
-                                ]
-                                : null,
-                      ),
-                      child: Center(
-                        child: Text(
-                          _label(e.value),
-                          style: TextStyle(
-                            color: selected ? Colors.white : mute,
-                            fontSize: 12.5,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              );
-            }).toList(),
+    assert(dark || !dark);
+    assert(line.a >= 0 && mute.a >= 0);
+    return Semantics(
+      label: 'Modo do Copiloto',
+      child: FxSettingsGroup(
+        header: 'Modo',
+        edgeToEdgeRows: true,
+        children: FxInsetPickerOption.list(
+          accent: brand,
+          items: [
+            for (final e in modes.asMap().entries)
+              FxInsetPickerOptionSpec(
+                label: _label(e.value),
+                icon: _icon(e.value),
+                selected: e.key == selectedIndex,
+                onTap: () => onSelect(e.key),
+              ),
+          ],
+        ),
       ),
     );
   }

@@ -14,6 +14,9 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
   IaCopilotProximaAcao? _proximaAcao;
   bool _tarefaCriada = false;
   bool _tarefaPersistida = false;
+  final DateTime _openedAt = DateTime.now();
+  bool _viewTracked = false;
+  bool _ttvTracked = false;
   final _modes = ['Treino', 'Dieta', 'Progressão'];
 
   String get _mode => _modes[_modeIdx];
