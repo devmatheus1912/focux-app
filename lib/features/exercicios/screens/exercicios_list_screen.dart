@@ -299,6 +299,16 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
     );
   }
 
+  Future<void> _novoExercicio() async {
+    final created = await context.push<bool>('/exercicios/novo');
+    if (created == true) _refresh();
+  }
+
+  Future<void> _abrirBiblioteca() async {
+    final imported = await context.push<bool>('/exercicios/biblioteca-wizard');
+    if (imported == true) _refresh();
+  }
+
   @override
   Widget build(BuildContext context) {
     final visible = _visibleItems;
@@ -320,44 +330,27 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
                   subtitle: freshnessLabel ?? 'BIBLIOTECA',
                   onBack: () => safePopOrGo(context, '/dashboard/personal'),
                   actions: [
-                    IconButton(
-                      tooltip: 'Selecionar exercicios',
-                      icon: const Icon(Icons.checklist_rounded),
-                      onPressed: () {
+                    ShellHeaderIconButton(
+                      icon: 'circle-check',
+                      tooltip: 'Selecionar exercícios',
+                      onTap: () {
                         if (visible.isEmpty) return;
                         setState(() => _selected.add(visible.first.id));
                       },
                     ),
-                    IconButton(
+                    ShellHeaderIconButton(
+                      icon: 'article',
                       tooltip: 'Carregar biblioteca completa',
-                      icon: const Icon(Icons.download_rounded),
-                      onPressed: () async {
-                        final imported = await context.push<bool>(
-                          '/exercicios/biblioteca-wizard',
-                        );
-                        if (imported == true) _refresh();
-                      },
+                      onTap: _abrirBiblioteca,
                     ),
-                    IconButton(
-                      tooltip: 'Novo exercicio',
-                      icon: const Icon(Icons.add_rounded),
-                      onPressed: () async {
-                        final created = await context.push<bool>(
-                          '/exercicios/novo',
-                        );
-                        if (created == true) _refresh();
-                      },
+                    ShellHeaderIconButton(
+                      icon: 'plus',
+                      tooltip: 'Novo exercício',
+                      onTap: _novoExercicio,
                     ),
                   ],
                 )
                 : null,
-        floatingActionButton: FloatingActionButton(
-          onPressed: () async {
-            final created = await context.push<bool>('/exercicios/novo');
-            if (created == true) _refresh();
-          },
-          child: const Icon(Icons.add_rounded),
-        ),
         body: SafeArea(
           bottom: false,
           child: Column(
