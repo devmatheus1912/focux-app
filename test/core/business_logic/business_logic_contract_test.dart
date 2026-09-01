@@ -23,6 +23,7 @@ void main() {
     ],
     'lib/features/financeiro/screens/financeiro_screen.dart': [
       'financeiro_mensalidades_tab.dart',
+      'financeiro_hub_display.dart',
     ],
     'lib/features/ia/screens/ia_copiloto_screen.dart': [
       "part 'ia_copiloto_screen_actions.part.dart'",
@@ -36,6 +37,7 @@ void main() {
     'lib/features/alunos/utils/aluno360_copilot_logic.dart',
     'lib/features/alunos/utils/alunos_list_sparkline_logic.dart',
     'lib/features/treinos/utils/treinos_list_labels.dart',
+    'lib/features/financeiro/utils/financeiro_hub_display.dart',
     'lib/features/financeiro/screens/financeiro_mensalidades_tab.dart',
     'lib/features/treinos/screens/treinos_list_screen_state.part.dart',
     'lib/features/ia/screens/ia_copiloto_screen_actions.part.dart',

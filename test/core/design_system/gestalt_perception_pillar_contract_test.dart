@@ -91,11 +91,13 @@ void main() {
     expect(peek, contains('FxHorizontalScrollPeek'));
   });
 
-  test('financeiro groups content with TabBar sections', () {
+  test('financeiro groups content with inset views', () {
     final source = readScreenSourceBundle(
       'lib/features/financeiro/screens/financeiro_screen.dart',
     );
-    expect(source, contains('TabBar'));
-    expect(source, contains('TabBarView'));
+    expect(source, contains('IndexedStack'));
+    expect(source, contains('showFxInsetPickerSheet'));
+    expect(source, contains('FxSettingsGroup'));
+    expect(source, isNot(contains('TabBar')));
   });
 }

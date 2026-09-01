@@ -67,6 +67,14 @@ void main() {
           source += File(extra).readAsStringSync();
         }
       }
+      if (path.endsWith('financeiro_screen.dart')) {
+        source += File(
+          'lib/features/financeiro/screens/financeiro_mensalidades_tab.dart',
+        ).readAsStringSync();
+        source += File(
+          'lib/features/financeiro/screens/financeiro_mensalidades_tab_actions.part.dart',
+        ).readAsStringSync();
+      }
 
       final hasMotion = FocuxMotion.hubMotionPatterns
           .any((pattern) => source.contains(pattern));

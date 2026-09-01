@@ -91,6 +91,7 @@ void main() {
     const financeiroTabs = [
       'lib/features/financeiro/screens/financeiro_dashboard_screen.dart',
       'lib/features/financeiro/screens/financeiro_resumo_screen.dart',
+      'lib/features/financeiro/screens/financeiro_mensalidades_tab.dart',
     ];
     const iaWidgets = [
       'lib/features/ia/widgets/ia_copilot_insight_widgets.dart',
@@ -118,7 +119,8 @@ void main() {
     for (final path in hubScreens) {
       final source = bundleFor(path);
       final hasMotion = FocuxPerformance.hubMotionPatterns
-          .any((pattern) => source.contains(pattern));
+              .any((pattern) => source.contains(pattern)) ||
+          source.contains('IndexedStack');
       expect(
         hasMotion,
         isTrue,

@@ -76,7 +76,7 @@ void main() {
           source.contains('DashboardLayout') ||
           source.contains('operacaoFocus') ||
           source.contains('operacao_focus') ||
-          source.contains('FinanceiroTypography') ||
+          source.contains('FxSettingsLayout') ||
           source.contains('AppTypography') ||
           source.contains('textTheme.headline') ||
           source.contains('textTheme.display');

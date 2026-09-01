@@ -43,11 +43,5 @@ abstract final class FocuxMicrocopy {
   static const saudeDaBase = 'Saúde da base';
   static const painelPersonal = 'Painel do personal';
 
-  static const periodoAgora = 'agora';
-  static const periodoEsteMes = 'este mês';
-  static const periodoMesAnterior = 'mês anterior';
-  static const periodoAno = 'ano';
-  static const financeiroEsteMes = 'ESTE MÊS';
-
   static const deslizeHorizontal = 'Deslize horizontalmente para ver mais';
 }

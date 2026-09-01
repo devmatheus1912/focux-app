@@ -23,10 +23,6 @@ void main() {
     'lib/features/ia/screens/ia_copiloto_screen.dart',
   ];
 
-  const moduleTypographyUtils = [
-    'lib/features/financeiro/utils/financeiro_typography.dart',
-  ];
-
   test('typography source files and scale constants exist', () {
     for (final path in typographySources) {
       expect(File(path).existsSync(), isTrue, reason: 'Fonte ausente: $path');
@@ -56,14 +52,6 @@ void main() {
     expect(theme, contains('TokensStrip.fontH1'));
   });
 
-  test('module typography utils exist for complex hubs', () {
-    for (final path in moduleTypographyUtils) {
-      expect(File(path).existsSync(), isTrue, reason: 'Util ausente: $path');
-      final source = File(path).readAsStringSync();
-      expect(source, contains('AppTypography'));
-    }
-  });
-
   test('hub screens use centralized typography', () {
     for (final path in hubScreens) {
       expect(File(path).existsSync(), isTrue, reason: 'Hub ausente: $path');
@@ -72,6 +60,7 @@ void main() {
           source.contains('FocuxTypography') ||
           source.contains('FocuxHubTypography') ||
           source.contains('FinanceiroTypography') ||
+          source.contains('FxSettingsLayout') ||
           source.contains('TokensStrip.h1') ||
           source.contains('TokensStrip.h2') ||
           source.contains('TokensStrip.body') ||

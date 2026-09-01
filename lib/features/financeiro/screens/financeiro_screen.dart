@@ -2,24 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/analytics/analytics_service.dart';
-import '../../../core/brand/focux_microcopy.dart';
 import '../../../core/router/safe_navigation.dart';
-import '../../../core/theme/design_tokens.dart';
-import '../../../core/theme/focux_hub_typography.dart';
+import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
-import '../../../core/theme/tokens_strip.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
-import '../../../core/utils/motion_preferences.dart';
 import '../../../core/widgets/feature_gate.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_help.dart';
+import '../../../core/widgets/fx_inset_picker_sheet.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
+import '../../../core/widgets/fx_settings_group.dart';
+import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../alunos/providers/alunos_provider.dart';
 import '../../planos/providers/plano_features_provider.dart';
 import '../../subscription/models/subscription_plan.dart';
 import '../financeiro_hub_scope.dart';
 import '../providers/financeiro_provider.dart';
+import '../utils/financeiro_hub_display.dart';
 import '../widgets/financeiro_help_sheet.dart';
 import 'financeiro_dashboard_screen.dart';
 import 'financeiro_mensalidades_tab.dart';
@@ -34,44 +34,49 @@ class FinanceiroScreen extends ConsumerStatefulWidget {
   ConsumerState<FinanceiroScreen> createState() => _FinanceiroScreenState();
 }
 
-class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-  String _periodFilter = 'agora';
+class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen> {
+  late FinanceiroHubView _view;
   final DateTime _openedAt = DateTime.now();
   bool _viewTracked = false;
   bool _ttvTracked = false;
 
-  static const Map<String, String> _periodLabels = {
-    'agora': FocuxMicrocopy.periodoAgora,
-    'mes_atual': FocuxMicrocopy.periodoEsteMes,
-    'mes_anterior': FocuxMicrocopy.periodoMesAnterior,
-    'ano': FocuxMicrocopy.periodoAno,
-  };
-
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
-    if (widget.initialAlunoId != null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        if (reduceMotionOf(context)) {
-          _tabController.index = 1;
-        } else {
-          _tabController.animateTo(
-            1,
-            duration: fxMotionDuration(context, normal: const Duration(milliseconds: 280)),
-          );
-        }
-      });
-    }
+    _view = widget.initialAlunoId != null
+        ? FinanceiroHubView.mensalidades
+        : FinanceiroHubView.resumo;
   }
 
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
+  Future<void> _abrirVista() async {
+    final picked = await showFxInsetPickerSheet<FinanceiroHubView>(
+      context,
+      title: 'Ver',
+      selected: _view,
+      items: [
+        for (final v in FinanceiroHubView.values)
+          FxInsetPickerSheetItem(
+            value: v,
+            label: financeiroHubViewLabel(v),
+          ),
+      ],
+    );
+    if (!mounted || picked == null || picked == _view) return;
+    if (picked == FinanceiroHubView.mensalidades) {
+      AnalyticsService.instance.track(
+        ProductEvents.financeiroMensalidadesOpened,
+        props: {'source': 'picker'},
+      );
+    }
+    setState(() => _view = picked);
+  }
+
+  void _irParaMensalidades({String source = 'hub'}) {
+    AnalyticsService.instance.track(
+      ProductEvents.financeiroMensalidadesOpened,
+      props: {'source': source},
+    );
+    setState(() => _view = FinanceiroHubView.mensalidades);
   }
 
   @override
@@ -80,7 +85,6 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen>
     final features = featuresAsync.valueOrNull;
     final hasFinanceiro = features?.financeiro == true;
 
-    // Gate first: não dispara BFF financeiro sem capability.
     if (features == null || !hasFinanceiro) {
       return const FeatureGate(
         featureName: 'Financeiro',
@@ -131,134 +135,47 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen>
   }
 
   Widget _buildContent(BuildContext context, DateTime? fetchedAt) {
-    final chrome = ShellChrome.of(context);
-    final ink = chrome.ink;
-    final mute = chrome.mute;
-    final primary = Theme.of(context).colorScheme.primary;
-    final freshnessLabel = FxHubFreshness.fromFetchedAt(fetchedAt);
-
     return fxScreenA11yScope(
       label: 'Financeiro',
       child: FxShellScaffold(
         useMesh: true,
-        extendBody: true,
-        constrainWidth: false,
-        appBar: PreferredSize(
-          preferredSize: const Size.fromHeight(136),
-          child: FxContentWidthLimiter(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                FxShellAppBar(
-                  title: 'Financeiro',
-                  subtitle: freshnessLabel ?? FocuxMicrocopy.financeiroEsteMes,
-                  onBack: () => safePopOrGo(context, '/dashboard/personal'),
-                  actions: [
-                    FxHelpIconButton(
-                      tooltip: 'Como usar o financeiro',
-                      onTap: () {
-                        AnalyticsService.instance.track(
-                          ProductEvents.financeiroHelpOpened,
-                        );
-                        showFinanceiroHelpSheet(context);
-                      },
-                    ),
-                    SizedBox(width: FxHelpChrome.gap),
-                    PopupMenuButton<String>(
-                      initialValue: _periodFilter,
-                      tooltip: 'Filtrar periodo',
-                      onSelected: (value) {
-                        setState(() => _periodFilter = value);
-                        if (value == 'ano') {
-                          _tabController.animateTo(2);
-                        }
-                      },
-                      itemBuilder:
-                          (context) =>
-                              _periodLabels.entries
-                                  .map(
-                                    (entry) => PopupMenuItem<String>(
-                                      value: entry.key,
-                                      child: Text(entry.value),
-                                    ),
-                                  )
-                                  .toList(),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
-                        ),
-                        decoration: chrome.panel(radius: 999),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              _periodLabels[_periodFilter] ?? 'agora',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: ink,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            SizedBox(width: TokensStrip.s2),
-                            Icon(
-                              Icons.keyboard_arrow_down,
-                              size: 16,
-                              color: mute,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                TabBar(
-                  controller: _tabController,
-                  indicatorColor: primary,
-                  labelColor: primary,
-                  unselectedLabelColor: mute,
-                  indicatorWeight: 2.5,
-                  dividerColor: Colors.transparent,
-                  tabs: const [
-                    Tab(icon: Icon(Icons.dashboard_outlined), text: 'Resumo'),
-                    Tab(
-                      icon: Icon(Icons.receipt_long_outlined),
-                      text: 'Mensalidades',
-                    ),
-                    Tab(icon: Icon(Icons.bar_chart_outlined), text: 'Metricas'),
-                  ],
-                ),
-              ],
-            ),
+        appBar: FxShellAppBar(
+          title: 'Financeiro',
+          subtitle: financeiroHubSubtitle(
+            view: _view,
+            freshness: FxHubFreshness.fromFetchedAt(fetchedAt),
           ),
+          onBack: () => safePopOrGo(context, '/dashboard/personal'),
+          actions: [
+            ShellHeaderIconButton(
+              icon: 'coin',
+              tooltip: 'Trocar visão',
+              onTap: _abrirVista,
+            ),
+            SizedBox(width: FxHelpChrome.gap),
+            FxHelpIconButton(
+              tooltip: 'Como usar o financeiro',
+              onTap: () {
+                AnalyticsService.instance.track(
+                  ProductEvents.financeiroHelpOpened,
+                );
+                showFinanceiroHelpSheet(context);
+              },
+            ),
+          ],
         ),
         body: FxContentWidthLimiter(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              if (widget.initialAlunoId != null)
-                _FinanceiroAlunoContextBanner(alunoId: widget.initialAlunoId!),
-              Expanded(
-                child: FinanceiroHubScope(
-                  goToMensalidades: ({String source = 'hub'}) {
-                    AnalyticsService.instance.track(
-                      ProductEvents.financeiroMensalidadesOpened,
-                      props: {'source': source},
-                    );
-                    if (reduceMotionOf(context)) {
-                      _tabController.index = 1;
-                    } else {
-                      _tabController.animateTo(
-                        1,
-                        duration: fxMotionDuration(
-                          context,
-                          normal: const Duration(milliseconds: 280),
-                        ),
-                      );
-                    }
-                  },
-                  child: TabBarView(
-                    controller: _tabController,
+          child: FinanceiroHubScope(
+            goToMensalidades: _irParaMensalidades,
+            child: Column(
+              children: [
+                if (widget.initialAlunoId != null)
+                  _FinanceiroAlunoContextBanner(
+                    alunoId: widget.initialAlunoId!,
+                  ),
+                Expanded(
+                  child: IndexedStack(
+                    index: _view.index,
                     children: [
                       const FinanceiroDashboardScreen(),
                       FinanceiroMensalidadesTab(
@@ -268,8 +185,8 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen>
                     ],
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -285,35 +202,24 @@ class _FinanceiroAlunoContextBanner extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final alunoAsync = ref.watch(alunoProvider(alunoId));
-    final nome = alunoAsync.valueOrNull?.nome ?? 'Aluno #$alunoId';
-    final chrome = ShellChrome.of(context);
-    return Material(
-      color: Colors.transparent,
-      child: Container(
-        margin: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-        decoration: BoxDecoration(
-          color: EagleTokens.warn.withValues(
-            alpha: chrome.isDark ? 0.14 : 0.08,
+    final nome = alunoAsync.valueOrNull?.nome;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        FxSettingsLayout.pageInset,
+        8,
+        FxSettingsLayout.pageInset,
+        0,
+      ),
+      child: FxSettingsGroup(
+        children: [
+          FxSettingsTile(
+            fxIcon: 'users',
+            label: financeiroAlunoContextLabel(nome),
+            value: '',
+            showDivider: false,
+            onTap: () {},
           ),
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: EagleTokens.warn.withValues(alpha: 0.25)),
-        ),
-        child: Row(
-          children: [
-            Icon(Icons.person_outline, color: EagleTokens.warn, size: 18),
-            SizedBox(width: TokensStrip.s2),
-            Expanded(
-              child: Text(
-                'Mensalidades de $nome',
-                style: FocuxHubTypography.bodyMuted(
-                  color: chrome.ink,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ),
-          ],
-        ),
+        ],
       ),
     );
   }

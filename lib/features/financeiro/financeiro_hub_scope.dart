@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// Permite que a aba Resumo peça a aba Mensalidades sem segundo scaffold.
+/// Permite que Resumo e Métricas abram a lista de mensalidades no mesmo hub.
 class FinanceiroHubScope extends InheritedWidget {
   const FinanceiroHubScope({
     super.key,

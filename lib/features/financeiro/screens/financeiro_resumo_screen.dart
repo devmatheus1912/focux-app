@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/design_tokens.dart';
-import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/utils/pt_br_display.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_inset_picker_sheet.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
@@ -17,6 +17,7 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../data/financeiro_repository.dart';
 import '../financeiro_hub_scope.dart';
 import '../providers/financeiro_provider.dart';
+import '../utils/financeiro_hub_display.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 
@@ -36,22 +37,6 @@ class _FinanceiroResumoScreenState
   ResumoMensal? _resumo;
   String? _erro;
   DateTime? _fetchedAt;
-
-  static const _meses = [
-    '',
-    'Janeiro',
-    'Fevereiro',
-    'Março',
-    'Abril',
-    'Maio',
-    'Junho',
-    'Julho',
-    'Agosto',
-    'Setembro',
-    'Outubro',
-    'Novembro',
-    'Dezembro',
-  ];
 
   @override
   void initState() {
@@ -96,64 +81,58 @@ class _FinanceiroResumoScreenState
     }
   }
 
-  void _mesAnterior() {
+  Future<void> _abrirMes() async {
+    var ops = financeiroMesOpcoes();
+    if (!ops.any((o) => o.ano == _ano && o.mes == _mes)) {
+      ops = [FinanceiroMesOpcao(ano: _ano, mes: _mes), ...ops];
+    }
+    final selected = FinanceiroMesOpcao(ano: _ano, mes: _mes).key;
+    final picked = await showFxInsetPickerSheet<String>(
+      context,
+      title: 'Mês',
+      selected: selected,
+      items: [
+        for (final o in ops)
+          FxInsetPickerSheetItem(value: o.key, label: o.label),
+      ],
+    );
+    if (!mounted || picked == null || picked == selected) return;
+    final match = ops.where((o) => o.key == picked).firstOrNull;
+    if (match == null) return;
     setState(() {
-      if (_mes == 1) {
-        _mes = 12;
-        _ano--;
-      } else {
-        _mes--;
-      }
+      _ano = match.ano;
+      _mes = match.mes;
     });
-    _carregar();
-  }
-
-  void _mesProximo() {
-    setState(() {
-      if (_mes == 12) {
-        _mes = 1;
-        _ano++;
-      } else {
-        _mes++;
-      }
-    });
-    _carregar();
+    await _carregar();
   }
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final primary = Theme.of(context).colorScheme.primary;
     final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
+    final mesLabel = financeiroMesTitulo(_mes, _ano);
 
     return fxScreenA11yScope(
-      label: 'Financeiro métricas. ${freshnessLabel ?? '${_meses[_mes]} $_ano'}',
+      label: 'Financeiro métricas. ${freshnessLabel ?? mesLabel}',
       child: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+            padding: const EdgeInsets.fromLTRB(
+              FxSettingsLayout.pageInset,
+              8,
+              FxSettingsLayout.pageInset,
+              0,
+            ),
+            child: FxSettingsGroup(
               children: [
-                _NavArrow(
-                  icon: Icons.chevron_left_rounded,
-                  onTap: _mesAnterior,
-                  isDark: isDark,
-                ),
-                const SizedBox(width: 16),
-                Text(
-                  '${_meses[_mes]} $_ano',
-                  style: FocuxHubTypography.sectionTitle(
-                    context,
-                    color: ink,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                _NavArrow(
-                  icon: Icons.chevron_right_rounded,
-                  onTap: _mesProximo,
-                  isDark: isDark,
+                FxSettingsTile(
+                  fxIcon: 'calendar',
+                  label: 'Mês',
+                  value: mesLabel,
+                  picker: true,
+                  showDivider: false,
+                  onTap: _abrirMes,
                 ),
               ],
             ),
@@ -230,7 +209,7 @@ class _FinanceiroResumoScreenState
                   ),
             ),
             FxSettingsTile(
-              fxIcon: 'user',
+              fxIcon: 'users',
               label: 'Ticket médio',
               value: formatBrlCurrency(r.ticketMedio, showDecimals: false),
               numeric: true,
@@ -252,38 +231,6 @@ class _FinanceiroResumoScreenState
           ],
         ),
       ],
-    );
-  }
-}
-
-// ─── Navigational arrow ─────────────────────────────────────────────────
-
-class _NavArrow extends StatelessWidget {
-  final IconData icon;
-  final VoidCallback onTap;
-  final bool isDark;
-  const _NavArrow({
-    required this.icon,
-    required this.onTap,
-    required this.isDark,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        width: 36,
-        height: 36,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: line),
-        ),
-        child: Icon(icon, size: 20, color: ink),
-      ),
     );
   }
 }

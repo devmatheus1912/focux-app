@@ -235,7 +235,7 @@ class _FinanceiroVencimentosGroup extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: FxSettingsLayout.pageInset),
       child: FxSettingsGroup(
         header: 'Vencimentos',
-        caption: 'Cobre na aba Mensalidades.',
+        caption: 'Cobre em Mensalidades.',
         children: [
           for (var i = 0; i < items.length; i++)
             FxSettingsTile(
@@ -282,7 +282,7 @@ class _FinanceiroTopAlunosGroup extends StatelessWidget {
         children: [
           for (var i = 0; i < items.length; i++)
             FxSettingsTile(
-              fxIcon: 'user',
+              fxIcon: 'users',
               label: items[i].alunoNome,
               subtitle: '#${i + 1}',
               value: formatBrlCurrency(items[i].totalPago, showDecimals: false),

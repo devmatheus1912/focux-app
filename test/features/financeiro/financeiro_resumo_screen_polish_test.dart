@@ -9,6 +9,9 @@ void main() {
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(screen, isNot(contains('FxShellScaffold(')));
     expect(screen, contains('FxSettingsGroup'));
+    expect(screen, contains('showFxInsetPickerSheet'));
+    expect(screen, isNot(contains('_NavArrow')));
+    expect(screen, isNot(contains('Icons.chevron')));
     expect(screen, anyOf(contains('FxContentWidthLimiter'), isNot(contains('constrainWidth: false'))));
     expect(screen, anyOf(contains('friendlyError'), contains('DashboardErrorState'), contains('FxEmptyState'), contains('_erro'), contains('_TrainingEmptyState'), contains('ref.invalidate')));
     expect(screen, anyOf(contains('FxLoading'), contains('SkeletonLoader'), contains('SkeletonList'), contains('DashboardShimmer'), contains('Shimmer'), contains('IaCopilotInsightsLoading'), contains('_loading')));
