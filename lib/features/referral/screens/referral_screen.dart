@@ -3,16 +3,24 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/analytics/analytics_service.dart';
-import '../../../features/auth/providers/auth_provider.dart';
-import '../../../core/theme/focux_hub_typography.dart';
-import '../../../core/theme/tokens_strip.dart';
-import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/router/safe_navigation.dart';
+import '../../../core/theme/fx_settings_layout.dart';
+import '../../../core/theme/shell_chrome.dart';
+import '../../../core/utils/clipboard_sensitive.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/ux/fx_hub_freshness.dart';
+import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_content_width_limiter.dart';
+import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
+import '../../../core/widgets/fx_settings_group.dart';
+import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
+import '../../../features/auth/providers/auth_provider.dart';
 import '../data/referral_repository.dart';
-import '../../../core/widgets/fx_screen_a11y.dart';
+import '../utils/referral_display.dart';
 
 final referralRepositoryProvider = Provider(
   (ref) => ReferralRepository(ref.read(apiClientProvider)),
@@ -29,6 +37,7 @@ class _ReferralScreenState extends ConsumerState<ReferralScreen> {
   ReferralInfo? _info;
   bool _loading = true;
   String? _erro;
+  DateTime? _fetchedAt;
 
   @override
   void initState() {
@@ -47,6 +56,7 @@ class _ReferralScreenState extends ConsumerState<ReferralScreen> {
         setState(() {
           _info = info;
           _loading = false;
+          _fetchedAt = DateTime.now();
         });
       }
     } catch (e) {
@@ -62,101 +72,143 @@ class _ReferralScreenState extends ConsumerState<ReferralScreen> {
   Future<void> _share() async {
     final info = _info;
     if (info == null) return;
-    final text =
-        'Use meu código ${info.codigo} e ganhe vantagens no Focux Personal!\n${info.linkCompartilhamento}';
+    HapticFeedback.selectionClick();
+    final text = referralInviteText(
+      codigo: info.codigo,
+      link: info.linkCompartilhamento,
+    );
     await AnalyticsService.instance.track(
       'referral_link_shared',
       props: {'codigo': info.codigo},
     );
-    await Clipboard.setData(ClipboardData(text: text));
+    await copySensitiveToClipboard(text);
     if (mounted) {
       FeedbackHelper.showSuccess(
         context,
-        'Convite copiado! Cole no WhatsApp ou Instagram.',
+        'Convite copiado. Some da área de transferência em 1 min.',
+      );
+    }
+  }
+
+  Future<void> _copiarLink() async {
+    final link = _info?.linkCompartilhamento ?? '';
+    if (!referralTemLink(link)) return;
+    HapticFeedback.selectionClick();
+    await copySensitiveToClipboard(link.trim());
+    if (mounted) {
+      FeedbackHelper.showSuccess(
+        context,
+        'Link copiado. Some da área de transferência em 1 min.',
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final freshness = FxHubFreshness.fromFetchedAt(_fetchedAt);
     return fxScreenA11yScope(
       label: 'Indique e ganhe',
       child: FxShellScaffold(
         useMesh: true,
-        appBar: FxShellAppBar(title: 'Indique e ganhe'),
+        appBar: FxShellAppBar(
+          title: 'Indique e ganhe',
+          subtitle: referralHubSubtitle(freshness),
+          onBack: () => safePopOrGo(context, '/dashboard/personal'),
+        ),
         body:
             _loading
-                ? const SkeletonList(count: 4)
+                ? const Padding(
+                  padding: EdgeInsets.all(FxSettingsLayout.pageInset),
+                  child: SkeletonList(count: 4),
+                )
                 : _erro != null
                 ? FxErrorState(
-                  chromeOnDark: isDark,
+                  chromeOnDark: chrome.isDark,
                   primary: primary,
                   message: _erro!,
                   onRetry: _load,
                 )
-                : Padding(
-                  padding: const EdgeInsets.all(TokensStrip.s5),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Text(
-                        'Indique outro personal. Quando ele assinar, você ganha 30 dias extras no plano.',
-                        style: TextStyle(
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.onSurface.withValues(alpha: 0.7),
-                          height: 1.45,
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      Container(
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(
-                            color: primary.withValues(alpha: 0.2),
-                          ),
-                        ),
-                        child: Column(
-                          children: [
-                            Text(
-                              _info?.codigo ?? '—',
-                              style: FocuxHubTypography.metric(
-                                color: primary,
-                                fontSize: FocuxHubTypography.metricLg,
-                                fontWeight: FontWeight.w800,
-                              ).copyWith(letterSpacing: 2),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              '${_info?.usosTotais ?? 0} indicações convertidas',
-                              style: FocuxHubTypography.bodyMuted(
-                                color: Theme.of(context).colorScheme.onSurface,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      FilledButton.icon(
-                        onPressed: _share,
-                        icon: const Icon(Icons.share_rounded),
-                        label: const Text('Compartilhar link'),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          final link = _info?.linkCompartilhamento ?? '';
-                          if (link.isEmpty) return;
-                          Clipboard.setData(ClipboardData(text: link));
-                          FeedbackHelper.showSuccess(context, 'Link copiado!');
-                        },
-                        child: const Text('Copiar link'),
-                      ),
-                    ],
-                  ),
-                ),
+                : FxContentWidthLimiter(child: _buildBody()),
+      ),
+    );
+  }
+
+  Widget _buildBody() {
+    final info = _info;
+    if (info == null || referralCodigoLabel(info.codigo) == '—') {
+      return RefreshIndicator(
+        onRefresh: _load,
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          children: [
+            FxEmptyState(
+              icon: 'users',
+              title: 'Código ainda não disponível',
+              subtitle: 'Puxe para atualizar. O servidor cria o código no primeiro acesso.',
+              action: FxEmptyAction(label: 'Tentar de novo', onTap: _load),
+            ),
+          ],
+        ),
+      );
+    }
+    return RefreshIndicator(
+      onRefresh: _load,
+      child: ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.fromLTRB(
+          FxSettingsLayout.pageInset,
+          8,
+          FxSettingsLayout.pageInset,
+          32,
+        ),
+        children: [
+          FxSettingsGroup(
+            header: 'Seu código',
+            caption:
+                'Quando o personal indicado assinar, você ganha 30 dias extras.',
+            children: [
+              FxSettingsTile(
+                fxIcon: 'users',
+                label: 'Código',
+                value: referralCodigoLabel(info.codigo),
+                highlight: true,
+                onTap: _share,
+              ),
+              FxSettingsTile(
+                fxIcon: 'star',
+                label: 'Indicações',
+                value: referralUsosLabel(info.usosTotais),
+                numeric: true,
+                showDivider: false,
+                onTap: () {},
+              ),
+            ],
+          ),
+          FxSettingsGroup(
+            header: 'Compartilhar',
+            caption:
+                'O convite some da área de transferência em 1 min.',
+            children: [
+              FxSettingsTile(
+                fxIcon: 'spark',
+                label: 'Copiar convite',
+                subtitle: 'Código + link para WhatsApp ou Instagram.',
+                value: 'Copiar',
+                highlight: true,
+                onTap: _share,
+              ),
+              FxSettingsTile(
+                fxIcon: 'route',
+                label: 'Só o link',
+                value: 'Copiar',
+                showDivider: false,
+                onTap: _copiarLink,
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
