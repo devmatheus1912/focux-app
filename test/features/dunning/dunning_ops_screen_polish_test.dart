@@ -18,9 +18,12 @@ void main() {
     expect(screen, contains('FeatureGate'));
     expect(screen, contains('showFxConfirmSheet'));
     expect(screen, contains('dunningHubViewed'));
+    expect(screen, contains('Carregar mais'));
+    expect(screen, contains('alunoNome'));
     expect(screen, contains('circle-check'));
     expect(screen, isNot(contains('check-circle')));
     expect(screen, isNot(contains('Aluno #')));
+    expect(screen, isNot(contains('aluno_id')));
     expect(screen, isNot(contains('FxSatellitePanel')));
     expect(screen, isNot(contains('FxSatelliteListTile')));
     expect(screen, isNot(contains('CircularProgressIndicator')));

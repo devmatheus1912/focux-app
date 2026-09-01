@@ -14,6 +14,7 @@ void main() {
         {
           'id': 1,
           'alunoId': 2,
+          'alunoNome': 'Aluno Dunning',
           'contexto': 'ALUNO_MENSALIDADE',
           'motivo': 'Cartao recusado',
           'valor': 99.9,
@@ -21,6 +22,9 @@ void main() {
           'criadoEm': '2026-08-16T10:00:00',
         },
       ],
+      'page': 0,
+      'size': 20,
+      'hasMore': false,
     });
     expect(bundle.snapshot.total, 10);
     expect(bundle.snapshot.abertas, 3);
@@ -29,8 +33,11 @@ void main() {
     expect(bundle.falhas, hasLength(1));
     expect(bundle.falhas.first.contexto, 'ALUNO_MENSALIDADE');
     expect(bundle.falhas.first.alunoId, 2);
+    expect(bundle.falhas.first.alunoNome, 'Aluno Dunning');
     expect(bundle.falhas.first.motivo, 'Cartao recusado');
     expect(bundle.falhas.first.valor, 99.9);
+    expect(bundle.hasMore, isFalse);
+    expect(bundle.page, 0);
   });
 
   test('DunningHomeBundle tolerates missing snapshot and falhas', () {

@@ -38,7 +38,10 @@ class _DunningOpsScreenState extends ConsumerState<DunningOpsScreen> {
   final _openedAt = DateTime.now();
   DunningSnapshot? _snapshot;
   List<DunningFalha> _falhas = [];
+  var _hasMore = false;
+  var _page = 0;
   var _loading = true;
+  var _carregandoMais = false;
   String? _erro;
   int? _marcandoId;
   DateTime? _fetchedAt;
@@ -62,6 +65,8 @@ class _DunningOpsScreenState extends ConsumerState<DunningOpsScreen> {
       setState(() {
         _snapshot = home.snapshot;
         _falhas = home.falhas;
+        _hasMore = home.hasMore;
+        _page = home.page;
         _fetchedAt = DateTime.now();
         _loading = false;
       });
@@ -72,6 +77,30 @@ class _DunningOpsScreenState extends ConsumerState<DunningOpsScreen> {
         _loading = false;
         _erro = friendlyError(e);
       });
+    }
+  }
+
+  Future<void> _carregarMais() async {
+    if (_carregandoMais || !_hasMore) return;
+    setState(() => _carregandoMais = true);
+    try {
+      final home = await ref.read(_repoProvider).getHome(page: _page + 1);
+      if (!mounted) return;
+      final seen = _falhas.map((f) => f.id).toSet();
+      setState(() {
+        _snapshot = home.snapshot;
+        _falhas = [
+          ..._falhas,
+          ...home.falhas.where((f) => seen.add(f.id)),
+        ];
+        _hasMore = home.hasMore;
+        _page = home.page;
+        _carregandoMais = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _carregandoMais = false);
+      FeedbackHelper.showError(context, friendlyError(e));
     }
   }
 
@@ -97,7 +126,7 @@ class _DunningOpsScreenState extends ConsumerState<DunningOpsScreen> {
     final ok = await showFxConfirmSheet(
       context,
       title: 'Marcar como recuperada?',
-      subtitle: dunningContextoLabel(falha.contexto),
+      subtitle: dunningFalhaTitulo(falha.alunoNome, falha.contexto),
       message:
           'A falha some da lista. Use só se o pagamento já entrou.',
       confirmLabel: 'Marcar recuperada',
@@ -109,7 +138,6 @@ class _DunningOpsScreenState extends ConsumerState<DunningOpsScreen> {
       props: {
         'feature': 'dunning',
         'falha_id': falha.id,
-        if (falha.alunoId != null) 'aluno_id': falha.alunoId,
       },
     );
     setState(() => _marcandoId = falha.id);
@@ -249,20 +277,38 @@ class _DunningOpsScreenState extends ConsumerState<DunningOpsScreen> {
                           for (var i = 0; i < _falhas.length; i++)
                             FxSettingsTile(
                               fxIcon: 'alert-triangle',
-                              label: dunningContextoLabel(_falhas[i].contexto),
+                              label: dunningFalhaTitulo(
+                                _falhas[i].alunoNome,
+                                _falhas[i].contexto,
+                              ),
                               value: _marcandoId == _falhas[i].id
                                   ? '…'
                                   : dunningMoneyLabel(_falhas[i].valor),
                               subtitle: dunningFalhaSubtitle(
-                                _falhas[i].motivo,
-                                _falhas[i].tentativa,
+                                contexto: _falhas[i].contexto,
+                                alunoNome: _falhas[i].alunoNome,
+                                motivo: _falhas[i].motivo,
+                                tentativa: _falhas[i].tentativa,
                               ),
                               numeric: true,
                               danger: true,
-                              showDivider: i != _falhas.length - 1,
+                              showDivider:
+                                  i != _falhas.length - 1 || _hasMore,
                               onTap: _marcandoId == _falhas[i].id
                                   ? () {}
                                   : () => _marcarRecuperado(_falhas[i]),
+                            ),
+                          if (_hasMore)
+                            FxSettingsTile(
+                              fxIcon: 'plus',
+                              label: _carregandoMais
+                                  ? 'Carregando…'
+                                  : 'Carregar mais',
+                              value: '',
+                              showDivider: false,
+                              onTap: _carregandoMais
+                                  ? () {}
+                                  : _carregarMais,
                             ),
                         ],
                       ),

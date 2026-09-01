@@ -26,6 +26,7 @@ class DunningSnapshot {
 class DunningFalha {
   final int id;
   final int? alunoId;
+  final String? alunoNome;
   final String contexto;
   final String? motivo;
   final double? valor;
@@ -35,6 +36,7 @@ class DunningFalha {
   DunningFalha({
     required this.id,
     this.alunoId,
+    this.alunoNome,
     required this.contexto,
     this.motivo,
     this.valor,
@@ -45,6 +47,7 @@ class DunningFalha {
   factory DunningFalha.fromJson(Map<String, dynamic> j) => DunningFalha(
     id: (j['id'] as num).toInt(),
     alunoId: (j['alunoId'] as num?)?.toInt(),
+    alunoNome: j['alunoNome'] as String?,
     contexto: j['contexto'] as String? ?? '',
     motivo: j['motivo'] as String?,
     valor: (j['valor'] as num?)?.toDouble(),
@@ -59,8 +62,17 @@ class DunningFalha {
 class DunningHomeBundle {
   final DunningSnapshot snapshot;
   final List<DunningFalha> falhas;
+  final int page;
+  final int size;
+  final bool hasMore;
 
-  const DunningHomeBundle({required this.snapshot, required this.falhas});
+  const DunningHomeBundle({
+    required this.snapshot,
+    required this.falhas,
+    this.page = 0,
+    this.size = 20,
+    this.hasMore = false,
+  });
 
   factory DunningHomeBundle.fromJson(Map<String, dynamic> j) {
     final snapshotJson = j['snapshot'];
@@ -78,6 +90,9 @@ class DunningHomeBundle {
           ((j['falhas'] as List?) ?? const [])
               .map((e) => DunningFalha.fromJson(e as Map<String, dynamic>))
               .toList(),
+      page: (j['page'] as num?)?.toInt() ?? 0,
+      size: (j['size'] as num?)?.toInt() ?? 20,
+      hasMore: j['hasMore'] == true,
     );
   }
 }
@@ -88,8 +103,11 @@ class DunningRepository {
   DunningRepository(ApiClient client) : _dio = client.dio;
 
   /// BFF tipado — first paint da tela Dunning (snapshot + falhas).
-  Future<DunningHomeBundle> getHome() async {
-    final r = await _dio.get('/api/dunning/home');
+  Future<DunningHomeBundle> getHome({int page = 0, int size = 20}) async {
+    final r = await _dio.get(
+      '/api/dunning/home',
+      queryParameters: {'page': page, 'size': size},
+    );
     return DunningHomeBundle.fromJson(r.data as Map<String, dynamic>);
   }
 

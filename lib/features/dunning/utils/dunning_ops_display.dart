@@ -17,8 +17,22 @@ String dunningTentativaLabel(int tentativa) {
   return 'Tentativa $tentativa';
 }
 
-String dunningFalhaSubtitle(String? motivo, int tentativa) {
+String dunningFalhaTitulo(String? alunoNome, String contexto) {
+  final nome = alunoNome?.trim();
+  if (nome != null && nome.isNotEmpty) return nome;
+  return dunningContextoLabel(contexto);
+}
+
+String dunningFalhaSubtitle({
+  required String contexto,
+  String? alunoNome,
+  String? motivo,
+  required int tentativa,
+}) {
+  final nome = alunoNome?.trim();
+  final mostraContexto = nome != null && nome.isNotEmpty;
   final parts = <String>[
+    if (mostraContexto) dunningContextoLabel(contexto),
     if (motivo != null && motivo.trim().isNotEmpty) displayPtBr(motivo.trim()),
     dunningTentativaLabel(tentativa),
   ];

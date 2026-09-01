@@ -9,15 +9,35 @@ void main() {
     expect(dunningContextoLabel('OUTRO'), 'OUTRO');
   });
 
-  test('dunningFalhaSubtitle e tentativa', () {
+  test('dunningFalhaTitulo e subtitle', () {
     expect(dunningTentativaLabel(0), 'Ainda sem retentativa');
     expect(dunningTentativaLabel(1), 'Tentativa 1');
     expect(dunningTentativaLabel(3), 'Tentativa 3');
     expect(
-      dunningFalhaSubtitle('Cartao recusado', 1),
-      'Cartao recusado · Tentativa 1',
+      dunningFalhaTitulo('Ana Silva', 'ALUNO_MENSALIDADE'),
+      'Ana Silva',
     );
-    expect(dunningFalhaSubtitle('  ', 2), 'Tentativa 2');
+    expect(
+      dunningFalhaTitulo(null, 'FOCUX_SUBSCRIPTION'),
+      'Assinatura Focux',
+    );
+    expect(
+      dunningFalhaSubtitle(
+        contexto: 'ALUNO_MENSALIDADE',
+        alunoNome: 'Ana Silva',
+        motivo: 'Cartao recusado',
+        tentativa: 1,
+      ),
+      'Mensalidade · Cartao recusado · Tentativa 1',
+    );
+    expect(
+      dunningFalhaSubtitle(
+        contexto: 'FOCUX_SUBSCRIPTION',
+        motivo: '  ',
+        tentativa: 2,
+      ),
+      'Tentativa 2',
+    );
   });
 
   test('dunningTaxaFraca e recuperadas', () {
