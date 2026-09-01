@@ -320,7 +320,7 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                                         aluno360Async
                                             .valueOrNull
                                             ?.aderenciaSemanal
-                                            .dias,
+                                            .diasMaps,
                                     recoveryAsync: recoveryAsync,
                                     autonomiaResumoAsync:
                                         resolvedAutonomiaResumoAsync,

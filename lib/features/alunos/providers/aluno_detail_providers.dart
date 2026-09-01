@@ -195,6 +195,14 @@ final alunoMedidasResumoProvider =
 
 final alunoOpenIaActionsProvider =
     FutureProvider.family<List<FilaAcaoResumo>, int>((ref, alunoId) async {
+      try {
+        final bundle = await ref.watch(aluno360Provider(alunoId).future);
+        if (bundle.openCopilotTasks != null) {
+          return bundle.openCopilotTasks!;
+        }
+      } catch (_) {
+        // 360 falhou ou payload antigo — sidecar abaixo.
+      }
       return ref
           .read(dashboardRepositoryProvider)
           .getIaCommandActions(status: 'ABERTO', alunoId: alunoId);
@@ -213,7 +221,7 @@ final alunoAderenciaSemanalProvider =
       alunoId,
     ) async {
       final aluno360 = await ref.watch(aluno360Provider(alunoId).future);
-      return aluno360.aderenciaSemanal.dias;
+      return aluno360.aderenciaSemanal.diasMaps;
     });
 
 /// Last weight measurements from avaliações físicas (up to 7 points, chronological).

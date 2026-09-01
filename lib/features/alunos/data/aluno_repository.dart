@@ -4,6 +4,7 @@ import '../../planos/data/planos_repository.dart';
 import '../../alertas/data/alertas_repository.dart';
 import '../../exercicios/data/enums.dart';
 import '../../evolucao/data/evolucao_repository.dart';
+import '../../dashboard/data/command_center_data.dart';
 import '../../health/data/health_repository.dart';
 
 class Aluno {
@@ -279,8 +280,32 @@ class ProximaAcaoResumo {
       );
 }
 
+class AderenciaDia {
+  final String data;
+  final String labelDia;
+  final int checkins;
+
+  const AderenciaDia({
+    this.data = '',
+    this.labelDia = '',
+    this.checkins = 0,
+  });
+
+  factory AderenciaDia.fromJson(Map<String, dynamic> json) => AderenciaDia(
+    data: json['data'] as String? ?? '',
+    labelDia: json['labelDia'] as String? ?? '',
+    checkins: (json['checkins'] as num?)?.toInt() ?? 0,
+  );
+
+  Map<String, dynamic> toMap() => {
+    'data': data,
+    'labelDia': labelDia,
+    'checkins': checkins,
+  };
+}
+
 class AderenciaSemanalBundle {
-  final List<Map<String, dynamic>> dias;
+  final List<AderenciaDia> dias;
   final int totalSemana;
   final int streakAtual;
   final int diasComCheckin;
@@ -294,11 +319,14 @@ class AderenciaSemanalBundle {
     this.resumo = '',
   });
 
+  List<Map<String, dynamic>> get diasMaps =>
+      dias.map((d) => d.toMap()).toList(growable: false);
+
   factory AderenciaSemanalBundle.fromJson(Map<String, dynamic> json) =>
       AderenciaSemanalBundle(
         dias:
             (json['dias'] as List<dynamic>? ?? const [])
-                .map((e) => Map<String, dynamic>.from(e as Map))
+                .map((e) => AderenciaDia.fromJson(Map<String, dynamic>.from(e as Map)))
                 .toList(),
         totalSemana: (json['totalSemana'] as num?)?.toInt() ?? 0,
         streakAtual: (json['streakAtual'] as num?)?.toInt() ?? 0,
@@ -308,7 +336,10 @@ class AderenciaSemanalBundle {
 
   factory AderenciaSemanalBundle.fromLegacyList(List<dynamic> raw) =>
       AderenciaSemanalBundle(
-        dias: raw.map((e) => Map<String, dynamic>.from(e as Map)).toList(),
+        dias:
+            raw
+                .map((e) => AderenciaDia.fromJson(Map<String, dynamic>.from(e as Map)))
+                .toList(),
       );
 
   static AderenciaSemanalBundle parse(dynamic raw) {
@@ -404,6 +435,7 @@ class Aluno360 {
   final RecoverySnapshot? recoverySnapshot;
   final RiscoResumo? riscoResumo;
   final OperacaoUiHints? operacaoUiHints;
+  final List<FilaAcaoResumo>? openCopilotTasks;
 
   const Aluno360({
     required this.aluno,
@@ -417,6 +449,7 @@ class Aluno360 {
     this.recoverySnapshot,
     this.riscoResumo,
     this.operacaoUiHints,
+    this.openCopilotTasks,
   });
 
   factory Aluno360.fromJson(Map<String, dynamic> json) => Aluno360(
@@ -452,6 +485,14 @@ class Aluno360 {
             ? OperacaoUiHints.fromJson(
               json['operacaoUiHints'] as Map<String, dynamic>,
             )
+            : null,
+    openCopilotTasks:
+        json.containsKey('openCopilotTasks')
+            ? (json['openCopilotTasks'] as List<dynamic>? ?? const [])
+                .map(
+                  (e) => FilaAcaoResumo.fromJson(e as Map<String, dynamic>),
+                )
+                .toList()
             : null,
   );
 }
@@ -640,7 +681,7 @@ class AlunoRepository {
     }
     return AderenciaSemanalBundle.fromJson(
       Map<String, dynamic>.from(data as Map),
-    ).dias;
+    ).diasMaps;
   }
 
   Future<AderenciaSemanalBundle> aderenciaSemanalBundle(int id) async {

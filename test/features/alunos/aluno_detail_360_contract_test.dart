@@ -238,6 +238,8 @@ void main() {
       expect(screen, contains('alunoAderenciaSemanalProvider'));
       expect(screen, contains('AnimatedSwitcher'));
       expect(screen, contains('hasOpenCopilotTask'));
+      expect(screen, contains('openCopilotTasks'));
+      expect(screen, contains('class AderenciaDia'));
       expect(screen, contains('hidePrimaryCta'));
       expect(screen, contains('hideChatCta'));
       expect(screen, contains('shouldHideCopilotChatCta'));
