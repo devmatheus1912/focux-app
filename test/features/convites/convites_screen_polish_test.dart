@@ -3,13 +3,23 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../support/screen_source_bundle.dart';
 
 void main() {
-  test('convites cumpre contrato Tier S+', () {
-    final screen = readScreenSourceBundle('lib/features/convites/screens/convites_screen.dart');
-    expect(screen, anyOf(contains('fxScreenA11yScope'), contains('Semantics(')));
-    expect(screen, isNot(contains('CircularProgressIndicator')));
+  test('convites cumpre contrato inset', () {
+    final screen = readScreenSourceBundle(
+      'lib/features/convites/screens/convites_screen.dart',
+    );
+    expect(screen, contains('fxScreenA11yScope'));
     expect(screen, contains('FxShellScaffold'));
-    expect(screen, anyOf(contains('FxContentWidthLimiter'), isNot(contains('constrainWidth: false'))));
-    expect(screen, anyOf(contains('friendlyError'), contains('DashboardErrorState'), contains('FxEmptyState'), contains('_erro'), contains('_TrainingEmptyState'), contains('ref.invalidate')));
-    expect(screen, anyOf(contains('FxLoading'), contains('SkeletonLoader'), contains('SkeletonList'), contains('DashboardShimmer'), contains('Shimmer'), contains('IaCopilotInsightsLoading'), contains('_loading')));
+    expect(screen, contains('FxHelpIconButton'));
+    expect(screen, contains('FxSettingsGroup'));
+    expect(screen, contains('FxEmptyState'));
+    expect(screen, contains('FxErrorState'));
+    expect(screen, contains('SkeletonList'));
+    expect(screen, contains('getHome()'));
+    expect(screen, contains('copySensitiveToClipboard'));
+    expect(screen, contains('convitesHubViewed'));
+    expect(screen, isNot(contains('CircularProgressIndicator')));
+    expect(screen, isNot(contains('FxLiquidPrimaryButton')));
+    expect(screen, isNot(contains('Clipboard.setData')));
+    expect(screen, isNot(contains('_HeroCard')));
   });
 }

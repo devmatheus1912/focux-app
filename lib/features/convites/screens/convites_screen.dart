@@ -2,25 +2,28 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../core/analytics/analytics_service.dart';
 import '../../../core/router/safe_navigation.dart';
-import '../../../core/theme/design_tokens.dart';
-import '../../../core/theme/focux_hub_typography.dart';
-import '../../../core/theme/tokens_strip.dart';
-import '../../../core/theme/shell_chrome.dart';
+import '../../../core/theme/fx_settings_layout.dart';
+import '../../../core/utils/clipboard_sensitive.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
-import '../../../core/widgets/fx_glass_surface.dart';
-import '../../../core/widgets/fx_motion.dart';
-import '../../../core/widgets/fx_premium_entrance.dart';
+import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
+import '../../../core/widgets/fx_settings_group.dart';
+import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/skeleton_loader.dart';
 import '../data/convite_repository.dart';
 import '../providers/convite_provider.dart';
+import '../utils/convite_display.dart';
+import '../widgets/convites_help_sheet.dart';
 
 class ConvitesScreen extends ConsumerStatefulWidget {
   const ConvitesScreen({super.key});
@@ -30,11 +33,21 @@ class ConvitesScreen extends ConsumerStatefulWidget {
 }
 
 class _ConvitesScreenState extends ConsumerState<ConvitesScreen> {
+  final _openedAt = DateTime.now();
   Convite? _convite;
-  bool _loading = false;
+  var _personalNome = '';
+  var _loading = true;
+  var _generating = false;
   String? _error;
+  DateTime? _fetchedAt;
   Timer? _countdownTimer;
-  Duration? _remaining;
+  var _viewTracked = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
 
   @override
   void dispose() {
@@ -42,13 +55,68 @@ class _ConvitesScreenState extends ConsumerState<ConvitesScreen> {
     super.dispose();
   }
 
+  Future<void> _load() async {
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    try {
+      final home = await ref.read(conviteRepositoryProvider).getHome();
+      if (!mounted) return;
+      _applyConvite(home.convite, home.personalNome);
+      setState(() {
+        _loading = false;
+        _fetchedAt = DateTime.now();
+      });
+      _trackView();
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = friendlyError(
+          e,
+          fallback: 'Não conseguimos abrir os convites. Tente novamente.',
+        );
+        _loading = false;
+      });
+    }
+  }
+
+  void _trackView() {
+    if (_viewTracked) return;
+    _viewTracked = true;
+    AnalyticsService.instance.track(
+      ProductEvents.convitesHubViewed,
+      props: {'tem_link': _convite != null},
+    );
+    AnalyticsService.instance.track(
+      ProductEvents.convitesHubTtv,
+      props: {'ms': DateTime.now().difference(_openedAt).inMilliseconds},
+    );
+  }
+
+  void _applyConvite(Convite? convite, String personalNome) {
+    _countdownTimer?.cancel();
+    _personalNome = personalNome;
+    final now = DateTime.now();
+    if (convite != null && conviteAindaValido(convite.expiraEm, now)) {
+      _convite = convite;
+      _startCountdown(convite.expiraEm!);
+    } else {
+      _convite = null;
+    }
+  }
+
   void _startCountdown(DateTime expiresAt) {
     _countdownTimer?.cancel();
     void tick() {
       if (!mounted) return;
       final left = expiresAt.difference(DateTime.now());
-      setState(() => _remaining = left.isNegative ? Duration.zero : left);
-      if (left.isNegative) _countdownTimer?.cancel();
+      if (left.isNegative) {
+        _countdownTimer?.cancel();
+        setState(() => _convite = null);
+        return;
+      }
+      setState(() {});
     }
 
     tick();
@@ -56,71 +124,63 @@ class _ConvitesScreenState extends ConsumerState<ConvitesScreen> {
   }
 
   Future<void> _gerar() async {
+    if (_generating) return;
     HapticFeedback.mediumImpact();
     setState(() {
-      _loading = true;
+      _generating = true;
       _error = null;
-      _convite = null;
-      _remaining = null;
     });
     try {
       final convite = await ref.read(conviteRepositoryProvider).gerar();
       if (!mounted) return;
-      setState(() => _convite = convite);
-      if (convite.expiraEm != null) {
-        _startCountdown(convite.expiraEm!);
-      }
+      _applyConvite(convite, _personalNome);
+      if (!mounted) return;
+      setState(() => _fetchedAt = DateTime.now());
+      AnalyticsService.instance.track(ProductEvents.convitesGenerated);
       HapticFeedback.lightImpact();
     } catch (e) {
       if (!mounted) return;
-      setState(
-        () =>
-            _error = friendlyError(
-              e,
-              fallback: 'Não conseguimos gerar o convite. Tente novamente.',
-            ),
-      );
+      setState(() {
+        _error = friendlyError(
+          e,
+          fallback: 'Não conseguimos gerar o convite. Tente novamente.',
+        );
+      });
     } finally {
-      if (mounted) setState(() => _loading = false);
+      if (mounted) setState(() => _generating = false);
     }
   }
 
   String get _shareLink => _convite?.shareLink ?? '';
 
-  void _copiar() {
+  Future<void> _copiar() async {
     if (_shareLink.isEmpty) return;
     HapticFeedback.selectionClick();
-    Clipboard.setData(ClipboardData(text: _shareLink));
-    FeedbackHelper.showSuccess(context, 'Link copiado!');
+    await copySensitiveToClipboard(_shareLink);
+    if (!mounted) return;
+    AnalyticsService.instance.track(ProductEvents.convitesCopied);
+    FeedbackHelper.showSuccess(context, 'Link copiado. Some em 1 min.');
   }
 
   Future<void> _compartilharWhatsApp() async {
     if (_shareLink.isEmpty) return;
     HapticFeedback.selectionClick();
-    final texto =
-        'Olá! Use este link para criar sua conta no app do seu personal: $_shareLink';
+    AnalyticsService.instance.track(ProductEvents.convitesWhatsapp);
+    final texto = conviteShareMessage(
+      personalNome: _personalNome,
+      shareLink: _shareLink,
+    );
     final uri = Uri.parse('https://wa.me/?text=${Uri.encodeComponent(texto)}');
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     }
   }
 
-  String _formatRemaining(Duration? remaining) {
-    if (remaining == null) return '24h';
-    if (remaining <= Duration.zero) return 'Expirado';
-    final hours = remaining.inHours;
-    final minutes = remaining.inMinutes.remainder(60);
-    if (hours > 0) return '${hours}h ${minutes}min';
-    return '${minutes}min';
-  }
-
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final chrome = ShellChrome.forDark(isDark);
+    final ativo = _convite != null && _shareLink.isNotEmpty;
 
     return fxScreenA11yScope(
       label: 'Convidar aluno',
@@ -128,217 +188,119 @@ class _ConvitesScreenState extends ConsumerState<ConvitesScreen> {
         useMesh: true,
         appBar: FxShellAppBar(
           title: 'Convidar aluno',
+          subtitle: FxHubFreshness.fromFetchedAt(_fetchedAt),
           onBack: () => safePopOrGo(context, '/dashboard/personal'),
-        ),
-        body: FxPremiumEntrance(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 8, 20, 32),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _HeroCard(
-                  isDark: isDark,
-                  primary: primary,
-                  ink: ink,
-                  mute: mute,
-                ),
-                const SizedBox(height: 20),
-                FxLiquidPrimaryButton(
-                  label: 'Gerar novo link',
-                  icon: Icons.link_rounded,
-                  loading: _loading,
-                  onPressed: _loading ? null : _gerar,
-                ),
-                if (_error != null) ...[
-                  const SizedBox(height: 14),
-                  FxErrorState(
-                    chromeOnDark: isDark,
-                    primary: primary,
-                    title: 'Não conseguimos gerar o convite',
-                    message: _error!,
-                    onRetry: _gerar,
-                  ),
-                ],
-                if (_convite != null) ...[
-                  const SizedBox(height: 20),
-                  FxGlassSurface(
-                        glow: true,
-                        radius: TokensStrip.rCard,
-                        padding: const EdgeInsets.all(TokensStrip.s4),
-                        accent: primary,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Container(
-                                  width: 40,
-                                  height: 40,
-                                  decoration: BoxDecoration(
-                                    color: primary.withValues(alpha: 0.12),
-                                    borderRadius: BorderRadius.circular(
-                                      TokensStrip.rInput,
-                                    ),
-                                  ),
-                                  child: Icon(
-                                    Icons.verified_outlined,
-                                    color: primary,
-                                    size: 20,
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'Link gerado',
-                                        style: FocuxHubTypography.cardTitle(
-                                          color: ink,
-                                        ),
-                                      ),
-                                      Text(
-                                        'Expira em ${_formatRemaining(_remaining)}',
-                                        style: TextStyle(
-                                          color: mute,
-                                          fontSize: 12.5,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 14),
-                            Container(
-                              width: double.infinity,
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: chrome.cardFill,
-                                borderRadius: BorderRadius.circular(
-                                  TokensStrip.rInput,
-                                ),
-                                border: Border.all(color: chrome.line),
-                              ),
-                              child: SelectableText(
-                                _shareLink,
-                                style: AppTypography.mono(
-                                  fontSize: 12.5,
-                                  height: 1.45,
-                                  color: ink,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 14),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: OutlinedButton.icon(
-                                    onPressed: _copiar,
-                                    icon: const Icon(
-                                      Icons.copy_rounded,
-                                      size: 18,
-                                    ),
-                                    label: const Text('Copiar'),
-                                  ),
-                                ),
-                                const SizedBox(width: 10),
-                                Expanded(
-                                  child: FxLiquidPrimaryButton(
-                                    label: 'WhatsApp',
-                                    icon: Icons.chat_rounded,
-                                    onPressed: _compartilharWhatsApp,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      )
-                      .animate()
-                      .fadeIn(duration: 320.ms, curve: Curves.easeOutCubic)
-                      .slideY(begin: 0.06, curve: Curves.easeOutCubic),
-                  const SizedBox(height: 12),
-                  Text(
-                    'Compartilhe este link com o aluno. Ele expira em 24h e pode ser usado uma única vez.',
-                    style: Theme.of(
-                      context,
-                    ).textTheme.bodySmall?.copyWith(color: mute, height: 1.4),
-                  ),
-                ],
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _HeroCard extends StatelessWidget {
-  const _HeroCard({
-    required this.isDark,
-    required this.primary,
-    required this.ink,
-    required this.mute,
-  });
-
-  final bool isDark;
-  final Color primary;
-  final Color ink;
-  final Color mute;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(TokensStrip.rCard),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            primary.withValues(alpha: isDark ? 0.22 : 0.12),
-            (isDark ? EagleTokens.darkCard : TokensStrip.cardBg).withValues(
-              alpha: 0.96,
+          actions: [
+            FxHelpIconButton(
+              tooltip: 'Como convidar',
+              onTap: () {
+                AnalyticsService.instance.track(
+                  ProductEvents.convitesHubHelpOpened,
+                );
+                showConvitesHelpSheet(context);
+              },
             ),
           ],
         ),
-        border: Border.all(color: primary.withValues(alpha: 0.18)),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: primary.withValues(alpha: 0.14),
-              borderRadius: BorderRadius.circular(TokensStrip.rCard),
-            ),
-            child: Icon(Icons.person_add_alt_1_rounded, color: primary),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Convite único',
-                  style: FocuxHubTypography.sectionTitle(
-                    context,
-                    color: ink,
-                  ),
+        body: _loading
+            ? const Padding(
+              padding: EdgeInsets.all(FxSettingsLayout.pageInset),
+              child: SkeletonList(count: 6),
+            )
+            : _error != null && _fetchedAt == null
+            ? FxErrorState(
+              chromeOnDark: isDark,
+              primary: primary,
+              title: 'Não conseguimos abrir o convite',
+              message: _error!,
+              onRetry: _load,
+            )
+            : RefreshIndicator(
+              color: primary,
+              onRefresh: _load,
+              child: ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.fromLTRB(
+                  FxSettingsLayout.pageInset,
+                  8,
+                  FxSettingsLayout.pageInset,
+                  110,
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  'Gere um link seguro para seu aluno criar a conta no app.',
-                  style: TextStyle(color: mute, height: 1.35, fontSize: 13),
-                ),
-              ],
+                children: [
+                  if (!ativo) ...[
+                    SizedBox(
+                      height: 280,
+                      child: FxEmptyState(
+                        icon: 'users',
+                        title: 'Nenhum convite ativo',
+                        subtitle:
+                            'Gere um link de um uso. O aluno cria a conta e troca a senha no primeiro acesso.',
+                        action: FxEmptyAction(
+                          label: _generating ? 'Gerando…' : 'Gerar link',
+                          onTap: _generating ? () {} : _gerar,
+                        ),
+                      ),
+                    ),
+                    if (_error != null)
+                      FxErrorState(
+                        chromeOnDark: isDark,
+                        primary: primary,
+                        title: 'Não gerou',
+                        message: _error!,
+                        onRetry: _gerar,
+                      ),
+                  ] else ...[
+                    FxSettingsGroup(
+                      header: 'Link vigente',
+                      caption:
+                          'Um uso. Expira em ${conviteRemainingLabel(_convite!.expiraEm, DateTime.now())}.',
+                      children: [
+                        FxSettingsTile(
+                          fxIcon: 'route',
+                          label: 'Copiar link',
+                          value: '1 min',
+                          onTap: _copiar,
+                        ),
+                        FxSettingsTile(
+                          fxIcon: 'message-circle',
+                          label: 'Enviar no WhatsApp',
+                          value: '',
+                          showDivider: false,
+                          onTap: _compartilharWhatsApp,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: FxSettingsLayout.groupGap),
+                    FxSettingsGroup(
+                      header: 'Outro convite',
+                      caption:
+                          'O anterior deixa de valer só quando expirar ou for usado.',
+                      children: [
+                        FxSettingsTile(
+                          fxIcon: 'plus',
+                          label: _generating
+                              ? 'Gerando…'
+                              : 'Gerar novo link',
+                          value: '',
+                          showDivider: false,
+                          onTap: _generating ? () {} : _gerar,
+                        ),
+                      ],
+                    ),
+                    if (_error != null) ...[
+                      const SizedBox(height: FxSettingsLayout.groupGap),
+                      FxErrorState(
+                        chromeOnDark: isDark,
+                        primary: primary,
+                        title: 'Não gerou',
+                        message: _error!,
+                        onRetry: _gerar,
+                      ),
+                    ],
+                  ],
+                ],
+              ),
             ),
-          ),
-        ],
       ),
     );
   }

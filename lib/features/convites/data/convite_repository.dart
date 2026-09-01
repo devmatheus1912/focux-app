@@ -46,10 +46,30 @@ class ConviteValidacao {
       );
 }
 
+class ConvitesHome {
+  final Convite? convite;
+  final String personalNome;
+
+  const ConvitesHome({this.convite, required this.personalNome});
+
+  factory ConvitesHome.fromJson(Map<String, dynamic> json) {
+    final raw = json['convite'];
+    return ConvitesHome(
+      convite: raw is Map<String, dynamic> ? Convite.fromJson(raw) : null,
+      personalNome: json['personalNome'] as String? ?? '',
+    );
+  }
+}
+
 class ConviteRepository {
   final Dio _dio;
 
   ConviteRepository(ApiClient client) : _dio = client.dio;
+
+  Future<ConvitesHome> getHome() async {
+    final response = await _dio.get('/api/convites/home');
+    return ConvitesHome.fromJson(response.data as Map<String, dynamic>);
+  }
 
   Future<Convite> gerar() async {
     final response = await _dio.post('/api/convites/gerar');
