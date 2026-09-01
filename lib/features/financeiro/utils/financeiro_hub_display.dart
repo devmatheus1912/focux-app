@@ -29,6 +29,33 @@ String financeiroAlunoContextLabel(String? nome) {
   return 'Mensalidades de $n';
 }
 
+String financeiroMensalidadeMesPorExtenso(String mesReferencia) {
+  final raw = mesReferencia.trim();
+  final parts = raw.split('-');
+  if (parts.length < 2) return raw.isEmpty ? 'Sem mês' : raw;
+  final ano = int.tryParse(parts[0]);
+  final mes = int.tryParse(parts[1]);
+  if (ano == null || mes == null) return raw;
+  return financeiroMesTitulo(mes, ano);
+}
+
+String financeiroContatoTipoLabel(String tipo) {
+  switch (tipo.trim().toUpperCase()) {
+    case 'WHATSAPP':
+      return 'WhatsApp';
+    case 'LIGACAO':
+      return 'Ligação';
+    case 'EMAIL':
+      return 'E-mail';
+    case 'PRESENCIAL':
+      return 'Presencial';
+    case 'OUTRO':
+      return 'Outro';
+    default:
+      return tipo;
+  }
+}
+
 String financeiroMensalidadeMesLabel(String mesReferencia) {
   final raw = mesReferencia.trim();
   if (raw.length >= 7) return raw.substring(0, 7);

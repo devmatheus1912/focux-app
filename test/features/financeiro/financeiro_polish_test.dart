@@ -22,10 +22,15 @@ void main() {
     expect(tab, contains('class FinanceiroMensalidadesTab'));
     expect(tab, contains('FxSettingsTile'));
     expect(tab, contains('showFxInsetPickerSheet'));
+    expect(tab, contains('showFxConfirmSheet'));
+    expect(tab, contains('copySensitiveToClipboard'));
+    expect(tab, contains('Carregar mais'));
     expect(tab, contains('FxErrorState'));
     expect(tab, contains('FeedbackHelper.showSuccess'));
     expect(tab, isNot(contains('class _MiniAction')));
     expect(tab, isNot(contains('FloatingActionButton')));
     expect(tab, isNot(contains('check-circle')));
+    expect(tab, isNot(contains('DropdownButtonFormField')));
+    expect(tab, isNot(contains('Clipboard.setData')));
   });
 }

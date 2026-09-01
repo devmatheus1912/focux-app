@@ -7,13 +7,19 @@ import 'package:focux_app/core/widgets/fx_shell_scaffold.dart';
 import 'package:focux_app/core/widgets/skeleton_loader.dart';
 
 import '../../../core/brand/focux_microcopy.dart';
-import '../../../core/theme/design_tokens.dart';
-import '../../../core/theme/shell_chrome.dart';
+import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/utils/pt_br_display.dart';
+import '../../../core/ux/fx_hub_freshness.dart';
+import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_content_width_limiter.dart';
+import '../../../core/widgets/fx_settings_group.dart';
+import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../features/alunos/utils/satellite_screen_utils.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/financeiro_repository.dart';
+import '../utils/financeiro_hub_display.dart';
 
 class FinanceiroAlunoScreen extends ConsumerStatefulWidget {
   const FinanceiroAlunoScreen({super.key});
@@ -25,24 +31,12 @@ class FinanceiroAlunoScreen extends ConsumerStatefulWidget {
 
 class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
   List<Mensalidade> _mensalidades = [];
-  bool _loading = true;
+  var _page = 0;
+  var _hasMore = false;
+  var _loading = true;
+  var _carregandoMais = false;
   String? _erro;
-
-  static const _mesesNomes = [
-    '',
-    'Janeiro',
-    'Fevereiro',
-    'Março',
-    'Abril',
-    'Maio',
-    'Junho',
-    'Julho',
-    'Agosto',
-    'Setembro',
-    'Outubro',
-    'Novembro',
-    'Dezembro',
-  ];
+  DateTime? _fetchedAt;
 
   @override
   void initState() {
@@ -60,43 +54,45 @@ class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
           await FinanceiroRepository(
             ref.read(apiClientProvider),
           ).minhasMensalidades();
-      if (mounted) {
-        setState(() {
-          _mensalidades = result;
-          _loading = false;
-        });
-      }
+      if (!mounted) return;
+      setState(() {
+        _mensalidades = result.mensalidades;
+        _page = result.page;
+        _hasMore = result.hasMore;
+        _fetchedAt = DateTime.now();
+        _loading = false;
+      });
     } catch (e) {
-      if (mounted) {
-        setState(() {
-          _erro = friendlyError(e);
-          _loading = false;
-        });
-      }
+      if (!mounted) return;
+      setState(() {
+        _erro = friendlyError(e);
+        _loading = false;
+      });
     }
   }
 
-  Color _statusColor(String s) {
-    switch (s) {
-      case 'PAGO':
-        return EagleTokens.good;
-      case 'ATRASADO':
-        return EagleTokens.bad;
-      default:
-        return EagleTokens.warn;
-    }
-  }
-
-  String _formatarMes(String mesReferencia) {
+  Future<void> _carregarMais() async {
+    if (_carregandoMais || !_hasMore) return;
+    setState(() => _carregandoMais = true);
     try {
-      final parts = mesReferencia.split('-');
-      if (parts.length < 2) return mesReferencia;
-      final ano = parts[0];
-      final mes = int.parse(parts[1]);
-      if (mes < 1 || mes > 12) return mesReferencia;
-      return '${_mesesNomes[mes]} $ano';
-    } catch (_) {
-      return mesReferencia;
+      final next = await FinanceiroRepository(
+        ref.read(apiClientProvider),
+      ).minhasMensalidades(page: _page + 1);
+      if (!mounted) return;
+      final seen = _mensalidades.map((m) => m.id).toSet();
+      setState(() {
+        _mensalidades = [
+          ..._mensalidades,
+          ...next.mensalidades.where((m) => seen.add(m.id)),
+        ];
+        _page = next.page;
+        _hasMore = next.hasMore;
+        _carregandoMais = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _carregandoMais = false);
+      FeedbackHelper.showError(context, friendlyError(e));
     }
   }
 
@@ -104,161 +100,116 @@ class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
+    final freshness = FxHubFreshness.fromFetchedAt(_fetchedAt);
 
     return fxScreenA11yScope(
-      label: 'Minhas Mensalidades',
+      label: 'Minhas mensalidades',
       child: FxShellScaffold(
         useMesh: true,
         appBar: FxShellAppBar(
-          title: 'Minhas Mensalidades',
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.refresh_rounded, size: 22),
-              onPressed: _carregar,
-              tooltip: 'Recarregar',
-            ),
-          ],
+          title: 'Minhas mensalidades',
+          subtitle: freshness ?? 'Suas cobranças',
         ),
-        body:
-            _loading
-                ? const Padding(
-                  padding: EdgeInsets.all(TokensStrip.s4),
-                  child: SkeletonList(count: 5),
-                )
-                : _erro != null
-                ? FxErrorState(
-                  chromeOnDark: isDark,
-                  primary: primary,
-                  title: FocuxMicrocopy.naoFoiPossivelCarregar,
-                  message: _erro!,
-                  onRetry: _carregar,
-                )
-                : _mensalidades.isEmpty
-                ? RefreshIndicator(
-                  onRefresh: _carregar,
-                  child: ListView(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    children: const [
-                      SizedBox(height: 72),
-                      FxEmptyState(
-                        icon: 'coin',
-                        title: 'Nenhuma mensalidade',
-                        subtitle: 'Suas cobranças aparecerão aqui.',
-                      ),
-                    ],
+        body: FxContentWidthLimiter(
+          child:
+              _loading
+                  ? const Padding(
+                    padding: EdgeInsets.only(top: TokensStrip.s4),
+                    child: SkeletonList(count: 5),
+                  )
+                  : _erro != null
+                  ? FxErrorState(
+                    chromeOnDark: isDark,
+                    primary: primary,
+                    title: FocuxMicrocopy.naoFoiPossivelCarregar,
+                    message: _erro!,
+                    onRetry: _carregar,
+                  )
+                  : RefreshIndicator(
+                    onRefresh: _carregar,
+                    child:
+                        _mensalidades.isEmpty
+                            ? ListView(
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              children: const [
+                                SizedBox(height: 72),
+                                FxEmptyState(
+                                  icon: 'coin',
+                                  title: 'Nenhuma mensalidade',
+                                  subtitle:
+                                      'Quando seu personal lançar uma cobrança, ela aparece aqui.',
+                                ),
+                              ],
+                            )
+                            : ListView(
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              padding: const EdgeInsets.fromLTRB(
+                                FxSettingsLayout.pageInset,
+                                8,
+                                FxSettingsLayout.pageInset,
+                                32,
+                              ),
+                              children: [
+                                FxSettingsGroup(
+                                  header: 'Cobranças',
+                                  caption:
+                                      'Valores e status da sua mensalidade.',
+                                  children: [
+                                    for (
+                                      var i = 0;
+                                      i < _mensalidades.length;
+                                      i++
+                                    )
+                                      FxSettingsTile(
+                                        fxIcon:
+                                            _mensalidades[i].status ==
+                                                    'ATRASADO'
+                                                ? 'alert-triangle'
+                                                : _mensalidades[i].status ==
+                                                    'PAGO'
+                                                ? 'circle-check'
+                                                : 'coin',
+                                        label:
+                                            financeiroMensalidadeMesPorExtenso(
+                                              _mensalidades[i].mesReferencia,
+                                            ),
+                                        subtitle:
+                                            financeiroMensalidadeStatusLabel(
+                                              _mensalidades[i].status,
+                                            ),
+                                        value: formatBrlCurrency(
+                                          _mensalidades[i].valor,
+                                          showDecimals: false,
+                                        ),
+                                        numeric: true,
+                                        danger:
+                                            _mensalidades[i].status ==
+                                            'ATRASADO',
+                                        showDivider:
+                                            i != _mensalidades.length - 1 ||
+                                            _hasMore,
+                                        onTap: () {},
+                                      ),
+                                    if (_hasMore)
+                                      FxSettingsTile(
+                                        fxIcon: 'plus',
+                                        label:
+                                            _carregandoMais
+                                                ? 'Carregando…'
+                                                : 'Carregar mais',
+                                        value: '',
+                                        showDivider: false,
+                                        onTap:
+                                            _carregandoMais
+                                                ? () {}
+                                                : _carregarMais,
+                                      ),
+                                  ],
+                                ),
+                              ],
+                            ),
                   ),
-                )
-                : RefreshIndicator(
-                  onRefresh: _carregar,
-                  child: ListView.builder(
-                    padding: const EdgeInsets.fromLTRB(
-                      TokensStrip.s4,
-                      8,
-                      16,
-                      32,
-                    ),
-                    itemCount: _mensalidades.length,
-                    itemBuilder:
-                        (_, i) => _MensalidadeCard(
-                          m: _mensalidades[i],
-                          isDark: isDark,
-                          formatarMes: _formatarMes,
-                          statusColor: _statusColor,
-                        ),
-                  ),
-                ),
-      ),
-    );
-  }
-}
-
-class _MensalidadeCard extends StatelessWidget {
-  final Mensalidade m;
-  final bool isDark;
-  final String Function(String) formatarMes;
-  final Color Function(String) statusColor;
-
-  const _MensalidadeCard({
-    required this.m,
-    required this.isDark,
-    required this.formatarMes,
-    required this.statusColor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final chrome = ShellChrome.forDark(isDark);
-    final sColor = statusColor(m.status);
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(14),
-      decoration: chrome.listCard(),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  formatarMes(m.mesReferencia),
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w800,
-                    color: chrome.ink,
-                    letterSpacing: -0.15,
-                  ),
-                ),
-              ),
-              Text(
-                'R\$ ${m.valor.toStringAsFixed(0)}',
-                style: AppTypography.mono(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
-                  color: chrome.ink,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 5,
-                ),
-                decoration: BoxDecoration(
-                  color: sColor.withValues(alpha: isDark ? 0.18 : 0.10),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Text(
-                  financeiroMensalidadeStatusLabel(m.status),
-                  style: TextStyle(
-                    color: financeiroMensalidadeStatusInk(
-                      sColor,
-                      status: m.status,
-                      isDark: isDark,
-                    ),
-                    fontSize: 11,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 0.3,
-                  ),
-                ),
-              ),
-              const Spacer(),
-              if (m.pagoEm != null)
-                Text(
-                  'Pago em ${m.pagoEm}',
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: EagleTokens.good,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-            ],
-          ),
-        ],
+        ),
       ),
     );
   }

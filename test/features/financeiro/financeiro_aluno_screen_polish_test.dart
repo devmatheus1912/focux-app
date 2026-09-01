@@ -12,5 +12,13 @@ void main() {
     expect(screen, anyOf(contains('friendlyError'), contains('DashboardErrorState'), contains('FxEmptyState'), contains('_erro'), contains('_TrainingEmptyState'), contains('ref.invalidate')));
     expect(screen, anyOf(contains('FxLoading'), contains('SkeletonLoader'), contains('SkeletonList'), contains('DashboardShimmer'), contains('Shimmer'), contains('IaCopilotInsightsLoading'), contains('_loading')));
     expect(screen, contains('RefreshIndicator'));
+    expect(screen, contains('FxSettingsTile'));
+    expect(screen, contains('Carregar mais'));
+    expect(screen, contains('FxHubFreshness'));
+    expect(screen, contains('circle-check'));
+    expect(screen, isNot(contains('check-circle')));
+    expect(screen, isNot(contains('Aluno #')));
+    expect(screen, isNot(contains('Icons.refresh')));
+    expect(screen, isNot(contains('CircularProgressIndicator')));
   });
 }

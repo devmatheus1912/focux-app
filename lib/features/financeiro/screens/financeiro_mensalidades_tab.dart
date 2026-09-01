@@ -9,9 +9,11 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/utils/clipboard_sensitive.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/utils/pt_br_display.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_form_sheet.dart';
@@ -26,12 +28,14 @@ import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../alunos/providers/alunos_provider.dart';
+import '../../alunos/utils/satellite_screen_utils.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../data/financeiro_repository.dart';
 import '../providers/financeiro_provider.dart';
 import '../utils/financeiro_hub_display.dart';
 
 part 'financeiro_mensalidades_tab_actions.part.dart';
+part 'financeiro_mensalidades_tab_forms.part.dart';
 part 'financeiro_mensalidades_tab_widgets.part.dart';
 
 class FinanceiroMensalidadesTab extends ConsumerStatefulWidget {
@@ -46,10 +50,16 @@ class FinanceiroMensalidadesTab extends ConsumerStatefulWidget {
 
 class _FinanceiroMensalidadesTabState
     extends ConsumerState<FinanceiroMensalidadesTab> {
-  List<Mensalidade> _mensalidades = [];
-  List<Mensalidade> _filtered = [];
-  bool _loading = true;
+  List<Mensalidade> _homeItems = [];
+  List<Mensalidade> _items = [];
+  var _page = 0;
+  var _homePage = 0;
+  var _hasMore = false;
+  var _homeHasMore = false;
+  var _loading = true;
+  var _carregandoMais = false;
   String? _erro;
+  var _buscaAtiva = '';
   final TextEditingController _searchCtrl = TextEditingController();
   Timer? _debounce;
 
@@ -71,31 +81,59 @@ class _FinanceiroMensalidadesTabState
     _debounce?.cancel();
     final query = _searchCtrl.text.trim();
     if (query.isEmpty) {
-      setState(() => _filtered = _mensalidades);
+      setState(() {
+        _buscaAtiva = '';
+        _items = _homeItems;
+        _page = _homePage;
+        _hasMore = _homeHasMore;
+      });
       return;
     }
     _debounce = Timer(const Duration(milliseconds: 500), () async {
       try {
         final results = await FinanceiroRepository(
           ref.read(apiClientProvider),
-        ).listarPorNome(query);
-        if (mounted) setState(() => _filtered = results);
+        ).listarPagina(
+          nomeAluno: query,
+          alunoId: widget.initialAlunoId,
+        );
+        if (!mounted) return;
+        setState(() {
+          _buscaAtiva = query;
+          _items = results.mensalidades;
+          _page = results.page;
+          _hasMore = results.hasMore;
+        });
       } catch (e) {
-        // fallback: filter locally quando a busca remota falha
-        if (mounted) {
-          setState(
-            () =>
-                _filtered =
-                    _mensalidades
-                        .where(
-                          (m) => m.alunoNome.toLowerCase().contains(
-                            query.toLowerCase(),
-                          ),
-                        )
-                        .toList(),
-          );
-        }
+        if (!mounted) return;
+        setState(() {
+          _buscaAtiva = query;
+          _items =
+              _homeItems
+                  .where(
+                    (m) => m.alunoNome.toLowerCase().contains(
+                      query.toLowerCase(),
+                    ),
+                  )
+                  .toList();
+          _hasMore = false;
+        });
       }
+    });
+  }
+
+  Future<void> _applyPage(MensalidadesPage page, {required bool fromHome}) async {
+    setState(() {
+      _items = page.mensalidades;
+      _page = page.page;
+      _hasMore = page.hasMore;
+      if (fromHome || widget.initialAlunoId != null) {
+        _homeItems = page.mensalidades;
+        _homePage = page.page;
+        _homeHasMore = page.hasMore;
+      }
+      _buscaAtiva = '';
+      _loading = false;
     });
   }
 
@@ -108,25 +146,67 @@ class _FinanceiroMensalidadesTabState
       if (force) {
         invalidateFinanceiroCaches(ref);
       }
-      final home = await ref.read(financeiroHomeProvider.future);
-      final r = home.mensalidades;
       final alunoFilter = widget.initialAlunoId;
-      final filtered =
-          alunoFilter == null
-              ? r
-              : r.where((m) => m.alunoId == alunoFilter).toList();
+      if (alunoFilter != null) {
+        final page = await FinanceiroRepository(
+          ref.read(apiClientProvider),
+        ).listarPagina(alunoId: alunoFilter);
+        if (!mounted) return;
+        await _applyPage(page, fromHome: false);
+        return;
+      }
+      final home = await ref.read(financeiroHomeProvider.future);
       if (!mounted) return;
-      setState(() {
-        _mensalidades = r;
-        _filtered = filtered;
-        _loading = false;
-      });
+      await _applyPage(
+        MensalidadesPage(
+          mensalidades: home.mensalidades,
+          page: home.page,
+          size: home.size,
+          hasMore: home.hasMore,
+        ),
+        fromHome: true,
+      );
     } catch (e) {
       if (!mounted) return;
       setState(() {
         _erro = friendlyError(e);
         _loading = false;
       });
+    }
+  }
+
+  Future<void> _carregarMais() async {
+    if (_carregandoMais || !_hasMore) return;
+    setState(() => _carregandoMais = true);
+    try {
+      final next = await FinanceiroRepository(
+        ref.read(apiClientProvider),
+      ).listarPagina(
+        page: _page + 1,
+        nomeAluno: _buscaAtiva.isEmpty ? null : _buscaAtiva,
+        alunoId: widget.initialAlunoId,
+      );
+      if (!mounted) return;
+      final seen = _items.map((m) => m.id).toSet();
+      final merged = [
+        ..._items,
+        ...next.mensalidades.where((m) => seen.add(m.id)),
+      ];
+      setState(() {
+        _items = merged;
+        _page = next.page;
+        _hasMore = next.hasMore;
+        if (_buscaAtiva.isEmpty) {
+          _homeItems = merged;
+          _homePage = next.page;
+          _homeHasMore = next.hasMore;
+        }
+        _carregandoMais = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _carregandoMais = false);
+      FeedbackHelper.showError(context, friendlyError(e));
     }
   }
 
@@ -139,7 +219,8 @@ class _FinanceiroMensalidadesTabState
       label: 'Mensalidades',
       child: Column(
         children: [
-          Padding(
+          if (widget.initialAlunoId == null)
+            Padding(
             padding: const EdgeInsets.fromLTRB(
               FxSettingsLayout.pageInset,
               8,
@@ -166,7 +247,12 @@ class _FinanceiroMensalidadesTabState
                           icon: FxIcon(name: 'x', size: 16, color: mute),
                           onPressed: () {
                             _searchCtrl.clear();
-                            setState(() => _filtered = _mensalidades);
+                            setState(() {
+                              _buscaAtiva = '';
+                              _items = _homeItems;
+                              _page = _homePage;
+                              _hasMore = _homeHasMore;
+                            });
                           },
                         )
                         : null,
@@ -203,7 +289,7 @@ class _FinanceiroMensalidadesTabState
                       message: _erro!,
                       onRetry: () => _load(force: true),
                     )
-                    : _filtered.isEmpty
+                    : _items.isEmpty
                     ? _buildMensalidadesEmpty(context)
                     : ListView(
                       padding: const EdgeInsets.fromLTRB(
@@ -235,26 +321,39 @@ class _FinanceiroMensalidadesTabState
                           header: 'Lançamentos',
                           caption: 'Toque na linha para editar, PIX ou marcar paga.',
                           children: [
-                            for (var i = 0; i < _filtered.length; i++)
+                            for (var i = 0; i < _items.length; i++)
                               FxSettingsTile(
-                                fxIcon: _filtered[i].status == 'ATRASADO'
+                                fxIcon: _items[i].status == 'ATRASADO'
                                     ? 'alert-triangle'
-                                    : _filtered[i].status == 'PAGO'
+                                    : _items[i].status == 'PAGO'
                                         ? 'circle-check'
                                         : 'coin',
-                                label: _filtered[i].alunoNome,
+                                label: _items[i].alunoNome,
                                 subtitle: financeiroMensalidadeSubtitle(
-                                  _filtered[i].status,
-                                  _filtered[i].mesReferencia,
+                                  _items[i].status,
+                                  _items[i].mesReferencia,
                                 ),
                                 value: formatBrlCurrency(
-                                  _filtered[i].valor,
+                                  _items[i].valor,
                                   showDecimals: false,
                                 ),
                                 numeric: true,
-                                danger: _filtered[i].status == 'ATRASADO',
-                                showDivider: i != _filtered.length - 1,
-                                onTap: () => _abrirAcoes(_filtered[i]),
+                                danger: _items[i].status == 'ATRASADO',
+                                showDivider:
+                                    i != _items.length - 1 || _hasMore,
+                                onTap: () => _abrirAcoes(_items[i]),
+                              ),
+                            if (_hasMore)
+                              FxSettingsTile(
+                                fxIcon: 'plus',
+                                label: _carregandoMais
+                                    ? 'Carregando…'
+                                    : 'Carregar mais',
+                                value: '',
+                                showDivider: false,
+                                onTap: _carregandoMais
+                                    ? () {}
+                                    : _carregarMais,
                               ),
                           ],
                         ),

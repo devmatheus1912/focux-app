@@ -39,6 +39,15 @@ void main() {
     expect(financeiroMensalidadeSubtitle('PAGO', ''), 'Pago · Sem mês');
   });
 
+  test('financeiroMensalidadeMesPorExtenso e tipo de contato', () {
+    expect(
+      financeiroMensalidadeMesPorExtenso('2026-09-01'),
+      'Setembro 2026',
+    );
+    expect(financeiroContatoTipoLabel('WHATSAPP'), 'WhatsApp');
+    expect(financeiroContatoTipoLabel('LIGACAO'), 'Ligação');
+  });
+
   test('financeiroMesOpcoes começa no próximo mês', () {
     final ops = financeiroMesOpcoes(
       agora: DateTime(2026, 9, 1),

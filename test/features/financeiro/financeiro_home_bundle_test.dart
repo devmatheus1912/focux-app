@@ -36,6 +36,32 @@ void main() {
     expect(bundle.resumoMesAtual.totalRecebido, 900.0);
     expect(bundle.planoFeatures?.plano, SubscriptionPlan.PRO);
     expect(bundle.planoFeatures?.financeiro, isTrue);
+    expect(bundle.hasMore, isFalse);
+    expect(bundle.page, 0);
+  });
+
+  test('FinanceiroHomeBundle parses pagination fields', () {
+    final bundle = FinanceiroHomeBundle.fromJson({
+      'dashboard': dashboardJson(),
+      'mensalidades': <dynamic>[],
+      'resumoMesAtual': <String, dynamic>{},
+      'page': 1,
+      'size': 20,
+      'hasMore': true,
+    });
+    expect(bundle.page, 1);
+    expect(bundle.hasMore, isTrue);
+  });
+
+  test('MensalidadesPage parses envelope', () {
+    final page = MensalidadesPage.fromJson({
+      'mensalidades': <dynamic>[],
+      'page': 0,
+      'size': 20,
+      'hasMore': false,
+    });
+    expect(page.mensalidades, isEmpty);
+    expect(page.hasMore, isFalse);
   });
 
   test('FinanceiroHomeBundle tolerates missing planoFeatures', () {

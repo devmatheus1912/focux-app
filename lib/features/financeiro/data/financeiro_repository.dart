@@ -213,10 +213,29 @@ class FinanceiroRepository {
     await _dio.patch('/api/financeiro/mensalidades/atualizar-atrasos');
   }
 
-  /// BFF first paint — dashboard + mensalidades + resumo + planoFeatures.
+  /// BFF first paint — dashboard + primeira página + resumo + planoFeatures.
   Future<FinanceiroHomeBundle> getHome() async {
     final r = await _dio.get('/api/financeiro/home');
     return FinanceiroHomeBundle.fromJson(r.data as Map<String, dynamic>);
+  }
+
+  Future<MensalidadesPage> listarPagina({
+    int page = 0,
+    int size = 20,
+    String? nomeAluno,
+    int? alunoId,
+  }) async {
+    final r = await _dio.get(
+      '/api/financeiro/mensalidades',
+      queryParameters: {
+        'page': page,
+        'size': size,
+        if (nomeAluno != null && nomeAluno.trim().isNotEmpty)
+          'nomeAluno': nomeAluno.trim(),
+        if (alunoId != null) 'alunoId': alunoId,
+      },
+    );
+    return MensalidadesPage.fromJson(r.data as Map<String, dynamic>);
   }
 
   Future<Mensalidade> criar(
@@ -261,14 +280,6 @@ class FinanceiroRepository {
     return Mensalidade.fromJson(r.data as Map<String, dynamic>);
   }
 
-  Future<List<Mensalidade>> listarPorNome(String nome) async {
-    final r = await _dio.get(
-      '/api/financeiro/mensalidades',
-      queryParameters: {'nomeAluno': nome},
-    );
-    return (r.data as List).map((e) => Mensalidade.fromJson(e)).toList();
-  }
-
   Future<ResumoMensal> resumoMensal(int ano, int mes) async {
     final r = await _dio.get(
       '/api/financeiro/mensalidades/resumo-mensal',
@@ -288,10 +299,38 @@ class FinanceiroRepository {
     return data?.toString() ?? 'Cobrança enviada!';
   }
 
-  Future<List<Mensalidade>> minhasMensalidades() async {
-    final r = await _dio.get('/api/financeiro/mensalidades/aluno/minhas');
-    return (r.data as List).map((e) => Mensalidade.fromJson(e)).toList();
+  Future<MensalidadesPage> minhasMensalidades({int page = 0, int size = 20}) async {
+    final r = await _dio.get(
+      '/api/financeiro/mensalidades/aluno/minhas',
+      queryParameters: {'page': page, 'size': size},
+    );
+    return MensalidadesPage.fromJson(r.data as Map<String, dynamic>);
   }
+}
+
+/// Página de `GET /api/financeiro/mensalidades` e `.../aluno/minhas`.
+class MensalidadesPage {
+  final List<Mensalidade> mensalidades;
+  final int page;
+  final int size;
+  final bool hasMore;
+
+  MensalidadesPage({
+    required this.mensalidades,
+    this.page = 0,
+    this.size = 20,
+    this.hasMore = false,
+  });
+
+  factory MensalidadesPage.fromJson(Map<String, dynamic> j) => MensalidadesPage(
+    mensalidades:
+        (j['mensalidades'] as List? ?? const [])
+            .map((e) => Mensalidade.fromJson(e as Map<String, dynamic>))
+            .toList(),
+    page: (j['page'] as num?)?.toInt() ?? 0,
+    size: (j['size'] as num?)?.toInt() ?? 20,
+    hasMore: j['hasMore'] == true,
+  );
 }
 
 /// BFF `GET /api/financeiro/home`.
@@ -300,6 +339,9 @@ class FinanceiroHomeBundle {
   final List<Mensalidade> mensalidades;
   final ResumoMensal resumoMesAtual;
   final PlanoFeatures? planoFeatures;
+  final int page;
+  final int size;
+  final bool hasMore;
   final DateTime fetchedAt;
 
   FinanceiroHomeBundle({
@@ -307,6 +349,9 @@ class FinanceiroHomeBundle {
     required this.mensalidades,
     required this.resumoMesAtual,
     this.planoFeatures,
+    this.page = 0,
+    this.size = 20,
+    this.hasMore = false,
     DateTime? fetchedAt,
   }) : fetchedAt = fetchedAt ?? DateTime.now();
 
@@ -327,6 +372,9 @@ class FinanceiroHomeBundle {
           planoRaw is Map
               ? PlanoFeatures.fromJson(Map<String, dynamic>.from(planoRaw))
               : null,
+      page: (j['page'] as num?)?.toInt() ?? 0,
+      size: (j['size'] as num?)?.toInt() ?? 20,
+      hasMore: j['hasMore'] == true,
     );
   }
 }
