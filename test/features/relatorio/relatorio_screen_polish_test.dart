@@ -15,6 +15,7 @@ void main() {
     expect(screen, contains('FxErrorState'));
     expect(screen, contains('SkeletonList'));
     expect(screen, contains('RefreshIndicator'));
+    expect(screen, contains('FeatureGate'));
     expect(screen, contains('getHome('));
     expect(screen, contains('relatorioAlunoViewed'));
     expect(screen, contains('Exportar relatório em PDF'));

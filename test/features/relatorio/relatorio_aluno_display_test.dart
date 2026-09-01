@@ -36,8 +36,6 @@ void main() {
     expect(relatorioAlunoAderenciaStatus(50), 'Regular');
     expect(relatorioAlunoAderenciaStatus(10), 'Baixa');
     expect(relatorioAlunoAderenciaBaixa(49.9), isTrue);
-    expect(relatorioAlunoMostraComparativo(personalizado: true), isFalse);
-    expect(relatorioAlunoMostraComparativo(personalizado: false), isTrue);
   });
 
   test('relatorioAlunoDeltaLabel e check-ins', () {

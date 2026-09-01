@@ -70,9 +70,6 @@ String relatorioAlunoAderenciaStatus(double taxa) {
 
 bool relatorioAlunoAderenciaBaixa(double taxa) => taxa < 50;
 
-bool relatorioAlunoMostraComparativo({required bool personalizado}) =>
-    !personalizado;
-
 String relatorioAlunoDeltaLabel(double delta) {
   if (delta > 0) return '+${delta.toStringAsFixed(1)}%';
   return '${delta.toStringAsFixed(1)}%';

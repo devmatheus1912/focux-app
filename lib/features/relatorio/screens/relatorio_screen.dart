@@ -8,6 +8,7 @@ import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/feature_gate.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
@@ -20,6 +21,7 @@ import '../../../core/widgets/skeleton_loader.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../alunos/utils/satellite_screen_utils.dart';
 import '../../alunos/widgets/aluno_outreach_message_sheet.dart';
+import '../../subscription/models/subscription_plan.dart';
 import '../data/relatorio_repository.dart';
 import '../utils/relatorio_aluno_display.dart';
 import '../utils/relatorio_global_display.dart';
@@ -176,12 +178,7 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
                   ),
         ),
         dados: dados,
-        comparativo:
-            relatorioAlunoMostraComparativo(
-                  personalizado: _rangeCustom != null,
-                )
-                ? _comparativo
-                : null,
+        comparativo: _comparativo,
       );
       AnalyticsService.instance.track(
         ProductEvents.relatorioAlunoPdfExported,
@@ -206,14 +203,14 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
             ? widget.alunoNome
             : '${widget.alunoNome} · $freshness';
     final dados = _dados;
-    final personalizado = _rangeCustom != null;
-    final mostraComparativo = relatorioAlunoMostraComparativo(
-      personalizado: personalizado,
-    );
 
     return fxScreenA11yScope(
       label: 'Relatório — ${widget.alunoNome}',
-      child: FxShellScaffold(
+      child: FeatureGate(
+        featureName: 'Relatórios',
+        requiredPlan: SubscriptionPlan.PRO,
+        capability: 'relatorios',
+        child: FxShellScaffold(
         useMesh: true,
         appBar: FxShellAppBar(
           title: 'Relatório',
@@ -334,7 +331,7 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
                         ),
                       ],
                     ),
-                    if (mostraComparativo && _comparativo != null) ...[
+                    if (_comparativo != null) ...[
                       const SizedBox(height: FxSettingsLayout.groupGap),
                       FxSettingsGroup(
                         header: 'Versus o recorte anterior',
@@ -419,6 +416,7 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
                 ],
               ),
             ),
+        ),
       ),
     );
   }

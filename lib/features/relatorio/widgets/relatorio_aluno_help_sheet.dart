@@ -10,7 +10,7 @@ Future<void> showRelatorioAlunoHelpSheet(BuildContext context) {
     tips: const [
       FxHelpTip(
         'Período',
-        '7 dias a 6 meses, ou um intervalo seu. O comparativo só aparece nos recortes prontos.',
+        '7 dias a 6 meses, ou um intervalo seu. O versus usa o mesmo tamanho, logo antes — inclusive no personalizado.',
         icon: 'calendar',
       ),
       FxHelpTip(
