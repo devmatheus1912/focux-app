@@ -13,13 +13,7 @@ void main() {
     );
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(screen, contains('FxShellScaffold'));
-    expect(
-      screen,
-      anyOf(
-        contains('FxContentWidthLimiter'),
-        isNot(contains('constrainWidth: false')),
-      ),
-    );
+    expect(screen, contains('FxContentWidthLimiter'));
     expect(
       screen,
       anyOf(
@@ -40,6 +34,12 @@ void main() {
     expect(screen, contains('FxHelpIconButton'));
     expect(screen, contains('chatInboxViewed'));
     expect(screen, contains('Carregar mais'));
+    expect(screen, contains('showFxInsetPickerSheet'));
+    expect(screen, contains('IndexedStack'));
+    expect(screen, contains('ShellHeaderIconButton'));
+    expect(screen, isNot(contains('TabBar')));
+    expect(screen, isNot(contains('TabBarView')));
+    expect(screen, isNot(contains('FloatingActionButton')));
     expect(screen, isNot(contains('showModalBottomSheet')));
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(16));
   });

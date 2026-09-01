@@ -1,8 +1,7 @@
 part of 'chat_inbox_screen.dart';
 
-class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
-    with SingleTickerProviderStateMixin {
-  late final TabController _tabCtrl;
+class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen> {
+  ChatInboxHubView _view = ChatInboxHubView.todas;
   final TextEditingController _searchCtrl = TextEditingController();
   bool _isSearching = false;
   List<ChatMsg>? _searchResults;
@@ -16,16 +15,27 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
   var _loadingMoreInbox = false;
 
   @override
-  void initState() {
-    super.initState();
-    _tabCtrl = TabController(length: 3, vsync: this);
-  }
-
-  @override
   void dispose() {
-    _tabCtrl.dispose();
     _searchCtrl.dispose();
     super.dispose();
+  }
+
+  Future<void> _abrirVista() async {
+    HapticFeedback.selectionClick();
+    final picked = await showFxInsetPickerSheet<ChatInboxHubView>(
+      context,
+      title: 'Ver',
+      selected: _view,
+      items: [
+        for (final v in ChatInboxHubView.values)
+          FxInsetPickerSheetItem(
+            value: v,
+            label: chatInboxHubViewLabel(v),
+          ),
+      ],
+    );
+    if (!mounted || picked == null || picked == _view) return;
+    setState(() => _view = picked);
   }
 
   Future<void> _performSearch(String query) async {
@@ -79,11 +89,8 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
 
     final confirm = await showFxConfirmSheet(
       context,
-      title: ids.length == 1 ? 'Excluir mensagens?' : 'Excluir conversas?',
-      message:
-          ids.length == 1
-              ? 'As mensagens desta conversa serao limpas da sua caixa.'
-              : 'As mensagens das ${ids.length} conversas selecionadas serao limpas da sua caixa.',
+      title: chatInboxDeleteConfirmTitle(ids.length),
+      message: chatInboxDeleteConfirmMessage(ids.length),
       icon: Icons.delete_outline_rounded,
       confirmLabel: 'Excluir',
       destructive: true,
@@ -101,7 +108,7 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
       if (!mounted) return;
       FeedbackHelper.showInfo(
         context,
-        ids.length == 1 ? 'Mensagens excluidas' : 'Conversas excluidas',
+        chatInboxDeleteDoneLabel(ids.length),
       );
     } catch (e) {
       if (!mounted) return;
@@ -117,22 +124,89 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
       ).conversationAction(alunoId, action);
       invalidateChatInboxCaches(ref);
       if (mounted) {
-        final labels = {
-          'pin': 'Fixada',
-          'unpin': 'Desafixada',
-          'archive': 'Arquivada',
-          'unarchive': 'Desarquivada',
-          'mute': 'Silenciada',
-          'unmute': 'Notificações ativadas',
-          'clear': 'Conversa limpa',
-        };
-        FeedbackHelper.showInfo(context, labels[action] ?? 'Ação aplicada');
+        FeedbackHelper.showInfo(context, chatInboxActionLabel(action));
       }
     } catch (e) {
       if (mounted) {
         FeedbackHelper.showError(context, friendlyError(e));
       }
     }
+  }
+
+  PreferredSizeWidget _buildAppBar({
+    required Color ink,
+    required Color mute,
+    required String? freshnessLabel,
+  }) {
+    if (_selectionActive) {
+      return FxShellAppBar(
+        title: chatInboxSelectionTitle(_selectedAlunoIds.length),
+        leading: IconButton(
+          onPressed: _clearSelection,
+          icon: Container(
+            width: 38,
+            height: 38,
+            decoration: ShellChrome.of(context).headerAction(radius: 12),
+            child: Icon(Icons.close_rounded, color: ink, size: 18),
+          ),
+        ),
+        actions: [
+          IconButton(
+            tooltip: 'Excluir mensagens',
+            icon: const Icon(Icons.delete_outline_rounded),
+            color:
+                _selectedAlunoIds.isEmpty
+                    ? mute.withValues(alpha: 0.45)
+                    : EagleTokens.bad,
+            onPressed:
+                _selectedAlunoIds.isEmpty
+                    ? null
+                    : _deleteSelectedConversations,
+          ),
+        ],
+      );
+    }
+    if (_isSearching) {
+      return FxShellAppBar(
+        title: 'Buscar',
+        onBack: _toggleSearch,
+      );
+    }
+    return FxShellAppBar(
+      title: 'Mensagens',
+      subtitle: chatInboxHubSubtitle(
+        view: _view,
+        freshness: freshnessLabel,
+      ),
+      onBack: () => safePopOrGo(context, '/dashboard/personal'),
+      actions: [
+        FxHelpIconButton(
+          tooltip: 'Como usar as mensagens',
+          onTap: () {
+            AnalyticsService.instance.track(
+              ProductEvents.chatInboxHelpOpened,
+            );
+            showChatInboxHelpSheet(context);
+          },
+        ),
+        const SizedBox(width: FxHelpChrome.gap),
+        ShellHeaderIconButton(
+          icon: 'search',
+          tooltip: 'Buscar conversas',
+          onTap: _toggleSearch,
+        ),
+        ShellHeaderIconButton(
+          icon: 'chat',
+          tooltip: 'Trocar visão',
+          onTap: _abrirVista,
+        ),
+        ShellHeaderIconButton(
+          icon: 'plus',
+          tooltip: 'Nova mensagem',
+          onTap: _showAlunoPicker,
+        ),
+      ],
+    );
   }
 
   @override
@@ -157,8 +231,6 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
       }
     });
     final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
-    final showFreshness =
-        !_isSearching && !_selectionActive && freshnessLabel != null;
 
     final inboxAsync = ref.watch(chatInboxProvider);
     if (inboxAsync.hasValue && !_viewTracked) {
@@ -187,178 +259,112 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
       label: 'Mensagens',
       child: FxShellScaffold(
         useMesh: true,
-        floatingActionButton:
-            _isSearching || _selectionActive
-                ? null
-                : FloatingActionButton(
-                  tooltip: 'Nova mensagem',
-                  onPressed: _showAlunoPicker,
-                  child: const Icon(Icons.edit_outlined),
-                ),
-        appBar: PreferredSize(
-          preferredSize: Size.fromHeight(
-            _isSearching || _selectionActive ? 56 : (showFreshness ? 112 : 104),
+        appBar: _buildAppBar(
+          ink: ink,
+          mute: mute,
+          freshnessLabel: freshnessLabel,
+        ),
+        body: _isSearching
+            ? _buildSearchBody(isDark, ink, mute)
+            : FxContentWidthLimiter(child: _buildHubBody(isDark, primary)),
+      ),
+    );
+  }
+
+  Widget _buildHubBody(bool isDark, Color primary) {
+    return IndexedStack(
+      index: _view.index,
+      children: [
+        _InboxTabPane(
+          async: ref.watch(chatInboxProvider).whenData(
+            (items) => [...items, ..._extraInbox],
           ),
+          isDark: isDark,
+          primary: primary,
+          view: ChatInboxHubView.todas,
+          selectionActive: _selectionActive,
+          selectedAlunoIds: _selectedAlunoIds,
+          showLoadMore: _inboxHasMore,
+          loadingMore: _loadingMoreInbox,
+          onLoadMore: _loadMoreInbox,
+          onRetry: () => invalidateChatInboxCaches(ref),
+          onRefresh: _refreshInbox,
+          onNovaConversa: _showAlunoPicker,
+          onConversationAction: _conversationAction,
+          onOpenThread: _openThread,
+          onToggleSelection: _toggleSelection,
+        ),
+        _InboxTabPane(
+          async: ref.watch(chatInboxUnreadProvider),
+          isDark: isDark,
+          primary: primary,
+          view: ChatInboxHubView.naoLidas,
+          selectionActive: _selectionActive,
+          selectedAlunoIds: _selectedAlunoIds,
+          onRetry: () => invalidateChatInboxCaches(ref),
+          onRefresh: _refreshInbox,
+          onNovaConversa: _showAlunoPicker,
+          onConversationAction: _conversationAction,
+          onOpenThread: _openThread,
+          onToggleSelection: _toggleSelection,
+        ),
+        _InboxTabPane(
+          async: ref.watch(chatInboxArchivedProvider),
+          isDark: isDark,
+          primary: primary,
+          view: ChatInboxHubView.arquivadas,
+          selectionActive: _selectionActive,
+          selectedAlunoIds: _selectedAlunoIds,
+          onRetry: () => invalidateChatInboxCaches(ref),
+          onRefresh: _refreshInbox,
+          onNovaConversa: _showAlunoPicker,
+          onConversationAction: _conversationAction,
+          onOpenThread: _openThread,
+          onToggleSelection: _toggleSelection,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSearchBody(bool isDark, Color ink, Color mute) {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(
+            FxSettingsLayout.pageInset,
+            8,
+            FxSettingsLayout.pageInset,
+            8,
+          ),
+          child: TextField(
+            controller: _searchCtrl,
+            autofocus: true,
+            style: TextStyle(color: ink, fontSize: 16),
+            decoration: InputDecoration(
+              hintText: 'Buscar em todas as conversas…',
+              hintStyle: TextStyle(color: mute),
+              prefixIcon: Icon(Icons.search_rounded, color: mute),
+              filled: true,
+              fillColor: ShellChrome.of(context).cardFill,
+              border: FxInputDeco.outlineBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide(color: ShellChrome.of(context).line),
+              ),
+            ),
+            onChanged: _performSearch,
+          ),
+        ),
+        Expanded(
           child:
-              _selectionActive || _isSearching
-                  ? AppBar(
-                    backgroundColor: Colors.transparent,
-                    elevation: 0,
-                    scrolledUnderElevation: 0,
-                    foregroundColor: ink,
-                    automaticallyImplyLeading: !_selectionActive,
-                    leading:
-                        _selectionActive
-                            ? IconButton(
-                              icon: Icon(Icons.close_rounded, color: ink),
-                              onPressed: _clearSelection,
-                            )
-                            : IconButton(
-                              onPressed:
-                                  () => safePopOrGo(
-                                    context,
-                                    '/dashboard/personal',
-                                  ),
-                              icon: Container(
-                                width: 38,
-                                height: 38,
-                                decoration: chrome.headerAction(radius: 12),
-                                child: Icon(
-                                  Icons.arrow_back_ios_new,
-                                  size: 16,
-                                  color: ink,
-                                ),
-                              ),
-                            ),
-                    title:
-                        _selectionActive
-                            ? Text(
-                              _selectedAlunoIds.isEmpty
-                                  ? 'Selecione mensagens'
-                                  : '${_selectedAlunoIds.length} selecionada(s)',
-                              style: TextStyle(
-                                color: ink,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            )
-                            : TextField(
-                              controller: _searchCtrl,
-                              autofocus: true,
-                              style: TextStyle(color: ink, fontSize: 16),
-                              decoration: InputDecoration(
-                                hintText: 'Buscar em todas as conversas...',
-                                hintStyle: TextStyle(color: mute),
-                                border: InputBorder.none,
-                              ),
-                              onChanged: _performSearch,
-                            ),
-                    actions: [
-                      if (_selectionActive)
-                        IconButton(
-                          tooltip: 'Excluir mensagens',
-                          icon: const Icon(Icons.delete_outline_rounded),
-                          color:
-                              _selectedAlunoIds.isEmpty
-                                  ? mute.withValues(alpha: 0.45)
-                                  : EagleTokens.bad,
-                          onPressed:
-                              _selectedAlunoIds.isEmpty
-                                  ? null
-                                  : _deleteSelectedConversations,
-                        )
-                      else
-                        IconButton(
-                          icon: Icon(Icons.close, color: ink),
-                          onPressed: _toggleSearch,
-                        ),
-                    ],
-                  )
-                  : Column(
-                    children: [
-                      FxShellAppBar(
-                        title: 'Mensagens',
-                        subtitle: freshnessLabel,
-                        onBack:
-                            () => safePopOrGo(context, '/dashboard/personal'),
-                        actions: [
-                          FxHelpIconButton(
-                            tooltip: 'Como usar as mensagens',
-                            onTap: () {
-                              AnalyticsService.instance.track(
-                                ProductEvents.chatInboxHelpOpened,
-                              );
-                              showChatInboxHelpSheet(context);
-                            },
-                          ),
-                          SizedBox(width: FxHelpChrome.gap),
-                          IconButton(
-                            icon: Icon(Icons.search_rounded, color: ink),
-                            onPressed: _toggleSearch,
-                          ),
-                        ],
-                      ),
-                      TabBar(
-                        controller: _tabCtrl,
-                        labelColor: primary,
-                        unselectedLabelColor: mute,
-                        indicatorColor: primary,
-                        indicatorSize: TabBarIndicatorSize.label,
-                        dividerColor: Colors.transparent,
-                        tabs: const [
-                          Tab(text: 'Todas'),
-                          Tab(text: 'Não lidas'),
-                          Tab(text: 'Arquivadas'),
-                        ],
-                      ),
-                    ],
+              _searchResults != null
+                  ? _buildSearchResults(isDark, ink, mute)
+                  : const FxEmptyState(
+                    icon: 'search',
+                    title: 'Buscar conversas',
+                    subtitle: 'Digite um termo para procurar nas mensagens.',
                   ),
         ),
-        body:
-            _isSearching && _searchResults != null
-                ? _buildSearchResults(isDark, ink, mute)
-                : _isSearching
-                ? Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.search, size: 48, color: mute),
-                      const SizedBox(height: 12),
-                      Text(
-                        'Digite para buscar...',
-                        style: TextStyle(color: mute),
-                      ),
-                    ],
-                  ),
-                )
-                : TabBarView(
-                  controller: _tabCtrl,
-                  children: [
-                    _buildInboxTab(
-                      ref.watch(chatInboxProvider).whenData(
-                        (items) => [...items, ..._extraInbox],
-                      ),
-                      isDark,
-                      primary,
-                      showLoadMore: _inboxHasMore,
-                      loadingMore: _loadingMoreInbox,
-                      onLoadMore: _loadMoreInbox,
-                    ),
-                    _buildInboxTab(
-                      ref.watch(chatInboxUnreadProvider),
-                      isDark,
-                      primary,
-                      emptyMsg: 'Nenhuma mensagem não lida',
-                    ),
-                    _buildInboxTab(
-                      ref.watch(chatInboxArchivedProvider),
-                      isDark,
-                      primary,
-                      emptyMsg: 'Nenhuma conversa arquivada',
-                      isArchived: true,
-                    ),
-                  ],
-                ),
-      ),
+      ],
     );
   }
 
@@ -404,6 +410,11 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
     );
   }
 
+  Future<void> _refreshInbox() async {
+    AnalyticsService.instance.track(ProductEvents.chatInboxRefreshed);
+    invalidateChatInboxCaches(ref);
+  }
+
   Future<void> _loadMoreInbox() async {
     if (_loadingMoreInbox || !_inboxHasMore) return;
     final home = ref.read(chatInboxHomeProvider).valueOrNull;
@@ -432,123 +443,5 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
       setState(() => _loadingMoreInbox = false);
       FeedbackHelper.showError(context, friendlyError(e));
     }
-  }
-
-  Widget _buildInboxTab(
-    AsyncValue<List<ChatInboxItem>> async,
-    bool isDark,
-    Color primary, {
-    String emptyMsg = 'Nenhuma conversa ainda',
-    bool isArchived = false,
-    bool showLoadMore = false,
-    bool loadingMore = false,
-    VoidCallback? onLoadMore,
-  }) {
-    return async.when(
-      loading:
-          () => const Padding(
-            padding: EdgeInsets.all(TokensStrip.s4),
-            child: SkeletonList(count: 6),
-          ),
-      error:
-          (e, _) => FxErrorState(
-            chromeOnDark: isDark,
-            primary: primary,
-            message: friendlyError(e),
-            onRetry: () => invalidateChatInboxCaches(ref),
-          ),
-      data: (items) {
-        if (items.isEmpty) {
-          return FxEmptyState(
-            icon: isArchived ? 'article' : 'chat',
-            title: emptyMsg,
-            subtitle:
-                isArchived
-                    ? 'Arraste conversas para a esquerda para arquivar.'
-                    : 'Escolha um aluno para começar uma conversa.',
-            action:
-                isArchived
-                    ? null
-                    : FxEmptyAction(
-                      label: 'Nova conversa',
-                      onTap: _showAlunoPicker,
-                    ),
-          );
-        }
-        return RefreshIndicator(
-          color: primary,
-          onRefresh: () async {
-            AnalyticsService.instance.track(ProductEvents.chatInboxRefreshed);
-            invalidateChatInboxCaches(ref);
-          },
-          child: FxSettingsGroupedList(
-            itemCount: items.length + (showLoadMore ? 1 : 0),
-            itemBuilder: (context, i) {
-              if (showLoadMore && i >= items.length) {
-                return FxSettingsTile(
-                  fxIcon: 'chat',
-                  label: loadingMore ? 'Carregando…' : 'Carregar mais',
-                  value: '',
-                  showDivider: false,
-                  onTap: loadingMore || onLoadMore == null
-                      ? () {}
-                      : onLoadMore,
-                );
-              }
-              return Dismissible(
-              key: Key('inbox-${items[i].alunoId}'),
-              direction: _selectionActive
-                  ? DismissDirection.none
-                  : DismissDirection.horizontal,
-              confirmDismiss: (direction) async {
-                if (direction == DismissDirection.endToStart) {
-                  await _conversationAction(
-                    items[i].alunoId,
-                    isArchived ? 'unarchive' : 'archive',
-                  );
-                  return false;
-                }
-                await _conversationAction(items[i].alunoId, 'pin');
-                return false;
-              },
-              background: Container(
-                alignment: Alignment.centerLeft,
-                padding: const EdgeInsets.only(left: 24),
-                color: primary.withValues(alpha: 0.12),
-                child: Icon(Icons.push_pin, color: primary),
-              ),
-              secondaryBackground: Container(
-                alignment: Alignment.centerRight,
-                padding: const EdgeInsets.only(right: 24),
-                color: EagleTokens.warn.withValues(alpha: 0.12),
-                child: Icon(
-                  isArchived ? Icons.unarchive : Icons.archive,
-                  color: EagleTokens.warn,
-                ),
-              ),
-              child: _InboxTile(
-                item: items[i],
-                isDark: isDark,
-                selected: _selectedAlunoIds.contains(items[i].alunoId),
-                selecting: _selectionActive,
-                showDivider: i < items.length - 1 || showLoadMore,
-                onTap: () {
-                  if (_selectionActive) {
-                    _toggleSelection(items[i].alunoId);
-                    return;
-                  }
-                  _openThread(
-                    items[i].alunoId,
-                    extra: items[i].alunoNome,
-                  );
-                },
-                onLongPress: () => _toggleSelection(items[i].alunoId),
-              ),
-            );
-            },
-          ),
-        );
-      },
-    );
   }
 }

@@ -245,3 +245,144 @@ class _InboxTile extends StatelessWidget {
     );
   }
 }
+
+class _InboxTabPane extends StatelessWidget {
+  const _InboxTabPane({
+    required this.async,
+    required this.isDark,
+    required this.primary,
+    required this.view,
+    required this.selectionActive,
+    required this.selectedAlunoIds,
+    required this.onRetry,
+    required this.onRefresh,
+    required this.onNovaConversa,
+    required this.onConversationAction,
+    required this.onOpenThread,
+    required this.onToggleSelection,
+    this.showLoadMore = false,
+    this.loadingMore = false,
+    this.onLoadMore,
+  });
+
+  final AsyncValue<List<ChatInboxItem>> async;
+  final bool isDark;
+  final Color primary;
+  final ChatInboxHubView view;
+  final bool selectionActive;
+  final Set<int> selectedAlunoIds;
+  final VoidCallback onRetry;
+  final Future<void> Function() onRefresh;
+  final VoidCallback onNovaConversa;
+  final Future<void> Function(int alunoId, String action) onConversationAction;
+  final void Function(int alunoId, {Object? extra}) onOpenThread;
+  final ValueChanged<int> onToggleSelection;
+  final bool showLoadMore;
+  final bool loadingMore;
+  final VoidCallback? onLoadMore;
+
+  @override
+  Widget build(BuildContext context) {
+    final isArchived = view == ChatInboxHubView.arquivadas;
+    return async.when(
+      loading:
+          () => const Padding(
+            padding: EdgeInsets.all(TokensStrip.s4),
+            child: SkeletonList(count: 6),
+          ),
+      error:
+          (e, _) => FxErrorState(
+            chromeOnDark: isDark,
+            primary: primary,
+            message: friendlyError(e),
+            onRetry: onRetry,
+          ),
+      data: (items) {
+        if (items.isEmpty) {
+          return FxEmptyState(
+            icon: isArchived ? 'article' : 'chat',
+            title: chatInboxEmptyTitle(view),
+            subtitle: chatInboxEmptySubtitle(view),
+            action:
+                isArchived
+                    ? null
+                    : FxEmptyAction(
+                      label: 'Nova conversa',
+                      onTap: onNovaConversa,
+                    ),
+          );
+        }
+        return RefreshIndicator(
+          color: primary,
+          onRefresh: onRefresh,
+          child: FxSettingsGroupedList(
+            itemCount: items.length + (showLoadMore ? 1 : 0),
+            itemBuilder: (context, i) {
+              if (showLoadMore && i >= items.length) {
+                return FxSettingsTile(
+                  fxIcon: 'chat',
+                  label: loadingMore ? 'Carregando…' : 'Carregar mais',
+                  value: '',
+                  showDivider: false,
+                  onTap: () {
+                    if (loadingMore) return;
+                    onLoadMore?.call();
+                  },
+                );
+              }
+              final item = items[i];
+              return Dismissible(
+                key: Key('inbox-${item.alunoId}'),
+                direction:
+                    selectionActive
+                        ? DismissDirection.none
+                        : DismissDirection.horizontal,
+                confirmDismiss: (direction) async {
+                  if (direction == DismissDirection.endToStart) {
+                    await onConversationAction(
+                      item.alunoId,
+                      isArchived ? 'unarchive' : 'archive',
+                    );
+                    return false;
+                  }
+                  await onConversationAction(item.alunoId, 'pin');
+                  return false;
+                },
+                background: Container(
+                  alignment: Alignment.centerLeft,
+                  padding: const EdgeInsets.only(left: 24),
+                  color: primary.withValues(alpha: 0.12),
+                  child: Icon(Icons.push_pin, color: primary),
+                ),
+                secondaryBackground: Container(
+                  alignment: Alignment.centerRight,
+                  padding: const EdgeInsets.only(right: 24),
+                  color: EagleTokens.warn.withValues(alpha: 0.12),
+                  child: Icon(
+                    isArchived ? Icons.unarchive : Icons.archive,
+                    color: EagleTokens.warn,
+                  ),
+                ),
+                child: _InboxTile(
+                  item: item,
+                  isDark: isDark,
+                  selected: selectedAlunoIds.contains(item.alunoId),
+                  selecting: selectionActive,
+                  showDivider: i < items.length - 1 || showLoadMore,
+                  onTap: () {
+                    if (selectionActive) {
+                      onToggleSelection(item.alunoId);
+                      return;
+                    }
+                    onOpenThread(item.alunoId, extra: item.alunoNome);
+                  },
+                  onLongPress: () => onToggleSelection(item.alunoId),
+                ),
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+}
