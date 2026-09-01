@@ -106,3 +106,21 @@ String leadFollowUpValue(String? proximoContato) {
     return raw;
   }
 }
+
+String leadListSubtitle(String? freshness) {
+  const base = 'Funil de prospects';
+  final stamp = freshness?.trim();
+  if (stamp == null || stamp.isEmpty) return base;
+  return '$base · $stamp';
+}
+
+String leadCardSubtitle({String? objetivo, String? origem}) {
+  final obj = objetivo?.trim();
+  if (obj != null && obj.isNotEmpty) return obj;
+  return leadOrigemLabel(origem);
+}
+
+String leadFreeLimitLabel(int count) {
+  if (count >= 5) return 'Limite de 5 leads atingido no Free.';
+  return '$count/5 leads no plano Free.';
+}

@@ -31,4 +31,20 @@ void main() {
     expect(leadFollowUpValue(null), 'Não definido');
     expect(leadFollowUpValue('  '), 'Não definido');
   });
+
+  test('lead list chrome helpers', () {
+    expect(leadListSubtitle(null), 'Funil de prospects');
+    expect(
+      leadListSubtitle('há 1 min'),
+      'Funil de prospects · há 1 min',
+    );
+    expect(
+      leadCardSubtitle(objetivo: 'Emagrecer', origem: 'Instagram'),
+      'Emagrecer',
+    );
+    expect(leadCardSubtitle(objetivo: '  ', origem: 'Google'), 'Google');
+    expect(leadCardSubtitle(origem: null), 'Não informada');
+    expect(leadFreeLimitLabel(5), 'Limite de 5 leads atingido no Free.');
+    expect(leadFreeLimitLabel(4), '4/5 leads no plano Free.');
+  });
 }

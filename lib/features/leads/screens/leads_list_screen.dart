@@ -1,23 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/router/safe_navigation.dart';
-import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
+import '../../../core/theme/fx_settings_layout.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
-import '../../../core/widgets/fx_shell_scaffold.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../data/lead_repository.dart';
-import '../providers/leads_provider.dart';
-import '../../planos/providers/plano_features_provider.dart';
-import '../../subscription/models/subscription_plan.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
-import 'package:focux_app/core/widgets/fx_empty_state.dart';
-import 'package:focux_app/core/widgets/fx_error_state.dart';
-import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
-import 'package:focux_app/core/widgets/skeleton_loader.dart';
+import '../../../core/widgets/fx_content_width_limiter.dart';
+import '../../../core/widgets/fx_empty_state.dart';
+import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/skeleton_loader.dart';
+import '../../planos/providers/plano_features_provider.dart';
+import '../../subscription/models/subscription_plan.dart';
+import '../data/lead_repository.dart';
+import '../providers/leads_provider.dart';
+import '../utils/lead_display.dart';
 
 class LeadsListScreen extends ConsumerStatefulWidget {
   const LeadsListScreen({super.key});
@@ -30,7 +34,6 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
   List<Lead> _leads = [];
   bool _loading = true;
   String? _erro;
-  String? _filtroStatus;
   DateTime? _fetchedAt;
 
   @override
@@ -51,14 +54,9 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
       if (planoFromHome != null) {
         ref.read(planoFeaturesProvider.notifier).seedFromHome(planoFromHome);
       }
-      var leads = home.leads;
-      if (_filtroStatus != null && _filtroStatus!.isNotEmpty) {
-        final status = _filtroStatus!.toUpperCase();
-        leads = leads.where((l) => l.status == status).toList();
-      }
       if (mounted) {
         setState(() {
-          _leads = leads;
+          _leads = home.leads;
           _loading = false;
           _fetchedAt = DateTime.now();
         });
@@ -79,26 +77,27 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
       props: {'feature': 'leads', 'action': 'novo'},
     );
     await context.push('/leads/novo');
-    _load(force: true);
+    if (mounted) _load(force: true);
+  }
+
+  Future<void> _abrirKanban() async {
+    await context.push('/leads/kanban');
+    if (mounted) _load(force: true);
+  }
+
+  Future<void> _abrirLead(Lead lead) async {
+    AnalyticsService.instance.track(
+      ProductEvents.leadCreatedOrOpened,
+      props: {'feature': 'leads', 'action': 'abrir', 'lead_id': lead.id},
+    );
+    await context.push('/leads/${lead.id}', extra: lead);
+    if (mounted) _load(force: true);
   }
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
-    final primaryDeep = BrandPalette.deep(primary);
-    final leadLeads = _leads.where((lead) => lead.status == 'LEAD').toList();
-    final testeLeads = _leads.where((lead) => lead.status == 'TESTE').toList();
-    final ativoLeads = _leads.where((lead) => lead.status == 'ATIVO').toList();
-    Future<void> openLead(Lead lead) async {
-      AnalyticsService.instance.track(
-        ProductEvents.leadCreatedOrOpened,
-        props: {'feature': 'leads', 'action': 'abrir', 'lead_id': lead.id},
-      );
-      await context.push('/leads/${lead.id}', extra: lead);
-      _load(force: true);
-    }
-
     final plano = ref.watch(planoFeaturesProvider).valueOrNull;
     final showLeadsLimitBanner =
         plano?.plano == SubscriptionPlan.FREE && _leads.length >= 4;
@@ -110,60 +109,20 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
         useMesh: true,
         appBar: FxShellAppBar(
           title: 'Funil de Leads',
-          subtitle: freshnessLabel,
+          subtitle: leadListSubtitle(freshnessLabel),
           onBack: () => safePopOrGo(context, '/dashboard/personal'),
           actions: [
-            IconButton(
-              icon: Icon(
-                Icons.view_column,
-                color:
-                    isDark
-                        ? EagleTokens.darkInkMute
-                        : TokensStrip.textSecondary,
-              ),
+            ShellHeaderIconButton(
+              icon: 'route',
               tooltip: 'Visão Kanban',
-              onPressed: () async {
-                await context.push('/leads/kanban');
-                _load(force: true);
-              },
+              onTap: _abrirKanban,
             ),
-            IconButton(
-              icon: Icon(
-                Icons.refresh,
-                color:
-                    isDark
-                        ? EagleTokens.darkInkMute
-                        : TokensStrip.textSecondary,
-              ),
-              onPressed: () => _load(force: true),
+            ShellHeaderIconButton(
+              icon: 'plus',
+              tooltip: 'Novo lead',
+              onTap: _novoLead,
             ),
           ],
-        ),
-        floatingActionButton: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(colors: [primary, primaryDeep]),
-            borderRadius: BorderRadius.circular(TokensStrip.rXl),
-            boxShadow: [
-              BoxShadow(
-                color: primary.withValues(alpha: 0.4),
-                blurRadius: 16,
-                offset: const Offset(0, 6),
-              ),
-            ],
-          ),
-          child: FloatingActionButton.extended(
-            onPressed: _novoLead,
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            icon: const Icon(Icons.person_add, color: Colors.white),
-            label: const Text(
-              'Novo Lead',
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
         ),
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -174,14 +133,12 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
                 child: InkWell(
                   onTap: () => context.push('/assinatura', extra: 'Pro'),
                   child: Padding(
-                    padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(FxSettingsLayout.pageInset),
                     child: Row(
                       children: [
                         Expanded(
                           child: Text(
-                            _leads.length >= 5
-                                ? 'Limite de 5 leads atingido no Free.'
-                                : '${_leads.length}/5 leads no plano Free.',
+                            leadFreeLimitLabel(_leads.length),
                             style: const TextStyle(
                               fontWeight: FontWeight.w700,
                               fontSize: 13,
@@ -200,68 +157,98 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
                   ),
                 ),
               ),
-            Expanded(
-              child:
-                  _loading
-                      ? const SkeletonList(count: 6)
-                      : _erro != null
-                      ? FxErrorState(
-                        chromeOnDark: isDark,
-                        primary: primary,
-                        message: _erro!,
-                        onRetry: () => _load(force: true),
-                      )
-                      : _leads.isEmpty
-                      ? FxEmptyState(
-                        icon: 'users',
-                        title: 'Nenhum lead cadastrado',
-                        subtitle:
-                            'Cadastre o primeiro lead para começar a acompanhar o funil.',
-                        action: FxEmptyAction(
-                          label: 'Novo lead',
-                          onTap: _novoLead,
-                        ),
-                      )
-                      : SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        padding: const EdgeInsets.fromLTRB(
-                          TokensStrip.s4,
-                          16,
-                          16,
-                          96,
-                        ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _KanbanColumn(
-                              title: 'LEAD',
-                              color: primary,
-                              leads: leadLeads,
-                              isDark: isDark,
-                              onTap: openLead,
-                            ),
-                            const SizedBox(width: 12),
-                            _KanbanColumn(
-                              title: 'TESTE',
-                              color: EagleTokens.warn,
-                              leads: testeLeads,
-                              isDark: isDark,
-                              onTap: openLead,
-                            ),
-                            const SizedBox(width: 12),
-                            _KanbanColumn(
-                              title: 'ATIVO',
-                              color: EagleTokens.good,
-                              leads: ativoLeads,
-                              isDark: isDark,
-                              onTap: openLead,
-                            ),
-                          ],
-                        ),
-                      ),
-            ),
+            Expanded(child: _buildBody(isDark: isDark, primary: primary)),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildBody({required bool isDark, required Color primary}) {
+    if (_loading) {
+      return const Padding(
+        padding: EdgeInsets.all(FxSettingsLayout.pageInset),
+        child: SkeletonList(count: 6),
+      );
+    }
+    if (_erro != null) {
+      return FxErrorState(
+        chromeOnDark: isDark,
+        primary: primary,
+        message: _erro!,
+        onRetry: () => _load(force: true),
+      );
+    }
+    if (_leads.isEmpty) {
+      return FxContentWidthLimiter(
+        child: RefreshIndicator(
+          onRefresh: () => _load(force: true),
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: [
+              FxEmptyState(
+                icon: 'users',
+                title: 'Nenhum lead cadastrado',
+                subtitle:
+                    'Cadastre o primeiro lead para começar a acompanhar o funil.',
+                action: FxEmptyAction(label: 'Novo lead', onTap: _novoLead),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    final leadLeads = _leads.where((lead) => lead.status == 'LEAD').toList();
+    final testeLeads = _leads.where((lead) => lead.status == 'TESTE').toList();
+    final ativoLeads = _leads.where((lead) => lead.status == 'ATIVO').toList();
+
+    return RefreshIndicator(
+      onRefresh: () => _load(force: true),
+      child: ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.fromLTRB(
+          FxSettingsLayout.pageInset,
+          8,
+          FxSettingsLayout.pageInset,
+          32,
+        ),
+        children: [
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _KanbanColumn(
+                  title: leadStatusLabel('LEAD'),
+                  color: primary,
+                  leads: leadLeads,
+                  isDark: isDark,
+                  onTap: _abrirLead,
+                  onAdd: _novoLead,
+                ),
+                const SizedBox(width: 12),
+                _KanbanColumn(
+                  title: leadStatusLabel('TESTE'),
+                  color: EagleTokens.warn,
+                  leads: testeLeads,
+                  isDark: isDark,
+                  onTap: _abrirLead,
+                  onAdd: _novoLead,
+                ),
+                const SizedBox(width: 12),
+                _KanbanColumn(
+                  title: leadStatusLabel('ATIVO'),
+                  color: EagleTokens.good,
+                  leads: ativoLeads,
+                  isDark: isDark,
+                  onTap: _abrirLead,
+                  onAdd: _novoLead,
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -273,6 +260,7 @@ class _KanbanColumn extends StatelessWidget {
   final List<Lead> leads;
   final bool isDark;
   final ValueChanged<Lead> onTap;
+  final VoidCallback onAdd;
 
   const _KanbanColumn({
     required this.title,
@@ -280,6 +268,7 @@ class _KanbanColumn extends StatelessWidget {
     required this.leads,
     required this.isDark,
     required this.onTap,
+    required this.onAdd,
   });
 
   @override
@@ -336,28 +325,34 @@ class _KanbanColumn extends StatelessWidget {
               ],
             ),
           ),
-          ...leads.map(
-            (lead) => _KanbanCard(
+          for (final lead in leads)
+            _KanbanCard(
               lead: lead,
               color: color,
               isDark: isDark,
               onTap: () => onTap(lead),
             ),
-          ),
-          Container(
-            margin: const EdgeInsets.only(top: 6),
-            height: 40,
-            decoration: BoxDecoration(
+          Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: onAdd,
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: border, width: 1.5),
-            ),
-            child: Center(
-              child: Text(
-                '+ Adicionar',
-                style: TextStyle(
-                  fontSize: 13,
-                  color: mute,
-                  fontWeight: FontWeight.w500,
+              child: Container(
+                margin: const EdgeInsets.only(top: 6),
+                height: 40,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: border, width: 1.5),
+                ),
+                child: Center(
+                  child: Text(
+                    '+ Adicionar',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: mute,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -385,6 +380,7 @@ class _KanbanCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final telefone = lead.telefone?.trim();
 
     return fxListTileCardShell(
       context: context,
@@ -403,7 +399,7 @@ class _KanbanCard extends StatelessWidget {
           ),
         ),
         subtitle: Text(
-          lead.objetivo ?? lead.origem ?? '',
+          leadCardSubtitle(objetivo: lead.objetivo, origem: lead.origem),
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
           style: FocuxHubTypography.bodyMuted(color: mute),
@@ -412,7 +408,7 @@ class _KanbanCard extends StatelessWidget {
           spacing: 6,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
-            if (lead.telefone != null && lead.telefone!.isNotEmpty)
+            if (telefone != null && telefone.isNotEmpty)
               Icon(
                 Icons.chat_bubble_outline,
                 size: 16,
