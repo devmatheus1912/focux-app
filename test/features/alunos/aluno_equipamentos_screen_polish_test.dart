@@ -10,6 +10,16 @@ void main() {
     expect(screen, contains('FxShellScaffold'));
     expect(screen, anyOf(contains('FxContentWidthLimiter'), isNot(contains('constrainWidth: false'))));
     expect(screen, anyOf(contains('friendlyError'), contains('DashboardErrorState'), contains('FxEmptyState'), contains('_erro'), contains('_TrainingEmptyState'), contains('ref.invalidate')));
-    expect(screen, anyOf(contains('FxLoading'), contains('SkeletonLoader'), contains('SkeletonList'), contains('DashboardShimmer'), contains('Shimmer'), contains('IaCopilotInsightsLoading'), contains('_loading')));
+    expect(screen, contains('SkeletonList'));
+    expect(screen, contains('FxSettingsGroup'));
+    expect(screen, contains('FxSettingsTile'));
+    expect(screen, contains('FxContentWidthLimiter'));
+    expect(screen, contains('RefreshIndicator'));
+    expect(screen, contains('ShellHeaderIconButton'));
+    expect(screen, contains("icon: 'circle-check'"));
+    expect(screen, isNot(contains('FilterChip')));
+    expect(screen, isNot(contains('OutlinedButton')));
+    expect(screen, isNot(contains('Icons.check_rounded')));
+    expect(screen, isNot(contains('FloatingActionButton')));
   });
 }
