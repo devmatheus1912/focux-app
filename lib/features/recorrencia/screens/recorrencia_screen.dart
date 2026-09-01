@@ -3,21 +3,29 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../../core/theme/design_tokens.dart';
-import '../../../core/theme/tokens_strip.dart';
-import '../../../core/widgets/fx_empty_state.dart';
-import '../../../core/widgets/fx_form_sheet.dart';
-import '../../../core/widgets/fx_input_deco.dart';
+
+import '../../../core/theme/fx_settings_layout.dart';
+import '../../../core/theme/shell_chrome.dart';
+import '../../../core/utils/clipboard_sensitive.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_content_width_limiter.dart';
+import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_form_sheet.dart';
+import '../../../core/widgets/fx_inset_picker_row.dart';
+import '../../../core/widgets/fx_inset_picker_sheet.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
+import '../../../core/widgets/fx_settings_group.dart';
+import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
-import '../../auth/providers/auth_provider.dart';
 import '../../alunos/data/aluno_repository.dart';
+import '../../alunos/widgets/aluno_inset_form_field.dart';
+import '../../auth/providers/auth_provider.dart';
 import '../data/recorrencia_repository.dart';
-import '../../../core/widgets/fx_screen_a11y.dart';
+import '../utils/recorrencia_display.dart';
 
 class RecorrenciaScreen extends ConsumerStatefulWidget {
   const RecorrenciaScreen({super.key});
@@ -64,72 +72,113 @@ class _RecorrenciaScreenState extends ConsumerState<RecorrenciaScreen> {
   }
 
   Future<void> _criar() async {
+    HapticFeedback.selectionClick();
     final alunos = await AlunoRepository(ref.read(apiClientProvider)).listar();
     if (alunos.isEmpty) {
       if (!mounted) return;
       FeedbackHelper.showWarn(context, 'Cadastre um aluno primeiro.');
       return;
     }
-    int? alunoId = alunos.first.id;
+    var alunoId = alunos.first.id;
+    var alunoNome = alunos.first.nome;
     final valorCtrl = TextEditingController(text: '199');
-
-    if (!mounted) return;
-    final ok = await showFxFormSheet(
-      context,
-      title: 'Nova recorrência',
-      icon: Icons.repeat_rounded,
-      confirmLabel: 'Criar',
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          DropdownButtonFormField<int>(
-            initialValue: alunoId,
-            items:
-                alunos
-                    .map(
-                      (a) => DropdownMenuItem(
-                        value: a.id,
-                        child: Text(a.nome),
-                      ),
-                    )
-                    .toList(),
-            onChanged: (v) => alunoId = v,
-            decoration: FxInputDeco.build(context, 'Aluno'),
-          ),
-          TextField(
-            controller: valorCtrl,
-            keyboardType: TextInputType.number,
-            decoration: FxInputDeco.build(context, 'Valor mensal (R\$)'),
-          ),
-        ],
-      ),
-    );
-    if (ok != true || alunoId == null) return;
+    var created = false;
 
     try {
+      if (!mounted) return;
+      final ok = await showFxFormSheet(
+        context,
+        title: 'Nova recorrência',
+        icon: Icons.repeat_rounded,
+        confirmLabel: 'Criar',
+        child: StatefulBuilder(
+          builder:
+              (ctx, setDialogState) => Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  FxInsetPickerRow(
+                    icon: Icons.person_outline,
+                    label: 'Aluno',
+                    value: recorrenciaAlunoLabel(alunoNome),
+                    onTap: () async {
+                      final picked = await showFxInsetPickerSheet<int>(
+                        ctx,
+                        title: 'Aluno',
+                        selected: alunoId,
+                        items: [
+                          for (final a in alunos)
+                            FxInsetPickerSheetItem(
+                              value: a.id,
+                              label: recorrenciaAlunoLabel(a.nome),
+                            ),
+                        ],
+                      );
+                      if (picked == null) return;
+                      Aluno? match;
+                      for (final a in alunos) {
+                        if (a.id == picked) {
+                          match = a;
+                          break;
+                        }
+                      }
+                      final aluno = match;
+                      if (aluno == null) return;
+                      setDialogState(() {
+                        alunoId = aluno.id;
+                        alunoNome = aluno.nome;
+                      });
+                    },
+                  ),
+                  AlunoInsetFormField(
+                    controller: valorCtrl,
+                    label: 'Valor mensal (R\$)',
+                    icon: Icons.payments_outlined,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    showDivider: false,
+                  ),
+                ],
+              ),
+        ),
+      );
+      if (ok != true) return;
+
       final r = await RecorrenciaRepository(ref.read(apiClientProvider)).criar(
-        alunoId: alunoId!,
+        alunoId: alunoId,
         valor: double.tryParse(valorCtrl.text.replaceAll(',', '.')) ?? 199,
       );
-      if (r.initPoint != null && r.initPoint!.isNotEmpty) {
-        await Clipboard.setData(ClipboardData(text: r.initPoint!));
+      final link = r.initPoint?.trim();
+      if (link != null && link.isNotEmpty) {
+        await copySensitiveToClipboard(link);
         if (!mounted) return;
         FeedbackHelper.showSuccess(
           context,
           'Link de assinatura copiado — envie ao aluno.',
         );
       }
-      _load();
+      created = true;
     } catch (e) {
       if (!mounted) return;
       FeedbackHelper.showError(context, friendlyError(e));
+    } finally {
+      valorCtrl.dispose();
+    }
+    if (created) await _load();
+  }
+
+  Future<void> _abrirCheckout(String initPoint) async {
+    final uri = Uri.tryParse(initPoint);
+    if (uri == null) return;
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
     return fxScreenA11yScope(
       label: 'Recorrência MP',
@@ -137,81 +186,86 @@ class _RecorrenciaScreenState extends ConsumerState<RecorrenciaScreen> {
         useMesh: true,
         appBar: FxShellAppBar(
           title: 'Recorrência MP',
-          subtitle: freshnessLabel ?? 'Assinaturas Mercado Pago',
+          subtitle: recorrenciaHubSubtitle(freshnessLabel),
           onBack: () => context.pop(),
-        ),
-        floatingActionButton: FloatingActionButton.extended(
-          onPressed: _criar,
-          icon: const Icon(Icons.add),
-          label: const Text('Nova'),
+          actions: [
+            ShellHeaderIconButton(
+              icon: 'plus',
+              tooltip: 'Nova recorrência',
+              onTap: _criar,
+            ),
+          ],
         ),
         body:
             _loading
-                ? const SkeletonList(count: 5)
+                ? const Padding(
+                  padding: EdgeInsets.all(FxSettingsLayout.pageInset),
+                  child: SkeletonList(count: 5),
+                )
                 : _erro != null
                 ? FxErrorState(
-                  chromeOnDark: isDark,
+                  chromeOnDark: chrome.isDark,
                   primary: primary,
                   message: _erro!,
                   onRetry: _load,
                 )
-                : RefreshIndicator(
-                  onRefresh: _load,
-                  child:
-                      _items.isEmpty
-                          ? ListView(
-                            children: const [
-                              SizedBox(height: 48),
-                              FxEmptyState(
-                                icon: 'coin',
-                                title: 'Nenhuma assinatura ainda',
-                                subtitle:
-                                    'Crie a primeira recorrência para cobrar seus alunos via Mercado Pago.',
-                              ),
-                            ],
-                          )
-                          : ListView.separated(
-                            padding: const EdgeInsets.all(TokensStrip.s4),
-                            itemCount: _items.length,
-                            separatorBuilder:
-                                (_, __) => const SizedBox(height: 2),
-                            itemBuilder: (_, i) {
-                              final item = _items[i];
-                              final pendente = item.status == 'PENDENTE';
-                              return FxSatelliteListTile(
-                                title:
-                                    item.alunoNome ?? 'Aluno #${item.alunoId}',
-                                accent: pendente ? EagleTokens.warn : null,
-                                subtitle: Text(
-                                  'R\$ ${item.valor.toStringAsFixed(0)} · ${item.status}'
-                                  '${item.proximaCobranca != null ? ' · Próx: ${item.proximaCobranca}' : ''}',
-                                ),
-                                trailing:
-                                    item.initPoint != null && pendente
-                                        ? IconButton(
-                                          icon: Icon(
-                                            Icons.link_rounded,
-                                            color: primary,
-                                          ),
-                                          onPressed: () async {
-                                            final uri = Uri.parse(
-                                              item.initPoint!,
-                                            );
-                                            if (await canLaunchUrl(uri)) {
-                                              await launchUrl(
-                                                uri,
-                                                mode:
-                                                    LaunchMode
-                                                        .externalApplication,
-                                              );
-                                            }
-                                          },
-                                        )
-                                        : null,
-                              );
-                            },
-                          ),
-                ),
+                : FxContentWidthLimiter(child: _buildBody()),
+      ),
+    );
+  }
+
+  Widget _buildBody() {
+    return RefreshIndicator(
+      onRefresh: _load,
+      child: ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.fromLTRB(
+          FxSettingsLayout.pageInset,
+          8,
+          FxSettingsLayout.pageInset,
+          32,
+        ),
+        children: [
+          if (_items.isEmpty)
+            FxEmptyState(
+              icon: 'coin',
+              title: 'Nenhuma assinatura ainda',
+              subtitle:
+                  'Crie a primeira recorrência para cobrar seus alunos via Mercado Pago.',
+              action: FxEmptyAction(label: 'Nova recorrência', onTap: _criar),
+            )
+          else
+            FxSettingsGroup(
+              header: 'Assinaturas',
+              caption:
+                  'Toque no pendente para abrir o checkout. O link some da área de transferência em 1 min.',
+              children: [
+                for (var i = 0; i < _items.length; i++)
+                  FxSettingsTile(
+                    fxIcon: recorrenciaFxIcon(_items[i].status),
+                    label: recorrenciaAlunoLabel(_items[i].alunoNome),
+                    subtitle: recorrenciaSubtitle(
+                      status: _items[i].status,
+                      proximaCobranca: _items[i].proximaCobranca,
+                    ),
+                    value: recorrenciaValorLabel(_items[i].valor),
+                    numeric: true,
+                    danger: recorrenciaDanger(_items[i].status),
+                    highlight: recorrenciaPendente(_items[i].status),
+                    showDivider: i != _items.length - 1,
+                    onTap: () {
+                      if (!recorrenciaTemLinkCheckout(
+                        _items[i].status,
+                        _items[i].initPoint,
+                      )) {
+                        return;
+                      }
+                      _abrirCheckout(_items[i].initPoint!);
+                    },
+                  ),
+              ],
+            ),
+        ],
       ),
     );
   }
