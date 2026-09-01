@@ -1,20 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../../core/theme/design_tokens.dart';
-import '../../../core/theme/tokens_strip.dart';
+
+import '../../../core/theme/fx_settings_layout.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
-import '../../../core/widgets/fx_home_sheet.dart';
-import '../../../core/widgets/fx_input_deco.dart';
+import '../../../core/widgets/fx_form_sheet.dart';
+import '../../../core/widgets/fx_inset_picker_row.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
+import '../../../core/widgets/fx_settings_group.dart';
+import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
+import '../../alunos/widgets/aluno_inset_form_field.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../data/grupo_aula_repository.dart';
-import '../../../core/widgets/fx_screen_a11y.dart';
+import '../utils/grupo_aula_display.dart';
 
 class GrupoAulasPersonalScreen extends ConsumerStatefulWidget {
   const GrupoAulasPersonalScreen({super.key});
@@ -30,10 +37,6 @@ class _GrupoAulasPersonalScreenState
   bool _loading = true;
   String? _erro;
   DateTime? _fetchedAt;
-
-  String _fmt(DateTime d) =>
-      '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')} '
-      '${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}';
 
   @override
   void initState() {
@@ -68,44 +71,164 @@ class _GrupoAulasPersonalScreenState
     }
   }
 
-  Future<void> _criar() async {
-    final result = await showFxHomeSheet<_NovaAulaResult>(
-      context,
-      builder: (_) => const _NovaAulaSheet(),
+  Future<DateTime?> _pickDateTime(
+    BuildContext context, {
+    required DateTime initial,
+    required DateTime firstDate,
+    required DateTime lastDate,
+  }) async {
+    final date = await showDatePicker(
+      context: context,
+      initialDate: initial,
+      firstDate: firstDate,
+      lastDate: lastDate,
     );
-    if (result == null) return;
+    if (date == null || !context.mounted) return null;
+    final time = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.fromDateTime(initial),
+    );
+    if (time == null) return null;
+    return DateTime(date.year, date.month, date.day, time.hour, time.minute);
+  }
 
-    if (!result.fim.isAfter(result.inicio)) {
-      if (mounted) {
-        FeedbackHelper.showWarn(
-          context,
-          'Horário de fim deve ser depois do início.',
-        );
-      }
-      return;
-    }
+  Future<void> _criar() async {
+    HapticFeedback.selectionClick();
+    final agora = DateTime.now();
+    var inicio = DateTime(agora.year, agora.month, agora.day + 1, 7, 0);
+    var fim = inicio.add(const Duration(hours: 1));
+    final tituloCtrl = TextEditingController();
+    final descricaoCtrl = TextEditingController();
+    final localCtrl = TextEditingController();
+    final capacidadeCtrl = TextEditingController(text: '20');
+    var created = false;
 
     try {
+      if (!mounted) return;
+      final ok = await showFxFormSheet(
+        context,
+        title: 'Nova aula em grupo',
+        subtitle: 'Defina horário, capacidade e local.',
+        icon: Icons.groups_outlined,
+        confirmLabel: 'Criar aula',
+        child: StatefulBuilder(
+          builder:
+              (ctx, setDialogState) => Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  AlunoInsetFormField(
+                    controller: tituloCtrl,
+                    label: 'Título',
+                    icon: Icons.title_outlined,
+                    hint: 'Ex: Funcional ao ar livre',
+                  ),
+                  AlunoInsetFormField(
+                    controller: descricaoCtrl,
+                    label: 'Descrição (opcional)',
+                    icon: Icons.notes_outlined,
+                    maxLines: 2,
+                  ),
+                  FxInsetPickerRow(
+                    icon: Icons.event_outlined,
+                    label: 'Início',
+                    value: grupoAulaWhenLabel(inicio),
+                    onTap: () async {
+                      final picked = await _pickDateTime(
+                        ctx,
+                        initial: inicio,
+                        firstDate: DateTime.now().subtract(
+                          const Duration(days: 1),
+                        ),
+                        lastDate: DateTime.now().add(const Duration(days: 365)),
+                      );
+                      if (picked == null) return;
+                      setDialogState(() {
+                        inicio = picked;
+                        if (!fim.isAfter(inicio)) {
+                          fim = inicio.add(const Duration(hours: 1));
+                        }
+                      });
+                    },
+                  ),
+                  FxInsetPickerRow(
+                    icon: Icons.event_available_outlined,
+                    label: 'Fim',
+                    value: grupoAulaWhenLabel(fim),
+                    onTap: () async {
+                      final picked = await _pickDateTime(
+                        ctx,
+                        initial: fim,
+                        firstDate: inicio,
+                        lastDate: inicio.add(const Duration(days: 1)),
+                      );
+                      if (picked == null) return;
+                      setDialogState(() => fim = picked);
+                    },
+                  ),
+                  AlunoInsetFormField(
+                    controller: capacidadeCtrl,
+                    label: 'Capacidade',
+                    icon: Icons.groups_outlined,
+                    keyboardType: TextInputType.number,
+                  ),
+                  AlunoInsetFormField(
+                    controller: localCtrl,
+                    label: 'Local (opcional)',
+                    icon: Icons.place_outlined,
+                    hint: 'Studio, Praia, Online…',
+                    showDivider: false,
+                  ),
+                ],
+              ),
+        ),
+      );
+      if (ok != true) return;
+      if (tituloCtrl.text.trim().isEmpty) {
+        if (mounted) {
+          FeedbackHelper.showWarn(context, 'Título é obrigatório.');
+        }
+        return;
+      }
+      if (!fim.isAfter(inicio)) {
+        if (mounted) {
+          FeedbackHelper.showWarn(
+            context,
+            'Horário de fim deve ser depois do início.',
+          );
+        }
+        return;
+      }
       await GrupoAulaRepository(ref.read(apiClientProvider)).criar(
-        titulo: result.titulo,
-        descricao: result.descricao,
-        inicio: result.inicio,
-        fim: result.fim,
-        capacidadeMax: result.capacidade,
-        localAula: result.local,
+        titulo: tituloCtrl.text.trim(),
+        descricao:
+            descricaoCtrl.text.trim().isEmpty
+                ? null
+                : descricaoCtrl.text.trim(),
+        inicio: inicio,
+        fim: fim,
+        capacidadeMax: int.tryParse(capacidadeCtrl.text.trim()) ?? 20,
+        localAula:
+            localCtrl.text.trim().isEmpty ? null : localCtrl.text.trim(),
       );
       if (mounted) {
         FeedbackHelper.showSuccess(context, 'Aula criada!');
       }
-      _load();
+      created = true;
     } catch (e) {
       if (mounted) FeedbackHelper.showError(context, friendlyError(e));
+    } finally {
+      tituloCtrl.dispose();
+      descricaoCtrl.dispose();
+      localCtrl.dispose();
+      capacidadeCtrl.dispose();
     }
+    if (created) await _load();
   }
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final chrome = ShellChrome.of(context);
+    final primary = Theme.of(context).colorScheme.primary;
     final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
     return fxScreenA11yScope(
       label: 'Aulas em grupo',
@@ -113,286 +236,84 @@ class _GrupoAulasPersonalScreenState
         useMesh: true,
         appBar: FxShellAppBar(
           title: 'Aulas em grupo',
-          subtitle: freshnessLabel,
+          subtitle: grupoAulaHubSubtitle(freshnessLabel),
           onBack: () => context.pop(),
-        ),
-        floatingActionButton:
-            _erro != null
-                ? null
-                : FloatingActionButton.extended(
-                  onPressed: _criar,
-                  icon: const Icon(Icons.add),
-                  label: const Text('Nova aula'),
-                ),
-        body:
-            _loading
-                ? const SkeletonList(count: 4)
-                : _erro != null
-                ? FxErrorState(
-                  chromeOnDark: isDark,
-                  primary: Theme.of(context).colorScheme.primary,
-                  message: _erro!,
-                  onRetry: _load,
-                )
-                : RefreshIndicator(
-                  onRefresh: _load,
-                  child:
-                      _aulas.isEmpty
-                          ? ListView(
-                            physics: const AlwaysScrollableScrollPhysics(),
-                            children: [
-                              const SizedBox(height: 72),
-                              FxEmptyState(
-                                icon: 'calendar',
-                                title: 'Nenhuma aula criada ainda',
-                                subtitle:
-                                    'Crie uma aula em grupo para abrir vagas aos seus alunos.',
-                                action: FxEmptyAction(
-                                  label: 'Nova aula',
-                                  onTap: _criar,
-                                ),
-                              ),
-                            ],
-                          )
-                          : ListView.separated(
-                            padding: const EdgeInsets.all(TokensStrip.s4),
-                            itemCount: _aulas.length,
-                            separatorBuilder:
-                                (_, __) => const SizedBox(height: 8),
-                            itemBuilder: (_, i) {
-                              final a = _aulas[i];
-                              final lotada = a.inscritos >= a.capacidadeMax;
-                              return FxSatelliteListTile(
-                                title: a.titulo,
-                                titleCase: false,
-                                accent: lotada ? EagleTokens.warn : null,
-                                subtitle: Text(
-                                  '${_fmt(a.inicio)} · ${a.inscritos}/${a.capacidadeMax}'
-                                  '${a.localAula != null ? ' · ${a.localAula}' : ''}',
-                                ),
-                                trailing:
-                                    lotada
-                                        ? const Chip(label: Text('Lotada'))
-                                        : Chip(
-                                          label: Text(
-                                            '${a.capacidadeMax - a.inscritos} vagas',
-                                          ),
-                                        ),
-                              );
-                            },
-                          ),
-                ),
-      ),
-    );
-  }
-}
-
-class _NovaAulaResult {
-  final String titulo;
-  final String? descricao;
-  final DateTime inicio;
-  final DateTime fim;
-  final int capacidade;
-  final String? local;
-
-  _NovaAulaResult({
-    required this.titulo,
-    required this.inicio,
-    required this.fim,
-    required this.capacidade,
-    this.descricao,
-    this.local,
-  });
-}
-
-class _NovaAulaSheet extends StatefulWidget {
-  const _NovaAulaSheet();
-
-  @override
-  State<_NovaAulaSheet> createState() => _NovaAulaSheetState();
-}
-
-class _NovaAulaSheetState extends State<_NovaAulaSheet> {
-  final _titulo = TextEditingController();
-  final _descricao = TextEditingController();
-  final _local = TextEditingController();
-  final _capacidade = TextEditingController(text: '20');
-  late DateTime _inicio;
-  late DateTime _fim;
-
-  @override
-  void initState() {
-    super.initState();
-    final agora = DateTime.now();
-    _inicio = DateTime(agora.year, agora.month, agora.day + 1, 7, 0);
-    _fim = _inicio.add(const Duration(hours: 1));
-  }
-
-  @override
-  void dispose() {
-    _titulo.dispose();
-    _descricao.dispose();
-    _local.dispose();
-    _capacidade.dispose();
-    super.dispose();
-  }
-
-  Future<void> _pickInicio() async {
-    final date = await showDatePicker(
-      context: context,
-      initialDate: _inicio,
-      firstDate: DateTime.now().subtract(const Duration(days: 1)),
-      lastDate: DateTime.now().add(const Duration(days: 365)),
-    );
-    if (date == null || !mounted) return;
-    final time = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay.fromDateTime(_inicio),
-    );
-    if (time == null) return;
-    setState(() {
-      _inicio = DateTime(
-        date.year,
-        date.month,
-        date.day,
-        time.hour,
-        time.minute,
-      );
-      if (!_fim.isAfter(_inicio)) _fim = _inicio.add(const Duration(hours: 1));
-    });
-  }
-
-  Future<void> _pickFim() async {
-    final date = await showDatePicker(
-      context: context,
-      initialDate: _fim,
-      firstDate: _inicio,
-      lastDate: _inicio.add(const Duration(days: 1)),
-    );
-    if (date == null || !mounted) return;
-    final time = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay.fromDateTime(_fim),
-    );
-    if (time == null) return;
-    setState(() {
-      _fim = DateTime(date.year, date.month, date.day, time.hour, time.minute);
-    });
-  }
-
-  String _fmt(DateTime d) =>
-      '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')} '
-      '${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}';
-
-  void _salvar() {
-    if (_titulo.text.trim().isEmpty) {
-      FeedbackHelper.showError(context, 'Título é obrigatório.');
-      return;
-    }
-    Navigator.pop(
-      context,
-      _NovaAulaResult(
-        titulo: _titulo.text.trim(),
-        descricao:
-            _descricao.text.trim().isEmpty ? null : _descricao.text.trim(),
-        local: _local.text.trim().isEmpty ? null : _local.text.trim(),
-        capacidade: int.tryParse(_capacidade.text.trim()) ?? 20,
-        inicio: _inicio,
-        fim: _fim,
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final primary = Theme.of(context).colorScheme.primary;
-    return FxHomeSheetSurface(
-      isDark: isDark,
-      maxHeight:
-          MediaQuery.sizeOf(context).height * FxHomeSheetChrome.maxHeightFactor,
-      child: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            FxHomeSheetHandle(isDark: isDark),
-            SizedBox(height: TokensStrip.s4),
-            FxHomeSheetHeader(
-              isDark: isDark,
-              title: 'Nova aula em grupo',
-              subtitle: 'Defina horário, capacidade e local.',
-              leading: Icon(Icons.groups_outlined, color: primary, size: 18),
-            ),
-            SizedBox(height: TokensStrip.s3),
-            TextField(
-              controller: _titulo,
-              decoration: FxInputDeco.build(
-                context,
-                'Título *',
-                hint: 'Ex: Funcional ao ar livre',
-              ),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _descricao,
-              maxLines: 2,
-              decoration: FxInputDeco.build(context, 'Descrição (opcional)'),
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: _pickInicio,
-                    icon: const Icon(Icons.event),
-                    label: Text('Início ${_fmt(_inicio)}'),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: _pickFim,
-                    icon: const Icon(Icons.event_available),
-                    label: Text('Fim ${_fmt(_fim)}'),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _capacidade,
-                    keyboardType: TextInputType.number,
-                    decoration: FxInputDeco.build(context, 'Capacidade'),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  flex: 2,
-                  child: TextField(
-                    controller: _local,
-                    decoration: FxInputDeco.build(
-                      context,
-                      'Local (opcional)',
-                      hint: 'Studio, Praia, Online…',
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            FilledButton(
-              onPressed: _salvar,
-              style: FilledButton.styleFrom(
-                minimumSize: const Size.fromHeight(48),
-              ),
-              child: const Text('Criar aula'),
+          actions: [
+            ShellHeaderIconButton(
+              icon: 'plus',
+              tooltip: 'Nova aula',
+              onTap: _criar,
             ),
           ],
         ),
+        body:
+            _loading
+                ? const Padding(
+                  padding: EdgeInsets.all(FxSettingsLayout.pageInset),
+                  child: SkeletonList(count: 4),
+                )
+                : _erro != null
+                ? FxErrorState(
+                  chromeOnDark: chrome.isDark,
+                  primary: primary,
+                  message: _erro!,
+                  onRetry: _load,
+                )
+                : FxContentWidthLimiter(child: _buildBody()),
+      ),
+    );
+  }
+
+  Widget _buildBody() {
+    return RefreshIndicator(
+      onRefresh: _load,
+      child: ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.fromLTRB(
+          FxSettingsLayout.pageInset,
+          8,
+          FxSettingsLayout.pageInset,
+          32,
+        ),
+        children: [
+          if (_aulas.isEmpty)
+            FxEmptyState(
+              icon: 'calendar',
+              title: 'Nenhuma aula criada ainda',
+              subtitle:
+                  'Crie uma aula em grupo para abrir vagas aos seus alunos.',
+              action: FxEmptyAction(label: 'Nova aula', onTap: _criar),
+            )
+          else
+            FxSettingsGroup(
+              header: 'Próximas aulas',
+              caption: 'Vagas e horário de cada turma.',
+              children: [
+                for (var i = 0; i < _aulas.length; i++)
+                  FxSettingsTile(
+                    fxIcon: grupoAulaFxIcon(
+                      inscritos: _aulas[i].inscritos,
+                      capacidadeMax: _aulas[i].capacidadeMax,
+                    ),
+                    label: _aulas[i].titulo,
+                    subtitle: grupoAulaSubtitle(
+                      inicio: _aulas[i].inicio,
+                      localAula: _aulas[i].localAula,
+                    ),
+                    value: grupoAulaVagasLabel(
+                      inscritos: _aulas[i].inscritos,
+                      capacidadeMax: _aulas[i].capacidadeMax,
+                    ),
+                    danger: grupoAulaLotada(
+                      inscritos: _aulas[i].inscritos,
+                      capacidadeMax: _aulas[i].capacidadeMax,
+                    ),
+                    showDivider: i != _aulas.length - 1,
+                    onTap: () {},
+                  ),
+              ],
+            ),
+        ],
       ),
     );
   }

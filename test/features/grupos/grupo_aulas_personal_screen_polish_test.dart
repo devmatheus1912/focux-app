@@ -4,13 +4,25 @@ import '../../support/screen_source_bundle.dart';
 
 void main() {
   test('grupo aulas personal cumpre contrato Tier S+', () {
-    final screen = readScreenSourceBundle('lib/features/grupos/screens/grupo_aulas_personal_screen.dart');
+    final screen = readScreenSourceBundle(
+      'lib/features/grupos/screens/grupo_aulas_personal_screen.dart',
+    );
     expect(screen, anyOf(contains('fxScreenA11yScope'), contains('Semantics(')));
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(screen, contains('FxShellScaffold'));
-    expect(screen, anyOf(contains('FxContentWidthLimiter'), isNot(contains('constrainWidth: false'))));
-    expect(screen, anyOf(contains('friendlyError'), contains('DashboardErrorState'), contains('FxEmptyState'), contains('_erro'), contains('_TrainingEmptyState'), contains('ref.invalidate')));
-    expect(screen, anyOf(contains('FxLoading'), contains('SkeletonLoader'), contains('SkeletonList'), contains('DashboardShimmer'), contains('Shimmer'), contains('IaCopilotInsightsLoading'), contains('_loading')));
+    expect(screen, contains('FxContentWidthLimiter'));
+    expect(screen, contains('friendlyError'));
+    expect(screen, contains('FxEmptyState'));
+    expect(screen, contains('SkeletonList'));
     expect(screen, contains('RefreshIndicator'));
+    expect(screen, contains('FxHubFreshness.fromFetchedAt'));
+    expect(screen, contains('showFxFormSheet'));
+    expect(screen, contains('FxSettingsGroup'));
+    expect(screen, isNot(contains('TabBar')));
+    expect(screen, isNot(contains('TabBarView')));
+    expect(screen, isNot(contains('DropdownButton')));
+    expect(screen, isNot(contains('FloatingActionButton')));
+    expect(screen, isNot(contains('FxSatelliteListTile')));
+    expect(screen, isNot(contains(r'showError(context, $e)')));
   });
 }
