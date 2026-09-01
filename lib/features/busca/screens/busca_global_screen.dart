@@ -1,25 +1,31 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../../core/theme/design_tokens.dart';
-import '../../../core/theme/focux_hub_typography.dart';
-import '../../../core/theme/shell_chrome.dart';
-import '../../../core/theme/tokens_strip.dart';
-import '../../../core/utils/friendly_error.dart';
-import '../../../core/widgets/fx_confirm_sheet.dart';
-import '../../../core/widgets/fx_empty_state.dart';
-import '../../../core/widgets/fx_error_state.dart';
-import '../../../core/widgets/fx_screen_a11y.dart';
-import '../../../core/widgets/loading_shimmer.dart';
-import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../../features/auth/providers/auth_provider.dart';
-import 'package:focux_app/core/widgets/feedback_helper.dart';
+
+import '../../../core/theme/fx_settings_layout.dart';
+import '../../../core/theme/shell_chrome.dart';
+import '../../../core/theme/tokens_strip.dart';
+import '../../../core/utils/friendly_error.dart';
+import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_confirm_sheet.dart';
+import '../../../core/widgets/fx_content_width_limiter.dart';
+import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_help.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
+import '../../../core/widgets/fx_settings_group.dart';
+import '../../../core/widgets/fx_settings_tile.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/skeleton_loader.dart';
+import '../../alunos/widgets/aluno_inset_form_field.dart';
+import '../../auth/providers/auth_provider.dart';
 import '../data/busca_repository.dart';
 import '../models/busca_global_models.dart';
-
-// ─── Providers ────────────────────────────────────────────────────────────────
+import '../utils/busca_display.dart';
+import 'widgets/busca_global_results.dart';
 
 final buscaQueryProvider = StateProvider<String>((ref) => '');
 final buscaFilterProvider = StateProvider<BuscaTipo>((ref) => BuscaTipo.todos);
@@ -32,11 +38,9 @@ final buscaResultadoProvider = FutureProvider.autoDispose<BuscaGlobalResult?>((
   ref,
 ) async {
   final query = ref.watch(buscaQueryProvider);
-  if (query.trim().length < 2) return null;
+  if (query.trim().length < buscaMinQueryLength) return null;
   return ref.read(buscaRepositoryProvider).buscar(query);
 });
-
-// ─── Screen ───────────────────────────────────────────────────────────────────
 
 class BuscaGlobalScreen extends ConsumerStatefulWidget {
   const BuscaGlobalScreen({super.key});
@@ -46,145 +50,80 @@ class BuscaGlobalScreen extends ConsumerStatefulWidget {
 
 class _BuscaGlobalScreenState extends ConsumerState<BuscaGlobalScreen> {
   final _ctrl = TextEditingController();
+  final _focus = FocusNode();
+  Timer? _debounce;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl.text = ref.read(buscaQueryProvider);
+    _ctrl.addListener(_onQueryChanged);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _focus.requestFocus();
+    });
+  }
 
   @override
   void dispose() {
+    _debounce?.cancel();
+    _ctrl.removeListener(_onQueryChanged);
+    _focus.dispose();
     _ctrl.dispose();
     super.dispose();
   }
 
-  Widget _buildFilterChips() {
-    final selected = ref.watch(buscaFilterProvider);
-    return SizedBox(
-      height: 40,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: BuscaTipo.values.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 8),
-        itemBuilder: (ctx, i) {
-          final tipo = BuscaTipo.values[i];
-          final isSelected = tipo == selected;
-          return FilterChip(
-            selected: isSelected,
-            label: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  tipo.icon,
-                  size: 14,
-                  color: isSelected ? Colors.white : TokensStrip.textSecondary,
-                ),
-                const SizedBox(width: 4),
-                Text(tipo.label),
-              ],
-            ),
-            selectedColor: Theme.of(context).colorScheme.primary,
-            checkmarkColor: Colors.white,
-            labelStyle: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: isSelected ? Colors.white : TokensStrip.textPrimary,
-            ),
-            backgroundColor:
-                Theme.of(context).brightness == Brightness.dark
-                    ? EagleTokens.surfaceDark
-                    : EagleTokens.surfaceGray,
-            side: BorderSide.none,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
-            onSelected: (_) {
-              HapticFeedback.selectionClick();
-              ref.read(buscaFilterProvider.notifier).state = tipo;
-            },
-          );
-        },
-      ),
-    );
+  void _onQueryChanged() {
+    setState(() {});
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: buscaDebounceMs), () {
+      if (!mounted) return;
+      ref.read(buscaQueryProvider.notifier).state = _ctrl.text;
+    });
   }
 
-  Widget _buildSection(String titulo, List<BuscaItem> items) {
-    if (items.isEmpty) return const SizedBox.shrink();
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 16, 16, 8),
-          child: Row(
-            children: [
-              Text(
-                titulo,
-                style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: EagleTokens.iconGray,
-                  letterSpacing: 1,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                decoration: BoxDecoration(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(TokensStrip.rInput),
-                ),
-                child: Text(
-                  '${items.length}',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                ),
-              ),
-            ],
-          ),
+  void _clearQuery() {
+    HapticFeedback.selectionClick();
+    _debounce?.cancel();
+    _ctrl.clear();
+    ref.read(buscaQueryProvider.notifier).state = '';
+  }
+
+  void _showHelp() {
+    showFxHelpSheet(
+      context,
+      title: 'Busca',
+      subtitle: 'Encontre aluno, treino ou cobrança sem sair do Personal.',
+      tips: const [
+        FxHelpTip(
+          'Consulta',
+          'Digite ao menos 2 caracteres. A busca espera você terminar de escrever.',
+          icon: 'search',
         ),
-        ...items.map(
-          (item) => _BuscaItemTile(item: item, onTap: () => _abrirItem(item)),
+        FxHelpTip(
+          'Filtro',
+          'Use Alunos, Treinos ou Cobranças para enxugar o que já veio.',
+          icon: 'users',
+        ),
+        FxHelpTip(
+          'Destino',
+          'Toque no resultado para abrir. Links externos pedem confirmação.',
+          icon: 'chevron-right',
         ),
       ],
     );
   }
 
-  List<BuscaItem> _filterByTipo(BuscaGlobalResult result, BuscaTipo filter) =>
-      switch (filter) {
-        BuscaTipo.todos => [
-          ...result.alunos,
-          ...result.treinos,
-          ...result.cobrancas,
-        ],
-        BuscaTipo.aluno => result.alunos,
-        BuscaTipo.treino => result.treinos,
-        BuscaTipo.cobranca => result.cobrancas,
-      };
-
-  static const _allowedInternalPrefixes = <String>[
-    '/alunos/',
-    '/treinos/',
-    '/financeiro/',
-    '/agenda/',
-    '/checkin/',
-    '/chat/',
-    '/leads/',
-    '/perfil/',
-  ];
-
   Future<void> _abrirItem(BuscaItem item) async {
     final raw = item.url.trim();
     if (raw.isEmpty) {
-      _showError('Item sem destino válido.');
+      _showInfo(buscaDestinationMissing());
       return;
     }
 
     if (raw.startsWith('/')) {
-      final normalized = _normalizePath(raw);
-      final isAllowed = _allowedInternalPrefixes.any(normalized.startsWith);
-      if (!isAllowed) {
-        _showError('Destino não permitido.');
+      final normalized = buscaNormalizePath(raw);
+      if (!buscaInternalPathAllowed(normalized)) {
+        _showInfo(buscaDestinationForbidden());
         return;
       }
       if (!mounted) return;
@@ -198,32 +137,24 @@ class _BuscaGlobalScreenState extends ConsumerState<BuscaGlobalScreen> {
     } catch (_) {
       uri = null;
     }
-    if (uri == null || (uri.scheme != 'http' && uri.scheme != 'https')) {
-      _showError('Destino não suportado.');
+    if (uri == null || !buscaIsHttpUrl(uri)) {
+      _showInfo(buscaDestinationUnsupported());
       return;
     }
     if (!mounted) return;
     final ok = await showFxConfirmSheet(
       context,
-      title: 'Abrir link externo?',
+      title: buscaExternalSheetTitle(),
       message: uri.toString(),
       icon: Icons.open_in_new_rounded,
-      confirmLabel: 'Abrir',
+      confirmLabel: buscaExternalConfirmLabel(),
     );
     if (!ok) return;
     final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
-    if (!launched && mounted) _showError('Não foi possível abrir este link.');
+    if (!launched && mounted) _showInfo(buscaLaunchFailed());
   }
 
-  String _normalizePath(String path) {
-    var p = path;
-    while (p.contains('//')) {
-      p = p.replaceAll('//', '/');
-    }
-    return p;
-  }
-
-  void _showError(String msg) {
+  void _showInfo(String msg) {
     if (!mounted) return;
     FeedbackHelper.showInfo(context, msg);
   }
@@ -231,209 +162,104 @@ class _BuscaGlobalScreenState extends ConsumerState<BuscaGlobalScreen> {
   @override
   Widget build(BuildContext context) {
     final resultAsync = ref.watch(buscaResultadoProvider);
-    final query = ref.watch(buscaQueryProvider);
     final filter = ref.watch(buscaFilterProvider);
-
     final chrome = ShellChrome.of(context);
+    final primary = Theme.of(context).colorScheme.primary;
+    final hasQuery = _ctrl.text.isNotEmpty;
+
     return fxScreenA11yScope(
       label: 'Busca global',
       child: FxShellScaffold(
         useMesh: true,
-        extendBody: true,
-        appBar: AppBar(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          scrolledUnderElevation: 0,
-          title: Semantics(
-            textField: true,
-            label: 'Campo de busca global',
-            child: TextField(
-              controller: _ctrl,
-              autofocus: true,
-              style: FocuxHubTypography.body(color: chrome.ink),
-              decoration: InputDecoration(
-                hintText: 'Buscar alunos, treinos, cobranças...',
-                border: InputBorder.none,
-                hintStyle: TextStyle(color: chrome.mute),
-              ),
-              onChanged: (v) => ref.read(buscaQueryProvider.notifier).state = v,
-            ),
-          ),
+        appBar: FxShellAppBar(
+          title: 'Busca',
           actions: [
-            if (query.isNotEmpty)
-              IconButton(
-                icon: const Icon(Icons.clear),
-                tooltip: 'Limpar busca',
-                onPressed: () {
-                  _ctrl.clear();
-                  ref.read(buscaQueryProvider.notifier).state = '';
-                },
+            if (hasQuery)
+              Padding(
+                padding: const EdgeInsets.only(right: TokensStrip.s3),
+                child: Center(
+                  child: Semantics(
+                    button: true,
+                    label: 'Limpar busca',
+                    child: ShellHeaderIconButton(
+                      icon: 'x',
+                      tooltip: 'Limpar busca',
+                      onTap: _clearQuery,
+                    ),
+                  ),
+                ),
               ),
           ],
         ),
-        body: Column(
-          children: [
-            _buildFilterChips(),
-            const SizedBox(height: 8),
-            Expanded(
-              child: resultAsync.when(
-                loading:
-                    () =>
-                        const ShimmerListLoading(itemCount: 6, itemHeight: 64),
-                error:
-                    (e, _) => FxErrorState(
-                      chromeOnDark: chrome.isDark,
-                      primary: Theme.of(context).colorScheme.primary,
-                      message: friendlyError(e),
-                      onRetry: () => ref.invalidate(buscaResultadoProvider),
+        body: RefreshIndicator(
+          onRefresh: () async {
+            ref.invalidate(buscaResultadoProvider);
+            await ref.read(buscaResultadoProvider.future);
+          },
+          child: FxContentWidthLimiter(
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(
+                FxSettingsLayout.pageInset,
+                TokensStrip.s3,
+                FxSettingsLayout.pageInset,
+                TokensStrip.s6,
+              ),
+              children: [
+                FxSettingsGroup(
+                  header: 'Consulta',
+                  caption: buscaMinQuerySubtitle(),
+                  helpTooltip: 'Como buscar',
+                  onHelpTap: _showHelp,
+                  children: [
+                    AlunoInsetFormField(
+                      controller: _ctrl,
+                      focusNode: _focus,
+                      label: 'Campo de busca global',
+                      hint: buscaHint(),
+                      icon: Icons.search,
+                      showDivider: false,
                     ),
-                data: (result) {
-                  if (query.trim().length < 2) {
-                    return const FxEmptyState(
-                      icon: 'search',
-                      title: 'Digite ao menos 2 caracteres',
-                      subtitle: 'Busque por alunos, treinos ou cobranças.',
-                    );
-                  }
-                  if (result == null || result.isEmpty) {
-                    return FxEmptyState(
-                      icon: 'search',
-                      title: 'Nenhum resultado para "$query"',
-                      subtitle:
-                          'Tente outro nome, apelido ou trecho do treino.',
-                    );
-                  }
-                  if (filter != BuscaTipo.todos) {
-                    final items = _filterByTipo(result, filter);
-                    if (items.isEmpty) {
-                      return FxEmptyState(
-                        icon: 'search',
-                        title: 'Nenhum resultado em ${filter.label}',
-                        subtitle:
-                            'Troque o filtro para ver os outros resultados.',
-                      );
-                    }
-                    return ListView(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(
-                            TokensStrip.s4,
-                            12,
-                            16,
-                            4,
-                          ),
-                          child: Text(
-                            '${items.length} resultado${items.length > 1 ? 's' : ''} em ${filter.label}',
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: TokensStrip.textSecondary,
-                            ),
-                          ),
+                  ],
+                ),
+                const SizedBox(height: FxSettingsLayout.groupGap),
+                FxSettingsGroup(
+                  header: 'Mostrar',
+                  children: [
+                    for (var i = 0; i < BuscaTipo.values.length; i++)
+                      FxSettingsTile(
+                        fxIcon: buscaTipoFxIcon(BuscaTipo.values[i]),
+                        label: BuscaTipo.values[i].label,
+                        value: buscaFilterValue(
+                          BuscaTipo.values[i] == filter,
                         ),
-                        ...items.map(
-                          (item) => _BuscaItemTile(
-                            item: item,
-                            onTap: () => _abrirItem(item),
-                          ),
-                        ),
-                        const SizedBox(height: 32),
-                      ],
-                    );
-                  }
-                  return ListView(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(
-                          TokensStrip.s4,
-                          8,
-                          16,
-                          0,
-                        ),
-                        child: Text(
-                          '${result.totalCount} resultado${result.totalCount > 1 ? 's' : ''}',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: TokensStrip.textSecondary,
-                          ),
-                        ),
+                        highlight: BuscaTipo.values[i] == filter,
+                        showDivider: i != BuscaTipo.values.length - 1,
+                        onTap:
+                            () =>
+                                ref.read(buscaFilterProvider.notifier).state =
+                                    BuscaTipo.values[i],
                       ),
-                      _buildSection('ALUNOS', result.alunos),
-                      _buildSection('TREINOS', result.treinos),
-                      _buildSection('COBRANÇAS', result.cobrancas),
-                      const SizedBox(height: 32),
-                    ],
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _BuscaItemTile extends StatelessWidget {
-  final BuscaItem item;
-  final VoidCallback onTap;
-  const _BuscaItemTile({required this.item, required this.onTap});
-
-  IconData _iconForTipo(String tipo) => switch (tipo) {
-    'ALUNO' => Icons.person,
-    'TREINO' => Icons.fitness_center,
-    'COBRANCA' => Icons.attach_money,
-    _ => Icons.search,
-  };
-  Color _colorForTipo(String tipo) => switch (tipo) {
-    'ALUNO' => EagleTokens.legacyBrandCyan,
-    'TREINO' => EagleTokens.buscaTreino,
-    'COBRANCA' => EagleTokens.goldStar,
-    _ => TokensStrip.textSecondary,
-  };
-
-  @override
-  Widget build(BuildContext context) {
-    final cor = _colorForTipo(item.tipo);
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(TokensStrip.rCard),
-          onTap: onTap,
-          child: Ink(
-            decoration: fxListCardDecoration(context),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-              child: Row(
-                children: [
-                  CircleAvatar(
-                    backgroundColor: cor.withValues(alpha: 0.1),
-                    child: Icon(_iconForTipo(item.tipo), color: cor, size: 20),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          item.titulo,
-                          style: const TextStyle(fontWeight: FontWeight.w600),
-                        ),
-                        if (item.subtitulo != null)
-                          Text(
-                            item.subtitulo!,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: Theme.of(context).textTheme.bodySmall,
-                          ),
-                      ],
-                    ),
-                  ),
-                  const Icon(Icons.chevron_right, size: 20),
-                ],
-              ),
+                  ],
+                ),
+                const SizedBox(height: FxSettingsLayout.groupGap),
+                resultAsync.when(
+                  loading: () => const SkeletonList(count: 6),
+                  error:
+                      (e, _) => FxErrorState(
+                        chromeOnDark: chrome.isDark,
+                        primary: primary,
+                        message: friendlyError(e),
+                        onRetry: () => ref.invalidate(buscaResultadoProvider),
+                      ),
+                  data:
+                      (result) => BuscaGlobalResults(
+                        query: ref.watch(buscaQueryProvider),
+                        filter: filter,
+                        result: result ?? const BuscaGlobalResult.empty(),
+                        onOpen: _abrirItem,
+                      ),
+                ),
+              ],
             ),
           ),
         ),

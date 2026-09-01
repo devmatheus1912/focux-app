@@ -4,13 +4,42 @@ import '../../support/screen_source_bundle.dart';
 
 void main() {
   test('busca global cumpre contrato Tier S+', () {
-    final screen = readScreenSourceBundle('lib/features/busca/screens/busca_global_screen.dart');
+    final screen = readScreenSourceBundle(
+      'lib/features/busca/screens/busca_global_screen.dart',
+    );
     expect(screen, anyOf(contains('fxScreenA11yScope'), contains('Semantics(')));
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(screen, contains('FxShellScaffold'));
-    expect(screen, anyOf(contains('FxContentWidthLimiter'), isNot(contains('constrainWidth: false'))));
-    expect(screen, anyOf(contains('friendlyError'), contains('DashboardErrorState'), contains('FxEmptyState'), contains('_erro'), contains('_TrainingEmptyState'), contains('ref.invalidate')));
-    expect(screen, anyOf(contains('FxLoading'), contains('SkeletonLoader'), contains('SkeletonList'), contains('DashboardShimmer'), contains('Shimmer'), contains('IaCopilotInsightsLoading'), contains('_loading')));
-    expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(16));
+    expect(screen, contains('FxContentWidthLimiter'));
+    expect(screen, contains('friendlyError'));
+    expect(screen, contains('SkeletonList'));
+    expect(screen, contains('FxSettingsGroup'));
+    expect(screen, contains('FxSettingsTile'));
+    expect(screen, contains('FxSettingsLayout'));
+    expect(screen, contains('ShellHeaderIconButton'));
+    expect(screen, contains("icon: 'x'"));
+    expect(screen, contains('AlunoInsetFormField'));
+    expect(screen, contains('showFxHelpSheet'));
+    expect(screen, isNot(contains('FilterChip')));
+    expect(screen, isNot(contains('ChoiceChip')));
+    expect(screen, isNot(contains('FxLiquidPrimaryButton')));
+    expect(screen, isNot(contains('FloatingActionButton')));
+    expect(screen, isNot(contains('DropdownButton')));
+    expect(screen, isNot(contains('Map<String, dynamic>')));
+    expect(screen, isNot(contains('Icons.clear')));
+    expect(screen, isNot(contains('Icons.person')));
+  });
+
+  test('busca global fold segue pele do Perfil', () {
+    final results = readScreenSourceBundle(
+      'lib/features/busca/screens/widgets/busca_global_results.dart',
+    );
+    expect(results, contains('FxSettingsGroup'));
+    expect(results, contains('FxSettingsTile'));
+    expect(results, contains('FxEmptyState'));
+    expect(results, isNot(contains('FilterChip')));
+    expect(results, isNot(contains('CircleAvatar')));
+    expect(results, isNot(contains('Icons.person')));
+    expect(results, isNot(contains('Map<String, dynamic>')));
   });
 }

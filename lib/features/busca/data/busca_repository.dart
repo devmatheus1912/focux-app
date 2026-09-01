@@ -9,7 +9,8 @@ class BuscaRepository {
 
   Future<BuscaGlobalResult> buscar(String query) async {
     final res = await _api.dio.get(
-      '/api/busca?q=${Uri.encodeComponent(query)}',
+      '/api/busca',
+      queryParameters: {'q': query},
     );
     return BuscaGlobalResult.fromJson(res.data as Map<String, dynamic>);
   }
