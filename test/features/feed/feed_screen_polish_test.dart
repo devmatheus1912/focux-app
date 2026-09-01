@@ -13,39 +13,21 @@ void main() {
     );
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(screen, contains('FxShellScaffold'));
-    expect(
-      screen,
-      anyOf(
-        contains('FxContentWidthLimiter'),
-        isNot(contains('constrainWidth: false')),
-      ),
-    );
-    expect(
-      screen,
-      anyOf(
-        contains('friendlyError'),
-        contains('DashboardErrorState'),
-        contains('FxEmptyState'),
-        contains('_erro'),
-        contains('_TrainingEmptyState'),
-        contains('ref.invalidate'),
-      ),
-    );
-    expect(
-      screen,
-      anyOf(
-        contains('FxLoading'),
-        contains('SkeletonLoader'),
-        contains('SkeletonList'),
-        contains('DashboardShimmer'),
-        contains('Shimmer'),
-        contains('IaCopilotInsightsLoading'),
-        contains('_loading'),
-      ),
-    );
+    expect(screen, contains('FxShellAppBar'));
+    expect(screen, contains('FxContentWidthLimiter'));
+    expect(screen, contains('friendlyError'));
+    expect(screen, contains('FxEmptyState'));
+    expect(screen, contains('SkeletonList'));
     expect(screen, contains('RefreshIndicator'));
     expect(screen, contains('showFxHomeSheet'));
+    expect(screen, contains('showFxInsetPickerSheet'));
+    expect(screen, contains('showFxConfirmSheet'));
+    expect(screen, contains('FxHubFreshness.fromFetchedAt'));
     expect(screen, isNot(contains('showModalBottomSheet')));
+    expect(screen, isNot(contains('FloatingActionButton')));
+    expect(screen, isNot(contains('DropdownButton')));
+    expect(screen, isNot(contains('_FeedListHeader')));
+    expect(screen, isNot(contains(r'showError(context, $e)')));
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(16));
   });
 }

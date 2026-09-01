@@ -85,10 +85,10 @@ class _FeedComposerSheetState extends State<_FeedComposerSheet> {
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.only(
-        left: 24,
-        right: 24,
-        top: 20,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+        left: FxSettingsLayout.pageInset,
+        right: FxSettingsLayout.pageInset,
+        top: TokensStrip.s3,
+        bottom: MediaQuery.of(context).viewInsets.bottom + TokensStrip.s4,
       ),
       child: SafeArea(
         child: SingleChildScrollView(
@@ -98,88 +98,55 @@ class _FeedComposerSheetState extends State<_FeedComposerSheet> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        'Nova Publicação',
-                        style: FocuxHubTypography.sectionTitle(
-                          context,
-                          color: Theme.of(context).colorScheme.onSurface,
-                        ),
-                      ),
-                    ),
-                    IconButton(
-                      tooltip: 'Fechar',
-                      icon: const Icon(Icons.close),
-                      onPressed: () => Navigator.of(context).pop(),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: TokensStrip.s4),
-                DropdownButtonFormField<String>(
-                  initialValue: _tipoSelecionado,
-                  decoration: InputDecoration(
-                    labelText: 'Tipo de post',
-                    border: FxInputDeco.outlineBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    prefixIcon: Icon(Icons.category),
-                  ),
-                  items: const [
-                    DropdownMenuItem(value: 'TEXTO', child: Text('Texto')),
-                    DropdownMenuItem(value: 'IMAGEM', child: Text('Imagem')),
-                    DropdownMenuItem(value: 'VIDEO', child: Text('Vídeo')),
-                    DropdownMenuItem(value: 'ENQUETE', child: Text('Enquete')),
-                    DropdownMenuItem(value: 'DICA', child: Text('Dica rápida')),
-                  ],
-                  onChanged: (v) {
-                    if (v != null) {
-                      setState(() {
-                        _tipoSelecionado = v;
-                        if (v != 'IMAGEM' && v != 'VIDEO') {
-                          _midiaSelecionada = null;
-                        }
-                      });
-                    }
+                FxInsetPickerRow(
+                  icon: Icons.category_outlined,
+                  label: 'Tipo de post',
+                  value: feedTipoLabel(_tipoSelecionado),
+                  onTap: () async {
+                    final picked = await showFxInsetPickerSheet<String>(
+                      context,
+                      title: 'Tipo de post',
+                      selected: _tipoSelecionado,
+                      items: [
+                        for (final t in feedTipoValues)
+                          FxInsetPickerSheetItem(
+                            value: t,
+                            label: feedTipoLabel(t),
+                          ),
+                      ],
+                    );
+                    if (picked == null) return;
+                    setState(() {
+                      _tipoSelecionado = picked;
+                      if (!feedTipoTemMidia(picked)) {
+                        _midiaSelecionada = null;
+                      }
+                    });
                   },
                 ),
-                const SizedBox(height: 12),
-                TextFormField(
+                AlunoInsetFormField(
                   controller: _tituloCtrl,
-                  decoration: InputDecoration(
-                    labelText: 'Título',
-                    border: FxInputDeco.outlineBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    prefixIcon: Icon(Icons.title),
-                  ),
+                  label: 'Título',
+                  icon: Icons.title_outlined,
                   validator:
                       (v) =>
                           (v == null || v.trim().isEmpty)
                               ? 'Informe o título'
                               : null,
                 ),
-                const SizedBox(height: 12),
-                TextFormField(
+                AlunoInsetFormField(
                   controller: _conteudoCtrl,
-                  decoration: InputDecoration(
-                    labelText: 'Conteúdo',
-                    border: FxInputDeco.outlineBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    prefixIcon: Icon(Icons.text_fields),
-                    alignLabelWithHint: true,
-                  ),
+                  label: 'Conteúdo',
+                  icon: Icons.notes_outlined,
                   maxLines: 4,
+                  showDivider: false,
                   validator:
                       (v) =>
                           (v == null || v.trim().isEmpty)
                               ? 'Informe o conteúdo'
                               : null,
                 ),
-                if (_tipoSelecionado == 'IMAGEM' ||
-                    _tipoSelecionado == 'VIDEO') ...[
+                if (feedTipoTemMidia(_tipoSelecionado)) ...[
                   const SizedBox(height: 12),
                   OutlinedButton.icon(
                     onPressed:
@@ -199,11 +166,10 @@ class _FeedComposerSheetState extends State<_FeedComposerSheet> {
                                   : Icons.photo_library_outlined,
                             ),
                     label: Text(
-                      _midiaSelecionada == null
-                          ? (_tipoSelecionado == 'VIDEO'
-                              ? 'Escolher vídeo'
-                              : 'Escolher imagem')
-                          : 'Trocar arquivo',
+                      feedMidiaCta(
+                        tipo: _tipoSelecionado,
+                        hasFile: _midiaSelecionada != null,
+                      ),
                     ),
                   ),
                   if (_midiaSelecionada != null) ...[

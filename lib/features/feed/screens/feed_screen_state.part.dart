@@ -98,6 +98,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
       context,
       builder: (ctx) {
         final isDark = Theme.of(ctx).brightness == Brightness.dark;
+        final accent = Theme.of(ctx).colorScheme.primary;
         return FxHomeSheetSurface(
           isDark: isDark,
           maxHeight:
@@ -106,6 +107,20 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               FxHomeSheetHandle(isDark: isDark),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  FxSettingsLayout.pageInset,
+                  TokensStrip.s3,
+                  FxSettingsLayout.pageInset,
+                  0,
+                ),
+                child: FxHomeSheetHeader(
+                  isDark: isDark,
+                  title: 'Nova publicação',
+                  subtitle: 'Os alunos veem no feed deles.',
+                  leading: Icon(Icons.rss_feed_outlined, color: accent, size: 18),
+                ),
+              ),
               _FeedComposerSheet(ref: ref),
             ],
           ),
@@ -119,100 +134,94 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
     });
   }
 
+  Widget _buildBody(Color primary) {
+    if (_posts.isEmpty) {
+      return RefreshIndicator(
+        color: primary,
+        onRefresh: _load,
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          children: [
+            FxEmptyState(
+              icon: 'rss',
+              title: 'Nenhuma publicação ainda',
+              subtitle:
+                  'Compartilhe novidades, vídeos e conquistas com seus alunos.',
+              action: FxEmptyAction(
+                label: 'Criar publicação',
+                onTap: _abrirFormulario,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return RefreshIndicator(
+      color: primary,
+      onRefresh: _load,
+      child: ListView.builder(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.fromLTRB(
+          FxSettingsLayout.pageInset,
+          8,
+          FxSettingsLayout.pageInset,
+          32,
+        ),
+        itemCount: _posts.length,
+        itemBuilder: (_, i) {
+          final p = _posts[i];
+          return _FeedPostCard(
+            post: p,
+            index: i,
+            primary: primary,
+            curtidas: _curtidasLocais[p.id] ?? p.totalCurtidas,
+            comentarios: _comentariosLocais[p.id] ?? p.totalComentarios,
+            onCurtir: () => _curtir(p.id),
+            onComentar: () => _abrirComentarios(p.id),
+            onFixar: () => _toggleFixar(p.id),
+            onExcluir: () => _confirmarExclusao(p.id),
+          );
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final chrome = ShellChrome.of(context);
     final isDark = chrome.isDark;
     final primary = Theme.of(context).colorScheme.primary;
-    final primaryDeep = BrandPalette.deep(primary);
     final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
     return fxScreenA11yScope(
       label: 'Feed',
       child: FxShellScaffold(
         useMesh: true,
-        floatingActionButton: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(colors: [primary, primaryDeep]),
-            borderRadius: BorderRadius.circular(44),
-            boxShadow: [
-              BoxShadow(
-                color: primary.withValues(alpha: 0.4),
-                blurRadius: 16,
-                offset: const Offset(0, 6),
-              ),
-            ],
-          ),
-          child: FloatingActionButton(
-            onPressed: _abrirFormulario,
-            tooltip: 'Nova Publicação',
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            child: const Icon(Icons.add, color: EagleTokens.darkInk),
-          ),
+        appBar: FxShellAppBar(
+          title: 'Feed',
+          subtitle: feedHubSubtitle(freshnessLabel),
+          actions: [
+            ShellHeaderIconButton(
+              icon: 'plus',
+              tooltip: 'Nova publicação',
+              onTap: _abrirFormulario,
+            ),
+          ],
         ),
-        body: SafeArea(
-          child:
-              _loading
-                  ? const Padding(
-                    padding: EdgeInsets.all(TokensStrip.s4),
-                    child: SkeletonList(count: 4),
-                  )
-                  : _erro != null
-                  ? FxErrorState(
-                    chromeOnDark: isDark,
-                    primary: primary,
-                    message: _erro!,
-                    onRetry: _load,
-                  )
-                  : _posts.isEmpty
-                  ? FxEmptyState(
-                    icon: 'rss',
-                    title: 'Nenhuma publicacao ainda',
-                    subtitle:
-                        'Compartilhe novidades, videos e conquistas com seus alunos.',
-                    action: FxEmptyAction(
-                      label: 'Criar publicacao',
-                      onTap: _abrirFormulario,
-                    ),
-                  )
-                  : RefreshIndicator(
-                    color: primary,
-                    onRefresh: _load,
-                    child: ListView.builder(
-                      padding: const EdgeInsets.fromLTRB(
-                        TokensStrip.s4,
-                        10,
-                        16,
-                        110,
-                      ),
-                      itemCount: _posts.length + 1,
-                      itemBuilder: (_, i) {
-                        if (i == 0) {
-                          return _FeedListHeader(
-                            freshnessLabel: freshnessLabel,
-                            chrome: chrome,
-                            primary: primary,
-                            primaryDeep: primaryDeep,
-                            onNovaPublicacao: _abrirFormulario,
-                          );
-                        }
-                        final p = _posts[i - 1];
-                        return _FeedPostCard(
-                          post: p,
-                          index: i,
-                          primary: primary,
-                          curtidas: _curtidasLocais[p.id] ?? p.totalCurtidas,
-                          comentarios:
-                              _comentariosLocais[p.id] ?? p.totalComentarios,
-                          onCurtir: () => _curtir(p.id),
-                          onComentar: () => _abrirComentarios(p.id),
-                          onFixar: () => _toggleFixar(p.id),
-                          onExcluir: () => _confirmarExclusao(p.id),
-                        );
-                      },
-                    ),
-                  ),
-        ),
+        body:
+            _loading
+                ? const Padding(
+                  padding: EdgeInsets.all(FxSettingsLayout.pageInset),
+                  child: SkeletonList(count: 4),
+                )
+                : _erro != null
+                ? FxErrorState(
+                  chromeOnDark: isDark,
+                  primary: primary,
+                  message: _erro!,
+                  onRetry: _load,
+                )
+                : FxContentWidthLimiter(child: _buildBody(primary)),
       ),
     );
   }

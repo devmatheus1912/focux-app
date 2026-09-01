@@ -8,7 +8,6 @@ class _TypeBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final label = (tipo == null || tipo!.isEmpty) ? 'TEXTO' : tipo!;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
@@ -16,7 +15,7 @@ class _TypeBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(999),
       ),
       child: Text(
-        label.toUpperCase(),
+        feedTipoLabel(tipo),
         style: TextStyle(
           fontSize: 10,
           color: color,
@@ -167,83 +166,6 @@ Color _feedBadgeColor(String? tipo, Color primary) {
       return EagleTokens.purple;
     default:
       return primary;
-  }
-}
-
-class _FeedListHeader extends StatelessWidget {
-  const _FeedListHeader({
-    required this.freshnessLabel,
-    required this.chrome,
-    required this.primary,
-    required this.primaryDeep,
-    required this.onNovaPublicacao,
-  });
-
-  final String? freshnessLabel;
-  final ShellPalette chrome;
-  final Color primary;
-  final Color primaryDeep;
-  final VoidCallback onNovaPublicacao;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(4, 0, 4, 18),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Feed',
-                  style: TextStyle(
-                    color: chrome.ink,
-                    fontSize: 28,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: -0.5,
-                  ),
-                ),
-                if (freshnessLabel != null) ...[
-                  const SizedBox(height: 2),
-                  Text(
-                    freshnessLabel!,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: chrome.mute,
-                      fontSize: 11.5,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-          InkWell(
-            onTap: onNovaPublicacao,
-            borderRadius: BorderRadius.circular(44),
-            child: Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(colors: [primary, primaryDeep]),
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: primary.withValues(alpha: 0.38),
-                    blurRadius: 16,
-                    offset: const Offset(0, 6),
-                  ),
-                ],
-              ),
-              child: const Icon(Icons.add_rounded, color: Colors.white),
-            ),
-          ),
-        ],
-      ),
-    );
   }
 }
 
