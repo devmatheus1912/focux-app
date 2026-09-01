@@ -1,17 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../features/auth/providers/auth_provider.dart';
-import '../data/evolucao_repository.dart';
+
 import '../../../core/router/safe_navigation.dart';
+import '../../../core/theme/fx_settings_layout.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/ux/fx_hub_freshness.dart';
+import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_inset_picker_sheet.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
+import '../../../core/widgets/fx_settings_group.dart';
+import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
-import '../../../core/theme/focux_hub_typography.dart';
-import '../../../core/theme/shell_chrome.dart';
-import '../../../core/theme/tokens_strip.dart';
-import '../../../core/widgets/fx_screen_a11y.dart';
+import '../../../features/auth/providers/auth_provider.dart';
+import '../data/evolucao_repository.dart';
+import '../utils/engajamento_display.dart';
 
 class EngajamentoScreen extends ConsumerStatefulWidget {
   final int alunoId;
@@ -31,6 +38,7 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
   List<EventoEngajamento> _eventos = [];
   bool _loading = true;
   String? _erro;
+  DateTime? _fetchedAt;
 
   @override
   void initState() {
@@ -50,6 +58,7 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
         setState(() {
           _eventos = eventos;
           _loading = false;
+          _fetchedAt = DateTime.now();
         });
       }
     } catch (e) {
@@ -62,70 +71,52 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
     }
   }
 
-  IconData _iconForTipo(String tipo) {
-    switch (tipo) {
-      case 'CHECKIN_CONCLUIDO':
-        return Icons.fitness_center;
-      case 'TREINO_INICIADO':
-        return Icons.play_arrow;
-      default:
-        return Icons.circle;
-    }
+  Future<void> _pickPeriodo() async {
+    HapticFeedback.selectionClick();
+    final picked = await showFxInsetPickerSheet<int>(
+      context,
+      title: 'Período',
+      selected: _dias,
+      items: [
+        for (final d in engajamentoPeriodos)
+          FxInsetPickerSheetItem(value: d, label: engajamentoPeriodoLabel(d)),
+      ],
+    );
+    if (!mounted || picked == null || picked == _dias) return;
+    setState(() => _dias = picked);
+    await _load();
   }
 
-  String _formatarDataHora(String dataHora) {
-    try {
-      final dt = DateTime.parse(dataHora).toLocal();
-      final dd = dt.day.toString().padLeft(2, '0');
-      final mm = dt.month.toString().padLeft(2, '0');
-      final hh = dt.hour.toString().padLeft(2, '0');
-      final min = dt.minute.toString().padLeft(2, '0');
-      return '$dd/$mm $hh:$min';
-    } catch (_) {
-      return dataHora.length >= 16 ? dataHora.substring(0, 16) : dataHora;
-    }
+  void _verNoventaDias() {
+    if (_dias == 90) return;
+    setState(() => _dias = 90);
+    _load();
   }
 
   @override
   Widget build(BuildContext context) {
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
+    final freshness = FxHubFreshness.fromFetchedAt(_fetchedAt);
     return fxScreenA11yScope(
       label: 'Engajamento — ${widget.alunoNome}',
       child: FxShellScaffold(
         useMesh: true,
         appBar: FxShellAppBar(
-          title: 'Engajamento — ${widget.alunoNome}',
+          title: 'Engajamento',
+          subtitle: engajamentoHubSubtitle(
+            alunoNome: widget.alunoNome,
+            dias: _dias,
+            freshness: freshness,
+          ),
           onBack: () => safePopOrGo(context, '/evolucao'),
-          actions: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              child: DropdownButton<int>(
-                value: _dias,
-                underline: const SizedBox(),
-                style: TextStyle(color: chrome.ink),
-                items:
-                    [30, 60, 90]
-                        .map(
-                          (d) => DropdownMenuItem(
-                            value: d,
-                            child: Text('$d dias'),
-                          ),
-                        )
-                        .toList(),
-                onChanged: (v) {
-                  if (v != null) {
-                    setState(() => _dias = v);
-                    _load();
-                  }
-                },
-              ),
-            ),
-          ],
         ),
         body:
             _loading
-                ? const SkeletonList(count: 6)
+                ? const Padding(
+                  padding: EdgeInsets.all(FxSettingsLayout.pageInset),
+                  child: SkeletonList(count: 6),
+                )
                 : _erro != null
                 ? FxErrorState(
                   chromeOnDark: chrome.isDark,
@@ -134,47 +125,74 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
                   onRetry: _load,
                   title: 'Não conseguimos carregar o engajamento',
                 )
-                : _eventos.isEmpty
-                ? ListView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  children: const [
-                    FxEmptyState(
-                      icon: 'trend',
-                      title: 'Nenhum evento registrado',
-                      subtitle:
-                          'Check-ins e treinos do aluno aparecerão aqui nos últimos dias.',
+                : FxContentWidthLimiter(child: _buildBody()),
+      ),
+    );
+  }
+
+  Widget _buildBody() {
+    return RefreshIndicator(
+      onRefresh: _load,
+      child: ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.fromLTRB(
+          FxSettingsLayout.pageInset,
+          8,
+          FxSettingsLayout.pageInset,
+          32,
+        ),
+        children: [
+          FxSettingsGroup(
+            header: 'Período',
+            children: [
+              FxSettingsTile(
+                fxIcon: 'calendar',
+                label: 'Janela',
+                value: engajamentoPeriodoLabel(_dias),
+                picker: true,
+                showDivider: false,
+                onTap: _pickPeriodo,
+              ),
+            ],
+          ),
+          if (_eventos.isEmpty)
+            FxEmptyState(
+              icon: 'trend',
+              title: 'Nenhum evento registrado',
+              subtitle:
+                  'Treinos, medidas e mensagens do aluno aparecem aqui na janela escolhida.',
+              action:
+                  _dias == 90
+                      ? null
+                      : FxEmptyAction(
+                        label: 'Ver 90 dias',
+                        onTap: _verNoventaDias,
+                      ),
+            )
+          else
+            FxSettingsGroup(
+              header: 'Eventos',
+              caption:
+                  'Treinos, medidas e mensagens nos últimos ${engajamentoPeriodoLabel(_dias)}.',
+              children: [
+                for (var i = 0; i < _eventos.length; i++)
+                  FxSettingsTile(
+                    fxIcon: engajamentoFxIcon(_eventos[i].tipo),
+                    label: engajamentoEventoLabel(
+                      _eventos[i].descricao,
+                      _eventos[i].tipo,
                     ),
-                  ],
-                )
-                : ListView.builder(
-                  padding: const EdgeInsets.all(TokensStrip.s4),
-                  itemCount: _eventos.length,
-                  itemBuilder: (_, i) {
-                    final e = _eventos[i];
-                    return FxSatelliteListTile(
-                      accent: primary,
-                      title: e.descricao,
-                      titleCase: false,
-                      subtitle: Text(
-                        e.tipo,
-                        style: TextStyle(color: chrome.mute),
-                      ),
-                      trailing: Text(
-                        _formatarDataHora(e.dataHora),
-                        style: FocuxHubTypography.bodyMuted(color: chrome.mute),
-                      ),
-                      leading: CircleAvatar(
-                        backgroundColor:
-                            Theme.of(context).colorScheme.primaryContainer,
-                        child: Icon(
-                          _iconForTipo(e.tipo),
-                          color: primary,
-                          size: 20,
-                        ),
-                      ),
-                    );
-                  },
-                ),
+                    subtitle: engajamentoEventoSubtitle(
+                      tipo: _eventos[i].tipo,
+                      dataHora: _eventos[i].dataHora,
+                    ),
+                    value: engajamentoWhenLabel(_eventos[i].dataHora),
+                    showDivider: i != _eventos.length - 1,
+                    onTap: () {},
+                  ),
+              ],
+            ),
+        ],
       ),
     );
   }
