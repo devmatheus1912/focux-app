@@ -21,4 +21,14 @@ void main() {
       'Nutrição prescrita para o aluno · Ana · há 1 min',
     );
   });
+
+  test('alimentarDetailSubtitle e kcal da refeição', () {
+    expect(alimentarDetailSubtitle(null), 'Refeições e macros do plano');
+    expect(
+      alimentarDetailSubtitle('há 1 min'),
+      'Refeições e macros do plano · há 1 min',
+    );
+    expect(alimentarRefeicaoKcalLabel(450), '450 kcal');
+    expect(alimentarRefeicaoKcalLabel(null), 'Sem kcal');
+  });
 }

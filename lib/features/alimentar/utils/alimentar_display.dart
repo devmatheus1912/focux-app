@@ -16,3 +16,15 @@ String alimentarHubSubtitle({
   if (stamp != null && stamp.isNotEmpty) return '$base · $stamp';
   return base;
 }
+
+String alimentarDetailSubtitle(String? freshness) {
+  const base = 'Refeições e macros do plano';
+  final stamp = freshness?.trim();
+  if (stamp == null || stamp.isEmpty) return base;
+  return '$base · $stamp';
+}
+
+String alimentarRefeicaoKcalLabel(int? calorias) {
+  if (calorias == null) return 'Sem kcal';
+  return '$calorias kcal';
+}
