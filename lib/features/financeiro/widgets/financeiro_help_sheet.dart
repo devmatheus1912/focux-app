@@ -28,6 +28,11 @@ Future<void> showFinanceiroHelpSheet(BuildContext context) {
         'Troque o mês no topo. Os números também abrem Mensalidades.',
         icon: 'target',
       ),
+      FxHelpTip(
+        'Como calculamos',
+        'Recebido do mês = mensalidades PAGO daquele mês. Pendente = soma ainda em aberto. Ticket = total pago ÷ quantidade de pagas. Atrasados = status ATRASADO.',
+        icon: 'help',
+      ),
     ],
   );
 }
