@@ -19,14 +19,20 @@ class Broadcast {
     required this.totalEnviados,
   });
 
-  factory Broadcast.fromJson(Map<String, dynamic> json) => Broadcast(
-    id: json['id'] as int,
-    titulo: json['titulo'] as String,
-    mensagem: json['mensagem'] as String,
-    tipoConsultoriaAlvo: json['tipoConsultoriaAlvo'] as String?,
-    enviadoEm: DateTime.parse(json['enviadoEm'] as String),
-    totalEnviados: json['totalEnviados'] as int,
-  );
+  factory Broadcast.fromJson(Map<String, dynamic> json) {
+    final idRaw = json['id'];
+    final countRaw = json['totalEnviados'];
+    return Broadcast(
+      id: idRaw is num ? idRaw.toInt() : 0,
+      titulo: '${json['titulo'] ?? ''}',
+      mensagem: '${json['mensagem'] ?? ''}',
+      tipoConsultoriaAlvo: json['tipoConsultoriaAlvo'] as String?,
+      enviadoEm:
+          DateTime.tryParse('${json['enviadoEm'] ?? ''}') ??
+          DateTime.fromMillisecondsSinceEpoch(0, isUtc: true),
+      totalEnviados: countRaw is num ? countRaw.toInt() : 0,
+    );
+  }
 }
 
 /// Repositório de broadcasts — envia notificações push em massa e lista histórico.
@@ -57,9 +63,11 @@ class BroadcastRepository {
   /// Lista o histórico de broadcasts enviados pelo personal autenticado.
   Future<List<Broadcast>> listar() async {
     final response = await _dio.get('/api/broadcasts');
-    final lista = response.data as List<dynamic>;
-    return lista
-        .map((e) => Broadcast.fromJson(e as Map<String, dynamic>))
+    final raw = response.data;
+    if (raw is! List) return const [];
+    return raw
+        .whereType<Map>()
+        .map((e) => Broadcast.fromJson(Map<String, dynamic>.from(e)))
         .toList();
   }
 }

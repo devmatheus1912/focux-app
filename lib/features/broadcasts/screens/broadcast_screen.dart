@@ -1,21 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../core/theme/fx_settings_layout.dart';
+import '../../../core/theme/shell_chrome.dart';
+import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
-
-import '../../../core/theme/focux_hub_typography.dart';
-import '../../../core/theme/shell_chrome.dart';
+import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_confirm_sheet.dart';
+import '../../../core/widgets/fx_content_width_limiter.dart';
+import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_help.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
+import '../../../core/widgets/fx_settings_group.dart';
+import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
-import 'package:focux_app/core/widgets/fx_motion.dart';
-import '../../../features/auth/providers/auth_provider.dart';
-import '../data/broadcast_repository.dart';
 import '../../../core/widgets/skeleton_loader.dart';
-import 'package:focux_app/core/widgets/fx_empty_state.dart';
-import 'package:focux_app/core/widgets/fx_error_state.dart';
-import 'package:focux_app/core/widgets/fx_input_deco.dart';
-import 'package:focux_app/core/widgets/feedback_helper.dart';
-import '../../../core/theme/tokens_strip.dart';
-import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
+import '../../alunos/widgets/aluno_inset_form_field.dart';
+import '../../auth/providers/auth_provider.dart';
+import '../data/broadcast_repository.dart';
+import '../utils/broadcast_display.dart';
+import 'widgets/broadcast_historico.dart';
 
 final _broadcastRepositoryProvider = Provider<BroadcastRepository>(
   (ref) => BroadcastRepository(ref.read(apiClientProvider)),
@@ -41,8 +47,6 @@ class _BroadcastScreenState extends ConsumerState<BroadcastScreen> {
   DateTime? _fetchedAt;
   ProviderSubscription<AsyncValue<List<Broadcast>>>? _freshnessSub;
 
-  static const _publicos = ['TODOS', 'ONLINE', 'PRESENCIAL', 'HIBRIDO'];
-
   @override
   void initState() {
     super.initState();
@@ -63,8 +67,38 @@ class _BroadcastScreenState extends ConsumerState<BroadcastScreen> {
     super.dispose();
   }
 
+  void _showHelp() {
+    showFxHelpSheet(
+      context,
+      title: 'Broadcasts',
+      subtitle: 'Avisa a base inteira sem abrir conversa por conversa.',
+      tips: const [
+        FxHelpTip(
+          'Público',
+          'Todos, online, presencial ou híbrido — o filtro usa o tipo de consultoria do aluno.',
+          icon: 'users',
+        ),
+        FxHelpTip(
+          'Envio',
+          'Confirme no sheet. A notificação vai para os apps dos alunos deste público.',
+          icon: 'message-circle',
+        ),
+      ],
+    );
+  }
+
   Future<void> _enviar() async {
+    if (_enviando) return;
     if (!_formKey.currentState!.validate()) return;
+    HapticFeedback.mediumImpact();
+    final ok = await showFxConfirmSheet(
+      context,
+      title: broadcastConfirmTitle(_publicoAlvo),
+      message: broadcastConfirmMessage(),
+      icon: Icons.send_rounded,
+      confirmLabel: broadcastConfirmLabel(),
+    );
+    if (!ok || !mounted) return;
     setState(() => _enviando = true);
     try {
       final resultado = await ref
@@ -72,7 +106,7 @@ class _BroadcastScreenState extends ConsumerState<BroadcastScreen> {
           .enviar(
             titulo: _tituloCtrl.text.trim(),
             mensagem: _mensagemCtrl.text.trim(),
-            tipoConsultoriaAlvo: _publicoAlvo == 'TODOS' ? null : _publicoAlvo,
+            tipoConsultoriaAlvo: broadcastTipoApi(_publicoAlvo),
           );
       _tituloCtrl.clear();
       _mensagemCtrl.clear();
@@ -81,7 +115,7 @@ class _BroadcastScreenState extends ConsumerState<BroadcastScreen> {
       if (!mounted) return;
       FeedbackHelper.showSuccess(
         context,
-        'Enviado para ${resultado.totalEnviados} alunos.',
+        broadcastSendSuccess(resultado.totalEnviados),
       );
     } catch (e) {
       if (!mounted) return;
@@ -95,355 +129,130 @@ class _BroadcastScreenState extends ConsumerState<BroadcastScreen> {
   Widget build(BuildContext context) {
     final historicoAsync = ref.watch(_broadcastHistoricoProvider);
     final chrome = ShellChrome.of(context);
-    final isDark = chrome.isDark;
-    final ink = chrome.ink;
-    final mute = chrome.mute;
-    final brand = Theme.of(context).colorScheme.primary;
+    final primary = Theme.of(context).colorScheme.primary;
     final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
 
     return fxScreenA11yScope(
       label: 'Broadcast',
       child: FxShellScaffold(
         useMesh: true,
-        safeArea: false,
         appBar: FxShellAppBar(
           title: 'Broadcasts',
-          subtitle: freshnessLabel ?? 'Central de mensageria',
+          subtitle: freshnessLabel ?? 'Mensagem para a base',
+          actions: [
+            Padding(
+              padding: const EdgeInsets.only(right: TokensStrip.s3),
+              child: Center(
+                child: Semantics(
+                  button: true,
+                  label: 'Enviar',
+                  child: ShellHeaderIconButton(
+                    icon: 'circle-check',
+                    tooltip: 'Enviar',
+                    onTap: _enviando ? () {} : _enviar,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
-        body: SafeArea(
-          child: RefreshIndicator(
-            onRefresh: () async => ref.invalidate(_broadcastHistoricoProvider),
-            child: ListView(
-              padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 10, 16, 28),
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(18),
-                  decoration: fxListCardDecoration(
-                    context,
-                    accent: brand,
-                    radius: 22,
-                  ),
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Text(
-                          'Nova mensagem',
-                          style: TextStyle(
-                            color: ink,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                        const SizedBox(height: 14),
-                        _DesignField(
-                          controller: _tituloCtrl,
-                          label: 'Titulo',
-                          hint: 'Ex.: Lembrete de treino...',
-                          maxLength: 100,
-                          validatorText: 'Informe o titulo',
-                        ),
-                        const SizedBox(height: 12),
-                        _DesignField(
-                          controller: _mensagemCtrl,
-                          label: 'Mensagem',
-                          hint: 'Digite sua mensagem para os alunos...',
-                          minLines: 3,
-                          validatorText: 'Informe a mensagem',
-                        ),
-                        const SizedBox(height: 14),
-                        Text(
-                          'Publico-alvo',
-                          style: TextStyle(
-                            color: mute,
-                            fontSize: 11.5,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Row(
-                          children: [
-                            for (final p in _publicos) ...[
-                              Expanded(
-                                child: _AudienceChip(
-                                  label: p,
-                                  selected: _publicoAlvo == p,
-                                  onTap: () => setState(() => _publicoAlvo = p),
-                                ),
-                              ),
-                              if (p != _publicos.last) const SizedBox(width: 7),
-                            ],
-                          ],
-                        ),
-                        const SizedBox(height: 18),
-                        FxLiquidPrimaryButton(
-                          label:
-                              _enviando ? 'Enviando...' : 'Enviar notificacao',
-                          icon: Icons.send_rounded,
-                          loading: _enviando,
-                          onPressed: _enviando ? null : _enviar,
-                        ),
-                      ],
-                    ),
-                  ),
+        body: RefreshIndicator(
+          onRefresh: () async {
+            ref.invalidate(_broadcastHistoricoProvider);
+            await ref.read(_broadcastHistoricoProvider.future);
+          },
+          child: FxContentWidthLimiter(
+            child: Form(
+              key: _formKey,
+              child: ListView(
+                padding: const EdgeInsets.fromLTRB(
+                  FxSettingsLayout.pageInset,
+                  TokensStrip.s3,
+                  FxSettingsLayout.pageInset,
+                  TokensStrip.s6,
                 ),
-                const SizedBox(height: 22),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                  child: Text(
-                    'Historico',
-                    style: FocuxHubTypography.cardTitle(color: ink),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                historicoAsync.when(
-                  loading: () => const SkeletonList(count: 4),
-                  error:
-                      (e, _) => FxErrorState(
-                        chromeOnDark: isDark,
-                        primary: brand,
-                        message: friendlyError(e),
-                        onRetry:
-                            () => ref.invalidate(_broadcastHistoricoProvider),
-                      ),
-                  data: (lista) {
-                    if (lista.isEmpty) {
-                      return const FxEmptyState(
-                        icon: 'message-circle',
-                        title: 'Nenhum broadcast enviado',
-                        subtitle:
-                            'Escreva a primeira mensagem acima para avisar sua base de uma vez.',
-                      );
-                    }
-                    return Column(
-                      children: [
-                        for (final b in lista) ...[
-                          _BroadcastCard(broadcast: b),
-                          const SizedBox(height: 8),
+                children: [
+                  FxSettingsGroup(
+                    header: 'Nova mensagem',
+                    caption: 'Título e texto da notificação push.',
+                    helpTooltip: 'Como funciona o broadcast',
+                    onHelpTap: _showHelp,
+                    children: [
+                      AlunoInsetFormField(
+                        controller: _tituloCtrl,
+                        label: 'Título',
+                        hint: 'Ex.: Lembrete de treino',
+                        icon: Icons.title_outlined,
+                        textCapitalization: TextCapitalization.sentences,
+                        inputFormatters: [
+                          LengthLimitingTextInputFormatter(100),
                         ],
-                      ],
-                    );
-                  },
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _DesignField extends StatelessWidget {
-  const _DesignField({
-    required this.controller,
-    required this.label,
-    required this.hint,
-    required this.validatorText,
-    this.minLines = 1,
-    this.maxLength,
-  });
-
-  final TextEditingController controller;
-  final String label;
-  final String hint;
-  final String validatorText;
-  final int minLines;
-  final int? maxLength;
-
-  @override
-  Widget build(BuildContext context) {
-    final chrome = ShellChrome.of(context);
-    final isDark = chrome.isDark;
-    final mute = chrome.mute;
-    final line = chrome.line;
-    final fill =
-        isDark ? Colors.white.withValues(alpha: 0.05) : TokensStrip.pageBg;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            color: mute,
-            fontSize: 11.5,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        const SizedBox(height: 5),
-        TextFormField(
-          controller: controller,
-          minLines: minLines,
-          maxLines: minLines == 1 ? 1 : 5,
-          maxLength: maxLength,
-          decoration: InputDecoration(
-            hintText: hint,
-            hintStyle: TextStyle(color: mute, fontSize: 14),
-            filled: true,
-            fillColor: fill,
-            counterText: '',
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 14,
-              vertical: 12,
-            ),
-            border: FxInputDeco.outlineBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: line),
-            ),
-            enabledBorder: FxInputDeco.outlineBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: line),
-            ),
-          ),
-          validator:
-              (v) => v == null || v.trim().isEmpty ? validatorText : null,
-        ),
-      ],
-    );
-  }
-}
-
-class _AudienceChip extends StatelessWidget {
-  const _AudienceChip({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final chrome = ShellChrome.of(context);
-    final isDark = chrome.isDark;
-    final brand = Theme.of(context).colorScheme.primary;
-    final mute = chrome.mute;
-    final line = chrome.line;
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(10),
-      child: Container(
-        height: 34,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color:
-              selected
-                  ? brand
-                  : (isDark
-                      ? Colors.white.withValues(alpha: 0.05)
-                      : TokensStrip.pageBg),
-          borderRadius: BorderRadius.circular(10),
-          border: selected ? null : Border.all(color: line),
-          boxShadow:
-              selected
-                  ? [
-                    BoxShadow(
-                      color: brand.withValues(alpha: 0.32),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ]
-                  : null,
-        ),
-        child: Text(
-          label,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(
-            color: selected ? Colors.white : mute,
-            fontSize: 10.5,
-            fontWeight: FontWeight.w800,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _BroadcastCard extends StatelessWidget {
-  const _BroadcastCard({required this.broadcast});
-
-  final Broadcast broadcast;
-
-  @override
-  Widget build(BuildContext context) {
-    final chrome = ShellChrome.of(context);
-    final isDark = chrome.isDark;
-    final ink = chrome.ink;
-    final mute = chrome.mute;
-    final brand = Theme.of(context).colorScheme.primary;
-    final publico = broadcast.tipoConsultoriaAlvo ?? 'TODOS';
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: fxListCardDecoration(context, accent: brand),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Text(
-                  broadcast.titulo,
-                  style: TextStyle(
-                    color: ink,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w800,
+                        validator:
+                            (v) =>
+                                v == null || v.trim().isEmpty
+                                    ? broadcastRequiredTitulo()
+                                    : null,
+                      ),
+                      AlunoInsetFormField(
+                        controller: _mensagemCtrl,
+                        label: 'Mensagem',
+                        hint: 'O que os alunos vão ler no aviso.',
+                        icon: Icons.notes_outlined,
+                        maxLines: 4,
+                        textCapitalization: TextCapitalization.sentences,
+                        inputFormatters: [
+                          LengthLimitingTextInputFormatter(2000),
+                        ],
+                        showDivider: false,
+                        validator:
+                            (v) =>
+                                v == null || v.trim().isEmpty
+                                    ? broadcastRequiredMensagem()
+                                    : null,
+                      ),
+                    ],
                   ),
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(
-                  color: brand.withValues(alpha: isDark ? 0.16 : 0.10),
-                  borderRadius: BorderRadius.circular(999),
-                ),
-                child: Text(
-                  '${broadcast.totalEnviados} alunos',
-                  style: TextStyle(
-                    color: brand,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w800,
+                  const SizedBox(height: FxSettingsLayout.groupGap),
+                  FxSettingsGroup(
+                    header: 'Público',
+                    caption: 'Quem recebe, pelo tipo de consultoria.',
+                    children: [
+                      for (var i = 0; i < broadcastPublicos.length; i++)
+                        FxSettingsTile(
+                          fxIcon: broadcastPublicoFxIcon(broadcastPublicos[i]),
+                          label: broadcastPublicoLabel(broadcastPublicos[i]),
+                          value: broadcastChoiceValue(
+                            _publicoAlvo == broadcastPublicos[i],
+                          ),
+                          highlight: _publicoAlvo == broadcastPublicos[i],
+                          showDivider: i != broadcastPublicos.length - 1,
+                          onTap:
+                              () => setState(
+                                () => _publicoAlvo = broadcastPublicos[i],
+                              ),
+                        ),
+                    ],
                   ),
-                ),
+                  const SizedBox(height: FxSettingsLayout.groupGap),
+                  historicoAsync.when(
+                    loading: () => const SkeletonList(count: 4),
+                    error:
+                        (e, _) => FxErrorState(
+                          chromeOnDark: chrome.isDark,
+                          primary: primary,
+                          message: friendlyError(e),
+                          onRetry:
+                              () =>
+                                  ref.invalidate(_broadcastHistoricoProvider),
+                        ),
+                    data: (lista) => BroadcastHistorico(itens: lista),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
-          const SizedBox(height: 6),
-          Text(
-            broadcast.mensagem,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(color: mute, height: 1.4, fontSize: 13),
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Icon(Icons.people_outline_rounded, size: 13, color: mute),
-              const SizedBox(width: 4),
-              Text(publico, style: TextStyle(color: mute, fontSize: 11)),
-              const SizedBox(width: 12),
-              Icon(Icons.schedule_rounded, size: 13, color: mute),
-              const SizedBox(width: 4),
-              Text(
-                _formatarData(broadcast.enviadoEm),
-                style: TextStyle(color: mute, fontSize: 11),
-              ),
-            ],
-          ),
-        ],
+        ),
       ),
     );
-  }
-
-  String _formatarData(DateTime dt) {
-    final dia = dt.day.toString().padLeft(2, '0');
-    final mes = dt.month.toString().padLeft(2, '0');
-    final hora = dt.hour.toString().padLeft(2, '0');
-    final min = dt.minute.toString().padLeft(2, '0');
-    return '$dia/$mes · $hora:$min';
   }
 }

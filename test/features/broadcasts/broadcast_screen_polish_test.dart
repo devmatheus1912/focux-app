@@ -4,14 +4,39 @@ import '../../support/screen_source_bundle.dart';
 
 void main() {
   test('broadcast cumpre contrato Tier S+', () {
-    final screen = readScreenSourceBundle('lib/features/broadcasts/screens/broadcast_screen.dart');
+    final screen = readScreenSourceBundle(
+      'lib/features/broadcasts/screens/broadcast_screen.dart',
+    );
     expect(screen, anyOf(contains('fxScreenA11yScope'), contains('Semantics(')));
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(screen, contains('FxShellScaffold'));
-    expect(screen, anyOf(contains('FxContentWidthLimiter'), isNot(contains('constrainWidth: false'))));
-    expect(screen, anyOf(contains('friendlyError'), contains('DashboardErrorState'), contains('FxEmptyState'), contains('_erro'), contains('_TrainingEmptyState'), contains('ref.invalidate')));
-    expect(screen, anyOf(contains('FxLoading'), contains('SkeletonLoader'), contains('SkeletonList'), contains('DashboardShimmer'), contains('Shimmer'), contains('IaCopilotInsightsLoading'), contains('_loading')));
-    expect(screen, contains('RefreshIndicator'));
-    expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(16));
+    expect(screen, contains('FxContentWidthLimiter'));
+    expect(screen, contains('friendlyError'));
+    expect(screen, contains('SkeletonList'));
+    expect(screen, contains('FxSettingsGroup'));
+    expect(screen, contains('FxSettingsTile'));
+    expect(screen, contains('FxSettingsLayout'));
+    expect(screen, contains('ShellHeaderIconButton'));
+    expect(screen, contains("icon: 'circle-check'"));
+    expect(screen, contains('AlunoInsetFormField'));
+    expect(screen, contains('showFxConfirmSheet'));
+    expect(screen, contains('showFxHelpSheet'));
+    expect(screen, isNot(contains('FxLiquidPrimaryButton')));
+    expect(screen, isNot(contains('FilterChip')));
+    expect(screen, isNot(contains('_AudienceChip')));
+    expect(screen, isNot(contains('_DesignField')));
+    expect(screen, isNot(contains('FloatingActionButton')));
+    expect(screen, isNot(contains('DropdownButton')));
+  });
+
+  test('broadcast historico segue pele do Perfil', () {
+    final historico = readScreenSourceBundle(
+      'lib/features/broadcasts/screens/widgets/broadcast_historico.dart',
+    );
+    expect(historico, contains('FxSettingsGroup'));
+    expect(historico, contains('FxSettingsTile'));
+    expect(historico, contains('FxEmptyState'));
+    expect(historico, isNot(contains('Icons.people_outline_rounded')));
+    expect(historico, isNot(contains('FxLiquidPrimaryButton')));
   });
 }
