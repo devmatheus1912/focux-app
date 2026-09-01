@@ -3,8 +3,6 @@ part of 'lead_detail_screen.dart';
 class _LeadDetailContent extends StatelessWidget {
   const _LeadDetailContent({
     required this.lead,
-    required this.color,
-    required this.podeConverter,
     required this.loadingInteracoes,
     required this.interacoes,
     required this.onDefinirFollowUp,
@@ -12,11 +10,10 @@ class _LeadDetailContent extends StatelessWidget {
     required this.onWhatsapp,
     required this.onConverter,
     required this.onArquivar,
+    required this.onNovaInteracao,
   });
 
   final Lead lead;
-  final Color color;
-  final bool podeConverter;
   final bool loadingInteracoes;
   final List<LeadInteracao> interacoes;
   final VoidCallback onDefinirFollowUp;
@@ -24,328 +21,153 @@ class _LeadDetailContent extends StatelessWidget {
   final VoidCallback onWhatsapp;
   final VoidCallback onConverter;
   final VoidCallback onArquivar;
+  final VoidCallback onNovaInteracao;
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
+    final telefone = lead.telefone?.trim();
+    final temTelefone = telefone != null && telefone.isNotEmpty;
+    final observacoes = lead.observacoes?.trim();
+    final objetivo = lead.objetivo?.trim();
+    final origem = lead.origem?.trim();
+    final historico = interacoes.reversed.toList();
+
+    return ListView(
       padding: const EdgeInsets.fromLTRB(
-        TokensStrip.s4,
-        TokensStrip.s4,
-        TokensStrip.s4,
-        96,
+        FxSettingsLayout.pageInset,
+        8,
+        FxSettingsLayout.pageInset,
+        32,
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Status chip
-          Center(
-            child: Chip(
-              label: Text(
-                _statusLabels[lead.status] ?? lead.status,
-                style: TextStyle(color: color, fontWeight: FontWeight.w700),
-              ),
-              backgroundColor: color.withValues(alpha: 0.12),
-              avatar: Icon(Icons.circle, size: 10, color: color),
+      children: [
+        FxSettingsGroup(
+          header: 'Prospect',
+          caption: 'Toque no follow-up para remarcar o próximo contato.',
+          children: [
+            FxSettingsTile(
+              fxIcon: 'users',
+              label: 'Nome',
+              value: lead.nome,
+              onTap: () {},
             ),
-          ),
-          const SizedBox(height: TokensStrip.s4),
-
-          // Info card
-          Container(
-            decoration: fxListCardDecoration(context),
-            child: Padding(
-              padding: const EdgeInsets.all(TokensStrip.s4),
-              child: Column(
-                children: [
-                  _InfoRow(label: 'Nome', value: lead.nome),
-                  if (lead.telefone != null)
-                    _InfoRow(label: 'Telefone', value: lead.telefone!),
-                  if (lead.origem != null)
-                    _InfoRow(label: 'Origem', value: lead.origem!),
-                  if (lead.objetivo != null)
-                    _InfoRow(label: 'Objetivo', value: lead.objetivo!),
-                  _InfoRow(label: 'Cadastrado em', value: lead.criadoEm),
-                  if (lead.convertidoEm != null)
-                    _InfoRow(
-                      label: 'Convertido em',
-                      value: lead.convertidoEm!,
-                    ),
-                ],
+            if (temTelefone)
+              FxSettingsTile(
+                fxIcon: 'message-circle',
+                label: 'Telefone',
+                value: telefone,
+                onTap: onLigar,
               ),
+            if (origem != null && origem.isNotEmpty)
+              FxSettingsTile(
+                fxIcon: 'spark',
+                label: 'Origem',
+                value: origem,
+                onTap: () {},
+              ),
+            if (objetivo != null && objetivo.isNotEmpty)
+              FxSettingsTile(
+                fxIcon: 'target',
+                label: 'Objetivo',
+                value: objetivo,
+                onTap: () {},
+              ),
+            FxSettingsTile(
+              fxIcon: 'calendar',
+              label: 'Cadastrado',
+              value: lead.criadoEm,
+              onTap: () {},
             ),
-          ),
-
-          // Próximo Contato / Follow-up
-          const SizedBox(height: 12),
-          Container(
-            decoration: fxListCardDecoration(context),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: TokensStrip.s4,
-                vertical: 10,
+            if (lead.convertidoEm != null)
+              FxSettingsTile(
+                fxIcon: 'circle-check',
+                label: 'Convertido',
+                value: lead.convertidoEm!,
+                onTap: () {},
               ),
-              child: Row(
-                children: [
-                  const Icon(Icons.event, color: EagleTokens.purpleAccent),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Próximo Contato',
-                          style: Theme.of(context).textTheme.labelMedium
-                              ?.copyWith(color: TokensStrip.textSecondary),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          lead.proximoContato ?? 'Não definido',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w500,
-                            color:
-                                lead.proximoContato != null
-                                    ? EagleTokens.purpleAccent
-                                    : TokensStrip.textSecondary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  TextButton.icon(
-                    onPressed: onDefinirFollowUp,
-                    icon: const Icon(Icons.edit_calendar, size: 16),
-                    label: const Text('Definir follow-up'),
-                  ),
-                ],
-              ),
+            FxSettingsTile(
+              fxIcon: 'calendar',
+              label: 'Próximo contato',
+              value: leadFollowUpValue(lead.proximoContato),
+              picker: true,
+              showDivider: observacoes != null && observacoes.isNotEmpty,
+              onTap: onDefinirFollowUp,
             ),
-          ),
-
-          if (lead.observacoes != null) ...[
-            const SizedBox(height: 12),
-            Container(
-              decoration: fxListCardDecoration(context),
-              child: Padding(
-                padding: const EdgeInsets.all(TokensStrip.s4),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Observações',
-                      style: Theme.of(context).textTheme.labelMedium
-                          ?.copyWith(color: TokensStrip.textSecondary),
-                    ),
-                    const SizedBox(height: TokensStrip.s2),
-                    Text(lead.observacoes!),
-                  ],
-                ),
+            if (observacoes != null && observacoes.isNotEmpty)
+              FxSettingsTile(
+                fxIcon: 'article',
+                label: 'Observações',
+                value: observacoes,
+                showDivider: false,
+                onTap: () {},
               ),
+          ],
+        ),
+        const SizedBox(height: FxSettingsLayout.groupGap),
+        FxSettingsGroup(
+          header: 'Ações',
+          children: [
+            if (temTelefone) ...[
+              FxSettingsTile(
+                fxIcon: 'message-circle',
+                label: 'Ligar',
+                value: telefone,
+                onTap: onLigar,
+              ),
+              FxSettingsTile(
+                fxIcon: 'chat',
+                label: 'WhatsApp',
+                value: telefone,
+                onTap: onWhatsapp,
+              ),
+            ],
+            if (leadPodeConverter(lead.status))
+              FxSettingsTile(
+                fxIcon: 'users',
+                label: 'Converter em aluno',
+                value: '',
+                onTap: onConverter,
+              ),
+            FxSettingsTile(
+              fxIcon: 'x',
+              label: 'Arquivar lead',
+              value: '',
+              danger: true,
+              showDivider: false,
+              onTap: onArquivar,
             ),
           ],
-
-          const SizedBox(height: TokensStrip.s5),
-          const Divider(),
-          const SizedBox(height: 8),
-
-          // Ações rápidas
-          if (lead.telefone != null) ...[
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: onLigar,
-                    icon: const Icon(Icons.phone),
-                    label: const Text('Ligar'),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: onWhatsapp,
-                    icon: const Icon(Icons.chat),
-                    label: const Text('WhatsApp'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: EagleTokens.good,
-                    ),
-                  ),
-                ),
-              ],
+        ),
+        const SizedBox(height: FxSettingsLayout.groupGap),
+        if (loadingInteracoes)
+          const SkeletonList(count: 3)
+        else if (interacoes.isEmpty)
+          FxEmptyState(
+            icon: 'chat',
+            title: 'Nenhuma interação registrada',
+            subtitle:
+                'Registre ligações, mensagens e visitas para não perder o histórico.',
+            action: FxEmptyAction(
+              label: 'Nova interação',
+              onTap: onNovaInteracao,
             ),
-            const SizedBox(height: 12),
-          ],
-
-          if (podeConverter) ...[
-            FilledButton.tonal(
-              onPressed: onConverter,
-              child: const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.person_add),
-                  SizedBox(width: 8),
-                  Text('Converter em Aluno'),
-                ],
-              ),
-            ),
-            const SizedBox(height: 8),
-          ],
-
-          OutlinedButton.icon(
-            onPressed: onArquivar,
-            icon: const Icon(Icons.archive),
-            label: const Text('Arquivar Lead'),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: TokensStrip.textSecondary,
-            ),
-          ),
-
-          // Interações
-          const SizedBox(height: TokensStrip.s5),
-          Row(
+          )
+        else
+          FxSettingsGroup(
+            header: 'Interações',
+            caption: '${historico.length} registro(s).',
             children: [
-              const Icon(Icons.timeline, size: 20),
-              const SizedBox(width: 8),
-              Text(
-                'Interações',
-                style: Theme.of(context).textTheme.titleSmall,
-              ),
-              const Spacer(),
-              if (!loadingInteracoes)
-                Text(
-                  '${interacoes.length}',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: TokensStrip.textSecondary,
-                  ),
+              for (var i = 0; i < historico.length; i++)
+                FxSettingsTile(
+                  fxIcon: leadInteracaoFxIcon(historico[i].tipo),
+                  label: leadInteracaoTipoLabel(historico[i].tipo),
+                  subtitle: historico[i].descricao,
+                  value: leadFollowUpValue(historico[i].dataInteracao),
+                  showDivider: i != historico.length - 1,
+                  onTap: () {},
                 ),
             ],
           ),
-          const SizedBox(height: 8),
-
-          if (loadingInteracoes)
-            Center(
-              child: Padding(
-                padding: const EdgeInsets.all(TokensStrip.s4),
-                child: FxLoading(
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-              ),
-            )
-          else if (interacoes.isEmpty)
-            Container(
-              decoration: fxListCardDecoration(context),
-              child: const FxEmptyState(
-                icon: 'chat',
-                title: 'Nenhuma interação registrada',
-                subtitle:
-                    'Registre ligações, mensagens e visitas para não perder o histórico.',
-              ),
-            )
-          else
-            ...interacoes.reversed.map((i) => _InteracaoTile(interacao: i)),
-        ],
-      ),
-    );
-  }
-}
-
-class _InteracaoTile extends StatelessWidget {
-  final LeadInteracao interacao;
-  const _InteracaoTile({required this.interacao});
-
-  @override
-  Widget build(BuildContext context) {
-    final icon = _tipoIcons[interacao.tipo] ?? Icons.note;
-    final dataStr =
-        interacao.dataInteracao != null
-            ? fxDateShort(DateTime.parse(interacao.dataInteracao!))
-            : '';
-
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Column(
-          children: [
-            Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primaryContainer,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                icon,
-                size: 18,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-            ),
-            Container(
-              width: 2,
-              height: 24,
-              color: Theme.of(context).dividerColor,
-            ),
-          ],
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.only(top: 4, bottom: 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Text(
-                      interacao.tipo,
-                      style: FocuxHubTypography.bodyMuted(
-                        color: Theme.of(context).colorScheme.onSurface,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    if (dataStr.isNotEmpty) ...[
-                      const SizedBox(width: 8),
-                      Text(
-                        dataStr,
-                        style: FocuxHubTypography.bodyMuted(
-                          color: TokensStrip.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  interacao.descricao,
-                  style: FocuxHubTypography.bodyMuted(
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
       ],
     );
   }
-}
-
-class _InfoRow extends StatelessWidget {
-  final String label, value;
-  const _InfoRow({required this.label, required this.value});
-
-  @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.symmetric(vertical: 6),
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(label, style: const TextStyle(color: TokensStrip.textSecondary)),
-        Flexible(
-          child: Text(
-            value,
-            textAlign: TextAlign.end,
-            style: const TextStyle(fontWeight: FontWeight.w500),
-          ),
-        ),
-      ],
-    ),
-  );
 }

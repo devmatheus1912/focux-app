@@ -99,7 +99,7 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
       if (mounted) {
         FeedbackHelper.showSuccess(
           context,
-          'Status atualizado para ${_statusLabels[novoStatus]}',
+          'Status atualizado para ${leadStatusLabel(novoStatus)}',
         );
       }
     } catch (e) {
@@ -188,126 +188,88 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
     }
   }
 
-  Future<void> _novaInteracao() async {
-    String tipo = 'WHATSAPP';
-    final descCtrl = TextEditingController();
-
-    await showFxHomeSheet(
+  Future<void> _abrirStatus() async {
+    final picked = await showFxInsetPickerSheet<String>(
       context,
-      builder: (ctx) {
-        final isDark = Theme.of(ctx).brightness == Brightness.dark;
-        final primary = Theme.of(ctx).colorScheme.primary;
-        return StatefulBuilder(
-          builder:
-              (ctx, setS) => FxHomeSheetSurface(
-                isDark: isDark,
-                maxHeight:
-                    MediaQuery.sizeOf(ctx).height *
-                    FxHomeSheetChrome.maxHeightFactor,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    FxHomeSheetHandle(isDark: isDark),
-                    SizedBox(height: TokensStrip.s4),
-                    FxHomeSheetHeader(
-                      isDark: isDark,
-                      title: 'Nova Interação',
-                      subtitle: 'Registre o contato com este lead.',
-                      leading: Icon(
-                        Icons.chat_bubble_outline_rounded,
-                        color: primary,
-                        size: 18,
-                      ),
-                    ),
-                    SizedBox(height: TokensStrip.s3),
-                    DropdownButtonFormField<String>(
-                      initialValue: tipo,
-                      decoration: InputDecoration(
-                        labelText: 'Tipo',
-                        border: FxInputDeco.outlineBorder(
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                        prefixIcon: Icon(Icons.category),
-                      ),
-                      items:
-                          _tiposInteracao
-                              .map(
-                                (t) => DropdownMenuItem(
-                                  value: t,
-                                  child: Row(
-                                    children: [
-                                      Icon(
-                                        _tipoIcons[t] ?? Icons.note,
-                                        size: 18,
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Text(t),
-                                    ],
-                                  ),
-                                ),
-                              )
-                              .toList(),
-                      onChanged: (v) {
-                        if (v != null) setS(() => tipo = v);
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    TextField(
-                      controller: descCtrl,
-                      decoration: InputDecoration(
-                        labelText: 'Descrição *',
-                        border: FxInputDeco.outlineBorder(
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                        alignLabelWithHint: true,
-                      ),
-                      maxLines: 3,
-                    ),
-                    const SizedBox(height: TokensStrip.s4),
-                    SizedBox(
-                      width: double.infinity,
-                      child: FxLiquidPrimaryButton(
-                        icon: Icons.save,
-                        label: 'Salvar',
-                        onPressed: () async {
-                          final desc = descCtrl.text.trim();
-                          if (desc.isEmpty) {
-                            FeedbackHelper.showError(
-                              ctx,
-                              'Informe a descrição',
-                            );
-                            return;
-                          }
-                          Navigator.pop(ctx);
-                          try {
-                            await LeadRepository(
-                              ref.read(apiClientProvider),
-                            ).adicionarInteracao(_activeLead.id, tipo, desc);
-                            await _carregarInteracoes();
-                            if (mounted) {
-                              FeedbackHelper.showSuccess(
-                                context,
-                                'Interação registrada!',
-                              );
-                            }
-                          } catch (e) {
-                            if (mounted) {
-                              FeedbackHelper.showError(
-                                context,
-                                friendlyError(e),
-                              );
-                            }
-                          }
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-        );
-      },
+      title: 'Status',
+      selected: _activeLead.status,
+      items: [
+        for (final s in leadStatusValues)
+          FxInsetPickerSheetItem(value: s, label: leadStatusLabel(s)),
+      ],
     );
-    descCtrl.dispose();
+    if (!mounted || picked == null || picked == _activeLead.status) return;
+    await _mudarStatus(picked);
+  }
+
+  Future<void> _novaInteracao() async {
+    var tipo = 'WHATSAPP';
+    final descCtrl = TextEditingController();
+    try {
+      final ok = await showFxFormSheet(
+        context,
+        title: 'Nova interação',
+        subtitle: 'Registre o contato com este lead.',
+        icon: Icons.chat_bubble_outline_rounded,
+        confirmLabel: 'Salvar',
+        child: StatefulBuilder(
+          builder:
+              (ctx, setDialogState) => Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  FxInsetPickerRow(
+                    icon: Icons.category_outlined,
+                    label: 'Tipo',
+                    value: leadInteracaoTipoLabel(tipo),
+                    onTap: () async {
+                      final picked = await showFxInsetPickerSheet<String>(
+                        ctx,
+                        title: 'Tipo',
+                        selected: tipo,
+                        items: [
+                          for (final t in leadInteracaoTipoValues)
+                            FxInsetPickerSheetItem(
+                              value: t,
+                              label: leadInteracaoTipoLabel(t),
+                            ),
+                        ],
+                      );
+                      if (picked == null) return;
+                      setDialogState(() => tipo = picked);
+                    },
+                  ),
+                  AlunoInsetFormField(
+                    controller: descCtrl,
+                    label: 'Descrição',
+                    icon: Icons.notes_outlined,
+                    maxLines: 3,
+                    showDivider: false,
+                  ),
+                ],
+              ),
+        ),
+      );
+      final desc = descCtrl.text.trim();
+      if (ok != true || desc.isEmpty) {
+        if (ok == true && mounted) {
+          FeedbackHelper.showError(context, 'Informe a descrição');
+        }
+        return;
+      }
+      await LeadRepository(
+        ref.read(apiClientProvider),
+      ).adicionarInteracao(_activeLead.id, tipo, desc);
+      await _carregarInteracoes();
+      if (mounted) {
+        FeedbackHelper.showSuccess(context, 'Interação registrada!');
+      }
+    } catch (e) {
+      if (mounted) {
+        FeedbackHelper.showError(context, friendlyError(e));
+      }
+    } finally {
+      descCtrl.dispose();
+    }
   }
 
   @override
@@ -337,66 +299,41 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
     }
 
     final lead = _lead!;
-    final color = _statusColor(
-      lead.status,
-      Theme.of(context).colorScheme.primary,
-    );
-    final podeConverter = lead.status != 'CONVERTIDO' && lead.status != 'ATIVO';
 
-    return FxShellScaffold(
-      useMesh: true,
-      appBar: FxShellAppBar(
-        title: lead.nome,
-        onBack: () => safePopOrGo(context, '/leads'),
-        actions: [
-          PopupMenuButton<String>(
-            onSelected: _mudarStatus,
-            itemBuilder:
-                (_) =>
-                    _statusOpcoes
-                        .map(
-                          (s) => PopupMenuItem(
-                            value: s,
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.circle,
-                                  size: 10,
-                                  color: _statusColor(
-                                    s,
-                                    Theme.of(context).colorScheme.primary,
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                Text(_statusLabels[s] ?? s),
-                              ],
-                            ),
-                          ),
-                        )
-                        .toList(),
-            child: const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16),
-              child: Icon(Icons.more_vert),
+    return fxScreenA11yScope(
+      label: 'Lead ${lead.nome}',
+      child: FxShellScaffold(
+        useMesh: true,
+        appBar: FxShellAppBar(
+          title: lead.nome,
+          subtitle: leadStatusLabel(lead.status),
+          onBack: () => safePopOrGo(context, '/leads'),
+          actions: [
+            ShellHeaderIconButton(
+              icon: 'trend',
+              tooltip: 'Mudar status',
+              onTap: _abrirStatus,
             ),
+            ShellHeaderIconButton(
+              icon: 'plus',
+              tooltip: 'Nova interação',
+              onTap: _novaInteracao,
+            ),
+          ],
+        ),
+        body: FxContentWidthLimiter(
+          child: _LeadDetailContent(
+            lead: lead,
+            loadingInteracoes: _loadingInteracoes,
+            interacoes: _interacoes,
+            onDefinirFollowUp: _definirFollowUp,
+            onLigar: _ligar,
+            onWhatsapp: _whatsapp,
+            onConverter: _converter,
+            onArquivar: _arquivar,
+            onNovaInteracao: _novaInteracao,
           ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _novaInteracao,
-        icon: const Icon(Icons.add_comment),
-        label: const Text('Nova Interação'),
-      ),
-      body: _LeadDetailContent(
-        lead: lead,
-        color: color,
-        podeConverter: podeConverter,
-        loadingInteracoes: _loadingInteracoes,
-        interacoes: _interacoes,
-        onDefinirFollowUp: _definirFollowUp,
-        onLigar: _ligar,
-        onWhatsapp: _whatsapp,
-        onConverter: _converter,
-        onArquivar: _arquivar,
+        ),
       ),
     );
   }
