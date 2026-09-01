@@ -26,9 +26,11 @@ import '../widgets/agenda_next_banner.dart';
 import '../../alunos/widgets/aluno_avatar.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
+import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
@@ -511,21 +513,58 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                                     ),
                                   ],
                                 )
-                              : ListView.separated(
+                              : ListView(
                                   physics:
                                       const AlwaysScrollableScrollPhysics(),
                                   padding: const EdgeInsets.fromLTRB(
-                                    TokensStrip.s4,
+                                    FxSettingsLayout.pageInset,
                                     0,
-                                    TokensStrip.s4,
+                                    FxSettingsLayout.pageInset,
                                     TokensStrip.s3,
                                   ),
-                                  itemCount: lane.length + (cancelled > 0 ? 1 : 0),
-                                  separatorBuilder: (_, __) =>
-                                      const SizedBox(height: TokensStrip.s2),
-                                  itemBuilder: (_, i) {
-                                    if (i >= lane.length) {
-                                      return Text(
+                                  children: [
+                                    FxSettingsGroup(
+                                      children: [
+                                        for (var i = 0; i < lane.length; i++)
+                                          if (lane[i] is AgendaLaneGap)
+                                            AgendaGapTile(
+                                              label: agendaGapLabel(
+                                                (lane[i] as AgendaLaneGap)
+                                                    .duration,
+                                              ),
+                                              showDivider: i < lane.length - 1,
+                                              onTap: () => _novoAgendamento(
+                                                slot: (lane[i] as AgendaLaneGap)
+                                                    .from,
+                                              ),
+                                            )
+                                          else
+                                            AgendaEventCard(
+                                              agendamento:
+                                                  (lane[i] as AgendaLaneEvent)
+                                                      .agendamento,
+                                              photoUrl: _photoFor(
+                                                (lane[i] as AgendaLaneEvent)
+                                                    .agendamento
+                                                    .alunoId,
+                                              ),
+                                              emphasized:
+                                                  (lane[i] as AgendaLaneEvent)
+                                                      .next,
+                                              showDivider: i < lane.length - 1,
+                                              onTap: () =>
+                                                  _openAgendamentoDetails(
+                                                (lane[i] as AgendaLaneEvent)
+                                                    .agendamento,
+                                              ),
+                                            ),
+                                      ],
+                                    ),
+                                    if (cancelled > 0) ...[
+                                      const SizedBox(
+                                        height: FxSettingsLayout.footerAfterGroup,
+                                      ),
+                                      Text(
                                         cancelled == 1
                                             ? '1 horário cancelado oculto'
                                             : '$cancelled horários cancelados ocultos',
@@ -535,26 +574,9 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                                           fontSize: 12,
                                           fontWeight: FontWeight.w600,
                                         ),
-                                      );
-                                    }
-                                    final item = lane[i];
-                                    if (item is AgendaLaneGap) {
-                                      return AgendaGapTile(
-                                        label: agendaGapLabel(item.duration),
-                                        onTap: () =>
-                                            _novoAgendamento(slot: item.from),
-                                      );
-                                    }
-                                    final ev = item as AgendaLaneEvent;
-                                    return AgendaEventCard(
-                                      agendamento: ev.agendamento,
-                                      photoUrl: _photoFor(ev.agendamento.alunoId),
-                                      emphasized: ev.next,
-                                      onTap: () => _openAgendamentoDetails(
-                                        ev.agendamento,
                                       ),
-                                    );
-                                  },
+                                    ],
+                                  ],
                                 ),
                         ),
                 ),
