@@ -356,27 +356,15 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
         subtitle: 'Tente outro termo ou revise a grafia.',
       );
     }
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(
-        FxSettingsLayout.pageInset,
-        8,
-        FxSettingsLayout.pageInset,
-        110,
+    return FxSettingsGroupedList(
+      itemCount: _searchResults!.length,
+      itemBuilder: (context, i) => _SearchResultTile(
+        msg: _searchResults![i],
+        isDark: isDark,
+        ink: ink,
+        mute: mute,
+        showDivider: i < _searchResults!.length - 1,
       ),
-      children: [
-        FxSettingsGroup(
-          children: [
-            for (var i = 0; i < _searchResults!.length; i++)
-              _SearchResultTile(
-                msg: _searchResults![i],
-                isDark: isDark,
-                ink: ink,
-                mute: mute,
-                showDivider: i < _searchResults!.length - 1,
-              ),
-          ],
-        ),
-      ],
     );
   }
 
@@ -446,70 +434,58 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
             AnalyticsService.instance.track(ProductEvents.chatInboxRefreshed);
             invalidateChatInboxCaches(ref);
           },
-          child: ListView(
-            padding: const EdgeInsets.fromLTRB(
-              FxSettingsLayout.pageInset,
-              8,
-              FxSettingsLayout.pageInset,
-              110,
-            ),
-            children: [
-              FxSettingsGroup(
-                children: [
-                  for (var i = 0; i < items.length; i++)
-                    Dismissible(
-                      key: Key('inbox-${items[i].alunoId}'),
-                      direction: _selectionActive
-                          ? DismissDirection.none
-                          : DismissDirection.horizontal,
-                      confirmDismiss: (direction) async {
-                        if (direction == DismissDirection.endToStart) {
-                          await _conversationAction(
-                            items[i].alunoId,
-                            isArchived ? 'unarchive' : 'archive',
-                          );
-                          return false;
-                        }
-                        await _conversationAction(items[i].alunoId, 'pin');
-                        return false;
-                      },
-                      background: Container(
-                        alignment: Alignment.centerLeft,
-                        padding: const EdgeInsets.only(left: 24),
-                        color: primary.withValues(alpha: 0.12),
-                        child: Icon(Icons.push_pin, color: primary),
-                      ),
-                      secondaryBackground: Container(
-                        alignment: Alignment.centerRight,
-                        padding: const EdgeInsets.only(right: 24),
-                        color: EagleTokens.warn.withValues(alpha: 0.12),
-                        child: Icon(
-                          isArchived ? Icons.unarchive : Icons.archive,
-                          color: EagleTokens.warn,
-                        ),
-                      ),
-                      child: _InboxTile(
-                        item: items[i],
-                        isDark: isDark,
-                        selected: _selectedAlunoIds.contains(items[i].alunoId),
-                        selecting: _selectionActive,
-                        showDivider: i < items.length - 1,
-                        onTap: () {
-                          if (_selectionActive) {
-                            _toggleSelection(items[i].alunoId);
-                            return;
-                          }
-                          _openThread(
-                            items[i].alunoId,
-                            extra: items[i].alunoNome,
-                          );
-                        },
-                        onLongPress: () => _toggleSelection(items[i].alunoId),
-                      ),
-                    ),
-                ],
+          child: FxSettingsGroupedList(
+            itemCount: items.length,
+            itemBuilder: (context, i) => Dismissible(
+              key: Key('inbox-${items[i].alunoId}'),
+              direction: _selectionActive
+                  ? DismissDirection.none
+                  : DismissDirection.horizontal,
+              confirmDismiss: (direction) async {
+                if (direction == DismissDirection.endToStart) {
+                  await _conversationAction(
+                    items[i].alunoId,
+                    isArchived ? 'unarchive' : 'archive',
+                  );
+                  return false;
+                }
+                await _conversationAction(items[i].alunoId, 'pin');
+                return false;
+              },
+              background: Container(
+                alignment: Alignment.centerLeft,
+                padding: const EdgeInsets.only(left: 24),
+                color: primary.withValues(alpha: 0.12),
+                child: Icon(Icons.push_pin, color: primary),
               ),
-            ],
+              secondaryBackground: Container(
+                alignment: Alignment.centerRight,
+                padding: const EdgeInsets.only(right: 24),
+                color: EagleTokens.warn.withValues(alpha: 0.12),
+                child: Icon(
+                  isArchived ? Icons.unarchive : Icons.archive,
+                  color: EagleTokens.warn,
+                ),
+              ),
+              child: _InboxTile(
+                item: items[i],
+                isDark: isDark,
+                selected: _selectedAlunoIds.contains(items[i].alunoId),
+                selecting: _selectionActive,
+                showDivider: i < items.length - 1,
+                onTap: () {
+                  if (_selectionActive) {
+                    _toggleSelection(items[i].alunoId);
+                    return;
+                  }
+                  _openThread(
+                    items[i].alunoId,
+                    extra: items[i].alunoNome,
+                  );
+                },
+                onLongPress: () => _toggleSelection(items[i].alunoId),
+              ),
+            ),
           ),
         );
       },
