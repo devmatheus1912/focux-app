@@ -1,24 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
-import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feature_gate.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
-import '../../../core/widgets/fx_form_sheet.dart';
-import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_error_state.dart';
-import '../../../core/widgets/fx_motion.dart';
+import '../../../core/widgets/fx_form_sheet.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
+import '../../../core/widgets/fx_settings_group.dart';
+import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
+import '../../alunos/widgets/aluno_inset_form_field.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../subscription/models/subscription_plan.dart';
 import '../data/equipe_repository.dart';
 import '../models/tenant_membro.dart';
+import '../utils/equipe_display.dart';
 
 final equipeRepositoryProvider = Provider(
   (ref) => EquipeRepository(ref.read(apiClientProvider)),
@@ -48,7 +51,6 @@ class _EquipeScreenState extends ConsumerState<EquipeScreen> {
       _loading = true;
       _error = null;
     });
-
     try {
       _membros = await ref.read(equipeRepositoryProvider).listar();
       if (!mounted) return;
@@ -67,31 +69,35 @@ class _EquipeScreenState extends ConsumerState<EquipeScreen> {
 
   Future<void> _convidar() async {
     final ctrl = TextEditingController();
-    final ok = await showFxFormSheet(
-      context,
-      title: 'Convidar assistente',
-      icon: Icons.person_add_outlined,
-      confirmLabel: 'Convidar',
-      child: TextField(
-        controller: ctrl,
-        decoration: FxInputDeco.build(context, 'Email'),
-        keyboardType: TextInputType.emailAddress,
-      ),
-    );
-
-    if (ok != true || ctrl.text.trim().isEmpty) return;
-
+    var sent = false;
     try {
+      final ok = await showFxFormSheet(
+        context,
+        title: 'Convidar assistente',
+        icon: Icons.mail_outline_rounded,
+        confirmLabel: 'Convidar',
+        child: AlunoInsetFormField(
+          controller: ctrl,
+          label: 'Email',
+          icon: Icons.alternate_email_outlined,
+          keyboardType: TextInputType.emailAddress,
+          showDivider: false,
+        ),
+      );
+      if (ok != true || ctrl.text.trim().isEmpty) return;
       await ref
           .read(equipeRepositoryProvider)
           .convidar(email: ctrl.text.trim());
-      await _load();
-      if (!mounted) return;
-      FeedbackHelper.showSuccess(context, 'Convite enviado');
+      sent = true;
+      if (mounted) FeedbackHelper.showSuccess(context, 'Convite enviado');
     } catch (e) {
-      if (!mounted) return;
-      FeedbackHelper.showError(context, friendlyError(e));
+      if (mounted) {
+        FeedbackHelper.showError(context, friendlyError(e));
+      }
+    } finally {
+      ctrl.dispose();
     }
+    if (sent) await _load();
   }
 
   @override
@@ -110,20 +116,21 @@ class _EquipeScreenState extends ConsumerState<EquipeScreen> {
           useMesh: true,
           appBar: FxShellAppBar(
             title: 'Equipe',
-            subtitle: freshnessLabel ?? 'Assistentes e permissões',
-          ),
-          floatingActionButton: Semantics(
-            label: 'Convidar membro da equipe',
-            button: true,
-            child: FloatingActionButton.extended(
-              onPressed: _convidar,
-              icon: const Icon(Icons.person_add),
-              label: const Text('Convidar'),
-            ),
+            subtitle: equipeHubSubtitle(freshnessLabel),
+            actions: [
+              ShellHeaderIconButton(
+                icon: 'plus',
+                tooltip: 'Convidar membro',
+                onTap: _convidar,
+              ),
+            ],
           ),
           body:
               _loading
-                  ? const SkeletonList(count: 5)
+                  ? const Padding(
+                    padding: EdgeInsets.all(FxSettingsLayout.pageInset),
+                    child: SkeletonList(count: 5),
+                  )
                   : _error != null
                   ? FxErrorState(
                     chromeOnDark: chrome.isDark,
@@ -132,47 +139,51 @@ class _EquipeScreenState extends ConsumerState<EquipeScreen> {
                     onRetry: _load,
                     title: 'Não conseguimos carregar a equipe',
                   )
-                  : _membros.isEmpty
-                  ? FxEmptyState(
-                    icon: 'users',
-                    title: 'Nenhum membro',
-                    subtitle: 'Convide assistentes para escalar sua operação.',
-                    action: FxEmptyAction(label: 'Convidar', onTap: _convidar),
-                  )
-                  : RefreshIndicator(
-                    onRefresh: _load,
-                    child: ListView.builder(
-                      padding: const EdgeInsets.fromLTRB(
-                        TokensStrip.s4,
-                        TokensStrip.s2,
-                        TokensStrip.s4,
-                        96,
-                      ),
-                      itemCount: _membros.length,
-                      itemBuilder: (_, i) {
-                        final membro = _membros[i];
-                        return FxStaggerItem(
-                          index: i,
-                          child: Semantics(
-                            label: 'Membro ${membro.userEmail}',
-                            child: FxSatelliteListTile(
-                              accent: scheme.primary,
-                              title: membro.userEmail,
-                              titleCase: false,
-                              subtitle: Text(
-                                '${membro.role} · ${membro.status}',
-                              ),
-                              leading: Icon(
-                                Icons.person_outline,
-                                color: scheme.primary,
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
+                  : FxContentWidthLimiter(child: _buildBody()),
         ),
+      ),
+    );
+  }
+
+  Widget _buildBody() {
+    return RefreshIndicator(
+      onRefresh: _load,
+      child: ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.fromLTRB(
+          FxSettingsLayout.pageInset,
+          8,
+          FxSettingsLayout.pageInset,
+          32,
+        ),
+        children: [
+          if (_membros.isEmpty)
+            FxEmptyState(
+              icon: 'users',
+              title: 'Nenhum membro',
+              subtitle: 'Convide assistentes para escalar sua operação.',
+              action: FxEmptyAction(label: 'Convidar', onTap: _convidar),
+            )
+          else
+            FxSettingsGroup(
+              header: 'Membros',
+              caption: 'Papel e status de cada convite.',
+              children: [
+                for (var i = 0; i < _membros.length; i++)
+                  FxSettingsTile(
+                    fxIcon: 'users',
+                    label: _membros[i].userEmail,
+                    subtitle: equipeMembroSubtitle(
+                      role: _membros[i].role,
+                      status: _membros[i].status,
+                    ),
+                    value: equipeStatusLabel(_membros[i].status),
+                    showDivider: i != _membros.length - 1,
+                    onTap: () {},
+                  ),
+              ],
+            ),
+        ],
       ),
     );
   }
