@@ -1,26 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/analytics/analytics_service.dart';
-import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
-import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/feature_gate.dart';
+import '../../../core/widgets/fx_confirm_sheet.dart';
+import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
-import '../../../core/widgets/fx_form_sheet.dart';
-import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_form_sheet.dart';
+import '../../../core/widgets/fx_inset_picker_row.dart';
+import '../../../core/widgets/fx_inset_picker_sheet.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
+import '../../../core/widgets/fx_settings_group.dart';
+import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
+import '../../../features/alunos/widgets/aluno_inset_form_field.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../../features/planos/data/planos_repository.dart';
 import '../../../features/planos/providers/plano_features_provider.dart';
 import '../../../features/subscription/models/subscription_plan.dart';
 import '../data/habito_repository.dart';
+import '../utils/habitos_display.dart';
 
 final _repoProvider = Provider(
   (ref) => HabitoRepository(ref.read(apiClientProvider)),
@@ -85,55 +92,78 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
     HabitoTemplate? selected;
     final tituloCtrl = TextEditingController();
     final descricaoCtrl = TextEditingController();
-    final ok = await showFxFormSheet(
-      context,
-      title: 'Novo hábito',
-      icon: Icons.add_task_outlined,
-      confirmLabel: 'Criar',
-      child: StatefulBuilder(
-        builder:
-            (ctx, setDialogState) => Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (templates.isNotEmpty) ...[
-                  DropdownButtonFormField<HabitoTemplate>(
-                    decoration: FxInputDeco.build(ctx, 'Template'),
-                    items:
-                        templates
-                            .map(
-                              (t) => DropdownMenuItem(
-                                value: t,
-                                child: Text('${t.icone ?? ''} ${t.titulo}'),
+    var created = false;
+    try {
+      final ok = await showFxFormSheet(
+        context,
+        title: 'Novo hábito',
+        subtitle: 'Vale para todos os seus alunos.',
+        icon: Icons.add_task_outlined,
+        confirmLabel: 'Criar',
+        child: StatefulBuilder(
+          builder:
+              (ctx, setDialogState) => Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (templates.isNotEmpty)
+                    FxInsetPickerRow(
+                      icon: Icons.auto_awesome_outlined,
+                      label: 'Template',
+                      value: habitoTemplateValue(
+                        selected?.titulo,
+                        icone: selected?.icone,
+                      ),
+                      onTap: () async {
+                        final picked = await showFxInsetPickerSheet<String>(
+                          ctx,
+                          title: 'Template',
+                          selected: selected?.tipo,
+                          items: [
+                            for (final t in templates)
+                              FxInsetPickerSheetItem(
+                                value: t.tipo,
+                                label: habitoTemplateLabel(
+                                  titulo: t.titulo,
+                                  icone: t.icone,
+                                ),
                               ),
-                            )
-                            .toList(),
-                    onChanged: (t) {
-                      setDialogState(() {
-                        selected = t;
-                        if (t != null) {
-                          tituloCtrl.text = t.titulo;
-                          descricaoCtrl.text = t.descricao ?? '';
+                          ],
+                        );
+                        if (picked == null) return;
+                        HabitoTemplate? match;
+                        for (final t in templates) {
+                          if (t.tipo == picked) {
+                            match = t;
+                            break;
+                          }
                         }
-                      });
-                    },
+                        final template = match;
+                        if (template == null) return;
+                        setDialogState(() {
+                          selected = template;
+                          tituloCtrl.text = template.titulo;
+                          descricaoCtrl.text = template.descricao ?? '';
+                        });
+                      },
+                    ),
+                  AlunoInsetFormField(
+                    controller: tituloCtrl,
+                    label: 'Título',
+                    icon: Icons.title_outlined,
+                    showDivider: true,
                   ),
-                  const SizedBox(height: 8),
+                  AlunoInsetFormField(
+                    controller: descricaoCtrl,
+                    label: 'Descrição (opcional)',
+                    icon: Icons.notes_outlined,
+                    maxLines: 2,
+                    showDivider: false,
+                  ),
                 ],
-                TextField(
-                  controller: tituloCtrl,
-                  decoration: FxInputDeco.build(ctx, 'Título'),
-                ),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: descricaoCtrl,
-                  decoration: FxInputDeco.build(ctx, 'Descrição (opcional)'),
-                ),
-              ],
-            ),
-      ),
-    );
-    if (ok == true && tituloCtrl.text.trim().isNotEmpty) {
-      try {
+              ),
+        ),
+      );
+      if (ok == true && tituloCtrl.text.trim().isNotEmpty) {
         await ref
             .read(_repoProvider)
             .criar(
@@ -151,11 +181,33 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
           ProductEvents.habitoCreated,
           props: {'feature': 'habitos'},
         );
-        await _carregar();
-      } catch (e) {
-        if (!mounted) return;
-        FeedbackHelper.showError(context, friendlyError(e));
+        created = true;
       }
+    } catch (e) {
+      if (mounted) FeedbackHelper.showError(context, friendlyError(e));
+    } finally {
+      tituloCtrl.dispose();
+      descricaoCtrl.dispose();
+    }
+    if (created) await _carregar();
+  }
+
+  Future<void> _desativar(Habito h) async {
+    final ok = await showFxConfirmSheet(
+      context,
+      title: 'Desativar hábito?',
+      subtitle: h.titulo,
+      message: 'Os alunos deixam de ver este hábito. Dá para criar outro depois.',
+      confirmLabel: 'Desativar',
+      destructive: true,
+    );
+    if (!ok || !mounted) return;
+    try {
+      await ref.read(_repoProvider).desativar(h.id);
+      await _carregar();
+    } catch (e) {
+      if (!mounted) return;
+      FeedbackHelper.showError(context, friendlyError(e));
     }
   }
 
@@ -182,157 +234,114 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
           useMesh: true,
           appBar: FxShellAppBar(
             title: 'Hábitos & Compliance',
-            subtitle: freshnessLabel ?? 'Coaching diário e aderência',
+            subtitle: habitoHubSubtitle(freshnessLabel),
+            actions: [
+              ShellHeaderIconButton(
+                icon: 'plus',
+                tooltip: 'Novo hábito',
+                onTap: _novoHabito,
+              ),
+            ],
           ),
-        floatingActionButton: Semantics(
-          label: 'Novo hábito',
-          button: true,
-          child: FloatingActionButton.extended(
-            onPressed: _novoHabito,
-            icon: const Icon(Icons.add),
-            label: const Text('Novo hábito'),
-          ),
-        ),
-        body:
-            _loading
-                ? const Padding(
-                  padding: EdgeInsets.all(TokensStrip.s4),
-                  child: SkeletonList(count: 5),
-                )
-                : _error != null
-                ? FxErrorState(
-                  chromeOnDark: chrome.isDark,
-                  primary: primary,
-                  message: _error!,
-                  onRetry: _carregar,
-                )
-                : RefreshIndicator(
-                  onRefresh: _carregar,
-                  child: ListView(
-                    padding: const EdgeInsets.all(16),
-                    children: [
-                      _SectionHeader(
-                        titulo: 'Hábitos cadastrados',
-                        subtitulo: 'Aplica para todos os seus alunos',
-                      ),
-                      if (_habitos.isEmpty)
-                        FxEmptyState(
-                          icon: 'circle-check',
-                          title: 'Nenhum hábito cadastrado',
-                          subtitle:
-                              'Hábitos diários (água, sono, refeições) aumentam aderência e reduzem churn.',
-                          action: FxEmptyAction(
-                            label: 'Novo hábito',
-                            onTap: _novoHabito,
-                          ),
-                        )
-                      else
-                        ..._habitos.map(
-                          (h) => FxSatelliteListTile(
-                            title: h.titulo,
-                            titleCase: false,
-                            leading: Icon(
-                              Icons.fitness_center_rounded,
-                              color: primary,
-                            ),
-                            subtitle: Text(
-                              h.descricao ?? 'Meta semanal: ${h.metaSemanal}x',
-                            ),
-                            trailing: IconButton(
-                              icon: const Icon(Icons.delete_outline_rounded),
-                              onPressed: () async {
-                                await ref.read(_repoProvider).desativar(h.id);
-                                await _carregar();
-                              },
-                            ),
-                          ),
-                        ),
-                      const SizedBox(height: 24),
-                      _SectionHeader(
-                        titulo: 'Compliance da semana',
-                        subtitulo: 'Aderência dos seus alunos aos hábitos',
-                      ),
-                      if (_compliance.isEmpty)
-                        const FxEmptyState(
-                          icon: 'trend',
-                          title: 'Sem dados ainda',
-                          subtitle:
-                              'Cadastre hábitos e os alunos vão começar a marcar.',
-                        )
-                      else
-                        ..._compliance.map((c) => _ComplianceTile(item: c)),
-                      const SizedBox(height: 80),
-                    ],
-                  ),
-                ),
+          body:
+              _loading
+                  ? const Padding(
+                    padding: EdgeInsets.all(FxSettingsLayout.pageInset),
+                    child: SkeletonList(count: 5),
+                  )
+                  : _error != null
+                  ? FxErrorState(
+                    chromeOnDark: chrome.isDark,
+                    primary: primary,
+                    message: _error!,
+                    onRetry: _carregar,
+                  )
+                  : FxContentWidthLimiter(child: _buildBody()),
         ),
       ),
     );
   }
-}
 
-class _SectionHeader extends StatelessWidget {
-  const _SectionHeader({required this.titulo, required this.subtitulo});
-  final String titulo;
-  final String subtitulo;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildBody() {
+    return RefreshIndicator(
+      onRefresh: _carregar,
+      child: ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.fromLTRB(
+          FxSettingsLayout.pageInset,
+          8,
+          FxSettingsLayout.pageInset,
+          32,
+        ),
         children: [
-          Text(
-            titulo,
-            style: Theme.of(
-              context,
-            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
-          ),
-          Text(
-            subtitulo,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).colorScheme.outline,
+          if (_habitos.isEmpty)
+            FxEmptyState(
+              icon: 'circle-check',
+              title: 'Nenhum hábito cadastrado',
+              subtitle:
+                  'Hábitos diários (água, sono, refeições) aumentam aderência e reduzem churn.',
+              action: FxEmptyAction(
+                label: 'Novo hábito',
+                onTap: _novoHabito,
+              ),
+            )
+          else
+            FxSettingsGroup(
+              header: 'Hábitos cadastrados',
+              caption: 'Toque para desativar. Vale para todos os seus alunos.',
+              children: [
+                for (var i = 0; i < _habitos.length; i++)
+                  FxSettingsTile(
+                    fxIcon: 'circle-check',
+                    label: _habitos[i].titulo,
+                    subtitle: habitoSubtitle(
+                      descricao: _habitos[i].descricao,
+                      metaSemanal: _habitos[i].metaSemanal,
+                    ),
+                    value: habitoMetaValue(_habitos[i].metaSemanal),
+                    numeric: true,
+                    showDivider: i != _habitos.length - 1,
+                    onTap: () => _desativar(_habitos[i]),
+                  ),
+              ],
             ),
-          ),
+          const SizedBox(height: FxSettingsLayout.groupGap),
+          if (_compliance.isEmpty)
+            const FxEmptyState(
+              icon: 'trend',
+              title: 'Sem dados ainda',
+              subtitle: 'Cadastre hábitos e os alunos vão começar a marcar.',
+            )
+          else
+            FxSettingsGroup(
+              header: 'Compliance da semana',
+              caption: 'Toque para abrir o aluno.',
+              children: [
+                for (var i = 0; i < _compliance.length; i++)
+                  FxSettingsTile(
+                    fxIcon: habitoComplianceFxIcon(
+                      _compliance[i].compliancePct,
+                    ),
+                    label: habitoComplianceLabel(_compliance[i].alunoNome),
+                    subtitle: habitoComplianceSubtitle(
+                      _compliance[i].checksSemana,
+                    ),
+                    value: habitoComplianceValue(
+                      _compliance[i].compliancePct,
+                    ),
+                    numeric: true,
+                    danger: habitoComplianceDanger(
+                      _compliance[i].compliancePct,
+                    ),
+                    showDivider: i != _compliance.length - 1,
+                    onTap:
+                        () => context.push(
+                          '/alunos/${_compliance[i].alunoId}',
+                        ),
+                  ),
+              ],
+            ),
         ],
-      ),
-    );
-  }
-}
-
-class _ComplianceTile extends StatelessWidget {
-  const _ComplianceTile({required this.item});
-  final ComplianceItem item;
-
-  @override
-  Widget build(BuildContext context) {
-    final color =
-        item.compliancePct >= 70
-            ? EagleTokens.good
-            : item.compliancePct >= 40
-            ? EagleTokens.warn
-            : EagleTokens.bad;
-    return FxSatelliteListTile(
-      title: item.alunoNome,
-      accent: color,
-      leading: CircleAvatar(
-        backgroundColor: color.withValues(alpha: 0.15),
-        child: Text(
-          '${item.compliancePct}%',
-          style: TextStyle(
-            color: color,
-            fontSize: 12,
-            fontWeight: FontWeight.w800,
-          ),
-        ),
-      ),
-      subtitle: Text('${item.checksSemana} checks na semana'),
-      trailing: Icon(
-        item.compliancePct >= 70
-            ? Icons.trending_up_rounded
-            : Icons.trending_down_rounded,
-        color: color,
       ),
     );
   }
