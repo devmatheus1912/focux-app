@@ -293,6 +293,7 @@ class IaRepository {
         data: {
           'alunoId': alunoId,
           'tipoAcao': tipoAcao,
+          'confirm': true,
           if (parametros != null && parametros.isNotEmpty)
             'parametros': parametros,
         },
