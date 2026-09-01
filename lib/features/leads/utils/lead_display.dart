@@ -32,6 +32,23 @@ String leadOrigemLabel(String? origem) {
 
 String leadNovoHubSubtitle() => 'Cadastre um prospect no CRM';
 
+const leadNomeMax = 100;
+const leadTelefoneMax = 20;
+const leadObjetivoMax = 300;
+const leadObservacoesMax = 1000;
+
+String leadSalvarTooltip() => 'Salvar lead';
+
+String leadConfirmTitle() => 'Salvar este prospect?';
+
+String leadConfirmMessage(String nome) {
+  final value = nome.trim();
+  if (value.isEmpty) return 'O nome entra no funil de leads.';
+  return '$value entra no funil de leads.';
+}
+
+String leadConfirmLabel() => 'Salvar';
+
 String leadStatusLabel(String? status) {
   switch ((status ?? '').trim().toUpperCase()) {
     case 'LEAD':

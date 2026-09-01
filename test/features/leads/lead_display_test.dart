@@ -8,6 +8,13 @@ void main() {
     expect(leadOrigemLabel('Instagram'), 'Instagram');
     expect(leadOrigemValues, containsAll(['Instagram', 'WhatsApp', 'Outro']));
     expect(leadNovoHubSubtitle(), 'Cadastre um prospect no CRM');
+    expect(leadSalvarTooltip(), 'Salvar lead');
+    expect(leadConfirmTitle(), 'Salvar este prospect?');
+    expect(leadConfirmLabel(), 'Salvar');
+    expect(leadConfirmMessage('  '), 'O nome entra no funil de leads.');
+    expect(leadConfirmMessage('Ana'), 'Ana entra no funil de leads.');
+    expect(leadNomeMax, 100);
+    expect(leadTelefoneMax, 20);
   });
 
   test('leadStatus e conversão', () {

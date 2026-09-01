@@ -3,13 +3,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/analytics/analytics_service.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/fx_settings_layout.dart';
+import '../../../core/theme/shell_chrome.dart';
+import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
+import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_inset_picker_sheet.dart';
-import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
@@ -44,6 +48,26 @@ class _AddLeadScreenState extends ConsumerState<AddLeadScreen> {
     super.dispose();
   }
 
+  void _showHelp() {
+    showFxHelpSheet(
+      context,
+      title: 'Novo Lead',
+      subtitle: leadNovoHubSubtitle(),
+      tips: const [
+        FxHelpTip(
+          'Nome',
+          'É o único campo obrigatório. O prospect entra no funil como Lead.',
+          icon: 'users',
+        ),
+        FxHelpTip(
+          'Plano Free',
+          'O Free segura 5 leads. No Pro o CRM não tem esse teto.',
+          icon: 'spark',
+        ),
+      ],
+    );
+  }
+
   Future<void> _abrirOrigem() async {
     final picked = await showFxInsetPickerSheet<String>(
       context,
@@ -59,8 +83,17 @@ class _AddLeadScreenState extends ConsumerState<AddLeadScreen> {
   }
 
   Future<void> _salvar() async {
+    if (_saving) return;
     if (!_formKey.currentState!.validate()) return;
     HapticFeedback.mediumImpact();
+    final ok = await showFxConfirmSheet(
+      context,
+      title: leadConfirmTitle(),
+      message: leadConfirmMessage(_nome.text),
+      icon: Icons.badge_outlined,
+      confirmLabel: leadConfirmLabel(),
+    );
+    if (!ok || !mounted) return;
     setState(() => _saving = true);
     try {
       await LeadRepository(ref.read(apiClientProvider)).criar(
@@ -70,7 +103,14 @@ class _AddLeadScreenState extends ConsumerState<AddLeadScreen> {
         objetivo: _objetivo.text.trim(),
         observacoes: _observacoes.text.trim(),
       );
-      if (mounted) safePopOrGo(context, '/leads');
+      AnalyticsService.instance.track(
+        ProductEvents.leadCreatedOrOpened,
+        props: {'feature': 'leads', 'action': 'salvar'},
+      );
+      if (mounted) {
+        FeedbackHelper.showSuccess(context, 'Lead salvo no funil.');
+        safePopOrGo(context, '/leads');
+      }
     } catch (e) {
       if (mounted) {
         if (e is DioException && e.response?.statusCode == 403) {
@@ -101,6 +141,22 @@ class _AddLeadScreenState extends ConsumerState<AddLeadScreen> {
         title: 'Novo Lead',
         subtitle: leadNovoHubSubtitle(),
         onBack: () => safePopOrGo(context, '/leads'),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: TokensStrip.s3),
+            child: Center(
+              child: Semantics(
+                button: true,
+                label: _saving ? 'Salvando lead' : leadSalvarTooltip(),
+                child: ShellHeaderIconButton(
+                  icon: 'circle-check',
+                  tooltip: leadSalvarTooltip(),
+                  onTap: _saving ? () {} : _salvar,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
       body: FxContentWidthLimiter(
         child: Form(
@@ -116,12 +172,17 @@ class _AddLeadScreenState extends ConsumerState<AddLeadScreen> {
               FxSettingsGroup(
                 header: 'Prospect',
                 caption: 'Nome é obrigatório. O restante ajuda no follow-up.',
+                helpTooltip: 'Como cadastrar um lead',
+                onHelpTap: _showHelp,
                 children: [
                   AlunoInsetFormField(
                     controller: _nome,
                     label: 'Nome',
                     icon: Icons.badge_outlined,
                     textCapitalization: TextCapitalization.words,
+                    inputFormatters: [
+                      LengthLimitingTextInputFormatter(leadNomeMax),
+                    ],
                     validator:
                         (v) =>
                             v == null || v.trim().isEmpty
@@ -133,6 +194,9 @@ class _AddLeadScreenState extends ConsumerState<AddLeadScreen> {
                     label: 'Telefone / WhatsApp',
                     icon: Icons.phone_outlined,
                     keyboardType: TextInputType.phone,
+                    inputFormatters: [
+                      LengthLimitingTextInputFormatter(leadTelefoneMax),
+                    ],
                   ),
                   FxSettingsTile(
                     fxIcon: 'spark',
@@ -146,6 +210,9 @@ class _AddLeadScreenState extends ConsumerState<AddLeadScreen> {
                     label: 'Objetivo',
                     hint: 'Ex.: emagrecer, hipertrofiar',
                     icon: Icons.flag_outlined,
+                    inputFormatters: [
+                      LengthLimitingTextInputFormatter(leadObjetivoMax),
+                    ],
                   ),
                   AlunoInsetFormField(
                     controller: _observacoes,
@@ -153,19 +220,11 @@ class _AddLeadScreenState extends ConsumerState<AddLeadScreen> {
                     icon: Icons.notes_outlined,
                     maxLines: 3,
                     showDivider: false,
+                    inputFormatters: [
+                      LengthLimitingTextInputFormatter(leadObservacoesMax),
+                    ],
                   ),
                 ],
-              ),
-              const SizedBox(height: FxSettingsLayout.groupGap),
-              Semantics(
-                button: true,
-                label: _saving ? 'Salvando lead' : 'Salvar lead',
-                child: FxLiquidPrimaryButton(
-                  loading: _saving,
-                  icon: Icons.check_rounded,
-                  label: _saving ? 'Salvando...' : 'Salvar lead',
-                  onPressed: _saving ? null : _salvar,
-                ),
               ),
             ],
           ),

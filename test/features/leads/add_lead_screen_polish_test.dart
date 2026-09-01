@@ -18,6 +18,12 @@ void main() {
     expect(screen, contains('showFxInsetPickerSheet'));
     expect(screen, contains('FxSettingsGroup'));
     expect(screen, contains('AlunoInsetFormField'));
+    expect(screen, contains('ShellHeaderIconButton'));
+    expect(screen, contains("icon: 'circle-check'"));
+    expect(screen, contains('showFxConfirmSheet'));
+    expect(screen, contains('showFxHelpSheet'));
+    expect(screen, isNot(contains('FxLiquidPrimaryButton')));
+    expect(screen, isNot(contains('person_add')));
     expect(screen, isNot(contains('DropdownButton')));
     expect(screen, isNot(contains('FloatingActionButton')));
     expect(screen, isNot(contains(r'showError(context, $e)')));
