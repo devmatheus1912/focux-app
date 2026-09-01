@@ -20,9 +20,12 @@ import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_content_width_limiter.dart';
+import '../../../core/widgets/fx_inset_picker_sheet.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
+import '../utils/ia_aluno_display.dart';
 
 class IaAlunoScreen extends ConsumerStatefulWidget {
   const IaAlunoScreen({super.key});
@@ -31,9 +34,8 @@ class IaAlunoScreen extends ConsumerStatefulWidget {
   ConsumerState<IaAlunoScreen> createState() => _IaAlunoScreenState();
 }
 
-class _IaAlunoScreenState extends ConsumerState<IaAlunoScreen>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabs;
+class _IaAlunoScreenState extends ConsumerState<IaAlunoScreen> {
+  IaAlunoHubView _view = IaAlunoHubView.chat;
   int? _alunoId;
   bool _resolving = true;
   Object? _resolveError;
@@ -41,14 +43,21 @@ class _IaAlunoScreenState extends ConsumerState<IaAlunoScreen>
   @override
   void initState() {
     super.initState();
-    _tabs = TabController(length: 2, vsync: this);
     _resolverAlunoId();
   }
 
-  @override
-  void dispose() {
-    _tabs.dispose();
-    super.dispose();
+  Future<void> _abrirVista() async {
+    final picked = await showFxInsetPickerSheet<IaAlunoHubView>(
+      context,
+      title: 'Ver',
+      selected: _view,
+      items: [
+        for (final v in IaAlunoHubView.values)
+          FxInsetPickerSheetItem(value: v, label: iaAlunoHubViewLabel(v)),
+      ],
+    );
+    if (!mounted || picked == null || picked == _view) return;
+    setState(() => _view = picked);
   }
 
   Future<void> _resolverAlunoId() async {
@@ -104,8 +113,15 @@ class _IaAlunoScreenState extends ConsumerState<IaAlunoScreen>
         useMesh: true,
         appBar: FxShellAppBar(
           title: 'Assistente IA',
-          subtitle: 'Chat e progressão personalizados',
+          subtitle: iaAlunoHubSubtitle(_view),
           onBack: () => safePopOrGo(context, '/dashboard/aluno'),
+          actions: [
+            ShellHeaderIconButton(
+              icon: 'spark',
+              tooltip: 'Trocar visão',
+              onTap: _abrirVista,
+            ),
+          ],
         ),
         body:
             _resolving
@@ -121,39 +137,14 @@ class _IaAlunoScreenState extends ConsumerState<IaAlunoScreen>
                   ),
                   onRetry: _resolverAlunoId,
                 )
-                : Column(
-                  children: [
-                    Semantics(
-                      container: true,
-                      label: 'Abas do assistente: Chat e Progressão',
-                      child: TabBar(
-                        controller: _tabs,
-                        labelColor: primary,
-                        unselectedLabelColor: chrome.mute,
-                        indicatorColor: primary,
-                        dividerColor: Colors.transparent,
-                        tabs: const [
-                          Tab(
-                            icon: Icon(Icons.chat_bubble_outline_rounded),
-                            text: 'Chat',
-                          ),
-                          Tab(
-                            icon: Icon(Icons.trending_up_rounded),
-                            text: 'Progressão',
-                          ),
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                      child: TabBarView(
-                        controller: _tabs,
-                        children: [
-                          _ChatTab(alunoId: _alunoId),
-                          _ProgressaoTab(alunoId: _alunoId),
-                        ],
-                      ),
-                    ),
-                  ],
+                : FxContentWidthLimiter(
+                  child: IndexedStack(
+                    index: _view.index,
+                    children: [
+                      _ChatTab(alunoId: _alunoId),
+                      _ProgressaoTab(alunoId: _alunoId),
+                    ],
+                  ),
                 ),
       ),
     );
@@ -339,11 +330,9 @@ class _ChatTabState extends ConsumerState<_ChatTab> {
               Expanded(
                 child: TextField(
                   controller: _ctrl,
-                  decoration: InputDecoration(
-                    hintText: 'Pergunte ao assistente...',
-                    border: FxInputDeco.outlineBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
+                  decoration: FxInputDeco.build(
+                    context,
+                    'Pergunte ao assistente…',
                   ),
                   maxLines: null,
                   textInputAction: TextInputAction.send,
