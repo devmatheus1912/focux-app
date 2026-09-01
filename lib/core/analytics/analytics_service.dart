@@ -183,6 +183,10 @@ class ProductEvents {
   static const alertasConfigTtv = 'alertas_config_ttv';
   static const alertasConfigHelpOpened = 'alertas_config_help_opened';
   static const alertasConfigSaved = 'alertas_config_saved';
+  static const relatoriosHubViewed = 'relatorios_hub_viewed';
+  static const relatoriosHubTtv = 'relatorios_hub_ttv';
+  static const relatoriosHubHelpOpened = 'relatorios_hub_help_opened';
+  static const relatoriosHubRefreshed = 'relatorios_hub_refreshed';
   static const convitesHubViewed = 'convites_hub_viewed';
   static const convitesHubTtv = 'convites_hub_ttv';
   static const convitesHubHelpOpened = 'convites_hub_help_opened';
