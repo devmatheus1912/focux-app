@@ -11,11 +11,13 @@ void main() {
       'lib/features/relatorio/screens/relatorio_global_screen.dart',
     );
 
-    expect(screen, contains('FxContentWidthLimiter'));
-    expect(screen, contains('fxListCardDecoration'));
+    expect(screen, contains('fxScreenA11yScope'));
+    expect(screen, contains('FxSettingsGroup'));
+    expect(screen, contains('FxHelpIconButton'));
     expect(screen, contains('friendlyError'));
-    expect(screen, contains('Semantics('));
-    expect(screen, contains("label: 'Exportar relatório em PDF'"));
+    expect(screen, contains('Exportar relatório em PDF'));
+    expect(screen, isNot(contains('dashboardHeroCaptionOnTeal')));
+    expect(screen, isNot(contains('_PeriodPill')));
 
     expect(global, contains('fxScreenA11yScope'));
     expect(global, contains('FxSettingsGroup'));

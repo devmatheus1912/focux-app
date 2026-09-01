@@ -19,6 +19,7 @@ void main() {
     expect(screen, contains('relatoriosHubViewed'));
     expect(screen, contains('/alunos/'));
     expect(screen, contains('/relatorio'));
+    expect(screen, contains('extra:'));
     expect(screen, isNot(contains('constrainWidth: false')));
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(screen, isNot(contains('bar-chart-2')));

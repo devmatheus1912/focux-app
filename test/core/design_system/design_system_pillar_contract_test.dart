@@ -30,7 +30,6 @@ void main() {
 
   const excludedPrefixes = ['lib/features/qa/'];
   const excludedFiles = {
-    'lib/features/relatorio/screens/relatorio_screen.dart',
     'lib/features/anamnese/screens/anamnese_screen.dart',
   };
 
