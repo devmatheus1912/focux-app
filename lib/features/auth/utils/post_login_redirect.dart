@@ -70,6 +70,7 @@ bool isPersonalPath(String path) {
       path == '/agenda' ||
       path == '/agenda/novo' ||
       path == '/financeiro' ||
+      path == '/checkin' ||
       path == '/feed' ||
       path == '/broadcasts' ||
       path == '/leads' ||

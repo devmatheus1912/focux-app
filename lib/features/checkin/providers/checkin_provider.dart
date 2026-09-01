@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/checkin_repository.dart';
 import '../data/meus_treinos_mem_cache.dart';
+import '../models/checkin_personal_home.dart';
 
 final checkinRepositoryProvider = Provider<CheckinRepository>(
   (ref) => CheckinRepository(ref.read(apiClientProvider)),
@@ -23,4 +24,10 @@ final historicoCheckinProvider = FutureProvider<List<ExecucaoTreino>>((
   ref,
 ) async {
   return ref.read(checkinRepositoryProvider).historico();
+});
+
+final checkinPersonalHomeProvider = FutureProvider<CheckinPersonalHomeBundle>((
+  ref,
+) async {
+  return ref.read(checkinRepositoryProvider).personalHome();
 });

@@ -12,6 +12,7 @@ import '../../features/perfil/screens/perfil_ferramentas_screen.dart';
 import '../../features/perfil/screens/editar_perfil_screen.dart';
 import '../../features/assinatura/screens/assinatura_screen.dart';
 import '../../features/convites/screens/convites_screen.dart';
+import '../../features/checkin/screens/checkin_personal_hub_screen.dart';
 import '../../features/checkin/screens/checkin_screen.dart';
 import '../../features/checkin/screens/historico_screen.dart';
 import '../../features/exercicios/screens/exercicios_list_screen.dart';
@@ -430,6 +431,11 @@ RouteBase buildChromeShellRoute() {
           ),
 
           // Check-in
+          GoRoute(
+            path: '/checkin',
+            builder:
+                (context, state) => const CheckinPersonalHubScreen(),
+          ),
           GoRoute(
             path: '/checkin/executar',
             redirect:

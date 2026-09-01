@@ -174,6 +174,10 @@ class ProductEvents {
   static const automacaoTemplateActivated = 'automacao_template_activated';
   static const lojaCheckoutStarted = 'loja_checkout_started';
   static const habitoCreated = 'habito_created';
+  static const checkinHubViewed = 'checkin_hub_viewed';
+  static const checkinHubTtv = 'checkin_hub_ttv';
+  static const checkinHubHelpOpened = 'checkin_hub_help_opened';
+  static const checkinHubRefreshed = 'checkin_hub_refreshed';
   static const chatInboxViewed = 'chat_inbox_viewed';
   static const chatInboxTtv = 'chat_inbox_ttv';
   static const chatInboxHelpOpened = 'chat_inbox_help_opened';

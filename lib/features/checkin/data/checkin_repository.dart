@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
+import '../models/checkin_personal_home.dart';
 
 class ExecucaoExercicio {
   final int id;
@@ -410,5 +411,12 @@ class CheckinRepository {
     return (r.data as List)
         .map((e) => ExecucaoTreino.fromJson(e as Map<String, dynamic>))
         .toList();
+  }
+
+  Future<CheckinPersonalHomeBundle> personalHome() async {
+    final r = await _dio.get('/api/checkin/personal/home');
+    return CheckinPersonalHomeBundle.fromJson(
+      Map<String, dynamic>.from(r.data as Map),
+    );
   }
 }

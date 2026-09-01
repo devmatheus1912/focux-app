@@ -100,6 +100,7 @@ bool isPersonalOnlyLocation(String path) {
     '/agenda',
     '/agenda/novo',
     '/financeiro',
+    '/checkin',
     '/feed',
     '/broadcasts',
     '/leads',

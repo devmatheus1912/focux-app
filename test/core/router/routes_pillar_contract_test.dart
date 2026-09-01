@@ -22,6 +22,7 @@ void main() {
     '/alunos/:id/chat',
     '/treinos/novo',
     '/financeiro',
+    '/checkin',
     '/chat/inbox',
     '/alertas',
     '/paywall',
