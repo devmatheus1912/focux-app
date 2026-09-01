@@ -3,19 +3,21 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/analytics/analytics_service.dart';
+import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
+import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_error_state.dart';
-import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../data/enums.dart';
+import '../models/curated_biblioteca.dart';
 import '../providers/exercicios_provider.dart';
-import 'widgets/wizard_step_confirmacao.dart';
-import 'widgets/wizard_step_espacos.dart';
-import 'widgets/wizard_step_modalidades.dart';
+import '../utils/biblioteca_wizard_display.dart';
+import 'widgets/biblioteca_wizard_steps.dart';
 
 class OnboardingBibliotecaWizard extends ConsumerStatefulWidget {
   const OnboardingBibliotecaWizard({super.key});
@@ -29,7 +31,7 @@ class _OnboardingBibliotecaWizardState
     extends ConsumerState<OnboardingBibliotecaWizard> {
   int _step = 0;
   bool _importing = false;
-  Future<Map<String, dynamic>>? _previewFuture;
+  Future<CuratedBibliotecaPreview>? _previewFuture;
   final Set<Modalidade> _modalidades = {
     Modalidade.musculacao,
     Modalidade.mobilidade,
@@ -53,6 +55,17 @@ class _OnboardingBibliotecaWizardState
     setState(() {
       _espacos.contains(value) ? _espacos.remove(value) : _espacos.add(value);
     });
+  }
+
+  void _pular() {
+    if (_importing) return;
+    AnalyticsService.instance.track('wizard_skipped');
+    context.pop(false);
+  }
+
+  void _voltar() {
+    if (_importing || _step <= 0) return;
+    setState(() => _step -= 1);
   }
 
   void _next() {
@@ -85,17 +98,19 @@ class _OnboardingBibliotecaWizardState
           .importarCuratedV2(modalidades: _modalidades, espacos: _espacos);
       ref.invalidate(exerciciosFilteredProvider);
       ref.invalidate(exerciciosCuradoriaProvider);
-      final importados = (result['importados'] as num?)?.toInt() ?? 0;
       AnalyticsService.instance.track(
         'wizard_completed',
         props: {
           'modalidades': _modalidades.map((e) => e.backendName).toList(),
           'espacos': _espacos.map((e) => e.backendName).toList(),
-          'importados': importados,
+          'importados': result.importados,
         },
       );
       if (!mounted) return;
-      FeedbackHelper.showSuccess(context, '$importados exercicios carregados.');
+      FeedbackHelper.showSuccess(
+        context,
+        bibliotecaImportSuccess(result.importados),
+      );
       context.pop(true);
     } catch (e) {
       if (!mounted) return;
@@ -105,6 +120,14 @@ class _OnboardingBibliotecaWizardState
       });
       FeedbackHelper.showError(context, friendlyError(e));
     }
+  }
+
+  void _retryPreview() {
+    setState(() {
+      _previewFuture = ref
+          .read(exercicioRepositoryProvider)
+          .previewCuratedV2(modalidades: _modalidades, espacos: _espacos);
+    });
   }
 
   @override
@@ -120,51 +143,40 @@ class _OnboardingBibliotecaWizardState
         appBar: FxShellAppBar(
           title: 'Biblioteca curada',
           subtitle: 'Monte sua base de exercícios em minutos',
-          leading: IconButton(
-            icon: const Icon(Icons.close_rounded),
-            tooltip: 'Pular configuração',
-            onPressed:
-                _importing
-                    ? null
-                    : () {
-                      AnalyticsService.instance.track('wizard_skipped');
-                      context.pop(false);
-                    },
-          ),
+          onBack: _importing ? () {} : _pular,
+          actions: [
+            Padding(
+              padding: const EdgeInsets.only(right: TokensStrip.s3),
+              child: Center(
+                child: Semantics(
+                  button: true,
+                  label: 'Pular',
+                  child: ShellHeaderIconButton(
+                    icon: 'x',
+                    tooltip: 'Pular',
+                    onTap: _pular,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
-        body: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(20),
+        body: FxContentWidthLimiter(
+          child: BibliotecaWizardPagePadding(
             child: Column(
               children: [
-                LinearProgressIndicator(value: (_step + 1) / 4),
-                const SizedBox(height: 24),
-                Expanded(child: _content()),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    if (_step > 0 && _step < 3)
-                      TextButton(
-                        onPressed:
-                            _importing ? null : () => setState(() => _step -= 1),
-                        child: const Text('Voltar'),
-                      ),
-                    const Spacer(),
-                    if (_step < 2)
-                      FxLiquidPrimaryButton(
-                        label: 'Continuar',
-                        onPressed: canGoNext ? _next : null,
-                        expand: false,
-                      ),
-                    if (_step == 2)
-                      FxLiquidPrimaryButton(
-                        label: 'Carregar biblioteca',
-                        icon: Icons.download_rounded,
-                        onPressed: _importing ? null : _importar,
-                        loading: _importing,
-                        expand: false,
-                      ),
-                  ],
+                BibliotecaWizardProgress(step: _step),
+                const SizedBox(height: FxSettingsLayout.headerToGroup),
+                Expanded(
+                  child: SingleChildScrollView(child: _content()),
+                ),
+                BibliotecaWizardActions(
+                  step: _step,
+                  canContinue: canGoNext,
+                  importing: _importing,
+                  onBack: _voltar,
+                  onContinue: _next,
+                  onImport: _importar,
                 ),
               ],
             ),
@@ -172,14 +184,6 @@ class _OnboardingBibliotecaWizardState
         ),
       ),
     );
-  }
-
-  void _retryPreview() {
-    setState(() {
-      _previewFuture = ref
-          .read(exercicioRepositoryProvider)
-          .previewCuratedV2(modalidades: _modalidades, espacos: _espacos);
-    });
   }
 
   Widget _content() {
@@ -191,7 +195,7 @@ class _OnboardingBibliotecaWizardState
         onToggle: _toggleModalidade,
       ),
       1 => WizardStepEspacos(selecionados: _espacos, onToggle: _toggleEspaco),
-      2 => FutureBuilder<Map<String, dynamic>>(
+      2 => FutureBuilder<CuratedBibliotecaPreview>(
         future: _previewFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -209,7 +213,8 @@ class _OnboardingBibliotecaWizardState
           return WizardStepConfirmacao(
             modalidades: _modalidades,
             espacos: _espacos,
-            preview: snapshot,
+            preview:
+                snapshot.data ?? const CuratedBibliotecaPreview(totalCandidatos: 0),
           );
         },
       ),

@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/utils/pt_br_display.dart';
+import '../models/curated_biblioteca.dart';
 import 'enums.dart';
 import 'exercicio_page.dart';
 
@@ -846,7 +847,7 @@ class ExercicioRepository {
     return Exercicio.fromJson(response.data as Map<String, dynamic>);
   }
 
-  Future<Map<String, dynamic>> previewCuratedV2({
+  Future<CuratedBibliotecaPreview> previewCuratedV2({
     required Set<Modalidade> modalidades,
     required Set<Espaco> espacos,
   }) async {
@@ -857,10 +858,12 @@ class ExercicioRepository {
         'espacos': espacos.map((e) => e.backendName).join(','),
       },
     );
-    return Map<String, dynamic>.from(response.data as Map);
+    return CuratedBibliotecaPreview.fromJson(
+      Map<String, dynamic>.from(response.data as Map),
+    );
   }
 
-  Future<Map<String, dynamic>> importarCuratedV2({
+  Future<CuratedBibliotecaImport> importarCuratedV2({
     required Set<Modalidade> modalidades,
     required Set<Espaco> espacos,
   }) async {
@@ -871,7 +874,9 @@ class ExercicioRepository {
         'espacos': espacos.map((e) => e.backendName).toList(),
       },
     );
-    return Map<String, dynamic>.from(response.data as Map);
+    return CuratedBibliotecaImport.fromJson(
+      Map<String, dynamic>.from(response.data as Map),
+    );
   }
 
   Future<Exercicio> uploadVideoExercicio(
@@ -954,7 +959,7 @@ class ExercicioRepository {
         Espaco.outdoor,
       },
     );
-    return (data['importados'] as num?)?.toInt() ?? 0;
+    return data.importados;
   }
 
   Future<int> enriquecerBibliotecaCurada() async {
