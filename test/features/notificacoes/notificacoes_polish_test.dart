@@ -8,15 +8,16 @@ void main() {
       'lib/features/notificacoes/screens/notificacoes_screen.dart',
     );
 
-    expect(screen, contains("freshnessLabel ?? 'INBOX'"));
     expect(screen, contains('FxHubFreshness'));
     expect(screen, contains('formatDisplayName'));
     expect(screen, contains('Todas marcadas como lidas.'));
-    expect(screen, contains('BrandPalette.deep(primary)'));
+    expect(screen, contains('FxSettingsGroupedList'));
+    expect(screen, contains('FxHelpIconButton'));
+    expect(screen, contains('roleHomePath'));
     expect(screen, contains('Semantics('));
     expect(screen, contains('Marcar todas as notificações como lidas'));
-    expect(screen, contains('Abrir sinais do Radar Focux'));
-    expect(screen, contains('_dedupeRadarGroup'));
     expect(screen, contains('radarSignalDedupeKey'));
+    expect(screen, isNot(contains('Abrir sinais do Radar Focux')));
+    expect(screen, isNot(contains("freshnessLabel ?? 'INBOX'")));
   });
 }

@@ -54,6 +54,7 @@ import '../../features/winback/screens/winback_screen.dart';
 import '../../features/evolucao/screens/engajamento_screen.dart';
 import '../../features/ia/screens/ia_aluno_screen.dart';
 import '../../features/financeiro/screens/financeiro_aluno_screen.dart';
+import '../../features/notificacoes/screens/notificacoes_screen.dart';
 import '../../features/suporte/screens/suporte_screen.dart';
 import '../../features/broadcasts/screens/broadcast_screen.dart';
 import '../../features/plano_sucesso/plano_sucesso_provider.dart';
@@ -814,6 +815,10 @@ RouteBase buildChromeShellRoute() {
           GoRoute(
             path: '/coach',
             builder: (context, state) => const CoachScreen(),
+          ),
+          GoRoute(
+            path: '/notificacoes',
+            builder: (context, state) => const NotificacoesScreen(),
           ),
           GoRoute(
             path: '/suporte',

@@ -10,7 +10,6 @@ import '../../features/habitos/screens/habitos_aluno_screen.dart';
 import '../../features/recorrencia/screens/recorrencia_aluno_screen.dart';
 import '../../features/grupos/screens/grupo_aulas_aluno_screen.dart';
 import '../../features/feedback/screens/feedback_aluno_screen.dart';
-import '../../features/notificacoes/screens/notificacoes_screen.dart';
 import '../widgets/fx_route_chrome.dart';
 
 /// Aluno shell and push routes.
@@ -79,12 +78,6 @@ List<RouteBase> buildAlunoRoutes() {
       GoRoute(
         path: '/aluno/form-check',
         builder: (context, state) => const FxRouteChrome(child: FeedbackAlunoScreen()),
-      ),
-      GoRoute(
-        path: '/notificacoes',
-        builder:
-            (context, state) =>
-                const FxRouteChrome(child: NotificacoesScreen()),
       ),
       GoRoute(
         path: '/evolucao',

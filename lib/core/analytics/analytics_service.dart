@@ -178,6 +178,12 @@ class ProductEvents {
   static const checkinHubTtv = 'checkin_hub_ttv';
   static const checkinHubHelpOpened = 'checkin_hub_help_opened';
   static const checkinHubRefreshed = 'checkin_hub_refreshed';
+  static const notificacoesViewed = 'notificacoes_viewed';
+  static const notificacoesTtv = 'notificacoes_ttv';
+  static const notificacoesHelpOpened = 'notificacoes_help_opened';
+  static const notificacoesRefreshed = 'notificacoes_refreshed';
+  static const notificacoesMarkedAllRead = 'notificacoes_marked_all_read';
+  static const notificacoesOpened = 'notificacoes_opened';
   static const chatInboxViewed = 'chat_inbox_viewed';
   static const chatInboxTtv = 'chat_inbox_ttv';
   static const chatInboxHelpOpened = 'chat_inbox_help_opened';

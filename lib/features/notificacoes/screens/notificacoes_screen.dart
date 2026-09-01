@@ -2,23 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/brand/focux_microcopy.dart';
+import '../../../core/analytics/analytics_service.dart';
+import '../../../core/router/role_home.dart';
 import '../../../core/router/safe_navigation.dart';
-import '../../../core/theme/brand_palette.dart';
-import '../../../core/theme/design_tokens.dart';
-import '../../../core/theme/shell_chrome.dart';
-import '../../../core/theme/tokens_strip.dart';
-import '../../../core/ux/fx_hub_freshness.dart';
+import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
-import '../../../core/widgets/fx_icon.dart';
+import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
+import '../../../core/widgets/fx_settings_grouped_list.dart';
+import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../data/notificacoes_repository.dart';
 import '../notificacao_display.dart';
+import '../widgets/notificacoes_help_sheet.dart';
 
 part 'notificacoes_screen_widgets.part.dart';
 
@@ -30,11 +31,13 @@ class NotificacoesScreen extends ConsumerStatefulWidget {
 }
 
 class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
+  final _openedAt = DateTime.now();
   DateTime? _fetchedAt;
+  var _viewTracked = false;
+  var _ttvTracked = false;
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final async = ref.watch(notificacoesProvider);
     ref.listen<AsyncValue<List<NotificacaoApp>>>(notificacoesProvider, (
       _,
@@ -44,20 +47,53 @@ class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
         setState(() => _fetchedAt = DateTime.now());
       }
     });
-    final repo = ref.read(notificacoesRepositoryProvider);
+
+    if (async.hasValue && !_viewTracked) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted || _viewTracked) return;
+        _viewTracked = true;
+        final items = async.requireValue;
+        final unread = items.where((item) => !item.lida).length;
+        AnalyticsService.instance.track(
+          ProductEvents.notificacoesViewed,
+          props: {'count': items.length, 'unread': unread},
+        );
+        if (!_ttvTracked) {
+          _ttvTracked = true;
+          AnalyticsService.instance.track(
+            ProductEvents.notificacoesTtv,
+            props: {
+              'ms': DateTime.now().difference(_openedAt).inMilliseconds,
+              'unread': unread,
+            },
+          );
+        }
+      });
+    }
+
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
-    final actionInk = isDark ? primary : BrandPalette.deep(primary);
-    final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
+    final repo = ref.read(notificacoesRepositoryProvider);
+    final home = roleHomePath(ref);
+    final unreadCount =
+        async.valueOrNull?.where((item) => !item.lida).length ?? 0;
 
     Future<void> reload() async {
+      AnalyticsService.instance.track(ProductEvents.notificacoesRefreshed);
       ref.invalidate(notificacoesProvider);
       ref.invalidate(notificacoesNaoLidasProvider);
+      await ref.read(notificacoesProvider.future);
     }
 
     Future<void> openItem(NotificacaoApp item) async {
+      AnalyticsService.instance.track(
+        ProductEvents.notificacoesOpened,
+        props: {'tipo': item.tipo, 'lida': item.lida},
+      );
       if (!item.lida) {
         await repo.marcarLida(item.id);
-        await reload();
+        ref.invalidate(notificacoesProvider);
+        ref.invalidate(notificacoesNaoLidasProvider);
       }
       final route = item.route;
       if (route != null && route.startsWith('/') && context.mounted) {
@@ -71,148 +107,123 @@ class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
         useMesh: true,
         appBar: FxShellAppBar(
           title: 'Notificações',
-          subtitle: freshnessLabel ?? 'INBOX',
-          onBack: () => safePopOrGo(context, '/dashboard/personal'),
+          subtitle: FxHubFreshness.fromFetchedAt(_fetchedAt),
+          onBack: () => safePopOrGo(context, home),
           actions: [
-            Semantics(
-              button: true,
-              label: 'Marcar todas as notificações como lidas',
-              child: TextButton(
-                style: TextButton.styleFrom(foregroundColor: actionInk),
-                onPressed: () async {
-                  await repo.marcarTodasLidas();
-                  await reload();
-                  if (!context.mounted) return;
-                  FeedbackHelper.showSuccess(
-                    context,
-                    'Todas marcadas como lidas.',
-                  );
-                },
-                child: const Text('Ler todas'),
-              ),
+            FxHelpIconButton(
+              tooltip: 'Como usar as notificações',
+              onTap: () {
+                AnalyticsService.instance.track(
+                  ProductEvents.notificacoesHelpOpened,
+                );
+                showNotificacoesHelpSheet(context);
+              },
             ),
+            if (unreadCount > 0)
+              Semantics(
+                button: true,
+                label: 'Marcar todas as notificações como lidas',
+                child: TextButton(
+                  onPressed: () async {
+                    AnalyticsService.instance.track(
+                      ProductEvents.notificacoesMarkedAllRead,
+                      props: {'unread': unreadCount},
+                    );
+                    await repo.marcarTodasLidas();
+                    ref.invalidate(notificacoesProvider);
+                    ref.invalidate(notificacoesNaoLidasProvider);
+                    if (!context.mounted) return;
+                    FeedbackHelper.showSuccess(
+                      context,
+                      'Todas marcadas como lidas.',
+                    );
+                  },
+                  child: const Text('Ler todas'),
+                ),
+              ),
           ],
         ),
-        body: RefreshIndicator(
-          onRefresh: reload,
-          child: async.when(
-            loading:
-                () => ListView(
-                  padding: const EdgeInsets.fromLTRB(
-                    TokensStrip.s4,
-                    12,
-                    16,
-                    120,
-                  ),
-                  children: const [SkeletonList(count: 5)],
-                ),
-            error:
-                (e, _) => ListView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  children: [
-                    SizedBox(
-                      height: MediaQuery.sizeOf(context).height * 0.55,
-                      child: FxErrorState(
-                        chromeOnDark: isDark,
-                        primary: primary,
-                        title: FocuxMicrocopy.naoFoiPossivelCarregar,
-                        message: friendlyError(e),
-                        onRetry: reload,
-                      ),
-                    ),
-                  ],
-                ),
-            data: (items) {
-              final entries = _buildNotificationEntries(items);
-              if (entries.isEmpty) {
-                return ListView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  children: const [
-                    SizedBox(height: 48),
-                    FxEmptyState(
-                      icon: 'circle-check',
-                      title: 'Tudo em ordem',
-                      subtitle:
-                          'Alertas operacionais, mensagens importantes e Radar Focux aparecem aqui.',
-                    ),
-                  ],
-                );
-              }
-
-              final showQuietFooter = entries.length <= 2;
-              return ListView.separated(
-                padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 10, 16, 120),
-                itemCount: entries.length + (showQuietFooter ? 1 : 0),
-                separatorBuilder: (_, __) => const SizedBox(height: 8),
-                itemBuilder: (context, index) {
-                  if (index == entries.length) {
-                    return _QuietFooter(
-                      isDark: isDark,
-                      primary: primary,
-                      actionInk: actionInk,
-                    );
-                  }
-
-                  final entry = entries[index];
-                  final group = _groupLabel(entry.createdAt);
-                  final previousGroup =
-                      index == 0
-                          ? null
-                          : _groupLabel(entries[index - 1].createdAt);
+        body: async.when(
+          loading:
+              () => const Padding(
+                padding: EdgeInsets.all(FxSettingsLayout.pageInset),
+                child: SkeletonList(count: 6),
+              ),
+          error:
+              (e, _) => FxErrorState(
+                chromeOnDark: isDark,
+                primary: primary,
+                message: friendlyError(e),
+                onRetry: reload,
+              ),
+          data: (items) {
+            final rows = _buildNotificationRows(items);
+            if (rows.isEmpty) {
+              return FxEmptyState(
+                icon: 'circle-check',
+                title: 'Tudo em ordem',
+                subtitle:
+                    'Alertas, mensagens e o Radar Focux aparecem aqui quando pedem ação.',
+              );
+            }
+            final unread = items.where((item) => !item.lida).length;
+            return RefreshIndicator(
+              color: primary,
+              onRefresh: reload,
+              child: FxSettingsGroupedList(
+                header: unread == 0
+                    ? 'Tudo lido'
+                    : unread == 1
+                    ? '1 não lida'
+                    : '$unread não lidas',
+                caption: 'Toque para abrir o destino. Ler todas zera o sino.',
+                itemCount: rows.length,
+                itemBuilder: (context, i) {
+                  final row = rows[i];
+                  final showDay =
+                      i == 0 || rows[i - 1].dayGroup != row.dayGroup;
                   return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      if (index == 0 || group != previousGroup)
-                        Semantics(
-                          header: true,
-                          label: 'Notificações de $group',
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(2, 8, 0, 8),
-                            child: Text(
-                              group.toUpperCase(),
-                              style: TextStyle(
-                                fontSize: 10.5,
-                                fontWeight: FontWeight.w900,
-                                color:
-                                    isDark
-                                        ? EagleTokens.darkInkMute
-                                        : TokensStrip.textSecondary,
-                                letterSpacing: 0.9,
-                              ),
+                      if (showDay)
+                        Padding(
+                          padding: EdgeInsets.fromLTRB(
+                            FxSettingsLayout.groupPadH,
+                            i == 0 ? 0 : 10,
+                            FxSettingsLayout.groupPadH,
+                            4,
+                          ),
+                          child: Text(
+                            row.dayGroup,
+                            style: FxSettingsLayout.sectionHeader(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurface
+                                  .withValues(alpha: 0.55),
                             ),
                           ),
                         ),
-                      switch (entry) {
-                        _SingleNotificationEntry(:final item) =>
-                          _NotificationTile(
-                            item: item,
-                            isDark: isDark,
-                            primary: primary,
-                            actionInk: actionInk,
-                            onTap: () => openItem(item),
-                          ),
-                        _RadarNotificationEntry(:final items) =>
-                          _RadarNotificationGroup(
-                            items: items,
-                            isDark: isDark,
-                            primary: primary,
-                            actionInk: actionInk,
-                            onOpen: openItem,
-                          ),
-                      },
+                      FxSettingsTile(
+                        fxIcon: notificationFxIcon(row.item),
+                        label: notificationHumanTitle(row.item),
+                        subtitle: notificationSubtitle(row.item),
+                        value: notificationTimeLabel(row.item.criadaEm),
+                        highlight: !row.item.lida,
+                        showDivider: i < rows.length - 1,
+                        semanticsLabel:
+                            '${row.item.lida ? '' : 'Não lida. '}'
+                            '${notificationHumanTitle(row.item)}. '
+                            '${row.item.mensagem}',
+                        onTap: () => openItem(row.item),
+                      ),
                     ],
                   );
                 },
-              );
-            },
-          ),
+              ),
+            );
+          },
         ),
       ),
     );
   }
-}
-
-sealed class _NotificationEntry {
-  const _NotificationEntry();
-  DateTime? get createdAt;
 }

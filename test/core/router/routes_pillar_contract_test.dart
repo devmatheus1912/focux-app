@@ -23,6 +23,7 @@ void main() {
     '/treinos/novo',
     '/financeiro',
     '/checkin',
+    '/notificacoes',
     '/chat/inbox',
     '/alertas',
     '/paywall',
@@ -31,6 +32,7 @@ void main() {
 
   const alunoDeepLinks = [
     '/dashboard/aluno',
+    '/notificacoes',
     '/checkin/treinos',
     '/checkin/executar',
     '/feed/aluno',
