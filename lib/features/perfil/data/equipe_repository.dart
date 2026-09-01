@@ -16,7 +16,7 @@ class EquipeRepository {
   Future<void> convidar({required String email}) async {
     await _dio.post(
       '/api/tenant/membros',
-      data: {'userEmail': email, 'role': 'ASSISTENTE'},
+      data: {'userEmail': email, 'role': 'SECRETARIA'},
     );
   }
 }
