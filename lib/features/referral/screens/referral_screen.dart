@@ -77,10 +77,7 @@ class _ReferralScreenState extends ConsumerState<ReferralScreen> {
       codigo: info.codigo,
       link: info.linkCompartilhamento,
     );
-    await AnalyticsService.instance.track(
-      'referral_link_shared',
-      props: {'codigo': info.codigo},
-    );
+    await AnalyticsService.instance.track('referral_link_shared');
     await copySensitiveToClipboard(text);
     if (mounted) {
       FeedbackHelper.showSuccess(
