@@ -1053,19 +1053,95 @@ O agravante: `OfflineSyncService` (`lib/core/api/offline_sync_service.dart`) **e
 
 Nota de escopo: a idempotência do app (header) e a do webhook (marcador de evento do MercadoPago) são sistemas distintos. Os três P0 de `WebhookController` são do segundo, e nenhum deles é resolvido pela chave que o app envia.
 
+Ressalva medida depois: a chave é preservada **na fila offline**, mas é regerada a cada tentativa no caminho normal, o que limita muito o alcance real da proteção — ver §22.7.3, item 3.
+
 **3. O payload `dados` do FCM não é parâmetro morto — é feature quebrada.** O app consome `message.data` em seis pontos de `lib/core/fcm/fcm_service.dart` e `plan_sync_coordinator.dart`: `type`, `route`, `alunoId`, `chatId`, `event`, `plano`. Dois usos dependem dele:
 
 - **Roteamento no toque da notificação** (`_handleNotificationTap`) — sem `dados`, o toque não leva a lugar nenhum.
 - **Sincronização de plano** (`type: plan_sync`) — é como o app descobre que o plano mudou. Sem isso, depois de um upgrade ou downgrade o app segue com a permissão antiga até expirar cache ou reiniciar.
 
-O relatório aponta o descarte em `enviarNotificacaoParaAluno`, que é o caminho do aluno; confirmar se o envio de `plan_sync` ao personal usa o mesmo método. Se usar, o efeito combina com o P1 "webhook MP troca plano sem registrar na trilha": o plano muda, não é auditado, e o app não é avisado.
+O relatório aponta o descarte em `enviarNotificacaoParaAluno`, que é o caminho do aluno. **Fechado na rodada seguinte:** o `plan_sync` do personal usa `enviarDataParaPersonal`, que faz `putAllData` corretamente, então a sincronização de plano do personal funciona hoje. O quebrado é qualquer payload data-only destinado a **aluno**, pelos seis chamadores de `enviarNotificacaoParaAluno`. Isso desacopla o bug do P1 do webhook MP: o app é avisado da troca de plano; o que falta é o registro na trilha de auditoria.
 
 #### 22.6.5 O que segue em aberto
 
-- **Consumidor de cada endpoint (meta 15).** Precisa do inventário dos 432 paths para cruzar contra as chamadas em `lib/`. Sem isso não há como saber quantos endpoints são órfãos.
 - **N+1 real (meta 5).** `show-sql` desligado; candidatos achados por análise estática, não observados em SQL.
-- **p95 dos hubs (meta 13).** 31 timers existem, mas não há orçamento declarado — a meta não é mensurável até o orçamento ser definido por endpoint.
 - **Credencial no histórico do git.** O commit que removeu os scripts não reescreveu o histórico.
+
+Fechados depois desta seção: consumidor de cada endpoint (meta 15) e orçamento de p95 (meta 13) — ver §22.7.
+
+### 22.7 Cruzamento app × backend (backend @66ba467, app nesta branch)
+
+Fecha a meta 15. Reprodutível com `python3 tools/audit/xref_endpoints.py`: o inventário recebido do backend está em `tools/audit/backend_endpoints.tsv` e o extrator varre `lib/**/*.dart` procurando `.get|post|put|patch|delete('/...')`, normaliza `$var`, `${expr}` e `{pathVariable}` para `{}`, e compara verbo + path contra o inventário. Regerar o TSV no repo do backend e substituir o arquivo inteiro; o script sai com código 1 se o app passar a chamar endpoint inexistente, então serve de gate.
+
+**Números.** 432 endpoints no backend, 342 call sites em código de produto, 330 endpoints consumidos.
+
+| Camada | Qtd | Significado |
+| --- | --- | --- |
+| Chamado por código de produto | 330 | contrato vivo; mudança quebra tela |
+| Path no produto, outro verbo | 7 | ex.: app faz `POST /api/fcm/token` e nunca `DELETE` |
+| Só no catálogo de smoke QA | 5 | backend pronto, UI inexistente |
+| Zero menção no app | 90 | ver §22.7.1 |
+
+Dois resultados negativos que valem tanto quanto os positivos: **nenhuma chamada do app aponta para endpoint inexistente** e **nenhuma usa verbo divergente**. O cliente não tem rota morta nem 404 latente, o que dá confiança de que a lista de 90 órfãos é do backend, não erro do extrator.
+
+**Cobertura de OpenAPI na fronteira que importa:** 225 dos 330 endpoints que o app chama não têm `@Operation`. O P1 do pilar 68 medido só onde tem consumidor.
+
+#### 22.7.1 Endpoints sem consumidor (meta 15)
+
+Dos 90 sem menção, 20 são legitimamente fora do app — 4 webhooks servidor-a-servidor, 2 `.well-known` (consumidos pelo SO), e 14 de superfície web pública (`/`, `/p/{slug}`, `/c/{slug}`, `public/personal/*`, `loja/publico/*`, `pacotes/publico/*`, `captura/publico/*`, `public/ical/*`, `public/resolve-domain`).
+
+**Restam 70 endpoints autenticados que só um cliente app alcançaria e que nenhum cliente chama.** Os agrupamentos que mudam decisão:
+
+- **`comunidade` — 12 endpoints, módulo inteiro, zero referência.** Grupos, posts, entrada, bloqueio, denúncia e moderação existem no backend e não existem no app; não há `lib/features/comunidade/`. Consequências diretas: (a) o P0 "post de comunidade sem gate de plano" não tem caminho de UI, então o **vazamento de receita observado é zero** — a dívida permanece e precisa ser fechada antes de a superfície nascer; (b) 9 das 29 fugas de entidade JPA estão em `ComunidadeController`, então corrigir esses DTOs é **grátis** — não há contrato de app para quebrar. Decisão de produto pendente: construir a superfície ou remover o módulo.
+- **Telemetria do cliente nunca emitida.** `POST /api/analytics/evento`, `POST /api/pql/eventos/{tipo}` e `GET /api/pql/me` não são chamados. O app lê `GET /api/analytics` e `GET /api/analytics/funil`, mas **não produz nenhum evento**. Os painéis de funil e o escore de PQL são alimentados só pelo que o servidor infere. `analytics/cohort` e `analytics/wau` também não têm consumidor.
+- **Consentimento LGPD nunca registrado.** `GET` e `POST /api/lgpd/me/consent` sem consumidor, e `GET /api/lgpd/me/export` só aparece no catálogo de smoke. O app exclui conta (`DELETE /api/lgpd/me/delete` é chamado) mas nunca grava consentimento. Lacuna de pilar 55 no lado do app, com endpoint pronto.
+- **Listas cruas já substituídas pelo gêmeo paginado.** `GET /api/alunos/{id}/timeline-360` (List) está órfã enquanto `/timeline-360/page` (Page) é usada. Mesmo padrão em `/api/exercicios` cru vs. `/api/exercicios/v2`. São remoções seguras.
+- **Backend pronto sem UI (camada de smoke):** `POST /api/backup/create`, `GET /api/backup/list`, `GET /api/exportacao/dados`, `GET /api/lgpd/me/export`. Quatro funcionalidades completas sem superfície — candidatas naturais a S8 (Configuração) sem custo de backend.
+- **`PUT` e `DELETE /api/tenant/membros/{id}` sem consumidor.** O app só lista (`GET`) e cria (`POST`) membro; nunca edita nem remove. É exatamente onde mora o P0 de escalonamento de privilégio (`TenantMembroController`). Ver a ressalva abaixo antes de concluir qualquer coisa sobre severidade.
+- **`GET /api/pose-coach/status` nunca chamado** — ver §22.7.3.
+- Outros grupos órfãos, sem decisão pendente: `auditoria` (3 — a trilha existe e nenhuma tela a mostra), `templates` (3), `trilhas` (3 de 6), `dashboard/focux-score` (2), `agenda/ocupacao` e `agenda/periodo`, `financeiro/lote/marcar-pago` e `mensalidades/marcar-atrasadas`.
+
+> **Ressalva de leitura, obrigatória.** Órfão significa "nenhum cliente nosso chama", não "inalcançável". Um endpoint autenticado sem consumidor continua exposto a qualquer portador de token com `curl` — o atacante não usa o app. Portanto:
+>
+> - Para P0 de **autorização** (escalonamento em `TenantMembroController`, concessão arbitrária em `RbacController`, RBAC em 6 de 64 módulos), ser órfão **não reduz severidade em nada**. O único efeito é liberar a correção para ser agressiva: sem consumidor, não há contrato de app a preservar, então dá para fechar no nível mais restrito sem período de compatibilidade.
+> - Para P0 de **gate de plano** (post de comunidade, pacotes, lote financeiro, conversão de lead), ser órfão reduz o vazamento de receita observado, porque nenhum usuário legítimo tem caminho de UI para consumir a feature sem pagar. A dívida continua e precisa ser fechada antes de a superfície existir.
+>
+> Em resumo: usar esta seção para dimensionar **risco de quebrar o app**, nunca para dimensionar **risco de segurança**.
+
+#### 22.7.2 Paginação: as 61 listas que o app consome
+
+Dos 86 endpoints com flag `L`, **61 têm consumidor de produto e 25 não**. Não paginar os 25. Os 61 se dividem por risco de crescimento, não por módulo:
+
+| Bucket | Qtd | Ação |
+| --- | --- | --- |
+| **A — paginar primeiro** | 19 | cresce sem teto e alimenta tela de lista primária |
+| **B — paginar depois** | 14 | cresce, mas volume por tenant é menor ou a tela é secundária |
+| **C — só cap de `size`** | 26 | conjunto naturalmente pequeno; paginar aqui é custo sem ganho |
+| **D — remover o cru** | 2 | gêmeo paginado já existe e o app usa os dois |
+
+**Bucket A:** `/api/alunos`, `/api/leads`, `/api/feed`, `/api/feed/aluno`, `/api/feed/{postId}/comentarios`, `/api/checkin/historico`, `/api/feedback-videos`, `/api/feedback-videos/me`, `/api/feedback-videos/aluno/{alunoId}`, `/api/alunos/{alunoId}/fotos`, `/api/alunos/{alunoId}/medidas`, `/api/alunos/{alunoId}/avaliacoes`, `/api/alunos/{alunoId}/recordes`, `/api/alunos/{id}/historico-mensalidades`, `/api/chat/inbox/archived`, `/api/broadcasts`, `/api/captura`, `/api/retencao/base`, `/api/ranking`.
+
+**Bucket B:** `/api/agenda/aluno/meus`, `/api/aluno/medidas`, `/api/automacoes/{fluxoId}/logs`, `/api/coach-proativo/mensagens`, `/api/depoimentos`, `/api/personal/depoimentos`, `/api/habitos/compliance`, `/api/habitos/me`, `/api/leads/{id}/interacoes`, `/api/loja/pedidos`, `/api/personal/gallery`, `/api/suporte/tickets/meus`, `/api/trilhas/aluno/{alunoId}`, `/api/winback/log`.
+
+**Bucket D:** `/api/chat/aluno/historico` e `/api/chat/historico/{alunoId}`. Os gêmeos `/page` já são chamados; o app usa os dois. Sequência obrigatória: o app migra para `/page` e o PR remove o uso do cru → só então o backend apaga. Apagar antes quebra o histórico de chat.
+
+Contrato de paginação exigido pelos buckets A e B, para o design de lista ter estado definido: `page`, `size` com cap no servidor, `totalElements`, `hasNext`, e ordenação **fixada no servidor** (o P1 "2 endpoints repassam `Sort` do cliente ao JPA" não deve se propagar). Sem `hasNext`, S4 não sabe distinguir "fim da lista" de "carregando mais" e o rodapé da lista fica sem contrato.
+
+#### 22.7.3 Três bugs do lado do app achados pelo cruzamento
+
+São do app, entram no meu lado do plano, não no do backend.
+
+**1. Logout não desregistra o token de push.** `FcmService._registrarToken` faz `POST /api/fcm/token` (`lib/core/fcm/fcm_service.dart:142`), e `DELETE /api/fcm/token` **nunca é chamado** — `AuthRepository.logout` (`lib/features/auth/data/auth_repository.dart:373`) revoga o refresh token e não toca em FCM. O token do dispositivo continua ligado ao usuário anterior no servidor. Em aparelho compartilhado, ou em troca de conta personal → aluno, o dispositivo segue recebendo notificação de quem saiu. Severidade de privacidade, não de estética. Correção: chamar `DELETE /api/fcm/token` no logout antes de limpar o token local.
+
+**2. A fila offline trata falha permanente como transitória.** `OfflineSyncService.syncPendingRequests` (`lib/core/api/offline_sync_service.dart:180`) tem `catch (_)` sem discriminar status. Um 400, 403 ou 422 — erro que nunca vai passar — é reenfileirado com backoff de 5s a 1h por 8 tentativas e depois **descartado em silêncio**. E como o interceptor já respondeu `202 {'status': 'queued'}` para a UI (`api_client.dart:82`), o usuário foi informado de sucesso e nunca sabe que a mutação morreu. Correção: só reenfileirar em erro de transporte e 5xx; em 4xx permanente, descartar e notificar.
+
+**3. `Idempotency-Key` nova por tentativa anula a proteção contra toque duplo.** `_shouldUseIdempotency` (`api_client.dart:195`) injeta o header em todo POST/PUT/PATCH/DELETE, mas `_newIdempotencyKey()` gera **chave nova a cada requisição**. Dois toques no mesmo botão viram duas chaves distintas, logo duas mutações reais — a infraestrutura de idempotência do backend (228 de 229 mutações cobertas) não tem como deduplicar. A chave só é estável no caminho da fila offline, que por sua vez exclui a maioria dos paths via `_isSensitivePath` (`/chat`, `/alunos`, `/mensalidade`, `/ia`, `/fcm`, `/upload` e outros). Efeito prático: o mecanismo protege reenvio de transporte e quase nada de duplicação por usuário. Correção: derivar a chave da operação (rota + identidade do alvo + janela de tempo) nos botões de mutação financeira e de escrita não reentrante.
+
+#### 22.7.4 Correções ao que ficou registrado antes
+
+- **O 409 da idempotência concorrente é benigno, e o risco real é outro.** A fila offline só é acionada em `connectionError`/`connectionTimeout` (`api_client.dart:77`), então um 409 do servidor nunca entra na fila; e dentro da fila um 409 é engolido, reenviado com backoff e resolvido pelo replay quando a primeira requisição completa. O 409 não chega ao usuário. O problema naquele mesmo trecho é o do item 2 acima.
+- **O gate do Pose Coach pode fechar sem quebrar usuário legítimo.** O app trava a feature 100% no cliente por `features.poseCoach`, vindo de `GET /api/planos/me` (`lib/features/checkin/widgets/gated_pose_coach_panel.dart:36` e `lib/features/alunos/utils/aluno360_ferramentas_logic.dart`), e **nunca chama `GET /api/pose-coach/status`**. Como o app já esconde a entrada com a mesma capability que o backend passará a exigir, fechar o gate em `POST /api/feedback-videos` não remove nada que um cliente atualizado ofereça a um plano sem direito. A decisão de produto fica bem mais barata do que o relatório sugeriu; o endpoint `/api/pose-coach/status` é dívida (ou vira a fonte única e o cliente para de inferir).
+- **A correção do código de erro tem caminho de app trivial.** `isPlanGateError` (`lib/core/utils/friendly_error.dart:104`) lê `data['message'] | data['erro'] | data['mensagem']` e **não lê `codigo`**. Como `ApiErrorResponse` já tem o campo e o `GlobalExceptionHandler` já o propaga, o PR pareado é pequeno: passar a preferir `codigo` e manter o casamento por texto como fallback. Só depois disso a reescrita de mensagem fica segura.
 
 ## 23. Contrato de dados por tipo de superfície
 
