@@ -1026,20 +1026,20 @@ Aplicação literal da regra "P0 do backend antes do trabalho estético no domí
 
 | Lote | Estado | Trava | Por quê |
 |---|---|---|---|
-| **S6 login / cadastro / recuperar senha** | **Liberado** | — | P0 de auth é RBAC dentro do tenant, não o fluxo de entrada |
-| **S6 paywall / planos** | **Bloqueado** | fechar gates de plano (fila do backend) | Redesenhar a tela que vende o plano enquanto a feature ainda vaza é maquiar perda de receita. Sheet já lê `codigo`/`upgradePlano`; o vazamento é no servidor |
-| **S1 hubs** | **Bloqueado** | timezone (`LocalDate.now()` sem zona) | O job de S1 é *operar o dia*. Hub bonito com o dia errado das 21h à meia-noite no fuso BR é pior que hub feio |
-| **S3 detalhe de entidade** | **Liberado com ressalva** | mesmo fuso | Estrutura, hierarquia, sticky CTA: sim. Números de streak/aderência/agenda do dia ficam suspeitos até o P0 transversal |
-| **S4 coleção / lista** | **Bloqueado no geral; exceção abaixo** | paginação A ainda atrás dos P0 | Envelope e parser prontos (`Pagina.fromJson`). Sem `hasNext` no servidor, o rodapé da lista não tem contrato. **Exceção:** listas que já paginam (financeiro, notificações, chat `/page`) podem receber chrome S4 agora |
-| **S5 formulário** | **Liberado** | códigos de domínio ainda incompletos fora do catálogo §2.3 | Footer sticky, 1 P0, picker inset: sim. Erro inline de gate/cota/409/429 já classifica por `codigo`. Validação de campo (400 genérico) continua prosa |
-| **S8 execução** | **Liberado** | — | Nada no relatório toca a execução de treino |
-| **S9 wizard** | **Liberado** | — | Depende de S5 pronto, não do backend |
-| **S7 sheets** | **Liberado** | — | Varredura de conformidade, sem dado novo |
-| **S2 ajustes** | **Liberado** | — | Já no padrão; só auditar limites de §11 |
-| Telas de **financeiro** (qualquer tipo) | **Bloqueado** | idempotência do webhook MercadoPago | Crédito duplicado é erro de dado; não se redesenha em cima. A chave do *app* já é estável em criar/pagar/PIX; o P0 restante é o webhook |
-| Telas de **IA** | **Bloqueado** | timeouts HTTP (7 de 9 clientes) | Sem timeout o loading não tem fim definido — o design de carregamento fica sem contrato |
+| **S6 login / cadastro / recuperar senha** | **Liberado** | — | — |
+| **S6 paywall / planos** | **Liberado** | — | Gates no servidor devolvem 403 com `codigo` do catálogo. Sheet já lê `upgradePlano` / `detalhes.feature` |
+| **S1 hubs** | **Liberado** | — | `FocuxClock` em America/Sao_Paulo. 21h UTC-3 do dia 1 permanece dia 1 |
+| **S3 detalhe de entidade** | **Liberado** | — | Números de streak/aderência/agenda passam a ter “hoje” estável |
+| **S4 coleção / lista** | **Liberado** | — | Envelope A no ar. Primeiro: `GET /api/alunos` via `Pagina.fromJson`. Chat legado intacto. B/C fora desta rodada |
+| **S5 formulário** | **Liberado** | — | Gate/cota/409/429 por `codigo`. 400 de campo continua prosa |
+| **S8 execução** | **Liberado** | — | — |
+| **S9 wizard** | **Liberado** | — | — |
+| **S7 sheets** | **Liberado** | — | — |
+| **S2 ajustes** | **Liberado** | — | Auditar limites de §11 |
+| Telas de **financeiro** | **Liberado** | `double` no contrato (dívida, não trava) | Mesma notificação MP 2× credita 1× |
+| Telas de **IA** | **Liberado** | — | Connect 5s / read 30s; estouro vira erro, não loading infinito |
 
-**Primeiro lote em massa, agora:** S2 + S7 + S8 + S9 + S6 auth (não paywall) + S5 + S3 (estrutura, sem fiar em data do dia). Um tipo por PR, no máximo 3 telas do mesmo tipo (§28.3). Extrair padrão repetido para `lib/core/widgets/` *antes* do lote (§28.2).
+**Lote em massa:** a ordem do §28.3 volta a valer. Um tipo por PR, no máximo 3 telas do mesmo tipo. Extrair padrão repetido para `lib/core/widgets/` *antes* do lote (§28.2). `double` em dinheiro e paginação B/C não bloqueiam estética.
 
 #### 22.6.4 Acoplamentos descobertos no lado do app
 
@@ -1378,7 +1378,7 @@ Candidatos prováveis por tipo: barra sticky de ação (S3), footer de formulár
 
 Consistência intra-tipo é o que faz o app parecer desenhado. Ordem sugerida por impacto.
 
-> **Sobrescrita vigente:** a auditoria do backend de 2026-09-02 bloqueia parte desta ordem. Use a [matriz de travas de §22.6.3](#2263-matriz-de-travas-qual-lote-de-design-espera-o-quê) — em especial S1 e S4, que dependem de correção no backend antes de qualquer trabalho estético.
+> **Vigente:** a matriz de §22.6.3 está liberada. A ordem desta tabela volta a valer. `double` em dinheiro e paginação B/C não bloqueiam.
 
 | Ordem | Lote | Por quê |
 |---|---|---|

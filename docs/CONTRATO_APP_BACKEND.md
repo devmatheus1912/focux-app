@@ -284,17 +284,22 @@ agressiva e não precisa de PR pareado nem de aviso prévio.
 
 ---
 
-## 7. Fila restante (backend)
+## 7. Fila do lote de design — fechada
 
-Itens desta rodada já fechados nos dois lados: envelope de paginação,
-`codigo` aditivo nos lançamentos do catálogo, FCM unique em `token`.
+Os seis itens que travavam o lote estão fechados no backend
+([PR #4](https://github.com/devmatheus1912/focux-backend/pull/4)). `erro`
+não foi reescrito.
 
-O que resta, nesta ordem, e **sem reescrever `erro`**:
+| Item | Libera | Estado |
+|---|---|---|
+| RBAC P0 | — (sem tela) | Fechado |
+| Webhook MercadoPago | financeiro | Fechado. `double` no contrato continua dívida |
+| `FocuxClock` America/Sao_Paulo | S1 hubs + números de S3 | Fechado |
+| Gates de plano + `codigo` | S6 paywall | Fechado |
+| Timeouts IA (connect 5s / read 30s) | IA | Fechado |
+| Paginação A / `PaginaResponse<T>` | S4 | Fechado. Primeiro no ar: `GET /api/alunos` |
 
-- P0 de RBAC / autorização (`TenantMembroController`, post de comunidade)
-- Idempotência do webhook MercadoPago
-- Timezone
-- Fechar gates de plano no servidor
-- Timeouts HTTP
-- Paginação A com `PaginaResponse<T>` — o app já consome via `Pagina.fromJson`
+App: `AlunoRepository.listarPagina` consome via `Pagina.fromJson`. `listar()`
+drena as páginas (picker de recorrência). A lista de produto continua no BFF
+`/api/alunos/home`.
 
