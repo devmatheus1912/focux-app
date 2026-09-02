@@ -8,10 +8,10 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/hero_teal.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
+import '../../../core/widgets/fx_conversion.dart';
 import '../../../core/widgets/fx_help.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
-import '../../../core/widgets/fx_settings_group.dart';
-import '../../../core/widgets/fx_settings_tile.dart';
 import '../providers/auth_provider.dart';
 import '../utils/auth_error_messages.dart';
 import '../utils/esqueci_senha_display.dart';
@@ -106,6 +106,20 @@ class _ResetarSenhaVerificarCodigoScreenState
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            Center(
+                              child: FxConversionLockup(
+                                width: authLogoWidthFor(
+                                  context,
+                                  withTagline: true,
+                                ),
+                                semanticLabel:
+                                    _isAluno
+                                        ? 'Focux ALUNO'
+                                        : 'Focux PERSONAL',
+                                aluno: _isAluno,
+                              ),
+                            ),
+                            const SizedBox(height: TokensStrip.s4),
                             Row(
                               children: [
                                 Expanded(
@@ -147,32 +161,20 @@ class _ResetarSenhaVerificarCodigoScreenState
                               ),
                             ],
                             const SizedBox(height: 20),
-                            FxSettingsGroup(
-                              children: [
-                                FxSettingsTile(
-                                  fxIcon: 'circle-check',
-                                  label: resetCodigoContinuarLabel(),
-                                  value:
-                                      _loading
-                                          ? resetCodigoContinuandoLabel()
-                                          : resetCodigoRoleQuery(
-                                            isAluno: _isAluno,
-                                          ),
-                                  onTap:
-                                      _loading ? () {} : _pedirContinuar,
-                                ),
-                                FxSettingsTile(
-                                  fxIcon: 'users',
-                                  label: resetCodigoVoltarLoginLabel(),
-                                  value: 'Login',
-                                  picker: true,
-                                  showDivider: false,
-                                  onTap:
-                                      _loading
-                                          ? () {}
-                                          : () => context.go(_loginPath),
-                                ),
-                              ],
+                            FxLiquidPrimaryButton(
+                              label: resetCodigoContinuarLabel(),
+                              loading: _loading,
+                              loadingLabel: resetCodigoContinuandoLabel(),
+                              onPressed:
+                                  _loading ? null : _pedirContinuar,
+                            ),
+                            FxConversionTextLink(
+                              text: '',
+                              actionText: resetCodigoVoltarLoginLabel(),
+                              onTap: () {
+                                if (_loading) return;
+                                context.go(_loginPath);
+                              },
                             ),
                           ],
                         ),

@@ -7,6 +7,7 @@ import '../../../core/brand/focux_brand_copy.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_conversion.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_input_deco.dart';
@@ -136,6 +137,17 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                    Center(
+                      child: FxConversionLockup(
+                        width: authLogoWidthFor(
+                          context,
+                          withTagline: true,
+                        ),
+                        semanticLabel: 'Focux ALUNO',
+                        aluno: true,
+                      ),
+                    ),
+                    const SizedBox(height: TokensStrip.s4),
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 14,
@@ -291,14 +303,14 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen> {
                       loading: _loading,
                       onPressed: _loading ? null : _submit,
                     ),
-                    const SizedBox(height: 10),
-                    FxLiquidSecondaryButton(
-                      label: FocuxBrandCopy.authInviteExistingAccountCta,
-                      icon: Icons.login_rounded,
-                      onPressed:
-                          _loading
-                              ? null
-                              : () => context.go('/login?role=aluno'),
+                    FxConversionTextLink(
+                      text: '',
+                      actionText:
+                          FocuxBrandCopy.authInviteExistingAccountCta,
+                      onTap: () {
+                        if (_loading) return;
+                        context.go('/login?role=aluno');
+                      },
                     ),
                     const SizedBox(height: 8),
                           ],
