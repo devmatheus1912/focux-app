@@ -11,12 +11,13 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/utils/motion_preferences.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
-import '../../../core/widgets/fx_inset_picker_row.dart';
+import '../../../core/widgets/fx_icon.dart';
 import '../../../core/widgets/fx_inset_picker_sheet.dart';
-import '../../../core/widgets/fx_motion.dart';
+import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -276,30 +277,20 @@ class StorefrontLinkCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 12),
-            Row(
+            FxSettingsGroup(
               children: [
-                Expanded(
-                  child: Semantics(
-                    button: true,
-                    label: 'Copiar link da página de vendas',
-                    child: FxLiquidSecondaryButton(
-                      label: 'Copiar link',
-                      icon: Icons.link_rounded,
-                      onPressed: onCopy,
-                    ),
-                  ),
+                FxSettingsTile(
+                  fxIcon: 'route',
+                  label: 'Copiar link',
+                  value: 'WhatsApp',
+                  onTap: onCopy,
                 ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Semantics(
-                    button: true,
-                    label: 'Ver página como o cliente vê',
-                    child: FxLiquidSecondaryButton(
-                      label: 'Ver como cliente',
-                      icon: Icons.open_in_new_rounded,
-                      onPressed: onPreview,
-                    ),
-                  ),
+                FxSettingsTile(
+                  fxIcon: 'article',
+                  label: 'Ver como cliente',
+                  value: 'Abrir',
+                  showDivider: false,
+                  onTap: onPreview,
                 ),
               ],
             ),

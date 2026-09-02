@@ -24,6 +24,10 @@ void main() {
     expect(sheet, contains('AlunoInsetFormField'));
     expect(sheet, contains('showFxInsetPickerSheet'));
     expect(sheet, contains('FxSettingsGroup'));
+    expect(sheet, contains('showFxConfirmSheet'));
+    expect(sheet, contains('pacoteCriarConfirmTitle'));
+    expect(sheet, isNot(contains('FxLiquidPrimaryButton')));
+    expect(sheet, isNot(contains('FxLiquidSecondaryButton')));
     expect(sheet, isNot(contains('ChoiceChip')));
     expect(sheet, isNot(contains('DropdownButton')));
   });

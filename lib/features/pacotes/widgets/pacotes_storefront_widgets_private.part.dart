@@ -60,54 +60,15 @@ Future<bool> showNovoPacoteSheet(
 }
 
 /// Confirma desativação antes de remover da vitrine.
-Future<bool> confirmDesativarPacote(BuildContext context, String titulo) async {
-  final mute = fxScreenMute(context);
-  final confirmed = await showFxHomeSheet<bool>(
+Future<bool> confirmDesativarPacote(BuildContext context, String titulo) {
+  return showFxConfirmSheet(
     context,
-    builder: (ctx) {
-      final isDark = Theme.of(ctx).brightness == Brightness.dark;
-      final primary = Theme.of(ctx).colorScheme.primary;
-      return FxHomeSheetSurface(
-        isDark: isDark,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            FxHomeSheetHandle(isDark: isDark),
-            SizedBox(height: TokensStrip.s4),
-            FxHomeSheetHeader(
-              isDark: isDark,
-              title: 'Desativar plano?',
-              leading: Icon(
-                Icons.delete_outline_rounded,
-                color: primary,
-                size: 18,
-              ),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              '“$titulo” some da sua página na internet. '
-              'Quem abrir seu link não verá mais este plano. '
-              'Você pode criar outro depois.',
-              textAlign: TextAlign.center,
-              style: TokensStrip.bodyMuted(color: mute).copyWith(height: 1.4),
-            ),
-            const SizedBox(height: 20),
-            FxLiquidPrimaryButton(
-              label: 'Desativar',
-              icon: Icons.delete_outline_rounded,
-              onPressed: () => Navigator.of(ctx).pop(true),
-            ),
-            const SizedBox(height: 10),
-            FxLiquidSecondaryButton(
-              label: 'Cancelar',
-              onPressed: () => Navigator.of(ctx).pop(false),
-            ),
-          ],
-        ),
-      );
-    },
+    title: pacoteDesativarConfirmTitle(),
+    message: pacoteDesativarConfirmMessage(titulo),
+    icon: Icons.delete_outline_rounded,
+    confirmLabel: pacoteDesativarConfirmLabel(),
+    destructive: true,
   );
-  return confirmed ?? false;
 }
 
 class _NovoPacoteSheet extends StatefulWidget {
@@ -140,12 +101,38 @@ class _NovoPacoteSheetState extends State<_NovoPacoteSheet> {
     super.dispose();
   }
 
+  Future<void> _abrirDuracao() async {
+    final picked = await showFxInsetPickerSheet<int>(
+      context,
+      title: 'Duração',
+      selected: _duracao,
+      items: [
+        for (final meses in pacoteDuracaoMesesValues)
+          FxInsetPickerSheetItem(
+            value: meses,
+            label: pacoteDuracaoLabel(meses),
+          ),
+      ],
+    );
+    if (picked == null) return;
+    setState(() => _duracao = picked);
+  }
+
   Future<void> _submit() async {
     if (_enviando) return;
     if (!_formKey.currentState!.validate()) {
       HapticFeedback.heavyImpact();
       return;
     }
+    HapticFeedback.mediumImpact();
+    final ok = await showFxConfirmSheet(
+      context,
+      title: pacoteCriarConfirmTitle(),
+      message: pacoteCriarConfirmMessage(),
+      icon: Icons.add_card_outlined,
+      confirmLabel: pacoteCriarConfirmLabel(),
+    );
+    if (!ok || !mounted) return;
 
     setState(() => _enviando = true);
     try {
@@ -160,7 +147,7 @@ class _NovoPacoteSheetState extends State<_NovoPacoteSheet> {
         destaque: _destaque,
       );
       if (!mounted) return;
-      HapticFeedback.mediumImpact();
+      HapticFeedback.heavyImpact();
       Navigator.of(context).pop(true);
     } catch (e) {
       if (!mounted) return;
@@ -186,38 +173,53 @@ class _NovoPacoteSheetState extends State<_NovoPacoteSheet> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               FxHomeSheetHandle(isDark: isDark),
-              SizedBox(height: TokensStrip.s4),
-              FxHomeSheetHeader(
-                isDark: isDark,
-                title: 'Novo plano',
-                subtitle:
-                    'Quem abrir seu link verá este plano na sua página de vendas.',
-                leading: Icon(
-                  Icons.add_card_outlined,
-                  color: primary,
-                  size: 18,
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  FxSettingsLayout.pageInset,
+                  TokensStrip.s3,
+                  FxSettingsLayout.pageInset,
+                  0,
                 ),
-                trailing: IconButton(
-                  tooltip: 'Fechar',
-                  onPressed:
-                      _enviando ? null : () => Navigator.of(context).pop(),
-                  style: IconButton.styleFrom(
-                    minimumSize: const Size(
-                      FxHomeSheetChrome.touchTarget,
-                      FxHomeSheetChrome.touchTarget,
+                child: FxHomeSheetHeader(
+                  isDark: isDark,
+                  title: 'Novo plano',
+                  subtitle:
+                      'Quem abrir seu link verá este plano na sua página de vendas.',
+                  leading: FxIcon(name: 'coin', color: primary, size: 18),
+                  trailing: IconButton(
+                    tooltip: 'Fechar',
+                    onPressed:
+                        _enviando ? null : () => Navigator.of(context).pop(),
+                    style: IconButton.styleFrom(
+                      minimumSize: const Size(
+                        FxHomeSheetChrome.touchTarget,
+                        FxHomeSheetChrome.touchTarget,
+                      ),
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    icon: const Icon(Icons.close_rounded, size: 22),
                   ),
-                  icon: const Icon(Icons.close_rounded, size: 22),
                 ),
               ),
-              const SizedBox(height: 16),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                  FxSettingsLayout.pageInset,
+                  TokensStrip.s3,
+                  FxSettingsLayout.pageInset,
+                  MediaQuery.of(context).viewInsets.bottom + TokensStrip.s4,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
               FxSettingsGroup(
                 children: [
                   AlunoInsetFormField(
                     controller: _tituloCtrl,
                     label: 'Título',
                     icon: Icons.title_outlined,
+                    inputFormatters: [
+                      LengthLimitingTextInputFormatter(pacoteTituloMax),
+                    ],
                     validator:
                         (v) =>
                             v == null || v.trim().isEmpty
@@ -229,6 +231,9 @@ class _NovoPacoteSheetState extends State<_NovoPacoteSheet> {
                     label: 'Descrição',
                     icon: Icons.notes_outlined,
                     maxLines: 2,
+                    inputFormatters: [
+                      LengthLimitingTextInputFormatter(pacoteDescricaoMax),
+                    ],
                   ),
                   AlunoInsetFormField(
                     controller: _valorCtrl,
@@ -250,35 +255,19 @@ class _NovoPacoteSheetState extends State<_NovoPacoteSheet> {
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: TokensStrip.s3),
               FxSettingsGroup(
                 header: 'Plano',
                 children: [
-                  FxInsetPickerRow(
-                    icon: Icons.schedule_outlined,
+                  FxSettingsTile(
+                    fxIcon: 'calendar',
                     label: 'Duração',
                     value: pacoteDuracaoLabel(_duracao),
-                    onTap: _enviando
-                        ? () {}
-                        : () async {
-                            final picked = await showFxInsetPickerSheet<int>(
-                              context,
-                              title: 'Duração',
-                              selected: _duracao,
-                              items: [
-                                for (final meses in pacoteDuracaoMesesValues)
-                                  FxInsetPickerSheetItem(
-                                    value: meses,
-                                    label: pacoteDuracaoLabel(meses),
-                                  ),
-                              ],
-                            );
-                            if (picked == null) return;
-                            setState(() => _duracao = picked);
-                          },
+                    picker: true,
+                    onTap: _enviando ? () {} : _abrirDuracao,
                   ),
                   FxSettingsTile(
-                    icon: Icons.fitness_center_outlined,
+                    fxIcon: 'target',
                     label: 'Treino',
                     value: pacoteIncluiValue(_treino),
                     onTap: _enviando
@@ -286,7 +275,7 @@ class _NovoPacoteSheetState extends State<_NovoPacoteSheet> {
                         : () => setState(() => _treino = !_treino),
                   ),
                   FxSettingsTile(
-                    icon: Icons.restaurant_outlined,
+                    fxIcon: 'spark',
                     label: 'Nutrição',
                     value: pacoteIncluiValue(_nutri),
                     onTap: _enviando
@@ -294,7 +283,7 @@ class _NovoPacoteSheetState extends State<_NovoPacoteSheet> {
                         : () => setState(() => _nutri = !_nutri),
                   ),
                   FxSettingsTile(
-                    icon: Icons.chat_bubble_outline,
+                    fxIcon: 'message-circle',
                     label: 'Consultoria',
                     value: pacoteIncluiValue(_consultoria),
                     showDivider: false,
@@ -304,11 +293,11 @@ class _NovoPacoteSheetState extends State<_NovoPacoteSheet> {
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: TokensStrip.s3),
               FxSettingsGroup(
                 children: [
                   FxSettingsTile(
-                    icon: Icons.star_outline_rounded,
+                    fxIcon: 'star',
                     label: 'Mostrar em destaque',
                     value: pacoteIncluiValue(_destaque),
                     showDivider: false,
@@ -318,13 +307,20 @@ class _NovoPacoteSheetState extends State<_NovoPacoteSheet> {
                   ),
                 ],
               ),
-              const SizedBox(height: 20),
-              FxLiquidPrimaryButton(
-                label: 'Criar plano',
-                icon: Icons.check_rounded,
-                loading: _enviando,
-                loadingLabel: 'Criando…',
-                onPressed: _enviando ? null : _submit,
+              const SizedBox(height: TokensStrip.s3),
+              FxSettingsGroup(
+                children: [
+                  FxSettingsTile(
+                    fxIcon: 'circle-check',
+                    label: pacoteCriarTileLabel(),
+                    value: _enviando ? 'Criando…' : 'Confirmar',
+                    showDivider: false,
+                    onTap: _enviando ? () {} : _submit,
+                  ),
+                ],
+              ),
+                  ],
+                ),
               ),
             ],
           ),
