@@ -9,6 +9,12 @@ void main() {
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(screen, contains('FxShellScaffold'));
     expect(screen, anyOf(contains('FxContentWidthLimiter'), isNot(contains('constrainWidth: false'))));
+    expect(screen, contains('FxSettingsGroup'));
+    expect(screen, contains('showFxConfirmSheet'));
+    expect(screen, contains('FxHelpIconButton'));
+    expect(screen, contains('migracaoIniciarLabel'));
+    expect(screen, isNot(contains('FxLiquidPrimaryButton')));
+    expect(screen, isNot(contains('OutlinedButton')));
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(16));
   });
 }

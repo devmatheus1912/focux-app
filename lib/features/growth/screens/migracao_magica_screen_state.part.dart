@@ -89,12 +89,35 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
       },
       child: FxShellScaffold(
           useMesh: true,
-          appBar: FxShellAppBar(title: 'Migração Focux', onBack: _handleBack),
+          appBar: FxShellAppBar(
+            title: 'Migração Focux',
+            onBack: _handleBack,
+            actions: [
+              FxHelpIconButton(
+                tooltip: 'Como funciona a migração',
+                onTap: () => showFxHelpSheet(
+                  context,
+                  title: 'Migração Focux',
+                  subtitle: 'Importe alunos e revise antes de salvar.',
+                  tips: const [
+                    FxHelpTip(
+                      'Importar',
+                      'Planilha, texto colado ou foto. A análise de texto não cria ficha ainda.',
+                    ),
+                    FxHelpTip(
+                      'Confirmar',
+                      'Só a confirmação grava alunos. Duplicados são ignorados.',
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
           body: SingleChildScrollView(
             padding: const EdgeInsets.fromLTRB(
-              TokensStrip.s4,
+              FxSettingsLayout.pageInset,
               TokensStrip.s2,
-              TokensStrip.s4,
+              FxSettingsLayout.pageInset,
               TokensStrip.s6,
             ),
             child: Column(
@@ -412,77 +435,44 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                         ),
                       ],
                       const SizedBox(height: TokensStrip.s3),
-                      Row(
+                      FxSettingsGroup(
                         children: [
-                          Expanded(
-                            child: OutlinedButton.icon(
-                              onPressed:
-                                  (_isLoading || _isImportingFile)
-                                      ? null
-                                      : _importarArquivo,
-                              icon:
-                                  _isImportingFile
-                                      ? SizedBox(
-                                        width: 16,
-                                        height: 16,
-                                        child: FxLoading(
-                                          size: 16,
-                                          strokeWidth: 2,
-                                          color: brand,
-                                        ),
-                                      )
-                                      : const Icon(
-                                        Icons.upload_file_rounded,
-                                        size: 18,
-                                      ),
-                              label: Text(
-                                _isImportingFile ? 'Lendo...' : 'Planilha',
-                              ),
-                            ),
+                          FxSettingsTile(
+                            fxIcon: 'article',
+                            label: _isImportingFile
+                                ? migracaoPlanilhaLendoLabel()
+                                : migracaoPlanilhaLabel(),
+                            value: '',
+                            accent: brand,
+                            mute: mute,
+                            onTap: (_isLoading || _isImportingFile)
+                                ? () {}
+                                : _importarArquivo,
                           ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: TextButton.icon(
-                              onPressed: _isLoading ? null : _colarClipboard,
-                              icon: const Icon(
-                                Icons.content_paste_go_rounded,
-                                size: 18,
-                              ),
-                              label: const Text('Colar texto'),
-                            ),
+                          FxSettingsTile(
+                            fxIcon: 'spark',
+                            label: migracaoColarLabel(),
+                            value: '',
+                            accent: brand,
+                            mute: mute,
+                            onTap: _isLoading ? () {} : _colarClipboard,
+                          ),
+                          FxSettingsTile(
+                            fxIcon: 'plus',
+                            label: _isLoading && _importedPhotoBytes != null
+                                ? migracaoFotoLendoLabel()
+                                : migracaoFotoLabel(),
+                            value: '',
+                            showDivider: false,
+                            accent: brand,
+                            mute: mute,
+                            semanticsLabel:
+                                'Subir foto ou print de app concorrente',
+                            onTap: (_isLoading || _isImportingFile)
+                                ? () {}
+                                : _subirFoto,
                           ),
                         ],
-                      ),
-                      const SizedBox(height: 8),
-                      Semantics(
-                        button: true,
-                        label: 'Subir foto ou print de app concorrente',
-                        child: OutlinedButton.icon(
-                          onPressed:
-                              (_isLoading || _isImportingFile)
-                                  ? null
-                                  : _subirFoto,
-                          icon:
-                              _isLoading && _importedPhotoBytes != null
-                                  ? SizedBox(
-                                    width: 16,
-                                    height: 16,
-                                    child: FxLoading(
-                                      size: 16,
-                                      strokeWidth: 2,
-                                      color: brand,
-                                    ),
-                                  )
-                                  : const Icon(
-                                    Icons.add_a_photo_outlined,
-                                    size: 18,
-                                  ),
-                          label: Text(
-                            _isLoading && _importedPhotoBytes != null
-                                ? 'Lendo print (OCR)...'
-                                : 'Subir foto ou print',
-                          ),
-                        ),
                       ),
                       Semantics(
                         label:
@@ -526,15 +516,23 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                       ),
                       if (_controller.text.trim().isNotEmpty) ...[
                         const SizedBox(height: TokensStrip.s3),
-                        FxLiquidPrimaryButton(
-                          label: 'Iniciar migração',
-                          icon: Icons.auto_awesome,
-                          loading: _isLoading && _importedPhotoBytes == null,
-                          loadingLabel: 'Analisando texto...',
-                          onPressed:
-                              (_isLoading && _importedPhotoBytes == null)
-                                  ? null
+                        FxSettingsGroup(
+                          children: [
+                            FxSettingsTile(
+                              fxIcon: 'spark',
+                              label: _isLoading && _importedPhotoBytes == null
+                                  ? migracaoIniciarAnalisandoLabel()
+                                  : migracaoIniciarLabel(),
+                              value: '',
+                              showDivider: false,
+                              highlight: true,
+                              accent: brand,
+                              mute: mute,
+                              onTap: (_isLoading && _importedPhotoBytes == null)
+                                  ? () {}
                                   : _processarMigracao,
+                            ),
+                          ],
                         ),
                       ],
                     ],
@@ -751,13 +749,23 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
               );
             }),
             const SizedBox(height: TokensStrip.s3),
-            FxLiquidPrimaryButton(
-              label:
-                  'Confirmar e salvar ${alunos.where((a) => !a.duplicado).length} alunos',
-              icon: Icons.check_rounded,
-              loading: _isSaving,
-              loadingLabel: 'Salvando alunos...',
-              onPressed: _isSaving ? null : _salvarAlunos,
+            FxSettingsGroup(
+              children: [
+                FxSettingsTile(
+                  fxIcon: 'circle-check',
+                  label: _isSaving
+                      ? migracaoSalvandoLabel()
+                      : migracaoSalvarLabel(
+                          alunos.where((a) => !a.duplicado).length,
+                        ),
+                  value: '',
+                  showDivider: false,
+                  highlight: true,
+                  accent: brand,
+                  mute: mute,
+                  onTap: _isSaving ? () {} : _salvarAlunos,
+                ),
+              ],
             ),
           ],
         ),

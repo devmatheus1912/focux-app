@@ -384,6 +384,13 @@ extension MigracaoMagicaScreenActions on _MigracaoMagicaScreenState {
   }
 
   Future<void> _processarMigracao() async {
+    final ok = await showFxConfirmSheet(
+      context,
+      title: migracaoIniciarConfirmTitle(),
+      message: migracaoIniciarConfirmMessage(),
+      confirmLabel: migracaoIniciarLabel(),
+    );
+    if (!ok || !mounted) return;
     await _processarTextoMigracao(_controller.text);
   }
 
@@ -399,6 +406,14 @@ extension MigracaoMagicaScreenActions on _MigracaoMagicaScreenState {
       );
       return;
     }
+
+    final ok = await showFxConfirmSheet(
+      context,
+      title: migracaoSalvarConfirmTitle(toSave.length),
+      message: migracaoSalvarConfirmMessage(),
+      confirmLabel: migracaoSalvarLabel(toSave.length),
+    );
+    if (!ok || !mounted) return;
 
     setState(() => _isSaving = true);
 
@@ -722,56 +737,15 @@ extension MigracaoMagicaScreenActions on _MigracaoMagicaScreenState {
   List<MigracaoAlunoLinha>? _parsarResultado(dynamic data) =>
       MigracaoAlunoLinha.parseResultado(data);
 
-  Future<bool> _confirmDiscard() async {
-    final discard = await showDialog<bool>(
-      context: context,
-      builder: (ctx) {
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(TokensStrip.rCard),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(24, 24, 24, 20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  'Sair da migração?',
-                  style: FocuxHubTypography.sectionTitle(
-                    ctx,
-                    color: ShellChrome.of(ctx).ink,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  'Há texto ou alunos revisados que ainda não foram salvos.',
-                  style: TextStyle(
-                    height: 1.45,
-                    color:
-                        Theme.of(ctx).brightness == Brightness.dark
-                            ? EagleTokens.darkInkMute
-                            : TokensStrip.textSecondary,
-                  ),
-                ),
-                const SizedBox(height: 24),
-                FilledButton(
-                  onPressed: () => Navigator.pop(ctx, false),
-                  child: const Text('Continuar migração'),
-                ),
-                const SizedBox(height: 8),
-                TextButton(
-                  style: TextButton.styleFrom(foregroundColor: EagleTokens.bad),
-                  onPressed: () => Navigator.pop(ctx, true),
-                  child: const Text('Sair sem salvar'),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
+  Future<bool> _confirmDiscard() {
+    return showFxConfirmSheet(
+      context,
+      title: migracaoDiscardTitle(),
+      message: migracaoDiscardMessage(),
+      confirmLabel: migracaoDiscardConfirmLabel(),
+      cancelLabel: migracaoDiscardCancelLabel(),
+      destructive: true,
     );
-    return discard ?? false;
   }
 
   Future<void> _handleBack() async {
