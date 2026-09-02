@@ -109,6 +109,13 @@ extension AssinaturaScreenBuildBody on _AssinaturaScreenState {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  Center(
+                    child: FxConversionLockup(
+                      width: authLogoWidthFor(context, withTagline: true),
+                      semanticLabel: 'Focux Personal',
+                    ),
+                  ),
+                  const SizedBox(height: TokensStrip.s3),
                   if (usage != null &&
                       ((widget.blockedFeature != null &&
                               widget.blockedFeature!.isNotEmpty) ||
