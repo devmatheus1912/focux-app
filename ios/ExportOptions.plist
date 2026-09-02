@@ -5,7 +5,7 @@
 	<key>method</key>
 	<string>app-store</string>
 	<key>teamID</key>
-	<string>YOUR_APPLE_TEAM_ID</string>
+	<string>TVY2QLKX54</string>
 	<key>uploadSymbols</key>
 	<true/>
 	<key>signingStyle</key>
