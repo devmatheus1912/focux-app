@@ -55,7 +55,7 @@ void main() {
 
     expect(isPlanGateError(error), isTrue);
     expect(isPlanQuotaError(error), isFalse);
-    expect(isEntitlementError(error), isTrue);
+    expect(isPlanRestrictionError(error), isTrue);
   });
 
   test('codigo de cota nao e gate, mesmo com Faca upgrade no texto', () {
@@ -73,7 +73,7 @@ void main() {
 
     expect(isPlanGateError(error), isFalse);
     expect(isPlanQuotaError(error), isTrue);
-    expect(isEntitlementError(error), isTrue);
+    expect(isPlanRestrictionError(error), isTrue);
     expect(ApiError.from(error)!.limite, '120');
   });
 
@@ -89,7 +89,7 @@ void main() {
 
     expect(isPlanGateError(error), isFalse);
     expect(isPlanQuotaError(error), isFalse);
-    expect(isEntitlementError(error), isFalse);
+    expect(isPlanRestrictionError(error), isFalse);
   });
 
   test('codigo fora do catalogo cai no heuristico de texto', () {
@@ -123,7 +123,7 @@ void main() {
     final error = _dio(data: {'erro': 'Sem permissao para este recurso.'});
 
     expect(isPlanGateError(error), isFalse);
-    expect(isEntitlementError(error), isFalse);
+    expect(isPlanRestrictionError(error), isFalse);
   });
 
   test('campo da mensagem e erro, nao mensagem', () {

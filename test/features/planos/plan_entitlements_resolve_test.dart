@@ -69,12 +69,23 @@ void main() {
       upgradePlano: SubscriptionPlan.PRO,
     );
     expect(fromServer.targetPlan, SubscriptionPlan.PRO);
+  });
 
-    final local = PlanEntitlements.lockedOffer(
+  test('sem upgradePlano, poseCoach continua Enterprise e LEADS/NFSE seguem o contrato', () {
+    final pose = PlanEntitlements.lockedOffer(
       featureName: 'Pose Coach',
       capability: 'poseCoach',
     );
-    expect(local.targetPlan, SubscriptionPlan.ENTERPRISE);
+    expect(pose.targetPlan, SubscriptionPlan.ENTERPRISE);
+
+    expect(
+      PlanEntitlements.targetPlan(capability: 'leads'),
+      SubscriptionPlan.PRO,
+    );
+    expect(
+      PlanEntitlements.targetPlan(capability: 'nfse'),
+      SubscriptionPlan.ENTERPRISE,
+    );
   });
 
   test('alignedToBilling elevates FREE /me to Enterprise limits', () {

@@ -37,8 +37,8 @@ class UpgradePromptSheet {
   /// Abre a sheet a partir de um erro de entitlement do contrato.
   ///
   /// Devolve `true` se mostrou — o chamador não empilha snackbar de falha em
-  /// cima. `false` para qualquer outra coisa, inclusive 403 de permissão:
-  /// tratar todo 403 como paywall era o bug (RBAC virava "faça upgrade").
+  /// cima. `false` para qualquer outra coisa: 403 de permissão, cota, 409.
+  /// Cota não é entitlement — não abre "desbloqueie o recurso".
   static Future<bool> showFromError(
     BuildContext context,
     Object error, {
@@ -46,7 +46,7 @@ class UpgradePromptSheet {
     String? fallbackCapability,
     String source = 'api_error',
   }) async {
-    if (!isEntitlementError(error)) return false;
+    if (!isPlanGateError(error)) return false;
     final api = ApiError.from(error);
     final feature = api?.feature;
     final capability =

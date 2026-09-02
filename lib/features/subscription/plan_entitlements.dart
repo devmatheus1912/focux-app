@@ -134,6 +134,7 @@ class PlanEntitlements {
       case 'lojaDigital':
       case 'poseCoach':
       case 'automacoesAvancadas':
+      case 'nfse':
         return SubscriptionPlan.ENTERPRISE;
       case 'whiteLabel':
       case 'automacoes':
@@ -147,6 +148,7 @@ class PlanEntitlements {
       case 'iaCopiloto':
       case 'migracaoFoto':
       case 'agenda':
+      case 'leads':
         return SubscriptionPlan.PRO;
       default:
         return fallback;
@@ -190,6 +192,8 @@ class PlanEntitlements {
       'equipeRbac' => 'Equipe com permissões granulares',
       'lojaDigital' => 'Loja digital com checkout PIX',
       'poseCoach' => 'Pose Coach — análise de postura ML',
+      'leads' => 'CRM de leads sem teto do Free',
+      'nfse' => 'Nota fiscal no fluxo de cobrança',
       _ => 'Desbloqueie $featureName',
     };
 
@@ -229,6 +233,11 @@ class PlanEntitlements {
         'Venda programas digitais com checkout PIX no Enterprise.',
       'poseCoach' =>
         'Análise de postura por ML em tempo real no Enterprise.',
+      'leads' =>
+        'CRM de leads ilimitado faz parte do plano $planLabel. '
+            'O Free segura 5; no Pro o funil não tem esse teto.',
+      'nfse' =>
+        'Emissão de nota fiscal no fluxo de cobrança exige Enterprise.',
       _ =>
         '"$featureName" faz parte do plano $planLabel. Faça upgrade em um passo.',
     };

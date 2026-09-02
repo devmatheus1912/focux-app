@@ -126,19 +126,20 @@ bool isPlanGateError(Object error) {
 
 /// True quando o teto do plano foi atingido, e não quando o tier não alcança.
 ///
-/// Sem `codigo` no corpo isto é indistinguível de gate de plano pelo texto,
-/// então o fallback devolve `false`: prefiro não afirmar cota do que afirmar
-/// errado e mostrar "limite atingido" para quem só precisa de upgrade.
+/// Cota **não** é entitlement (§2 do contrato). Sheet de "desbloqueie o
+/// recurso" não abre por isto — IA tem UI própria de cota, aluno-limite
+/// mostra a mensagem de `erro`. Sem `codigo` no corpo isto é indistinguível
+/// de gate pelo texto, então o fallback devolve `false`.
 bool isPlanQuotaError(Object error) {
   final apiError = ApiError.from(error);
   if (apiError == null || !apiError.hasCodigo) return false;
   return ApiErrorCodes.quotaExceeded.contains(apiError.codigo);
 }
 
-/// True quando o erro vem de entitlement — gate de plano ou cota — e portanto
-/// não é indisponibilidade. Tela que já mostra estado bloqueado usa isto para
-/// não empilhar um aviso de falha em cima.
-bool isEntitlementError(Object error) =>
+/// Gate ou cota: não é indisponibilidade. Home que já mostra locked/upsell
+/// usa isto para não empilhar snackbar de falha. Não abre paywall — paywall
+/// é só [isPlanGateError].
+bool isPlanRestrictionError(Object error) =>
     isPlanGateError(error) || isPlanQuotaError(error);
 
 bool _looksLikePlanGateText(String? message) {
