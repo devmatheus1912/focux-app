@@ -1026,18 +1026,20 @@ Aplicação literal da regra "P0 do backend antes do trabalho estético no domí
 
 | Lote | Estado | Trava | Por quê |
 |---|---|---|---|
-| **S6 login / cadastro / recuperar senha** | **Liberado** | — | Os P0 de auth são RBAC e escalonamento dentro do tenant, não o fluxo de entrada. O CTA como botão não depende de backend |
-| **S6 paywall / planos** | **Bloqueado** | 5 gates de plano (esforço P + M) | Redesenhar a tela que vende o plano enquanto a feature vaza de graça é maquiar perda de receita |
-| **S1 hubs** | **Bloqueado** | 342 `LocalDate.now()` sem zona | O job de S1 é *operar o dia*. Com `hoje` errado das 21h à meia-noite no fuso BR, `dayFocus`, streak, aderência e agenda apontam para o dia seguinte. Hub bonito com dia errado é pior que hub feio |
-| **S3 detalhe de entidade** | **Liberado com ressalva** | Datas do fuso afetam streak e aderência exibidos no detalhe | Estrutura pode ser feita; números de data ficam suspeitos até o P0 transversal |
-| **S4 coleção / lista** | **Bloqueado** | 80 de 88 listagens sem paginação (P1, G, **quebra contrato**) | §23 exige contrato paginado em toda S4. É o único item grande que precisa de PRs pareados |
-| **S5 formulário** | **Liberado com lacuna** | 2 códigos de erro para 623 lançamentos | Estrutura e footer sticky podem ser feitos; "erro inline específico" fica inalcançável até haver código de domínio |
+| **S6 login / cadastro / recuperar senha** | **Liberado** | — | P0 de auth é RBAC dentro do tenant, não o fluxo de entrada |
+| **S6 paywall / planos** | **Bloqueado** | fechar gates de plano (fila do backend) | Redesenhar a tela que vende o plano enquanto a feature ainda vaza é maquiar perda de receita. Sheet já lê `codigo`/`upgradePlano`; o vazamento é no servidor |
+| **S1 hubs** | **Bloqueado** | timezone (`LocalDate.now()` sem zona) | O job de S1 é *operar o dia*. Hub bonito com o dia errado das 21h à meia-noite no fuso BR é pior que hub feio |
+| **S3 detalhe de entidade** | **Liberado com ressalva** | mesmo fuso | Estrutura, hierarquia, sticky CTA: sim. Números de streak/aderência/agenda do dia ficam suspeitos até o P0 transversal |
+| **S4 coleção / lista** | **Bloqueado no geral; exceção abaixo** | paginação A ainda atrás dos P0 | Envelope e parser prontos (`Pagina.fromJson`). Sem `hasNext` no servidor, o rodapé da lista não tem contrato. **Exceção:** listas que já paginam (financeiro, notificações, chat `/page`) podem receber chrome S4 agora |
+| **S5 formulário** | **Liberado** | códigos de domínio ainda incompletos fora do catálogo §2.3 | Footer sticky, 1 P0, picker inset: sim. Erro inline de gate/cota/409/429 já classifica por `codigo`. Validação de campo (400 genérico) continua prosa |
 | **S8 execução** | **Liberado** | — | Nada no relatório toca a execução de treino |
 | **S9 wizard** | **Liberado** | — | Depende de S5 pronto, não do backend |
 | **S7 sheets** | **Liberado** | — | Varredura de conformidade, sem dado novo |
 | **S2 ajustes** | **Liberado** | — | Já no padrão; só auditar limites de §11 |
-| Telas de **financeiro** (qualquer tipo) | **Bloqueado** | 3 P0 de idempotência + dinheiro em `double` no contrato | Crédito duplicado é erro de dado; não se redesenha em cima disso |
-| Telas de **IA** | **Bloqueado** | 7 de 9 clientes HTTP sem timeout | Sem timeout, o estado de carregamento da tela não tem fim definido — o design de loading fica sem contrato |
+| Telas de **financeiro** (qualquer tipo) | **Bloqueado** | idempotência do webhook MercadoPago | Crédito duplicado é erro de dado; não se redesenha em cima. A chave do *app* já é estável em criar/pagar/PIX; o P0 restante é o webhook |
+| Telas de **IA** | **Bloqueado** | timeouts HTTP (7 de 9 clientes) | Sem timeout o loading não tem fim definido — o design de carregamento fica sem contrato |
+
+**Primeiro lote em massa, agora:** S2 + S7 + S8 + S9 + S6 auth (não paywall) + S5 + S3 (estrutura, sem fiar em data do dia). Um tipo por PR, no máximo 3 telas do mesmo tipo (§28.3). Extrair padrão repetido para `lib/core/widgets/` *antes* do lote (§28.2).
 
 #### 22.6.4 Acoplamentos descobertos no lado do app
 
@@ -1143,11 +1145,11 @@ Para coleção que cresce pela ponta e é lida de trás para frente, o cursor do
 
 São do app, entram no meu lado do plano, não no do backend.
 
-**1. Logout não desregistra o token de push.** **Resolvido no app:** `AuthRepository.logout` chama `FcmService.desregistrarToken` **antes** de `POST /api/auth/logout`, com o token no corpo. Resta um P0 no servidor: `UNIQUE (personal_id, token)` não impede o mesmo token de existir em dois personais — ver `docs/CONTRATO_APP_BACKEND.md` §3.2. O app não tem mais o que fazer neste item.
+**1. Logout não desregistra o token de push.** **Resolvido nos dois lados:** app chama `DELETE` antes do logout; servidor reclama o token no registro e `V157` cria unique em `token`. Ver `docs/CONTRATO_APP_BACKEND.md` §3.
 
-**2. A fila offline trata falha permanente como transitória.** `OfflineSyncService.syncPendingRequests` (`lib/core/api/offline_sync_service.dart:180`) tem `catch (_)` sem discriminar status. Um 400, 403 ou 422 — erro que nunca vai passar — é reenfileirado com backoff de 5s a 1h por 8 tentativas e depois **descartado em silêncio**. E como o interceptor já respondeu `202 {'status': 'queued'}` para a UI (`api_client.dart:82`), o usuário foi informado de sucesso e nunca sabe que a mutação morreu. Correção: só reenfileirar em erro de transporte e 5xx; em 4xx permanente, descartar e notificar.
+**2. A fila offline trata falha permanente como transitória.** **Resolvido no app:** 4xx permanente sai na primeira tentativa; 5xx/transporte/408/409/429 retentam; descarte aparece no banner.
 
-**3. `Idempotency-Key` nova por tentativa anula a proteção contra toque duplo.** `_shouldUseIdempotency` (`api_client.dart:195`) injeta o header em todo POST/PUT/PATCH/DELETE, mas `_newIdempotencyKey()` gera **chave nova a cada requisição**. Dois toques no mesmo botão viram duas chaves distintas, logo duas mutações reais — a infraestrutura de idempotência do backend (228 de 229 mutações cobertas) não tem como deduplicar. A chave só é estável no caminho da fila offline, que por sua vez exclui a maioria dos paths via `_isSensitivePath` (`/chat`, `/alunos`, `/mensalidade`, `/ia`, `/fcm`, `/upload` e outros). Efeito prático: o mecanismo protege reenvio de transporte e quase nada de duplicação por usuário. Correção: derivar a chave da operação (rota + identidade do alvo + janela de tempo) nos botões de mutação financeira e de escrita não reentrante.
+**3. `Idempotency-Key` nova por tentativa anula a proteção contra toque duplo.** **Resolvido no app** para criar/pagar/PIX de mensalidade via `ApiClient.idempotent(scope)`. O P0 restante de dinheiro é o webhook MercadoPago, não esta chave.
 
 #### 22.7.4 Correções ao que ficou registrado antes
 
