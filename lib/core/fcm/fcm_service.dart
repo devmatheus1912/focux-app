@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
@@ -142,6 +143,42 @@ class FcmService {
       await apiClient.dio.post('/api/fcm/token', data: {'token': token});
     } catch (e) {
       debugPrint('[Focux] FCM register error: $e');
+    }
+  }
+
+  /// Desfaz o vínculo do dispositivo com a conta que está saindo.
+  ///
+  /// Precisa rodar **antes** de o JWT ser apagado, porque o endpoint exige
+  /// sessão — daí a chamada viver em `AuthRepository.logout` e não no
+  /// `SessionInvalidator`, que já roda com o storage limpo.
+  ///
+  /// O `deleteToken` local no fim não é redundância: ele derruba o token
+  /// mesmo que a chamada ao servidor falhe, o que mantém a garantia de que o
+  /// aparelho para de receber push da sessão anterior sem depender de rede.
+  /// Nada aqui pode escapar: `FirebaseMessaging.instance` lança quando o
+  /// Firebase não foi inicializado (web, ou falha do `initializeApp` no
+  /// `main`), e logout precisa concluir de qualquer forma.
+  static Future<void> desregistrarToken(Dio dio) async {
+    try {
+      final messaging = FirebaseMessaging.instance;
+      try {
+        final jwtToken = await SecureStorage.getToken();
+        final token = await messaging.getToken();
+        if (jwtToken != null && token != null) {
+          await dio.delete(
+            '/api/fcm/token',
+            data: {'token': token},
+            options: Options(
+              extra: {'fxNoInvalidate': true, 'fxNoOfflineQueue': true},
+            ),
+          );
+        }
+      } catch (e) {
+        if (kDebugMode) debugPrint('[FCM] unregister error: $e');
+      }
+      await messaging.deleteToken();
+    } catch (e) {
+      if (kDebugMode) debugPrint('[FCM] deleteToken error: $e');
     }
   }
 }

@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
+import '../../../core/fcm/fcm_service.dart';
 import '../../../core/storage/secure_storage.dart';
 
 class PasswordResetRequestResult {
@@ -371,6 +372,9 @@ class AuthRepository {
   }
 
   Future<void> logout() async {
+    // Antes de revogar a sessão, enquanto o JWT ainda existe.
+    await FcmService.desregistrarToken(_dio);
+
     final refresh = await SecureStorage.getRefreshToken();
     if (refresh != null && refresh.isNotEmpty) {
       try {
