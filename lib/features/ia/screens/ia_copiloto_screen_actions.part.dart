@@ -271,6 +271,14 @@ extension IaCopilotScreenActions on _IaCopilotoScreenState {
     }
     if (!mounted) return;
     if (!await IaQuotaUpgrade.guardBeforeRequest(context, ref)) return;
+    if (!mounted) return;
+    final ok = await showFxConfirmSheet(
+      context,
+      title: iaCopilotoGerarConfirmTitle(_modeDisplay),
+      message: iaCopilotoGerarConfirmMessage(),
+      confirmLabel: iaCopilotoGerarConfirmLabel(_modeDisplay),
+    );
+    if (!ok || !mounted) return;
 
     setState(() {
       _gerando = true;
@@ -366,6 +374,14 @@ extension IaCopilotScreenActions on _IaCopilotoScreenState {
         motivo,
       );
       if (draft == null) return;
+      if (!mounted) return;
+      final confirmar = await showFxConfirmSheet(
+        context,
+        title: iaCopilotoCriarTarefaConfirmTitle(),
+        message: iaCopilotoCriarTarefaConfirmMessage(),
+        confirmLabel: iaCopilotoCriarTarefaLabel(),
+      );
+      if (!confirmar || !mounted) return;
       final acao = await repo.salvarAcaoCopiloto(
         alunoId: _selectedAlunoId!,
         acao: draft.acao,
@@ -526,31 +542,25 @@ extension IaCopilotScreenActions on _IaCopilotoScreenState {
                   ),
                 ],
                 const SizedBox(height: 18),
-                Row(
+                FxSettingsGroup(
                   children: [
-                    Expanded(
-                      child: TextButton(
-                        onPressed: () => Navigator.of(ctx).pop(),
-                        child: const Text('Cancelar'),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      flex: 2,
-                      child: FxLiquidPrimaryButton(
-                        label: 'Criar tarefa',
-                        icon: Icons.add_task_outlined,
-                        onPressed: () {
-                          final text = controller.text.trim();
-                          if (text.isEmpty) return;
-                          Navigator.of(ctx).pop(
-                            IaCopilotTaskDraft(
-                              acao: text,
-                              motivo: motivoInicial.trim(),
-                            ),
-                          );
-                        },
-                      ),
+                    FxSettingsTile(
+                      fxIcon: 'circle-check',
+                      label: iaCopilotoCriarTarefaLabel(),
+                      value: '',
+                      showDivider: false,
+                      highlight: true,
+                      accent: brand,
+                      onTap: () {
+                        final text = controller.text.trim();
+                        if (text.isEmpty) return;
+                        Navigator.of(ctx).pop(
+                          IaCopilotTaskDraft(
+                            acao: text,
+                            motivo: motivoInicial.trim(),
+                          ),
+                        );
+                      },
                     ),
                   ],
                 ),

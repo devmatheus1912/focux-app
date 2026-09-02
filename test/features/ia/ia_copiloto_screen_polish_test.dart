@@ -30,5 +30,8 @@ void main() {
     expect(screen, contains('FxHubFreshness.fromFetchedAt'));
     expect(screen, contains('iaCopilotoHomeProvider'));
     expect(screen, contains("retryLabel:"));
+    expect(screen, contains('showFxConfirmSheet'));
+    expect(screen, isNot(contains('FxLiquidPrimaryButton')));
+    expect(screen, isNot(contains('OutlinedButton')));
   });
 }

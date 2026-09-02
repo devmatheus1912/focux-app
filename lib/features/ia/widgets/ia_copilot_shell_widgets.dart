@@ -5,23 +5,22 @@ import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/widgets/fx_inset_picker_option.dart';
-import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../utils/ia_copiloto_display.dart';
 
 class IaCopilotResultActionBar extends StatelessWidget {
   const IaCopilotResultActionBar({
     super.key,
     required this.brand,
-    required this.ink,
     required this.onCreateTask,
     required this.onMore,
   });
 
   final Color brand;
-  final Color ink;
   final VoidCallback onCreateTask;
   final VoidCallback onMore;
 
@@ -30,41 +29,32 @@ class IaCopilotResultActionBar extends StatelessWidget {
     return SafeArea(
       top: false,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(22, 10, 22, 12),
-        child: Row(
+        padding: const EdgeInsets.fromLTRB(
+          FxSettingsLayout.pageInset,
+          10,
+          FxSettingsLayout.pageInset,
+          12,
+        ),
+        child: FxSettingsGroup(
           children: [
-            Expanded(
-              child: Semantics(
-                button: true,
-                label: 'Criar tarefa no ${FocuxMicrocopy.commandCenter}',
-                child: FxLiquidPrimaryButton(
-                  label: 'Criar tarefa',
-                  icon: Icons.assignment_turned_in_outlined,
-                  onPressed: onCreateTask,
-                ),
-              ),
+            FxSettingsTile(
+              fxIcon: 'circle-check',
+              label: iaCopilotoCriarTarefaLabel(),
+              value: '',
+              highlight: true,
+              accent: brand,
+              semanticsLabel:
+                  'Criar tarefa no ${FocuxMicrocopy.commandCenter}',
+              onTap: onCreateTask,
             ),
-            const SizedBox(width: 10),
-            Semantics(
-              button: true,
-              label: 'Mais ações do Copiloto',
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  onTap: onMore,
-                  borderRadius: BorderRadius.circular(14),
-                  child: Ink(
-                    width: 50,
-                    height: 50,
-                    decoration: fxListCardDecoration(
-                      context,
-                      accent: brand,
-                      radius: 14,
-                    ),
-                    child: Icon(Icons.more_vert, color: ink),
-                  ),
-                ),
-              ),
+            FxSettingsTile(
+              fxIcon: 'article',
+              label: iaCopilotoMaisAcoesLabel(),
+              value: '',
+              showDivider: false,
+              accent: brand,
+              semanticsLabel: 'Mais ações do Copiloto',
+              onTap: onMore,
             ),
           ],
         ),
@@ -385,14 +375,12 @@ class IaCopilotPrimaryAction extends StatelessWidget {
   const IaCopilotPrimaryAction({
     super.key,
     required this.label,
-    required this.icon,
     required this.brand,
     required this.primaryDeep,
     required this.onTap,
   });
 
   final String label;
-  final IconData icon;
   final Color brand;
   final Color primaryDeep;
   final VoidCallback onTap;
@@ -403,10 +391,18 @@ class IaCopilotPrimaryAction extends StatelessWidget {
     return Semantics(
       button: true,
       label: label,
-      child: FxLiquidPrimaryButton(
-        label: label,
-        icon: icon,
-        onPressed: onTap,
+      child: FxSettingsGroup(
+        children: [
+          FxSettingsTile(
+            fxIcon: 'spark',
+            label: label,
+            value: '',
+            showDivider: false,
+            highlight: true,
+            accent: brand,
+            onTap: onTap,
+          ),
+        ],
       ),
     );
   }

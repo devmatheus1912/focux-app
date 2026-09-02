@@ -42,5 +42,11 @@ void main() {
     expect(insightWidgets, contains('insight.detalhe'));
     expect(screen, isNot(contains('Ações do rascunho')));
     expect(actionsPart, contains('Ações das recomendações'));
+    expect(screen, contains('showFxConfirmSheet'));
+    expect(screen, contains('iaCopilotoGerarConfirmTitle'));
+    expect(screen, isNot(contains('FxLiquidPrimaryButton')));
+    expect(shellWidgets, isNot(contains('FxLiquidPrimaryButton')));
+    expect(shellWidgets, contains('IaCopilotPreviewCard'));
+    expect(shellWidgets, contains('IaCopilotGenerationStatus'));
   });
 }

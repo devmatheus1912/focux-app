@@ -82,7 +82,6 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
               _gerado
                   ? IaCopilotResultActionBar(
                     brand: brand,
-                    ink: ink,
                     onCreateTask: _atribuir,
                     onMore: _abrirMenu,
                   )
@@ -197,16 +196,15 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
                   // Generate button / progress
                   Padding(
                     padding: const EdgeInsets.fromLTRB(
-                      TokensStrip.s4,
+                      FxSettingsLayout.pageInset,
                       0,
-                      16,
+                      FxSettingsLayout.pageInset,
                       18,
                     ),
                     child:
                         !_gerado && !_gerando
                             ? IaCopilotPrimaryAction(
-                              label: 'Gerar $_modeDisplay',
-                              icon: _modeIcon,
+                              label: iaCopilotoGerarLabel(_modeDisplay),
                               brand: brand,
                               primaryDeep: primaryDeep,
                               onTap: _gerar,
@@ -405,49 +403,42 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
                           header: _tarefaPersistida
                               ? 'Tarefa salva no ${FocuxMicrocopy.commandCenter}'
                               : 'Tarefa criada, verifique a lista',
-                          footer: Row(
-                            children: [
-                              Expanded(
-                                child: OutlinedButton.icon(
-                                  onPressed: () => context.push(
-                                    '/dashboard/command-center/copiloto',
-                                  ),
-                                  icon: const Icon(
-                                    Icons.space_dashboard_outlined,
-                                    size: 16,
-                                  ),
-                                  label: const Text('Ver tarefa'),
-                                ),
-                              ),
-                              SizedBox(width: TokensStrip.s2),
-                              Expanded(
-                                child: FxLiquidPrimaryButton(
-                                  label: 'Abrir aluno',
-                                  icon: Icons.person_outline,
-                                  expand: true,
-                                  onPressed: _selectedAlunoId == null
-                                      ? null
-                                      : () => context.push(
-                                            '/alunos/$_selectedAlunoId',
-                                          ),
-                                ),
-                              ),
-                            ],
-                          ),
                           children: [
                             FxSettingsTile(
-                              icon: _tarefaPersistida
-                                  ? Icons.check_circle_outline
-                                  : Icons.sync_problem_outlined,
+                              fxIcon: _tarefaPersistida
+                                  ? 'circle-check'
+                                  : 'alert-triangle',
                               label: _proximaAcao!.displayText,
                               value: _proximaAcao!.statusLabel,
-                              showDivider: false,
                               accent: brand,
                               mute: mute,
                               onTap: () => context.push(
                                 '/dashboard/command-center/copiloto',
                               ),
                             ),
+                            FxSettingsTile(
+                              fxIcon: 'article',
+                              label: iaCopilotoVerTarefaLabel(),
+                              value: '',
+                              showDivider: _selectedAlunoId != null,
+                              accent: brand,
+                              mute: mute,
+                              onTap: () => context.push(
+                                '/dashboard/command-center/copiloto',
+                              ),
+                            ),
+                            if (_selectedAlunoId != null)
+                              FxSettingsTile(
+                                fxIcon: 'users',
+                                label: iaCopilotoAbrirAlunoLabel(),
+                                value: '',
+                                showDivider: false,
+                                accent: brand,
+                                mute: mute,
+                                onTap: () => context.push(
+                                  '/alunos/$_selectedAlunoId',
+                                ),
+                              ),
                           ],
                         ),
                       ),
