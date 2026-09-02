@@ -155,7 +155,7 @@ void main() {
     expect(catalog, contains('catalogoSubtitle'));
     expect(catalog, isNot(contains('DashboardExpandableToolGroups')));
     expect(catalog, isNot(contains('shortcutAspectRatio')));
-    expect(tools, contains('DashboardToolShortcutGroup'));
+    expect(tools, contains('CommandActionTile'));
     expect(tools, contains('FxSettingsLayout.pageInset'));
     expect(tools, isNot(contains('DashboardShortcutGrid')));
     expect(tools, isNot(contains('shortcutAspectRatio')));
@@ -214,7 +214,8 @@ void main() {
     expect(tile, contains('FxSettingsLayout.rowMinHeight'));
     expect(tile, isNot(contains('fxStripCardDecoration')));
     expect(tile, isNot(contains('entranceIndex')));
-    expect(panel, contains('FxSettingsGroup'));
+    expect(panel, contains('CommandActionTile'));
+    expect(panel, isNot(contains('FxSettingsGroup')));
     expect(finance, contains('FxSettingsTile'));
     expect(finance, isNot(contains('DashboardHomeActionChip')));
     expect(aderencia, contains('FxSettingsTile'));
@@ -225,11 +226,11 @@ void main() {
     final pulse = File(
       'lib/features/dashboard/widgets/dashboard_pulse_strip.dart',
     ).readAsStringSync();
-    expect(pulse, contains('FxSettingsGroup'));
-    expect(pulse, contains('header: DashboardMicrocopy.pulsoOperacional'));
+    expect(pulse, contains('OperationalMetricTile'));
+    expect(pulse, contains('DashboardMicrocopy.pulsoOperacional'));
     expect(pulse, isNot(contains('fxStripCardDecoration')));
     expect(pulse, isNot(contains('_PulseChipEntrance')));
-    expect(pulse, contains('FxSettingsTile'));
+    expect(pulse, isNot(contains('FxSettingsTile')));
     expect(pulse, contains("label: 'Risco'"));
     expect(pulse, isNot(contains("label: 'Agenda'")));
     expect(pulse, isNot(contains('hideRiscoChip')));

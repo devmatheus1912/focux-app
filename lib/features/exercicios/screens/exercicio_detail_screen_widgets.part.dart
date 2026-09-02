@@ -887,24 +887,38 @@ class _OwnVideoPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FxSettingsGroup(
-      header: exerciseVideoPanelHeader(),
-      caption: exerciseVideoPanelCaption(hasVideo: hasVideo),
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        FxSettingsTile(
-          fxIcon: 'spark',
-          label: exerciseVideoUploadLabel(hasVideo: hasVideo),
-          value: uploading ? 'Enviando…' : '',
-          showDivider: hasVideo,
-          onTap: uploading ? () {} : onUpload,
+        Text(
+          exerciseVideoPanelHeader(),
+          style: FxSettingsLayout.sectionHeader(
+            color: ShellChrome.of(context).mute,
+          ),
+        ),
+        const SizedBox(height: TokensStrip.s2),
+        Text(
+          exerciseVideoPanelCaption(hasVideo: hasVideo),
+          style: FocuxHubTypography.bodyMuted(
+            color: ShellChrome.of(context).mute,
+          ),
+        ),
+        const SizedBox(height: TokensStrip.s3),
+        DashboardHomeActionChip(
+          label: uploading
+              ? 'Enviando…'
+              : exerciseVideoUploadLabel(hasVideo: hasVideo),
+          accent: primary,
+          isDark: isDark,
+          enabled: !uploading,
+          onPressed: onUpload,
         ),
         if (hasVideo)
-          FxSettingsTile(
-            fxIcon: 'alert-triangle',
-            label: exerciseVideoRemoveLabel(),
-            value: '',
-            danger: true,
-            showDivider: false,
+          FxConversionTextLink(
+            text: '',
+            actionText: exerciseVideoRemoveLabel(),
             onTap: uploading ? () {} : onRemove,
           ),
       ],

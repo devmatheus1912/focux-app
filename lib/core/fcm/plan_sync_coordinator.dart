@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../features/assinatura/providers/assinatura_provider.dart';
 import '../../features/perfil/providers/perfil_provider.dart';
+import '../../features/planos/data/plano_features_bff_cache.dart';
 import '../../features/planos/providers/plano_features_provider.dart';
 import 'fcm_service.dart';
 
@@ -33,6 +34,7 @@ class PlanSyncCoordinator {
       debugPrint('[PlanSync] FCM event=$event plano=${data['plano']}');
     }
 
+    PlanoFeaturesBffCache.clear();
     await container.read(planosRepositoryProvider).clearPlanoFeaturesCache();
     await container.read(assinaturaRepositoryProvider).clearVitrineCache();
     container.invalidate(paywallHomeProvider);

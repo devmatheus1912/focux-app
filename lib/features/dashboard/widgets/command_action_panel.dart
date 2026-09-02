@@ -4,7 +4,6 @@ import 'package:shimmer/shimmer.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/tokens_strip.dart';
-import '../../../core/widgets/fx_settings_group.dart';
 import '../data/command_action_item.dart';
 import '../utils/dashboard_microcopy.dart';
 import '../utils/dashboard_readability.dart';
@@ -73,37 +72,32 @@ class CommandActionPanel extends StatelessWidget {
           ],
         ),
         const SizedBox(height: FxSettingsLayout.headerToGroup),
-        FxSettingsGroup(
-          accent: primary,
-          children: [
-            if (loading)
-              CommandActionsShimmer(isDark: isDark, primary: primary)
-            else if (unavailable)
-              CommandStatusTile(
-                isDark: isDark,
-                primary: primary,
-                icon: Icons.cloud_off_rounded,
-                title: 'Central temporariamente indisponível',
-                subtitle: 'Puxe para atualizar ou tente em instantes.',
-              )
-            else if (actions.isEmpty)
-              CommandStatusTile(
-                isDark: isDark,
-                primary: primary,
-                icon: Icons.check_circle_outline_rounded,
-                title: 'Operação sob controle',
-                subtitle: 'Nenhuma ação crítica para agora.',
-              )
-            else
-              for (var index = 0; index < actions.length; index++)
-                CommandActionTile(
-                  item: actions[index],
-                  isDark: isDark,
-                  primary: primary,
-                  showDivider: index < actions.length - 1,
-                ),
-          ],
-        ),
+        if (loading)
+          CommandActionsShimmer(isDark: isDark, primary: primary)
+        else if (unavailable)
+          CommandStatusTile(
+            isDark: isDark,
+            primary: primary,
+            icon: Icons.cloud_off_rounded,
+            title: 'Central temporariamente indisponível',
+            subtitle: 'Puxe para atualizar ou tente em instantes.',
+          )
+        else if (actions.isEmpty)
+          CommandStatusTile(
+            isDark: isDark,
+            primary: primary,
+            icon: Icons.check_circle_outline_rounded,
+            title: 'Operação sob controle',
+            subtitle: 'Nenhuma ação crítica para agora.',
+          )
+        else
+          for (var index = 0; index < actions.length; index++)
+            CommandActionTile(
+              item: actions[index],
+              isDark: isDark,
+              primary: primary,
+              showDivider: index < actions.length - 1,
+            ),
       ],
     );
   }

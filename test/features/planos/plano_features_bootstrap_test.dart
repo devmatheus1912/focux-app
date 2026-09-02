@@ -9,6 +9,7 @@ import 'package:focux_app/features/dashboard/data/command_center_data.dart';
 import 'package:focux_app/features/dashboard/data/dashboard_repository.dart';
 import 'package:focux_app/features/dashboard/utils/dashboard_home_client_cache.dart';
 import 'package:focux_app/features/financeiro/data/financeiro_repository.dart';
+import 'package:focux_app/features/planos/data/plano_features_bff_cache.dart';
 import 'package:focux_app/features/planos/data/planos_repository.dart';
 import 'package:focux_app/features/planos/providers/plano_features_provider.dart';
 import 'package:focux_app/features/subscription/models/subscription_plan.dart';
@@ -97,8 +98,12 @@ void main() {
   setUp(() {
     SharedPreferences.setMockInitialValues({});
     DashboardHomeClientCache.clear();
+    PlanoFeaturesBffCache.clear();
   });
-  tearDown(DashboardHomeClientCache.clear);
+  tearDown(() {
+    DashboardHomeClientCache.clear();
+    PlanoFeaturesBffCache.clear();
+  });
 
   test(
     'bootstrap skips GET /planos/me when Home cache has fresh planoFeatures',
@@ -145,29 +150,33 @@ void main() {
   });
 
   test(
-    'local PlanosRepository cache still stale-while-revalidates /planos/me',
+    'local PlanosRepository cache does not sidecar GET /planos/me',
     () async {
       final repo = _RecordingPlanosRepository()
         ..cached = _premium.copyWithOperationalState(
           fromCache: true,
           cacheSavedAt: DateTime.now(),
-        )
-        ..freshDelay = Completer<PlanoFeatures>();
+        );
       final notifier = PlanoFeaturesNotifier(repo);
 
-      final done = notifier.bootstrap();
-      await Future<void>.delayed(Duration.zero);
-      await Future<void>.delayed(Duration.zero);
+      await notifier.bootstrap();
 
       expect(notifier.state.valueOrNull?.plano, SubscriptionPlan.PRO);
-      expect(repo.freshCalls, 1);
-
-      repo.freshDelay!.complete(_free);
-      await done;
-
-      expect(notifier.state.valueOrNull?.plano, SubscriptionPlan.FREE);
+      expect(repo.freshCalls, 0);
     },
   );
+
+  test('BFF cache seeds without GET /planos/me', () async {
+    PlanoFeaturesBffCache.put(_premium);
+    final repo = _RecordingPlanosRepository();
+    final notifier = PlanoFeaturesNotifier(repo);
+
+    await notifier.bootstrap();
+
+    expect(repo.freshCalls, 0);
+    expect(repo.cacheLoads, 0);
+    expect(notifier.state.valueOrNull?.plano, SubscriptionPlan.PRO);
+  });
 
   test(
     'seedFromHome during in-flight bootstrap is not overwritten by /planos/me',

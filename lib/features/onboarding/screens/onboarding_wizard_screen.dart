@@ -25,6 +25,7 @@ import '../../../core/widgets/skeleton_loader.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
 import '../../dashboard/utils/dashboard_home_client_cache.dart';
+import '../../planos/data/plano_features_bff_cache.dart';
 import '../../dashboard/utils/dashboard_onboarding_logic.dart';
 import '../../dashboard/widgets/dashboard_command_center_sticky_header.dart';
 import '../data/onboarding_repository.dart';
@@ -75,6 +76,7 @@ class _OnboardingWizardScreenState
 
   void _evictHomeCaches() {
     DashboardHomeClientCache.clear();
+    PlanoFeaturesBffCache.clear();
     OnboardingWizardClientCache.clear();
     ref.invalidate(dashboardHomeProvider);
   }

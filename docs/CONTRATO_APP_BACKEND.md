@@ -319,3 +319,8 @@ drena as páginas (picker de recorrência). A lista de produto continua no BFF
 resolver. First paint de `/assinatura` lê `home.me`; fallback
 `GET /api/planos/me` se `me` ausente.
 
+`planoFeaturesProvider` não chama `/api/planos/me` quando existe snapshot
+fresco de qualquer BFF (`PlanoFeaturesBffCache` ou Home) ou cache local.
+`GET /api/planos/me` fica só para cold start sem cache e para `refresh`
+(compra, FCM `plan_sync`).
+

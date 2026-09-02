@@ -161,6 +161,7 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                 return RefreshIndicator(
                   onRefresh: () async {
                     DashboardHomeClientCache.clear();
+                    PlanoFeaturesBffCache.clear();
                     ref.invalidate(dashboardHomeProvider);
                     ref.invalidate(notificacoesProvider);
                     ref.invalidate(notificacoesNaoLidasProvider);
