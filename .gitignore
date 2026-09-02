@@ -83,7 +83,13 @@ skills-lock.json
 .fvm/
 devtools_options.yaml
 focux_app.iml
-.cursor/
+.cursor/*
+!.cursor/skills/
+!.cursor/skills/**
+!.cursor/rules/
+!.cursor/rules/**
+!.cursor/agents/
+!.cursor/agents/**
 
 # Android local SDK path (per machine)
 android/local.properties

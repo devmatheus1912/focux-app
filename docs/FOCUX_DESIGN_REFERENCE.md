@@ -127,7 +127,7 @@ Ao adotar este arquivo, os ponteiros para os documentos antigos ficam órfãos. 
 | `lib/core/theme/fx_settings_layout.dart` (dartdoc) | `D:/Focux Personal/docs/PERFIL_DESIGN_REFERENCE.md` | Idem, e ajustar o texto para "estrutura padrão de S2" |
 | `test/core/design_system/security_pillar_contract_test.dart` | Asserção do nome do arquivo | Atualizar no mesmo commit |
 | `test/core/security/platform_hardening_test.dart` | Idem | Atualizar no mesmo commit |
-| Regra Cursor `focux-10-10` | Cita os dois arquivos | Apontar só para este |
+| Regra Cursor `focux-10-10` | Cita os dois arquivos | Substituída pelo skill `/ruflo` + rule `focux-design` (ambos apontam só para este) |
 | `docs/` | `PERFIL_DESIGN_REFERENCE.md`, `FOCUX_80_PILARES.md` | Apagar após o commit acima (pilar 72 — não deixar "por precaução") |
 
 Enquanto a atualização não acontecer, **não apagar os arquivos v1**: o gate `security_pillar_contract_test` referencia o nome e quebra o CI.
@@ -1350,6 +1350,17 @@ Extras da v1, generalizados para todo o app. Avaliados junto dos 80.
 ## 28. Playbook de implementação em massa
 
 Objetivo: **paridade operacional + pele deste arquivo + anatomia do tipo certo**.
+
+### 28.0 Ruflo no Cursor
+
+O playbook deste capítulo vive no skill do repo (`.cursor/skills/ruflo/SKILL.md`). No Desktop:
+
+1. Abrir o `focux-app` e um chat **Agent** novo.
+2. Digitar `/ruflo` e confirmar com **Alt+Enter** (Windows/Linux) ou **Option+Enter** (Mac), ou **Use as Mode**. O badge fica no input até sair do modo.
+3. Escolher o modelo no picker do chat. O skill não trava modelo.
+4. Pedir o lote (primeiro: S6, no máximo 3 telas). O Ruflo lê este arquivo e `docs/CONTRATO_APP_BACKEND.md`; não precisa colar o playbook.
+
+A rule `.cursor/rules/focux-design.mdc` entra sozinha em arquivos `*.dart` mesmo sem o modo. User Rules da conta **não** devem carregar esta referência (estoura contexto e vaza para outros projetos).
 
 ### 28.1 Fase 0 — inventário (antes de qualquer edição)
 
