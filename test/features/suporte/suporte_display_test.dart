@@ -11,4 +11,18 @@ void main() {
     expect(suporteSeveridadeLabel(null), 'Média');
     expect(suporteSeveridadeLabel('  '), 'Média');
   });
+
+  test('ticket confirma e limita tamanho', () {
+    expect(suporteTituloMax, 200);
+    expect(suporteDescricaoMax, 4000);
+    expect(suporteClasseMax, 200);
+    expect(suporteChatMax, 4000);
+    expect(suporteEnviarTicketLabel(), 'Enviar ticket');
+    expect(suporteEnviarTicketConfirmTitle(), 'Abrir ticket?');
+    expect(
+      suporteEnviarTicketConfirmMessage(),
+      'O suporte Focux recebe este chamado.',
+    );
+    expect(suporteEnviarTicketConfirmLabel(), 'Enviar');
+  });
 }

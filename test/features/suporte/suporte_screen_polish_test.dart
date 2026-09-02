@@ -10,7 +10,12 @@ void main() {
     expect(screen, contains('FxShellScaffold'));
     expect(screen, anyOf(contains('FxContentWidthLimiter'), isNot(contains('constrainWidth: false'))));
     expect(screen, contains('showFxInsetPickerSheet'));
+    expect(screen, contains('showFxConfirmSheet'));
+    expect(screen, contains('FxSettingsTile'));
+    expect(screen, contains('suporteEnviarTicketConfirmTitle'));
+    expect(screen, isNot(contains('FxLiquidPrimaryButton')));
     expect(screen, isNot(contains('DropdownButton')));
     expect(screen, isNot(contains('FloatingActionButton')));
+    expect(screen, isNot(contains(r'showError(context, $e)')));
   });
 }
