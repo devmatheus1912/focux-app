@@ -985,6 +985,88 @@ Sintomas típicos de backend legado, com o alvo correspondente. Cada item vira l
 - Upgrade de plataforma só depois dos testes de contrato nos paths críticos.
 - Relatório por domínio com severidade. **P0 do backend vem antes de qualquer trabalho estético** — inclusive antes do lote de design daquele domínio.
 
+### 22.6 Estado do backend em 2026-09-02 e travas sobre o plano de design
+
+Resultado da primeira varredura de `focux-backend`. Relatório completo em `focux-backend/docs/BACKEND_AUDIT.md`.
+
+**Placar: 4 de 15 metas passam.** Spring Boot 3.4.4 (fora do suporte OSS) · JDK 21 · 432 endpoints · 12 P0 · 22 P1.
+
+O que **passa**: nenhum endpoint aceita tenant do cliente (0 de 432 — a disciplina de `TenantContext` é real); `ddl-auto: validate` em produção; todo cache com TTL e invalidação distribuída ativa; nenhum teste ignorado.
+
+#### 22.6.1 A causa-raiz: o gate nunca existiu
+
+Quatro workflows ativos com **0 execuções**, e nenhum dos 790 commits passou por verificação. A suíte está vermelha (31 de 1087) e ninguém foi avisado. Pior: **21 das 31 falhas são apenas arquivos que não existem** (`AUDIT.md` na raiz, `docs/adr/001-jacoco-indicador.md`) — e não existem porque o `.gitignore` do backend ignora `/docs/`, a mesma política que o `focux-app` tem.
+
+A cadeia é: `/docs/` ignorado → ADR não pode viver em `docs/` → teste que afirma a existência do arquivo falha → suíte vermelha → CI desligado não reclama → 790 commits sem gate → todo o resto desta lista pôde entrar sem resistência.
+
+**Consequência de método:** consertar P0 com suíte vermelha e CI desligado é consertar no escuro. O primeiro PR do backend não é correção de código — é **fechar o gate**: decidir o destino de `/docs/`, resolver as 31 falhas, ligar o Actions. Só depois os P0 são seguros.
+
+#### 22.6.2 Achados P0 por domínio
+
+| Domínio | P0 | Pilar | Esforço | Quebra o app |
+|---|---|---|---|---|
+| plataforma | CI com 0 execuções; 790 commits sem gate | 79 | P | não |
+| plataforma | Suíte vermelha 31/1087, incl. teste impossível de passar | 79 | M | não |
+| auth | `SECRETARIA` altera o próprio papel para `CO_PERSONAL`, isento de todo cap | 54 | P | não |
+| auth | Qualquer `PERSONAL` concede a si permissão arbitrária; recurso e nível são string livre do cliente | 54 | P | não |
+| auth | RBAC de equipe em 6 de 64 módulos; colaborador alcança backup e pagamentos | 54 | G | não |
+| financeiro | `catch` apaga o marcador de idempotência: MercadoPago re-entrega e credita o mês duas vezes | 64 | M | não |
+| financeiro | Idempotência por check-then-act em vez de `INSERT ON CONFLICT` | 64 | M | não |
+| financeiro | `@Transactional(REQUIRES_NEW)` anulado por auto-invocação | 64 | P | não |
+| transversal | **342** `LocalDate(Time).now()` sem zona, container UTC, produto BR | 3 | G | não |
+| assinatura | `POST /api/feedback-videos` não checa `POSE_COACH`; o gêmeo do aluno checa | 11 | P | não |
+| assinatura | 4 entradas sem gate: pacotes, lote financeiro, converter lead, post de comunidade | 11 | M | não |
+| IA e rede | 7 de 9 clientes HTTP sem timeout de connect ou read | 48 | P | não |
+
+**Nenhum dos 12 P0 quebra o contrato do app.** Todos podem ser corrigidos sem PR pareado — o que os torna baratos em coordenação, não em risco.
+
+#### 22.6.3 Matriz de travas: qual lote de design espera o quê
+
+Aplicação literal da regra "P0 do backend antes do trabalho estético no domínio". Isto **substitui** a ordem sugerida em §28.3.
+
+| Lote | Estado | Trava | Por quê |
+|---|---|---|---|
+| **S6 login / cadastro / recuperar senha** | **Liberado** | — | Os P0 de auth são RBAC e escalonamento dentro do tenant, não o fluxo de entrada. O CTA como botão não depende de backend |
+| **S6 paywall / planos** | **Bloqueado** | 5 gates de plano (esforço P + M) | Redesenhar a tela que vende o plano enquanto a feature vaza de graça é maquiar perda de receita |
+| **S1 hubs** | **Bloqueado** | 342 `LocalDate.now()` sem zona | O job de S1 é *operar o dia*. Com `hoje` errado das 21h à meia-noite no fuso BR, `dayFocus`, streak, aderência e agenda apontam para o dia seguinte. Hub bonito com dia errado é pior que hub feio |
+| **S3 detalhe de entidade** | **Liberado com ressalva** | Datas do fuso afetam streak e aderência exibidos no detalhe | Estrutura pode ser feita; números de data ficam suspeitos até o P0 transversal |
+| **S4 coleção / lista** | **Bloqueado** | 80 de 88 listagens sem paginação (P1, G, **quebra contrato**) | §23 exige contrato paginado em toda S4. É o único item grande que precisa de PRs pareados |
+| **S5 formulário** | **Liberado com lacuna** | 2 códigos de erro para 623 lançamentos | Estrutura e footer sticky podem ser feitos; "erro inline específico" fica inalcançável até haver código de domínio |
+| **S8 execução** | **Liberado** | — | Nada no relatório toca a execução de treino |
+| **S9 wizard** | **Liberado** | — | Depende de S5 pronto, não do backend |
+| **S7 sheets** | **Liberado** | — | Varredura de conformidade, sem dado novo |
+| **S2 ajustes** | **Liberado** | — | Já no padrão; só auditar limites de §11 |
+| Telas de **financeiro** (qualquer tipo) | **Bloqueado** | 3 P0 de idempotência + dinheiro em `double` no contrato | Crédito duplicado é erro de dado; não se redesenha em cima disso |
+| Telas de **IA** | **Bloqueado** | 7 de 9 clientes HTTP sem timeout | Sem timeout, o estado de carregamento da tela não tem fim definido — o design de loading fica sem contrato |
+
+#### 22.6.4 Acoplamentos descobertos no lado do app
+
+Cruzamento do relatório contra `focux-app`. Três itens que o backend marcou como "não verificável" ficam fechados, e um vira mais grave do que parecia.
+
+**1. O gate de plano do app depende de texto em português.** `isPlanGateError` em `lib/core/utils/friendly_error.dart:104` decide entre mostrar `UpgradePromptSheet` ou um erro genérico procurando as substrings `requer plano`, `faça upgrade`, `faca upgrade` e `premium` na mensagem do servidor. `_humanizeServerMessage` faz o mesmo com `cloudinary`, `nao configurado` e `service unavailable`.
+
+Ou seja: **a UX de bloqueio de plano de todo o app é presa a prosa.** Reescrever "Requer plano PRO" para "Disponível no plano PRO" no backend degrada silenciosamente toda feature bloqueada de sheet de upgrade para erro genérico, sem quebrar compilação nem teste. Isso eleva o P1 "2 códigos para 623 lançamentos" (pilar 63) de dívida de contrato a **risco de regressão silenciosa**, e é pré-requisito real do pilar 11 na superfície.
+
+**2. `Idempotency-Key`: o app cobre, e o app *reproduz* mutações.** `ApiClient` (`lib/core/api/api_client.dart:195`) injeta o header em **todo** POST, PUT, PATCH e DELETE, exceto rotas de auth, `/api/suporte/analisar-erro`, `/api/uploads` e corpos `FormData`; `PaymentApiClient` faz o mesmo no caminho de pagamento. A cobertura do lado do cliente está essencialmente completa.
+
+O agravante: `OfflineSyncService` (`lib/core/api/offline_sync_service.dart`) **enfileira mutações offline e as reenvia preservando a chave**. Reenvio não é hipótese — é comportamento projetado. Portanto o P0 "idempotência por check-then-act" não é teórico: a fila pode disparar duas requisições concorrentes com a mesma chave e vencer a janela entre o `SELECT` e o `INSERT`.
+
+Nota de escopo: a idempotência do app (header) e a do webhook (marcador de evento do MercadoPago) são sistemas distintos. Os três P0 de `WebhookController` são do segundo, e nenhum deles é resolvido pela chave que o app envia.
+
+**3. O payload `dados` do FCM não é parâmetro morto — é feature quebrada.** O app consome `message.data` em seis pontos de `lib/core/fcm/fcm_service.dart` e `plan_sync_coordinator.dart`: `type`, `route`, `alunoId`, `chatId`, `event`, `plano`. Dois usos dependem dele:
+
+- **Roteamento no toque da notificação** (`_handleNotificationTap`) — sem `dados`, o toque não leva a lugar nenhum.
+- **Sincronização de plano** (`type: plan_sync`) — é como o app descobre que o plano mudou. Sem isso, depois de um upgrade ou downgrade o app segue com a permissão antiga até expirar cache ou reiniciar.
+
+O relatório aponta o descarte em `enviarNotificacaoParaAluno`, que é o caminho do aluno; confirmar se o envio de `plan_sync` ao personal usa o mesmo método. Se usar, o efeito combina com o P1 "webhook MP troca plano sem registrar na trilha": o plano muda, não é auditado, e o app não é avisado.
+
+#### 22.6.5 O que segue em aberto
+
+- **Consumidor de cada endpoint (meta 15).** Precisa do inventário dos 432 paths para cruzar contra as chamadas em `lib/`. Sem isso não há como saber quantos endpoints são órfãos.
+- **N+1 real (meta 5).** `show-sql` desligado; candidatos achados por análise estática, não observados em SQL.
+- **p95 dos hubs (meta 13).** 31 timers existem, mas não há orçamento declarado — a meta não é mensurável até o orçamento ser definido por endpoint.
+- **Credencial no histórico do git.** O commit que removeu os scripts não reescreveu o histórico.
+
 ## 23. Contrato de dados por tipo de superfície
 
 | Tipo | Forma esperada do dado | Cache | Paginação |
@@ -1204,7 +1286,9 @@ Candidatos prováveis por tipo: barra sticky de ação (S3), footer de formulár
 
 ### 28.3 Fase 2 — lotes por tipo, não por pasta
 
-Consistência intra-tipo é o que faz o app parecer desenhado. Ordem sugerida por impacto:
+Consistência intra-tipo é o que faz o app parecer desenhado. Ordem sugerida por impacto.
+
+> **Sobrescrita vigente:** a auditoria do backend de 2026-09-02 bloqueia parte desta ordem. Use a [matriz de travas de §22.6.3](#2263-matriz-de-travas-qual-lote-de-design-espera-o-quê) — em especial S1 e S4, que dependem de correção no backend antes de qualquer trabalho estético.
 
 | Ordem | Lote | Por quê |
 |---|---|---|
