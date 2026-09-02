@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
+import '../../../core/api/api_error.dart';
 import '../../subscription/models/subscription_plan.dart';
 import '../models/ia_copilot_insight.dart';
 import '../models/ia_copilot_proxima_acao.dart';
@@ -24,8 +25,10 @@ class IaOperationalException implements Exception {
     this.upgradePlano,
   });
 
-  bool get quotaExhausted => codigo == 'IA_QUOTA_ESGOTADA';
-  bool get planUpgradeRequired => codigo == 'IA_PLANO_INSUFICIENTE';
+  bool get quotaExhausted =>
+      codigo != null && ApiErrorCodes.quotaExceeded.contains(codigo);
+  bool get planUpgradeRequired =>
+      codigo != null && ApiErrorCodes.planGate.contains(codigo);
   bool get suggestsUpgrade =>
       upgradePlano != null && upgradePlano!.trim().isNotEmpty;
 
@@ -35,15 +38,11 @@ class IaOperationalException implements Exception {
   }
 
   factory IaOperationalException.fromDio(DioException error) {
-    final status = error.response?.statusCode;
-    final payload = error.response?.data;
-    final rawMessage =
-        payload is Map
-            ? (payload['erro'] ?? payload['message'])?.toString()
-            : null;
-    final codigo = payload is Map ? payload['codigo']?.toString() : null;
-    final upgradePlano =
-        payload is Map ? payload['upgradePlano']?.toString() : null;
+    final apiError = ApiError.from(error);
+    final status = apiError?.status ?? error.response?.statusCode;
+    final rawMessage = apiError?.mensagem;
+    final codigo = apiError?.codigo;
+    final upgradePlano = apiError?.upgradePlano;
     final fullMessage =
         rawMessage?.trim().isNotEmpty == true
             ? rawMessage!.trim()
@@ -60,7 +59,8 @@ class IaOperationalException implements Exception {
                 .replaceAll(RegExp(r'\s*Ref:\s*[a-zA-Z0-9-]+\.?'), '')
                 .trim();
     final retryable =
-        !(codigo == 'IA_QUOTA_ESGOTADA' || codigo == 'IA_PLANO_INSUFICIENTE') &&
+        !ApiErrorCodes.planGate.contains(codigo) &&
+        !ApiErrorCodes.quotaExceeded.contains(codigo) &&
         (status == null || status == 408 || status == 429 || status >= 500);
     return IaOperationalException(
       message: message,

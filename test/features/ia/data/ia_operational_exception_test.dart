@@ -48,4 +48,27 @@ void main() {
     expect(mapped.retryable, isFalse);
     expect(mapped.suggestedUpgradePlan?.apiName, 'ENTERPRISE');
   });
+
+  test('IaOperationalException nao retenta gate de plano do catalogo compartilhado', () {
+    final error = DioException(
+      requestOptions: RequestOptions(path: '/api/ia/copiloto/insights'),
+      response: Response(
+        requestOptions: RequestOptions(path: '/api/ia/copiloto/insights'),
+        statusCode: 403,
+        data: {
+          'erro': 'O recurso IA_COPILOTO requer plano PRO. Faca upgrade.',
+          'codigo': 'PLANO_FEATURE_REQUER_UPGRADE',
+          'upgradePlano': 'PRO',
+          'detalhes': {'feature': 'IA_COPILOTO'},
+        },
+      ),
+    );
+
+    final mapped = IaOperationalException.fromDio(error);
+
+    expect(mapped.retryable, isFalse);
+    expect(mapped.planUpgradeRequired, isTrue);
+    expect(mapped.suggestsUpgrade, isTrue);
+    expect(mapped.suggestedUpgradePlan, SubscriptionPlan.PRO);
+  });
 }

@@ -1,5 +1,7 @@
 import 'package:dio/dio.dart';
 
+import '../api/api_error.dart';
+
 /// Extracts a user-friendly error message from any exception.
 /// Strips DioException stack traces, HTTP status details, and raw class names
 /// so the user never sees internal technical errors.
@@ -10,10 +12,11 @@ String friendlyError(Object error, {String? fallback}) {
     final statusCode = error.response?.statusCode;
     final data = error.response?.data;
 
-    // Try to extract a server-provided message
-    if (data is Map<String, dynamic>) {
+    // Try to extract a server-provided message. `erro` is the field name in
+    // the paired contract; the others stay as tolerance for older payloads.
+    if (data is Map) {
       final msg =
-          data['message'] ?? data['error'] ?? data['erro'] ?? data['mensagem'];
+          data['erro'] ?? data['message'] ?? data['mensagem'] ?? data['error'];
       if (msg is String && msg.trim().isNotEmpty) {
         return _humanizeServerMessage(msg);
       }
@@ -101,19 +104,46 @@ String _humanizeServerMessage(String raw) {
 }
 
 /// True when the error is a plan/feature gate (not a real outage).
+///
+/// `codigo` do catálogo decide sozinho e o texto não é consultado. Código
+/// fora do catálogo não conclui nada — cai no heurístico de texto, porque
+/// código que o backend passou a mandar depois desta versão do app não pode
+/// virar "não é gate" e derrubar a sheet de upgrade em silêncio.
+///
+/// O match de string é o fallback para os pontos de lançamento que ainda não
+/// populam o campo (§2.4 do contrato pareado). Enquanto ele existe, reescrever
+/// mensagem no servidor quebra o gate sem quebrar nenhum teste.
 bool isPlanGateError(Object error) {
-  if (error is! DioException) return false;
-  if (error.response?.statusCode != 403) return false;
-  final data = error.response?.data;
-  String? msg;
-  if (data is Map) {
-    final raw = data['message'] ?? data['erro'] ?? data['mensagem'];
-    if (raw is String) msg = raw;
-  } else if (data is String) {
-    msg = data;
+  final apiError = ApiError.from(error);
+  if (apiError == null) return false;
+  final codigo = apiError.codigo;
+  if (codigo != null && ApiErrorCodes.isKnown(codigo)) {
+    return ApiErrorCodes.planGate.contains(codigo);
   }
-  if (msg == null) return false;
-  final lower = msg.toLowerCase();
+  if (apiError.status != 403) return false;
+  return _looksLikePlanGateText(apiError.mensagem);
+}
+
+/// True quando o teto do plano foi atingido, e não quando o tier não alcança.
+///
+/// Sem `codigo` no corpo isto é indistinguível de gate de plano pelo texto,
+/// então o fallback devolve `false`: prefiro não afirmar cota do que afirmar
+/// errado e mostrar "limite atingido" para quem só precisa de upgrade.
+bool isPlanQuotaError(Object error) {
+  final apiError = ApiError.from(error);
+  if (apiError == null || !apiError.hasCodigo) return false;
+  return ApiErrorCodes.quotaExceeded.contains(apiError.codigo);
+}
+
+/// True quando o erro vem de entitlement — gate de plano ou cota — e portanto
+/// não é indisponibilidade. Tela que já mostra estado bloqueado usa isto para
+/// não empilhar um aviso de falha em cima.
+bool isEntitlementError(Object error) =>
+    isPlanGateError(error) || isPlanQuotaError(error);
+
+bool _looksLikePlanGateText(String? message) {
+  if (message == null) return false;
+  final lower = message.toLowerCase();
   return lower.contains('requer plano') ||
       lower.contains('faça upgrade') ||
       lower.contains('faca upgrade') ||
