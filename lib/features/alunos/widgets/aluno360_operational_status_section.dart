@@ -4,10 +4,11 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/design_tokens.dart';
-import '../../../core/widgets/fx_settings_group.dart';
-import '../../../core/widgets/fx_settings_tile.dart';
+import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/operational_metric_tile.dart';
+import '../../dashboard/widgets/dashboard_home_action_chip.dart';
+import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../constants/aluno_360_layout.dart';
 import '../data/aluno_repository.dart';
 import '../data/aluno_contact_utils.dart';
@@ -109,114 +110,134 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
             ? '—'
             : '$daysWithCheckin/${week.points.length}';
 
-    final tiles = <Widget>[];
-
-    if (!heroShowsRisco) {
-      tiles.add(
-        FxSettingsTile(
-          icon: riscoMetricIcon(dominant.riscoNivel ?? aluno.riscoNivel),
-          accent: _dominantAccent(dominant, aderenciaColor, riscoColor, primary),
-          label: dominant.label,
-          subtitle: dominant.hint,
-          value: dominant.value,
-          highlight: dominant.kind == OperacaoDominantMetricKind.risco,
-          onTap: () => _openTreinos(context),
-        ),
-      );
-    }
-
-    if (heroShowsRisco) {
-      tiles.add(
-        FxSettingsTile(
-          icon: Icons.percent_rounded,
-          accent: aderenciaColor,
-          label: 'Aderência',
-          subtitle: 'Treinos concluídos na semana',
-          value: aluno.aderenciaPercent == null ? '—' : '${aluno.aderenciaPercent}%',
-          numeric: aluno.aderenciaPercent != null,
-          highlight: (aluno.aderenciaPercent ?? 0) <= 0,
-          onTap: () => _openTreinos(context),
-        ),
-      );
-      tiles.add(
-        FxSettingsTile(
-          icon: Icons.pause_circle_outline_rounded,
-          accent: semTreinoAccent,
-          label: 'Sem treino',
-          subtitle: semTreinoSubtitle,
-          value: semTreinoDisplay,
-          highlight: (dias ?? 0) >= diasLimite,
-          onTap: () => _openTreinos(context),
-        ),
-      );
-    } else {
-      tiles.addAll([
-        FxSettingsTile(
-          icon: Icons.speed_rounded,
-          accent: primary,
-          label: 'Prontidão',
-          subtitle: 'Índice operacional',
-          value: aluno.scoreProntidao == null ? '—' : '${aluno.scoreProntidao}',
-          numeric: aluno.scoreProntidao != null,
-          onTap: () => _openTreinos(context),
-        ),
-        FxSettingsTile(
-          icon: Icons.percent_rounded,
-          accent: aderenciaColor,
-          label: 'Aderência',
-          subtitle: 'Treinos concluídos na semana',
-          value: aluno.aderenciaPercent == null ? '—' : '${aluno.aderenciaPercent}%',
-          numeric: aluno.aderenciaPercent != null,
-          highlight: (aluno.aderenciaPercent ?? 0) <= 0,
-          onTap: () => _openTreinos(context),
-        ),
-        FxSettingsTile(
-          icon: Icons.pause_circle_outline_rounded,
-          accent: semTreinoAccent,
-          label: 'Sem treino',
-          subtitle: semTreinoSubtitle,
-          value: semTreinoDisplay,
-          highlight: (dias ?? 0) >= diasLimite,
-          onTap: () => _openTreinos(context),
-        ),
-        FxSettingsTile(
-          icon: riscoMetricIcon(aluno.riscoNivel),
-          accent: riscoColor,
-          label: 'Risco',
-          subtitle: aluno.emRisco ? 'Em risco' : 'Estável',
-          value: formatRiscoNivel(aluno.riscoNivel),
-          highlight: aluno.emRisco,
-          onTap: () => _openTreinos(context),
-        ),
-      ]);
-    }
-
-    tiles.add(
-      FxSettingsTile(
-        icon: Icons.calendar_view_week_rounded,
-        accent: week.hasAnyCheckin ? aderenciaColor : EagleTokens.warn,
-        label: 'Check-ins · 7 dias',
-        subtitle: adherenceEmpty?.message ?? week.caption,
-        value: weekValue,
-        numeric: week.points.isNotEmpty,
-        highlight: !week.hasAnyCheckin && week.points.isNotEmpty,
-        showDivider: false,
-        onTap: () => _openTreinos(context),
-      ),
-    );
-
-    final firstName = aluno.nome.split(' ').first;
+    final mute = fxScreenMute(context);
     final line = ShellChrome.of(context).line;
 
-    return FxSettingsGroup(
+    Widget metric({
+      required String label,
+      required String value,
+      required String hint,
+      required Color color,
+      required bool alert,
+      IconData? icon,
+    }) {
+      return Padding(
+        padding: const EdgeInsets.only(bottom: TokensStrip.s2),
+        child: InkWell(
+          onTap: () => _openTreinos(context),
+          borderRadius: BorderRadius.circular(12),
+          child: OperationalMetricTile(
+            label: label,
+            value: value,
+            hint: hint,
+            color: color,
+            isDark: isDark,
+            leadingIcon: icon,
+            emphasis:
+                alert
+                    ? OperationalMetricEmphasis.alert
+                    : OperationalMetricEmphasis.normal,
+          ),
+        ),
+      );
+    }
+
+    final metrics = <Widget>[
+      if (!heroShowsRisco)
+        metric(
+          label: dominant.label,
+          value: dominant.value,
+          hint: dominant.hint,
+          color: _dominantAccent(dominant, aderenciaColor, riscoColor, primary),
+          alert: dominant.kind == OperacaoDominantMetricKind.risco,
+          icon: riscoMetricIcon(dominant.riscoNivel ?? aluno.riscoNivel),
+        ),
+      if (heroShowsRisco) ...[
+        metric(
+          label: 'Aderência',
+          value:
+              aluno.aderenciaPercent == null
+                  ? '—'
+                  : '${aluno.aderenciaPercent}%',
+          hint: 'Treinos concluídos na semana',
+          color: aderenciaColor,
+          alert: (aluno.aderenciaPercent ?? 0) <= 0,
+          icon: Icons.percent_rounded,
+        ),
+        metric(
+          label: 'Sem treino',
+          value: semTreinoDisplay,
+          hint: semTreinoSubtitle,
+          color: semTreinoAccent,
+          alert: (dias ?? 0) >= diasLimite,
+          icon: Icons.pause_circle_outline_rounded,
+        ),
+      ] else ...[
+        metric(
+          label: 'Prontidão',
+          value:
+              aluno.scoreProntidao == null ? '—' : '${aluno.scoreProntidao}',
+          hint: 'Índice operacional',
+          color: primary,
+          alert: false,
+          icon: Icons.speed_rounded,
+        ),
+        metric(
+          label: 'Aderência',
+          value:
+              aluno.aderenciaPercent == null
+                  ? '—'
+                  : '${aluno.aderenciaPercent}%',
+          hint: 'Treinos concluídos na semana',
+          color: aderenciaColor,
+          alert: (aluno.aderenciaPercent ?? 0) <= 0,
+          icon: Icons.percent_rounded,
+        ),
+        metric(
+          label: 'Sem treino',
+          value: semTreinoDisplay,
+          hint: semTreinoSubtitle,
+          color: semTreinoAccent,
+          alert: (dias ?? 0) >= diasLimite,
+          icon: Icons.pause_circle_outline_rounded,
+        ),
+        metric(
+          label: 'Risco',
+          value: formatRiscoNivel(aluno.riscoNivel),
+          hint: aluno.emRisco ? 'Em risco' : 'Estável',
+          color: riscoColor,
+          alert: aluno.emRisco,
+          icon: riscoMetricIcon(aluno.riscoNivel),
+        ),
+      ],
+      metric(
+        label: 'Check-ins · 7 dias',
+        value: weekValue,
+        hint: adherenceEmpty?.message ?? week.caption,
+        color: week.hasAnyCheckin ? aderenciaColor : EagleTokens.warn,
+        alert: !week.hasAnyCheckin && week.points.isNotEmpty,
+        icon: Icons.calendar_view_week_rounded,
+      ),
+    ];
+
+    return Column(
       key: const ValueKey('aluno360_operacao_status'),
-      header: 'Status operacional',
-      caption: statusSubtitle,
-      helpTooltip: 'Ajuda sobre status operacional',
-      onHelpTap: () => showAluno360StatusOperacionalHelpSheet(context),
-      accent: primary,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        ...tiles,
+        DashboardSectionHeader(
+          title: 'Status operacional',
+          actionLabel: 'Ajuda',
+          onAction: () => showAluno360StatusOperacionalHelpSheet(context),
+        ),
+        if (statusSubtitle != null && statusSubtitle.isNotEmpty) ...[
+          const SizedBox(height: 4),
+          Text(
+            statusSubtitle,
+            style: Aluno360Layout.metaStyle(context).copyWith(color: mute),
+          ),
+        ],
+        const SizedBox(height: TokensStrip.s3),
+        ...metrics,
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 8),
           child: Divider(
@@ -232,7 +253,7 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
             child: Text(
               'Calendário da semana',
               style: Aluno360Layout.metaStyle(context).copyWith(
-                color: fxScreenMute(context),
+                color: mute,
                 fontWeight: FontWeight.w600,
                 letterSpacing: 0.2,
               ),
@@ -263,19 +284,19 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
             ),
           ),
         if (showCheckinCta && (adherenceEmpty?.showCheckinCta ?? true))
-          FxSettingsTile(
-            icon: Icons.message_outlined,
-            accent: primary,
-            label: 'Pedir check-in',
-            subtitle: 'Mensagem pronta para $firstName',
-            value: '',
-            showDivider: false,
-            onTap:
-                () => showAlunoCheckinMessageSheet(
-                  context,
-                  alunoId: alunoId,
-                  alunoNome: aluno.nome,
-                ),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: DashboardHomeActionChip(
+              label: 'Pedir check-in',
+              accent: primary,
+              isDark: isDark,
+              onPressed:
+                  () => showAlunoCheckinMessageSheet(
+                    context,
+                    alunoId: alunoId,
+                    alunoNome: aluno.nome,
+                  ),
+            ),
           ),
       ],
     );

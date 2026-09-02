@@ -6,8 +6,11 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/brand/focux_microcopy.dart';
-import '../../../core/widgets/fx_settings_group.dart';
-import '../../../core/widgets/fx_settings_tile.dart';
+import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../dashboard/data/command_action_item.dart';
+import '../../dashboard/widgets/command_action_tile.dart';
+import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../planos/utils/effective_plano_features.dart';
 import '../../planos/utils/plano_capability.dart';
 import '../data/aluno_repository.dart';
@@ -208,13 +211,25 @@ class Aluno360CopilotCard extends ConsumerWidget {
     return Semantics(
       container: true,
       label: 'Prioridade do dia, copiloto operacional',
-      child: FxSettingsGroup(
-        header: copilotCardTitle(contactPriority: operacao.contactPriority),
-        caption: caption,
-        helpTooltip: 'Ajuda sobre prioridade do dia',
-        onHelpTap: () => showAluno360CopilotHelpSheet(context),
-        accent: primary,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          DashboardSectionHeader(
+            title: copilotCardTitle(contactPriority: operacao.contactPriority),
+            actionLabel: 'Ajuda',
+            onAction: () => showAluno360CopilotHelpSheet(context),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            caption,
+            style: TextStyle(
+              color: fxScreenMute(context),
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+              height: 1.35,
+            ),
+          ),
+          const SizedBox(height: TokensStrip.s3),
           if (showFocusToggle)
             Padding(
               padding: const EdgeInsets.only(bottom: 4),
@@ -269,12 +284,16 @@ class Aluno360CopilotCard extends ConsumerWidget {
               profileCompletion,
               sticky: stickyAction,
             )) ...[
-              FxSettingsTile(
-                icon: Icons.person_add_alt_1_rounded,
-                label: copilotProfileGapsButtonLabel(aluno),
-                subtitle: 'Dados que ainda afetam a prescrição',
-                value: '',
-                accent: primary,
+              CommandActionTile(
+                item: CommandActionItem(
+                  icon: 'users',
+                  title: copilotProfileGapsButtonLabel(aluno),
+                  subtitle: 'Dados que ainda afetam a prescrição',
+                  route: '/alunos/${aluno.id}/editar',
+                  tone: CommandActionTone.primary,
+                ),
+                isDark: isDark,
+                primary: primary,
                 showDivider: false,
                 onTap: () => _completeProfile(context, aluno),
               ),

@@ -20,8 +20,9 @@ void main() {
     expect(shell, isNot(contains('_MiniAction')));
 
     expect(tab, contains('class FinanceiroMensalidadesTab'));
-    expect(tab, contains('FxSettingsTile'));
-    expect(tab, contains('showFxInsetPickerSheet'));
+    expect(tab, contains('FxSatelliteListTile'));
+    expect(tab, contains('ListView.builder'));
+    expect(tab, contains('FxLiquidPrimaryButton'));
     expect(tab, contains('showFxConfirmSheet'));
     expect(tab, contains('copySensitiveToClipboard'));
     expect(tab, contains('Carregar mais'));
@@ -29,9 +30,18 @@ void main() {
     expect(tab, contains('FeedbackHelper.showSuccess'));
     expect(tab, isNot(contains('class _MiniAction')));
     expect(tab, isNot(contains('FloatingActionButton')));
-    expect(tab, isNot(contains('FxLiquidPrimaryButton')));
     expect(tab, isNot(contains('check-circle')));
     expect(tab, isNot(contains('DropdownButtonFormField')));
     expect(tab, isNot(contains('Clipboard.setData')));
+  });
+
+  test('mensalidade detalhe é S3 com sticky transacional', () {
+    final detail = readScreenSourceBundle(
+      'lib/features/financeiro/screens/financeiro_mensalidade_detail_screen.dart',
+    );
+    expect(detail, contains('FxLiquidPrimaryButton'));
+    expect(detail, contains('Marcar como paga'));
+    expect(detail, contains('OperationalMetricTile'));
+    expect(detail, isNot(contains('FxSettingsGroup')));
   });
 }

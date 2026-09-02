@@ -11,8 +11,6 @@ import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_inset_picker_sheet.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
-import '../../../core/widgets/fx_settings_group.dart';
-import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../alunos/providers/alunos_provider.dart';
 import '../../planos/providers/plano_features_provider.dart';
@@ -210,16 +208,11 @@ class _FinanceiroAlunoContextBanner extends ConsumerWidget {
         FxSettingsLayout.pageInset,
         0,
       ),
-      child: FxSettingsGroup(
-        children: [
-          FxSettingsTile(
-            fxIcon: 'users',
-            label: financeiroAlunoContextLabel(nome),
-            value: '',
-            showDivider: false,
-            onTap: () {},
-          ),
-        ],
+      child: Text(
+        financeiroAlunoContextLabel(nome),
+        style: FxSettingsLayout.sectionHeader(
+          color: ShellChrome.of(context).mute,
+        ),
       ),
     );
   }

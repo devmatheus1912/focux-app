@@ -22,6 +22,7 @@ void main() {
     '/alunos/:id/chat',
     '/treinos/novo',
     '/financeiro',
+    '/financeiro/mensalidades/:id',
     '/checkin',
     '/notificacoes',
     '/chat/inbox',

@@ -54,6 +54,8 @@ import '../../features/winback/screens/winback_screen.dart';
 import '../../features/evolucao/screens/engajamento_screen.dart';
 import '../../features/ia/screens/ia_aluno_screen.dart';
 import '../../features/financeiro/screens/financeiro_aluno_screen.dart';
+import '../../features/financeiro/screens/financeiro_mensalidade_detail_screen.dart';
+import '../../features/financeiro/data/financeiro_repository.dart';
 import '../../features/notificacoes/screens/notificacoes_screen.dart';
 import '../../features/suporte/screens/suporte_screen.dart';
 import '../../features/broadcasts/screens/broadcast_screen.dart';
@@ -566,6 +568,19 @@ RouteBase buildChromeShellRoute() {
           GoRoute(
             path: '/financeiro/aluno',
             builder: (context, state) => const FinanceiroAlunoScreen(),
+          ),
+          GoRoute(
+            path: '/financeiro/mensalidades/:id',
+            redirect:
+                (context, state) =>
+                    state.extra is Mensalidade ? null : '/financeiro',
+            pageBuilder:
+                (context, state) => fxTransitionPage(
+                  state: state,
+                  child: FinanceiroMensalidadeDetailScreen(
+                    mensalidade: state.extra as Mensalidade,
+                  ),
+                ),
           ),
 
           // Feed

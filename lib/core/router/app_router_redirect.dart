@@ -136,6 +136,7 @@ bool isPersonalOnlyLocation(String path) {
   return path.startsWith('/alunos/') ||
       path.startsWith('/treinos/') ||
       path.startsWith('/exercicios') ||
+      path.startsWith('/financeiro/mensalidades') ||
       path.startsWith('/alertas/');
 }
 

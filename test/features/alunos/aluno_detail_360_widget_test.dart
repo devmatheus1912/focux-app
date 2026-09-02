@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:focux_app/core/widgets/fx_settings_tile.dart';
+import 'package:focux_app/core/widgets/operational_metric_tile.dart';
 import 'package:focux_app/features/auth/providers/auth_provider.dart';
 import 'package:focux_app/features/alunos/data/aluno_repository.dart';
 import 'package:focux_app/features/ia/models/ia_copilot_proxima_acao.dart';
@@ -259,7 +259,7 @@ void main() {
 
       expect(find.byKey(const ValueKey('aluno360_operacao_status')), findsOneWidget);
       expect(find.text('Status operacional'), findsOneWidget);
-      expect(find.byType(FxSettingsTile), findsWidgets);
+      expect(find.byType(OperationalMetricTile), findsWidgets);
       expect(find.byKey(const ValueKey('aluno360_operacao_sticky_cta')), findsOneWidget);
       expect(find.text('Enviar mensagem'), findsWidgets);
       expect(tester.takeException(), isNull);

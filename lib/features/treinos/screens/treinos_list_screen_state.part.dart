@@ -428,12 +428,18 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
                                 ),
                                 child: Align(
                                   alignment: Alignment.topCenter,
-                                  child: FxSettingsGroup(
-                                    header:
+                                  child: FxEmptyState(
+                                    icon: 'dumbbell',
+                                    title:
                                         widget.alunoId == null
-                                            ? 'Biblioteca'
-                                            : 'Plano do aluno',
-                                    caption:
+                                            ? (uiHints?.emptyTitle ??
+                                                TreinosListLabels.emptyTitle(
+                                                  alunoNome: widget.alunoNome,
+                                                ))
+                                            : TreinosListLabels.emptyTitle(
+                                              alunoNome: widget.alunoNome,
+                                            ),
+                                    subtitle:
                                         widget.alunoId == null
                                             ? (uiHints?.emptySubtitle ??
                                                 TreinosListLabels.emptySubtitle(
@@ -442,31 +448,14 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
                                             : TreinosListLabels.emptySubtitle(
                                               alunoNome: widget.alunoNome,
                                             ),
-                                    accent: primary,
-                                    children: [
-                                      FxSettingsTile(
-                                        icon: Icons.add_rounded,
-                                        label:
-                                            widget.alunoId == null
-                                                ? (uiHints?.createCtaLabel ??
-                                                    'Criar treino')
-                                                : 'Criar treino',
-                                        subtitle:
-                                            widget.alunoId == null
-                                                ? (uiHints?.emptyTitle ??
-                                                    TreinosListLabels.emptyTitle(
-                                                      alunoNome:
-                                                          widget.alunoNome,
-                                                    ))
-                                                : TreinosListLabels.emptyTitle(
-                                                  alunoNome: widget.alunoNome,
-                                                ),
-                                        value: '',
-                                        highlight: true,
-                                        showDivider: false,
-                                        onTap: createWorkout,
-                                      ),
-                                    ],
+                                    action: FxEmptyAction(
+                                      label:
+                                          widget.alunoId == null
+                                              ? (uiHints?.createCtaLabel ??
+                                                  'Criar treino')
+                                              : 'Criar treino',
+                                      onTap: createWorkout,
+                                    ),
                                   ),
                                 ),
                               ),
