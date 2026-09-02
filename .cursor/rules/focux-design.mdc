@@ -1,0 +1,17 @@
+---
+description: Pele Focux e taxonomia S1–S9 ao editar UI Dart. Aplica o playbook Ruflo sem reabrir auth/pagamento/contrato.
+globs: "**/*.dart"
+alwaysApply: false
+---
+
+# Focux UI
+
+Antes de editar uma tela: declare o tipo S1–S9 (`docs/FOCUX_DESIGN_REFERENCE.md` §9). Sem tipo, não abra PR.
+
+- Pele constante (§1–§8). Estrutura vem do tipo, nunca de outra tela. Inset-grouped só em S2.
+- Tokens: `TokensStrip` / `FxSettingsLayout` / `BrandPalette` / `EagleTokens`. Sem hex solto, sem `#007AFF`.
+- Chevron ⟺ push de rota. `Entrar` / `Salvar` / `Assinar` / `Pagar` são botão (`FxLiquidPrimaryButton`), nunca `FxSettingsTile`.
+- CTA full-width proibido em S1/S2; obrigatório em S5/S6/S9.
+- Erro: `friendlyError`. Plano: capability, nunca `if (plano == 'FREE')`.
+- Pode editar visual/UX. Só propor: auth, tenant, pagamento, IA, contrato API, migration, PII (`docs/FOCUX_DESIGN_REFERENCE.md` §29).
+- Lote em massa: skill `/ruflo` (Custom Mode). Ordem S6 → S1 → S3 → S4 → S5 → S8 → S9 → S7 → S2. Máx. 3 telas do mesmo tipo.
