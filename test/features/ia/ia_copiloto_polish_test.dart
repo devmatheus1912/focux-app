@@ -28,6 +28,8 @@ void main() {
     expect(screen, contains('FxHelpIconButton'));
     expect(screen, contains('FxSettingsGroup'));
     expect(shellWidgets, contains('IaCopilotResultActionBar'));
+    expect(shellWidgets, contains('DashboardHomeActionChip'));
+    expect(shellWidgets, contains('FxConversionTextLink'));
     expect(shellWidgets, contains('FxInsetPickerOption'));
     expect(actionsPart, contains('explicitChildNodes: true'));
     expect(shellWidgets, contains('Como funciona'));

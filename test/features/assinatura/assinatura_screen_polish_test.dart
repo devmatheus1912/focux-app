@@ -17,6 +17,8 @@ void main() {
     );
     expect(screen, contains('paywallHomeProvider'));
     expect(screen, contains('ref.watch(paywallHomeProvider)'));
+    expect(screen, contains('seedFromHome'));
+    expect(screen, contains('home.me'));
     expect(screen, contains('FxHubFreshness.fromFetchedAt'));
     expect(screen, isNot(contains('ref.watch(planosProvider)')));
     expect(screen, isNot(contains('ref.watch(paywallVitrineProvider)')));
@@ -26,6 +28,8 @@ void main() {
     ).readAsStringSync();
     expect(repo, contains('/api/planos/paywall/home'));
     expect(repo, contains('getPaywallHome'));
+    expect(repo, contains("raw['me']"));
+    expect(repo, contains('PlanoFeatures.fromJson'));
     expect(repo, isNot(contains('/api/planos/vitrine')));
     expect(repo, isNot(contains('listarPlanos')));
     expect(repo, isNot(contains('fetchVitrine')));

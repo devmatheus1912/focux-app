@@ -14,6 +14,8 @@ import '../../../core/utils/friendly_error.dart';
 import '../../dashboard/utils/dashboard_readability.dart';
 import '../../dashboard/widgets/dashboard_error_state.dart';
 import '../../../core/theme/fx_settings_layout.dart';
+import '../../../core/widgets/operational_metric_tile.dart';
+import '../../../core/theme/design_tokens.dart';
 import '../../../core/utils/pt_br_display.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';

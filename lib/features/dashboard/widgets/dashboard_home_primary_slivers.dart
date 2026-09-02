@@ -10,8 +10,6 @@ import '../../subscription/widgets/plan_usage_banner.dart';
 import '../../subscription/widgets/trial_countdown_banner.dart';
 import '../data/command_center_data.dart';
 import '../constants/dashboard_layout.dart';
-import '../../../core/widgets/fx_settings_group.dart';
-import '../../../core/widgets/fx_settings_tile.dart';
 import '../utils/dashboard_day_focus.dart';
 import '../utils/dashboard_entry_motion.dart';
 import '../utils/dashboard_home_focus.dart';
@@ -161,17 +159,18 @@ List<Widget> buildDashboardHomePrimarySlivers({
       SliverToBoxAdapter(
         child: Padding(
           padding: DashboardLayout.foldCard,
-          child: FxSettingsGroup(
-            children: [
-              FxSettingsTile(
-                fxIcon: 'alert-triangle',
-                label: 'Saúde da base',
-                subtitle: 'Alunos em risco pedem contato',
-                value: 'Ver',
-                showDivider: false,
-                onTap: () => context.push('/retencao'),
-              ),
-            ],
+          child: CommandActionTile(
+            item: const CommandActionItem(
+              icon: 'alert-triangle',
+              title: 'Saúde da base',
+              subtitle: 'Alunos em risco pedem contato',
+              route: '/retencao',
+              tone: CommandActionTone.hot,
+            ),
+            isDark: isDark,
+            primary: primary,
+            showDivider: false,
+            onTap: () => context.push('/retencao'),
           ),
         ),
       ),

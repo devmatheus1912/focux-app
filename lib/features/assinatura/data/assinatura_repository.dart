@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/api/offline_sync_service.dart';
 import '../../../core/api/payment_api_client.dart';
+import '../../planos/data/planos_repository.dart';
 import '../../planos/paywall/paywall_vitrine.dart';
 
 import 'plano.dart';
@@ -10,8 +11,13 @@ import 'plano.dart';
 class PaywallHomeBundle {
   final List<Plano> planos;
   final PaywallVitrineSnapshot vitrine;
+  final PlanoFeatures? me;
 
-  const PaywallHomeBundle({required this.planos, required this.vitrine});
+  const PaywallHomeBundle({
+    required this.planos,
+    required this.vitrine,
+    this.me,
+  });
 }
 
 class AssinaturaRepository {
@@ -23,7 +29,7 @@ class AssinaturaRepository {
     : _dio = client.dio,
       _paymentDio = payment.dio;
 
-  /// BFF first paint — planos + vitrine em um round-trip.
+  /// BFF first paint — planos + vitrine + me em um round-trip.
   Future<PaywallHomeBundle> getPaywallHome() async {
     final response = await _dio.get('/api/planos/paywall/home');
     final raw = response.data as Map<String, dynamic>;
@@ -40,7 +46,12 @@ class AssinaturaRepository {
     } catch (_) {
       vitrine = PaywallVitrineSnapshot.fromCatalog();
     }
-    return PaywallHomeBundle(planos: planos, vitrine: vitrine);
+    PlanoFeatures? me;
+    final meRaw = raw['me'];
+    if (meRaw is Map<String, dynamic>) {
+      me = PlanoFeatures.fromJson(meRaw);
+    }
+    return PaywallHomeBundle(planos: planos, vitrine: vitrine, me: me);
   }
 
   Future<void> clearVitrineCache() async {

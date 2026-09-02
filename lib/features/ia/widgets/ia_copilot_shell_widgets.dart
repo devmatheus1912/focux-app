@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/brand/focux_microcopy.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/theme/fx_settings_layout.dart';
+import '../../../core/widgets/fx_conversion.dart';
 import '../../../core/widgets/fx_inset_picker_option.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../utils/ia_copiloto_display.dart';
 
 class IaCopilotResultActionBar extends StatelessWidget {
@@ -35,25 +36,21 @@ class IaCopilotResultActionBar extends StatelessWidget {
           FxSettingsLayout.pageInset,
           12,
         ),
-        child: FxSettingsGroup(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            FxSettingsTile(
-              fxIcon: 'circle-check',
-              label: iaCopilotoCriarTarefaLabel(),
-              value: '',
-              highlight: true,
-              accent: brand,
-              semanticsLabel:
-                  'Criar tarefa no ${FocuxMicrocopy.commandCenter}',
-              onTap: onCreateTask,
+            Align(
+              alignment: Alignment.centerLeft,
+              child: DashboardHomeActionChip(
+                label: iaCopilotoCriarTarefaLabel(),
+                accent: brand,
+                isDark: Theme.of(context).brightness == Brightness.dark,
+                onPressed: onCreateTask,
+              ),
             ),
-            FxSettingsTile(
-              fxIcon: 'article',
-              label: iaCopilotoMaisAcoesLabel(),
-              value: '',
-              showDivider: false,
-              accent: brand,
-              semanticsLabel: 'Mais ações do Copiloto',
+            FxConversionTextLink(
+              text: '',
+              actionText: iaCopilotoMaisAcoesLabel(),
               onTap: onMore,
             ),
           ],
@@ -391,18 +388,14 @@ class IaCopilotPrimaryAction extends StatelessWidget {
     return Semantics(
       button: true,
       label: label,
-      child: FxSettingsGroup(
-        children: [
-          FxSettingsTile(
-            fxIcon: 'spark',
-            label: label,
-            value: '',
-            showDivider: false,
-            highlight: true,
-            accent: brand,
-            onTap: onTap,
-          ),
-        ],
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: DashboardHomeActionChip(
+          label: label,
+          accent: brand,
+          isDark: Theme.of(context).brightness == Brightness.dark,
+          onPressed: onTap,
+        ),
       ),
     );
   }
