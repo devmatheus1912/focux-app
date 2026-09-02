@@ -2,14 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../../core/theme/design_tokens.dart';
-import '../../../core/theme/focux_hub_typography.dart';
+
+import '../../../core/theme/hero_teal.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_confirm_sheet.dart';
+import '../../../core/widgets/fx_conversion.dart';
+import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_motion.dart';
-import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
 import '../providers/auth_provider.dart';
-import 'package:focux_app/core/widgets/fx_input_deco.dart';
-import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
+import '../utils/auth_error_messages.dart';
+import '../utils/definir_senha_display.dart';
+import '../widgets/auth_shell.dart';
+import '../widgets/password_strength_meter.dart';
+
+part 'definir_senha_aluno_screen_actions.part.dart';
 
 class DefinirSenhaAlunoScreen extends ConsumerStatefulWidget {
   const DefinirSenhaAlunoScreen({super.key});
@@ -20,500 +27,198 @@ class DefinirSenhaAlunoScreen extends ConsumerStatefulWidget {
 }
 
 class _DefinirSenhaAlunoScreenState
-    extends ConsumerState<DefinirSenhaAlunoScreen>
-    with SingleTickerProviderStateMixin {
+    extends ConsumerState<DefinirSenhaAlunoScreen> {
   final _formKey = GlobalKey<FormState>();
   final _senhaAtualCtrl = TextEditingController();
   final _novaSenhaCtrl = TextEditingController();
   final _confirmacaoCtrl = TextEditingController();
-
   bool _loading = false;
   String? _error;
   bool _showSenhaAtual = false;
   bool _showNovaSenha = false;
-  bool _showConfirmacao = false;
-
-  late final AnimationController _iconAnim;
-  late final Animation<double> _iconScale;
 
   @override
   void initState() {
     super.initState();
-    _iconAnim = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 800),
-    );
-    _iconScale = CurvedAnimation(parent: _iconAnim, curve: Curves.elasticOut);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      if (TokensStrip.prefersReducedMotion(context)) {
-        _iconAnim.value = 1;
-      } else {
-        _iconAnim.forward();
-      }
+    _novaSenhaCtrl.addListener(() {
+      if (mounted) setState(() {});
     });
-    _novaSenhaCtrl.addListener(() => setState(() {}));
   }
 
   @override
   void dispose() {
-    _iconAnim.dispose();
     _senhaAtualCtrl.dispose();
     _novaSenhaCtrl.dispose();
     _confirmacaoCtrl.dispose();
     super.dispose();
   }
 
-  double _passwordStrength() {
-    final pwd = _novaSenhaCtrl.text;
-    if (pwd.isEmpty) return 0;
-    double score = 0;
-    if (pwd.length >= 8) score += 0.3;
-    if (pwd.length >= 12) score += 0.1;
-    if (RegExp(r'[A-Z]').hasMatch(pwd)) score += 0.2;
-    if (RegExp(r'[0-9]').hasMatch(pwd)) score += 0.2;
-    if (RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(pwd)) score += 0.2;
-    return score.clamp(0, 1);
-  }
-
-  Color _strengthColor() =>
-      EagleTokens.passwordStrengthColor(_passwordStrength());
-
-  String _strengthLabel() {
-    final s = _passwordStrength();
-    if (s <= 0) return '';
-    if (s <= 0.25) return 'Fraca';
-    if (s <= 0.5) return 'Razoável';
-    if (s <= 0.75) return 'Boa';
-    return 'Forte';
-  }
-
-  Future<void> _submit() async {
-    final form = _formKey.currentState;
-    if (form == null || !form.validate()) return;
-    setState(() {
-      _loading = true;
-      _error = null;
-    });
-    HapticFeedback.mediumImpact();
-    try {
-      await ref
-          .read(authProvider.notifier)
-          .definirSenhaDefinitivaAluno(
-            _senhaAtualCtrl.text,
-            _novaSenhaCtrl.text,
-          );
-      if (!mounted) return;
-      HapticFeedback.heavyImpact();
-      context.go('/aluno/ativacao');
-    } catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _error = 'Não foi possível definir a nova senha. Verifique os dados.';
-      });
-    } finally {
-      if (mounted) {
-        setState(() => _loading = false);
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final primary = Theme.of(context).colorScheme.primary;
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-    final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
-    final strength = _passwordStrength();
-
     return fxScreenA11yScope(
-      label: 'Definir Senha Aluno',
-      child: FxShellScaffold(
-        useMesh: true,
-        body: SafeArea(
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 440),
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 32,
-                ),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      // ── Hero icon ──
-                      Center(
-                        child: ScaleTransition(
-                          scale: _iconScale,
-                          child: Container(
-                            width: 88,
-                            height: 88,
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                                colors: [
-                                  primary,
-                                  primary.withValues(alpha: 0.7),
-                                ],
+      label: definirSenhaHelpTitle(),
+      child: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: const SystemUiOverlayStyle(
+          statusBarColor: fxTransparent,
+          statusBarIconBrightness: Brightness.light,
+          statusBarBrightness: Brightness.dark,
+        ),
+        child: Scaffold(
+          body: AuthShell(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: authScrollPadding(
+                      context,
+                      top: TokensStrip.s3,
+                      bottomExtra: TokensStrip.s5,
+                      ensureFooter: true,
+                    ),
+                    child: Form(
+                      key: _formKey,
+                      child: AuthFormEntrance(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Center(
+                              child: FxConversionLockup(
+                                width: authLogoWidthFor(
+                                  context,
+                                  withTagline: true,
+                                ),
+                                semanticLabel: 'Focux ALUNO',
+                                aluno: true,
                               ),
-                              borderRadius: BorderRadius.circular(
-                                TokensStrip.r2xl,
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: primary.withValues(alpha: 0.3),
-                                  blurRadius: 24,
-                                  offset: const Offset(0, 8),
+                            ),
+                            const SizedBox(height: TokensStrip.s4),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    definirSenhaHelpTitle(),
+                                    style: authPageTitleStyle(context),
+                                  ),
+                                ),
+                                FxHelpIconButton(
+                                  tooltip: definirSenhaHelpTitle(),
+                                  onTap: _abrirAjuda,
                                 ),
                               ],
                             ),
-                            child: const Icon(
-                              Icons.lock_outline_rounded,
-                              color: Colors.white,
-                              size: 40,
+                            const SizedBox(height: TokensStrip.s2),
+                            Text(
+                              definirSenhaSubtitle(),
+                              style: authSubtitleStyle().copyWith(height: 1.55),
                             ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 28),
-
-                      // ── Title ──
-                      Text(
-                        'Crie sua senha',
-                        textAlign: TextAlign.center,
-                        style: FocuxHubTypography.pageTitle(
-                          context,
-                          color: ink,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Por segurança, defina uma senha pessoal\npara proteger sua conta.',
-                        textAlign: TextAlign.center,
-                        style: FocuxHubTypography.bodyMuted(
-                          color: mute,
-                          height: 1.5,
-                        ),
-                      ),
-                      const SizedBox(height: 32),
-
-                      // ── Card ──
-                      Container(
-                        padding: const EdgeInsets.all(TokensStrip.s4),
-                        decoration: fxStripCardDecoration(context),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            // Senha provisória
-                            TextFormField(
+                            const SizedBox(height: TokensStrip.s5),
+                            AuthField(
+                              label: 'Senha provisória',
                               controller: _senhaAtualCtrl,
+                              hintText: 'A senha temporária do convite',
+                              icon: Icons.key_rounded,
                               obscureText: !_showSenhaAtual,
-                              decoration: InputDecoration(
-                                labelText: 'Senha provisória',
-                                prefixIcon: Icon(
-                                  Icons.key_rounded,
-                                  color: mute,
-                                  size: 20,
+                              textInputAction: TextInputAction.next,
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Informe a senha provisória';
+                                }
+                                return null;
+                              },
+                              suffix: IconButton(
+                                onPressed: () {
+                                  setState(
+                                    () => _showSenhaAtual = !_showSenhaAtual,
+                                  );
+                                },
+                                icon: Icon(
+                                  _showSenhaAtual
+                                      ? Icons.visibility_off_outlined
+                                      : Icons.visibility_outlined,
+                                  color: heroTealSurface(0.82),
+                                  size: 18,
                                 ),
-                                suffixIcon: IconButton(
-                                  icon: Icon(
-                                    _showSenhaAtual
-                                        ? Icons.visibility_off_outlined
-                                        : Icons.visibility_outlined,
-                                    color: mute,
-                                    size: 20,
-                                  ),
-                                  onPressed:
-                                      () => setState(
-                                        () =>
-                                            _showSenhaAtual = !_showSenhaAtual,
-                                      ),
-                                ),
-                                border: FxInputDeco.outlineBorder(
-                                  borderRadius: BorderRadius.circular(
-                                    TokensStrip.rInput,
-                                  ),
-                                ),
-                                enabledBorder: FxInputDeco.outlineBorder(
-                                  borderRadius: BorderRadius.circular(
-                                    TokensStrip.rInput,
-                                  ),
-                                  borderSide: BorderSide(color: line),
-                                ),
-                                focusedBorder: FxInputDeco.outlineBorder(
-                                  borderRadius: BorderRadius.circular(
-                                    TokensStrip.rInput,
-                                  ),
-                                  borderSide: BorderSide(
-                                    color: primary,
-                                    width: 1.5,
-                                  ),
-                                ),
-                                filled: true,
-                                fillColor:
-                                    isDark
-                                        ? Colors.white.withValues(alpha: 0.04)
-                                        : TokensStrip.pageBg,
                               ),
-                              validator:
-                                  (v) =>
-                                      v == null || v.isEmpty
-                                          ? 'Informe a senha atual'
-                                          : null,
                             ),
-                            const SizedBox(height: TokensStrip.s4),
-
-                            // Nova senha
-                            TextFormField(
+                            const SizedBox(height: TokensStrip.s3),
+                            AuthField(
+                              label: 'Nova senha',
                               controller: _novaSenhaCtrl,
+                              hintText:
+                                  'Mín. $kDefinirSenhaMinLength caracteres',
+                              icon: Icons.lock_outline_rounded,
                               obscureText: !_showNovaSenha,
-                              decoration: InputDecoration(
-                                labelText: 'Nova senha',
-                                prefixIcon: Icon(
-                                  Icons.lock_outline_rounded,
-                                  color: mute,
-                                  size: 20,
-                                ),
-                                suffixIcon: IconButton(
-                                  icon: Icon(
-                                    _showNovaSenha
-                                        ? Icons.visibility_off_outlined
-                                        : Icons.visibility_outlined,
-                                    color: mute,
-                                    size: 20,
-                                  ),
-                                  onPressed:
-                                      () => setState(
-                                        () => _showNovaSenha = !_showNovaSenha,
-                                      ),
-                                ),
-                                border: FxInputDeco.outlineBorder(
-                                  borderRadius: BorderRadius.circular(
-                                    TokensStrip.rInput,
-                                  ),
-                                ),
-                                enabledBorder: FxInputDeco.outlineBorder(
-                                  borderRadius: BorderRadius.circular(
-                                    TokensStrip.rInput,
-                                  ),
-                                  borderSide: BorderSide(color: line),
-                                ),
-                                focusedBorder: FxInputDeco.outlineBorder(
-                                  borderRadius: BorderRadius.circular(
-                                    TokensStrip.rInput,
-                                  ),
-                                  borderSide: BorderSide(
-                                    color: primary,
-                                    width: 1.5,
-                                  ),
-                                ),
-                                filled: true,
-                                fillColor:
-                                    isDark
-                                        ? Colors.white.withValues(alpha: 0.04)
-                                        : TokensStrip.pageBg,
-                              ),
-                              validator: (v) {
-                                if (v == null || v.isEmpty) {
-                                  return 'Informe a nova senha';
-                                }
-                                if (v.length < 8) {
-                                  return 'Mínimo de 8 caracteres';
+                              textInputAction: TextInputAction.next,
+                              validator: (value) {
+                                if (value == null ||
+                                    value.length < kDefinirSenhaMinLength) {
+                                  return 'A senha precisa ter no mínimo $kDefinirSenhaMinLength caracteres.';
                                 }
                                 return null;
                               },
+                              suffix: IconButton(
+                                onPressed: () {
+                                  setState(
+                                    () => _showNovaSenha = !_showNovaSenha,
+                                  );
+                                },
+                                icon: Icon(
+                                  _showNovaSenha
+                                      ? Icons.visibility_off_outlined
+                                      : Icons.visibility_outlined,
+                                  color: heroTealSurface(0.82),
+                                  size: 18,
+                                ),
+                              ),
                             ),
-
-                            // ── Strength indicator ──
                             if (_novaSenhaCtrl.text.isNotEmpty) ...[
-                              const SizedBox(height: 10),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(999),
-                                      child: LinearProgressIndicator(
-                                        value: strength,
-                                        minHeight: 5,
-                                        backgroundColor: line,
-                                        valueColor: AlwaysStoppedAnimation(
-                                          _strengthColor(),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 10),
-                                  Text(
-                                    _strengthLabel(),
-                                    style: FocuxHubTypography.chip(
-                                      _strengthColor(),
-                                    ),
-                                  ),
-                                ],
+                              const SizedBox(height: TokensStrip.s2),
+                              PasswordStrengthMeter(
+                                password: _novaSenhaCtrl.text,
+                                minLength: kDefinirSenhaMinLength,
                               ),
                             ],
-                            const SizedBox(height: TokensStrip.s4),
-
-                            // Confirmar
-                            TextFormField(
+                            const SizedBox(height: TokensStrip.s3),
+                            AuthField(
+                              label: 'Confirmar nova senha',
                               controller: _confirmacaoCtrl,
-                              obscureText: !_showConfirmacao,
-                              decoration: InputDecoration(
-                                labelText: 'Confirmar nova senha',
-                                prefixIcon: Icon(
-                                  Icons.lock_reset_rounded,
-                                  color: mute,
-                                  size: 20,
-                                ),
-                                suffixIcon: IconButton(
-                                  icon: Icon(
-                                    _showConfirmacao
-                                        ? Icons.visibility_off_outlined
-                                        : Icons.visibility_outlined,
-                                    color: mute,
-                                    size: 20,
-                                  ),
-                                  onPressed:
-                                      () => setState(
-                                        () =>
-                                            _showConfirmacao =
-                                                !_showConfirmacao,
-                                      ),
-                                ),
-                                border: FxInputDeco.outlineBorder(
-                                  borderRadius: BorderRadius.circular(
-                                    TokensStrip.rInput,
-                                  ),
-                                ),
-                                enabledBorder: FxInputDeco.outlineBorder(
-                                  borderRadius: BorderRadius.circular(
-                                    TokensStrip.rInput,
-                                  ),
-                                  borderSide: BorderSide(color: line),
-                                ),
-                                focusedBorder: FxInputDeco.outlineBorder(
-                                  borderRadius: BorderRadius.circular(
-                                    TokensStrip.rInput,
-                                  ),
-                                  borderSide: BorderSide(
-                                    color: primary,
-                                    width: 1.5,
-                                  ),
-                                ),
-                                filled: true,
-                                fillColor:
-                                    isDark
-                                        ? Colors.white.withValues(alpha: 0.04)
-                                        : TokensStrip.pageBg,
-                              ),
-                              validator: (v) {
-                                if (v == null || v.isEmpty) {
-                                  return 'Confirme a nova senha';
-                                }
-                                if (v != _novaSenhaCtrl.text) {
-                                  return 'As senhas não conferem';
+                              hintText: 'Repita a senha',
+                              icon: Icons.lock_reset_rounded,
+                              obscureText: !_showNovaSenha,
+                              textInputAction: TextInputAction.done,
+                              onFieldSubmitted: (_) => _pedirSalvar(),
+                              validator: (value) {
+                                if (value != _novaSenhaCtrl.text) {
+                                  return 'As senhas não conferem.';
                                 }
                                 return null;
                               },
                             ),
-
-                            // ── Error ──
+                            const SizedBox(height: TokensStrip.s4),
                             if (_error != null) ...[
-                              const SizedBox(height: 14),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 14,
-                                  vertical: 10,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: EagleTokens.bad.withValues(
-                                    alpha: 0.08,
-                                  ),
-                                  borderRadius: BorderRadius.circular(
-                                    TokensStrip.rCard,
-                                  ),
-                                  border: Border.all(
-                                    color: EagleTokens.bad.withValues(
-                                      alpha: 0.3,
-                                    ),
-                                  ),
-                                ),
-                                child: Row(
-                                  children: [
-                                    const Icon(
-                                      Icons.error_outline,
-                                      color: EagleTokens.bad,
-                                      size: 18,
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Expanded(
-                                      child: Text(
-                                        _error!,
-                                        style: FocuxHubTypography.bodyMuted(
-                                          color: EagleTokens.bad,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
+                              Semantics(
+                                liveRegion: true,
+                                child: Text(
+                                  _error!,
+                                  style: authInlineErrorStyle(),
                                 ),
                               ),
+                              const SizedBox(height: TokensStrip.s3),
                             ],
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: TokensStrip.s5),
-
-                      FxLiquidPrimaryButton(
-                        label: 'Salvar nova senha',
-                        icon: Icons.shield_outlined,
-                        loading: _loading,
-                        onPressed: _loading ? null : _submit,
-                      ),
-                      const SizedBox(height: 20),
-
-                      // ── Tips ──
-                      Container(
-                        padding: const EdgeInsets.all(14),
-                        decoration: BoxDecoration(
-                          color: primary.withValues(alpha: isDark ? 0.1 : 0.05),
-                          borderRadius: BorderRadius.circular(
-                            TokensStrip.rInput,
-                          ),
-                          border: Border.all(
-                            color: primary.withValues(alpha: 0.15),
-                          ),
-                        ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Icon(
-                              Icons.lightbulb_outline_rounded,
-                              color: primary,
-                              size: 18,
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Text(
-                                'Use pelo menos 6 caracteres, combinando letras maiúsculas, números e símbolos para uma senha forte.',
-                                style: FocuxHubTypography.bodyMuted(
-                                  color: mute,
-                                  height: 1.5,
-                                ),
-                              ),
+                            FxLiquidPrimaryButton(
+                              label: definirSenhaSalvarLabel(),
+                              loading: _loading,
+                              loadingLabel: definirSenhaSalvandoLabel(),
+                              onPressed: _loading ? null : _pedirSalvar,
                             ),
                           ],
                         ),
                       ),
-                    ],
+                    ),
                   ),
                 ),
-              ),
+              ],
             ),
           ),
         ),

@@ -2,19 +2,23 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
-import '../../../core/brand/focux_microcopy.dart';
+
 import '../../../core/legal/focux_legal.dart';
 import '../../../core/platform/secure_screen.dart';
 import '../../../core/theme/brand_palette.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_conversion.dart';
 import '../../../core/widgets/fx_empty_state.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../auth/utils/auth_layout.dart';
 import '../../planos/paywall/paywall_catalog.dart';
 import '../../subscription/models/subscription_plan.dart';
-import '../../subscription/store_subscription_policy.dart';
 import '../../subscription/subscription_products.dart';
+import '../utils/assinatura_review_display.dart';
 
 /// Revisão honesta antes da compra na loja (App Store / Play compliant).
 class AssinaturaReviewScreen extends StatefulWidget {
@@ -62,6 +66,11 @@ class _AssinaturaReviewScreenState extends State<AssinaturaReviewScreen> {
     } catch (_) {}
   }
 
+  void _confirm() {
+    HapticFeedback.mediumImpact();
+    context.pop(true);
+  }
+
   @override
   Widget build(BuildContext context) {
     final chrome = ShellChrome.of(context);
@@ -71,44 +80,70 @@ class _AssinaturaReviewScreenState extends State<AssinaturaReviewScreen> {
       PaywallCatalog.accentForPlan(widget.plan),
     );
     final price = widget.priceDisplay.trim();
-    final freq =
-        widget.billingPeriod == SubscriptionBillingPeriod.yearly
-            ? 'Anual'
-            : 'Mensal';
-    final nextBill = DateTime.now().add(
-      Duration(
-        days:
-            widget.billingPeriod == SubscriptionBillingPeriod.yearly ? 365 : 30,
-      ),
+    final nextLabel = assinaturaReviewNextBillLabel(
+      assinaturaReviewNextBill(DateTime.now(), widget.billingPeriod),
     );
-    final nextLabel =
-        '${nextBill.day.toString().padLeft(2, '0')}/'
-        '${nextBill.month.toString().padLeft(2, '0')}/'
-        '${nextBill.year}';
+    final planLabel = assinaturaReviewPlanLabel(widget.plan);
 
     return fxScreenA11yScope(
-      label: 'Confirmar assinatura',
+      label: assinaturaReviewTitle(),
       child: FxShellScaffold(
         useMesh: true,
         appBar: FxShellAppBar(
-          title: 'Confirmar assinatura',
+          title: assinaturaReviewTitle(),
           onBack: () => Navigator.of(context).pop(false),
         ),
+        bottomNavigationBar:
+            price.isEmpty
+                ? null
+                : SafeArea(
+                  minimum: const EdgeInsets.fromLTRB(
+                    TokensStrip.s5,
+                    TokensStrip.s2,
+                    TokensStrip.s5,
+                    TokensStrip.s2,
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Semantics(
+                        button: true,
+                        label: 'Confirmar e assinar plano $planLabel',
+                        child: FxLiquidPrimaryButton(
+                          label: assinaturaReviewConfirmLabel(),
+                          onPressed: _confirm,
+                        ),
+                      ),
+                      FxConversionTextLink(
+                        text: '',
+                        actionText: assinaturaReviewBackLabel(),
+                        onTap: () => context.pop(false),
+                      ),
+                    ],
+                  ),
+                ),
         body:
             price.isEmpty
                 ? FxEmptyState(
                   icon: 'dollar-sign',
-                  title: 'Preço indisponível',
-                  subtitle:
-                      'Não encontramos o valor deste plano na loja. Volte e tente de novo.',
+                  title: assinaturaReviewEmptyTitle(),
+                  subtitle: assinaturaReviewEmptySubtitle(),
                   action: FxEmptyAction(
-                    label: 'Voltar',
+                    label: assinaturaReviewBackLabel(),
                     onTap: () => Navigator.of(context).pop(false),
                   ),
                 )
                 : ListView(
                   padding: const EdgeInsets.all(TokensStrip.s5),
                   children: [
+                    Center(
+                      child: FxConversionLockup(
+                        width: authLogoWidthFor(context, withTagline: true),
+                        semanticLabel: 'Focux Personal',
+                      ),
+                    ),
+                    const SizedBox(height: TokensStrip.s4),
                     Container(
                       padding: const EdgeInsets.all(TokensStrip.s4),
                       decoration: chrome.accentPanel(accent: accent),
@@ -116,29 +151,19 @@ class _AssinaturaReviewScreenState extends State<AssinaturaReviewScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            widget.plan.apiName,
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: 1.6,
-                              color: accent,
-                            ),
+                            planLabel.toUpperCase(),
+                            style: FocuxHubTypography.chip(accent),
                           ),
                           const SizedBox(height: TokensStrip.s2),
+                          Text(price, style: TokensStrip.h1(color: ink)),
+                          const SizedBox(height: TokensStrip.s1),
                           Text(
-                            price,
-                            style: TokensStrip.h1(
-                              color: ink,
-                            ).copyWith(fontSize: 28),
+                            assinaturaReviewBillingLine(widget.billingPeriod),
+                            style: TokensStrip.bodyMuted(color: mute),
                           ),
                           const SizedBox(height: TokensStrip.s1),
                           Text(
-                            'Cobrança $freq · renovação automática',
-                            style: TokensStrip.bodyMuted(color: mute),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'Próxima cobrança estimada: $nextLabel',
+                            nextLabel,
                             style: TokensStrip.bodyMuted(color: mute),
                           ),
                           if (widget.trialNote != null) ...[
@@ -152,13 +177,10 @@ class _AssinaturaReviewScreenState extends State<AssinaturaReviewScreen> {
                       ),
                     ),
                     const SizedBox(height: TokensStrip.s5),
-                    Text(
-                      'Incluído no plano',
-                      style: TokensStrip.h2(color: ink).copyWith(fontSize: 17),
-                    ),
+                    Text('Incluído no plano', style: TokensStrip.h2(color: ink)),
                     const SizedBox(height: TokensStrip.s3),
-                    ..._topFeatures(widget.plan).map(
-                      (f) => Padding(
+                    ...assinaturaReviewTopFeatures(widget.plan).map(
+                      (feature) => Padding(
                         padding: const EdgeInsets.only(bottom: TokensStrip.s2),
                         child: Row(
                           children: [
@@ -170,7 +192,7 @@ class _AssinaturaReviewScreenState extends State<AssinaturaReviewScreen> {
                             const SizedBox(width: TokensStrip.s3),
                             Expanded(
                               child: Text(
-                                f,
+                                feature,
                                 style: TokensStrip.body(color: ink),
                               ),
                             ),
@@ -179,105 +201,42 @@ class _AssinaturaReviewScreenState extends State<AssinaturaReviewScreen> {
                       ),
                     ),
                     const SizedBox(height: TokensStrip.s5),
-                    ExpansionTile(
-                      tilePadding: EdgeInsets.zero,
-                      title: Text(
-                        'Detalhes legais',
-                        style: TokensStrip.bodyMuted(color: mute).copyWith(
-                          fontWeight: FontWeight.w700,
-                        ),
+                    Text(
+                      assinaturaReviewLegalBody(
+                        price: price,
+                        period: widget.billingPeriod,
                       ),
+                      style: TokensStrip.bodyMuted(color: mute).copyWith(
+                        height: 1.5,
+                      ),
+                    ),
+                    const SizedBox(height: TokensStrip.s2),
+                    Wrap(
+                      spacing: TokensStrip.s3,
                       children: [
-                        Text(
-                          _legalBody(price, freq),
-                          style: TokensStrip.bodyMuted(
-                            color: mute,
-                          ).copyWith(fontSize: 12, height: 1.5),
+                        FxConversionTextLink(
+                          text: '',
+                          actionText: 'Privacidade',
+                          onTap: () {
+                            FocuxLegal.openPrivacy();
+                          },
                         ),
-                        const SizedBox(height: TokensStrip.s2),
-                        Wrap(
-                          spacing: 12,
-                          children: [
-                            TextButton(
-                              onPressed: () => FocuxLegal.openPrivacy(),
-                              child: const Text('Privacidade'),
-                            ),
-                            TextButton(
-                              onPressed: () => FocuxLegal.openTerms(),
-                              child: const Text('Termos'),
-                            ),
-                          ],
+                        FxConversionTextLink(
+                          text: '',
+                          actionText: 'Termos',
+                          onTap: () {
+                            FocuxLegal.openTerms();
+                          },
                         ),
                       ],
                     ),
-                    SizedBox(height: MediaQuery.paddingOf(context).bottom + TokensStrip.s4),
-                    Semantics(
-                      button: true,
-                      label:
-                          'Confirmar e assinar plano ${widget.plan.apiName}',
-                      child: FilledButton(
-                        onPressed: () {
-                          HapticFeedback.mediumImpact();
-                          context.pop(true);
-                        },
-                        style: FilledButton.styleFrom(
-                          backgroundColor: accent,
-                          foregroundColor: Colors.white,
-                          minimumSize: const Size.fromHeight(52),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(
-                              TokensStrip.rMd,
-                            ),
-                          ),
-                        ),
-                        child: const Text(
-                          'Confirmar e assinar',
-                          style: TextStyle(fontWeight: FontWeight.w900),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: TokensStrip.s3),
-                    Semantics(
-                      button: true,
-                      label: 'Voltar sem assinar',
-                      child: TextButton(
-                        onPressed: () => context.pop(false),
-                        child: Text(
-                          'Voltar',
-                          style: TextStyle(
-                            color: mute,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
+                    SizedBox(
+                      height:
+                          MediaQuery.paddingOf(context).bottom + TokensStrip.s4,
                     ),
                   ],
                 ),
       ),
     );
-  }
-
-  static List<String> _topFeatures(SubscriptionPlan plan) => switch (plan) {
-    SubscriptionPlan.ENTERPRISE => [
-      'Landing page completa com depoimentos e FAQ',
-      'Marca própria e domínio customizado',
-      'Alunos ilimitados + IA 600/mês + equipe (5)',
-    ],
-    SubscriptionPlan.PRO => [
-      'Até 30 alunos ativos',
-      'PIX e financeiro no app',
-      'IA Copiloto e ${FocuxMicrocopy.commandCenter}',
-      'Agenda e relatórios avançados',
-    ],
-    _ => ['Recursos do plano selecionado'],
-  };
-
-  static String _legalBody(String price, String freq) {
-    final channel = subscriptionChannelLabel();
-    return 'Ao confirmar, você autoriza a cobrança de $price na forma de pagamento '
-        'da $channel. A assinatura renova automaticamente ($freq) até ser cancelada. '
-        'Cancele quando quiser em Ajustes > Assinaturas.\n\n'
-        'Base legal (LGPD): execução de contrato para processar pagamento e entregar o serviço. '
-        'Dados de pagamento são processados pela $channel — a Focux não armazena número de cartão.';
   }
 }
