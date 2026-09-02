@@ -44,6 +44,39 @@ void main() {
     expect(usage.limiteIaMensal, 600);
   });
 
+  test('capabilityFromBackendFeature mapeia o enum do contrato', () {
+    expect(
+      PlanEntitlements.capabilityFromBackendFeature('POSE_COACH'),
+      'poseCoach',
+    );
+    expect(
+      PlanEntitlements.capabilityFromBackendFeature('ia_copiloto'),
+      'iaCopiloto',
+    );
+    expect(
+      PlanEntitlements.capabilityFromBackendFeature('FEATURE_INEXISTENTE'),
+      isNull,
+    );
+  });
+
+  test('upgradePlano do servidor vence o mapa local de capability', () {
+    // Pose Coach é Enterprise no mapa local. Se o servidor mandar PRO,
+    // a sheet oferece PRO — senão o app ignora o campo que o contrato
+    // existe para carregar.
+    final fromServer = PlanEntitlements.lockedOffer(
+      featureName: 'Pose Coach',
+      capability: 'poseCoach',
+      upgradePlano: SubscriptionPlan.PRO,
+    );
+    expect(fromServer.targetPlan, SubscriptionPlan.PRO);
+
+    final local = PlanEntitlements.lockedOffer(
+      featureName: 'Pose Coach',
+      capability: 'poseCoach',
+    );
+    expect(local.targetPlan, SubscriptionPlan.ENTERPRISE);
+  });
+
   test('alignedToBilling elevates FREE /me to Enterprise limits', () {
     const me = PlanoFeatures(
       plano: SubscriptionPlan.FREE,

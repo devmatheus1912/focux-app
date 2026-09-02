@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/analytics/analytics_service.dart';
+import '../../../core/api/api_error.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../planos/paywall/paywall_catalog.dart';
 import '../models/subscription_plan.dart';
@@ -20,21 +22,63 @@ class UpgradePromptSheet {
     required String featureName,
     String? capability,
     SubscriptionPlan? requiredPlan,
+    SubscriptionPlan? upgradePlano,
     String source = 'upgrade_prompt',
   }) => _present(
     context: context,
     featureName: featureName,
     capability: capability,
     requiredPlan: requiredPlan,
+    upgradePlano: upgradePlano,
     source: source,
     respectCooldown: false,
   );
+
+  /// Abre a sheet a partir de um erro de entitlement do contrato.
+  ///
+  /// Devolve `true` se mostrou — o chamador não empilha snackbar de falha em
+  /// cima. `false` para qualquer outra coisa, inclusive 403 de permissão:
+  /// tratar todo 403 como paywall era o bug (RBAC virava "faça upgrade").
+  static Future<bool> showFromError(
+    BuildContext context,
+    Object error, {
+    String? fallbackFeatureName,
+    String? fallbackCapability,
+    String source = 'api_error',
+  }) async {
+    if (!isEntitlementError(error)) return false;
+    final api = ApiError.from(error);
+    final feature = api?.feature;
+    final capability =
+        PlanEntitlements.capabilityFromBackendFeature(feature) ??
+        fallbackCapability;
+    final featureName =
+        fallbackFeatureName ??
+        PlanEntitlements.featureNameFromBackendFeature(
+          feature,
+          fallback: 'recurso',
+        );
+    final upgradePlano =
+        api?.upgradePlano != null && api!.upgradePlano!.trim().isNotEmpty
+            ? subscriptionPlanFromApi(api.upgradePlano)
+            : null;
+    if (!context.mounted) return false;
+    await show(
+      context: context,
+      featureName: featureName,
+      capability: capability,
+      upgradePlano: upgradePlano,
+      source: source,
+    );
+    return true;
+  }
 
   static Future<void> showIfAllowed({
     required BuildContext context,
     required String featureName,
     String? capability,
     SubscriptionPlan? requiredPlan,
+    SubscriptionPlan? upgradePlano,
   }) async {
     final triggerKey = UpgradePromptCooldown.keyFor(
       capability: capability,
@@ -48,6 +92,7 @@ class UpgradePromptSheet {
       featureName: featureName,
       capability: capability,
       requiredPlan: requiredPlan,
+      upgradePlano: upgradePlano,
       source: 'upgrade_prompt',
       respectCooldown: true,
       triggerKey: triggerKey,
@@ -59,6 +104,7 @@ class UpgradePromptSheet {
     required String featureName,
     String? capability,
     SubscriptionPlan? requiredPlan,
+    SubscriptionPlan? upgradePlano,
     required String source,
     required bool respectCooldown,
     String? triggerKey,
@@ -74,6 +120,7 @@ class UpgradePromptSheet {
       featureName: featureName,
       capability: capability,
       requiredPlan: requiredPlan,
+      upgradePlano: upgradePlano,
     );
     final plan = offer.targetPlan ?? SubscriptionPlan.PRO;
     final accent = PaywallCatalog.accentForPlan(plan);

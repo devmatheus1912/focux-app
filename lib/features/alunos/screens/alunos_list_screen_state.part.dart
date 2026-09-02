@@ -310,14 +310,17 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
       }
     } catch (e) {
       if (!mounted) return;
-      if (e is DioException && e.response?.statusCode == 403) {
-        await UpgradePromptSheet.show(
-          context: context,
-          featureName: 'Financeiro',
-          capability: 'financeiro',
-        );
-        return;
-      }
+      // Nem todo 403 é paywall: RBAC e "sem permissão" também devolvem 403.
+      // O catálogo de codigo decide; o resto cai no erro genérico.
+      final surfaced = await UpgradePromptSheet.showFromError(
+        context,
+        e,
+        fallbackFeatureName: 'Financeiro',
+        fallbackCapability: 'financeiro',
+        source: 'alunos_lote_pago',
+      );
+      if (surfaced) return;
+      if (!mounted) return;
       FeedbackHelper.showError(context, friendlyError(e));
     }
   }

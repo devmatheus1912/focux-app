@@ -8,15 +8,22 @@ Future<bool> surfaceAluno360IaUpgradeIfNeeded(
   BuildContext context,
   Object error,
 ) async {
-  if (error is! IaOperationalException || !error.planUpgradeRequired) {
-    return false;
+  if (error is IaOperationalException && error.planUpgradeRequired) {
+    await UpgradePromptSheet.show(
+      context: context,
+      featureName: 'Copiloto IA',
+      capability: 'iaCopiloto',
+      requiredPlan: error.suggestedUpgradePlan,
+      upgradePlano: error.suggestedUpgradePlan,
+      source: 'aluno360_ia',
+    );
+    return true;
   }
-  await UpgradePromptSheet.show(
-    context: context,
-    featureName: 'Copiloto IA',
-    capability: 'iaCopiloto',
-    requiredPlan: error.suggestedUpgradePlan,
+  return UpgradePromptSheet.showFromError(
+    context,
+    error,
+    fallbackFeatureName: 'Copiloto IA',
+    fallbackCapability: 'iaCopiloto',
     source: 'aluno360_ia',
   );
-  return true;
 }

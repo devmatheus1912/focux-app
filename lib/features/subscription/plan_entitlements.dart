@@ -8,6 +8,60 @@ class PlanEntitlements {
 
   static String displayPlanName(SubscriptionPlan plan) => plan.apiName;
 
+  /// Converte o enum de `detalhes.feature` do backend (`POSE_COACH`,
+  /// `IA_COPILOTO`, …) para a capability camelCase que o paywall já conhece.
+  ///
+  /// Sem este mapa a sheet não sabe qual copy mostrar, e `upgradePlano`
+  /// sozinho não preenche o título. Os 16 nomes são os de
+  /// `PlanoVerificationService` no contrato §2.3.
+  static String? capabilityFromBackendFeature(String? feature) {
+    if (feature == null || feature.isEmpty) return null;
+    const map = {
+      'IA_COPILOTO': 'iaCopiloto',
+      'WHITE_LABEL': 'whiteLabel',
+      'LANDING_COMPLETA': 'landingCompleta',
+      'HABIT_COACHING': 'habitCoaching',
+      'COMUNIDADE_PRIVADA': 'comunidadePrivada',
+      'AUTOMACOES': 'automacoes',
+      'AUTOMACOES_AVANCADAS': 'automacoesAvancadas',
+      'COMUNIDADE_GRUPOS': 'comunidadeGrupos',
+      'EQUIPE_RBAC': 'equipeRbac',
+      'LOJA_DIGITAL': 'lojaDigital',
+      'POSE_COACH': 'poseCoach',
+      'FINANCEIRO': 'financeiro',
+      'RELATORIOS': 'relatorios',
+      'AGENDA': 'agenda',
+      'LEADS': 'leads',
+      'NFSE': 'nfse',
+    };
+    return map[feature.trim().toUpperCase()];
+  }
+
+  static String featureNameFromBackendFeature(
+    String? feature, {
+    String fallback = 'recurso',
+  }) {
+    const names = {
+      'IA_COPILOTO': 'IA Copiloto',
+      'WHITE_LABEL': 'White-label',
+      'LANDING_COMPLETA': 'Landing page completa',
+      'HABIT_COACHING': 'Habit coaching',
+      'COMUNIDADE_PRIVADA': 'Comunidade privada',
+      'AUTOMACOES': 'Automações',
+      'AUTOMACOES_AVANCADAS': 'Automações avançadas',
+      'COMUNIDADE_GRUPOS': 'Desafios e grupos',
+      'EQUIPE_RBAC': 'Equipe / RBAC',
+      'LOJA_DIGITAL': 'Loja digital',
+      'POSE_COACH': 'Pose Coach',
+      'FINANCEIRO': 'Financeiro',
+      'RELATORIOS': 'Relatórios',
+      'AGENDA': 'Agenda',
+      'LEADS': 'Leads',
+      'NFSE': 'Nota fiscal',
+    };
+    return names[feature?.trim().toUpperCase()] ?? fallback;
+  }
+
   /// Infere capability a partir do rótulo exibido no paywall ou deep link `feature=`.
   static String? capabilityFromFeatureLabel(String label) {
     final lower = label.toLowerCase();
@@ -103,11 +157,16 @@ class PlanEntitlements {
     required String featureName,
     String? capability,
     SubscriptionPlan? requiredPlan,
+    SubscriptionPlan? upgradePlano,
   }) {
-    final plan = targetPlan(
-      capability: capability,
-      fallback: requiredPlan ?? SubscriptionPlan.PRO,
-    );
+    // `upgradePlano` do servidor é a fonte da verdade quando veio no erro.
+    // Sem ele, o mapa local de capability continua valendo — é o caminho das
+    // telas que gateiam antes de chamar a API.
+    final plan = upgradePlano ??
+        targetPlan(
+          capability: capability,
+          fallback: requiredPlan ?? SubscriptionPlan.PRO,
+        );
     final planLabel = switch (plan) {
       SubscriptionPlan.ENTERPRISE => 'Enterprise',
       SubscriptionPlan.PRO => 'Pro',
