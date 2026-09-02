@@ -14,8 +14,10 @@ import '../../../core/utils/clipboard_sensitive.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
-import '../../../core/widgets/fx_motion.dart';
+import '../../../core/widgets/fx_settings_group.dart';
+import '../../../core/widgets/fx_settings_tile.dart';
 import '../utils/aluno360_operacao_logic.dart';
+import '../utils/aluno_outreach_display.dart';
 
 /// Opens a polished outreach sheet with copy + chat actions.
 Future<void> showAlunoOutreachMessageSheet(
@@ -103,61 +105,51 @@ class _AlunoOutreachMessageSheet extends StatelessWidget {
             isDark: isDark,
           ),
           const SizedBox(height: TokensStrip.s4),
-          FxLiquidPrimaryButton(
-            icon: Icons.chat_bubble_outline_rounded,
-            label: 'Abrir chat',
-            onPressed: () {
-              unawaited(
-                AnalyticsService.instance.track(
-                  ProductEvents.aluno360OutreachChatOpened,
-                  props: {'aluno_id': alunoId},
-                ),
-              );
-              Navigator.of(context).pop();
-              context.push(
-                '/alunos/$alunoId/chat',
-                extra: alunoChatRouteExtra(
-                  nome: alunoNome,
-                  draft: message,
-                ),
-              );
-            },
-          ),
-          const SizedBox(height: TokensStrip.s2),
-          Semantics(
-            button: true,
-            label: 'Copiar mensagem sugerida',
-            child: SizedBox(
-              width: double.infinity,
-              height: 46,
-              child: OutlinedButton.icon(
-                onPressed: () async {
+          FxSettingsGroup(
+            children: [
+              FxSettingsTile(
+                fxIcon: 'chat',
+                label: alunoOutreachOpenChatLabel(),
+                value: '',
+                onTap: () {
+                  unawaited(
+                    AnalyticsService.instance.track(
+                      ProductEvents.aluno360OutreachChatOpened,
+                      props: {'aluno_id': alunoId},
+                    ),
+                  );
+                  Navigator.of(context).pop();
+                  context.push(
+                    '/alunos/$alunoId/chat',
+                    extra: alunoChatRouteExtra(
+                      nome: alunoNome,
+                      draft: message,
+                    ),
+                  );
+                },
+              ),
+              FxSettingsTile(
+                fxIcon: 'article',
+                label: alunoOutreachCopyLabel(),
+                value: '',
+                showDivider: false,
+                semanticsLabel: alunoOutreachCopySemanticsLabel(),
+                onTap: () async {
                   await copySensitiveToClipboard(message);
                   if (!context.mounted) return;
                   Navigator.of(context).pop();
-                  FeedbackHelper.showSuccess(context, 'Mensagem copiada.');
+                  FeedbackHelper.showSuccess(
+                    context,
+                    alunoOutreachCopySuccess(),
+                  );
                 },
-                icon: Icon(Icons.copy_rounded, size: 17, color: primary),
-                label: Text(
-                  'Copiar mensagem',
-                  style: FocuxHubTypography.cardTitle(color: primary),
-                ),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: primary,
-                  side: BorderSide(
-                    color: primary.withValues(alpha: isDark ? 0.30 : 0.22),
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                ),
               ),
-            ),
+            ],
           ),
           Padding(
             padding: const EdgeInsets.only(top: TokensStrip.s3),
             child: Text(
-              'Ajuste o tom se precisar antes de enviar.',
+              alunoOutreachFooterHint(),
               textAlign: TextAlign.center,
               style: FxSettingsLayout.footer(color: mute),
             ),

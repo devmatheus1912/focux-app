@@ -26,6 +26,8 @@ String _alunoDetailLibrarySource() {
       'lib/features/alunos/utils/aluno360_copilot_outreach_logic.dart';
   const copilotTextLogicFile =
       'lib/features/alunos/utils/aluno360_copilot_text_logic.dart';
+  const outreachDisplayFile =
+      'lib/features/alunos/utils/aluno_outreach_display.dart';
   const outreachSheetFile =
       'lib/features/alunos/widgets/aluno_outreach_message_sheet.dart';
   const copilotCardFile =
@@ -96,6 +98,7 @@ String _alunoDetailLibrarySource() {
   final copilotOutreachLogic =
       File(copilotOutreachLogicFile).readAsStringSync();
   final copilotTextLogic = File(copilotTextLogicFile).readAsStringSync();
+  final outreachDisplay = File(outreachDisplayFile).readAsStringSync();
   final outreachSheet = File(outreachSheetFile).readAsStringSync();
   final copilotCard = File(copilotCardFile).readAsStringSync();
   final copilotLockedSection =
@@ -129,7 +132,7 @@ String _alunoDetailLibrarySource() {
   final detailLoadingSkeleton =
       File(detailLoadingSkeletonFile).readAsStringSync();
   final alunoRepository = File(alunoRepositoryFile).readAsStringSync();
-  return '$main\n$statePart\n$providers\n$heroWidget\n$heroRiskStyle\n$headerWidget\n$operacaoTab\n$operacaoLogic\n$copilotLogic\n$copilotExecutarLogic\n$copilotOutreachLogic\n$copilotTextLogic\n$outreachSheet\n$copilotCard\n$copilotLockedSection\n$copilotUpgradeSheet\n$operationalSection\n$focusToggle\n$copilotSupport\n$stickyCta\n$followUp\n$copilotTaskActions\n$executarButton\n$financeBanner\n$ferramentasModules\n$timelineCard\n$insetEmptyActions\n$alunoActions\n$deleteConfirmSheet\n$quickActions\n$evolucaoCard\n$adherenceLegend\n$profileGapsSheet\n$iaRepository\n$detailOperacaoTab\n$detailEvolucaoTab\n$detailFerramentasTab\n$recoveryInsight\n$weightActivity\n$detailLoadingSkeleton\n$alunoRepository';
+  return '$main\n$statePart\n$providers\n$heroWidget\n$heroRiskStyle\n$headerWidget\n$operacaoTab\n$operacaoLogic\n$copilotLogic\n$copilotExecutarLogic\n$copilotOutreachLogic\n$copilotTextLogic\n$outreachDisplay\n$outreachSheet\n$copilotCard\n$copilotLockedSection\n$copilotUpgradeSheet\n$operationalSection\n$focusToggle\n$copilotSupport\n$stickyCta\n$followUp\n$copilotTaskActions\n$executarButton\n$financeBanner\n$ferramentasModules\n$timelineCard\n$insetEmptyActions\n$alunoActions\n$deleteConfirmSheet\n$quickActions\n$evolucaoCard\n$adherenceLegend\n$profileGapsSheet\n$iaRepository\n$detailOperacaoTab\n$detailEvolucaoTab\n$detailFerramentasTab\n$recoveryInsight\n$weightActivity\n$detailLoadingSkeleton\n$alunoRepository';
 }
 
 void main() {
@@ -178,6 +181,19 @@ void main() {
     expect(screen, contains("'Copiar mensagem'"));
     expect(screen, contains("'Mensagem sugerida'"));
     expect(screen, contains("'Abrir chat'"));
+    expect(screen, contains('alunoOutreachOpenChatLabel'));
+    expect(screen, contains('FxSettingsTile'));
+    expect(
+      File(
+        'lib/features/alunos/widgets/aluno_outreach_message_sheet.dart',
+      ).readAsStringSync(),
+      allOf(
+        contains('FxSettingsGroup'),
+        isNot(contains('FxLiquidPrimaryButton')),
+        isNot(contains('OutlinedButton')),
+        contains('_OutreachMessageQuote'),
+      ),
+    );
     expect(screen, contains('executarAcaoCopiloto'));
     expect(screen, contains('resolveCopilotExecutarAcao'));
     expect(
