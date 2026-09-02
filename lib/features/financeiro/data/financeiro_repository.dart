@@ -250,18 +250,27 @@ class FinanceiroRepository {
         'valor': valor,
         'mesReferencia': mesReferencia,
       },
+      // Aluno + mês já identificam a mensalidade: duas submissões são a
+      // mesma intenção, não duas cobranças.
+      options: ApiClient.idempotent('mensalidade-criar-$alunoId-$mesReferencia'),
     );
     return Mensalidade.fromJson(r.data);
   }
 
   Future<Mensalidade> pagar(int id) async {
-    final r = await _dio.put('/api/financeiro/mensalidades/$id/pagar');
+    final r = await _dio.put(
+      '/api/financeiro/mensalidades/$id/pagar',
+      options: ApiClient.idempotent('mensalidade-pagar-$id'),
+    );
     return Mensalidade.fromJson(r.data);
   }
 
   Future<PixData> gerarPix(int mensalidadeId) async {
     final r = await _dio.post(
       '/api/financeiro/mensalidades/$mensalidadeId/pix',
+      // Sem chave estável, dois toques geram duas cobranças PIX para a mesma
+      // mensalidade e o aluno recebe dois QR codes válidos.
+      options: ApiClient.idempotent('mensalidade-pix-$mensalidadeId'),
     );
     return PixData.fromJson(r.data as Map<String, dynamic>);
   }
