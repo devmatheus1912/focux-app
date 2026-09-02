@@ -13,8 +13,11 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
+import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -26,7 +29,10 @@ import '../../dashboard/utils/dashboard_onboarding_logic.dart';
 import '../../dashboard/widgets/dashboard_command_center_sticky_header.dart';
 import '../data/onboarding_repository.dart';
 import '../data/onboarding_wizard_client_cache.dart';
+import '../utils/onboarding_wizard_display.dart';
 import '../widgets/setup_step_widgets.dart';
+
+part 'onboarding_wizard_screen_actions.part.dart';
 
 class OnboardingWizardScreen extends ConsumerStatefulWidget {
   const OnboardingWizardScreen({super.key});
@@ -46,6 +52,7 @@ class _OnboardingWizardScreenState
   DateTime? _fetchedAt;
   bool _viewTracked = false;
   bool _ttvTracked = false;
+  bool _concluindo = false;
   final DateTime _openedAt = DateTime.now();
 
   @override
@@ -160,22 +167,6 @@ class _OnboardingWizardScreenState
     await _load(silent: true);
   }
 
-  Future<void> _concluir() async {
-    HapticFeedback.heavyImpact();
-    unawaited(
-      AnalyticsService.instance.track(
-        ProductEvents.setupWizardCompleted,
-        props: {
-          'completed': _wizard?.completedCount,
-          'total': _wizard?.totalCount,
-        },
-      ),
-    );
-    await OnboardingRepository(ref.read(apiClientProvider)).marcarCompleto();
-    _evictHomeCaches();
-    if (mounted) context.go('/dashboard/personal');
-  }
-
   Future<void> _abrirStep(String route, {bool fromChip = false}) async {
     unawaited(
       AnalyticsService.instance.track(
@@ -217,6 +208,10 @@ class _OnboardingWizardScreenState
           subtitle: _appBarSubtitle,
           onBack: _sairSemConcluir,
           actions: [
+            FxHelpIconButton(
+              tooltip: wizardHelpTitle(),
+              onTap: _abrirAjuda,
+            ),
             Padding(
               padding: const EdgeInsets.only(right: TokensStrip.s3),
               child: Center(
@@ -291,11 +286,13 @@ class _OnboardingWizardScreenState
                         DashboardPrioritiesOverlay(
                           isDark: chrome.isDark,
                           primary: accent,
-                          label:
-                              wizard.allStepsDone ? 'Concluir' : 'Continuar',
+                          label: wizardStickyLabel(
+                            allDone:
+                                wizard.allStepsDone || wizard.wizardCompleto,
+                          ),
                           onTap:
                               wizard.allStepsDone || wizard.wizardCompleto
-                                  ? _concluir
+                                  ? _pedirConcluir
                                   : () => _abrirStep(
                                     wizard.nextActionRoute,
                                     fromChip: true,

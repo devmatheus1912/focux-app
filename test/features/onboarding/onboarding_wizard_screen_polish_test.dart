@@ -54,6 +54,10 @@ void main() {
     expect(screen, contains('dismissForSession'));
     expect(screen, contains("icon: 'x'"));
     expect(screen, contains("tooltip: 'Fechar'"));
+    expect(screen, contains('FxHelpIconButton'));
+    expect(screen, contains('showFxConfirmSheet'));
+    expect(screen, contains('wizardStickyLabel'));
+    expect(screen, contains('_pedirConcluir'));
     expect(screen, isNot(contains('FxLiquidPrimaryButton')));
   });
 
