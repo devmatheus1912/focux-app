@@ -1117,15 +1117,29 @@ Dos 86 endpoints com flag `L`, **61 têm consumidor de produto e 25 não**. Não
 | **A — paginar primeiro** | 19 | cresce sem teto e alimenta tela de lista primária |
 | **B — paginar depois** | 14 | cresce, mas volume por tenant é menor ou a tela é secundária |
 | **C — só cap de `size`** | 26 | conjunto naturalmente pequeno; paginar aqui é custo sem ganho |
-| **D — remover o cru** | 2 | gêmeo paginado já existe e o app usa os dois |
+| **D — remover o cru** | 2 | gêmeo paginado já existe; app já migrou, backend pode apagar |
 
 **Bucket A:** `/api/alunos`, `/api/leads`, `/api/feed`, `/api/feed/aluno`, `/api/feed/{postId}/comentarios`, `/api/checkin/historico`, `/api/feedback-videos`, `/api/feedback-videos/me`, `/api/feedback-videos/aluno/{alunoId}`, `/api/alunos/{alunoId}/fotos`, `/api/alunos/{alunoId}/medidas`, `/api/alunos/{alunoId}/avaliacoes`, `/api/alunos/{alunoId}/recordes`, `/api/alunos/{id}/historico-mensalidades`, `/api/chat/inbox/archived`, `/api/broadcasts`, `/api/captura`, `/api/retencao/base`, `/api/ranking`.
 
 **Bucket B:** `/api/agenda/aluno/meus`, `/api/aluno/medidas`, `/api/automacoes/{fluxoId}/logs`, `/api/coach-proativo/mensagens`, `/api/depoimentos`, `/api/personal/depoimentos`, `/api/habitos/compliance`, `/api/habitos/me`, `/api/leads/{id}/interacoes`, `/api/loja/pedidos`, `/api/personal/gallery`, `/api/suporte/tickets/meus`, `/api/trilhas/aluno/{alunoId}`, `/api/winback/log`.
 
-**Bucket D:** `/api/chat/aluno/historico` e `/api/chat/historico/{alunoId}`. Os gêmeos `/page` já são chamados; o app usa os dois. Sequência obrigatória: o app migra para `/page` e o PR remove o uso do cru → só então o backend apaga. Apagar antes quebra o histórico de chat.
+**Bucket D:** `/api/chat/aluno/historico` e `/api/chat/historico/{alunoId}`. **Resolvido do lado do app:** `historico()` não tinha chamador nenhum e saiu; `historicoAluno()` tinha um só, um fallback em `ia_aluno_screen` que baixava o histórico inteiro para ler um `alunoId`, e agora usa `historicoAlunoPage(limit: 1)`. Os dois endpoints crus passaram a órfãos no cruzamento e o backend está livre para apagá-los.
 
-Contrato de paginação exigido pelos buckets A e B, para o design de lista ter estado definido: `page`, `size` com cap no servidor, `totalElements`, `hasNext`, e ordenação **fixada no servidor** (o P1 "2 endpoints repassam `Sort` do cliente ao JPA" não deve se propagar). Sem `hasNext`, S4 não sabe distinguir "fim da lista" de "carregando mais" e o rodapé da lista fica sem contrato.
+##### Envelope de paginação: escolher um antes de propagar
+
+O app já convive com **três formatos** de resposta paginada, e essa é a dívida que os 33 endpoints dos buckets A e B multiplicariam se cada um for feito à mão:
+
+| Formato | Campos | Onde |
+| --- | --- | --- |
+| Spring `Page` padrão | `content`, `number`, `size`, `totalElements`, `totalPages`, `last` | `/api/exercicios/v2`, `/api/exercicios/picker` |
+| Financeiro | `mensalidades`, `page`, `size`, `hasMore` | `/api/financeiro/mensalidades` |
+| Notificações | `items`, `page`, `total`, `hasMore` | `/api/notificacoes` |
+
+Nenhum dos três é errado; ter três é. O custo real não é estético: array com nome de domínio (`mensalidades`) impede um parser genérico único no app, então cada endpoint novo vira um `fromJson` novo.
+
+**Contrato único para os endpoints novos** — não mexer nos três que já funcionam: array em `content` (nome genérico, não de domínio), `page`, `size` com **cap no servidor**, `totalElements`, e `hasNext` explícito. `hasNext` explícito em vez de derivar de `last`, porque sem ele S4 não distingue "fim da lista" de "carregando mais" e o rodapé fica sem contrato. Ordenação **fixada no servidor** — o P1 "2 endpoints repassam `Sort` do cliente ao JPA" não deve se propagar junto.
+
+Para coleção que cresce pela ponta e é lida de trás para frente, o cursor do chat (`items`, `nextBeforeId`, `hasMore`) é o modelo melhor e já está implementado: preferir cursor a offset em histórico e feed, onde `page`/`offset` sofre com item inserido durante a navegação.
 
 #### 22.7.3 Três bugs do lado do app achados pelo cruzamento
 
