@@ -1585,6 +1585,18 @@ Em formulário, o grupo inset é **correto** — ele agrupa campos relacionados,
 
 Auditoria concluída em 2026-08-25 sobre `/perfil` + `/perfil/ferramentas` — **nota geral 10/10** nos pilares com nota (N/A fora). Preservado como registro histórico e como exemplo de scorecard preenchido. Os `N/A` refletem o escopo daquela tela, não uma dispensa geral.
 
+> ### Ressalva após a auditoria do backend (2026-09-02)
+>
+> Este scorecard foi levantado **a partir da tela**. A varredura de `focux-backend` contradiz três linhas, que ficam registradas aqui em vez de serem reescritas — o histórico se preserva, mas não pode induzir a erro:
+>
+> | # | Nota registrada | O que a auditoria do backend mostrou |
+> |---|---|---|
+> | 54 | 10 — "`TenantContext`; sem `personalId` do cliente" | A metade verificável pela tela está correta: **nenhum** endpoint aceita tenant do cliente. Mas **não existe política de RLS por tenant** — só `USING(false)` para `anon`/`authenticated`, que não cobre o papel da aplicação. O isolamento entre personais depende inteiramente do filtro na camada de aplicação, sem rede no banco. Além disso, a autorização **dentro** do tenant tem escalonamento de privilégio, e o RBAC de equipe está aplicado em 6 de 64 módulos. Nota real: bem abaixo de 10 |
+> | 63 | 10 — "`@Valid` + `FocuxException`" | Verdadeiro no escopo do Perfil, mas o critério elevado ("código de erro que o FE traduz em copy específica") falha globalmente: **2 códigos de erro para 623 lançamentos** |
+> | 11 | 10 — "`verificarAcesso`; contrato intacto" | Verdadeiro nesta tela; falso no produto: **5 pontos de entrada sem gate de plano**, incluindo feature ENTERPRISE liberada para FREE/PRO |
+>
+> **Lição de método:** pilar de backend avaliado só pela superfície produz nota inflada. Os pilares 52–68 exigem o repositório do backend aberto — é exatamente o que §22.5 passa a exigir.
+
 | # | Pilar | Nota | Evidência |
 |---|---|---|---|
 | 1 | Produtividade operacional | 10 | Conta / marca / operação em poucos toques |
