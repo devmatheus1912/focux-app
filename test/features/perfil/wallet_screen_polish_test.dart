@@ -12,5 +12,15 @@ void main() {
     expect(screen, anyOf(contains('friendlyError'), contains('DashboardErrorState'), contains('FxEmptyState'), contains('_erro'), contains('_TrainingEmptyState'), contains('ref.invalidate')));
     expect(screen, anyOf(contains('FxLoading'), contains('SkeletonLoader'), contains('SkeletonList'), contains('DashboardShimmer'), contains('Shimmer'), contains('IaCopilotInsightsLoading'), contains('_loading')));
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(16));
+    expect(screen, contains('AlunoInsetFormField'));
+    expect(screen, contains('showFxConfirmSheet'));
+    expect(screen, contains('showFxInsetPickerSheet'));
+    expect(screen, contains('ShellHeaderIconButton'));
+    expect(screen, contains('copySensitiveToClipboard'));
+    expect(screen, isNot(contains('FxLiquidPrimaryButton')));
+    expect(screen, isNot(contains('FxLiquidSecondaryButton')));
+    expect(screen, isNot(contains('showDialog')));
+    expect(screen, isNot(contains('ListTile(')));
+    expect(screen, contains('_ResumoMensalCard'));
   });
 }

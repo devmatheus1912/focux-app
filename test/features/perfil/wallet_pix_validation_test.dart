@@ -56,4 +56,11 @@ void main() {
       );
     });
   });
+
+  test('copy de salvar e descartar fica fora da UI', () {
+    expect(walletSalvarTileLabel(), 'Salvar dados');
+    expect(walletSalvarConfirmTitle(), 'Salvar dados da carteira?');
+    expect(walletDiscardTitle(), 'Descartar alterações?');
+    expect(walletChavePixMax, 120);
+  });
 }

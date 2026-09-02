@@ -145,6 +145,26 @@ class WalletPixValidation {
   }
 }
 
+const walletChavePixMax = 120;
+const walletBancoMax = 80;
+const walletAgenciaMax = 6;
+
+String walletSalvarTooltip() => 'Salvar carteira';
+
+String walletSalvarTileLabel() => 'Salvar dados';
+
+String walletSalvarConfirmTitle() => 'Salvar dados da carteira?';
+
+String walletSalvarConfirmMessage() =>
+    'PIX e banco passam a valer nos recebimentos dos alunos.';
+
+String walletDiscardTitle() => 'Descartar alterações?';
+
+String walletDiscardMessage() =>
+    'Você alterou dados da carteira. Se sair agora, as mudanças não serão salvas.';
+
+String walletCopiarTileLabel() => 'Copiar chave PIX';
+
 class _CpfInputFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(
