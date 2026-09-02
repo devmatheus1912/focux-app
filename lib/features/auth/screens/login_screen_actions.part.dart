@@ -1,13 +1,18 @@
 part of 'login_screen.dart';
 
 extension on _LoginScreenState {
-  void _trackLogin({required bool success, required String method}) {
+  void _trackLogin({
+    required bool success,
+    required String method,
+    String? codigo,
+  }) {
     unawaited(
       AnalyticsService.instance.track(
         success ? ProductEvents.loginSuccess : ProductEvents.loginFailure,
         props: {
           'role': loginRoleQuery(isAluno: _isAluno),
           'method': method,
+          if (codigo != null && codigo.isNotEmpty) 'codigo': codigo,
         },
       ),
     );
@@ -69,7 +74,11 @@ extension on _LoginScreenState {
       }
     } catch (error) {
       HapticFeedback.heavyImpact();
-      _trackLogin(success: false, method: 'password');
+      _trackLogin(
+        success: false,
+        method: 'password',
+        codigo: ApiError.from(error)?.codigo,
+      );
       setState(() {
         _error = mapLoginError(error);
       });
@@ -125,7 +134,11 @@ extension on _LoginScreenState {
     } catch (error) {
       HapticFeedback.heavyImpact();
       if (!mounted) return;
-      _trackLogin(success: false, method: 'google');
+      _trackLogin(
+        success: false,
+        method: 'google',
+        codigo: ApiError.from(error)?.codigo,
+      );
       setState(() => _error = mapGoogleSignInError(error, isAluno: _isAluno));
     } finally {
       if (mounted) setState(() => _loadingGoogle = false);

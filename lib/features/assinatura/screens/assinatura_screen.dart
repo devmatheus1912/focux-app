@@ -46,6 +46,7 @@ import '../../subscription/plan_entitlements.dart';
 import '../services/subscription_biometric_gate.dart';
 import '../services/subscription_device_guard.dart';
 import '../assinatura_route_args.dart';
+import '../utils/assinatura_review_display.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
 
 part 'assinatura_screen_footer.part.dart';
@@ -345,7 +346,8 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
             break;
           case PurchaseStatus.error:
             _finishPurchaseFlowWithError(
-              purchase.error?.message ?? 'Falha ao concluir a compra.',
+              assinaturaStoreFailureCopy(),
+              reason: 'iap_store',
             );
             break;
           case PurchaseStatus.canceled:
@@ -606,10 +608,13 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
     }
   }
 
-  void _finishPurchaseFlowWithError(String message) {
+  void _finishPurchaseFlowWithError(
+    String message, {
+    String reason = 'checkout',
+  }) {
     AnalyticsService.instance.track(
       ProductEvents.checkoutFailed,
-      props: {'error_message': message},
+      props: {'reason': reason},
     );
     if (!mounted) return;
     setState(() {

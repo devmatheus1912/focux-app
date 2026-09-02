@@ -3,14 +3,21 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../support/screen_source_bundle.dart';
 
 void main() {
-  test('definir senha aluno cumpre contrato Tier S+', () {
-    final screen = readScreenSourceBundle('lib/features/auth/screens/definir_senha_aluno_screen.dart');
-    expect(screen, anyOf(contains('fxScreenA11yScope'), contains('Semantics(')));
+  test('definir senha aluno cumpre o esqueleto S6', () {
+    final screen = readScreenSourceBundle(
+      'lib/features/auth/screens/definir_senha_aluno_screen.dart',
+    );
+    expect(screen, contains('fxScreenA11yScope'));
     expect(screen, isNot(contains('CircularProgressIndicator')));
-    expect(screen, contains('FxShellScaffold'));
-    expect(screen, anyOf(contains('FxContentWidthLimiter'), isNot(contains('constrainWidth: false'))));
-    expect(screen, anyOf(contains('friendlyError'), contains('DashboardErrorState'), contains('FxEmptyState'), contains('_erro'), contains('_TrainingEmptyState'), contains('ref.invalidate')));
-    expect(screen, anyOf(contains('FxLoading'), contains('SkeletonLoader'), contains('SkeletonList'), contains('DashboardShimmer'), contains('Shimmer'), contains('IaCopilotInsightsLoading'), contains('_loading')));
-    expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(16));
+    expect(screen, contains('AuthShell'));
+    expect(screen, contains('FxConversionLockup'));
+    expect(screen, contains('FxLiquidPrimaryButton'));
+    expect(screen, contains('PasswordStrengthMeter'));
+    expect(screen, contains('mapDefinirSenhaError'));
+    expect(screen, contains('showFxConfirmSheet'));
+    expect(screen, contains('minLength: kDefinirSenhaMinLength'));
+    expect(screen, isNot(contains('FxSettingsTile')));
+    expect(screen, isNot(contains('ScaleTransition')));
+    expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(4));
   });
 }

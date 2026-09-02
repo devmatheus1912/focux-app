@@ -120,6 +120,26 @@ String mapResetSenhaError(Object error) {
   return 'Código ou senha recusados. Solicite um novo código se expirou.';
 }
 
+/// Troca da senha provisória do aluno após o primeiro login.
+String mapDefinirSenhaError(Object error) {
+  if (error is DioException) {
+    final statusCode = error.response?.statusCode;
+    if (statusCode == null) return 'Sem conexão com o servidor.';
+    if (statusCode == 429) {
+      return _backendMessage(error) ??
+          'Muitas tentativas. Aguarde um pouco e tente de novo.';
+    }
+    if (statusCode == 401) {
+      return 'Senha provisória incorreta. Confira e tente de novo.';
+    }
+    if (statusCode == 400) {
+      return _backendMessage(error) ??
+          'A nova senha precisa ter no mínimo 8 caracteres.';
+    }
+  }
+  return 'Não foi possível definir a nova senha. Verifique os dados.';
+}
+
 /// Cadastro personal (e-mail/senha + código).
 String mapRegisterError(Object error) {
   if (error is DioException) {
