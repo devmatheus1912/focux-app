@@ -77,9 +77,12 @@ class _IaAlunoScreenState extends ConsumerState<IaAlunoScreen> {
     } catch (_) {}
 
     try {
-      final msgs =
-          await ChatRepository(ref.read(apiClientProvider)).historicoAluno();
-      final id = msgs.isNotEmpty ? msgs.first.alunoId : null;
+      // Fallback: qualquer mensagem serve para descobrir o próprio id, então
+      // pede uma só em vez do histórico inteiro.
+      final page = await ChatRepository(
+        ref.read(apiClientProvider),
+      ).historicoAlunoPage(limit: 1);
+      final id = page.items.isNotEmpty ? page.items.first.alunoId : null;
       if (!mounted) return;
       if (id != null) {
         setState(() {

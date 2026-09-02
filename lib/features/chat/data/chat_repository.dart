@@ -196,11 +196,6 @@ class ChatRepository {
 
   ChatRepository(ApiClient c) : _dio = c.dio;
 
-  Future<List<ChatMsg>> historico(int alunoId) async {
-    final r = await _dio.get('/api/chat/historico/$alunoId');
-    return (r.data as List).map((e) => ChatMsg.fromJson(e)).toList();
-  }
-
   Future<ChatPage> historicoPage(
     int alunoId, {
     int? beforeId,
@@ -251,11 +246,6 @@ class ChatRepository {
       },
     );
     return ChatMsg.fromJson(r.data);
-  }
-
-  Future<List<ChatMsg>> historicoAluno() async {
-    final r = await _dio.get('/api/chat/aluno/historico');
-    return (r.data as List).map((e) => ChatMsg.fromJson(e)).toList();
   }
 
   Future<ChatPage> historicoAlunoPage({int? beforeId, int limit = 30}) async {
