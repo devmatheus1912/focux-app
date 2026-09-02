@@ -89,6 +89,25 @@ String mapResetCodigoError(Object error) {
   return 'Código inválido ou expirado.';
 }
 
+/// Confirmação da nova senha após o OTP.
+String mapResetSenhaError(Object error) {
+  if (error is DioException) {
+    final statusCode = error.response?.statusCode;
+    if (statusCode == null) return 'Sem conexão com o servidor.';
+    if (statusCode == 429) {
+      return _backendMessage(error) ??
+          'Muitas tentativas. Aguarde um pouco e tente de novo.';
+    }
+    if (statusCode == 400) {
+      return _backendMessage(error) ??
+          'Código ou senha recusados. Solicite um novo código se expirou.';
+    }
+    final msg = _backendMessage(error);
+    if (msg != null) return msg;
+  }
+  return 'Código ou senha recusados. Solicite um novo código se expirou.';
+}
+
 /// Cadastro personal (e-mail/senha + código).
 String mapRegisterError(Object error) {
   if (error is DioException) {

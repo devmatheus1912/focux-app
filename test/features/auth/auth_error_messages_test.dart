@@ -50,6 +50,8 @@ void main() {
     expect(mapEsqueciSenhaError(dio(429)), contains('Muitas tentativas'));
     expect(mapResetCodigoError(dio(429)), contains('novo código'));
     expect(mapResetCodigoError(dio(400, 'Código inválido. Confira e tente de novo.')), contains('Código inválido'));
+    expect(mapResetSenhaError(dio(null)), 'Sem conexão com o servidor.');
+    expect(mapResetSenhaError(dio(400)), contains('senha'));
   });
 
   test('mapGoogleSignInError humaniza timeout do proxy', () {
