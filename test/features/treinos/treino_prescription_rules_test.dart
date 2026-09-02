@@ -35,4 +35,10 @@ void main() {
       'Descanso deve estar entre 0 e 600 segundos.',
     );
   });
+
+  test('copy do salvar confirma a mutação', () {
+    expect(treinoPrescriptionSaveLabel(), 'Salvar prescrição');
+    expect(treinoPrescriptionSaveConfirmTitle(), contains('prescrição'));
+    expect(treinoPrescriptionSaveConfirmMessage(), contains('treino'));
+  });
 }

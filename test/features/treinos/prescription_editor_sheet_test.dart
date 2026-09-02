@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/core/theme/design_tokens.dart';
 import 'package:focux_app/core/widgets/fx_home_sheet.dart';
-import 'package:focux_app/core/widgets/fx_motion.dart';
+import 'package:focux_app/core/widgets/fx_settings_group.dart';
+import 'package:focux_app/core/widgets/fx_settings_tile.dart';
 import 'package:focux_app/features/treinos/widgets/prescription_editor_sheet.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -72,12 +73,19 @@ void main() {
                             onApplyLastPrescription: () {},
                             expand: true,
                             heightFactor: 0.88,
-                            stickyFooter: FxLiquidPrimaryButton(
-                              label: 'Salvar prescrição',
-                              onPressed: () {
-                                saved = true;
-                                Navigator.pop(ctx);
-                              },
+                            stickyFooter: FxSettingsGroup(
+                              children: [
+                                FxSettingsTile(
+                                  fxIcon: 'circle-check',
+                                  label: 'Salvar prescrição',
+                                  value: '',
+                                  showDivider: false,
+                                  onTap: () {
+                                    saved = true;
+                                    Navigator.pop(ctx);
+                                  },
+                                ),
+                              ],
                             ),
                           ),
                     ),

@@ -55,6 +55,13 @@ void main() {
     expect(exerciseVideoRemoveConfirmTitle(), contains('Remover'));
     expect(exerciseVideoUploadSuccess(), contains('Vídeo próprio'));
     expect(exerciseVideoRemoveSuccess(), contains('removido'));
+    expect(exerciseVideoPreviewLabel(hasPersonal: true), 'Ver vídeo');
+    expect(
+      exerciseVideoPreviewLabel(hasPersonal: false),
+      'Ver demonstração',
+    );
+    expect(exerciseVideoSourceCameraLabel(), 'Filmar agora');
+    expect(exerciseVideoSourceGalleryLabel(), contains('galeria'));
   });
 
   test('tips cobrem resolução, duração e formato', () {

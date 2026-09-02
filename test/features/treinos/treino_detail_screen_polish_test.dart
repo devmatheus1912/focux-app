@@ -104,7 +104,9 @@ void main() {
     expect(screen, isNot(contains('treino_prescription_form.dart')));
     expect(screen, isNot(contains('TreinoPrescriptionField')));
     expect(screen, isNot(contains('TreinoTipoSeriePicker')));
-    expect(screen, contains('FxLiquidPrimaryButton'));
+    expect(screen, isNot(contains('FxLiquidPrimaryButton')));
+    expect(screen, contains('showFxConfirmSheet'));
+    expect(screen, contains('treinoPrescriptionSaveConfirmTitle'));
     expect(screen, contains('heightFactor: 0.88'));
     final videoBlock =
         File(
@@ -122,6 +124,13 @@ void main() {
         contains('Demo da biblioteca ou envie o seu'),
       ),
     );
+    expect(videoBlock, contains('showFxConfirmSheet'));
+    expect(videoBlock, contains('showFxInsetPickerSheet'));
+    expect(videoBlock, contains('FxSettingsTile'));
+    expect(videoBlock, contains('exerciseVideoUploadConfirmTitle'));
+    expect(videoBlock, contains('exerciseVideoRemoveConfirmTitle'));
+    expect(videoBlock, isNot(contains('TextButton')));
+    expect(videoBlock, isNot(contains('FxLiquidPrimaryButton')));
     expect(videoBlock, isNot(contains('Celular em pé')));
     expect(videoBlock, isNot(contains('ExerciseVideoUploadStrip')));
     expect(videoBlock, isNot(contains('fxStripCardDecoration')));

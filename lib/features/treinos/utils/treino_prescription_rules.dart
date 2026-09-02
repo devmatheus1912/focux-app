@@ -10,3 +10,11 @@ String? treinoPrescriptionRejection({
   }
   return null;
 }
+
+String treinoPrescriptionSaveLabel() => 'Salvar prescrição';
+
+String treinoPrescriptionSaveConfirmTitle() =>
+    'Salvar a prescrição deste exercício?';
+
+String treinoPrescriptionSaveConfirmMessage() =>
+    'Séries, reps, descanso e carga passam a valer neste treino.';

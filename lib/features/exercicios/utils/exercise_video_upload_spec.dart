@@ -92,6 +92,18 @@ String exerciseVideoUploadSuccess() =>
 
 String exerciseVideoRemoveSuccess() => 'Vídeo próprio removido.';
 
+String exerciseVideoPreviewLabel({required bool hasPersonal}) =>
+    hasPersonal ? 'Ver vídeo' : 'Ver demonstração';
+
+String exerciseVideoSourceSheetTitle() => 'Vídeo do exercício';
+
+String exerciseVideoSourceSheetSubtitle() =>
+    'Filme agora ou escolha um arquivo da galeria.';
+
+String exerciseVideoSourceCameraLabel() => 'Filmar agora';
+
+String exerciseVideoSourceGalleryLabel() => 'Escolher da galeria';
+
 class ExerciseVideoSpecTip {
   const ExerciseVideoSpecTip({
     required this.title,

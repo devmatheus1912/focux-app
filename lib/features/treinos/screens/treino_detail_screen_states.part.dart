@@ -77,6 +77,13 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
 
   Future<void> _save() async {
     if (_saving || _videoBusy) return;
+    final ok = await showFxConfirmSheet(
+      context,
+      title: treinoPrescriptionSaveConfirmTitle(),
+      message: treinoPrescriptionSaveConfirmMessage(),
+      confirmLabel: treinoPrescriptionSaveLabel(),
+    );
+    if (!ok || !mounted) return;
     final series = int.tryParse(_seriesCtrl.text) ?? widget.item.series;
     final descansoSegundos = int.tryParse(_descansoCtrl.text) ?? 60;
     final rejection = treinoPrescriptionRejection(
@@ -157,22 +164,14 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
           if (mounted) setState(() => _videoBusy = value);
         },
       ),
-      stickyFooter: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+      stickyFooter: FxSettingsGroup(
         children: [
-          Divider(height: 1, color: chrome.line.withValues(alpha: 0.8)),
-          SizedBox(height: TokensStrip.s4),
-          FxLiquidPrimaryButton(
-            label: 'Salvar prescrição',
-            loading: _saving,
-            onPressed:
-                busy
-                    ? null
-                    : () {
-                      HapticFeedback.mediumImpact();
-                      _save();
-                    },
+          FxSettingsTile(
+            fxIcon: 'circle-check',
+            label: treinoPrescriptionSaveLabel(),
+            value: _saving ? 'Salvando…' : '',
+            showDivider: false,
+            onTap: busy ? () {} : _save,
           ),
         ],
       ),
