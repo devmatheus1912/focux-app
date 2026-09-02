@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
+import '../../../core/api/pagina.dart';
 import '../../planos/data/planos_repository.dart';
 import '../../alertas/data/alertas_repository.dart';
 import '../../exercicios/data/enums.dart';
@@ -545,10 +546,39 @@ class AlunoRepository {
 
   AlunoRepository(ApiClient client) : _dio = client.dio;
 
+  /// Primeira página no envelope do contrato. A lista de produto usa o BFF
+  /// `/home`; este GET é picker e tela que ainda não migrou.
+  Future<Pagina<Aluno>> listarPagina({int page = 0, int size = 20}) async {
+    final response = await _dio.get(
+      '/api/alunos',
+      queryParameters: {'page': page, 'size': size},
+    );
+    final data = response.data;
+    if (data is! Map) {
+      throw FormatException(
+        'GET /api/alunos agora devolve Pagina, não lista crua.',
+      );
+    }
+    return Pagina.fromJson(
+      Map<String, dynamic>.from(data),
+      (item) => Aluno.fromJson(Map<String, dynamic>.from(item as Map)),
+    );
+  }
+
+  /// Drena as páginas até `hasNext == false`. Picker (recorrência) ainda
+  /// precisa do conjunto; size no cap do servidor (100) para menos round-trips.
   Future<List<Aluno>> listar() async {
-    final response = await _dio.get('/api/alunos');
-    final list = response.data as List<dynamic>;
-    return list.map((e) => Aluno.fromJson(e as Map<String, dynamic>)).toList();
+    final all = <Aluno>[];
+    var page = 0;
+    const size = 100;
+    while (true) {
+      final chunk = await listarPagina(page: page, size: size);
+      all.addAll(chunk.content);
+      if (!chunk.hasNext) break;
+      page++;
+      if (page >= 50) break;
+    }
+    return all;
   }
 
   /// BFF tipado — first paint da lista (alunos + stats + alertas config).
