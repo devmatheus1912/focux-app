@@ -48,7 +48,8 @@
 - [21. Desempenho](#21-desempenho)
 
 **Parte IV — Backend**
-- [22. Protocolo de proposta de backend](#22-protocolo-de-proposta-de-backend)
+- [22. Backend: proposta por tela e auditoria de legado](#22-backend-proposta-por-tela-e-auditoria-de-legado)
+  - [22.5 Auditoria de legado (varredura por domínio)](#225-auditoria-de-legado-varredura-por-domínio-não-por-tela)
 - [23. Contrato de dados por tipo de superfície](#23-contrato-de-dados-por-tipo-de-superfície)
 - [24. Superfície Hoje: contrato vigente de referência](#24-superfície-hoje-contrato-vigente-de-referência)
 
@@ -729,7 +730,16 @@ Rodada MobSF (APK release) + OWASP ZAP (site + backend). **Meta operacional:** 0
 
 # Parte IV — Backend
 
-## 22. Protocolo de proposta de backend
+## 22. Backend: proposta por tela e auditoria de legado
+
+Duas frentes distintas, com ritmos distintos:
+
+| Frente | Gatilho | Escopo | Onde |
+|---|---|---|---|
+| **Proposta por tela** | Toda vez que uma superfície é tocada | O caminho de dados **daquela** tela | §22.1–§22.4 |
+| **Auditoria de legado** | Uma vez por domínio, independente do design | O código do backend como um todo | §22.5 |
+
+A primeira impede que o trabalho de design deixe dívida invisível. A segunda é o que moderniza um backend escrito no começo do projeto — e **não** acontece como efeito colateral da primeira: uma auditoria conduzida a partir das telas só encontra o que a tela consegue sentir.
 
 **Regra permanente, obrigatória, em toda tela tocada.** Ao trabalhar qualquer superfície, auditar o caminho de dados que a alimenta e **emitir o bloco "Proposta de backend" no scorecard — mesmo que a conclusão seja "nenhuma proposta"**. Backend **nunca** é alterado sozinho (§29): a entrega é a proposta, não o commit.
 
@@ -796,6 +806,184 @@ Motivo: UI boa sobre contrato ruim produz tela lenta, dado divergente e retrabal
 - **Nunca** aplicar sozinho: auth, tenant/RLS, pagamento, migration, endpoint novo, mudança de contrato, rate limit, cache server, telemetria nova.
 - Proposta descreve **contrato**, não implementação: campos, tipos, códigos de erro, paginação, TTL, invalidação.
 - Se a tela precisar de campo que ainda não existe: **propor e parar**. Não inventar stub no FE, não criar segundo caminho de dado, não deixar `TODO`.
+
+### 22.5 Auditoria de legado (varredura por domínio, não por tela)
+
+**Limite declarado deste documento:** ele foi escrito a partir do aplicativo. Tudo o que ele afirma sobre o backend vem dos contratos que o app consome e das regras já documentadas — **não** de leitura do código de `focux-backend`. Portanto §22.5 é o **roteiro** da varredura, não o resultado dela. O resultado exige o repositório do backend aberto, e produz um relatório próprio, com severidade, por domínio.
+
+Backend iniciado no começo do projeto acumula um tipo específico de dívida: o que funcionava com 3 alunos e 1 personal não sobrevive a tenant, plano, webhook de pagamento e hub agregado. A varredura procura exatamente essas costuras.
+
+#### 22.5.1 Fase 0 — inventário (entregável antes de qualquer refactor)
+
+Sem inventário, modernização vira caça a sintoma. Seis levantamentos, cada linha classificada como `OK` / `P0` / `P1` / `P2`:
+
+| Inventário | O que levantar | Serve para |
+|---|---|---|
+| **Endpoints** | Método, path, papel exigido (`@PreAuthorize`), origem do tenant, rate limit, documentado no OpenAPI, **quem consome no app** | Achar endpoint sem autorização, sem tenant e **sem consumidor** (candidato a remoção) |
+| **Entidades** | Tabela, relacionamentos, `fetch` (LAZY/EAGER), cascatas, índices, colunas de filtro/ordenação, soft delete, auditoria | Achar N+1 estrutural, FK sem índice, cascata perigosa |
+| **Migrations** | Histórico Flyway completo, buracos de numeração, migration editada após aplicada, `ddl-auto` efetivo por ambiente, drift entre schema e entidades | Garantir que o schema é reproduzível do zero |
+| **Dependências e plataforma** | Versão de Spring Boot, JDK, Hibernate e bibliotecas; fim de suporte; CVEs conhecidas; deprecations em uso | Planejar upgrade sem quebrar contrato |
+| **Assíncrono** | Schedulers, filas, webhooks (MercadoPago, Terra), push FCM: idempotência, retry, tratamento de falha, reprocessamento | Achar duplicidade de cobrança e evento perdido |
+| **Caches** | Nome, TTL, quem popula, **quem invalida**, invalidação distribuída (Redis pub/sub) | Achar cache sem evict no writer e dado velho servido como novo |
+
+#### 22.5.2 Ordem de ataque (por risco, não por idade do código)
+
+1. **Autorização, tenant e RLS.** Vazamento de dado entre personais é o pior defeito possível do produto. Vem antes de tudo.
+2. **Correção de dado.** Transação, concorrência, idempotência de webhook e de ação financeira.
+3. **Testes dos caminhos críticos.** Antes de refatorar, travar o comportamento atual em teste — é a escora.
+4. **Contrato.** DTO/record na borda, erro padronizado, OpenAPI, agregado para hub.
+5. **Performance.** N+1, índice, paginação, cache com TTL e evict.
+6. **Resiliência e observabilidade.** Timeout, retry com backoff, métrica e trace por endpoint.
+7. **Estrutura interna.** Camadas, god-service, duplicação de mapeamento.
+8. **Plataforma.** Upgrade de versões — **por último**, e somente com o passo 3 pronto. Trocar a fundação antes de ter escora é como subir de versão sem rede.
+
+#### 22.5.3 Checklist por área
+
+Sintomas típicos de backend legado, com o alvo correspondente. Cada item vira linha do relatório com severidade.
+
+**A. Autorização, tenant e sessão** (pilares 52–55)
+
+| Sintoma de legado | Alvo |
+|---|---|
+| Endpoint sem `@PreAuthorize`, ou com papel genérico demais | Papel explícito por endpoint |
+| `personalId` chegando por `@PathVariable`/`@RequestParam`/body | Tenant **só** de `TenantContext` |
+| Query sem filtro de tenant confiando no filtro do app | Filtro no repositório + RLS no Postgres como rede |
+| RLS ausente ou desalinhada das queries | Política por tabela multi-tenant |
+| CORS `*` ou `@CrossOrigin` espalhado no controller | Origem restrita, configurada num só lugar |
+| Refresh token sem rotação/revogação | Rotação + revogação testada |
+
+**B. Persistência e modelo** (pilares 61, 71)
+
+| Sintoma de legado | Alvo |
+|---|---|
+| `EAGER` por conveniência; coleção carregada sempre | `LAZY` + `@EntityGraph`/join fetch no caso de uso |
+| Loop chamando repositório dentro de laço | Consulta em lote |
+| `findAll()` alimentando tela | Consulta paginada e filtrada |
+| FK e coluna de filtro/ordenação sem índice | Índice por padrão de acesso real |
+| `CascadeType.ALL` amplo, com `orphanRemoval` implícito | Cascata mínima e explícita |
+| Entidade JPA devolvida direto como resposta HTTP | DTO/record na borda |
+| Enum persistido por `ORDINAL` ou string livre | `@Enumerated(STRING)` com valor estável |
+| `Date`/`Calendar` legado; timestamp sem timezone | `Instant`/`OffsetDateTime`, UTC no banco |
+| Dinheiro em `double`/`float` | `BigDecimal` com escala definida |
+| Exclusão física onde o produto precisa de histórico | Soft delete + auditoria |
+
+**C. Migrations e schema** (pilar 66)
+
+| Sintoma de legado | Alvo |
+|---|---|
+| `ddl-auto: update` fora de teste local | `validate` em produção; schema só por migration |
+| Migration editada depois de aplicada | Migration nova, sempre |
+| Coluna criada à mão em produção | Toda mudança versionada em `V###__descricao.sql` |
+| Banco impossível de recriar do zero | Histórico Flyway íntegro, verificado em CI |
+
+**D. Contrato e API** (pilares 59, 63, 68, 71)
+
+| Sintoma de legado | Alvo |
+|---|---|
+| Endpoint devolvendo o mundo; app usa 4 de 40 campos | Resposta do tamanho do caso de uso; agregado para hub |
+| Muitos endpoints para montar uma tela | Um agregado tipado (padrão `GET /api/dashboard/home`) |
+| `Map<String, Object>` como resposta | Record/DTO tipado |
+| Erro respondido como texto livre ou stacktrace | Corpo de erro padronizado com **código de domínio** que o app traduz em copy |
+| `catch (Exception e)` engolindo a causa | Exceção de domínio + handler global |
+| Validação só no app | Jakarta Validation na borda do BE |
+| Endpoint sem `@Operation`/Springdoc | 100% dos endpoints consumidos pelo app documentados |
+| Mudança de contrato sem par no app | PRs pareados; nunca quebrar cliente em produção |
+
+**E. Idempotência, transação e concorrência** (pilar 64)
+
+| Sintoma de legado | Alvo |
+|---|---|
+| Webhook de pagamento reprocessado gera cobrança/baixa duplicada | Idempotência por id do evento, com teste que envia o mesmo evento duas vezes |
+| `@Transactional` no controller, ou ausente no serviço que muda estado | Fronteira de transação no serviço, no tamanho da operação |
+| Escrita concorrente sobrescrevendo silenciosamente | Versionamento otimista ou trava explícita |
+| Retry do cliente criando registro repetido | Chave de idempotência na requisição |
+| Chamada externa dentro da transação | Externo fora da transação |
+
+**F. Cache e invalidação** (pilares 49, 62)
+
+| Sintoma de legado | Alvo |
+|---|---|
+| Cache sem TTL, ou TTL só no cliente | TTL explícito nos dois lados, alinhados |
+| Nenhum writer invalidando | Evict no **write path** (padrão `DashboardHomeCacheEvictor`) |
+| Instâncias com cache divergente | Invalidação distribuída (Redis pub/sub) |
+| Expiração simultânea derrubando o banco | Jitter no TTL |
+| App forçando refresh a cada tap para ver o próprio write | Evict correto, não refetch |
+
+**G. Resiliência e rede** (pilar 48)
+
+| Sintoma de legado | Alvo |
+|---|---|
+| Cliente HTTP sem timeout | Timeout de conexão e leitura em toda integração |
+| Retry infinito, ou nenhum | Retry com backoff (Resilience4j) e teto |
+| Falha de integração derrubando a resposta inteira | Degradação parcial, com o campo faltante sinalizado |
+| Sem proteção em endpoint quente (IA, upload, busca) | Rate limit por endpoint (pilar 58) |
+
+**H. Observabilidade** (pilar 67)
+
+| Sintoma de legado | Alvo |
+|---|---|
+| `System.out.println` / log de payload pessoal | Log estruturado, **sem PII** |
+| Impossível saber o p95 de um endpoint | Timer por endpoint (Micrometer), nome por domínio |
+| Erro sem correlação entre app e servidor | Trace propagado, id de correlação |
+| Sem health/readiness | Actuator exposto no que é seguro expor |
+
+**I. Testes** (pilares 73, 75)
+
+| Sintoma de legado | Alvo |
+|---|---|
+| Regra de negócio sem teste | Teste de regra no serviço |
+| Endpoint crítico sem teste de controller/contrato | Teste por path crítico |
+| Teste dependendo de banco compartilhado ou de ordem | Banco efêmero por execução, teste independente |
+| Refactor feito sem rede | Teste que trava o comportamento **antes** do refactor |
+
+**J. Estrutura e limpeza** (pilares 69, 70, 72)
+
+| Sintoma de legado | Alvo |
+|---|---|
+| Serviço com centenas de linhas e várias responsabilidades | Recorte por caso de uso |
+| Regra de negócio no controller | Controller fino; regra no domínio |
+| Mapeamento entidade→DTO duplicado em cada endpoint | Mapeamento num só lugar |
+| Injeção por campo (`@Autowired` em atributo) | Injeção por construtor |
+| Endpoint, entidade ou flag sem consumidor | Remoção, no mesmo ship (pilar 72) |
+| Configuração espalhada em `@Value` soltos | Objeto de configuração tipado |
+
+**K. Segredos, LGPD e auditoria** (pilares 55–57)
+
+| Sintoma de legado | Alvo |
+|---|---|
+| Credencial em `application.yml` versionado | Variável de ambiente / gerenciador de segredo |
+| PII em log, em resposta de erro ou em payload de hub | Somente o dado do caso de uso |
+| Exclusão/exportação de dados sem caminho único | Só `/api/lgpd/me`, com o contrato existente |
+| Ação sensível sem trilha | Registro de auditoria (quem, quando, o quê) |
+
+#### 22.5.4 Metas mensuráveis
+
+"Perfeito" não é adjetivo — é uma lista que passa ou falha. O backend está no alvo quando:
+
+1. **0** endpoint sem papel exigido e sem tenant de `TenantContext`.
+2. **0** ocorrência de tenant vindo do cliente.
+3. RLS ativa e coerente em toda tabela multi-tenant.
+4. **100%** dos endpoints consumidos pelo app documentados no OpenAPI.
+5. **0** N+1 nos endpoints mais chamados, verificado com log de SQL sob carga realista.
+6. Índice em toda FK e em toda coluna usada para filtro ou ordenação.
+7. Toda lista exibida no app paginada, filtrada e ordenada **no servidor**.
+8. Todo cache com TTL explícito e evict no writer; invalidação distribuída funcionando.
+9. Todo webhook e toda ação financeira idempotentes, com teste de evento repetido.
+10. Banco recriável do zero pelo histórico de migrations, verificado em CI; `ddl-auto: validate` em produção.
+11. **0** segredo no repositório.
+12. Erro de domínio com código estável, consumido pelo app para gerar copy específica.
+13. p95 dos endpoints de hub dentro de um orçamento declarado por endpoint.
+14. Teste de contrato em todo path crítico; `./gradlew test` verde sem teste ignorado.
+15. **0** endpoint, entidade ou flag sem consumidor.
+
+#### 22.5.5 Regras de execução
+
+- **Um domínio por PR** (alunos, financeiro, treinos, assinatura, notificações, IA). Não misturar domínios.
+- **Nunca** mudar contrato sem PR pareado no aplicativo. O app em produção não pode quebrar.
+- Toda mudança de schema em migration nova. Nunca editar migration aplicada.
+- Antes de refatorar, escrever o teste que trava o comportamento atual.
+- Upgrade de plataforma só depois dos testes de contrato nos paths críticos.
+- Relatório por domínio com severidade. **P0 do backend vem antes de qualquer trabalho estético** — inclusive antes do lote de design daquele domínio.
 
 ## 23. Contrato de dados por tipo de superfície
 
