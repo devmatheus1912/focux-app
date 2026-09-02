@@ -114,6 +114,10 @@ flutter_native_splash:
 # The following section is specific to Flutter packages.
 flutter:
 
+  # flutter_native_splash (dev) falha na integração SPM experimental do Flutter 3.44+.
+  config:
+    enable-swift-package-manager: false
+
   generate: true
 
   # The following line ensures that the Material Icons font is
