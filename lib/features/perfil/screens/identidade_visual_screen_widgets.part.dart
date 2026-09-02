@@ -611,10 +611,19 @@ class _SaveBar extends StatelessWidget {
       ),
       child: SafeArea(
         top: false,
-        child: FxLiquidPrimaryButton(
-          label: label,
-          loading: salvando,
-          onPressed: salvando ? null : onPressed,
+        child: FxSettingsGroup(
+          children: [
+            FxSettingsTile(
+              fxIcon: 'circle-check',
+              label: label,
+              value:
+                  salvando
+                      ? identidadeSalvandoLabel()
+                      : identidadeConfirmarLabel(),
+              showDivider: false,
+              onTap: salvando ? () {} : onPressed,
+            ),
+          ],
         ),
       ),
     );

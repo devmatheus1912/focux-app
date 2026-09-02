@@ -12,22 +12,29 @@ import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_loading.dart';
-import '../../../core/widgets/fx_motion.dart';
+import '../../../core/widgets/fx_settings_group.dart';
+import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../features/auth/providers/auth_provider.dart';
+import '../../planos/providers/plano_features_provider.dart';
 import '../data/perfil_repository.dart';
 import '../providers/perfil_provider.dart';
 import '../utils/brand_slogan_display.dart';
+import '../utils/identidade_visual_display.dart';
 import '../../subscription/utils/landing_editor_access.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_typography.dart';
+import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../dashboard/utils/dashboard_readability.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 
+part 'identidade_visual_screen_actions.part.dart';
 part 'identidade_visual_screen_widgets.part.dart';
 
 class IdentidadeVisualScreen extends ConsumerStatefulWidget {
@@ -98,79 +105,6 @@ class _IdentidadeVisualScreenState
     _perfilLoaded = true;
   }
 
-  Future<void> _pickLogo() async {
-    final file = await ImagePicker().pickImage(
-      source: ImageSource.gallery,
-      imageQuality: 88,
-      maxWidth: 1024,
-    );
-    if (file == null || !mounted) return;
-    setState(() => _uploadingLogo = true);
-    try {
-      final url = await MediaUploadService(
-        ref.read(apiClientProvider),
-      ).uploadBytes(
-        bytes: await file.readAsBytes(),
-        filename: file.name,
-        folder: 'identidade',
-        resourceType: 'image',
-      );
-      if (mounted) setState(() => _logoUrl = url);
-    } catch (e) {
-      if (mounted) {
-        FeedbackHelper.showError(context, friendlyError(e));
-      }
-    } finally {
-      if (mounted) setState(() => _uploadingLogo = false);
-    }
-  }
-
-  Future<void> _restoreDefaultBrandColors(String plano) async {
-    if (plano.toUpperCase() != 'ENTERPRISE') return;
-    setState(() => _palette = CuratedBrandPalette.focuxDefault);
-    await _salvar(plano, successMessage: 'Cores padrão do Focux restauradas!');
-  }
-
-  Future<void> _salvar(
-    String plano, {
-    String successMessage = 'Identidade visual salva!',
-  }) async {
-    if (plano.toUpperCase() == 'FREE') return;
-    setState(() => _salvando = true);
-    try {
-      final dio = ref.read(apiClientProvider).dio;
-      final body = <String, dynamic>{
-        'descricaoProfissional': _descCtrl.text.trim(),
-        'especialidades': _espCtrl.text.trim(),
-        'instagram': _instaCtrl.text.trim(),
-      };
-      if (plano.toUpperCase() == 'ENTERPRISE') {
-        body['corPrimaria'] = BrandPalette.toHex(_corPrimaria);
-        body['corSecundaria'] = BrandPalette.toHex(_corSecundaria);
-        body['slogan'] = _sloganCtrl.text.trim();
-        if (_logoUrl != null) body['logoUrl'] = _logoUrl;
-      }
-      await dio.put('/api/personal/identidade', data: body);
-      if (plano.toUpperCase() == 'ENTERPRISE') {
-        ref.read(primaryColorProvider.notifier).state = _corPrimaria;
-        if (_logoUrl != null && _logoUrl!.isNotEmpty) {
-          ref.read(logoUrlProvider.notifier).state = _logoUrl;
-        }
-      }
-      ref.invalidate(perfilProvider);
-      if (mounted) {
-        FeedbackHelper.showInfo(context, successMessage);
-        if (widget.isSetup) context.pop(true);
-      }
-    } catch (e) {
-      if (mounted) {
-        FeedbackHelper.showError(context, friendlyError(e));
-      }
-    } finally {
-      if (mounted) setState(() => _salvando = false);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final perfilAsync = ref.watch(perfilProvider);
@@ -207,9 +141,10 @@ class _IdentidadeVisualScreenState
 
     final chrome = ShellChrome.of(context);
     final plano = perfil.plano;
-    final planUpper = plano.toUpperCase();
-    final isEnterprise =
-        planUpper == 'ENTERPRISE' || planUpper == 'ENTERPRISE_PRO';
+    final hasWhiteLabel = identidadeHasWhiteLabel(
+      featureWhiteLabel: ref.watch(planoFeaturesProvider).valueOrNull?.whiteLabel,
+      plano: plano,
+    );
     final nomePersonal = perfil.nome;
 
     return fxScreenA11yScope(
@@ -218,22 +153,26 @@ class _IdentidadeVisualScreenState
         useMesh: true,
         appBar: FxShellAppBar(
           title: widget.isSetup ? 'Configurar meu app' : 'Identidade Visual',
-          subtitle: isEnterprise ? 'Sua marca no app' : 'Marca no app',
+          subtitle: hasWhiteLabel ? 'Sua marca no app' : 'Marca no app',
           onBack:
               widget.isSetup
                   ? null
                   : () => safePopOrGo(context, '/dashboard/personal'),
           leading: widget.isSetup ? const SizedBox(width: 8) : null,
+          actions: [
+            FxHelpIconButton(
+              tooltip: identidadeHelpTitle(),
+              onTap: () => _abrirIdentidadeAjuda(context),
+            ),
+            const SizedBox(width: TokensStrip.s2),
+          ],
         ),
         bottomNavigationBar:
-            isEnterprise
+            hasWhiteLabel
                 ? _SaveBar(
                   salvando: _salvando,
-                  label:
-                      widget.isSetup
-                          ? 'Finalizar configuração'
-                          : 'Salvar marca',
-                  onPressed: () => _salvar(plano),
+                  label: identidadeSalvarLabel(isSetup: widget.isSetup),
+                  onPressed: () => _pedirSalvar(hasWhiteLabel: hasWhiteLabel),
                 )
                 : null,
         body: CustomScrollView(
@@ -242,10 +181,15 @@ class _IdentidadeVisualScreenState
           ),
           slivers: [
             SliverPadding(
-              padding: const EdgeInsets.fromLTRB(18, 4, 18, 120),
+              padding: const EdgeInsets.fromLTRB(
+                FxSettingsLayout.pageInset,
+                4,
+                FxSettingsLayout.pageInset,
+                120,
+              ),
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
-                  if (!isEnterprise) ...[
+                  if (!hasWhiteLabel) ...[
                     _PaywallCard(
                       onTap: () => context.go('/assinatura'),
                       chrome: chrome,
@@ -253,9 +197,9 @@ class _IdentidadeVisualScreenState
                     const SizedBox(height: 18),
                   ],
                   AbsorbPointer(
-                    absorbing: !isEnterprise,
+                    absorbing: !hasWhiteLabel,
                     child: Opacity(
-                      opacity: isEnterprise ? 1 : 0.38,
+                      opacity: hasWhiteLabel ? 1 : 0.38,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
@@ -268,15 +212,22 @@ class _IdentidadeVisualScreenState
                             paletteName: _palette.name,
                           ),
                           const SizedBox(height: 12),
-                          if (isEnterprise)
-                            OutlinedButton.icon(
-                              onPressed:
-                                  () =>
-                                      openLandingEditorOrUpgrade(context, ref),
-                              icon: const Icon(Icons.language_outlined),
-                              label: const Text(
-                                'Editor da landing (Enterprise)',
-                              ),
+                          if (hasWhiteLabel)
+                            FxSettingsGroup(
+                              children: [
+                                FxSettingsTile(
+                                  fxIcon: 'article',
+                                  label: identidadeLandingEditorLabel(),
+                                  value: 'Landing',
+                                  picker: true,
+                                  showDivider: false,
+                                  onTap:
+                                      () => openLandingEditorOrUpgrade(
+                                        context,
+                                        ref,
+                                      ),
+                                ),
+                              ],
                             ),
                           const SizedBox(height: TokensStrip.s4),
                           ShellSurface(
@@ -301,14 +252,15 @@ class _IdentidadeVisualScreenState
                                     primary: _corPrimaria,
                                     secondary: _corSecundaria,
                                     uploading: _uploadingLogo,
-                                    onTap: isEnterprise ? _pickLogo : null,
+                                    onTap:
+                                        hasWhiteLabel ? _pedirTrocarLogo : null,
                                   ),
                                 ),
                                 const SizedBox(height: 18),
                                 _BrandField(
                                   label: 'Slogan',
                                   controller: _sloganCtrl,
-                                  enabled: isEnterprise,
+                                  enabled: hasWhiteLabel,
                                   accent: _corPrimaria,
                                   icon: Icons.format_quote_outlined,
                                   hint:
@@ -338,65 +290,28 @@ class _IdentidadeVisualScreenState
                                 _CuratedPaletteGrid(
                                   selected: _palette,
                                   onSelect:
-                                      isEnterprise
+                                      hasWhiteLabel
                                           ? (p) {
                                             HapticFeedback.selectionClick();
                                             setState(() => _palette = p);
                                           }
                                           : null,
                                 ),
-                                if (isEnterprise) ...[
+                                if (hasWhiteLabel) ...[
                                   const SizedBox(height: 10),
-                                  Align(
-                                    alignment: Alignment.centerLeft,
-                                    child: Material(
-                                      color: fxTransparent,
-                                      child: InkWell(
+                                  FxSettingsGroup(
+                                    children: [
+                                      FxSettingsTile(
+                                        fxIcon: 'target',
+                                        label: identidadeRestaurarCoresLabel(),
+                                        value: 'Padrão Focux',
+                                        showDivider: false,
                                         onTap:
-                                            () => _restoreDefaultBrandColors(
-                                              plano,
+                                            () => _pedirRestaurarCores(
+                                              hasWhiteLabel: hasWhiteLabel,
                                             ),
-                                        borderRadius: BorderRadius.circular(
-                                          999,
-                                        ),
-                                        child: Container(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 12,
-                                            vertical: 8,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: _corPrimaria.withValues(
-                                              alpha: 0.08,
-                                            ),
-                                            borderRadius: BorderRadius.circular(
-                                              999,
-                                            ),
-                                            border: Border.all(
-                                              color: _corPrimaria.withValues(
-                                                alpha: 0.18,
-                                              ),
-                                            ),
-                                          ),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              Icon(
-                                                Icons.restore_rounded,
-                                                size: 16,
-                                                color: _corPrimaria,
-                                              ),
-                                              const SizedBox(width: 6),
-                                              Text(
-                                                'Restaurar cores padrão',
-                                                style: FocuxHubTypography.chip(
-                                                  _corPrimaria,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
                                       ),
-                                    ),
+                                    ],
                                   ),
                                 ],
                               ],
@@ -421,7 +336,7 @@ class _IdentidadeVisualScreenState
                                 _BrandField(
                                   label: 'Descrição profissional',
                                   controller: _descCtrl,
-                                  enabled: isEnterprise,
+                                  enabled: hasWhiteLabel,
                                   accent: _corPrimaria,
                                   hint:
                                       'Trajetória, metodologia, diferencial...',
@@ -432,7 +347,7 @@ class _IdentidadeVisualScreenState
                                 _BrandField(
                                   label: 'Especialidades',
                                   controller: _espCtrl,
-                                  enabled: isEnterprise,
+                                  enabled: hasWhiteLabel,
                                   accent: _corPrimaria,
                                   icon: Icons.fitness_center_outlined,
                                   hint:
@@ -442,7 +357,7 @@ class _IdentidadeVisualScreenState
                                 _BrandField(
                                   label: 'Instagram',
                                   controller: _instaCtrl,
-                                  enabled: isEnterprise,
+                                  enabled: hasWhiteLabel,
                                   accent: _corPrimaria,
                                   icon: Icons.alternate_email,
                                   hint: '@seuperfil',
