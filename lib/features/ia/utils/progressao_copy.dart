@@ -1,4 +1,26 @@
 /// PT-BR copy helpers for progressão de carga flows.
+const progressaoObjetivoMax = 500;
+const progressaoHistoricoMax = 8000;
+
+String progressaoHubSubtitle(String alunoNome) {
+  final nome = alunoNome.trim();
+  if (nome.isEmpty) return 'Sugestão de carga, só se você pedir';
+  return '$nome · só se você pedir';
+}
+
+String progressaoGerarTooltip() => 'Gerar com IA';
+
+String progressaoGerarTileLabel() => 'Gerar progressão';
+
+String progressaoGerarTileValue() => 'Pedir à IA';
+
+String progressaoConfirmTitle() => 'Gerar progressão com IA?';
+
+String progressaoConfirmMessage() =>
+    'A IA sugere cargas. Nada entra no treino sem você aceitar.';
+
+String progressaoConfirmLabel() => 'Gerar';
+
 String progressaoPendingReviewLabel(int count) {
   if (count <= 0) return 'Revisar sugestões pendentes';
   if (count == 1) return 'Revisar 1 sugestão pendente';

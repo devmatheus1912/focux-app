@@ -7,4 +7,14 @@ void main() {
     expect(progressaoPendingReviewLabel(1), 'Revisar 1 sugestão pendente');
     expect(progressaoPendingReviewLabel(3), 'Revisar 3 sugestões pendentes');
   });
+
+  test('chrome e limites do pedido de progressão', () {
+    expect(progressaoObjetivoMax, 500);
+    expect(progressaoHistoricoMax, 8000);
+    expect(progressaoHubSubtitle(''), 'Sugestão de carga, só se você pedir');
+    expect(progressaoHubSubtitle('  Ana  '), 'Ana · só se você pedir');
+    expect(progressaoGerarTooltip(), 'Gerar com IA');
+    expect(progressaoConfirmTitle(), 'Gerar progressão com IA?');
+    expect(progressaoConfirmLabel(), 'Gerar');
+  });
 }
