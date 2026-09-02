@@ -1,35 +1,30 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/design_tokens.dart';
-import '../../../core/theme/focux_hub_typography.dart';
-import '../../../core/utils/friendly_error.dart';
-import '../../../core/utils/fx_utils.dart';
-import '../../../core/router/safe_navigation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../features/auth/providers/auth_provider.dart';
-import '../data/avaliacao_repository.dart';
-import '../../evolucao/data/evolucao_repository.dart';
-import '../../../core/widgets/fx_empty_state.dart';
-import '../../../core/widgets/fx_error_state.dart';
-import '../../../core/widgets/fx_motion.dart';
-import '../../../core/widgets/skeleton_loader.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
-import '../../../core/theme/tokens_strip.dart';
-import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 
-String _fmtData(String? iso) {
-  if (iso == null || iso.isEmpty) return '—';
-  try {
-    return fxDateShort(DateTime.parse(iso));
-  } catch (_) {
-    return iso;
-  }
-}
-
-String _fmtNum(double? v, {int decimais = 1}) {
-  if (v == null) return '—';
-  return v.toStringAsFixed(decimais);
-}
+import '../../../core/router/safe_navigation.dart';
+import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/fx_settings_layout.dart';
+import '../../../core/theme/shell_chrome.dart';
+import '../../../core/theme/tokens_strip.dart';
+import '../../../core/utils/friendly_error.dart';
+import '../../../core/widgets/fx_confirm_sheet.dart';
+import '../../../core/widgets/fx_content_width_limiter.dart';
+import '../../../core/widgets/fx_empty_state.dart';
+import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_help.dart';
+import '../../../core/widgets/fx_premium_entrance.dart';
+import '../../../core/widgets/fx_settings_group.dart';
+import '../../../core/widgets/fx_settings_tile.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/skeleton_loader.dart';
+import '../../../features/auth/providers/auth_provider.dart';
+import '../../evolucao/data/evolucao_repository.dart';
+import '../data/avaliacao_repository.dart';
+import '../utils/evolucao_comparativo_display.dart';
+import '../widgets/evolucao_comparativo_table.dart';
 
 class EvolucaoComparativoScreen extends ConsumerStatefulWidget {
   final int alunoId;
@@ -50,6 +45,7 @@ class _EvolucaoComparativoScreenState
   bool _loading = true;
   String? _erro;
   bool _semAvaliacao = false;
+  bool _compartilhando = false;
 
   @override
   void initState() {
@@ -87,355 +83,190 @@ class _EvolucaoComparativoScreenState
     }
   }
 
+  void _showHelp() {
+    showFxHelpSheet(
+      context,
+      title: 'Comparativo',
+      subtitle: evolucaoComparativoHubSubtitle(),
+      tips: const [
+        FxHelpTip(
+          'Janela',
+          'Primeira e última avaliação física do aluno. A tabela não mistura outras métricas.',
+          icon: 'trend',
+        ),
+        FxHelpTip(
+          'Delta',
+          'Verde é melhora no sentido da métrica. Vermelho é piora. Cinza não mudou.',
+          icon: 'target',
+        ),
+        FxHelpTip(
+          'Chat',
+          'Compartilhar envia um resumo na conversa. Confirme antes — o aluno vê a mensagem.',
+          icon: 'message-circle',
+        ),
+      ],
+    );
+  }
+
+  Future<void> _compartilhar() async {
+    if (_compartilhando || _comparativo == null) return;
+    HapticFeedback.mediumImpact();
+    final ok = await showFxConfirmSheet(
+      context,
+      title: evolucaoComparativoConfirmTitle(),
+      message: evolucaoComparativoConfirmMessage(),
+      icon: Icons.chat_bubble_outline_rounded,
+      confirmLabel: evolucaoComparativoConfirmLabel(),
+    );
+    if (!ok || !mounted) return;
+    setState(() => _compartilhando = true);
+    try {
+      await EvolucaoRepository(
+        ref.read(apiClientProvider),
+      ).compartilharEvolucao(widget.alunoId);
+      if (!mounted) return;
+      HapticFeedback.heavyImpact();
+      FeedbackHelper.showSuccess(
+        context,
+        'Evolução compartilhada via chat.',
+      );
+    } catch (e) {
+      if (mounted) {
+        FeedbackHelper.showError(
+          context,
+          friendlyError(e, fallback: 'Não deu para compartilhar. Tente de novo.'),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _compartilhando = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final chrome = ShellChrome.of(context);
+    final isDark = chrome.isDark;
     final primary = Theme.of(context).colorScheme.primary;
+    final canShare = !_loading && _comparativo != null && !_compartilhando;
     return fxScreenA11yScope(
       label: 'Evolução de ${widget.alunoNome}',
       child: FxShellScaffold(
         useMesh: true,
         appBar: FxShellAppBar(
           title: 'Evolução de ${widget.alunoNome}',
-          subtitle: 'Comparativo de avaliações físicas',
+          subtitle: evolucaoComparativoHubSubtitle(),
           onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
-        ),
-        body:
-            _loading
-                ? const SkeletonList(count: 4)
-                : _erro != null
-                ? FxErrorState(
-                  chromeOnDark: isDark,
-                  primary: primary,
-                  message: _erro!,
-                  onRetry: _load,
-                  title: 'Não conseguimos carregar o comparativo',
-                )
-                : _semAvaliacao
-                ? FxEmptyState(
-                  icon: 'trend',
-                  title: 'Nenhuma avaliação para comparar',
-                  subtitle:
-                      'Registre ao menos duas avaliações físicas para ver a evolução.',
-                  action: FxEmptyAction(
-                    label: 'Voltar ao Aluno 360',
-                    onTap:
-                        () =>
-                            safePopOrGo(context, '/alunos/${widget.alunoId}'),
+          actions: [
+            FxHelpIconButton(tooltip: 'Como comparar', onTap: _showHelp),
+            Padding(
+              padding: const EdgeInsets.only(right: TokensStrip.s3),
+              child: Center(
+                child: Semantics(
+                  button: true,
+                  enabled: canShare,
+                  label:
+                      _compartilhando
+                          ? 'Enviando resumo da evolução'
+                          : evolucaoComparativoShareTooltip(),
+                  child: ShellHeaderIconButton(
+                    icon: 'message-circle',
+                    tooltip: evolucaoComparativoShareTooltip(),
+                    onTap: canShare ? _compartilhar : () {},
                   ),
-                )
-                : _buildConteudo(_comparativo!),
+                ),
+              ),
+            ),
+          ],
+        ),
+        body: FxPremiumEntrance(
+          child: _loading
+              ? const SkeletonList(count: 4)
+              : _erro != null
+              ? FxErrorState(
+                chromeOnDark: isDark,
+                primary: primary,
+                message: _erro!,
+                onRetry: _load,
+                title: 'Não conseguimos carregar o comparativo',
+              )
+              : _semAvaliacao
+              ? FxEmptyState(
+                icon: 'trend',
+                title: 'Nenhuma avaliação para comparar',
+                subtitle:
+                    'Registre ao menos duas avaliações físicas para ver a evolução.',
+                action: FxEmptyAction(
+                  label: 'Voltar ao Aluno 360',
+                  onTap:
+                      () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
+                ),
+              )
+              : _buildConteudo(_comparativo!),
+        ),
       ),
     );
   }
 
   Widget _buildConteudo(ComparativoEvolucao c) {
-    final primeira = c.primeira;
-    final atual = c.atual;
-
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(TokensStrip.s4),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Cabeçalho com datas
-          Container(
-            decoration: fxListCardDecoration(context),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      children: [
-                        const Text(
-                          'Primeira',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w700,
-                            color: TokensStrip.textSecondary,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          _fmtData(primeira.avaliadoEm),
-                          style: FocuxHubTypography.bodyMuted(
-                            color: Theme.of(context).colorScheme.onSurface,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  const Icon(
-                    Icons.arrow_forward,
-                    color: TokensStrip.textSecondary,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Column(
-                      children: [
-                        const Text(
-                          'Atual',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w700,
-                            color: TokensStrip.textSecondary,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          _fmtData(atual.avaliadoEm),
-                          style: FocuxHubTypography.bodyMuted(
-                            color: Theme.of(context).colorScheme.onSurface,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: TokensStrip.s4),
-
-          // Tabela de comparativo
-          Container(
-            decoration: fxListCardDecoration(context),
-            clipBehavior: Clip.antiAlias,
-            child: Column(
-              children: [
-                _headerRow(),
-                const Divider(height: 1),
-                _metricaRow(
-                  label: 'Peso',
-                  unidade: 'kg',
-                  vPrimeira: primeira.pesoKg,
-                  vAtual: atual.pesoKg,
-                  menorEMelhor: true,
-                ),
-                _metricaRow(
-                  label: 'IMC',
-                  unidade: '',
-                  vPrimeira: primeira.imc,
-                  vAtual: atual.imc,
-                  menorEMelhor: true,
-                ),
-                _metricaRow(
-                  label: '% Gordura',
-                  unidade: '%',
-                  vPrimeira: primeira.percGordura,
-                  vAtual: atual.percGordura,
-                  menorEMelhor: true,
-                ),
-                _metricaRow(
-                  label: 'Massa Muscular',
-                  unidade: 'kg',
-                  vPrimeira: primeira.massaMuscular,
-                  vAtual: atual.massaMuscular,
-                  menorEMelhor: false,
-                ),
-                _metricaRow(
-                  label: 'Circ. Cintura',
-                  unidade: 'cm',
-                  vPrimeira: primeira.circCintura,
-                  vAtual: atual.circCintura,
-                  menorEMelhor: true,
-                ),
-                _metricaRow(
-                  label: 'Circ. Quadril',
-                  unidade: 'cm',
-                  vPrimeira: primeira.circQuadril,
-                  vAtual: atual.circQuadril,
-                  menorEMelhor: true,
-                ),
-                _metricaRow(
-                  label: 'Circ. Braço',
-                  unidade: 'cm',
-                  vPrimeira: primeira.circBraco,
-                  vAtual: atual.circBraco,
-                  menorEMelhor: false,
-                ),
-                _metricaRow(
-                  label: 'Circ. Coxa',
-                  unidade: 'cm',
-                  vPrimeira: primeira.circCoxa,
-                  vAtual: atual.circCoxa,
-                  menorEMelhor: false,
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: TokensStrip.s4),
-          const Row(
-            children: [
-              Icon(Icons.circle, size: 10, color: EagleTokens.good),
-              SizedBox(width: 4),
-              Text(
-                'Melhora',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: TokensStrip.textSecondary,
-                ),
-              ),
-              SizedBox(width: 12),
-              Icon(Icons.circle, size: 10, color: EagleTokens.bad),
-              SizedBox(width: 4),
-              Text(
-                'Piora',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: TokensStrip.textSecondary,
-                ),
-              ),
-              SizedBox(width: 12),
-              Icon(Icons.circle, size: 10, color: TokensStrip.textSecondary),
-              SizedBox(width: 4),
-              Text(
-                'Sem alteração',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: TokensStrip.textSecondary,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 32),
-          SizedBox(
-            width: double.infinity,
-            child: FxLiquidPrimaryButton(
-              label: 'Compartilhar com o aluno via Chat',
-              icon: Icons.share_rounded,
-              onPressed: () async {
-                try {
-                  final repo = EvolucaoRepository(ref.read(apiClientProvider));
-                  await repo.compartilharEvolucao(widget.alunoId);
-                  if (mounted) {
-                    FeedbackHelper.showSuccess(
-                      context,
-                      'Evolução compartilhada via chat com sucesso!',
-                    );
-                  }
-                } catch (e) {
-                  if (mounted) {
-                    FeedbackHelper.showError(context, friendlyError(e));
-                  }
-                }
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _headerRow() {
-    const style = TextStyle(
-      fontWeight: FontWeight.w700,
-      fontSize: 13,
-      color: TokensStrip.textSecondary,
-    );
-    return const Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      child: Row(
-        children: [
-          Expanded(flex: 3, child: Text('Métrica', style: style)),
-          Expanded(
-            flex: 2,
-            child: Text('Primeira', style: style, textAlign: TextAlign.center),
-          ),
-          Expanded(
-            flex: 2,
-            child: Text('Atual', style: style, textAlign: TextAlign.center),
-          ),
-          Expanded(
-            flex: 2,
-            child: Text('Delta', style: style, textAlign: TextAlign.center),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _metricaRow({
-    required String label,
-    required String unidade,
-    required double? vPrimeira,
-    required double? vAtual,
-    required bool menorEMelhor,
-  }) {
-    Color deltaColor = TokensStrip.textSecondary;
-    String deltaText = '—';
-    IconData? deltaIcon;
-
-    if (vPrimeira != null && vAtual != null) {
-      final diff = vAtual - vPrimeira;
-      deltaText = (diff >= 0 ? '+' : '') + diff.toStringAsFixed(1);
-      if (diff != 0) {
-        final melhorou = menorEMelhor ? diff < 0 : diff > 0;
-        deltaColor = melhorou ? EagleTokens.good : EagleTokens.bad;
-        deltaIcon = melhorou ? Icons.trending_up : Icons.trending_down;
-      }
-    }
-
-    final unidStr = unidade.isNotEmpty ? ' $unidade' : '';
-
-    return Container(
-      decoration: BoxDecoration(
-        border: Border(
-          top: BorderSide(color: Colors.black.withValues(alpha: 0.1)),
+    final chrome = ShellChrome.of(context);
+    return FxContentWidthLimiter(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(
+          FxSettingsLayout.pageInset,
+          8,
+          FxSettingsLayout.pageInset,
+          24,
         ),
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      child: Row(
-        children: [
-          Expanded(
-            flex: 3,
-            child: Text(
-              label,
-              style: FocuxHubTypography.bodyMuted(
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
-            ),
-          ),
-          Expanded(
-            flex: 2,
-            child: Text(
-              vPrimeira != null ? '${_fmtNum(vPrimeira)}$unidStr' : '—',
-              textAlign: TextAlign.center,
-              style: FocuxHubTypography.bodyMuted(
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
-            ),
-          ),
-          Expanded(
-            flex: 2,
-            child: Text(
-              vAtual != null ? '${_fmtNum(vAtual)}$unidStr' : '—',
-              textAlign: TextAlign.center,
-              style: FocuxHubTypography.bodyMuted(
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
-            ),
-          ),
-          Expanded(
-            flex: 2,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            EvolucaoComparativoTable(primeira: c.primeira, atual: c.atual),
+            const SizedBox(height: TokensStrip.s3),
+            Row(
               children: [
-                if (deltaIcon != null) ...[
-                  Icon(deltaIcon, size: 14, color: deltaColor),
-                  const SizedBox(width: 2),
-                ],
+                const Icon(Icons.circle, size: 10, color: EagleTokens.good),
+                const SizedBox(width: 4),
                 Text(
-                  deltaText,
-                  style: FocuxHubTypography.bodyMuted(
-                    color: deltaColor,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  'Melhora',
+                  style: TextStyle(fontSize: 12, color: chrome.mute),
+                ),
+                const SizedBox(width: 12),
+                const Icon(Icons.circle, size: 10, color: EagleTokens.bad),
+                const SizedBox(width: 4),
+                Text(
+                  'Piora',
+                  style: TextStyle(fontSize: 12, color: chrome.mute),
+                ),
+                const SizedBox(width: 12),
+                Icon(Icons.circle, size: 10, color: chrome.mute),
+                const SizedBox(width: 4),
+                Text(
+                  'Sem alteração',
+                  style: TextStyle(fontSize: 12, color: chrome.mute),
                 ),
               ],
             ),
-          ),
-        ],
+            const SizedBox(height: TokensStrip.s4),
+            FxSettingsGroup(
+              caption: evolucaoComparativoJanelaCaption(
+                primeira: evolucaoComparativoFmtData(c.primeira.avaliadoEm),
+                atual: evolucaoComparativoFmtData(c.atual.avaliadoEm),
+              ),
+              children: [
+                FxSettingsTile(
+                  fxIcon: 'message-circle',
+                  label: evolucaoComparativoShareTileLabel(),
+                  value:
+                      _compartilhando
+                          ? 'Enviando…'
+                          : evolucaoComparativoShareTileValue(),
+                  onTap: _compartilhando ? () {} : _compartilhar,
+                  showDivider: false,
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
