@@ -21,6 +21,7 @@ class _FxConnectivityBannerState extends State<FxConnectivityBanner> {
   StreamSubscription<List<ConnectivityResult>>? _subscription;
   bool _offline = false;
   int _pending = 0;
+  int _dropped = 0;
 
   @override
   void initState() {
@@ -45,6 +46,15 @@ class _FxConnectivityBannerState extends State<FxConnectivityBanner> {
       final after = await OfflineSyncService.getPendingCount();
       if (mounted) setState(() => _pending = after);
     }
+    // Depois de drenar: o que a fila desistiu de reenviar precisa aparecer,
+    // porque a tela já disse ao usuário que a ação tinha sido registrada.
+    final dropped = (await OfflineSyncService.pendingDropped()).length;
+    if (mounted && dropped != _dropped) setState(() => _dropped = dropped);
+  }
+
+  Future<void> _dismissDropped() async {
+    await OfflineSyncService.clearDropped();
+    if (mounted) setState(() => _dropped = 0);
   }
 
   @override
@@ -55,7 +65,7 @@ class _FxConnectivityBannerState extends State<FxConnectivityBanner> {
 
   @override
   Widget build(BuildContext context) {
-    final showBanner = _offline || _pending > 0;
+    final showBanner = _offline || _dropped > 0 || _pending > 0;
     return Column(
       children: [
         AnimatedSize(
@@ -64,10 +74,7 @@ class _FxConnectivityBannerState extends State<FxConnectivityBanner> {
           child:
               showBanner
                   ? Material(
-                    color:
-                        _offline
-                            ? EagleTokens.bad.withValues(alpha: 0.92)
-                            : Theme.of(context).colorScheme.primary.withValues(alpha: 0.92),
+                    color: _bannerColor(context),
                     child: SafeArea(
                       bottom: false,
                       child: Padding(
@@ -77,17 +84,11 @@ class _FxConnectivityBannerState extends State<FxConnectivityBanner> {
                         ),
                         child: Row(
                           children: [
-                            Icon(
-                              _offline ? Icons.wifi_off_rounded : Icons.sync,
-                              color: Colors.white,
-                              size: 16,
-                            ),
+                            Icon(_bannerIcon(), color: Colors.white, size: 16),
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
-                                _offline
-                                    ? 'Sem conexao — alteracoes serao sincronizadas depois.'
-                                    : 'Sincronizando $_pending acao(oes) pendente(s)...',
+                                _bannerMessage(),
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 12.5,
@@ -95,6 +96,20 @@ class _FxConnectivityBannerState extends State<FxConnectivityBanner> {
                                 ),
                               ),
                             ),
+                            // Descarte é o único estado que exige ciência do
+                            // usuário: conexão e sincronia se resolvem sozinhas.
+                            if (!_offline && _dropped > 0)
+                              TextButton(
+                                onPressed: _dismissDropped,
+                                style: TextButton.styleFrom(
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                  ),
+                                  minimumSize: const Size(44, 44),
+                                ),
+                                child: const Text('OK'),
+                              ),
                           ],
                         ),
                       ),
@@ -105,5 +120,29 @@ class _FxConnectivityBannerState extends State<FxConnectivityBanner> {
         Expanded(child: widget.child),
       ],
     );
+  }
+
+  Color _bannerColor(BuildContext context) {
+    if (_offline) return EagleTokens.bad.withValues(alpha: 0.92);
+    if (_dropped > 0) return EagleTokens.warn.withValues(alpha: 0.94);
+    return Theme.of(context).colorScheme.primary.withValues(alpha: 0.92);
+  }
+
+  IconData _bannerIcon() {
+    if (_offline) return Icons.wifi_off_rounded;
+    if (_dropped > 0) return Icons.error_outline_rounded;
+    return Icons.sync;
+  }
+
+  String _bannerMessage() {
+    if (_offline) {
+      return 'Sem conexao — alteracoes serao sincronizadas depois.';
+    }
+    if (_dropped > 0) {
+      return _dropped == 1
+          ? 'Uma alteracao nao pode ser salva. Refaca a acao.'
+          : '$_dropped alteracoes nao puderam ser salvas. Refaca as acoes.';
+    }
+    return 'Sincronizando $_pending acao(oes) pendente(s)...';
   }
 }
