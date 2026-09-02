@@ -12,19 +12,23 @@ void main() {
     expect(screen, contains('AuthShell'));
     expect(screen, contains('AuthFormEntrance'));
     expect(screen, contains('AuthOtpField'));
+    expect(screen, contains('AuthStickyRoleBar'));
     expect(screen, isNot(contains('CircularProgressIndicator')));
-
-    // Tipografia canônica — sem fontSize literal na tela.
     expect(screen, contains('authPageTitleStyle'));
     expect(screen, contains('authSubtitleStyle'));
     expect(screen, contains('authInlineErrorStyle'));
     expect(screen, isNot(contains('fontSize: 28')));
-
-    // Erro anunciado para leitor de tela e reenvio com countdown.
     expect(screen, contains('liveRegion: true'));
     expect(screen, contains('resendSeconds'));
-
-    // Segurança: não logar código nem nonce.
     expect(screen, isNot(contains('debugPrint')));
+    expect(screen, contains('FxSettingsTile'));
+    expect(screen, contains('showFxConfirmSheet'));
+    expect(screen, contains('resetCodigoContinuarLabel'));
+    expect(screen, contains('resetCodigoEmailHint'));
+    expect(screen, contains('mapResetCodigoError'));
+    expect(screen, contains('form == null || !form.validate()'));
+    expect(screen, contains('ensureFooter: true'));
+    expect(screen, isNot(contains('FxLiquidPrimaryButton')));
+    expect(screen, isNot(contains(r'$_email')));
   });
 }

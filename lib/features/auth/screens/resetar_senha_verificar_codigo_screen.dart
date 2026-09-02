@@ -1,17 +1,26 @@
-import 'package:dio/dio.dart';
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/hero_teal.dart';
 import '../../../core/theme/tokens_strip.dart';
-import '../../../core/widgets/fx_motion.dart';
+import '../../../core/widgets/fx_confirm_sheet.dart';
+import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
+import '../../../core/widgets/fx_settings_group.dart';
+import '../../../core/widgets/fx_settings_tile.dart';
 import '../providers/auth_provider.dart';
+import '../utils/auth_error_messages.dart';
+import '../utils/esqueci_senha_display.dart';
+import '../utils/login_display.dart';
+import '../utils/reset_codigo_display.dart';
 import '../widgets/auth_otp_field.dart';
 import '../widgets/auth_shell.dart';
+
+part 'resetar_senha_verificar_codigo_screen_actions.part.dart';
 
 class ResetarSenhaVerificarCodigoScreen extends ConsumerStatefulWidget {
   const ResetarSenhaVerificarCodigoScreen({super.key});
@@ -56,155 +65,122 @@ class _ResetarSenhaVerificarCodigoScreenState
     super.dispose();
   }
 
-  String get _loginPath => '/login?role=${_isAluno ? 'aluno' : 'personal'}';
-
-  Future<void> _resend() async {
-    if (_email.isEmpty) return;
-    setState(() {
-      _resending = true;
-      _error = null;
-    });
-    try {
-      await ref.read(authRepositoryProvider).solicitarResetSenha(
-        email: _email,
-        isAluno: _isAluno,
-        personalSlug: _isAluno ? _personalSlug : null,
-      );
-      if (!mounted) return;
-      startResendCooldown();
-    } catch (error) {
-      if (!mounted) return;
-      setState(() => _error = _mapError(error));
-    } finally {
-      if (mounted) setState(() => _resending = false);
-    }
-  }
-
-  Future<void> _submit() async {
-    final form = _formKey.currentState;
-    if (form == null || !form.validate()) return;
-    setState(() {
-      _loading = true;
-      _error = null;
-    });
-    HapticFeedback.mediumImpact();
-    try {
-      final nonce = await ref.read(authRepositoryProvider).validarResetCodigo(
-        email: _email,
-        codigo: _codeController.text.trim(),
-        isAluno: _isAluno,
-        personalSlug: _isAluno ? _personalSlug : null,
-      );
-      if (!mounted) return;
-      final role = _isAluno ? 'aluno' : 'personal';
-      final slugQuery =
-          _personalSlug != null && _personalSlug!.isNotEmpty
-              ? '&p=${Uri.encodeComponent(_personalSlug!)}'
-              : '';
-      context.go('/resetar-senha?resetNonce=$nonce&role=$role$slugQuery');
-    } catch (error) {
-      HapticFeedback.heavyImpact();
-      if (mounted) setState(() => _error = _mapError(error));
-    } finally {
-      if (mounted) setState(() => _loading = false);
-    }
-  }
-
-  String _mapError(Object error) {
-    if (error is DioException) {
-      final status = error.response?.statusCode;
-      if (status == null) return 'Sem conexão com o servidor.';
-      if (status == 429) {
-        return 'Muitas tentativas. Aguarde e peça um novo código.';
-      }
-      final data = error.response?.data;
-      if (data is Map && data['message'] is String) {
-        return data['message'] as String;
-      }
-    }
-    return 'Código inválido ou expirado.';
-  }
-
   @override
   Widget build(BuildContext context) {
     return fxScreenA11yScope(
-      label: 'Verificar código de recuperação',
+      label: resetCodigoHelpTitle(),
       child: AnnotatedRegion<SystemUiOverlayStyle>(
         value: const SystemUiOverlayStyle(
-          statusBarColor: Colors.transparent,
+          statusBarColor: fxTransparent,
           statusBarIconBrightness: Brightness.light,
           statusBarBrightness: Brightness.dark,
         ),
         child: Scaffold(
           body: AuthShell(
-            child: SingleChildScrollView(
-              padding: authScrollPadding(context, top: 48, bottomExtra: 28),
-              child: Form(
-                key: _formKey,
-                child: AuthFormEntrance(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      AuthBackButton(
-                        showLabel: true,
-                        onTap: () => context.go('/esqueci-senha?role=${_isAluno ? 'aluno' : 'personal'}'),
-                      ),
-                      const SizedBox(height: 16),
-                      AuthRoleHeader(
-                        roleLabel: _isAluno ? 'ALUNO' : 'PERSONAL',
-                        center: true,
-                        width: authLogoWidthFor(context),
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Digite o código',
-                        style: authPageTitleStyle(context),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Enviamos 6 dígitos para $_email. Válido por 10 minutos.',
-                        style: authSubtitleStyle().copyWith(height: 1.5),
-                      ),
-                      const SizedBox(height: 24),
-                      AuthOtpField(
-                        controller: _codeController,
-                        resendSeconds: resendSeconds,
-                        sending: _resending,
-                        disabled: _email.isEmpty,
-                        onResend: _resend,
-                        resendLabel: 'Reenviar',
-                      ),
-                      if (_error != null) ...[
-                        const SizedBox(height: 12),
-                        Semantics(
-                          liveRegion: true,
-                          child: Text(
-                            _error!,
-                            style: authInlineErrorStyle(),
-                          ),
-                        ),
-                      ],
-                      const SizedBox(height: 20),
-                      FxLiquidPrimaryButton(
-                        label: 'Continuar',
-                        icon: Icons.arrow_forward_rounded,
-                        loading: _loading,
-                        onPressed: _loading ? null : _submit,
-                      ),
-                      const SizedBox(height: TokensStrip.s3),
-                      TextButton(
-                        onPressed: () => context.go(_loginPath),
-                        child: Text(
-                          'Voltar ao login',
-                          style: FocuxHubTypography.body(
-                            color: heroTealSurface(0.85),
-                          ).copyWith(fontWeight: FontWeight.w600),
-                        ),
-                      ),
-                    ],
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    TokensStrip.s5,
+                    TokensStrip.s2,
+                    TokensStrip.s5,
+                    0,
+                  ),
+                  child: AuthStickyRoleBar(
+                    roleLabel: _isAluno ? 'ALUNO' : 'PERSONAL',
+                    onBack: () => context.go(_esqueciPath),
                   ),
                 ),
-              ),
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: authScrollPadding(
+                      context,
+                      top: TokensStrip.s3,
+                      bottomExtra: TokensStrip.s5,
+                      ensureFooter: true,
+                    ),
+                    child: Form(
+                      key: _formKey,
+                      child: AuthFormEntrance(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    resetCodigoHelpTitle(),
+                                    style: authPageTitleStyle(context),
+                                  ),
+                                ),
+                                FxHelpIconButton(
+                                  tooltip: resetCodigoHelpTitle(),
+                                  onTap: _abrirAjuda,
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Enviamos 6 dígitos para ${resetCodigoEmailHint(_email)}. '
+                              'Válido por 10 minutos.',
+                              style: authSubtitleStyle().copyWith(height: 1.5),
+                            ),
+                            const SizedBox(height: 24),
+                            AuthOtpField(
+                              controller: _codeController,
+                              resendSeconds: resendSeconds,
+                              sending: _resending,
+                              disabled: _email.isEmpty,
+                              onResend: () {
+                                unawaited(_pedirReenviar());
+                              },
+                            ),
+                            if (_error != null) ...[
+                              const SizedBox(height: 12),
+                              Semantics(
+                                liveRegion: true,
+                                child: Text(
+                                  _error!,
+                                  style: authInlineErrorStyle(),
+                                ),
+                              ),
+                            ],
+                            const SizedBox(height: 20),
+                            FxSettingsGroup(
+                              children: [
+                                FxSettingsTile(
+                                  fxIcon: 'circle-check',
+                                  label: resetCodigoContinuarLabel(),
+                                  value:
+                                      _loading
+                                          ? resetCodigoContinuandoLabel()
+                                          : resetCodigoRoleQuery(
+                                            isAluno: _isAluno,
+                                          ),
+                                  onTap:
+                                      _loading ? () {} : _pedirContinuar,
+                                ),
+                                FxSettingsTile(
+                                  fxIcon: 'users',
+                                  label: resetCodigoVoltarLoginLabel(),
+                                  value: 'Login',
+                                  picker: true,
+                                  showDivider: false,
+                                  onTap:
+                                      _loading
+                                          ? () {}
+                                          : () => context.go(_loginPath),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ),

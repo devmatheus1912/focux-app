@@ -71,6 +71,24 @@ String mapEsqueciSenhaError(Object error) {
   return 'Não foi possível enviar o código agora.';
 }
 
+/// Validação do código de 6 dígitos no reset de senha.
+String mapResetCodigoError(Object error) {
+  if (error is DioException) {
+    final statusCode = error.response?.statusCode;
+    if (statusCode == null) return 'Sem conexão com o servidor.';
+    if (statusCode == 429) {
+      return _backendMessage(error) ??
+          'Muitas tentativas. Aguarde e peça um novo código.';
+    }
+    if (statusCode == 400) {
+      return _backendMessage(error) ?? 'Código inválido ou expirado.';
+    }
+    final msg = _backendMessage(error);
+    if (msg != null) return msg;
+  }
+  return 'Código inválido ou expirado.';
+}
+
 /// Cadastro personal (e-mail/senha + código).
 String mapRegisterError(Object error) {
   if (error is DioException) {
