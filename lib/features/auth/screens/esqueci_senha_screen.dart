@@ -6,10 +6,10 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/hero_teal.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
+import '../../../core/widgets/fx_conversion.dart';
 import '../../../core/widgets/fx_help.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
-import '../../../core/widgets/fx_settings_group.dart';
-import '../../../core/widgets/fx_settings_tile.dart';
 import '../data/auth_repository.dart';
 import '../providers/auth_provider.dart';
 import '../utils/auth_error_messages.dart';
@@ -134,6 +134,20 @@ class _EsqueciSenhaScreenState extends ConsumerState<EsqueciSenhaScreen> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
+                                  Center(
+                                    child: FxConversionLockup(
+                                      width: authLogoWidthFor(
+                                        context,
+                                        withTagline: true,
+                                      ),
+                                      semanticLabel:
+                                          _isAluno
+                                              ? 'Focux ALUNO'
+                                              : 'Focux PERSONAL',
+                                      aluno: _isAluno,
+                                    ),
+                                  ),
+                                  const SizedBox(height: TokensStrip.s4),
                                   Row(
                                     children: [
                                       Expanded(
@@ -223,32 +237,20 @@ class _EsqueciSenhaScreenState extends ConsumerState<EsqueciSenhaScreen> {
                                     ),
                                     const SizedBox(height: 14),
                                   ],
-                                  FxSettingsGroup(
-                                    children: [
-                                      FxSettingsTile(
-                                        fxIcon: 'spark',
-                                        label: esqueciEnviarLabel(),
-                                        value:
-                                            _loading
-                                                ? esqueciEnviandoLabel()
-                                                : esqueciRoleQuery(
-                                                  isAluno: _isAluno,
-                                                ),
-                                        onTap:
-                                            _loading ? () {} : _pedirEnviar,
-                                      ),
-                                      FxSettingsTile(
-                                        fxIcon: 'users',
-                                        label: esqueciVoltarLoginLabel(),
-                                        value: 'Login',
-                                        picker: true,
-                                        showDivider: false,
-                                        onTap:
-                                            _loading
-                                                ? () {}
-                                                : () => context.go(_loginPath),
-                                      ),
-                                    ],
+                                  FxLiquidPrimaryButton(
+                                    label: esqueciEnviarLabel(),
+                                    loading: _loading,
+                                    loadingLabel: esqueciEnviandoLabel(),
+                                    onPressed:
+                                        _loading ? null : _pedirEnviar,
+                                  ),
+                                  FxConversionTextLink(
+                                    text: '',
+                                    actionText: esqueciVoltarLoginLabel(),
+                                    onTap: () {
+                                      if (_loading) return;
+                                      context.go(_loginPath);
+                                    },
                                   ),
                                 ],
                               ),
