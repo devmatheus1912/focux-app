@@ -11,9 +11,19 @@ void main() {
     expect(screen, anyOf(contains('FxContentWidthLimiter'), isNot(contains('constrainWidth: false'))));
     expect(screen, anyOf(contains('friendlyError'), contains('DashboardErrorState'), contains('FxEmptyState'), contains('_erro'), contains('_TrainingEmptyState'), contains('ref.invalidate')));
     expect(screen, anyOf(contains('FxLoading'), contains('SkeletonLoader'), contains('SkeletonList'), contains('DashboardShimmer'), contains('Shimmer'), contains('IaCopilotInsightsLoading'), contains('_loading')));
-    expect(screen, contains('copySensitiveToClipboard'));
+    expect(screen, contains('showAddAlunoSenhaSheet'));
+    final senha = readScreenSourceBundle(
+      'lib/features/alunos/widgets/add_aluno_senha_sheet.dart',
+    );
+    expect(senha, contains('copySensitiveToClipboard'));
+    expect(senha, isNot(contains('FxLiquidPrimaryButton')));
     expect(screen, contains('Outro objetivo'));
-    expect(screen, contains('FxLiquidPrimaryButton'));
+    expect(screen, contains('ShellHeaderIconButton'));
+    expect(screen, contains("icon: 'circle-check'"));
+    expect(screen, contains('showFxConfirmSheet'));
+    expect(screen, contains('FxContentWidthLimiter'));
+    expect(screen, isNot(contains('FxLiquidPrimaryButton')));
+    expect(screen, isNot(contains('bottomNavigationBar')));
     expect(screen, isNot(contains('DashboardHomeActionChip')));
     expect(screen, contains('enabled: _canSubmit && !_loading'));
     expect(screen, contains('FxErrorState'));

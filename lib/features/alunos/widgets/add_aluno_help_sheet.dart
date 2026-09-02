@@ -12,7 +12,7 @@ Future<void> showAddAlunoHelpSheet(BuildContext context) {
       FxHelpTip(
         'Obrigatório',
         'Só nome completo e e-mail válidos liberam o Cadastrar.',
-        icon: 'user',
+        icon: 'users',
       ),
       FxHelpTip(
         'WhatsApp',
