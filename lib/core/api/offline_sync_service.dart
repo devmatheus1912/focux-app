@@ -78,9 +78,52 @@ class QueuedRequest {
   }
 }
 
+/// Mutação que a fila desistiu de reenviar, guardada para a UI poder contar a
+/// verdade depois de já ter respondido `202 queued` ao usuário.
+class DroppedMutation {
+  final String path;
+  final String method;
+  final int? statusCode;
+  final int droppedAtMillis;
+
+  const DroppedMutation({
+    required this.path,
+    required this.method,
+    this.statusCode,
+    required this.droppedAtMillis,
+  });
+
+  Map<String, dynamic> toJson() => {
+    'path': path,
+    'method': method,
+    'statusCode': statusCode,
+    'droppedAtMillis': droppedAtMillis,
+  };
+
+  factory DroppedMutation.fromJson(Map<String, dynamic> json) =>
+      DroppedMutation(
+        path: json['path'] as String? ?? '',
+        method: json['method'] as String? ?? '',
+        statusCode: (json['statusCode'] as num?)?.toInt(),
+        droppedAtMillis: (json['droppedAtMillis'] as num?)?.toInt() ?? 0,
+      );
+}
+
 class OfflineSyncService {
   static const _queueKey = 'offline_outbox_queue';
+  static const _droppedKey = 'offline_outbox_dropped';
   static const _maxAttempts = 8;
+  static const _maxDropped = 20;
+
+  /// 4xx que ainda valem nova tentativa. `409` entra porque o backend responde
+  /// isso enquanto a *primeira* requisição com a mesma `Idempotency-Key` está
+  /// em voo — a tentativa seguinte recebe o replay da resposta original.
+  static const _retryableClientStatuses = {408, 409, 425, 429};
+
+  /// Notificada quando uma mutação é descartada em definitivo. A UI liga aqui
+  /// para avisar o usuário; sem ouvinte, o descarte fica só no registro
+  /// persistido de [pendingDropped].
+  static void Function(DroppedMutation)? onMutationDropped;
 
   /// Add a failed request to the queue (sem body sensível).
   static Future<void> enqueueRequest(RequestOptions options) async {
@@ -130,9 +173,12 @@ class OfflineSyncService {
     return data;
   }
 
+  /// Chamado na invalidação de sessão: leva o registro de descartes junto,
+  /// porque ele descreve mutações do usuário que saiu.
   static Future<void> clearQueue() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_queueKey);
+    await prefs.remove(_droppedKey);
   }
 
   /// Get the number of pending requests
@@ -148,6 +194,10 @@ class OfflineSyncService {
   /// Aplica backoff exponencial: requests que falharam recentemente são
   /// puladas até `nextRetryAtMillis`. Após `_maxAttempts` falhas a request
   /// é descartada para não bloquear a fila eternamente.
+  ///
+  /// Falha permanente (4xx que não seja [_retryableClientStatuses]) sai na
+  /// primeira tentativa, sem gastar o backoff. Todo descarte, por limite de
+  /// tentativas ou por ser permanente, fica registrado em [pendingDropped].
   static Future<void> syncPendingRequests(Dio dio) async {
     final prefs = await SharedPreferences.getInstance();
     final queueStr = prefs.getString(_queueKey);
@@ -177,9 +227,14 @@ class OfflineSyncService {
             },
           ),
         );
-      } catch (_) {
-        if (req.attempts + 1 >= _maxAttempts) {
-          // Descarta após N tentativas para não enfileirar para sempre.
+      } catch (error) {
+        // Erro que nunca vai passar (validação, gate de plano, recurso que
+        // sumiu) não ganha nova tentativa: reenviar 8 vezes só atrasa o
+        // aviso ao usuário, que já recebeu `202 queued` como se tivesse dado
+        // certo.
+        final permanent = !_isRetryable(error);
+        if (permanent || req.attempts + 1 >= _maxAttempts) {
+          await _recordDropped(req, error);
           continue;
         }
         remainingList.add(req.withRetry().toJson());
@@ -191,6 +246,61 @@ class OfflineSyncService {
     } else {
       await prefs.setString(_queueKey, jsonEncode(remainingList));
     }
+  }
+
+  /// Na dúvida, retenta: só descarta o que dá para provar que é permanente.
+  static bool _isRetryable(Object error) {
+    if (error is! DioException) return true;
+    final status = error.response?.statusCode;
+    if (status == null) return true; // falha de transporte
+    if (status >= 500) return true;
+    if (status >= 400) return _retryableClientStatuses.contains(status);
+    return true;
+  }
+
+  static Future<void> _recordDropped(QueuedRequest req, Object error) async {
+    final dropped = DroppedMutation(
+      path: req.path,
+      method: req.method,
+      statusCode: error is DioException ? error.response?.statusCode : null,
+      droppedAtMillis: DateTime.now().millisecondsSinceEpoch,
+    );
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString(_droppedKey);
+      final list = raw != null ? (jsonDecode(raw) as List<dynamic>) : <dynamic>[];
+      list.add(dropped.toJson());
+      // Mantém só as últimas: o registro serve para avisar, não para auditar.
+      final trimmed =
+          list.length > _maxDropped
+              ? list.sublist(list.length - _maxDropped)
+              : list;
+      await prefs.setString(_droppedKey, jsonEncode(trimmed));
+    } catch (_) {
+      // Perder o registro não pode impedir a fila de seguir drenando.
+    }
+    try {
+      onMutationDropped?.call(dropped);
+    } catch (_) {}
+  }
+
+  /// Mutações que a fila desistiu de reenviar e que o usuário ainda não viu.
+  static Future<List<DroppedMutation>> pendingDropped() async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(_droppedKey);
+    if (raw == null) return const [];
+    try {
+      return (jsonDecode(raw) as List<dynamic>)
+          .map((e) => DroppedMutation.fromJson(e as Map<String, dynamic>))
+          .toList();
+    } catch (_) {
+      return const [];
+    }
+  }
+
+  static Future<void> clearDropped() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_droppedKey);
   }
 
   static String? _readIdempotencyKey(Map<String, dynamic> headers) {
