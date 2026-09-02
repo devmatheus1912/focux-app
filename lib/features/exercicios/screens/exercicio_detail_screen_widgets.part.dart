@@ -876,75 +876,38 @@ class _OwnVideoPanel extends StatelessWidget {
   final bool hasVideo;
   final bool uploading;
   final VoidCallback onUpload;
+  final VoidCallback onRemove;
 
   const _OwnVideoPanel({
     required this.hasVideo,
     required this.uploading,
     required this.onUpload,
+    required this.onRemove,
   });
 
   @override
   Widget build(BuildContext context) {
-    final chrome = ShellChrome.of(context);
-    final primary = Theme.of(context).colorScheme.primary;
-    final ink = chrome.ink;
-    final mute = chrome.mute;
-
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: fxListCardDecoration(context, accent: primary),
-      child: Row(
-        children: [
-          Container(
-            width: 42,
-            height: 42,
-            decoration: BoxDecoration(
-              color: primary.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Icon(
-              hasVideo ? Icons.verified_rounded : Icons.video_call_rounded,
-              color: primary,
-              size: 20,
-            ),
+    return FxSettingsGroup(
+      header: exerciseVideoPanelHeader(),
+      caption: exerciseVideoPanelCaption(hasVideo: hasVideo),
+      children: [
+        FxSettingsTile(
+          fxIcon: 'spark',
+          label: exerciseVideoUploadLabel(hasVideo: hasVideo),
+          value: uploading ? 'Enviando…' : '',
+          showDivider: hasVideo,
+          onTap: uploading ? () {} : onUpload,
+        ),
+        if (hasVideo)
+          FxSettingsTile(
+            fxIcon: 'alert-triangle',
+            label: exerciseVideoRemoveLabel(),
+            value: '',
+            danger: true,
+            showDivider: false,
+            onTap: uploading ? () {} : onRemove,
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  hasVideo ? 'Vídeo próprio ativo' : 'Adicionar vídeo próprio',
-                  style: TextStyle(
-                    color: ink,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  hasVideo
-                      ? 'Use sua demonstracao para gerar mais confianca no aluno.'
-                      : 'Suba uma demonstracao sua para diferenciar este exercicio.',
-                  style: TextStyle(
-                    color: mute,
-                    fontSize: 12.2,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 10),
-          FxLiquidPrimaryButton(
-            label: hasVideo ? 'Trocar vídeo' : 'Enviar vídeo',
-            icon: hasVideo ? Icons.sync_rounded : Icons.upload_rounded,
-            onPressed: uploading ? null : onUpload,
-            loading: uploading,
-            expand: false,
-          ),
-        ],
-      ),
+      ],
     );
   }
 }

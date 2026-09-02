@@ -62,6 +62,36 @@ abstract final class ExerciseVideoUploadSpec {
   }
 }
 
+String exerciseVideoPanelHeader() => 'Vídeo próprio';
+
+String exerciseVideoPanelCaption({required bool hasVideo}) =>
+    hasVideo
+        ? 'Use sua demonstração para gerar mais confiança no aluno.'
+        : 'Suba uma demonstração sua para diferenciar este exercício.';
+
+String exerciseVideoUploadLabel({required bool hasVideo}) =>
+    hasVideo ? 'Trocar vídeo' : 'Enviar vídeo';
+
+String exerciseVideoUploadConfirmTitle({required bool hasVideo}) =>
+    hasVideo
+        ? 'Trocar o vídeo deste exercício?'
+        : 'Enviar vídeo deste exercício?';
+
+String exerciseVideoUploadConfirmMessage() =>
+    'O arquivo vai para a biblioteca do aluno. Até 120 MB, MP4 ou MOV.';
+
+String exerciseVideoRemoveLabel() => 'Remover vídeo';
+
+String exerciseVideoRemoveConfirmTitle() => 'Remover vídeo próprio?';
+
+String exerciseVideoRemoveConfirmMessage() =>
+    'O aluno deixa de ver a sua demonstração neste exercício.';
+
+String exerciseVideoUploadSuccess() =>
+    'Vídeo próprio adicionado ao exercício.';
+
+String exerciseVideoRemoveSuccess() => 'Vídeo próprio removido.';
+
 class ExerciseVideoSpecTip {
   const ExerciseVideoSpecTip({
     required this.title,

@@ -19,7 +19,17 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
     }
   }
 
-  Future<void> _pickAndUploadVideo(BuildContext context) async {
+  Future<void> _pickAndUploadVideo(
+    BuildContext context, {
+    required bool hasVideo,
+  }) async {
+    final ok = await showFxConfirmSheet(
+      context,
+      title: exerciseVideoUploadConfirmTitle(hasVideo: hasVideo),
+      message: exerciseVideoUploadConfirmMessage(),
+      confirmLabel: exerciseVideoUploadLabel(hasVideo: hasVideo),
+    );
+    if (!ok || !context.mounted) return;
     setState(() => _uploadingVideo = true);
     try {
       final uploaded = await ref
@@ -33,10 +43,34 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
       ref.invalidate(exercicioProvider(widget.exercicioId));
       ref.invalidate(exerciciosFilteredProvider);
       if (!context.mounted) return;
-      FeedbackHelper.showSuccess(
-        context,
-        'Video proprio adicionado ao exercicio.',
-      );
+      FeedbackHelper.showSuccess(context, exerciseVideoUploadSuccess());
+    } catch (e) {
+      if (context.mounted) {
+        FeedbackHelper.showError(context, friendlyError(e));
+      }
+    } finally {
+      if (mounted) setState(() => _uploadingVideo = false);
+    }
+  }
+
+  Future<void> _removeOwnVideo(BuildContext context) async {
+    final ok = await showFxConfirmSheet(
+      context,
+      title: exerciseVideoRemoveConfirmTitle(),
+      message: exerciseVideoRemoveConfirmMessage(),
+      confirmLabel: exerciseVideoRemoveLabel(),
+      destructive: true,
+    );
+    if (!ok || !context.mounted) return;
+    setState(() => _uploadingVideo = true);
+    try {
+      await ref
+          .read(exercicioRepositoryProvider)
+          .removerVideo(id: widget.exercicioId);
+      ref.invalidate(exercicioProvider(widget.exercicioId));
+      ref.invalidate(exerciciosFilteredProvider);
+      if (!context.mounted) return;
+      FeedbackHelper.showSuccess(context, exerciseVideoRemoveSuccess());
     } catch (e) {
       if (context.mounted) {
         FeedbackHelper.showError(context, friendlyError(e));
@@ -65,7 +99,7 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
           border: FxInputDeco.outlineBorder(
             borderRadius: BorderRadius.circular(14),
           ),
-          hintText: 'Notas tecnicas, fonte do video ou motivo da decisao',
+          hintText: 'Notas técnicas, fonte do vídeo ou motivo da decisão',
         ),
       ),
     );
@@ -107,11 +141,11 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
     final primary = Theme.of(context).colorScheme.primary;
 
     return fxScreenA11yScope(
-      label: 'Exercicio',
+      label: 'Exercício',
       child: FxShellScaffold(
         useMesh: true,
         appBar: FxShellAppBar(
-          title: 'Exercicio',
+          title: 'Exercício',
           subtitle: 'DETALHES',
           onBack: () => safePopOrGo(context, '/exercicios'),
           actions: exercicioAsync.maybeWhen(
@@ -161,8 +195,14 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
                   title: 'Não conseguimos carregar o exercício',
                 ),
             data:
-                (ex) => SingleChildScrollView(
-                  padding: const EdgeInsets.all(TokensStrip.s4),
+                (ex) => FxContentWidthLimiter(
+                  child: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(
+                    FxSettingsLayout.pageInset,
+                    8,
+                    FxSettingsLayout.pageInset,
+                    32,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
@@ -177,7 +217,12 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
                       _OwnVideoPanel(
                         hasVideo: ex.videoUrl?.isNotEmpty == true,
                         uploading: _uploadingVideo,
-                        onUpload: () => _pickAndUploadVideo(context),
+                        onUpload:
+                            () => _pickAndUploadVideo(
+                              context,
+                              hasVideo: ex.videoUrl?.isNotEmpty == true,
+                            ),
+                        onRemove: () => _removeOwnVideo(context),
                       ),
                       if (ex.videoUrl?.isNotEmpty == true) ...[
                         const SizedBox(height: 12),
@@ -216,9 +261,10 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
                     ],
                   ),
                 ),
+              ),
+            ),
           ),
         ),
-      ),
     );
   }
 }

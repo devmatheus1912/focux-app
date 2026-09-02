@@ -12,5 +12,17 @@ void main() {
     expect(screen, anyOf(contains('friendlyError'), contains('DashboardErrorState'), contains('FxEmptyState'), contains('_erro'), contains('_TrainingEmptyState'), contains('ref.invalidate')));
     expect(screen, anyOf(contains('FxLoading'), contains('SkeletonLoader'), contains('SkeletonList'), contains('DashboardShimmer'), contains('Shimmer'), contains('IaCopilotInsightsLoading'), contains('_loading')));
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(16));
+    expect(screen, contains('FxContentWidthLimiter'));
+    expect(screen, contains('FxSettingsGroup'));
+    expect(screen, contains('FxSettingsTile'));
+    expect(screen, contains('showFxConfirmSheet'));
+    expect(screen, contains('exerciseVideoUploadConfirmTitle'));
+    expect(screen, contains('exerciseVideoRemoveConfirmTitle'));
+    expect(screen, contains('exerciseVideoUploadSuccess'));
+    expect(screen, isNot(contains('FxLiquidPrimaryButton')));
+    expect(screen, isNot(contains('FxLiquidSecondaryButton')));
+    expect(screen, isNot(contains('ExerciseVideoUploadStrip')));
+    expect(screen, contains('_PrescriptionReadinessPanel'));
+    expect(screen, contains('_VideoPlayer'));
   });
 }
