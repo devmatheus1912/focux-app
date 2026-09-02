@@ -252,8 +252,9 @@ class _PersonalDashboardScreenState
       _applyFinanceData(home.financeiro);
     } catch (e) {
       if (!mounted) return;
-      // Gate de plano ≠ outage — Home já mostra locked/upsell; sem snackbar.
-      if (isPlanGateError(e)) return;
+      // Entitlement ≠ outage — Home já mostra locked/upsell; sem snackbar.
+      // Cobre cota atingida também, que igualmente não é indisponibilidade.
+      if (isEntitlementError(e)) return;
       FeedbackHelper.showWarn(context, friendlyError(e));
     }
   }
