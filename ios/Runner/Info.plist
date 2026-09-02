@@ -38,6 +38,9 @@
 			<string>UIInterfaceOrientationPortrait</string>
 			<string>UIInterfaceOrientationPortraitUpsideDown</string>
 		</array>
+		<!-- Sem Split View/Slide Over: permite portrait-only no iPad (App Store 90474) -->
+		<key>UIRequiresFullScreen</key>
+		<true/>
 		<key>CADisableMinimumFrameDurationOnPhone</key>
 		<true/>
 		<key>UIApplicationSupportsIndirectInputEvents</key>
