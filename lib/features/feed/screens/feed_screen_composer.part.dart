@@ -47,9 +47,17 @@ class _FeedComposerSheetState extends State<_FeedComposerSheet> {
   }
 
   Future<void> _publicar() async {
-    if (!_formKey.currentState!.validate()) {
-      return;
-    }
+    if (_salvando) return;
+    if (!_formKey.currentState!.validate()) return;
+    HapticFeedback.mediumImpact();
+    final ok = await showFxConfirmSheet(
+      context,
+      title: feedPublicarConfirmTitle(),
+      message: feedPublicarConfirmMessage(),
+      icon: Icons.rss_feed_outlined,
+      confirmLabel: feedPublicarConfirmLabel(),
+    );
+    if (!ok || !mounted) return;
     setState(() => _salvando = true);
     try {
       String? midiaUrl;
@@ -71,6 +79,7 @@ class _FeedComposerSheetState extends State<_FeedComposerSheet> {
         midiaUrl: midiaUrl,
       );
       if (mounted) {
+        HapticFeedback.heavyImpact();
         Navigator.of(context).pop(true);
       }
     } catch (e) {
@@ -81,8 +90,28 @@ class _FeedComposerSheetState extends State<_FeedComposerSheet> {
     }
   }
 
+  Future<void> _abrirTipo() async {
+    final picked = await showFxInsetPickerSheet<String>(
+      context,
+      title: 'Tipo de post',
+      selected: _tipoSelecionado,
+      items: [
+        for (final t in feedTipoValues)
+          FxInsetPickerSheetItem(value: t, label: feedTipoLabel(t)),
+      ],
+    );
+    if (picked == null) return;
+    setState(() {
+      _tipoSelecionado = picked;
+      if (!feedTipoTemMidia(picked)) {
+        _midiaSelecionada = null;
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    final temMidia = feedTipoTemMidia(_tipoSelecionado);
     return Padding(
       padding: EdgeInsets.only(
         left: FxSettingsLayout.pageInset,
@@ -98,131 +127,91 @@ class _FeedComposerSheetState extends State<_FeedComposerSheet> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                FxInsetPickerRow(
-                  icon: Icons.category_outlined,
-                  label: 'Tipo de post',
-                  value: feedTipoLabel(_tipoSelecionado),
-                  onTap: () async {
-                    final picked = await showFxInsetPickerSheet<String>(
-                      context,
-                      title: 'Tipo de post',
-                      selected: _tipoSelecionado,
-                      items: [
-                        for (final t in feedTipoValues)
-                          FxInsetPickerSheetItem(
-                            value: t,
-                            label: feedTipoLabel(t),
-                          ),
-                      ],
-                    );
-                    if (picked == null) return;
-                    setState(() {
-                      _tipoSelecionado = picked;
-                      if (!feedTipoTemMidia(picked)) {
-                        _midiaSelecionada = null;
-                      }
-                    });
-                  },
-                ),
-                AlunoInsetFormField(
-                  controller: _tituloCtrl,
-                  label: 'Título',
-                  icon: Icons.title_outlined,
-                  validator:
-                      (v) =>
-                          (v == null || v.trim().isEmpty)
-                              ? 'Informe o título'
-                              : null,
-                ),
-                AlunoInsetFormField(
-                  controller: _conteudoCtrl,
-                  label: 'Conteúdo',
-                  icon: Icons.notes_outlined,
-                  maxLines: 4,
-                  showDivider: false,
-                  validator:
-                      (v) =>
-                          (v == null || v.trim().isEmpty)
-                              ? 'Informe o conteúdo'
-                              : null,
-                ),
-                if (feedTipoTemMidia(_tipoSelecionado)) ...[
-                  const SizedBox(height: 12),
-                  OutlinedButton.icon(
-                    onPressed:
-                        _salvando || _escolhendoMidia
-                            ? null
-                            : () => _escolherMidia(_tipoSelecionado),
-                    icon:
-                        _escolhendoMidia
-                            ? const SizedBox(
-                              width: 18,
-                              height: 18,
-                              child: FxLoading(strokeWidth: 2),
-                            )
-                            : Icon(
-                              _tipoSelecionado == 'VIDEO'
-                                  ? Icons.video_library_outlined
-                                  : Icons.photo_library_outlined,
-                            ),
-                    label: Text(
-                      feedMidiaCta(
-                        tipo: _tipoSelecionado,
-                        hasFile: _midiaSelecionada != null,
-                      ),
+                FxSettingsGroup(
+                  children: [
+                    FxSettingsTile(
+                      fxIcon: 'article',
+                      label: 'Tipo de post',
+                      value: feedTipoLabel(_tipoSelecionado),
+                      picker: true,
+                      onTap: _salvando ? () {} : _abrirTipo,
                     ),
-                  ),
-                  if (_midiaSelecionada != null) ...[
-                    const SizedBox(height: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 10,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.primary.withValues(alpha: 0.08),
-                        borderRadius: BorderRadius.circular(TokensStrip.rCard),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            _tipoSelecionado == 'VIDEO'
-                                ? Icons.movie_outlined
-                                : Icons.image_outlined,
-                            size: 18,
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              _midiaSelecionada!.name,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          IconButton(
-                            tooltip: 'Remover arquivo',
-                            visualDensity: VisualDensity.compact,
-                            onPressed:
-                                _salvando
-                                    ? null
-                                    : () => setState(
-                                      () => _midiaSelecionada = null,
-                                    ),
-                            icon: const Icon(Icons.close, size: 18),
-                          ),
-                        ],
-                      ),
+                    AlunoInsetFormField(
+                      controller: _tituloCtrl,
+                      label: 'Título',
+                      icon: Icons.title_outlined,
+                      inputFormatters: [
+                        LengthLimitingTextInputFormatter(feedTituloMax),
+                      ],
+                      validator:
+                          (v) =>
+                              (v == null || v.trim().isEmpty)
+                                  ? 'Informe o título'
+                                  : null,
+                    ),
+                    AlunoInsetFormField(
+                      controller: _conteudoCtrl,
+                      label: 'Conteúdo',
+                      icon: Icons.notes_outlined,
+                      maxLines: 4,
+                      showDivider: false,
+                      inputFormatters: [
+                        LengthLimitingTextInputFormatter(feedConteudoMax),
+                      ],
+                      validator:
+                          (v) =>
+                              (v == null || v.trim().isEmpty)
+                                  ? 'Informe o conteúdo'
+                                  : null,
                     ),
                   ],
+                ),
+                if (temMidia) ...[
+                  const SizedBox(height: TokensStrip.s3),
+                  FxSettingsGroup(
+                    children: [
+                      FxSettingsTile(
+                        fxIcon: _tipoSelecionado == 'VIDEO' ? 'trend' : 'article',
+                        label: feedMidiaCta(
+                          tipo: _tipoSelecionado,
+                          hasFile: _midiaSelecionada != null,
+                        ),
+                        value:
+                            _escolhendoMidia
+                                ? 'Abrindo…'
+                                : (_midiaSelecionada?.name ?? 'Galeria'),
+                        onTap:
+                            _salvando || _escolhendoMidia
+                                ? () {}
+                                : () => _escolherMidia(_tipoSelecionado),
+                        showDivider: _midiaSelecionada != null,
+                      ),
+                      if (_midiaSelecionada != null)
+                        FxSettingsTile(
+                          fxIcon: 'x',
+                          label: 'Remover arquivo',
+                          value: '',
+                          danger: true,
+                          showDivider: false,
+                          onTap:
+                              _salvando
+                                  ? () {}
+                                  : () => setState(() => _midiaSelecionada = null),
+                        ),
+                    ],
+                  ),
                 ],
-                const SizedBox(height: TokensStrip.s5),
-                FxLiquidPrimaryButton(
-                  label: _salvando ? 'Publicando...' : 'Publicar',
-                  icon: Icons.send,
-                  loading: _salvando,
-                  onPressed: _salvando ? null : _publicar,
+                const SizedBox(height: TokensStrip.s3),
+                FxSettingsGroup(
+                  children: [
+                    FxSettingsTile(
+                      fxIcon: 'circle-check',
+                      label: feedPublicarTileLabel(),
+                      value: _salvando ? 'Publicando…' : 'Confirmar',
+                      showDivider: false,
+                      onTap: _salvando ? () {} : _publicar,
+                    ),
+                  ],
                 ),
               ],
             ),

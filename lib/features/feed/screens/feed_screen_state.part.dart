@@ -118,7 +118,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                   isDark: isDark,
                   title: 'Nova publicação',
                   subtitle: 'Os alunos veem no feed deles.',
-                  leading: Icon(Icons.rss_feed_outlined, color: accent, size: 18),
+                  leading: FxIcon(name: 'article', color: accent, size: 18),
                 ),
               ),
               _FeedComposerSheet(ref: ref),

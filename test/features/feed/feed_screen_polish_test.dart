@@ -22,7 +22,13 @@ void main() {
     expect(screen, contains('showFxHomeSheet'));
     expect(screen, contains('showFxInsetPickerSheet'));
     expect(screen, contains('showFxConfirmSheet'));
+    expect(screen, contains('FxSettingsGroup'));
+    expect(screen, contains('FxSettingsTile'));
+    expect(screen, contains('feedPublicarConfirmTitle'));
+    expect(screen, contains('LengthLimitingTextInputFormatter'));
     expect(screen, contains('FxHubFreshness.fromFetchedAt'));
+    expect(screen, isNot(contains('FxLiquidPrimaryButton')));
+    expect(screen, isNot(contains('OutlinedButton')));
     expect(screen, isNot(contains('showModalBottomSheet')));
     expect(screen, isNot(contains('FloatingActionButton')));
     expect(screen, isNot(contains('DropdownButton')));

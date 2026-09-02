@@ -25,4 +25,16 @@ void main() {
     expect(feedMidiaCta(tipo: 'VIDEO', hasFile: false), 'Escolher vídeo');
     expect(feedMidiaCta(tipo: 'IMAGEM', hasFile: true), 'Trocar arquivo');
   });
+
+  test('publicar confirma e limita tamanho', () {
+    expect(feedTituloMax, 255);
+    expect(feedConteudoMax, 4000);
+    expect(feedPublicarTileLabel(), 'Publicar');
+    expect(feedPublicarConfirmTitle(), 'Publicar no feed?');
+    expect(
+      feedPublicarConfirmMessage(),
+      'Os alunos passam a ver esta publicação no feed deles.',
+    );
+    expect(feedPublicarConfirmLabel(), 'Publicar');
+  });
 }
