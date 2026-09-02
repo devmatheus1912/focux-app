@@ -39,7 +39,11 @@ class ApiClient {
           }
           if (_shouldUseIdempotency(options) &&
               !_hasHeader(options.headers, 'Idempotency-Key')) {
-            options.headers['Idempotency-Key'] = _newIdempotencyKey();
+            final scope = options.extra[_idempotencyScopeKey];
+            options.headers['Idempotency-Key'] =
+                scope is String && scope.isNotEmpty
+                    ? _idempotencyKeyForScope(scope)
+                    : _newIdempotencyKey();
           }
           handler.next(options);
         },
@@ -226,6 +230,46 @@ class ApiClient {
     return 'fx-$time-$randA$randB';
   }
 
+  /// Declara que a requisição representa uma operação identificável, para que
+  /// duas submissões dela compartilhem a mesma `Idempotency-Key`.
+  ///
+  /// Sem isso a chave é nova a cada tentativa, e aí a idempotência do servidor
+  /// só protege reenvio de transporte — dois toques no mesmo botão chegam como
+  /// duas mutações legítimas e distintas. O [scope] deve identificar a
+  /// operação e o alvo, não o instante: `'mensalidade-pagar-42'`, não
+  /// `'pagar-$now'`.
+  static Options idempotent(String scope, {Map<String, dynamic>? extra}) {
+    return Options(extra: {...?extra, _idempotencyScopeKey: scope});
+  }
+
+  static const _idempotencyScopeKey = 'fxIdempotencyScope';
+
+  /// Janela em que o mesmo escopo reaproveita a chave já emitida. Cobre toque
+  /// duplo e "tentar de novo" impaciente, e ainda deixa a mesma operação ser
+  /// repetida de propósito depois.
+  ///
+  /// É reaproveitamento por escopo em memória, não bucket de tempo, de
+  /// propósito: bucket tem borda, e duas submissões em lados opostos dela
+  /// receberiam chaves diferentes justamente no caso que precisa colapsar.
+  static const _idempotencyScopeTtl = Duration(minutes: 10);
+  static final Map<String, _ScopedIdempotencyKey> _scopedKeys = {};
+
+  static String _idempotencyKeyForScope(String scope) {
+    final now = DateTime.now();
+    _scopedKeys.removeWhere(
+      (_, issued) => now.difference(issued.issuedAt) > _idempotencyScopeTtl,
+    );
+    final existing = _scopedKeys[scope];
+    if (existing != null) return existing.key;
+    final key = _newIdempotencyKey();
+    _scopedKeys[scope] = _ScopedIdempotencyKey(key, now);
+    return key;
+  }
+
+  /// Só para teste: a janela é estática e vazaria entre casos.
+  @visibleForTesting
+  static void resetIdempotencyScopes() => _scopedKeys.clear();
+
   /// Catálogo não-PII apenas (planos). Dashboard/hoje/treinos ficam fora do disco.
   static bool _shouldCachePath(String path) {
     if (_isSensitiveDiskCachePath(path)) return false;
@@ -329,4 +373,11 @@ class ApiClient {
   static String _normalizePath(String path) {
     return path.replaceAll(RegExp(r'/\d+'), '/:id');
   }
+}
+
+class _ScopedIdempotencyKey {
+  final String key;
+  final DateTime issuedAt;
+
+  const _ScopedIdempotencyKey(this.key, this.issuedAt);
 }
