@@ -10,6 +10,9 @@ String mapLoginError(Object error) {
       return 'Email ou senha incorretos. '
           'Se você entrou com Google, use o botão Google ou redefina a senha.';
     }
+    if (statusCode == 429) {
+      return 'Muitas tentativas. Aguarde um pouco e tente de novo.';
+    }
   }
   return 'Não foi possível entrar agora.';
 }

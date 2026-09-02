@@ -12,10 +12,12 @@ void main() {
     expect(screen, anyOf(contains('FxLoading'), contains('SkeletonLoader'), contains('SkeletonList'), contains('DashboardShimmer'), contains('Shimmer'), contains('IaCopilotInsightsLoading'), contains('_loading')));
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(16));
 
-    // Esqueci-senha herda papel + slug do personal quando aluno já informou tenant.
-    expect(screen, contains('/esqueci-senha?role='));
-    expect(screen, contains("Uri.encodeComponent(slug)"));
-    expect(screen, contains('&p='));
+    expect(screen, contains('loginEsqueciPath'));
+    expect(screen, contains('loginRegisterPath'));
+    expect(
+      readScreenSourceBundle('lib/features/auth/utils/login_display.dart'),
+      contains("Uri.encodeComponent(slug)"),
+    );
 
     // Lockup de marca compartilhado — largura única para Personal e Aluno.
     expect(screen, contains('AuthLoginBrandHeader'));
@@ -38,7 +40,13 @@ void main() {
     expect(screen, contains("_personalSlug"));
     expect(screen, contains('PERSONAL_SLUG_REQUIRED'));
 
-    // Paleta hero teal para textos sobre o mesh cinematográfico.
-    expect(screen, anyOf(contains('heroTeal'), contains('AuthLoginBrandHeader')));
+    expect(screen, contains('FxSettingsTile'));
+    expect(screen, contains('showFxHelpSheet'));
+    expect(screen, contains('ProductEvents.loginSuccess'));
+    expect(screen, contains('AuthRoleToggle'));
+    expect(screen, contains('GoogleSignInButton'));
+    expect(screen, contains('AuthField'));
+    expect(screen, isNot(contains('FxLiquidPrimaryButton')));
+    expect(screen, isNot(contains('AuthTextLink')));
   });
 }

@@ -43,6 +43,11 @@ void main() {
     expect(mapSignupCodeError(dio(429)), contains('Aguarde'));
   });
 
+  test('mapLoginError cobre 401 e rate limit', () {
+    expect(mapLoginError(dio(401)), contains('Email ou senha'));
+    expect(mapLoginError(dio(429)), contains('Muitas tentativas'));
+  });
+
   test('mapGoogleSignInError humaniza timeout do proxy', () {
     expect(
       mapGoogleSignInError(

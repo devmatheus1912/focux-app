@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io' show Platform;
 
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -7,22 +8,28 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
+import '../../../core/analytics/analytics_service.dart';
 import '../../../core/auth/session_cache_evictor.dart';
 import '../../../core/config/env.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/hero_teal.dart';
 import '../../../core/theme/theme_provider.dart';
-import '../../../core/widgets/fx_motion.dart';
+import '../../../core/widgets/fx_help.dart';
+import '../../../core/widgets/fx_settings_group.dart';
+import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../features/perfil/providers/perfil_provider.dart';
 import '../../dashboard/utils/dashboard_home_prefetch.dart';
 import '../../alunos/utils/alunos_home_prefetch.dart';
 import '../providers/auth_provider.dart';
 import '../utils/auth_error_messages.dart';
+import '../utils/login_display.dart';
 import '../utils/post_login_redirect.dart';
 import '../widgets/auth_operational_notice.dart';
 import '../widgets/auth_shell.dart';
 import '../widgets/google_sign_in_button.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
+
+part 'login_screen_actions.part.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -136,131 +143,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     super.dispose();
   }
 
-  Future<void> _submit() async {
-    final form = _formKey.currentState;
-    if (form == null || !form.validate()) return;
-
-    setState(() {
-      _loading = true;
-      _error = null;
-    });
-    HapticFeedback.mediumImpact();
-
-    try {
-      if (_isAluno) {
-        if (_personalSlug == null || _personalSlug!.trim().isEmpty) {
-          setState(() {
-            _error =
-                'Abra o link do seu personal (?p=slug) para entrar como aluno.';
-            _loading = false;
-          });
-          return;
-        }
-        // BUG-39: aluno uses dedicated endpoint
-        await ref.read(authProvider.notifier).loginAluno(
-          _emailController.text.trim(),
-          _passwordController.text,
-          personalSlug: _personalSlug,
-        );
-        if (!mounted) return;
-        // BUG-40: redirect based on role + requiresPasswordChange
-        final requiresChange =
-            ref.read(authProvider.notifier).requiresPasswordChange;
-        context.go(
-          requiresChange
-              ? '/aluno/definir-senha'
-              : _postLoginRedirect(context, isAluno: true),
-        );
-      } else {
-        await ref
-            .read(authProvider.notifier)
-            .login(_emailController.text.trim(), _passwordController.text);
-        if (!mounted) return;
-        context.go(await _postPersonalLoginRedirect(context));
-      }
-    } catch (error) {
-      HapticFeedback.heavyImpact();
-      setState(() {
-        _error = mapLoginError(error);
-      });
-    } finally {
-      if (mounted) {
-        setState(() {
-          _loading = false;
-        });
-      }
-    }
-  }
-
-  Future<void> _submitGoogle() async {
-    if (_loading || _loadingGoogle) return;
-    setState(() {
-      _loadingGoogle = true;
-      _error = null;
-    });
-    HapticFeedback.mediumImpact();
-    try {
-      final isAndroid = !kIsWeb && Platform.isAndroid;
-      final google = GoogleSignIn(
-        clientId: isAndroid ? null : Env.googleWebClientId,
-        serverClientId: Env.googleWebClientId,
-        scopes: const ['email', 'profile'],
-      );
-      try {
-        await google.signOut();
-      } catch (_) {}
-      final account = await google.signIn();
-      if (account == null) return;
-      final auth = await account.authentication;
-      final idToken = auth.idToken;
-      if (idToken == null || idToken.isEmpty) {
-        throw StateError('Google nao retornou idToken.');
-      }
-      if (_isAluno &&
-          (_personalSlug == null || _personalSlug!.trim().isEmpty)) {
-        throw StateError('PERSONAL_SLUG_REQUIRED');
-      }
-      await ref.read(authProvider.notifier).loginGoogle(
-        idToken: idToken,
-        isAluno: _isAluno,
-        personalSlug: _isAluno ? _personalSlug : null,
-      );
-      if (!mounted) return;
-      if (_isAluno) {
-        context.go(_postLoginRedirect(context, isAluno: true));
-      } else {
-        context.go(await _postPersonalLoginRedirect(context));
-      }
-    } catch (error) {
-      HapticFeedback.heavyImpact();
-      if (!mounted) return;
-      setState(() => _error = mapGoogleSignInError(error, isAluno: _isAluno));
-    } finally {
-      if (mounted) setState(() => _loadingGoogle = false);
-    }
-  }
-
-  String _postLoginRedirect(BuildContext context, {required bool isAluno}) {
-    final fallback = isAluno ? '/dashboard/aluno' : '/dashboard/personal';
-    final from = GoRouterState.of(context).uri.queryParameters['from'];
-    if (from == null) return fallback;
-    return safePostLoginPath(from, isAluno: isAluno) ?? fallback;
-  }
-
-  Future<String> _postPersonalLoginRedirect(BuildContext context) async {
-    final fallback = _postLoginRedirect(context, isAluno: false);
-    try {
-      invalidateSessionUserCaches(ref);
-      ref.invalidate(perfilProvider);
-      prefetchPersonalDashboardHome(ref);
-      prefetchAlunosHome(ref);
-      await ref.read(perfilProvider.future);
-    } catch (_) {
-      // Prefetch best-effort — Home ainda é o destino.
-    }
-    return fallback;
-  }
-
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
@@ -292,9 +174,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                'Entrar',
-                                style: authPageTitleStyle(context),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      loginEntrarLabel(),
+                                      style: authPageTitleStyle(context),
+                                    ),
+                                  ),
+                                  FxHelpIconButton(
+                                    tooltip: loginHelpTitle(),
+                                    onTap: _abrirAjuda,
+                                  ),
+                                ],
                               ),
                               const SizedBox(height: 16),
                               AuthRoleToggle(
@@ -361,30 +253,41 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                   ),
                                 ),
                               ),
-                              Align(
-                                alignment: Alignment.centerRight,
-                                child: TextButton(
-                                  onPressed:
-                                      () {
-                                        final slug = _personalSlug?.trim();
-                                        final role =
-                                            _isAluno ? 'aluno' : 'personal';
-                                        final path =
-                                            slug != null && slug.isNotEmpty
-                                                ? '/esqueci-senha?role=$role&p=${Uri.encodeComponent(slug)}'
-                                                : '/esqueci-senha?role=$role';
-                                        context.go(path);
-                                      },
-                                  child: Text(
-                                    'Esqueci minha senha',
-                                    style: FocuxHubTypography.bodyMuted(
-                                      color: primary,
-                                      fontWeight: FontWeight.w600,
-                                    ),
+                              const SizedBox(height: 8),
+                              FxSettingsGroup(
+                                children: [
+                                  FxSettingsTile(
+                                    fxIcon: 'route',
+                                    label: loginEsqueciLabel(),
+                                    value: 'Reset',
+                                    picker: true,
+                                    onTap:
+                                        () => context.go(
+                                          loginEsqueciPath(
+                                            isAluno: _isAluno,
+                                            personalSlug: _personalSlug,
+                                          ),
+                                        ),
                                   ),
-                                ),
+                                  FxSettingsTile(
+                                    fxIcon: 'circle-check',
+                                    label: loginEntrarLabel(),
+                                    value:
+                                        _loading
+                                            ? loginEntrandoLabel()
+                                            : loginRoleQuery(
+                                              isAluno: _isAluno,
+                                            ),
+                                    showDivider: false,
+                                    onTap:
+                                        _loading || _loadingGoogle
+                                            ? () {}
+                                            : _submit,
+                                  ),
+                                ],
                               ),
                               if (_error != null) ...[
+                                const SizedBox(height: 12),
                                 Semantics(
                                   liveRegion: true,
                                   child: Text(
@@ -392,13 +295,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                     style: authInlineErrorStyle(),
                                   ),
                                 ),
-                                const SizedBox(height: 14),
                               ],
-                              FxLiquidPrimaryButton(
-                                label: 'Entrar',
-                                onPressed: _loading ? null : _submit,
-                                loading: _loading,
-                              ),
                               if (_googleEnabled ||
                                   _googleStatusNote != null) ...[
                                 const SizedBox(height: 12),
@@ -428,13 +325,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           ),
                         ),
                         const SizedBox(height: 18),
-                        AuthTextLink(
-                          text: 'Não tem conta? ',
-                          actionText: 'Criar conta grátis',
-                          onTap:
-                              () => context.go(
-                                _isAluno ? '/register/aluno' : '/register',
-                              ),
+                        FxSettingsGroup(
+                          children: [
+                            FxSettingsTile(
+                              fxIcon: 'users',
+                              label: loginCriarContaLabel(),
+                              value: loginRoleQuery(isAluno: _isAluno),
+                              picker: true,
+                              showDivider: false,
+                              onTap:
+                                  () => context.go(
+                                    loginRegisterPath(isAluno: _isAluno),
+                                  ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
@@ -445,32 +349,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           ),
         ),
       ),
-    );
-  }
-}
-
-class _AuthDivider extends StatelessWidget {
-  final String label;
-
-  const _AuthDivider({required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(child: Divider(color: heroTealSurface(0.2), height: 1)),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10),
-          child: Text(
-            label,
-            style: FocuxHubTypography.bodyMuted(
-              color: heroTealSurface(0.82),
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
-        Expanded(child: Divider(color: heroTealSurface(0.2), height: 1)),
-      ],
     );
   }
 }
