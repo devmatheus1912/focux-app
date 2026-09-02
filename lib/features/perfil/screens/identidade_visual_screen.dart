@@ -32,6 +32,7 @@ import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../dashboard/utils/dashboard_readability.dart';
+import 'package:focux_app/core/widgets/fx_motion.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 
 part 'identidade_visual_screen_actions.part.dart';
