@@ -12,24 +12,30 @@ void main() {
     expect(screen, contains('BrPhone'));
     expect(screen, contains('telefone:'));
     expect(screen, contains('emailCodigo:'));
-    expect(screen, contains('Enviar'));
+    expect(screen, contains('registerEnviarCodigoLabel'));
     expect(screen, contains('enviarCodigoEmail'));
     expect(screen, contains('mapRegisterError'));
     expect(screen, contains('mapSignupCodeError'));
-    // Crashlytics: nunca bang em FormState nulo no submit.
     expect(screen, isNot(contains('currentState!.validate')));
     expect(screen, contains('form == null || !form.validate()'));
     expect(screen, contains('AutofillHints.oneTimeCode'));
     expect(screen, contains('heroTeal'));
-    // Primário antes do secondary (hierarquia de CTA).
+    expect(screen, contains('registerCriarLabel'));
     expect(
-      screen.indexOf('Criar minha conta'),
+      screen.indexOf('registerCriarLabel'),
       lessThan(screen.indexOf('onboardingExistingAccountCta')),
     );
     expect(screen, contains('AuthStickyRoleBar'));
     expect(screen, contains('ensureFooter: true'));
     expect(screen, contains('AuthFormEntrance'));
     expect(screen, contains('dark: true'));
+    expect(screen, contains('FxSettingsTile'));
+    expect(screen, contains('showFxConfirmSheet'));
+    expect(screen, contains('PasswordStrengthMeter'));
+    expect(screen, contains('GoogleSignInButton'));
+    expect(screen, contains('FocuxLegal'));
+    expect(screen, isNot(contains('FxLiquidPrimaryButton')));
+    expect(screen, isNot(contains('FxLiquidSecondaryButton')));
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(8));
   });
 }

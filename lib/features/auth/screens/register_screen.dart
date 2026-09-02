@@ -16,15 +16,21 @@ import '../../../core/theme/hero_teal.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/br_phone.dart';
 import '../../../core/widgets/feedback_helper.dart';
-import '../../../core/widgets/fx_motion.dart';
+import '../../../core/widgets/fx_confirm_sheet.dart';
+import '../../../core/widgets/fx_help.dart';
+import '../../../core/widgets/fx_settings_group.dart';
+import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../features/perfil/providers/perfil_provider.dart';
 import '../providers/auth_provider.dart';
 import '../utils/auth_error_messages.dart';
+import '../utils/register_display.dart';
 import '../widgets/auth_operational_notice.dart';
 import '../widgets/auth_shell.dart';
 import '../widgets/google_sign_in_button.dart';
 import '../widgets/password_strength_meter.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
+
+part 'register_screen_actions.part.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
   final String? referralCodigo;
@@ -109,148 +115,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     });
   }
 
-  Future<void> _enviarCodigo() async {
-    final email = _emailController.text.trim();
-    if (email.isEmpty || !email.contains('@')) {
-      setState(() => _error = 'Informe um e-mail válido antes de enviar o código.');
-      return;
-    }
-    if (_sendingCode || _resendSeconds > 0) return;
-
-    setState(() {
-      _sendingCode = true;
-      _error = null;
-    });
-    HapticFeedback.selectionClick();
-
-    try {
-      final result =
-          await ref.read(authProvider.notifier).enviarCodigoEmail(email);
-      if (!mounted) return;
-      if (!result.codigoEnviado) {
-        HapticFeedback.heavyImpact();
-        setState(() {
-          _codeSent = false;
-          _error = result.hint.isNotEmpty
-              ? result.hint
-              : 'Não enviamos código para este e-mail. Tente Entrar se já tiver conta.';
-        });
-        return;
-      }
-      setState(() => _codeSent = true);
-      _startResendCountdown();
-      FeedbackHelper.showSuccess(
-        context,
-        result.hint.isNotEmpty
-            ? result.hint
-            : 'Código enviado. Confira a caixa de entrada (e o spam).',
-      );
-    } catch (error) {
-      HapticFeedback.heavyImpact();
-      if (!mounted) return;
-      setState(() => _error = mapSignupCodeError(error));
-    } finally {
-      if (mounted) setState(() => _sendingCode = false);
-    }
-  }
-
-  Future<void> _submit() async {
-    final form = _formKey.currentState;
-    if (form == null || !form.validate()) {
-      return;
-    }
-    if (!_codeSent && _codeController.text.trim().isEmpty) {
-      setState(() {
-        _error = 'Envie o código para o e-mail antes de criar a conta.';
-      });
-      return;
-    }
-
-    setState(() {
-      _loading = true;
-      _error = null;
-    });
-
-    HapticFeedback.mediumImpact();
-
-    try {
-      await ref
-          .read(authProvider.notifier)
-          .register(
-            _nameController.text.trim(),
-            _emailController.text.trim(),
-            _passwordController.text,
-            referralCodigo: widget.referralCodigo,
-            telefone: BrPhone.normalizeOrNull(_phoneController.text),
-            emailCodigo: _codeController.text.trim(),
-          );
-
-      if (!mounted) {
-        return;
-      }
-
-      ref.invalidate(perfilProvider);
-      context.go('/dashboard/personal');
-    } catch (error) {
-      HapticFeedback.heavyImpact();
-      if (!mounted) return;
-      setState(() {
-        _error = mapRegisterError(error);
-      });
-    } finally {
-      if (mounted) {
-        setState(() {
-          _loading = false;
-        });
-      }
-    }
-  }
-
-  Future<void> _submitGoogle() async {
-    if (_loading || _loadingGoogle) return;
-
-    setState(() {
-      _loadingGoogle = true;
-      _error = null;
-    });
-    HapticFeedback.mediumImpact();
-
-    try {
-      final isAndroid = !kIsWeb && Platform.isAndroid;
-      final google = GoogleSignIn(
-        clientId: isAndroid ? null : Env.googleWebClientId,
-        serverClientId: Env.googleWebClientId,
-        scopes: const ['email', 'profile'],
-      );
-      try {
-        await google.signOut();
-      } catch (_) {}
-
-      final account = await google.signIn();
-      if (account == null) return;
-
-      final auth = await account.authentication;
-      final idToken = auth.idToken;
-      if (idToken == null || idToken.isEmpty) {
-        throw StateError('Google nao retornou idToken.');
-      }
-
-      await ref
-          .read(authProvider.notifier)
-          .loginGoogle(idToken: idToken, isAluno: false);
-
-      if (!mounted) return;
-      ref.invalidate(perfilProvider);
-      context.go('/dashboard/personal');
-    } catch (error) {
-      HapticFeedback.heavyImpact();
-      if (!mounted) return;
-      setState(() => _error = mapGoogleSignInError(error, isAluno: false));
-    } finally {
-      if (mounted) setState(() => _loadingGoogle = false);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
@@ -295,9 +159,19 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                      Text(
-                        'Criar conta',
-                        style: authPageTitleStyle(context),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              'Criar conta',
+                              style: authPageTitleStyle(context),
+                            ),
+                          ),
+                          FxHelpIconButton(
+                            tooltip: registerHelpTitle(),
+                            onTap: _abrirAjuda,
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 6),
                       Text(
@@ -364,30 +238,23 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         }
                         return null;
                       },
-                      suffix: Semantics(
-                        button: true,
-                        label:
-                            _resendSeconds > 0
-                                ? 'Reenviar código em $_resendSeconds segundos'
-                                : 'Enviar código de verificação',
-                        child: TextButton(
-                          onPressed:
-                              (_sendingCode ||
-                                      _loading ||
-                                      _resendSeconds > 0 ||
-                                      _emailDeliveryAvailable == false)
-                                  ? null
-                                  : _enviarCodigo,
-                          child: Text(
-                            _sendingCode
-                                ? 'Enviando…'
-                                : _resendSeconds > 0
-                                ? '${_resendSeconds}s'
-                                : 'Enviar',
-                            style: FocuxHubTypography.chip(primary),
-                          ),
+                    ),
+                    const SizedBox(height: 8),
+                    FxSettingsGroup(
+                      children: [
+                        FxSettingsTile(
+                          fxIcon: 'spark',
+                          label: registerEnviarCodigoLabel(),
+                          value:
+                              _sendingCode
+                                  ? registerEnviandoCodigoLabel()
+                                  : _resendSeconds > 0
+                                  ? '${_resendSeconds}s'
+                                  : 'E-mail',
+                          showDivider: false,
+                          onTap: _pedirEnviarCodigo,
                         ),
-                      ),
+                      ],
                     ),
                     const SizedBox(height: 6),
                     Text(
@@ -444,7 +311,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       textInputAction: TextInputAction.done,
                       inputFormatters: [BrPhone.formatter()],
                       validator: BrPhone.validateOptional,
-                      onFieldSubmitted: (_) => _submit(),
+                      onFieldSubmitted: (_) => _pedirCriarConta(),
                     ),
                     const SizedBox(height: 22),
                     if (_error != null) ...[
@@ -457,19 +324,32 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       ),
                       const SizedBox(height: 12),
                     ],
-                    FxLiquidPrimaryButton(
-                      label: 'Criar minha conta',
-                      loading: _loading,
-                      onPressed: _loading ? null : _submit,
-                    ),
-                    const SizedBox(height: 10),
-                    FxLiquidSecondaryButton(
-                      label: FocuxBrandCopy.onboardingExistingAccountCta,
-                      icon: Icons.login_rounded,
-                      onPressed:
-                          _loading
-                              ? null
-                              : () => context.go('/login?role=personal'),
+                    FxSettingsGroup(
+                      children: [
+                        FxSettingsTile(
+                          fxIcon: 'circle-check',
+                          label: registerCriarLabel(),
+                          value:
+                              _loading
+                                  ? registerCriandoLabel()
+                                  : 'Personal',
+                          onTap:
+                              _loading || _loadingGoogle
+                                  ? () {}
+                                  : _pedirCriarConta,
+                        ),
+                        FxSettingsTile(
+                          fxIcon: 'users',
+                          label: FocuxBrandCopy.onboardingExistingAccountCta,
+                          value: 'Login',
+                          picker: true,
+                          showDivider: false,
+                          onTap:
+                              _loading
+                                  ? () {}
+                                  : () => context.go('/login?role=personal'),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 16),
                     const _AuthDivider(label: 'ou cadastre com'),
