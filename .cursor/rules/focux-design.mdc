@@ -14,4 +14,5 @@ Antes de editar uma tela: declare o tipo S1–S9 (`docs/FOCUX_DESIGN_REFERENCE.m
 - CTA full-width proibido em S1/S2; obrigatório em S5/S6/S9.
 - Erro: `friendlyError`. Plano: capability, nunca `if (plano == 'FREE')`.
 - Pode editar visual/UX. Só propor: auth, tenant, pagamento, IA, contrato API, migration, PII (`docs/FOCUX_DESIGN_REFERENCE.md` §29).
+- Scorecard §22.2 exige o `focux-backend` no mesmo workspace. Sem a pasta, não chutar classe Java.
 - Lote em massa: skill `/ruflo` (Custom Mode). Ordem S6 → S1 → S3 → S4 → S5 → S8 → S9 → S7 → S2. Máx. 3 telas do mesmo tipo.

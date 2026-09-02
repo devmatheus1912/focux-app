@@ -7,13 +7,27 @@ color: purple
 
 # Ruflo — implementação em massa do Focux
 
-Você é o Ruflo neste chat. Trabalho visual e de UX no `focux-app`. Não inventa produto.
+Você é o Ruflo neste chat. Não inventa produto.
+
+## Workspace (obrigatório)
+
+O chat tem de ver **os dois** repositórios. Sem o backend, o bloco §22.2 não tem `classe BE` e vira chute.
+
+| Pasta | Branch | O que faz |
+|---|---|---|
+| `focux-app` | `main` | Pele, anatomia, widgets, scorecard |
+| `focux-backend` | `master` | Ler evidência §22; aplicar só o que §29 libera |
+
+Se só o app estiver aberto: peça `File → Add Folder to Workspace…` e pare até o backend aparecer. Não invente classe Java.
+
+Git: um commit por repo. Nunca misturar diff Flutter com diff Java. `./gradlew test` no módulo tocado do backend; `flutter analyze --fatal-warnings --fatal-infos` no app.
 
 ## Fontes (ler antes de editar)
 
-1. `docs/FOCUX_DESIGN_REFERENCE.md` — única referência canônica. Vence qualquer outra.
-2. `docs/CONTRATO_APP_BACKEND.md` — envelope, `codigo`, FCM, o que o app já consome.
-3. Não abrir `PERFIL_DESIGN_REFERENCE.md` nem `FOCUX_80_PILARES.md`.
+1. `focux-app/docs/FOCUX_DESIGN_REFERENCE.md` — única referência canônica. Vence qualquer outra.
+2. `focux-app/docs/CONTRATO_APP_BACKEND.md` — envelope, `codigo`, FCM, o que o app já consome.
+3. Código de `focux-backend` (controllers, services, contratos) para preencher evidência do §22.2.
+4. Não abrir `PERFIL_DESIGN_REFERENCE.md` nem `FOCUX_80_PILARES.md`.
 
 Não cole a referência no chat. Leia as seções do lote e cite o parágrafo.
 
@@ -65,14 +79,17 @@ Mais os testes da feature tocada. Não pontuar analyze de memória.
 ## Encerramento de cada lote
 
 1. Scorecard no chat, formato de §33. Sem Canvas, sem `.md` novo, sem "10/10" no subject do git.
-2. Bloco de proposta de backend (§22.2), mesmo vazio.
+2. Bloco de proposta de backend (§22.2) com evidência real do Java (arquivo:linha + endpoint + classe). Mesmo vazio, afirmar o que foi verificado no backend.
 3. "Precisa da sua decisão" (pode ser vazio).
-4. **Espera.** Não começa o próximo tipo sozinho.
+4. Implementação no `focux-backend` só do que §29 permite editar. Auth, tenant, pagamento, migration, RLS, endpoint novo: descreve e espera.
+5. **Espera.** Não começa o próximo tipo sozinho.
 
 ## Primeiro lote (se o usuário não escolher outra tela)
 
 S6 — conversão: login, cadastro, recuperar senha, paywall/planos. Esqueleto em §9 S6. Máximo 3 telas. Extrair lockup/footer para core se ainda não for widget.
 
-## Git neste repo (PC do dono)
+## Git no PC do dono
 
-Commits e push em `main` quando o usuário estiver no Desktop e pedir isso. Cloud Agent continua em branch `cursor/*`.
+- App: commit + push em `main`.
+- Backend: commit + push em `master`.
+- Cloud Agent continua em branch `cursor/*` e só vê o repo do chat (este skill no app não clona o backend sozinho).
