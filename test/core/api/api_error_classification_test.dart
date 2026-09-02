@@ -92,6 +92,21 @@ void main() {
     expect(isPlanRestrictionError(error), isFalse);
   });
 
+  test('CREDENCIAIS_INVALIDAS e conhecido e nao e gate', () {
+    final error = _dio(
+      status: 401,
+      data: {
+        'erro': 'Credenciais inválidas',
+        'codigo': 'CREDENCIAIS_INVALIDAS',
+      },
+    );
+
+    expect(ApiErrorCodes.isKnown('CREDENCIAIS_INVALIDAS'), isTrue);
+    expect(ApiErrorCodes.credentials.contains('CREDENCIAIS_INVALIDAS'), isTrue);
+    expect(isPlanGateError(error), isFalse);
+    expect(isPlanRestrictionError(error), isFalse);
+  });
+
   test('codigo fora do catalogo cai no heuristico de texto', () {
     // Codigo que o backend passou a mandar depois desta versao nao pode
     // virar "nao e gate" e derrubar a sheet em silencio.

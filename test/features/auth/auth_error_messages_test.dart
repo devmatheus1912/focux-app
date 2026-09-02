@@ -46,6 +46,23 @@ void main() {
   test('mapLoginError cobre 401 e rate limit', () {
     expect(mapLoginError(dio(401)), contains('Email ou senha'));
     expect(mapLoginError(dio(429)), contains('Muitas tentativas'));
+    expect(
+      mapLoginError(
+        DioException(
+          requestOptions: RequestOptions(path: '/api/auth/login'),
+          response: Response(
+            requestOptions: RequestOptions(path: '/api/auth/login'),
+            statusCode: 401,
+            data: {
+              'erro': 'Credenciais inválidas',
+              'codigo': 'CREDENCIAIS_INVALIDAS',
+            },
+          ),
+          type: DioExceptionType.badResponse,
+        ),
+      ),
+      contains('Email ou senha'),
+    );
     expect(mapEsqueciSenhaError(dio(null)), 'Sem conexão com o servidor.');
     expect(mapEsqueciSenhaError(dio(429)), contains('Muitas tentativas'));
     expect(mapResetCodigoError(dio(429)), contains('novo código'));

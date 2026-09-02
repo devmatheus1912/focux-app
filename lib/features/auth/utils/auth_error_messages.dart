@@ -1,21 +1,33 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/services.dart';
 
+import '../../../core/api/api_error.dart';
+
 /// Mapeia erros do login por e-mail/senha para mensagens amigáveis em pt-BR.
+///
+/// `codigo` é a fonte primária. Status 401 continua como fallback para
+/// backend antigo sem o campo. O texto de `erro` no servidor não é
+/// reescrito nem exibido cru.
 String mapLoginError(Object error) {
+  final api = ApiError.from(error);
+  final codigo = api?.codigo;
+  if (codigo != null && ApiErrorCodes.credentials.contains(codigo)) {
+    return _loginCredenciaisCopy;
+  }
   if (error is DioException) {
-    final statusCode = error.response?.statusCode;
+    final statusCode = error.response?.statusCode ?? api?.status;
     if (statusCode == null) return 'Sem conexão com o servidor.';
-    if (statusCode == 401) {
-      return 'Email ou senha incorretos. '
-          'Se você entrou com Google, use o botão Google ou redefina a senha.';
-    }
+    if (statusCode == 401) return _loginCredenciaisCopy;
     if (statusCode == 429) {
       return 'Muitas tentativas. Aguarde um pouco e tente de novo.';
     }
   }
   return 'Não foi possível entrar agora.';
 }
+
+const _loginCredenciaisCopy =
+    'Email ou senha incorretos. '
+    'Se você entrou com Google, use o botão Google ou redefina a senha.';
 
 /// Extrai `message` do body JSON do backend, quando existir.
 String? _backendMessage(Object error) {

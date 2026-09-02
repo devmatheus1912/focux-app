@@ -132,6 +132,11 @@ abstract final class ApiErrorCodes {
     'CODIGO_SENHA_LIMITE_HORA',
   };
 
+  /// Login recusado — e-mail ou senha. Não é gate de plano.
+  static const credentials = <String>{
+    'CREDENCIAIS_INVALIDAS',
+  };
+
   /// Se o código está no catálogo que este app conhece.
   ///
   /// Existe para separar "código conhecido que não é gate" — decisão fechada —
@@ -142,5 +147,6 @@ abstract final class ApiErrorCodes {
       planGate.contains(codigo) ||
       quotaExceeded.contains(codigo) ||
       alreadyExists.contains(codigo) ||
-      rateLimited.contains(codigo);
+      rateLimited.contains(codigo) ||
+      credentials.contains(codigo);
 }

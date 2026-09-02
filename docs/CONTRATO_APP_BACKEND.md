@@ -175,6 +175,14 @@ Os dois primeiros já existem em produção hoje e não mudam.
 | `CODIGO_EMAIL_LIMITE_HORA` | `EmailVerificationService` |
 | `CODIGO_SENHA_LIMITE_HORA` | `PasswordResetService` |
 
+#### Credenciais — 401
+
+| `codigo` | Origem |
+|---|---|
+| `CREDENCIAIS_INVALIDAS` | `AuthService.loginPersonal` / `loginAluno` |
+
+O campo `erro` permanece `"Credenciais inválidas"`. Só o `codigo` é aditivo.
+
 Fonte no app: `lib/core/api/api_error.dart` (`ApiErrorCodes`). Código novo
 entra nos dois lados no mesmo PR pareado. Código que o app ainda não conhece
 **não** é tratado como "não é gate" — cai no heurístico de texto, senão um
