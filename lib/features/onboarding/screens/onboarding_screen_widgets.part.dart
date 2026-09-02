@@ -171,18 +171,29 @@ class _OnboardingFooter extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: TokensStrip.s5),
           child: Column(
             children: [
-              FxLiquidSecondaryButton(
-                label: FocuxBrandCopy.onboardingExistingAccountCta,
-                icon: Icons.login_rounded,
-                onPressed: onLogin,
-              ),
-              const SizedBox(height: 10),
-              FxLiquidPrimaryButton(
-                label:
-                    isLast
-                        ? FocuxBrandCopy.onboardingFinishCta(persona)
-                        : FocuxBrandCopy.onboardingCtaNext,
-                onPressed: onPrimary,
+              FxSettingsGroup(
+                children: [
+                  FxSettingsTile(
+                    fxIcon: 'circle-check',
+                    label:
+                        isLast
+                            ? FocuxBrandCopy.onboardingFinishCta(persona)
+                            : FocuxBrandCopy.onboardingCtaNext,
+                    value: onboardingPrimaryTileValue(
+                      isLast: isLast,
+                      persona: persona,
+                    ),
+                    onTap: onPrimary,
+                  ),
+                  FxSettingsTile(
+                    fxIcon: 'users',
+                    label: FocuxBrandCopy.onboardingExistingAccountCta,
+                    value: onboardingLoginTileValue(),
+                    picker: true,
+                    showDivider: false,
+                    onTap: onLogin,
+                  ),
+                ],
               ),
               if (isLast) ...[
                 const SizedBox(height: 8),

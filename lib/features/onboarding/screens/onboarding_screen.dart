@@ -12,10 +12,12 @@ import '../../../core/theme/hero_teal.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/motion_preferences.dart';
 import '../../../core/widgets/focux_official_logo.dart';
-import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
+import '../../../core/widgets/fx_settings_group.dart';
+import '../../../core/widgets/fx_settings_tile.dart';
 import '../../auth/widgets/auth_shell.dart';
 import '../data/brand_pulse_repository.dart';
+import '../utils/onboarding_display.dart';
 
 part 'onboarding_screen_widgets.part.dart';
 
