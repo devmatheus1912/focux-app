@@ -40,13 +40,13 @@ void main() {
     expect(screen, contains("_personalSlug"));
     expect(screen, contains('PERSONAL_SLUG_REQUIRED'));
 
-    expect(screen, contains('FxSettingsTile'));
+    expect(screen, isNot(contains('FxSettingsTile')));
+    expect(screen, contains('FxLiquidPrimaryButton'));
+    expect(screen, contains('FxConversionTextLink'));
     expect(screen, contains('showFxHelpSheet'));
     expect(screen, contains('ProductEvents.loginSuccess'));
     expect(screen, contains('AuthRoleToggle'));
     expect(screen, contains('GoogleSignInButton'));
     expect(screen, contains('AuthField'));
-    expect(screen, isNot(contains('FxLiquidPrimaryButton')));
-    expect(screen, isNot(contains('AuthTextLink')));
   });
 }

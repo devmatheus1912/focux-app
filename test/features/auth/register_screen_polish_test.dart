@@ -29,13 +29,15 @@ void main() {
     expect(screen, contains('ensureFooter: true'));
     expect(screen, contains('AuthFormEntrance'));
     expect(screen, contains('dark: true'));
-    expect(screen, contains('FxSettingsTile'));
+    expect(screen, isNot(contains('FxSettingsTile')));
+    expect(screen, contains('FxLiquidPrimaryButton'));
+    expect(screen, contains('FxLiquidSecondaryButton'));
+    expect(screen, contains('FxConversionLockup'));
+    expect(screen, contains('FxConversionTextLink'));
     expect(screen, contains('showFxConfirmSheet'));
     expect(screen, contains('PasswordStrengthMeter'));
     expect(screen, contains('GoogleSignInButton'));
     expect(screen, contains('FocuxLegal'));
-    expect(screen, isNot(contains('FxLiquidPrimaryButton')));
-    expect(screen, isNot(contains('FxLiquidSecondaryButton')));
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(8));
   });
 }

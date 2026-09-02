@@ -17,9 +17,9 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/br_phone.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
+import '../../../core/widgets/fx_conversion.dart';
 import '../../../core/widgets/fx_help.dart';
-import '../../../core/widgets/fx_settings_group.dart';
-import '../../../core/widgets/fx_settings_tile.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../../features/perfil/providers/perfil_provider.dart';
 import '../providers/auth_provider.dart';
 import '../utils/auth_error_messages.dart';
@@ -159,6 +159,16 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                      Center(
+                        child: FxConversionLockup(
+                          width: authLogoWidthFor(
+                            context,
+                            withTagline: true,
+                          ),
+                          semanticLabel: 'Focux PERSONAL',
+                        ),
+                      ),
+                      const SizedBox(height: TokensStrip.s4),
                       Row(
                         children: [
                           Expanded(
@@ -239,22 +249,18 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         return null;
                       },
                     ),
-                    const SizedBox(height: 8),
-                    FxSettingsGroup(
-                      children: [
-                        FxSettingsTile(
-                          fxIcon: 'spark',
-                          label: registerEnviarCodigoLabel(),
-                          value:
-                              _sendingCode
-                                  ? registerEnviandoCodigoLabel()
-                                  : _resendSeconds > 0
-                                  ? '${_resendSeconds}s'
-                                  : 'E-mail',
-                          showDivider: false,
-                          onTap: _pedirEnviarCodigo,
-                        ),
-                      ],
+                    const SizedBox(height: TokensStrip.s2),
+                    FxLiquidSecondaryButton(
+                      label:
+                          _sendingCode
+                              ? registerEnviandoCodigoLabel()
+                              : _resendSeconds > 0
+                              ? '${registerEnviarCodigoLabel()} (${_resendSeconds}s)'
+                              : registerEnviarCodigoLabel(),
+                      onPressed:
+                          _sendingCode || _resendSeconds > 0
+                              ? null
+                              : _pedirEnviarCodigo,
                     ),
                     const SizedBox(height: 6),
                     Text(
@@ -324,32 +330,23 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       ),
                       const SizedBox(height: 12),
                     ],
-                    FxSettingsGroup(
-                      children: [
-                        FxSettingsTile(
-                          fxIcon: 'circle-check',
-                          label: registerCriarLabel(),
-                          value:
-                              _loading
-                                  ? registerCriandoLabel()
-                                  : 'Personal',
-                          onTap:
-                              _loading || _loadingGoogle
-                                  ? () {}
-                                  : _pedirCriarConta,
-                        ),
-                        FxSettingsTile(
-                          fxIcon: 'users',
-                          label: FocuxBrandCopy.onboardingExistingAccountCta,
-                          value: 'Login',
-                          picker: true,
-                          showDivider: false,
-                          onTap:
-                              _loading
-                                  ? () {}
-                                  : () => context.go('/login?role=personal'),
-                        ),
-                      ],
+                    FxLiquidPrimaryButton(
+                      label: registerCriarLabel(),
+                      loading: _loading,
+                      loadingLabel: registerCriandoLabel(),
+                      onPressed:
+                          _loading || _loadingGoogle
+                              ? null
+                              : _pedirCriarConta,
+                    ),
+                    FxConversionTextLink(
+                      text: '',
+                      actionText:
+                          FocuxBrandCopy.onboardingExistingAccountCta,
+                      onTap: () {
+                        if (_loading) return;
+                        context.go('/login?role=personal');
+                      },
                     ),
                     const SizedBox(height: 16),
                     const _AuthDivider(label: 'ou cadastre com'),

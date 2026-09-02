@@ -15,10 +15,10 @@ import '../../../core/theme/focux_system_chrome.dart';
 import '../../../core/theme/hero_teal.dart';
 import '../../../core/theme/theme_provider.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
-import 'package:focux_app/core/widgets/fx_loading.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/focux_official_logo.dart';
 import '../../../core/widgets/focux_brand_tagline.dart';
+import '../../../core/widgets/fx_conversion.dart';
 import '../../../core/widgets/cinematic_mesh_background.dart';
 import '../../../core/widgets/fx_premium_entrance.dart';
 import '../../../core/widgets/mesh_scope.dart';
@@ -118,34 +118,7 @@ class AuthLogoMark extends ConsumerWidget {
   }
 }
 
-/// Cabeçalho compacto para cadastro — ícone + FOCUX / papel (sem lockup duplicado).
-/// Cabeçalho de marca nas telas auth — mesmo lockup oficial do splash/onboarding.
-class AuthRoleHeader extends StatelessWidget {
-  const AuthRoleHeader({
-    super.key,
-    required this.roleLabel,
-    this.center = false,
-    this.width = kAuthFormLogoWidth,
-  });
-
-  final String roleLabel;
-  final bool center;
-  final double width;
-
-  @override
-  Widget build(BuildContext context) {
-    final logo = Semantics(
-      label: 'Focux $roleLabel',
-      image: true,
-      child: FocuxOfficialLogo.full(width: width),
-    );
-    return center ? Center(child: logo) : logo;
-  }
-}
-
-/// Cabeçalho do login — mesmo lockup oficial Focux para Personal e Aluno,
-/// apenas trocando o rótulo do papel. Nenhuma variante é apenas ícone.
-/// Nunca usa logoUrl de sessão anterior (evita foto de perfil no login).
+/// Cabeçalho do login — lockup S6 oficial. Nunca usa logoUrl de sessão.
 class AuthLoginBrandHeader extends ConsumerWidget {
   const AuthLoginBrandHeader({
     super.key,
@@ -164,32 +137,13 @@ class AuthLoginBrandHeader extends ConsumerWidget {
       duration: reduceMotion ? Duration.zero : const Duration(milliseconds: 280),
       switchInCurve: Curves.easeOutCubic,
       switchOutCurve: Curves.easeInCubic,
-      child:
-          isAluno
-              ? Column(
-                key: const ValueKey('login-aluno'),
-                children: [
-                  AuthRoleHeader(
-                    roleLabel: 'ALUNO',
-                    center: true,
-                    width: logoWidth,
-                  ),
-                  const SizedBox(height: TokensStrip.s3),
-                  AuthWordmark(taglineSize: taglineSize),
-                ],
-              )
-              : Column(
-                key: const ValueKey('login-personal'),
-                children: [
-                  AuthRoleHeader(
-                    roleLabel: 'PERSONAL',
-                    center: true,
-                    width: logoWidth,
-                  ),
-                  const SizedBox(height: TokensStrip.s3),
-                  AuthWordmark(taglineSize: taglineSize),
-                ],
-              ),
+      child: FxConversionLockup(
+        key: ValueKey(isAluno ? 'login-aluno' : 'login-personal'),
+        width: logoWidth,
+        semanticLabel: isAluno ? 'Focux ALUNO' : 'Focux PERSONAL',
+        tagline: AuthWordmark(taglineSize: taglineSize),
+        aluno: isAluno,
+      ),
     );
   }
 }
@@ -457,23 +411,23 @@ class AuthField extends StatelessWidget {
             filled: true,
             fillColor: TokensStrip.glassFill(dark: true, opacity: 0.55),
             contentPadding: const EdgeInsets.symmetric(
-              horizontal: 14,
-              vertical: 12,
+              horizontal: TokensStrip.s4,
+              vertical: TokensStrip.s3,
             ),
             enabledBorder: FxInputDeco.outlineBorder(
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(TokensStrip.rInput),
               borderSide: BorderSide(color: primary.withValues(alpha: 0.18)),
             ),
             focusedBorder: FxInputDeco.outlineBorder(
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(TokensStrip.rInput),
               borderSide: BorderSide(color: primary, width: 1.35),
             ),
             errorBorder: FxInputDeco.outlineBorder(
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(TokensStrip.rInput),
               borderSide: BorderSide(color: EagleTokens.authErrorBorder),
             ),
             focusedErrorBorder: FxInputDeco.outlineBorder(
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(TokensStrip.rInput),
               borderSide: BorderSide(color: EagleTokens.authErrorBorder),
             ),
             errorStyle: const TextStyle(
@@ -483,183 +437,6 @@ class AuthField extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class AuthPrimaryButton extends StatefulWidget {
-  const AuthPrimaryButton({
-    super.key,
-    required this.label,
-    required this.onPressed,
-    this.icon,
-    this.isLoading = false,
-  });
-
-  final String label;
-  final VoidCallback? onPressed;
-  final IconData? icon;
-  final bool isLoading;
-
-  @override
-  State<AuthPrimaryButton> createState() => _AuthPrimaryButtonState();
-}
-
-class _AuthPrimaryButtonState extends State<AuthPrimaryButton>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _ctrl;
-  late Animation<double> _scale;
-
-  @override
-  void initState() {
-    super.initState();
-    _ctrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 120),
-      reverseDuration: const Duration(milliseconds: 280),
-    );
-    _scale = Tween<double>(
-      begin: 1.0,
-      end: 0.97,
-    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut));
-  }
-
-  @override
-  void dispose() {
-    _ctrl.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final primary = Theme.of(context).colorScheme.primary;
-    final reduceMotion = TokensStrip.prefersReducedMotion(context);
-    return GestureDetector(
-      onTapDown:
-          widget.isLoading || reduceMotion ? null : (_) => _ctrl.forward(),
-      onTapUp:
-          widget.isLoading
-              ? null
-              : (_) {
-                if (!reduceMotion) _ctrl.reverse();
-                widget.onPressed?.call();
-              },
-      onTapCancel:
-          widget.isLoading || reduceMotion ? null : () => _ctrl.reverse(),
-      child: AnimatedBuilder(
-        animation: _scale,
-        builder:
-            (_, child) => Transform.scale(
-              scale: reduceMotion ? 1.0 : _scale.value,
-              child: child,
-            ),
-        child: SizedBox(
-          width: double.infinity,
-          height: 48,
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  primary,
-                  widget.isLoading
-                      ? primary.withValues(alpha: 0.45)
-                      : BrandPalette.deep(primary),
-                ],
-              ),
-              boxShadow:
-                  widget.isLoading
-                      ? null
-                      : TokensStrip.coloredDepthGlow(primary, strength: 0.18),
-            ),
-            child: Center(
-              child:
-                  widget.isLoading
-                      ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: FxLoading(strokeWidth: 2, color: Colors.white),
-                      )
-                      : Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          if (widget.icon != null) ...[
-                            Icon(widget.icon, size: 16, color: Colors.white),
-                            const SizedBox(width: 8),
-                          ],
-                          Text(
-                            widget.label,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 15,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ],
-                      ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class AuthSecondaryButton extends StatelessWidget {
-  const AuthSecondaryButton({
-    super.key,
-    required this.label,
-    required this.onPressed,
-    this.icon,
-  });
-
-  final String label;
-  final VoidCallback? onPressed;
-  final IconData? icon;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      height: 48,
-      child: OutlinedButton(
-        onPressed: onPressed,
-        style: OutlinedButton.styleFrom(
-          side: BorderSide(
-            color: Theme.of(
-              context,
-            ).colorScheme.primary.withValues(alpha: 0.45),
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(TokensStrip.rButton),
-          ),
-          backgroundColor: TokensStrip.glassFill(dark: true, opacity: 0.55),
-          foregroundColor: Colors.white,
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            if (icon != null) ...[
-              Icon(
-                icon,
-                size: 17,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-              const SizedBox(width: 8),
-            ],
-            Text(
-              label,
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.primary,
-                fontSize: 15,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }
@@ -763,55 +540,6 @@ class AuthStickyRoleBar extends StatelessWidget {
             ),
             const SizedBox(width: 38),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-/// Link de rich text acessível para rodapés de auth (ex.: "Não tem conta? Criar conta").
-/// Expõe Semantics(link, button) em vez de depender apenas do gesto visual.
-class AuthTextLink extends StatelessWidget {
-  const AuthTextLink({
-    super.key,
-    required this.text,
-    required this.actionText,
-    required this.onTap,
-    this.textColor,
-    this.actionColor,
-    this.fontSize = 14,
-  });
-
-  final String text;
-  final String actionText;
-  final VoidCallback onTap;
-  final Color? textColor;
-  final Color? actionColor;
-  final double fontSize;
-
-  @override
-  Widget build(BuildContext context) {
-    final primary = actionColor ?? Theme.of(context).colorScheme.primary;
-    return Semantics(
-      link: true,
-      button: true,
-      label: '$text$actionText',
-      child: GestureDetector(
-        onTap: onTap,
-        child: RichText(
-          textAlign: TextAlign.center,
-          text: TextSpan(
-            style: FocuxHubTypography.body(
-              color: textColor ?? heroTealSurface(0.82),
-            ).copyWith(fontSize: fontSize),
-            children: [
-              TextSpan(text: text),
-              TextSpan(
-                text: actionText,
-                style: TextStyle(color: primary, fontWeight: FontWeight.w700),
-              ),
-            ],
-          ),
         ),
       ),
     );

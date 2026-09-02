@@ -50,12 +50,13 @@ void main() {
       screen.indexOf('esqueciEnviarLabel'),
       lessThan(screen.indexOf('esqueciVoltarLoginLabel')),
     );
-    expect(screen, contains('FxSettingsTile'));
+    expect(screen, isNot(contains('FxSettingsTile')));
+    expect(screen, contains('FxLiquidPrimaryButton'));
+    expect(screen, contains('FxConversionLockup'));
+    expect(screen, contains('FxConversionTextLink'));
     expect(screen, contains('showFxConfirmSheet'));
     expect(screen, contains('mapEsqueciSenhaError'));
     expect(screen, contains('form == null || !form.validate()'));
     expect(screen, contains('AuthOperationalNotice'));
-    expect(screen, isNot(contains('FxLiquidPrimaryButton')));
-    expect(screen, isNot(contains('AuthTextLink')));
   });
 }

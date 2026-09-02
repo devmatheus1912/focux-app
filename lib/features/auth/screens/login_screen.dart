@@ -14,9 +14,10 @@ import '../../../core/config/env.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/hero_teal.dart';
 import '../../../core/theme/theme_provider.dart';
+import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_conversion.dart';
 import '../../../core/widgets/fx_help.dart';
-import '../../../core/widgets/fx_settings_group.dart';
-import '../../../core/widgets/fx_settings_tile.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../../features/perfil/providers/perfil_provider.dart';
 import '../../dashboard/utils/dashboard_home_prefetch.dart';
 import '../../alunos/utils/alunos_home_prefetch.dart';
@@ -253,41 +254,22 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                   ),
                                 ),
                               ),
-                              const SizedBox(height: 8),
-                              FxSettingsGroup(
-                                children: [
-                                  FxSettingsTile(
-                                    fxIcon: 'route',
-                                    label: loginEsqueciLabel(),
-                                    value: 'Reset',
-                                    picker: true,
-                                    onTap:
-                                        () => context.go(
-                                          loginEsqueciPath(
-                                            isAluno: _isAluno,
-                                            personalSlug: _personalSlug,
-                                          ),
+                              const SizedBox(height: TokensStrip.s2),
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: FxConversionTextLink(
+                                  text: '',
+                                  actionText: loginEsqueciLabel(),
+                                  onTap:
+                                      () => context.go(
+                                        loginEsqueciPath(
+                                          isAluno: _isAluno,
+                                          personalSlug: _personalSlug,
                                         ),
-                                  ),
-                                  FxSettingsTile(
-                                    fxIcon: 'circle-check',
-                                    label: loginEntrarLabel(),
-                                    value:
-                                        _loading
-                                            ? loginEntrandoLabel()
-                                            : loginRoleQuery(
-                                              isAluno: _isAluno,
-                                            ),
-                                    showDivider: false,
-                                    onTap:
-                                        _loading || _loadingGoogle
-                                            ? () {}
-                                            : _submit,
-                                  ),
-                                ],
+                                      ),
+                                ),
                               ),
                               if (_error != null) ...[
-                                const SizedBox(height: 12),
                                 Semantics(
                                   liveRegion: true,
                                   child: Text(
@@ -295,7 +277,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                     style: authInlineErrorStyle(),
                                   ),
                                 ),
+                                const SizedBox(height: TokensStrip.s3),
                               ],
+                              FxLiquidPrimaryButton(
+                                label: loginEntrarLabel(),
+                                loading: _loading,
+                                loadingLabel: loginEntrandoLabel(),
+                                onPressed:
+                                    _loading || _loadingGoogle
+                                        ? null
+                                        : _submit,
+                              ),
                               if (_googleEnabled ||
                                   _googleStatusNote != null) ...[
                                 const SizedBox(height: 12),
@@ -324,21 +316,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             ],
                           ),
                         ),
-                        const SizedBox(height: 18),
-                        FxSettingsGroup(
-                          children: [
-                            FxSettingsTile(
-                              fxIcon: 'users',
-                              label: loginCriarContaLabel(),
-                              value: loginRoleQuery(isAluno: _isAluno),
-                              picker: true,
-                              showDivider: false,
-                              onTap:
-                                  () => context.go(
-                                    loginRegisterPath(isAluno: _isAluno),
-                                  ),
-                            ),
-                          ],
+                        const SizedBox(height: TokensStrip.s4),
+                        FxConversionTextLink(
+                          text: 'Não tem conta? ',
+                          actionText: loginCriarContaLabel(),
+                          onTap:
+                              () => context.go(
+                                loginRegisterPath(isAluno: _isAluno),
+                              ),
                         ),
                       ],
                     ),
