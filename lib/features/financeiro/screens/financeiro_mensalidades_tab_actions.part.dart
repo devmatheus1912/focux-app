@@ -49,47 +49,6 @@ extension FinanceiroMensalidadesTabActions on _FinanceiroMensalidadesTabState {
     }
   }
 
-  InputDecoration _fxDeco(String label, {IconData? icon, String? hint}) {
-    final chrome = ShellChrome.of(context);
-    final line = chrome.line;
-    final mute = chrome.mute;
-    final primary = Theme.of(context).colorScheme.primary;
-    return InputDecoration(
-      labelText: label,
-      hintText: hint,
-      labelStyle: TextStyle(
-        color: mute,
-        fontSize: 13.5,
-        fontWeight: FontWeight.w600,
-      ),
-      hintStyle: TextStyle(color: mute.withValues(alpha: 0.5), fontSize: 13.5),
-      prefixIcon: icon != null ? Icon(icon, size: 20, color: mute) : null,
-      filled: true,
-      fillColor: chrome.cardFill,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      border: FxInputDeco.outlineBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide(color: line),
-      ),
-      enabledBorder: FxInputDeco.outlineBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide(color: line),
-      ),
-      focusedBorder: FxInputDeco.outlineBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide(color: primary, width: 1.6),
-      ),
-      errorBorder: FxInputDeco.outlineBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: EagleTokens.bad),
-      ),
-      focusedErrorBorder: FxInputDeco.outlineBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: EagleTokens.bad, width: 1.6),
-      ),
-    );
-  }
-
   Future<void> _atualizarAtrasos() async {
     try {
       await FinanceiroRepository(

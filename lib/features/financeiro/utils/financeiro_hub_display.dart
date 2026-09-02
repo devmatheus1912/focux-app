@@ -111,3 +111,29 @@ List<FinanceiroMesOpcao> financeiroMesOpcoes({
   }
   return out;
 }
+
+String financeiroSalvarMensalidadeConfirmTitle() => 'Salvar mensalidade?';
+
+String financeiroSalvarMensalidadeConfirmMessage() =>
+    'Valor, mês e status entram no financeiro do aluno.';
+
+String financeiroLancarMensalidadeConfirmTitle() => 'Lançar mensalidade?';
+
+String financeiroLancarMensalidadeConfirmMessage() =>
+    'O valor entra na cobrança deste aluno.';
+
+String financeiroSalvarMensalidadeTileLabel() => 'Salvar';
+
+String financeiroLancarMensalidadeTileLabel() => 'Lançar';
+
+String financeiroMesPickerValue(String mesReferencia) {
+  final raw = mesReferencia.trim();
+  if (raw.isEmpty) return 'Selecionar';
+  return financeiroMensalidadeMesPorExtenso(raw);
+}
+
+String financeiroAlunoPickerValue(String? nome) {
+  final n = nome?.trim();
+  if (n == null || n.isEmpty) return 'Selecionar';
+  return n;
+}

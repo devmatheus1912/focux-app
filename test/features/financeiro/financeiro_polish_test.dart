@@ -29,6 +29,7 @@ void main() {
     expect(tab, contains('FeedbackHelper.showSuccess'));
     expect(tab, isNot(contains('class _MiniAction')));
     expect(tab, isNot(contains('FloatingActionButton')));
+    expect(tab, isNot(contains('FxLiquidPrimaryButton')));
     expect(tab, isNot(contains('check-circle')));
     expect(tab, isNot(contains('DropdownButtonFormField')));
     expect(tab, isNot(contains('Clipboard.setData')));

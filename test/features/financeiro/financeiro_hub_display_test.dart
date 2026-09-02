@@ -60,4 +60,15 @@ void main() {
     expect(ops[2].key, '2026-08');
     expect(financeiroMesTitulo(9, 2026), 'Setembro 2026');
   });
+
+  test('copy das sheets de lançar e salvar', () {
+    expect(financeiroSalvarMensalidadeConfirmTitle(), 'Salvar mensalidade?');
+    expect(financeiroLancarMensalidadeConfirmTitle(), 'Lançar mensalidade?');
+    expect(financeiroSalvarMensalidadeTileLabel(), 'Salvar');
+    expect(financeiroLancarMensalidadeTileLabel(), 'Lançar');
+    expect(financeiroMesPickerValue(''), 'Selecionar');
+    expect(financeiroMesPickerValue('2026-09-01'), 'Setembro 2026');
+    expect(financeiroAlunoPickerValue(null), 'Selecionar');
+    expect(financeiroAlunoPickerValue('Ana'), 'Ana');
+  });
 }
