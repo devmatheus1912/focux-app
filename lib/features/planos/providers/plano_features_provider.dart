@@ -6,6 +6,7 @@ import '../../../core/analytics/analytics_service.dart';
 import '../../../core/storage/secure_storage.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../dashboard/utils/dashboard_home_client_cache.dart';
+import '../data/plano_features_bff_cache.dart';
 import '../data/planos_repository.dart';
 
 final planosRepositoryProvider = Provider<PlanosRepository>(
@@ -40,6 +41,11 @@ class PlanoFeaturesNotifier extends StateNotifier<AsyncValue<PlanoFeatures>> {
   PlanoFeaturesNotifier(this._repo) : super(const AsyncLoading());
 
   bool _applyFreshHomeCacheIfAny() {
+    final fromBff = PlanoFeaturesBffCache.getIfFresh();
+    if (fromBff != null) {
+      seedFromHome(fromBff);
+      return true;
+    }
     final fromHome = DashboardHomeClientCache.getIfFresh()?.planoFeatures;
     if (fromHome == null) return false;
     seedFromHome(fromHome);
@@ -54,19 +60,20 @@ class PlanoFeaturesNotifier extends StateNotifier<AsyncValue<PlanoFeatures>> {
     if (_generation != gen) return;
     if (_applyFreshHomeCacheIfAny()) return;
 
-    if (cached != null &&
-        PlanosRepository.isEntitlementsCacheFresh(cached.cacheSavedAt)) {
+    if (cached != null) {
       state = AsyncData(cached.normalizeForTier());
-      unawaited(
-        AnalyticsService.instance.track(
-          ProductEvents.planGateStaleUsed,
-          props: {
-            'plan': cached.plano.name,
-            'cacheSavedAt': cached.cacheSavedAt?.toIso8601String(),
-          },
-        ),
-      );
-      unawaited(_refreshIfBootstrapStillCurrent(gen));
+      if (PlanosRepository.isEntitlementsCacheFresh(cached.cacheSavedAt)) {
+        unawaited(
+          AnalyticsService.instance.track(
+            ProductEvents.planGateStaleUsed,
+            props: {
+              'plan': cached.plano.name,
+              'cacheSavedAt': cached.cacheSavedAt?.toIso8601String(),
+            },
+          ),
+        );
+      }
+      // Sem GET /me em fundo: o próximo BFF chama [seedFromHome].
       return;
     }
 
@@ -174,6 +181,8 @@ class PlanoFeaturesNotifier extends StateNotifier<AsyncValue<PlanoFeatures>> {
   /// Seed imediato a partir do BFF `/home` (mesmo shape de `/planos/me`).
   void seedFromHome(PlanoFeatures features) {
     _generation++;
-    state = AsyncData(features.normalizeForTier());
+    final normalized = features.normalizeForTier();
+    PlanoFeaturesBffCache.put(normalized);
+    state = AsyncData(normalized);
   }
 }

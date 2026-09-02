@@ -56,7 +56,7 @@ void main() {
     expect(screen, contains('ProductEvents.treinoDetailRefreshed'));
     expect(screen, contains('ProductEvents.treinoPrescriptionSaved'));
     expect(screen, contains('treinoPrescriptionRejection'));
-    expect(screen, contains("source: 'empty'"));
+    expect(screen, contains('openAdd()'));
     expect(screen, contains('Montar por modelo'));
     expect(screen, contains('openMontarPorModelo'));
     expect(screen, contains('TreinosLayout.touchTarget'));
@@ -93,7 +93,7 @@ void main() {
     expect(screen, contains('TreinoInsetActionSheet'));
     expect(screen, isNot(contains('_DetailActionTile')));
     expect(screen, isNot(contains('_TreinoHeroActions')));
-    expect(screen, isNot(contains('FxEmptyState')));
+    expect(screen, contains('FxEmptyState'));
     expect(screen, contains('FxHomeSheetHandle'));
     expect(screen, contains('expand: true'));
     expect(screen, contains('TreinoPrescriptionVideoBlock'));
@@ -104,7 +104,7 @@ void main() {
     expect(screen, isNot(contains('treino_prescription_form.dart')));
     expect(screen, isNot(contains('TreinoPrescriptionField')));
     expect(screen, isNot(contains('TreinoTipoSeriePicker')));
-    expect(screen, isNot(contains('FxLiquidPrimaryButton')));
+    expect(screen, contains('FxLiquidPrimaryButton'));
     expect(screen, contains('showFxConfirmSheet'));
     expect(screen, contains('treinoPrescriptionSaveConfirmTitle'));
     expect(screen, contains('heightFactor: 0.88'));

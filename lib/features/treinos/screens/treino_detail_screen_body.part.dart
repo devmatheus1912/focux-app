@@ -259,7 +259,6 @@ class _TreinoDetailBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final repo = ref.read(treinoRepositoryProvider);
     final primary = Theme.of(context).colorScheme.primary;
-    final soft = BrandPalette.softened(primary);
     final chrome = ShellChrome.forDark(isDark);
     final contextLabel = _workoutContextLabel(treino, alunoNome);
     final displayName = _displayWorkoutName(treino.nome);
@@ -301,7 +300,10 @@ class _TreinoDetailBody extends StatelessWidget {
       }
     }
 
-    return RefreshIndicator(
+    return Column(
+      children: [
+        Expanded(
+          child: RefreshIndicator(
       onRefresh: onRefresh,
       child: FxContentWidthLimiter(
         child: CustomScrollView(
@@ -410,30 +412,6 @@ class _TreinoDetailBody extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(
                   FxSettingsLayout.pageInset,
-                  TokensStrip.s2,
-                  FxSettingsLayout.pageInset,
-                  TokensStrip.s3,
-                ),
-                child: FxSettingsGroup(
-                  accent: primary,
-                  children: [
-                    FxSettingsTile(
-                      icon: Icons.add_rounded,
-                      accent: soft,
-                      label: 'Adicionar exercício',
-                      value: '',
-                      highlight: true,
-                      showDivider: false,
-                      onTap: () => openAdd(),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  FxSettingsLayout.pageInset,
                   TokensStrip.s3,
                   FxSettingsLayout.pageInset,
                   TokensStrip.s2,
@@ -472,37 +450,19 @@ class _TreinoDetailBody extends StatelessWidget {
                     FxSettingsLayout.pageInset,
                     32,
                   ),
-                  child: Align(
-                    alignment: Alignment.topCenter,
-                    child: FxSettingsGroup(
-                      caption:
-                          'Adicione exercícios da biblioteca curada para montar este treino.',
-                      accent: primary,
-                      children: [
-                        FxSettingsTile(
-                          icon: Icons.fitness_center_rounded,
-                          accent: soft,
-                          label: 'Nenhum exercício ainda',
-                          subtitle: 'Adicionar exercício',
-                          value: '',
-                          highlight: true,
-                          onTap: () => openAdd(source: 'empty'),
-                        ),
-                        FxSettingsTile(
-                          icon: Icons.view_agenda_outlined,
-                          accent: soft,
-                          label: 'Montar por modelo',
-                          subtitle: 'ABC, full body, PPL…',
-                          value: '',
-                          showDivider: false,
-                          onTap: () => openMontarPorModelo(
-                            context: context,
-                            ref: ref,
-                            treinoId: treinoId,
-                            alreadyInTreinoIds: const {},
-                          ),
-                        ),
-                      ],
+                  child: FxEmptyState(
+                    icon: 'dumbbell',
+                    title: 'Nenhum exercício ainda',
+                    subtitle:
+                        'Adicione exercícios da biblioteca curada para montar este treino.',
+                    action: FxEmptyAction(
+                      label: 'Montar por modelo',
+                      onTap: () => openMontarPorModelo(
+                        context: context,
+                        ref: ref,
+                        treinoId: treinoId,
+                        alreadyInTreinoIds: const {},
+                      ),
                     ),
                   ),
                 ),
@@ -518,10 +478,28 @@ class _TreinoDetailBody extends StatelessWidget {
                 ref: ref,
                 onEditPrescription: openEditPrescription,
               ),
-            const SliverToBoxAdapter(child: SizedBox(height: 80)),
+            const SliverToBoxAdapter(child: SizedBox(height: 24)),
           ],
         ),
       ),
+          ),
+        ),
+        SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(
+              FxSettingsLayout.pageInset,
+              TokensStrip.s2,
+              FxSettingsLayout.pageInset,
+              TokensStrip.s3,
+            ),
+            child: FxLiquidPrimaryButton(
+              label: 'Adicionar exercício',
+              onPressed: () => openAdd(),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/widgets/fx_settings_group.dart';
-import '../../../core/widgets/fx_settings_tile.dart';
+import '../../../core/theme/tokens_strip.dart';
+import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../data/aluno_repository.dart';
 
 class Aluno360StudentQuickActions extends StatelessWidget {
@@ -27,33 +27,28 @@ class Aluno360StudentQuickActions extends StatelessWidget {
     final firstName = aluno.nome.split(' ').first;
     return Semantics(
       container: true,
-      label: 'Ações rápidas da aba operação',
-      child: FxSettingsGroup(
-        header: 'Ações rápidas',
-        caption: 'Acesso e evolução de $firstName',
-        accent: primary,
+      label: 'Ações rápidas da aba operação. Acesso e evolução de $firstName',
+      child: Wrap(
+        spacing: TokensStrip.s2,
+        runSpacing: TokensStrip.s2,
         children: [
-          FxSettingsTile(
-            icon: Icons.key_outlined,
+          DashboardHomeActionChip(
             label: 'Senha',
-            subtitle: 'Redefinir acesso do aluno',
-            value: '',
-            onTap: onPassword,
+            accent: primary,
+            isDark: isDark,
+            onPressed: onPassword,
           ),
-          FxSettingsTile(
-            icon: Icons.trending_up_rounded,
+          DashboardHomeActionChip(
             label: 'Evoluir',
-            subtitle: 'Medidas e histórico corporal',
-            value: '',
-            onTap: onEvolve,
+            accent: primary,
+            isDark: isDark,
+            onPressed: onEvolve,
           ),
-          FxSettingsTile(
-            icon: Icons.edit_outlined,
+          DashboardHomeActionChip(
             label: 'Editar',
-            subtitle: 'Cadastro e objetivo',
-            value: '',
-            showDivider: false,
-            onTap: onEdit,
+            accent: primary,
+            isDark: isDark,
+            onPressed: onEdit,
           ),
         ],
       ),

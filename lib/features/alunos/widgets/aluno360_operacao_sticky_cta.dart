@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../data/aluno_repository.dart';
 import '../providers/aluno_detail_providers.dart';
@@ -117,41 +118,44 @@ class Aluno360OperacaoStickyCtaBar extends ConsumerWidget {
             TokensStrip.s4,
             10,
           ),
-          child: Align(
-            alignment: AlignmentDirectional.bottomEnd,
-            child: Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              alignment: WrapAlignment.end,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: [
-                if (showSecondaryCommandCenter)
-                  DashboardHomeActionChip(
-                    label: 'Tarefa',
-                    accent: primary,
-                    isDark: isDark,
-                    onPressed: openCommandCenter,
-                  ),
-                if (showSecondaryChat)
-                  DashboardHomeActionChip(
-                    label: 'Chat',
-                    accent: primary,
-                    isDark: isDark,
-                    onPressed: () => openChat(acao: effectiveProxima?.acao),
-                  ),
-                Semantics(
-                  button: true,
-                  label: stickyDisplayLabel,
-                  child: DashboardHomeActionChip(
-                    label: stickyDisplayLabel,
-                    accent: primary,
-                    isDark: isDark,
-                    enabled: !creating,
-                    onPressed: onPrimary,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (showSecondaryCommandCenter || showSecondaryChat)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: TokensStrip.s2),
+                  child: Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      if (showSecondaryCommandCenter)
+                        DashboardHomeActionChip(
+                          label: 'Tarefa',
+                          accent: primary,
+                          isDark: isDark,
+                          onPressed: openCommandCenter,
+                        ),
+                      if (showSecondaryChat)
+                        DashboardHomeActionChip(
+                          label: 'Chat',
+                          accent: primary,
+                          isDark: isDark,
+                          onPressed: () => openChat(acao: effectiveProxima?.acao),
+                        ),
+                    ],
                   ),
                 ),
-              ],
-            ),
+              Semantics(
+                button: true,
+                label: stickyDisplayLabel,
+                child: FxLiquidPrimaryButton(
+                  label: stickyDisplayLabel,
+                  loading: creating,
+                  onPressed: creating ? null : onPrimary,
+                ),
+              ),
+            ],
           ),
         ),
       ),

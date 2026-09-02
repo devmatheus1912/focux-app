@@ -6,16 +6,16 @@ import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_icon.dart';
-import '../../../core/widgets/fx_settings_group.dart';
-import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_sparkline.dart';
+import '../../../core/widgets/operational_metric_tile.dart';
+import 'dashboard_home_action_chip.dart';
 import '../constants/dashboard_layout.dart';
 import '../utils/dashboard_entry_motion.dart';
 import '../utils/dashboard_microcopy.dart';
 import '../utils/dashboard_readability.dart';
 import '../utils/dashboard_screen_helpers.dart';
 
-/// Pulso do dia — um grupo inset (ChatGPT/iOS), sem cards KPI soltos.
+/// Pulso do dia — até 3 métricas S1 + tendência. Sem inset.
 class DashboardDayPulseStrip extends StatelessWidget {
   const DashboardDayPulseStrip({
     super.key,
@@ -86,49 +86,74 @@ class DashboardDayPulseStrip extends StatelessWidget {
       context: context,
       fade: fade,
       slideBegin: const Offset(0, 0.03),
-      child: FxSettingsGroup(
-        header: DashboardMicrocopy.pulsoOperacional,
-        accent: primary,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          FxSettingsTile(
-            fxIcon: 'users',
-            label: 'Ativos',
-            value: '$alunosAtivos',
-            numeric: true,
-            showDivider: true,
-            semanticsLabel:
-                alunosAtivos == 0
-                    ? '0 ativos, sem movimento hoje'
-                    : '$alunosAtivos ativos',
+          Text(
+            DashboardMicrocopy.pulsoOperacional,
+            style: FxSettingsLayout.sectionHeader(
+              color: dashboardReadableCaption(context, isDark: isDark),
+            ),
+          ),
+          const SizedBox(height: FxSettingsLayout.headerToGroup),
+          InkWell(
             onTap: onAtivos,
+            borderRadius: BorderRadius.circular(12),
+            child: OperationalMetricTile(
+              label: 'Ativos',
+              value: '$alunosAtivos',
+              hint: alunosAtivos == 0
+                  ? 'Sem movimento hoje'
+                  : 'Base ativa',
+              color: primary,
+              isDark: isDark,
+              semanticsLabel:
+                  alunosAtivos == 0
+                      ? '0 ativos, sem movimento hoje'
+                      : '$alunosAtivos ativos',
+            ),
           ),
-          FxSettingsTile(
-            fxIcon: 'circle-check',
-            label: DashboardMicrocopy.checkinsPulseLabel,
-            value: '$checkinsHoje',
-            numeric: true,
-            showDivider: true,
-            accent: checkinsAccent,
-            semanticsLabel:
-                checkinsHoje == 0
-                    ? '0 check-ins, sem movimento hoje'
-                    : '$checkinsHoje check-ins',
+          const SizedBox(height: TokensStrip.s2),
+          InkWell(
             onTap: onCheckins,
+            borderRadius: BorderRadius.circular(12),
+            child: OperationalMetricTile(
+              label: DashboardMicrocopy.checkinsPulseLabel,
+              value: '$checkinsHoje',
+              hint: checkinsHoje == 0
+                  ? 'Sem movimento hoje'
+                  : 'Check-ins de hoje',
+              color: checkinsAccent,
+              isDark: isDark,
+              semanticsLabel:
+                  checkinsHoje == 0
+                      ? '0 check-ins, sem movimento hoje'
+                      : '$checkinsHoje check-ins',
+            ),
           ),
-          FxSettingsTile(
-            fxIcon: riscoAlto > 0 ? 'alert-triangle' : 'circle-check',
-            label: 'Risco',
-            value: '$riscoAlto',
-            numeric: true,
-            showDivider: showTrendRow || showCta,
-            accent: riscoAccent,
-            semanticsLabel:
-                riscoAlto == 0
-                    ? '0 em risco, sem movimento hoje'
-                    : '$riscoAlto em risco',
+          const SizedBox(height: TokensStrip.s2),
+          InkWell(
             onTap: onRisco,
+            borderRadius: BorderRadius.circular(12),
+            child: OperationalMetricTile(
+              label: 'Risco',
+              value: '$riscoAlto',
+              hint: riscoAlto == 0
+                  ? 'Sem movimento hoje'
+                  : 'Alunos pedem contato',
+              color: riscoAccent,
+              isDark: isDark,
+              emphasis: riscoAlto > 0
+                  ? OperationalMetricEmphasis.alert
+                  : OperationalMetricEmphasis.normal,
+              semanticsLabel:
+                  riscoAlto == 0
+                      ? '0 em risco, sem movimento hoje'
+                      : '$riscoAlto em risco',
+            ),
           ),
-          if (showTrendRow)
+          if (showTrendRow) ...[
+            const SizedBox(height: TokensStrip.s2),
             _PulseTrendRow(
               isDark: isDark,
               primary: primary,
@@ -141,18 +166,21 @@ class DashboardDayPulseStrip extends StatelessWidget {
               comfortable: comfortable,
               trailingReserve: trailingReserve,
               onTap: onCheckins,
-              showDivider: showCta,
-            ),
-          if (showCta)
-            FxSettingsTile(
-              fxIcon: emptyTrendCtaLabel!.toLowerCase().contains('agenda')
-                  ? 'calendar'
-                  : 'dumbbell',
-              label: emptyTrendCtaLabel!,
-              value: 'Abrir',
-              onTap: onEmptyTrendCta!,
               showDivider: false,
             ),
+          ],
+          if (showCta) ...[
+            const SizedBox(height: TokensStrip.s2),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: DashboardHomeActionChip(
+                label: emptyTrendCtaLabel!,
+                accent: primary,
+                isDark: isDark,
+                onPressed: onEmptyTrendCta!,
+              ),
+            ),
+          ],
         ],
       ),
     );

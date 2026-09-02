@@ -13,8 +13,8 @@ void main() {
     expect(screen, anyOf(contains('FxLoading'), contains('SkeletonLoader'), contains('SkeletonList'), contains('DashboardShimmer'), contains('Shimmer'), contains('IaCopilotInsightsLoading'), contains('_loading')));
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(16));
     expect(screen, contains('FxContentWidthLimiter'));
-    expect(screen, contains('FxSettingsGroup'));
-    expect(screen, contains('FxSettingsTile'));
+    expect(screen, contains('DashboardHomeActionChip'));
+    expect(screen, contains('FxConversionTextLink'));
     expect(screen, contains('showFxConfirmSheet'));
     expect(screen, contains('exerciseVideoUploadConfirmTitle'));
     expect(screen, contains('exerciseVideoRemoveConfirmTitle'));

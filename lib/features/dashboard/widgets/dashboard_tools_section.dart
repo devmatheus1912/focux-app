@@ -4,16 +4,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/tokens_strip.dart';
-import '../../../core/widgets/fx_settings_group.dart';
-import '../../../core/widgets/fx_settings_tile.dart';
 import '../../planos/data/planos_repository.dart';
+import '../data/command_action_item.dart';
+import 'command_action_tile.dart';
 import '../../planos/utils/effective_plano_features.dart';
 import '../data/dashboard_tool_shortcuts.dart';
 import '../utils/dashboard_haptic.dart';
 import '../utils/dashboard_microcopy.dart';
 import '../utils/dashboard_shortcut_navigation.dart';
 import 'dashboard_section_header.dart';
-import 'dashboard_tool_shortcut_group.dart';
 import 'dashboard_tools_catalog_sheet.dart';
 
 export 'dashboard_tools_catalog_sheet.dart';
@@ -65,6 +64,7 @@ class DashboardHomeToolsSection extends ConsumerWidget {
       );
     }
 
+    final primary = Theme.of(context).colorScheme.primary;
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         FxSettingsLayout.pageInset,
@@ -76,17 +76,18 @@ class DashboardHomeToolsSection extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           if (hideFeatured)
-            FxSettingsGroup(
-              children: [
-                FxSettingsTile(
-                  fxIcon: 'spark',
-                  label: DashboardMicrocopy.maisFerramentas,
-                  subtitle: caption,
-                  value: DashboardMicrocopy.abrirCatalogo,
-                  showDivider: false,
-                  onTap: openCatalog,
-                ),
-              ],
+            CommandActionTile(
+              item: CommandActionItem(
+                icon: 'spark',
+                title: DashboardMicrocopy.maisFerramentas,
+                subtitle: caption,
+                route: '',
+                tone: CommandActionTone.primary,
+              ),
+              isDark: isDark,
+              primary: primary,
+              showDivider: false,
+              onTap: openCatalog,
             )
           else ...[
             DashboardSectionHeader(
@@ -95,17 +96,33 @@ class DashboardHomeToolsSection extends ConsumerWidget {
               onAction: openCatalog,
             ),
             const SizedBox(height: FxSettingsLayout.headerToGroup),
-            DashboardToolShortcutGroup(
-              shortcuts: featuredShortcuts,
-              homePlanoFeatures: homePlanoFeatures,
-              onShortcut:
-                  (shortcut) => openDashboardShortcut(
-                    context,
-                    ref,
-                    shortcut,
-                    homeOverride: homePlanoFeatures,
-                  ),
-            ),
+            for (var i = 0; i < featuredShortcuts.length; i++)
+              CommandActionTile(
+                item: CommandActionItem(
+                  icon: featuredShortcuts[i].icon,
+                  title: featuredShortcuts[i].label,
+                  subtitle:
+                      featuredShortcuts[i].isUnlocked(features)
+                          ? ''
+                          : 'Requer ${featuredShortcuts[i].tierBadgeLabel()}',
+                  route: featuredShortcuts[i].route ?? '',
+                  tone: CommandActionTone.primary,
+                  priorityBadge:
+                      featuredShortcuts[i].isUnlocked(features)
+                          ? null
+                          : featuredShortcuts[i].tierBadgeLabel(),
+                ),
+                isDark: isDark,
+                primary: primary,
+                showDivider: i < featuredShortcuts.length - 1,
+                onTap:
+                    () => openDashboardShortcut(
+                      context,
+                      ref,
+                      featuredShortcuts[i],
+                      homeOverride: homePlanoFeatures,
+                    ),
+              ),
           ],
         ],
       ),

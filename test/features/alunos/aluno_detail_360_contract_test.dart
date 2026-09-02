@@ -208,8 +208,8 @@ void main() {
       ).readAsStringSync(),
       allOf(
         contains('class Aluno360FinanceRiskBanner'),
-        contains('FxSettingsGroup'),
-        contains('FxSettingsTile'),
+        contains('CommandActionTile'),
+        contains('Pendência financeira'),
       ),
     );
     expect(
@@ -477,7 +477,7 @@ void main() {
       File(
         'lib/features/alunos/widgets/aluno360_student_quick_actions.dart',
       ).readAsStringSync(),
-      contains('FxSettingsGroup'),
+      contains('DashboardHomeActionChip'),
     );
     expect(
       File(
@@ -498,6 +498,7 @@ void main() {
         'lib/features/alunos/widgets/aluno360_operacao_sticky_cta.dart',
       ).readAsStringSync(),
       allOf(
+        contains('FxLiquidPrimaryButton'),
         contains('DashboardHomeActionChip'),
         contains('Ações rápidas da aba operação'),
       ),

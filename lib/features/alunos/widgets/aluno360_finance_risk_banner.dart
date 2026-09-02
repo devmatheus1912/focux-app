@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/design_tokens.dart';
-import '../../../core/widgets/fx_settings_group.dart';
-import '../../../core/widgets/fx_settings_tile.dart';
+import '../../dashboard/data/command_action_item.dart';
+import '../../dashboard/widgets/command_action_tile.dart';
 
-/// Finance delinquency row on the Operação tab — inset Perfil, not a tinted card.
+/// Pendência financeira — navegação para mensalidades, não transação.
 class Aluno360FinanceRiskBanner extends StatelessWidget {
   const Aluno360FinanceRiskBanner({
     super.key,
@@ -16,22 +16,19 @@ class Aluno360FinanceRiskBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FxSettingsGroup(
-      accent: EagleTokens.bad,
-      children: [
-        FxSettingsTile(
-          icon: Icons.payments_outlined,
-          label: 'Pendência financeira',
-          subtitle: 'Abrir mensalidades deste aluno',
-          value: '',
-          accent: EagleTokens.bad,
-          highlight: true,
-          showDivider: false,
-          semanticsLabel:
-              'Pendência financeira. Abrir mensalidades deste aluno',
-          onTap: () => context.push('/financeiro?alunoId=$alunoId'),
-        ),
-      ],
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return CommandActionTile(
+      item: const CommandActionItem(
+        icon: 'alert-triangle',
+        title: 'Pendência financeira',
+        subtitle: 'Abrir mensalidades deste aluno',
+        route: '/financeiro',
+        tone: CommandActionTone.hot,
+      ),
+      isDark: isDark,
+      primary: EagleTokens.bad,
+      showDivider: false,
+      onTap: () => context.push('/financeiro?alunoId=$alunoId'),
     );
   }
 }
