@@ -1,18 +1,23 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/hero_teal.dart';
 import '../../../core/theme/tokens_strip.dart';
-import '../../../core/widgets/fx_motion.dart';
+import '../../../core/widgets/fx_confirm_sheet.dart';
+import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
+import '../../../core/widgets/fx_settings_group.dart';
+import '../../../core/widgets/fx_settings_tile.dart';
 import '../data/auth_repository.dart';
 import '../providers/auth_provider.dart';
+import '../utils/auth_error_messages.dart';
+import '../utils/esqueci_senha_display.dart';
 import '../widgets/auth_operational_notice.dart';
 import '../widgets/auth_shell.dart';
+
+part 'esqueci_senha_screen_actions.part.dart';
 
 class EsqueciSenhaScreen extends ConsumerStatefulWidget {
   const EsqueciSenhaScreen({super.key});
@@ -26,9 +31,7 @@ class _EsqueciSenhaScreenState extends ConsumerState<EsqueciSenhaScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   bool _loading = false;
-  String? _message;
   String? _error;
-  String? _hint;
   bool _isAluno = false;
   bool _roleFromQueryApplied = false;
   String? _personalSlug;
@@ -79,105 +82,14 @@ class _EsqueciSenhaScreenState extends ConsumerState<EsqueciSenhaScreen> {
     super.dispose();
   }
 
-  Future<void> _submit() async {
-    final form = _formKey.currentState;
-    if (form == null || !form.validate()) {
-      return;
-    }
-
-    setState(() {
-      _loading = true;
-      _error = null;
-      _message = null;
-      _hint = null;
-    });
-
-    HapticFeedback.mediumImpact();
-
-    try {
-      await ref
-          .read(authRepositoryProvider)
-          .solicitarResetSenha(
-            email: _emailController.text.trim(),
-            isAluno: _isAluno,
-            personalSlug: _isAluno ? _personalSlug : null,
-          );
-
-      if (!mounted) {
-        return;
-      }
-
-      final role = _isAluno ? 'aluno' : 'personal';
-      final email = Uri.encodeComponent(_emailController.text.trim());
-      final slug =
-          _personalSlug != null && _personalSlug!.isNotEmpty
-              ? '&p=${Uri.encodeComponent(_personalSlug!)}'
-              : '';
-      context.go('/resetar-senha/verificar-codigo?email=$email&role=$role$slug');
-    } catch (error) {
-      HapticFeedback.heavyImpact();
-      setState(() {
-        _error = _mapError(error);
-      });
-    } finally {
-      if (mounted) {
-        setState(() {
-          _loading = false;
-        });
-      }
-    }
-  }
-
-  String _mapError(Object error) {
-    if (error is DioException) {
-      final statusCode = error.response?.statusCode;
-      if (statusCode == null) {
-        return 'Sem conexão com o servidor.';
-      }
-    }
-    return 'Não foi possível enviar o código agora.';
-  }
-
-  String _resetEnvironmentWarning() {
-    final issue = _environmentStatus?.firstIssueFor('password_reset');
-    if (issue != null) {
-      return issue.detail.isEmpty
-          ? 'O pedido de reset será registrado, mas a entrega do link depende da configuração de e-mail.'
-          : issue.detail;
-    }
-    return 'Envio de e-mail ainda não está ativo neste ambiente. O pedido será registrado, mas a entrega depende da configuração SMTP.';
-  }
-
-  String _resetEnvironmentTitle() {
-    return _environmentStatus?.firstIssueFor('password_reset')?.title ??
-        'E-mail de recuperação pendente';
-  }
-
-  String? _resetEnvironmentAction() {
-    final issue = _environmentStatus?.firstIssueFor('password_reset');
-    if (issue?.action.isNotEmpty == true) {
-      return issue!.action;
-    }
-    final actions =
-        _environmentStatus?.nextActions
-            .where((action) => action.toLowerCase().contains('smtp'))
-            .toList() ??
-        const [];
-    if (actions.isNotEmpty) {
-      return actions.first;
-    }
-    return 'Configurar SMTP no ambiente real antes da publicação.';
-  }
-
-  String get _loginPath => '/login?role=${_isAluno ? 'aluno' : 'personal'}';
-
   @override
   Widget build(BuildContext context) {
+    final issue = _environmentStatus?.firstIssueFor('password_reset');
     return fxScreenA11yScope(
-      label: 'Recuperar senha',
+      label: esqueciHelpTitle(),
       child: AnnotatedRegion<SystemUiOverlayStyle>(
         value: const SystemUiOverlayStyle(
-          statusBarColor: Colors.transparent,
+          statusBarColor: fxTransparent,
           statusBarIconBrightness: Brightness.light,
           statusBarBrightness: Brightness.dark,
         ),
@@ -207,9 +119,11 @@ class _EsqueciSenhaScreenState extends ConsumerState<EsqueciSenhaScreen> {
                         bottomExtra: TokensStrip.s4,
                         ensureFooter: true,
                       );
-                      final minBody = (constraints.maxHeight -
-                              scrollPad.vertical)
-                          .clamp(0.0, constraints.maxHeight);
+                      final minBody =
+                          (constraints.maxHeight - scrollPad.vertical).clamp(
+                            0.0,
+                            constraints.maxHeight,
+                          );
                       return SingleChildScrollView(
                         padding: scrollPad,
                         child: ConstrainedBox(
@@ -220,107 +134,122 @@ class _EsqueciSenhaScreenState extends ConsumerState<EsqueciSenhaScreen> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                    Text(
-                      'Recuperar senha',
-                      style: authPageTitleStyle(context),
-                    ),
-                    const SizedBox(height: 10),
-                    ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 320),
-                      child: Text(
-                        'Digite seu e-mail e enviamos um código de 6 dígitos para redefinir sua senha.',
-                        style: authSubtitleStyle(
-                          color: heroTealSurface(0.82),
-                        ).copyWith(height: 1.55),
-                      ),
-                    ),
-                    const SizedBox(height: TokensStrip.s5),
-                    AuthRoleToggle(
-                      isAluno: _isAluno,
-                      onPersonalTap: () {
-                        if (_isAluno) {
-                          HapticFeedback.selectionClick();
-                          setState(() => _isAluno = false);
-                        }
-                      },
-                      onAlunoTap: () {
-                        if (!_isAluno) {
-                          HapticFeedback.selectionClick();
-                          setState(() => _isAluno = true);
-                        }
-                      },
-                    ),
-                    const SizedBox(height: 18),
-                    AuthField(
-                      label: 'E-mail cadastrado',
-                      controller: _emailController,
-                      hintText: 'seu@email.com',
-                      icon: Icons.person_outline_rounded,
-                      keyboardType: TextInputType.emailAddress,
-                      textInputAction: TextInputAction.done,
-                      onFieldSubmitted: (_) => _submit(),
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'Informe o e-mail.';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: TokensStrip.s4),
-                    if (_emailDeliveryAvailable == false) ...[
-                      AuthOperationalNotice(
-                        icon: Icons.mark_email_unread_outlined,
-                        title: _resetEnvironmentTitle(),
-                        text: _resetEnvironmentWarning(),
-                        action: _resetEnvironmentAction(),
-                      ),
-                      const SizedBox(height: 18),
-                    ],
-                    if (_error != null) ...[
-                      Semantics(
-                        liveRegion: true,
-                        child: Text(_error!, style: authInlineErrorStyle()),
-                      ),
-                      const SizedBox(height: 14),
-                    ],
-                    if (_message != null) ...[
-                      Semantics(
-                        liveRegion: true,
-                        child: Text(
-                          _message!,
-                          style: authInlineSuccessStyle(),
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                    ],
-                    if (_hint != null) ...[
-                      Text(
-                        _hint!,
-                        style: FocuxHubTypography.bodyMuted(
-                          color: heroTealSurface(0.82),
-                          height: 1.45,
-                        ),
-                      ),
-                      const SizedBox(height: 14),
-                    ],
-                    FxLiquidPrimaryButton(
-                      label: 'Enviar código',
-                      icon: Icons.send_rounded,
-                      loading: _loading,
-                      onPressed: _loading ? null : _submit,
-                    ),
-                    // Sem Spacer: o corpo vive num scroll com altura ilimitada
-                    // (flex aqui quebra o layout). Padrão igual ao login.
-                    const SizedBox(height: TokensStrip.s5),
-                    Center(
-                      child: AuthTextLink(
-                        text: 'Lembrei a senha · ',
-                        actionText: 'Voltar ao login',
-                        onTap: () => context.go(_loginPath),
-                        fontSize: 13,
-                        textColor: heroTealSurface(0.78),
-                      ),
-                    ),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          esqueciHelpTitle(),
+                                          style: authPageTitleStyle(context),
+                                        ),
+                                      ),
+                                      FxHelpIconButton(
+                                        tooltip: esqueciHelpTitle(),
+                                        onTap: _abrirAjuda,
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 10),
+                                  ConstrainedBox(
+                                    constraints: const BoxConstraints(
+                                      maxWidth: 320,
+                                    ),
+                                    child: Text(
+                                      'Digite seu e-mail e enviamos um código de 6 dígitos para redefinir sua senha.',
+                                      style: authSubtitleStyle(
+                                        color: heroTealSurface(0.82),
+                                      ).copyWith(height: 1.55),
+                                    ),
+                                  ),
+                                  const SizedBox(height: TokensStrip.s5),
+                                  AuthRoleToggle(
+                                    isAluno: _isAluno,
+                                    onPersonalTap: () {
+                                      if (_isAluno) {
+                                        HapticFeedback.selectionClick();
+                                        setState(() => _isAluno = false);
+                                      }
+                                    },
+                                    onAlunoTap: () {
+                                      if (!_isAluno) {
+                                        HapticFeedback.selectionClick();
+                                        setState(() => _isAluno = true);
+                                      }
+                                    },
+                                  ),
+                                  const SizedBox(height: 18),
+                                  AuthField(
+                                    label: 'E-mail cadastrado',
+                                    controller: _emailController,
+                                    hintText: 'seu@email.com',
+                                    icon: Icons.person_outline_rounded,
+                                    keyboardType: TextInputType.emailAddress,
+                                    textInputAction: TextInputAction.done,
+                                    onFieldSubmitted: (_) => _pedirEnviar(),
+                                    validator: (value) {
+                                      if (value == null ||
+                                          value.trim().isEmpty) {
+                                        return 'Informe o e-mail.';
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                  const SizedBox(height: TokensStrip.s4),
+                                  if (_emailDeliveryAvailable == false) ...[
+                                    AuthOperationalNotice(
+                                      icon: Icons.mark_email_unread_outlined,
+                                      title: esqueciEnvironmentTitle(
+                                        issue?.title,
+                                      ),
+                                      text: esqueciEnvironmentWarning(
+                                        hasIssue: issue != null,
+                                        issueDetail: issue?.detail,
+                                      ),
+                                      action: esqueciEnvironmentAction(
+                                        issueAction: issue?.action,
+                                        nextActions:
+                                            _environmentStatus?.nextActions ??
+                                            const [],
+                                      ),
+                                    ),
+                                    const SizedBox(height: 18),
+                                  ],
+                                  if (_error != null) ...[
+                                    Semantics(
+                                      liveRegion: true,
+                                      child: Text(
+                                        _error!,
+                                        style: authInlineErrorStyle(),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 14),
+                                  ],
+                                  FxSettingsGroup(
+                                    children: [
+                                      FxSettingsTile(
+                                        fxIcon: 'spark',
+                                        label: esqueciEnviarLabel(),
+                                        value:
+                                            _loading
+                                                ? esqueciEnviandoLabel()
+                                                : esqueciRoleQuery(
+                                                  isAluno: _isAluno,
+                                                ),
+                                        onTap:
+                                            _loading ? () {} : _pedirEnviar,
+                                      ),
+                                      FxSettingsTile(
+                                        fxIcon: 'users',
+                                        label: esqueciVoltarLoginLabel(),
+                                        value: 'Login',
+                                        picker: true,
+                                        showDivider: false,
+                                        onTap:
+                                            _loading
+                                                ? () {}
+                                                : () => context.go(_loginPath),
+                                      ),
+                                    ],
+                                  ),
                                 ],
                               ),
                             ),

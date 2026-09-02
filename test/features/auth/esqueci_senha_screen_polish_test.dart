@@ -4,28 +4,58 @@ import '../../support/screen_source_bundle.dart';
 
 void main() {
   test('esqueci senha cumpre contrato Tier S+', () {
-    final screen = readScreenSourceBundle('lib/features/auth/screens/esqueci_senha_screen.dart');
+    final screen = readScreenSourceBundle(
+      'lib/features/auth/screens/esqueci_senha_screen.dart',
+    );
     expect(screen, anyOf(contains('fxScreenA11yScope'), contains('Semantics(')));
     expect(screen, isNot(contains('CircularProgressIndicator')));
-    expect(screen, anyOf(contains('friendlyError'), contains('DashboardErrorState'), contains('FxEmptyState'), contains('_erro'), contains('_TrainingEmptyState'), contains('ref.invalidate')));
-    expect(screen, anyOf(contains('FxLoading'), contains('SkeletonLoader'), contains('SkeletonList'), contains('DashboardShimmer'), contains('Shimmer'), contains('IaCopilotInsightsLoading'), contains('_loading')));
+    expect(
+      screen,
+      anyOf(
+        contains('friendlyError'),
+        contains('DashboardErrorState'),
+        contains('FxEmptyState'),
+        contains('_erro'),
+        contains('_TrainingEmptyState'),
+        contains('ref.invalidate'),
+      ),
+    );
+    expect(
+      screen,
+      anyOf(
+        contains('FxLoading'),
+        contains('SkeletonLoader'),
+        contains('SkeletonList'),
+        contains('DashboardShimmer'),
+        contains('Shimmer'),
+        contains('IaCopilotInsightsLoading'),
+        contains('_loading'),
+      ),
+    );
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(16));
 
-    // Segue o mesmo padrão de estado/rede das outras telas de auth.
     expect(screen, contains('ConsumerStatefulWidget'));
     expect(screen, contains('authRepositoryProvider'));
-
-    // Toggle de papel + barra sticky (marca sempre no viewport).
     expect(screen, contains('AuthRoleToggle'));
     expect(screen, contains('AuthStickyRoleBar'));
     expect(screen, contains('ensureFooter: true'));
-    expect(screen, contains('Spacer'));
+    expect(screen, contains('LayoutBuilder'));
     expect(screen, contains('AuthFormEntrance'));
-
-    // Papel é lido da query e propagado de volta ao login.
     expect(screen, contains("params['role']"));
     expect(screen, contains("params['p']"));
     expect(screen, contains('personalSlug:'));
-    expect(screen, contains(r"role=${_isAluno ? 'aluno' : 'personal'}"));
+    expect(screen, contains('esqueciEnviarLabel'));
+    expect(screen, contains('esqueciVoltarLoginLabel'));
+    expect(
+      screen.indexOf('esqueciEnviarLabel'),
+      lessThan(screen.indexOf('esqueciVoltarLoginLabel')),
+    );
+    expect(screen, contains('FxSettingsTile'));
+    expect(screen, contains('showFxConfirmSheet'));
+    expect(screen, contains('mapEsqueciSenhaError'));
+    expect(screen, contains('form == null || !form.validate()'));
+    expect(screen, contains('AuthOperationalNotice'));
+    expect(screen, isNot(contains('FxLiquidPrimaryButton')));
+    expect(screen, isNot(contains('AuthTextLink')));
   });
 }
