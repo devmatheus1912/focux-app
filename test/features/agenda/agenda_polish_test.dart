@@ -12,10 +12,10 @@ void main() {
     expect(screen, contains('NovoAgendamentoScreen'));
     expect(screen, contains("context.push('/agenda/novo'"));
     expect(screen, contains('Selecione quem será atendido'));
-    expect(screen, contains('_AgendaHorarioCard'));
+    expect(screen, contains('AlunoInsetFormField'));
     expect(screen, contains('FxShellScaffold'));
-    expect(screen, contains('loadingLabel: \'Agendando…\''));
-    expect(screen, contains('FxInputDeco.outlineBorder'));
+    expect(screen, contains('agendaNovoTileLabel'));
+    expect(screen, contains('showFxConfirmSheet'));
     expect(screen, contains('showFxHomeSheet'));
     expect(screen, contains('FxHomeSheetSurface'));
     expect(screen, contains('FxHomeSheetHeader'));
@@ -37,13 +37,15 @@ void main() {
     expect(screen, contains('RefreshIndicator'));
     expect(screen, contains('maskEmailForList'));
     expect(screen, contains('agendaEventSessionNote'));
-    expect(screen, contains('FxLiquidSecondaryButton'));
+    expect(screen, isNot(contains('FxLiquidPrimaryButton')));
+    expect(screen, isNot(contains('FxLiquidSecondaryButton')));
     expect(screen, contains('_AgendaMetaStrip'));
     expect(screen, contains('Semantics('));
     expect(screen, contains('explicitChildNodes: true'));
     expect(screen, isNot(contains('ListTile(')));
     expect(screen, isNot(contains('MaterialPageRoute')));
     expect(screen, isNot(contains('quem sera atendido')));
+    expect(screen, contains('ShellHeaderIconButton'));
 
     expect(router, contains("path: '/agenda/novo'"));
     expect(router, contains('NovoAgendamentoScreen('));

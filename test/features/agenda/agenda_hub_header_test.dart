@@ -9,6 +9,7 @@ void main() {
   ) async {
     var help = 0;
     var ical = 0;
+    var created = 0;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -17,6 +18,7 @@ void main() {
             freshnessLabel: 'Atualizado agora',
             onHelp: () => help++,
             onIcal: () => ical++,
+            onNew: () => created++,
           ),
         ),
       ),
@@ -27,6 +29,11 @@ void main() {
 
     expect(ical, 1);
     expect(help, 0);
+    expect(created, 0);
+
+    await tester.tap(find.byTooltip('Novo agendamento'));
+    await tester.pump();
+    expect(created, 1);
 
     await tester.tap(find.byType(FxHelpIconButton));
     await tester.pump();

@@ -16,12 +16,14 @@ class AgendaHubHeader extends StatelessWidget {
     required this.onHelp,
     required this.onIcal,
     this.onToday,
+    this.onNew,
   });
 
   final String? freshnessLabel;
   final VoidCallback onHelp;
   final VoidCallback onIcal;
   final VoidCallback? onToday;
+  final VoidCallback? onNew;
 
   @override
   Widget build(BuildContext context) {
@@ -128,6 +130,18 @@ class AgendaHubHeader extends StatelessWidget {
                       ),
                     ),
                   ),
+                ),
+              ],
+              if (onNew != null) ...[
+                const SizedBox(width: FxHelpChrome.gap),
+                ShellHeaderIconButton(
+                  icon: 'plus',
+                  size: FxHelpChrome.iconSize,
+                  tooltip: 'Novo agendamento',
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    onNew!();
+                  },
                 ),
               ],
             ],

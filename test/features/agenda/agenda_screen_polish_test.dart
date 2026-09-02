@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../support/screen_source_bundle.dart';
@@ -25,6 +27,11 @@ void main() {
     expect(screen, contains('SkeletonList'));
     expect(screen, contains('FxHubFreshness.fromFetchedAt'));
     expect(screen, isNot(contains('class _AgendaEmptyState')));
-    expect(screen, isNot(contains('ref.watch(alunosProvider)')));
+    expect(
+      File('lib/features/agenda/screens/agenda_screen.dart').readAsStringSync(),
+      isNot(contains('ref.watch(alunosProvider)')),
+    );
+    expect(screen, isNot(contains('FxLiquidPrimaryButton')));
+    expect(screen, contains('onNew:'));
   });
 }

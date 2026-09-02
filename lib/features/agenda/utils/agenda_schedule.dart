@@ -110,3 +110,32 @@ String agendaDayHeading({
 
 String agendaEmptyDayHint() =>
     'Encaixe avaliação, retorno ou sessão.';
+
+const agendaTituloMax = 120;
+
+String agendaNovoTileLabel() => 'Agendar atendimento';
+
+String agendaNovoSalvarTooltip() => 'Agendar';
+
+String agendaNovoConfirmTitle() => 'Agendar este horário?';
+
+String agendaNovoConfirmMessage({
+  required String alunoNome,
+  required DateTime inicio,
+  required DateTime fim,
+}) {
+  final nome = alunoNome.trim().isEmpty ? 'o aluno' : alunoNome.trim();
+  return 'Confirma $nome em ${agendaHm(inicio)}–${agendaHm(fim)}.';
+}
+
+String agendaCompleteConfirmTitle() => 'Marcar como concluído?';
+
+String agendaCompleteConfirmMessage(String alunoNome) {
+  final nome = alunoNome.trim().isEmpty ? 'este aluno' : alunoNome.trim();
+  return 'O horário com $nome passa a concluído.';
+}
+
+String agendaEventPrimaryLabel({required bool completePrimary}) =>
+    completePrimary ? 'Marcar concluído' : 'Abrir aluno';
+
+String agendaHorarioConfirmLabel() => 'Confirmar horário';

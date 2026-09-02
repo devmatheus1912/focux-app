@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:focux_app/core/widgets/fx_motion.dart';
 import 'package:focux_app/features/agenda/utils/agenda_schedule.dart';
 import 'package:focux_app/features/agenda/widgets/agenda_day_empty_panel.dart';
 
@@ -21,9 +20,9 @@ void main() {
     expect(find.text('Qui · 20 ago'), findsOneWidget);
     expect(find.text('Dia livre'), findsOneWidget);
     expect(find.text(agendaEmptyDayHint()), findsOneWidget);
-    expect(find.byType(FxLiquidPrimaryButton), findsOneWidget);
+    expect(find.text('Novo'), findsOneWidget);
 
-    await tester.tap(find.text('Novo agendamento'));
+    await tester.tap(find.text('Dia livre'));
     await tester.pump();
     expect(tapped, isTrue);
   });

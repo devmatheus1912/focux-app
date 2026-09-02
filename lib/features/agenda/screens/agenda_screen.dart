@@ -24,6 +24,7 @@ import '../widgets/agenda_help_sheet.dart';
 import '../widgets/agenda_hub_header.dart';
 import '../widgets/agenda_next_banner.dart';
 import '../../alunos/widgets/aluno_avatar.dart';
+import '../../../core/utils/clipboard_sensitive.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/theme/fx_settings_layout.dart';
@@ -31,21 +32,22 @@ import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_settings_group.dart';
-import '../../../core/widgets/fx_help.dart';
+import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../alunos/widgets/aluno_inset_form_field.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
-import 'package:focux_app/core/widgets/fx_loading.dart';
-import 'package:focux_app/core/widgets/fx_motion.dart';
 import 'package:focux_app/core/widgets/fx_shell_scaffold.dart';
 import '../../dashboard/constants/dashboard_layout.dart';
 import '../../dashboard/utils/dashboard_readability.dart';
 
+part 'agenda_screen_actions.part.dart';
 part 'agenda_screen_widgets.part.dart';
 part 'agenda_screen_novo.part.dart';
+part 'agenda_screen_novo_pickers.part.dart';
 
 class AgendaScreen extends ConsumerStatefulWidget {
   const AgendaScreen({super.key});
@@ -197,181 +199,6 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
     return null;
   }
 
-  Future<bool> _confirmDestructive({
-    required String title,
-    required String body,
-    required String confirmLabel,
-  }) {
-    return showFxConfirmSheet(
-      context,
-      title: title,
-      message: body,
-      confirmLabel: confirmLabel,
-      cancelLabel: 'Voltar',
-      destructive: true,
-    );
-  }
-
-  Future<void> _setStatus(Agendamento ag, String status) async {
-    await ref.read(agendaRepositoryProvider).atualizarStatus(ag.id, status);
-    if (!mounted) return;
-    Navigator.pop(context);
-    await _load(force: true);
-    if (!mounted) return;
-    AnalyticsService.instance.track(
-      ProductEvents.agendaStatusChanged,
-      props: {'status': status},
-    );
-    FeedbackHelper.showSuccess(
-      context,
-      status == 'CONFIRMADO'
-          ? 'Horário confirmado.'
-          : status == 'CONCLUIDO'
-          ? 'Atendimento concluído.'
-          : 'Horário cancelado.',
-    );
-  }
-
-  Future<void> _reschedule(Agendamento ag) async {
-    final dt = await showFxHomeSheet<DateTime>(
-      context,
-      builder:
-          (_) => _AgendaDateTimeSheet(
-            title: 'Novo início',
-            initial: ag.inicio,
-          ),
-    );
-    if (dt == null || !mounted) return;
-    final fim = dt.add(ag.fim.difference(ag.inicio));
-    await ref
-        .read(agendaRepositoryProvider)
-        .atualizarHorario(ag.id, dt, fim, titulo: ag.titulo);
-    if (!mounted) return;
-    Navigator.pop(context);
-    await _load(force: true);
-    if (!mounted) return;
-    AnalyticsService.instance.track(ProductEvents.agendaRescheduled);
-    FeedbackHelper.showSuccess(context, 'Horário remarcado.');
-  }
-
-  /// Combina `Env.apiUrl` (https://host[/api]) com um path relativo (/api/...) sem
-  /// duplicar segmentos. Aceita também URL já absoluta vinda do backend.
-  String _resolveAbsoluteApiUrl(String pathOrUrl) {
-    if (pathOrUrl.startsWith('http://') || pathOrUrl.startsWith('https://')) {
-      return pathOrUrl;
-    }
-    var base = Env.apiUrl;
-    while (base.endsWith('/')) {
-      base = base.substring(0, base.length - 1);
-    }
-    final path = pathOrUrl.startsWith('/') ? pathOrUrl : '/$pathOrUrl';
-    if (base.endsWith('/api') && path.startsWith('/api/')) {
-      base = base.substring(0, base.length - 4);
-    }
-    return '$base$path';
-  }
-
-  Future<void> _copyIcalLink() async {
-    try {
-      final info = await ref.read(agendaRepositoryProvider).icalToken();
-      final fullUrl = _resolveAbsoluteApiUrl(info.url);
-      await Clipboard.setData(ClipboardData(text: fullUrl));
-      if (mounted) {
-        FeedbackHelper.showSuccess(
-          context,
-          'Link iCal copiado — cole no Google Calendar ou Apple Calendar.',
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        FeedbackHelper.showError(
-          context,
-          friendlyError(e, fallback: 'Erro ao gerar link iCal.'),
-        );
-      }
-    }
-  }
-
-  Future<void> _openAgendamentoDetails(Agendamento ag) async {
-    Aluno? aluno = _alunoFromCache(ag.alunoId);
-    try {
-      aluno = await ref.read(alunoProvider(ag.alunoId).future);
-    } catch (_) {}
-    if (!mounted) return;
-    final digits = (aluno?.whatsapp ?? '').replaceAll(RegExp(r'\D'), '');
-    final actionable = agendaStatusIsActionable(ag.status);
-
-    await showFxHomeSheet<void>(
-      context,
-      builder:
-          (_) => _AgendaEventSheet(
-            agendamento: ag,
-            statusLabel: agendaStatusLabel(ag.status),
-            photoUrl: aluno?.fotoUrl ?? _photoFor(ag.alunoId),
-            onOpenAluno: () async {
-              Navigator.pop(context);
-              if (!mounted) return;
-              AnalyticsService.instance.track(ProductEvents.agendaAlunoOpened);
-              context.push('/alunos/${ag.alunoId}');
-            },
-            onWhatsapp:
-                digits.isEmpty
-                    ? null
-                    : () {
-                      AnalyticsService.instance.track(
-                        ProductEvents.agendaWhatsapp,
-                      );
-                      return openAlunoWhatsappOutreach(
-                        context,
-                        displayName: ag.alunoNome,
-                        whatsappNumber: digits,
-                        emRisco: aluno?.emRisco ?? false,
-                        message: agendaWhatsappReminder(
-                          alunoNome: ag.alunoNome,
-                          inicio: ag.inicio,
-                        ),
-                      );
-                    },
-            onConfirm:
-                agendaStatusNeedsConfirm(ag.status)
-                    ? () => _setStatus(ag, 'CONFIRMADO')
-                    : null,
-            onComplete:
-                actionable ? () => _setStatus(ag, 'CONCLUIDO') : null,
-            onCancel:
-                actionable
-                    ? () async {
-                      final ok = await _confirmDestructive(
-                        title: 'Cancelar horário?',
-                        body:
-                            'O horário com ${ag.alunoNome} deixa de aparecer como ativo.',
-                        confirmLabel: 'Cancelar horário',
-                      );
-                      if (!ok) return;
-                      await _setStatus(ag, 'CANCELADO');
-                    }
-                    : null,
-            onReschedule:
-                actionable ? () => _reschedule(ag) : null,
-            onDelete: () async {
-              final ok = await _confirmDestructive(
-                title: 'Excluir atendimento?',
-                body: 'Isso remove o horário com ${ag.alunoNome} da agenda.',
-                confirmLabel: 'Excluir',
-              );
-              if (!ok) return;
-              await ref.read(agendaRepositoryProvider).excluir(ag.id);
-              if (!mounted) return;
-              Navigator.pop(context);
-              await _load(force: true);
-              if (!mounted) return;
-              AnalyticsService.instance.track(ProductEvents.agendaDeleted);
-              FeedbackHelper.showSuccess(context, 'Agendamento excluído.');
-            },
-          ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final chrome = ShellChrome.of(context);
@@ -414,6 +241,7 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                   },
                   onIcal: _copyIcalLink,
                   onToday: _isTodayVisible ? null : _goToday,
+                  onNew: () => _novoAgendamento(),
                 ),
                 AgendaWeekBar(
                   weekStart: _weekStart,
@@ -520,7 +348,7 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                                     FxSettingsLayout.pageInset,
                                     0,
                                     FxSettingsLayout.pageInset,
-                                    TokensStrip.s3,
+                                    DashboardLayout.bottomDockClearance,
                                   ),
                                   children: [
                                     FxSettingsGroup(
@@ -580,23 +408,6 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                                 ),
                         ),
                 ),
-                if (!_loading && _erro == null && visible.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(
-                      TokensStrip.s4,
-                      TokensStrip.s1,
-                      TokensStrip.s4,
-                      DashboardLayout.bottomDockClearance,
-                    ),
-                    child: Semantics(
-                      button: true,
-                      label: 'Novo agendamento',
-                      child: FxLiquidPrimaryButton(
-                        label: 'Novo agendamento',
-                        onPressed: () => _novoAgendamento(),
-                      ),
-                    ),
-                  ),
               ],
             ),
           ),

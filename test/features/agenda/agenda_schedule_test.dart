@@ -76,4 +76,20 @@ void main() {
     );
     expect(agendaEmptyDayHint(), 'Encaixe avaliação, retorno ou sessão.');
   });
+
+  test('copy de agendar e concluir fica fora da UI', () {
+    expect(agendaNovoTileLabel(), 'Agendar atendimento');
+    expect(agendaNovoConfirmTitle(), 'Agendar este horário?');
+    expect(
+      agendaNovoConfirmMessage(
+        alunoNome: 'Bruno',
+        inicio: DateTime(2026, 8, 19, 8, 30),
+        fim: DateTime(2026, 8, 19, 9, 30),
+      ),
+      'Confirma Bruno em 08:30–09:30.',
+    );
+    expect(agendaEventPrimaryLabel(completePrimary: true), 'Marcar concluído');
+    expect(agendaEventPrimaryLabel(completePrimary: false), 'Abrir aluno');
+    expect(agendaTituloMax, 120);
+  });
 }

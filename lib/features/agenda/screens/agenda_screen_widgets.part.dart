@@ -121,123 +121,111 @@ class _AgendaEventSheetState extends State<_AgendaEventSheet> {
               _AgendaDetailNote(label: 'Depois do atendimento', value: pos),
             ],
             SizedBox(height: TokensStrip.s4),
-            Semantics(
-              button: true,
-              label:
-                  completePrimary
-                      ? 'Marcar atendimento como concluído'
-                      : 'Abrir ficha do aluno',
-              child: FxLiquidPrimaryButton(
-                label:
-                    completePrimary ? 'Marcar concluído' : 'Abrir aluno',
-                loading: _busy,
-                onPressed:
-                    _busy
-                        ? null
-                        : () =>
-                            _run(
+            FxSettingsGroup(
+              children: [
+                FxSettingsTile(
+                  fxIcon: completePrimary ? 'circle-check' : 'users',
+                  label: agendaEventPrimaryLabel(
+                    completePrimary: completePrimary,
+                  ),
+                  value: _busy ? '…' : '',
+                  showDivider:
+                      widget.onWhatsapp != null ||
+                      widget.onConfirm != null ||
+                      widget.onReschedule != null ||
+                      (!completePrimary && widget.onComplete != null) ||
+                      (completePrimary && widget.onOpenAluno != null) ||
+                      widget.onCancel != null,
+                  onTap:
+                      _busy
+                          ? () {}
+                          : () async {
+                            if (completePrimary) {
+                              final ok = await showFxConfirmSheet(
+                                context,
+                                title: agendaCompleteConfirmTitle(),
+                                message: agendaCompleteConfirmMessage(
+                                  ag.alunoNome,
+                                ),
+                                confirmLabel: agendaEventPrimaryLabel(
+                                  completePrimary: true,
+                                ),
+                              );
+                              if (!ok || !mounted) return;
+                            }
+                            await _run(
                               completePrimary
                                   ? widget.onComplete
                                   : widget.onOpenAluno,
-                            ),
-              ),
-            ),
-            if (widget.onWhatsapp != null || widget.onConfirm != null) ...[
-              const SizedBox(height: TokensStrip.s2),
-              Row(
-                children: [
-                  if (widget.onWhatsapp != null)
-                    Expanded(
-                      child: FxLiquidSecondaryButton(
-                        label: 'WhatsApp',
-                        icon: Icons.chat_outlined,
-                        onPressed: _busy ? null : () => _run(widget.onWhatsapp),
-                      ),
-                    ),
-                  if (widget.onWhatsapp != null && widget.onConfirm != null)
-                    const SizedBox(width: TokensStrip.s2),
-                  if (widget.onConfirm != null)
-                    Expanded(
-                      child: FxLiquidSecondaryButton(
-                        label: 'Confirmado',
-                        onPressed: _busy ? null : () => _run(widget.onConfirm),
-                      ),
-                    ),
-                ],
-              ),
-            ],
-            if (widget.onReschedule != null ||
-                (!completePrimary && widget.onComplete != null) ||
-                (completePrimary && widget.onOpenAluno != null)) ...[
-              const SizedBox(height: TokensStrip.s2),
-              Row(
-                children: [
-                  if (widget.onReschedule != null)
-                    Expanded(
-                      child: FxLiquidSecondaryButton(
-                        label: 'Remarcar',
-                        onPressed:
-                            _busy ? null : () => _run(widget.onReschedule),
-                      ),
-                    ),
-                  if (widget.onReschedule != null &&
-                      ((!completePrimary && widget.onComplete != null) ||
-                          (completePrimary && widget.onOpenAluno != null)))
-                    const SizedBox(width: TokensStrip.s2),
-                  if (!completePrimary && widget.onComplete != null)
-                    Expanded(
-                      child: FxLiquidSecondaryButton(
-                        label: 'Concluído',
-                        onPressed:
-                            _busy ? null : () => _run(widget.onComplete),
-                      ),
-                    )
-                  else if (completePrimary && widget.onOpenAluno != null)
-                    Expanded(
-                      child: FxLiquidSecondaryButton(
-                        label: 'Ver aluno',
-                        onPressed:
-                            _busy ? null : () => _run(widget.onOpenAluno),
-                      ),
-                    ),
-                ],
-              ),
-            ],
-            if (widget.onCancel != null) ...[
-              const SizedBox(height: TokensStrip.s1),
-              Semantics(
-                button: true,
-                label: 'Cancelar horário',
-                child: TextButton(
-                  onPressed: _busy ? null : () => _run(widget.onCancel),
-                  child: Text(
-                    'Cancelar horário',
-                    style: TextStyle(
-                      color: chrome.mute,
-                      fontWeight: FontWeight.w600,
-                    ),
+                            );
+                          },
+                ),
+                if (widget.onWhatsapp != null)
+                  FxSettingsTile(
+                    fxIcon: 'message-circle',
+                    label: 'WhatsApp',
+                    value: '',
+                    onTap: _busy ? () {} : () => _run(widget.onWhatsapp),
                   ),
-                ),
-              ),
-            ],
-            Semantics(
-              button: true,
-              label: 'Excluir agendamento',
-              child: TextButton.icon(
-                onPressed: _busy ? null : () => _run(widget.onDelete),
-                icon: Icon(
-                  Icons.delete_outline_rounded,
-                  size: 18,
-                  color: EagleTokens.bad.withValues(alpha: _busy ? 0.4 : 1),
-                ),
-                label: Text(
-                  'Excluir agendamento',
-                  style: TextStyle(
-                    color: EagleTokens.bad.withValues(alpha: _busy ? 0.4 : 1),
-                    fontWeight: FontWeight.w700,
+                if (widget.onConfirm != null)
+                  FxSettingsTile(
+                    fxIcon: 'circle-check',
+                    label: 'Confirmado',
+                    value: '',
+                    onTap: _busy ? () {} : () => _run(widget.onConfirm),
                   ),
+                if (widget.onReschedule != null)
+                  FxSettingsTile(
+                    fxIcon: 'calendar',
+                    label: 'Remarcar',
+                    value: '',
+                    onTap: _busy ? () {} : () => _run(widget.onReschedule),
+                  ),
+                if (!completePrimary && widget.onComplete != null)
+                  FxSettingsTile(
+                    fxIcon: 'circle-check',
+                    label: 'Concluído',
+                    value: '',
+                    onTap:
+                        _busy
+                            ? () {}
+                            : () async {
+                              final ok = await showFxConfirmSheet(
+                                context,
+                                title: agendaCompleteConfirmTitle(),
+                                message: agendaCompleteConfirmMessage(
+                                  ag.alunoNome,
+                                ),
+                                confirmLabel: 'Concluído',
+                              );
+                              if (!ok || !mounted) return;
+                              await _run(widget.onComplete);
+                            },
+                  )
+                else if (completePrimary && widget.onOpenAluno != null)
+                  FxSettingsTile(
+                    fxIcon: 'users',
+                    label: 'Ver aluno',
+                    value: '',
+                    onTap: _busy ? () {} : () => _run(widget.onOpenAluno),
+                  ),
+                if (widget.onCancel != null)
+                  FxSettingsTile(
+                    fxIcon: 'alert-triangle',
+                    label: 'Cancelar horário',
+                    value: '',
+                    danger: true,
+                    onTap: _busy ? () {} : () => _run(widget.onCancel),
+                  ),
+                FxSettingsTile(
+                  icon: Icons.delete_outline_rounded,
+                  label: 'Excluir agendamento',
+                  value: '',
+                  danger: true,
+                  showDivider: false,
+                  onTap: _busy ? () {} : () => _run(widget.onDelete),
                 ),
-              ),
+              ],
             ),
           ],
         ),
