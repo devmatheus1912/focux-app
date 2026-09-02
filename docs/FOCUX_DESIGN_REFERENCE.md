@@ -1353,12 +1353,17 @@ Objetivo: **paridade operacional + pele deste arquivo + anatomia do tipo certo**
 
 ### 28.0 Ruflo no Cursor
 
-O playbook deste capítulo vive no skill do repo (`.cursor/skills/ruflo/SKILL.md`). No Desktop:
+O playbook deste capítulo vive no skill do repo (`.cursor/skills/ruflo/SKILL.md`).
 
-1. Abrir o `focux-app` e um chat **Agent** novo.
-2. Digitar `/ruflo` e confirmar com **Alt+Enter** (Windows/Linux) ou **Option+Enter** (Mac), ou **Use as Mode**. O badge fica no input até sair do modo.
-3. Escolher o modelo no picker do chat. O skill não trava modelo.
-4. Pedir o lote (primeiro: S6, no máximo 3 telas). O Ruflo lê este arquivo e `docs/CONTRATO_APP_BACKEND.md`; não precisa colar o playbook.
+**Workspace: os dois repositórios.** §22 exige evidência no backend (`classe BE se conhecida`). Sem o `focux-backend` aberto, o bloco vira chute a partir do contrato do app — o próprio §22.5 diz que o resultado da varredura **exige** o repositório do backend. No Desktop:
+
+1. `File → Add Folder to Workspace…` e adicionar a pasta do `focux-backend` ao lado do `focux-app`. Salvar como `focux.code-workspace`.
+2. Um chat **Agent** novo nesse workspace (não um chat só com o app).
+3. Digitar `/ruflo` e confirmar com **Alt+Enter** (Windows/Linux) ou **Option+Enter** (Mac), ou **Use as Mode**. O badge fica no input até sair do modo.
+4. Escolher o modelo no picker do chat. O skill não trava modelo.
+5. Pedir o lote (primeiro: S6, no máximo 3 telas). O Ruflo lê este arquivo, `docs/CONTRATO_APP_BACKEND.md` e o código do backend; não precisa colar o playbook.
+
+Git separado: `focux-app` em `main`, `focux-backend` em `master`. Nunca um commit atravessando os dois. Visual no app; proposta §22.2 no scorecard; implementação no backend só do que §29 libera (nunca auth/tenant/pagamento/migration/endpoint novo sem contrato).
 
 A rule `.cursor/rules/focux-design.mdc` entra sozinha em arquivos `*.dart` mesmo sem o modo. User Rules da conta **não** devem carregar esta referência (estoura contexto e vaza para outros projetos).
 
