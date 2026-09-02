@@ -1,12 +1,12 @@
 ﻿import 'dart:async';
 
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/analytics/analytics_service.dart';
+import '../../../core/api/api_error.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
@@ -24,6 +24,7 @@ import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../providers/alunos_provider.dart';
 import '../utils/add_aluno_display.dart';
+import '../../subscription/widgets/upgrade_prompt_sheet.dart';
 import '../widgets/add_aluno_help_sheet.dart';
 import '../widgets/add_aluno_senha_sheet.dart';
 import '../widgets/aluno_form_choices.dart';
@@ -211,29 +212,27 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
       }
     } catch (e) {
       HapticFeedback.heavyImpact();
-      var errorMsg = friendlyError(
+      if (!mounted) return;
+      final surfaced = await UpgradePromptSheet.showFromError(
+        context,
         e,
-        fallback: 'Não foi possível cadastrar o aluno. Revise os dados.',
+        fallbackFeatureName: 'Mais vagas de alunos',
+        fallbackCapability: 'alunos',
+        source: 'add_aluno',
       );
-      String? requestId;
-
-      if (e is DioException && e.response?.data is Map) {
-        final data = e.response!.data as Map;
-        if (data.containsKey('erro')) {
-          errorMsg = data['erro'].toString();
-        }
-        if (data.containsKey('detalhes') && data['detalhes'] is Map) {
-          final details = (data['detalhes'] as Map).entries
-              .map((entry) => '${entry.key}: ${entry.value}')
-              .join('\n');
-          errorMsg = '$errorMsg\n$details';
-        }
-        requestId = data['requestId']?.toString();
+      if (surfaced) return;
+      // `erro` do contrato, sem despejar `detalhes` (chaves internas como
+      // feature/limite) na cara do usuário.
+      final api = ApiError.from(e);
+      var errorMsg =
+          api?.mensagem ??
+          friendlyError(
+            e,
+            fallback: 'Não foi possível cadastrar o aluno. Revise os dados.',
+          );
+      if (api?.requestId != null) {
+        errorMsg = '$errorMsg\n\nRef: ${api!.requestId}';
       }
-      if (requestId != null) {
-        errorMsg = '$errorMsg\n\nRef: $requestId';
-      }
-
       if (mounted) setState(() => _error = errorMsg);
     } finally {
       if (mounted) setState(() => _loading = false);

@@ -125,8 +125,12 @@ O campo da mensagem chama **`erro`**, não `mensagem`. O corpo real é:
 }
 ```
 
-`upgradePlano` diz *qual tier* oferecer. A sheet de upgrade não infere o plano
-a partir do texto.
+`upgradePlano` diz *qual tier* oferecer. A sheet de upgrade **não** infere o
+plano a partir do texto: `UpgradePromptSheet.showFromError` lê o campo e
+`PlanEntitlements.lockedOffer(upgradePlano:)` o trata como fonte da verdade,
+mesmo quando o mapa local de capability diria outro tier. Sem o campo, o
+mapa local continua valendo — é o caminho das telas que gateiam antes de
+chamar a API.
 
 ### 2.3 Catálogo inicial
 
