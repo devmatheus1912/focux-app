@@ -8,10 +8,10 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/hero_teal.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
+import '../../../core/widgets/fx_conversion.dart';
 import '../../../core/widgets/fx_help.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
-import '../../../core/widgets/fx_settings_group.dart';
-import '../../../core/widgets/fx_settings_tile.dart';
 import '../providers/auth_provider.dart';
 import '../utils/auth_error_messages.dart';
 import '../utils/esqueci_senha_display.dart';
@@ -124,6 +124,20 @@ class _ResetarSenhaScreenState extends ConsumerState<ResetarSenhaScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            Center(
+                              child: FxConversionLockup(
+                                width: authLogoWidthFor(
+                                  context,
+                                  withTagline: true,
+                                ),
+                                semanticLabel:
+                                    _isAluno
+                                        ? 'Focux ALUNO'
+                                        : 'Focux PERSONAL',
+                                aluno: _isAluno,
+                              ),
+                            ),
+                            const SizedBox(height: TokensStrip.s4),
                             Row(
                               children: [
                                 Expanded(
@@ -217,34 +231,21 @@ class _ResetarSenhaScreenState extends ConsumerState<ResetarSenhaScreen> {
                               ),
                               const SizedBox(height: 12),
                             ],
-                            FxSettingsGroup(
-                              children: [
-                                FxSettingsTile(
-                                  fxIcon: 'circle-check',
-                                  label: resetSenhaAlterarLabel(),
-                                  value:
-                                      _loading
-                                          ? resetSenhaAlterandoLabel()
-                                          : hasNonce
-                                          ? (_isAluno ? 'aluno' : 'personal')
-                                          : 'Código',
-                                  showDivider: !hasNonce,
-                                  onTap:
-                                      _loading || !hasNonce
-                                          ? () {}
-                                          : _pedirAlterar,
-                                ),
-                                if (!hasNonce)
-                                  FxSettingsTile(
-                                    fxIcon: 'spark',
-                                    label: resetSenhaValidarCodigoLabel(),
-                                    value: 'OTP',
-                                    picker: true,
-                                    showDivider: false,
-                                    onTap: () => context.go(_esqueciPath),
-                                  ),
-                              ],
+                            FxLiquidPrimaryButton(
+                              label: resetSenhaAlterarLabel(),
+                              loading: _loading,
+                              loadingLabel: resetSenhaAlterandoLabel(),
+                              onPressed:
+                                  _loading || !hasNonce
+                                      ? null
+                                      : _pedirAlterar,
                             ),
+                            if (!hasNonce)
+                              FxConversionTextLink(
+                                text: '',
+                                actionText: resetSenhaValidarCodigoLabel(),
+                                onTap: () => context.go(_esqueciPath),
+                              ),
                           ],
                         ),
                       ),

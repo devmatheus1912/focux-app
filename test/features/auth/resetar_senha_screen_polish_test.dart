@@ -41,13 +41,14 @@ void main() {
     expect(screen, contains('liveRegion: true'));
     expect(screen, contains('AuthFormEntrance'));
     expect(screen, contains('AuthStickyRoleBar'));
-    expect(screen, contains('FxSettingsTile'));
+    expect(screen, isNot(contains('FxSettingsTile')));
+    expect(screen, contains('FxLiquidPrimaryButton'));
+    expect(screen, contains('FxConversionLockup'));
     expect(screen, contains('showFxConfirmSheet'));
     expect(screen, contains('resetSenhaAlterarLabel'));
     expect(screen, contains('mapResetSenhaError'));
     expect(screen, contains('form == null || !form.validate()'));
     expect(screen, contains('ensureFooter: true'));
-    expect(screen, isNot(contains('FxLiquidPrimaryButton')));
     expect(screen, isNot(contains('debugPrint')));
   });
 }

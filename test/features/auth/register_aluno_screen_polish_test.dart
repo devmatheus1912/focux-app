@@ -15,6 +15,9 @@ void main() {
     );
     expect(screen, contains('AuthStickyRoleBar'));
     expect(screen, contains('AuthFormEntrance'));
+    expect(screen, contains('FxConversionLockup'));
+    expect(screen, contains('FxLiquidPrimaryButton'));
+    expect(screen, contains('FxConversionTextLink'));
     expect(screen, contains('minLength: 8'));
     expect(screen, contains('Mín. 8 caracteres'));
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(16));

@@ -21,14 +21,16 @@ void main() {
     expect(screen, contains('liveRegion: true'));
     expect(screen, contains('resendSeconds'));
     expect(screen, isNot(contains('debugPrint')));
-    expect(screen, contains('FxSettingsTile'));
+    expect(screen, isNot(contains('FxSettingsTile')));
+    expect(screen, contains('FxLiquidPrimaryButton'));
+    expect(screen, contains('FxConversionLockup'));
+    expect(screen, contains('FxConversionTextLink'));
     expect(screen, contains('showFxConfirmSheet'));
     expect(screen, contains('resetCodigoContinuarLabel'));
     expect(screen, contains('resetCodigoEmailHint'));
     expect(screen, contains('mapResetCodigoError'));
     expect(screen, contains('form == null || !form.validate()'));
     expect(screen, contains('ensureFooter: true'));
-    expect(screen, isNot(contains('FxLiquidPrimaryButton')));
     expect(screen, isNot(contains(r'$_email')));
   });
 }
