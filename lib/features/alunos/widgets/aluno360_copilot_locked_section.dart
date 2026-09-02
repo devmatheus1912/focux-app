@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/fx_settings_layout.dart';
-import '../../../core/widgets/fx_settings_group.dart';
-import '../../../core/widgets/fx_settings_tile.dart';
+import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../dashboard/data/command_action_item.dart';
+import '../../dashboard/widgets/command_action_tile.dart';
+import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../subscription/plan_entitlements.dart';
 import 'aluno360_copilot_upgrade_sheet.dart';
 
@@ -20,6 +22,7 @@ class Aluno360CopilotLockedSection extends StatelessWidget {
       capability: 'iaCopiloto',
     );
     final mute = fxScreenMute(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final planLabel =
         offer.targetPlan != null
             ? PlanEntitlements.displayPlanName(offer.targetPlan!)
@@ -28,33 +31,38 @@ class Aluno360CopilotLockedSection extends StatelessWidget {
     return Semantics(
       container: true,
       label: 'Prioridade do dia indisponível no seu plano',
-      child: FxSettingsGroup(
-        header: 'Prioridade do dia',
-        caption: 'Sugestão diária com IA Copiloto',
-        accent: primary,
-        footer: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: FxSettingsLayout.groupPadH,
-          ),
-          child: Text(
-            'Disponível no plano $planLabel · toque para assinar.',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const DashboardSectionHeader(title: 'Prioridade do dia'),
+          const SizedBox(height: 4),
+          Text(
+            'Sugestão diária com IA Copiloto',
             style: FxSettingsLayout.footer(color: mute),
           ),
-        ),
-        children: [
-          FxSettingsTile(
-            icon: Icons.auto_awesome_outlined,
-            label: 'Prioridade com IA',
-            subtitle: 'Sugestão personalizada com contexto do aluno',
-            value: '',
-            locked: true,
-            upgradeTierLabel: planLabel,
+          const SizedBox(height: TokensStrip.s3),
+          CommandActionTile(
+            item: CommandActionItem(
+              icon: 'zap',
+              title: 'Prioridade com IA',
+              subtitle: 'Sugestão personalizada com contexto do aluno',
+              route: '/assinatura',
+              tone: CommandActionTone.primary,
+              priorityBadge: planLabel,
+            ),
+            isDark: isDark,
+            primary: primary,
             showDivider: false,
             onTap:
                 () => Aluno360CopilotUpgradeSheet.show(
                   context,
                   primary: primary,
                 ),
+          ),
+          const SizedBox(height: TokensStrip.s2),
+          Text(
+            'Disponível no plano $planLabel · toque para assinar.',
+            style: FxSettingsLayout.footer(color: mute),
           ),
         ],
       ),

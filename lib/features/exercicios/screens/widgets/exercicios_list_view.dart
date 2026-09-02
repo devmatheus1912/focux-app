@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/widgets/fx_empty_state.dart';
 import '../../../../core/widgets/fx_loading.dart';
-import '../../../../core/widgets/fx_settings_group.dart';
 import '../../data/exercicio_repository.dart';
 import 'exercicio_card.dart';
 
@@ -43,34 +42,31 @@ class ExerciciosListView extends StatelessWidget {
     }
 
     final primary = accent ?? Theme.of(context).colorScheme.primary;
+    final extra = loadingMore ? 1 : 0;
 
-    return ListView(
+    return ListView.builder(
       controller: controller,
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
-      children: [
-        FxSettingsGroup(
-          accent: primary,
-          children: [
-            for (var i = 0; i < exercicios.length; i++)
-              ExercicioCard(
-                exercicio: exercicios[i],
-                accent: primary,
-                selected: selectedIds.contains(exercicios[i].id),
-                showDivider: i < exercicios.length - 1,
-                onTapOverride: () => onTap(exercicios[i]),
-                onLongPress: () => onLongPress(exercicios[i]),
-                onFavoritoToggle: () => onFavorite(exercicios[i]),
-                onUploadVideo: () => onUploadVideo(exercicios[i]),
-                onDelete: () => onDelete(exercicios[i]),
-              ),
-          ],
-        ),
-        if (loadingMore)
-          const Padding(
+      itemCount: exercicios.length + extra,
+      itemBuilder: (context, i) {
+        if (i >= exercicios.length) {
+          return const Padding(
             padding: EdgeInsets.symmetric(vertical: 16),
             child: Center(child: FxLoading(size: 22)),
-          ),
-      ],
+          );
+        }
+        final item = exercicios[i];
+        return ExercicioCard(
+          exercicio: item,
+          accent: primary,
+          selected: selectedIds.contains(item.id),
+          onTapOverride: () => onTap(item),
+          onLongPress: () => onLongPress(item),
+          onFavoritoToggle: () => onFavorite(item),
+          onUploadVideo: () => onUploadVideo(item),
+          onDelete: () => onDelete(item),
+        );
+      },
     );
   }
 }

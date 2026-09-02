@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/design_tokens.dart';
-import '../../../../core/widgets/fx_settings_tile.dart';
+import '../../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../../core/utils/friendly_error.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
 import '../../data/enums.dart';
@@ -20,7 +20,6 @@ class ExercicioCard extends ConsumerWidget {
   final VoidCallback? onTapOverride;
   final VoidCallback? onLongPress;
   final bool selected;
-  final bool showDivider;
   final Color? accent;
 
   const ExercicioCard({
@@ -32,7 +31,6 @@ class ExercicioCard extends ConsumerWidget {
     this.onTapOverride,
     this.onLongPress,
     this.selected = false,
-    this.showDivider = true,
     this.accent,
   });
 
@@ -68,18 +66,21 @@ class ExercicioCard extends ConsumerWidget {
           : 'Sem demo',
     ].where((s) => s != null && s.isNotEmpty).join(' · ');
 
-    return FxSettingsTile(
-      icon: Icons.fitness_center_rounded,
+    return GestureDetector(
+      onLongPress: onLongPress,
+      child: FxSatelliteListTile(
+      title: exercicio.nome,
       accent: primary,
-      label: exercicio.nome,
-      subtitle: subtitle,
-      value: '',
-      highlight: selected,
-      showDivider: showDivider,
+      titleCase: false,
       onTap:
           onTapOverride ?? () => context.push('/exercicios/${exercicio.id}'),
-      onLongPress: onLongPress,
-      accessory: Row(
+      leading: Icon(
+        Icons.fitness_center_rounded,
+        color: primary,
+        size: 22,
+      ),
+      subtitle: Text(subtitle),
+      trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           if (exercicio.hasPlayableMedia)
@@ -155,6 +156,7 @@ class ExercicioCard extends ConsumerWidget {
                   ],
             ),
         ],
+      ),
       ),
     );
   }

@@ -19,6 +19,15 @@ void main() {
     expect(screen, isNot(contains('FxLiquidPrimaryButton')));
   });
 
+  test('exercicios list rows são S4 satellite', () {
+    final list = readScreenSourceBundle(
+      'lib/features/exercicios/screens/widgets/exercicios_list_view.dart',
+    );
+    expect(list, contains('ListView.builder'));
+    expect(list, isNot(contains('FxSettingsGroup')));
+    expect(list, contains('ExercicioCard'));
+  });
+
   test('exercicios filter bar segue pele do Perfil', () {
     final bar = readScreenSourceBundle(
       'lib/features/exercicios/screens/widgets/exercicios_filter_bar.dart',

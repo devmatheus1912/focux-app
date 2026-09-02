@@ -1,51 +1,25 @@
 part of 'financeiro_mensalidades_tab.dart';
 
-enum _MensalidadeAcao { editar, chat, contato, pix, pagar }
-
 extension FinanceiroMensalidadesTabActions on _FinanceiroMensalidadesTabState {
   Future<void> _abrirAcoes(Mensalidade m) async {
-    final pending = m.status == 'PENDENTE' || m.status == 'ATRASADO';
-    final picked = await showFxInsetPickerSheet<_MensalidadeAcao>(
-      context,
-      title: m.alunoNome,
-      subtitle: financeiroMensalidadeSubtitle(m.status, m.mesReferencia),
-      items: [
-        const FxInsetPickerSheetItem(
-          value: _MensalidadeAcao.editar,
-          label: 'Editar',
-        ),
-        if (pending) ...[
-          const FxInsetPickerSheetItem(
-            value: _MensalidadeAcao.chat,
-            label: 'Cobrar no chat',
-          ),
-          const FxInsetPickerSheetItem(
-            value: _MensalidadeAcao.contato,
-            label: 'Registrar contato',
-          ),
-          const FxInsetPickerSheetItem(
-            value: _MensalidadeAcao.pix,
-            label: 'PIX',
-          ),
-          const FxInsetPickerSheetItem(
-            value: _MensalidadeAcao.pagar,
-            label: 'Marcar paga',
-          ),
-        ],
-      ],
+    final result = await context.push<String>(
+      '/financeiro/mensalidades/${m.id}',
+      extra: m,
     );
-    if (!mounted || picked == null) return;
-    switch (picked) {
-      case _MensalidadeAcao.editar:
+    if (!mounted || result == null) return;
+    switch (result) {
+      case 'edit':
         await _editarMensalidade(m);
-      case _MensalidadeAcao.chat:
+      case 'chat':
         await _cobrarViaChat(m);
-      case _MensalidadeAcao.contato:
+      case 'contato':
         await _registrarContato(m);
-      case _MensalidadeAcao.pix:
+      case 'pix':
         await _mostrarPix(m.id);
-      case _MensalidadeAcao.pagar:
+      case 'pay':
         await _pagar(m);
+      case 'changed':
+        _load(force: true);
     }
   }
 

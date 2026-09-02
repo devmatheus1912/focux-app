@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/utils/motion_preferences.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_inset_picker_sheet.dart';
-import '../../../core/widgets/fx_settings_group.dart';
-import '../../../core/widgets/fx_settings_tile.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../dashboard/widgets/dashboard_home_action_chip.dart';
+import '../../dashboard/widgets/dashboard_section_header.dart';
+import '../constants/aluno_360_layout.dart';
 import '../data/aluno_repository.dart';
 import '../providers/aluno_followup_provider.dart';
 import '../utils/aluno360_a11y.dart';
@@ -210,59 +213,44 @@ class _Aluno360FollowUpCardState extends ConsumerState<Aluno360FollowUpCard> {
     return parts.join(' · ');
   }
 
-  List<Widget> _buildFollowUpTiles({
+  List<Widget> _buildFollowUpChips({
     required Color primary,
     required DateTime? followUpDate,
     required bool isSnoozed,
-    required DateTime? snoozedUntil,
     required dynamic actions,
-    required bool highlightContactDone,
   }) {
-    final busyValue = _busy ? '…' : '';
-    final dateValue =
-        followUpDate == null ? '' : _formatDate(followUpDate);
-    final snoozeSubtitle =
-        isSnoozed && snoozedUntil != null
-            ? 'Adiado até ${_formatDate(snoozedUntil)}'
-            : '24 horas ou 3 dias';
-
     return [
-      FxSettingsTile(
-        icon: Icons.check_rounded,
+      DashboardHomeActionChip(
         label: 'Contato feito',
-        subtitle: 'Registrar que falou com ${aluno.nome.split(' ').first}',
-        value: busyValue,
-        highlight: highlightContactDone,
         accent: primary,
-        onTap: _busy ? () {} : () => _markContactDone(actions),
+        isDark: widget.isDark,
+        enabled: !_busy,
+        onPressed: () => _markContactDone(actions),
       ),
-      FxSettingsTile(
-        icon: Icons.calendar_month_rounded,
-        label: 'Definir data',
-        subtitle:
+      DashboardHomeActionChip(
+        label:
             followUpDate == null
-                ? 'Agendar próximo contato'
-                : 'Alterar data agendada',
-        value: dateValue,
-        onTap: _busy ? () {} : _pickFollowUpDate,
+                ? 'Definir data'
+                : 'Data ${_formatDate(followUpDate)}',
+        accent: primary,
+        isDark: widget.isDark,
+        enabled: !_busy,
+        onPressed: _pickFollowUpDate,
       ),
-      FxSettingsTile(
-        icon: Icons.snooze_rounded,
+      DashboardHomeActionChip(
         label: 'Adiar',
-        subtitle: snoozeSubtitle,
-        value: '',
-        showDivider: followUpDate == null && !isSnoozed,
-        onTap: _busy ? () {} : () => _showSnoozeSheet(actions),
+        accent: primary,
+        isDark: widget.isDark,
+        enabled: !_busy,
+        onPressed: () => _showSnoozeSheet(actions),
       ),
       if (followUpDate != null || isSnoozed)
-        FxSettingsTile(
-          icon: Icons.event_busy_rounded,
-          label: 'Limpar follow-up',
-          subtitle: 'Remove data e adiamento',
-          value: '',
-          danger: true,
-          showDivider: false,
-          onTap: _busy ? () {} : () => _confirmClearFollowUp(actions),
+        DashboardHomeActionChip(
+          label: 'Limpar',
+          accent: primary,
+          isDark: widget.isDark,
+          enabled: !_busy,
+          onPressed: () => _confirmClearFollowUp(actions),
         ),
     ];
   }
@@ -289,13 +277,11 @@ class _Aluno360FollowUpCardState extends ConsumerState<Aluno360FollowUpCard> {
       snoozedUntil: snoozedUntil,
     );
     final showActions = !compact || _expanded;
-    final tiles = _buildFollowUpTiles(
+    final chips = _buildFollowUpChips(
       primary: primary,
       followUpDate: followUpDate,
       isSnoozed: isSnoozed,
-      snoozedUntil: snoozedUntil,
       actions: actions,
-      highlightContactDone: !compact,
     );
 
     return Semantics(
@@ -304,24 +290,35 @@ class _Aluno360FollowUpCardState extends ConsumerState<Aluno360FollowUpCard> {
         subtitle: compact ? summarySubtitle : (caption ?? ''),
         expanded: compact && _expanded,
       ),
-      child: FxSettingsGroup(
+      child: Column(
         key:
             compact
                 ? const ValueKey('aluno360_followup_compact')
                 : const ValueKey('aluno360_follow_up'),
-        header: compact ? 'Próximo contato' : 'Follow-up do personal',
-        caption: caption,
-        accent: primary,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          DashboardSectionHeader(
+            title: compact ? 'Próximo contato' : 'Follow-up do personal',
+          ),
+          if (caption != null && caption.isNotEmpty) ...[
+            const SizedBox(height: 4),
+            Text(
+              caption,
+              style: Aluno360Layout.metaStyle(context).copyWith(
+                color: fxScreenMute(context),
+              ),
+            ),
+          ],
+          const SizedBox(height: TokensStrip.s3),
           if (compact)
-            FxSettingsTile(
-              icon: Icons.event_available_rounded,
-              label: 'Registrar ou agendar',
-              subtitle: summarySubtitle,
-              value: followUpDate == null ? '' : _formatDate(followUpDate),
-              picker: true,
-              showDivider: showActions,
-              onTap: () => setState(() => _expanded = !_expanded),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: DashboardHomeActionChip(
+                label: 'Registrar ou agendar',
+                accent: primary,
+                isDark: widget.isDark,
+                onPressed: () => setState(() => _expanded = !_expanded),
+              ),
             ),
           AnimatedSize(
             duration: Duration(milliseconds: motionMs),
@@ -329,9 +326,13 @@ class _Aluno360FollowUpCardState extends ConsumerState<Aluno360FollowUpCard> {
             alignment: Alignment.topCenter,
             child:
                 showActions
-                    ? Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: tiles,
+                    ? Padding(
+                      padding: EdgeInsets.only(top: compact ? TokensStrip.s2 : 0),
+                      child: Wrap(
+                        spacing: TokensStrip.s2,
+                        runSpacing: TokensStrip.s2,
+                        children: chips,
+                      ),
                     )
                     : const SizedBox.shrink(),
           ),

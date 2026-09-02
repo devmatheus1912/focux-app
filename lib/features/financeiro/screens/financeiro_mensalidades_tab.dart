@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/fx_settings_layout.dart';
@@ -23,9 +24,12 @@ import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_inset_picker_sheet.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
+import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../../alunos/providers/alunos_provider.dart';
 import '../../alunos/utils/satellite_screen_utils.dart';
 import '../../alunos/widgets/aluno_inset_form_field.dart';
@@ -291,71 +295,105 @@ class _FinanceiroMensalidadesTabState
                     )
                     : _items.isEmpty
                     ? _buildMensalidadesEmpty(context)
-                    : ListView(
-                      padding: const EdgeInsets.fromLTRB(
-                        FxSettingsLayout.pageInset,
-                        8,
-                        FxSettingsLayout.pageInset,
-                        110,
-                      ),
+                    : Column(
                       children: [
-                        FxSettingsGroup(
-                          children: [
-                            FxSettingsTile(
-                              fxIcon: 'plus',
-                              label: 'Nova mensalidade',
-                              value: '',
-                              onTap: _abrirFormularioNovaMensalidade,
-                            ),
-                            FxSettingsTile(
-                              fxIcon: 'calendar',
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(
+                            FxSettingsLayout.pageInset,
+                            8,
+                            FxSettingsLayout.pageInset,
+                            8,
+                          ),
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: DashboardHomeActionChip(
                               label: 'Atualizar atrasos',
-                              value: '',
-                              showDivider: false,
-                              onTap: _atualizarAtrasos,
+                              accent: primary,
+                              isDark: chrome.isDark,
+                              onPressed: _atualizarAtrasos,
                             ),
-                          ],
+                          ),
                         ),
-                        const SizedBox(height: FxSettingsLayout.groupGap),
-                        FxSettingsGroup(
-                          header: 'Lançamentos',
-                          caption: 'Toque na linha para editar, PIX ou marcar paga.',
-                          children: [
-                            for (var i = 0; i < _items.length; i++)
-                              FxSettingsTile(
-                                fxIcon: _items[i].status == 'ATRASADO'
-                                    ? 'alert-triangle'
-                                    : _items[i].status == 'PAGO'
-                                        ? 'circle-check'
-                                        : 'coin',
-                                label: _items[i].alunoNome,
-                                subtitle: financeiroMensalidadeSubtitle(
-                                  _items[i].status,
-                                  _items[i].mesReferencia,
+                        Expanded(
+                          child: ListView.builder(
+                            padding: const EdgeInsets.fromLTRB(
+                              FxSettingsLayout.pageInset,
+                              0,
+                              FxSettingsLayout.pageInset,
+                              24,
+                            ),
+                            itemCount: _items.length + (_hasMore ? 1 : 0),
+                            itemBuilder: (context, i) {
+                              if (i >= _items.length) {
+                                return FxSatelliteListTile(
+                                  title:
+                                      _carregandoMais
+                                          ? 'Carregando…'
+                                          : 'Carregar mais',
+                                  titleCase: false,
+                                  onTap:
+                                      _carregandoMais ? null : _carregarMais,
+                                  leading: FxIcon(
+                                    name: 'plus',
+                                    size: 18,
+                                    color: primary,
+                                  ),
+                                );
+                              }
+                              final item = _items[i];
+                              final overdue = item.status == 'ATRASADO';
+                              return FxSatelliteListTile(
+                                title: item.alunoNome,
+                                subtitle: Text(
+                                  financeiroMensalidadeSubtitle(
+                                    item.status,
+                                    item.mesReferencia,
+                                  ),
                                 ),
-                                value: formatBrlCurrency(
-                                  _items[i].valor,
-                                  showDecimals: false,
+                                onTap: () => _abrirAcoes(item),
+                                accent: overdue ? EagleTokens.bad : primary,
+                                leading: FxIcon(
+                                  name:
+                                      overdue
+                                          ? 'alert-triangle'
+                                          : item.status == 'PAGO'
+                                          ? 'circle-check'
+                                          : 'coin',
+                                  size: 18,
+                                  color:
+                                      overdue ? EagleTokens.bad : primary,
                                 ),
-                                numeric: true,
-                                danger: _items[i].status == 'ATRASADO',
-                                showDivider:
-                                    i != _items.length - 1 || _hasMore,
-                                onTap: () => _abrirAcoes(_items[i]),
-                              ),
-                            if (_hasMore)
-                              FxSettingsTile(
-                                fxIcon: 'plus',
-                                label: _carregandoMais
-                                    ? 'Carregando…'
-                                    : 'Carregar mais',
-                                value: '',
-                                showDivider: false,
-                                onTap: _carregandoMais
-                                    ? () {}
-                                    : _carregarMais,
-                              ),
-                          ],
+                                trailing: Text(
+                                  formatBrlCurrency(
+                                    item.valor,
+                                    showDecimals: false,
+                                  ),
+                                  style: TextStyle(
+                                    color: chrome.ink,
+                                    fontWeight: FontWeight.w700,
+                                    fontFeatures: const [
+                                      FontFeature.tabularFigures(),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                        SafeArea(
+                          top: false,
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(
+                              FxSettingsLayout.pageInset,
+                              TokensStrip.s2,
+                              FxSettingsLayout.pageInset,
+                              TokensStrip.s3,
+                            ),
+                            child: FxLiquidPrimaryButton(
+                              label: 'Nova mensalidade',
+                              onPressed: _abrirFormularioNovaMensalidade,
+                            ),
+                          ),
                         ),
                       ],
                     ),

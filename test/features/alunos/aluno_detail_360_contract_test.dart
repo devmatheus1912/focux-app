@@ -389,7 +389,7 @@ void main() {
       ).readAsStringSync(),
       allOf(
         contains('aluno360FollowUpSemantics'),
-        contains('FxSettingsGroup'),
+        contains('DashboardHomeActionChip'),
         contains('showFxInsetPickerSheet'),
       ),
     );
@@ -409,7 +409,7 @@ void main() {
       File(
         'lib/features/alunos/widgets/aluno360_operational_status_section.dart',
       ).readAsStringSync(),
-      contains('FxSettingsGroup'),
+      contains('OperationalMetricTile'),
     );
     expect(
       File(
@@ -533,13 +533,16 @@ void main() {
       File(
         'lib/features/alunos/widgets/aluno360_follow_up_card.dart',
       ).readAsStringSync(),
-      allOf(contains('FxSettingsTile'), contains('FxSettingsGroup')),
+      allOf(
+        contains('DashboardHomeActionChip'),
+        contains('DashboardSectionHeader'),
+      ),
     );
     expect(
       File(
         'lib/features/alunos/widgets/aluno360_copilot_locked_section.dart',
       ).readAsStringSync(),
-      allOf(contains('FxSettingsTile'), contains('locked: true')),
+      allOf(contains('CommandActionTile'), contains('Aluno360CopilotUpgradeSheet.show')),
     );
     expect(screen, contains('operacaoContentWidthLimiter'));
     expect(screen, contains('ValueKey(\'aluno360_follow_up\')'));
