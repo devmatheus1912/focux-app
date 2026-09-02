@@ -5,18 +5,26 @@ import 'package:go_router/go_router.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
-import '../../../core/theme/focux_hub_typography.dart';
+import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_dock.dart';
+import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
-import '../../../core/widgets/fx_motion.dart';
+import '../../../core/widgets/fx_help.dart';
+import '../../../core/widgets/fx_inset_picker_sheet.dart';
+import '../../../core/widgets/fx_settings_group.dart';
+import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../data/command_center_data.dart';
 import '../providers/dashboard_provider.dart';
+import '../utils/copilot_actions_display.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 import 'package:focux_app/core/widgets/skeleton_loader.dart';
+
+part 'copilot_actions_screen_widgets.part.dart';
 
 final iaActionsProvider = FutureProvider.family<List<FilaAcaoResumo>, String>((
   ref,
@@ -36,7 +44,7 @@ class CopilotActionsScreen extends ConsumerStatefulWidget {
 }
 
 class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
-  String _status = 'ABERTO';
+  String _status = copilotActionsStatusAberto;
 
   @override
   Widget build(BuildContext context) {
@@ -55,6 +63,12 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
           title: 'Tarefas IA',
           subtitle: 'Centro de Comando',
           onBack: () => safePopOrGo(context, '/dashboard/personal'),
+          actions: [
+            FxHelpIconButton(
+              tooltip: 'Como funcionam as tarefas IA',
+              onTap: _abrirAjuda,
+            ),
+          ],
         ),
         bottomNavigationBar: Padding(
           padding: const EdgeInsets.fromLTRB(
@@ -86,17 +100,24 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
           children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(
-                TokensStrip.s4,
+                FxSettingsLayout.pageInset,
                 2,
-                TokensStrip.s4,
+                FxSettingsLayout.pageInset,
                 TokensStrip.s2,
               ),
-              child: _StatusSegmentedControl(
-                selected: _status,
-                brand: brand,
-                ink: ink,
-                mute: mute,
-                onChanged: (value) => setState(() => _status = value),
+              child: FxSettingsGroup(
+                children: [
+                  FxSettingsTile(
+                    fxIcon: 'spark',
+                    label: copilotActionsFiltroTitle(),
+                    value: copilotActionsStatusLabel(_status),
+                    picker: true,
+                    accent: brand,
+                    mute: mute,
+                    showDivider: false,
+                    onTap: _abrirFiltro,
+                  ),
+                ],
               ),
             ),
             Expanded(
@@ -124,19 +145,20 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
                       onRefresh: _refresh,
                       child: ListView(
                         padding: const EdgeInsets.fromLTRB(
+                          FxSettingsLayout.pageInset,
                           TokensStrip.s4,
-                          TokensStrip.s4,
-                          TokensStrip.s4,
+                          FxSettingsLayout.pageInset,
                           120,
                         ),
                         children: [
-                          _IaActionsEmptyCard(
-                            title: _emptyTitle(_status),
-                            subtitle: _emptySubtitle(_status),
-                            ink: ink,
-                            mute: mute,
-                            brand: brand,
-                            onRefresh: _refresh,
+                          FxEmptyState(
+                            icon: 'circle-check',
+                            title: copilotActionsEmptyTitle(_status),
+                            subtitle: copilotActionsEmptySubtitle(_status),
+                            action: FxEmptyAction(
+                              label: copilotActionsAtualizarLabel(),
+                              onTap: _refresh,
+                            ),
                           ),
                         ],
                       ),
@@ -147,16 +169,19 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
                     onRefresh: _refresh,
                     child: ListView(
                       padding: const EdgeInsets.fromLTRB(
-                        TokensStrip.s4,
+                        FxSettingsLayout.pageInset,
                         10,
-                        TokensStrip.s4,
+                        FxSettingsLayout.pageInset,
                         120,
                       ),
                       children: [
                         if (copilot.isNotEmpty) ...[
                           _SectionHeader(
                             title: 'Copiloto',
-                            detail: _sectionDetail(_status, copilot.length),
+                            detail: copilotActionsSectionDetail(
+                              _status,
+                              copilot.length,
+                            ),
                             ink: ink,
                             mute: mute,
                           ),
@@ -166,7 +191,8 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
                               action: entry.value,
                               status: _status,
                               highlighted:
-                                  _status == 'ABERTO' && entry.key == 0,
+                                  _status == copilotActionsStatusAberto &&
+                                  entry.key == 0,
                               ink: ink,
                               mute: mute,
                               brand: brand,
@@ -214,6 +240,41 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
     );
   }
 
+  Future<void> _abrirFiltro() async {
+    final picked = await showFxInsetPickerSheet<String>(
+      context,
+      title: copilotActionsFiltroTitle(),
+      selected: _status,
+      items: [
+        for (final status in copilotActionsStatusValues)
+          FxInsetPickerSheetItem(
+            value: status,
+            label: copilotActionsStatusLabel(status),
+          ),
+      ],
+    );
+    if (!mounted || picked == null || picked == _status) return;
+    setState(() => _status = picked);
+  }
+
+  void _abrirAjuda() {
+    showFxHelpSheet(
+      context,
+      title: copilotActionsHelpTitle(),
+      subtitle: copilotActionsHelpSubtitle(),
+      tips: const [
+        FxHelpTip(
+          'Copiloto',
+          'Tarefas que você salvou a partir de um insight. Revisar o aluno não conclui a tarefa.',
+        ),
+        FxHelpTip(
+          'Sinais',
+          'Alertas automáticos do Radar. Concluir, adiar ou reabrir pede confirmação.',
+        ),
+      ],
+    );
+  }
+
   Future<void> _refresh() async {
     ref.invalidate(iaActionsProvider(_status));
     await ref.read(iaActionsProvider(_status).future);
@@ -226,6 +287,13 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
   }
 
   Future<void> _complete(FilaAcaoResumo action) async {
+    final ok = await showFxConfirmSheet(
+      context,
+      title: copilotActionsCompleteConfirmTitle(),
+      message: copilotActionsCompleteConfirmMessage(),
+      confirmLabel: copilotActionsConcluirLabel(),
+    );
+    if (!ok || !mounted) return;
     await _runAction(
       () => ref
           .read(dashboardRepositoryProvider)
@@ -235,6 +303,13 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
   }
 
   Future<void> _snooze(FilaAcaoResumo action) async {
+    final ok = await showFxConfirmSheet(
+      context,
+      title: copilotActionsSnoozeConfirmTitle(),
+      message: copilotActionsSnoozeConfirmMessage(),
+      confirmLabel: copilotActionsAdiarLabel(),
+    );
+    if (!ok || !mounted) return;
     await _runAction(
       () => ref
           .read(dashboardRepositoryProvider)
@@ -244,6 +319,13 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
   }
 
   Future<void> _reopen(FilaAcaoResumo action) async {
+    final ok = await showFxConfirmSheet(
+      context,
+      title: copilotActionsReopenConfirmTitle(),
+      message: copilotActionsReopenConfirmMessage(),
+      confirmLabel: copilotActionsReabrirLabel(),
+    );
+    if (!ok || !mounted) return;
     await _runAction(
       () => ref
           .read(dashboardRepositoryProvider)
@@ -263,562 +345,12 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
       ref.invalidate(dashboardHomeProvider);
       ref.invalidate(commandCenterProvider);
       FeedbackHelper.showInfo(context, successMessage);
-    } catch (_) {
+    } catch (e) {
       if (!mounted) return;
-      FeedbackHelper.showError(context, 'Não foi possível atualizar a tarefa.');
+      FeedbackHelper.showError(
+        context,
+        friendlyError(e, fallback: 'Não foi possível atualizar a tarefa.'),
+      );
     }
   }
-}
-
-class _StatusSegmentedControl extends StatelessWidget {
-  const _StatusSegmentedControl({
-    required this.selected,
-    required this.brand,
-    required this.ink,
-    required this.mute,
-    required this.onChanged,
-  });
-
-  final String selected;
-  final Color brand;
-  final Color ink;
-  final Color mute;
-  final ValueChanged<String> onChanged;
-
-  static const _items = [
-    ('ABERTO', 'Abertas'),
-    ('ADIADO', 'Adiadas'),
-    ('CONCLUIDO', 'Concluídas'),
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(4),
-      decoration: fxListCardDecoration(context),
-      child: Row(
-        children:
-            _items.map((item) {
-              final active = item.$1 == selected;
-              return Expanded(
-                child: GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: () => onChanged(item.$1),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 160),
-                    height: 34,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: active ? brand : Colors.transparent,
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow:
-                          active
-                              ? [
-                                BoxShadow(
-                                  color: brand.withValues(alpha: 0.18),
-                                  blurRadius: 14,
-                                  offset: const Offset(0, 6),
-                                ),
-                              ]
-                              : null,
-                    ),
-                    child: Text(
-                      item.$2,
-                      style: TextStyle(
-                        color: active ? Colors.white : mute,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                  ),
-                ),
-              );
-            }).toList(),
-      ),
-    );
-  }
-}
-
-class _SectionHeader extends StatelessWidget {
-  const _SectionHeader({
-    required this.title,
-    required this.detail,
-    required this.ink,
-    required this.mute,
-  });
-
-  final String title;
-  final String detail;
-  final Color ink;
-  final Color mute;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Text(
-          title,
-          style: TextStyle(
-            color: ink,
-            fontSize: 13,
-            fontWeight: FontWeight.w900,
-            letterSpacing: 0.2,
-          ),
-        ),
-        const SizedBox(width: 8),
-        Text(
-          detail,
-          style: TextStyle(
-            color: mute,
-            fontSize: 12,
-            fontWeight: FontWeight.w800,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _CopilotTaskCard extends StatelessWidget {
-  const _CopilotTaskCard({
-    required this.action,
-    required this.status,
-    required this.highlighted,
-    required this.ink,
-    required this.mute,
-    required this.brand,
-    required this.onOpen,
-    required this.onComplete,
-    required this.onSnooze,
-    required this.onReopen,
-  });
-
-  final FilaAcaoResumo action;
-  final String status;
-  final bool highlighted;
-  final Color ink;
-  final Color mute;
-  final Color brand;
-  final VoidCallback onOpen;
-  final VoidCallback onComplete;
-  final VoidCallback onSnooze;
-  final VoidCallback onReopen;
-
-  @override
-  Widget build(BuildContext context) {
-    final mode = _modeLabel(action);
-    final isDone = status == 'CONCLUIDO';
-    return Container(
-      padding: const EdgeInsets.fromLTRB(
-        TokensStrip.s3,
-        TokensStrip.s3,
-        TokensStrip.s3,
-        10,
-      ),
-      decoration:
-          highlighted
-              ? fxListCardDecoration(context, accent: brand, selected: true)
-              : fxListCardDecoration(context),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (highlighted) ...[
-            Text(
-              'Próxima ação',
-              style: TextStyle(
-                color: brand,
-                fontSize: 10,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 0.8,
-              ),
-            ),
-            const SizedBox(height: 8),
-          ],
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _TaskIcon(icon: Icons.auto_awesome, brand: brand),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      action.titulo,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: ink,
-                        fontSize: 13.5,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
-                      'Copiloto · $mode',
-                      style: TextStyle(
-                        color: brand,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              _CompactPill(
-                label: _deadlineLabel(action, status),
-                color: isDone ? mute : brand,
-              ),
-            ],
-          ),
-          const SizedBox(height: 9),
-          Text(
-            action.descricao,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(color: mute, fontSize: 12, height: 1.32),
-          ),
-          const SizedBox(height: 11),
-          Row(
-            children: [
-              Expanded(
-                child:
-                    isDone
-                        ? OutlinedButton.icon(
-                          onPressed:
-                              action.acaoUrl.startsWith('/') ? onOpen : null,
-                          icon: const Icon(Icons.person_outline, size: 15),
-                          label: const Text('Ver aluno'),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: brand,
-                            minimumSize: const Size.fromHeight(38),
-                            textStyle: const TextStyle(
-                              fontSize: 12.5,
-                              fontWeight: FontWeight.w900,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                        )
-                        : FxLiquidPrimaryButton(
-                          label: 'Revisar aluno',
-                          icon: Icons.person_outline,
-                          onPressed:
-                              action.acaoUrl.startsWith('/') ? onOpen : null,
-                        ),
-              ),
-              const SizedBox(width: 8),
-              if (isDone)
-                _MiniActionButton(label: 'Reabrir', onPressed: onReopen)
-              else ...[
-                _MiniActionButton(label: 'Adiar', onPressed: onSnooze),
-                const SizedBox(width: 6),
-                _MiniActionButton(label: 'Concluir', onPressed: onComplete),
-              ],
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _RadarSignalCard extends StatelessWidget {
-  const _RadarSignalCard({
-    required this.action,
-    required this.status,
-    required this.ink,
-    required this.mute,
-    required this.brand,
-    required this.onOpen,
-    required this.onComplete,
-    required this.onSnooze,
-    required this.onReopen,
-  });
-
-  final FilaAcaoResumo action;
-  final String status;
-  final Color ink;
-  final Color mute;
-  final Color brand;
-  final VoidCallback onOpen;
-  final VoidCallback onComplete;
-  final VoidCallback onSnooze;
-  final VoidCallback onReopen;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: fxListCardDecoration(context),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _TaskIcon(icon: Icons.sensors, brand: brand),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        action.titulo,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: ink,
-                          fontSize: 13.2,
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    _CompactPill(label: action.prioridade, color: brand),
-                  ],
-                ),
-                const SizedBox(height: 5),
-                Text(
-                  action.descricao,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(color: mute, fontSize: 11.8, height: 1.3),
-                ),
-                const SizedBox(height: 9),
-                Wrap(
-                  spacing: 6,
-                  runSpacing: 6,
-                  children: [
-                    _TextAction(label: action.ctaLabel, onPressed: onOpen),
-                    if (status == 'CONCLUIDO')
-                      _TextAction(label: 'Reabrir', onPressed: onReopen)
-                    else ...[
-                      _TextAction(label: 'Adiar', onPressed: onSnooze),
-                      _TextAction(label: 'Concluir', onPressed: onComplete),
-                    ],
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _TaskIcon extends StatelessWidget {
-  const _TaskIcon({required this.icon, required this.brand});
-
-  final IconData icon;
-  final Color brand;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 34,
-      height: 34,
-      decoration: BoxDecoration(
-        color: brand.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Icon(icon, color: brand, size: 17),
-    );
-  }
-}
-
-class _CompactPill extends StatelessWidget {
-  const _CompactPill({required this.label, required this.color});
-
-  final String label;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          color: color,
-          fontSize: 10.5,
-          fontWeight: FontWeight.w900,
-        ),
-      ),
-    );
-  }
-}
-
-class _MiniActionButton extends StatelessWidget {
-  const _MiniActionButton({required this.label, required this.onPressed});
-
-  final String label;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    final primary = Theme.of(context).colorScheme.primary;
-    return TextButton(
-      onPressed: onPressed,
-      style: TextButton.styleFrom(
-        backgroundColor: primary.withValues(alpha: 0.07),
-        foregroundColor: primary,
-        minimumSize: const Size(0, 36),
-        padding: const EdgeInsets.symmetric(horizontal: 9),
-        textStyle: FocuxHubTypography.chip(primary).copyWith(
-          fontWeight: FontWeight.w900,
-        ),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(11)),
-      ),
-      child: Text(label),
-    );
-  }
-}
-
-class _TextAction extends StatelessWidget {
-  const _TextAction({required this.label, required this.onPressed});
-
-  final String label;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      borderRadius: BorderRadius.circular(999),
-      onTap: onPressed,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 2),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: Theme.of(context).colorScheme.primary,
-            fontSize: 11.5,
-            fontWeight: FontWeight.w900,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _IaActionsEmptyCard extends StatelessWidget {
-  const _IaActionsEmptyCard({
-    required this.title,
-    required this.subtitle,
-    required this.ink,
-    required this.mute,
-    required this.brand,
-    required this.onRefresh,
-  });
-
-  final String title;
-  final String subtitle;
-  final Color ink;
-  final Color mute;
-  final Color brand;
-  final Future<void> Function() onRefresh;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: fxListCardDecoration(context, accent: brand),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color: brand.withValues(alpha: 0.10),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Icon(Icons.task_alt, color: brand, size: 22),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            'Tudo em ordem',
-            textAlign: TextAlign.center,
-            style: FocuxHubTypography.eyebrow(
-              context,
-              color: brand,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 0.7,
-            ).copyWith(fontSize: 11),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            title,
-            textAlign: TextAlign.center,
-            style: FocuxHubTypography.pageTitle(context, color: ink),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            subtitle,
-            textAlign: TextAlign.center,
-            style: FocuxHubTypography.bodyMuted(color: mute),
-          ),
-          const SizedBox(height: 14),
-          OutlinedButton.icon(
-            onPressed: onRefresh,
-            icon: const Icon(Icons.refresh, size: 16),
-            label: const Text('Atualizar'),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-String _modeLabel(FilaAcaoResumo action) {
-  final raw = (action.sourceMode ?? '').trim();
-  if (raw.isEmpty) return 'Treino';
-  final lower = raw.toLowerCase();
-  return lower.substring(0, 1).toUpperCase() + lower.substring(1);
-}
-
-String _deadlineLabel(FilaAcaoResumo action, String status) {
-  if (status == 'CONCLUIDO') return 'concluída';
-  if (status == 'ADIADO') return 'adiada';
-  final dueAt = DateTime.tryParse(action.dueAt ?? '');
-  if (dueAt == null) {
-    final sla = action.sla.trim();
-    if (sla.isEmpty) return 'vence em 24h';
-    return sla.toLowerCase().contains('vence') ? sla : 'vence em $sla';
-  }
-  final diff = dueAt.difference(DateTime.now());
-  if (diff.isNegative) return 'atrasada';
-  final hours = diff.inHours.clamp(1, 999);
-  return 'vence em ${hours}h';
-}
-
-String _sectionDetail(String status, int count) {
-  final suffix = switch (status) {
-    'ADIADO' => 'adiadas',
-    'CONCLUIDO' => 'concluídas',
-    _ => 'abertas',
-  };
-  return '$count $suffix';
-}
-
-String _emptyTitle(String status) {
-  return switch (status) {
-    'ADIADO' => 'Nenhuma tarefa adiada',
-    'CONCLUIDO' => 'Nenhuma tarefa concluída',
-    _ => 'Nenhuma tarefa IA aberta',
-  };
-}
-
-String _emptySubtitle(String status) {
-  return switch (status) {
-    'ADIADO' => 'Quando uma ação for adiada, ela fica guardada aqui.',
-    'CONCLUIDO' => 'As tarefas resolvidas aparecem aqui para auditoria.',
-    _ => 'Copiloto e Radar Focux aparecem aqui quando exigem ação humana.',
-  };
 }
