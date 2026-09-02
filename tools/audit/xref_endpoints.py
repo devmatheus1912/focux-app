@@ -94,8 +94,8 @@ PAGINATE_LATER = {
     "/api/trilhas/aluno/{alunoId}",
     "/api/winback/log",
 }
-# Gemeo paginado existe e o app chama os dois. O app migra para /page primeiro;
-# so depois o backend remove o cru.
+# Gemeo paginado existe e o cru esta liberado para remocao no backend: o app
+# ja migrou para /page, entao estes dois saem como orfaos no relatorio.
 DROP_RAW_LIST = {
     "/api/chat/aluno/historico",
     "/api/chat/historico/{alunoId}",
