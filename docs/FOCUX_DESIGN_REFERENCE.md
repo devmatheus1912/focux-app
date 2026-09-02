@@ -1,0 +1,1497 @@
+# Focux Personal — Referência oficial de design e engenharia
+
+**Padrão de excelência do aplicativo (visual, UX, arquitetura, segurança, dados, ops).**
+**Versão:** 2.0 · **Data:** 2026-09-02 · **Plataforma de referência:** iOS (HIG) com paridade Android.
+
+> **Este arquivo é a única referência canônica.** Ele **substitui e aposenta**:
+> - `PERFIL_DESIGN_REFERENCE.md` (v1 — escopo `/perfil`, fold inset)
+> - `FOCUX_80_PILARES.md` (v1 — constituição dos 80 pilares)
+>
+> Todo o conteúdo normativo dos dois foi absorvido aqui. Não consultar os arquivos antigos: onde houver divergência, **este documento vence**.
+
+---
+
+## Índice
+
+**Parte 0 — Como usar**
+- [0.1 Regra de ouro](#01-regra-de-ouro)
+- [0.2 O que mudou da v1 para a v2](#02-o-que-mudou-da-v1-para-a-v2)
+- [0.3 Ordem de precedência](#03-ordem-de-precedência)
+- [0.4 Migração: pendências ao aposentar os arquivos v1](#04-migração-pendências-ao-aposentar-os-arquivos-v1)
+
+**Parte I — A pele (invariante em todo o app)**
+- [1. Princípio raiz: pele constante, anatomia variável](#1-princípio-raiz-pele-constante-anatomia-variável)
+- [2. Assinatura visual Focux](#2-assinatura-visual-focux)
+- [3. Contrato de camadas: o que copiar e o que nunca copiar](#3-contrato-de-camadas-o-que-copiar-e-o-que-nunca-copiar)
+- [4. Tokens canônicos](#4-tokens-canônicos)
+- [5. Tipografia: papéis fixos](#5-tipografia-papéis-fixos)
+- [6. Cor, contraste e semântica](#6-cor-contraste-e-semântica)
+- [7. Motion, haptics e entrada](#7-motion-haptics-e-entrada)
+- [8. Locale: aplicativo Brasil-first](#8-locale-aplicativo-brasil-first)
+
+**Parte II — A anatomia (varia por função)**
+- [9. Taxonomia de superfícies](#9-taxonomia-de-superfícies)
+  - [S1 Hub operacional](#s1--hub-operacional) · [S2 Hub de ajustes](#s2--hub-de-ajustes--conta) · [S3 Detalhe de entidade](#s3--detalhe-de-entidade) · [S4 Coleção](#s4--coleção--lista) · [S5 Formulário de página](#s5--formulário-de-página) · [S6 Conversão](#s6--conversão-autenticação-plano-pagamento) · [S7 Sheet](#s7--sheet-overlay-modal) · [S8 Execução](#s8--execução--foco-total) · [S9 Wizard](#s9--wizard--onboarding)
+- [10. Componente por intenção (matriz normativa)](#10-componente-por-intenção-matriz-normativa)
+- [11. Orçamento de destaque](#11-orçamento-de-destaque)
+- [12. Densidade e revelação progressiva](#12-densidade-e-revelação-progressiva)
+- [13. Estados obrigatórios](#13-estados-obrigatórios)
+- [14. Navegação, sheets, teclado e layout estável](#14-navegação-sheets-teclado-e-layout-estável)
+- [15. Acessibilidade e ergonomia](#15-acessibilidade-e-ergonomia)
+
+**Parte III — Regras que não podem ser esquecidas**
+- [16. Rota, job, SSOT e tipos](#16-rota-job-ssot-e-tipos)
+- [17. IA, monetização e mutação](#17-ia-monetização-e-mutação)
+- [18. Tenant, auth e cache](#18-tenant-auth-e-cache)
+- [19. Superfície, erro e PII](#19-superfície-erro-e-pii)
+- [20. Segurança, privacidade e hardening](#20-segurança-privacidade-e-hardening)
+- [21. Desempenho](#21-desempenho)
+
+**Parte IV — Backend**
+- [22. Protocolo de proposta de backend](#22-protocolo-de-proposta-de-backend)
+- [23. Contrato de dados por tipo de superfície](#23-contrato-de-dados-por-tipo-de-superfície)
+- [24. Superfície Hoje: contrato vigente de referência](#24-superfície-hoje-contrato-vigente-de-referência)
+
+**Parte V — Os 80 pilares**
+- [25. Regra de evidência](#25-regra-de-evidência)
+- [26. Tabelas dos 80 pilares](#26-tabelas-dos-80-pilares)
+- [27. Pilares estruturais 81–92](#27-pilares-estruturais-8192)
+
+**Parte VI — Execução**
+- [28. Playbook de implementação em massa](#28-playbook-de-implementação-em-massa)
+- [29. O que pode aplicar sozinho vs. o que só propor](#29-o-que-pode-aplicar-sozinho-vs-o-que-só-propor)
+- [30. Limpeza de mortos](#30-limpeza-de-mortos)
+- [31. Anti-padrões](#31-anti-padrões)
+- [32. Gates verificáveis](#32-gates-verificáveis)
+- [33. Scorecard e checklist de ship](#33-scorecard-e-checklist-de-ship)
+- [34. Catálogo de componentes](#34-catálogo-de-componentes)
+- [35. Padrões de detalhe](#35-padrões-de-detalhe)
+
+**Apêndices**
+- [A. Registro de auditoria: hub Perfil](#a-registro-de-auditoria-hub-perfil)
+- [B. Mortos: não reintroduzir](#b-mortos-não-reintroduzir)
+
+---
+
+## 0.1 Regra de ouro
+
+> **A pele é constante. A anatomia é função do job da tela.**
+
+Duas telas do Focux devem ser reconhecíveis como do mesmo produto em 200 ms (pele) e distinguíveis como jobs diferentes em 1 s (anatomia). Se toda tela parece a mesma tela, a pele venceu a anatomia — e isso é defeito, não consistência.
+
+Corolário operacional: **antes de editar qualquer tela, classifique-a** em um dos nove tipos da [taxonomia](#9-taxonomia-de-superfícies). Sem classificação declarada, não se abre PR.
+
+Uma tela linda com regra, contrato ou tenant errados é pior do que não mexer.
+
+---
+
+## 0.2 O que mudou da v1 para a v2
+
+A v1 (`PERFIL_DESIGN_REFERENCE.md`) era excelente para o que se propunha — o fold inset de `/perfil` — mas foi lida como especificação global. O resultado previsível: o padrão *inset-grouped* (lista de linhas com chevron) virou a estrutura de telas que não são ajustes, e o app passou a "parecer um perfil" em todo lugar. As correções normativas abaixo são o núcleo desta versão.
+
+| # | Regra v1 | Problema | Regra v2 |
+|---|---|---|---|
+| 1 | "O Perfil define a **pele** do Personal. Telas futuras copiam **este** padrão." | "Padrão" foi lido como *estrutura*, não como *pele*. | Telas futuras copiam a **pele** (§1–§8). A **estrutura** vem da taxonomia (§9). *Inset-grouped* é a estrutura padrão **apenas de S2**. |
+| 2 | Picker inset → "Navegação / ação \| `FxSettingsTile` (chevron)" | A palavra "ação" autorizou `Entrar`, `Salvar`, `Assinar` como linha com chevron. Viola HIG e os pilares 4 e 19. | **Chevron ⟺ push de rota.** Ação transacional é botão. Ver [regra do chevron](#regra-do-chevron-normativa). |
+| 3 | Sticky: "Chip `Completar`/`Hoje`" · Não copiar: "CTA full-width do Planos" | A proibição de CTA full-width era escopada a S1/S2 e virou global — telas de login e formulário perderam o botão primário. | CTA full-width é **proibido** em S1/S2 e **obrigatório** em S5/S6/S9. Ver §11. |
+| 4 | Layout: "Não copiar: Cards KPI, accordion, pills no hero" | Escopado a S2, aplicado em todo lugar — hubs e detalhes perderam métricas e agrupamento. | Cards KPI são **corretos** em S1/S3. Proibidos em S2. |
+| 5 | Sem taxonomia de superfície | Login, wizard, execução de treino e formulário não tinham arquétipo — caíram no default inset. | §9 define nove arquétipos, cada um com esqueleto, componentes e proibições. |
+| 6 | Sem orçamento de destaque | "Densidade comparável à Home" é subjetivo; virou muro de chips/badges. | §11 e §12 dão limites contáveis (1 P0, ≤2 P1, ≤3 sinais/linha, agregação a partir de 3 repetições). |
+| 7 | Backend: "na dúvida, propor" | Correto, mas passivo — sem proposta, nada era proposto. | §22 torna a auditoria de backend **obrigatória e entregável** em toda tela tocada, com template e severidade. |
+
+Nada foi relaxado: todas as regras de negócio, segurança, tenant, LGPD, cache e performance da v1 continuam vigentes, íntegras, em §16–§21.
+
+---
+
+## 0.3 Ordem de precedência
+
+Em caso de conflito, decidir nesta ordem:
+
+1. **Segurança, tenant, LGPD, auth, pagamento** (§20, pilares 52–68) — nunca cede a estética.
+2. **Regra de negócio e contrato de dados** (§16–§18) — nunca cede a estética.
+3. **Acessibilidade e alvo de toque** (§15, pilares 33/38) — nunca cede a densidade.
+4. **Anatomia da superfície** (§9–§12) — vence a preferência pessoal e vence "como a outra tela faz".
+5. **Pele** (§1–§8) — vence variação criativa local.
+6. **Preferência estética** — último critério.
+
+---
+
+## 0.4 Migração: pendências ao aposentar os arquivos v1
+
+Ao adotar este arquivo, os ponteiros para os documentos antigos ficam órfãos. **Tarefas de migração** (executar no primeiro lote da implementação em massa, em PR próprio de documentação):
+
+| Onde | Referência atual | Ação |
+|---|---|---|
+| `lib/core/security/focux_security.dart` | `'../docs/PERFIL_DESIGN_REFERENCE.md'` em `coreSources` | Apontar para `../docs/FOCUX_DESIGN_REFERENCE.md` |
+| `lib/core/theme/fx_settings_layout.dart` (dartdoc) | `D:/Focux Personal/docs/PERFIL_DESIGN_REFERENCE.md` | Idem, e ajustar o texto para "estrutura padrão de S2" |
+| `test/core/design_system/security_pillar_contract_test.dart` | Asserção do nome do arquivo | Atualizar no mesmo commit |
+| `test/core/security/platform_hardening_test.dart` | Idem | Atualizar no mesmo commit |
+| Regra Cursor `focux-10-10` | Cita os dois arquivos | Apontar só para este |
+| `docs/` | `PERFIL_DESIGN_REFERENCE.md`, `FOCUX_80_PILARES.md` | Apagar após o commit acima (pilar 72 — não deixar "por precaução") |
+
+Enquanto a atualização não acontecer, **não apagar os arquivos v1**: o gate `security_pillar_contract_test` referencia o nome e quebra o CI.
+
+---
+
+# Parte I — A pele (invariante em todo o app)
+
+## 1. Princípio raiz: pele constante, anatomia variável
+
+| Camada | Definição | Varia por tela? | Fonte |
+|---|---|---|---|
+| **Pele** | Cor, tipografia, raio, blur, glow, sombra, mesh, motion, ícone, microcopy, locale | **Não.** Idêntica em 100% do app | §2–§8 |
+| **Anatomia** | Esqueleto de layout, componentes estruturais, tratamento da ação primária, densidade | **Sim.** Determinada pelo tipo de superfície | §9–§12 |
+| **Conteúdo** | Dados, regras, contratos | Sim, por domínio | §16–§24 |
+
+O erro da v1 foi tratar a anatomia de `/perfil` como parte da pele. Ela não é: é a anatomia correta de **um** dos nove tipos.
+
+## 2. Assinatura visual Focux
+
+Uma tela só é "Focux" se **todos** estes sete itens estiverem presentes. Este é o teste de marca — e ele não menciona lista, chevron ou grupo inset em nenhum ponto.
+
+1. **Fundo mesh cinematográfico** — `CinematicMeshBackground` + `MeshScope` (via `FxShellScaffold(useMesh: true)` ou herdado do shell). Nunca fundo chapado; nunca preto puro estilo ChatGPT.
+2. **Superfície glass** — `ShellChrome.of(context).panel(...)`, `FxGlassSurface`, `fxStripCardDecoration` ou `fxListCardDecoration`. Fill translúcido, borda 1px tingida na marca, luz interna no topo.
+3. **Teal da marca como único acento** — `TokensStrip.primary` (`#13C2C2`) ou a cor do personal via `BrandPalette.softened(...)`. Zero `#007AFF`, zero poço colorido, zero paleta paralela.
+4. **Profundidade com glow tingido** — `TokensStrip.coloredDepthGlow` / `interactiveGlow` / `elevation(level, dark:)`. Sombra neutra sozinha não é a marca.
+5. **Geometria de raio** — 8 input · 12 card · 20 grupo/painel · 50 pill (botão). Nunca raio arbitrário.
+6. **Entrada coreografada** — `FxPremiumEntrance` na tela, `FxStaggerItem` nos blocos, respeitando `TokensStrip.prefersReducedMotion`.
+7. **Ícone outline + microcopy PT-BR curta** — `FxIcon` (22 em linha, 18 em botão de chrome), voz de ação, sem jargão interno.
+
+Se os sete estão lá, a tela é Focux **mesmo sendo** um formulário, um timer em tela cheia ou um paywall.
+
+## 3. Contrato de camadas: o que copiar e o que nunca copiar
+
+| Camada | Fonte canônica | Copiar sempre | Nunca copiar |
+|---|---|---|---|
+| Identidade | §2 deste arquivo | Mesh, glass, teal da marca, `ShellChrome` | Tema preto ChatGPT, CTA branco invertido, hero invertido no Financeiro |
+| Tipografia | `FocuxHubTypography` | `pageTitle` / `sectionTitle` / `cardTitle` / `bodyMuted` / `metric` / `kpi` | Escala Dynamic Type 17pt como família própria; `Inter 17` ad-hoc; `pageTitle` 22 solto |
+| Cor | Marca do personal | Ícone leading `BrandPalette.softened`; texto `chrome.ink`; muted `chrome.mute`; destrutivo `EagleTokens.bad` | Poços coloridos, azul iOS `#007AFF`, gradiente decorativo sem função |
+| Estrutura | **Taxonomia §9 — nunca outra tela** | O esqueleto do tipo da tela | O esqueleto de um tipo diferente (em especial: inset-grouped fora de S2) |
+| Ação primária | §10 + §11 | 1 P0 no tratamento previsto pelo tipo | Chevron para transação; dois primários; nenhum primário |
+| Sticky | §9 por tipo | S1/S2: chip overlay · S3: barra com botão · S5/S6/S9: footer full-width | Full-width em S1/S2; chip como submit de formulário |
+| Locale | §8 | PT-BR na superfície, `Locale('pt')`, formatos BR | Traduzir `app_en`/`app_es`; ligar seletor de idioma |
+
+## 4. Tokens canônicos
+
+Zero número mágico solto na árvore de widgets (pilar 16). Se um valor não está aqui nem em `TokensStrip`/`FxSettingsLayout`/`DashboardLayout`, ele não entra no diff.
+
+### 4.1 Espaço, raio, blur — `lib/core/theme/tokens_strip.dart`
+
+| Papel | Token | Valor |
+|---|---|---|
+| Grid 8pt | `s1`…`s9` | 4 · 8 · 12 · 16 · 24 · 32 · 48 · 64 · 80 |
+| Raio input / campo | `rInput` | 8 |
+| Raio card | `rCard` | 12 |
+| Raio grupo / painel | `FxSettingsLayout.groupRadius` | 20 |
+| Raio botão pill | `rButton` | 50 |
+| Blur | `blurLight` / `blurMedium` / `blurHeavy` | 16 · 22 · 28 |
+| Camadas de elevação | `layerBase`…`layerModal` | 0 · 4 · 8 · 16 · 24 |
+| Anel de foco | `focusRingWidth` | 2 |
+
+### 4.2 Layout inset (S2, e grupos de campo em S5) — `lib/core/theme/fx_settings_layout.dart`
+
+| Papel | Token | Valor |
+|---|---|---|
+| Inset da página | `pageInset` | `s4` (16) |
+| Gap entre grupos | `groupGap` | `s5` (24) |
+| Padding horizontal do grupo | `groupPadH` | `s4` (16) |
+| Header → grupo | `headerToGroup` | `s2` (8) |
+| Grupo → footer | `footerAfterGroup` | `s2` (8) |
+| Altura mínima de linha | `rowMinHeight` | 52 |
+| Ícone leading | `iconSize` | 22 |
+| Slot de prefixo em campo/picker | `insetPrefixWidth` | 48 |
+| Chevron | `chevronSize` | 17 |
+| Divisor | `dividerThickness` | 0.5 |
+| Avatar do hero | `avatarSize` | `s9` (80) |
+
+### 4.3 Toque
+
+| Papel | Token | Valor |
+|---|---|---|
+| Alvo mínimo | `DashboardLayout.touchTarget` / `FxHelpChrome.touchTarget` | 48 |
+| Controle de execução (S8) | — | ≥ 64 |
+
+## 5. Tipografia: papéis fixos
+
+Fonte única: `FocuxHubTypography` (`lib/core/theme/focux_hub_typography.dart`), sobre `AppTypography` (Outfit / JetBrains Mono). Papel é definido por **função semântica**, não por tamanho desejado.
+
+| Papel | API | Onde |
+|---|---|---|
+| Título de página | `pageTitle` | Título de S1/S3/S4 quando há hero textual |
+| Título de app bar | `TokensStrip.h2` (via `FxShellAppBar`) | Toda app bar — não estilizar à mão |
+| Título de seção / nome de entidade | `sectionTitle` | Header de S3, nome no hero de S2, título de bloco |
+| Título de linha / card | `cardTitle` | Linha de S2, título de `FxSatelliteListTile`, título de card |
+| Corpo | `body` | Texto de leitura |
+| Corpo secundário | `bodyMuted` | Subtítulo, caption, footer de grupo, freshness |
+| Eyebrow | `eyebrow` | Rótulo acima de bloco (uso parcimonioso) |
+| Métrica | `metric` (+ `fontSize: TokensStrip.fontBodySm` quando em linha) | Score, percentual, valor em linha |
+| KPI | `kpi` | Número dominante de card de métrica em S1/S3 |
+| Chip | `chip` | Texto de `FxToggleChip` e chips de status |
+
+Regras: **um** `pageTitle` por tela, no máximo. Número sempre com unidade ou contexto no mesmo bloco visual (pilar 40). Nunca `TextStyle` inline com `fontSize` literal.
+
+## 6. Cor, contraste e semântica
+
+| Uso | Fonte | Regra |
+|---|---|---|
+| Texto principal | `ShellChrome.of(context).ink` / `fxScreenInk(context)` | Nunca `Colors.black`/`white` diretos |
+| Texto secundário | `chrome.mute` / `fxScreenMute(context)` | Contraste ≥ 4.5:1 (pilar 17) |
+| Linha / divisor | `chrome.line` | 0.5 de espessura |
+| Acento e ícone leading | `BrandPalette.softened(colorScheme.primary)` | Cor do personal (white-label, pilar 8) — nunca hardcoded |
+| Destrutivo | `EagleTokens.bad` | Só em ação destrutiva real; sempre com confirmação |
+| Sucesso / aviso / erro / info | `TokensStrip.badgeSuccess` / `badgeWarning` / `badgeError` / `badgeInfo` (+ `*Bg`) | Badge de status apenas; não pintar superfície inteira |
+| Bloqueio de plano | `FxPlanLockBadge` / `FxPlanLockTrailing` | Ink a 55% de alpha + cadeado + tier |
+
+Dark/light: toda cor passa por `ShellChrome` (pilar 18). Toda tela é verificada nos dois temas antes do ship. Zero cor literal fora de `tokens_strip.dart` / `brand_palette.dart` / `design_tokens.dart`.
+
+## 7. Motion, haptics e entrada
+
+| Situação | API | Regra |
+|---|---|---|
+| Entrada de tela | `FxPremiumEntrance` | Uma vez por tela, na raiz do body |
+| Entrada de blocos | `FxStaggerItem` | Escalonado; nunca em item de `ListView.builder` longo |
+| Transição de rota | `FxPremiumPageTransitionsBuilder` / `fxTransitionPage` | Não escrever transição custom por tela |
+| Botão primário | `FxLiquidPrimaryButton` / `FxSpringButton` | Glow e spring já embutidos |
+| Redução de movimento | `TokensStrip.prefersReducedMotion(context)` / `fxMotionDuration` | **Obrigatório**: zera animação de entrada (pilar 37) |
+| Seleção em picker | `HapticFeedback.selectionClick()` | Já dentro de `FxInsetPickerOption` — não duplicar no caller |
+| Ação destrutiva / confirmação | Haptic + `showFxConfirmSheet` | Haptic só em gesto deliberado, nunca em scroll ou first paint |
+| Celebração | `FxCelebrationOverlay` / `FxRiveCelebration` / `FxConfettiBurst` | Só em conclusão real de outcome; ≤1 por fluxo |
+
+## 8. Locale: aplicativo Brasil-first
+
+Produto é **Brasil-first**. ADR: `focux-backend/docs/adr/002-brasil-first-sem-i18n.md`. O pilar 39 **não** pede `app_en`/`app_es` na UI.
+
+1. Copy do app em **português do Brasil**.
+2. Locale fixo `pt` (`main.dart`). Datas, telefone, PIX e `R$` no formato BR.
+3. `app_en.arb` / `app_es.arb` existem no codegen Flutter — **standby**. Não migrar telas para EN/ES enquanto esta regra vigorar.
+4. 10/10 do pilar 39 = PT-BR consistente na superfície + formatação por locale BR, **não** wiring multilíngue.
+
+Microcopy (pilar 29): voz de ação, 2ª pessoa implícita, sem jargão interno ("fold", "provider", "BFF" nunca aparecem na UI). Rótulo de botão é verbo ("Cobrar", "Registrar treino", "Assinar"), não substantivo ("Cobrança").
+
+---
+
+# Parte II — A anatomia (varia por função)
+
+## 9. Taxonomia de superfícies
+
+Todo destino navegável do app é **exatamente um** destes nove tipos. A classificação é declarada no PR e determina esqueleto, componentes permitidos, tratamento da ação primária e proibições.
+
+| Tipo | Job | Estrutura | Ação primária | Exemplos de rota |
+|---|---|---|---|---|
+| **S1** | Decidir e agir sobre um domínio hoje | Cards + foco + próximas ações | Chip in-card / banner | `/dashboard/personal`, `/ia`, hub financeiro |
+| **S2** | Ler e alterar configuração da conta | **Inset-grouped** | Chip sticky de pendência (ou nenhuma) | `/perfil`, `/perfil/ferramentas`, configurações |
+| **S3** | Entender e agir sobre 1 entidade | Header + métricas + seções | Barra sticky com botão | Aluno 360, treino, mensalidade, exercício |
+| **S4** | Encontrar e escolher 1 item entre muitos | Busca + filtros + lista de cards | FAB / sticky "criar" | Lista de alunos, histórico, catálogo |
+| **S5** | Capturar/alterar campos e confirmar | Grupos de campo + footer | **Botão full-width no footer** | Novo aluno, editar treino, dados bancários |
+| **S6** | Converter: entrar, criar conta, pagar | Marca + poucos campos/planos + CTA | **Botão full-width com glow** | Login, cadastro, recuperar senha, planos, checkout |
+| **S7** | Uma pergunta, uma escolha, um aviso | Handle + header + corpo curto | Confirmar (ou fechar) | Picker, confirm, form sheet, help |
+| **S8** | Executar sem distração | Alvo único + controles grandes | Controle de execução | Treino em andamento, timer, captura ML Kit |
+| **S9** | Uma decisão por etapa até um resultado | Progresso + 1 pergunta + Continuar | **Botão full-width "Continuar"** | First-run, criar treino em etapas |
+
+---
+
+### S1 — Hub operacional
+
+**Job.** Em um olhar, saber o que fazer agora no domínio e conseguir fazer sem sair da tela.
+
+**Esqueleto (topo → base).**
+1. Header com saudação/contexto + freshness (`Olá, {primeiro}` · "atualizado há X").
+2. **Um** banner de foco (`DashboardDayFocusBanner`) — a decisão do dia.
+3. Bloco P0: próximas ações, no máximo 3 (`buildDashboardNextActions` → `CommandActionTile` / `CommandActionPanel`).
+4. Blocos secundários, com header próprio e abertos por demanda (`DashboardSectionHeader` + `DashboardHomeSecondaryBlock`).
+5. Rails horizontais com **top-N** (`FxHorizontalScrollPeek`, `DashboardAttentionRail`, `DashboardAgendaHojeStrip`) — score ≤5, aderência 3, agenda 3.
+6. Sticky de prioridades como overlay (`DashboardPrioritiesOverlay`), que recolhe ao entrar na faixa de ferramentas.
+
+**Componentes.** `FxShellScaffold(useMesh: true, constrainWidth: false)`, `FxShellAppBar`, `DashboardHomeHeader`, `DashboardDayFocusBanner`, `CommandActionTile` / `CommandActionPanel` / `CommandStatusTile`, `FxStripCard` / `fxStripCardDecoration(emphasize: true)` **só no P0**, `OperationalMetricTile`, `FxSparkline`, `DashboardSectionHeader`, `DashboardHomeSecondaryBlock`, `CustomScrollView` + slivers.
+
+**Ação primária.** Chip in-card (`DashboardHomeActionChip`) ou a ação do banner de foco. Uma só, visível sem scroll.
+
+**Proibido.** `FxSettingsGroup`/`FxSettingsTile` como estrutura da tela. Lista plana de tudo que existe. CTA full-width. Mais de um `emphasize: true` por viewport. Lista pesada no first paint (`alunos: null` no snapshot). Teaser de IA duplicado no header.
+
+**Aceite.** Valor principal above the fold, sem scroll e sem segundo loading (pilar 13). Exatamente 1 P0 visualmente destacado (pilar 4). Um único request de hub (BFF).
+
+---
+
+### S2 — Hub de ajustes / conta
+
+**Job.** Ler o estado da conta e alterar configurações. **Este é o único tipo cuja estrutura padrão é inset-grouped.**
+
+**Esqueleto.**
+1. Hero de identidade: avatar 80 + nome (`sectionTitle`) + score/percentual (`metric` 13).
+2. Grupos inset (`FxSettingsGroup`) com header opcional, caption e footer explicativo.
+3. Cada linha: `FxSettingsTile` — ícone outline 22 na cor da marca, label `cardTitle`, valor à direita `bodyMuted`, chevron 17 muted, divisor após o ícone.
+4. Grupo destrutivo (Sair, Excluir conta) **isolado, por último**.
+5. Chip sticky de prontidão (`PerfilStickyBar`) apenas quando houver pendência real.
+
+**Componentes.** `FxSettingsLayout`, `FxSettingsGroup`, `FxSettingsGroupedList`, `FxSettingsTile`, `showFxInsetPickerSheet`, `FxPlanLockTrailing`, `FxHelpIconButton`.
+
+**Ação primária.** Normalmente **nenhuma**: a tela é navegação e configuração. Quando existir pendência de cadastro, o chip sticky `Completar` é o P0.
+
+**Proibido.** Cards KPI. Accordion. Pills no hero. Preview LIVE. CTA full-width. Linha que executa transação (pagar, enviar, iniciar) — isso é botão em S5/S6, não linha.
+
+**Aceite.** Toda linha ou empilha uma rota, ou abre um picker, ou alterna um booleano. Nenhuma linha executa transação. Grupos ≤ 4; se passar de 7 destinos no mesmo nível, mover o excedente para rota-catálogo própria (foi assim que `/perfil/ferramentas` nasceu).
+
+---
+
+### S3 — Detalhe de entidade
+
+**Job.** Entender uma entidade e agir sobre ela.
+
+**Esqueleto.**
+1. Header de identidade: avatar/ícone + nome (`sectionTitle`) + status (chip) + contexto (`bodyMuted`). `FxHubHeader`.
+2. Faixa de 2 a 4 métricas (`OperationalMetricTile` / `kpi` + `FxSparkline`) — o "por que eu abri isso".
+3. Seletor de seções: `AlunoSegmentedChoice` (2–4 seções) ou tabs.
+4. Conteúdo da seção: cards (`FxStripCard`) e linhas de dado (`FxSatelliteListTile`).
+5. **Barra sticky** na base com a ação primária (`FxLiquidPrimaryButton`), + até 2 secundárias em ícone/texto.
+
+**Componentes.** `FxHubHeader`, `OperationalMetricTile`, `FxSparkline`, `AlunoSegmentedChoice`, `FxStripCard`, `FxSatellitePanel`, `FxSatelliteListTile`, `FxLiquidPrimaryButton` na sticky, `FxHelpIconButton` na app bar.
+
+**Ação primária.** Um botão na barra sticky, na thumb zone. Exemplo: "Registrar treino", "Cobrar mensalidade", "Marcar como pago".
+
+**Proibido.** Transformar as seções em pilha de `FxSettingsGroup` com chevrons (é o anti-padrão A1). Enterrar a ação primária no meio do scroll. Repetir a mesma métrica em card e em linha. Mais de 3 chips de status no header.
+
+**Aceite.** Métricas above the fold. Ação primária alcançável sem scroll. Cada seção responde a uma pergunta nomeável.
+
+---
+
+### S4 — Coleção / lista
+
+**Job.** Encontrar e escolher um item entre muitos.
+
+**Esqueleto.**
+1. App bar com título + contagem no subtítulo (`FxShellAppBar(subtitle: '32 alunos')`).
+2. Busca, obrigatória a partir de ~10 itens (pilar 31).
+3. Filtros: `FxToggleChip` em wrap, **≤5 visíveis**; excedente em sheet de ordenação/filtro.
+4. `ListView.builder` / `SliverList` de `FxSatelliteListTile` ou card de domínio.
+5. Paginação real no BE (scroll infinito ou "carregar mais").
+6. Criar: FAB ou sticky.
+
+**Componentes.** `FxAsyncBody` (loading/erro/vazio de graça), `FxSatelliteListTile`, `FxToggleChip`, `showFxInsetPickerSheet` para ordenação, `SkeletonList`.
+
+**Ação primária.** Criar/adicionar — FAB ou botão sticky. **Nunca** uma das linhas da lista.
+
+**Proibido.** `FxSettingsGroup` para dado dinâmico (grupo inset é para conjunto fixo e conhecido de configurações). Filtrar/ordenar o mundo no FE (pilar 65). Mais de 3 sinais visuais por linha (§12). Lista sem busca acima de ~10 itens. `ListView(children: [...])` para lista de tamanho desconhecido.
+
+**Aceite.** Busca a um toque. Paginação no BE. Linha com no máximo: título, uma linha de contexto, um sinal de status, um valor.
+
+---
+
+### S5 — Formulário de página
+
+**Job.** Capturar ou alterar um conjunto de campos e confirmar.
+
+**Esqueleto.**
+1. App bar com o nome da tarefa + "Cancelar" no leading (não seta, quando o fluxo é criação).
+2. Grupos de **campos** em inset — aqui o grupo inset é correto: agrupa campos relacionados, com footer explicativo (`FxSettingsGroup` + `FxInputDeco` + `FxInsetPickerRow`).
+3. Erros de validação **inline**, sob o campo.
+4. **Footer sticky**: primário full-width (`FxLiquidPrimaryButton`) + secundário em texto.
+
+**Componentes.** `FxInputDeco`, `FxInsetPickerRow`, `FxSettingsGroup` (container de campos), `AlunoSegmentedChoice` para 2–4 opções fixas, `FxToggleChip` para multi-seleção, `FxLiquidPrimaryButton`, `showFxConfirmSheet` para descarte com dados preenchidos.
+
+**Ação primária.** **Botão full-width no footer sticky.** A proibição de CTA full-width vale para S1/S2 — aqui ela não se aplica.
+
+**Proibido.** Submit como linha com chevron. Validação apenas no submit. `autofocus` sem `post-frame`. Teclado errado por tipo (usar `keyboardType` + máscara BR: telefone, CPF, CEP, moeda). Botão que não desabilita durante o envio.
+
+**Aceite.** Validação inline; teclado e máscara corretos; botão com estado de envio; descarte com dados preenchidos pede confirmação; nenhum overflow com teclado aberto em phone e landscape.
+
+---
+
+### S6 — Conversão (autenticação, plano, pagamento)
+
+**Job.** Converter. Cada elemento que não ajuda a converter é ruído.
+
+**Esqueleto.**
+1. Lockup de marca: `FocuxOfficialLogo` + `FocuxBrandTagline`.
+2. O mínimo: 1–2 campos (login) **ou** 1–3 opções de plano em cards comparáveis.
+3. **`FxLiquidPrimaryButton` full-width, com glow** — o elemento mais destacado da tela.
+4. Alternativas em link de texto ("Criar conta", "Esqueci minha senha") — nunca competindo com o primário.
+5. Nota legal / disclaimer discreto ao final.
+
+**Componentes.** `FocuxOfficialLogo`, `FocuxBrandTagline`, `FxInputDeco`, `FxLiquidPrimaryButton`, `FxLiquidSecondaryButton`, `FxStripCard(emphasize: true)` para o plano recomendado, `UpgradePromptSheet`, `SubscriptionDeviceGuard`, `IaSafetyDisclaimer` quando houver IA no pitch.
+
+**Ação primária.** Full-width, com glow, acima da dobra. **Correção normativa explícita:** `Entrar`, `Criar conta`, `Assinar`, `Continuar com…` são **botões**. Nunca `FxSettingsTile` com chevron.
+
+**Proibido.** Estrutura inset-grouped. Mais de um CTA com peso de primário. Comparação de planos em lista de chevrons. Pedir dado que não é necessário para converter. Contornar `SubscriptionDeviceGuard` na UI.
+
+**Aceite.** Conversão em ≤2 toques a partir do primeiro frame. Um único primário visível sem scroll. Erro de credencial via `friendlyError`, inline e específico, nunca stack.
+
+---
+
+### S7 — Sheet (overlay modal)
+
+Quatro subtipos. Cada um tem um chrome fechado; não inventar um quinto.
+
+| Subtipo | API | Corpo | Saída |
+|---|---|---|---|
+| **Picker** (1 valor) | `showFxInsetPickerSheet` | `FxSettingsGroup(edgeToEdgeRows: true)` + `FxInsetPickerOption` (check teal) | Fecha no tap |
+| **Form** | `showFxFormSheet` | Campos curtos | Confirmar / Cancelar |
+| **Confirm** | `showFxConfirmSheet` | Uma frase + consequência | Confirmar (destrutivo em `EagleTokens.bad`) + haptic |
+| **Notice / Help** | `showFxNoticeSheet` / `showFxHelpSheet` | Texto + `FxHelpTipRow` | Um "Fechar" |
+
+**Chrome comum.** `showFxHomeSheet` → `FxHomeSheetSurface` → `FxHomeSheetHandle` + `FxHomeSheetHeader` (título + subtítulo de contexto). `centerTitle: true` só aqui, e só em sheet curto sem lista densa.
+
+**Regras rígidas (custaram crash de layout antes).**
+- Nunca `Flexible`/`Expanded` dentro de `Column(mainAxisSize: min)` sem altura limitada.
+- Lista no sheet: `expand: true` + `Expanded(ListView…)`.
+- Altura capada pelas **constraints recebidas**, não por `%` da tela ignorando `viewInsets`.
+- `autofocus` → focar **post-frame**.
+- Fecha por back e por gesto; focus trap correto; nunca bloqueia sem saída (pilar 45).
+- Máximo **um** nível de sheet aninhado.
+
+---
+
+### S8 — Execução / foco total
+
+**Job.** Executar uma atividade em andamento sem nada competindo pela atenção.
+
+**Esqueleto.**
+1. Chrome mínimo: sem dock, sem badge, sem notificação in-screen.
+2. **Um** alvo dominante: timer, contador, série atual — tipografia `kpi`, grande.
+3. Contexto imediato abaixo, em uma linha (`bodyMuted`).
+4. Controles primários grandes (≥64) na thumb zone: pausar / avançar / concluir.
+5. "Sair" sempre visível, com confirmação (`showFxConfirmSheet`) se houver progresso não salvo.
+
+**Proibido.** Listas. Chips de status. Badges. Chevron (não há navegação aqui). Mesh animada custosa em tela que roda por minutos — usar fundo estático. Celebração antes da conclusão real.
+
+**Aceite.** Uma informação dominante. Controles alcançáveis com o polegar. Reduced motion respeitado. Tela permanece acesa quando o job exige. Interrupção (ligação, background) não perde progresso.
+
+---
+
+### S9 — Wizard / onboarding
+
+**Job.** Uma decisão por etapa, até um resultado.
+
+**Esqueleto.**
+1. Indicador de progresso discreto (`Etapa 2 de 4`).
+2. **Uma** pergunta por etapa, como `sectionTitle`.
+3. Opções: `AlunoSegmentedChoice`, `FxToggleChip` ou cards de escolha — nunca lista longa de chevrons.
+4. Primário full-width "Continuar"; "Voltar" em texto.
+5. Estado salvo a cada etapa; sair e voltar retoma onde parou.
+
+**Proibido.** Mais de uma decisão por etapa. Etapa sem como voltar. Perder o preenchido ao sair. First-run que mostra apenas "vazio" em vez de estado guiado (pilar 7).
+
+---
+
+## 10. Componente por intenção (matriz normativa)
+
+Escolha do componente é **função da intenção**, nunca da aparência desejada nem do que a tela vizinha usa.
+
+| Intenção | Componente | Affordance | Nunca |
+|---|---|---|---|
+| Navegar para outra tela (ver/editar mais) | `FxSettingsTile` (S2) · `FxSatelliteListTile` (S3/S4) | Chevron 17 muted | — |
+| Escolher 1 valor entre poucos, em sheet | `showFxInsetPickerSheet` / `FxInsetPickerOption` | Check teal | Chevron |
+| Escolher 1 valor, muitos itens | `FxInsetPickerOption.list` + busca acima | Check + busca | Chevron; lista sem busca |
+| Escolher 1 entre 2–4 fixas, inline | `AlunoSegmentedChoice` / chips inline | Segmented | Linha com chevron |
+| Escolher vários | `FxToggleChip` em wrap/grid | Chip selecionado | Picker de lista |
+| Alternar booleano | `FxSettingsTile(accessory: Switch…)` | Switch | Chevron + sheet |
+| **Ação primária transacional** (entrar, salvar, pagar, iniciar, confirmar, assinar) | `FxLiquidPrimaryButton` | Pill r50 + gradiente + glow | **`FxSettingsTile` / chevron** |
+| Ação secundária | `FxLiquidSecondaryButton` | Pill outline | Segundo primário |
+| Ação terciária | `TextButton` / link teal | Texto | Botão cheio |
+| Ação in-card em hub | `DashboardHomeActionChip` / `CommandActionTile` | Chip | Full-width |
+| Ação destrutiva | `showFxConfirmSheet` + linha/botão `danger` | Vermelho `EagleTokens.bad` + haptic | Swipe sem confirmação; destrutivo junto do resto |
+| Abrir ajuda/contexto | `FxHelpIconButton` → `showFxHelpSheet` | Ícone `?` na app bar | Linha de ajuda no meio da lista |
+| Exibir item de dado dinâmico | `FxSatelliteListTile` / `FxStripCard` | Card | `FxSettingsTile` |
+| Exibir métrica | `OperationalMetricTile` / `kpi` / `FxSparkline` | Número + unidade | Linha com valor à direita |
+| Comunicar bloqueio de plano | `FxPlanLockTrailing` + `UpgradePromptSheet` | Cadeado + tier | Esconder no FE; `if (plano == 'FREE')` |
+| Informar estado do sistema | `FxConnectivityBanner` / freshness em `bodyMuted` | Banner/caption | Snackbar recorrente |
+| Confirmar resultado de ação | `FeedbackHelper.showSuccess/Warn/Error` | Toast curto | Diálogo bloqueante |
+
+### Regra do chevron (normativa)
+
+> **Chevron ⟺ push de rota.** Se o tap não empilha uma tela, não existe chevron.
+
+| Tap faz | Affordance |
+|---|---|
+| Empilha uma tela | Chevron |
+| Abre sheet de escolha | Nenhuma (ou valor atual à direita) |
+| Alterna booleano | Switch |
+| Executa transação | **Botão** |
+| Expande no lugar | Setinha de disclosure (baixo/cima), nunca chevron lateral |
+
+Esta regra **revoga** a linha "Navegação / ação → `FxSettingsTile` (chevron)" da v1, que era a origem direta de "Entrar >" e afins.
+
+---
+
+## 11. Orçamento de destaque
+
+Hierarquia não é subjetiva: é contável. Números aplicam-se **por viewport**, não por tela inteira.
+
+| Limite | Valor |
+|---|---|
+| Ação primária (P0) | **Exatamente 1** por tela |
+| Ações secundárias (P1) | ≤ 2 |
+| Superfície com `emphasize: true` / `interactiveGlow` | ≤ 1 |
+| Chips + badges simultâneos por card/linha | ≤ 3 |
+| Chips + badges simultâneos na tela | ≤ 5 |
+| Alertas/banners simultâneos | 1 (pilar 41) |
+| Destinos de navegação no mesmo nível hierárquico | ≤ 7 — acima disso, agrupar em ≤4 grupos ou mover para catálogo |
+| Métricas na faixa de KPI | 2 a 4 |
+| `pageTitle` por tela | ≤ 1 |
+
+**Três pesos, sem exceção.**
+
+| Peso | Tratamento | Quantidade |
+|---|---|---|
+| **P0** | `FxLiquidPrimaryButton` (S5/S6/S9) · barra sticky (S3) · chip in-card destacado (S1) · controle grande (S8) | 1 |
+| **P1** | `FxLiquidSecondaryButton`, chip tonal, ícone na app bar | ≤ 2 |
+| **P2** | Linha, texto, link, chevron | resto |
+
+**Tratamento por tipo de superfície** — a tabela que evita tanto "toda tela é perfil" quanto "toda tela tem botão gigante":
+
+| Tipo | Tratamento do P0 | Full-width? |
+|---|---|---|
+| S1 | Chip in-card ou ação do banner de foco | **Não** |
+| S2 | Chip sticky de pendência, ou nenhum P0 | **Não** |
+| S3 | Botão em barra sticky | Opcional (largura da barra) |
+| S4 | FAB ou botão sticky "criar" | Opcional |
+| S5 | Botão em footer sticky | **Sim** |
+| S6 | Botão com glow acima da dobra | **Sim** |
+| S7 | Botão de confirmação do sheet | Sim (dentro do sheet) |
+| S8 | Controle de execução ≥64 | Sim |
+| S9 | "Continuar" no footer | **Sim** |
+
+**Teste do squint.** Desfoque a tela mentalmente: deve sobrar **uma** mancha dominante. Se sobram cinco manchas iguais, a tela é uma lista plana e falha o pilar 4. Se não sobra nenhuma, falha o pilar 19.
+
+---
+
+## 12. Densidade e revelação progressiva
+
+Este bloco é o antídoto direto do "muro de informação repetida".
+
+1. **Regra da agregação (3).** Se **3 ou mais** itens consecutivos exibem o mesmo sinal (mesmo status, mesmo aviso, mesma pendência), remover o sinal das linhas e colocar **um** resumo no topo do bloco: `4 pendentes`, filtrável. Repetição idêntica não informa — só polui.
+2. **Regra do 3 por linha.** Uma linha de lista carrega no máximo: título, uma linha de contexto, um sinal de status, um valor. O quarto sinal vai para o detalhe (S3).
+3. **Top-N em hub.** Rails e blocos de S1 mostram top-N com "ver todos" para S4. Nunca lista completa em hub.
+4. **Secundário não compete.** Bloco secundário de S1 fica abaixo do P0, com header próprio (`DashboardSectionHeader`) e sem tratamento de destaque. Quando o bloco for longo, mover o excedente para a rota S4 do domínio.
+5. **Detalhe atrás de um toque.** Explicação de score, histórico e metadado vão para long-press / sheet de ajuda (`showFxHelpSheet`), não para a superfície.
+6. **Vazio não é branco.** Todo vazio tem ícone + título + subtítulo + uma ação (pilar 25).
+7. **Densidade por tipo:** S8 é a mais esparsa (1 informação dominante); S4 a mais densa (mas ≤3 sinais/linha); S1/S3 no meio; S2 é regular por construção (linhas de 52).
+
+---
+
+## 13. Estados obrigatórios
+
+Toda tela que lê dados implementa **quatro** estados. Sem exceção, em todos os nove tipos.
+
+| Estado | Componente | Regra |
+|---|---|---|
+| Carregando | `SkeletonList` / `SkeletonLoader` / `ShimmerListLoading` / `DashboardShimmerLoading` | Skeleton no formato do conteúdo real. **Nunca** tela branca; nunca spinner isolado sem contexto (pilar 26) |
+| Vazio | `FxEmptyState` (+ `FxEmptyAction`) | Ícone + título + subtítulo + CTA. First-run é **guiado**, não "vazio" (pilar 7) |
+| Erro | `FxErrorState` / `DashboardErrorState` + `friendlyError` | Mensagem humana + retry. **Proibido** `FeedbackHelper.showError(context, '$e')` |
+| Freshness | `bodyMuted` / `FxHubFreshness` | "atualizado há X" sempre que houver cache (pilar 28) |
+
+Atalho canônico: **`FxAsyncBody<T>`** entrega skeleton → erro com retry → vazio → dados a partir de um `AsyncValue`. Preferir a ele em vez de escrever `.when` na mão.
+
+Offline: `FxConnectivityBanner`. Estado parcial não derruba a tela inteira — o bloco que falhou mostra erro local com retry.
+
+---
+
+## 14. Navegação, sheets, teclado e layout estável
+
+- **Uma rota, um job nomeável** (pilar 2). Rota no shell correto — Personal vs. Aluno — na árvore do GoRouter (`buildPersonalShellRoute`, `buildAlunoRoutes`, `buildAuthRoutes`, `buildChromeShellRoute`).
+- **Voltar é previsível.** `safePopOrGo`; sem loop, sem tela órfã (pilar 44). Back gesture Android e swipe iOS não conflitam com gesto customizado.
+- **App bar.** `FxShellAppBar`, título e subtítulo **à esquerda** (`centerTitle: false`) — paridade `.toolbarRole(.editor)` do iOS 26. `centerTitle: true` só em sheet/modal curto, sem lista densa, título curto, sem subtítulo longo.
+- **Largura.** `FxContentWidthLimiter` (via `FxShellScaffold(constrainWidth: true)`) em telas satélite; hubs full-bleed usam `false`.
+- **Sheets, teclado e altura:** ver as regras rígidas em [S7](#s7--sheet-overlay-modal). Valem para qualquer overlay do app.
+- **Layout estável:** evitar `LayoutBuilder` + `FittedBox` + `AnimatedContainer` no mesmo eixo. Preferir `FractionallySizedBox` ou constraints explícitas.
+- **Crash de layout não se silencia no Crashlytics.** Overflow, `ParentData`, `S.of` e asserts são dívida de UI a corrigir na causa.
+- **Deep link** funciona quando aplicável, e os parâmetros são documentados na tela (padrão Hoje: `?focus=on|off`, `?sheet=search|help|catalog`).
+
+## 15. Acessibilidade e ergonomia
+
+| Item | Regra |
+|---|---|
+| Semantics | Presente em todo controle interativo; `fxScreenA11yScope` na raiz da tela; hint em ação destrutiva |
+| Alvo de toque | ≥ 48×48 (`DashboardLayout.touchTarget`); linha inset de 52 já cumpre; controle de S8 ≥ 64 |
+| Contraste | ≥ 4.5:1 texto/fundo, via tokens de `ShellChrome` — verificado nos dois temas |
+| Leitor de tela | Ordem de foco segue a ordem visual; ícone decorativo é `excludeSemantics` |
+| Anúncio dinâmico | `fxAnnounce` / `fxAnnounceGlobal` ao mudar estado sem mudar tela |
+| Reduced motion | `TokensStrip.prefersReducedMotion` zera entrada e stagger |
+| Thumb zone | Ação frequente na metade inferior; nunca só no topo distante (pilar 36) |
+| Responsivo | Sem overflow em phone, tablet e landscape; iPad em `UIRequiresFullScreen` (portrait-only aprovado) |
+| Texto | Sem truncamento que perca informação essencial; `maxLines` + ellipsis só em rótulo secundário |
+
+---
+
+# Parte III — Regras que não podem ser esquecidas
+
+Valem em **todo** o Personal, em qualquer tipo de superfície. Quebrar qualquer item é regressão de produto, não "detalhe de UI".
+
+## 16. Rota, job, SSOT e tipos
+
+1. **Uma rota = um job nomeável.** Hoje = operar o dia (cobrar / retomar / agenda). Perfil = conta, marca, operação da conta. Não misturar cadastro + financeiro + chat no mesmo fold.
+2. **Hub tem BFF.** Home: um `GET /api/dashboard/home`, snapshot tipado. Não criar provider que refetcha o que o agregado já traz (`/home`, `/360`, `/perfil`).
+3. **`dayFocus` é SSOT do BFF.** FE consome `home.dayFocus`. Sem fallback `DashboardDayFocus.resolve(` no runtime da Home (só em testes de paridade).
+4. **`planoFeatures` do BFF** tem o mesmo shape de `GET /api/planos/me`. FE usa `seedFromHome` + `effectivePlanoFeatures(homeOverride:)`.
+5. **Gates de plano** via `effectivePlanoFeatures` / capabilities / `verificarAcesso` no BE. **Proibido** `if (plano == 'FREE')` solto no widget. O BE é a fonte; a UI só comunica.
+6. **Unread são dois domínios.** App: `notificacoesNaoLidas`. Chat: `pulse.mensagensNaoLidas`. Não unificar nem stubar inbox.
+7. **Tipos na borda.** `fromJson` → model/DTO/record. Zero `Map<String, dynamic>` na UI.
+8. **Lógica fora do `build()`.** Regras, priorização, formatação e estado em `utils/`, services ou funções puras.
+
+## 17. IA, monetização e mutação
+
+9. **IA:** opt-in, reversível, **nunca** autoaplicada no first paint. Entrada pela tab `/ia` — sem teaser duplicado no header da Home.
+10. **Atalho bloqueado** → `UpgradePromptSheet`. Não esconder o gate só no FE.
+11. **Mutação sensível** (pago, exclusão, dado financeiro): auditoria no BE; confirmação + haptic no FE; idempotência se a ação for repetível.
+12. **LGPD:** exportação/exclusão só pelos endpoints `/api/lgpd/me`. A tela **não** inventa um segundo caminho. Não logar payload pessoal. Badge/unread sem preview de conteúdo. Contrato de delete: `senha` + `confirmacao: EXCLUIR`.
+13. **Telemetria:** só **propor** evento novo; não inventar funil paralelo ao existente (`home_viewed`, `home_ttv`, etc.).
+
+## 18. Tenant, auth e cache
+
+14. **Tenant só de `TenantContext`.** Nunca `personalId` livre em query/body vindo do cliente.
+15. **Rota atrás do auth** do app; BE com `@PreAuthorize` no papel correto.
+16. **Cache Home:** client + server TTL **90s** (`dashboard-home`). Invalidar no **write path**, não refetch a cada tap. Writers (perfil, wallet, aluno, chat, mensalidade, white-label…) chamam `DashboardHomeCacheEvictor`.
+17. **Prefetch** só em cold start de hub (login/splash → Home), não em toda tela interna.
+18. **Snapshot de hub não traz lista pesada** (`alunos: null` no first paint). Top-N no BFF; paginar no BE, nunca filtrar o mundo no FE.
+19. **Rate limit** nos endpoints que a tela dispara (hub GET 60/60s é o teto; IA, upload, busca, delete LGPD mais baixos). Não martelar `invalidate` em loop.
+20. **Release exige `API_CERT_PINS`.** Sideload com `REQUIRE_API_CERT_PINS=false` é só teste — não shipar assim.
+
+## 19. Superfície, erro e PII
+
+21. **PII só do job.** Home não leva email/CPF no payload. Máscara quando o dado não precisa estar visível. WhatsApp no Perfil só se o cadastro estiver incompleto.
+22. **Erros na UI:** `friendlyError` / `.when` / `FxAsyncBody`. **Proibido** `FeedbackHelper.showError(context, '$e')` — vaza stack.
+23. **Estados obrigatórios:** loading (skeleton, nunca tela branca), vazio com CTA, erro + retry, freshness quando houver cache. Ver §13.
+24. **Sheets e teclado:** regras rígidas de [S7](#s7--sheet-overlay-modal).
+25. **Layout estável:** ver §14.
+26. **Não silenciar crash de layout** no Crashlytics como se fosse correção.
+27. **Clipboard PII** só via `copySensitiveToClipboard` (com timeout). Nunca `Clipboard.setData` solto.
+28. **Pagamento:** `SubscriptionDeviceGuard` — jailbreak/root bloqueia assinatura. Não contornar na UI.
+29. **IA na superfície:** manter `IaSafetyDisclaimer`.
+30. **Token/role** só em `SecureStorage`. Nunca `SharedPreferences` para auth.
+
+## 20. Segurança, privacidade e hardening
+
+Fonte única no código: `lib/core/security/focux_security.dart` (`FocuxSecurity.coreSources`, `hubSecurityPatterns`, `forbiddenHubPatterns`, `automatedGates`). Ao elevar uma tela, **não reinventar**.
+Gate de teste: `test/core/design_system/security_pillar_contract_test.dart`.
+
+| Área | Onde | Regra ao subir telas |
+|---|---|---|
+| Token / sessão | `secure_storage.dart`, `app_router_redirect.dart`, `api_client.dart` | Token/role só em `SecureStorage`; redirect e Dio com Bearer + `SessionInvalidator` — nunca `SharedPreferences` para auth |
+| Transporte | `tls_certificate_pinning.dart`, `Env.requireApiCertPins` | Release exige `API_CERT_PINS`; não desabilitar pinning "para facilitar debug" no ship |
+| Erros na UI | `friendly_error.dart`, `FeedbackHelper` | `friendlyError` / `.when`; **proibido** `showError(context, '$e')` |
+| IA | `ia_safety_disclaimer.dart` | Superfícies de IA mantêm `IaSafetyDisclaimer` |
+| Pagamento | `subscription_device_guard.dart` | Jailbreak/root bloqueia fluxo de assinatura |
+| Clipboard PII | `clipboard_sensitive.dart` | Copiar dado sensível só via helper com timeout |
+| CI | `.github/workflows/security.yml`, `semgrep.yml` | Não quebrar `security_pillar_contract_test.dart` / `focux_security_test.dart` |
+
+**Proibido no diff de upgrade visual:**
+- Secret, API key ou PII desnecessário no payload/widget
+- Token em prefs compartilhadas ou log de payload pessoal
+- Relaxar manifest, backup rules, pinning ou headers "para passar no scanner"
+- Auth, tenant, RLS, LGPD, migration ou contrato de API **sem aprovação** (pilares 52–68)
+
+### Hardening mobile e web (baseline auditado 2026-08-20)
+
+Rodada MobSF (APK release) + OWASP ZAP (site + backend). **Meta operacional:** 0 FAIL no ZAP; MobSF release ~50/100 (Grade B) é aceitável com os SDKs em uso (Health Connect, FCM, ML Kit) — **não** perseguir 100/100 removendo feature ou enfraquecendo manifest.
+
+**Android (`focux-app`) — não regredir:**
+
+| Artefato | Caminho | O que protege |
+|---|---|---|
+| Manifest | `android/app/src/main/AndroidManifest.xml` | `usesCleartextTraffic="false"`, `allowBackup="false"`, `taskAffinity=""` em activities exportadas (mitiga StrandHogg), App Links só `focuxpersonal.com` |
+| Rede | `android/.../res/xml/network_security_config.xml` | TLS-only; alinhado ao pinning do app |
+| Backup | `backup_rules.xml`, `data_extraction_rules.xml` | Exclui dados sensíveis de backup cloud/adb |
+| Ofuscação | `android/app/proguard-rules.pro` | Regras ML Kit / R8 — não remover `dontwarn` necessários |
+| Deep link | `focux-website/client/public/.well-known/assetlinks.json` + BE `application.yml` (`android-sha256-fingerprints`) | SHA-256 do keystore **release** |
+
+**Achados MobSF aceitos (não "corrigir" no escuro):** StrandHogg residual em plugins (Health, `url_launcher` WebView), CBC/PKCS7 em bibliotecas de terceiros, 1 tracker Firebase/Google.
+
+**iOS — não regredir:**
+
+| Artefato | Caminho | O que protege |
+|---|---|---|
+| Orientação iPad | `ios/Runner/Info.plist` — `UIRequiresFullScreen = true` | Permite portrait-only no iPad (App Store 90474) |
+| Deployment target | `ios/Podfile` + `Runner.xcodeproj` — 15.5 | Mínimo de `google_mlkit_commons`; manter os dois em sincronia |
+| Assinatura | `ios/ExportOptions.plist` — `teamID` | Export de release |
+| SPM | `pubspec.yaml` — `flutter: config: enable-swift-package-manager: false` | `flutter_native_splash` quebra na integração SPM experimental |
+| APNs | Chave `.p8` no Firebase (não certificado SSL no portal) | Push via FCM |
+
+**Web (`focux-website`) — headers em `vercel.json`:**
+- CSP, HSTS, `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`
+- `Cross-Origin-Embedder-Policy: credentialless` (não `require-corp` — quebra assets)
+- `Access-Control-Allow-Origin` restrito a `https://focuxpersonal.com` (não `*`)
+- Re-scan ZAP baseline após mudança de headers (`security-scans/zap/` no monorepo)
+
+**Backend — ao expor rotas novas:** `@PreAuthorize` + `TenantContext` (pilares 53–54); rate limit nos endpoints quentes (pilar 58); fingerprints de deep link sincronizados com website e Play signing key; teste `DeepLinkControllerTest`.
+
+## 21. Desempenho
+
+- **First paint:** um request de hub quando existir BFF; shimmer imediato; prefetch só em cold start de hub.
+- **Scroll:** `CustomScrollView` / `ListView.builder` / slivers. Rails horizontais com **top-N**.
+- **Rede:** timeout + retry do client; estado parcial não derruba a tela toda. Hub 60/60s é o teto.
+- **Memória:** imagens lazy; sem listas locais pesadas no snapshot inicial. Paginar no BE.
+- **Jank:** `TokensStrip.prefersReducedMotion` zera animação de entrada; haptics só em gesto deliberado. Em S8, fundo estático em vez de mesh animada.
+- **Rebuild:** `select` / providers granulares; não invalidar o bundle inteiro do hub por causa de um chip.
+- **BE:** sem N+1; batch; virtual threads só onde a Home já prova (`buildHomeResponseParallel`). Cache server com **evict no writer** e TTL explícito.
+- **Peso:** não puxar `fl_chart`, câmera ou IAP se `FxSparkline` resolve.
+- **Estabilidade:** null-safety respeitado; sem `!` perigoso sem tratamento; Crashlytics cobre a tela.
+
+---
+
+# Parte IV — Backend
+
+## 22. Protocolo de proposta de backend
+
+**Regra permanente, obrigatória, em toda tela tocada.** Ao trabalhar qualquer superfície, auditar o caminho de dados que a alimenta e **emitir o bloco "Proposta de backend" no scorecard — mesmo que a conclusão seja "nenhuma proposta"**. Backend **nunca** é alterado sozinho (§29): a entrega é a proposta, não o commit.
+
+Motivo: UI boa sobre contrato ruim produz tela lenta, dado divergente e retrabalho. Auditar o dado junto do layout é mais barato do que descobrir depois.
+
+### 22.1 Checklist de auditoria (rodar em toda tela)
+
+| # | Sintoma no FE | Provável causa no BE | Pilar |
+|---|---|---|---|
+| 1 | A tela usa 4 campos de um payload de 40 | Falta BFF / endpoint genérico reaproveitado | 59 |
+| 2 | Vários requests em série para montar um fold | Falta agregado | 59, 46 |
+| 3 | FE filtra, ordena ou soma a coleção inteira | Falta filtro/ordenação/paginação no BE | 65 |
+| 4 | Lista carrega tudo e pagina no cliente | Falta paginação real | 65 |
+| 5 | Lista lenta conforme cresce | N+1 no Hibernate / falta `@EntityGraph` / falta índice | 61 |
+| 6 | Dado muda numa tela e não na outra | Dual SSOT — dois endpoints como origem | 60 |
+| 7 | Precisa de pull-to-refresh para ver o próprio write | Cache sem evict no write path | 62 |
+| 8 | Regra de negócio escrita no widget | Regra ausente no BE | 3 |
+| 9 | Gate de plano decidido no FE | Falta `verificarAcesso` / capability no BE | 11 |
+| 10 | Duplo toque cria dois registros | Falta idempotência | 64 |
+| 11 | Erro genérico sem como explicar ao usuário | Falta código/mensagem de domínio | 63 |
+| 12 | Validação só no FE | Falta Jakarta Validation | 63 |
+| 13 | Payload traz email/CPF que a tela não mostra | PII além do job | 52, 55 |
+| 14 | Endpoint quente sem proteção (IA, upload, busca) | Falta rate limit | 58 |
+| 15 | Campo novo sem contrato publicado | Falta `@Operation` / Springdoc | 68 |
+| 16 | Mudança de schema aplicada à mão | Falta migration `V###__descricao.sql` | 66 |
+| 17 | Impossível depurar lentidão da tela | Falta log/métrica/trace (Actuator/Micrometer/Brave) | 67 |
+| 18 | Enum como string livre atravessando a borda | Falta tipo no contrato | 71 |
+| 19 | Ação sensível sem registro | Falta auditoria | 56 |
+| 20 | Ação principal sem evento de produto | Falta telemetria | 77 |
+
+### 22.2 Template do bloco (obrigatório no scorecard)
+
+```
+## Proposta de backend — <rota> (<tipo S#>)
+
+### P0 (bloqueia o ship desta tela)
+- Sintoma: <o que o usuário sente / o que a UI é forçada a fazer>
+  Evidência: <arquivo:linha no FE> · <endpoint> · <classe BE se conhecida>
+  Impacto: pilar <#> — <consequência concreta>
+  Proposta: <contrato atual → contrato proposto, campo a campo>
+  Custo/risco: <quem consome hoje, o que quebra, precisa de migration?>
+  Decisão pendente: <o que eu preciso que você aprove>
+
+### P1 (propor agora, aplicar em PR próprio)
+- <mesmo formato>
+
+### P2 (registrar, sem urgência)
+- <uma linha por item>
+
+### Nenhuma proposta
+- <quando for o caso, afirmar explicitamente e dizer o que foi verificado>
+```
+
+### 22.3 Severidade
+
+| Nível | Critério | Efeito |
+|---|---|---|
+| **P0** | Correção de dado, segurança, tenant, PII, LGPD, gate de plano burlável, idempotência ausente em ação financeira | **Bloqueia o ship da tela.** Não maquiar com UI |
+| **P1** | Performance (N+1, paginação, agregado), contrato gordo, cache sem evict, validação, observabilidade | Propor no scorecard; aplicar em PR próprio após aprovação |
+| **P2** | Nomenclatura, documentação, telemetria adicional, refinamento de erro | Registrar |
+
+### 22.4 Limites
+
+- **Nunca** aplicar sozinho: auth, tenant/RLS, pagamento, migration, endpoint novo, mudança de contrato, rate limit, cache server, telemetria nova.
+- Proposta descreve **contrato**, não implementação: campos, tipos, códigos de erro, paginação, TTL, invalidação.
+- Se a tela precisar de campo que ainda não existe: **propor e parar**. Não inventar stub no FE, não criar segundo caminho de dado, não deixar `TODO`.
+
+## 23. Contrato de dados por tipo de superfície
+
+| Tipo | Forma esperada do dado | Cache | Paginação |
+|---|---|---|---|
+| S1 | **Um** agregado tipado (BFF), com top-N embutido e `null` nas listas pesadas | Client + server, TTL explícito (Home: 90s), evict no writer | Não se aplica (top-N) |
+| S2 | Um GET de perfil/config + gates de plano | Curto; invalidar no write | Não |
+| S3 | Um agregado da entidade (`/360`) | Curto | Seções internas paginadas se longas |
+| S4 | Página tipada: `content` + `page`/`total`/`hasNext` | Curto ou nenhum | **Obrigatória no BE**, com filtro e ordenação |
+| S5 | GET do recurso (edição) + PUT/POST validado | Nenhum | Não |
+| S6 | Sessão/auth e catálogo de planos | Catálogo pode cachear | Não |
+| S7 | Reusa o dado da tela-mãe | Herda | Não |
+| S8 | Estado local durável + sync eventual idempotente | Local first | Não |
+| S9 | Rascunho persistido por etapa | Local + servidor | Não |
+
+## 24. Superfície Hoje: contrato vigente de referência
+
+Contrato em produção da principal S1. Não apagar estas regras: elas são o modelo de qualquer hub novo.
+
+| Tema | Contrato |
+|---|---|
+| Rota | Shell `/dashboard/personal` (tab Hoje). Job = cobrar / retomar / agenda |
+| BFF | `GET /api/dashboard/home` + `DashboardHomeBundle.fromJson`. Rate limit 60/60s. Timer `focux.dashboard.home` |
+| Foco | `dayFocus` do BFF; banner + chip; «Foco» só no banner |
+| Próximas ações | `buildDashboardNextActions` / `CommandCenterService`. Sticky `DashboardPrioritiesOverlay` recolhe na faixa de tools |
+| Plano | `planoFeatures` no bundle = `/api/planos/me` |
+| Unread | Badge do app ≠ unread do chat |
+| Cache | TTL 90s client + server; `DashboardHomeCacheEvictor` + Redis pub/sub |
+| First paint | Header `Olá, {primeiro}` + freshness → Foco → P0. Conta nova: `DashboardActivationCta` |
+| IA | Só na tab `/ia`. Complete/snooze via `/command-center/actions/*` |
+| Deep link | `?focus=on\|off`, `?sheet=search\|help\|catalog` |
+| Top-N | Score ≤5, aderência 3, agenda strip 3. Sem lista infinita |
+| Funil | `home_viewed`, `home_ttv`, `home_search_opened`, `home_priorities_opened`, `home_day_focus_action`, `home_help_opened` |
+| Pele | Glass/`ShellChrome`, raio 20, ícone 22 sem poço. Financeiro **não** é hero invertido. CTA in-card = chip sticky (`DashboardHomeActionChip`), não botão branco no preto nem full-width |
+
+**BE a espelhar em hubs:** `DashboardController.getHome` → `DashboardService` / `DashboardHomeResponse` / `DashboardDayFocusResolver` / `DashboardHomeCacheEvictor`.
+
+**Composição Hoje-only** (reusar só se houver outro "Hoje"): `PersonalDashboardScreen` + parts, `buildDashboardHomePrimarySlivers`, `DashboardHomeSecondaryBlock`.
+
+---
+
+# Parte V — Os 80 pilares
+
+## 25. Regra de evidência
+
+Nenhum pilar recebe nota sem evidência verificada em código — ou é marcado explicitamente **"não verificável nesta sessão"**, com o que falta abrir para verificar. Print de tela sozinho só é evidência suficiente para os pilares puramente visuais (14–30, aprox.); os demais exigem abrir o(s) arquivo(s) FE e/ou BE.
+
+**Lado(s):** **FE** = frontend Flutter · **BE** = backend Spring Boot · **FE+BE** = ambos aplicáveis por padrão (podem virar N/A individualmente dependendo da tela avaliada).
+
+A coluna **10/10 elevado** existe onde a v2 endurece o critério; `=` significa que a evidência mínima já é o alvo.
+
+## 26. Tabelas dos 80 pilares
+
+### Produto e valor
+
+| # | Pilar | Lado(s) | Evidência mínima | 10/10 elevado |
+|---|---|---|---|---|
+| 1 | Produtividade operacional | FE+BE | Ação principal completável em poucos toques, sem ida-e-volta desnecessária entre telas. | Ação principal do tipo (§9) em ≤2 toques a partir do first paint |
+| 2 | Rota & job-to-be-done | FE | A rota/tela resolve um job único e nomeável; não mistura fluxos não relacionados. | Tela **classificada** em S1–S9 e coerente com o esqueleto do tipo |
+| 3 | Lógica de negócio & regras | FE+BE | Regra (ex.: aluno inativo, plano FREE) aplicada nos dois lados e refletida na UI, não só silenciosa no BE. | Regra em função pura testada; ausência no BE gera proposta P0 (§22) |
+| 4 | Hierarquia de decisão (foco/priorização) | FE | Existe 1 ação/decisão primária visualmente destacada; não é lista plana. | **Exatamente 1 P0**, no tratamento previsto para o tipo (§11); passa o teste do squint |
+| 5 | Valor aluno (loop retenção/outcome) | FE+BE | Ação conecta a um outcome visível (score, progresso, conquista) quando a tela permite. | = |
+| 6 | Descoberta & educação in-product | FE | Funcionalidade não óbvia tem dica/tooltip/empty-state educativo. | Ajuda via `FxHelpIconButton`/`showFxHelpSheet`, não linha no meio da lista |
+| 7 | Onboarding & first-run | FE | Primeira visualização sem dados tem estado guiado, não só "vazio". | `FxEmptyState` com CTA que inicia o job; S9 quando houver múltiplas etapas |
+| 8 | Personalização & white-label | FE | Cor/identidade do personal aplicada via token, não hardcoded. | Acento sempre `BrandPalette.softened(colorScheme.primary)` |
+| 9 | IA assistiva (sugestão, opt-in, reversível) | FE+BE | Sugestão de IA é opt-in e reversível (aceitar/rejeitar explícito), nunca autoaplicada. | = |
+| 10 | Confiança & transparência (scores, IA, dados) | FE+BE | Score/número tem origem explicável (tooltip "como calculamos"); IA tem disclaimer. | = |
+| 11 | Monetização & gates de plano | FE+BE | Limite de plano é checado no BE (não só escondido no FE) e comunicado com copy clara. | `FxPlanLockTrailing` + `UpgradePromptSheet`; zero `if (plano == …)` em widget |
+| 12 | Notificações & unread unificado | FE+BE | Contagem de não lidos bate entre a tela, o badge da tab e a central. | = |
+| 13 | Time-to-value | FE | Valor principal visível sem scroll/loading extra (above the fold). | Valor do **tipo** above the fold: métrica em S3, foco em S1, CTA em S6 |
+
+### UX / UI / visual
+
+| # | Pilar | Lado(s) | Evidência mínima | 10/10 elevado |
+|---|---|---|---|---|
+| 14 | Design visual & identidade | FE | Paridade de tokens de cor/glass com a Home. | Os **7 itens da assinatura Focux** (§2) presentes |
+| 15 | Tipografia & hierarquia | FE | Usa `AppTypography` (Outfit / JetBrains Mono) nos mesmos papéis da Home. | Papel semântico de §5; zero `fontSize` literal; ≤1 `pageTitle` |
+| 16 | Espaçamento & layout | FE | Usa tokens de spacing; zero número mágico solto. | Todo valor rastreável a §4 |
+| 17 | Cores & contraste (WCAG) | FE | Contraste texto/fundo ≥ 4.5:1. | Verificado nos dois temas |
+| 18 | Dark / light parity | FE | Testado em tema escuro; nenhuma cor hardcoded quebra o dark. | Toda cor via `ShellChrome`/tokens |
+| 19 | Hierarquia visual & foco atencional | FE | Peso visual primário vs. secundário replica o padrão da Home. | **Três pesos** de §11 respeitados: 1 P0, ≤2 P1, resto P2 |
+| 20 | Componentes & design system | FE | Reusa componentes de core; não reimplementa estilo inline. | Componente escolhido pela **matriz de intenção** (§10) |
+| 21 | Densidade de informação | FE | Densidade comparável à Home — nem vazia demais, nem lotada. | Limites contáveis de §11–§12 (≤3 sinais/linha, agregação a partir de 3) |
+| 22 | Gestalt & percepção | FE | Agrupamento por proximidade/similaridade organiza itens relacionados. | ≤4 grupos por nível; destrutivo isolado |
+| 23 | Personalidade & branding | FE | Tom de copy consistente com o resto do app. | Rótulo de ação é verbo; sem jargão interno |
+| 24 | Data viz & conteúdo dinâmico | FE | Gráficos/números seguem o estilo já usado na Home. | `FxSparkline` antes de `fl_chart`; número sempre com unidade |
+| 25 | Empty states & zero-data | FE | Ícone + título + subtítulo + CTA. | `FxEmptyState` + `FxEmptyAction` que inicia o job |
+| 26 | Loading / skeleton / disclosure | FE | Usa skeleton; nunca spinner isolado sem contexto. | Skeleton no **formato** do conteúdo real; `FxAsyncBody` preferido |
+| 27 | Erro / retry / degradação | FE | Estado de erro com retry; nunca exceção crua na tela. | `friendlyError`; erro **local** por bloco quando o resto funciona |
+| 28 | Offline / stale / freshness | FE | Indica dado desatualizado quando a tela depende de cache. | = |
+| 29 | UX writing & microcopy | FE | Copy curta, orientada à ação, sem jargão técnico/interno. | = |
+| 30 | Feedback & estados de interação | FE | Hover/press/disabled seguem o padrão de motion da Home. | Estado de envio explícito em S5/S6 |
+| 31 | Search & findability | FE | Lista longa tem busca/filtro acessível. | Busca obrigatória em S4 acima de ~10 itens; ≤5 chips visíveis |
+| 32 | Forms & data entry | FE | Validação inline, máscara e teclado corretos por tipo. | Esqueleto S5 completo, incluindo footer sticky e descarte confirmado |
+| 33 | Touch targets & haptics | FE | Alvo mínimo 48×48dp; haptic em ações destrutivas/confirmação. | Controle de S8 ≥64; haptic nunca em first paint/scroll |
+| 34 | Gestos & adaptação de plataforma | FE | Back gesture Android / swipe iOS não conflitam com gesto customizado. | = |
+| 35 | Responsividade | FE | Sem overflow em phone/tablet/landscape. | Testado com teclado aberto; `FxContentWidthLimiter` em satélite |
+| 36 | Thumb zone & ergonomia | FE | Ações frequentes na zona inferior alcançável. | P0 na metade inferior em S3/S5/S6/S8/S9 |
+| 37 | Motion design & reduced motion | FE | Curva/duração igual ao padrão; respeita "reduce motion" do SO. | `prefersReducedMotion` verificado; S8 sem mesh animada |
+| 38 | Acessibilidade (WCAG 2.2 AA) | FE | `Semantics` presentes; navegável por leitor; contraste ok. | `fxScreenA11yScope` na raiz; `fxAnnounce` em mudança de estado |
+| 39 | Internacionalização & locale | FE | Datas/moeda formatadas por locale. | **PT-BR na superfície** + formatos BR (§8). Não migrar para EN/ES |
+| 40 | Conteúdo & clareza informacional | FE | Texto sem ambiguidade; números sempre com unidade/contexto. | = |
+| 41 | Sustentabilidade de atenção | FE | Não empilha múltiplos alertas/badges sem necessidade. | 1 banner; ≤5 chips na tela; agregação a partir de 3 repetições |
+
+### Navegação e arquitetura de informação
+
+| # | Pilar | Lado(s) | Evidência mínima | 10/10 elevado |
+|---|---|---|---|---|
+| 42 | Navegação & IA | FE | Rota no shell certo (Personal vs. Aluno) na árvore do GoRouter. | = |
+| 43 | Shell / tabs / deep links | FE | Acessível via tab/shell consistente; deep link funciona se aplicável. | Parâmetros de deep link documentados |
+| 44 | Back stack & predicabilidade | FE | Voltar leva ao lugar esperado, sem loop nem tela órfã. | `safePopOrGo`; S5/S9 confirmam descarte |
+| 45 | Modais / sheets / overlays / focus trap | FE | Focus trap correto; fecha por back/gesture; nunca bloqueia sem saída. | Um dos 4 subtipos de S7; ≤1 nível de aninhamento; regras de altura/teclado |
+
+### Performance e resiliência
+
+| # | Pilar | Lado(s) | Evidência mínima | 10/10 elevado |
+|---|---|---|---|---|
+| 46 | Performance percebida (TTI) | FE | Skeleton aparece rápido; nunca tela branca. | Um request de hub; sem segundo loading no fold |
+| 47 | Performance real (jank/scroll) | FE | `ListView.builder`/lazy rendering em listas; sem rebuild desnecessário. | Stagger só em bloco finito, nunca em item de lista longa |
+| 48 | Rede & resiliência | FE+BE | Timeout, retry com backoff, estado parcial tratado na UI. | = |
+| 49 | Cache client | FE | Cache local coerente com o TTL do padrão Home. | TTL alinhado ao BE; evict no write path |
+| 50 | Cold start / peso da tela | FE | Lazy loading de imagens/dados pesados; não bloqueia o primeiro frame. | = |
+| 51 | Estabilidade (crash-free) | FE | Null-safety respeitado; sem `!` perigoso; Crashlytics cobre a tela. | Crash de layout corrigido na causa, não silenciado |
+
+### Segurança, privacidade e compliance
+
+| # | Pilar | Lado(s) | Evidência mínima | 10/10 elevado |
+|---|---|---|---|---|
+| 52 | Segurança de superfície (PII na UI) | FE | Dado sensível mascarado quando não estritamente necessário. | PII fora do job vira proposta P0 (§22) |
+| 53 | Autenticação & sessão | FE+BE | Token expira/renova (refresh com rotação); 401 desloga corretamente. | = |
+| 54 | Autorização / tenant / RLS | BE | Endpoint valida `personal_id` via `TenantContext`; nunca tenant por parâmetro livre; RLS coerente. | = |
+| 55 | LGPD / privacidade / consentimento | FE+BE | Dado pessoal com base legal; `/api/lgpd/me` respeitado. | Sem segundo caminho de exportação/exclusão |
+| 56 | Auditoria & trilha | BE | Ação sensível gera registro de auditoria. | = |
+| 57 | Secrets / OWASP mobile | FE | Nenhum secret hardcoded; certificate pinning ativo em release. | `REQUIRE_API_CERT_PINS=false` só em sideload de teste |
+| 58 | Rate limit & abuse | BE | Endpoints consumidos pela tela (IA, upload) têm rate limit. | Ausência em endpoint quente vira proposta P0 |
+
+### Backend, dados e ops
+
+| # | Pilar | Lado(s) | Evidência mínima | 10/10 elevado |
+|---|---|---|---|---|
+| 59 | Contrato API & BFF | BE | Endpoint retorna só o que a tela precisa; contrato documentado no Springdoc. | Contrato conforme §23 para o tipo da tela |
+| 60 | Single source of truth | FE+BE | Dado não diverge entre telas (mesmo provider/endpoint como origem). | Zero provider duplicado do agregado |
+| 61 | Performance API (N+1, batch, p95) | BE | Sem N+1 (checar fetch/`@EntityGraph`); índice presente. | = |
+| 62 | Cache server & invalidação | BE | TTL correto, invalidado ao mutar o dado relacionado. | Evict no writer, não refetch por tap |
+| 63 | Validação & erros de domínio | BE | Validação Jakarta + mensagem de domínio clara, nunca stacktrace. | Código de erro que o FE traduz em copy específica |
+| 64 | Idempotência & concorrência | BE | Ação repetível é idempotente; concorrência tratada. | = |
+| 65 | Paginação / filtros / ordenação | BE | Lista pagina no backend, não traz tudo para paginar no cliente. | Toda S4 com contrato paginado (§23) |
+| 66 | Migrations / Flyway / schema | BE | Mudança de schema em migration versionada. | = |
+| 67 | Observabilidade BE | BE | Log/métrica/trace suficientes para depurar problema desta tela. | Timer p95 nomeado por domínio |
+| 68 | Documentação (API/contrato/runbook) | BE | Endpoint documentado no Springdoc OpenAPI. | = |
+
+### Engenharia e qualidade
+
+| # | Pilar | Lado(s) | Evidência mínima | 10/10 elevado |
+|---|---|---|---|---|
+| 69 | Código limpo & SRP | FE+BE | Responsabilidade única; sem "god file". | Lógica fora do `build()`; parts por bloco, não por conveniência |
+| 70 | Escalabilidade & composição | FE+BE | Componente composável/reutilizável, não copiar-colar entre telas. | Padrão que vai repetir é **extraído para core antes** do lote (§28) |
+| 71 | Tipagem & modelos de borda | FE+BE | DTOs/models tipados nas bordas; sem `dynamic`/`Object` solto. | Zero `Map<String, dynamic>` na UI |
+| 72 | Dead code & dívida técnica | FE+BE | Sem import/método morto; sem TODO crítico esquecido. | Fold antigo removido **no mesmo ship** (§30) |
+| 73 | Testes unitários (regras) | FE+BE | Regra nova coberta; lógica de estado crítica coberta no Flutter. | = |
+| 74 | Testes de UI / widget | FE | `flutter test` cobre o widget principal da tela. | Teste de contrato afirma o **tipo** da superfície (§32) |
+| 75 | Testes de contrato / API / MVC | BE | Endpoint tem teste de controller/contrato. | = |
+| 76 | A11y automatizada em testes | FE | `Semantics` verificado em teste ou checado com TalkBack/VoiceOver. | = |
+| 77 | Telemetria / analytics de produto | FE+BE | Product event disparado na ação principal da tela. | Evento novo só **proposto**, nunca funil paralelo |
+| 78 | Feature flags & rollout | FE+BE | Mudança arriscada protegida por flag quando aplicável. | = |
+| 79 | CI / release readiness | FE+BE | `flutter analyze --fatal-warnings --fatal-infos` e `./gradlew test` sem novo warning. | Rodado de fato; não pontuar de memória |
+| 80 | Docs de produto / help na superfície | FE | Tela complexa tem help/tooltip acessível nela mesma. | `FxHelpIconButton` na app bar |
+
+## 27. Pilares estruturais 81–92
+
+Extras da v1, generalizados para todo o app. Avaliados junto dos 80.
+
+| # | Pilar | Lado | Evidência de 10/10 |
+|---|---|---|---|
+| 81 | **Tipo de superfície declarado** | FE | A tela é classificada em S1–S9 no PR e o esqueleto corresponde ao tipo (§9) |
+| 82 | **Paridade tipográfica** | FE | Papéis de `FocuxHubTypography`; sem escala ad-hoc |
+| 83 | **Ícones e acento na marca** | FE | Leading na marca, chevron muted, `FxIcon` outline 22 |
+| 84 | **Sem CTA invertido** | FE | Nenhum botão branco sobre preto; nenhum hero invertido |
+| 85 | **Sem tema emprestado** | FE | Mesh + glass; não copia o preto/azul do ChatGPT nem o azul iOS |
+| 86 | **Limpeza no mesmo ship** | FE | Fold antigo, campos e testes velhos removidos no mesmo commit (§30) |
+| 87 | **Picker canônico** | FE | Seleção única em sheet via `showFxInsetPickerSheet` / `FxInsetPickerOption` |
+| 88 | **Destrutivo isolado** | FE | Sair / excluir em grupo próprio, ao fim, com confirmação |
+| 89 | **App BR** | FE | PT-BR na superfície; sem tradução EN/ES ativa |
+| 90 | **Chevron ⟺ rota** | FE | Nenhum chevron em ação transacional; nenhum botão para navegação simples (§10) |
+| 91 | **Orçamento de destaque** | FE | 1 P0, ≤2 P1, ≤1 `emphasize`, ≤3 sinais por linha (§11–§12) |
+| 92 | **Proposta de backend entregue** | FE+BE | Bloco de §22 presente no scorecard, mesmo quando vazio |
+
+---
+
+# Parte VI — Execução
+
+## 28. Playbook de implementação em massa
+
+Objetivo: **paridade operacional + pele deste arquivo + anatomia do tipo certo**.
+
+### 28.1 Fase 0 — inventário (antes de qualquer edição)
+
+Entregável único, sem tocar em código: **planilha de rotas**, uma linha por destino navegável.
+
+| Coluna | Conteúdo |
+|---|---|
+| Rota | Path no GoRouter |
+| Tela | Widget raiz |
+| Tipo | S1…S9 |
+| Estrutura atual | O que está lá hoje (ex.: "inset-grouped") |
+| Divergência | Anti-padrão identificado (§31) |
+| P0 atual / correto | Qual é a ação primária e como está tratada |
+| Endpoint(s) | Caminho de dados |
+| Lote | Agrupamento de execução |
+
+Nada de "editar no escuro": se houver dúvida sobre qual tela é, listar candidatas e perguntar.
+
+### 28.2 Fase 1 — extração para core
+
+Antes de cada lote, **extrair para `lib/core/widgets/`** o padrão que vai se repetir naquele tipo. É isto que evita centenas de edições divergentes: a tela nova compõe, não recria.
+
+Candidatos prováveis por tipo: barra sticky de ação (S3), footer de formulário (S5), lockup de conversão (S6), header de execução (S8), passo de wizard (S9). Se o padrão ainda não é widget, ele nasce widget **antes** de ser colado na segunda tela.
+
+### 28.3 Fase 2 — lotes por tipo, não por pasta
+
+Consistência intra-tipo é o que faz o app parecer desenhado. Ordem sugerida por impacto:
+
+| Ordem | Lote | Por quê |
+|---|---|---|
+| 1 | **S6** conversão | Maior dano hoje (CTA como linha); menor superfície; impacto direto em receita |
+| 2 | **S1** hubs | Definem a percepção de produto |
+| 3 | **S3** detalhes | Onde o personal passa o dia |
+| 4 | **S4** listas | Busca, filtro e paginação |
+| 5 | **S5** formulários | Volume alto, padrão fechado |
+| 6 | **S8** execução | Poucas telas, ganho alto de foco |
+| 7 | **S9** wizard | Depende de S5 pronto |
+| 8 | **S7** sheets | Varredura de conformidade |
+| 9 | **S2** ajustes | Já está no padrão; só auditar limites de §11 |
+
+### 28.4 Ritmo (agilidade sem dívida)
+
+1. **Uma tela — ou um lote homogêneo de até 3 telas do mesmo tipo — por PR.** Não misturar tipos no mesmo PR.
+2. **Identificar FE + BE antes de editar:** widget, provider, rota, endpoint(s).
+3. **Copiar padrão, não copiar arquivo.** Reusar tokens, sheets, estados, tipografia.
+4. **Diff mínimo, estruturalmente correto.** Corrigir a causa; não espalhar magic numbers nem duplicar microcopy.
+5. **Não misturar** refactor amplo + feature nova + upgrade visual no mesmo commit.
+6. **Limpar o fold antigo no mesmo ship** (§30).
+7. **Scorecard no chat**, no formato de §33. Sem Canvas, sem `.md` novo, sem "10/10" no subject do git.
+8. **Checagens reais** quando houver terminal: `flutter analyze --fatal-warnings --fatal-infos`, testes da feature, e no BE `./gradlew test` do módulo tocado. Não pontuar 69–79 de memória.
+9. **Bloco de proposta de backend obrigatório** em todo PR (§22), mesmo vazio.
+10. Chats de bugfix/git/limpeza **não** reabrem o playbook inteiro — só o pedaço que o bug toca.
+
+### 28.5 Definição de pronto por tela
+
+- [ ] Tipo declarado e esqueleto conforme §9
+- [ ] Assinatura Focux completa (§2)
+- [ ] Componentes escolhidos pela matriz de intenção (§10)
+- [ ] Orçamento de destaque respeitado (§11) e densidade dentro dos limites (§12)
+- [ ] Quatro estados implementados (§13)
+- [ ] Regras de §16–§21 verificadas
+- [ ] Bloco de proposta de backend entregue (§22)
+- [ ] Mortos removidos (§30)
+- [ ] Analyze + testes do caminho tocado passaram
+- [ ] Scorecard + "Precisa da sua decisão" (pode ser vazio)
+
+## 29. O que pode aplicar sozinho vs. o que só propor
+
+Espelha a regra Cursor `focux-10-10`. Na dúvida: **propor**, nunca auto-aplicar.
+
+| Pode editar direto | Só propor e esperar aprovação |
+|---|---|
+| Visual, UX, tipografia, densidade, a11y, motion, navegação de UI, sheets, empty/loading/erro, performance **client-side**, SRP/limpeza que **não** muda contrato nem regra | Regra de negócio, IA, gates de plano, PII, auth/sessão, tenant/RLS, LGPD, auditoria, secrets, rate limit, contrato API/BFF, cache **server**, validação de domínio, idempotência, paginação BE, Flyway, observabilidade BE, testes de contrato, telemetria de produto |
+| Pilares típicos: 1–2, 4, 6–8, 13–51, 69–72, 74, 76, 78–80, 81–91 | Pilares típicos: 3, 9, 11, 52–68, 73, 75, 77, 92 |
+
+**Nunca editar sozinho:** auth, tenant, pagamento, migration, RLS, endpoint novo sem contrato.
+
+## 30. Limpeza de mortos
+
+O fold novo **não** convive com o antigo. Depois de implementar, no mesmo ship, antes do scorecard:
+
+1. Apagar campos, `GlobalKey`, flags, métodos e `part`s que só existiam para o layout anterior.
+2. Grep do símbolo no app: se **nenhuma outra rota** chama, apagar o arquivo — não deixar "por precaução".
+3. Se outra tela ainda usa, extrair para o domínio dela; não manter morto no hub elevado.
+4. Reescrever testes que afirmavam o fold antigo **no mesmo commit**.
+5. Só então `flutter analyze --fatal-warnings --fatal-infos` — tem que falhar se sobrou `unused_*`.
+
+Não vale "limpa no próximo PR". Campo morto no State depois de um redesign é regressão do pilar 72.
+
+## 31. Anti-padrões
+
+Catálogo de defeitos. Cada um tem nome para poder ser citado em revisão.
+
+| Cód. | Nome | Sintoma | Correção |
+|---|---|---|---|
+| **A1** | Tela-perfil | Inset-grouped como estrutura fora de S2 | Aplicar o esqueleto do tipo real (§9) |
+| **A2** | CTA com chevron | `Entrar >`, `Salvar >`, `Assinar >` como linha | `FxLiquidPrimaryButton` (§10) |
+| **A3** | Muro de repetição | 3+ linhas com o mesmo chip de status | Agregar em 1 resumo com contagem (§12.1) |
+| **A4** | Tela plana | Nenhum elemento dominante | Definir 1 P0 no tratamento do tipo (pilar 4) |
+| **A5** | Dois primários | Dois botões com glow competindo | Rebaixar um a `FxLiquidSecondaryButton` |
+| **A6** | Número órfão | Métrica sem unidade nem contexto | Unidade/rótulo no mesmo bloco (pilar 40) |
+| **A7** | Full-width fora de lugar | CTA full-width em hub ou ajustes | Chip in-card (§11) |
+| **A8** | Tema emprestado | Botão branco sobre preto, azul iOS, hero invertido | Mesh + glass + teal (§2) |
+| **A9** | KPI em ajustes | Card de métrica dentro de S2 | Mover para S1/S3 |
+| **A10** | Picker com chevron | Escolha de valor exibindo chevron | Check teal em `FxInsetPickerOption` |
+| **A11** | Stack na tela | `showError(context, '$e')` | `friendlyError` / `FxAsyncBody` |
+| **A12** | Regra no widget | `if (plano == 'FREE')` na UI | `effectivePlanoFeatures` / capability |
+| **A13** | Sheet sem altura | `Flexible`/`Expanded` em `Column(min)` sem cap | `expand: true` + `Expanded(ListView)` |
+| **A14** | Mundo no cliente | FE busca tudo para filtrar/paginar | Paginação e filtro no BE (proposta §22) |
+| **A15** | SSOT duplo | Provider refetcha o que o agregado já traz | Consumir o agregado |
+| **A16** | Morto convivendo | Fold antigo mantido "por precaução" | §30 no mesmo ship |
+| **A17** | Chip como submit | Chip de hub usado para enviar formulário | Footer sticky full-width (S5) |
+| **A18** | Execução poluída | Timer com listas, badges e notificações | S8: um alvo dominante |
+| **A19** | Wizard sobrecarregado | Várias decisões numa etapa | Uma pergunta por etapa (S9) |
+| **A20** | Ajuda enterrada | Linha "Ajuda" no meio da lista | `FxHelpIconButton` na app bar |
+
+## 32. Gates verificáveis
+
+O que a v1 tinha de melhor era ter transformado segurança em teste (`security_pillar_contract_test.dart`). A v2 propõe o mesmo para a taxonomia — regra que não é testada volta a ser violada em escala.
+
+**Vigente:**
+
+| Gate | Arquivo |
+|---|---|
+| Contrato de segurança dos hubs | `test/core/design_system/security_pillar_contract_test.dart` |
+| Catálogo de segurança | `test/core/security/focux_security_test.dart` |
+| Hardening de plataforma | `test/core/security/platform_hardening_test.dart` |
+| Analyze | `flutter analyze --fatal-warnings --fatal-infos` |
+
+**Proposto (implementar no Fase 1 do playbook, não agora):**
+
+| Gate | Onde | O que afirma |
+|---|---|---|
+| `FocuxSurfaces` — catálogo de superfícies | `lib/core/design_system/focux_surfaces.dart` | Mapa rota → tipo S1–S9, espelhando o padrão de `FocuxSecurity.coreSources` |
+| `surface_taxonomy_contract_test.dart` | `test/core/design_system/` | Toda rota do router está classificada; nenhuma rota sem tipo |
+| Regra "inset só em S2" | idem | Telas S1/S3/S4/S6/S8/S9 não usam `FxSettingsGroup` como raiz do body |
+| Regra "chevron ⟺ rota" | idem | Rótulo de `FxSettingsTile` não casa com verbo transacional (`entrar`, `salvar`, `pagar`, `assinar`, `iniciar`, `confirmar`, `enviar`) |
+| Regra "1 P0" | idem | No máximo 1 `FxLiquidPrimaryButton` por árvore de tela |
+| Regra "sem CTA full-width em S1/S2" | idem | S1/S2 não instanciam `FxLiquidPrimaryButton` |
+| Regra "S6 tem primário" | idem | Toda rota de `buildAuthRoutes` instancia exatamente 1 `FxLiquidPrimaryButton` |
+
+Um gate de source-contract (leitura do arquivo + regex, como os testes de segurança já fazem) é suficiente e barato — não precisa de golden test.
+
+## 33. Scorecard e checklist de ship
+
+Formato do relatório de cada tela, entregue no chat.
+
+### 33.1 Cabeçalho
+
+```
+# <Rota> — <nome da tela>
+Tipo de superfície: S<#> (<nome>)
+Job: <uma frase>
+P0: <ação primária e tratamento>
+Estados: loading / vazio / erro / freshness — <ok | o que falta>
+Endpoints: <lista>
+Mortos removidos: <lista>
+Checagens: analyze <ok|falhou> · testes <quais>
+```
+
+### 33.2 Tabela de pilares
+
+Colunas: `#` · `Pilar` · `Cat` · `Lado` · `FE` · `BE` · `Nota` · `Meta` · `Evidência`.
+Meta é sempre 10. `N/A` quando o pilar não se aplica à tela — com justificativa na evidência.
+Fechar com: **Nota geral (pilares com nota, N/A fora): X/10.**
+
+### 33.3 Blocos finais
+
+1. **Proposta de backend** — template de §22.2, obrigatório.
+2. **Precisa da sua decisão** — lista de escolhas que dependem do dono do produto (pode ser vazia).
+
+### 33.4 Checklist rápido antes do ship
+
+- [ ] Tipo de superfície declarado; job da rota claro; chrome/dock no shell certo
+- [ ] Esqueleto do tipo respeitado; nenhum anti-padrão de §31
+- [ ] 1 P0 no tratamento do tipo; ≤2 P1; ≤1 `emphasize` por viewport
+- [ ] Densidade dentro de §12 (≤3 sinais/linha; agregação a partir de 3 repetições)
+- [ ] Loading / vazio / erro / retry / freshness
+- [ ] Tokens, tipografia, sheets e toque 48dp — sem paleta paralela
+- [ ] Dark e light verificados
+- [ ] Sem provider duplicado do agregado; parse tipado na borda
+- [ ] Sem PII extra; tenant não veio do cliente; erros com `friendlyError` (sem `$e`)
+- [ ] Hub passa `security_pillar_contract_test` se estiver na lista de hubs
+- [ ] Lista longa = builder + paginação no BE; sheet = altura limitada + teclado
+- [ ] Sem `Flexible` unbounded; sem overflow com teclado/landscape
+- [ ] Nada de auth/pagamento/migration/IA autoaplicada neste diff
+- [ ] Fold antigo limpo; testes do fold velho atualizados
+- [ ] Analyze + testes do caminho tocado passaram
+- [ ] Scorecard + proposta de backend + "Precisa da sua decisão"
+
+## 34. Catálogo de componentes
+
+Preferir estes; extrair para core antes de duplicar (pilar 70).
+
+### Estrutura e chrome
+
+| Símbolo | Caminho |
+|---|---|
+| `FxShellScaffold`, `FxShellAppBar`, `ShellSurface`, `FxSatellitePanel`, `FxSatelliteListTile` | `lib/core/widgets/fx_shell_scaffold.dart` |
+| `fxListCardDecoration`, `fxListTileCardShell`, `fxStripCardDecoration`, `fxScreenInk`, `fxScreenMute` | idem |
+| `ShellChrome` | `lib/core/theme/shell_chrome.dart` |
+| `CinematicMeshBackground`, `MeshScope` | `lib/core/widgets/cinematic_mesh_background.dart`, `mesh_scope.dart` |
+| `FxGlassSurface`, `FxStripCard`, `FxHubHeader` | `lib/core/widgets/fx_glass_surface.dart`, `fx_strip_card.dart`, `fx_hub_header.dart` |
+| `FxContentWidthLimiter` | `lib/core/widgets/fx_content_width_limiter.dart` |
+| `FxRouteChrome`, `FxDock`, `FxDockItems` | `lib/core/widgets/fx_route_chrome.dart`, `fx_dock.dart` |
+| `FocuxSystemChrome` | `lib/core/theme/focux_system_chrome.dart` |
+
+### Tokens e tipografia
+
+| Símbolo | Caminho |
+|---|---|
+| `TokensStrip` | `lib/core/theme/tokens_strip.dart` |
+| `FxSettingsLayout` | `lib/core/theme/fx_settings_layout.dart` |
+| `FocuxHubTypography`, `AppTypography`, `FocuxTypography` | `lib/core/theme/` |
+| `BrandPalette`, `EagleTokens` | `lib/core/theme/brand_palette.dart`, `design_tokens.dart` |
+| `DashboardLayout` | `lib/features/dashboard/constants/dashboard_layout.dart` |
+
+### Ação e entrada
+
+| Símbolo | Caminho |
+|---|---|
+| `FxLiquidPrimaryButton`, `FxLiquidSecondaryButton`, `FxSpringButton`, `FxStaggerItem`, `FxInteractiveGlow` | `lib/core/widgets/fx_motion.dart` |
+| `FxPremiumEntrance` | `lib/core/widgets/fx_premium_entrance.dart` |
+| `FxInputDeco` | `lib/core/widgets/fx_input_deco.dart` |
+| `FxToggleChip` | `lib/core/widgets/fx_toggle_chip.dart` |
+| `FxIcon` | `lib/core/widgets/fx_icon.dart` |
+| `AlunoSegmentedChoice` (2–4 opções inline) | `lib/features/alunos/widgets/aluno_form_choices.dart` |
+| `PerfilStickyBar` (chip sticky de pendência, modelo de S2) | `lib/features/perfil/widgets/perfil_sticky_bar.dart` |
+
+### Listas inset e picker
+
+| Símbolo | Caminho |
+|---|---|
+| `FxSettingsGroup`, `FxSettingsGroupedList`, `FxSettingsTile` | `lib/core/widgets/fx_settings_group.dart`, `fx_settings_grouped_list.dart`, `fx_settings_tile.dart` |
+| `showFxInsetPickerSheet`, `FxInsetPickerSheetItem` | `lib/core/widgets/fx_inset_picker_sheet.dart` |
+| `FxInsetPickerOption`, `FxInsetPickerOptionSpec` | `lib/core/widgets/fx_inset_picker_option.dart` |
+| `FxInsetPickerRow` | `lib/core/widgets/fx_inset_picker_row.dart` |
+
+### Sheets, estados e feedback
+
+| Símbolo | Caminho |
+|---|---|
+| `showFxHomeSheet`, `FxHomeSheetSurface`, `FxHomeSheetHandle`, `FxHomeSheetHeader`, `FxHomeSheetScaffold`, `FxHomeSheetChrome` | `lib/core/widgets/fx_home_sheet.dart` |
+| `showFxConfirmSheet` | `lib/core/widgets/fx_confirm_sheet.dart` |
+| `showFxFormSheet`, `showFxNoticeSheet` | `lib/core/widgets/fx_form_sheet.dart` |
+| `showFxBottomSheet` | `lib/core/widgets/fx_bottom_sheet.dart` |
+| `FxAsyncBody` | `lib/core/widgets/fx_async_body.dart` |
+| `FxEmptyState`, `FxEmptyAction` | `lib/core/widgets/fx_empty_state.dart` |
+| `FxErrorState` | `lib/core/widgets/fx_error_state.dart` |
+| `FxLoading`, `SkeletonLoader`/`SkeletonList`, `ShimmerListLoading` | `lib/core/widgets/fx_loading.dart`, `skeleton_loader.dart`, `loading_shimmer.dart` |
+| `FeedbackHelper`, `FocuxFeedback` | `lib/core/widgets/feedback_helper.dart`, `lib/core/ux/focux_feedback.dart` |
+| `FxConnectivityBanner` | `lib/core/widgets/fx_connectivity_banner.dart` |
+| `FxHelpIconButton`, `showFxHelpSheet`, `FxHelpTipRow`, `FxHelpChrome` | `lib/core/widgets/fx_help.dart` |
+| `FxCelebrationOverlay`, `FxConfettiBurst`, `FxRivePlayer` | `lib/core/widgets/fx_celebration_overlay.dart`, `fx_confetti_burst.dart`, `fx_rive_player.dart` |
+
+### Dados e métricas
+
+| Símbolo | Caminho |
+|---|---|
+| `FxSparkline` | `lib/core/widgets/fx_sparkline.dart` |
+| `OperationalMetricTile` | `lib/core/widgets/operational_metric_tile.dart` |
+| `FxHorizontalScrollPeek` | `lib/core/widgets/fx_horizontal_scroll_peek.dart` |
+| `FxPlanLockBadge`, `FxPlanLockTrailing` | `lib/core/widgets/fx_plan_lock_badge.dart` |
+| `effectivePlanoFeatures` | `lib/features/planos/utils/effective_plano_features.dart` |
+| `UpgradePromptSheet` | `lib/features/subscription/widgets/upgrade_prompt_sheet.dart` |
+| `FeatureGate` | `lib/core/widgets/feature_gate.dart` |
+
+### Marca
+
+| Símbolo | Caminho |
+|---|---|
+| `FocuxOfficialLogo`, `FocuxBrandTagline`, `BrandedAppIcon` | `lib/core/widgets/focux_official_logo.dart`, `focux_brand_tagline.dart`, `branded_app_identity.dart` |
+| `FocuxBranding`, `FocuxBrandCopy`, `FocuxMicrocopy` | `lib/core/brand/` |
+
+### Domínio Hoje (reusar só em outro S1)
+
+| Símbolo | Caminho |
+|---|---|
+| `DashboardDayFocusBanner` | `lib/features/dashboard/widgets/dashboard_day_focus_banner.dart` |
+| `DashboardHomeHeader` | `lib/features/dashboard/widgets/dashboard_home_header.dart` |
+| `DashboardCommandCenterSection`, `showCommandActionsSheet` | `lib/features/dashboard/widgets/dashboard_command_center_section.dart` |
+| `CommandActionTile`, `CommandActionPanel`, `CommandStatusTile`, `CommandPrioritiesSheet` | `lib/features/dashboard/widgets/command_*.dart` |
+| `DashboardPrioritiesOverlay` | `lib/features/dashboard/widgets/dashboard_command_center_sticky_header.dart` |
+| `DashboardSectionHeader`, `DashboardHomeSecondaryBlock` | `lib/features/dashboard/widgets/` |
+| `DashboardAttentionRail`, `DashboardAgendaHojeStrip`, `DashboardDayPulseStrip`, `DashboardBaseRadarStrip` | `lib/features/dashboard/widgets/` |
+| `DashboardHomeActionChip`, `DashboardHomeActivationStrip`, `DashboardHomeCoachBanner` | `lib/features/dashboard/widgets/` |
+| `DashboardShimmerLoading`, `DashboardErrorState`, `DashboardFinanceEmptyState` | `lib/features/dashboard/widgets/` |
+| `showDashboardToolsCatalogSheet`, `showDashboardQuickSearchSheet`, `showDashboardHomeHelpSheet`, `showDashboardRadarSheet` | `lib/features/dashboard/widgets/` |
+| `DashboardHomeClientCache`, `DashboardMicrocopy`, `buildDashboardNextActions`, `DashboardHomeFocusRules`, `DashboardDayFocus` | `lib/features/dashboard/utils/` |
+| `DashboardActivationCta` | `lib/features/subscription/widgets/dashboard_activation_cta.dart` |
+| `NotificacaoBadgeButton` | `lib/features/notificacoes/widgets/notificacao_badge_button.dart` |
+
+### Segurança (app-wide — usar em todo hub)
+
+| Símbolo | Caminho |
+|---|---|
+| `FocuxSecurity` (catálogo) | `lib/core/security/focux_security.dart` |
+| `SecureStorage` | `lib/core/storage/secure_storage.dart` |
+| `TlsCertificatePinning` | `lib/core/api/tls_certificate_pinning.dart` |
+| `friendlyError` | `lib/core/utils/friendly_error.dart` |
+| `copySensitiveToClipboard` | `lib/core/utils/clipboard_sensitive.dart` |
+| `IaSafetyDisclaimer` | `lib/core/widgets/ia_safety_disclaimer.dart` |
+| `SubscriptionDeviceGuard` | `lib/features/assinatura/services/subscription_device_guard.dart` |
+| Hardening Android (catálogo) | `FocuxSecurity.androidHardeningSources` |
+
+### Utilitários
+
+| Símbolo | Caminho |
+|---|---|
+| `fxScreenA11yScope` | `lib/core/widgets/fx_screen_a11y.dart` |
+| `fxAnnounce`, `fxAnnounceGlobal` | `lib/core/utils/a11y_announce.dart` |
+| `fxMotionDuration`, `fxMotionDurationMs` | `lib/core/utils/motion_preferences.dart` |
+| `fxTitleCaseName`, `fxInitials`, `fxTimeAgo`, `fxDateFull`, `fxDateShort`, `fxMonthYear` | `lib/core/utils/fx_utils.dart` |
+| `BrPhone` | `lib/core/utils/br_phone.dart` |
+| `FxHubFreshness` | `lib/core/ux/fx_hub_freshness.dart` |
+| `fxTransitionPage` | `lib/core/router/fx_page_transition.dart` |
+
+## 35. Padrões de detalhe
+
+### 35.1 Picker inset (seleção única em sheet)
+
+Padrão **global** para escolher **um** valor em bottom sheet (tema, nível, taxonomia, ordenação, filtro enum). Não reinventar `InkWell` + `Icons.check`.
+
+**Quando usar:**
+
+| Situação | Componente |
+|---|---|
+| Lista em sheet, **1 opção** | `showFxInsetPickerSheet` ou `FxInsetPickerOption` + `FxSettingsGroup(edgeToEdgeRows: true)` |
+| Lista com **busca** (muitos itens) | `FxInsetPickerOption.list` + campo de busca acima |
+| **Multi-seleção** | `FxToggleChip` em grid/wrap — não é picker de lista |
+| **2–4 opções fixas** em formulário | `AlunoSegmentedChoice` / chips inline |
+| **Navegar** para outra tela | `FxSettingsTile` com chevron |
+| **Executar** transação | `FxLiquidPrimaryButton` — **nunca** linha de picker nem chevron |
+
+**Contrato visual:**
+
+1. **Chrome:** `showFxHomeSheet` → `FxHomeSheetSurface` → `FxHomeSheetHandle` + `FxHomeSheetHeader` (título + subtítulo de contexto).
+2. **Grupo:** `FxSettingsGroup(accent: primary, edgeToEdgeRows: true)` — sem padding interno; `ClipRRect` no card.
+3. **Linha:** `FxInsetPickerOption` — altura mínima `rowMinHeight` (52), padding horizontal `groupPadH` (16).
+4. **Selecionado:** fundo `accent` a 10% (light) / 16% (dark) **de borda a borda**; label em bold + `Icons.check_rounded` teal à direita; cantos arredondados no primeiro e no último item.
+5. **Ícone opcional** à esquerda (22, cor da marca); **subtítulo opcional** (`bodyMuted`).
+6. **Haptic:** `HapticFeedback.selectionClick()` no tap — já dentro do widget, não duplicar no caller.
+7. **Proibido:** `BoxDecoration` manual com `alpha: 0.08` dentro de grupo com padding — gera highlight quebrado.
+
+**Exemplo mínimo:**
+
+```dart
+final picked = await showFxInsetPickerSheet<ThemeMode>(
+  context,
+  title: 'Aparência',
+  headerIcon: Icons.dark_mode_outlined,
+  selected: current,
+  items: [
+    FxInsetPickerSheetItem(value: ThemeMode.system, label: 'Sistema'),
+    FxInsetPickerSheetItem(value: ThemeMode.light, label: 'Claro'),
+    FxInsetPickerSheetItem(value: ThemeMode.dark, label: 'Escuro'),
+  ],
+);
+```
+
+Lista com ícone/subtítulo em grupo (sheet que não fecha no tap — ex.: status em lote):
+
+```dart
+FxSettingsGroup(
+  header: 'Ordenação',
+  edgeToEdgeRows: true,
+  accent: primary,
+  children: FxInsetPickerOption.list(
+    accent: soft,
+    items: [
+      FxInsetPickerOptionSpec(
+        label: 'Nome A-Z',
+        subtitle: 'Ordem alfabética.',
+        icon: Icons.sort_by_alpha_rounded,
+        selected: ordenacao == AlunoOrdenacao.nome,
+        onTap: () => _setOrdenacao(AlunoOrdenacao.nome),
+      ),
+    ],
+  ),
+)
+```
+
+### 35.2 Grupo inset como container de campos (S5)
+
+Em formulário, o grupo inset é **correto** — ele agrupa campos relacionados, não navegação:
+
+- `FxSettingsGroup(header: 'Contato', footer: 'Usamos o WhatsApp para avisar o aluno.')`
+- Campos com `FxInputDeco`; slot de prefixo `insetPrefixWidth` (48) para paridade com as linhas.
+- Escolha inline via `FxInsetPickerRow` (abre picker, mostra o valor — sem chevron).
+- Erro de validação inline, sob o campo, em `EagleTokens.bad`.
+- **O submit nunca é uma linha do grupo.** Ele é o botão full-width do footer sticky.
+
+### 35.3 Barra sticky de ação (S3)
+
+- Fixa na base, sobre a superfície, com blur (`TokensStrip.blurLight`) e borda superior `chrome.line`.
+- Um `FxLiquidPrimaryButton` + no máximo dois ícones/links secundários.
+- Respeita `SafeArea` inferior e recolhe com o teclado.
+- Nunca dois níveis de sticky simultâneos (barra + chip).
+
+---
+
+# Apêndices
+
+## A. Registro de auditoria: hub Perfil
+
+Auditoria concluída em 2026-08-25 sobre `/perfil` + `/perfil/ferramentas` — **nota geral 10/10** nos pilares com nota (N/A fora). Preservado como registro histórico e como exemplo de scorecard preenchido. Os `N/A` refletem o escopo daquela tela, não uma dispensa geral.
+
+| # | Pilar | Nota | Evidência |
+|---|---|---|---|
+| 1 | Produtividade operacional | 10 | Conta / marca / operação em poucos toques |
+| 2 | Rota & job | 10 | Hub único; Ferramentas em rota própria |
+| 3 | Lógica & regras | 10 | FE ∪ API `readinessMissing` (`PersonalReadiness`) |
+| 4 | Hierarquia de decisão | 10 | Sticky `Completar`/`Hoje` + Planos em destaque teal |
+| 5 | Valor aluno | 10 | `%` + `readinessPercent` visíveis |
+| 6 | Descoberta | 10 | Caption + long-press em Marca |
+| 7 | First-run | 10 | Grupo de prontidão só quando incompleto |
+| 8 | White-label | 10 | `corPrimaria` via `BrandPalette` em ícones e avatar |
+| 9 | IA assistiva | N/A | Sem IA nesta tela |
+| 10 | Transparência | 10 | Hint "como calculamos" + payload BE |
+| 11 | Gates de plano | 10 | `verificarAcesso`; tile `locked`; contrato intacto |
+| 12 | Unread | N/A | Sem unread |
+| 13 | Time-to-value | 10 | Hero + 1º grupo sem scroll extra |
+| 14 | Identidade visual | 10 | Mesh/glass/teal; não copia o preto do ChatGPT |
+| 15 | Tipografia | 10 | Papéis de `FocuxHubTypography`; sem Inter 17 ad-hoc |
+| 16 | Espaçamento | 10 | `FxSettingsLayout` 16/24/52/20 |
+| 17 | Contraste | 10 | Labels `ink`; ícone teal sobre chrome |
+| 18 | Dark/light | 10 | `cardFill` e avatar ring via `ShellChrome` |
+| 19 | Hierarquia visual | 10 | Nome = headline; linhas = `cardTitle` |
+| 20 | Design system | 10 | `FxSettings*` em core |
+| 21 | Densidade | 10 | Linha 52; sem KPI card; sem preview LIVE |
+| 22 | Gestalt | 10 | Grupos + Sair isolado |
+| 23 | Branding | 10 | Ícones outline 22 na marca |
+| 24 | Data viz | N/A | Sem gráfico |
+| 25 | Empty | 10 | Linha "criar link público" como CTA |
+| 26 | Loading | 10 | Skeleton em Ferramentas |
+| 27 | Erro/retry | 10 | `FxErrorState` + retry |
+| 28 | Freshness | 10 | Subtítulo da app bar |
+| 29 | Microcopy | 10 | Labels de ajuste, sem jargão |
+| 30 | Feedback | 10 | Chevron/check + `selectionClick` |
+| 31 | Search | N/A | Lista curta |
+| 32 | Forms | 10 | `showFxFormSheet` (excluir conta) |
+| 33 | Touch/haptics | 10 | Linha 52 ≥ 48dp |
+| 34 | Gestos | 10 | Back do shell; `safePopOrGo` |
+| 35 | Responsivo | 10 | `constrainWidth` + inset 16 |
+| 36 | Thumb zone | 10 | `PerfilStickyBar` na base |
+| 37 | Motion | 10 | `FxStaggerItem` + reduced motion |
+| 38 | A11y | 10 | Semantics nas linhas; hint no destrutivo |
+| 39 | i18n | 10 | PT-BR; `Locale('pt')`; sem EN/ES na UI |
+| 40 | Clareza | 10 | Plano e score com unidade |
+| 41 | Atenção | 10 | Hero limpo; sem pills de Marca/Plano |
+| 42 | IA nav | 10 | `/perfil` no shell Personal |
+| 43 | Deep links | 10 | Push para wallet/planos/etc. |
+| 44 | Back stack | 10 | Ferramentas → Perfil previsível |
+| 45 | Sheets | 10 | `showFxHomeSheet` / `FxHomeSheetSurface`; picker com linha 52 |
+| 46 | TTI | 10 | Scaffold de loading; sem tela branca |
+| 47 | Scroll | 10 | `CustomScrollView`; sem preview pesado |
+| 48 | Rede | 10 | GET perfil 60/min; `friendlyError` |
+| 49 | Cache client | 10 | TTL 90s; invalidate no refresh |
+| 50 | Cold start | 10 | Foto lazy; sem card LIVE |
+| 51 | Estabilidade | 10 | Null-safe; `fatal-infos` no escopo |
+| 52 | PII na UI | 10 | WhatsApp só se cadastro incompleto |
+| 53 | Auth/sessão | 10 | Logout 204; teste revoga refresh |
+| 54 | Tenant/RLS | 10 | `TenantContext`; sem `personalId` do cliente |
+| 55 | LGPD | 10 | `DELETE /api/lgpd/me`; contrato inalterado |
+| 56 | Auditoria | 10 | `PERFIL_UPDATE`; wallet e identidade também |
+| 57 | Secrets | 10 | Sem secret; `Env`; pins=false só em sideload |
+| 58 | Rate limit | 10 | `@RateLimit` em perfil/planos/public |
+| 59 | Contrato API | 10 | Springdoc no path crítico perfil + delete |
+| 60 | SSOT | 10 | Evict da home no write |
+| 61 | N+1 | 10 | `findById`; plano EAGER no Personal |
+| 62 | Cache server | 10 | Perfil e wallet invalidam home |
+| 63 | Validação domínio | 10 | `@Valid` + `FocuxException` (telefone/PIX) |
+| 64 | Idempotência | 10 | Refresh já revogado → 401 |
+| 65 | Paginação BE | N/A | Sem lista paginada |
+| 66 | Flyway | N/A | Sem mudança de schema |
+| 67 | Observabilidade | 10 | Timer `focux.personal.perfil` (p95) |
+| 68 | OpenAPI | 10 | `@Operation` no gate crítico |
+| 69 | SRP | 10 | Layout separado da pele; utils/widgets |
+| 70 | Composição | 10 | Ferramentas reusa o tile |
+| 71 | Tipagem | 10 | Borda tipada; records no BE |
+| 72 | Dead code | 10 | Grep + compile no mesmo ship |
+| 73 | Testes regra | 10 | FE (labels/tokens) + BE (`ReadinessTest`) |
+| 74 | Testes UI | 10 | `perfil_screen_contract_test` |
+| 75 | Contrato API test | 10 | PUT + LGPD HTTP; paths no OpenAPI |
+| 76 | A11y testes | 10 | Source contract de semantics |
+| 77 | Telemetria | 10 | view/share/sticky + Micrometer |
+| 78 | Flags | N/A | Fold visual |
+| 79 | CI/analyze | 10 | FE + BE passaram |
+| 80 | Help na superfície | 10 | Caption + long-press em Marca |
+
+**Extras da v1 (hoje pilares 81–92):** fold inset (81), paridade tipográfica (82), ícones da marca (83), sem CTA invertido (84), sem tema ChatGPT (85), limpeza no mesmo ship (86), picker Aparência (87), Sair isolado (88), app BR (89) — todos 10.
+
+**Precisa da sua decisão:** vazio à época — tema, CTA, sticky chip, LGPD/gates e i18n PT-BR já decididos.
+
+**Reclassificação v2:** `/perfil` e `/perfil/ferramentas` são **S2**. A auditoria segue válida. O que mudou é o alcance: o esqueleto desta tela **não** é o esqueleto padrão do app.
+
+## B. Mortos: não reintroduzir
+
+**Fold Perfil (removidos):** `perfil_action_tile`, `perfil_card_section`, `perfil_quiet_collapsible`, `_HeroMarcaChip`, `_PlanPill`, `_BrandPreview`, `_PerfilPublicLinkCard`, `perfilPlanSectionLabel`.
+
+**Picker:** `_AlunosSheetCheckRow` e rows custom com `InkWell` + `Icons.check` em sheets de seleção. Highlight de seleção recuado dentro de `FxSettingsGroup` sem `edgeToEdgeRows`.
+
+**Padrões proibidos (§31):** CTA com chevron (A2), inset-grouped fora de S2 (A1), CTA full-width em hub/ajustes (A7), botão branco sobre preto (A8), `showError(context, '$e')` (A11), `if (plano == 'FREE')` em widget (A12).
+
+**Regra geral:** ao remover, remover de verdade — arquivo, campos, testes do fold antigo, no mesmo commit (§30).
