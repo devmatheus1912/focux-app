@@ -180,8 +180,10 @@ Os dois primeiros já existem em produção hoje e não mudam.
 | `codigo` | Origem |
 |---|---|
 | `CREDENCIAIS_INVALIDAS` | `AuthService.loginPersonal` / `loginAluno` |
+| `SENHA_ATUAL_INVALIDA` | `AuthService.definirSenhaDefinitivaAluno` |
 
-O campo `erro` permanece `"Credenciais inválidas"`. Só o `codigo` é aditivo.
+O campo `erro` permanece `"Credenciais inválidas"` no login e
+`"Senha atual inválida"` na troca da provisória. Só o `codigo` é aditivo.
 
 Fonte no app: `lib/core/api/api_error.dart` (`ApiErrorCodes`). Código novo
 entra nos dois lados no mesmo PR pareado. Código que o app ainda não conhece
@@ -310,4 +312,10 @@ não foi reescrito.
 App: `AlunoRepository.listarPagina` consome via `Pagina.fromJson`. `listar()`
 drena as páginas (picker de recorrência). A lista de produto continua no BFF
 `/api/alunos/home`.
+
+`GET /api/planos/paywall/home` inclui `me` no mesmo shape de
+`GET /api/planos/me`. O campo é por personal e **não** entra no cache
+`planos-paywall-home` (só `planos` + `vitrine`). Null só se o tenant não
+resolver. First paint de `/assinatura` lê `home.me`; fallback
+`GET /api/planos/me` se `me` ausente.
 

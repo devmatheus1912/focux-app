@@ -122,8 +122,13 @@ String mapResetSenhaError(Object error) {
 
 /// Troca da senha provisória do aluno após o primeiro login.
 String mapDefinirSenhaError(Object error) {
+  final api = ApiError.from(error);
+  final codigo = api?.codigo;
+  if (codigo != null && ApiErrorCodes.passwordChallenge.contains(codigo)) {
+    return 'Senha provisória incorreta. Confira e tente de novo.';
+  }
   if (error is DioException) {
-    final statusCode = error.response?.statusCode;
+    final statusCode = error.response?.statusCode ?? api?.status;
     if (statusCode == null) return 'Sem conexão com o servidor.';
     if (statusCode == 429) {
       return _backendMessage(error) ??

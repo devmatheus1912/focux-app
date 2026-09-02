@@ -90,7 +90,6 @@ extension AssinaturaScreenBuildBody on _AssinaturaScreenState {
     return RefreshIndicator(
       onRefresh: () async {
         ref.invalidate(paywallHomeProvider);
-        ref.invalidate(planoFeaturesProvider);
         await ref.read(paywallHomeProvider.future);
       },
       child: CustomScrollView(

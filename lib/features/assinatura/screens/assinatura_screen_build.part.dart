@@ -13,10 +13,21 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
     final perfil = ref.watch(perfilProvider).valueOrNull;
     final currentPlan = subscriptionPlanFromApi(perfil?.plano);
     final homeAsync = ref.watch(paywallHomeProvider);
-    final vitrine = homeAsync.valueOrNull?.vitrine;
-    final featuresAsync = ref.watch(planoFeaturesProvider);
+    final home = homeAsync.valueOrNull;
+    final vitrine = home?.vitrine;
+    final meFromHome = home?.me;
+    final AsyncValue<PlanoFeatures?> featuresAsync;
+    if (meFromHome != null) {
+      featuresAsync = AsyncValue<PlanoFeatures?>.data(meFromHome);
+    } else {
+      featuresAsync = ref.watch(planoFeaturesProvider).when(
+        data: (value) => AsyncValue<PlanoFeatures?>.data(value),
+        loading: () => const AsyncValue<PlanoFeatures?>.loading(),
+        error: (error, stack) => AsyncValue<PlanoFeatures?>.error(error, stack),
+      );
+    }
 
-    final planos = homeAsync.valueOrNull?.planos;
+    final planos = home?.planos;
 
     SubscriptionPlan? paywallNextTier;
     var paywallHasUpgradeAbove = false;
@@ -34,6 +45,10 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
 
     ref.listen(paywallHomeProvider, (previous, next) {
       next.whenData((home) {
+        final me = home.me;
+        if (me != null) {
+          ref.read(planoFeaturesProvider.notifier).seedFromHome(me);
+        }
         if (_initialSelectionApplied || home.planos.isEmpty) return;
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!mounted || _initialSelectionApplied) return;

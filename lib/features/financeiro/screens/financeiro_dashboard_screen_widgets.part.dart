@@ -22,47 +22,60 @@ class _FinanceiroKpiGroup extends StatelessWidget {
     final showTicket = data.receitaMes > 0 && data.ticketMedio > 0;
     final inadimpl = data.totalInadimplentes;
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: FxSettingsLayout.pageInset),
       child: Semantics(
         label:
             'Panorama financeiro de $mes. '
             'Recebido $recebido. Pendente $pendenteLabel. $metaLabel',
-        child: FxSettingsGroup(
+        child: Column(
           children: [
-            FxSettingsTile(
-              fxIcon: 'dollar-sign',
-              label: 'Recebido · $mes',
-              subtitle: metaSuperada
-                  ? 'Meta superada'
-                  : pendente > 0
-                      ? 'Faltam $pendenteLabel para a meta'
-                      : 'Meta do mês sob controle',
-              value: recebido,
-              numeric: true,
-              showDivider: true,
+            InkWell(
               onTap: () => _openMensalidades(context, source: 'kpi'),
+              borderRadius: BorderRadius.circular(12),
+              child: OperationalMetricTile(
+                label: 'Recebido · $mes',
+                value: recebido,
+                hint: metaSuperada
+                    ? 'Meta superada'
+                    : pendente > 0
+                    ? 'Faltam $pendenteLabel para a meta'
+                    : 'Meta do mês sob controle',
+                color: EagleTokens.moneyGreen,
+                isDark: isDark,
+              ),
             ),
-            FxSettingsTile(
-              fxIcon: 'alert-triangle',
-              label: 'Pendente',
-              subtitle: inadimpl > 0
-                  ? '$inadimpl ${financeInadimplLabel(MediaQuery.sizeOf(context).width).toLowerCase()}'
-                  : 'Sem inadimplência no recorte',
-              value: pendenteLabel,
-              numeric: true,
-              showDivider: true,
+            const SizedBox(height: TokensStrip.s2),
+            InkWell(
               onTap: () => _openMensalidades(context, source: 'kpi'),
+              borderRadius: BorderRadius.circular(12),
+              child: OperationalMetricTile(
+                label: 'Pendente',
+                value: pendenteLabel,
+                hint: inadimpl > 0
+                    ? '$inadimpl ${financeInadimplLabel(MediaQuery.sizeOf(context).width).toLowerCase()}'
+                    : 'Sem inadimplência no recorte',
+                color: EagleTokens.warn,
+                isDark: isDark,
+                emphasis: inadimpl > 0
+                    ? OperationalMetricEmphasis.alert
+                    : OperationalMetricEmphasis.normal,
+              ),
             ),
-            FxSettingsTile(
-              fxIcon: 'target',
-              label: 'Meta',
-              subtitle: showTicket
-                  ? 'Ticket ${formatBrlCurrency(data.ticketMedio, showDecimals: false)}'
-                  : null,
-              value: metaLabel,
-              showDivider: false,
+            const SizedBox(height: TokensStrip.s2),
+            InkWell(
               onTap: () => _openMensalidades(context, source: 'kpi'),
+              borderRadius: BorderRadius.circular(12),
+              child: OperationalMetricTile(
+                label: 'Meta',
+                value: metaLabel,
+                hint: showTicket
+                    ? 'Ticket ${formatBrlCurrency(data.ticketMedio, showDecimals: false)}'
+                    : 'Acompanhe a meta do mês',
+                color: Theme.of(context).colorScheme.primary,
+                isDark: isDark,
+              ),
             ),
           ],
         ),

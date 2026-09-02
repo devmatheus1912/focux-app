@@ -137,6 +137,11 @@ abstract final class ApiErrorCodes {
     'CREDENCIAIS_INVALIDAS',
   };
 
+  /// Senha provisória / atual recusada na troca obrigatória.
+  static const passwordChallenge = <String>{
+    'SENHA_ATUAL_INVALIDA',
+  };
+
   /// Se o código está no catálogo que este app conhece.
   ///
   /// Existe para separar "código conhecido que não é gate" — decisão fechada —
@@ -148,5 +153,6 @@ abstract final class ApiErrorCodes {
       quotaExceeded.contains(codigo) ||
       alreadyExists.contains(codigo) ||
       rateLimited.contains(codigo) ||
-      credentials.contains(codigo);
+      credentials.contains(codigo) ||
+      passwordChallenge.contains(codigo);
 }

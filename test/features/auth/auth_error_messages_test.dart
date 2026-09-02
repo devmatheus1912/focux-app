@@ -71,6 +71,23 @@ void main() {
     expect(mapResetSenhaError(dio(400)), contains('senha'));
     expect(mapDefinirSenhaError(dio(null)), 'Sem conexão com o servidor.');
     expect(mapDefinirSenhaError(dio(401)), contains('provisória'));
+    expect(
+      mapDefinirSenhaError(
+        DioException(
+          requestOptions: RequestOptions(path: '/api/auth/aluno/definir-senha'),
+          response: Response(
+            requestOptions: RequestOptions(path: '/api/auth/aluno/definir-senha'),
+            statusCode: 401,
+            data: {
+              'erro': 'Senha atual inválida',
+              'codigo': 'SENHA_ATUAL_INVALIDA',
+            },
+          ),
+          type: DioExceptionType.badResponse,
+        ),
+      ),
+      contains('provisória'),
+    );
     expect(mapDefinirSenhaError(dio(400)), contains('8 caracteres'));
   });
 
