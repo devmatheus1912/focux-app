@@ -188,10 +188,10 @@ erro genérico procurando `requer plano`, `faça upgrade`, `faca upgrade` e
 o gate de upgrade em silêncio.
 
 1. Backend adiciona `codigo` **de forma aditiva**, mantendo `erro` byte a byte
-   igual. *(em curso no backend)*
+   igual. *(feito no backend — lançamentos do catálogo §2.3)*
 2. Backend avisa o app; este catálogo é a fonte. *(feito)*
 3. App passa a usar `codigo` como fonte primária, com o match de string como
-   fallback para versões antigas. *(feito nesta branch —
+   fallback para versões antigas. *(feito —
    `lib/core/utils/friendly_error.dart`)*
 4. **Só então** qualquer mensagem pode ser reescrita.
 
@@ -199,15 +199,18 @@ O passo 4 continua bloqueado enquanto houver versão antiga relevante em
 produção. O fallback de string some quando o catálogo cobrir todos os pontos
 de lançamento **e** a versão antiga sair de circulação.
 
-Código de **cota** (`IA_QUOTA_ESGOTADA` e irmãos) não é gate de plano, mesmo
-quando o texto contém "Faca upgrade". O app distingue os dois:
-`isPlanGateError` vs `isPlanQuotaError`. Tela que já mostra estado bloqueado
-usa `isEntitlementError`, que cobre os dois, para não empilhar snackbar de
-falha.
+**Cota não é entitlement.** `IA_QUOTA_ESGOTADA` e irmãos não abrem a sheet de
+"desbloqueie o recurso" (`isPlanGateError` / `showFromError`). Distinção no
+app: `isPlanGateError` vs `isPlanQuotaError`. Tela que já mostra estado
+bloqueado usa `isPlanRestrictionError` (os dois) para não empilhar snackbar
+de falha.
+
+Fallback local quando `upgradePlano` não veio: `LEADS` → PRO, `NFSE` →
+ENTERPRISE. Com o campo presente, ele vence o mapa.
 
 ---
 
-## 3. `DELETE /api/fcm/token` — confirmado, P0 restante é do servidor
+## 3. `DELETE /api/fcm/token` — confirmado, P0 fechado no servidor
 
 ### 3.1 O contrato está correto
 
@@ -224,26 +227,15 @@ Ordem: a rota exige autenticação. O `DELETE` acontece **antes** do
 (`AuthRepository.logout` → `FcmService.desregistrarToken`). Confirmado no
 app.
 
-### 3.2 P0 — vazamento de PII entre tenants em aparelho compartilhado
+### 3.2 P0 — vazamento de PII entre tenants — fechado no servidor
 
-O `DELETE` do app cobre o caminho feliz. Não cobre logout de versão antiga,
-logout offline, ou troca de conta sem logout.
-
-Causa: `fcm_tokens` tem `UNIQUE (personal_id, token)`, não unicidade em
-`token`. `registrarToken` busca por `findByPersonalIdAndToken`. Se o mesmo
-token estiver sob outro personal, a busca não acha nada e insere uma segunda
-linha. O aparelho de B passa a receber push de A.
-
-**Correção do servidor, independente do app:** no registro, remover qualquer
-outra linha com o mesmo `token` antes de inserir. Um token de dispositivo
-pertence a exatamente uma identidade logada por vez. Reforçar com índice
-único em `token`.
+O `DELETE` do app cobre o caminho feliz. Os outros três casos (versão antiga,
+logout offline, troca de conta sem logout) o servidor resolve no registro:
+apaga qualquer linha com aquele token e insere a identidade atual. `V157`
+cria unique em `token`. Um token de dispositivo pertence a exatamente uma
+identidade logada por vez.
 
 Nada disso muda o contrato. O app não faz mais nada neste item.
-
-O caminho do aluno não tem esse furo dentro de um mesmo tenant —
-`registrarTokenAluno` encontra a linha e reatribui o `alunoId`. É
-estritamente entre personais distintos.
 
 ---
 
@@ -289,3 +281,20 @@ não usa o app.
 
 O que muda é só o custo: não há tela para quebrar, então a correção pode ser
 agressiva e não precisa de PR pareado nem de aviso prévio.
+
+---
+
+## 7. Fila restante (backend)
+
+Itens desta rodada já fechados nos dois lados: envelope de paginação,
+`codigo` aditivo nos lançamentos do catálogo, FCM unique em `token`.
+
+O que resta, nesta ordem, e **sem reescrever `erro`**:
+
+- P0 de RBAC / autorização (`TenantMembroController`, post de comunidade)
+- Idempotência do webhook MercadoPago
+- Timezone
+- Fechar gates de plano no servidor
+- Timeouts HTTP
+- Paginação A com `PaginaResponse<T>` — o app já consome via `Pagina.fromJson`
+

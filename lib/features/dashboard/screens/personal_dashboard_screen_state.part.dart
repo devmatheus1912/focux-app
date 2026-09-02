@@ -252,9 +252,8 @@ class _PersonalDashboardScreenState
       _applyFinanceData(home.financeiro);
     } catch (e) {
       if (!mounted) return;
-      // Entitlement ≠ outage — Home já mostra locked/upsell; sem snackbar.
-      // Cobre cota atingida também, que igualmente não é indisponibilidade.
-      if (isEntitlementError(e)) return;
+      // Gate/cota ≠ outage — Home já mostra locked/upsell; sem snackbar.
+      if (isPlanRestrictionError(e)) return;
       FeedbackHelper.showWarn(context, friendlyError(e));
     }
   }
