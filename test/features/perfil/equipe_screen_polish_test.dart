@@ -21,6 +21,7 @@ void main() {
     expect(screen, contains('FeatureGate'));
     expect(screen, contains('equipeRbac'));
     expect(screen, contains('ShellHeaderIconButton'));
+    expect(screen, isNot(contains('onTap: () {}')));
     expect(screen, isNot(contains('TabBar')));
     expect(screen, isNot(contains('TabBarView')));
     expect(screen, isNot(contains('DropdownButton')));

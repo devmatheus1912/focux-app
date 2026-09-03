@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
+import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feature_gate.dart';
@@ -13,7 +14,6 @@ import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_form_sheet.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_settings_group.dart';
-import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../alunos/widgets/aluno_inset_form_field.dart';
@@ -146,6 +146,7 @@ class _EquipeScreenState extends ConsumerState<EquipeScreen> {
   }
 
   Widget _buildBody() {
+    final chrome = ShellChrome.of(context);
     return RefreshIndicator(
       onRefresh: _load,
       child: ListView(
@@ -170,16 +171,41 @@ class _EquipeScreenState extends ConsumerState<EquipeScreen> {
               caption: 'Papel e status de cada convite.',
               children: [
                 for (var i = 0; i < _membros.length; i++)
-                  FxSettingsTile(
-                    fxIcon: 'users',
-                    label: _membros[i].userEmail,
-                    subtitle: equipeMembroSubtitle(
-                      role: _membros[i].role,
-                      status: _membros[i].status,
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: TokensStrip.s3,
                     ),
-                    value: equipeStatusLabel(_membros[i].status),
-                    showDivider: i != _membros.length - 1,
-                    onTap: () {},
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                _membros[i].userEmail,
+                                style: FxSettingsLayout.rowLabel(
+                                  color: chrome.ink,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                equipeMembroSubtitle(
+                                  role: _membros[i].role,
+                                  status: _membros[i].status,
+                                ),
+                                style: FxSettingsLayout.subhead(
+                                  color: chrome.mute,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Text(
+                          equipeStatusLabel(_membros[i].status),
+                          style: FxSettingsLayout.rowValue(color: chrome.mute),
+                        ),
+                      ],
+                    ),
                   ),
               ],
             ),

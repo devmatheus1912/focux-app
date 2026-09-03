@@ -15,7 +15,7 @@ void main() {
     expect(screen, contains('SkeletonList'));
     expect(screen, contains('alertasConfigViewed'));
     expect(screen, isNot(contains('CircularProgressIndicator')));
-    expect(screen, isNot(contains('FxLiquidPrimaryButton')));
+    expect(screen, contains('DashboardHomeActionChip'));
     expect(screen, isNot(contains('Icons.calendar_month')));
   });
 }

@@ -5,15 +5,16 @@ import 'package:go_router/go_router.dart';
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/fx_settings_layout.dart';
+import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_settings_group.dart';
-import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
+import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/alertas_repository.dart';
 import '../widgets/alertas_config_help_sheet.dart';
@@ -151,7 +152,9 @@ class _AlertasConfigScreenState extends ConsumerState<AlertasConfigScreen> {
               message: _erro!,
               onRetry: _load,
             )
-            : ListView(
+            : Stack(
+              children: [
+                ListView(
               padding: const EdgeInsets.fromLTRB(
                 FxSettingsLayout.pageInset,
                 8,
@@ -192,23 +195,20 @@ class _AlertasConfigScreenState extends ConsumerState<AlertasConfigScreen> {
                     ),
                   ],
                 ),
-                const SizedBox(height: FxSettingsLayout.groupGap),
-                FxSettingsGroup(
-                  header: 'Aplicar',
-                  children: [
-                    FxSettingsTile(
-                      fxIcon: 'circle-check',
-                      label: _salvando
-                          ? 'Salvando…'
-                          : _dirty
-                          ? 'Salvar limiares'
-                          : 'Nada para salvar',
-                      value: '',
-                      showDivider: false,
-                      onTap: _dirty && !_salvando ? _salvar : () {},
+              ],
+            ),
+                if (_dirty)
+                  Positioned(
+                    right: TokensStrip.s4,
+                    bottom: TokensStrip.s4,
+                    child: DashboardHomeActionChip(
+                      label: _salvando ? 'Salvando…' : 'Salvar',
+                      accent: primary,
+                      isDark: isDark,
+                      enabled: !_salvando,
+                      onPressed: _salvar,
                     ),
-                  ],
-                ),
+                  ),
               ],
             ),
       ),

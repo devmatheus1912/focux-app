@@ -15,9 +15,10 @@ void main() {
     expect(screen, contains('AlunoInsetFormField'));
     expect(screen, contains('showFxConfirmSheet'));
     expect(screen, contains('showFxInsetPickerSheet'));
-    expect(screen, contains('ShellHeaderIconButton'));
+    expect(screen, contains('FxSettingsGroup'));
     expect(screen, contains('copySensitiveToClipboard'));
-    expect(screen, isNot(contains('FxLiquidPrimaryButton')));
+    expect(screen, contains('FxLiquidPrimaryButton'));
+    expect(screen, contains('bottomNavigationBar'));
     expect(screen, isNot(contains('FxLiquidSecondaryButton')));
     expect(screen, isNot(contains('showDialog')));
     expect(screen, isNot(contains('ListTile(')));
