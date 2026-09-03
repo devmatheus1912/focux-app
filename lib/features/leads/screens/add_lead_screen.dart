@@ -6,7 +6,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/fx_settings_layout.dart';
-import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
@@ -14,6 +13,7 @@ import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_inset_picker_sheet.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
@@ -66,6 +66,28 @@ class _AddLeadScreenState extends ConsumerState<AddLeadScreen> {
         ),
       ],
     );
+  }
+
+  bool get _dirty =>
+      _nome.text.trim().isNotEmpty ||
+      _telefone.text.trim().isNotEmpty ||
+      _objetivo.text.trim().isNotEmpty ||
+      _observacoes.text.trim().isNotEmpty ||
+      _origem != null;
+
+  bool get _canSubmit => _nome.text.trim().isNotEmpty && !_saving;
+
+  Future<void> _cancel() async {
+    if (_dirty) {
+      final ok = await showFxConfirmSheet(
+        context,
+        title: 'Descartar cadastro?',
+        message: 'O que você preencheu não será salvo.',
+        confirmLabel: 'Descartar',
+      );
+      if (!ok || !mounted) return;
+    }
+    safePopOrGo(context, '/leads');
   }
 
   Future<void> _abrirOrigem() async {
@@ -140,41 +162,70 @@ class _AddLeadScreenState extends ConsumerState<AddLeadScreen> {
       appBar: FxShellAppBar(
         title: 'Novo Lead',
         subtitle: leadNovoHubSubtitle(),
-        onBack: () => safePopOrGo(context, '/leads'),
+        leadingWidth: 92,
+        leading: TextButton(
+          onPressed: _cancel,
+          style: TextButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            minimumSize: Size.zero,
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          ),
+          child: const Text('Cancelar'),
+        ),
         actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: TokensStrip.s3),
-            child: Center(
-              child: Semantics(
-                button: true,
-                label: _saving ? 'Salvando lead' : leadSalvarTooltip(),
-                child: ShellHeaderIconButton(
-                  icon: 'circle-check',
-                  tooltip: leadSalvarTooltip(),
-                  onTap: _saving ? () {} : _salvar,
-                ),
-              ),
-            ),
+          FxHelpIconButton(
+            tooltip: 'Como cadastrar um lead',
+            onTap: _showHelp,
           ),
         ],
       ),
-      body: FxContentWidthLimiter(
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            padding: const EdgeInsets.fromLTRB(
-              FxSettingsLayout.pageInset,
-              8,
-              FxSettingsLayout.pageInset,
-              32,
-            ),
-            children: [
-              FxSettingsGroup(
-                header: 'Prospect',
-                caption: 'Nome é obrigatório. O restante ajuda no follow-up.',
-                helpTooltip: 'Como cadastrar um lead',
-                onHelpTap: _showHelp,
-                children: [
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(
+            FxSettingsLayout.pageInset,
+            TokensStrip.s2,
+            FxSettingsLayout.pageInset,
+            TokensStrip.s3,
+          ),
+          child: ListenableBuilder(
+            listenable: _nome,
+            builder: (context, _) {
+              return Semantics(
+                button: true,
+                enabled: _canSubmit,
+                label:
+                    _canSubmit
+                        ? (_saving ? 'Salvando lead' : leadSalvarTooltip())
+                        : 'Salvar. Informe o nome para habilitar',
+                child: FxLiquidPrimaryButton(
+                  label: 'Salvar',
+                  loading: _saving,
+                  loadingLabel: 'Salvando…',
+                  onPressed: _canSubmit ? _salvar : null,
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+      body: SafeArea(
+        bottom: false,
+        child: FxContentWidthLimiter(
+          child: Form(
+            key: _formKey,
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(
+                FxSettingsLayout.pageInset,
+                8,
+                FxSettingsLayout.pageInset,
+                24,
+              ),
+              children: [
+                FxSettingsGroup(
+                  header: 'Prospect',
+                  caption: 'Nome é obrigatório. O restante ajuda no follow-up.',
+                  children: [
                   AlunoInsetFormField(
                     controller: _nome,
                     label: 'Nome',
@@ -231,5 +282,6 @@ class _AddLeadScreenState extends ConsumerState<AddLeadScreen> {
         ),
       ),
     ),
-  );
+  ),
+);
 }
