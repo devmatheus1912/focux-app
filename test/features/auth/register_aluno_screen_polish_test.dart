@@ -24,6 +24,8 @@ void main() {
     expect(screen, contains('authUnfocusAndLeave'));
     expect(screen, contains('authUnfocusAndGo'));
     expect(screen, contains('AutofillHints.email'));
+    expect(screen, contains('mapRegisterAlunoError'));
+    expect(screen, contains('ProductEvents.signupSuccess'));
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(16));
   });
 }

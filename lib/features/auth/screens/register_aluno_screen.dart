@@ -1,17 +1,22 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/analytics/analytics_service.dart';
 import '../../../core/brand/focux_brand_copy.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
+import '../../../core/theme/hero_teal.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_conversion.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_input_deco.dart';
 import '../providers/auth_provider.dart';
+import '../utils/auth_error_messages.dart';
 import '../widgets/auth_shell.dart';
 import '../widgets/password_strength_meter.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
@@ -81,12 +86,24 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen> {
           );
       if (mounted) {
         HapticFeedback.heavyImpact();
+        unawaited(
+          AnalyticsService.instance.track(
+            ProductEvents.signupSuccess,
+            props: {'role': 'aluno', 'method': 'convite'},
+          ),
+        );
         context.go('/dashboard/aluno');
       }
     } catch (e) {
       HapticFeedback.heavyImpact();
+      unawaited(
+        AnalyticsService.instance.track(
+          ProductEvents.signupFailure,
+          props: {'role': 'aluno', 'method': 'convite'},
+        ),
+      );
       setState(() {
-        _error = 'Erro ao criar conta. Verifique o código de convite.';
+        _error = mapRegisterAlunoError(e);
       });
     } finally {
       if (mounted) {
@@ -186,17 +203,12 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen> {
                               const SizedBox(height: TokensStrip.s4),
                               Text(
                                 'Ativar conta',
-                                style: authPageTitleStyle(
-                                  context,
-                                  color: Colors.white,
-                                ),
+                                style: authPageTitleStyle(context),
                               ),
                               const SizedBox(height: TokensStrip.s2),
                               Text(
                                 'Use o código que seu personal enviou e crie sua senha.',
-                                style: authSubtitleStyle(
-                                  color: Colors.white.withValues(alpha: 0.78),
-                                ),
+                                style: authSubtitleStyle(),
                               ),
                               if (widget.personalSlug != null) ...[
                                 const SizedBox(height: TokensStrip.s3),
@@ -296,7 +308,7 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen> {
                                     _senhaVisivel
                                         ? Icons.visibility_off_outlined
                                         : Icons.visibility_outlined,
-                                    color: Colors.white.withValues(alpha: 0.72),
+                                    color: heroTealSurface(0.82),
                                     size: 18,
                                   ),
                                 ),
@@ -311,7 +323,13 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen> {
                               ],
                               if (_error != null) ...[
                                 const SizedBox(height: 10),
-                                Text(_error!, style: authInlineErrorStyle()),
+                                Semantics(
+                                  liveRegion: true,
+                                  child: Text(
+                                    _error!,
+                                    style: authInlineErrorStyle(),
+                                  ),
+                                ),
                               ],
                               const SizedBox(height: 22),
                               FxLiquidPrimaryButton(

@@ -52,11 +52,13 @@ extension on _EsqueciSenhaScreenState {
     HapticFeedback.mediumImpact();
 
     try {
-      await ref.read(authRepositoryProvider).solicitarResetSenha(
-        email: _emailController.text.trim(),
-        isAluno: _isAluno,
-        personalSlug: _isAluno ? _personalSlug : null,
-      );
+      await ref
+          .read(authRepositoryProvider)
+          .solicitarResetSenha(
+            email: _emailController.text.trim(),
+            isAluno: _isAluno,
+            personalSlug: _isAluno ? _personalSlug : null,
+          );
 
       if (!mounted) {
         return;
@@ -67,6 +69,12 @@ extension on _EsqueciSenhaScreenState {
           email: _emailController.text.trim(),
           isAluno: _isAluno,
           personalSlug: _personalSlug,
+        ),
+      );
+      unawaited(
+        AnalyticsService.instance.track(
+          ProductEvents.passwordResetRequested,
+          props: {'role': _isAluno ? 'aluno' : 'personal'},
         ),
       );
     } catch (error) {

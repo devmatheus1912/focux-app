@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/analytics/analytics_service.dart';
 import '../../../core/theme/hero_teal.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';

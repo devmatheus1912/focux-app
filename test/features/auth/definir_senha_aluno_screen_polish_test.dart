@@ -18,6 +18,9 @@ void main() {
     expect(screen, contains('minLength: kDefinirSenhaMinLength'));
     expect(screen, isNot(contains('FxSettingsTile')));
     expect(screen, isNot(contains('ScaleTransition')));
+    expect(screen, contains('keyboardDismissBehavior'));
+    expect(screen, contains('authUnfocusAndLeave'));
+    expect(screen, contains('AutofillHints.newPassword'));
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(4));
   });
 }

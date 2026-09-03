@@ -9,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import '../../../core/brand/focux_brand_copy.dart';
+import '../../../core/analytics/analytics_service.dart';
 import '../../../core/config/env.dart';
 import '../../../core/legal/focux_legal.dart';
 import '../../../core/theme/focux_hub_typography.dart';

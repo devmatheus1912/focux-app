@@ -73,6 +73,10 @@ class ProductEvents {
 
   static const loginSuccess = 'login_success';
   static const loginFailure = 'login_failure';
+  static const signupSuccess = 'signup_success';
+  static const signupFailure = 'signup_failure';
+  static const passwordResetRequested = 'password_reset_requested';
+  static const passwordResetCompleted = 'password_reset_completed';
 
   static const paywallOpened = 'paywall_opened';
   static const paywallPlanSelected = 'paywall_plan_selected';
