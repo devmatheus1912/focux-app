@@ -36,12 +36,20 @@ extension on _DefinirSenhaAlunoScreenState {
     });
     HapticFeedback.mediumImpact();
     try {
-      await ref.read(authProvider.notifier).definirSenhaDefinitivaAluno(
-        _senhaAtualCtrl.text,
-        _novaSenhaCtrl.text,
-      );
+      await ref
+          .read(authProvider.notifier)
+          .definirSenhaDefinitivaAluno(
+            _senhaAtualCtrl.text,
+            _novaSenhaCtrl.text,
+          );
       if (!mounted) return;
       HapticFeedback.heavyImpact();
+      unawaited(
+        AnalyticsService.instance.track(
+          ProductEvents.passwordDefined,
+          props: {'role': 'aluno'},
+        ),
+      );
       context.go('/aluno/ativacao');
     } catch (error) {
       HapticFeedback.heavyImpact();
