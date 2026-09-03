@@ -178,6 +178,9 @@ void main() {
     );
     expect(screen, contains('copySensitiveToClipboard'));
     expect(screen, contains("'Criar tarefa'"));
+    expect(screen, contains('TextButton'));
+    expect(screen, isNot(contains("label: 'Criar tarefa'")));
+    expect(screen, isNot(contains("label: 'Concluir'")));
     expect(screen, contains("'Copiar mensagem'"));
     expect(screen, contains("'Mensagem sugerida'"));
     expect(screen, contains("'Abrir chat'"));

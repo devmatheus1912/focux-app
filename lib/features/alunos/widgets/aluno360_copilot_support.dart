@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/brand/focux_microcopy.dart';
+import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_loading.dart';
@@ -165,74 +166,94 @@ class _Aluno360CopilotActionRowState
       return const SizedBox.shrink();
     }
 
-    final tiles = <Widget>[];
+    final children = <Widget>[];
+    void add(Widget child) {
+      if (children.isNotEmpty) {
+        children.add(const SizedBox(height: FxSettingsLayout.groupGap));
+      }
+      children.add(child);
+    }
+
     if (!hidePrimary) {
       if (hasTask) {
         if (widget.existingTask != null) {
-          tiles.add(
-            FxSettingsTile(
-              icon: Icons.check_circle_outline_rounded,
-              label: 'Concluir',
-              subtitle: 'Marcar a tarefa do copiloto como feita',
-              value: '',
-              accent: widget.primary,
-              showDivider: true,
+          add(
+            _commandButton(
+              label: _completing ? 'Concluindo...' : 'Concluir',
               semanticsLabel: 'Concluir tarefa do copiloto',
-              accessory:
-                  _completing
-                      ? const FxLoading(size: 18, strokeWidth: 2)
-                      : null,
-              onTap: _completing ? null : _completeOpenTask,
+              loading: _completing,
+              onPressed: _completing ? null : _completeOpenTask,
             ),
           );
         }
-        tiles.add(
+        add(
           FxSettingsTile(
             icon: Icons.open_in_new_rounded,
             label: FocuxMicrocopy.commandCenter,
             subtitle: 'Abrir a fila de ações',
             value: '',
             accent: widget.primary,
-            showDivider: !widget.hideChatCta,
+            showDivider: false,
             semanticsLabel: 'Abrir ${FocuxMicrocopy.commandCenter}',
             onTap: _handlePrimary,
           ),
         );
       } else {
-        tiles.add(
-          FxSettingsTile(
-            icon: Icons.task_alt_rounded,
+        add(
+          _commandButton(
             label: _creating ? 'Criando...' : 'Criar tarefa',
-            subtitle: 'Mandar para o ${FocuxMicrocopy.commandCenter}',
-            value: '',
-            accent: widget.primary,
-            highlight: true,
-            showDivider: !widget.hideChatCta,
-            accessory:
-                _creating ? const FxLoading(size: 18, strokeWidth: 2) : null,
-            onTap: _creating ? null : _handlePrimary,
+            loading: _creating,
+            onPressed: _creating ? null : _handlePrimary,
           ),
         );
       }
     }
     if (!widget.hideChatCta) {
-      tiles.add(
-        FxSettingsTile(
-          icon: Icons.chat_bubble_outline,
+      add(
+        _commandButton(
           label: 'Abrir chat',
-          subtitle: 'Mensagem sugerida com ${widget.aluno.nome}',
-          value: '',
-          accent: widget.primary,
-          showDivider: false,
           semanticsLabel: 'Abrir chat com ${widget.aluno.nome}',
-          onTap: () => widget.onPrepareMessage(widget.acao),
+          onPressed: () => widget.onPrepareMessage(widget.acao),
         ),
       );
     }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: tiles,
+      children: children,
+    );
+  }
+
+  Widget _commandButton({
+    required String label,
+    required VoidCallback? onPressed,
+    String? semanticsLabel,
+    bool loading = false,
+  }) {
+    return Semantics(
+      button: true,
+      label: semanticsLabel ?? label,
+      child: TextButton(
+        onPressed: onPressed,
+        style: TextButton.styleFrom(
+          minimumSize: const Size(
+            FxSettingsLayout.rowMinHeight,
+            FxSettingsLayout.rowMinHeight,
+          ),
+          alignment: Alignment.centerLeft,
+        ),
+        child:
+            loading
+                ? Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    FxLoading(size: 18, strokeWidth: 2, color: widget.primary),
+                    const SizedBox(width: FxSettingsLayout.iconGap),
+                    Text(label),
+                  ],
+                )
+                : Text(label),
+      ),
     );
   }
 }
