@@ -174,13 +174,11 @@ class _TreinoActionsSheet extends StatelessWidget {
           TreinoInsetActionSpec(
             icon: Icons.person_add_alt_1_rounded,
             label: 'Atribuir a um aluno',
-            showChevron: true,
             onTap: () => Navigator.pop(context, _TreinoAction.assign),
           ),
           TreinoInsetActionSpec(
             icon: Icons.assignment_ind_rounded,
             label: 'Copiar para aluno',
-            showChevron: true,
             onTap: () => Navigator.pop(context, _TreinoAction.clone),
           ),
         ],

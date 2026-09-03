@@ -23,9 +23,23 @@ void main() {
     ].join('\n');
 
     expect(screen, contains('showFxHomeSheet'));
-    expect(screen, contains('SingleChildScrollView'));
+    expect(screen, contains('ListView.separated'));
     expect(screen, contains('maxHeight: maxHeight'));
     expect(screen, contains('Atribuir a um aluno'));
+    expect(
+      File(
+        'lib/features/treinos/screens/treinos_list_sheets.part.dart',
+      ).readAsStringSync(),
+      contains('showChevron: true'),
+    );
+    expect(
+      'showChevron: true'.allMatches(
+        File(
+          'lib/features/treinos/screens/treinos_list_sheets.part.dart',
+        ).readAsStringSync(),
+      ).length,
+      1,
+    );
     expect(screen, contains('control_point_duplicate_rounded'));
     expect(screen, contains('assignment_ind_rounded'));
     expect(screen, contains('displayWorkoutName(treino.nome)'));
