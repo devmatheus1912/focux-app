@@ -6,10 +6,10 @@ import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_input_deco.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_toggle_chip.dart';
-import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../data/enums.dart';
 import '../data/exercicio_taxonomy_labels.dart';
 
@@ -264,14 +264,9 @@ class _AddExercicioFiltersSheetState extends State<_AddExercicioFiltersSheet> {
             ),
           ),
           const SizedBox(height: 10),
-          Align(
-            alignment: AlignmentDirectional.centerEnd,
-            child: DashboardHomeActionChip(
-              label: 'Aplicar',
-              accent: primary,
-              isDark: widget.isDark,
-              onPressed: _apply,
-            ),
+          FxLiquidPrimaryButton(
+            label: 'Aplicar',
+            onPressed: _apply,
           ),
         ],
       ),

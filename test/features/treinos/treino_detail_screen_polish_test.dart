@@ -91,6 +91,12 @@ void main() {
     expect(screen, contains('FxSettingsGroup'));
     expect(screen, contains('treino_inset_sheet.dart'));
     expect(screen, contains('TreinoInsetActionSheet'));
+    final inset = File(
+      'lib/features/treinos/widgets/treino_inset_sheet.dart',
+    ).readAsStringSync();
+    expect(inset, contains('ElevatedButton'));
+    expect(inset, contains('child: Text(confirmLabel)'));
+    expect(inset, isNot(contains('label: confirmLabel')));
     expect(screen, isNot(contains('_DetailActionTile')));
     expect(screen, isNot(contains('_TreinoHeroActions')));
     expect(screen, contains('FxEmptyState'));

@@ -18,7 +18,7 @@ import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_form_sheet.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
-import '../../../core/widgets/fx_settings_tile.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../features/auth/providers/auth_provider.dart';
@@ -189,24 +189,21 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
                         ? 'O que você quer fazer agora?'
                         : alerta.motivos.first,
               ),
-              FxSettingsTile(
-                fxIcon: 'message-circle',
+              const SizedBox(height: TokensStrip.s3),
+              FxLiquidPrimaryButton(
                 label: 'Enviar mensagem',
-                value: '',
-                onTap: () {
+                onPressed: () {
                   Navigator.pop(sheetContext);
                   _enviarMensagemChat(alerta);
                 },
               ),
-              FxSettingsTile(
-                fxIcon: 'circle-check',
-                label: alertaAdiarCtaLabel(),
-                value: '',
-                showDivider: false,
-                onTap: () {
+              const SizedBox(height: TokensStrip.s2),
+              TextButton(
+                onPressed: () {
                   Navigator.pop(sheetContext);
                   _resolverAlerta(alerta);
                 },
+                child: Text(alertaAdiarCtaLabel()),
               ),
             ],
           ),

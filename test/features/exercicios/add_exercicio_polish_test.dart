@@ -19,6 +19,11 @@ void main() {
     expect(screen, isNot(contains('DropdownButtonFormField')));
     expect(screen, isNot(contains('_EnumPicker')));
     expect(screen, contains('showAddExercicioFiltersSheet'));
+    final filters = File(
+      'lib/features/exercicios/widgets/add_exercicio_filters_sheet.dart',
+    ).readAsStringSync();
+    expect(filters, contains('FxLiquidPrimaryButton'));
+    expect(filters, isNot(contains('DashboardHomeActionChip')));
     expect(screen, contains('showAddExercicioEnumPicker'));
     expect(screen, contains('exercicioId'));
     expect(screen, contains('S.of(context)'));
