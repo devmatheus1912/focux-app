@@ -17,6 +17,8 @@ void main() {
     expect(screen, contains('RefreshIndicator'));
     expect(screen, contains('FxHubFreshness.fromFetchedAt'));
     expect(screen, contains('showFxFormSheet'));
+    expect(screen, contains('FxSatelliteListTile'));
+    expect(screen, contains('DashboardSectionHeader'));
     expect(screen, contains('FxSettingsGroup'));
     expect(screen, contains('FeatureGate'));
     expect(screen, contains('comunidadeGrupos'));
@@ -25,7 +27,7 @@ void main() {
     expect(screen, isNot(contains('TabBarView')));
     expect(screen, isNot(contains('DropdownButton')));
     expect(screen, isNot(contains('FloatingActionButton')));
-    expect(screen, isNot(contains('FxSatelliteListTile')));
+    expect(screen, contains('FxSatelliteListTile'));
     expect(screen, isNot(contains(r'showError(context, $e)')));
   });
 }
