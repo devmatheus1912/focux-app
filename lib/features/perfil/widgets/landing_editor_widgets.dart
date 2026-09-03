@@ -308,13 +308,6 @@ class LandingChecklistCard extends StatelessWidget {
                                 ),
                               )
                               : null,
-                      trailing:
-                          tappable
-                              ? Icon(
-                                Icons.chevron_right_rounded,
-                                color: scheme.onSurface.withValues(alpha: 0.35),
-                              )
-                              : null,
                     ),
                   );
                 }),
@@ -470,8 +463,6 @@ Future<void> showLandingContentReviewSheet(
   required ValueChanged<LandingContentIssue> onIssueTap,
   VoidCallback? onFocusMode,
 }) {
-  final scheme = Theme.of(context).colorScheme;
-
   return showFxHomeSheet<void>(
     context,
     builder: (ctx) {
@@ -525,10 +516,6 @@ Future<void> showLandingContentReviewSheet(
                     leading: Icon(
                       Icons.warning_amber_rounded,
                       color: EagleTokens.landingWarnIcon,
-                    ),
-                    trailing: Icon(
-                      Icons.chevron_right_rounded,
-                      color: scheme.onSurface.withValues(alpha: 0.35),
                     ),
                     onTap: () {
                       Navigator.pop(ctx);

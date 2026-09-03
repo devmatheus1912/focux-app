@@ -66,7 +66,7 @@ class FxConversionTextLink extends StatelessWidget {
 
   final String text;
   final String actionText;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
   final Color? textColor;
   final Color? actionColor;
   final double fontSize;
@@ -75,8 +75,9 @@ class FxConversionTextLink extends StatelessWidget {
   Widget build(BuildContext context) {
     final primary = actionColor ?? Theme.of(context).colorScheme.primary;
     return Semantics(
-      link: true,
-      button: true,
+      link: onTap != null,
+      button: onTap != null,
+      enabled: onTap != null,
       label: '$text$actionText',
       child: ConstrainedBox(
         constraints: const BoxConstraints(minHeight: 48),

@@ -52,6 +52,7 @@ void main() {
     expect(screen, isNot(contains('FxLiquidPrimaryButton')));
     expect(shellWidgets, isNot(contains('FxLiquidPrimaryButton')));
     expect(shellWidgets, isNot(contains('chevron_right')));
+    expect(actionsPart, isNot(contains('chevron_right')));
     expect(shellWidgets, contains('IaCopilotPreviewCard'));
     expect(shellWidgets, contains('IaCopilotGenerationStatus'));
     expect(

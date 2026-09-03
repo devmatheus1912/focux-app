@@ -47,6 +47,7 @@ void main() {
     expect(screen, contains('_LiveBrandHero'));
     expect(screen, contains('_CuratedPaletteGrid'));
     expect(screen, contains('_LogoUploadRing'));
+    expect(screen, contains('FxLiquidPrimaryButton'));
     expect(screen, isNot(contains('OutlinedButton')));
     expect(screen, isNot(contains('Editor da landing (Enterprise)')));
   });

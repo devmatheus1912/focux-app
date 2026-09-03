@@ -24,7 +24,7 @@ class FxToggleChip extends StatelessWidget {
   final IconData? icon;
   final bool selected;
   final bool isDark;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
   final bool showCheckmark;
   final bool filledWhenSelected;
   final bool expanded;
@@ -38,16 +38,19 @@ class FxToggleChip extends StatelessWidget {
     final fg = filledWhenSelected && selected ? Colors.white : (selected ? action : ink);
 
     return Semantics(
-      button: true,
+      button: onTap != null,
       selected: selected,
       label: selected ? '$label, selecionado' : label,
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () {
-            HapticFeedback.selectionClick();
-            onTap();
-          },
+          onTap:
+              onTap == null
+                  ? null
+                  : () {
+                    HapticFeedback.selectionClick();
+                    onTap!();
+                  },
           borderRadius: BorderRadius.circular(TokensStrip.rSm),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 160),

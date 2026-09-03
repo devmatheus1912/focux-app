@@ -134,7 +134,7 @@ class _FeedComposerSheetState extends State<_FeedComposerSheet> {
                       label: 'Tipo de post',
                       value: feedTipoLabel(_tipoSelecionado),
                       picker: true,
-                      onTap: _salvando ? () {} : _abrirTipo,
+                      onTap: _salvando ? null : _abrirTipo,
                     ),
                     AlunoInsetFormField(
                       controller: _tituloCtrl,
@@ -180,9 +180,10 @@ class _FeedComposerSheetState extends State<_FeedComposerSheet> {
                             _escolhendoMidia
                                 ? 'Abrindo…'
                                 : (_midiaSelecionada?.name ?? 'Galeria'),
+                        picker: true,
                         onTap:
                             _salvando || _escolhendoMidia
-                                ? () {}
+                                ? null
                                 : () => _escolherMidia(_tipoSelecionado),
                         showDivider: _midiaSelecionada != null,
                       ),
@@ -195,23 +196,29 @@ class _FeedComposerSheetState extends State<_FeedComposerSheet> {
                           showDivider: false,
                           onTap:
                               _salvando
-                                  ? () {}
+                                  ? null
                                   : () => setState(() => _midiaSelecionada = null),
                         ),
                     ],
                   ),
                 ],
                 const SizedBox(height: TokensStrip.s3),
-                FxSettingsGroup(
-                  children: [
-                    FxSettingsTile(
-                      fxIcon: 'circle-check',
-                      label: feedPublicarTileLabel(),
-                      value: _salvando ? 'Publicando…' : 'Confirmar',
-                      showDivider: false,
-                      onTap: _salvando ? () {} : _publicar,
+                SizedBox(
+                  height: 52,
+                  child: ElevatedButton(
+                    onPressed: _salvando ? null : _publicar,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).colorScheme.primary,
+                      foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(TokensStrip.rButton),
+                      ),
                     ),
-                  ],
+                    child: Text(
+                      _salvando ? 'Publicando…' : feedPublicarTileLabel(),
+                    ),
+                  ),
                 ),
               ],
             ),

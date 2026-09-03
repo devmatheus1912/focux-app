@@ -421,10 +421,11 @@ class _SlotTile extends StatelessWidget {
       label: slot.label,
       subtitle: done ? 'Adicionado ao treino' : 'Escolher exercício',
       value: '',
+      picker: true,
       showDivider: showDivider,
       onTap:
           saving
-              ? () {}
+              ? null
               : () => showFxBottomSheet(
                 context: context,
                 builder:

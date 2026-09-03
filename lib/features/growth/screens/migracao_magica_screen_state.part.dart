@@ -213,7 +213,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                       isDark: isDark,
                       showCheckmark: true,
                       onTap: _captureBusy
-                          ? () {}
+                          ? null
                           : () => setState(() => _fonte = fonte),
                     ),
                 ],
