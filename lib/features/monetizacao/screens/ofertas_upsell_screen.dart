@@ -12,17 +12,14 @@ import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
-import '../../../core/widgets/fx_form_sheet.dart';
-import '../../../core/widgets/fx_inset_picker_row.dart';
-import '../../../core/widgets/fx_inset_picker_sheet.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
-import '../../../features/alunos/widgets/aluno_inset_form_field.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/upsell_repository.dart';
 import '../utils/oferta_upsell_display.dart';
+import '../widgets/oferta_upsell_editor.dart';
 
 final upsellRepositoryProvider = Provider(
   (ref) => UpsellRepository(ref.read(apiClientProvider)),
@@ -72,105 +69,54 @@ class _OfertasUpsellScreenState extends ConsumerState<OfertasUpsellScreen> {
     }
   }
 
-  Future<void> _criar() async {
+  Future<void> _abrirEditor({OfertaUpsell? existing}) async {
     HapticFeedback.selectionClick();
-    final tituloCtrl = TextEditingController();
-    final descricaoCtrl = TextEditingController();
-    final valorCtrl = TextEditingController();
-    var tipoGatilho = 'MANUAL';
-    var created = false;
-
-    try {
-      if (!mounted) return;
-      final ok = await showFxFormSheet(
-        context,
-        title: 'Nova oferta',
-        subtitle: 'Dispara no gatilho que você escolher.',
-        icon: Icons.local_offer_outlined,
-        confirmLabel: 'Criar oferta',
-        child: StatefulBuilder(
-          builder:
-              (ctx, setDialogState) => Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  AlunoInsetFormField(
-                    controller: tituloCtrl,
-                    label: 'Título',
-                    icon: Icons.title_outlined,
-                  ),
-                  AlunoInsetFormField(
-                    controller: descricaoCtrl,
-                    label: 'Descrição',
-                    icon: Icons.notes_outlined,
-                    maxLines: 2,
-                  ),
-                  AlunoInsetFormField(
-                    controller: valorCtrl,
-                    label: 'Valor (R\$)',
-                    icon: Icons.payments_outlined,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                  ),
-                  FxInsetPickerRow(
-                    icon: Icons.bolt_outlined,
-                    label: 'Gatilho',
-                    value: ofertaGatilhoLabel(tipoGatilho),
-                    showDivider: false,
-                    onTap: () async {
-                      final picked = await showFxInsetPickerSheet<String>(
-                        ctx,
-                        title: 'Gatilho',
-                        selected: tipoGatilho,
-                        items: [
-                          for (final value in ofertaGatilhoValues)
-                            FxInsetPickerSheetItem(
-                              value: value,
-                              label: ofertaGatilhoLabel(value),
-                            ),
-                        ],
-                      );
-                      if (picked == null) return;
-                      setDialogState(() => tipoGatilho = picked);
-                    },
-                  ),
-                ],
-              ),
-        ),
-      );
-      if (ok != true) return;
-      final valor = double.tryParse(valorCtrl.text.replaceAll(',', '.'));
-      if (tituloCtrl.text.trim().isEmpty || valor == null || valor <= 0) {
-        if (mounted) {
-          FeedbackHelper.showError(context, 'Preencha título e valor válido');
-        }
-        return;
-      }
-      await ref
-          .read(upsellRepositoryProvider)
-          .criar(
-            titulo: tituloCtrl.text.trim(),
-            descricao: descricaoCtrl.text.trim(),
-            valor: valor,
-            tipoGatilho: tipoGatilho,
-          );
-      created = true;
+    if (!mounted) return;
+    final result = await showOfertaUpsellEditor(context, existing: existing);
+    if (!result.submitted) return;
+    final draft = result.draft;
+    if (draft == null) {
       if (mounted) {
-        FeedbackHelper.showSuccess(context, 'Oferta criada');
+        FeedbackHelper.showError(context, 'Preencha título e valor válido');
       }
+      return;
+    }
+    try {
+      final repo = ref.read(upsellRepositoryProvider);
+      if (existing == null) {
+        await repo.criar(
+          titulo: draft.titulo,
+          descricao: draft.descricao,
+          valor: draft.valor,
+          tipoGatilho: draft.tipoGatilho,
+        );
+        if (mounted) FeedbackHelper.showSuccess(context, 'Oferta criada');
+      } else {
+        await repo.atualizar(
+          id: existing.id,
+          titulo: draft.titulo,
+          descricao: draft.descricao,
+          valor: draft.valor,
+          tipoGatilho: draft.tipoGatilho,
+          ativo: draft.ativo,
+        );
+        if (mounted) FeedbackHelper.showSuccess(context, 'Oferta atualizada');
+      }
+      await _load();
     } catch (e) {
       if (mounted) {
         FeedbackHelper.showError(
           context,
-          friendlyError(e, fallback: 'Erro ao criar oferta'),
+          friendlyError(
+            e,
+            fallback:
+                existing == null
+                    ? 'Erro ao criar oferta'
+                    : 'Erro ao salvar oferta',
+          ),
         );
       }
-    } finally {
-      tituloCtrl.dispose();
-      descricaoCtrl.dispose();
-      valorCtrl.dispose();
     }
-    if (created) await _load();
   }
 
   @override
@@ -191,7 +137,7 @@ class _OfertasUpsellScreenState extends ConsumerState<OfertasUpsellScreen> {
             ShellHeaderIconButton(
               icon: 'plus',
               tooltip: 'Nova oferta',
-              onTap: _criar,
+              onTap: () => _abrirEditor(),
             ),
           ],
         ),
@@ -215,6 +161,9 @@ class _OfertasUpsellScreenState extends ConsumerState<OfertasUpsellScreen> {
   }
 
   Widget _buildBody() {
+    final ativas = _ofertas.where((o) => o.ativo).toList();
+    final pausadas = _ofertas.where((o) => !o.ativo).toList();
+
     return RefreshIndicator(
       onRefresh: _load,
       child:
@@ -232,14 +181,17 @@ class _OfertasUpsellScreenState extends ConsumerState<OfertasUpsellScreen> {
                 children: [
                   FxEmptyState(
                     icon: 'spark',
-                    title: 'Nenhuma oferta ativa',
+                    title: 'Nenhuma oferta ainda',
                     subtitle:
                         'Crie a primeira oferta. Ela aparece para o aluno no gatilho escolhido (manual, check-in ou trilha).',
-                    action: FxEmptyAction(label: 'Nova oferta', onTap: _criar),
+                    action: FxEmptyAction(
+                      label: 'Nova oferta',
+                      onTap: () => _abrirEditor(),
+                    ),
                   ),
                 ],
               )
-              : ListView.builder(
+              : ListView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 keyboardDismissBehavior:
                     ScrollViewKeyboardDismissBehavior.onDrag,
@@ -249,33 +201,50 @@ class _OfertasUpsellScreenState extends ConsumerState<OfertasUpsellScreen> {
                   FxSettingsLayout.pageInset,
                   TokensStrip.s6,
                 ),
-                itemCount: _ofertas.length + 1,
-                itemBuilder: (context, i) {
-                  if (i == 0) {
-                    return const Padding(
-                      padding: EdgeInsets.only(bottom: TokensStrip.s3),
-                      child: DashboardSectionHeader(title: 'Ativas'),
-                    );
-                  }
-                  final oferta = _ofertas[i - 1];
-                  return FxSatelliteListTile(
-                    title: oferta.titulo,
-                    subtitle: Text(
-                      ofertaSubtitle(
-                        tipoGatilho: oferta.tipoGatilho,
-                        descricao: oferta.descricao,
+                children: [
+                  if (ativas.isNotEmpty) ...[
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: TokensStrip.s3),
+                      child: DashboardSectionHeader(
+                        title: ofertaSectionTitle(ativo: true),
                       ),
                     ),
-                    trailing: Text(
-                      ofertaValorLabel(oferta.valor),
-                      style: FocuxHubTypography.bodyMuted(
-                        color: fxScreenMute(context),
-                        fontWeight: FontWeight.w700,
+                    for (final oferta in ativas) _tile(oferta),
+                  ],
+                  if (pausadas.isNotEmpty) ...[
+                    Padding(
+                      padding: EdgeInsets.only(
+                        top: ativas.isEmpty ? 0 : TokensStrip.s4,
+                        bottom: TokensStrip.s3,
+                      ),
+                      child: DashboardSectionHeader(
+                        title: ofertaSectionTitle(ativo: false),
                       ),
                     ),
-                  );
-                },
+                    for (final oferta in pausadas) _tile(oferta),
+                  ],
+                ],
               ),
+    );
+  }
+
+  Widget _tile(OfertaUpsell oferta) {
+    return FxSatelliteListTile(
+      title: oferta.titulo,
+      subtitle: Text(
+        ofertaSubtitle(
+          tipoGatilho: oferta.tipoGatilho,
+          descricao: oferta.descricao,
+        ),
+      ),
+      trailing: Text(
+        ofertaValorLabel(oferta.valor),
+        style: FocuxHubTypography.bodyMuted(
+          color: fxScreenMute(context),
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+      onTap: () => _abrirEditor(existing: oferta),
     );
   }
 }

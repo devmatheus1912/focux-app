@@ -7,6 +7,7 @@ class OfertaUpsell {
   final String descricao;
   final double valor;
   final String tipoGatilho;
+  final bool ativo;
 
   OfertaUpsell({
     required this.id,
@@ -14,6 +15,7 @@ class OfertaUpsell {
     required this.descricao,
     required this.valor,
     required this.tipoGatilho,
+    this.ativo = true,
   });
 
   factory OfertaUpsell.fromJson(Map<String, dynamic> j) => OfertaUpsell(
@@ -22,6 +24,7 @@ class OfertaUpsell {
     descricao: j['descricao'] as String? ?? '',
     valor: (j['valor'] as num?)?.toDouble() ?? 0,
     tipoGatilho: j['tipoGatilho'] as String? ?? 'MANUAL',
+    ativo: j['ativo'] as bool? ?? true,
   );
 }
 
@@ -77,6 +80,31 @@ class UpsellRepository {
         'valor': valor,
         'tipoGatilho': tipoGatilho,
       },
+      options: ApiClient.idempotent(
+        'upsell-create-$titulo-$valor-$tipoGatilho',
+      ),
+    );
+    return OfertaUpsell.fromJson(r.data as Map<String, dynamic>);
+  }
+
+  Future<OfertaUpsell> atualizar({
+    required int id,
+    String? titulo,
+    String? descricao,
+    double? valor,
+    String? tipoGatilho,
+    bool? ativo,
+  }) async {
+    final r = await _dio.patch(
+      '/api/upsell/ofertas/$id',
+      data: {
+        if (titulo != null) 'titulo': titulo,
+        if (descricao != null) 'descricao': descricao,
+        if (valor != null) 'valor': valor,
+        if (tipoGatilho != null) 'tipoGatilho': tipoGatilho,
+        if (ativo != null) 'ativo': ativo,
+      },
+      options: ApiClient.idempotent('upsell-patch-$id'),
     );
     return OfertaUpsell.fromJson(r.data as Map<String, dynamic>);
   }
