@@ -3,8 +3,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
+import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feedback_helper.dart';
@@ -13,10 +15,9 @@ import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_inset_picker_sheet.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
-import '../../../core/widgets/fx_settings_group.dart';
-import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
+import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/captura_repository.dart';
 import '../utils/leads_publicos_display.dart';
@@ -159,47 +160,65 @@ class _LeadsPublicosScreenState extends ConsumerState<LeadsPublicosScreen> {
   }
 
   Widget _buildBody() {
+    final primary = Theme.of(context).colorScheme.primary;
     return RefreshIndicator(
       onRefresh: _carregar,
-      child: ListView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(
-          FxSettingsLayout.pageInset,
-          8,
-          FxSettingsLayout.pageInset,
-          32,
-        ),
-        children: [
-          if (_leads.isEmpty)
-            const FxEmptyState(
-              icon: 'users',
-              title: 'Nenhum lead ainda',
-              subtitle:
-                  'Compartilhe o link do seu storefront para começar a captar contatos.',
-            )
-          else
-            FxSettingsGroup(
-              header: 'Contatos captados',
-              caption: 'Toque para criar aluno ou marcar como convertido.',
-              children: [
-                for (var i = 0; i < _leads.length; i++)
-                  FxSettingsTile(
-                    fxIcon: leadPublicoFxIcon(_leads[i].convertido),
-                    label: leadPublicoNome(_leads[i].nome),
-                    subtitle: leadPublicoSubtitle(
-                      telefone: _leads[i].telefone,
-                      email: _leads[i].email,
-                      objetivo: _leads[i].objetivo,
-                    ),
-                    value: leadPublicoValue(_leads[i].convertido),
-                    highlight: !_leads[i].convertido,
-                    showDivider: i != _leads.length - 1,
-                    onTap: () => _abrirAcoes(_leads[i]),
-                  ),
+      child: _leads.isEmpty
+          ? ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.fromLTRB(
+                FxSettingsLayout.pageInset,
+                8,
+                FxSettingsLayout.pageInset,
+                32,
+              ),
+              children: const [
+                FxEmptyState(
+                  icon: 'users',
+                  title: 'Nenhum lead ainda',
+                  subtitle:
+                      'Compartilhe o link do seu storefront para começar a captar contatos.',
+                ),
               ],
+            )
+          : ListView.builder(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.fromLTRB(
+                FxSettingsLayout.pageInset,
+                TokensStrip.s3,
+                FxSettingsLayout.pageInset,
+                TokensStrip.s6,
+              ),
+              itemCount: _leads.length + 1,
+              itemBuilder: (context, i) {
+                if (i == 0) {
+                  return const Padding(
+                    padding: EdgeInsets.only(bottom: TokensStrip.s3),
+                    child: DashboardSectionHeader(title: 'Contatos captados'),
+                  );
+                }
+                final lead = _leads[i - 1];
+                return FxSatelliteListTile(
+                  title: leadPublicoNome(lead.nome),
+                  subtitle: Text(
+                    leadPublicoSubtitle(
+                      telefone: lead.telefone,
+                      email: lead.email,
+                      objetivo: lead.objetivo,
+                    ),
+                  ),
+                  trailing: Text(
+                    leadPublicoValue(lead.convertido),
+                    style: FocuxHubTypography.bodyMuted(
+                      color: fxScreenMute(context),
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  accent: lead.convertido ? null : primary,
+                  onTap: () => _abrirAcoes(lead),
+                );
+              },
             ),
-        ],
-      ),
     );
   }
 }
