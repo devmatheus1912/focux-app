@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -7,6 +8,7 @@ import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/utils/pt_br_display.dart';
+import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
@@ -14,10 +16,10 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/operational_metric_tile.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../alunos/utils/satellite_screen_utils.dart';
-import '../../auth/providers/auth_provider.dart';
 import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../data/financeiro_repository.dart';
 import '../utils/financeiro_hub_display.dart';
+import '../utils/mensalidade_surface_actions.dart';
 
 class FinanceiroMensalidadeDetailScreen extends ConsumerStatefulWidget {
   const FinanceiroMensalidadeDetailScreen({
@@ -38,6 +40,8 @@ class _FinanceiroMensalidadeDetailScreenState
     extends ConsumerState<FinanceiroMensalidadeDetailScreen> {
   Mensalidade? _mensalidade;
   var _loading = false;
+  var _paying = false;
+  var _changed = false;
   String? _erro;
 
   @override
@@ -55,9 +59,7 @@ class _FinanceiroMensalidadeDetailScreenState
       _erro = null;
     });
     try {
-      final loaded = await FinanceiroRepository(
-        ref.read(apiClientProvider),
-      ).buscar(widget.mensalidadeId);
+      final loaded = await mensalidadeRepo(ref).buscar(widget.mensalidadeId);
       if (!mounted) return;
       setState(() {
         _mensalidade = loaded;
@@ -75,52 +77,137 @@ class _FinanceiroMensalidadeDetailScreenState
   bool _pending(Mensalidade m) =>
       m.status == 'PENDENTE' || m.status == 'ATRASADO';
 
+  void _leave() {
+    if (!context.canPop()) return;
+    context.pop(_changed ? 'changed' : null);
+  }
+
+  void _apply(Mensalidade updated) {
+    setState(() {
+      _mensalidade = updated;
+      _changed = true;
+    });
+  }
+
+  Future<void> _pagar() async {
+    final m = _mensalidade;
+    if (m == null || _paying) return;
+    setState(() => _paying = true);
+    final updated = await confirmarPagarMensalidade(
+      context: context,
+      ref: ref,
+      m: m,
+    );
+    if (!mounted) return;
+    setState(() => _paying = false);
+    if (updated != null) _apply(updated);
+  }
+
+  Future<void> _editar() async {
+    final m = _mensalidade;
+    if (m == null) return;
+    final updated = await showEditarMensalidadeSheet(
+      context: context,
+      ref: ref,
+      m: m,
+    );
+    if (!mounted || updated == null) return;
+    HapticFeedback.heavyImpact();
+    FeedbackHelper.showSuccess(context, 'Mensalidade atualizada!');
+    _apply(updated);
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
     final m = _mensalidade;
 
-    return fxScreenA11yScope(
-      label:
-          m == null
-              ? 'Mensalidade'
-              : 'Mensalidade de ${m.alunoNome}',
-      child: FxShellScaffold(
-        useMesh: true,
-        appBar: FxShellAppBar(
-          title: m?.alunoNome ?? 'Mensalidade',
-          subtitle:
-              m == null
-                  ? null
-                  : financeiroMensalidadeMesPorExtenso(m.mesReferencia),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        _leave();
+      },
+      child: fxScreenA11yScope(
+        label:
+            m == null ? 'Mensalidade' : 'Mensalidade de ${m.alunoNome}',
+        child: FxShellScaffold(
+          useMesh: true,
+          appBar: FxShellAppBar(
+            title: m?.alunoNome ?? 'Mensalidade',
+            subtitle:
+                m == null
+                    ? null
+                    : financeiroMensalidadeMesPorExtenso(m.mesReferencia),
+            onBack: _leave,
+          ),
+          body:
+              _loading && m == null
+                  ? const Padding(
+                    padding: EdgeInsets.only(top: TokensStrip.s4),
+                    child: SkeletonList(count: 3),
+                  )
+                  : _erro != null && m == null
+                  ? FxErrorState(
+                    chromeOnDark: isDark,
+                    primary: primary,
+                    message: _erro!,
+                    onRetry: _carregar,
+                  )
+                  : m == null
+                  ? const SizedBox.shrink()
+                  : _DetailBody(
+                    mensalidade: m,
+                    pending: _pending(m),
+                    paying: _paying,
+                    onPay: _pagar,
+                    onEdit: _editar,
+                    onPix:
+                        () => mostrarPixMensalidade(
+                          context: context,
+                          ref: ref,
+                          id: m.id,
+                        ),
+                    onChat:
+                        () => cobrarMensalidadeViaChat(
+                          context: context,
+                          ref: ref,
+                          m: m,
+                        ),
+                    onContato:
+                        () => registrarContatoMensalidade(
+                          context: context,
+                          ref: ref,
+                          m: m,
+                        ),
+                  ),
         ),
-        body:
-            _loading && m == null
-                ? const Padding(
-                  padding: EdgeInsets.only(top: TokensStrip.s4),
-                  child: SkeletonList(count: 3),
-                )
-                : _erro != null && m == null
-                ? FxErrorState(
-                  chromeOnDark: isDark,
-                  primary: primary,
-                  message: _erro!,
-                  onRetry: _carregar,
-                )
-                : m == null
-                ? const SizedBox.shrink()
-                : _DetailBody(mensalidade: m, pending: _pending(m)),
       ),
     );
   }
 }
 
 class _DetailBody extends StatelessWidget {
-  const _DetailBody({required this.mensalidade, required this.pending});
+  const _DetailBody({
+    required this.mensalidade,
+    required this.pending,
+    required this.paying,
+    required this.onPay,
+    required this.onEdit,
+    required this.onPix,
+    required this.onChat,
+    required this.onContato,
+  });
 
   final Mensalidade mensalidade;
   final bool pending;
+  final bool paying;
+  final VoidCallback onPay;
+  final VoidCallback onEdit;
+  final VoidCallback onPix;
+  final VoidCallback onChat;
+  final VoidCallback onContato;
 
   @override
   Widget build(BuildContext context) {
@@ -165,26 +252,26 @@ class _DetailBody extends StatelessWidget {
                     label: 'Editar',
                     accent: primary,
                     isDark: isDark,
-                    onPressed: () => context.pop('edit'),
+                    onPressed: onEdit,
                   ),
                   if (pending) ...[
                     DashboardHomeActionChip(
                       label: 'PIX',
                       accent: primary,
                       isDark: isDark,
-                      onPressed: () => context.pop('pix'),
+                      onPressed: onPix,
                     ),
                     DashboardHomeActionChip(
                       label: 'Cobrar no chat',
                       accent: primary,
                       isDark: isDark,
-                      onPressed: () => context.pop('chat'),
+                      onPressed: onChat,
                     ),
                     DashboardHomeActionChip(
                       label: 'Registrar contato',
                       accent: primary,
                       isDark: isDark,
-                      onPressed: () => context.pop('contato'),
+                      onPressed: onContato,
                     ),
                   ],
                 ],
@@ -204,7 +291,8 @@ class _DetailBody extends StatelessWidget {
               ),
               child: FxLiquidPrimaryButton(
                 label: 'Marcar como paga',
-                onPressed: () => context.pop('pay'),
+                loading: paying,
+                onPressed: paying ? null : onPay,
               ),
             ),
           ),

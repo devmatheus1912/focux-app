@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_typography.dart';
-import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 
@@ -46,7 +44,6 @@ class CheckinWorkoutHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final chrome = ShellChrome.of(context);
     return Container(
       padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 58, 20, 18),
       child: Column(
@@ -54,17 +51,6 @@ class CheckinWorkoutHeader extends StatelessWidget {
         children: [
           Row(
             children: [
-              InkWell(
-                onTap: onBack,
-                borderRadius: BorderRadius.circular(12),
-                child: Container(
-                  width: 38,
-                  height: 38,
-                  decoration: chrome.headerAction(radius: 12),
-                  child: Icon(Icons.chevron_left_rounded, color: ink),
-                ),
-              ),
-              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -92,7 +78,10 @@ class CheckinWorkoutHeader extends StatelessWidget {
                   ],
                 ),
               ),
-              const CheckinLiveBadge(),
+              TextButton(
+                onPressed: onBack,
+                child: const Text('Sair'),
+              ),
             ],
           ),
           const SizedBox(height: 20),
@@ -240,57 +229,3 @@ class CheckinHeaderMetric extends StatelessWidget {
   }
 }
 
-class CheckinLiveBadge extends StatefulWidget {
-  const CheckinLiveBadge({super.key});
-
-  @override
-  State<CheckinLiveBadge> createState() => _CheckinLiveBadgeState();
-}
-
-class _CheckinLiveBadgeState extends State<CheckinLiveBadge>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _ctrl;
-  late final Animation<double> _anim;
-
-  @override
-  void initState() {
-    super.initState();
-    _ctrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1200),
-    )..repeat(reverse: true);
-    _anim = Tween<double>(
-      begin: 1.0,
-      end: 0.3,
-    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut));
-  }
-
-  @override
-  void dispose() {
-    _ctrl.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return FadeTransition(
-      opacity: _anim,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-        decoration: BoxDecoration(
-          color: EagleTokens.bad,
-          borderRadius: BorderRadius.circular(999),
-        ),
-        child: const Text(
-          'AO VIVO',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 11,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 0.5,
-          ),
-        ),
-      ),
-    );
-  }
-}
