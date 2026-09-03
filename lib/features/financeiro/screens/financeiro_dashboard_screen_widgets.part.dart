@@ -15,16 +15,15 @@ class _FinanceiroKpiGroup extends StatelessWidget {
         data.previsaoReceita > 0 && data.receitaMes >= data.previsaoReceita;
     final recebido = formatBrlCurrency(data.receitaMes, showDecimals: false);
     final pendenteLabel = formatBrlCurrency(pendente, showDecimals: false);
-    final metaLabel = financePercentLabel(
-      progressRaw,
-      exceeded: metaSuperada,
-    );
+    final metaLabel = financePercentLabel(progressRaw, exceeded: metaSuperada);
     final showTicket = data.receitaMes > 0 && data.ticketMedio > 0;
     final inadimpl = data.totalInadimplentes;
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: FxSettingsLayout.pageInset),
+      padding: const EdgeInsets.symmetric(
+        horizontal: FxSettingsLayout.pageInset,
+      ),
       child: Semantics(
         label:
             'Panorama financeiro de $mes. '
@@ -37,11 +36,12 @@ class _FinanceiroKpiGroup extends StatelessWidget {
               child: OperationalMetricTile(
                 label: 'Recebido · $mes',
                 value: recebido,
-                hint: metaSuperada
-                    ? 'Meta superada'
-                    : pendente > 0
-                    ? 'Faltam $pendenteLabel para a meta'
-                    : 'Meta do mês sob controle',
+                hint:
+                    metaSuperada
+                        ? 'Meta superada'
+                        : pendente > 0
+                        ? 'Faltam $pendenteLabel para a meta'
+                        : 'Meta do mês sob controle',
                 color: EagleTokens.moneyGreen,
                 isDark: isDark,
               ),
@@ -53,14 +53,16 @@ class _FinanceiroKpiGroup extends StatelessWidget {
               child: OperationalMetricTile(
                 label: 'Pendente',
                 value: pendenteLabel,
-                hint: inadimpl > 0
-                    ? '$inadimpl ${financeInadimplLabel(MediaQuery.sizeOf(context).width).toLowerCase()}'
-                    : 'Sem inadimplência no recorte',
+                hint:
+                    inadimpl > 0
+                        ? '$inadimpl ${financeInadimplLabel(MediaQuery.sizeOf(context).width).toLowerCase()}'
+                        : 'Sem inadimplência no recorte',
                 color: EagleTokens.warn,
                 isDark: isDark,
-                emphasis: inadimpl > 0
-                    ? OperationalMetricEmphasis.alert
-                    : OperationalMetricEmphasis.normal,
+                emphasis:
+                    inadimpl > 0
+                        ? OperationalMetricEmphasis.alert
+                        : OperationalMetricEmphasis.normal,
               ),
             ),
             const SizedBox(height: TokensStrip.s2),
@@ -70,9 +72,10 @@ class _FinanceiroKpiGroup extends StatelessWidget {
               child: OperationalMetricTile(
                 label: 'Meta',
                 value: metaLabel,
-                hint: showTicket
-                    ? 'Ticket ${formatBrlCurrency(data.ticketMedio, showDecimals: false)}'
-                    : 'Acompanhe a meta do mês',
+                hint:
+                    showTicket
+                        ? 'Ticket ${formatBrlCurrency(data.ticketMedio, showDecimals: false)}'
+                        : 'Acompanhe a meta do mês',
                 color: Theme.of(context).colorScheme.primary,
                 isDark: isDark,
               ),
@@ -104,7 +107,9 @@ class _EvolucaoChart extends StatelessWidget {
     final chartMax = maxV <= 0 ? 100.0 : maxV;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: FxSettingsLayout.pageInset),
+      padding: const EdgeInsets.symmetric(
+        horizontal: FxSettingsLayout.pageInset,
+      ),
       child: Container(
         padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 18, 16, 14),
         decoration: fxListCardDecoration(
@@ -121,10 +126,9 @@ class _EvolucaoChart extends StatelessWidget {
               children: [
                 Text(
                   'Evolução · 6 meses',
-                  style: FocuxHubTypography.body(color: ink).copyWith(
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: -0.2,
-                  ),
+                  style: FocuxHubTypography.body(
+                    color: ink,
+                  ).copyWith(fontWeight: FontWeight.w600, letterSpacing: -0.2),
                 ),
                 if (items.length > 1)
                   Builder(
@@ -155,8 +159,7 @@ class _EvolucaoChart extends StatelessWidget {
                       final h = (e.value.recebido / chartMax).clamp(0.05, 1.0);
 
                       final mes = e.value.mes;
-                      final label =
-                          mes.length >= 7 ? mes.substring(5) : mes;
+                      final label = mes.length >= 7 ? mes.substring(5) : mes;
 
                       return Expanded(
                         child: Column(
@@ -245,11 +248,20 @@ class _FinanceiroVencimentosGroup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: FxSettingsLayout.pageInset),
+      padding: const EdgeInsets.symmetric(
+        horizontal: FxSettingsLayout.pageInset,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const DashboardSectionHeader(title: 'Vencimentos'),
+          DashboardSectionHeader(
+            title: 'Vencimentos',
+            actionLabel: items.length > 3 ? 'Ver todos' : null,
+            onAction:
+                items.length > 3
+                    ? () => _openMensalidades(context, source: 'vencimentos')
+                    : null,
+          ),
           const SizedBox(height: TokensStrip.s2),
           Text(
             'Cobre em Mensalidades.',
@@ -259,25 +271,27 @@ class _FinanceiroVencimentosGroup extends StatelessWidget {
             ),
           ),
           const SizedBox(height: TokensStrip.s3),
-          for (final item in items)
+          for (final item in items.take(3))
             FxSatelliteListTile(
               title: item.alunoNome,
               subtitle: Text(_vencimentoSubtitle(item)),
               trailing: Text(
                 formatBrlCurrency(item.valor, showDecimals: false),
                 style: FocuxHubTypography.bodyMuted(
-                  color: item.status == 'ATRASADO'
-                      ? EagleTokens.bad
-                      : fxScreenMute(context),
+                  color:
+                      item.status == 'ATRASADO'
+                          ? EagleTokens.bad
+                          : fxScreenMute(context),
                   fontWeight: FontWeight.w700,
                 ),
               ),
               accent: item.status == 'ATRASADO' ? EagleTokens.bad : null,
-              onTap: () => _openAlunoOrMensalidades(
-                context,
-                item.alunoId,
-                source: 'vencimento',
-              ),
+              onTap:
+                  () => _openAlunoOrMensalidades(
+                    context,
+                    item.alunoId,
+                    source: 'vencimento',
+                  ),
             ),
         ],
       ),
@@ -286,9 +300,10 @@ class _FinanceiroVencimentosGroup extends StatelessWidget {
 
   String _vencimentoSubtitle(VencimentoItem item) {
     final atrasado = item.status == 'ATRASADO';
-    final mes = item.mesReferencia.length >= 7
-        ? item.mesReferencia.substring(0, 7)
-        : item.mesReferencia;
+    final mes =
+        item.mesReferencia.length >= 7
+            ? item.mesReferencia.substring(0, 7)
+            : item.mesReferencia;
     return '${atrasado ? 'Atrasado' : 'Vencendo'} · $mes';
   }
 }
@@ -300,29 +315,40 @@ class _FinanceiroTopAlunosGroup extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final visible = items.take(3).toList(growable: false);
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: FxSettingsLayout.pageInset),
+      padding: const EdgeInsets.symmetric(
+        horizontal: FxSettingsLayout.pageInset,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const DashboardSectionHeader(title: 'Top alunos · acumulado'),
+          DashboardSectionHeader(
+            title: 'Top alunos · acumulado',
+            actionLabel: items.length > 3 ? 'Ver todos' : null,
+            onAction:
+                items.length > 3
+                    ? () => _openMensalidades(context, source: 'top')
+                    : null,
+          ),
           const SizedBox(height: TokensStrip.s3),
-          for (var i = 0; i < items.length; i++)
+          for (var i = 0; i < visible.length; i++)
             FxSatelliteListTile(
-              title: items[i].alunoNome,
+              title: visible[i].alunoNome,
               subtitle: Text('#${i + 1}'),
               trailing: Text(
-                formatBrlCurrency(items[i].totalPago, showDecimals: false),
+                formatBrlCurrency(visible[i].totalPago, showDecimals: false),
                 style: FocuxHubTypography.bodyMuted(
                   color: fxScreenMute(context),
                   fontWeight: FontWeight.w700,
                 ),
               ),
-              onTap: () => _openAlunoOrMensalidades(
-                context,
-                items[i].alunoId,
-                source: 'top',
-              ),
+              onTap:
+                  () => _openAlunoOrMensalidades(
+                    context,
+                    visible[i].alunoId,
+                    source: 'top',
+                  ),
             ),
         ],
       ),

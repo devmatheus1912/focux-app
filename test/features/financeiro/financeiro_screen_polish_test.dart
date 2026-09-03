@@ -23,5 +23,7 @@ void main() {
     expect(screen, isNot(contains('Icons.dashboard')));
     expect(screen, isNot(contains('bar_chart')));
     expect(screen, isNot(contains('CircularProgressIndicator')));
+    expect(screen, contains('constrainWidth: false'));
+    expect(screen, contains("safePopOrGo(context, '/dashboard/personal')"));
   });
 }
