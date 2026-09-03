@@ -14,8 +14,8 @@ import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/fx_inset_picker_option.dart';
 import '../../../core/widgets/fx_settings_group.dart';
-import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../exercicios/data/enums.dart';
 import '../../exercicios/data/exercicio_page.dart';
@@ -687,22 +687,24 @@ class _CategoryTilesBody extends ConsumerWidget {
           children: [
             FxSettingsGroup(
               accent: primary,
+              edgeToEdgeRows: true,
               caption: 'Grupos musculares · ${items.length}',
-              children: [
-                for (var i = 0; i < items.length; i++)
-                  FxSettingsTile(
-                    icon: Icons.fitness_center_outlined,
-                    accent: soft,
-                    label: items[i].label,
-                    subtitle:
-                        items[i].count == 1
-                            ? '1 exercício'
-                            : '${items[i].count} exercícios',
-                    value: '',
-                    showDivider: i < items.length - 1,
-                    onTap: items[i].onTap,
-                  ),
-              ],
+              children: FxInsetPickerOption.list(
+                accent: soft,
+                items: [
+                  for (final item in items)
+                    FxInsetPickerOptionSpec(
+                      icon: Icons.fitness_center_outlined,
+                      label: item.label,
+                      subtitle:
+                          item.count == 1
+                              ? '1 exercício'
+                              : '${item.count} exercícios',
+                      selected: false,
+                      onTap: item.onTap,
+                    ),
+                ],
+              ),
             ),
           ],
         );

@@ -38,6 +38,8 @@ void main() {
     expect(screen, isNot(contains('showNovoExercicioIdentidadeHelpSheet')));
     expect(screen, isNot(contains('showNovoExercicioPerfilRapidoHelpSheet')));
     expect(screen, contains("'Unilateral'"));
+    expect(screen, contains('Switch.adaptive'));
+    expect(screen, isNot(contains('_unilateral = !_unilateral')));
     expect(screen, isNot(contains("header: 'Execução'")));
     expect(enumPicker, contains('edgeToEdgeRows: true'));
     expect(enumPicker, contains('FxInsetPickerOption.list'));
