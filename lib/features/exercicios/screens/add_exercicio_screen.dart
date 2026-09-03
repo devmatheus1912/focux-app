@@ -20,7 +20,6 @@ import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
 import '../../alunos/widgets/aluno_inset_form_field.dart';
 import '../../../l10n/app_localizations.dart';
-import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../data/enums.dart';
 import '../data/exercicio_repository.dart';
 import '../data/exercicio_taxonomy_labels.dart';

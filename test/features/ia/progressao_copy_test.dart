@@ -13,7 +13,9 @@ void main() {
     expect(progressaoHistoricoMax, 8000);
     expect(progressaoHubSubtitle(''), 'Sugestão de carga, só se você pedir');
     expect(progressaoHubSubtitle('  Ana  '), 'Ana · só se você pedir');
-    expect(progressaoGerarTooltip(), 'Gerar com IA');
+    expect(progressaoStickyLabel(hasResult: false), 'Gerar progressão');
+    expect(progressaoStickyLabel(hasResult: true), 'Gerar outra');
+    expect(progressaoStickyLoadingLabel(), 'Gerando…');
     expect(progressaoConfirmTitle(), 'Gerar progressão com IA?');
     expect(progressaoConfirmLabel(), 'Gerar');
   });

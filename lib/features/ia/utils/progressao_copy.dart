@@ -8,11 +8,10 @@ String progressaoHubSubtitle(String alunoNome) {
   return '$nome · só se você pedir';
 }
 
-String progressaoGerarTooltip() => 'Gerar com IA';
+String progressaoStickyLabel({required bool hasResult}) =>
+    hasResult ? 'Gerar outra' : 'Gerar progressão';
 
-String progressaoGerarTileLabel() => 'Gerar progressão';
-
-String progressaoGerarTileValue() => 'Pedir à IA';
+String progressaoStickyLoadingLabel() => 'Gerando…';
 
 String progressaoConfirmTitle() => 'Gerar progressão com IA?';
 
