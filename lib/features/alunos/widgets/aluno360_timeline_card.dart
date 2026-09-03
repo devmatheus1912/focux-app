@@ -540,14 +540,22 @@ class Timeline360Tile extends StatelessWidget {
       }
     }
 
+    final hasRoute = item.deepLink != null && item.deepLink!.isNotEmpty;
+    final interactive = expandable || hasRoute;
+
     return FxSettingsTile(
       icon: item.icon,
       accent: item.color,
       label: label,
       subtitle: previewBody,
       value: formatTimeline360Date(item.at),
-      onTap: onTap,
+      onTap: interactive ? onTap : null,
+      disclosure: expandable,
       showDivider: showSpineBelow,
+      semanticsLabel:
+          expandable
+              ? '$label. ${timeline360ExpandLinkLabel(kind: item.kind)}'
+              : null,
     );
   }
 }

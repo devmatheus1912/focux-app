@@ -153,6 +153,8 @@ void main() {
     expect(screen, isNot(contains('alertasConfigProvider')));
     expect(screen, contains('buscarAluno360'));
     expect(screen, contains('class Timeline360Tile'));
+    expect(screen, contains('disclosure: expandable'));
+    expect(screen, contains('onTap: interactive ? onTap : null'));
     expect(screen, contains('alunoCopilotoActionProvider'));
     expect(screen, contains('proximaAcao(alunoId)'));
     expect(screen, contains('salvarAcaoCopiloto'));

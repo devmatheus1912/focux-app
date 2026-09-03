@@ -27,12 +27,14 @@ class FxSettingsTile extends StatelessWidget {
     this.locked = false,
     this.highlight = false,
     this.picker = false,
+    this.disclosure = false,
     this.numeric = false,
     this.onLongPress,
     this.upgradeTierLabel,
     this.semanticsLabel,
     this.accessory,
-  }) : assert(icon != null || fxIcon != null);
+  }) : assert(icon != null || fxIcon != null),
+       assert(!(picker && disclosure));
 
   final IconData? icon;
   final String? fxIcon;
@@ -49,6 +51,9 @@ class FxSettingsTile extends StatelessWidget {
   final bool locked;
   final bool highlight;
   final bool picker;
+  /// Setinha baixo/cima — tap revela no lugar ou abre sheet do mesmo item.
+  /// Nunca usa chevron lateral (chevron ⟺ push de rota).
+  final bool disclosure;
   final bool numeric;
   final String? upgradeTierLabel;
   final String? semanticsLabel;
@@ -84,12 +89,17 @@ class FxSettingsTile extends StatelessWidget {
             ? '$spoken trancado. Plano ${upgradeTierLabel ?? 'upgrade'}'
             : (value.isEmpty ? spoken : '$spoken. $value');
     final interactive = onTap != null;
-    final showChevron = interactive && !danger && !locked;
+    final showChevron = interactive && !danger && !locked && !disclosure;
 
     return Semantics(
       button: interactive,
       label: a11y,
-      hint: danger && interactive ? 'Confirmação será solicitada' : null,
+      hint:
+          danger && interactive
+              ? 'Confirmação será solicitada'
+              : disclosure && interactive
+              ? 'Mostra o conteúdo completo'
+              : null,
       child: InkWell(
         onTap: !interactive
             ? null
@@ -196,6 +206,13 @@ class FxSettingsTile extends StatelessWidget {
                             tier: upgradeTierLabel ?? 'Pro',
                             brand: brand,
                             mute: mute,
+                          ),
+                        ] else if (interactive && disclosure) ...[
+                          const SizedBox(width: TokensStrip.s1),
+                          Icon(
+                            Icons.expand_more,
+                            size: FxSettingsLayout.chevronSize,
+                            color: mute,
                           ),
                         ] else if (showChevron) ...[
                           const SizedBox(width: TokensStrip.s1),
