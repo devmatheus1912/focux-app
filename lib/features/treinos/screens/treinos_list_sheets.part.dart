@@ -153,165 +153,49 @@ class _TreinoActionsSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
-    final chrome = ShellChrome.forDark(isDark);
     final maxHeight = MediaQuery.sizeOf(context).height * 0.82;
     final displayName = displayWorkoutName(treino.nome);
-    final actions = <_TreinoActionTile>[
-      _TreinoActionTile(
-        icon: Icons.open_in_new_rounded,
-        label: 'Abrir treino',
-        onTap: () => Navigator.pop(context, _TreinoAction.open),
-      ),
-      if (canAssign) ...[
-        _TreinoActionTile(
-          icon: Icons.person_add_alt_1_rounded,
-          label: 'Atribuir a um aluno',
-          showChevron: true,
-          onTap: () => Navigator.pop(context, _TreinoAction.assign),
-        ),
-        _TreinoActionTile(
-          icon: Icons.assignment_ind_rounded,
-          label: 'Copiar para aluno',
-          showChevron: true,
-          onTap: () => Navigator.pop(context, _TreinoAction.clone),
-        ),
-      ],
-      _TreinoActionTile(
-        icon: Icons.control_point_duplicate_rounded,
-        label: 'Duplicar treino',
-        onTap: () => Navigator.pop(context, _TreinoAction.duplicate),
-      ),
-      _TreinoActionTile(
-        icon: Icons.delete_outline_rounded,
-        label: 'Excluir treino',
-        color: EagleTokens.bad,
-        onTap: () => Navigator.pop(context, _TreinoAction.delete),
-      ),
-    ];
 
-    return TreinoHomeSheetSurface(
+    return TreinoInsetActionSheet(
       isDark: isDark,
       maxHeight: maxHeight,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Center(
-            child: Container(
-              width: 42,
-              height: 4,
-              decoration: BoxDecoration(
-                color: chrome.mute.withValues(alpha: 0.26),
-                borderRadius: BorderRadius.circular(999),
-              ),
-            ),
+      headerIcon: Icons.fitness_center_rounded,
+      title: 'Ações do treino',
+      subtitle: displayName,
+      accent: primary,
+      actions: [
+        TreinoInsetActionSpec(
+          icon: Icons.open_in_new_rounded,
+          label: 'Abrir treino',
+          showChevron: true,
+          onTap: () => Navigator.pop(context, _TreinoAction.open),
+        ),
+        if (canAssign) ...[
+          TreinoInsetActionSpec(
+            icon: Icons.person_add_alt_1_rounded,
+            label: 'Atribuir a um aluno',
+            showChevron: true,
+            onTap: () => Navigator.pop(context, _TreinoAction.assign),
           ),
-          SizedBox(height: TokensStrip.s4),
-          TreinoSheetChromeHeader(
-            icon: Icons.fitness_center_rounded,
-            title: 'Ações do treino',
-            subtitle: displayName,
-            isDark: isDark,
-          ),
-          const SizedBox(height: TokensStrip.s4),
-          Flexible(
-            child: SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              child: DecoratedBox(
-                decoration: fxListCardDecoration(context, accent: primary),
-                child: Material(
-                  color: Colors.transparent,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      for (var i = 0; i < actions.length; i++) ...[
-                        if (i > 0)
-                          Divider(
-                            height: 1,
-                            thickness: 1,
-                            color: chrome.line.withValues(alpha: 0.7),
-                          ),
-                        actions[i],
-                      ],
-                    ],
-                  ),
-                ),
-              ),
-            ),
+          TreinoInsetActionSpec(
+            icon: Icons.assignment_ind_rounded,
+            label: 'Copiar para aluno',
+            showChevron: true,
+            onTap: () => Navigator.pop(context, _TreinoAction.clone),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _TreinoActionTile extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final Color? color;
-  final bool showChevron;
-  final VoidCallback onTap;
-
-  const _TreinoActionTile({
-    required this.icon,
-    required this.label,
-    this.color,
-    this.showChevron = false,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final chrome = ShellChrome.of(context);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final primary = Theme.of(context).colorScheme.primary;
-    final tint = color ?? primary;
-
-    return Semantics(
-      button: true,
-      label: label,
-      child: InkWell(
-        onTap: () {
-          HapticFeedback.selectionClick();
-          onTap();
-        },
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(
-            minHeight: TreinosLayout.touchTarget,
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            child: Row(
-              children: [
-                Container(
-                  width: 34,
-                  height: 34,
-                  decoration: BoxDecoration(
-                    color: BrandPalette.soft(tint, dark: isDark),
-                    borderRadius: BorderRadius.circular(13),
-                  ),
-                  child: Icon(icon, color: tint, size: 18),
-                ),
-                SizedBox(width: TokensStrip.s3),
-                Expanded(
-                  child: Text(
-                    label,
-                    style: FocuxHubTypography.cardTitle(
-                      color: color ?? chrome.ink,
-                    ),
-                  ),
-                ),
-                if (showChevron)
-                  Icon(
-                    Icons.chevron_right_rounded,
-                    color: chrome.mute,
-                    size: 18,
-                  ),
-              ],
-            ),
-          ),
+        TreinoInsetActionSpec(
+          icon: Icons.control_point_duplicate_rounded,
+          label: 'Duplicar treino',
+          onTap: () => Navigator.pop(context, _TreinoAction.duplicate),
         ),
-      ),
+        TreinoInsetActionSpec(
+          icon: Icons.delete_outline_rounded,
+          label: 'Excluir treino',
+          danger: true,
+          onTap: () => Navigator.pop(context, _TreinoAction.delete),
+        ),
+      ],
     );
   }
 }

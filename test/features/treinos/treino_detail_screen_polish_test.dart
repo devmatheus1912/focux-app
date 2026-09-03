@@ -94,6 +94,8 @@ void main() {
     final inset = File(
       'lib/features/treinos/widgets/treino_inset_sheet.dart',
     ).readAsStringSync();
+    expect(inset, contains('treinoInsetActionChildren'));
+    expect(inset, isNot(contains('treinoInsetActionTiles')));
     expect(inset, contains('ElevatedButton'));
     expect(inset, contains('child: Text(confirmLabel)'));
     expect(inset, isNot(contains('label: confirmLabel')));
