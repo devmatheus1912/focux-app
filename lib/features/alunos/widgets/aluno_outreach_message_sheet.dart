@@ -14,8 +14,7 @@ import '../../../core/utils/clipboard_sensitive.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
-import '../../../core/widgets/fx_settings_group.dart';
-import '../../../core/widgets/fx_settings_tile.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../utils/aluno360_operacao_logic.dart';
 import '../utils/aluno_outreach_display.dart';
 
@@ -105,46 +104,36 @@ class _AlunoOutreachMessageSheet extends StatelessWidget {
             isDark: isDark,
           ),
           const SizedBox(height: TokensStrip.s4),
-          FxSettingsGroup(
-            children: [
-              FxSettingsTile(
-                fxIcon: 'chat',
-                label: alunoOutreachOpenChatLabel(),
-                value: '',
-                onTap: () {
-                  unawaited(
-                    AnalyticsService.instance.track(
-                      ProductEvents.aluno360OutreachChatOpened,
-                      props: {'aluno_id': alunoId},
-                    ),
-                  );
-                  Navigator.of(context).pop();
-                  context.push(
-                    '/alunos/$alunoId/chat',
-                    extra: alunoChatRouteExtra(
-                      nome: alunoNome,
-                      draft: message,
-                    ),
-                  );
-                },
-              ),
-              FxSettingsTile(
-                fxIcon: 'article',
-                label: alunoOutreachCopyLabel(),
-                value: '',
-                showDivider: false,
-                semanticsLabel: alunoOutreachCopySemanticsLabel(),
-                onTap: () async {
-                  await copySensitiveToClipboard(message);
-                  if (!context.mounted) return;
-                  Navigator.of(context).pop();
-                  FeedbackHelper.showSuccess(
-                    context,
-                    alunoOutreachCopySuccess(),
-                  );
-                },
-              ),
-            ],
+          FxLiquidPrimaryButton(
+            label: alunoOutreachOpenChatLabel(),
+            onPressed: () {
+              unawaited(
+                AnalyticsService.instance.track(
+                  ProductEvents.aluno360OutreachChatOpened,
+                  props: {'aluno_id': alunoId},
+                ),
+              );
+              Navigator.of(context).pop();
+              context.push(
+                '/alunos/$alunoId/chat',
+                extra: alunoChatRouteExtra(
+                  nome: alunoNome,
+                  draft: message,
+                ),
+              );
+            },
+          ),
+          TextButton(
+            onPressed: () async {
+              await copySensitiveToClipboard(message);
+              if (!context.mounted) return;
+              Navigator.of(context).pop();
+              FeedbackHelper.showSuccess(
+                context,
+                alunoOutreachCopySuccess(),
+              );
+            },
+            child: Text(alunoOutreachCopyLabel()),
           ),
           Padding(
             padding: const EdgeInsets.only(top: TokensStrip.s3),

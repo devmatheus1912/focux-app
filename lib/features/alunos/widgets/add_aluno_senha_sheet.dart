@@ -9,8 +9,8 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/clipboard_sensitive.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_settings_group.dart';
-import '../../../core/widgets/fx_settings_tile.dart';
 import '../data/aluno_repository.dart';
 import '../utils/aluno_invite_copy.dart';
 
@@ -72,57 +72,55 @@ Future<void> showAddAlunoSenhaSheet({
               ],
             ),
             const SizedBox(height: FxSettingsLayout.groupGap),
-            FxSettingsGroup(
-              children: [
-                if (hasWhatsapp)
-                  FxSettingsTile(
-                    icon: Icons.send_rounded,
-                    label: 'Enviar no WhatsApp',
-                    value: '',
-                    highlight: true,
-                    showDivider: true,
-                    onTap: () async {
-                      HapticFeedback.mediumImpact();
-                      final uri = Uri.parse(
-                        'https://wa.me/55$whatsappNumber?text=${Uri.encodeComponent(convite)}',
-                      );
-                      if (await canLaunchUrl(uri)) {
-                        await launchUrl(
-                          uri,
-                          mode: LaunchMode.externalApplication,
-                        );
-                        if (ctx.mounted) Navigator.of(ctx).pop();
-                        onDone();
-                        return;
-                      }
-                      await copyConvite();
-                      if (ctx.mounted) Navigator.of(ctx).pop();
-                      if (context.mounted) {
-                        FeedbackHelper.showSuccess(
-                          context,
-                          'Mensagem copiada. Abra o WhatsApp e envie ao aluno.',
-                        );
-                      }
-                      onDone();
-                    },
-                  ),
-                FxSettingsTile(
-                  icon: Icons.copy_rounded,
-                  label: 'Copiar convite',
-                  value: '',
-                  showDivider: false,
-                  onTap: () async {
-                    await copyConvite();
+            FxLiquidPrimaryButton(
+              label: hasWhatsapp ? 'Enviar no WhatsApp' : 'Copiar convite',
+              onPressed: () async {
+                if (hasWhatsapp) {
+                  HapticFeedback.mediumImpact();
+                  final uri = Uri.parse(
+                    'https://wa.me/55$whatsappNumber?text=${Uri.encodeComponent(convite)}',
+                  );
+                  if (await canLaunchUrl(uri)) {
+                    await launchUrl(
+                      uri,
+                      mode: LaunchMode.externalApplication,
+                    );
                     if (ctx.mounted) Navigator.of(ctx).pop();
-                    if (context.mounted) {
-                      FeedbackHelper.showSuccess(context, 'Convite copiado.');
-                    }
                     onDone();
-                  },
-                ),
-              ],
+                    return;
+                  }
+                }
+                await copyConvite();
+                if (ctx.mounted) Navigator.of(ctx).pop();
+                if (context.mounted) {
+                  FeedbackHelper.showSuccess(
+                    context,
+                    hasWhatsapp
+                        ? 'Mensagem copiada. Abra o WhatsApp e envie ao aluno.'
+                        : 'Convite copiado.',
+                  );
+                }
+                onDone();
+              },
             ),
-            const SizedBox(height: TokensStrip.s3),
+            if (hasWhatsapp)
+              TextButton(
+                style: TextButton.styleFrom(
+                  minimumSize: const Size(
+                    FxHomeSheetChrome.touchTarget,
+                    FxHomeSheetChrome.touchTarget,
+                  ),
+                ),
+                onPressed: () async {
+                  await copyConvite();
+                  if (ctx.mounted) Navigator.of(ctx).pop();
+                  if (context.mounted) {
+                    FeedbackHelper.showSuccess(context, 'Convite copiado.');
+                  }
+                  onDone();
+                },
+                child: const Text('Copiar convite'),
+              ),
             TextButton(
               style: TextButton.styleFrom(
                 minimumSize: const Size(

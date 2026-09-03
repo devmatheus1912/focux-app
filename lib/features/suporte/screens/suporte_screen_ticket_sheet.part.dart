@@ -161,16 +161,11 @@ class _NovoTicketSheetState extends ConsumerState<_NovoTicketSheet> {
                       ],
                     ),
                     const SizedBox(height: TokensStrip.s3),
-                    FxSettingsGroup(
-                      children: [
-                        FxSettingsTile(
-                          fxIcon: 'circle-check',
-                          label: suporteEnviarTicketLabel(),
-                          value: _enviando ? 'Enviando…' : 'Confirmar',
-                          showDivider: false,
-                          onTap: _enviando ? () {} : _enviarTicket,
-                        ),
-                      ],
+                    FxLiquidPrimaryButton(
+                      label: suporteEnviarTicketLabel(),
+                      loading: _enviando,
+                      loadingLabel: 'Enviando…',
+                      onPressed: _enviando ? null : _enviarTicket,
                     ),
                   ],
                 ),

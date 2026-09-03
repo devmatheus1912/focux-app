@@ -16,7 +16,7 @@ void main() {
       'lib/features/alunos/widgets/add_aluno_senha_sheet.dart',
     );
     expect(senha, contains('copySensitiveToClipboard'));
-    expect(senha, isNot(contains('FxLiquidPrimaryButton')));
+    expect(senha, contains('FxLiquidPrimaryButton'));
     expect(screen, contains('Outro objetivo'));
     expect(screen, isNot(contains('ShellHeaderIconButton')));
     expect(screen, isNot(contains("icon: 'circle-check'")));
