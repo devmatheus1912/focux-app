@@ -3,8 +3,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
+import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feedback_helper.dart';
@@ -14,10 +17,9 @@ import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_form_sheet.dart';
 import '../../../core/widgets/fx_inset_picker_row.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
-import '../../../core/widgets/fx_settings_group.dart';
-import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
+import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../alunos/widgets/aluno_inset_form_field.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../data/grupo_aula_repository.dart';
@@ -267,54 +269,70 @@ class _GrupoAulasPersonalScreenState
   Widget _buildBody() {
     return RefreshIndicator(
       onRefresh: _load,
-      child: ListView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(
-          FxSettingsLayout.pageInset,
-          8,
-          FxSettingsLayout.pageInset,
-          32,
-        ),
-        children: [
-          if (_aulas.isEmpty)
-            FxEmptyState(
-              icon: 'calendar',
-              title: 'Nenhuma aula criada ainda',
-              subtitle:
-                  'Crie uma aula em grupo para abrir vagas aos seus alunos.',
-              action: FxEmptyAction(label: 'Nova aula', onTap: _criar),
-            )
-          else
-            FxSettingsGroup(
-              header: 'Próximas aulas',
-              caption: 'Vagas e horário de cada turma.',
+      child: _aulas.isEmpty
+          ? ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.fromLTRB(
+                FxSettingsLayout.pageInset,
+                8,
+                FxSettingsLayout.pageInset,
+                32,
+              ),
               children: [
-                for (var i = 0; i < _aulas.length; i++)
-                  FxSettingsTile(
-                    fxIcon: grupoAulaFxIcon(
-                      inscritos: _aulas[i].inscritos,
-                      capacidadeMax: _aulas[i].capacidadeMax,
-                    ),
-                    label: _aulas[i].titulo,
-                    subtitle: grupoAulaSubtitle(
-                      inicio: _aulas[i].inicio,
-                      localAula: _aulas[i].localAula,
-                    ),
-                    value: grupoAulaVagasLabel(
-                      inscritos: _aulas[i].inscritos,
-                      capacidadeMax: _aulas[i].capacidadeMax,
-                    ),
-                    danger: grupoAulaLotada(
-                      inscritos: _aulas[i].inscritos,
-                      capacidadeMax: _aulas[i].capacidadeMax,
-                    ),
-                    showDivider: i != _aulas.length - 1,
-                    onTap: () {},
-                  ),
+                FxEmptyState(
+                  icon: 'calendar',
+                  title: 'Nenhuma aula criada ainda',
+                  subtitle:
+                      'Crie uma aula em grupo para abrir vagas aos seus alunos.',
+                  action: FxEmptyAction(label: 'Nova aula', onTap: _criar),
+                ),
               ],
+            )
+          : ListView.builder(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.fromLTRB(
+                FxSettingsLayout.pageInset,
+                TokensStrip.s3,
+                FxSettingsLayout.pageInset,
+                TokensStrip.s6,
+              ),
+              itemCount: _aulas.length + 1,
+              itemBuilder: (context, i) {
+                if (i == 0) {
+                  return const Padding(
+                    padding: EdgeInsets.only(bottom: TokensStrip.s3),
+                    child: DashboardSectionHeader(title: 'Próximas aulas'),
+                  );
+                }
+                final aula = _aulas[i - 1];
+                final lotada = grupoAulaLotada(
+                  inscritos: aula.inscritos,
+                  capacidadeMax: aula.capacidadeMax,
+                );
+                return FxSatelliteListTile(
+                  title: aula.titulo,
+                  subtitle: Text(
+                    grupoAulaSubtitle(
+                      inicio: aula.inicio,
+                      localAula: aula.localAula,
+                    ),
+                  ),
+                  trailing: Text(
+                    grupoAulaVagasLabel(
+                      inscritos: aula.inscritos,
+                      capacidadeMax: aula.capacidadeMax,
+                    ),
+                    style: FocuxHubTypography.bodyMuted(
+                      color: lotada
+                          ? EagleTokens.bad
+                          : fxScreenMute(context),
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  accent: lotada ? EagleTokens.bad : null,
+                );
+              },
             ),
-        ],
-      ),
     );
   }
 }

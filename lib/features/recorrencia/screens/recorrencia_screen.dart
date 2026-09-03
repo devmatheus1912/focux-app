@@ -4,8 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
+import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/clipboard_sensitive.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
@@ -17,10 +20,9 @@ import '../../../core/widgets/fx_form_sheet.dart';
 import '../../../core/widgets/fx_inset_picker_row.dart';
 import '../../../core/widgets/fx_inset_picker_sheet.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
-import '../../../core/widgets/fx_settings_group.dart';
-import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
+import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../alunos/data/aluno_repository.dart';
 import '../../alunos/widgets/aluno_inset_form_field.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -215,58 +217,77 @@ class _RecorrenciaScreenState extends ConsumerState<RecorrenciaScreen> {
   }
 
   Widget _buildBody() {
+    final primary = Theme.of(context).colorScheme.primary;
     return RefreshIndicator(
       onRefresh: _load,
-      child: ListView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(
-          FxSettingsLayout.pageInset,
-          8,
-          FxSettingsLayout.pageInset,
-          32,
-        ),
-        children: [
-          if (_items.isEmpty)
-            FxEmptyState(
-              icon: 'coin',
-              title: 'Nenhuma assinatura ainda',
-              subtitle:
-                  'Crie a primeira recorrência para cobrar seus alunos via Mercado Pago.',
-              action: FxEmptyAction(label: 'Nova recorrência', onTap: _criar),
-            )
-          else
-            FxSettingsGroup(
-              header: 'Assinaturas',
-              caption:
-                  'Toque no pendente para abrir o checkout. O link some da área de transferência em 1 min.',
+      child: _items.isEmpty
+          ? ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.fromLTRB(
+                FxSettingsLayout.pageInset,
+                8,
+                FxSettingsLayout.pageInset,
+                32,
+              ),
               children: [
-                for (var i = 0; i < _items.length; i++)
-                  FxSettingsTile(
-                    fxIcon: recorrenciaFxIcon(_items[i].status),
-                    label: recorrenciaAlunoLabel(_items[i].alunoNome),
-                    subtitle: recorrenciaSubtitle(
-                      status: _items[i].status,
-                      proximaCobranca: _items[i].proximaCobranca,
-                    ),
-                    value: recorrenciaValorLabel(_items[i].valor),
-                    numeric: true,
-                    danger: recorrenciaDanger(_items[i].status),
-                    highlight: recorrenciaPendente(_items[i].status),
-                    showDivider: i != _items.length - 1,
-                    onTap: () {
-                      if (!recorrenciaTemLinkCheckout(
-                        _items[i].status,
-                        _items[i].initPoint,
-                      )) {
-                        return;
-                      }
-                      _abrirCheckout(_items[i].initPoint!);
-                    },
-                  ),
+                FxEmptyState(
+                  icon: 'coin',
+                  title: 'Nenhuma assinatura ainda',
+                  subtitle:
+                      'Crie a primeira recorrência para cobrar seus alunos via Mercado Pago.',
+                  action: FxEmptyAction(label: 'Nova recorrência', onTap: _criar),
+                ),
               ],
+            )
+          : ListView.builder(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.fromLTRB(
+                FxSettingsLayout.pageInset,
+                TokensStrip.s3,
+                FxSettingsLayout.pageInset,
+                TokensStrip.s6,
+              ),
+              itemCount: _items.length + 1,
+              itemBuilder: (context, i) {
+                if (i == 0) {
+                  return const Padding(
+                    padding: EdgeInsets.only(bottom: TokensStrip.s3),
+                    child: DashboardSectionHeader(title: 'Assinaturas'),
+                  );
+                }
+                final item = _items[i - 1];
+                final danger = recorrenciaDanger(item.status);
+                return FxSatelliteListTile(
+                  title: recorrenciaAlunoLabel(item.alunoNome),
+                  subtitle: Text(
+                    recorrenciaSubtitle(
+                      status: item.status,
+                      proximaCobranca: item.proximaCobranca,
+                    ),
+                  ),
+                  trailing: Text(
+                    recorrenciaValorLabel(item.valor),
+                    style: FocuxHubTypography.bodyMuted(
+                      color: danger
+                          ? EagleTokens.bad
+                          : fxScreenMute(context),
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  accent: danger
+                      ? EagleTokens.bad
+                      : recorrenciaPendente(item.status)
+                          ? primary
+                          : null,
+                  onTap: recorrenciaTemLinkCheckout(
+                    item.status,
+                    item.initPoint,
+                  )
+                      ? () => _abrirCheckout(item.initPoint!)
+                      : null,
+                );
+              },
             ),
-        ],
-      ),
     );
   }
 }
