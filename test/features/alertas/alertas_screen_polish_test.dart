@@ -9,6 +9,10 @@ void main() {
     );
     expect(screen, contains('fxScreenA11yScope'));
     expect(screen, contains('FxShellScaffold'));
+    expect(screen, contains('constrainWidth: false'));
+    expect(screen, contains('FxContentWidthLimiter'));
+    expect(screen, contains('Como calculamos'));
+    expect(screen, contains('keyboardDismissBehavior'));
     expect(screen, contains('FxHelpIconButton'));
     expect(screen, contains('FxSatelliteListTile'));
     expect(screen, isNot(contains('FxSettingsGroupedList')));

@@ -3,22 +3,21 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/analytics/analytics_service.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/focux_hub_typography.dart';
-import '../../../core/theme/fx_settings_layout.dart';
-import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
-import '../../dashboard/widgets/dashboard_home_action_chip.dart';
-import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../data/winback_repository.dart';
 import '../utils/winback_display.dart';
 
@@ -35,7 +34,10 @@ class WinbackScreen extends ConsumerStatefulWidget {
 
 class _WinbackScreenState extends ConsumerState<WinbackScreen> {
   List<WinbackLogEntry> _entries = [];
-  bool _loading = true;
+  var _page = 0;
+  var _hasMore = false;
+  var _loading = true;
+  var _carregandoMais = false;
   String? _erro;
   DateTime? _fetchedAt;
 
@@ -55,6 +57,8 @@ class _WinbackScreenState extends ConsumerState<WinbackScreen> {
       if (!mounted) return;
       setState(() {
         _entries = entries;
+        _page = 0;
+        _hasMore = entries.length >= WinbackRepository.pageSize;
         _loading = false;
         _fetchedAt = DateTime.now();
       });
@@ -67,14 +71,39 @@ class _WinbackScreenState extends ConsumerState<WinbackScreen> {
     }
   }
 
-  void _abrirSaude() {
+  Future<void> _carregarMais() async {
+    if (_carregandoMais || !_hasMore) return;
+    setState(() => _carregandoMais = true);
+    try {
+      final next = await ref.read(winbackRepositoryProvider).log(page: _page + 1);
+      if (!mounted) return;
+      setState(() {
+        _entries = [..._entries, ...next];
+        _page += 1;
+        _hasMore = next.length >= WinbackRepository.pageSize;
+        _carregandoMais = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _carregandoMais = false);
+    }
+  }
+
+  void _abrirRetencao() {
     HapticFeedback.selectionClick();
-    context.push('/retencao');
+    goPersonalShellTab(context, '/retencao');
+  }
+
+  void _abrirAluno(WinbackLogEntry entry) {
+    final id = entry.alunoId;
+    if (id == null || id <= 0) return;
+    AnalyticsService.instance.track(ProductEvents.alunosViewed);
+    context.push('/alunos/$id', extra: entry.alunoNome);
   }
 
   @override
   Widget build(BuildContext context) {
-    final chrome = ShellChrome.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
     final freshness = FxHubFreshness.fromFetchedAt(_fetchedAt);
 
@@ -82,90 +111,110 @@ class _WinbackScreenState extends ConsumerState<WinbackScreen> {
       label: 'Win-back automático',
       child: FxShellScaffold(
         useMesh: true,
+        constrainWidth: false,
         appBar: FxShellAppBar(
           title: 'Win-back automático',
-          subtitle: winbackHubSubtitle(freshness),
+          subtitle: _loading
+              ? winbackHubSubtitle(freshness)
+              : '${winbackCountLabel(_entries.length)}${freshness == null ? '' : ' · $freshness'}',
           onBack: () => safePopOrGo(context, '/dashboard/personal'),
-        ),
-        body:
-            _loading
-                ? const Padding(
-                  padding: EdgeInsets.all(FxSettingsLayout.pageInset),
-                  child: SkeletonList(count: 5),
-                )
-                : _erro != null
-                ? FxErrorState(
-                  chromeOnDark: chrome.isDark,
-                  primary: primary,
-                  message: _erro!,
-                  onRetry: _carregar,
-                )
-                : FxContentWidthLimiter(child: _buildBody()),
-      ),
-    );
-  }
-
-  Widget _buildBody() {
-    final chrome = ShellChrome.of(context);
-    final primary = Theme.of(context).colorScheme.primary;
-    return RefreshIndicator(
-      onRefresh: _carregar,
-      child: ListView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(
-          FxSettingsLayout.pageInset,
-          8,
-          FxSettingsLayout.pageInset,
-          32,
-        ),
-        children: [
-          Text(
-            'Push automático para alunos inativos. Trial do personal não entra neste log.',
-            style: FocuxHubTypography.bodyMuted(
-              color: fxScreenMute(context),
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: TokensStrip.s3),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: DashboardHomeActionChip(
-              label: 'Saúde da retenção',
-              accent: primary,
-              isDark: chrome.isDark,
-              onPressed: _abrirSaude,
-            ),
-          ),
-          const SizedBox(height: TokensStrip.s5),
-          if (_entries.isEmpty)
-            const FxEmptyState(
-              icon: 'bell',
-              title: 'Nenhum envio ainda',
-              subtitle:
-                  'Quando a automação disparar, os registros aparecem aqui.',
-            )
-          else ...[
-            const DashboardSectionHeader(title: 'Envios'),
-            const SizedBox(height: TokensStrip.s3),
-            for (final entry in _entries)
-              FxSatelliteListTile(
-                title: winbackAlunoLabel(entry.alunoNome),
-                subtitle: Text(
-                  winbackSubtitle(
-                    tipo: entry.tipo,
-                    mensagem: entry.mensagem,
+          actions: [
+            FxHelpIconButton(
+              tooltip: 'Como funciona o win-back',
+              onTap: () => showFxHelpSheet(
+                context,
+                title: 'Win-back',
+                subtitle: 'Push automático para aluno inativo.',
+                tips: const [
+                  FxHelpTip('Como calculamos', winbackComoCalculamos),
+                  FxHelpTip(
+                    'Lista',
+                    'Toque no aluno para o 360. Trial do personal não aparece aqui.',
                   ),
-                ),
-                trailing: Text(
-                  winbackWhenLabel(entry.enviadoEm),
-                  style: FocuxHubTypography.bodyMuted(
-                    color: fxScreenMute(context),
-                    fontWeight: FontWeight.w600,
+                  FxHelpTip(
+                    'Retenção',
+                    'A saúde da base continua em Retenção.',
                   ),
-                ),
+                ],
               ),
+            ),
           ],
-        ],
+        ),
+        body: _loading
+            ? const SkeletonList(count: 5)
+            : _erro != null
+            ? FxErrorState(
+              chromeOnDark: isDark,
+              primary: primary,
+              message: _erro!,
+              onRetry: _carregar,
+            )
+            : RefreshIndicator(
+              color: primary,
+              onRefresh: _carregar,
+              child: _entries.isEmpty
+                  ? ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    children: [
+                      const SizedBox(height: 48),
+                      FxEmptyState(
+                        icon: 'bell',
+                        title: 'Nenhum envio ainda',
+                        subtitle:
+                            'Quando a automação disparar, os registros aparecem aqui.',
+                        action: FxEmptyAction(
+                          label: 'Saúde da base',
+                          onTap: _abrirRetencao,
+                        ),
+                      ),
+                    ],
+                  )
+                  : FxContentWidthLimiter(
+                    child: ListView.builder(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      keyboardDismissBehavior:
+                          ScrollViewKeyboardDismissBehavior.onDrag,
+                      padding: const EdgeInsets.all(TokensStrip.s4),
+                      itemCount: _entries.length + (_hasMore ? 2 : 1),
+                      itemBuilder: (context, index) {
+                        if (index == 0) {
+                          return const Padding(
+                            padding: EdgeInsets.only(bottom: TokensStrip.s3),
+                            child: DashboardSectionHeader(title: 'Envios'),
+                          );
+                        }
+                        if (_hasMore && index == _entries.length + 1) {
+                          return FxSatelliteListTile(
+                            title: _carregandoMais
+                                ? 'Carregando…'
+                                : 'Carregar mais',
+                            onTap: _carregandoMais ? null : _carregarMais,
+                          );
+                        }
+                        final entry = _entries[index - 1];
+                        return FxSatelliteListTile(
+                          title: winbackAlunoLabel(entry.alunoNome),
+                          subtitle: Text(
+                            winbackSubtitle(
+                              tipo: entry.tipo,
+                              mensagem: entry.mensagem,
+                            ),
+                          ),
+                          trailing: Text(
+                            winbackWhenLabel(entry.enviadoEm),
+                            style: FocuxHubTypography.bodyMuted(
+                              color: fxScreenMute(context),
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          onTap: entry.alunoId == null
+                              ? null
+                              : () => _abrirAluno(entry),
+                        );
+                      },
+                    ),
+                  ),
+            ),
       ),
     );
   }

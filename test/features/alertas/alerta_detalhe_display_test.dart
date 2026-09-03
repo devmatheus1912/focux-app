@@ -46,4 +46,11 @@ void main() {
     expect(detalhe.sugestaoFonte, 'LOCAL');
     expect(detalhe.podeGerarIa, isTrue);
   });
+
+  test('alertaCountLabel e como calculamos', () {
+    expect(alertaCountLabel(0), 'Nenhum em risco');
+    expect(alertaCountLabel(1), '1 aluno em risco');
+    expect(alertaCountLabel(3), '3 alunos em risco');
+    expect(alertaComoCalculamos, contains('aderência'));
+  });
 }

@@ -13,6 +13,7 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_form_sheet.dart';
@@ -26,7 +27,6 @@ import '../../alunos/widgets/aluno_avatar.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../data/alertas_repository.dart';
 import '../utils/alerta_detalhe_display.dart';
-import '../widgets/alertas_help_sheet.dart';
 
 class AlertasScreen extends ConsumerStatefulWidget {
   const AlertasScreen({super.key});
@@ -228,9 +228,12 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
       label: 'Alertas',
       child: FxShellScaffold(
         useMesh: true,
+        constrainWidth: false,
         appBar: FxShellAppBar(
           title: 'Alertas',
-          subtitle: FxHubFreshness.fromFetchedAt(_fetchedAt),
+          subtitle: _loading
+              ? FxHubFreshness.fromFetchedAt(_fetchedAt)
+              : '${alertaCountLabel(_alertas.length)}${FxHubFreshness.fromFetchedAt(_fetchedAt) == null ? '' : ' · ${FxHubFreshness.fromFetchedAt(_fetchedAt)}'}',
           onBack: () => safePopOrGo(context, '/dashboard/personal'),
           actions: [
             FxHelpIconButton(
@@ -239,7 +242,22 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
                 AnalyticsService.instance.track(
                   ProductEvents.alertasHubHelpOpened,
                 );
-                showAlertasHelpSheet(context);
+                showFxHelpSheet(
+                  context,
+                  title: 'Alertas',
+                  subtitle: 'Quem está esfriando. O check-in live continua no aluno.',
+                  tips: const [
+                    FxHelpTip('Como calculamos', alertaComoCalculamos),
+                    FxHelpTip(
+                      'Lista',
+                      'Toque no aluno para o detalhe. Segure para escrever ou adiar 24h.',
+                    ),
+                    FxHelpTip(
+                      'Limiares',
+                      'Ajuste em Quando dispara.',
+                    ),
+                  ],
+                );
               },
             ),
           ],
@@ -288,12 +306,15 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
                               ),
                             ],
                           )
-                          : ListView.builder(
+                          : FxContentWidthLimiter(
+                            child: ListView.builder(
                             physics: const AlwaysScrollableScrollPhysics(),
+                            keyboardDismissBehavior:
+                                ScrollViewKeyboardDismissBehavior.onDrag,
                             padding: const EdgeInsets.fromLTRB(
-                              FxSettingsLayout.pageInset,
+                              TokensStrip.s4,
                               TokensStrip.s3,
-                              FxSettingsLayout.pageInset,
+                              TokensStrip.s4,
                               TokensStrip.s6,
                             ),
                             itemCount: rows.length,
@@ -367,6 +388,7 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
                                 ],
                               );
                             },
+                          ),
                           ),
                 ),
       ),
