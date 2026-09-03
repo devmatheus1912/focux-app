@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/widgets/fx_help.dart';
+import '../utils/ia_copiloto_display.dart';
 
 Future<void> showIaCopilotoHelpSheet(BuildContext context) {
   return showFxHelpSheet(
@@ -8,6 +9,7 @@ Future<void> showIaCopilotoHelpSheet(BuildContext context) {
     title: 'Como usar o Copiloto',
     subtitle: 'Sugestão da IA. Nada entra no aluno sem você revisar.',
     tips: const [
+      FxHelpTip('Como calculamos', iaCopilotoComoCalculamos),
       FxHelpTip(
         'Aluno',
         'Escolha quem entra na análise. Sem aluno, o Copiloto não gera.',

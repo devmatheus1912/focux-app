@@ -20,7 +20,9 @@ import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
+import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_inset_picker_sheet.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -39,6 +41,7 @@ class _IaAlunoScreenState extends ConsumerState<IaAlunoScreen> {
   int? _alunoId;
   bool _resolving = true;
   Object? _resolveError;
+  DateTime? _fetchedAt;
 
   @override
   void initState() {
@@ -71,6 +74,7 @@ class _IaAlunoScreenState extends ConsumerState<IaAlunoScreen> {
         setState(() {
           _alunoId = aluno.id;
           _resolving = false;
+          _fetchedAt = DateTime.now();
         });
       }
       return;
@@ -88,6 +92,7 @@ class _IaAlunoScreenState extends ConsumerState<IaAlunoScreen> {
         setState(() {
           _alunoId = id;
           _resolving = false;
+          _fetchedAt = DateTime.now();
         });
       } else {
         setState(() {
@@ -110,15 +115,33 @@ class _IaAlunoScreenState extends ConsumerState<IaAlunoScreen> {
   Widget build(BuildContext context) {
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
+    final freshness = FxHubFreshness.fromFetchedAt(_fetchedAt);
+    final subtitle = iaAlunoHubSubtitle(_view);
     return fxScreenA11yScope(
       label: 'Assistente IA',
       child: FxShellScaffold(
         useMesh: true,
+        constrainWidth: false,
         appBar: FxShellAppBar(
           title: 'Assistente IA',
-          subtitle: iaAlunoHubSubtitle(_view),
+          subtitle: freshness == null ? subtitle : '$subtitle · $freshness',
           onBack: () => safePopOrGo(context, '/dashboard/aluno'),
           actions: [
+            FxHelpIconButton(
+              tooltip: 'Como usar o assistente',
+              onTap: () => showFxHelpSheet(
+                context,
+                title: 'Assistente IA',
+                subtitle: 'Pergunte. Nada entra no aluno sem você.',
+                tips: const [
+                  FxHelpTip('Como calculamos', iaAlunoComoCalculamos),
+                  FxHelpTip(
+                    'Visão',
+                    'Chat responde perguntas. Progressão só gera se você pedir.',
+                  ),
+                ],
+              ),
+            ),
             ShellHeaderIconButton(
               icon: 'spark',
               tooltip: 'Trocar visão',
@@ -173,6 +196,7 @@ class _ChatTab extends ConsumerStatefulWidget {
 class _ChatTabState extends ConsumerState<_ChatTab> {
   final List<_IaMsg> _msgs = [];
   final _ctrl = TextEditingController();
+  final _focus = FocusNode();
   final _scroll = ScrollController();
   bool _loading = false;
   Object? _threadError;
@@ -181,6 +205,7 @@ class _ChatTabState extends ConsumerState<_ChatTab> {
   @override
   void dispose() {
     _ctrl.dispose();
+    _focus.dispose();
     _scroll.dispose();
     super.dispose();
   }
@@ -261,7 +286,7 @@ class _ChatTabState extends ConsumerState<_ChatTab> {
                     },
                   )
                   : _msgs.isEmpty
-                  ? const Column(
+                  ? Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       FxEmptyState(
@@ -269,13 +294,19 @@ class _ChatTabState extends ConsumerState<_ChatTab> {
                         title: 'Comece uma conversa',
                         subtitle:
                             'Pergunte sobre treino, dieta ou saúde ao assistente.',
+                        action: FxEmptyAction(
+                          label: 'Escrever pergunta',
+                          onTap: () => _focus.requestFocus(),
+                        ),
                       ),
-                      SizedBox(height: 8),
-                      IaSafetyDisclaimer(),
+                      const SizedBox(height: 8),
+                      const IaSafetyDisclaimer(),
                     ],
                   )
                   : ListView.builder(
                     controller: _scroll,
+                    keyboardDismissBehavior:
+                        ScrollViewKeyboardDismissBehavior.onDrag,
                     padding: const EdgeInsets.all(12),
                     itemCount: _msgs.length + (_loading ? 1 : 0),
                     itemBuilder: (_, i) {
@@ -333,6 +364,7 @@ class _ChatTabState extends ConsumerState<_ChatTab> {
               Expanded(
                 child: TextField(
                   controller: _ctrl,
+                  focusNode: _focus,
                   decoration: FxInputDeco.build(
                     context,
                     'Pergunte ao assistente…',
@@ -340,11 +372,14 @@ class _ChatTabState extends ConsumerState<_ChatTab> {
                   maxLines: null,
                   textInputAction: TextInputAction.send,
                   onSubmitted: (_) => _enviar(),
+                  onTapOutside: (_) =>
+                      FocusManager.instance.primaryFocus?.unfocus(),
                 ),
               ),
               const SizedBox(width: 8),
-              IconButton.filled(
-                icon: const Icon(Icons.send),
+              IconButton(
+                tooltip: 'Enviar',
+                icon: const Icon(Icons.send_rounded),
                 onPressed: _loading ? null : () => _enviar(),
               ),
             ],

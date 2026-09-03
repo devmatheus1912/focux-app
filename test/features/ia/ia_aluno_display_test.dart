@@ -9,5 +9,7 @@ void main() {
       iaAlunoHubSubtitle(IaAlunoHubView.progressao),
       contains('só se você pedir'),
     );
+    expect(iaAlunoComoCalculamos, contains('pedir'));
+    expect(iaChatComoCalculamos, contains('escreve'));
   });
 }

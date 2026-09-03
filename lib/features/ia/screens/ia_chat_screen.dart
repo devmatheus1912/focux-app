@@ -4,12 +4,15 @@ import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/ia_safety_disclaimer.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/ia_repository.dart';
+import '../utils/ia_aluno_display.dart';
 import '../widgets/ia_quota_upgrade.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
@@ -112,10 +115,28 @@ class _IaChatScreenState extends ConsumerState<IaChatScreen> {
       label: 'Assistente IA',
       child: FxShellScaffold(
         useMesh: true,
+        constrainWidth: false,
         appBar: FxShellAppBar(
           title: 'Assistente IA',
           subtitle: 'Chat inteligente para o seu negócio',
-          onBack: () => safePopOrGo(context, '/dashboard/personal'),
+          onBack: () => safePopOrGo(context, '/ia/copiloto'),
+          actions: [
+            FxHelpIconButton(
+              tooltip: 'Como usar o assistente',
+              onTap: () => showFxHelpSheet(
+                context,
+                title: 'Assistente IA',
+                subtitle: 'Pergunte. Nada entra no aluno sem você.',
+                tips: const [
+                  FxHelpTip('Como calculamos', iaChatComoCalculamos),
+                  FxHelpTip(
+                    'Copiloto',
+                    'Para gerar treino, dieta ou progresso, use o Copiloto.',
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
         body: Column(
           children: [
@@ -142,7 +163,7 @@ class _IaChatScreenState extends ConsumerState<IaChatScreen> {
                         },
                       )
                       : _msgs.isEmpty
-                      ? const Column(
+                      ? Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           FxEmptyState(
@@ -150,13 +171,21 @@ class _IaChatScreenState extends ConsumerState<IaChatScreen> {
                             title: 'Comece uma conversa',
                             subtitle:
                                 'Pergunte ao seu assistente de fitness sobre treino, dieta ou negócio.',
+                            action: FxEmptyAction(
+                              label: 'Abrir Copiloto',
+                              onTap: () =>
+                                  safePopOrGo(context, '/ia/copiloto'),
+                            ),
                           ),
-                          SizedBox(height: 8),
-                          IaSafetyDisclaimer(),
+                          const SizedBox(height: 8),
+                          const IaSafetyDisclaimer(),
                         ],
                       )
-                      : ListView.builder(
+                      : FxContentWidthLimiter(
+                        child: ListView.builder(
                         controller: _scroll,
+                        keyboardDismissBehavior:
+                            ScrollViewKeyboardDismissBehavior.onDrag,
                         padding: const EdgeInsets.all(12),
                         itemCount: _msgs.length + (_loading ? 1 : 0),
                         itemBuilder: (_, i) {
@@ -203,6 +232,7 @@ class _IaChatScreenState extends ConsumerState<IaChatScreen> {
                           );
                         },
                       ),
+                      ),
             ),
             if (_msgs.isNotEmpty && _threadError == null)
               const IaSafetyDisclaimer(compact: true),
@@ -230,11 +260,14 @@ class _IaChatScreenState extends ConsumerState<IaChatScreen> {
                       maxLines: null,
                       textInputAction: TextInputAction.send,
                       onSubmitted: (_) => _enviar(),
+                      onTapOutside: (_) =>
+                          FocusManager.instance.primaryFocus?.unfocus(),
                     ),
                   ),
                   const SizedBox(width: 8),
-                  IconButton.filled(
-                    icon: const Icon(Icons.send),
+                  IconButton(
+                    tooltip: 'Enviar',
+                    icon: const Icon(Icons.send_rounded),
                     onPressed: _loading ? null : () => _enviar(),
                   ),
                 ],
