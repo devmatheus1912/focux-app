@@ -1,7 +1,9 @@
 # Focux Personal — Referência oficial de design e engenharia
 
-**Padrão de excelência do aplicativo (visual, UX, arquitetura, segurança, dados, ops).**
-**Versão:** 2.0 · **Data:** 2026-09-02 · **Plataforma de referência:** iOS (HIG) com paridade Android.
+**Padrão de excelência do aplicativo (visual, UX, job, arquitetura, segurança, dados, ops).**
+**Versão:** 2.1 · **Data:** 2026-09-03 · **Plataforma de referência:** iOS (HIG) com paridade Android.
+
+> **Barra de produção (v2.1).** Pele e anatomia não bastam. Uma tela só está pronta quando o **job do domínio** está completo, **voltar** funciona em todo caminho de entrada, o **teclado iOS** fecha sem freeze, os **quatro estados** existem, e o caminho de dados foi auditado. O Ruflo não declara lote encerrado só porque a tela “parece Focux”. Ver [§0.5](#05-barra-de-produção-v21) e [§39](#39-freeze-de-produção).
 
 > **Este arquivo é a única referência canônica.** Ele **substitui e aposenta**:
 > - `PERFIL_DESIGN_REFERENCE.md` (v1 — escopo `/perfil`, fold inset)
@@ -18,6 +20,7 @@
 - [0.2 O que mudou da v1 para a v2](#02-o-que-mudou-da-v1-para-a-v2)
 - [0.3 Ordem de precedência](#03-ordem-de-precedência)
 - [0.4 Migração: pendências ao aposentar os arquivos v1](#04-migração-pendências-ao-aposentar-os-arquivos-v1)
+- [0.5 Barra de produção (v2.1)](#05-barra-de-produção-v21)
 
 **Parte I — A pele (invariante em todo o app)**
 - [1. Princípio raiz: pele constante, anatomia variável](#1-princípio-raiz-pele-constante-anatomia-variável)
@@ -37,6 +40,7 @@
 - [12. Densidade e revelação progressiva](#12-densidade-e-revelação-progressiva)
 - [13. Estados obrigatórios](#13-estados-obrigatórios)
 - [14. Navegação, sheets, teclado e layout estável](#14-navegação-sheets-teclado-e-layout-estável)
+  - [14.1 Voltar previsível](#141-voltar-previsível) · [14.2 Teclado iOS / Android](#142-teclado-ios--android) · [14.3 Sheets e overlays](#143-sheets-e-overlays) · [14.4 Deep link e FCM](#144-deep-link-e-fcm)
 - [15. Acessibilidade e ergonomia](#15-acessibilidade-e-ergonomia)
 
 **Parte III — Regras que não podem ser esquecidas**
@@ -56,7 +60,7 @@
 **Parte V — Os 80 pilares**
 - [25. Regra de evidência](#25-regra-de-evidência)
 - [26. Tabelas dos 80 pilares](#26-tabelas-dos-80-pilares)
-- [27. Pilares estruturais 81–92](#27-pilares-estruturais-8192)
+- [27. Pilares estruturais 81–100](#27-pilares-estruturais-81100)
 
 **Parte VI — Execução**
 - [28. Playbook de implementação em massa](#28-playbook-de-implementação-em-massa)
@@ -67,6 +71,12 @@
 - [33. Scorecard e checklist de ship](#33-scorecard-e-checklist-de-ship)
 - [34. Catálogo de componentes](#34-catálogo-de-componentes)
 - [35. Padrões de detalhe](#35-padrões-de-detalhe)
+
+**Parte VII — Produção (v2.1)**
+- [36. Job completo: tela rasa é regressão](#36-job-completo-tela-rasa-é-regressão)
+- [37. Catálogo SaaS fitness: potencial mínimo por domínio](#37-catálogo-saas-fitness-potencial-mínimo-por-domínio)
+- [38. Decisão ship / hide / delete](#38-decisão-ship--hide--delete)
+- [39. Freeze de produção](#39-freeze-de-produção)
 
 **Apêndices**
 - [A. Registro de auditoria: hub Perfil](#a-registro-de-auditoria-hub-perfil)
@@ -84,6 +94,8 @@ Corolário operacional: **antes de editar qualquer tela, classifique-a** em um d
 
 Uma tela linda com regra, contrato ou tenant errados é pior do que não mexer.
 
+Corolário de produção (v2.1): **uma tela linda com job incompleto, voltar morto ou teclado preso também é pior do que não mexer.** Pele sem operação não é Focux.
+
 ---
 
 ## 0.2 O que mudou da v1 para a v2
@@ -99,8 +111,9 @@ A v1 (`PERFIL_DESIGN_REFERENCE.md`) era excelente para o que se propunha — o f
 | 5 | Sem taxonomia de superfície | Login, wizard, execução de treino e formulário não tinham arquétipo — caíram no default inset. | §9 define nove arquétipos, cada um com esqueleto, componentes e proibições. |
 | 6 | Sem orçamento de destaque | "Densidade comparável à Home" é subjetivo; virou muro de chips/badges. | §11 e §12 dão limites contáveis (1 P0, ≤2 P1, ≤3 sinais/linha, agregação a partir de 3 repetições). |
 | 7 | Backend: "na dúvida, propor" | Correto, mas passivo — sem proposta, nada era proposto. | §22 torna a auditoria de backend **obrigatória e entregável** em toda tela tocada, com template e severidade. |
+| 8 | *(v2.1)* Pronto = visual elevado | Lote Ruflo encerrava com pele/anatomia; voltar, teclado, job e freeze ficavam para “depois”. | Pronto = visual **e** operação. §0.5, §14, §36–§39. Tela rasa (A21), voltar morto (A22) e teclado preso (A23) são regressão. |
 
-Nada foi relaxado: todas as regras de negócio, segurança, tenant, LGPD, cache e performance da v1 continuam vigentes, íntegras, em §16–§21.
+Nada foi relaxado: todas as regras de negócio, segurança, tenant, LGPD, cache e performance da v1 continuam vigentes, íntegras, em §16–§21. A v2.1 **não** relaxa estética: ela fecha o buraco entre “parece pronto” e “sobe para a loja”.
 
 ---
 
@@ -110,10 +123,11 @@ Em caso de conflito, decidir nesta ordem:
 
 1. **Segurança, tenant, LGPD, auth, pagamento** (§20, pilares 52–68) — nunca cede a estética.
 2. **Regra de negócio e contrato de dados** (§16–§18) — nunca cede a estética.
-3. **Acessibilidade e alvo de toque** (§15, pilares 33/38) — nunca cede a densidade.
-4. **Anatomia da superfície** (§9–§12) — vence a preferência pessoal e vence "como a outra tela faz".
-5. **Pele** (§1–§8) — vence variação criativa local.
-6. **Preferência estética** — último critério.
+3. **Acessibilidade, teclado e alvo de toque** (§14.2, §15, pilares 33/38/94) — nunca cede a densidade nem a animação.
+4. **Navegação previsível e job completo** (§14.1, §36, pilares 2/44/93/95) — nunca cede a “já parece elevado”.
+5. **Anatomia da superfície** (§9–§12) — vence a preferência pessoal e vence "como a outra tela faz".
+6. **Pele** (§1–§8) — vence variação criativa local.
+7. **Preferência estética** — último critério.
 
 ---
 
@@ -131,6 +145,34 @@ Ao adotar este arquivo, os ponteiros para os documentos antigos ficam órfãos. 
 | `docs/` | `PERFIL_DESIGN_REFERENCE.md`, `FOCUX_80_PILARES.md` | Apagar após o commit acima (pilar 72 — não deixar "por precaução") |
 
 Enquanto a atualização não acontecer, **não apagar os arquivos v1**: o gate `security_pillar_contract_test` referencia o nome e quebra o CI.
+
+---
+
+## 0.5 Barra de produção (v2.1)
+
+> **O Ruflo termina quando o Personal pode subir para a loja, não quando a última tela “parece Focux”.**
+
+Esta versão fecha o gap observado na implementação em massa: telas elevadas visualmente com (a) botão voltar morto, (b) teclado iOS que não fecha e obriga a matar o app, (c) job raso — uma funcionalidade onde o domínio SaaS fitness exige várias.
+
+**Cinco eixos, todos bloqueantes.** Um eixo verde e quatro vermelhos = tela **não** pronta.
+
+| Eixo | O que afirma | Onde |
+|---|---|---|
+| **Pele + anatomia** | Tipo S1–S9, tokens, 1 P0, densidade | §1–§12 |
+| **Estados** | Loading / vazio / erro / freshness | §13 |
+| **Navegação + teclado** | `safePopOrGo`; teclado dismissível no iPhone; sheet com `viewInsets` | §14 |
+| **Job completo** | A tela oferece o potencial do domínio, não um único atalho | §36–§37 |
+| **Dados + freeze** | Proposta §22; gates §32; checklist §39 | §22, §32, §39 |
+
+**O que o Ruflo pode e não pode fazer:**
+
+- **Pode** (e deve) corrigir no mesmo lote da tela: voltar, teclado, empty/erro, P0 do tipo, extração para core, fold morto, a11y, density.
+- **Deve propor e esperar** (§29): auth, tenant, pagamento, migration, endpoint novo, gate de plano, PII, IA autoaplicada.
+- **Não pode** encerrar o lote com “visual ok, job depois”. Isso é A21.
+- **Não pode** inventar módulo novo (comunidade, backup, consent) sem passar por [§38](#38-decisão-ship--hide--delete).
+- **Não pode** declarar o app pronto para produção sem o freeze de [§39](#39-freeze-de-produção).
+
+**Lote 0 (antes de continuar tipos).** Se ainda não existir no core: (1) `FxShellAppBar` nunca cai em `Navigator.maybePop` sozinho — exige `onBack` com `safePopOrGo` ou `fallbackLocation`; (2) wrapper canônico de dismiss de teclado para S5/S6/S7. Sem isso, cada lote reproduz A22 e A23.
 
 ---
 
@@ -309,7 +351,7 @@ Todo destino navegável do app é **exatamente um** destes nove tipos. A classif
 
 **Proibido.** `FxSettingsGroup`/`FxSettingsTile` como estrutura da tela. Lista plana de tudo que existe. CTA full-width. Mais de um `emphasize: true` por viewport. Lista pesada no first paint (`alunos: null` no snapshot). Teaser de IA duplicado no header.
 
-**Aceite.** Valor principal above the fold, sem scroll e sem segundo loading (pilar 13). Exatamente 1 P0 visualmente destacado (pilar 4). Um único request de hub (BFF).
+**Aceite.** Valor principal above the fold, sem scroll e sem segundo loading (pilar 13). Exatamente 1 P0 visualmente destacado (pilar 4). Um único request de hub (BFF). **Job completo (§36):** o personal decide e age neste domínio sem abrir outra tela para a ação óbvia do dia. Uma lista sozinha, um log, ou um empty sem CTA **não** é S1.
 
 ---
 
@@ -330,7 +372,7 @@ Todo destino navegável do app é **exatamente um** destes nove tipos. A classif
 
 **Proibido.** Cards KPI. Accordion. Pills no hero. Preview LIVE. CTA full-width. Linha que executa transação (pagar, enviar, iniciar) — isso é botão em S5/S6, não linha.
 
-**Aceite.** Toda linha ou empilha uma rota, ou abre um picker, ou alterna um booleano. Nenhuma linha executa transação. Grupos ≤ 4; se passar de 7 destinos no mesmo nível, mover o excedente para rota-catálogo própria (foi assim que `/perfil/ferramentas` nasceu).
+**Aceite.** Toda linha ou empilha uma rota, ou abre um picker, ou alterna um booleano. Nenhuma linha executa transação. Grupos ≤ 4; se passar de 7 destinos no mesmo nível, mover o excedente para rota-catálogo própria (foi assim que `/perfil/ferramentas` nasceu). **Job completo:** cada destino do catálogo existe de verdade (não 404, não tela rasa). Linha que abre um módulo incompleto é A21 — esconder (hide) até o job existir (§38).
 
 ---
 
@@ -351,7 +393,7 @@ Todo destino navegável do app é **exatamente um** destes nove tipos. A classif
 
 **Proibido.** Transformar as seções em pilha de `FxSettingsGroup` com chevrons (é o anti-padrão A1). Enterrar a ação primária no meio do scroll. Repetir a mesma métrica em card e em linha. Mais de 3 chips de status no header.
 
-**Aceite.** Métricas above the fold. Ação primária alcançável sem scroll. Cada seção responde a uma pergunta nomeável.
+**Aceite.** Métricas above the fold. Ação primária alcançável sem scroll. Cada seção responde a uma pergunta nomeável. **Job completo:** entender **e** agir. S3 só-leitura, sem sticky P0 do domínio, é tela rasa (A21). Exemplo: aluno 360 sem cobrar / escrever / atribuir treino; mensalidade sem marcar pago / lembrar; treino sem atribuir / duplicar / iniciar.
 
 ---
 
@@ -373,7 +415,7 @@ Todo destino navegável do app é **exatamente um** destes nove tipos. A classif
 
 **Proibido.** `FxSettingsGroup` para dado dinâmico (grupo inset é para conjunto fixo e conhecido de configurações). Filtrar/ordenar o mundo no FE (pilar 65). Mais de 3 sinais visuais por linha (§12). Lista sem busca acima de ~10 itens. `ListView(children: [...])` para lista de tamanho desconhecido.
 
-**Aceite.** Busca a um toque. Paginação no BE. Linha com no máximo: título, uma linha de contexto, um sinal de status, um valor.
+**Aceite.** Busca a um toque. Paginação no BE. Linha com no máximo: título, uma linha de contexto, um sinal de status, um valor. **Job completo:** encontrar, filtrar, abrir o detalhe, e criar quando o domínio cria. Lista sem busca acima de ~10 itens, sem empty com CTA, ou sem caminho para o S3 do item, não fecha o lote.
 
 ---
 
@@ -393,7 +435,7 @@ Todo destino navegável do app é **exatamente um** destes nove tipos. A classif
 
 **Proibido.** Submit como linha com chevron. Validação apenas no submit. `autofocus` sem `post-frame`. Teclado errado por tipo (usar `keyboardType` + máscara BR: telefone, CPF, CEP, moeda). Botão que não desabilita durante o envio.
 
-**Aceite.** Validação inline; teclado e máscara corretos; botão com estado de envio; descarte com dados preenchidos pede confirmação; nenhum overflow com teclado aberto em phone e landscape.
+**Aceite.** Validação inline; teclado e máscara corretos; botão com estado de envio; descarte com dados preenchidos pede confirmação; nenhum overflow com teclado aberto em phone e landscape. **Contrato de teclado (§14.2) é aceite, não polimento.** Se o teclado do iPhone não fecha sem matar o app, a tela **não** está pronta — mesmo com visual 10/10. **Contrato de teclado (§14.2) é aceite, não polimento.** Se o teclado do iPhone não fecha sem matar o app, a tela **não** está pronta — mesmo com visual 10/10.
 
 ---
 
@@ -414,7 +456,7 @@ Todo destino navegável do app é **exatamente um** destes nove tipos. A classif
 
 **Proibido.** Estrutura inset-grouped. Mais de um CTA com peso de primário. Comparação de planos em lista de chevrons. Pedir dado que não é necessário para converter. Contornar `SubscriptionDeviceGuard` na UI.
 
-**Aceite.** Conversão em ≤2 toques a partir do primeiro frame. Um único primário visível sem scroll. Erro de credencial via `friendlyError`, inline e específico, nunca stack.
+**Aceite.** Conversão em ≤2 toques a partir do primeiro frame. Um único primário visível sem scroll. Erro de credencial via `friendlyError`, inline e específico, nunca stack. **Teclado:** mesmo contrato de S5 — campo de e-mail/senha/código não pode prender o teclado nem esconder o CTA. `authScrollPadding` considera `viewInsets`; tap fora / scroll dismissam o teclado.
 
 ---
 
@@ -438,6 +480,9 @@ Quatro subtipos. Cada um tem um chrome fechado; não inventar um quinto.
 - `autofocus` → focar **post-frame**.
 - Fecha por back e por gesto; focus trap correto; nunca bloqueia sem saída (pilar 45).
 - Máximo **um** nível de sheet aninhado.
+- **Teclado no sheet (normativo, v2.1).** Padding inferior = `max(viewPadding.bottom, viewInsets.bottom)` (já em `FxHomeSheetChrome.paddingOf`). Campo focado permanece visível. Arrastar para baixo **e** Fechar/Cancelar primeiro `unfocus`, depois fecham o sheet. Sheet que não respeita `viewInsets` é A23 — causa o freeze de teclado no iPhone.
+
+**Aceite de S7.** Uma pergunta, uma saída óbvia, teclado dismissível, back do SO fecha. Overlay sem saída é pilar 45. Overlay que exige matar o app é P0 de produção.
 
 ---
 
@@ -454,7 +499,7 @@ Quatro subtipos. Cada um tem um chrome fechado; não inventar um quinto.
 
 **Proibido.** Listas. Chips de status. Badges. Chevron (não há navegação aqui). Mesh animada custosa em tela que roda por minutos — usar fundo estático. Celebração antes da conclusão real.
 
-**Aceite.** Uma informação dominante. Controles alcançáveis com o polegar. Reduced motion respeitado. Tela permanece acesa quando o job exige. Interrupção (ligação, background) não perde progresso.
+**Aceite.** Uma informação dominante. Controles alcançáveis com o polegar. Reduced motion respeitado. Tela permanece acesa quando o job exige. Interrupção (ligação, background) não perde progresso. **Sair** visível; confirmação se houver progresso. Voltar do SO no meio da execução não descarta sem `PopScope` + confirm.
 
 ---
 
@@ -470,6 +515,8 @@ Quatro subtipos. Cada um tem um chrome fechado; não inventar um quinto.
 5. Estado salvo a cada etapa; sair e voltar retoma onde parou.
 
 **Proibido.** Mais de uma decisão por etapa. Etapa sem como voltar. Perder o preenchido ao sair. First-run que mostra apenas "vazio" em vez de estado guiado (pilar 7).
+
+**Aceite.** Uma decisão por etapa; Voltar em texto em toda etapa > 1; estado persistido; teclado dismissível nas etapas com campo. Sair no meio retoma. Etapa 1 também tem como cancelar (`safePopOrGo` para o pai, com confirm se houver dado).
 
 ---
 
@@ -589,15 +636,70 @@ Offline: `FxConnectivityBanner`. Estado parcial não derruba a tela inteira — 
 ## 14. Navegação, sheets, teclado e layout estável
 
 - **Uma rota, um job nomeável** (pilar 2). Rota no shell correto — Personal vs. Aluno — na árvore do GoRouter (`buildPersonalShellRoute`, `buildAlunoRoutes`, `buildAuthRoutes`, `buildChromeShellRoute`).
-- **Voltar é previsível.** `safePopOrGo`; sem loop, sem tela órfã (pilar 44). Back gesture Android e swipe iOS não conflitam com gesto customizado.
 - **App bar.** `FxShellAppBar`, título e subtítulo **à esquerda** (`centerTitle: false`) — paridade `.toolbarRole(.editor)` do iOS 26. `centerTitle: true` só em sheet/modal curto, sem lista densa, título curto, sem subtítulo longo.
 - **Largura.** `FxContentWidthLimiter` (via `FxShellScaffold(constrainWidth: true)`) em telas satélite; hubs full-bleed usam `false`.
-- **Sheets, teclado e altura:** ver as regras rígidas em [S7](#s7--sheet-overlay-modal). Valem para qualquer overlay do app.
 - **Layout estável:** evitar `LayoutBuilder` + `FittedBox` + `AnimatedContainer` no mesmo eixo. Preferir `FractionallySizedBox` ou constraints explícitas.
 - **Crash de layout não se silencia no Crashlytics.** Overflow, `ParentData`, `S.of` e asserts são dívida de UI a corrigir na causa.
-- **Deep link** funciona quando aplicável, e os parâmetros são documentados na tela (padrão Hoje: `?focus=on|off`, `?sheet=search|help|catalog`).
+
+O restante deste capítulo é **contrato de produção**. Quebrar 14.1 ou 14.2 em qualquer tela tocada invalida o scorecard daquela tela.
+
+### 14.1 Voltar previsível
+
+**Norma.** `safePopOrGo(context, fallbackLocation)` em todo leading de rota satélite. Sem loop, sem tela órfã (pilar 44). Back gesture Android e swipe iOS não conflitam com gesto customizado.
+
+**Causa-raiz observada.** `FxShellAppBar` que omite `onBack` cai em `Navigator.maybePop`. Com GoRouter, `go` / redirect / deep link / FCM **não empilham**. `canPop() == false` → o botão **não faz nada**. `onBack: () => context.pop()` tem o mesmo defeito. Isso é A22.
+
+**Contrato (obrigatório em toda rota chrome / satélite):**
+
+1. `FxShellAppBar` **exige** `onBack` **ou** `fallbackLocation`. Default `maybePop` sozinho é proibido.
+2. `onBack` chama `safePopOrGo(context, '<pai lógico>')`. Pai = hub do domínio (`/alunos`, `/treinos`, `/dashboard/personal`, `/perfil/ferramentas`…), nunca `/` genérico, nunca a própria rota.
+3. Hub de tab do shell (`/dashboard/personal`, `/alunos`, `/treinos`, `/agenda`, `/ia/copiloto` e gêmeos aluno) **não** mostra seta de voltar — o dock é a saída.
+4. Auth S6: leading só quando há tela anterior no fluxo (ex.: `/esqueci-senha` → `/login`). Login raiz não tem seta morta.
+5. Wizard S9: "Voltar" em texto nas etapas > 1; etapa 1 cancela com `safePopOrGo` + confirm se houver dado.
+6. Sheet S7: back do SO fecha o sheet, não a rota de baixo. `PopScope` no sheet, não na página, quando o overlay está aberto.
+7. Três caminhos de entrada, os três voltam: (a) `push` da lista; (b) `go` / deep link / busca; (c) toque de notificação FCM. QA que só testa (a) não fecha A22.
+
+**Pai lógico — regra.** Se a rota é `/alunos/:id/alimentar`, o pai é `/alunos/:id`, não `/dashboard/personal`. Se a rota é `/desafios` aberta pelo catálogo de ferramentas, o pai é `/perfil/ferramentas` **ou** `/dashboard/personal` conforme o `GoRouterState` de origem; na dúvida, usar o fallback do catálogo que abriu a tela, documentado na rota.
+
+**Gate.** Teste de contrato: toda `FxShellAppBar` em arquivo de screen satélite contém `safePopOrGo` ou `fallbackLocation`. Omissão falha o CI (§32).
+
+### 14.2 Teclado iOS / Android
+
+**Plataforma de referência é iOS.** O defeito típico: o teclado abre, o footer/sheet não se move, `unfocus` não dispara, o gesto de voltar é engolido, e o único escape é matar o app. Isso é A23 — P0 de produção, não "polimento".
+
+**Contrato (toda superfície com `TextField` / `TextFormField` / campo de busca / OTP):**
+
+| # | Regra |
+|---|---|
+| 1 | Altura útil considera `MediaQuery.viewInsetsOf(context).bottom`. Footer sticky, CTA S5/S6/S9 e padding de sheet **sobem** com o teclado. |
+| 2 | `FxShellScaffold` / páginas S5/S6 respeitam `resizeToAvoidBottomInset: true` (default). Só desligar com justificativa no scorecard e alternativa que ainda respeita `viewInsets`. |
+| 3 | Tap fora do campo → `FocusScope.of(context).unfocus()`. Preferir wrapper de core (`FxKeyboardDismissScope` quando extraído no lote 0). |
+| 4 | Lista / form com scroll: `keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag`. |
+| 5 | `onTapOutside` / `onSubmitted` em campos de busca. Enter no último campo dispara o P0 ou avança o foco, nunca deixa o teclado órfão. |
+| 6 | `autofocus` só em **post-frame** (`WidgetsBinding.instance.addPostFrameCallback`). Autofocus no `build` em sheet iOS é freeze clássico. |
+| 7 | `keyboardType` + `textInputAction` + máscara BR corretos (e-mail, telefone, CPF, CEP, moeda, OTP). Campo numérico não abre teclado de texto. |
+| 8 | Campo focado permanece visível — scroll automático ou padding. CTA nunca fica 100% atrás do teclado. |
+| 9 | Fechar sheet / voltar rota / botão Cancelar: **primeiro** `unfocus`, **depois** pop. Ordem inversa no iOS deixa o teclado na rota de baixo. |
+| 10 | Landscape + teclado: zero overflow. Phone SE / mini e iPhone atual: ambos passam. |
+| 11 | Back do SO com teclado aberto: fecha o teclado **ou** sai da rota. Nunca no-op. |
+| 12 | Não combinar `maxHeight: % da tela` **ignorando** `viewInsets` em overlay. Usar constraints recebidas (já em `FxHomeSheetChrome.paddingOf`). |
+
+**QA em device iPhone real (não só simulador) antes de marcar o lote S5/S6/S7 pronto:** abrir campo no meio do form; abrir campo em sheet; abrir OTP; abrir busca de S4; rotacionar; voltar com teclado aberto. Se qualquer passo exigir matar o app, o lote **não** fecha.
+
+### 14.3 Sheets e overlays
+
+As regras rígidas de [S7](#s7--sheet-overlay-modal) valem para **qualquer** overlay (`showFxHomeSheet`, `showFxFormSheet`, `showFxConfirmSheet`, `showModalBottomSheet` legado, diálogo). Overlay fora dessas APIs, no lote da tela, **migra** para a API canônica no mesmo ship (§30) — não convive "por precaução".
+
+### 14.4 Deep link e FCM
+
+Deep link funciona quando aplicável, e os parâmetros são documentados na tela (padrão Hoje: `?focus=on|off`, `?sheet=search|help|catalog`).
+
+**FCM.** O app consome `message.data` (`type`, `route`, `alunoId`, `chatId`, `event`, `plano`). Toque de notificação **navega** e a seta volta para um pai válido (14.1, caminho c). Payload data-only do **aluno** que chega vazio é feature quebrada (§22.6.4) — o Ruflo **propõe** o P0 no scorecard; não inventa um segundo roteador.
+
+`plan_sync` do personal precisa atualizar capability sem restart. Se a tela tocada depende de plano e o FCM não sincroniza, registrar no bloco §22.2.
 
 ## 15. Acessibilidade e ergonomia
+
 
 | Item | Regra |
 |---|---|
@@ -610,6 +712,7 @@ Offline: `FxConnectivityBanner`. Estado parcial não derruba a tela inteira — 
 | Thumb zone | Ação frequente na metade inferior; nunca só no topo distante (pilar 36) |
 | Responsivo | Sem overflow em phone, tablet e landscape; iPad em `UIRequiresFullScreen` (portrait-only aprovado) |
 | Texto | Sem truncamento que perca informação essencial; `maxLines` + ellipsis só em rótulo secundário |
+| Teclado | Contrato §14.2. VoiceOver: o campo focado anuncia o rótulo, não só o placeholder. Fechar teclado não deve exigir gesto que o VoiceOver não descubra |
 
 ---
 
@@ -619,7 +722,7 @@ Valem em **todo** o Personal, em qualquer tipo de superfície. Quebrar qualquer 
 
 ## 16. Rota, job, SSOT e tipos
 
-1. **Uma rota = um job nomeável.** Hoje = operar o dia (cobrar / retomar / agenda). Perfil = conta, marca, operação da conta. Não misturar cadastro + financeiro + chat no mesmo fold.
+1. **Uma rota = um job nomeável.** Hoje = operar o dia (cobrar / retomar / agenda). Perfil = conta, marca, operação da conta. Não misturar cadastro + financeiro + chat no mesmo fold. **Job incompleto não conta:** se a rota existe, ela entrega o potencial do domínio (§36–§37), não uma única ação simbólica.
 2. **Hub tem BFF.** Home: um `GET /api/dashboard/home`, snapshot tipado. Não criar provider que refetcha o que o agregado já traz (`/home`, `/360`, `/perfil`).
 3. **`dayFocus` é SSOT do BFF.** FE consome `home.dayFocus`. Sem fallback `DashboardDayFocus.resolve(` no runtime da Home (só em testes de paridade).
 4. **`planoFeatures` do BFF** tem o mesmo shape de `GET /api/planos/me`. FE usa `seedFromHome` + `effectivePlanoFeatures(homeOverride:)`.
@@ -651,8 +754,8 @@ Valem em **todo** o Personal, em qualquer tipo de superfície. Quebrar qualquer 
 21. **PII só do job.** Home não leva email/CPF no payload. Máscara quando o dado não precisa estar visível. WhatsApp no Perfil só se o cadastro estiver incompleto.
 22. **Erros na UI:** `friendlyError` / `.when` / `FxAsyncBody`. **Proibido** `FeedbackHelper.showError(context, '$e')` — vaza stack.
 23. **Estados obrigatórios:** loading (skeleton, nunca tela branca), vazio com CTA, erro + retry, freshness quando houver cache. Ver §13.
-24. **Sheets e teclado:** regras rígidas de [S7](#s7--sheet-overlay-modal).
-25. **Layout estável:** ver §14.
+24. **Sheets e teclado:** regras rígidas de [S7](#s7--sheet-overlay-modal) e [§14.2](#142-teclado-ios--android). Teclado preso no iPhone é P0, não débito estético.
+25. **Layout estável e voltar:** ver [§14](#14-navegação-sheets-teclado-e-layout-estável). Seta que não volta (A22) é P0.
 26. **Não silenciar crash de layout** no Crashlytics como se fosse correção.
 27. **Clipboard PII** só via `copySensitiveToClipboard` (com timeout). Nunca `Clipboard.setData` solto.
 28. **Pagamento:** `SubscriptionDeviceGuard` — jailbreak/root bloqueia assinatura. Não contornar na UI.
@@ -1324,9 +1427,9 @@ A coluna **10/10 elevado** existe onde a v2 endurece o critério; `=` significa 
 | 79 | CI / release readiness | FE+BE | `flutter analyze --fatal-warnings --fatal-infos` e `./gradlew test` sem novo warning. | Rodado de fato; não pontuar de memória |
 | 80 | Docs de produto / help na superfície | FE | Tela complexa tem help/tooltip acessível nela mesma. | `FxHelpIconButton` na app bar |
 
-## 27. Pilares estruturais 81–92
+## 27. Pilares estruturais 81–100
 
-Extras da v1, generalizados para todo o app. Avaliados junto dos 80.
+Extras da v1, generalizados para todo o app. Avaliados junto dos 80. **93–100 são da v2.1** — sem eles o scorecard visual mente sobre produção.
 
 | # | Pilar | Lado | Evidência de 10/10 |
 |---|---|---|---|
@@ -1342,6 +1445,14 @@ Extras da v1, generalizados para todo o app. Avaliados junto dos 80.
 | 90 | **Chevron ⟺ rota** | FE | Nenhum chevron em ação transacional; nenhum botão para navegação simples (§10) |
 | 91 | **Orçamento de destaque** | FE | 1 P0, ≤2 P1, ≤1 `emphasize`, ≤3 sinais por linha (§11–§12) |
 | 92 | **Proposta de backend entregue** | FE+BE | Bloco de §22 presente no scorecard, mesmo quando vazio |
+| 93 | **Voltar previsível** | FE | `safePopOrGo` + pai lógico; os três caminhos de entrada voltam (§14.1) |
+| 94 | **Teclado dismissível** | FE | Contrato §14.2 em device iOS; nenhum freeze; CTA visível com teclado aberto |
+| 95 | **Job completo do domínio** | FE | A tela cobre o potencial mínimo de §37, não um único atalho (anti A21) |
+| 96 | **Catálogo `FocuxSurfaces`** | FE | Rota classificada no mapa rota → S1–S9; gate §32 verde |
+| 97 | **Paridade Personal / Aluno** | FE | Gêmeo aluno, quando o domínio tem gêmeo, não é stub nem copy "em breve" |
+| 98 | **Ship / hide / delete** | FE+BE | Módulo órfão ou raso tem decisão §38 explícita no scorecard |
+| 99 | **Deep link / FCM da tela** | FE | Toque de notificação e query params documentados; payload vazio proposto em §22 |
+| 100 | **Freeze de produção** | FE+BE | A tela consta na planilha §28.1 com os cinco eixos verdes; o app só sobe com §39 |
 
 ---
 
@@ -1349,7 +1460,7 @@ Extras da v1, generalizados para todo o app. Avaliados junto dos 80.
 
 ## 28. Playbook de implementação em massa
 
-Objetivo: **paridade operacional + pele deste arquivo + anatomia do tipo certo**.
+Objetivo: **paridade operacional + pele deste arquivo + anatomia do tipo certo + job completo + voltar + teclado + freeze**. Visual sozinho não é o objetivo.
 
 ### 28.0 Ruflo no Cursor
 
@@ -1361,7 +1472,7 @@ O playbook deste capítulo vive no skill do repo (`.cursor/skills/ruflo/SKILL.md
 2. Um chat **Agent** novo nesse workspace (não um chat só com o app).
 3. Digitar `/ruflo` e confirmar com **Alt+Enter** (Windows/Linux) ou **Option+Enter** (Mac), ou **Use as Mode**. O badge fica no input até sair do modo.
 4. Escolher o modelo no picker do chat. O skill não trava modelo.
-5. Pedir o lote (primeiro: S6, no máximo 3 telas). O Ruflo lê este arquivo, `docs/CONTRATO_APP_BACKEND.md` e o código do backend; não precisa colar o playbook.
+5. Pedir o lote (primeiro: **lote 0 de core** se A22/A23 ainda forem o default — ver §0.5; senão S6, no máximo 3 telas). O Ruflo lê este arquivo, `docs/CONTRATO_APP_BACKEND.md` e o código do backend; não precisa colar o playbook.
 
 Git separado: `focux-app` em `main`, `focux-backend` em `master`. Nunca um commit atravessando os dois. Visual no app; proposta §22.2 no scorecard; implementação no backend só do que §29 libera (nunca auth/tenant/pagamento/migration/endpoint novo sem contrato).
 
@@ -1376,19 +1487,30 @@ Entregável único, sem tocar em código: **planilha de rotas**, uma linha por d
 | Rota | Path no GoRouter |
 | Tela | Widget raiz |
 | Tipo | S1…S9 |
+| Pai lógico | Fallback de `safePopOrGo` |
+| Tem input? | Sim/não — se sim, contrato §14.2 aplica |
 | Estrutura atual | O que está lá hoje (ex.: "inset-grouped") |
-| Divergência | Anti-padrão identificado (§31) |
+| Divergência | Anti-padrão identificado (§31, incl. A21–A28) |
 | P0 atual / correto | Qual é a ação primária e como está tratada |
+| Job mínimo §37 | O que o domínio exige vs. o que a tela faz hoje |
 | Endpoint(s) | Caminho de dados |
+| Decisão §38 | ship / hide / delete (se aplicável) |
 | Lote | Agrupamento de execução |
 
-Nada de "editar no escuro": se houver dúvida sobre qual tela é, listar candidatas e perguntar.
+Nada de "editar no escuro": se houver dúvida sobre qual tela é, listar candidatas e perguntar. **Sem esta planilha, o Ruflo não começa lote de tipo.** Inventário incompleto é como editar no escuro em escala.
+
+**Lote 0 — core de produção (antes de S6 se ainda não feito).** Extrair/corrigir no core, PR próprio, sem misturar tela de produto:
+
+1. `FxShellAppBar`: exigir `onBack` ou `fallbackLocation`; default `maybePop` sozinho sai do código.
+2. Wrapper de dismiss de teclado (`FxKeyboardDismissScope` ou equivalente) usado por S5/S6/S7.
+3. Gate de teste §32 para `safePopOrGo` / `FocuxSurfaces`.
+4. `showModalBottomSheet` legado no caminho do lote seguinte migrado para `showFxHomeSheet` no mesmo ship da tela, não "depois".
 
 ### 28.2 Fase 1 — extração para core
 
 Antes de cada lote, **extrair para `lib/core/widgets/`** o padrão que vai se repetir naquele tipo. É isto que evita centenas de edições divergentes: a tela nova compõe, não recria.
 
-Candidatos prováveis por tipo: barra sticky de ação (S3), footer de formulário (S5), lockup de conversão (S6), header de execução (S8), passo de wizard (S9). Se o padrão ainda não é widget, ele nasce widget **antes** de ser colado na segunda tela.
+Candidatos prováveis por tipo: barra sticky de ação (S3), footer de formulário (S5), lockup de conversão (S6), header de execução (S8), passo de wizard (S9), **dismiss de teclado e leading com `safePopOrGo` (lote 0)**. Se o padrão ainda não é widget, ele nasce widget **antes** de ser colado na segunda tela.
 
 ### 28.3 Fase 2 — lotes por tipo, não por pasta
 
@@ -1398,15 +1520,18 @@ Consistência intra-tipo é o que faz o app parecer desenhado. Ordem sugerida po
 
 | Ordem | Lote | Por quê |
 |---|---|---|
+| 0 | **Core de produção** | Voltar e teclado no default; senão cada lote reproduz A22/A23 |
 | 1 | **S6** conversão | Maior dano hoje (CTA como linha); menor superfície; impacto direto em receita |
-| 2 | **S1** hubs | Definem a percepção de produto |
-| 3 | **S3** detalhes | Onde o personal passa o dia |
+| 2 | **S1** hubs | Definem a percepção de produto **e** o job do dia |
+| 3 | **S3** detalhes | Onde o personal passa o dia; job completo, não só header bonito |
 | 4 | **S4** listas | Busca, filtro e paginação |
-| 5 | **S5** formulários | Volume alto, padrão fechado |
+| 5 | **S5** formulários | Volume alto, padrão fechado, teclado no aceite |
 | 6 | **S8** execução | Poucas telas, ganho alto de foco |
 | 7 | **S9** wizard | Depende de S5 pronto |
-| 8 | **S7** sheets | Varredura de conformidade |
-| 9 | **S2** ajustes | Já está no padrão; só auditar limites de §11 |
+| 8 | **S7** sheets | Varredura de conformidade de overlay + teclado |
+| 9 | **S2** ajustes | Já está no padrão; só auditar limites de §11 e destinos rasos do catálogo |
+| 10 | **Job dos satélites** | §37: hábitos, desafios, winback, loja, NPS… — nenhum fica "lista + empty" |
+| 11 | **Freeze §39** | Planilha 100% verde; device iPhone; analyze; P0 BE conhecidos tratados ou aceitos por escrito |
 
 ### 28.4 Ritmo (agilidade sem dívida)
 
@@ -1420,6 +1545,8 @@ Consistência intra-tipo é o que faz o app parecer desenhado. Ordem sugerida po
 8. **Checagens reais** quando houver terminal: `flutter analyze --fatal-warnings --fatal-infos`, testes da feature, e no BE `./gradlew test` do módulo tocado. Não pontuar 69–79 de memória.
 9. **Bloco de proposta de backend obrigatório** em todo PR (§22), mesmo vazio.
 10. Chats de bugfix/git/limpeza **não** reabrem o playbook inteiro — só o pedaço que o bug toca.
+11. **Voltar + teclado + job** entram no mesmo PR da tela. Não abrir "PR de polish" para A21/A22/A23 da tela que o lote acabou de tocar.
+12. **Espera entre tipos.** Não começa o próximo tipo sozinho. Satélites de §37 só depois do tipo correspondente (um desafio S4 não fura a fila na frente de `/alunos`).
 
 ### 28.5 Definição de pronto por tela
 
@@ -1428,11 +1555,17 @@ Consistência intra-tipo é o que faz o app parecer desenhado. Ordem sugerida po
 - [ ] Componentes escolhidos pela matriz de intenção (§10)
 - [ ] Orçamento de destaque respeitado (§11) e densidade dentro dos limites (§12)
 - [ ] Quatro estados implementados (§13)
+- [ ] **Voltar:** `safePopOrGo` + pai lógico; push, `go`/deep link e FCM voltam (§14.1)
+- [ ] **Teclado:** se a tela tem input, contrato §14.2; sheet respeita `viewInsets` (§14.3)
+- [ ] **Job completo:** potencial mínimo do domínio em §37 coberto, ou hide/delete em §38
 - [ ] Regras de §16–§21 verificadas
 - [ ] Bloco de proposta de backend entregue (§22)
 - [ ] Mortos removidos (§30)
 - [ ] Analyze + testes do caminho tocado passaram
 - [ ] Scorecard + "Precisa da sua decisão" (pode ser vazio)
+- [ ] Pilares 93–100 com nota ou N/A justificado
+
+**Tela não pronta (exemplos que o Ruflo já viu e não pode repetir):** seta que não volta; teclado iPhone que só some matando o app; hub que só lista; detalhe sem ação primária do domínio; empty sem CTA; destino no Perfil que abre módulo stub.
 
 ## 29. O que pode aplicar sozinho vs. o que só propor
 
@@ -1440,8 +1573,8 @@ Espelha a regra Cursor `focux-10-10`. Na dúvida: **propor**, nunca auto-aplicar
 
 | Pode editar direto | Só propor e esperar aprovação |
 |---|---|
-| Visual, UX, tipografia, densidade, a11y, motion, navegação de UI, sheets, empty/loading/erro, performance **client-side**, SRP/limpeza que **não** muda contrato nem regra | Regra de negócio, IA, gates de plano, PII, auth/sessão, tenant/RLS, LGPD, auditoria, secrets, rate limit, contrato API/BFF, cache **server**, validação de domínio, idempotência, paginação BE, Flyway, observabilidade BE, testes de contrato, telemetria de produto |
-| Pilares típicos: 1–2, 4, 6–8, 13–51, 69–72, 74, 76, 78–80, 81–91 | Pilares típicos: 3, 9, 11, 52–68, 73, 75, 77, 92 |
+| Visual, UX, tipografia, densidade, a11y, motion, navegação de UI, **voltar (`safePopOrGo`)**, **teclado/sheets**, empty/loading/erro, job de domínio cujo **contrato já existe**, hide de destino raso no catálogo, performance **client-side**, SRP/limpeza que **não** muda contrato nem regra | Regra de negócio, IA, gates de plano, PII, auth/sessão, tenant/RLS, LGPD, auditoria, secrets, rate limit, contrato API/BFF, cache **server**, validação de domínio, idempotência, paginação BE, Flyway, observabilidade BE, testes de contrato, telemetria de produto, **ligar módulo órfão com P0 de autorização/plano aberto** |
+| Pilares típicos: 1–2, 4, 6–8, 13–51, 69–72, 74, 76, 78–80, 81–91, **93–97, 99–100 (FE)** | Pilares típicos: 3, 9, 11, 52–68, 73, 75, 77, 92, **98 quando a decisão é ship de módulo novo** |
 
 **Nunca editar sozinho:** auth, tenant, pagamento, migration, RLS, endpoint novo sem contrato.
 
@@ -1483,12 +1616,20 @@ Catálogo de defeitos. Cada um tem nome para poder ser citado em revisão.
 | **A18** | Execução poluída | Timer com listas, badges e notificações | S8: um alvo dominante |
 | **A19** | Wizard sobrecarregado | Várias decisões numa etapa | Uma pergunta por etapa (S9) |
 | **A20** | Ajuda enterrada | Linha "Ajuda" no meio da lista | `FxHelpIconButton` na app bar |
+| **A21** | Tela rasa | Visual ok, uma só função onde o domínio SaaS exige várias | Completar o job mínimo de §37 ou hide/delete (§38) |
+| **A22** | Voltar morto | Seta / gesto / `maybePop` / `context.pop()` sem stack | `safePopOrGo` + pai lógico (§14.1) |
+| **A23** | Teclado preso | iPhone abre o teclado e não fecha; freeze; matar o app | Contrato §14.2; `unfocus` antes do pop; `viewInsets` no sheet |
+| **A24** | Overlay fora do chrome | `showModalBottomSheet` / diálogo cru no lote novo | Migrar para `showFxHomeSheet` / form / confirm / help no mesmo ship |
+| **A25** | Gêmeo stub | Tela aluno "em breve" / só empty enquanto o personal opera o domínio | Paridade do job mínimo (§37) ou hide da entrada aluno |
+| **A26** | Destino 404 interno | Linha de ferramentas / deep link / FCM abre rota vazia ou órfã | Ligar, hide, ou delete; nunca chevron para lugar nenhum |
+| **A27** | P0 atrás do teclado | CTA full-width invisível com teclado aberto | Footer sticky com `viewInsets` (§14.2) |
+| **A28** | Freeze sem planilha | Lote visual encerrado; rotas fora do inventário §28.1 | Inventário completo; §39 só com cinco eixos verdes |
 
 ## 32. Gates verificáveis
 
-O que a v1 tinha de melhor era ter transformado segurança em teste (`security_pillar_contract_test.dart`). A v2 propõe o mesmo para a taxonomia — regra que não é testada volta a ser violada em escala.
+O que a v1 tinha de melhor era ter transformado segurança em teste (`security_pillar_contract_test.dart`). A v2 propõe o mesmo para a taxonomia — regra que não é testada volta a ser violada em escala. **A v2.1 torna os gates de superfície, voltar e teclado parte do freeze:** "proposto, não agora" deixou A22/A23 entrarem em lote.
 
-**Vigente:**
+**Vigente (já no repo):**
 
 | Gate | Arquivo |
 |---|---|
@@ -1497,7 +1638,7 @@ O que a v1 tinha de melhor era ter transformado segurança em teste (`security_p
 | Hardening de plataforma | `test/core/security/platform_hardening_test.dart` |
 | Analyze | `flutter analyze --fatal-warnings --fatal-infos` |
 
-**Proposto (implementar no Fase 1 do playbook, não agora):**
+**Vigente a implementar no lote 0 (bloqueia freeze §39 se faltar):**
 
 | Gate | Onde | O que afirma |
 |---|---|---|
@@ -1505,11 +1646,13 @@ O que a v1 tinha de melhor era ter transformado segurança em teste (`security_p
 | `surface_taxonomy_contract_test.dart` | `test/core/design_system/` | Toda rota do router está classificada; nenhuma rota sem tipo |
 | Regra "inset só em S2" | idem | Telas S1/S3/S4/S6/S8/S9 não usam `FxSettingsGroup` como raiz do body |
 | Regra "chevron ⟺ rota" | idem | Rótulo de `FxSettingsTile` não casa com verbo transacional (`entrar`, `salvar`, `pagar`, `assinar`, `iniciar`, `confirmar`, `enviar`) |
-| Regra "1 P0" | idem | No máximo 1 `FxLiquidPrimaryButton` por árvore de tela |
-| Regra "sem CTA full-width em S1/S2" | idem | S1/S2 não instanciam `FxLiquidPrimaryButton` |
+| Regra "1 P0" | idem | No máximo 1 `FxLiquidPrimaryButton` por árvore de tela (exceto empty state isolado) |
+| Regra "sem CTA full-width em S1/S2" | idem | S1/S2 não instanciam `FxLiquidPrimaryButton` como estrutura do hub |
 | Regra "S6 tem primário" | idem | Toda rota de `buildAuthRoutes` instancia exatamente 1 `FxLiquidPrimaryButton` |
+| Regra "voltar previsível" | idem | `FxShellAppBar` em screen satélite contém `safePopOrGo` ou `fallbackLocation`; default `maybePop` sozinho não existe no core |
+| Regra "dismiss de teclado" | idem | S5/S6 com campo usam o wrapper de core ou `onTapOutside` + `keyboardDismissBehavior` |
 
-Um gate de source-contract (leitura do arquivo + regex, como os testes de segurança já fazem) é suficiente e barato — não precisa de golden test.
+Um gate de source-contract (leitura do arquivo + regex, como os testes de segurança já fazem) é suficiente e barato — não precisa de golden test. **Device iPhone** continua QA humano: regex não pega freeze de teclado.
 
 ## 33. Scorecard e checklist de ship
 
@@ -1521,8 +1664,12 @@ Formato do relatório de cada tela, entregue no chat.
 # <Rota> — <nome da tela>
 Tipo de superfície: S<#> (<nome>)
 Job: <uma frase>
+Pai lógico (voltar): <rota>
+Input / teclado: <não | sim — contrato 14.2>
 P0: <ação primária e tratamento>
+Job mínimo §37: <coberto | gap: ... | hide/delete §38>
 Estados: loading / vazio / erro / freshness — <ok | o que falta>
+Caminhos de entrada: push / go / FCM — <ok | o que falta>
 Endpoints: <lista>
 Mortos removidos: <lista>
 Checagens: analyze <ok|falhou> · testes <quais>
@@ -1532,17 +1679,19 @@ Checagens: analyze <ok|falhou> · testes <quais>
 
 Colunas: `#` · `Pilar` · `Cat` · `Lado` · `FE` · `BE` · `Nota` · `Meta` · `Evidência`.
 Meta é sempre 10. `N/A` quando o pilar não se aplica à tela — com justificativa na evidência.
+Incluir **81–100**. Sem 93–95 o scorecard mente.
 Fechar com: **Nota geral (pilares com nota, N/A fora): X/10.**
 
 ### 33.3 Blocos finais
 
 1. **Proposta de backend** — template de §22.2, obrigatório.
-2. **Precisa da sua decisão** — lista de escolhas que dependem do dono do produto (pode ser vazia).
+2. **Precisa da sua decisão** — lista de escolhas que dependem do dono do produto (pode ser vazia). Itens típicos v2.1: ship/hide/delete de módulo raso; pai lógico ambíguo; gêmeo aluno ausente.
+3. **Riscos de produção desta tela** — voltar / teclado / job. Uma linha cada. "Nenhum" só com evidência.
 
 ### 33.4 Checklist rápido antes do ship
 
 - [ ] Tipo de superfície declarado; job da rota claro; chrome/dock no shell certo
-- [ ] Esqueleto do tipo respeitado; nenhum anti-padrão de §31
+- [ ] Esqueleto do tipo respeitado; nenhum anti-padrão de §31 (incl. A21–A28)
 - [ ] 1 P0 no tratamento do tipo; ≤2 P1; ≤1 `emphasize` por viewport
 - [ ] Densidade dentro de §12 (≤3 sinais/linha; agregação a partir de 3 repetições)
 - [ ] Loading / vazio / erro / retry / freshness
@@ -1553,10 +1702,13 @@ Fechar com: **Nota geral (pilares com nota, N/A fora): X/10.**
 - [ ] Hub passa `security_pillar_contract_test` se estiver na lista de hubs
 - [ ] Lista longa = builder + paginação no BE; sheet = altura limitada + teclado
 - [ ] Sem `Flexible` unbounded; sem overflow com teclado/landscape
+- [ ] `safePopOrGo` no leading; três caminhos de entrada voltam
+- [ ] Teclado iOS: unfocus, viewInsets, CTA visível, back não freeze
+- [ ] Job mínimo §37 coberto ou decisão §38 no scorecard
 - [ ] Nada de auth/pagamento/migration/IA autoaplicada neste diff
 - [ ] Fold antigo limpo; testes do fold velho atualizados
 - [ ] Analyze + testes do caminho tocado passaram
-- [ ] Scorecard + proposta de backend + "Precisa da sua decisão"
+- [ ] Scorecard + proposta de backend + "Precisa da sua decisão" + riscos de produção
 
 ## 34. Catálogo de componentes
 
@@ -1677,6 +1829,7 @@ Preferir estes; extrair para core antes de duplicar (pilar 70).
 
 | Símbolo | Caminho |
 |---|---|
+| `safePopOrGo`, `safePopOr`, `goPersonalShellTab` | `lib/core/router/safe_navigation.dart` |
 | `fxScreenA11yScope` | `lib/core/widgets/fx_screen_a11y.dart` |
 | `fxAnnounce`, `fxAnnounceGlobal` | `lib/core/utils/a11y_announce.dart` |
 | `fxMotionDuration`, `fxMotionDurationMs` | `lib/core/utils/motion_preferences.dart` |
@@ -1764,12 +1917,233 @@ Em formulário, o grupo inset é **correto** — ele agrupa campos relacionados,
 
 - Fixa na base, sobre a superfície, com blur (`TokensStrip.blurLight`) e borda superior `chrome.line`.
 - Um `FxLiquidPrimaryButton` + no máximo dois ícones/links secundários.
-- Respeita `SafeArea` inferior e recolhe com o teclado.
+- Respeita `SafeArea` inferior **e** `viewInsets` (§14.2). Recolhe com o teclado; nunca fica escondida atrás dele (A27).
 - Nunca dois níveis de sticky simultâneos (barra + chip).
 
 ---
 
+# Parte VII — Produção (v2.1)
+
+Esta parte não inventa produto. Ela afirma o que **já existe** no Focux (rotas, endpoints, papéis Personal/Aluno) e o mínimo operacional para cada domínio poder ir à loja. O Ruflo implementa o mínimo. Feature nova fora desta lista = decisão do dono, não lote.
+
+## 36. Job completo: tela rasa é regressão
+
+**Tela rasa (A21).** A pele está correta, o tipo até pode estar certo, mas a operação cabe em uma frase pobre: "ver lista", "ver log", "criar um título". O personal de academia/estúdio espera o job inteiro do domínio.
+
+**Teste de uma pergunta, obrigatório no scorecard:**
+
+> "O personal abre esta tela para fazer o quê em 10 segundos?"
+
+Se a resposta honesta for só "olhar", a tela não está pronta. S1 decide e age. S3 entende e age. S4 encontra, filtra e cria. S5 captura e confirma. S8 executa. S6 converte.
+
+**Como completar sem inventar produto:**
+
+1. Listar o que o **backend já expõe** para o domínio (grep do controller + `CONTRATO_APP_BACKEND.md` + call sites no app).
+2. Listar o que a **UI faz hoje**.
+3. O gap é o lote de job — no mesmo tipo de superfície, no mesmo ship visual quando couber, senão PR imediato do mesmo tipo.
+4. Se o backend não tem o endpoint: **propor** em §22.2 (P0/P1). Não desenhar botão morto.
+5. Se o backend tem e a UI não chama: **implementar** no FE (está em §29 como UX/navegação, desde que o contrato exista).
+6. Se ninguém deveria usar ainda: **hide** no catálogo (§38). Chevron para módulo morto é A26.
+
+**Sinais de tela rasa (qualquer um já reprova o lote):**
+
+- Um único formulário de um campo onde o domínio tem ciclo de vida (criar / atribuir / pausar / encerrar / ver ranking / notificar).
+- Hub que é `ListView` de cards sem foco do dia e sem ação.
+- Empty state sem CTA, ou CTA que não executa o job.
+- "Em breve" / placeholder / leaderboard-only / log-only em rota de produção.
+- Gêmeo aluno ausente ou stub enquanto o personal opera o mesmo domínio (A25).
+- Métricas sem ação, ou ação sem contexto (número órfão + A4 juntos).
+
+## 37. Catálogo SaaS fitness: potencial mínimo por domínio
+
+Escopo: **funcionalidades já presentes** no Personal (rotas em `buildChromeShellRoute`, `buildPersonalShellRoute`, `buildAlunoRoutes`, `buildAuthRoutes`). Não é roadmap. É o chão de produção.
+
+Para cada linha: o Ruflo, ao tocar qualquer tela do domínio, fecha o **mínimo**. O que passar do mínimo e já existir no código **não pode regredir**. O que o BE oferece além do mínimo entra no gap do scorecard (implementar se contrato vivo; senão propor).
+
+### 37.1 Núcleo operacional (o dia a dia)
+
+| Domínio | Rotas âncora | Tipo típico | Mínimo de produção (job) |
+|---|---|---|---|
+| **Auth / sessão** | `/login`, `/register`, `/register/aluno`, `/esqueci-senha`, `/resetar-senha`, `/aluno/definir-senha` | S6 | Entrar (e-mail/senha + Google se habilitado), criar conta, recuperar senha com código, erros inline, teclado, redirect pós-login para o shell certo. Sem seta morta no login raiz. |
+| **Onboarding** | `/onboarding`, `/onboarding/wizard`, `/setup/identidade` | S9 | Uma decisão por etapa; persistir; retomar; Voltar; identidade mínima para operar. First-run guiado, nunca empty da Home sem rumo. |
+| **Hoje** | `/dashboard/personal` | S1 | Foco do dia, ≤3 ações, rails top-N, freshness, busca/help/catálogo por deep link. Sem teaser de IA duplicado. |
+| **Alunos (lista)** | `/alunos`, `/kanban`, `/alunos/novo`, `/alunos/acoes-massa` | S4/S5 | Busca, filtros, status, criar, ações em massa que o BE já tem. Kanban se existir rota: mover etapa de verdade, não maquete. |
+| **Aluno 360** | `/alunos/:id`, editar, equipamentos | S3/S5 | Identidade + 2–4 métricas + seções nomeáveis + sticky P0 do momento (cobrar **ou** escrever **ou** atribuir — o que o foco do aluno pedir). Atalhos para treino, financeiro, chat, evolução, anamnese, alimentar **funcionam** (A26). |
+| **Treinos** | `/treinos`, `/treinos/novo`, `/treinos/:id`, add exercício | S4/S5/S3 | Listar, criar, montar, atribuir, duplicar, excluir com confirm. Picker de exercício canônico. |
+| **Exercícios** | `/exercicios`, novo, detalhe, wizard biblioteca | S4/S3/S5/S9 | Catálogo, busca, CRUD, filtros, wizard de biblioteca. Preview de vídeo não pode ser copy "em breve" se a rota existe — ou player, ou hide do atalho. |
+| **Agenda** | `/agenda`, `/agenda/novo`, `/agenda/aluno` | S1/S5 | Ver o dia, criar, remarcar/cancelar se o contrato existir, empty do dia com CTA. Ocupação/período do BE: usar ou propor, não ignorar em silêncio. |
+| **Check-in / execução** | `/checkin`, `/checkin/executar`, histórico, presencial, `/checkin/treinos` | S1/S8/S4 | Iniciar, pausar, avançar, concluir; progresso sobrevive background; sair com confirm. Histórico encontrável. Presencial não mistura lista de biblioteca com o alvo de execução (A18). |
+| **Financeiro** | `/financeiro`, `/financeiro/aluno`, `/financeiro/mensalidades/:id` | S1/S3 | Cobrar, marcar pago, atrasadas, detalhe da mensalidade com P0. Lote marcar-pago do BE: se a UI não tem, propor no scorecard — não deixar o personal cobrando um a um se o contrato de lote existe. `double` no contrato é dívida, não trava visual. |
+| **Chat** | `/chat/inbox`, `/chat/aluno`, `/alunos/:id/chat` | S4 + conversa | Inbox com unread **do chat** (não misturar com notificações). Enviar, mídia que o contrato já tem, busca na conversa. Teclado: §14.2 rigoroso — composer é o freeze clássico. |
+| **IA copiloto** | `/ia/copiloto`, `/ia/chat`, `/ia/aluno`, progressão | S1/S7 | Opt-in, nunca autoaplicar no first paint. Quota e gate via capability. Insight com CTA que executa ou empurra a rota certa. Timeout vira erro, não loading infinito. |
+
+### 37.2 Relacionamento, crescimento e marca
+
+| Domínio | Rotas âncora | Tipo típico | Mínimo de produção (job) |
+|---|---|---|---|
+| **Leads** | `/leads`, `/leads/kanban`, `/leads/novo`, `/leads/:id`, `/leads-publicos` | S4/S3/S5 | Capturar, qualificar, converter (se o BE converter lead: **gate de plano** no servidor antes de a UI nascer — §22.6). Kanban move estágio de verdade. |
+| **Convites** | `/convites` | S4/S5 | Gerar, copiar, revogar, estado do convite. Clipboard PII via helper canônico. |
+| **Feed** | `/feed`, `/feed/aluno` | S1/S4 | Publicar, listar, comentar se o contrato existir. Aluno vê o feed do personal, não empty eterno sem copy honesta. |
+| **Broadcasts** | `/broadcasts` | S5/S4 | Enviar para segmento que o BE já tem; confirmação; histórico. Um campo "mensagem" sem destinatário é A21. |
+| **Captura / landing** | `/perfil/landing-editor`, `/leads-publicos` | S5/S2 | Editar landing, publicar, ver leads públicos. Placeholder de copy detectado não publica. |
+| **Marca / white-label** | `/identidade-visual`, `/white-label`, wallet | S2/S5 | Identidade, domínio, wallet. Voltar para `/perfil`. |
+| **Referral** | `/referral` | S1/S6 | Código, copiar, estado. Sem botão morto. |
+| **Migração** | `/migracao-magica` e aliases | S9/S5 | Importar, revisar, confirmar. Teclado e sheets de foto/OCR no contrato §14.2. |
+
+### 37.3 Engajamento, saúde da base e conteúdo do aluno
+
+| Domínio | Rotas âncora | Tipo típico | Mínimo de produção (job) |
+|---|---|---|---|
+| **Alertas** | `/alertas`, detalhe, `/alertas/config` | S1/S3/S2 | Ver, filtrar, agir (abrir aluno / cobrar / silenciar), configurar. Detalhe sem ação é A21. |
+| **Coach proativo** | `/coach` | S1 | Mensagens **com** CTA para o aluno/alerta/agenda — não só lista de texto. Empty com o que o coach precisa para ter o que dizer. |
+| **Win-back / retenção / dunning / churn** | `/winback`, `/retencao`, `/dunning` | S1 | Quem está em risco, por quê, o que fazer (mensagem, cobrança, tarefa). Log sozinho é A21. "Scores em breve" não fecha lote. |
+| **Hábitos** | `/habitos`, `/aluno/habitos` | S1/S4/S3 | Definir, atribuir, marcar, streak visível. Gêmeo aluno opera o hábito, não só lê. |
+| **Desafios** | `/desafios` | S4/S3 | Criar com o que o contrato tem (não só título), prazo, participantes, ranking, encerrar. Sheet de leaderboard não substitui o detalhe. |
+| **Ranking / gamificação / trilhas** | `/ranking`, `/gamificacao`, `/alunos/:id/trilhas` | S1/S4/S3 | Ver posição, regras, atribuir trilha, progresso. Badge sem caminho de ganhar é A21. |
+| **NPS** | `/nps` | S1 | Ver score, listar respostas, filtrar detratores com atalho (chat/aluno). Prompt de coleta no momento certo, não diálogo cru fora do chrome. |
+| **Depoimentos** | `/depoimentos`, `/depoimentos-aluno` | S4/S5 | Solicitar, aprovar, publicar. Aluno consegue enviar. |
+| **Evolução / fotos / comparativo / engajamento** | `/evolucao`, fotos, comparativo, `/alunos/:id/engajamento` | S3/S4 | Registrar medida/foto, comparar, ler aderência **com** próxima ação. |
+| **Anamnese** | `/alunos/:id/anamnese` | S5/S3 | Preencher, salvar, reler. Teclado §14.2. |
+| **Alimentar** | `/alunos/:id/alimentar` | S3/S5 | Ver plano, editar refeições que o contrato permite, atribuir ao aluno. |
+| **Grupos / aulas** | `/grupo-aulas` + gêmeo aluno | S1/S4 | Turma, presença, aviso. Não é lista morta. |
+| **Recorrência** | `/recorrencia` + gêmeo aluno | S3/S5 | Ver ciclo, pausar/retomar se o BE tem, não só texto. |
+| **Galeria / feedback de vídeo / pose** | `/galeria`, feedback-videos, form-check | S4/S8 | Upload, revisar, devolver. Pose coach: status do BE (`/api/pose-coach/status`) consumido; se gated, sheet de upgrade, não tela muda. |
+| **Health** | `/saude` (aluno) | S1 | Dados que o contrato traz; empty honesto se o SO negar permissão. |
+| **Plano de sucesso** | `/alunos/:id/plano-sucesso` | S3/S5 | Metas, prazos, revisar. |
+
+### 37.4 Conta, monetização, operação e suporte
+
+| Domínio | Rotas âncora | Tipo típico | Mínimo de produção (job) |
+|---|---|---|---|
+| **Perfil / ferramentas** | `/perfil`, `/perfil/ferramentas`, `/perfil/editar`, `/perfil/equipe` | S2/S5 | Conta, marca, equipe (listar **e** o que o BE já permite: convite; PUT/DELETE membro hoje órfãos — **não** ligar na UI enquanto o P0 de privilégio do BE estiver aberto; propor). Destinos do catálogo: ou job mínimo, ou hide. |
+| **Planos / paywall / assinatura** | `/planos`, `/paywall`, `/assinatura`, review, success, cancel-save, upsell, promo | S6 | Comparar, assinar, review, sucesso, retenção de cancelamento. Device guard. CTA botão, nunca chevron. |
+| **Pacotes / loja** | `/pacotes`, `/loja` | S4/S5 | CRUD de pacote com gate de plano no **servidor** antes de a superfície vender. Loja: catálogo + status, não vitrine morta. |
+| **Notificações** | `/notificacoes` | S4 | Lista, marcar lida, deep link que volta (§14.1+§14.4). Unread do app ≠ unread do chat. |
+| **Busca global** | `/busca` | S4 | Encontra aluno, treino, ferramenta. Resultado empilha rota viva. |
+| **Analytics / relatórios / qualidade** | `/analytics`, `/relatorios/global`, `/relatorio/business`, `/dashboard/qualidade` | S1 | Ler o que o BE já agrega. **Emitir** eventos de produto se o contrato `/api/analytics/evento` existe e o app hoje não produz — propor no scorecard (pilar 77: não inventar funil paralelo; **usar** o que já há). |
+| **Automações** | `/automacoes` | S2/S5 | Ligar/desligar fluxos existentes. Automação sem trigger visível é A21. |
+| **RBAC admin** | `/admin/rbac` | S2 | Só para quem o BE autoriza. Não ampliar superfície enquanto P0 de concessão arbitrária estiver aberto — descrever, esperar. |
+| **Suporte** | `/suporte` | S4/S7 | Abrir ticket, listar, detalhe. Sheet de ticket no chrome S7 + teclado. |
+| **QA interno** | `/qa/smoke`, `/qa/tokens-strip` | — | Fora da loja. Não entra no freeze do usuário final. |
+
+### 37.5 Shell do aluno
+
+Toda rota em `buildAlunoRoutes` tem job mínimo **do aluno**, não um recorte quebrado do personal:
+
+| Superfície aluno | Mínimo |
+|---|---|
+| Home aluno | O que fazer hoje (treino, mensagem, cobrança visível se o contrato mostrar) |
+| Treinos / check-in | Executar o treino atribuído (S8) |
+| Hábitos / recorrência / grupos / feed / form-check / evolução / perfil | Operar o gêmeo, com voltar e teclado |
+| Ativação | S6/S9 de senha/primeiro acesso completo |
+
+A25 (gêmeo stub) reprova o domínio inteiro, não só a tela aluno.
+
+## 38. Decisão ship / hide / delete
+
+Três estados legais para qualquer módulo, rota ou linha de ferramentas. **Meia tela não é estado legal.**
+
+| Estado | Quando | O que o Ruflo faz |
+|---|---|---|
+| **Ship** | Contrato vivo + job mínimo §37 cobrível no FE sem auth/pagamento/migration novos | Implementa o job no lote do tipo; scorecard verde |
+| **Hide** | Contrato incompleto, P0 de segurança/plano aberto, ou produto ainda não quer expor | Remove a entrada (catálogo, dock, deep link documentado como inativo). Rota pode existir atrás de flag interna/QA. **Não** deixa chevron visível |
+| **Delete** | Morto, duplicata, ou fold antigo | §30 no mesmo ship. Backend órfão: **propor** remoção, não apagar controller sozinho |
+
+**Órfãos conhecidos (§22.7) — decisão obrigatória no freeze, não no escuro:**
+
+| Grupo | Default sugerido (o dono confirma) | Por quê |
+|---|---|---|
+| `comunidade` (12 endpoints, zero UI) | **Hide** até gate de plano P0 fechado; depois ship ou delete do módulo | Vazamento de receita se nascer sem gate |
+| Consentimento LGPD `GET/POST /api/lgpd/me/consent` | **Ship** no Perfil (S2) — pilar 55 | Endpoint pronto; app só deleta conta |
+| Backup / export (`/api/backup/*`, `/api/exportacao/dados`, `/api/lgpd/me/export`) | Hide ou ship S2/S8 curto | Não deixar linha "Backup" que 404 |
+| `PUT`/`DELETE` membro de equipe | **Hide** na UI até P0 de privilégio no BE | Ligar agora amplia a superfície do P0 |
+| Telemetria `POST /api/analytics/evento` | Propor ligar nos P0 de produto já existentes | Painel hoje é cego do cliente |
+| Auditoria, templates, focux-score, agenda ocupação/período | Propor no domínio dono | Ou a tela passa a mostrar, ou o endpoint some |
+| Listas cruas já substituídas pelo gêmeo paginado | Delete seguro no BE (propor) | App já usa `/page` e `/v2` |
+
+O Ruflo **não** escolhe ship de módulo com P0 de autorização/plano aberto. Escreve a recomendação no "Precisa da sua decisão" e espera.
+
+## 39. Freeze de produção
+
+> **Subir para a loja só com este freeze verde.** O Ruflo não declara "acabou o design" no lugar deste capítulo.
+
+### 39.1 Quem assina o quê
+
+| Papel | Assina |
+|---|---|
+| Ruflo (agente) | Planilha §28.1 com cinco eixos por rota; scorecards; gates de FE; propostas §22; hide de A26 |
+| Dono do produto | Itens §38 ainda em "Precisa da sua decisão"; aceite de P0 de backend que **não** quebram o app mas são risco (CI BE, RBAC, idempotência MP, timezone) |
+| Ninguém | "Visual 10/10, o resto depois" |
+
+### 39.2 Checklist do app (FE) — tudo bloqueante
+
+- [ ] Planilha §28.1 cobre **todas** as rotas de `lib/core/router/` (auth, shell personal, chrome, aluno). QA interno marcado fora da loja.
+- [ ] Cada linha: tipo S#, pai lógico, input sim/não, job §37, decisão §38 se raso/órfão.
+- [ ] Lote 0 de core: `FxShellAppBar` sem `maybePop` sozinho; wrapper de teclado; `FocuxSurfaces` + testes §32 verdes.
+- [ ] Zero A22 amostral: satélites abertos por push, por `go` e por busca voltam.
+- [ ] Zero A23 amostral em **iPhone físico**: login, cadastro, editar aluno, chat, sheet de form, busca S4, OTP, wallet.
+- [ ] Zero A21 nos âncoras de §37.1 (núcleo). Satélites de 37.2–37.4: ship completo **ou** hide.
+- [ ] Gêmeos aluno de 37.5 não são stub.
+- [ ] Dark e light nos âncoras.
+- [ ] `flutter analyze --fatal-warnings --fatal-infos` verde.
+- [ ] Testes das features tocadas + gates de segurança vigentes verdes.
+- [ ] Release com `API_CERT_PINS` exigido. Sideload sem pin **não** é o binário da loja.
+- [ ] Crashlytics: overflow/layout **não** silenciados.
+- [ ] FCM: toque navega; `plan_sync` do personal atualiza plano; payload aluno proposto se ainda quebrado.
+
+### 39.3 Checklist backend (não é "o Ruflo conserta sozinho")
+
+O app pode estar visualmente perfeito e a loja ainda ser irresponsável se os P0 de §22.6 estiverem abertos. O freeze **lista** cada um com estado:
+
+| P0 conhecido | Estado no freeze | Nota |
+|---|---|---|
+| CI backend / suíte vermelha | dono | Gate no escuro |
+| Escalonamento RBAC / `SECRETARIA` / permissão arbitrária | dono — **não** ligar UI de equipe/RBAC extra | |
+| Idempotência MercadoPago (crédito 2×) | dono | Offline sync do app agrava |
+| `LocalDateTime.now()` sem zona | dono | App já assume BR |
+| Gates de plano órfãos (comunidade, pacotes, lote, lead) | hide da UI até fechar | |
+| HTTP client sem timeout (IA/rede) | se ainda aberto, loading infinito = A23 de rede | |
+| FCM aluno sem `dados` | proposta P0 no scorecard das telas aluno | |
+
+**Nenhum desses autoriza o Ruflo a relaxar §39.2.** Visual não cobre webhook.
+
+### 39.4 Roteiro humano final (device)
+
+Percorrer como personal real, depois como aluno real:
+
+1. Instalar build de release (ou TestFlight interno), não só debug.
+2. Login, logout, recuperar senha, teclado.
+3. Dia 1: Hoje → aluno novo → treino → agenda → cobrar → chat.
+4. Executar treino (S8) com interrupção (home do SO) e voltar.
+5. Abrir **cada** destino ainda visível em `/perfil/ferramentas` e no dock. Seta volta. Empty tem CTA ou hide.
+6. Matar o app e reabrir: sessão, plano, unread.
+7. Toque em notificação (se houver).
+8. Upgrade / paywall (sandbox), device guard não contornado.
+9. Aluno: ativação, treino, hábito, feed.
+
+Qualquer freeze de teclado, seta morta, tela rasa visível ou crash aborta o freeze. Não se "abre exceção de UI".
+
+### 39.5 O que o Ruflo diz no último lote
+
+No chat, formato curto:
+
+```
+# Freeze de produção
+Planilha: <N rotas> · cinco eixos verdes: <N> · hide: <lista> · delete: <lista>
+A22/A23: <ok em device / gaps>
+Job §37: núcleo <ok> · satélites <ok | hide: ...>
+Gates §32: <ok | faltando>
+Analyze: <ok>
+P0 BE ainda abertos (dono): <lista>
+Pode subir para a loja: sim | não — <motivo>
+```
+
+**"Pode subir: sim"** só com 39.2 verde e 39.3 explícito (aberto = risco aceito **por escrito pelo dono**, não pelo agente).
+
+---
+
 # Apêndices
+
 
 ## A. Registro de auditoria: hub Perfil
 
@@ -1876,12 +2250,14 @@ Auditoria concluída em 2026-08-25 sobre `/perfil` + `/perfil/ferramentas` — *
 
 **Reclassificação v2:** `/perfil` e `/perfil/ferramentas` são **S2**. A auditoria segue válida. O que mudou é o alcance: o esqueleto desta tela **não** é o esqueleto padrão do app.
 
+**Nota v2.1:** este scorecard histórico não pontua pilares 93–100. Não usar como modelo de freeze: um 10/10 de 2026-08-25 não afirma voltar/teclado/job/freeze.
+
 ## B. Mortos: não reintroduzir
 
 **Fold Perfil (removidos):** `perfil_action_tile`, `perfil_card_section`, `perfil_quiet_collapsible`, `_HeroMarcaChip`, `_PlanPill`, `_BrandPreview`, `_PerfilPublicLinkCard`, `perfilPlanSectionLabel`.
 
 **Picker:** `_AlunosSheetCheckRow` e rows custom com `InkWell` + `Icons.check` em sheets de seleção. Highlight de seleção recuado dentro de `FxSettingsGroup` sem `edgeToEdgeRows`.
 
-**Padrões proibidos (§31):** CTA com chevron (A2), inset-grouped fora de S2 (A1), CTA full-width em hub/ajustes (A7), botão branco sobre preto (A8), `showError(context, '$e')` (A11), `if (plano == 'FREE')` em widget (A12).
+**Padrões proibidos (§31):** CTA com chevron (A2), inset-grouped fora de S2 (A1), CTA full-width em hub/ajustes (A7), botão branco sobre preto (A8), `showError(context, '$e')` (A11), `if (plano == 'FREE')` em widget (A12), tela rasa (A21), voltar morto (A22), teclado preso (A23), overlay cru (A24), gêmeo stub (A25), destino morto (A26), P0 atrás do teclado (A27), freeze sem planilha (A28).
 
 **Regra geral:** ao remover, remover de verdade — arquivo, campos, testes do fold antigo, no mesmo commit (§30).

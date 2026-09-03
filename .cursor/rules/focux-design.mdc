@@ -1,5 +1,5 @@
 ---
-description: Pele Focux e taxonomia S1–S9 ao editar UI Dart. Aplica o playbook Ruflo sem reabrir auth/pagamento/contrato.
+description: Pele Focux, taxonomia S1–S9, job completo, voltar e teclado ao editar UI Dart. Aplica o playbook Ruflo sem reabrir auth/pagamento/contrato.
 globs: "**/*.dart"
 alwaysApply: false
 ---
@@ -13,6 +13,10 @@ Antes de editar uma tela: declare o tipo S1–S9 (`docs/FOCUX_DESIGN_REFERENCE.m
 - Chevron ⟺ push de rota. `Entrar` / `Salvar` / `Assinar` / `Pagar` são botão (`FxLiquidPrimaryButton`), nunca `FxSettingsTile`.
 - CTA full-width proibido em S1/S2; obrigatório em S5/S6/S9.
 - Erro: `friendlyError`. Plano: capability, nunca `if (plano == 'FREE')`.
-- Pode editar visual/UX. Só propor: auth, tenant, pagamento, IA, contrato API, migration, PII (`docs/FOCUX_DESIGN_REFERENCE.md` §29).
+- Voltar: `safePopOrGo` + pai lógico. Nunca `maybePop` / `context.pop()` sozinho em satélite (§14.1).
+- Teclado iOS: `viewInsets`, unfocus antes do pop, dismiss por tap/drag (§14.2). Freeze = P0.
+- Job completo do domínio (§36–§37). Tela rasa (A21) não fecha lote. Hide/delete se não der para completar (§38).
+- Pode editar visual/UX/voltar/teclado/job com contrato existente. Só propor: auth, tenant, pagamento, IA, contrato API, migration, PII (`docs/FOCUX_DESIGN_REFERENCE.md` §29).
 - Scorecard §22.2 exige o `focux-backend` no mesmo workspace. Sem a pasta, não chutar classe Java.
-- Lote em massa: skill `/ruflo` (Custom Mode). Ordem S6 → S1 → S3 → S4 → S5 → S8 → S9 → S7 → S2. Máx. 3 telas do mesmo tipo.
+- Lote em massa: skill `/ruflo`. Ordem lote 0 → S6 → S1 → S3 → S4 → S5 → S8 → S9 → S7 → S2 → satélites → freeze §39. Máx. 3 telas do mesmo tipo.
+- Produção: freeze §39. Visual sozinho não autoriza subir para a loja.
