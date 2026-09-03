@@ -14,26 +14,16 @@ class IaCopilotInsightItem extends StatefulWidget {
     super.key,
     required this.index,
     required this.insight,
-    required this.isLast,
     required this.highlighted,
-    required this.line,
-    required this.primarySoft,
     required this.brand,
-    required this.ink,
     required this.mute,
-    required this.chipBg,
   });
 
   final int index;
   final IaCopilotInsight insight;
-  final bool isLast;
   final bool highlighted;
-  final Color line;
-  final Color primarySoft;
   final Color brand;
-  final Color ink;
   final Color mute;
-  final Color chipBg;
 
   @override
   State<IaCopilotInsightItem> createState() => _IaCopilotInsightItemState();
@@ -48,31 +38,27 @@ class _IaCopilotInsightItemState extends State<IaCopilotInsightItem> {
     final detalhe = widget.insight.detalhe;
     final tipo = widget.insight.tipo;
 
-    assert(
-      widget.line.a >= 0 &&
-          widget.primarySoft.a >= 0 &&
-          widget.ink.a >= 0 &&
-          widget.chipBg.a >= 0,
-    );
     final shown = _expanded || detalhe.length <= 150
         ? detalhe
         : '${detalhe.substring(0, 150).trim()}…';
     return Semantics(
       button: detalhe.length > 150,
       label: '$titulo. $tipo. $detalhe',
-      child: FxSettingsTile(
-        fxIcon: 'spark',
-        label: widget.highlighted ? 'Mais importante · $titulo' : titulo,
-        subtitle: shown.isEmpty ? null : shown,
-        value: tipo.isNotEmpty ? tipo : '${widget.index + 1}',
-        highlight: widget.highlighted,
-        showDivider: !widget.isLast,
-        accent: widget.brand,
-        mute: widget.mute,
-        semanticsLabel: '$titulo. $tipo. $detalhe',
+      child: FxSatelliteListTile(
+        title: widget.highlighted ? 'Mais importante · $titulo' : titulo,
+        subtitle: shown.isEmpty ? null : Text(shown),
+        trailing: Text(
+          tipo.isNotEmpty ? tipo : '${widget.index + 1}',
+          style: TextStyle(
+            color: widget.mute,
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        accent: widget.highlighted ? widget.brand : null,
         onTap: detalhe.length > 150
             ? () => setState(() => _expanded = !_expanded)
-            : () {},
+            : null,
       ),
     );
   }

@@ -101,46 +101,36 @@ class _CopilotTaskCard extends StatelessWidget {
             style: TextStyle(color: mute, fontSize: 12, height: 1.32),
           ),
           const SizedBox(height: 11),
-          FxSettingsGroup(
+          Wrap(
+            spacing: TokensStrip.s2,
+            runSpacing: TokensStrip.s2,
             children: [
               if (canOpen)
-                FxSettingsTile(
-                  fxIcon: 'users',
+                DashboardHomeActionChip(
                   label: copilotActionsOpenAlunoLabel(isDone),
-                  value: '',
-                  highlight: !isDone,
                   accent: brand,
-                  mute: mute,
-                  onTap: onOpen,
+                  isDark: Theme.of(context).brightness == Brightness.dark,
+                  onPressed: onOpen,
                 ),
               if (isDone)
-                FxSettingsTile(
-                  fxIcon: 'spark',
+                DashboardHomeActionChip(
                   label: copilotActionsReabrirLabel(),
-                  value: '',
-                  showDivider: false,
                   accent: brand,
-                  mute: mute,
-                  onTap: onReopen,
+                  isDark: Theme.of(context).brightness == Brightness.dark,
+                  onPressed: onReopen,
                 )
               else ...[
-                FxSettingsTile(
-                  fxIcon: 'calendar',
+                DashboardHomeActionChip(
                   label: copilotActionsAdiarLabel(),
-                  value: '',
                   accent: brand,
-                  mute: mute,
-                  onTap: onSnooze,
+                  isDark: Theme.of(context).brightness == Brightness.dark,
+                  onPressed: onSnooze,
                 ),
-                FxSettingsTile(
-                  fxIcon: 'circle-check',
+                DashboardHomeActionChip(
                   label: copilotActionsConcluirLabel(),
-                  value: '',
-                  showDivider: false,
-                  highlight: true,
                   accent: brand,
-                  mute: mute,
-                  onTap: onComplete,
+                  isDark: Theme.of(context).brightness == Brightness.dark,
+                  onPressed: onComplete,
                 ),
               ],
             ],
@@ -215,45 +205,35 @@ class _RadarSignalCard extends StatelessWidget {
                   style: TextStyle(color: mute, fontSize: 11.8, height: 1.3),
                 ),
                 const SizedBox(height: 9),
-                FxSettingsGroup(
+                Wrap(
+                  spacing: TokensStrip.s2,
+                  runSpacing: TokensStrip.s2,
                   children: [
-                    FxSettingsTile(
-                      fxIcon: 'users',
+                    DashboardHomeActionChip(
                       label: action.ctaLabel,
-                      value: '',
-                      highlight: !isDone,
                       accent: brand,
-                      mute: mute,
-                      onTap: onOpen,
+                      isDark: Theme.of(context).brightness == Brightness.dark,
+                      onPressed: onOpen,
                     ),
                     if (isDone)
-                      FxSettingsTile(
-                        fxIcon: 'spark',
+                      DashboardHomeActionChip(
                         label: copilotActionsReabrirLabel(),
-                        value: '',
-                        showDivider: false,
                         accent: brand,
-                        mute: mute,
-                        onTap: onReopen,
+                        isDark: Theme.of(context).brightness == Brightness.dark,
+                        onPressed: onReopen,
                       )
                     else ...[
-                      FxSettingsTile(
-                        fxIcon: 'calendar',
+                      DashboardHomeActionChip(
                         label: copilotActionsAdiarLabel(),
-                        value: '',
                         accent: brand,
-                        mute: mute,
-                        onTap: onSnooze,
+                        isDark: Theme.of(context).brightness == Brightness.dark,
+                        onPressed: onSnooze,
                       ),
-                      FxSettingsTile(
-                        fxIcon: 'circle-check',
+                      DashboardHomeActionChip(
                         label: copilotActionsConcluirLabel(),
-                        value: '',
-                        showDivider: false,
-                        highlight: true,
                         accent: brand,
-                        mute: mute,
-                        onTap: onComplete,
+                        isDark: Theme.of(context).brightness == Brightness.dark,
+                        onPressed: onComplete,
                       ),
                     ],
                   ],

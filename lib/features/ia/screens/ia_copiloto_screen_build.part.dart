@@ -338,29 +338,31 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
                                 FxSettingsLayout.pageInset,
                                 16,
                               ),
-                              child: FxSettingsGroup(
-                                header: 'Insights · $_modeDisplay',
-                                caption: degraded
-                                    ? 'A IA respondeu fora do formato ideal. Mantivemos as recomendações para revisão manual.'
-                                    : '${insights.length} recomendações geradas',
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
                                 children: [
+                                  DashboardSectionHeader(
+                                    title: 'Insights · $_modeDisplay',
+                                  ),
+                                  const SizedBox(height: TokensStrip.s2),
+                                  Text(
+                                    degraded
+                                        ? 'A IA respondeu fora do formato ideal. Mantivemos as recomendações para revisão manual.'
+                                        : '${insights.length} recomendações geradas',
+                                    style: TextStyle(
+                                      color: mute,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  const SizedBox(height: TokensStrip.s3),
                                   for (final e in insights.asMap().entries)
                                     IaCopilotInsightItem(
                                       index: e.key,
                                       insight: e.value,
-                                      isLast: e.key == insights.length - 1,
                                       highlighted: e.key == 0,
-                                      line: line,
-                                      primarySoft: primarySoft,
                                       brand: brand,
-                                      ink: ink,
                                       mute: mute,
-                                      chipBg:
-                                          dark
-                                              ? Colors.white.withValues(
-                                                alpha: 0.06,
-                                              )
-                                              : TokensStrip.borderDefault,
                                     ),
                                 ],
                               ),
@@ -376,19 +378,18 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
                         FxSettingsLayout.pageInset,
                         12,
                       ),
-                      child: FxSettingsGroup(
-                        caption: freshnessLabel,
-                        children: [
-                          FxSettingsTile(
-                            icon: Icons.auto_awesome,
-                            label: _resultNote,
-                            value: '',
-                            showDivider: false,
-                            accent: brand,
-                            mute: mute,
-                            onTap: () {},
-                          ),
-                        ],
+                      child: Text(
+                        [
+                          if (freshnessLabel != null &&
+                              freshnessLabel.trim().isNotEmpty)
+                            freshnessLabel,
+                          _resultNote,
+                        ].where((s) => s.trim().isNotEmpty).join(' · '),
+                        style: TextStyle(
+                          color: mute,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                     if (_tarefaCriada && _proximaAcao != null)
@@ -399,42 +400,32 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
                           FxSettingsLayout.pageInset,
                           0,
                         ),
-                        child: FxSettingsGroup(
-                          header: _tarefaPersistida
-                              ? 'Tarefa salva no ${FocuxMicrocopy.commandCenter}'
-                              : 'Tarefa criada, verifique a lista',
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            FxSettingsTile(
-                              fxIcon: _tarefaPersistida
-                                  ? 'circle-check'
-                                  : 'alert-triangle',
-                              label: _proximaAcao!.displayText,
-                              value: _proximaAcao!.statusLabel,
+                            DashboardSectionHeader(
+                              title: _tarefaPersistida
+                                  ? 'Tarefa salva no ${FocuxMicrocopy.commandCenter}'
+                                  : 'Tarefa criada, verifique a lista',
+                            ),
+                            const SizedBox(height: TokensStrip.s3),
+                            FxSatelliteListTile(
+                              title: _proximaAcao!.displayText,
+                              subtitle: Text(_proximaAcao!.statusLabel),
                               accent: brand,
-                              mute: mute,
                               onTap: () => context.push(
                                 '/dashboard/command-center/copiloto',
                               ),
                             ),
-                            FxSettingsTile(
-                              fxIcon: 'article',
-                              label: iaCopilotoVerTarefaLabel(),
-                              value: '',
-                              showDivider: _selectedAlunoId != null,
-                              accent: brand,
-                              mute: mute,
+                            FxSatelliteListTile(
+                              title: iaCopilotoVerTarefaLabel(),
                               onTap: () => context.push(
                                 '/dashboard/command-center/copiloto',
                               ),
                             ),
                             if (_selectedAlunoId != null)
-                              FxSettingsTile(
-                                fxIcon: 'users',
-                                label: iaCopilotoAbrirAlunoLabel(),
-                                value: '',
-                                showDivider: false,
-                                accent: brand,
-                                mute: mute,
+                              FxSatelliteListTile(
+                                title: iaCopilotoAbrirAlunoLabel(),
                                 onTap: () => context.push(
                                   '/alunos/$_selectedAlunoId',
                                 ),
