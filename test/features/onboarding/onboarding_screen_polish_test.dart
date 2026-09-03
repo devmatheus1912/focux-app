@@ -26,16 +26,17 @@ void main() {
     // Hero budget: metric chips removidos do slide 1.
     expect(widgets, isNot(contains('class _MetricChipWidget')));
     expect(widgets, contains('_OnboardingHook'));
-    expect(widgets, contains('FxSettingsTile'));
-    expect(widgets, contains('onboardingPrimaryTileValue'));
-    expect(widgets, contains('onboardingLoginTileValue'));
+    expect(widgets, contains('FxLiquidPrimaryButton'));
+    expect(widgets, contains('FxConversionTextLink'));
+    expect(widgets, isNot(contains('FxSettingsTile')));
+    expect(widgets, isNot(contains('FxSettingsGroup')));
     expect(widgets, contains('onboardingCtaNext'));
-    expect(widgets, contains('onboardingExistingAccountCta'));
+    expect(widgets, contains('onboardingLoginLead'));
+    expect(widgets, contains('onboardingLoginAction'));
     expect(
       widgets.indexOf('onboardingFinishCta'),
-      lessThan(widgets.indexOf('onboardingExistingAccountCta')),
+      lessThan(widgets.indexOf('onboardingLoginLead')),
     );
-    expect(widgets, isNot(contains('FxLiquidPrimaryButton')));
     expect(widgets, isNot(contains('FxLiquidSecondaryButton')));
     expect(screen, contains('AuthRoleToggle'));
     expect(screen, contains('AuthShell'));

@@ -4,6 +4,7 @@ import 'package:focux_app/core/brand/brand_pulse.dart';
 import 'package:focux_app/core/brand/focux_brand_copy.dart';
 import 'package:focux_app/core/theme/app_theme.dart';
 import 'package:focux_app/core/theme/tokens_strip.dart';
+import 'package:focux_app/core/widgets/fx_conversion.dart';
 import 'package:focux_app/features/onboarding/screens/onboarding_screen.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -44,7 +45,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 1000));
 
-    expect(find.text(FocuxBrandCopy.onboardingExistingAccountCta), findsOneWidget);
+    expect(find.byType(FxConversionTextLink), findsOneWidget);
     expect(find.text(FocuxBrandCopy.onboardingCtaNext), findsOneWidget);
     expect(find.text(FocuxBrandCopy.onboardingPersonaPersonal), findsOneWidget);
     expect(find.text(FocuxBrandCopy.onboardingPersonaAluno), findsOneWidget);
@@ -91,7 +92,7 @@ void main() {
     );
   });
 
-  testWidgets('Já tenho conta marca onboarding e navega para login', (
+  testWidgets('Entrar marca onboarding e navega para login', (
     tester,
   ) async {
     SharedPreferences.setMockInitialValues({});
@@ -119,7 +120,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 1000));
 
-    await tester.tap(find.text(FocuxBrandCopy.onboardingExistingAccountCta));
+    await tester.tap(find.byType(FxConversionTextLink));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
 
