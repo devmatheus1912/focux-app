@@ -25,6 +25,7 @@ void main() {
     expect(screen, isNot(contains('DropdownButton')));
     expect(screen, isNot(contains('FloatingActionButton')));
     expect(screen, isNot(contains('PopupMenuButton')));
+    expect(screen, isNot(contains('onTap: () {}')));
     expect(screen, isNot(contains(r'showError(context, $e)')));
   });
 }

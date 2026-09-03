@@ -149,7 +149,6 @@ class _DesafiosScreenState extends ConsumerState<DesafiosScreen> {
                                 value: desafioLeaderboardPoints(lb[i]['pontos']),
                                 numeric: true,
                                 showDivider: i != lb.length - 1,
-                                onTap: () {},
                               ),
                           ],
                         ),

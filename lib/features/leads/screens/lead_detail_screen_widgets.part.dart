@@ -181,7 +181,6 @@ class _LeadDetailContent extends StatelessWidget {
                   label: leadInteracaoTipoLabel(item.tipo),
                   subtitle: item.descricao,
                   value: leadFollowUpValue(item.dataInteracao),
-                  onTap: () {},
                 ),
             ],
           ),
