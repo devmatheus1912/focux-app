@@ -48,5 +48,8 @@ void main() {
       winbackHubSubtitle('Atualizado agora'),
       'Push de reengajamento · Atualizado agora',
     );
+    expect(winbackSearchEmptyTitle(''), 'Nenhum envio ainda');
+    expect(winbackSearchEmptyTitle('Ana'), 'Nenhum envio encontrado');
+    expect(winbackSearchEmptySubtitle('Ana'), contains('nome'));
   });
 }

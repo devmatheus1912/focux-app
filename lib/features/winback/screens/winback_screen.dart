@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:focux_app/core/widgets/fx_input_deco.dart';
 
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/router/safe_navigation.dart';
@@ -33,6 +36,9 @@ class WinbackScreen extends ConsumerStatefulWidget {
 }
 
 class _WinbackScreenState extends ConsumerState<WinbackScreen> {
+  final _searchCtrl = TextEditingController();
+  Timer? _debounce;
+  var _query = '';
   List<WinbackLogEntry> _entries = [];
   var _page = 0;
   var _hasMore = false;
@@ -47,13 +53,30 @@ class _WinbackScreenState extends ConsumerState<WinbackScreen> {
     _carregar();
   }
 
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    _searchCtrl.dispose();
+    super.dispose();
+  }
+
+  void _onQueryChanged(String value) {
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 350), () {
+      final next = value.trim();
+      if (next == _query) return;
+      _query = next;
+      _carregar();
+    });
+  }
+
   Future<void> _carregar() async {
     setState(() {
       _loading = true;
       _erro = null;
     });
     try {
-      final entries = await ref.read(winbackRepositoryProvider).log();
+      final entries = await ref.read(winbackRepositoryProvider).log(q: _query);
       if (!mounted) return;
       setState(() {
         _entries = entries;
@@ -75,7 +98,9 @@ class _WinbackScreenState extends ConsumerState<WinbackScreen> {
     if (_carregandoMais || !_hasMore) return;
     setState(() => _carregandoMais = true);
     try {
-      final next = await ref.read(winbackRepositoryProvider).log(page: _page + 1);
+      final next = await ref
+          .read(winbackRepositoryProvider)
+          .log(page: _page + 1, q: _query);
       if (!mounted) return;
       setState(() {
         _entries = [..._entries, ...next];
@@ -149,23 +174,58 @@ class _WinbackScreenState extends ConsumerState<WinbackScreen> {
               message: _erro!,
               onRetry: _carregar,
             )
-            : RefreshIndicator(
+            : Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    TokensStrip.s4,
+                    TokensStrip.s2,
+                    TokensStrip.s4,
+                    TokensStrip.s2,
+                  ),
+                  child: TextField(
+                    controller: _searchCtrl,
+                    textInputAction: TextInputAction.search,
+                    onChanged: _onQueryChanged,
+                    onSubmitted: (value) {
+                      _debounce?.cancel();
+                      final next = value.trim();
+                      if (next == _query && _entries.isNotEmpty) return;
+                      _query = next;
+                      _carregar();
+                    },
+                    onTapOutside: (_) =>
+                        FocusManager.instance.primaryFocus?.unfocus(),
+                    decoration: InputDecoration(
+                      hintText: 'Buscar aluno',
+                      prefixIcon: const Icon(Icons.search_rounded),
+                      border: FxInputDeco.outlineBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: RefreshIndicator(
               color: primary,
               onRefresh: _carregar,
               child: _entries.isEmpty
                   ? ListView(
                     physics: const AlwaysScrollableScrollPhysics(),
+                    keyboardDismissBehavior:
+                        ScrollViewKeyboardDismissBehavior.onDrag,
                     children: [
                       const SizedBox(height: 48),
                       FxEmptyState(
                         icon: 'bell',
-                        title: 'Nenhum envio ainda',
-                        subtitle:
-                            'Quando a automação disparar, os registros aparecem aqui.',
-                        action: FxEmptyAction(
-                          label: 'Saúde da base',
-                          onTap: _abrirRetencao,
-                        ),
+                        title: winbackSearchEmptyTitle(_query),
+                        subtitle: winbackSearchEmptySubtitle(_query),
+                        action: _query.isEmpty
+                            ? FxEmptyAction(
+                                label: 'Saúde da base',
+                                onTap: _abrirRetencao,
+                              )
+                            : null,
                       ),
                     ],
                   )
@@ -214,6 +274,9 @@ class _WinbackScreenState extends ConsumerState<WinbackScreen> {
                       },
                     ),
                   ),
+                  ),
+                ),
+              ],
             ),
       ),
     );

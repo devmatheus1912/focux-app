@@ -18,6 +18,8 @@ void main() {
     expect(screen, contains('Como calculamos'));
     expect(screen, contains('ListView.builder'));
     expect(screen, contains('Carregar mais'));
+    expect(screen, contains('Buscar aluno'));
+    expect(screen, contains('onTapOutside'));
     expect(screen, contains('goPersonalShellTab'));
     expect(screen, contains('friendlyError'));
     expect(screen, contains('FxEmptyState'));

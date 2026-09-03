@@ -70,6 +70,13 @@ String winbackCountLabel(int count) {
   return '$count envios';
 }
 
+String winbackSearchEmptyTitle(String query) =>
+    query.trim().isEmpty ? 'Nenhum envio ainda' : 'Nenhum envio encontrado';
+
+String winbackSearchEmptySubtitle(String query) => query.trim().isEmpty
+    ? 'Quando a automação disparar, os registros aparecem aqui.'
+    : 'Nada com esse nome neste log.';
+
 String winbackHubSubtitle(String? freshness) {
   const base = 'Push de reengajamento';
   final stamp = freshness?.trim();

@@ -39,7 +39,11 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
   final _openedAt = DateTime.now();
   List<AlertaRisco> _alertas = [];
   AlertasConfiguracao? _config;
+  var _page = 0;
+  var _hasMore = false;
+  var _totalRiscos = 0;
   var _loading = true;
+  var _carregandoMais = false;
   String? _erro;
   DateTime? _fetchedAt;
   var _viewTracked = false;
@@ -63,6 +67,9 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
       setState(() {
         _alertas = home.riscos;
         _config = home.configuracao;
+        _page = home.page;
+        _hasMore = home.hasNext;
+        _totalRiscos = home.totalRiscos;
         _loading = false;
         _fetchedAt = DateTime.now();
       });
@@ -73,6 +80,33 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
         _loading = false;
         _erro = friendlyError(e);
       });
+    }
+  }
+
+  Future<void> _carregarMais() async {
+    if (_carregandoMais || !_hasMore) return;
+    setState(() => _carregandoMais = true);
+    try {
+      final home = await AlertasRepository(
+        ref.read(apiClientProvider),
+      ).getHome(page: _page + 1);
+      if (!mounted) return;
+      final seen = _alertas.map((a) => a.alunoId).toSet();
+      setState(() {
+        _alertas = [
+          ..._alertas,
+          ...home.riscos.where((a) => seen.add(a.alunoId)),
+        ];
+        _page = home.page;
+        _hasMore = home.hasNext;
+        _totalRiscos = home.totalRiscos;
+        _config = home.configuracao;
+        _carregandoMais = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _carregandoMais = false);
+      FeedbackHelper.showError(context, friendlyError(e));
     }
   }
 
@@ -233,7 +267,7 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
           title: 'Alertas',
           subtitle: _loading
               ? FxHubFreshness.fromFetchedAt(_fetchedAt)
-              : '${alertaCountLabel(_alertas.length)}${FxHubFreshness.fromFetchedAt(_fetchedAt) == null ? '' : ' · ${FxHubFreshness.fromFetchedAt(_fetchedAt)}'}',
+              : '${alertaCountLabel(_totalRiscos)}${FxHubFreshness.fromFetchedAt(_fetchedAt) == null ? '' : ' · ${FxHubFreshness.fromFetchedAt(_fetchedAt)}'}',
           onBack: () => safePopOrGo(context, '/dashboard/personal'),
           actions: [
             FxHelpIconButton(
@@ -317,8 +351,18 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
                               TokensStrip.s4,
                               TokensStrip.s6,
                             ),
-                            itemCount: rows.length,
+                            itemCount: rows.length + (_hasMore ? 1 : 0),
                             itemBuilder: (context, i) {
+                              if (_hasMore && i == rows.length) {
+                                return FxSatelliteListTile(
+                                  title: _carregandoMais
+                                      ? 'Carregando…'
+                                      : 'Carregar mais',
+                                  onTap: _carregandoMais
+                                      ? null
+                                      : _carregarMais,
+                                );
+                              }
                               final row = rows[i];
                               if (row.config != null) {
                                 final config = row.config!;

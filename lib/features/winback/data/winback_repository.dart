@@ -34,10 +34,15 @@ class WinbackRepository {
 
   static const pageSize = 20;
 
-  Future<List<WinbackLogEntry>> log({int page = 0}) async {
+  Future<List<WinbackLogEntry>> log({int page = 0, String q = ''}) async {
+    final query = q.trim();
     final response = await _dio.get(
       '/api/winback/log',
-      queryParameters: {'page': page, 'size': pageSize},
+      queryParameters: {
+        'page': page,
+        'size': pageSize,
+        if (query.isNotEmpty) 'q': query,
+      },
     );
     return (response.data as List<dynamic>)
         .map((e) => WinbackLogEntry.fromJson(e as Map<String, dynamic>))

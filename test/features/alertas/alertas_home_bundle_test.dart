@@ -15,6 +15,9 @@ void main() {
         },
       ],
       'configuracao': {'diasSemTreino': 7, 'aderenciaMinima': 60},
+      'page': 0,
+      'totalRiscos': 4,
+      'hasNext': true,
     });
 
     expect(bundle.riscos, hasLength(1));
@@ -23,6 +26,8 @@ void main() {
     expect(bundle.riscos.first.diasSemTreino, 12);
     expect(bundle.configuracao.diasSemTreino, 7);
     expect(bundle.configuracao.aderenciaMinima, 60);
+    expect(bundle.totalRiscos, 4);
+    expect(bundle.hasNext, isTrue);
   });
 
   test('AlertasHomeBundle tolerates missing riscos and configuracao', () {
