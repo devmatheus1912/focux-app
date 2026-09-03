@@ -49,6 +49,125 @@ class _AgendaEventSheetState extends State<_AgendaEventSheet> {
     }
   }
 
+  Future<void> _confirmComplete({required String confirmLabel}) async {
+    final ok = await showFxConfirmSheet(
+      context,
+      title: agendaCompleteConfirmTitle(),
+      message: agendaCompleteConfirmMessage(widget.agendamento.alunoNome),
+      confirmLabel: confirmLabel,
+    );
+    if (!ok || !mounted) return;
+    await _run(widget.onComplete);
+  }
+
+  Widget _command({required String label, required VoidCallback? onPressed}) {
+    return TextButton(
+      onPressed: onPressed,
+      style: TextButton.styleFrom(
+        minimumSize: const Size(
+          DashboardLayout.touchTarget,
+          DashboardLayout.touchTarget,
+        ),
+        alignment: Alignment.centerLeft,
+      ),
+      child: Text(_busy ? '…' : label),
+    );
+  }
+
+  Widget _danger({required String label, required VoidCallback? onPressed}) {
+    return SizedBox(
+      height: 52,
+      child: ElevatedButton(
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: EagleTokens.bad,
+          foregroundColor: Colors.white,
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+        ),
+        child: Text(label),
+      ),
+    );
+  }
+
+  List<Widget> _eventActions({required bool completePrimary}) {
+    final nav = <FxSettingsTile>[
+      if (widget.onOpenAluno != null)
+        FxSettingsTile(
+          fxIcon: 'users',
+          label:
+              completePrimary
+                  ? 'Ver aluno'
+                  : agendaEventPrimaryLabel(completePrimary: false),
+          value: '',
+          showDivider: false,
+          onTap: _busy ? null : () => _run(widget.onOpenAluno),
+        ),
+    ];
+    final commands = <Widget>[
+      if (completePrimary)
+        _command(
+          label: agendaEventPrimaryLabel(completePrimary: true),
+          onPressed:
+              _busy
+                  ? null
+                  : () => _confirmComplete(
+                    confirmLabel: agendaEventPrimaryLabel(
+                      completePrimary: true,
+                    ),
+                  ),
+        ),
+      if (widget.onWhatsapp != null)
+        _command(
+          label: 'WhatsApp',
+          onPressed: _busy ? null : () => _run(widget.onWhatsapp),
+        ),
+      if (widget.onConfirm != null)
+        _command(
+          label: 'Confirmado',
+          onPressed: _busy ? null : () => _run(widget.onConfirm),
+        ),
+      if (widget.onReschedule != null)
+        _command(
+          label: 'Remarcar',
+          onPressed: _busy ? null : () => _run(widget.onReschedule),
+        ),
+      if (!completePrimary && widget.onComplete != null)
+        _command(
+          label: 'Concluído',
+          onPressed:
+              _busy
+                  ? null
+                  : () => _confirmComplete(confirmLabel: 'Concluído'),
+        ),
+    ];
+    final dangers = <Widget>[
+      if (widget.onCancel != null)
+        _danger(
+          label: 'Cancelar horário',
+          onPressed: _busy ? null : () => _run(widget.onCancel),
+        ),
+      _danger(
+        label: 'Excluir agendamento',
+        onPressed: _busy ? null : () => _run(widget.onDelete),
+      ),
+    ];
+
+    return [
+      if (nav.isNotEmpty) FxSettingsGroup(children: nav),
+      for (final command in commands) ...[
+        const SizedBox(height: FxSettingsLayout.groupGap),
+        command,
+      ],
+      for (final danger in dangers) ...[
+        const SizedBox(height: FxSettingsLayout.groupGap),
+        danger,
+      ],
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     final chrome = ShellChrome.of(context);
@@ -121,112 +240,7 @@ class _AgendaEventSheetState extends State<_AgendaEventSheet> {
               _AgendaDetailNote(label: 'Depois do atendimento', value: pos),
             ],
             SizedBox(height: TokensStrip.s4),
-            FxSettingsGroup(
-              children: [
-                FxSettingsTile(
-                  fxIcon: completePrimary ? 'circle-check' : 'users',
-                  label: agendaEventPrimaryLabel(
-                    completePrimary: completePrimary,
-                  ),
-                  value: _busy ? '…' : '',
-                  showDivider:
-                      widget.onWhatsapp != null ||
-                      widget.onConfirm != null ||
-                      widget.onReschedule != null ||
-                      (!completePrimary && widget.onComplete != null) ||
-                      (completePrimary && widget.onOpenAluno != null) ||
-                      widget.onCancel != null,
-                  onTap:
-                      _busy
-                          ? () {}
-                          : () async {
-                            if (completePrimary) {
-                              final ok = await showFxConfirmSheet(
-                                context,
-                                title: agendaCompleteConfirmTitle(),
-                                message: agendaCompleteConfirmMessage(
-                                  ag.alunoNome,
-                                ),
-                                confirmLabel: agendaEventPrimaryLabel(
-                                  completePrimary: true,
-                                ),
-                              );
-                              if (!ok || !mounted) return;
-                            }
-                            await _run(
-                              completePrimary
-                                  ? widget.onComplete
-                                  : widget.onOpenAluno,
-                            );
-                          },
-                ),
-                if (widget.onWhatsapp != null)
-                  FxSettingsTile(
-                    fxIcon: 'message-circle',
-                    label: 'WhatsApp',
-                    value: '',
-                    onTap: _busy ? () {} : () => _run(widget.onWhatsapp),
-                  ),
-                if (widget.onConfirm != null)
-                  FxSettingsTile(
-                    fxIcon: 'circle-check',
-                    label: 'Confirmado',
-                    value: '',
-                    onTap: _busy ? () {} : () => _run(widget.onConfirm),
-                  ),
-                if (widget.onReschedule != null)
-                  FxSettingsTile(
-                    fxIcon: 'calendar',
-                    label: 'Remarcar',
-                    value: '',
-                    onTap: _busy ? () {} : () => _run(widget.onReschedule),
-                  ),
-                if (!completePrimary && widget.onComplete != null)
-                  FxSettingsTile(
-                    fxIcon: 'circle-check',
-                    label: 'Concluído',
-                    value: '',
-                    onTap:
-                        _busy
-                            ? () {}
-                            : () async {
-                              final ok = await showFxConfirmSheet(
-                                context,
-                                title: agendaCompleteConfirmTitle(),
-                                message: agendaCompleteConfirmMessage(
-                                  ag.alunoNome,
-                                ),
-                                confirmLabel: 'Concluído',
-                              );
-                              if (!ok || !mounted) return;
-                              await _run(widget.onComplete);
-                            },
-                  )
-                else if (completePrimary && widget.onOpenAluno != null)
-                  FxSettingsTile(
-                    fxIcon: 'users',
-                    label: 'Ver aluno',
-                    value: '',
-                    onTap: _busy ? () {} : () => _run(widget.onOpenAluno),
-                  ),
-                if (widget.onCancel != null)
-                  FxSettingsTile(
-                    fxIcon: 'alert-triangle',
-                    label: 'Cancelar horário',
-                    value: '',
-                    danger: true,
-                    onTap: _busy ? () {} : () => _run(widget.onCancel),
-                  ),
-                FxSettingsTile(
-                  icon: Icons.delete_outline_rounded,
-                  label: 'Excluir agendamento',
-                  value: '',
-                  danger: true,
-                  showDivider: false,
-                  onTap: _busy ? () {} : () => _run(widget.onDelete),
-                ),
-              ],
-            ),
+            ..._eventActions(completePrimary: completePrimary),
           ],
         ),
       ),

@@ -221,7 +221,7 @@ class _AgendaAlunoSheetState extends State<_AgendaAlunoSheet> {
                                     Icon(
                                       selected
                                           ? Icons.check_circle
-                                          : Icons.chevron_right_rounded,
+                                          : Icons.check_circle_outline,
                                       color:
                                           selected ? primary : chrome.mute,
                                     ),
@@ -376,27 +376,33 @@ class _AgendaDateTimeSheetState extends State<_AgendaDateTimeSheet> {
             ),
             Divider(height: 1, color: chrome.line.withValues(alpha: 0.8)),
             SizedBox(height: TokensStrip.s3),
-            FxSettingsGroup(
-              children: [
-                FxSettingsTile(
-                  fxIcon: 'circle-check',
-                  label: agendaHorarioConfirmLabel(),
-                  value: _timeLabel(_selectedTime),
-                  showDivider: false,
-                  onTap: () {
-                    Navigator.pop(
-                      context,
-                      DateTime(
-                        _selectedDay.year,
-                        _selectedDay.month,
-                        _selectedDay.day,
-                        _selectedTime.hour,
-                        _selectedTime.minute,
-                      ),
-                    );
-                  },
+            SizedBox(
+              height: 52,
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(
+                    context,
+                    DateTime(
+                      _selectedDay.year,
+                      _selectedDay.month,
+                      _selectedDay.day,
+                      _selectedTime.hour,
+                      _selectedTime.minute,
+                    ),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(TokensStrip.rButton),
+                  ),
                 ),
-              ],
+                child: Text(
+                  '${agendaHorarioConfirmLabel()} · ${_timeLabel(_selectedTime)}',
+                ),
+              ),
             ),
           ],
         ),
