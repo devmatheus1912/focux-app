@@ -4,7 +4,10 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/router/safe_navigation.dart';
+import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
+import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feature_gate.dart';
@@ -12,10 +15,10 @@ import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
-import '../../../core/widgets/fx_settings_group.dart';
-import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/operational_metric_tile.dart';
 import '../../../core/widgets/skeleton_loader.dart';
+import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../subscription/models/subscription_plan.dart';
 import '../data/business_repository.dart';
@@ -168,118 +171,118 @@ class _BusinessReportsScreenState extends ConsumerState<BusinessReportsScreen> {
                         110,
                       ),
                       children: [
-                        FxSettingsGroup(
-                          header: 'Mês',
-                          caption: 'O que entrou, o previsto e o mês passado.',
-                          children: [
-                            FxSettingsTile(
-                              fxIcon: 'coin',
-                              label: 'Recebido',
-                              value: businessMoneyLabel(snap.mrrAtual),
-                              numeric: true,
-                              onTap: () => context.push('/financeiro'),
-                            ),
-                            FxSettingsTile(
-                              fxIcon: 'target',
-                              label: 'Previsto',
-                              value: businessMoneyLabel(snap.mrrPrevisto),
-                              numeric: true,
-                              onTap: () => context.push('/financeiro'),
-                            ),
-                            FxSettingsTile(
-                              fxIcon: 'trend',
-                              label: 'Mês anterior',
-                              value: businessMoneyLabel(snap.mrrAnterior),
-                              numeric: true,
-                              showDivider: false,
-                              onTap: () => context.push('/financeiro'),
-                            ),
-                          ],
+                        const DashboardSectionHeader(title: 'Mês'),
+                        const SizedBox(height: TokensStrip.s3),
+                        InkWell(
+                          onTap: () => context.push('/financeiro'),
+                          borderRadius: BorderRadius.circular(12),
+                          child: OperationalMetricTile(
+                            label: 'Recebido',
+                            value: businessMoneyLabel(snap.mrrAtual),
+                            hint:
+                                'Previsto ${businessMoneyLabel(snap.mrrPrevisto)}',
+                            color: EagleTokens.moneyGreen,
+                            isDark: isDark,
+                          ),
                         ),
-                        const SizedBox(height: FxSettingsLayout.groupGap),
-                        FxSettingsGroup(
-                          header: 'Retenção',
-                          caption: 'NDR acima de 100% é expansão em reais.',
-                          children: [
-                            FxSettingsTile(
-                              fxIcon: 'trend',
-                              label: 'NDR',
-                              value: '${snap.ndrPct.toStringAsFixed(1)}%',
-                              subtitle: businessNdrStatus(snap.ndrPct),
-                              numeric: true,
-                              danger: businessNdrRuim(snap.ndrPct),
-                              highlight: !businessNdrRuim(snap.ndrPct),
-                              onTap: () {},
-                            ),
-                            FxSettingsTile(
-                              fxIcon: 'users',
-                              label: 'Alunos ativos',
-                              value: businessAlunosLabel(
-                                snap.alunosAtivos,
-                                snap.alunosTotal,
-                              ),
-                              numeric: true,
-                              onTap: () => context.go('/alunos'),
-                            ),
-                            FxSettingsTile(
-                              fxIcon: 'alert-triangle',
-                              label: 'Inadimplentes',
-                              value: '${snap.inadimplentes}',
-                              numeric: true,
-                              danger: snap.inadimplentes > 0,
-                              showDivider: false,
-                              onTap: () => context.push('/financeiro'),
-                            ),
-                          ],
+                        const SizedBox(height: TokensStrip.s2),
+                        InkWell(
+                          onTap: () => context.push('/financeiro'),
+                          borderRadius: BorderRadius.circular(12),
+                          child: OperationalMetricTile(
+                            label: 'Mês anterior',
+                            value: businessMoneyLabel(snap.mrrAnterior),
+                            hint: 'Comparar no financeiro',
+                            color: primary,
+                            isDark: isDark,
+                          ),
                         ),
-                        const SizedBox(height: FxSettingsLayout.groupGap),
-                        FxSettingsGroup(
-                          header: 'Ticket',
-                          children: [
-                            FxSettingsTile(
-                              fxIcon: 'coin',
-                              label: 'ARPA',
-                              value: businessMoneyLabel(snap.arpa),
-                              numeric: true,
-                              onTap: () {},
-                            ),
-                            FxSettingsTile(
-                              fxIcon: 'trend',
-                              label: 'LTV (proxy)',
-                              value: businessMoneyLabel(snap.ltvProxy),
-                              numeric: true,
-                              showDivider: false,
-                              onTap: () {},
-                            ),
-                          ],
+                        const SizedBox(height: TokensStrip.s5),
+                        const DashboardSectionHeader(title: 'Retenção'),
+                        const SizedBox(height: TokensStrip.s3),
+                        OperationalMetricTile(
+                          label: 'NDR',
+                          value: '${snap.ndrPct.toStringAsFixed(1)}%',
+                          hint: businessNdrStatus(snap.ndrPct),
+                          color: businessNdrRuim(snap.ndrPct)
+                              ? EagleTokens.bad
+                              : EagleTokens.moneyGreen,
+                          isDark: isDark,
+                          emphasis: businessNdrRuim(snap.ndrPct)
+                              ? OperationalMetricEmphasis.alert
+                              : OperationalMetricEmphasis.normal,
                         ),
-                        const SizedBox(height: FxSettingsLayout.groupGap),
-                        FxSettingsGroup(
-                          header: 'Cobrança e ativação',
-                          caption: 'A recuperação é a mesma do Dunning.',
-                          children: [
-                            FxSettingsTile(
-                              fxIcon: 'alert-triangle',
-                              label: 'Recuperação',
-                              value:
-                                  '${snap.dunningRecoveryPct.toStringAsFixed(1)}%',
-                              subtitle: businessDunningFalhasLabel(
-                                snap.dunningAbertas,
-                              ),
-                              numeric: true,
-                              onTap: () => context.push('/dunning'),
+                        const SizedBox(height: TokensStrip.s2),
+                        InkWell(
+                          onTap: () => context.go('/alunos'),
+                          borderRadius: BorderRadius.circular(12),
+                          child: OperationalMetricTile(
+                            label: 'Alunos ativos',
+                            value: businessAlunosLabel(
+                              snap.alunosAtivos,
+                              snap.alunosTotal,
                             ),
-                            FxSettingsTile(
-                              fxIcon: 'spark',
-                              label: 'Ativação',
-                              value: '${snap.pqlScore} pts',
-                              subtitle: businessPqlLabel(
-                                snap.pqlClassificacao,
-                              ),
-                              showDivider: false,
-                              onTap: () {},
-                            ),
-                          ],
+                            hint: 'Abrir a base',
+                            color: primary,
+                            isDark: isDark,
+                          ),
+                        ),
+                        const SizedBox(height: TokensStrip.s2),
+                        InkWell(
+                          onTap: () => context.push('/financeiro'),
+                          borderRadius: BorderRadius.circular(12),
+                          child: OperationalMetricTile(
+                            label: 'Inadimplentes',
+                            value: '${snap.inadimplentes}',
+                            hint: snap.inadimplentes > 0
+                                ? 'Cobre em Mensalidades'
+                                : 'Sem inadimplência no recorte',
+                            color: snap.inadimplentes > 0
+                                ? EagleTokens.bad
+                                : EagleTokens.moneyGreen,
+                            isDark: isDark,
+                            emphasis: snap.inadimplentes > 0
+                                ? OperationalMetricEmphasis.alert
+                                : OperationalMetricEmphasis.normal,
+                          ),
+                        ),
+                        const SizedBox(height: TokensStrip.s5),
+                        const DashboardSectionHeader(title: 'Ticket'),
+                        const SizedBox(height: TokensStrip.s3),
+                        OperationalMetricTile(
+                          label: 'ARPA',
+                          value: businessMoneyLabel(snap.arpa),
+                          hint:
+                              'LTV ${businessMoneyLabel(snap.ltvProxy)}',
+                          color: primary,
+                          isDark: isDark,
+                        ),
+                        const SizedBox(height: TokensStrip.s5),
+                        const DashboardSectionHeader(
+                          title: 'Cobrança e ativação',
+                        ),
+                        const SizedBox(height: TokensStrip.s2),
+                        Text(
+                          'A recuperação é a mesma do Dunning.',
+                          style: FocuxHubTypography.bodyMuted(
+                            color: fxScreenMute(context),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: TokensStrip.s3),
+                        FxSatelliteListTile(
+                          title: 'Recuperação',
+                          subtitle: Text(
+                            '${snap.dunningRecoveryPct.toStringAsFixed(1)}% · ${businessDunningFalhasLabel(snap.dunningAbertas)}',
+                          ),
+                          onTap: () => context.push('/dunning'),
+                        ),
+                        OperationalMetricTile(
+                          label: 'Ativação',
+                          value: '${snap.pqlScore} pts',
+                          hint: businessPqlLabel(snap.pqlClassificacao),
+                          color: primary,
+                          isDark: isDark,
                         ),
                       ],
                     ),

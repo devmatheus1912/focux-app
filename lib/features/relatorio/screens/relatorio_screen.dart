@@ -4,7 +4,9 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/router/safe_navigation.dart';
+import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/fx_settings_layout.dart';
+import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feedback_helper.dart';
@@ -14,10 +16,11 @@ import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_inset_picker_sheet.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
-import '../../../core/widgets/fx_settings_group.dart';
-import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/operational_metric_tile.dart';
 import '../../../core/widgets/skeleton_loader.dart';
+import '../../dashboard/widgets/dashboard_home_action_chip.dart';
+import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../alunos/utils/satellite_screen_utils.dart';
 import '../../alunos/widgets/aluno_outreach_message_sheet.dart';
@@ -258,27 +261,21 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
                   110,
                 ),
                 children: [
-                  FxSettingsGroup(
-                    header: 'Período',
-                    caption:
-                        'O comparativo usa o mesmo tamanho, no recorte anterior.',
-                    children: [
-                      FxSettingsTile(
-                        fxIcon: 'calendar',
-                        label: 'Recorte',
-                        value: relatorioAlunoPeriodoValueLabel(
-                          dias: _dias,
-                          inicio: _rangeCustom?.start,
-                          fim: _rangeCustom?.end,
-                        ),
-                        picker: true,
-                        showDivider: false,
-                        onTap: _abrirPeriodo,
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: DashboardHomeActionChip(
+                      label: relatorioAlunoPeriodoValueLabel(
+                        dias: _dias,
+                        inicio: _rangeCustom?.start,
+                        fim: _rangeCustom?.end,
                       ),
-                    ],
+                      accent: primary,
+                      isDark: isDark,
+                      onPressed: _abrirPeriodo,
+                    ),
                   ),
                   if (dados == null || dados.treinosTotal == 0) ...[
-                    const SizedBox(height: FxSettingsLayout.groupGap),
+                    const SizedBox(height: TokensStrip.s5),
                     SizedBox(
                       height: 280,
                       child: FxEmptyState(
@@ -293,124 +290,121 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
                       ),
                     ),
                   ] else ...[
-                    const SizedBox(height: FxSettingsLayout.groupGap),
-                    FxSettingsGroup(
-                      header: 'Aderência',
-                      caption: 'Concluídos sobre o total neste recorte.',
-                      children: [
-                        FxSettingsTile(
-                          fxIcon: 'trend',
-                          label: 'Taxa',
-                          value: relatorioAderenciaMediaLabel(
-                            dados.taxaAderenciaPercent,
-                          ),
-                          subtitle: relatorioAlunoAderenciaStatus(
-                            dados.taxaAderenciaPercent,
-                          ),
-                          numeric: true,
-                          danger: relatorioAlunoAderenciaBaixa(
-                            dados.taxaAderenciaPercent,
-                          ),
-                          onTap: () {},
-                        ),
-                        FxSettingsTile(
-                          fxIcon: 'circle-check',
-                          label: 'Treinos concluídos',
-                          value:
-                              '${dados.treinosConcluidos} / ${dados.treinosTotal}',
-                          numeric: true,
-                          onTap: () {},
-                        ),
-                        FxSettingsTile(
-                          fxIcon: 'calendar',
-                          label: 'Dias analisados',
-                          value: '${dados.diasAnalisados}',
-                          numeric: true,
-                          showDivider: false,
-                          onTap: () {},
-                        ),
-                      ],
+                    const SizedBox(height: TokensStrip.s5),
+                    const DashboardSectionHeader(title: 'Aderência'),
+                    const SizedBox(height: TokensStrip.s3),
+                    OperationalMetricTile(
+                      label: 'Taxa',
+                      value: relatorioAderenciaMediaLabel(
+                        dados.taxaAderenciaPercent,
+                      ),
+                      hint: relatorioAlunoAderenciaStatus(
+                        dados.taxaAderenciaPercent,
+                      ),
+                      color: relatorioAlunoAderenciaBaixa(
+                        dados.taxaAderenciaPercent,
+                      )
+                          ? EagleTokens.bad
+                          : EagleTokens.moneyGreen,
+                      isDark: isDark,
+                      emphasis: relatorioAlunoAderenciaBaixa(
+                        dados.taxaAderenciaPercent,
+                      )
+                          ? OperationalMetricEmphasis.alert
+                          : OperationalMetricEmphasis.normal,
+                    ),
+                    const SizedBox(height: TokensStrip.s2),
+                    OperationalMetricTile(
+                      label: 'Treinos concluídos',
+                      value:
+                          '${dados.treinosConcluidos} / ${dados.treinosTotal}',
+                      hint: 'Concluídos sobre o total neste recorte',
+                      color: primary,
+                      isDark: isDark,
+                    ),
+                    const SizedBox(height: TokensStrip.s2),
+                    OperationalMetricTile(
+                      label: 'Dias analisados',
+                      value: '${dados.diasAnalisados}',
+                      hint: 'Tamanho do recorte',
+                      color: primary,
+                      isDark: isDark,
                     ),
                     if (_comparativo != null) ...[
-                      const SizedBox(height: FxSettingsLayout.groupGap),
-                      FxSettingsGroup(
-                        header: 'Versus o recorte anterior',
-                        caption: 'Mesmo número de dias, logo antes deste.',
-                        children: [
-                          FxSettingsTile(
-                            fxIcon: 'trend',
-                            label: 'Este período',
-                            value: relatorioAderenciaMediaLabel(
-                              _comparativo!.aderenciaAtual,
-                            ),
-                            subtitle: relatorioAlunoCheckinsLabel(
-                              _comparativo!.checkInsAtual,
-                            ),
-                            numeric: true,
-                            onTap: () {},
-                          ),
-                          FxSettingsTile(
-                            fxIcon: 'trend',
-                            label: 'Anterior',
-                            value: relatorioAderenciaMediaLabel(
-                              _comparativo!.aderenciaAnterior,
-                            ),
-                            subtitle: relatorioAlunoCheckinsLabel(
-                              _comparativo!.checkInsAnterior,
-                            ),
-                            numeric: true,
-                            onTap: () {},
-                          ),
-                          FxSettingsTile(
-                            fxIcon: 'trend',
-                            label: 'Variação',
-                            value: relatorioAlunoDeltaLabel(
-                              _comparativo!.deltaPercent,
-                            ),
-                            numeric: true,
-                            danger: _comparativo!.deltaPercent < 0,
-                            highlight: _comparativo!.deltaPercent > 0,
-                            showDivider: false,
-                            onTap: () {},
-                          ),
-                        ],
+                      const SizedBox(height: TokensStrip.s5),
+                      const DashboardSectionHeader(
+                        title: 'Versus o recorte anterior',
+                      ),
+                      const SizedBox(height: TokensStrip.s3),
+                      OperationalMetricTile(
+                        label: 'Este período',
+                        value: relatorioAderenciaMediaLabel(
+                          _comparativo!.aderenciaAtual,
+                        ),
+                        hint: relatorioAlunoCheckinsLabel(
+                          _comparativo!.checkInsAtual,
+                        ),
+                        color: primary,
+                        isDark: isDark,
+                      ),
+                      const SizedBox(height: TokensStrip.s2),
+                      OperationalMetricTile(
+                        label: 'Anterior',
+                        value: relatorioAderenciaMediaLabel(
+                          _comparativo!.aderenciaAnterior,
+                        ),
+                        hint: relatorioAlunoCheckinsLabel(
+                          _comparativo!.checkInsAnterior,
+                        ),
+                        color: primary,
+                        isDark: isDark,
+                      ),
+                      const SizedBox(height: TokensStrip.s2),
+                      OperationalMetricTile(
+                        label: 'Variação',
+                        value: relatorioAlunoDeltaLabel(
+                          _comparativo!.deltaPercent,
+                        ),
+                        hint: 'Mesmo número de dias, logo antes deste',
+                        color: _comparativo!.deltaPercent < 0
+                            ? EagleTokens.bad
+                            : EagleTokens.moneyGreen,
+                        isDark: isDark,
+                        emphasis: _comparativo!.deltaPercent < 0
+                            ? OperationalMetricEmphasis.alert
+                            : OperationalMetricEmphasis.normal,
                       ),
                     ],
-                    const SizedBox(height: FxSettingsLayout.groupGap),
-                    FxSettingsGroup(
-                      header: 'Ações',
-                      children: [
-                        FxSettingsTile(
-                          fxIcon: 'article',
-                          label: _exporting ? 'Gerando PDF…' : 'Exportar PDF',
-                          value: '',
-                          semanticsLabel: 'Exportar relatório em PDF',
-                          onTap: _exporting ? () {} : _exportarPdf,
+                    const SizedBox(height: TokensStrip.s5),
+                    const DashboardSectionHeader(title: 'Ações'),
+                    const SizedBox(height: TokensStrip.s3),
+                    Semantics(
+                      button: true,
+                      label: 'Exportar relatório em PDF',
+                      child: FxSatelliteListTile(
+                        title: _exporting
+                            ? 'Gerando PDF…'
+                            : 'Exportar PDF',
+                        onTap: _exporting ? null : _exportarPdf,
+                      ),
+                    ),
+                    if (relatorioAlunoAderenciaBaixa(
+                      dados.taxaAderenciaPercent,
+                    ))
+                      FxSatelliteListTile(
+                        title: 'Pedir check-in',
+                        onTap: () => showAlunoCheckinMessageSheet(
+                          context,
+                          alunoId: widget.alunoId,
+                          alunoNome: widget.alunoNome,
                         ),
-                        if (relatorioAlunoAderenciaBaixa(
-                          dados.taxaAderenciaPercent,
-                        ))
-                          FxSettingsTile(
-                            fxIcon: 'message-circle',
-                            label: 'Pedir check-in',
-                            value: '',
-                            onTap: () => showAlunoCheckinMessageSheet(
-                              context,
-                              alunoId: widget.alunoId,
-                              alunoNome: widget.alunoNome,
-                            ),
-                          ),
-                        FxSettingsTile(
-                          fxIcon: 'users',
-                          label: 'Abrir o 360',
-                          value: '',
-                          showDivider: false,
-                          onTap: () => context.push(
-                            '/alunos/${widget.alunoId}',
-                            extra: widget.alunoNome,
-                          ),
-                        ),
-                      ],
+                      ),
+                    FxSatelliteListTile(
+                      title: 'Abrir o 360',
+                      onTap: () => context.push(
+                        '/alunos/${widget.alunoId}',
+                        extra: widget.alunoNome,
+                      ),
                     ),
                   ],
                 ],
