@@ -10,11 +10,11 @@ import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
-import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/alertas_repository.dart';
 import '../widgets/alertas_config_help_sheet.dart';
@@ -140,6 +140,26 @@ class _AlertasConfigScreenState extends ConsumerState<AlertasConfigScreen> {
             ),
           ],
         ),
+        bottomNavigationBar:
+            !_dirty || _loading || _erro != null
+                ? null
+                : SafeArea(
+                  top: false,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      FxSettingsLayout.pageInset,
+                      TokensStrip.s2,
+                      FxSettingsLayout.pageInset,
+                      TokensStrip.s3,
+                    ),
+                    child: FxLiquidPrimaryButton(
+                      label: 'Salvar',
+                      loading: _salvando,
+                      loadingLabel: 'Salvando…',
+                      onPressed: _salvando ? null : _salvar,
+                    ),
+                  ),
+                ),
         body: _loading
             ? const Padding(
               padding: EdgeInsets.all(FxSettingsLayout.pageInset),
@@ -152,14 +172,12 @@ class _AlertasConfigScreenState extends ConsumerState<AlertasConfigScreen> {
               message: _erro!,
               onRetry: _load,
             )
-            : Stack(
-              children: [
-                ListView(
+            : ListView(
               padding: const EdgeInsets.fromLTRB(
                 FxSettingsLayout.pageInset,
                 8,
                 FxSettingsLayout.pageInset,
-                110,
+                32,
               ),
               children: [
                 FxSettingsGroup(
@@ -195,20 +213,6 @@ class _AlertasConfigScreenState extends ConsumerState<AlertasConfigScreen> {
                     ),
                   ],
                 ),
-              ],
-            ),
-                if (_dirty)
-                  Positioned(
-                    right: TokensStrip.s4,
-                    bottom: TokensStrip.s4,
-                    child: DashboardHomeActionChip(
-                      label: _salvando ? 'Salvando…' : 'Salvar',
-                      accent: primary,
-                      isDark: isDark,
-                      enabled: !_salvando,
-                      onPressed: _salvar,
-                    ),
-                  ),
               ],
             ),
       ),
