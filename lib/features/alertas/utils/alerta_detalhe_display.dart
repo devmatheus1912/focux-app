@@ -1,5 +1,14 @@
 import '../../../core/utils/fx_utils.dart';
 
+const alertaComoCalculamos =
+    'Dispara se ficou sem treino além do prazo ou se a aderência caiu abaixo do limiar.';
+
+String alertaCountLabel(int count) {
+  if (count <= 0) return 'Nenhum em risco';
+  if (count == 1) return '1 aluno em risco';
+  return '$count alunos em risco';
+}
+
 String alertaAdiarCtaLabel() => 'Adiar 24h';
 
 String alertaAdiarLoadingLabel() => 'Adiando…';

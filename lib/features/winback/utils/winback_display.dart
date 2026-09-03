@@ -61,6 +61,15 @@ String winbackSubtitle({
   return '$tipoLabel · $msg';
 }
 
+const winbackComoCalculamos =
+    'Push no 7º, 30º e 60º dia sem treino. Trial do personal não entra neste log.';
+
+String winbackCountLabel(int count) {
+  if (count <= 0) return 'Nenhum envio';
+  if (count == 1) return '1 envio';
+  return '$count envios';
+}
+
 String winbackHubSubtitle(String? freshness) {
   const base = 'Push de reengajamento';
   final stamp = freshness?.trim();

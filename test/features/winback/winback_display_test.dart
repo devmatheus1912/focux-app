@@ -39,6 +39,10 @@ void main() {
       ),
       'Inativo 7 dias · Sentimos sua falta!',
     );
+    expect(winbackCountLabel(0), 'Nenhum envio');
+    expect(winbackCountLabel(1), '1 envio');
+    expect(winbackCountLabel(4), '4 envios');
+    expect(winbackComoCalculamos, contains('7º'));
     expect(winbackHubSubtitle(null), 'Push de reengajamento');
     expect(
       winbackHubSubtitle('Atualizado agora'),
