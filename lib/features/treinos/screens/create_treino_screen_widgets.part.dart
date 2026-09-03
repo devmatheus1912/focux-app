@@ -66,11 +66,6 @@ class _PlanoBaseSummary extends StatelessWidget {
                       ],
                     ),
                   ),
-                  Icon(
-                    Icons.chevron_right_rounded,
-                    color: mute,
-                    size: FxSettingsLayout.chevronSize,
-                  ),
                 ],
               ),
             ),

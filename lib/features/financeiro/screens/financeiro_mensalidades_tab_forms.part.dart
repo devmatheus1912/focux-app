@@ -65,8 +65,9 @@ extension FinanceiroMensalidadesTabForms on _FinanceiroMensalidadesTabState {
                                     value: financeiroAlunoPickerValue(
                                       alunoSelecionadoNome,
                                     ),
+                                    picker: true,
                                     onTap: alunos.isEmpty
-                                        ? () {}
+                                        ? null
                                         : () async {
                                             final picked =
                                                 await showFxInsetPickerSheet<

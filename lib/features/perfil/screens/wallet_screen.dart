@@ -297,7 +297,7 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                                     _tipoChavePix!,
                                   ),
                           picker: true,
-                          onTap: _carregando ? () {} : _selecionarTipoPix,
+                          onTap: _carregando ? null : _selecionarTipoPix,
                         ),
                         AlunoInsetFormField(
                           controller: _chavePixCtrl,

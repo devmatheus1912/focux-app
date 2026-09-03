@@ -264,32 +264,44 @@ class _NovoPacoteSheetState extends State<_NovoPacoteSheet> {
                     label: 'Duração',
                     value: pacoteDuracaoLabel(_duracao),
                     picker: true,
-                    onTap: _enviando ? () {} : _abrirDuracao,
+                    onTap: _enviando ? null : _abrirDuracao,
                   ),
                   FxSettingsTile(
                     fxIcon: 'target',
                     label: 'Treino',
                     value: pacoteIncluiValue(_treino),
-                    onTap: _enviando
-                        ? () {}
-                        : () => setState(() => _treino = !_treino),
+                    accessory: Switch.adaptive(
+                      value: _treino,
+                      onChanged:
+                          _enviando
+                              ? null
+                              : (v) => setState(() => _treino = v),
+                    ),
                   ),
                   FxSettingsTile(
                     fxIcon: 'spark',
                     label: 'Nutrição',
                     value: pacoteIncluiValue(_nutri),
-                    onTap: _enviando
-                        ? () {}
-                        : () => setState(() => _nutri = !_nutri),
+                    accessory: Switch.adaptive(
+                      value: _nutri,
+                      onChanged:
+                          _enviando
+                              ? null
+                              : (v) => setState(() => _nutri = v),
+                    ),
                   ),
                   FxSettingsTile(
                     fxIcon: 'message-circle',
                     label: 'Consultoria',
                     value: pacoteIncluiValue(_consultoria),
                     showDivider: false,
-                    onTap: _enviando
-                        ? () {}
-                        : () => setState(() => _consultoria = !_consultoria),
+                    accessory: Switch.adaptive(
+                      value: _consultoria,
+                      onChanged:
+                          _enviando
+                              ? null
+                              : (v) => setState(() => _consultoria = v),
+                    ),
                   ),
                 ],
               ),
@@ -301,23 +313,33 @@ class _NovoPacoteSheetState extends State<_NovoPacoteSheet> {
                     label: 'Mostrar em destaque',
                     value: pacoteIncluiValue(_destaque),
                     showDivider: false,
-                    onTap: _enviando
-                        ? () {}
-                        : () => setState(() => _destaque = !_destaque),
+                    accessory: Switch.adaptive(
+                      value: _destaque,
+                      onChanged:
+                          _enviando
+                              ? null
+                              : (v) => setState(() => _destaque = v),
+                    ),
                   ),
                 ],
               ),
               const SizedBox(height: TokensStrip.s3),
-              FxSettingsGroup(
-                children: [
-                  FxSettingsTile(
-                    fxIcon: 'circle-check',
-                    label: pacoteCriarTileLabel(),
-                    value: _enviando ? 'Criando…' : 'Confirmar',
-                    showDivider: false,
-                    onTap: _enviando ? () {} : _submit,
+              SizedBox(
+                height: 52,
+                child: ElevatedButton(
+                  onPressed: _enviando ? null : _submit,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(TokensStrip.rButton),
+                    ),
                   ),
-                ],
+                  child: Text(
+                    _enviando ? 'Criando…' : pacoteCriarTileLabel(),
+                  ),
+                ),
               ),
                   ],
                 ),

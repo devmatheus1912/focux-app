@@ -221,7 +221,7 @@ extension IaCopilotScreenActions on _IaCopilotoScreenState {
                                         Icon(
                                           selected
                                               ? Icons.check_circle
-                                              : Icons.chevron_right,
+                                              : Icons.check_circle_outline,
                                           color: selected ? primary : mute,
                                           size: selected ? 22 : 20,
                                         ),

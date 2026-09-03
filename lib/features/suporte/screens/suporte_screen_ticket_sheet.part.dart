@@ -146,7 +146,7 @@ class _NovoTicketSheetState extends ConsumerState<_NovoTicketSheet> {
                           label: 'Severidade',
                           value: suporteSeveridadeLabel(_severidade),
                           picker: true,
-                          onTap: _enviando ? () {} : _abrirSeveridade,
+                          onTap: _enviando ? null : _abrirSeveridade,
                         ),
                         AlunoInsetFormField(
                           controller: _classeCtrl,

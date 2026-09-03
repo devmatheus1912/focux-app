@@ -919,7 +919,7 @@ class _OwnVideoPanel extends StatelessWidget {
           FxConversionTextLink(
             text: '',
             actionText: exerciseVideoRemoveLabel(),
-            onTap: uploading ? () {} : onRemove,
+            onTap: uploading ? null : onRemove,
           ),
       ],
     );

@@ -28,6 +28,8 @@ void main() {
     expect(screen, contains('LengthLimitingTextInputFormatter'));
     expect(screen, contains('FxHubFreshness.fromFetchedAt'));
     expect(screen, isNot(contains('FxLiquidPrimaryButton')));
+    expect(screen, isNot(contains('label: feedPublicarTileLabel')));
+    expect(screen, contains('feedPublicarTileLabel()'));
     expect(screen, isNot(contains('OutlinedButton')));
     expect(screen, isNot(contains('showModalBottomSheet')));
     expect(screen, isNot(contains('FloatingActionButton')));
