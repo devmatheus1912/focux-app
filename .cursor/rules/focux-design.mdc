@@ -1,12 +1,14 @@
 ---
-description: Pele Focux, taxonomia S1–S9, job completo, voltar e teclado ao editar UI Dart. Aplica o playbook Ruflo sem reabrir auth/pagamento/contrato.
+description: Reimplementação Focux até a loja — pele, S1–S9, job, profundidade, voltar, teclado. Playbook Ruflo sem reabrir auth/pagamento/contrato.
 globs: "**/*.dart"
 alwaysApply: false
 ---
 
 # Focux UI
 
-Antes de editar uma tela: declare o tipo S1–S9 (`docs/FOCUX_DESIGN_REFERENCE.md` §9). Sem tipo, não abra PR.
+Programa vigente: **reimplementação do zero até a loja** (`docs/FOCUX_DESIGN_REFERENCE.md` §0.6). Lote visual anterior **não** isenta a rota (A29).
+
+Antes de editar uma tela: declare o tipo S1–S9 (`docs/FOCUX_DESIGN_REFERENCE.md` §9). Sem tipo, não abra PR. Reclassifique mesmo se outro lote já restilou.
 
 - Pele constante (§1–§8). Estrutura vem do tipo, nunca de outra tela. Inset-grouped só em S2.
 - Tokens: `TokensStrip` / `FxSettingsLayout` / `BrandPalette` / `EagleTokens`. Sem hex solto, sem `#007AFF`.
@@ -15,8 +17,10 @@ Antes de editar uma tela: declare o tipo S1–S9 (`docs/FOCUX_DESIGN_REFERENCE.m
 - Erro: `friendlyError`. Plano: capability, nunca `if (plano == 'FREE')`.
 - Voltar: `safePopOrGo` + pai lógico. Nunca `maybePop` / `context.pop()` sozinho em satélite (§14.1).
 - Teclado iOS: `viewInsets`, unfocus antes do pop, dismiss por tap/drag (§14.2). Freeze = P0.
-- Job completo do domínio (§36–§37). Tela rasa (A21) não fecha lote. Hide/delete se não der para completar (§38).
-- Pode editar visual/UX/voltar/teclado/job com contrato existente. Só propor: auth, tenant, pagamento, IA, contrato API, migration, PII (`docs/FOCUX_DESIGN_REFERENCE.md` §29).
+- Amplitude (§36.1 / §37) **e** profundidade de affordance (§36.2). Contrato vivo e UI muda → implementar. Sem contrato → propor, não botão morto.
+- Tela rasa (A21) não fecha lote. Hide/delete se não der para completar (§38). Não pular o “já elevado” (A29).
+- Pode editar visual/UX/voltar/teclado/job/profundidade com contrato existente. Só propor: auth, tenant, pagamento, IA, contrato API, migration, PII (`docs/FOCUX_DESIGN_REFERENCE.md` §29).
 - Scorecard §22.2 exige o `focux-backend` no mesmo workspace. Sem a pasta, não chutar classe Java.
-- Lote em massa: skill `/ruflo`. Ordem lote 0 → S6 → S1 → S3 → S4 → S5 → S8 → S9 → S7 → S2 → satélites → freeze §39. Máx. 3 telas do mesmo tipo.
+- Lote em massa: skill `/ruflo`. Ordem lote 0 → S6 → S1 → S3 → S4 → S5 → S8 → S9 → S7 → S2 → satélites → freeze §39. Máx. 3 telas do mesmo tipo. Rotas já restiladas entram na mesma ordem.
 - Produção: freeze §39. Visual sozinho não autoriza subir para a loja.
+
