@@ -18,7 +18,7 @@ class FxSettingsTile extends StatelessWidget {
     required this.label,
     this.subtitle,
     required this.value,
-    required this.onTap,
+    this.onTap,
     this.mute,
     this.line,
     this.accent,
@@ -39,7 +39,7 @@ class FxSettingsTile extends StatelessWidget {
   final String label;
   final String? subtitle;
   final String value;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
   final VoidCallback? onLongPress;
   final Color? mute;
   final Color? line;
@@ -83,16 +83,20 @@ class FxSettingsTile extends StatelessWidget {
             : locked
             ? '$spoken trancado. Plano ${upgradeTierLabel ?? 'upgrade'}'
             : (value.isEmpty ? spoken : '$spoken. $value');
+    final interactive = onTap != null;
+    final showChevron = interactive && !danger && !locked;
 
     return Semantics(
-      button: true,
+      button: interactive,
       label: a11y,
-      hint: danger ? 'Confirmação será solicitada' : null,
+      hint: danger && interactive ? 'Confirmação será solicitada' : null,
       child: InkWell(
-        onTap: () {
-          HapticFeedback.selectionClick();
-          onTap();
-        },
+        onTap: !interactive
+            ? null
+            : () {
+              HapticFeedback.selectionClick();
+              onTap!();
+            },
         onLongPress:
             onLongPress == null
                 ? null
@@ -186,22 +190,22 @@ class FxSettingsTile extends StatelessWidget {
                             ),
                           ),
                         ],
-                        if (!danger) ...[
+                        if (locked) ...[
                           const SizedBox(width: TokensStrip.s1),
-                          if (locked)
-                            FxPlanLockTrailing(
-                              tier: upgradeTierLabel ?? 'Pro',
-                              brand: brand,
-                              mute: mute,
-                            )
-                          else
-                            Icon(
-                              picker
-                                  ? Icons.unfold_more
-                                  : Icons.chevron_right,
-                              size: FxSettingsLayout.chevronSize,
-                              color: mute,
-                            ),
+                          FxPlanLockTrailing(
+                            tier: upgradeTierLabel ?? 'Pro',
+                            brand: brand,
+                            mute: mute,
+                          ),
+                        ] else if (showChevron) ...[
+                          const SizedBox(width: TokensStrip.s1),
+                          Icon(
+                            picker
+                                ? Icons.unfold_more
+                                : Icons.chevron_right,
+                            size: FxSettingsLayout.chevronSize,
+                            color: mute,
+                          ),
                         ],
                       ],
                     ),

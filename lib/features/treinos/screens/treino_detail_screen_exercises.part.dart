@@ -320,8 +320,6 @@ class _AssignWorkoutSheetState extends State<_AssignWorkoutSheet> {
                   label: 'Nenhum aluno cadastrado',
                   value: '',
                   showDivider: false,
-                  locked: true,
-                  onTap: () {},
                 ),
               ],
             )

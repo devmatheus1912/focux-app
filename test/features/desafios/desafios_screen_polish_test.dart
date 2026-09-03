@@ -20,6 +20,7 @@ void main() {
     expect(screen, contains('FxSatelliteListTile'));
     expect(screen, contains('DashboardSectionHeader'));
     expect(screen, contains('FxSettingsGroup'));
+    expect(screen, isNot(contains('onTap: () {}')));
     expect(screen, contains('FeatureGate'));
     expect(screen, contains('comunidadeGrupos'));
     expect(screen, contains('ShellHeaderIconButton'));

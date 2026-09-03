@@ -55,7 +55,6 @@ class Aluno360CopilotSignalTile extends StatelessWidget {
       accent: signal.color,
       showDivider: showDivider,
       semanticsLabel: '${signal.label}: ${signal.value}. ${signal.detail}',
-      onTap: () {},
     );
   }
 }
@@ -80,7 +79,6 @@ class Aluno360CopilotTaskStatus extends StatelessWidget {
       subtitle: subtitle,
       value: '',
       showDivider: false,
-      onTap: () {},
     );
   }
 }
@@ -184,7 +182,7 @@ class _Aluno360CopilotActionRowState
                   _completing
                       ? const FxLoading(size: 18, strokeWidth: 2)
                       : null,
-              onTap: _completing ? () {} : _completeOpenTask,
+              onTap: _completing ? null : _completeOpenTask,
             ),
           );
         }
@@ -212,7 +210,7 @@ class _Aluno360CopilotActionRowState
             showDivider: !widget.hideChatCta,
             accessory:
                 _creating ? const FxLoading(size: 18, strokeWidth: 2) : null,
-            onTap: _creating ? () {} : _handlePrimary,
+            onTap: _creating ? null : _handlePrimary,
           ),
         );
       }

@@ -188,8 +188,9 @@ void main() {
         'lib/features/alunos/widgets/aluno_outreach_message_sheet.dart',
       ).readAsStringSync(),
       allOf(
-        contains('FxSettingsGroup'),
-        isNot(contains('FxLiquidPrimaryButton')),
+        contains('FxLiquidPrimaryButton'),
+        contains('alunoOutreachOpenChatLabel'),
+        isNot(contains('FxSettingsGroup')),
         isNot(contains('OutlinedButton')),
         contains('_OutreachMessageQuote'),
       ),

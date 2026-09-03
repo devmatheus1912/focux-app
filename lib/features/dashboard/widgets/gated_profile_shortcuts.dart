@@ -63,15 +63,7 @@ class GatedProfileShortcuts extends ConsumerWidget {
   }) {
     final shortcut = _shortcutFor(entry.$4);
     if (shortcut == null) {
-      return tileBuilder(
-        icon: entry.$1,
-        label: entry.$2,
-        value: entry.$3,
-        locked: false,
-        showDivider: showDivider,
-        upgradeTierLabel: null,
-        onTap: () {},
-      );
+      return const SizedBox.shrink();
     }
     final locked = !shortcut.isUnlocked(features);
     final tier = locked ? shortcut.tierBadgeLabel() : null;
