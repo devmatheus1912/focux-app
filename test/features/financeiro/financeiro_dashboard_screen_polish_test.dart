@@ -11,5 +11,8 @@ void main() {
     expect(screen, anyOf(contains('FxLoading'), contains('SkeletonLoader'), contains('SkeletonList'), contains('DashboardShimmer'), contains('Shimmer'), contains('IaCopilotInsightsLoading'), contains('_loading')));
     expect(screen, contains('RefreshIndicator'));
     expect(screen, contains('OperationalMetricTile'));
+    expect(screen, contains('FxSatelliteListTile'));
+    expect(screen, contains('DashboardSectionHeader'));
+    expect(screen, isNot(contains('FxSettingsGroup')));
   });
 }

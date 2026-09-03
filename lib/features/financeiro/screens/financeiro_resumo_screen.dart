@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/utils/pt_br_display.dart';
@@ -8,9 +9,10 @@ import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_inset_picker_sheet.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
-import '../../../core/widgets/fx_settings_group.dart';
-import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/operational_metric_tile.dart';
+import '../../dashboard/widgets/dashboard_home_action_chip.dart';
+import '../../dashboard/widgets/dashboard_section_header.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../../../features/auth/providers/auth_provider.dart';
@@ -120,21 +122,18 @@ class _FinanceiroResumoScreenState
           Padding(
             padding: const EdgeInsets.fromLTRB(
               FxSettingsLayout.pageInset,
-              8,
+              TokensStrip.s3,
               FxSettingsLayout.pageInset,
               0,
             ),
-            child: FxSettingsGroup(
-              children: [
-                FxSettingsTile(
-                  fxIcon: 'calendar',
-                  label: 'Mês',
-                  value: mesLabel,
-                  picker: true,
-                  showDivider: false,
-                  onTap: _abrirMes,
-                ),
-              ],
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: DashboardHomeActionChip(
+                label: mesLabel,
+                accent: primary,
+                isDark: isDark,
+                onPressed: _abrirMes,
+              ),
             ),
           ),
           Expanded(
@@ -173,62 +172,72 @@ class _FinanceiroResumoScreenState
       ),
       children: [
         _DonutChartCard(resumo: r, isDark: isDark),
-        const SizedBox(height: FxSettingsLayout.groupGap),
-        FxSettingsGroup(
-          header: 'Do mês',
-          caption: freshnessLabel,
-          children: [
-            FxSettingsTile(
-              fxIcon: 'dollar-sign',
-              label: 'Total recebido',
-              value: formatBrlCurrency(r.totalRecebido, showDecimals: false),
-              numeric: true,
-              showDivider: true,
-              onTap: () => FinanceiroHubScope.maybeOf(context)?.goToMensalidades(
-                    source: 'metricas',
-                  ),
+        const SizedBox(height: TokensStrip.s4),
+        DashboardSectionHeader(
+          title: 'Do mês',
+          actionLabel: 'Mensalidades',
+          onAction: () => FinanceiroHubScope.maybeOf(context)?.goToMensalidades(
+            source: 'metricas',
+          ),
+        ),
+        if (freshnessLabel != null) ...[
+          const SizedBox(height: TokensStrip.s2),
+          Text(
+            freshnessLabel,
+            style: FocuxHubTypography.bodyMuted(
+              color: fxScreenMute(context),
+              fontWeight: FontWeight.w600,
             ),
-            FxSettingsTile(
-              fxIcon: 'target',
-              label: 'Total previsto',
-              value: formatBrlCurrency(r.totalPrevisto, showDecimals: false),
-              numeric: true,
-              showDivider: true,
-              onTap: () => FinanceiroHubScope.maybeOf(context)?.goToMensalidades(
-                    source: 'metricas',
-                  ),
-            ),
-            FxSettingsTile(
-              fxIcon: 'alert-triangle',
-              label: 'Inadimplentes',
-              value: '${r.inadimplentes}',
-              danger: r.inadimplentes > 0,
-              showDivider: true,
-              onTap: () => FinanceiroHubScope.maybeOf(context)?.goToMensalidades(
-                    source: 'metricas',
-                  ),
-            ),
-            FxSettingsTile(
-              fxIcon: 'users',
-              label: 'Ticket médio',
-              value: formatBrlCurrency(r.ticketMedio, showDecimals: false),
-              numeric: true,
-              showDivider: true,
-              onTap: () => FinanceiroHubScope.maybeOf(context)?.goToMensalidades(
-                    source: 'metricas',
-                  ),
-            ),
-            FxSettingsTile(
-              fxIcon: 'dollar-sign',
-              label: 'Acumulado anual',
-              value: formatBrlCurrency(r.acumuladoAnual, showDecimals: false),
-              numeric: true,
-              showDivider: false,
-              onTap: () => FinanceiroHubScope.maybeOf(context)?.goToMensalidades(
-                    source: 'metricas',
-                  ),
-            ),
-          ],
+          ),
+        ],
+        const SizedBox(height: TokensStrip.s3),
+        InkWell(
+          onTap: () => FinanceiroHubScope.maybeOf(context)?.goToMensalidades(
+            source: 'metricas',
+          ),
+          borderRadius: BorderRadius.circular(12),
+          child: OperationalMetricTile(
+            label: 'Recebido',
+            value: formatBrlCurrency(r.totalRecebido, showDecimals: false),
+            hint:
+                'Previsto ${formatBrlCurrency(r.totalPrevisto, showDecimals: false)}',
+            color: EagleTokens.moneyGreen,
+            isDark: isDark,
+          ),
+        ),
+        const SizedBox(height: TokensStrip.s2),
+        InkWell(
+          onTap: () => FinanceiroHubScope.maybeOf(context)?.goToMensalidades(
+            source: 'metricas',
+          ),
+          borderRadius: BorderRadius.circular(12),
+          child: OperationalMetricTile(
+            label: 'Inadimplentes',
+            value: '${r.inadimplentes}',
+            hint:
+                'Ticket ${formatBrlCurrency(r.ticketMedio, showDecimals: false)}',
+            color: r.inadimplentes > 0
+                ? EagleTokens.bad
+                : Theme.of(context).colorScheme.primary,
+            isDark: isDark,
+            emphasis: r.inadimplentes > 0
+                ? OperationalMetricEmphasis.alert
+                : OperationalMetricEmphasis.normal,
+          ),
+        ),
+        const SizedBox(height: TokensStrip.s2),
+        InkWell(
+          onTap: () => FinanceiroHubScope.maybeOf(context)?.goToMensalidades(
+            source: 'metricas',
+          ),
+          borderRadius: BorderRadius.circular(12),
+          child: OperationalMetricTile(
+            label: 'Acumulado anual',
+            value: formatBrlCurrency(r.acumuladoAnual, showDecimals: false),
+            hint: 'Soma do ano em curso',
+            color: Theme.of(context).colorScheme.primary,
+            isDark: isDark,
+          ),
         ),
       ],
     );
