@@ -59,3 +59,10 @@ String habitoHubSubtitle(String? freshness) {
   if (stamp == null || stamp.isEmpty) return base;
   return '$base · $stamp';
 }
+
+String habitoComplianceEmptyTitle(String query) =>
+    query.trim().isEmpty ? 'Sem dados ainda' : 'Nenhum aluno encontrado';
+
+String habitoComplianceEmptySubtitle(String query) => query.trim().isEmpty
+    ? 'Cadastre hábitos e os alunos vão começar a marcar.'
+    : 'Nada com esse nome na compliance da semana.';

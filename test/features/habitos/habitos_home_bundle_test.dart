@@ -43,6 +43,23 @@ void main() {
     expect(bundle.compliance.first.compliancePct, 71);
     expect(bundle.planoFeatures?.plano, SubscriptionPlan.PRO);
     expect(bundle.planoFeatures?.habitCoaching, isTrue);
+    expect(bundle.page, 0);
+    expect(bundle.totalCompliance, 1);
+    expect(bundle.hasNext, isFalse);
+  });
+
+  test('HabitosHomeBundle lê paginação da compliance', () {
+    final bundle = HabitosHomeBundle.fromJson({
+      'compliance': [
+        {'alunoId': 1, 'alunoNome': 'Ana', 'checksSemana': 1, 'compliancePct': 10},
+      ],
+      'page': 1,
+      'totalCompliance': 21,
+      'hasNext': true,
+    });
+    expect(bundle.page, 1);
+    expect(bundle.totalCompliance, 21);
+    expect(bundle.hasNext, isTrue);
   });
 
   test('HabitosHomeBundle tolerates missing lists', () {

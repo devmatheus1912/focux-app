@@ -36,10 +36,15 @@ class RankingRepository {
 
   static const pageSize = 20;
 
-  Future<Pagina<RankingItem>> listar({int page = 0}) async {
+  Future<Pagina<RankingItem>> listar({int page = 0, String q = ''}) async {
+    final query = q.trim();
     final r = await _dio.get(
       '/api/ranking',
-      queryParameters: {'page': page, 'size': pageSize},
+      queryParameters: {
+        'page': page,
+        'size': pageSize,
+        if (query.isNotEmpty) 'q': query,
+      },
     );
     return Pagina.fromJson(
       r.data as Map<String, dynamic>,

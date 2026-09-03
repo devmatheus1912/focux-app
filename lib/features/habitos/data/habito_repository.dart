@@ -100,28 +100,39 @@ class HabitosHomeBundle {
   final List<Habito> habitos;
   final List<ComplianceItem> compliance;
   final PlanoFeatures? planoFeatures;
+  final int page;
+  final int totalCompliance;
+  final bool hasNext;
 
   const HabitosHomeBundle({
     required this.habitos,
     required this.compliance,
     this.planoFeatures,
+    this.page = 0,
+    this.totalCompliance = 0,
+    this.hasNext = false,
   });
 
   factory HabitosHomeBundle.fromJson(Map<String, dynamic> j) {
     final planoRaw = j['planoFeatures'];
+    final compliance =
+        ((j['compliance'] as List?) ?? const [])
+            .map((e) => ComplianceItem.fromJson(e as Map<String, dynamic>))
+            .toList();
     return HabitosHomeBundle(
       habitos:
           ((j['habitos'] as List?) ?? const [])
               .map((e) => Habito.fromJson(e as Map<String, dynamic>))
               .toList(),
-      compliance:
-          ((j['compliance'] as List?) ?? const [])
-              .map((e) => ComplianceItem.fromJson(e as Map<String, dynamic>))
-              .toList(),
+      compliance: compliance,
       planoFeatures:
           planoRaw is Map
               ? PlanoFeatures.fromJson(Map<String, dynamic>.from(planoRaw))
               : null,
+      page: (j['page'] as num?)?.toInt() ?? 0,
+      totalCompliance:
+          (j['totalCompliance'] as num?)?.toInt() ?? compliance.length,
+      hasNext: j['hasNext'] == true,
     );
   }
 }
@@ -129,6 +140,8 @@ class HabitosHomeBundle {
 class HabitoRepository {
   final Dio _dio;
   HabitoRepository(ApiClient c) : _dio = c.dio;
+
+  static const pageSize = 20;
 
   Future<List<HabitoTemplate>> templates() async {
     final r = await _dio.get('/api/habitos/templates');
@@ -138,8 +151,16 @@ class HabitoRepository {
   }
 
   /// BFF tipado — first paint da tela Hábitos (lista + compliance).
-  Future<HabitosHomeBundle> getHome() async {
-    final r = await _dio.get('/api/habitos/home');
+  Future<HabitosHomeBundle> getHome({int page = 0, String q = ''}) async {
+    final query = q.trim();
+    final r = await _dio.get(
+      '/api/habitos/home',
+      queryParameters: {
+        'page': page,
+        'size': pageSize,
+        if (query.isNotEmpty) 'q': query,
+      },
+    );
     return HabitosHomeBundle.fromJson(r.data as Map<String, dynamic>);
   }
 

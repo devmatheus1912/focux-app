@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focux_app/core/widgets/fx_input_deco.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/analytics/analytics_service.dart';
@@ -46,10 +49,17 @@ class HabitosPersonalScreen extends ConsumerStatefulWidget {
 }
 
 class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
+  final _searchCtrl = TextEditingController();
+  Timer? _debounce;
+  var _query = '';
   List<Habito> _habitos = [];
   List<ComplianceItem> _compliance = [];
   PlanoFeatures? _planoFromHome;
-  bool _loading = true;
+  var _page = 0;
+  var _hasMore = false;
+  var _totalCompliance = 0;
+  var _loading = true;
+  var _carregandoMais = false;
   String? _error;
   DateTime? _fetchedAt;
 
@@ -59,18 +69,38 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
     _carregar();
   }
 
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    _searchCtrl.dispose();
+    super.dispose();
+  }
+
+  void _onQueryChanged(String value) {
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 350), () {
+      final next = value.trim();
+      if (next == _query) return;
+      _query = next;
+      _carregar();
+    });
+  }
+
   Future<void> _carregar() async {
     setState(() {
       _loading = true;
       _error = null;
     });
     try {
-      final home = await ref.read(_repoProvider).getHome();
+      final home = await ref.read(_repoProvider).getHome(q: _query);
       if (!mounted) return;
       setState(() {
         _habitos = home.habitos;
         _compliance = home.compliance;
         _planoFromHome = home.planoFeatures;
+        _page = home.page;
+        _hasMore = home.hasNext;
+        _totalCompliance = home.totalCompliance;
         _fetchedAt = DateTime.now();
         _loading = false;
       });
@@ -80,6 +110,31 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
         _loading = false;
         _error = friendlyError(e);
       });
+    }
+  }
+
+  Future<void> _carregarMais() async {
+    if (_carregandoMais || !_hasMore) return;
+    setState(() => _carregandoMais = true);
+    try {
+      final home = await ref
+          .read(_repoProvider)
+          .getHome(page: _page + 1, q: _query);
+      if (!mounted) return;
+      final seen = _compliance.map((c) => c.alunoId).toSet();
+      setState(() {
+        _compliance = [
+          ..._compliance,
+          ...home.compliance.where((c) => seen.add(c.alunoId)),
+        ];
+        _page = home.page;
+        _hasMore = home.hasNext;
+        _totalCompliance = home.totalCompliance;
+        _carregandoMais = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _carregandoMais = false);
     }
   }
 
@@ -290,92 +345,136 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
   }
 
   Widget _buildBody() {
-    return RefreshIndicator(
-      onRefresh: _carregar,
-      child: ListView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-        padding: const EdgeInsets.fromLTRB(
-          FxSettingsLayout.pageInset,
-          8,
-          FxSettingsLayout.pageInset,
-          32,
-        ),
-        children: [
-          if (_habitos.isEmpty)
-            FxEmptyState(
-              icon: 'circle-check',
-              title: 'Nenhum hábito cadastrado',
-              subtitle:
-                  'Hábitos diários (água, sono, refeições) aumentam aderência e reduzem churn.',
-              action: FxEmptyAction(
-                label: 'Novo hábito',
-                onTap: _novoHabito,
-              ),
-            )
-          else ...[
-            const DashboardSectionHeader(title: 'Hábitos cadastrados'),
-            const SizedBox(height: TokensStrip.s2),
-            Text(
-              'Toque para desativar. Vale para todos os seus alunos.',
-              style: FocuxHubTypography.bodyMuted(
-                color: fxScreenMute(context),
-                fontWeight: FontWeight.w600,
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(
+            TokensStrip.s4,
+            TokensStrip.s2,
+            TokensStrip.s4,
+            TokensStrip.s2,
+          ),
+          child: TextField(
+            controller: _searchCtrl,
+            textInputAction: TextInputAction.search,
+            onChanged: _onQueryChanged,
+            onSubmitted: (value) {
+              _debounce?.cancel();
+              final next = value.trim();
+              if (next == _query && _compliance.isNotEmpty) return;
+              _query = next;
+              _carregar();
+            },
+            onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
+            decoration: InputDecoration(
+              hintText: 'Buscar aluno',
+              prefixIcon: const Icon(Icons.search_rounded),
+              border: FxInputDeco.outlineBorder(
+                borderRadius: BorderRadius.circular(16),
               ),
             ),
-            const SizedBox(height: TokensStrip.s3),
-            for (final habito in _habitos)
-              FxSatelliteListTile(
-                title: habito.titulo,
-                subtitle: Text(
-                  habitoSubtitle(
-                    descricao: habito.descricao,
-                    metaSemanal: habito.metaSemanal,
-                  ),
-                ),
-                trailing: Text(
-                  habitoMetaValue(habito.metaSemanal),
-                  style: FocuxHubTypography.bodyMuted(
-                    color: fxScreenMute(context),
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                onTap: () => _desativar(habito),
+          ),
+        ),
+        Expanded(
+          child: RefreshIndicator(
+            onRefresh: _carregar,
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+              padding: const EdgeInsets.fromLTRB(
+                FxSettingsLayout.pageInset,
+                8,
+                FxSettingsLayout.pageInset,
+                32,
               ),
-          ],
-          const SizedBox(height: FxSettingsLayout.groupGap),
-          if (_compliance.isEmpty)
-            const FxEmptyState(
-              icon: 'trend',
-              title: 'Sem dados ainda',
-              subtitle: 'Cadastre hábitos e os alunos vão começar a marcar.',
-            )
-          else ...[
-            const DashboardSectionHeader(title: 'Compliance da semana'),
-            const SizedBox(height: TokensStrip.s3),
-            for (final item in _compliance)
-              FxSatelliteListTile(
-                title: habitoComplianceLabel(item.alunoNome),
-                subtitle: Text(
-                  habitoComplianceSubtitle(item.checksSemana),
-                ),
-                trailing: Text(
-                  habitoComplianceValue(item.compliancePct),
-                  style: FocuxHubTypography.bodyMuted(
-                    color: habitoComplianceDanger(item.compliancePct)
-                        ? EagleTokens.bad
-                        : fxScreenMute(context),
-                    fontWeight: FontWeight.w700,
+              children: [
+                if (_habitos.isEmpty)
+                  FxEmptyState(
+                    icon: 'circle-check',
+                    title: 'Nenhum hábito cadastrado',
+                    subtitle:
+                        'Hábitos diários (água, sono, refeições) aumentam aderência e reduzem churn.',
+                    action: FxEmptyAction(
+                      label: 'Novo hábito',
+                      onTap: _novoHabito,
+                    ),
+                  )
+                else ...[
+                  const DashboardSectionHeader(title: 'Hábitos cadastrados'),
+                  const SizedBox(height: TokensStrip.s2),
+                  Text(
+                    'Toque para desativar. Vale para todos os seus alunos.',
+                    style: FocuxHubTypography.bodyMuted(
+                      color: fxScreenMute(context),
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                ),
-                accent: habitoComplianceDanger(item.compliancePct)
-                    ? EagleTokens.bad
-                    : null,
-                onTap: () => context.push('/alunos/${item.alunoId}'),
-              ),
-          ],
-        ],
-      ),
+                  const SizedBox(height: TokensStrip.s3),
+                  for (final habito in _habitos)
+                    FxSatelliteListTile(
+                      title: habito.titulo,
+                      subtitle: Text(
+                        habitoSubtitle(
+                          descricao: habito.descricao,
+                          metaSemanal: habito.metaSemanal,
+                        ),
+                      ),
+                      trailing: Text(
+                        habitoMetaValue(habito.metaSemanal),
+                        style: FocuxHubTypography.bodyMuted(
+                          color: fxScreenMute(context),
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      onTap: () => _desativar(habito),
+                    ),
+                ],
+                const SizedBox(height: FxSettingsLayout.groupGap),
+                if (_compliance.isEmpty)
+                  FxEmptyState(
+                    icon: 'trend',
+                    title: habitoComplianceEmptyTitle(_query),
+                    subtitle: habitoComplianceEmptySubtitle(_query),
+                  )
+                else ...[
+                  const DashboardSectionHeader(title: 'Compliance da semana'),
+                  const SizedBox(height: TokensStrip.s3),
+                  for (final item in _compliance)
+                    FxSatelliteListTile(
+                      title: habitoComplianceLabel(item.alunoNome),
+                      subtitle: Text(
+                        habitoComplianceSubtitle(item.checksSemana),
+                      ),
+                      trailing: Text(
+                        habitoComplianceValue(item.compliancePct),
+                        style: FocuxHubTypography.bodyMuted(
+                          color: habitoComplianceDanger(item.compliancePct)
+                              ? EagleTokens.bad
+                              : fxScreenMute(context),
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      accent: habitoComplianceDanger(item.compliancePct)
+                          ? EagleTokens.bad
+                          : null,
+                      onTap: () => context.push('/alunos/${item.alunoId}'),
+                    ),
+                  if (_hasMore)
+                    FxSatelliteListTile(
+                      title: _carregandoMais ? 'Carregando…' : 'Carregar mais',
+                      subtitle: _carregandoMais
+                          ? null
+                          : Text(
+                            'Mais ${_totalCompliance - _compliance.length} nesta lista.',
+                          ),
+                      onTap: _carregandoMais ? null : _carregarMais,
+                    ),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

@@ -36,6 +36,9 @@ void main() {
     expect(screen, isNot(contains('DropdownButton')));
     expect(screen, isNot(contains('FloatingActionButton')));
     expect(screen, contains('FxSatelliteListTile'));
+    expect(screen, contains('Buscar aluno'));
+    expect(screen, contains('Carregar mais'));
+    expect(screen, contains('onTapOutside'));
     expect(screen, isNot(contains(r'showError(context, $e)')));
   });
 }
