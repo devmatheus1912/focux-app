@@ -5,6 +5,7 @@ import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_form_sheet.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
+import '../../../core/widgets/fx_inset_picker_sheet.dart';
 import '../data/checkin_repository.dart';
 import '../utils/checkin_execucao_display.dart';
 import 'checkin_media_widgets.dart';
@@ -25,40 +26,29 @@ String checkinEvolucaoValorLabel(double value, String unidade) {
 Future<int?> showCheckinFilaSheet(
   BuildContext context, {
   required List<ExecucaoExercicio> exercicios,
+  int? selectedId,
 }) {
-  return showFxHomeSheet<int>(
+  return showFxInsetPickerSheet<int>(
     context,
-    builder: (ctx) {
-      final isDark = Theme.of(ctx).brightness == Brightness.dark;
-      return FxHomeSheetSurface(
-        isDark: isDark,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            FxHomeSheetHandle(isDark: isDark),
-            const SizedBox(height: TokensStrip.s4),
-            FxHomeSheetHeader(
-              isDark: isDark,
-              title: 'Fila do treino',
-              subtitle: '${exercicios.length} exercícios',
-              leading: const Icon(Icons.format_list_numbered_rounded, size: 18),
-            ),
-            const SizedBox(height: TokensStrip.s3),
-            for (final item in exercicios)
-              ListTile(
-                title: Text(item.exercicioNome),
-                subtitle: Text(
-                  item.concluido
-                      ? 'Concluído'
-                      : '${item.seriesFeitas}/${item.series ?? 0} séries',
-                ),
-                onTap: () => Navigator.of(ctx).pop(item.treinoExercicioId),
-              ),
-          ],
+    title: 'Fila do treino',
+    subtitle: '${exercicios.length} exercícios',
+    headerIcon: Icons.format_list_numbered_rounded,
+    selected: selectedId,
+    items: [
+      for (final item in exercicios)
+        FxInsetPickerSheetItem(
+          value: item.treinoExercicioId,
+          label: item.exercicioNome,
+          subtitle:
+              item.concluido
+                  ? 'Concluído'
+                  : '${item.seriesFeitas}/${item.series ?? 0} séries',
+          icon:
+              item.concluido
+                  ? Icons.check_circle_outline_rounded
+                  : Icons.fitness_center_rounded,
         ),
-      );
-    },
+    ],
   );
 }
 
