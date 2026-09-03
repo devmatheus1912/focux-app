@@ -5,19 +5,23 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/router/safe_navigation.dart';
+import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
+import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
-import '../../../core/widgets/fx_settings_group.dart';
-import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/ia_safety_disclaimer.dart';
+import '../../../core/widgets/operational_metric_tile.dart';
 import '../../../core/widgets/skeleton_loader.dart';
+import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../ia/data/ia_repository.dart';
 import '../../ia/widgets/ia_quota_upgrade.dart';
@@ -208,116 +212,127 @@ class _AlertaDetalheScreenState extends ConsumerState<AlertaDetalheScreen> {
                   'Não encontramos o detalhe agora. Puxe para atualizar.',
               action: FxEmptyAction(label: 'Tentar de novo', onTap: _load),
             )
-            : RefreshIndicator(
-              color: primary,
-              onRefresh: () async {
-                AnalyticsService.instance.track(
-                  ProductEvents.alertasDetalheRefreshed,
-                );
-                await _load();
-              },
-              child: ListView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.fromLTRB(
-                  FxSettingsLayout.pageInset,
-                  8,
-                  FxSettingsLayout.pageInset,
-                  110,
+            : Column(
+              children: [
+                Expanded(
+                  child: RefreshIndicator(
+                    color: primary,
+                    onRefresh: () async {
+                      AnalyticsService.instance.track(
+                        ProductEvents.alertasDetalheRefreshed,
+                      );
+                      await _load();
+                    },
+                    child: ListView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: const EdgeInsets.fromLTRB(
+                        FxSettingsLayout.pageInset,
+                        TokensStrip.s4,
+                        FxSettingsLayout.pageInset,
+                        TokensStrip.s4,
+                      ),
+                      children: [
+                        OperationalMetricTile(
+                          label: 'Último treino',
+                          value: alertaUltimoTreinoLabel(
+                            _detalhe!.ultimoTreino,
+                          ),
+                          hint: alertaCheckinsLabel(_detalhe!.checkIns30Dias),
+                          color: primary,
+                          isDark: isDark,
+                          emphasis: OperationalMetricEmphasis.alert,
+                        ),
+                        const SizedBox(height: TokensStrip.s3),
+                        OperationalMetricTile(
+                          label: 'Mensalidade',
+                          value: alertaStatusFinanceiroLabel(
+                            _detalhe!.statusFinanceiro,
+                          ),
+                          hint: 'Situação financeira',
+                          color:
+                              alertaStatusFinanceiroRuim(
+                                    _detalhe!.statusFinanceiro,
+                                  )
+                                  ? EagleTokens.bad
+                                  : primary,
+                          isDark: isDark,
+                          emphasis:
+                              alertaStatusFinanceiroRuim(
+                                    _detalhe!.statusFinanceiro,
+                                  )
+                                  ? OperationalMetricEmphasis.alert
+                                  : OperationalMetricEmphasis.normal,
+                        ),
+                        const SizedBox(height: TokensStrip.s4),
+                        Text(
+                          _detalhe!.sugestaoIa.trim().isEmpty
+                              ? 'Sem sugestão agora. Fale com o aluno pelo chat.'
+                              : _detalhe!.sugestaoIa.trim(),
+                          style: FocuxHubTypography.bodyMuted(
+                            color: fxScreenMute(context),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: TokensStrip.s3),
+                        const IaSafetyDisclaimer(compact: true),
+                        const SizedBox(height: TokensStrip.s4),
+                        Wrap(
+                          spacing: TokensStrip.s2,
+                          runSpacing: TokensStrip.s2,
+                          children: [
+                            DashboardHomeActionChip(
+                              label: 'Chat',
+                              accent: primary,
+                              isDark: isDark,
+                              onPressed: () => context.push(
+                                '/alunos/${widget.alunoId}/chat',
+                                extra: nome,
+                              ),
+                            ),
+                            DashboardHomeActionChip(
+                              label: 'Relatório',
+                              accent: primary,
+                              isDark: isDark,
+                              onPressed: () => context.push(
+                                '/alunos/${widget.alunoId}/relatorio',
+                                extra: nome,
+                              ),
+                            ),
+                            DashboardHomeActionChip(
+                              label: _gerandoIa
+                                  ? 'Gerando…'
+                                  : _detalhe!.sugestaoFonte == 'IA'
+                                  ? 'Gerar outra'
+                                  : 'Melhorar com IA',
+                              accent: primary,
+                              isDark: isDark,
+                              enabled: !_gerandoIa,
+                              onPressed: _gerarIa,
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-                children: [
-                  FxSettingsGroup(
-                    header: 'Situação',
-                    caption: 'O que esfriou neste aluno.',
-                    children: [
-                      FxSettingsTile(
-                        fxIcon: 'dumbbell',
-                        label: 'Último treino',
-                        value: alertaUltimoTreinoLabel(
-                          _detalhe!.ultimoTreino,
-                        ),
-                        onTap: () => context.push(
-                          '/alunos/${widget.alunoId}',
-                          extra: nome,
-                        ),
-                      ),
-                      FxSettingsTile(
-                        fxIcon: 'circle-check',
-                        label: 'Check-ins',
-                        value: alertaCheckinsLabel(
-                          _detalhe!.checkIns30Dias,
-                        ),
-                        onTap: () => context.push(
-                          '/alunos/${widget.alunoId}',
-                          extra: nome,
-                        ),
-                      ),
-                      FxSettingsTile(
-                        fxIcon: 'dollar-sign',
-                        label: 'Mensalidade',
-                        value: alertaStatusFinanceiroLabel(
-                          _detalhe!.statusFinanceiro,
-                        ),
-                        danger: alertaStatusFinanceiroRuim(
-                          _detalhe!.statusFinanceiro,
-                        ),
-                        showDivider: false,
-                        onTap: () => context.push(
-                          '/alunos/${widget.alunoId}',
-                          extra: nome,
-                        ),
-                      ),
-                    ],
+                SafeArea(
+                  top: false,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      FxSettingsLayout.pageInset,
+                      TokensStrip.s2,
+                      FxSettingsLayout.pageInset,
+                      TokensStrip.s3,
+                    ),
+                    child: FxLiquidPrimaryButton(
+                      label: 'Resolver alerta',
+                      loading: _resolving,
+                      loadingLabel: 'Resolvendo…',
+                      onPressed: _resolving ? null : _resolver,
+                    ),
                   ),
-                  const SizedBox(height: FxSettingsLayout.groupGap),
-                  FxSettingsGroup(
-                    header: 'Como retomar',
-                    caption: _detalhe!.sugestaoIa.trim().isEmpty
-                        ? 'Sem sugestão agora. Fale com o aluno pelo chat.'
-                        : _detalhe!.sugestaoIa.trim(),
-                    footer: const IaSafetyDisclaimer(compact: true),
-                    children: [
-                      FxSettingsTile(
-                        fxIcon: 'spark',
-                        label: _gerandoIa
-                            ? 'Gerando…'
-                            : _detalhe!.sugestaoFonte == 'IA'
-                            ? 'Gerar outra sugestão'
-                            : 'Melhorar com IA',
-                        value: '',
-                        locked: !_detalhe!.podeGerarIa,
-                        upgradeTierLabel:
-                            _detalhe!.podeGerarIa ? null : 'Pro',
-                        onTap: _gerandoIa ? () {} : _gerarIa,
-                      ),
-                      FxSettingsTile(
-                        fxIcon: 'message-circle',
-                        label: 'Enviar mensagem',
-                        value: 'Chat',
-                        onTap: () => context.push(
-                          '/alunos/${widget.alunoId}/chat',
-                          extra: nome,
-                        ),
-                      ),
-                      FxSettingsTile(
-                        fxIcon: 'article',
-                        label: 'Ver relatório',
-                        value: '',
-                        onTap: () => context.push(
-                          '/alunos/${widget.alunoId}/relatorio',
-                          extra: nome,
-                        ),
-                      ),
-                      FxSettingsTile(
-                        fxIcon: 'circle-check',
-                        label: _resolving ? 'Resolvendo…' : 'Resolver alerta',
-                        value: '',
-                        showDivider: false,
-                        onTap: _resolving ? () {} : _resolver,
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
       ),
     );

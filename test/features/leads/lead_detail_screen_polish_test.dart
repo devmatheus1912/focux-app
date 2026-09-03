@@ -17,8 +17,11 @@ void main() {
     expect(screen, contains('SkeletonList'));
     expect(screen, contains('friendlyError'));
     expect(screen, contains('showFxInsetPickerSheet'));
-    expect(screen, contains('FxSettingsGroup'));
+    expect(screen, contains('OperationalMetricTile'));
+    expect(screen, contains('FxLiquidPrimaryButton'));
+    expect(screen, contains('DashboardHomeActionChip'));
     expect(screen, contains('showFxConfirmSheet'));
+    expect(screen, isNot(contains('FxSettingsGroup')));
     expect(screen, isNot(contains('DropdownButton')));
     expect(screen, isNot(contains('FloatingActionButton')));
     expect(screen, isNot(contains('PopupMenuButton')));

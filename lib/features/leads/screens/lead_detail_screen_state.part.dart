@@ -321,18 +321,40 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
             ),
           ],
         ),
-        body: FxContentWidthLimiter(
-          child: _LeadDetailContent(
-            lead: lead,
-            loadingInteracoes: _loadingInteracoes,
-            interacoes: _interacoes,
-            onDefinirFollowUp: _definirFollowUp,
-            onLigar: _ligar,
-            onWhatsapp: _whatsapp,
-            onConverter: _converter,
-            onArquivar: _arquivar,
-            onNovaInteracao: _novaInteracao,
-          ),
+        body: Column(
+          children: [
+            Expanded(
+              child: FxContentWidthLimiter(
+                child: _LeadDetailContent(
+                  lead: lead,
+                  loadingInteracoes: _loadingInteracoes,
+                  interacoes: _interacoes,
+                  isDark: Theme.of(context).brightness == Brightness.dark,
+                  onDefinirFollowUp: _definirFollowUp,
+                  onLigar: _ligar,
+                  onWhatsapp: _whatsapp,
+                  onArquivar: _arquivar,
+                  onNovaInteracao: _novaInteracao,
+                ),
+              ),
+            ),
+            if (leadPodeConverter(lead.status))
+              SafeArea(
+                top: false,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    FxSettingsLayout.pageInset,
+                    TokensStrip.s2,
+                    FxSettingsLayout.pageInset,
+                    TokensStrip.s3,
+                  ),
+                  child: FxLiquidPrimaryButton(
+                    label: 'Converter em aluno',
+                    onPressed: _converter,
+                  ),
+                ),
+              ),
+          ],
         ),
       ),
     );
