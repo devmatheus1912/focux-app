@@ -16,6 +16,8 @@ void main() {
     expect(screen, contains('Semantics('));
     expect(screen, contains('semanticsLabel:'));
     expect(screen, contains('_PerfilVitrineTiles'));
+    expect(screen, contains("child: const Text('Copiar link')"));
+    expect(screen, isNot(contains("label: 'Copiar link'")));
     expect(screen, contains('PerfilMarcaVitrineSection'));
     expect(screen, isNot(contains('_HeroMarcaChip')));
     expect(screen, isNot(contains('_PlanPill')));

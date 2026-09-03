@@ -19,8 +19,6 @@ class _PerfilVitrineTiles extends StatelessWidget {
   Widget build(BuildContext context) {
     final normalizedSlug = slug?.trim();
     final hasSlug = normalizedSlug != null && normalizedSlug.isNotEmpty;
-    final displayLabel =
-        hasSlug ? Env.landingPageDisplayLabel(normalizedSlug) : '';
     final copyUrl = hasSlug ? Env.landingPageUrl(normalizedSlug) : '';
 
     return Column(
@@ -57,46 +55,46 @@ class _PerfilVitrineTiles extends StatelessWidget {
             onTap: onOpenEditor,
           )
         else ...[
-          FxSettingsTile(
-            icon: Icons.copy_rounded,
-            label: 'Copiar link',
-            value: displayLabel,
-            mute: mute,
-            line: line,
-            onTap: () {
-              unawaited(
-                copyLandingLink(
-                  context,
-                  url: copyUrl,
-                  successMessage:
-                      'Link copiado. Cole no Instagram ou WhatsApp.',
-                  reserveBottom: 96,
+          Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: Wrap(
+              spacing: TokensStrip.s2,
+              children: [
+                TextButton(
+                  onPressed: () {
+                    unawaited(
+                      copyLandingLink(
+                        context,
+                        url: copyUrl,
+                        successMessage:
+                            'Link copiado. Cole no Instagram ou WhatsApp.',
+                        reserveBottom: 96,
+                      ),
+                    );
+                  },
+                  child: const Text('Copiar link'),
                 ),
-              );
-            },
-          ),
-          FxSettingsTile(
-            icon: Icons.ios_share_outlined,
-            label: 'Compartilhar',
-            value: '',
-            mute: mute,
-            line: line,
-            onTap: () {
-              unawaited(
-                AnalyticsService.instance.track(
-                  ProductEvents.perfilShareTapped,
+                TextButton(
+                  onPressed: () {
+                    unawaited(
+                      AnalyticsService.instance.track(
+                        ProductEvents.perfilShareTapped,
+                      ),
+                    );
+                    unawaited(
+                      copyLandingLink(
+                        context,
+                        url: copyUrl,
+                        successMessage:
+                            'Link pronto para compartilhar no Instagram ou WhatsApp.',
+                        reserveBottom: 96,
+                      ),
+                    );
+                  },
+                  child: const Text('Compartilhar'),
                 ),
-              );
-              unawaited(
-                copyLandingLink(
-                  context,
-                  url: copyUrl,
-                  successMessage:
-                      'Link pronto para compartilhar no Instagram ou WhatsApp.',
-                  reserveBottom: 96,
-                ),
-              );
-            },
+              ],
+            ),
           ),
           FxSettingsTile(
             icon: Icons.open_in_new_outlined,
