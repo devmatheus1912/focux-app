@@ -356,7 +356,6 @@ class IaCopilotMenuAction extends StatelessWidget {
                   ],
                 ),
               ),
-              Icon(Icons.chevron_right, color: mute, size: 20),
             ],
           ),
         ),

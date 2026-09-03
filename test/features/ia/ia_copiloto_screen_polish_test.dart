@@ -24,7 +24,8 @@ void main() {
     expect(screen, contains('FxEmptyState'));
     expect(screen, contains('IaCopilotSafetyNote'));
     expect(screen, contains('FxHelpIconButton'));
-    expect(screen, contains('FxSettingsGroup'));
+    expect(screen, isNot(contains('FxSettingsGroup')));
+    expect(screen, isNot(contains('FxSettingsTile')));
     expect(screen, contains('iaCopilotoViewed'));
     expect(screen, contains('iaCopilotoHelpOpened'));
     expect(screen, contains('FxHubFreshness.fromFetchedAt'));

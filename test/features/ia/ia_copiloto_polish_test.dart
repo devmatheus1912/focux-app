@@ -26,7 +26,8 @@ void main() {
     expect(screen, contains('FxShellScaffold'));
     expect(screen, contains('FxShellAppBar'));
     expect(screen, contains('FxHelpIconButton'));
-    expect(screen, contains('FxSettingsGroup'));
+    expect(screen, isNot(contains('FxSettingsGroup')));
+    expect(screen, isNot(contains('FxSettingsTile')));
     expect(shellWidgets, contains('IaCopilotResultActionBar'));
     expect(shellWidgets, contains('DashboardHomeActionChip'));
     expect(shellWidgets, contains('FxConversionTextLink'));
@@ -45,11 +46,23 @@ void main() {
     expect(insightWidgets, contains('insight.detalhe'));
     expect(screen, isNot(contains('Ações do rascunho')));
     expect(actionsPart, contains('Ações das recomendações'));
+    expect(actionsPart, contains('showIaCopilotCreateTaskSheet'));
     expect(screen, contains('showFxConfirmSheet'));
     expect(screen, contains('iaCopilotoGerarConfirmTitle'));
     expect(screen, isNot(contains('FxLiquidPrimaryButton')));
     expect(shellWidgets, isNot(contains('FxLiquidPrimaryButton')));
+    expect(shellWidgets, isNot(contains('chevron_right')));
     expect(shellWidgets, contains('IaCopilotPreviewCard'));
     expect(shellWidgets, contains('IaCopilotGenerationStatus'));
+    expect(
+      File(
+        'lib/features/ia/widgets/ia_copilot_create_task_sheet.dart',
+      ).readAsStringSync(),
+      allOf(
+        contains('FxLiquidPrimaryButton'),
+        contains('iaCopilotoCriarTarefaLabel'),
+        isNot(contains('FxSettingsTile')),
+      ),
+    );
   });
 }
