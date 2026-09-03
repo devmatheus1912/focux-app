@@ -115,8 +115,6 @@ const agendaTituloMax = 120;
 
 String agendaNovoTileLabel() => 'Agendar atendimento';
 
-String agendaNovoSalvarTooltip() => 'Agendar';
-
 String agendaNovoConfirmTitle() => 'Agendar este horário?';
 
 String agendaNovoConfirmMessage({

@@ -19,7 +19,8 @@ void main() {
     expect(screen, contains("label: 'Aluno'"));
     expect(screen, contains("label: 'Início'"));
     expect(screen, contains('maskEmailForList'));
-    expect(screen, contains('ShellHeaderIconButton'));
+    expect(screen, isNot(contains('ShellHeaderIconButton')));
+    expect(screen, isNot(contains('agendaNovoSalvarTooltip')));
   });
 
   test('sheets de horário e aluno confirmam no tipo certo', () {
