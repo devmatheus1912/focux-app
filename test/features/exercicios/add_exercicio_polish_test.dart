@@ -23,14 +23,15 @@ void main() {
     expect(screen, contains('exercicioId'));
     expect(screen, contains('S.of(context)'));
     expect(screen, contains('atualizar'));
-    expect(screen, contains('DashboardHomeActionChip'));
+    expect(screen, contains('FxLiquidPrimaryButton'));
+    expect(screen, contains('bottomNavigationBar'));
+    expect(screen, isNot(contains('DashboardHomeActionChip')));
     expect(screen, contains('FxInsetPickerRow'));
     expect(screen, contains('FxHelpIconButton'));
     expect(screen, contains('showNovoExercicioHelpSheet'));
     expect(screen, isNot(contains('onHelpTap')));
     expect(screen, isNot(contains('showNovoExercicioIdentidadeHelpSheet')));
     expect(screen, isNot(contains('showNovoExercicioPerfilRapidoHelpSheet')));
-    expect(screen, contains('MediaQuery.paddingOf(context).bottom'));
     expect(screen, contains("'Unilateral'"));
     expect(screen, isNot(contains("header: 'Execução'")));
     expect(enumPicker, contains('edgeToEdgeRows: true'));
