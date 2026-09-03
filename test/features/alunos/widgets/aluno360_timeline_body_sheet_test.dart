@@ -128,4 +128,62 @@ void main() {
     expect(find.byType(FxHomeSheetSurface), findsOneWidget);
     expect(find.text('Abrir chat'), findsOneWidget);
   });
+
+  testWidgets('expandable timeline tile uses disclosure, not chevron', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: Timeline360Tile(
+            item: Timeline360Item(
+              at: null,
+              kind: 'Chat',
+              title: 'Chat · Personal',
+              body:
+                  'Primeira mensagem longa sobre treino: me manda carga e '
+                  'repetições para eu ajustar o plano completo desta semana.',
+              meta: 'PERSONAL',
+              priority: 'P3',
+              icon: Icons.chat_bubble_outline,
+              color: Colors.teal,
+              deepLink: '/alunos/42/chat',
+            ),
+            isDark: false,
+            accent: Colors.teal,
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byIcon(Icons.expand_more), findsOneWidget);
+    expect(find.byIcon(Icons.chevron_right), findsNothing);
+  });
+
+  testWidgets('route-only timeline tile keeps chevron', (tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: Timeline360Tile(
+            item: Timeline360Item(
+              at: null,
+              kind: 'Radar',
+              title: 'Radar',
+              body: 'Curto.',
+              meta: '',
+              priority: 'P3',
+              icon: Icons.radar_outlined,
+              color: Colors.orange,
+              deepLink: '/alunos/42',
+            ),
+            isDark: false,
+            accent: Colors.teal,
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byIcon(Icons.chevron_right), findsOneWidget);
+    expect(find.byIcon(Icons.expand_more), findsNothing);
+  });
 }
