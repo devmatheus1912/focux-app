@@ -120,6 +120,26 @@ void main() {
     expect(screen, contains('showFxConfirmSheet'));
     expect(screen, contains('treinoPrescriptionSaveConfirmTitle'));
     expect(screen, contains('heightFactor: 0.88'));
+    expect(
+      File(
+        'lib/features/treinos/screens/treino_detail_screen_body.part.dart',
+      ).readAsStringSync(),
+      contains("label: 'Adicionar exercício'"),
+    );
+    expect(
+      'showChevron: true'.allMatches(
+        File(
+          'lib/features/treinos/screens/treino_detail_screen_body.part.dart',
+        ).readAsStringSync(),
+      ).length,
+      1,
+    );
+    expect(
+      File(
+        'lib/features/treinos/screens/treino_detail_screen_rows.part.dart',
+      ).readAsStringSync(),
+      isNot(contains('showChevron: true')),
+    );
     final videoBlock =
         File(
           'lib/features/treinos/widgets/treino_prescription_video_block.dart',
@@ -138,7 +158,8 @@ void main() {
     );
     expect(videoBlock, contains('showFxConfirmSheet'));
     expect(videoBlock, contains('showFxInsetPickerSheet'));
-    expect(videoBlock, contains('FxSettingsTile'));
+    expect(videoBlock, contains('ElevatedButton'));
+    expect(videoBlock, isNot(contains('FxSettingsTile')));
     expect(videoBlock, contains('exerciseVideoUploadConfirmTitle'));
     expect(videoBlock, contains('exerciseVideoRemoveConfirmTitle'));
     expect(videoBlock, isNot(contains('TextButton')));

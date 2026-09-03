@@ -71,19 +71,16 @@ class _TreinoDetailBody extends StatelessWidget {
             TreinoInsetActionSpec(
               icon: Icons.view_agenda_outlined,
               label: 'Montar por modelo',
-              showChevron: true,
               onTap: () => Navigator.pop(sheetContext, 'template_split'),
             ),
             TreinoInsetActionSpec(
               icon: Icons.person_add_alt_1_rounded,
               label: 'Atribuir a aluno',
-              showChevron: true,
               onTap: () => Navigator.pop(sheetContext, 'assign'),
             ),
             TreinoInsetActionSpec(
               icon: Icons.assignment_ind_rounded,
               label: 'Copiar para aluno',
-              showChevron: true,
               onTap: () => Navigator.pop(sheetContext, 'clone'),
             ),
             TreinoInsetActionSpec(

@@ -187,7 +187,6 @@ class _ExerciseActionsSheet extends StatelessWidget {
         TreinoInsetActionSpec(
           icon: Icons.edit_note_rounded,
           label: 'Editar prescrição',
-          showChevron: true,
           onTap: () => Navigator.pop(context, 'edit'),
         ),
         TreinoInsetActionSpec(
@@ -198,7 +197,6 @@ class _ExerciseActionsSheet extends StatelessWidget {
         TreinoInsetActionSpec(
           icon: Icons.swap_horiz_rounded,
           label: 'Substituir',
-          showChevron: true,
           onTap: () => Navigator.pop(context, 'substitute'),
         ),
         TreinoInsetActionSpec(

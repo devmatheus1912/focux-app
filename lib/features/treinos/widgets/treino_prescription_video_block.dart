@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/theme/brand_palette.dart';
+import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -13,7 +14,6 @@ import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_inset_picker_sheet.dart';
 import '../../../core/widgets/fx_settings_group.dart';
-import '../../../core/widgets/fx_settings_tile.dart';
 import '../../exercicios/data/exercicio_repository.dart';
 import '../../exercicios/providers/exercicios_provider.dart';
 import '../../exercicios/screens/widgets/exercise_video_preview_sheet.dart';
@@ -268,29 +268,76 @@ class _TreinoPrescriptionVideoBlockState
               ),
             )
           else ...[
-            if (canPreview)
-              FxSettingsTile(
-                icon: Icons.play_circle_fill_rounded,
-                label: exerciseVideoPreviewLabel(hasPersonal: hasPersonal),
-                value: '',
-                onTap: _preview,
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: TokensStrip.s2),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (canPreview) ...[
+                    SizedBox(
+                      height: 52,
+                      child: OutlinedButton(
+                        onPressed: _preview,
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: chrome.ink,
+                          side: BorderSide(
+                            color: primary.withValues(alpha: 0.28),
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(
+                              TokensStrip.rButton,
+                            ),
+                          ),
+                        ),
+                        child: Text(
+                          exerciseVideoPreviewLabel(hasPersonal: hasPersonal),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: TokensStrip.s2),
+                  ],
+                  SizedBox(
+                    height: 52,
+                    child: ElevatedButton(
+                      onPressed: _upload,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: primary,
+                        foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(
+                            TokensStrip.rButton,
+                          ),
+                        ),
+                      ),
+                      child: Text(
+                        exerciseVideoUploadLabel(hasVideo: hasPersonal),
+                      ),
+                    ),
+                  ),
+                  if (hasPersonal) ...[
+                    const SizedBox(height: TokensStrip.s2),
+                    SizedBox(
+                      height: 52,
+                      child: ElevatedButton(
+                        onPressed: _remove,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: EagleTokens.bad,
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(
+                              TokensStrip.rButton,
+                            ),
+                          ),
+                        ),
+                        child: Text(exerciseVideoRemoveLabel()),
+                      ),
+                    ),
+                  ],
+                ],
               ),
-            FxSettingsTile(
-              fxIcon: 'spark',
-              label: exerciseVideoUploadLabel(hasVideo: hasPersonal),
-              value: '',
-              showDivider: hasPersonal,
-              onTap: _upload,
             ),
-            if (hasPersonal)
-              FxSettingsTile(
-                fxIcon: 'alert-triangle',
-                label: exerciseVideoRemoveLabel(),
-                value: '',
-                danger: true,
-                showDivider: false,
-                onTap: _remove,
-              ),
           ],
         ],
       ),
