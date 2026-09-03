@@ -238,6 +238,11 @@ class FinanceiroRepository {
     return MensalidadesPage.fromJson(r.data as Map<String, dynamic>);
   }
 
+  Future<Mensalidade> buscar(int id) async {
+    final r = await _dio.get('/api/financeiro/mensalidades/$id');
+    return Mensalidade.fromJson(r.data as Map<String, dynamic>);
+  }
+
   Future<Mensalidade> criar(
     int alunoId,
     double valor,

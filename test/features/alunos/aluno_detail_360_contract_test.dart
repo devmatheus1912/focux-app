@@ -346,7 +346,7 @@ void main() {
       ).readAsStringSync(),
       allOf(
         contains("'Medidas'"),
-        contains('FxSettingsGroup'),
+        contains('DashboardSectionHeader'),
       ),
     );
     expect(
@@ -425,8 +425,8 @@ void main() {
         contains("'Medidas'"),
         contains('measurementRows'),
         contains("'Medidas em dia'"),
-        contains('FxSettingsGroup'),
-        contains('FxSettingsTile'),
+        contains('DashboardSectionHeader'),
+        contains('FxSatelliteListTile'),
       ),
     );
     expect(
@@ -445,8 +445,8 @@ void main() {
         contains('ConsumerWidget'),
         contains('UpgradePromptSheet'),
         contains('Aluno360FerramentasMiniSparkline'),
-        contains('FxSettingsGroup'),
-        contains('FxSettingsTile'),
+        contains('DashboardSectionHeader'),
+        contains('FxSatelliteListTile'),
       ),
     );
     expect(
@@ -465,7 +465,7 @@ void main() {
       File(
         'lib/features/alunos/widgets/aluno360_recovery_insight_card.dart',
       ).readAsStringSync(),
-      contains('FxSettingsGroup'),
+      contains('DashboardSectionHeader'),
     );
     expect(
       File(
@@ -523,7 +523,6 @@ void main() {
       ).readAsStringSync(),
       contains('ValueKey(\'aluno360_ferramentas_modulos\')'),
     );
-    expect(screen, contains('aluno360InsetEmptyActionTiles'));
     expect(screen, contains('class Aluno360StudentQuickActions'));
     expect(screen, contains('AlunoOperacaoAdherenceLegend'));
     expect(screen, contains('fonteLabel'));
@@ -554,8 +553,9 @@ void main() {
         'lib/features/alunos/widgets/aluno360_evolucao_inteligente_card.dart',
       ).readAsStringSync(),
       allOf(
-        contains('FxSettingsGroup'),
-        contains('FxSettingsTile'),
+        contains('DashboardSectionHeader'),
+        contains('OperationalMetricTile'),
+        contains('DashboardHomeActionChip'),
       ),
     );
     expect(
@@ -563,8 +563,9 @@ void main() {
         'lib/features/alunos/widgets/aluno360_timeline_card.dart',
       ).readAsStringSync(),
       allOf(
-        contains('FxSettingsGroup'),
-        contains('FxSettingsTile'),
+        contains('DashboardSectionHeader'),
+        contains('FxSatelliteListTile'),
+        contains('DashboardHomeActionChip'),
       ),
     );
     expect(
@@ -572,8 +573,8 @@ void main() {
         'lib/features/alunos/widgets/aluno360_weight_activity_card.dart',
       ).readAsStringSync(),
       allOf(
-        contains('FxSettingsGroup'),
-        contains('FxSettingsTile'),
+        contains('DashboardSectionHeader'),
+        contains('OperationalMetricTile'),
       ),
     );
     expect(screen, contains('showAluno360CopilotProfileGapsSheet'));
@@ -583,7 +584,6 @@ void main() {
       ).readAsStringSync(),
       contains('showFxInsetPickerSheet'),
     );
-    expect(screen, contains('aluno360InsetEmptyActionTiles'));
     expect(screen, contains('Peça um check-in'));
     expect(screen, contains('Quando houver check-in ou chat'));
     expect(

@@ -19,6 +19,7 @@ import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -68,6 +69,28 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
   }
 
   String get _firstName => addAlunoFirstName(_nomeCtrl.text);
+
+  bool get _dirty =>
+      _nomeCtrl.text.trim().isNotEmpty ||
+      _emailCtrl.text.trim().isNotEmpty ||
+      _objetivoCtrl.text.trim().isNotEmpty ||
+      _whatsappCtrl.text.trim().isNotEmpty ||
+      _genero != null ||
+      _tipoConsultoria != null ||
+      _objetivoLivre;
+
+  Future<void> _cancel() async {
+    if (_dirty) {
+      final ok = await showFxConfirmSheet(
+        context,
+        title: 'Descartar cadastro?',
+        message: 'O que você preencheu não será salvo.',
+        confirmLabel: 'Descartar',
+      );
+      if (!ok || !mounted) return;
+    }
+    safePopOrGo(context, '/alunos');
+  }
 
   @override
   void initState() {
@@ -252,7 +275,16 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
         appBar: FxShellAppBar(
           title: 'Novo aluno',
           subtitle: addAlunoHubSubtitle(),
-          onBack: () => safePopOrGo(context, '/alunos'),
+          leadingWidth: 92,
+          leading: TextButton(
+            onPressed: _cancel,
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            child: const Text('Cancelar'),
+          ),
           actions: [
             FxHelpIconButton(
               tooltip: 'Como cadastrar',
@@ -261,27 +293,34 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                 showAddAlunoHelpSheet(context);
               },
             ),
-            Padding(
-              padding: const EdgeInsets.only(right: TokensStrip.s3),
-              child: Center(
-                child: Semantics(
-                  button: true,
-                  enabled: _canSubmit && !_loading,
-                  label:
-                      _canSubmit
-                          ? (_loading
-                              ? 'Cadastrando aluno'
-                              : 'Cadastrar $_firstName. O convite será preparado após o cadastro.')
-                          : 'Cadastrar. Complete nome e e-mail para habilitar',
-                  child: ShellHeaderIconButton(
-                    icon: 'circle-check',
-                    tooltip: addAlunoSalvarTooltip(),
-                    onTap: _loading ? () {} : _submit,
-                  ),
-                ),
+          ],
+        ),
+        bottomNavigationBar: SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(
+              FxSettingsLayout.pageInset,
+              TokensStrip.s2,
+              FxSettingsLayout.pageInset,
+              TokensStrip.s3,
+            ),
+            child: Semantics(
+              button: true,
+              enabled: _canSubmit && !_loading,
+              label:
+                  _canSubmit
+                      ? (_loading
+                          ? 'Cadastrando aluno'
+                          : 'Cadastrar $_firstName. O convite será preparado após o cadastro.')
+                      : 'Cadastrar. Complete nome e e-mail para habilitar',
+              child: FxLiquidPrimaryButton(
+                label: 'Cadastrar',
+                loading: _loading,
+                loadingLabel: 'Cadastrando…',
+                onPressed: _canSubmit && !_loading ? _submit : null,
               ),
             ),
-          ],
+          ),
         ),
         body: SafeArea(
           bottom: false,

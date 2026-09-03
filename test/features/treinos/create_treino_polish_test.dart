@@ -31,7 +31,7 @@ void main() {
     );
 
     expect(screen, contains("displayWorkoutName('Treino \${preset.title}')"));
-    expect(screen, contains('DashboardHomeActionChip'));
+    expect(screen, contains('FxLiquidPrimaryButton'));
     expect(screen, contains('FxSettingsGroup'));
     expect(screen, contains('_PlanoBaseSummary'));
     expect(screen, contains('CreateTreinoLogic.planoBaseCaption'));
@@ -41,7 +41,8 @@ void main() {
     expect(screen, contains('Scrollable.ensureVisible'));
     expect(screen, isNot(contains("label: 'Modelo \${preset.title}")));
     expect(screen, isNot(contains('BouncingScrollPhysics')));
-    expect(screen, isNot(contains('FxLiquidPrimaryButton')));
-    expect(screen, contains("label: _loading ? 'Criando…' : 'Criar'"));
+    expect(screen, contains("label: 'Criar'"));
+    expect(screen, contains("child: const Text('Cancelar')"));
+    expect(screen, contains("loadingLabel: 'Criando…'"));
   });
 }

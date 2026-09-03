@@ -17,6 +17,7 @@ import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_premium_entrance.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_settings_group.dart';
@@ -146,25 +147,32 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen> {
                 showEditarAlunoHelpSheet(context);
               },
             ),
-            Padding(
-              padding: const EdgeInsets.only(right: TokensStrip.s3),
-              child: Center(
-                child: Semantics(
-                  button: true,
-                  enabled: !_salvando,
-                  label:
-                      _salvando
-                          ? 'Salvando alterações do aluno'
-                          : 'Salvar alterações do aluno',
-                  child: ShellHeaderIconButton(
-                    icon: 'circle-check',
-                    tooltip: editarAlunoSalvarTooltip(),
-                    onTap: _salvando ? () {} : _salvar,
-                  ),
-                ),
+          ],
+        ),
+        bottomNavigationBar: SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(
+              FxSettingsLayout.pageInset,
+              TokensStrip.s2,
+              FxSettingsLayout.pageInset,
+              TokensStrip.s3,
+            ),
+            child: Semantics(
+              button: true,
+              enabled: !_salvando,
+              label:
+                  _salvando
+                      ? 'Salvando alterações do aluno'
+                      : 'Salvar alterações do aluno',
+              child: FxLiquidPrimaryButton(
+                label: 'Salvar',
+                loading: _salvando,
+                loadingLabel: 'Salvando…',
+                onPressed: _salvando ? null : _salvar,
               ),
             ),
-          ],
+          ),
         ),
         body: FxPremiumEntrance(
           child: SafeArea(

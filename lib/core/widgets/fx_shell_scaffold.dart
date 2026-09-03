@@ -100,6 +100,7 @@ class FxShellAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.subtitle,
     this.actions,
     this.leading,
+    this.leadingWidth,
     this.onBack,
     this.centerTitle = false,
   });
@@ -108,6 +109,7 @@ class FxShellAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String? subtitle;
   final List<Widget>? actions;
   final Widget? leading;
+  final double? leadingWidth;
   final VoidCallback? onBack;
 
   /// `false` (padrão): leading — operação, listas, título + subtítulo de contexto.
@@ -200,6 +202,7 @@ class FxShellAppBar extends StatelessWidget implements PreferredSizeWidget {
       centerTitle: centerTitle,
       automaticallyImplyLeading: false,
       leading: backButton,
+      leadingWidth: leadingWidth ?? (leading != null ? 92 : 56),
       title: titleWidget,
       actions: balancedActions,
     );

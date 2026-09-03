@@ -23,6 +23,25 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen> {
     if (mounted) setState(() {});
   }
 
+  bool get _dirty =>
+      _nomeCtrl.text.trim().isNotEmpty ||
+      _objetivoCtrl.text.trim().isNotEmpty ||
+      _descricaoCtrl.text.trim().isNotEmpty ||
+      _nivel != null;
+
+  Future<void> _cancel() async {
+    if (_dirty) {
+      final ok = await showFxConfirmSheet(
+        context,
+        title: 'Descartar treino?',
+        message: 'O que você preencheu não será salvo.',
+        confirmLabel: 'Descartar',
+      );
+      if (!ok || !mounted) return;
+    }
+    safePopOrGo(context, '/treinos');
+  }
+
   @override
   void dispose() {
     _nomeCtrl.dispose();
@@ -145,7 +164,16 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen> {
                       ? widget.alunoNome!.trim()
                       : 'Vincular ao aluno'
                   : null,
-          onBack: () => safePopOrGo(context, '/treinos'),
+          leadingWidth: 92,
+          leading: TextButton(
+            onPressed: _cancel,
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            child: const Text('Cancelar'),
+          ),
           actions: [
             FxHelpIconButton(
               tooltip: 'Ajuda sobre novo treino',
@@ -295,7 +323,7 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen> {
               ),
             ),
             Align(
-              alignment: AlignmentDirectional.bottomEnd,
+              alignment: Alignment.bottomCenter,
               child: SafeArea(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(
@@ -313,12 +341,11 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen> {
                             : canSubmit
                             ? 'Criar treino'
                             : 'Criar treino. Informe o nome para habilitar',
-                    child: DashboardHomeActionChip(
-                      label: _loading ? 'Criando…' : 'Criar',
-                      accent: primary,
-                      isDark: isDark,
-                      enabled: canSubmit,
-                      onPressed: _submit,
+                    child: FxLiquidPrimaryButton(
+                      label: 'Criar',
+                      loading: _loading,
+                      loadingLabel: 'Criando…',
+                      onPressed: canSubmit ? _submit : null,
                     ),
                   ),
                 ),

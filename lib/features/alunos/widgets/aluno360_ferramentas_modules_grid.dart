@@ -2,24 +2,25 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/theme/fx_settings_layout.dart';
-import '../../../core/widgets/fx_settings_group.dart';
-import '../../../core/widgets/fx_settings_tile.dart';
+import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../planos/utils/effective_plano_features.dart';
 import '../../subscription/widgets/upgrade_prompt_sheet.dart';
+import '../constants/aluno_360_layout.dart';
 import '../data/aluno_repository.dart';
 import '../utils/aluno360_ferramentas_logic.dart';
 import 'aluno360_ferramentas_mini_sparkline.dart';
 import 'aluno360_help_sheets.dart';
 
-/// Módulos Ferramentas em grupos inset — paridade Perfil (`FxSettingsGroup`).
+/// Módulos Ferramentas no first paint — header + satellite (S3).
 class Aluno360FerramentasModulesGrid extends ConsumerWidget {
   const Aluno360FerramentasModulesGrid({
     super.key,
     required this.aluno,
     required this.alunoId,
     required this.primary,
-    required this.isDark,
     required this.perfilCompletion,
     this.bf,
     this.massaMagra,
@@ -29,7 +30,6 @@ class Aluno360FerramentasModulesGrid extends ConsumerWidget {
   final Aluno aluno;
   final int alunoId;
   final Color primary;
-  final bool isDark;
   final int perfilCompletion;
   final String? bf;
   final String? massaMagra;
@@ -81,203 +81,216 @@ class Aluno360FerramentasModulesGrid extends ConsumerWidget {
         Aluno360FerramentasLogic.aderenciaSparkSemanticsLabel(
           aderenciaSemanal,
         );
+    final iaPlan = Aluno360FerramentasLogic.gatedModulePlanLabel(
+      Aluno360FerramentasGatedModule.iaProgresso,
+    );
+    final feedbackPlan = Aluno360FerramentasLogic.gatedModulePlanLabel(
+      Aluno360FerramentasGatedModule.feedbackVideo,
+    );
 
     return KeyedSubtree(
       key: const ValueKey('aluno360_ferramentas_modulos'),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          FxSettingsGroup(
-            header: 'Treino & evolução',
-            caption: Aluno360FerramentasLogic.treinoCaption,
-            helpTooltip: 'Ajuda sobre treino e evolução',
-            onHelpTap: () => showAluno360FerramentasHelpSheet(context),
-            accent: primary,
-            children: [
-              FxSettingsTile(
-                icon: Icons.fitness_center_outlined,
-                label: 'Treinos',
-                subtitle:
-                    aluno.diasSemTreino == null
-                        ? 'Histórico completo'
-                        : aluno.diasSemTreino! >= 7
-                        ? '${aluno.diasSemTreino} dias sem treino'
-                        : 'Ativo recentemente',
-                value: '',
-                onTap:
-                    () => context.push(
-                      '/alunos/$alunoId/treinos-list',
-                      extra: aluno.nome,
-                    ),
-              ),
-              FxSettingsTile(
-                icon: Icons.tune_rounded,
-                label: 'Equipamentos',
-                subtitle:
-                    aluno.equipamentosDisponiveis.isEmpty
-                        ? 'Sem restrição cadastrada'
-                        : '${aluno.equipamentosDisponiveis.length} marcados',
-                value: '',
-                onTap: () => context.push('/alunos/$alunoId/equipamentos'),
-              ),
-              FxSettingsTile(
-                icon: Icons.auto_awesome_outlined,
-                label: 'IA Progresso',
-                subtitle: 'Carga sugerida pela IA',
-                value: '',
-                locked: iaLocked,
-                upgradeTierLabel:
-                    iaLocked
-                        ? Aluno360FerramentasLogic.gatedModulePlanLabel(
-                          Aluno360FerramentasGatedModule.iaProgresso,
-                        )
-                        : null,
-                onTap:
-                    () => _openGated(
-                      context,
-                      module: Aluno360FerramentasGatedModule.iaProgresso,
-                      featureName: 'IA Progresso',
-                      locked: iaLocked,
-                      onUnlocked:
-                          () => context.push(
-                            '/alunos/$alunoId/ia/progressao',
-                            extra: aluno.nome,
-                          ),
-                    ),
-              ),
-              FxSettingsTile(
-                icon: Icons.show_chart_outlined,
-                label: 'Composição corporal',
-                subtitle:
-                    bf != null || massaMagra != null
-                        ? 'Última avaliação registrada'
-                        : 'Registrar medidas',
-                value: Aluno360FerramentasLogic.composicaoCorporalValue(
-                  bf: bf,
-                  massaMagra: massaMagra,
-                ),
-                highlight: composicaoPending,
-                onTap: () => context.push(evolucaoRoute, extra: aluno.nome),
-              ),
-              FxSettingsTile(
-                icon: Icons.assessment_outlined,
-                label: 'Aderência',
-                subtitle: Aluno360FerramentasLogic.aderenciaModuleSub(
-                  aluno: aluno,
-                  aderenciaSemanal: aderenciaSemanal,
-                ),
-                value: '${aderenciaPercent.toInt()}%',
-                numeric: true,
-                highlight: aderenciaAttention,
-                accessory:
-                    sparklineValues.isNotEmpty
-                        ? Aluno360FerramentasMiniSparkline(
-                          data: sparklineValues,
-                          color: primary,
-                          semanticsLabel: sparklineSemantics,
-                        )
-                        : null,
-                onTap:
-                    () => context.push(
-                      '/alunos/$alunoId/relatorio',
-                      extra: aluno.nome,
-                    ),
-              ),
-              FxSettingsTile(
-                icon: Icons.flag_outlined,
-                label: 'Plano de sucesso',
-                subtitle: 'Metas e marcos do aluno',
-                value: '',
-                showDivider: false,
-                onTap:
-                    () => context.push(
-                      '/alunos/$alunoId/plano-sucesso',
-                      extra: aluno.nome,
-                    ),
-              ),
-            ],
+          DashboardSectionHeader(
+            title: 'Treino & evolução',
+            actionLabel: 'Ajuda',
+            onAction: () => showAluno360FerramentasHelpSheet(context),
           ),
-          const SizedBox(height: FxSettingsLayout.groupGap),
-          FxSettingsGroup(
-            header: 'Perfil & gestão',
-            caption: Aluno360FerramentasLogic.perfilCaption,
-            helpTooltip: 'Ajuda sobre perfil e gestão',
-            onHelpTap: () => showAluno360FerramentasHelpSheet(context),
+          Text(
+            Aluno360FerramentasLogic.treinoCaption,
+            style: Aluno360Layout.metaStyle(context),
+          ),
+          const SizedBox(height: TokensStrip.s3),
+          FxSatelliteListTile(
+            title: 'Treinos',
+            subtitle: Text(
+              aluno.diasSemTreino == null
+                  ? 'Histórico completo'
+                  : aluno.diasSemTreino! >= 7
+                  ? '${aluno.diasSemTreino} dias sem treino'
+                  : 'Ativo recentemente',
+            ),
             accent: primary,
-            children: [
-              FxSettingsTile(
-                icon: Icons.people_outline,
-                label: 'Anamnese',
-                subtitle:
-                    perfilCompletion >= 85
-                        ? 'Perfil completo'
-                        : 'Completar cadastro',
-                value: Aluno360FerramentasLogic.anamneseValue(perfilCompletion),
-                numeric: perfilCompletion < 85,
-                highlight: perfilCompletion < 85,
-                onTap: () => context.push('/alunos/$alunoId/anamnese'),
+            onTap:
+                () => context.push(
+                  '/alunos/$alunoId/treinos-list',
+                  extra: aluno.nome,
+                ),
+          ),
+          FxSatelliteListTile(
+            title: 'Equipamentos',
+            subtitle: Text(
+              aluno.equipamentosDisponiveis.isEmpty
+                  ? 'Sem restrição cadastrada'
+                  : '${aluno.equipamentosDisponiveis.length} marcados',
+            ),
+            accent: primary,
+            onTap: () => context.push('/alunos/$alunoId/equipamentos'),
+          ),
+          FxSatelliteListTile(
+            title: 'IA Progresso',
+            subtitle: Text(
+              iaLocked ? 'Disponível no $iaPlan' : 'Carga sugerida pela IA',
+            ),
+            leading: Icon(
+              iaLocked ? Icons.lock_outline : Icons.auto_awesome_outlined,
+              color: primary,
+            ),
+            accent: primary,
+            onTap:
+                () => _openGated(
+                  context,
+                  module: Aluno360FerramentasGatedModule.iaProgresso,
+                  featureName: 'IA Progresso',
+                  locked: iaLocked,
+                  onUnlocked:
+                      () => context.push(
+                        '/alunos/$alunoId/ia/progressao',
+                        extra: aluno.nome,
+                      ),
+                ),
+          ),
+          FxSatelliteListTile(
+            title: 'Composição corporal',
+            subtitle: Text(
+              bf != null || massaMagra != null
+                  ? 'Última avaliação registrada'
+                  : 'Registrar medidas',
+            ),
+            trailing: Text(
+              Aluno360FerramentasLogic.composicaoCorporalValue(
+                bf: bf,
+                massaMagra: massaMagra,
               ),
-              FxSettingsTile(
-                icon: Icons.attach_money_outlined,
-                label: 'Mensalidades',
-                subtitle:
-                    aluno.statusFinanceiro == 'INADIMPLENTE'
-                        ? 'Pagamento em atraso'
-                        : 'Em dia',
-                value:
-                    aluno.statusFinanceiro == 'INADIMPLENTE' ? 'Ação' : 'OK',
-                danger: aluno.statusFinanceiro == 'INADIMPLENTE',
-                onTap: () => context.push('/financeiro?alunoId=$alunoId'),
+            ),
+            accent: composicaoPending ? EagleTokens.warn : primary,
+            onTap: () => context.push(evolucaoRoute, extra: aluno.nome),
+          ),
+          FxSatelliteListTile(
+            title: 'Aderência',
+            subtitle: Text(
+              Aluno360FerramentasLogic.aderenciaModuleSub(
+                aluno: aluno,
+                aderenciaSemanal: aderenciaSemanal,
               ),
-              FxSettingsTile(
-                icon: Icons.chat_bubble_outline,
-                label: 'Chat',
-                subtitle: 'Conversa direta com o aluno',
-                value: '',
-                onTap:
-                    () => context.push(
-                      '/alunos/$alunoId/chat',
-                      extra: aluno.nome,
-                    ),
-              ),
-              FxSettingsTile(
-                icon: Icons.restaurant_menu_outlined,
-                label: 'Dieta',
-                subtitle: 'Plano alimentar atual',
-                value: '',
-                onTap:
-                    () => context.push(
-                      '/alunos/$alunoId/alimentar',
-                      extra: aluno.nome,
-                    ),
-              ),
-              FxSettingsTile(
-                icon: Icons.videocam_outlined,
-                label: 'Feedback em vídeo',
-                subtitle: 'Correções e análise de execução',
-                value: '',
-                locked: feedbackLocked,
-                upgradeTierLabel:
-                    feedbackLocked
-                        ? Aluno360FerramentasLogic.gatedModulePlanLabel(
-                          Aluno360FerramentasGatedModule.feedbackVideo,
-                        )
-                        : null,
-                showDivider: false,
-                onTap:
-                    () => _openGated(
-                      context,
-                      module: Aluno360FerramentasGatedModule.feedbackVideo,
-                      featureName: 'Feedback em vídeo',
-                      locked: feedbackLocked,
-                      onUnlocked:
-                          () => context.push(
-                            '/alunos/$alunoId/feedback-video',
-                            extra: aluno.nome,
-                          ),
-                    ),
-              ),
-            ],
+            ),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (sparklineValues.isNotEmpty) ...[
+                  Aluno360FerramentasMiniSparkline(
+                    data: sparklineValues,
+                    color: primary,
+                    semanticsLabel: sparklineSemantics,
+                  ),
+                  const SizedBox(width: TokensStrip.s2),
+                ],
+                Text('${aderenciaPercent.toInt()}%'),
+              ],
+            ),
+            accent: aderenciaAttention ? EagleTokens.warn : primary,
+            onTap:
+                () => context.push(
+                  '/alunos/$alunoId/relatorio',
+                  extra: aluno.nome,
+                ),
+          ),
+          FxSatelliteListTile(
+            title: 'Plano de sucesso',
+            subtitle: const Text('Metas e marcos do aluno'),
+            accent: primary,
+            onTap:
+                () => context.push(
+                  '/alunos/$alunoId/plano-sucesso',
+                  extra: aluno.nome,
+                ),
+          ),
+          const SizedBox(height: TokensStrip.s5),
+          DashboardSectionHeader(
+            title: 'Perfil & gestão',
+            actionLabel: 'Ajuda',
+            onAction: () => showAluno360FerramentasHelpSheet(context),
+          ),
+          Text(
+            Aluno360FerramentasLogic.perfilCaption,
+            style: Aluno360Layout.metaStyle(context),
+          ),
+          const SizedBox(height: TokensStrip.s3),
+          FxSatelliteListTile(
+            title: 'Anamnese',
+            subtitle: Text(
+              perfilCompletion >= 85
+                  ? 'Perfil completo'
+                  : 'Completar cadastro',
+            ),
+            trailing: Text(
+              Aluno360FerramentasLogic.anamneseValue(perfilCompletion),
+            ),
+            accent: perfilCompletion < 85 ? EagleTokens.warn : primary,
+            onTap: () => context.push('/alunos/$alunoId/anamnese'),
+          ),
+          FxSatelliteListTile(
+            title: 'Mensalidades',
+            subtitle: Text(
+              aluno.statusFinanceiro == 'INADIMPLENTE'
+                  ? 'Pagamento em atraso'
+                  : 'Em dia',
+            ),
+            trailing: Text(
+              aluno.statusFinanceiro == 'INADIMPLENTE' ? 'Ação' : 'OK',
+            ),
+            accent:
+                aluno.statusFinanceiro == 'INADIMPLENTE'
+                    ? EagleTokens.bad
+                    : primary,
+            onTap: () => context.push('/financeiro?alunoId=$alunoId'),
+          ),
+          FxSatelliteListTile(
+            title: 'Chat',
+            subtitle: const Text('Conversa direta com o aluno'),
+            accent: primary,
+            onTap:
+                () => context.push(
+                  '/alunos/$alunoId/chat',
+                  extra: aluno.nome,
+                ),
+          ),
+          FxSatelliteListTile(
+            title: 'Dieta',
+            subtitle: const Text('Plano alimentar atual'),
+            accent: primary,
+            onTap:
+                () => context.push(
+                  '/alunos/$alunoId/alimentar',
+                  extra: aluno.nome,
+                ),
+          ),
+          FxSatelliteListTile(
+            title: 'Feedback em vídeo',
+            subtitle: Text(
+              feedbackLocked
+                  ? 'Disponível no $feedbackPlan'
+                  : 'Correções e análise de execução',
+            ),
+            leading: Icon(
+              feedbackLocked ? Icons.lock_outline : Icons.videocam_outlined,
+              color: primary,
+            ),
+            accent: primary,
+            onTap:
+                () => _openGated(
+                  context,
+                  module: Aluno360FerramentasGatedModule.feedbackVideo,
+                  featureName: 'Feedback em vídeo',
+                  locked: feedbackLocked,
+                  onUnlocked:
+                      () => context.push(
+                        '/alunos/$alunoId/feedback-video',
+                        extra: aluno.nome,
+                      ),
+                ),
           ),
         ],
       ),

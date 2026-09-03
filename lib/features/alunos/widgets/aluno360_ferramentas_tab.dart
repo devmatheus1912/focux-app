@@ -2,23 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/fx_settings_layout.dart';
+import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_loading.dart';
-import '../../../core/widgets/fx_settings_group.dart';
-import '../../../core/widgets/fx_settings_tile.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../constants/aluno_360_layout.dart';
 import '../data/aluno_repository.dart';
 import '../utils/aluno360_ferramentas_logic.dart';
 import 'aluno360_help_sheets.dart';
 import 'aluno360_operacao_tab.dart';
 
-/// Ferramentas tab: medidas inset + módulos de ação.
+/// Ferramentas tab: medidas + módulos de ação no first paint.
 class Aluno360FerramentasTab extends StatelessWidget {
   const Aluno360FerramentasTab({
     super.key,
     required this.aluno,
     required this.alunoId,
     required this.primary,
-    required this.isDark,
     required this.modulesSection,
     this.bf,
     this.massaMagra,
@@ -30,7 +30,6 @@ class Aluno360FerramentasTab extends StatelessWidget {
   final Aluno aluno;
   final int alunoId;
   final Color primary;
-  final bool isDark;
   final Widget modulesSection;
   final String? bf;
   final String? massaMagra;
@@ -98,13 +97,19 @@ class Aluno360FerramentasTab extends StatelessWidget {
 
     final measurements = _section(
       0,
-      FxSettingsGroup(
-        header: 'Medidas',
-        caption: Aluno360FerramentasLogic.medidasCaption,
-        helpTooltip: 'Ajuda sobre medidas corporais',
-        onHelpTap: () => showAluno360FerramentasHelpSheet(context),
-        accent: primary,
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          DashboardSectionHeader(
+            title: 'Medidas',
+            actionLabel: 'Ajuda',
+            onAction: () => showAluno360FerramentasHelpSheet(context),
+          ),
+          Text(
+            Aluno360FerramentasLogic.medidasCaption,
+            style: Aluno360Layout.metaStyle(context),
+          ),
+          const SizedBox(height: TokensStrip.s3),
           if (measurementsLoading)
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8),
@@ -115,37 +120,33 @@ class Aluno360FerramentasTab extends StatelessWidget {
               ),
             )
           else if (allComplete)
-            FxSettingsTile(
-              icon: Icons.verified_outlined,
-              label: 'Medidas em dia',
-              subtitle: completeSummary,
-              value: '',
-              accent: primary,
-              highlight: true,
-              showDivider: false,
-              semanticsLabel:
+            Semantics(
+              label:
                   'Medidas em dia. $completeSummary. Toque para ver evolução.',
-              onTap: () => context.push(evolucaoRoute, extra: aluno.nome),
+              button: true,
+              child: FxSatelliteListTile(
+                title: 'Medidas em dia',
+                subtitle: Text(completeSummary),
+                accent: primary,
+                onTap: () => context.push(evolucaoRoute, extra: aluno.nome),
+              ),
             )
           else
-            ...rows.asMap().entries.map((entry) {
-              final index = entry.key;
-              final row = entry.value;
-              return FxSettingsTile(
-                icon: _measurementIcon(row.field),
-                label: row.label,
-                subtitle: row.subtitle,
-                value: row.value,
-                highlight: row.highlight,
-                showDivider: index < rows.length - 1,
+            ...rows.map(
+              (row) => FxSatelliteListTile(
+                title: row.label,
+                subtitle: Text(row.subtitle),
+                trailing: Text(row.value),
+                leading: Icon(_measurementIcon(row.field), color: primary),
+                accent: row.highlight ? primary : null,
                 onTap:
                     () => _openMeasurementField(
                       context,
                       row.field,
                       complete: row.complete,
                     ),
-              );
-            }),
+              ),
+            ),
         ],
       ),
     );

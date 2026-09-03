@@ -9,7 +9,7 @@ void main() {
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(screen, contains('FxShellScaffold'));
     expect(screen, contains('FxContentWidthLimiter'));
-    expect(screen, isNot(contains('FxLiquidPrimaryButton')));
+    expect(screen, contains('FxLiquidPrimaryButton'));
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(16));
   });
 }

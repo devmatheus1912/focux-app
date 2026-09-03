@@ -32,13 +32,14 @@ void main() {
     final bar = readScreenSourceBundle(
       'lib/features/exercicios/screens/widgets/exercicios_filter_bar.dart',
     );
-    expect(bar, contains('FxSettingsGroup'));
-    expect(bar, contains('FxSettingsTile'));
-    expect(bar, contains('AlunoInsetFormField'));
+    expect(bar, contains('FxToggleChip'));
+    expect(bar, contains('TextField'));
+    expect(bar, isNot(contains('FxSettingsGroup')));
+    expect(bar, isNot(contains('FxSettingsTile')));
     expect(bar, isNot(contains('FilterChip')));
     expect(bar, isNot(contains('ActionChip')));
     expect(bar, isNot(contains('PopupMenuButton')));
-    expect(bar, isNot(contains('Chip(')));
+    expect(bar, isNot(contains('InputChip')));
   });
 
   test('exercicios filter sheet segue pele do Perfil', () {

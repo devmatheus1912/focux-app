@@ -9,8 +9,8 @@ void main() {
     );
 
     expect(screen, contains('editarAlunoHubSubtitle()'));
-    expect(screen, contains('ShellHeaderIconButton'));
-    expect(screen, contains("icon: 'circle-check'"));
+    expect(screen, isNot(contains('ShellHeaderIconButton')));
+    expect(screen, isNot(contains("icon: 'circle-check'")));
     expect(screen, contains('showFxConfirmSheet'));
     expect(screen, contains('showEditarAlunoHelpSheet'));
     expect(screen, contains('FxSettingsGroup'));
@@ -21,8 +21,8 @@ void main() {
     expect(screen, contains('Salvando alterações do aluno'));
     expect(screen, contains('FxErrorState'));
     expect(screen, contains('FxContentWidthLimiter'));
-    expect(screen, isNot(contains('FxLiquidPrimaryButton')));
-    expect(screen, isNot(contains('bottomNavigationBar')));
+    expect(screen, contains('FxLiquidPrimaryButton'));
+    expect(screen, contains('bottomNavigationBar'));
     expect(screen, isNot(contains("subtitle: 'ALUNO'")));
     expect(screen, isNot(contains('ElevatedButton')));
   });

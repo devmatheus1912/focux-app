@@ -7,14 +7,14 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_loading.dart';
-import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../dashboard/widgets/dashboard_home_action_chip.dart';
+import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../constants/aluno_360_layout.dart';
 import '../data/aluno_repository.dart';
 import '../utils/aluno360_timeline_logic.dart';
 import 'aluno360_help_sheets.dart';
-import 'aluno360_inset_empty_actions.dart';
 import 'aluno360_timeline_full_sheet.dart';
 import 'aluno360_timeline_sheet_motion.dart';
 import 'aluno_outreach_message_sheet.dart';
@@ -174,7 +174,7 @@ class Aluno360TimelineCard extends StatelessWidget {
     return kindHeader;
   }
 
-  String? _timelineTileSubtitle(Timeline360Item item) {
+  String _timelineTileSubtitle(Timeline360Item item) {
     final previewBody =
         item.kind == 'Chat'
             ? timeline360ChatPreviewBody(
@@ -214,19 +214,25 @@ class Aluno360TimelineCard extends StatelessWidget {
     return Semantics(
       container: true,
       label: 'Linha do tempo 360, últimos sinais do aluno',
-      child: FxSettingsGroup(
-        header: 'Linha do tempo 360',
-        caption:
-            allItems.isEmpty && !loading && !error
-                ? (compactEmpty
-                    ? 'Quando houver check-in ou chat, os sinais aparecem aqui em ordem cronológica.'
-                    : '${aluno.nome.split(' ').first} ainda não tem sinais suficientes. '
-                        'Peça um check-in ou abra o chat para registrar a próxima interação.')
-                : null,
-        helpTooltip: 'Ajuda sobre a linha do tempo',
-        onHelpTap: () => showAluno360TimelineHelpSheet(context),
-        accent: primary,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          DashboardSectionHeader(
+            title: 'Linha do tempo 360',
+            actionLabel: 'Ajuda',
+            onAction: () => showAluno360TimelineHelpSheet(context),
+          ),
+          if (allItems.isEmpty && !loading && !error) ...[
+            const SizedBox(height: 4),
+            Text(
+              compactEmpty
+                  ? 'Quando houver check-in ou chat, os sinais aparecem aqui em ordem cronológica.'
+                  : '${aluno.nome.split(' ').first} ainda não tem sinais suficientes. '
+                      'Peça um check-in ou abra o chat para registrar a próxima interação.',
+              style: Aluno360Layout.metaStyle(context).copyWith(color: mute),
+            ),
+          ],
+          const SizedBox(height: TokensStrip.s3),
           if (refreshing && !loading) ...[
             Padding(
               padding: const EdgeInsets.only(top: 4, bottom: 8),
@@ -263,59 +269,68 @@ class Aluno360TimelineCard extends StatelessWidget {
               key: const ValueKey('aluno360_timeline_empty'),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: aluno360InsetEmptyActionTiles([
-                  if (!compactEmpty)
-                    Aluno360InsetEmptyActionSpec(
-                      icon: Icons.message_outlined,
-                      label: 'Pedir check-in',
-                      subtitle: 'Mensagem pronta para enviar',
-                      highlight: true,
-                      onTap: () => _openTimelineCheckin(context),
-                    ),
-                  Aluno360InsetEmptyActionSpec(
-                    icon: Icons.chat_bubble_outline,
-                    label: 'Abrir chat',
-                    onTap:
-                        () => context.push(
-                          '/alunos/${aluno.id}/chat',
-                          extra: aluno.nome,
+                children: [
+                  Wrap(
+                    spacing: TokensStrip.s2,
+                    runSpacing: TokensStrip.s2,
+                    children: [
+                      if (!compactEmpty)
+                        DashboardHomeActionChip(
+                          label: 'Pedir check-in',
+                          accent: primary,
+                          isDark: isDark,
+                          onPressed: () => _openTimelineCheckin(context),
                         ),
+                      DashboardHomeActionChip(
+                        label: 'Abrir chat',
+                        accent: primary,
+                        isDark: isDark,
+                        onPressed:
+                            () => context.push(
+                              '/alunos/${aluno.id}/chat',
+                              extra: aluno.nome,
+                            ),
+                      ),
+                      if (!compactEmpty)
+                        DashboardHomeActionChip(
+                          label: 'Ver treinos',
+                          accent: primary,
+                          isDark: isDark,
+                          onPressed:
+                              () => context.push(
+                                '/alunos/${aluno.id}/treinos-list',
+                                extra: aluno.nome,
+                              ),
+                        ),
+                    ],
                   ),
-                  if (!compactEmpty)
-                    Aluno360InsetEmptyActionSpec(
-                      icon: Icons.fitness_center_rounded,
-                      label: 'Ver treinos',
-                      onTap:
-                          () => context.push(
-                            '/alunos/${aluno.id}/treinos-list',
-                            extra: aluno.nome,
-                          ),
-                    ),
-                ]),
+                ],
               ),
             )
           else
             for (var i = 0; i < visibleItems.length; i++)
               Aluno360TimelineTileEntrance(
                 index: i,
-                child: FxSettingsTile(
-                  icon: visibleItems[i].icon,
+                child: FxSatelliteListTile(
+                  title: _timelineTileLabel(visibleItems[i]),
+                  subtitle: Text(_timelineTileSubtitle(visibleItems[i])),
                   accent: visibleItems[i].color,
-                  label: _timelineTileLabel(visibleItems[i]),
-                  subtitle: _timelineTileSubtitle(visibleItems[i]),
-                  value: formatTimeline360Date(visibleItems[i].at),
                   onTap: () => _onTimelineItemTap(context, visibleItems[i]),
-                  showDivider: i < visibleItems.length - 1 || hasMore,
+                  trailing: Text(
+                    formatTimeline360Date(visibleItems[i].at),
+                    style: Aluno360Layout.metaStyle(context),
+                  ),
                 ),
               ),
           if (!loading && !error && allItems.isNotEmpty && hasMore)
-            FxSettingsTile(
-              icon: Icons.unfold_more_rounded,
-              label: 'Ver todos os ${allItems.length} sinais',
-              subtitle: 'Linha do tempo completa',
-              value: '',
-              showDivider: false,
-              onTap: () => _showFullTimeline(context, primary),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: DashboardHomeActionChip(
+                label: 'Ver todos os ${allItems.length} sinais',
+                accent: primary,
+                isDark: isDark,
+                onPressed: () => _showFullTimeline(context, primary),
+              ),
             ),
         ],
       ),

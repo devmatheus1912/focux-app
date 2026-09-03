@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/design_tokens.dart';
-import '../../../core/widgets/fx_settings_group.dart';
-import '../../../core/widgets/fx_settings_tile.dart';
+import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/operational_metric_tile.dart';
+import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../constants/aluno_360_layout.dart';
 import '../../health/data/health_repository.dart';
 import '../../health/widgets/recovery_score_ring.dart';
@@ -32,26 +33,26 @@ class _Aluno360RecoveryInsightCardState
 
   @override
   Widget build(BuildContext context) {
-    final ink = fxScreenInk(context);
     final mute = fxScreenMute(context);
+    final ink = fxScreenInk(context);
 
     return widget.recoveryAsync.when(
       loading: () => const SizedBox.shrink(),
       error:
           (_, __) => Semantics(
             label: 'Wearable indisponível',
-            child: FxSettingsGroup(
-              header: 'Wearable',
-              accent: widget.primary,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                FxSettingsTile(
-                  icon: Icons.watch_off_outlined,
-                  accent: EagleTokens.warn,
-                  label: 'Wearable indisponível',
-                  subtitle: 'Não foi possível carregar os dados agora',
-                  value: '',
-                  showDivider: false,
-                  onTap: () => setState(() {}),
+                const DashboardSectionHeader(title: 'Wearable'),
+                const SizedBox(height: TokensStrip.s3),
+                OperationalMetricTile(
+                  label: 'Wearable',
+                  value: 'Indisponível',
+                  hint: 'Não foi possível carregar os dados agora',
+                  color: EagleTokens.warn,
+                  isDark: widget.isDark,
+                  emphasis: OperationalMetricEmphasis.alert,
                 ),
               ],
             ),
@@ -63,21 +64,26 @@ class _Aluno360RecoveryInsightCardState
                 _expanded
                     ? 'Recolher wearable não conectado'
                     : 'Wearable não conectado — toque para expandir',
-            child: FxSettingsGroup(
-              header: 'Wearable',
-              accent: widget.primary,
+            button: true,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                FxSettingsTile(
-                  icon: Icons.watch_outlined,
-                  label: 'Não conectado',
-                  subtitle:
-                      _expanded
-                          ? 'Peça para conectar Apple Health ou Google Fit no app do aluno, se fizer sentido.'
-                          : 'Apple Health ou Google Fit ainda não vinculados',
-                  value: '',
-                  picker: true,
-                  showDivider: false,
+                const DashboardSectionHeader(title: 'Wearable'),
+                const SizedBox(height: TokensStrip.s3),
+                InkWell(
                   onTap: () => setState(() => _expanded = !_expanded),
+                  borderRadius: BorderRadius.circular(12),
+                  child: OperationalMetricTile(
+                    label: 'Não conectado',
+                    value: '—',
+                    hint:
+                        _expanded
+                            ? 'Peça para conectar Apple Health ou Google Fit no app do aluno, se fizer sentido.'
+                            : 'Apple Health ou Google Fit ainda não vinculados',
+                    color: widget.primary,
+                    isDark: widget.isDark,
+                    emphasis: OperationalMetricEmphasis.muted,
+                  ),
                 ),
               ],
             ),
@@ -86,55 +92,59 @@ class _Aluno360RecoveryInsightCardState
 
         return Semantics(
           label: 'Prontidão wearable ${snapshot.recoveryLabel}',
-          child: FxSettingsGroup(
-            header: 'Wearable',
-            caption: snapshot.recoveryHint,
-            accent: widget.primary,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    ExcludeSemantics(
-                      child: RecoveryScoreRing(
-                        score: snapshot.recoveryScore,
-                        color: widget.primary,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Prontidão wearable',
-                            style: Aluno360Layout.metaStyle(
-                              context,
-                            ).copyWith(color: ink),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            snapshot.recoveryLabel,
-                            style: Aluno360Layout.sectionTitleStyle(
-                              context,
-                              ink,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            snapshot.recoveryHint,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: Aluno360Layout.captionStyle(
-                              context,
-                            ).copyWith(color: mute, height: 1.3),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+              const DashboardSectionHeader(title: 'Wearable'),
+              if (snapshot.recoveryHint.isNotEmpty) ...[
+                const SizedBox(height: 4),
+                Text(
+                  snapshot.recoveryHint,
+                  style: Aluno360Layout.metaStyle(context).copyWith(color: mute),
                 ),
+              ],
+              const SizedBox(height: TokensStrip.s3),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  ExcludeSemantics(
+                    child: RecoveryScoreRing(
+                      score: snapshot.recoveryScore,
+                      color: widget.primary,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Prontidão wearable',
+                          style: Aluno360Layout.metaStyle(
+                            context,
+                          ).copyWith(color: ink),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          snapshot.recoveryLabel,
+                          style: Aluno360Layout.sectionTitleStyle(
+                            context,
+                            ink,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          snapshot.recoveryHint,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: Aluno360Layout.captionStyle(
+                            context,
+                          ).copyWith(color: mute, height: 1.3),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
