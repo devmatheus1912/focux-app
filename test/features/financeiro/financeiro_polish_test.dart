@@ -24,7 +24,7 @@ void main() {
     expect(tab, contains('ListView.builder'));
     expect(tab, contains('FxLiquidPrimaryButton'));
     expect(tab, contains('showFxConfirmSheet'));
-    expect(tab, contains('copySensitiveToClipboard'));
+    expect(tab, contains('pickMensalidadeMesReferencia'));
     expect(tab, contains('Carregar mais'));
     expect(tab, contains('FxErrorState'));
     expect(tab, contains('FeedbackHelper.showSuccess'));
@@ -56,6 +56,17 @@ void main() {
     expect(detail, contains('FxLiquidPrimaryButton'));
     expect(detail, contains('Marcar como paga'));
     expect(detail, contains('OperationalMetricTile'));
+    expect(detail, contains('confirmarPagarMensalidade'));
+    expect(detail, contains('mostrarPixMensalidade'));
+    expect(detail, contains('cobrarMensalidadeViaChat'));
+    expect(detail, contains('registrarContatoMensalidade'));
+    expect(detail, contains('showEditarMensalidadeSheet'));
+    expect(detail, isNot(contains("context.pop('pay')")));
     expect(detail, isNot(contains('FxSettingsGroup')));
+    final actions = readScreenSourceBundle(
+      'lib/features/financeiro/utils/mensalidade_surface_actions.dart',
+    );
+    expect(actions, contains('copySensitiveToClipboard'));
+    expect(actions, contains('showFxConfirmSheet'));
   });
 }

@@ -1,23 +1,19 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../../core/analytics/analytics_service.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
-import '../../../core/utils/clipboard_sensitive.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/utils/pt_br_display.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
-import '../../../core/widgets/fx_form_sheet.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_icon.dart';
 import '../../../core/widgets/fx_input_deco.dart';
@@ -31,12 +27,12 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../../alunos/providers/alunos_provider.dart';
-import '../../alunos/utils/satellite_screen_utils.dart';
 import '../../alunos/widgets/aluno_inset_form_field.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../data/financeiro_repository.dart';
 import '../providers/financeiro_provider.dart';
 import '../utils/financeiro_hub_display.dart';
+import '../utils/mensalidade_surface_actions.dart';
 
 part 'financeiro_mensalidades_tab_actions.part.dart';
 part 'financeiro_mensalidades_tab_forms.part.dart';
