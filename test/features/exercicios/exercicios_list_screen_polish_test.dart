@@ -51,5 +51,6 @@ void main() {
     expect(sheet, contains('showFxInsetPickerSheet'));
     expect(sheet, isNot(contains('FilterChip')));
     expect(sheet, isNot(contains('FxToggleChip')));
+    expect(sheet, contains('Switch.adaptive'));
   });
 }

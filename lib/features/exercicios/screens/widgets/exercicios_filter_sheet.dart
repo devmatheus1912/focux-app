@@ -206,23 +206,27 @@ class _ExerciciosFilterSheetState extends State<_ExerciciosFilterSheet> {
                         label: exerciciosFavoritosLabel(),
                         value: _filter.favoritos ? 'Ativo' : '',
                         highlight: _filter.favoritos,
-                        onTap:
-                            () => _emit(
-                              _filter.copyWith(favoritos: !_filter.favoritos),
-                            ),
+                        accessory: Switch.adaptive(
+                          value: _filter.favoritos,
+                          onChanged:
+                              (v) => _emit(_filter.copyWith(favoritos: v)),
+                        ),
                       ),
                       FxSettingsTile(
                         fxIcon: 'circle-check',
                         label: exerciciosComVideoLabel(),
                         value: _filter.comVideo ? 'Ativo' : '',
                         highlight: _filter.comVideo,
-                        onTap:
-                            () => _emit(
-                              _filter.copyWith(
-                                comVideo: !_filter.comVideo,
-                                semVideo: false,
+                        accessory: Switch.adaptive(
+                          value: _filter.comVideo,
+                          onChanged:
+                              (v) => _emit(
+                                _filter.copyWith(
+                                  comVideo: v,
+                                  semVideo: v ? false : _filter.semVideo,
+                                ),
                               ),
-                            ),
+                        ),
                       ),
                       FxSettingsTile(
                         fxIcon: 'x',
@@ -230,13 +234,16 @@ class _ExerciciosFilterSheetState extends State<_ExerciciosFilterSheet> {
                         value: _filter.semVideo ? 'Ativo' : '',
                         highlight: _filter.semVideo,
                         showDivider: false,
-                        onTap:
-                            () => _emit(
-                              _filter.copyWith(
-                                semVideo: !_filter.semVideo,
-                                comVideo: false,
+                        accessory: Switch.adaptive(
+                          value: _filter.semVideo,
+                          onChanged:
+                              (v) => _emit(
+                                _filter.copyWith(
+                                  semVideo: v,
+                                  comVideo: v ? false : _filter.comVideo,
+                                ),
                               ),
-                            ),
+                        ),
                       ),
                     ],
                   ),

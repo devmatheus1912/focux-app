@@ -48,6 +48,9 @@ void main() {
     expect(screen, contains('_CuratedPaletteGrid'));
     expect(screen, contains('_LogoUploadRing'));
     expect(screen, contains('FxLiquidPrimaryButton'));
+    expect(screen, contains('identidadeRestaurarCoresLabel()'));
+    expect(screen, isNot(contains('label: identidadeRestaurarCoresLabel')));
+    expect(screen, isNot(contains('picker: true')));
     expect(screen, isNot(contains('OutlinedButton')));
     expect(screen, isNot(contains('Editor da landing (Enterprise)')));
   });

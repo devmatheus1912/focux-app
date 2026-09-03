@@ -130,6 +130,7 @@ extension FinanceiroMensalidadesTabForms on _FinanceiroMensalidadesTabState {
                               fxIcon: 'calendar',
                               label: 'Mês de referência',
                               value: financeiroMesPickerValue(mesReferencia),
+                              picker: true,
                               showDivider: false,
                               onTap: () async {
                                 final picked = await pickMensalidadeMesReferencia(

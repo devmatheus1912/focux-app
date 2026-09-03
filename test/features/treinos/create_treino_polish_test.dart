@@ -44,5 +44,7 @@ void main() {
     expect(screen, contains("label: 'Criar'"));
     expect(screen, contains("child: const Text('Cancelar')"));
     expect(screen, contains("loadingLabel: 'Criando…'"));
+    expect(screen, contains('FxInsetPickerOption.list'));
+    expect(screen, contains("label: 'Abrir biblioteca'"));
   });
 }

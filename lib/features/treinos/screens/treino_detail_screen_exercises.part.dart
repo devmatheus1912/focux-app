@@ -356,23 +356,12 @@ class _AssignWorkoutSheetState extends State<_AssignWorkoutSheet> {
               ),
             ),
           const SizedBox(height: FxSettingsLayout.groupGap),
-          FxSettingsGroup(
-            accent: primary,
-            children: [
-              FxSettingsTile(
-                icon: Icons.check_rounded,
-                accent: soft,
-                label: 'Atribuir',
-                value: '',
-                highlight: true,
-                locked: selectedAlunoId == null,
-                showDivider: false,
-                onTap: () {
-                  if (selectedAlunoId == null) return;
-                  Navigator.pop(context, selectedAlunoId);
-                },
-              ),
-            ],
+          FxLiquidPrimaryButton(
+            label: 'Atribuir',
+            onPressed:
+                selectedAlunoId == null
+                    ? null
+                    : () => Navigator.pop(context, selectedAlunoId),
           ),
           const SizedBox(height: FxSettingsLayout.footerAfterGroup),
           Center(

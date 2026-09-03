@@ -200,45 +200,53 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen> {
                     children: [
                       FxStaggerItem(
                         index: 0,
-                        child: FxSettingsGroup(
-                          header: 'Modelos rápidos',
-                          caption:
-                              'Toque em um modelo para pré-preencher nome e objetivo.',
-                          accent: primary,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            for (var i = 0; i < CreateTreinoLogic.presets.length; i++)
-                              FxSettingsTile(
-                                icon: CreateTreinoLogic.presets[i].icon,
+                            FxSettingsGroup(
+                              header: 'Modelos rápidos',
+                              caption:
+                                  'Toque em um modelo para pré-preencher nome e objetivo.',
+                              accent: primary,
+                              edgeToEdgeRows: true,
+                              children: FxInsetPickerOption.list(
                                 accent: soft,
-                                label: CreateTreinoLogic.presets[i].title,
-                                subtitle: CreateTreinoLogic.presets[i].subtitle,
-                                value:
-                                    selectedPreset ==
-                                            CreateTreinoLogic.presets[i].title
-                                        ? 'Ativo'
-                                        : '',
-                                highlight:
-                                    selectedPreset ==
-                                    CreateTreinoLogic.presets[i].title,
-                                showDivider:
-                                    i < CreateTreinoLogic.presets.length - 1 ||
-                                    widget.alunoId == null,
-                                onTap:
-                                    () => _applyPreset(
-                                      CreateTreinoLogic.presets[i],
+                                items: [
+                                  for (final preset
+                                      in CreateTreinoLogic.presets)
+                                    FxInsetPickerOptionSpec(
+                                      label: preset.title,
+                                      subtitle: preset.subtitle,
+                                      icon: preset.icon,
+                                      selected:
+                                          selectedPreset == preset.title,
+                                      onTap: () => _applyPreset(preset),
                                     ),
+                                ],
                               ),
-                            if (widget.alunoId == null)
-                              FxSettingsTile(
-                                icon: Icons.grid_view_rounded,
-                                accent: soft,
-                                label: 'Abrir biblioteca',
-                                subtitle: 'Planos já salvos na sua conta',
-                                value: '',
-                                showDivider: false,
-                                onTap:
-                                    () => safePopOrGo(context, '/treinos'),
+                            ),
+                            if (widget.alunoId == null) ...[
+                              const SizedBox(
+                                height: FxSettingsLayout.groupGap,
                               ),
+                              FxSettingsGroup(
+                                accent: primary,
+                                children: [
+                                  FxSettingsTile(
+                                    icon: Icons.grid_view_rounded,
+                                    accent: soft,
+                                    label: 'Abrir biblioteca',
+                                    subtitle:
+                                        'Planos já salvos na sua conta',
+                                    value: '',
+                                    showDivider: false,
+                                    onTap:
+                                        () =>
+                                            safePopOrGo(context, '/treinos'),
+                                  ),
+                                ],
+                              ),
+                            ],
                           ],
                         ),
                       ),
