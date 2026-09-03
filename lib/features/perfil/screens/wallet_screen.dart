@@ -16,6 +16,7 @@ import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_inset_picker_sheet.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
@@ -239,26 +240,23 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
             title: 'Carteira e PIX',
             subtitle: 'RECEBIMENTOS',
             onBack: _handleBack,
-            actions: [
-              Padding(
-                padding: const EdgeInsets.only(right: TokensStrip.s3),
-                child: Center(
-                  child: Semantics(
-                    button: true,
-                    enabled: !_carregando,
-                    label:
-                        _carregando
-                            ? 'Salvando carteira'
-                            : walletSalvarTooltip(),
-                    child: ShellHeaderIconButton(
-                      icon: 'circle-check',
-                      tooltip: walletSalvarTooltip(),
-                      onTap: _carregando ? () {} : _salvar,
-                    ),
-                  ),
-                ),
+          ),
+          bottomNavigationBar: SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(
+                FxSettingsLayout.pageInset,
+                TokensStrip.s2,
+                FxSettingsLayout.pageInset,
+                TokensStrip.s3,
               ),
-            ],
+              child: FxLiquidPrimaryButton(
+                label: walletSalvarTileLabel(),
+                loading: _carregando,
+                loadingLabel: 'Salvando…',
+                onPressed: _carregando ? null : _salvar,
+              ),
+            ),
           ),
           body: perfilAsync.when(
             loading: () => const SkeletonList(count: 5),
@@ -320,15 +318,12 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                                 _tipoChavePix,
                                 v ?? '',
                               ),
-                          showDivider: _chavePixCtrl.text.trim().isNotEmpty,
+                          showDivider: false,
                         ),
                         if (_chavePixCtrl.text.trim().isNotEmpty)
-                          FxSettingsTile(
-                            fxIcon: 'article',
-                            label: walletCopiarTileLabel(),
-                            value: '',
-                            showDivider: false,
-                            onTap: _copiarChavePix,
+                          TextButton(
+                            onPressed: _carregando ? null : _copiarChavePix,
+                            child: Text(walletCopiarTileLabel()),
                           ),
                       ],
                     ),
@@ -366,18 +361,6 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                           inputFormatters:
                               WalletPixValidation.formattersForConta(),
                           showDivider: false,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: TokensStrip.s3),
-                    FxSettingsGroup(
-                      children: [
-                        FxSettingsTile(
-                          fxIcon: 'circle-check',
-                          label: walletSalvarTileLabel(),
-                          value: _carregando ? 'Salvando…' : 'Confirmar',
-                          showDivider: false,
-                          onTap: _carregando ? () {} : _salvar,
                         ),
                       ],
                     ),
