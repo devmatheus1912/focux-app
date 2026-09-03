@@ -14,9 +14,8 @@ import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_inset_picker_sheet.dart';
-import '../../../core/widgets/fx_settings_group.dart';
-import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../widgets/dashboard_home_action_chip.dart';
 import '../data/command_center_data.dart';
 import '../providers/dashboard_provider.dart';
 import '../utils/copilot_actions_display.dart';
@@ -105,19 +104,14 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
                 FxSettingsLayout.pageInset,
                 TokensStrip.s2,
               ),
-              child: FxSettingsGroup(
-                children: [
-                  FxSettingsTile(
-                    fxIcon: 'spark',
-                    label: copilotActionsFiltroTitle(),
-                    value: copilotActionsStatusLabel(_status),
-                    picker: true,
-                    accent: brand,
-                    mute: mute,
-                    showDivider: false,
-                    onTap: _abrirFiltro,
-                  ),
-                ],
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: DashboardHomeActionChip(
+                  label: copilotActionsStatusLabel(_status),
+                  accent: brand,
+                  isDark: dark,
+                  onPressed: _abrirFiltro,
+                ),
               ),
             ),
             Expanded(

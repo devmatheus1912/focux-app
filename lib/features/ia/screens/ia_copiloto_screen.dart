@@ -11,6 +11,7 @@ import '../../../core/theme/shell_chrome.dart';
 import '../../../core/analytics/analytics_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
+import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../../core/router/role_home.dart';
 import '../../../core/router/safe_navigation.dart';
