@@ -4,6 +4,10 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
   Widget buildPersonalDashboardBody(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
     final homeAsync = ref.watch(dashboardHomeProvider);
+    final coachPending = ref.watch(coachHomeProvider).maybeWhen(
+      data: (home) => home.pending,
+      orElse: () => 0,
+    );
     final reduceMotion = TokensStrip.prefersReducedMotion(context);
     final themeDark = Theme.of(context).brightness == Brightness.dark;
     final chromeOnDark = themeDark;
@@ -163,6 +167,7 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                     DashboardHomeClientCache.clear();
                     PlanoFeaturesBffCache.clear();
                     ref.invalidate(dashboardHomeProvider);
+                    ref.invalidate(coachHomeProvider);
                     ref.invalidate(notificacoesProvider);
                     ref.invalidate(notificacoesNaoLidasProvider);
                     await _loadFinFromHome();
@@ -234,6 +239,9 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                             showCoachBanner:
                                 _coachLoaded && !_coachSeen,
                             onDismissCoach: _dismissCoach,
+                            coachPending: coachPending,
+                            coachPendingLabel:
+                                coachPendingChipLabel(coachPending),
                             onQuickSearch:
                                 () => showDashboardQuickSearchSheet(
                                   context,

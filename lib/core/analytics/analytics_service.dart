@@ -1,6 +1,8 @@
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 
+import 'product_funnel.dart';
+
 /// Camada única de analytics + crash reporting do app.
 ///
 /// O objetivo é evitar callsites espalhados de `FirebaseCrashlytics` /
@@ -13,9 +15,15 @@ import 'package:flutter/foundation.dart';
 /// Implementação atual: Crashlytics breadcrumbs + debug log. Trocar para
 /// Sentry/Amplitude/PostHog é uma implementação por método sem mexer
 /// nos callsites.
+typedef AnalyticsFunnelPoster =
+    Future<void> Function(String tipoEvento, int alunoId);
+
 class AnalyticsService {
   AnalyticsService._();
   static final AnalyticsService instance = AnalyticsService._();
+
+  /// Liga [track] ao `POST /api/analytics/evento` sem segundo funil.
+  AnalyticsFunnelPoster? funnelPoster;
 
   bool _userIdSet = false;
 
@@ -46,6 +54,15 @@ class AnalyticsService {
         '${props == null ? '' : props.entries.map((e) => '${e.key}=${e.value}').join(' ')}',
       );
     } catch (_) {}
+    final tipo = productEventToFunnelTipo(event);
+    final alunoId = funnelAlunoIdFromProps(props);
+    final poster = funnelPoster;
+    if (tipo == null || alunoId == null || poster == null) return;
+    try {
+      await poster(tipo, alunoId);
+    } catch (e) {
+      if (kDebugMode) debugPrint('[Analytics] funnel post failed: $e');
+    }
   }
 
   Future<void> recordError(

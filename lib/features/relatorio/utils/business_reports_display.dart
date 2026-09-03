@@ -31,3 +31,6 @@ String businessDunningFalhasLabel(int abertas) {
 }
 
 String businessMoneyLabel(num value) => formatBrlCurrency(value);
+
+const businessComoCalculamos =
+    'Recebido é o que entrou no mês. NDR compara o recorrente com o mês anterior.';

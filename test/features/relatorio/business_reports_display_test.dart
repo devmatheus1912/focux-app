@@ -16,5 +16,6 @@ void main() {
     expect(businessDunningFalhasLabel(0), 'Nenhuma aberta');
     expect(businessDunningFalhasLabel(1), '1 falha aberta');
     expect(businessDunningFalhasLabel(4), '4 falhas abertas');
+    expect(businessComoCalculamos, contains('Recebido'));
   });
 }

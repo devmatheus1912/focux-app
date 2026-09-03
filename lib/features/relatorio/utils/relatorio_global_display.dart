@@ -16,6 +16,15 @@ String relatorioTreinosSubtitle(int concluidos, int total) {
   return '$concluidos de $total treinos concluídos';
 }
 
+List<T> relatorioRankingPreview<T>(List<T> items) =>
+    items.take(3).toList(growable: false);
+
+T? firstRelatorioAtencao<T>(List<T> menosComprometidos) =>
+    menosComprometidos.isEmpty ? null : menosComprometidos.first;
+
+const relatorioComoCalculamos =
+    'Média de aderência de todos os alunos da base, não só do ranking.';
+
 String relatorioUltimoTreinoLabel(String? raw) {
   final value = raw?.trim() ?? '';
   if (value.isEmpty) return 'Sem treinos';

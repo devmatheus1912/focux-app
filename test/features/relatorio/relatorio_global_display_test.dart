@@ -23,5 +23,9 @@ void main() {
     expect(relatorioUltimoTreinoLabel(null), 'Sem treinos');
     expect(relatorioUltimoTreinoLabel(''), 'Sem treinos');
     expect(relatorioUltimoTreinoLabel('2026-08-31'), '31 de agosto de 2026');
+    expect(relatorioRankingPreview([1, 2, 3, 4]), [1, 2, 3]);
+    expect(firstRelatorioAtencao(['Ana', 'Bia']), 'Ana');
+    expect(firstRelatorioAtencao(<String>[]), isNull);
+    expect(relatorioComoCalculamos, contains('Média'));
   });
 }

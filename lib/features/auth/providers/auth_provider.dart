@@ -1,10 +1,24 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/analytics/analytics_service.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/auth/session_invalidator.dart';
 import '../../../core/storage/secure_storage.dart';
 import '../data/auth_repository.dart';
 
-final apiClientProvider = Provider<ApiClient>((ref) => ApiClient());
+final apiClientProvider = Provider<ApiClient>((ref) {
+  final client = ApiClient();
+  AnalyticsService.instance.funnelPoster = (tipoEvento, alunoId) async {
+    await client.dio.post(
+      '/api/analytics/evento',
+      data: {
+        'alunoId': alunoId,
+        'tipoEvento': tipoEvento,
+        'canal': 'APP',
+      },
+    );
+  };
+  return client;
+});
 
 final authRepositoryProvider = Provider<AuthRepository>(
   (ref) => AuthRepository(ref.read(apiClientProvider)),

@@ -40,6 +40,8 @@ void main() {
     expect(screen, contains('onboardingFromHome'));
     expect(screen, isNot(contains('onboardingStatusProvider')));
     expect(screen, contains('buildDashboardHomePrimarySlivers'));
+    expect(screen, contains('coachHomeProvider'));
+    expect(screen, contains('coachPending'));
     expect(screen, contains('DashboardPrioritiesOverlay'));
     expect(screen, contains('RefreshIndicator'));
     expect(screen, isNot(contains('FxLiquidPrimaryButton')));

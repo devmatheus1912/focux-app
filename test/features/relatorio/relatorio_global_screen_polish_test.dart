@@ -22,7 +22,14 @@ void main() {
     expect(screen, contains('/alunos/'));
     expect(screen, contains('/relatorio'));
     expect(screen, contains('extra:'));
-    expect(screen, isNot(contains('constrainWidth: false')));
+    expect(screen, contains('constrainWidth: false'));
+    expect(screen, contains('FxContentWidthLimiter'));
+    expect(screen, contains('FxStripCard'));
+    expect(screen, contains('emphasize: true'));
+    expect(screen, contains('DashboardHomeActionChip'));
+    expect(screen, contains('keyboardDismissBehavior'));
+    expect(screen, contains('Como calculamos'));
+    expect(screen, contains('goPersonalShellTab'));
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(screen, isNot(contains('bar-chart-2')));
     expect(screen, isNot(contains('dashboardHeroCaptionOnTeal')));

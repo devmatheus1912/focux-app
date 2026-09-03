@@ -6,24 +6,26 @@ import '../../../core/analytics/analytics_service.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
-import '../../../core/theme/fx_settings_layout.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feature_gate.dart';
+import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/fx_strip_card.dart';
 import '../../../core/widgets/operational_metric_tile.dart';
 import '../../../core/widgets/skeleton_loader.dart';
+import '../../auth/providers/auth_provider.dart';
+import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
-import '../../../features/auth/providers/auth_provider.dart';
 import '../../subscription/models/subscription_plan.dart';
 import '../data/relatorio_repository.dart';
 import '../utils/relatorio_global_display.dart';
-import '../widgets/relatorio_global_help_sheet.dart';
 
 class RelatorioGlobalScreen extends ConsumerStatefulWidget {
   const RelatorioGlobalScreen({super.key});
@@ -96,6 +98,11 @@ class _RelatorioGlobalScreenState extends ConsumerState<RelatorioGlobalScreen> {
     }
   }
 
+  void _abrirAlunos() {
+    AnalyticsService.instance.track(ProductEvents.alunosViewed);
+    goPersonalShellTab(context, '/alunos');
+  }
+
   void _abrirRelatorioAluno(ResumoAluno aluno) {
     context.push(
       '/alunos/${aluno.alunoId}/relatorio',
@@ -108,6 +115,7 @@ class _RelatorioGlobalScreenState extends ConsumerState<RelatorioGlobalScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
     final dados = _dados;
+    final firstAtencao = firstRelatorioAtencao(dados?.menosComprometidos ?? []);
 
     return fxScreenA11yScope(
       label: 'Relatórios',
@@ -117,6 +125,7 @@ class _RelatorioGlobalScreenState extends ConsumerState<RelatorioGlobalScreen> {
         capability: 'relatorios',
         child: FxShellScaffold(
           useMesh: true,
+          constrainWidth: false,
           appBar: FxShellAppBar(
             title: 'Relatórios',
             subtitle: FxHubFreshness.fromFetchedAt(_fetchedAt),
@@ -128,16 +137,28 @@ class _RelatorioGlobalScreenState extends ConsumerState<RelatorioGlobalScreen> {
                   AnalyticsService.instance.track(
                     ProductEvents.relatoriosHubHelpOpened,
                   );
-                  showRelatorioGlobalHelpSheet(context);
+                  showFxHelpSheet(
+                    context,
+                    title: 'Relatórios',
+                    subtitle: 'Panorama da base. O PDF de um aluno continua no 360.',
+                    tips: const [
+                      FxHelpTip('Como calculamos', relatorioComoCalculamos),
+                      FxHelpTip(
+                        'Rankings',
+                        'Toque no aluno para o relatório dele.',
+                      ),
+                      FxHelpTip(
+                        'Atenção',
+                        'Quem está embaixo não é alerta. Para esfriamento, use Alertas.',
+                      ),
+                    ],
+                  );
                 },
               ),
             ],
           ),
           body: _loading
-              ? const Padding(
-                padding: EdgeInsets.all(FxSettingsLayout.pageInset),
-                child: SkeletonList(count: 6),
-              )
+              ? const SkeletonList(count: 6)
               : _erro != null
               ? FxErrorState(
                 chromeOnDark: isDark,
@@ -157,90 +178,79 @@ class _RelatorioGlobalScreenState extends ConsumerState<RelatorioGlobalScreen> {
                     ? ListView(
                       physics: const AlwaysScrollableScrollPhysics(),
                       children: [
-                        SizedBox(
-                          height: 320,
-                          child: FxEmptyState(
-                            icon: 'users',
-                            title: 'Nenhum aluno na base',
-                            subtitle:
-                                'Quando houver alunos, a média de aderência e os rankings aparecem aqui.',
-                            action: FxEmptyAction(
-                              label: 'Ver alunos',
-                              onTap: () => context.go('/alunos'),
-                            ),
+                        const SizedBox(height: 48),
+                        FxEmptyState(
+                          icon: 'users',
+                          title: 'Nenhum aluno na base',
+                          subtitle:
+                              'Quando houver alunos, a média de aderência e os rankings aparecem aqui.',
+                          action: FxEmptyAction(
+                            label: 'Ver alunos',
+                            onTap: _abrirAlunos,
                           ),
                         ),
                       ],
                     )
-                    : ListView(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      padding: const EdgeInsets.fromLTRB(
-                        FxSettingsLayout.pageInset,
-                        8,
-                        FxSettingsLayout.pageInset,
-                        110,
-                      ),
-                      children: [
-                        const DashboardSectionHeader(title: 'Base'),
-                        const SizedBox(height: TokensStrip.s3),
-                        OperationalMetricTile(
-                          label: 'Aderência média',
-                          value: relatorioAderenciaMediaLabel(
-                            dados.aderenciaMediaGeral,
+                    : FxContentWidthLimiter(
+                      child: ListView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        keyboardDismissBehavior:
+                            ScrollViewKeyboardDismissBehavior.onDrag,
+                        padding: const EdgeInsets.all(TokensStrip.s4),
+                        children: [
+                          _RelatorioFocusCard(
+                            dados: dados,
+                            firstAtencao: firstAtencao,
+                            isDark: isDark,
+                            onAlunos: _abrirAlunos,
+                            onAluno: _abrirRelatorioAluno,
                           ),
-                          hint: 'Média de todos os alunos, não só do ranking',
-                          color: primary,
-                          isDark: isDark,
-                        ),
-                        const SizedBox(height: TokensStrip.s2),
-                        InkWell(
-                          onTap: () => context.go('/alunos'),
-                          borderRadius: BorderRadius.circular(12),
-                          child: OperationalMetricTile(
+                          const SizedBox(height: TokensStrip.s4),
+                          OperationalMetricTile(
                             label: 'Alunos',
                             value: '${dados.totalAlunos}',
-                            hint: 'Abrir a lista da base',
+                            hint: 'Base no recorte',
                             color: primary,
                             isDark: isDark,
                           ),
-                        ),
-                        const SizedBox(height: TokensStrip.s5),
-                        const DashboardSectionHeader(
-                          title: 'Mais comprometidos',
-                        ),
-                        const SizedBox(height: TokensStrip.s2),
-                        Text(
-                          'Toque para o relatório do aluno.',
-                          style: FocuxHubTypography.bodyMuted(
-                            color: fxScreenMute(context),
-                            fontWeight: FontWeight.w600,
+                          const SizedBox(height: TokensStrip.s4),
+                          DashboardSectionHeader(
+                            title: 'Mais comprometidos',
+                            actionLabel:
+                                dados.maisComprometidos.length > 3
+                                    ? 'Ver mais'
+                                    : null,
+                            onAction:
+                                dados.maisComprometidos.length > 3
+                                    ? _abrirAlunos
+                                    : null,
                           ),
-                        ),
-                        const SizedBox(height: TokensStrip.s3),
-                        ..._rankingTiles(
-                          dados.maisComprometidos,
-                          emptyLabel: 'Ainda não há treinos concluídos',
-                          attention: false,
-                        ),
-                        const SizedBox(height: TokensStrip.s5),
-                        const DashboardSectionHeader(
-                          title: 'Precisam de atenção',
-                        ),
-                        const SizedBox(height: TokensStrip.s2),
-                        Text(
-                          'Priorize contato. Isso não é o motor de alertas.',
-                          style: FocuxHubTypography.bodyMuted(
-                            color: fxScreenMute(context),
-                            fontWeight: FontWeight.w600,
+                          const SizedBox(height: TokensStrip.s2),
+                          ..._rankingTiles(
+                            relatorioRankingPreview(dados.maisComprometidos),
+                            emptyLabel: 'Ainda não há treinos concluídos',
+                            attention: false,
                           ),
-                        ),
-                        const SizedBox(height: TokensStrip.s3),
-                        ..._rankingTiles(
-                          dados.menosComprometidos,
-                          emptyLabel: 'Ninguém precisa de atenção extra',
-                          attention: true,
-                        ),
-                      ],
+                          const SizedBox(height: TokensStrip.s4),
+                          DashboardSectionHeader(
+                            title: 'Precisam de atenção',
+                            actionLabel:
+                                dados.menosComprometidos.length > 3
+                                    ? 'Ver mais'
+                                    : null,
+                            onAction:
+                                dados.menosComprometidos.length > 3
+                                    ? _abrirAlunos
+                                    : null,
+                          ),
+                          const SizedBox(height: TokensStrip.s2),
+                          ..._rankingTiles(
+                            relatorioRankingPreview(dados.menosComprometidos),
+                            emptyLabel: 'Ninguém precisa de atenção extra',
+                            attention: true,
+                          ),
+                        ],
+                      ),
                     ),
               ),
         ),
@@ -302,5 +312,73 @@ class _RelatorioGlobalScreenState extends ConsumerState<RelatorioGlobalScreen> {
           ),
         ),
     ];
+  }
+}
+
+class _RelatorioFocusCard extends StatelessWidget {
+  const _RelatorioFocusCard({
+    required this.dados,
+    required this.firstAtencao,
+    required this.isDark,
+    required this.onAlunos,
+    required this.onAluno,
+  });
+
+  final ResumoGlobal dados;
+  final ResumoAluno? firstAtencao;
+  final bool isDark;
+  final VoidCallback onAlunos;
+  final void Function(ResumoAluno aluno) onAluno;
+
+  @override
+  Widget build(BuildContext context) {
+    final chrome = ShellChrome.forDark(isDark);
+    return FxStripCard(
+      emphasize: true,
+      semanticsLabel:
+          'Aderência média ${relatorioAderenciaMediaLabel(dados.aderenciaMediaGeral)}',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Aderência média', style: FocuxHubTypography.chip(chrome.mute)),
+          const SizedBox(height: 6),
+          Text(
+            relatorioAderenciaMediaLabel(dados.aderenciaMediaGeral),
+            style: FocuxHubTypography.kpi(
+              color: chrome.ink,
+              fontSize: FocuxHubTypography.metricLg,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            firstAtencao == null
+                ? '${dados.totalAlunos} alunos na base'
+                : '${firstAtencao!.alunoNome} pede atenção',
+            style: FocuxHubTypography.body(
+              color: chrome.ink,
+            ).copyWith(fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: TokensStrip.s3),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: DashboardHomeActionChip(
+              label: firstAtencao == null ? 'Ver alunos' : 'Ver aluno',
+              accent: firstAtencao == null
+                  ? Theme.of(context).colorScheme.primary
+                  : EagleTokens.bad,
+              isDark: isDark,
+              onPressed: () {
+                final alvo = firstAtencao;
+                if (alvo == null) {
+                  onAlunos();
+                  return;
+                }
+                onAluno(alvo);
+              },
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
