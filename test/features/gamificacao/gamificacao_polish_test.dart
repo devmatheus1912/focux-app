@@ -12,11 +12,14 @@ void main() {
     );
 
     expect(screen, contains('FxContentWidthLimiter'));
+    expect(screen, contains('constrainWidth: false'));
     expect(screen, contains('RefreshIndicator'));
-    expect(screen, contains('DashboardErrorState'));
+    expect(screen, contains('FxErrorState'));
     expect(screen, contains('gamificacaoProvider'));
-    expect(screen, contains('EagleTokens.darkInk'));
+    expect(screen, contains('FxStripCard'));
+    expect(screen, contains('Como calculamos'));
     expect(screen, isNot(contains('Colors.white')));
+    expect(screen, isNot(contains('FilledButton')));
     expect(provider, contains('gamificacaoProvider'));
     expect(provider, contains('GamificacaoRepository'));
     expect(screen, isNot(contains('final gamificacaoProvider')));
