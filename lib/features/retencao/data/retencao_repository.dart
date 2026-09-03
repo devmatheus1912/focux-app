@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
+import '../../../core/api/pagina.dart';
 
 class RetencaoAlunoScore {
   final int alunoId;
@@ -40,9 +41,16 @@ class RetencaoRepository {
   RetencaoRepository(ApiClient c) : _dio = c.dio;
 
   Future<List<RetencaoAlunoScore>> listarBase() async {
-    final r = await _dio.get('/api/retencao/base');
-    return (r.data as List<dynamic>)
-        .map((e) => RetencaoAlunoScore.fromJson(e as Map<String, dynamic>))
-        .toList();
+    final r = await _dio.get(
+      '/api/retencao/base',
+      queryParameters: {'page': 0, 'size': 100},
+    );
+    final pagina = Pagina.fromJson(
+      Map<String, dynamic>.from(r.data as Map),
+      (raw) => RetencaoAlunoScore.fromJson(
+        Map<String, dynamic>.from(raw as Map),
+      ),
+    );
+    return pagina.content;
   }
 }
