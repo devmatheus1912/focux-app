@@ -399,7 +399,7 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
           brand: brand,
           isDark: widget.isDark,
           line: line,
-          onApply: enabled ? widget.onApplyLastPrescription : () {},
+          onApply: enabled ? widget.onApplyLastPrescription : null,
         ),
         const SizedBox(height: TokensStrip.s3),
       ],
@@ -416,7 +416,7 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
               line: line,
               accent: brand,
               picker: true,
-              onTap: enabled ? _openObjetivoPicker : () {},
+              onTap: enabled ? _openObjetivoPicker : null,
             ),
           _PrescriptionStepperRow(
             label: 'Séries',
@@ -430,12 +430,12 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
                 enabled
                     ? () =>
                         _setSeries(adjustPrescriptionSeries(seriesValue, -1))
-                    : () {},
+                    : null,
             onIncrement:
                 enabled
                     ? () =>
                         _setSeries(adjustPrescriptionSeries(seriesValue, 1))
-                    : () {},
+                    : null,
           ),
           FxSettingsTile(
             icon: Icons.fitness_center_rounded,
@@ -446,7 +446,7 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
             accent: brand,
             picker: true,
             numeric: true,
-            onTap: enabled ? _openRepsSheet : () {},
+            onTap: enabled ? _openRepsSheet : null,
           ),
           _PrescriptionStepperRow(
             label: 'Descanso',
@@ -461,13 +461,13 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
                     ? () => _setRest(
                       adjustPrescriptionRestSeconds(restValue, -15),
                     )
-                    : () {},
+                    : null,
             onIncrement:
                 enabled
                     ? () => _setRest(
                       adjustPrescriptionRestSeconds(restValue, 15),
                     )
-                    : () {},
+                    : null,
             showDivider: false,
           ),
         ],
@@ -497,7 +497,7 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
             line: line,
             accent: brand,
             picker: true,
-            onTap: enabled ? _openTipoSeriePicker : () {},
+            onTap: enabled ? _openTipoSeriePicker : null,
           ),
           if (_tipoSerie.toUpperCase() == 'SUPERSET')
             _PrescriptionValueRow(
@@ -714,8 +714,8 @@ class _PrescriptionStepperRow extends StatelessWidget {
   final Color line;
   final Color ink;
   final Color mute;
-  final VoidCallback onDecrement;
-  final VoidCallback onIncrement;
+  final VoidCallback? onDecrement;
+  final VoidCallback? onIncrement;
   final bool showDivider;
 
   @override
@@ -775,7 +775,7 @@ class _StepperButton extends StatelessWidget {
   });
 
   final IconData icon;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
   final Color mute;
 
   @override
@@ -998,7 +998,7 @@ class _RepeatPrescriptionTile extends StatelessWidget {
   final Color brand;
   final bool isDark;
   final Color line;
-  final VoidCallback onApply;
+  final VoidCallback? onApply;
 
   @override
   Widget build(BuildContext context) {
