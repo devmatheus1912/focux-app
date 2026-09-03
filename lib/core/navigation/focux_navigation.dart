@@ -38,5 +38,6 @@ abstract final class FocuxNavigation {
   static const List<String> automatedGates = [
     'test/core/router/routes_pillar_contract_test.dart',
     'test/core/design_system/navigation_architecture_pillar_contract_test.dart',
+    'test/core/design_system/surface_taxonomy_contract_test.dart',
   ];
 }
