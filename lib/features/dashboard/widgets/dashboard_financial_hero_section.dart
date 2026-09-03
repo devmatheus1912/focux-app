@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/utils/pt_br_display.dart';
-import '../../../core/widgets/fx_settings_group.dart';
-import '../../../core/widgets/fx_settings_tile.dart';
+import '../../../core/widgets/operational_metric_tile.dart';
 import '../../financeiro/data/financeiro_repository.dart';
 import '../constants/dashboard_layout.dart';
 import '../utils/dashboard_microcopy.dart';
@@ -102,41 +102,53 @@ class _FinanceTiles extends StatelessWidget {
           'Panorama financeiro de $mes. '
           'Recebido $recebido. '
           'Toque para abrir financeiro',
-      child: FxSettingsGroup(
+      child: Column(
         children: [
-          FxSettingsTile(
-            fxIcon: 'dollar-sign',
-            label: 'Recebido · $mes',
-            subtitle: metaSuperada
-                ? 'Meta superada'
-                : pendente > 0
-                    ? 'Faltam $pendenteLabel para a meta'
-                    : 'Meta do mês sob controle',
-            value: recebido,
-            numeric: true,
-            showDivider: true,
+          InkWell(
             onTap: () => context.go('/financeiro'),
+            borderRadius: BorderRadius.circular(12),
+            child: OperationalMetricTile(
+              label: 'Recebido · $mes',
+              value: recebido,
+              hint: metaSuperada
+                  ? 'Meta superada'
+                  : pendente > 0
+                      ? 'Faltam $pendenteLabel para a meta'
+                      : 'Meta do mês sob controle',
+              color: EagleTokens.moneyGreen,
+              isDark: Theme.of(context).brightness == Brightness.dark,
+            ),
           ),
-          FxSettingsTile(
-            fxIcon: 'alert-triangle',
-            label: 'Pendente',
-            subtitle: inadimpl > 0
-                ? '$inadimpl ${financeInadimplLabel(MediaQuery.sizeOf(context).width).toLowerCase()}'
-                : 'Sem inadimplência no recorte',
-            value: pendenteLabel,
-            numeric: true,
-            showDivider: true,
+          const SizedBox(height: 8),
+          InkWell(
             onTap: () => context.go('/financeiro'),
+            borderRadius: BorderRadius.circular(12),
+            child: OperationalMetricTile(
+              label: 'Pendente',
+              value: pendenteLabel,
+              hint: inadimpl > 0
+                  ? '$inadimpl ${financeInadimplLabel(MediaQuery.sizeOf(context).width).toLowerCase()}'
+                  : 'Sem inadimplência no recorte',
+              color: inadimpl > 0 ? EagleTokens.bad : EagleTokens.moneyGreen,
+              isDark: Theme.of(context).brightness == Brightness.dark,
+              emphasis: inadimpl > 0
+                  ? OperationalMetricEmphasis.alert
+                  : OperationalMetricEmphasis.normal,
+            ),
           ),
-          FxSettingsTile(
-            fxIcon: 'target',
-            label: 'Meta',
-            subtitle: showTicket
-                ? 'Ticket ${formatBrlCurrency(ticket, showDecimals: false)}'
-                : null,
-            value: metaLabel,
-            showDivider: false,
+          const SizedBox(height: 8),
+          InkWell(
             onTap: () => context.go('/financeiro'),
+            borderRadius: BorderRadius.circular(12),
+            child: OperationalMetricTile(
+              label: 'Meta',
+              value: metaLabel,
+              hint: showTicket
+                  ? 'Ticket ${formatBrlCurrency(ticket, showDecimals: false)}'
+                  : 'Acompanhe a meta do mês',
+              color: Theme.of(context).colorScheme.primary,
+              isDark: Theme.of(context).brightness == Brightness.dark,
+            ),
           ),
         ],
       ),

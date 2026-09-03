@@ -43,7 +43,7 @@ void main() {
     expect(widget, contains('class CommandActionPanel'));
     expect(widget, contains('class CommandActionTile'));
     expect(widget, contains('showCommandActionsSheet'));
-    expect(widget, contains('FxSettingsTile'));
+    expect(widget, contains('FxSatelliteListTile'));
     expect(widget, contains('message-circle'));
     expect(widget, isNot(contains('atalhoKicker')));
     expect(widget, contains('if (hasTrend)'));
@@ -52,7 +52,7 @@ void main() {
     expect(widget, contains('maxLines: 2'));
     expect(widget, contains('TextOverflow.ellipsis'));
     expect(widget, contains('class DashboardDayPulseStrip'));
-    expect(widget, contains('FxSettingsTile'));
+    expect(widget, contains('FxSatelliteListTile'));
     expect(widget, contains('pulsoOperacional'));
     expect(widget, isNot(contains('hideRiscoChip')));
     expect(widget, contains("label: 'Risco'"));
@@ -61,12 +61,16 @@ void main() {
     expect(widget, contains('dashboardPanelIsOffscreen'));
     expect(
       File(
-        'lib/features/dashboard/widgets/dashboard_base_radar_strip.dart',
-      ).readAsStringSync(),
+            'lib/features/dashboard/widgets/dashboard_base_radar_strip.dart',
+          ).readAsStringSync() +
+          File(
+            'lib/features/dashboard/widgets/dashboard_radar_sheet.dart',
+          ).readAsStringSync(),
       allOf(
-        contains('FxSettingsGroup'),
+        contains('FxSatelliteListTile'),
         contains('dashboardRadarSplit'),
         contains('radarVerTodos'),
+        isNot(contains('FxSettingsGroup')),
         isNot(contains('SingleChildScrollView')),
       ),
     );

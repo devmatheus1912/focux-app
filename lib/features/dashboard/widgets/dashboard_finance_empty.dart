@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/widgets/fx_settings_group.dart';
-import '../../../core/widgets/fx_settings_tile.dart';
+import '../../../core/theme/design_tokens.dart';
+import '../../../core/widgets/operational_metric_tile.dart';
 import '../utils/dashboard_microcopy.dart';
 
-/// Empty de receita — tile inset, sem chip in-card.
+/// Empty de receita — métrica S1, sem chip in-card.
 class DashboardFinanceEmptyState extends StatelessWidget {
   const DashboardFinanceEmptyState({
     super.key,
@@ -22,19 +22,22 @@ class DashboardFinanceEmptyState extends StatelessWidget {
     final cta = ctaLabel?.trim().isNotEmpty == true
         ? ctaLabel!
         : DashboardMicrocopy.abrirFinanceiro;
-    return FxSettingsGroup(
-      accent: Theme.of(context).colorScheme.primary,
-      children: [
-        FxSettingsTile(
-          fxIcon: 'dollar-sign',
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Semantics(
+      label: 'Recebido de $mes zerado. $cta',
+      button: true,
+      child: InkWell(
+        onTap: onOpen,
+        borderRadius: BorderRadius.circular(12),
+        child: OperationalMetricTile(
           label: 'Recebido · $mes',
           value: 'R\$ 0',
-          onTap: onOpen,
-          showDivider: false,
-          semanticsLabel:
-              'Recebido de $mes zerado. $cta',
+          hint: 'Sem receita neste mês',
+          color: EagleTokens.moneyGreen,
+          isDark: isDark,
+          emphasis: OperationalMetricEmphasis.muted,
         ),
-      ],
+      ),
     );
   }
 }

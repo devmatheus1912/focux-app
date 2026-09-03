@@ -31,6 +31,8 @@ abstract final class FocuxDensity {
     'maxLines',
     'TextOverflow.ellipsis',
     'FxSettingsGroup',
+    'FxSatelliteListTile',
+    'OperationalMetricTile',
     'dashboardRadarFoldLimit',
     'AlunoListPreferences',
     '_listaCompacta',

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:focux_app/core/widgets/operational_metric_tile.dart';
 import 'package:focux_app/features/dashboard/data/command_center_data.dart';
 import 'package:focux_app/features/dashboard/utils/dashboard_microcopy.dart';
 import 'package:focux_app/features/dashboard/widgets/dashboard_agenda_hoje_strip.dart';
@@ -24,7 +25,9 @@ void main() {
 
     expect(find.byType(DashboardHomeActionChip), findsNothing);
     expect(find.byType(FilledButton), findsNothing);
-    expect(find.textContaining('Recebido · agosto'), findsOneWidget);
+    expect(find.byType(OperationalMetricTile), findsOneWidget);
+    expect(find.textContaining('RECEBIDO'), findsOneWidget);
+    expect(find.text('R\$ 0'), findsOneWidget);
     expect(find.text(DashboardMicrocopy.abrirFinanceiro), findsNothing);
   });
 

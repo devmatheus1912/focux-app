@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/router/safe_navigation.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/utils/fx_utils.dart';
-import '../../../core/widgets/fx_settings_group.dart';
-import '../../../core/widgets/fx_settings_tile.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../constants/dashboard_layout.dart';
 import '../data/command_center_data.dart';
 import '../utils/dashboard_microcopy.dart';
@@ -35,23 +35,25 @@ class DashboardAgendaHojeStrip extends StatelessWidget {
             onAction: () => goPersonalShellTab(context, '/agenda'),
           ),
           const SizedBox(height: FxSettingsLayout.headerToGroup),
-          FxSettingsGroup(
-            children: [
-              for (var i = 0; i < visible.length; i++)
-                FxSettingsTile(
-                  fxIcon: 'calendar',
-                  label: fxTitleCaseName(visible[i].nomeAluno),
-                  subtitle: _agendaStatusLabel(visible[i].status),
-                  value: visible[i].horario,
-                  numeric: true,
-                  showDivider: i < visible.length - 1,
-                  semanticsLabel:
-                      '${visible[i].horario}. ${visible[i].nomeAluno}. '
-                      'Status ${_agendaStatusLabel(visible[i].status)}. Abrir agenda',
-                  onTap: () => goPersonalShellTab(context, '/agenda'),
+          for (final item in visible)
+            Semantics(
+              label:
+                  '${item.horario}. ${item.nomeAluno}. '
+                  'Status ${_agendaStatusLabel(item.status)}. Abrir agenda',
+              button: true,
+              child: FxSatelliteListTile(
+                title: fxTitleCaseName(item.nomeAluno),
+                subtitle: Text(_agendaStatusLabel(item.status)),
+                trailing: Text(
+                  item.horario,
+                  style: FocuxHubTypography.bodyMuted(
+                    color: fxScreenMute(context),
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
-            ],
-          ),
+                onTap: () => goPersonalShellTab(context, '/agenda'),
+              ),
+            ),
         ],
       ),
     );

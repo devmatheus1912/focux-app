@@ -6,8 +6,7 @@ import '../../../core/analytics/analytics_service.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
-import '../../../core/widgets/fx_settings_group.dart';
-import '../../../core/widgets/fx_settings_tile.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../data/command_action_item.dart';
 import '../providers/dashboard_provider.dart';
 import '../utils/dashboard_chat_subtitle.dart';
@@ -148,18 +147,15 @@ class DashboardCommandCenterSectionState
                   : null,
         ),
         const SizedBox(height: TokensStrip.s4),
-        FxSettingsGroup(
-          accent: primary,
-          children: [
-            FxSettingsTile(
-              fxIcon: 'message-circle',
-              label: 'Mensagens',
-              value: chatSubtitle,
-              onTap: () => context.go('/chat/inbox'),
-              showDivider: false,
-              semanticsLabel: 'Mensagens. $chatSubtitle',
-            ),
-          ],
+        Semantics(
+          label: 'Mensagens. $chatSubtitle',
+          button: true,
+          child: FxSatelliteListTile(
+            title: 'Mensagens',
+            subtitle: Text(chatSubtitle),
+            accent: primary,
+            onTap: () => context.go('/chat/inbox'),
+          ),
         ),
       ],
     );

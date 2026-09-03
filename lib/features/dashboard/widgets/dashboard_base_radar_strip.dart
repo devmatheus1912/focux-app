@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
-import '../../../core/widgets/fx_settings_group.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../constants/dashboard_layout.dart';
 import '../data/command_center_data.dart';
 import '../utils/dashboard_microcopy.dart';
@@ -36,21 +37,23 @@ class DashboardBaseRadarStrip extends StatelessWidget {
                 : null,
           ),
           const SizedBox(height: FxSettingsLayout.headerToGroup),
-          FxSettingsGroup(
-            caption: dashboardRadarCaption(
+          Text(
+            dashboardRadarCaption(
               fold: split.fold.length,
               total: split.total,
             ),
-            children: [
-              for (var i = 0; i < split.fold.length; i++)
-                DashboardRadarTile(
-                  item: split.fold[i],
-                  index: i,
-                  total: split.total,
-                  showDivider: i < split.fold.length - 1,
-                ),
-            ],
+            style: FocuxHubTypography.bodyMuted(
+              color: fxScreenMute(context),
+              fontWeight: FontWeight.w600,
+            ),
           ),
+          const SizedBox(height: 8),
+          for (var i = 0; i < split.fold.length; i++)
+            DashboardRadarTile(
+              item: split.fold[i],
+              index: i,
+              total: split.total,
+            ),
         ],
       ),
     );
