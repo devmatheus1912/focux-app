@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/analytics/analytics_service.dart';
+import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
@@ -17,6 +18,7 @@ import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_form_sheet.dart';
+import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_inset_picker_row.dart';
 import '../../../core/widgets/fx_inset_picker_sheet.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
@@ -234,10 +236,33 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
         capability: 'habitCoaching',
         child: FxShellScaffold(
           useMesh: true,
+          constrainWidth: false,
           appBar: FxShellAppBar(
             title: 'Hábitos & Compliance',
-            subtitle: habitoHubSubtitle(freshnessLabel),
+            subtitle: _loading
+                ? habitoHubSubtitle(freshnessLabel)
+                : '${habitoCountLabel(_habitos.length)}${freshnessLabel == null ? '' : ' · $freshnessLabel'}',
+            onBack: () => safePopOrGo(context, '/perfil/ferramentas'),
             actions: [
+              FxHelpIconButton(
+                tooltip: 'Como usar os hábitos',
+                onTap: () => showFxHelpSheet(
+                  context,
+                  title: 'Hábitos',
+                  subtitle: 'Metas diárias da base e quem está cumprindo.',
+                  tips: const [
+                    FxHelpTip('Como calculamos', habitoComoCalculamos),
+                    FxHelpTip(
+                      'Lista',
+                      'Toque no hábito para desativar. Toque no aluno para o 360.',
+                    ),
+                    FxHelpTip(
+                      'Novo',
+                      'O mais cria um hábito para todos os alunos ativos.',
+                    ),
+                  ],
+                ),
+              ),
               ShellHeaderIconButton(
                 icon: 'plus',
                 tooltip: 'Novo hábito',
@@ -269,6 +294,7 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
       onRefresh: _carregar,
       child: ListView(
         physics: const AlwaysScrollableScrollPhysics(),
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         padding: const EdgeInsets.fromLTRB(
           FxSettingsLayout.pageInset,
           8,

@@ -4,14 +4,25 @@ import '../../support/screen_source_bundle.dart';
 
 void main() {
   test('ranking cumpre contrato Tier S+', () {
-    final screen = readScreenSourceBundle('lib/features/ranking/screens/ranking_screen.dart');
-    expect(screen, anyOf(contains('fxScreenA11yScope'), contains('Semantics(')));
-    expect(screen, isNot(contains('CircularProgressIndicator')));
+    final screen = readScreenSourceBundle(
+      'lib/features/ranking/screens/ranking_screen.dart',
+    );
+    expect(screen, contains('fxScreenA11yScope'));
     expect(screen, contains('FxShellScaffold'));
-    expect(screen, anyOf(contains('FxContentWidthLimiter'), isNot(contains('constrainWidth: false'))));
-    expect(screen, anyOf(contains('friendlyError'), contains('DashboardErrorState'), contains('FxEmptyState'), contains('_erro'), contains('_TrainingEmptyState'), contains('ref.invalidate')));
-    expect(screen, anyOf(contains('FxLoading'), contains('SkeletonLoader'), contains('SkeletonList'), contains('DashboardShimmer'), contains('Shimmer'), contains('IaCopilotInsightsLoading'), contains('_loading')));
+    expect(screen, contains('constrainWidth: false'));
+    expect(screen, contains('FxContentWidthLimiter'));
+    expect(screen, contains('Como calculamos'));
+    expect(screen, contains('ListView.builder'));
+    expect(screen, contains('Carregar mais'));
+    expect(screen, contains('keyboardDismissBehavior'));
+    expect(screen, contains('FxHelpIconButton'));
+    expect(screen, contains('FxEmptyState'));
+    expect(screen, contains('FxErrorState'));
+    expect(screen, contains('SkeletonList'));
     expect(screen, contains('RefreshIndicator'));
-    expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(16));
+    expect(screen, contains('goPersonalShellTab'));
+    expect(screen, isNot(contains('FilledButton')));
+    expect(screen, isNot(contains('CircularProgressIndicator')));
+    expect(screen, isNot(contains('Pódio do Mês')));
   });
 }

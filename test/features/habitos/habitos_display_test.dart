@@ -46,5 +46,9 @@ void main() {
       habitoHubSubtitle('há 1 min'),
       'Coaching diário e aderência · há 1 min',
     );
+    expect(habitoCountLabel(0), 'Nenhum hábito');
+    expect(habitoCountLabel(1), '1 hábito');
+    expect(habitoCountLabel(3), '3 hábitos');
+    expect(habitoComoCalculamos, contains('checks'));
   });
 }
