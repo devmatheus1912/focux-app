@@ -20,7 +20,7 @@ Future<void> showAlertaDetalheHelpSheet(BuildContext context) {
       ),
       FxHelpTip(
         'Ações',
-        'Mensagem abre o chat. Relatório é o histórico. Resolver tira da caixa por 24h.',
+        'Mensagem abre o chat. Relatório é o histórico. Adiar 24h tira da caixa por um dia.',
         icon: 'message-circle',
       ),
     ],

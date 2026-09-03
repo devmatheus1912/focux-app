@@ -1,5 +1,11 @@
 import '../../../core/utils/fx_utils.dart';
 
+String alertaAdiarCtaLabel() => 'Adiar 24h';
+
+String alertaAdiarLoadingLabel() => 'Adiando…';
+
+String alertaAdiadoSuccessMessage() => 'Alerta adiado por 24h.';
+
 String alertaUltimoTreinoLabel(String? raw) {
   final value = raw?.trim() ?? '';
   if (value.isEmpty) return 'Sem treinos';

@@ -23,6 +23,12 @@ void main() {
     expect(alertaStatusFinanceiroRuim('ATIVO'), isFalse);
   });
 
+  test('copy de adiar 24h fala a verdade do snooze', () {
+    expect(alertaAdiarCtaLabel(), 'Adiar 24h');
+    expect(alertaAdiarLoadingLabel(), 'Adiando…');
+    expect(alertaAdiadoSuccessMessage(), 'Alerta adiado por 24h.');
+  });
+
   test('AlertaDetalhe ignora e-mail no payload', () {
     final detalhe = AlertaDetalhe.fromJson({
       'alunoId': 1,
