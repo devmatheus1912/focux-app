@@ -1,23 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
 import '../../../core/router/safe_navigation.dart';
-import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
+import '../../../core/widgets/fx_empty_state.dart';
+import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_help.dart';
+import '../../../core/widgets/fx_rive_player.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/widgets/fx_strip_card.dart';
+import '../../../core/widgets/operational_metric_tile.dart';
+import '../../../core/widgets/skeleton_loader.dart';
+import '../../dashboard/widgets/dashboard_home_action_chip.dart';
+import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../data/gamificacao_repository.dart';
 import '../models/gamificacao_badge_tile.dart';
 import '../providers/gamificacao_provider.dart';
-import 'package:focux_app/core/widgets/fx_rive_player.dart';
-import 'package:focux_app/core/widgets/fx_empty_state.dart';
-import '../../../core/widgets/skeleton_loader.dart';
-import '../../dashboard/widgets/dashboard_error_state.dart';
-import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
+import '../utils/gamificacao_display.dart';
 
 class GamificacaoScreen extends ConsumerWidget {
   const GamificacaoScreen({super.key});
@@ -29,446 +35,189 @@ class GamificacaoScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final chrome = ShellChrome.of(context);
-    final dark = chrome.isDark;
-    final ink = chrome.ink;
-    final mute = chrome.mute;
-    final brand = Theme.of(context).colorScheme.primary;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
     final async = ref.watch(gamificacaoProvider);
 
     return fxScreenA11yScope(
       label: 'Minha evolução',
       child: FxShellScaffold(
-        constrainWidth: false,
         useMesh: true,
+        constrainWidth: false,
         appBar: FxShellAppBar(
           title: 'Minha evolução',
-          onBack: () => safePopOrGo(context, '/dashboard/personal'),
-        ),
-        body: FxContentWidthLimiter(
-          child: async.when(
-            loading: () => const SkeletonList(count: 5),
-            error:
-                (e, _) => RefreshIndicator(
-                  color: brand,
-                  onRefresh: () => _refresh(ref),
-                  child: ListView(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    children: [
-                      SizedBox(
-                        height: MediaQuery.sizeOf(context).height * 0.55,
-                        child: DashboardErrorState(
-                          chromeOnDark: dark,
-                          primary: brand,
-                          message: friendlyError(e),
-                          onRetry: () => _refresh(ref),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-            data: (data) {
-              if (data.totalTreinos == 0 && data.badges.isEmpty) {
-                return const FxEmptyState(
-                  icon: 'spark',
-                  title: 'Sua evolução começa no treino',
-                  subtitle:
-                      'Conquistas e sequência aparecem aqui depois do primeiro treino.',
-                );
-              }
-              return RefreshIndicator(
-                color: brand,
-                onRefresh: () => _refresh(ref),
-                child: _GamificacaoBody(
-                  data: data,
-                  dark: dark,
-                  ink: ink,
-                  mute: mute,
-                  brand: brand,
-                ),
-              );
-            },
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _GamificacaoBody extends StatelessWidget {
-  final GamificacaoData data;
-  final bool dark;
-  final Color ink;
-  final Color mute;
-  final Color brand;
-
-  const _GamificacaoBody({
-    required this.data,
-    required this.dark,
-    required this.ink,
-    required this.mute,
-    required this.brand,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final badges = buildGamificacaoBadgeTiles(
-      data,
-      brand,
-      TokensStrip.textSecondary,
-    );
-
-    return SingleChildScrollView(
-      physics: const AlwaysScrollableScrollPhysics(),
-      padding: const EdgeInsets.only(bottom: 110),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              TokensStrip.s5,
-              10,
-              TokensStrip.s5,
-              TokensStrip.s5,
-            ),
-            child: Text(
-              'Minha Evolução',
-              style: TextStyle(
-                color: ink,
-                fontSize: 28,
-                fontWeight: FontWeight.w700,
-                letterSpacing: -0.8,
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              TokensStrip.s4,
-              0,
-              TokensStrip.s4,
-              TokensStrip.s4,
-            ),
-            child: _StreakHeroStatic(
-              dark: dark,
-              brand: brand,
-              streak: data.streak.streakAtual,
-              recorde: data.streak.streakMaximo,
-              totalTreinos: data.totalTreinos,
-              prs: data.prsEsseMes,
-              aderencia: data.aderenciaPercent,
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              TokensStrip.s5,
-              0,
-              TokensStrip.s5,
-              TokensStrip.s3,
-            ),
-            child: Text(
-              'Conquistas',
-              style: FocuxHubTypography.sectionTitle(context, color: ink),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: TokensStrip.s4),
-            child: GridView.count(
-              crossAxisCount: 3,
-              crossAxisSpacing: 10,
-              mainAxisSpacing: 10,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              childAspectRatio: 0.9,
-              children:
-                  badges.map((b) {
-                    final earned = b.earned;
-                    final cor = b.cor;
-                    return AnimatedOpacity(
-                      opacity: earned ? 1.0 : 0.45,
-                      duration: const Duration(milliseconds: 300),
-                      child: Container(
-                        decoration: fxListCardDecoration(
-                          context,
-                          accent: earned ? cor : null,
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            SizedBox(
-                              width: 48,
-                              height: 48,
-                              child: Stack(
-                                alignment: Alignment.center,
-                                children: [
-                                  if (earned)
-                                    Positioned.fill(
-                                      child: FxRiveBadgeGlow(size: 48),
-                                    ),
-                                  Container(
-                                    width: 48,
-                                    height: 48,
-                                    decoration: BoxDecoration(
-                                      color:
-                                          earned
-                                              ? cor.withValues(alpha: 0.13)
-                                              : (dark
-                                                  ? EagleTokens.gamificationOverlay
-                                                  : TokensStrip.borderDefault),
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: Center(
-                                      child: ColorFiltered(
-                                        colorFilter:
-                                            earned
-                                                ? const ColorFilter.mode(
-                                                  Colors.transparent,
-                                                  BlendMode.saturation,
-                                                )
-                                                : const ColorFilter.matrix([
-                                                  0.2126,
-                                                  0.7152,
-                                                  0.0722,
-                                                  0,
-                                                  0,
-                                                  0.2126,
-                                                  0.7152,
-                                                  0.0722,
-                                                  0,
-                                                  0,
-                                                  0.2126,
-                                                  0.7152,
-                                                  0.0722,
-                                                  0,
-                                                  0,
-                                                  0,
-                                                  0,
-                                                  0,
-                                                  1,
-                                                  0,
-                                                ]),
-                                        child: Text(
-                                          b.icon,
-                                          style: const TextStyle(fontSize: 24),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 6,
-                              ),
-                              child: Text(
-                                b.label,
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: ink,
-                                  fontSize: 11.5,
-                                  fontWeight: FontWeight.w600,
-                                  height: 1.3,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  }).toList(),
-            ),
-          ),
-          const SizedBox(height: 20),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: TokensStrip.s4),
-            child: Container(
-              padding: const EdgeInsets.all(TokensStrip.s4),
-              decoration: fxListCardDecoration(context, accent: brand),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      const Text(
-                        '🎁',
-                        style: TextStyle(fontSize: FocuxHubTypography.metricLg),
-                      ),
-                      const SizedBox(width: 10),
-                      Text(
-                        'Indique um amigo',
-                        style: TextStyle(
-                          color: ink,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    'Indique outro personal. Quando ele assinar, você ganha 30 dias extras no plano.',
-                    style: TextStyle(color: mute, fontSize: 13, height: 1.5),
-                  ),
-                  const SizedBox(height: 14),
-                  FilledButton(
-                    onPressed: () => context.push('/referral'),
-                    child: const Text('Ver meu código de indicação'),
-                  ),
+          onBack: () => safePopOrGo(context, '/perfil/ferramentas'),
+          actions: [
+            FxHelpIconButton(
+              tooltip: 'Como funciona a evolução',
+              onTap: () => showFxHelpSheet(
+                context,
+                title: 'Evolução',
+                subtitle: 'Sequência, PRs e conquistas do treino.',
+                tips: const [
+                  FxHelpTip('Como calculamos', gamificacaoComoCalculamos),
+                  FxHelpTip('Conquistas', 'As 3 do topo. Ver mais abre o restante.'),
+                  FxHelpTip('Indicação', 'O código de amigo continua em Referral.'),
                 ],
               ),
             ),
+          ],
+        ),
+        body: async.when(
+          loading: () => const SkeletonList(count: 5),
+          error: (e, _) => FxErrorState(
+            chromeOnDark: isDark,
+            primary: primary,
+            message: friendlyError(e),
+            onRetry: () => _refresh(ref),
           ),
-        ],
+          data: (data) {
+            final empty = data.totalTreinos == 0 && data.badges.isEmpty;
+            return RefreshIndicator(
+              color: primary,
+              onRefresh: () => _refresh(ref),
+              child: empty
+                  ? ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    children: [
+                      const SizedBox(height: 48),
+                      FxEmptyState(
+                        icon: 'spark',
+                        title: 'Sua evolução começa no treino',
+                        subtitle:
+                            'Conquistas e sequência aparecem aqui depois do primeiro treino.',
+                        action: FxEmptyAction(
+                          label: 'Ir para o Hoje',
+                          onTap: () => goPersonalShellTab(
+                            context,
+                            '/dashboard/personal',
+                          ),
+                        ),
+                      ),
+                    ],
+                  )
+                  : FxContentWidthLimiter(
+                    child: _GamificacaoBody(data: data, isDark: isDark),
+                  ),
+            );
+          },
+        ),
       ),
     );
   }
 }
 
-class _StreakHeroStatic extends StatelessWidget {
-  final bool dark;
-  final Color brand;
-  final int streak, recorde, totalTreinos, prs, aderencia;
-  const _StreakHeroStatic({
-    required this.dark,
-    required this.brand,
-    required this.streak,
-    required this.recorde,
-    required this.totalTreinos,
-    required this.prs,
-    required this.aderencia,
-  });
+class _GamificacaoBody extends StatefulWidget {
+  const _GamificacaoBody({required this.data, required this.isDark});
+
+  final GamificacaoData data;
+  final bool isDark;
+
+  @override
+  State<_GamificacaoBody> createState() => _GamificacaoBodyState();
+}
+
+class _GamificacaoBodyState extends State<_GamificacaoBody> {
+  var _mostrarTodas = false;
 
   @override
   Widget build(BuildContext context) {
-    final brandDeep = BrandPalette.deep(brand);
-    final onPrimary = Theme.of(context).colorScheme.onPrimary;
-    final heroInk = dark ? EagleTokens.darkInk : onPrimary;
-    final heroInkMute =
-        dark ? EagleTokens.darkInkMute : onPrimary.withValues(alpha: 0.75);
-    final heroInkSubtle =
-        dark
-            ? EagleTokens.darkInkMute.withValues(alpha: 0.72)
-            : onPrimary.withValues(alpha: 0.6);
-    final heroDivider =
-        dark ? EagleTokens.darkLine : onPrimary.withValues(alpha: 0.24);
+    final data = widget.data;
+    final isDark = widget.isDark;
+    final primary = Theme.of(context).colorScheme.primary;
+    final badges = buildGamificacaoBadgeTiles(
+      data,
+      primary,
+      TokensStrip.textSecondary,
+    );
+    final visiveis =
+        _mostrarTodas ? badges : gamificacaoBadgePreview(badges);
 
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors:
-              dark ? [brandDeep, EagleTokens.cinematicBg] : [brand, brandDeep],
+    return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+      padding: const EdgeInsets.all(TokensStrip.s4),
+      children: [
+        _StreakCard(data: data, isDark: isDark),
+        const SizedBox(height: TokensStrip.s4),
+        OperationalMetricTile(
+          label: 'Aderência',
+          value: '${data.aderenciaPercent}%',
+          hint: '${data.totalTreinos} treinos',
+          color: primary,
+          isDark: isDark,
         ),
-        borderRadius: BorderRadius.circular(26),
-      ),
-      child: Stack(
+        const SizedBox(height: TokensStrip.s2),
+        OperationalMetricTile(
+          label: 'PRs no mês',
+          value: '${data.prsEsseMes}',
+          hint: 'Recorde ${data.streak.streakMaximo}d',
+          color: EagleTokens.moneyGreen,
+          isDark: isDark,
+        ),
+        const SizedBox(height: TokensStrip.s4),
+        DashboardSectionHeader(
+          title: 'Conquistas',
+          actionLabel: badges.length > 3 && !_mostrarTodas ? 'Ver mais' : null,
+          onAction: badges.length > 3 && !_mostrarTodas
+              ? () => setState(() => _mostrarTodas = true)
+              : null,
+        ),
+        const SizedBox(height: TokensStrip.s2),
+        for (final badge in visiveis) _BadgeRow(badge: badge),
+        const SizedBox(height: TokensStrip.s4),
+        FxSatelliteListTile(
+          title: 'Indique um amigo',
+          subtitle: const Text('30 dias extras quando ele assinar.'),
+          onTap: () => context.push('/referral'),
+        ),
+      ],
+    );
+  }
+}
+
+class _StreakCard extends StatelessWidget {
+  const _StreakCard({required this.data, required this.isDark});
+
+  final GamificacaoData data;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    final chrome = ShellChrome.forDark(isDark);
+    final streak = data.streak.streakAtual;
+    return FxStripCard(
+      emphasize: true,
+      semanticsLabel: 'Sequência ${gamificacaoStreakLabel(streak)}',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Positioned.fill(
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(26),
-              child: CustomPaint(
-                painter: _GridPainter(
-                  gridColor:
-                      dark
-                          ? EagleTokens.darkInk.withValues(alpha: 0.06)
-                          : onPrimary.withValues(alpha: 0.06),
-                ),
-              ),
+          Text('Sequência', style: FocuxHubTypography.chip(chrome.mute)),
+          const SizedBox(height: 6),
+          Text(
+            gamificacaoStreakLabel(streak),
+            style: FocuxHubTypography.kpi(
+              color: chrome.ink,
+              fontSize: FocuxHubTypography.metricLg,
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(22),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    const Text('🔥', style: TextStyle(fontSize: 52)),
-                    const SizedBox(width: 16),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '$streak dias',
-                          style: FocuxHubTypography.kpi(
-                            color: heroInk,
-                            fontSize: TokensStrip.fontH1,
-                          ).copyWith(height: 1),
-                        ),
-                        Text(
-                          'Sequência ativa!',
-                          style: TextStyle(color: heroInkMute, fontSize: 14),
-                        ),
-                      ],
-                    ),
-                    const Spacer(),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text(
-                          'RECORDE',
-                          style: TextStyle(
-                            color: heroInkSubtle,
-                            fontSize: 10,
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: 1.2,
-                          ),
-                        ),
-                        Text(
-                          '${recorde}d',
-                          style: TextStyle(
-                            color: heroInk,
-                            fontSize: 26,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 18),
-                Row(
-                  children: [
-                    for (final item in [
-                      ('Total treinos', '$totalTreinos'),
-                      ('PRs esse mês', '$prs'),
-                      ('Aderência', '$aderencia%'),
-                    ]) ...[
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            item.$1.toUpperCase(),
-                            style: TextStyle(
-                              color: heroInkSubtle,
-                              fontSize: 10,
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: 1,
-                            ),
-                          ),
-                          Text(
-                            item.$2,
-                            style: TextStyle(
-                              color: heroInk,
-                              fontSize: 24,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ],
-                      ),
-                      if (item.$1 != 'Aderência')
-                        Container(
-                          width: 1,
-                          height: 36,
-                          color: heroDivider,
-                          margin: const EdgeInsets.symmetric(horizontal: 20),
-                        ),
-                    ],
-                  ],
-                ),
-              ],
+          const SizedBox(height: 6),
+          Text(
+            streak == 0
+                ? 'Um treino hoje recomeça a série'
+                : 'Recorde ${data.streak.streakMaximo}d',
+            style: FocuxHubTypography.body(
+              color: chrome.ink,
+            ).copyWith(fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: TokensStrip.s3),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: DashboardHomeActionChip(
+              label: 'Ver check-in',
+              accent: Theme.of(context).colorScheme.primary,
+              isDark: isDark,
+              onPressed: () => goPersonalShellTab(context, '/checkin'),
             ),
           ),
         ],
@@ -477,26 +226,27 @@ class _StreakHeroStatic extends StatelessWidget {
   }
 }
 
-class _GridPainter extends CustomPainter {
-  final Color gridColor;
+class _BadgeRow extends StatelessWidget {
+  const _BadgeRow({required this.badge});
 
-  const _GridPainter({required this.gridColor});
+  final GamificacaoBadgeTile badge;
 
   @override
-  void paint(Canvas canvas, Size size) {
-    final paint =
-        Paint()
-          ..color = gridColor
-          ..strokeWidth = 0.5;
-    const step = 26.0;
-    for (double x = 0; x < size.width; x += step) {
-      canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
-    }
-    for (double y = 0; y < size.height; y += step) {
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
-    }
+  Widget build(BuildContext context) {
+    return FxSatelliteListTile(
+      title: badge.label,
+      subtitle: Text(badge.earned ? 'Conquistada' : 'Ainda não'),
+      leading: SizedBox(
+        width: 36,
+        height: 36,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            if (badge.earned) const FxRiveBadgeGlow(size: 36),
+            Text(badge.icon, style: const TextStyle(fontSize: 18)),
+          ],
+        ),
+      ),
+    );
   }
-
-  @override
-  bool shouldRepaint(_GridPainter old) => old.gridColor != gridColor;
 }
