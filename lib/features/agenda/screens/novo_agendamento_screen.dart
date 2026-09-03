@@ -1,4 +1,30 @@
-part of 'agenda_screen.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../core/analytics/analytics_service.dart';
+import '../../../core/router/safe_navigation.dart';
+import '../../../core/theme/fx_settings_layout.dart';
+import '../../../core/theme/shell_chrome.dart';
+import '../../../core/theme/tokens_strip.dart';
+import '../../../core/utils/friendly_error.dart';
+import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_confirm_sheet.dart';
+import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_home_sheet.dart';
+import '../../../core/widgets/fx_motion.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
+import '../../../core/widgets/fx_settings_group.dart';
+import '../../../core/widgets/fx_settings_tile.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../alunos/data/aluno_contact_utils.dart';
+import '../../alunos/data/aluno_repository.dart';
+import '../../alunos/providers/alunos_provider.dart';
+import '../../alunos/widgets/aluno_inset_form_field.dart';
+import '../providers/agenda_provider.dart';
+import '../utils/agenda_schedule.dart';
+import '../widgets/agenda_form_sheets.dart';
+import '../widgets/agenda_help_sheet.dart';
 
 class NovoAgendamentoScreen extends ConsumerStatefulWidget {
   const NovoAgendamentoScreen({super.key, this.seedDay});
@@ -48,7 +74,7 @@ class _NovoAgendamentoScreenState extends ConsumerState<NovoAgendamentoScreen> {
     final dt = await showFxHomeSheet<DateTime>(
       context,
       builder:
-          (_) => _AgendaDateTimeSheet(
+          (_) => AgendaDateTimeSheet(
             title: isInicio ? 'Início' : 'Fim',
             initial: base,
           ),
@@ -69,7 +95,7 @@ class _NovoAgendamentoScreenState extends ConsumerState<NovoAgendamentoScreen> {
   Future<void> _showAlunoSheet(List<Aluno> alunos) async {
     final aluno = await showFxHomeSheet<Aluno>(
       context,
-      builder: (_) => _AgendaAlunoSheet(alunos: alunos, selectedId: _alunoId),
+      builder: (_) => AgendaAlunoSheet(alunos: alunos, selectedId: _alunoId),
     );
     if (aluno == null || !mounted) return;
     setState(() {
@@ -256,22 +282,11 @@ class _NovoAgendamentoScreenState extends ConsumerState<NovoAgendamentoScreen> {
               ],
             ),
             const SizedBox(height: TokensStrip.s3),
-            SizedBox(
-              height: 52,
-              child: ElevatedButton(
-                onPressed: _saving ? null : _salvar,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).colorScheme.primary,
-                  foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(TokensStrip.rButton),
-                  ),
-                ),
-                child: Text(
-                  _saving ? 'Agendando…' : agendaNovoTileLabel(),
-                ),
-              ),
+            FxLiquidPrimaryButton(
+              label: agendaNovoTileLabel(),
+              loading: _saving,
+              loadingLabel: 'Agendando…',
+              onPressed: _saving ? null : _salvar,
             ),
           ],
         ),

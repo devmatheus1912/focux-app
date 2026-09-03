@@ -13,6 +13,7 @@ import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../data/pacote_repository.dart';
 import '../providers/pacotes_provider.dart';
+import '../widgets/novo_pacote_sheet.dart';
 import '../widgets/pacotes_storefront_widgets.dart';
 
 class PacotesScreen extends ConsumerStatefulWidget {

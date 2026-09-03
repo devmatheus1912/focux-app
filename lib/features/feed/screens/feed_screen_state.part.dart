@@ -121,7 +121,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                   leading: FxIcon(name: 'article', color: accent, size: 18),
                 ),
               ),
-              _FeedComposerSheet(ref: ref),
+              FeedComposerSheet(ref: ref),
             ],
           ),
         );

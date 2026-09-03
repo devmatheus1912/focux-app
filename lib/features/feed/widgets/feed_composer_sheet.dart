@@ -1,15 +1,33 @@
-part of 'feed_screen.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 
-class _FeedComposerSheet extends StatefulWidget {
-  const _FeedComposerSheet({required this.ref});
+import '../../../core/api/media_upload_service.dart';
+import '../../../core/theme/fx_settings_layout.dart';
+import '../../../core/theme/tokens_strip.dart';
+import '../../../core/utils/friendly_error.dart';
+import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_confirm_sheet.dart';
+import '../../../core/widgets/fx_inset_picker_sheet.dart';
+import '../../../core/widgets/fx_motion.dart';
+import '../../../core/widgets/fx_settings_group.dart';
+import '../../../core/widgets/fx_settings_tile.dart';
+import '../../../features/alunos/widgets/aluno_inset_form_field.dart';
+import '../../../features/auth/providers/auth_provider.dart';
+import '../data/feed_repository.dart';
+import '../utils/feed_display.dart';
+
+class FeedComposerSheet extends StatefulWidget {
+  const FeedComposerSheet({super.key, required this.ref});
 
   final WidgetRef ref;
 
   @override
-  State<_FeedComposerSheet> createState() => _FeedComposerSheetState();
+  State<FeedComposerSheet> createState() => _FeedComposerSheetState();
 }
 
-class _FeedComposerSheetState extends State<_FeedComposerSheet> {
+class _FeedComposerSheetState extends State<FeedComposerSheet> {
   final _formKey = GlobalKey<FormState>();
   final _tituloCtrl = TextEditingController();
   final _conteudoCtrl = TextEditingController();
@@ -203,22 +221,11 @@ class _FeedComposerSheetState extends State<_FeedComposerSheet> {
                   ),
                 ],
                 const SizedBox(height: TokensStrip.s3),
-                SizedBox(
-                  height: 52,
-                  child: ElevatedButton(
-                    onPressed: _salvando ? null : _publicar,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).colorScheme.primary,
-                      foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(TokensStrip.rButton),
-                      ),
-                    ),
-                    child: Text(
-                      _salvando ? 'Publicando…' : feedPublicarTileLabel(),
-                    ),
-                  ),
+                FxLiquidPrimaryButton(
+                  label: feedPublicarTileLabel(),
+                  loading: _salvando,
+                  loadingLabel: 'Publicando…',
+                  onPressed: _salvando ? null : _publicar,
                 ),
               ],
             ),

@@ -40,7 +40,7 @@ extension on _AgendaScreenState {
     final dt = await showFxHomeSheet<DateTime>(
       context,
       builder:
-          (_) => _AgendaDateTimeSheet(
+          (_) => AgendaDateTimeSheet(
             title: 'Novo início',
             initial: ag.inicio,
           ),

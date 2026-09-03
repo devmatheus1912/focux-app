@@ -1,4 +1,18 @@
-part of 'agenda_screen.dart';
+import 'package:flutter/material.dart';
+
+import '../../../core/theme/brand_palette.dart';
+import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
+import '../../../core/theme/shell_chrome.dart';
+import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_empty_state.dart';
+import '../../../core/widgets/fx_home_sheet.dart';
+import '../../../core/widgets/fx_input_deco.dart';
+import '../../../core/widgets/fx_motion.dart';
+import '../../alunos/data/aluno_contact_utils.dart';
+import '../../alunos/data/aluno_repository.dart';
+import '../utils/agenda_schedule.dart';
+import 'agenda_day_chip.dart';
 
 class _AgendaAlunoAvatar extends StatelessWidget {
   final Aluno? aluno;
@@ -51,17 +65,17 @@ class _AgendaAlunoAvatar extends StatelessWidget {
   }
 }
 
-class _AgendaAlunoSheet extends StatefulWidget {
+class AgendaAlunoSheet extends StatefulWidget {
   final List<Aluno> alunos;
   final int? selectedId;
 
-  const _AgendaAlunoSheet({required this.alunos, required this.selectedId});
+  const AgendaAlunoSheet({super.key, required this.alunos, required this.selectedId});
 
   @override
-  State<_AgendaAlunoSheet> createState() => _AgendaAlunoSheetState();
+  State<AgendaAlunoSheet> createState() => _AgendaAlunoSheetState();
 }
 
-class _AgendaAlunoSheetState extends State<_AgendaAlunoSheet> {
+class _AgendaAlunoSheetState extends State<AgendaAlunoSheet> {
   final _search = TextEditingController();
 
   @override
@@ -240,17 +254,21 @@ class _AgendaAlunoSheetState extends State<_AgendaAlunoSheet> {
   }
 }
 
-class _AgendaDateTimeSheet extends StatefulWidget {
+class AgendaDateTimeSheet extends StatefulWidget {
   final String title;
   final DateTime initial;
 
-  const _AgendaDateTimeSheet({required this.title, required this.initial});
+  const AgendaDateTimeSheet({
+    super.key,
+    required this.title,
+    required this.initial,
+  });
 
   @override
-  State<_AgendaDateTimeSheet> createState() => _AgendaDateTimeSheetState();
+  State<AgendaDateTimeSheet> createState() => _AgendaDateTimeSheetState();
 }
 
-class _AgendaDateTimeSheetState extends State<_AgendaDateTimeSheet> {
+class _AgendaDateTimeSheetState extends State<AgendaDateTimeSheet> {
   late DateTime _selectedDay;
   late TimeOfDay _selectedTime;
 
@@ -376,33 +394,21 @@ class _AgendaDateTimeSheetState extends State<_AgendaDateTimeSheet> {
             ),
             Divider(height: 1, color: chrome.line.withValues(alpha: 0.8)),
             SizedBox(height: TokensStrip.s3),
-            SizedBox(
-              height: 52,
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(
-                    context,
-                    DateTime(
-                      _selectedDay.year,
-                      _selectedDay.month,
-                      _selectedDay.day,
-                      _selectedTime.hour,
-                      _selectedTime.minute,
-                    ),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).colorScheme.primary,
-                  foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(TokensStrip.rButton),
-                  ),
-                ),
-                child: Text(
+            FxLiquidPrimaryButton(
+              label:
                   '${agendaHorarioConfirmLabel()} · ${_timeLabel(_selectedTime)}',
-                ),
-              ),
+              onPressed: () {
+                Navigator.pop(
+                  context,
+                  DateTime(
+                    _selectedDay.year,
+                    _selectedDay.month,
+                    _selectedDay.day,
+                    _selectedTime.hour,
+                    _selectedTime.minute,
+                  ),
+                );
+              },
             ),
           ],
         ),
