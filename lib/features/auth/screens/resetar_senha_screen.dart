@@ -28,8 +28,7 @@ class ResetarSenhaScreen extends ConsumerStatefulWidget {
   const ResetarSenhaScreen({super.key, this.resetNonce});
 
   @override
-  ConsumerState<ResetarSenhaScreen> createState() =>
-      _ResetarSenhaScreenState();
+  ConsumerState<ResetarSenhaScreen> createState() => _ResetarSenhaScreenState();
 }
 
 class _ResetarSenhaScreenState extends ConsumerState<ResetarSenhaScreen> {
@@ -107,7 +106,7 @@ class _ResetarSenhaScreenState extends ConsumerState<ResetarSenhaScreen> {
                   ),
                   child: AuthStickyRoleBar(
                     roleLabel: _isAluno ? 'ALUNO' : 'PERSONAL',
-                    onBack: () => context.go(_loginPath),
+                    onBack: () => authUnfocusAndLeave(context, _loginPath),
                   ),
                 ),
                 Expanded(
@@ -118,135 +117,151 @@ class _ResetarSenhaScreenState extends ConsumerState<ResetarSenhaScreen> {
                       bottomExtra: TokensStrip.s5,
                       ensureFooter: true,
                     ),
+                    keyboardDismissBehavior:
+                        ScrollViewKeyboardDismissBehavior.onDrag,
                     child: Form(
                       key: _formKey,
-                      child: AuthFormEntrance(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Center(
-                              child: FxConversionLockup(
-                                width: authLogoWidthFor(
-                                  context,
-                                  withTagline: true,
+                      child: AutofillGroup(
+                        child: AuthFormEntrance(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Center(
+                                child: FxConversionLockup(
+                                  width: authLogoWidthFor(
+                                    context,
+                                    withTagline: true,
+                                  ),
+                                  semanticLabel:
+                                      _isAluno
+                                          ? 'Focux ALUNO'
+                                          : 'Focux PERSONAL',
+                                  aluno: _isAluno,
                                 ),
-                                semanticLabel:
-                                    _isAluno
-                                        ? 'Focux ALUNO'
-                                        : 'Focux PERSONAL',
-                                aluno: _isAluno,
                               ),
-                            ),
-                            const SizedBox(height: TokensStrip.s4),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    resetSenhaHelpTitle(),
-                                    style: authPageTitleStyle(context),
+                              const SizedBox(height: TokensStrip.s4),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      resetSenhaHelpTitle(),
+                                      style: authPageTitleStyle(context),
+                                    ),
+                                  ),
+                                  FxHelpIconButton(
+                                    tooltip: resetSenhaHelpTitle(),
+                                    onTap: _abrirAjuda,
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 10),
+                              Text(
+                                resetSenhaSubtitle(hasNonce: hasNonce),
+                                style: authSubtitleStyle().copyWith(
+                                  height: 1.55,
+                                ),
+                              ),
+                              const SizedBox(height: 28),
+                              AuthField(
+                                label: 'Nova senha',
+                                controller: _senhaController,
+                                hintText: 'Mín. $_minPasswordLength caracteres',
+                                icon: Icons.lock_outline_rounded,
+                                obscureText: !_showPassword,
+                                textInputAction: TextInputAction.next,
+                                autofillHints: const [
+                                  AutofillHints.newPassword,
+                                ],
+                                validator: (value) {
+                                  if (value == null ||
+                                      value.length < _minPasswordLength) {
+                                    return 'A senha precisa ter no mínimo $_minPasswordLength caracteres.';
+                                  }
+                                  return null;
+                                },
+                                suffix: IconButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      _showPassword = !_showPassword;
+                                    });
+                                  },
+                                  icon: Icon(
+                                    _showPassword
+                                        ? Icons.visibility_off_outlined
+                                        : Icons.visibility_outlined,
+                                    color: heroTealSurface(0.82),
+                                    size: 18,
                                   ),
                                 ),
-                                FxHelpIconButton(
-                                  tooltip: resetSenhaHelpTitle(),
-                                  onTap: _abrirAjuda,
+                              ),
+                              if (_senhaController.text.isNotEmpty) ...[
+                                const SizedBox(height: 8),
+                                PasswordStrengthMeter(
+                                  password: _senhaController.text,
+                                  minLength: _minPasswordLength,
                                 ),
                               ],
-                            ),
-                            const SizedBox(height: 10),
-                            Text(
-                              resetSenhaSubtitle(hasNonce: hasNonce),
-                              style: authSubtitleStyle().copyWith(height: 1.55),
-                            ),
-                            const SizedBox(height: 28),
-                            AuthField(
-                              label: 'Nova senha',
-                              controller: _senhaController,
-                              hintText: 'Mín. $_minPasswordLength caracteres',
-                              icon: Icons.lock_outline_rounded,
-                              obscureText: !_showPassword,
-                              textInputAction: TextInputAction.next,
-                              validator: (value) {
-                                if (value == null ||
-                                    value.length < _minPasswordLength) {
-                                  return 'A senha precisa ter no mínimo $_minPasswordLength caracteres.';
-                                }
-                                return null;
-                              },
-                              suffix: IconButton(
-                                onPressed: () {
-                                  setState(() {
-                                    _showPassword = !_showPassword;
-                                  });
+                              const SizedBox(height: 14),
+                              AuthField(
+                                label: 'Confirmar senha',
+                                controller: _confirmarController,
+                                hintText: 'Repita a senha',
+                                icon: Icons.lock_reset_rounded,
+                                obscureText: !_showPassword,
+                                textInputAction: TextInputAction.done,
+                                autofillHints: const [
+                                  AutofillHints.newPassword,
+                                ],
+                                onFieldSubmitted: (_) => _pedirAlterar(),
+                                validator: (value) {
+                                  if (value != _senhaController.text) {
+                                    return 'As senhas não conferem.';
+                                  }
+                                  return null;
                                 },
-                                icon: Icon(
-                                  _showPassword
-                                      ? Icons.visibility_off_outlined
-                                      : Icons.visibility_outlined,
-                                  color: heroTealSurface(0.82),
-                                  size: 18,
+                              ),
+                              const SizedBox(height: 20),
+                              if (_error != null) ...[
+                                Semantics(
+                                  liveRegion: true,
+                                  child: Text(
+                                    _error!,
+                                    style: authInlineErrorStyle(),
+                                  ),
                                 ),
-                              ),
-                            ),
-                            if (_senhaController.text.isNotEmpty) ...[
-                              const SizedBox(height: 8),
-                              PasswordStrengthMeter(
-                                password: _senhaController.text,
-                                minLength: _minPasswordLength,
-                              ),
-                            ],
-                            const SizedBox(height: 14),
-                            AuthField(
-                              label: 'Confirmar senha',
-                              controller: _confirmarController,
-                              hintText: 'Repita a senha',
-                              icon: Icons.lock_reset_rounded,
-                              obscureText: !_showPassword,
-                              textInputAction: TextInputAction.done,
-                              onFieldSubmitted: (_) => _pedirAlterar(),
-                              validator: (value) {
-                                if (value != _senhaController.text) {
-                                  return 'As senhas não conferem.';
-                                }
-                                return null;
-                              },
-                            ),
-                            const SizedBox(height: 20),
-                            if (_error != null) ...[
-                              Semantics(
-                                liveRegion: true,
-                                child: Text(
-                                  _error!,
-                                  style: authInlineErrorStyle(),
+                                const SizedBox(height: 12),
+                              ],
+                              if (_message != null) ...[
+                                Semantics(
+                                  liveRegion: true,
+                                  child: Text(
+                                    _message!,
+                                    style: authInlineSuccessStyle(),
+                                  ),
                                 ),
+                                const SizedBox(height: 12),
+                              ],
+                              FxLiquidPrimaryButton(
+                                label: resetSenhaAlterarLabel(),
+                                loading: _loading,
+                                loadingLabel: resetSenhaAlterandoLabel(),
+                                onPressed:
+                                    _loading || !hasNonce
+                                        ? null
+                                        : _pedirAlterar,
                               ),
-                              const SizedBox(height: 12),
-                            ],
-                            if (_message != null) ...[
-                              Semantics(
-                                liveRegion: true,
-                                child: Text(
-                                  _message!,
-                                  style: authInlineSuccessStyle(),
+                              if (!hasNonce)
+                                FxConversionTextLink(
+                                  text: '',
+                                  actionText: resetSenhaValidarCodigoLabel(),
+                                  onTap:
+                                      () => authUnfocusAndGo(
+                                        context,
+                                        _esqueciPath,
+                                      ),
                                 ),
-                              ),
-                              const SizedBox(height: 12),
                             ],
-                            FxLiquidPrimaryButton(
-                              label: resetSenhaAlterarLabel(),
-                              loading: _loading,
-                              loadingLabel: resetSenhaAlterandoLabel(),
-                              onPressed:
-                                  _loading || !hasNonce
-                                      ? null
-                                      : _pedirAlterar,
-                            ),
-                            if (!hasNonce)
-                              FxConversionTextLink(
-                                text: '',
-                                actionText: resetSenhaValidarCodigoLabel(),
-                                onTap: () => context.go(_esqueciPath),
-                              ),
-                          ],
+                          ),
                         ),
                       ),
                     ),
