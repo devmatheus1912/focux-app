@@ -11,5 +11,47 @@ void main() {
     expect(iaCopilotoAbrirAlunoLabel(), 'Abrir aluno');
     expect(iaCopilotoVerTarefaLabel(), 'Ver tarefa');
     expect(iaCopilotoComoCalculamos, contains('você pede'));
+    expect(iaCopilotoRevisarProgressaoLabel(), 'Revisar progressão');
+  });
+
+  test('aplica só tipos executáveis do contrato existente', () {
+    expect(
+      iaCopilotoApplySpec(tipoAcao: 'TREINO')?.backendTipo,
+      'REDUZIR_CARGA',
+    );
+    expect(
+      iaCopilotoApplySpec(tipoAcao: 'REDUZIR_CARGA')?.backendTipo,
+      'REDUZIR_CARGA',
+    );
+    expect(
+      iaCopilotoApplySpec(
+        tipoAcao: 'CONTATO',
+        mensagemSugerida: 'Oi, Ana.',
+      )?.backendTipo,
+      'ENVIAR_PUSH',
+    );
+    expect(
+      iaCopilotoApplySpec(tipoAcao: 'CONTATO'),
+      isNull,
+    );
+    expect(
+      iaCopilotoApplySpec(tipoAcao: 'MARCAR_RISCO')?.backendTipo,
+      'MARCAR_RISCO',
+    );
+    expect(iaCopilotoApplySpec(tipoAcao: 'DIETA'), isNull);
+    expect(
+      iaCopilotoShouldReviewProgressao(mode: 'Progressão', apply: null),
+      isTrue,
+    );
+    expect(
+      iaCopilotoShouldReviewProgressao(
+        mode: 'Progressão',
+        apply: const IaCopilotoApplySpec(
+          backendTipo: 'REDUZIR_CARGA',
+          label: 'Aplicar',
+        ),
+      ),
+      isFalse,
+    );
   });
 }

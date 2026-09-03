@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -16,12 +15,14 @@ class IaCopilotResultActionBar extends StatelessWidget {
   const IaCopilotResultActionBar({
     super.key,
     required this.brand,
-    required this.onCreateTask,
+    required this.onPrimary,
     required this.onMore,
+    this.primaryLabel,
   });
 
   final Color brand;
-  final VoidCallback onCreateTask;
+  final String? primaryLabel;
+  final VoidCallback onPrimary;
   final VoidCallback onMore;
 
   @override
@@ -41,10 +42,10 @@ class IaCopilotResultActionBar extends StatelessWidget {
             Align(
               alignment: Alignment.centerLeft,
               child: DashboardHomeActionChip(
-                label: iaCopilotoCriarTarefaLabel(),
+                label: primaryLabel ?? iaCopilotoCriarTarefaLabel(),
                 accent: brand,
                 isDark: Theme.of(context).brightness == Brightness.dark,
-                onPressed: onCreateTask,
+                onPressed: onPrimary,
               ),
             ),
             FxConversionTextLink(
@@ -326,7 +327,7 @@ class IaCopilotMenuAction extends StatelessWidget {
                 width: 38,
                 height: 38,
                 decoration: BoxDecoration(
-                  color: BrandPalette.soft(primary, dark: dark),
+                  color: primary.withValues(alpha: dark ? 0.16 : 0.10),
                   borderRadius: BorderRadius.circular(13),
                 ),
                 child: Icon(icon, color: primary, size: 18),
@@ -369,18 +370,16 @@ class IaCopilotPrimaryAction extends StatelessWidget {
     super.key,
     required this.label,
     required this.brand,
-    required this.primaryDeep,
     required this.onTap,
   });
 
   final String label;
   final Color brand;
-  final Color primaryDeep;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    assert(brand.a >= 0 && primaryDeep.a >= 0);
+    assert(brand.a >= 0);
     return Semantics(
       button: true,
       label: label,
@@ -406,7 +405,7 @@ class IaCopilotGenerationStatus extends StatelessWidget {
     required this.mode,
     required this.ink,
     required this.mute,
-    required this.primarySoft,
+    required this.wash,
   });
 
   final bool gerando;
@@ -415,7 +414,7 @@ class IaCopilotGenerationStatus extends StatelessWidget {
   final String mode;
   final Color ink;
   final Color mute;
-  final Color primarySoft;
+  final Color wash;
 
   @override
   Widget build(BuildContext context) {
@@ -474,7 +473,7 @@ class IaCopilotGenerationStatus extends StatelessWidget {
             child: LinearProgressIndicator(
               value: gerado ? 1.0 : null,
               minHeight: 6,
-              backgroundColor: primarySoft,
+              backgroundColor: wash,
               valueColor: const AlwaysStoppedAnimation(EagleTokens.copilotSuccess),
             ),
           ),

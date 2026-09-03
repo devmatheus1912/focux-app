@@ -14,6 +14,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
   IaCopilotProximaAcao? _proximaAcao;
   bool _tarefaCriada = false;
   bool _tarefaPersistida = false;
+  bool _aplicando = false;
   final DateTime _openedAt = DateTime.now();
   bool _viewTracked = false;
   bool _ttvTracked = false;
@@ -68,6 +69,33 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
       default:
         return ['Objetivo e nível', 'Foco de volume', 'Próxima ação sugerida'];
     }
+  }
+
+  IaCopilotoApplySpec? get _applySpec => iaCopilotoApplySpec(
+        tipoAcao: _proximaAcao?.tipoAcao,
+        mensagemSugerida: _proximaAcao?.mensagemSugerida,
+      );
+
+  bool get _resultUsesApplyOrProgressao =>
+      _applySpec != null ||
+      iaCopilotoShouldReviewProgressao(mode: _mode, apply: _applySpec);
+
+  String get _resultPrimaryLabel {
+    final apply = _applySpec;
+    if (apply != null) return apply.label;
+    if (iaCopilotoShouldReviewProgressao(mode: _mode, apply: apply)) {
+      return iaCopilotoRevisarProgressaoLabel();
+    }
+    return iaCopilotoCriarTarefaLabel();
+  }
+
+  VoidCallback get _resultPrimaryAction {
+    final apply = _applySpec;
+    if (apply != null) return _aplicarAcao;
+    if (iaCopilotoShouldReviewProgressao(mode: _mode, apply: apply)) {
+      return _abrirProgressao;
+    }
+    return _atribuir;
   }
 
   String get _howItWorksPreview {

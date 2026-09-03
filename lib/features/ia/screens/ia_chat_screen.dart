@@ -13,8 +13,8 @@ import '../../../core/widgets/ia_safety_disclaimer.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/ia_repository.dart';
 import '../utils/ia_aluno_display.dart';
+import '../widgets/ia_chat_composer.dart';
 import '../widgets/ia_quota_upgrade.dart';
-import 'package:focux_app/core/widgets/fx_input_deco.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 
@@ -237,41 +237,11 @@ class _IaChatScreenState extends ConsumerState<IaChatScreen> {
             if (_msgs.isNotEmpty && _threadError == null)
               const IaSafetyDisclaimer(compact: true),
             const Divider(height: 1),
-            Padding(
-              padding: EdgeInsets.only(
-                left: 12,
-                right: 8,
-                top: 8,
-                bottom: MediaQuery.of(context).viewInsets.bottom + 8,
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _ctrl,
-                      decoration: InputDecoration(
-                        hintText: 'Pergunte sobre treino, dieta...',
-                        border: FxInputDeco.outlineBorder(
-                          borderRadius: BorderRadius.circular(
-                            TokensStrip.rCard,
-                          ),
-                        ),
-                      ),
-                      maxLines: null,
-                      textInputAction: TextInputAction.send,
-                      onSubmitted: (_) => _enviar(),
-                      onTapOutside: (_) =>
-                          FocusManager.instance.primaryFocus?.unfocus(),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  IconButton(
-                    tooltip: 'Enviar',
-                    icon: const Icon(Icons.send_rounded),
-                    onPressed: _loading ? null : () => _enviar(),
-                  ),
-                ],
-              ),
+            IaChatComposer(
+              controller: _ctrl,
+              loading: _loading,
+              hint: 'Pergunte sobre treino, dieta...',
+              onSend: _enviar,
             ),
           ],
         ),

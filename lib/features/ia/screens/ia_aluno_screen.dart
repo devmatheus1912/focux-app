@@ -11,9 +11,9 @@ import '../data/ia_repository.dart';
 import '../models/ia_progressao_carga_result.dart';
 import '../widgets/ia_progressao_loading_skeleton.dart';
 import '../widgets/ia_progressao_result_view.dart';
+import '../widgets/ia_chat_composer.dart';
 import '../widgets/ia_quota_upgrade.dart';
 import '../../../core/widgets/fx_loading.dart';
-import 'package:focux_app/core/widgets/fx_input_deco.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
 import 'package:focux_app/core/widgets/fx_motion.dart';
 import '../../../core/router/safe_navigation.dart';
@@ -352,38 +352,11 @@ class _ChatTabState extends ConsumerState<_ChatTab> {
                   ),
         ),
         const Divider(height: 1),
-        Padding(
-          padding: EdgeInsets.only(
-            left: 12,
-            right: 8,
-            top: 8,
-            bottom: MediaQuery.of(context).viewInsets.bottom + 8,
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: _ctrl,
-                  focusNode: _focus,
-                  decoration: FxInputDeco.build(
-                    context,
-                    'Pergunte ao assistente…',
-                  ),
-                  maxLines: null,
-                  textInputAction: TextInputAction.send,
-                  onSubmitted: (_) => _enviar(),
-                  onTapOutside: (_) =>
-                      FocusManager.instance.primaryFocus?.unfocus(),
-                ),
-              ),
-              const SizedBox(width: 8),
-              IconButton(
-                tooltip: 'Enviar',
-                icon: const Icon(Icons.send_rounded),
-                onPressed: _loading ? null : () => _enviar(),
-              ),
-            ],
-          ),
+        IaChatComposer(
+          controller: _ctrl,
+          focusNode: _focus,
+          loading: _loading,
+          onSend: _enviar,
         ),
       ],
     );

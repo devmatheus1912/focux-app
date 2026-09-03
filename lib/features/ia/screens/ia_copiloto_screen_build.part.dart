@@ -5,13 +5,11 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
     final chrome = ShellChrome.of(context);
     final dark = chrome.isDark;
     final primary = Theme.of(context).colorScheme.primary;
-    final primarySoft = BrandPalette.soft(primary, dark: dark);
-    final primaryAccent = BrandPalette.accent(primary);
-    final primaryDeep = BrandPalette.deep(primary);
+    final brand = BrandPalette.softened(primary);
+    final wash = primary.withValues(alpha: dark ? 0.16 : 0.10);
     final ink = chrome.ink;
     final mute = chrome.mute;
     final line = chrome.line;
-    final brand = dark ? primaryAccent : primary;
     final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
     final homeAsync = ref.watch(iaCopilotoHomeProvider);
     final home = homeAsync.valueOrNull;
@@ -83,8 +81,11 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
               _gerado
                   ? IaCopilotResultActionBar(
                     brand: brand,
-                    onCreateTask: _atribuir,
-                    onMore: _abrirMenu,
+                    primaryLabel: _resultPrimaryLabel,
+                    onPrimary: _resultPrimaryAction,
+                    onMore: () => _abrirMenu(
+                      includeCreateTask: _resultUsesApplyOrProgressao,
+                    ),
                   )
                   : null,
           body: SafeArea(
@@ -208,7 +209,6 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
                               ? IaCopilotPrimaryAction(
                                 label: iaCopilotoGerarLabel(_modeDisplay),
                                 brand: brand,
-                                primaryDeep: primaryDeep,
                                 onTap: _gerar,
                               )
                               : IaCopilotGenerationStatus(
@@ -218,7 +218,7 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
                                 mode: _modeDisplay,
                                 ink: ink,
                                 mute: mute,
-                                primarySoft: primarySoft,
+                                wash: wash,
                               ),
                     ),
 
