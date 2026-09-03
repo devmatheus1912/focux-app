@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 
 /// Lockup padrão nas telas de formulário auth (login, register, esqueci, reset).
 const double kAuthFormLogoWidth = 118.0;
@@ -34,4 +37,16 @@ EdgeInsets authScrollPadding(
     horizontal,
     bottomExtra + viewBottom + keyboardReserve + footerReserve,
   );
+}
+
+void authUnfocusAndGo(BuildContext context, String location) {
+  FxKeyboardDismissScope.dismiss();
+  if (!context.mounted) return;
+  context.go(location);
+}
+
+void authUnfocusAndLeave(BuildContext context, String fallbackLocation) {
+  FxKeyboardDismissScope.dismiss();
+  if (!context.mounted) return;
+  safePopOrGo(context, fallbackLocation);
 }

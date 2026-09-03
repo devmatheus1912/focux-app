@@ -41,11 +41,7 @@ class FxConversionLockup extends StatelessWidget {
           tagline!,
         ] else if (showTagline) ...[
           const SizedBox(height: TokensStrip.s3),
-          FocuxBrandTagline(
-            center: true,
-            fontSize: taglineSize,
-            aluno: aluno,
-          ),
+          FocuxBrandTagline(center: true, fontSize: taglineSize, aluno: aluno),
         ],
       ],
     );
@@ -107,6 +103,34 @@ class FxConversionTextLink extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Separador "ou" entre o P0 e o caminho Google (§9 S6).
+class FxConversionDivider extends StatelessWidget {
+  const FxConversionDivider({super.key, required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final line = heroTealSurface(0.2);
+    return Row(
+      children: [
+        Expanded(child: Divider(color: line, height: 1)),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: TokensStrip.s2),
+          child: Text(
+            label,
+            style: FocuxHubTypography.bodyMuted(
+              color: heroTealSurface(0.82),
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+        Expanded(child: Divider(color: line, height: 1)),
+      ],
     );
   }
 }
