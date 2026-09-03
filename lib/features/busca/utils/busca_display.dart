@@ -14,22 +14,6 @@ const _allowedInternalPrefixes = <String>[
   '/perfil/',
 ];
 
-String buscaTipoFxIcon(BuscaTipo tipo) => switch (tipo) {
-  BuscaTipo.todos => 'search',
-  BuscaTipo.aluno => 'users',
-  BuscaTipo.treino => 'dumbbell',
-  BuscaTipo.cobranca => 'coin',
-};
-
-String buscaItemFxIcon(String tipo) => switch (tipo.toUpperCase()) {
-  'ALUNO' => 'users',
-  'TREINO' => 'dumbbell',
-  'COBRANCA' => 'coin',
-  _ => 'search',
-};
-
-String buscaFilterValue(bool selected) => selected ? 'Ativo' : '';
-
 String buscaHint() => 'Nome, treino ou cobrança';
 
 String buscaMinQueryTitle() => 'Digite ao menos 2 caracteres';

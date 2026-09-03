@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/theme/focux_hub_typography.dart';
 import '../../../../core/theme/fx_settings_layout.dart';
+import '../../../../core/theme/tokens_strip.dart';
 import '../../../../core/widgets/fx_empty_state.dart';
-import '../../../../core/widgets/fx_settings_group.dart';
-import '../../../../core/widgets/fx_settings_tile.dart';
+import '../../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../dashboard/widgets/dashboard_section_header.dart';
 import '../../models/busca_global_models.dart';
 import '../../utils/busca_display.dart';
 
@@ -46,69 +48,73 @@ class BuscaGlobalResults extends StatelessWidget {
           subtitle: buscaEmptyFilterSubtitle(),
         );
       }
-      return FxSettingsGroup(
-        header: buscaSectionHeader(filter),
-        caption: buscaCountInFilterLabel(items.length, filter.label),
-        children: [
-          for (var i = 0; i < items.length; i++)
-            _tile(items[i], showDivider: i != items.length - 1),
-        ],
-      );
+      return _section(context, filter, items, buscaCountInFilterLabel(items.length, filter.label));
     }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (result.alunos.isNotEmpty) ...[
-          FxSettingsGroup(
-            header: buscaSectionHeader(BuscaTipo.aluno),
-            caption: buscaCountLabel(result.alunos.length),
-            children: [
-              for (var i = 0; i < result.alunos.length; i++)
-                _tile(
-                  result.alunos[i],
-                  showDivider: i != result.alunos.length - 1,
-                ),
-            ],
+        if (result.alunos.isNotEmpty)
+          _section(
+            context,
+            BuscaTipo.aluno,
+            result.alunos,
+            buscaCountLabel(result.alunos.length),
           ),
-          const SizedBox(height: FxSettingsLayout.groupGap),
-        ],
-        if (result.treinos.isNotEmpty) ...[
-          FxSettingsGroup(
-            header: buscaSectionHeader(BuscaTipo.treino),
-            caption: buscaCountLabel(result.treinos.length),
-            children: [
-              for (var i = 0; i < result.treinos.length; i++)
-                _tile(
-                  result.treinos[i],
-                  showDivider: i != result.treinos.length - 1,
-                ),
-            ],
+        if (result.treinos.isNotEmpty)
+          _section(
+            context,
+            BuscaTipo.treino,
+            result.treinos,
+            buscaCountLabel(result.treinos.length),
           ),
-          const SizedBox(height: FxSettingsLayout.groupGap),
-        ],
         if (result.cobrancas.isNotEmpty)
-          FxSettingsGroup(
-            header: buscaSectionHeader(BuscaTipo.cobranca),
-            caption: buscaCountLabel(result.cobrancas.length),
-            children: [
-              for (var i = 0; i < result.cobrancas.length; i++)
-                _tile(
-                  result.cobrancas[i],
-                  showDivider: i != result.cobrancas.length - 1,
-                ),
-            ],
+          _section(
+            context,
+            BuscaTipo.cobranca,
+            result.cobrancas,
+            buscaCountLabel(result.cobrancas.length),
           ),
       ],
     );
   }
 
-  Widget _tile(BuscaItem item, {required bool showDivider}) {
-    return FxSettingsTile(
-      fxIcon: buscaItemFxIcon(item.tipo),
-      label: item.titulo,
-      subtitle: item.subtitulo,
-      value: '',
-      showDivider: showDivider,
+  Widget _section(
+    BuildContext context,
+    BuscaTipo tipo,
+    List<BuscaItem> items,
+    String caption,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: FxSettingsLayout.groupGap),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          DashboardSectionHeader(title: buscaSectionHeader(tipo)),
+          Padding(
+            padding: const EdgeInsets.only(
+              top: TokensStrip.s1,
+              bottom: TokensStrip.s3,
+            ),
+            child: Text(
+              caption,
+              style: FocuxHubTypography.bodyMuted(
+                color: fxScreenMute(context),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          for (final item in items) _tile(item),
+        ],
+      ),
+    );
+  }
+
+  Widget _tile(BuscaItem item) {
+    return FxSatelliteListTile(
+      title: item.titulo,
+      subtitle: item.subtitulo == null || item.subtitulo!.trim().isEmpty
+          ? null
+          : Text(item.subtitulo!),
       onTap: () => onOpen(item),
     );
   }

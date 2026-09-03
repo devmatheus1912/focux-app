@@ -4,17 +4,19 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/router/safe_navigation.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
+import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
-import '../../../core/widgets/fx_settings_group.dart';
-import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../dashboard/widgets/dashboard_home_action_chip.dart';
+import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../data/winback_repository.dart';
@@ -104,6 +106,8 @@ class _WinbackScreenState extends ConsumerState<WinbackScreen> {
   }
 
   Widget _buildBody() {
+    final chrome = ShellChrome.of(context);
+    final primary = Theme.of(context).colorScheme.primary;
     return RefreshIndicator(
       onRefresh: _carregar,
       child: ListView(
@@ -115,21 +119,24 @@ class _WinbackScreenState extends ConsumerState<WinbackScreen> {
           32,
         ),
         children: [
-          FxSettingsGroup(
-            header: 'Automação',
-            caption:
-                'Push automático para alunos inativos. Trial do personal não entra neste log.',
-            children: [
-              FxSettingsTile(
-                fxIcon: 'bell',
-                label: 'FCM ativo',
-                subtitle: 'Reengajamento em 7, 30 e 60 dias sem treino.',
-                value: 'Saúde',
-                showDivider: false,
-                onTap: _abrirSaude,
-              ),
-            ],
+          Text(
+            'Push automático para alunos inativos. Trial do personal não entra neste log.',
+            style: FocuxHubTypography.bodyMuted(
+              color: fxScreenMute(context),
+              fontWeight: FontWeight.w600,
+            ),
           ),
+          const SizedBox(height: TokensStrip.s3),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: DashboardHomeActionChip(
+              label: 'Saúde da retenção',
+              accent: primary,
+              isDark: chrome.isDark,
+              onPressed: _abrirSaude,
+            ),
+          ),
+          const SizedBox(height: TokensStrip.s5),
           if (_entries.isEmpty)
             const FxEmptyState(
               icon: 'bell',
@@ -137,25 +144,27 @@ class _WinbackScreenState extends ConsumerState<WinbackScreen> {
               subtitle:
                   'Quando a automação disparar, os registros aparecem aqui.',
             )
-          else
-            FxSettingsGroup(
-              header: 'Envios',
-              caption: 'Push enviados pela automação de inatividade.',
-              children: [
-                for (var i = 0; i < _entries.length; i++)
-                  FxSettingsTile(
-                    fxIcon: winbackFxIcon(_entries[i].tipo),
-                    label: winbackAlunoLabel(_entries[i].alunoNome),
-                    subtitle: winbackSubtitle(
-                      tipo: _entries[i].tipo,
-                      mensagem: _entries[i].mensagem,
-                    ),
-                    value: winbackWhenLabel(_entries[i].enviadoEm),
-                    showDivider: i != _entries.length - 1,
-                    onTap: () {},
+          else ...[
+            const DashboardSectionHeader(title: 'Envios'),
+            const SizedBox(height: TokensStrip.s3),
+            for (final entry in _entries)
+              FxSatelliteListTile(
+                title: winbackAlunoLabel(entry.alunoNome),
+                subtitle: Text(
+                  winbackSubtitle(
+                    tipo: entry.tipo,
+                    mensagem: entry.mensagem,
                   ),
-              ],
-            ),
+                ),
+                trailing: Text(
+                  winbackWhenLabel(entry.enviadoEm),
+                  style: FocuxHubTypography.bodyMuted(
+                    color: fxScreenMute(context),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+          ],
         ],
       ),
     );
