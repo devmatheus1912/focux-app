@@ -143,16 +143,13 @@ extension FinanceiroMensalidadesTabForms on _FinanceiroMensalidadesTabState {
                           ],
                         ),
                         const SizedBox(height: TokensStrip.s3),
-                        FxSettingsGroup(
-                          children: [
-                            FxSettingsTile(
-                              fxIcon: 'circle-check',
-                              label: financeiroLancarMensalidadeTileLabel(),
-                              value: salvando ? 'Lançando…' : 'Confirmar',
-                              showDivider: false,
-                              onTap: salvando
-                                  ? () {}
-                                  : () async {
+                        FxLiquidPrimaryButton(
+                          label: financeiroLancarMensalidadeTileLabel(),
+                          loading: salvando,
+                          loadingLabel: 'Lançando…',
+                          onPressed: salvando
+                              ? null
+                              : () async {
                                       if (alunoSelecionadoId == null) {
                                         FeedbackHelper.showError(
                                           ctx,
@@ -221,8 +218,6 @@ extension FinanceiroMensalidadesTabForms on _FinanceiroMensalidadesTabState {
                                         }
                                       }
                                     },
-                            ),
-                          ],
                         ),
                       ],
                     ),

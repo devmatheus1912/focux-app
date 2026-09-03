@@ -23,6 +23,8 @@ void main() {
     expect(tab, contains('FxSatelliteListTile'));
     expect(tab, contains('ListView.builder'));
     expect(tab, contains('FxLiquidPrimaryButton'));
+    expect(tab, contains('loadingLabel:'));
+    expect(tab, isNot(contains("'Lançando…' : 'Confirmar'")));
     expect(tab, contains('showFxConfirmSheet'));
     expect(tab, contains('pickMensalidadeMesReferencia'));
     expect(tab, contains('Carregar mais'));
@@ -68,5 +70,7 @@ void main() {
     );
     expect(actions, contains('copySensitiveToClipboard'));
     expect(actions, contains('showFxConfirmSheet'));
+    expect(actions, contains('FxLiquidPrimaryButton'));
+    expect(actions, isNot(contains("'Salvando…' : 'Confirmar'")));
   });
 }
