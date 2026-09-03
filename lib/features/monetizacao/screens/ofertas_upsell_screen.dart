@@ -3,8 +3,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
+import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feedback_helper.dart';
@@ -15,10 +17,9 @@ import '../../../core/widgets/fx_form_sheet.dart';
 import '../../../core/widgets/fx_inset_picker_row.dart';
 import '../../../core/widgets/fx_inset_picker_sheet.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
-import '../../../core/widgets/fx_settings_group.dart';
-import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
+import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../../features/alunos/widgets/aluno_inset_form_field.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/upsell_repository.dart';
@@ -217,46 +218,60 @@ class _OfertasUpsellScreenState extends ConsumerState<OfertasUpsellScreen> {
   Widget _buildBody() {
     return RefreshIndicator(
       onRefresh: _load,
-      child: ListView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(
-          FxSettingsLayout.pageInset,
-          8,
-          FxSettingsLayout.pageInset,
-          32,
-        ),
-        children: [
-          if (_ofertas.isEmpty)
-            FxEmptyState(
-              icon: 'spark',
-              title: 'Nenhuma oferta ativa',
-              subtitle:
-                  'Crie a primeira oferta. Ela aparece para o aluno no gatilho escolhido (manual, check-in ou trilha).',
-              action: FxEmptyAction(label: 'Nova oferta', onTap: _criar),
-            )
-          else
-            FxSettingsGroup(
-              header: 'Ativas (${_ofertas.length})',
-              caption:
-                  'O aluno vê a oferta no gatilho. Manual, check-in ou trilha — o valor não muda aqui.',
+      child: _ofertas.isEmpty
+          ? ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.fromLTRB(
+                FxSettingsLayout.pageInset,
+                8,
+                FxSettingsLayout.pageInset,
+                32,
+              ),
               children: [
-                for (var i = 0; i < _ofertas.length; i++)
-                  FxSettingsTile(
-                    fxIcon: 'spark',
-                    label: _ofertas[i].titulo,
-                    subtitle: ofertaSubtitle(
-                      tipoGatilho: _ofertas[i].tipoGatilho,
-                      descricao: _ofertas[i].descricao,
-                    ),
-                    value: ofertaValorLabel(_ofertas[i].valor),
-                    numeric: true,
-                    showDivider: i != _ofertas.length - 1,
-                    onTap: () {},
-                  ),
+                FxEmptyState(
+                  icon: 'spark',
+                  title: 'Nenhuma oferta ativa',
+                  subtitle:
+                      'Crie a primeira oferta. Ela aparece para o aluno no gatilho escolhido (manual, check-in ou trilha).',
+                  action: FxEmptyAction(label: 'Nova oferta', onTap: _criar),
+                ),
               ],
+            )
+          : ListView.builder(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.fromLTRB(
+                FxSettingsLayout.pageInset,
+                TokensStrip.s3,
+                FxSettingsLayout.pageInset,
+                TokensStrip.s6,
+              ),
+              itemCount: _ofertas.length + 1,
+              itemBuilder: (context, i) {
+                if (i == 0) {
+                  return const Padding(
+                    padding: EdgeInsets.only(bottom: TokensStrip.s3),
+                    child: DashboardSectionHeader(title: 'Ativas'),
+                  );
+                }
+                final oferta = _ofertas[i - 1];
+                return FxSatelliteListTile(
+                  title: oferta.titulo,
+                  subtitle: Text(
+                    ofertaSubtitle(
+                      tipoGatilho: oferta.tipoGatilho,
+                      descricao: oferta.descricao,
+                    ),
+                  ),
+                  trailing: Text(
+                    ofertaValorLabel(oferta.valor),
+                    style: FocuxHubTypography.bodyMuted(
+                      color: fxScreenMute(context),
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                );
+              },
             ),
-        ],
-      ),
     );
   }
 }
