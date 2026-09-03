@@ -12,6 +12,7 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_conversion.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_motion.dart';
+import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../auth/utils/auth_layout.dart';
@@ -91,7 +92,14 @@ class _AssinaturaReviewScreenState extends State<AssinaturaReviewScreen> {
         useMesh: true,
         appBar: FxShellAppBar(
           title: assinaturaReviewTitle(),
-          onBack: () => Navigator.of(context).pop(false),
+          onBack: () {
+            FxKeyboardDismissScope.dismiss();
+            if (context.canPop()) {
+              context.pop(false);
+            } else {
+              context.go('/assinatura');
+            }
+          },
         ),
         bottomNavigationBar:
             price.isEmpty
@@ -118,7 +126,14 @@ class _AssinaturaReviewScreenState extends State<AssinaturaReviewScreen> {
                       FxConversionTextLink(
                         text: '',
                         actionText: assinaturaReviewBackLabel(),
-                        onTap: () => context.pop(false),
+                        onTap: () {
+                          FxKeyboardDismissScope.dismiss();
+                          if (context.canPop()) {
+                            context.pop(false);
+                          } else {
+                            context.go('/assinatura');
+                          }
+                        },
                       ),
                     ],
                   ),
@@ -177,7 +192,10 @@ class _AssinaturaReviewScreenState extends State<AssinaturaReviewScreen> {
                       ),
                     ),
                     const SizedBox(height: TokensStrip.s5),
-                    Text('Incluído no plano', style: TokensStrip.h2(color: ink)),
+                    Text(
+                      'Incluído no plano',
+                      style: TokensStrip.h2(color: ink),
+                    ),
                     const SizedBox(height: TokensStrip.s3),
                     ...assinaturaReviewTopFeatures(widget.plan).map(
                       (feature) => Padding(
@@ -206,9 +224,9 @@ class _AssinaturaReviewScreenState extends State<AssinaturaReviewScreen> {
                         price: price,
                         period: widget.billingPeriod,
                       ),
-                      style: TokensStrip.bodyMuted(color: mute).copyWith(
-                        height: 1.5,
-                      ),
+                      style: TokensStrip.bodyMuted(
+                        color: mute,
+                      ).copyWith(height: 1.5),
                     ),
                     const SizedBox(height: TokensStrip.s2),
                     Wrap(

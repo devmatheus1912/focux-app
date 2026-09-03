@@ -20,11 +20,15 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
     if (meFromHome != null) {
       featuresAsync = AsyncValue<PlanoFeatures?>.data(meFromHome);
     } else {
-      featuresAsync = ref.watch(planoFeaturesProvider).when(
-        data: (value) => AsyncValue<PlanoFeatures?>.data(value),
-        loading: () => const AsyncValue<PlanoFeatures?>.loading(),
-        error: (error, stack) => AsyncValue<PlanoFeatures?>.error(error, stack),
-      );
+      featuresAsync = ref
+          .watch(planoFeaturesProvider)
+          .when(
+            data: (value) => AsyncValue<PlanoFeatures?>.data(value),
+            loading: () => const AsyncValue<PlanoFeatures?>.loading(),
+            error:
+                (error, stack) =>
+                    AsyncValue<PlanoFeatures?>.error(error, stack),
+          );
     }
 
     final planos = home?.planos;
@@ -161,9 +165,10 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
         selectedBackendPlan == null
             ? null
             : _productDetails[SubscriptionProducts.productIdFor(
-              selectedPlan,
-              _billingPeriod,
-            )]?.price;
+                  selectedPlan,
+                  _billingPeriod,
+                )]
+                ?.price;
     final selectedPrice =
         selectedBackendPlan == null
             ? null
@@ -233,7 +238,10 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
       appBar: FxShellAppBar(
         title: 'Planos',
         subtitle: FxHubFreshness.fromFetchedAt(_paywallFetchedAt),
-        onBack: () => safePopOrGo(context, '/dashboard/personal'),
+        onBack: () {
+          FxKeyboardDismissScope.dismiss();
+          safePopOrGo(context, '/perfil');
+        },
         actions: [
           if (currentPlan != SubscriptionPlan.FREE)
             Semantics(
@@ -253,9 +261,10 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
               : FxContentWidthLimiter(
                 expandHeight: false,
                 child: AnimatedSwitcher(
-                  duration: TokensStrip.prefersReducedMotion(context)
-                      ? Duration.zero
-                      : const Duration(milliseconds: 220),
+                  duration:
+                      TokensStrip.prefersReducedMotion(context)
+                          ? Duration.zero
+                          : const Duration(milliseconds: 220),
                   child: KeyedSubtree(
                     key: ValueKey('${ctaMode.name}-$ctaLabel'),
                     child: _AssinaturaStickyGlassBar(

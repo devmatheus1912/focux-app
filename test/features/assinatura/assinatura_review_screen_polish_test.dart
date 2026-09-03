@@ -17,5 +17,6 @@ void main() {
     expect(screen, isNot(contains('ExpansionTile')));
     expect(screen, isNot(contains('fontSize: 28')));
     expect(screen, contains('assinaturaReviewConfirmLabel'));
+    expect(screen, contains('FxKeyboardDismissScope'));
   });
 }

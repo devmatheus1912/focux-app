@@ -131,6 +131,8 @@ void main() {
     expect(build, contains('paywallStickyCtaLabel'));
     expect(build, contains('Começar \$trialDays dias grátis'));
     expect(build, contains('Confirmar upgrade'));
+    expect(build, contains('FxKeyboardDismissScope.dismiss'));
+    expect(build, contains("safePopOrGo(context, '/perfil')"));
     expect(build, isNot(contains('— \$selectedLabel')));
     expect(body, isNot(contains('_EnterprisePreviewCard')));
     expect(body, isNot(contains('priceLabel:')));
