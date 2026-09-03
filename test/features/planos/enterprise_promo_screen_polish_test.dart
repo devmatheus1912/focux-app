@@ -8,6 +8,10 @@ void main() {
     expect(screen, anyOf(contains('fxScreenA11yScope'), contains('Semantics(')));
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(screen, contains('FxShellScaffold'));
+    expect(screen, contains('FxShellAppBar'));
+    expect(screen, contains("fallbackLocation: '/planos'"));
+    expect(screen, contains('FxConversionTextLink'));
+    expect(screen, contains('FxLiquidPrimaryButton'));
     expect(screen, anyOf(contains('FxContentWidthLimiter'), isNot(contains('constrainWidth: false'))));
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(16));
   });

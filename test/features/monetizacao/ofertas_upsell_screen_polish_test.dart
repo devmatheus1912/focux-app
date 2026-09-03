@@ -20,6 +20,9 @@ void main() {
     expect(screen, isNot(contains('FxSettingsGroup')));
     expect(screen, contains('FxSatelliteListTile'));
     expect(screen, contains('ListView.builder'));
+    expect(screen, contains("fallbackLocation: '/assinatura'"));
+    expect(screen, contains('keyboardDismissBehavior'));
+    expect(screen, isNot(contains('context.pop()')));
     expect(screen, contains('ofertaGatilhoValues'));
     expect(screen, contains("tipoGatilho: tipoGatilho"));
     expect(screen, isNot(contains('TabBar')));

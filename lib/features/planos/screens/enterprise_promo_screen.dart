@@ -10,6 +10,7 @@ import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_conversion.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_motion.dart';
@@ -112,6 +113,10 @@ class _EnterprisePromoScreenState extends ConsumerState<EnterprisePromoScreen> {
       label: 'Promoção Enterprise',
       child: FxShellScaffold(
         useMesh: true,
+        appBar: const FxShellAppBar(
+          title: 'Enterprise',
+          fallbackLocation: '/planos',
+        ),
         body: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
@@ -246,23 +251,15 @@ class _EnterprisePromoScreenState extends ConsumerState<EnterprisePromoScreen> {
                                       ? 'Continuar na loja'
                                       : 'Experimentar $kPaywallMaxPlanTrialDays dias grátis',
                               loading: _starting,
-                              onPressed:
-                                  _starting ? null : _continueToCheckout,
+                              onPressed: _starting ? null : _continueToCheckout,
                             ),
                           ),
                           const SizedBox(height: TokensStrip.s3),
-                          Semantics(
-                            button: true,
-                            label: 'Agora não',
-                            child: TextButton(
-                              onPressed: _dismiss,
-                              child: Text(
-                                'Agora não',
-                                style: TokensStrip.bodyMuted(
-                                  color: mute,
-                                ).copyWith(fontSize: 14),
-                              ),
-                            ),
+                          FxConversionTextLink(
+                            text: '',
+                            actionText: 'Agora não',
+                            onTap: _dismiss,
+                            actionColor: mute,
                           ),
                           const SizedBox(height: TokensStrip.s2),
                         ],
