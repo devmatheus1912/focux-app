@@ -113,6 +113,8 @@ void main() {
     expect(screen, isNot(contains('TreinoPrescriptionField')));
     expect(screen, isNot(contains('TreinoTipoSeriePicker')));
     expect(screen, contains('FxLiquidPrimaryButton'));
+    expect(screen, contains('treinoPrescriptionSaveLabel'));
+    expect(screen, isNot(contains('? () {}')));
     expect(screen, contains('showFxConfirmSheet'));
     expect(screen, contains('treinoPrescriptionSaveConfirmTitle'));
     expect(screen, contains('heightFactor: 0.88'));

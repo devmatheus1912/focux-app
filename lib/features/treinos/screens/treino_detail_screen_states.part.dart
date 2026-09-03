@@ -164,16 +164,11 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
           if (mounted) setState(() => _videoBusy = value);
         },
       ),
-      stickyFooter: FxSettingsGroup(
-        children: [
-          FxSettingsTile(
-            fxIcon: 'circle-check',
-            label: treinoPrescriptionSaveLabel(),
-            value: _saving ? 'Salvando…' : '',
-            showDivider: false,
-            onTap: busy ? () {} : _save,
-          ),
-        ],
+      stickyFooter: FxLiquidPrimaryButton(
+        label: treinoPrescriptionSaveLabel(),
+        loading: _saving,
+        loadingLabel: 'Salvando…',
+        onPressed: busy ? null : _save,
       ),
     );
   }
