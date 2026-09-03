@@ -1,9 +1,11 @@
 # Focux Personal — Referência oficial de design e engenharia
 
 **Padrão de excelência do aplicativo (visual, UX, job, arquitetura, segurança, dados, ops).**
-**Versão:** 2.1 · **Data:** 2026-09-03 · **Plataforma de referência:** iOS (HIG) com paridade Android.
+**Versão:** 2.2 · **Data:** 2026-09-03 · **Plataforma de referência:** iOS (HIG) com paridade Android.
 
-> **Barra de produção (v2.1).** Pele e anatomia não bastam. Uma tela só está pronta quando o **job do domínio** está completo, **voltar** funciona em todo caminho de entrada, o **teclado iOS** fecha sem freeze, os **quatro estados** existem, e o caminho de dados foi auditado. O Ruflo não declara lote encerrado só porque a tela “parece Focux”. Ver [§0.5](#05-barra-de-produção-v21) e [§39](#39-freeze-de-produção).
+> **Programa vigente (v2.2): reimplementação do zero até a loja.** Toda rota do Personal e do Aluno volta à fila — inclusive as que o Ruflo já “elevou” só com pele/anatomia. Scorecard visual antigo **não** isenta a tela. O programa só termina no freeze §39 com binário de App Store / Play. Ver [§0.6](#06-reimplementação-do-zero-até-a-loja).
+
+> **Barra de produção (v2.1–2.2).** Pele e anatomia não bastam. Uma tela só está pronta quando o **job do domínio** está completo (amplitude **e** profundidade de affordance), **voltar** funciona em todo caminho de entrada, o **teclado iOS** fecha sem freeze, os **quatro estados** existem, e o caminho de dados foi auditado. O Ruflo não declara lote encerrado só porque a tela “parece Focux”. Ver [§0.5](#05-barra-de-produção-v21) e [§39](#39-freeze-de-produção).
 
 > **Este arquivo é a única referência canônica.** Ele **substitui e aposenta**:
 > - `PERFIL_DESIGN_REFERENCE.md` (v1 — escopo `/perfil`, fold inset)
@@ -21,6 +23,7 @@
 - [0.3 Ordem de precedência](#03-ordem-de-precedência)
 - [0.4 Migração: pendências ao aposentar os arquivos v1](#04-migração-pendências-ao-aposentar-os-arquivos-v1)
 - [0.5 Barra de produção (v2.1)](#05-barra-de-produção-v21)
+- [0.6 Reimplementação do zero até a loja](#06-reimplementação-do-zero-até-a-loja)
 
 **Parte I — A pele (invariante em todo o app)**
 - [1. Princípio raiz: pele constante, anatomia variável](#1-princípio-raiz-pele-constante-anatomia-variável)
@@ -60,7 +63,7 @@
 **Parte V — Os 80 pilares**
 - [25. Regra de evidência](#25-regra-de-evidência)
 - [26. Tabelas dos 80 pilares](#26-tabelas-dos-80-pilares)
-- [27. Pilares estruturais 81–100](#27-pilares-estruturais-81100)
+- [27. Pilares estruturais 81–102](#27-pilares-estruturais-81102)
 
 **Parte VI — Execução**
 - [28. Playbook de implementação em massa](#28-playbook-de-implementação-em-massa)
@@ -72,8 +75,8 @@
 - [34. Catálogo de componentes](#34-catálogo-de-componentes)
 - [35. Padrões de detalhe](#35-padrões-de-detalhe)
 
-**Parte VII — Produção (v2.1)**
-- [36. Job completo: tela rasa é regressão](#36-job-completo-tela-rasa-é-regressão)
+**Parte VII — Produção (v2.1–2.2)**
+- [36. Job completo: amplitude e profundidade](#36-job-completo-amplitude-e-profundidade)
 - [37. Catálogo SaaS fitness: potencial mínimo por domínio](#37-catálogo-saas-fitness-potencial-mínimo-por-domínio)
 - [38. Decisão ship / hide / delete](#38-decisão-ship--hide--delete)
 - [39. Freeze de produção](#39-freeze-de-produção)
@@ -112,8 +115,9 @@ A v1 (`PERFIL_DESIGN_REFERENCE.md`) era excelente para o que se propunha — o f
 | 6 | Sem orçamento de destaque | "Densidade comparável à Home" é subjetivo; virou muro de chips/badges. | §11 e §12 dão limites contáveis (1 P0, ≤2 P1, ≤3 sinais/linha, agregação a partir de 3 repetições). |
 | 7 | Backend: "na dúvida, propor" | Correto, mas passivo — sem proposta, nada era proposto. | §22 torna a auditoria de backend **obrigatória e entregável** em toda tela tocada, com template e severidade. |
 | 8 | *(v2.1)* Pronto = visual elevado | Lote Ruflo encerrava com pele/anatomia; voltar, teclado, job e freeze ficavam para “depois”. | Pronto = visual **e** operação. §0.5, §14, §36–§39. Tela rasa (A21), voltar morto (A22) e teclado preso (A23) são regressão. |
+| 9 | *(v2.2)* Tela já restilada = pronta | Lotes só de pele passaram batido: seta morta, teclado preso, job raso, affordance pobre. | **Reimplementação do zero até a loja (§0.6).** Nenhum lote visual anterior isenta a rota. Amplitude **e** profundidade (§36). A29. |
 
-Nada foi relaxado: todas as regras de negócio, segurança, tenant, LGPD, cache e performance da v1 continuam vigentes, íntegras, em §16–§21. A v2.1 **não** relaxa estética: ela fecha o buraco entre “parece pronto” e “sobe para a loja”.
+Nada foi relaxado: todas as regras de negócio, segurança, tenant, LGPD, cache e performance da v1 continuam vigentes, íntegras, em §16–§21. A v2.2 **não** pede um SaaS com todos os módulos imagináveis: pede o Focux **inteiro e profundo** no que já é o produto, até o binário da loja.
 
 ---
 
@@ -124,7 +128,7 @@ Em caso de conflito, decidir nesta ordem:
 1. **Segurança, tenant, LGPD, auth, pagamento** (§20, pilares 52–68) — nunca cede a estética.
 2. **Regra de negócio e contrato de dados** (§16–§18) — nunca cede a estética.
 3. **Acessibilidade, teclado e alvo de toque** (§14.2, §15, pilares 33/38/94) — nunca cede a densidade nem a animação.
-4. **Navegação previsível e job completo** (§14.1, §36, pilares 2/44/93/95) — nunca cede a “já parece elevado”.
+4. **Navegação previsível, job completo e profundidade** (§14.1, §36, pilares 2/44/93/95/101) — nunca cede a “já parece elevado” nem a “já restilamos ontem”.
 5. **Anatomia da superfície** (§9–§12) — vence a preferência pessoal e vence "como a outra tela faz".
 6. **Pele** (§1–§8) — vence variação criativa local.
 7. **Preferência estética** — último critério.
@@ -173,6 +177,57 @@ Esta versão fecha o gap observado na implementação em massa: telas elevadas v
 - **Não pode** declarar o app pronto para produção sem o freeze de [§39](#39-freeze-de-produção).
 
 **Lote 0 (antes de continuar tipos).** Se ainda não existir no core: (1) `FxShellAppBar` nunca cai em `Navigator.maybePop` sozinho — exige `onBack` com `safePopOrGo` ou `fallbackLocation`; (2) wrapper canônico de dismiss de teclado para S5/S6/S7. Sem isso, cada lote reproduz A22 e A23.
+
+---
+
+## 0.6 Reimplementação do zero até a loja
+
+> **A partir desta versão, o Ruflo não “continua o visual”. Ele reimplementa o produto, tela a tela, até o freeze da loja.**
+
+### Mandato
+
+O Personal entra em **programa único**: reimplementação operacional de **todas** as rotas existentes (Personal + Aluno + auth) contra este arquivo, do lote 0 ao §39. Objetivo do programa: **binário nas lojas** (App Store e Google Play) com os cinco eixos verdes em cada rota visível.
+
+Isto **não** é um redesign criativo paralelo. É o mesmo app, as mesmas rotas, o mesmo contrato — refeitos no padrão v2.2. Código útil permanece; **crédito de “já está pronto” não permanece**.
+
+### Nada passa batido — inclusive o que já foi atacado
+
+Lotes anteriores (pele, tokens, inset, “parece Focux”, scorecard só de 1–92) **não encerram a rota**. Sintomas típicos desses lotes: visual ok, voltar morto, teclado iPhone preso, uma função onde o domínio pede várias, compositor/ação pobre.
+
+**Proibido (A29):**
+
+- Pular tela porque “já restilamos ontem / neste chat / neste PR”.
+- Tratar scorecard antigo como aceite de produção.
+- Abrir só o delta visual e deixar job/voltar/teclado/profundidade para “depois”.
+- Declarar tipo S# e copiar pele sem auditar contrato BE e affordances do P0.
+
+**Obrigatório em toda rota, mesmo recém-elevada:**
+
+1. Reclassificar S1–S9 (pode estar errado).
+2. Pai lógico + `safePopOrGo` (§14.1).
+3. Teclado se houver input (§14.2).
+4. Quatro estados (§13).
+5. Amplitude do job (§36.1 + §37).
+6. Profundidade de affordance do P0 (§36.2) — o que o BE já expõe entra na UI.
+7. Scorecard §33 **deste** programa (93–102, riscos, hide/delete).
+8. Proposta §22.2 com evidência Java.
+
+### Tese de produto (o que “perfeito” significa aqui)
+
+**Perfeito = o Focux existente, profundo e confiável — não um catálogo infinito de módulos que a concorrência “ainda não tem”.**
+
+| Faz | Não faz |
+|---|---|
+| Núcleo do dia (§37.1) 100% | Inventar comunidade, loja paralela, 12 gamificações |
+| Profundidade no compositor/ação cujo contrato já existe | Botão morto “em breve” |
+| Uma aposta diferenciadora **já no app** (pose, migração, copiloto) completa | Meia dúzia de apostas rasas |
+| Hide honesto do que não fecha | Chevron para stub |
+
+Diferenciação de loja: **poucas coisas impossíveis de largar**, ponta a ponta. Quantidade de telas não quebra concorrência; tela rasa sim.
+
+### Fim do programa
+
+O programa **não** termina em “S2 auditado” nem em “lotes S1–S9”. Termina só com [§39](#39-freeze-de-produção) verde e o dono aceitando por escrito os P0 de backend que o Ruflo não pode fechar sozinho. Até lá, cada chat Ruflo é continuidade desta reimplementação, não um restyle avulso.
 
 ---
 
@@ -722,7 +777,7 @@ Valem em **todo** o Personal, em qualquer tipo de superfície. Quebrar qualquer 
 
 ## 16. Rota, job, SSOT e tipos
 
-1. **Uma rota = um job nomeável.** Hoje = operar o dia (cobrar / retomar / agenda). Perfil = conta, marca, operação da conta. Não misturar cadastro + financeiro + chat no mesmo fold. **Job incompleto não conta:** se a rota existe, ela entrega o potencial do domínio (§36–§37), não uma única ação simbólica.
+1. **Uma rota = um job nomeável.** Hoje = operar o dia (cobrar / retomar / agenda). Perfil = conta, marca, operação da conta. Não misturar cadastro + financeiro + chat no mesmo fold. **Job incompleto não conta:** se a rota existe, ela entrega amplitude **e** profundidade (§36–§37), não uma única ação simbólica. Lote visual anterior não conta como job.
 2. **Hub tem BFF.** Home: um `GET /api/dashboard/home`, snapshot tipado. Não criar provider que refetcha o que o agregado já traz (`/home`, `/360`, `/perfil`).
 3. **`dayFocus` é SSOT do BFF.** FE consome `home.dayFocus`. Sem fallback `DashboardDayFocus.resolve(` no runtime da Home (só em testes de paridade).
 4. **`planoFeatures` do BFF** tem o mesmo shape de `GET /api/planos/me`. FE usa `seedFromHome` + `effectivePlanoFeatures(homeOverride:)`.
@@ -1427,9 +1482,9 @@ A coluna **10/10 elevado** existe onde a v2 endurece o critério; `=` significa 
 | 79 | CI / release readiness | FE+BE | `flutter analyze --fatal-warnings --fatal-infos` e `./gradlew test` sem novo warning. | Rodado de fato; não pontuar de memória |
 | 80 | Docs de produto / help na superfície | FE | Tela complexa tem help/tooltip acessível nela mesma. | `FxHelpIconButton` na app bar |
 
-## 27. Pilares estruturais 81–100
+## 27. Pilares estruturais 81–102
 
-Extras da v1, generalizados para todo o app. Avaliados junto dos 80. **93–100 são da v2.1** — sem eles o scorecard visual mente sobre produção.
+Extras da v1, generalizados para todo o app. Avaliados junto dos 80. **93–102 são da v2.1–2.2** — sem eles o scorecard visual mente sobre produção.
 
 | # | Pilar | Lado | Evidência de 10/10 |
 |---|---|---|---|
@@ -1447,12 +1502,14 @@ Extras da v1, generalizados para todo o app. Avaliados junto dos 80. **93–100 
 | 92 | **Proposta de backend entregue** | FE+BE | Bloco de §22 presente no scorecard, mesmo quando vazio |
 | 93 | **Voltar previsível** | FE | `safePopOrGo` + pai lógico; os três caminhos de entrada voltam (§14.1) |
 | 94 | **Teclado dismissível** | FE | Contrato §14.2 em device iOS; nenhum freeze; CTA visível com teclado aberto |
-| 95 | **Job completo do domínio** | FE | A tela cobre o potencial mínimo de §37, não um único atalho (anti A21) |
+| 95 | **Job completo do domínio** | FE | Amplitude §36.1 + mínimo §37; não um único atalho (anti A21) |
 | 96 | **Catálogo `FocuxSurfaces`** | FE | Rota classificada no mapa rota → S1–S9; gate §32 verde |
 | 97 | **Paridade Personal / Aluno** | FE | Gêmeo aluno, quando o domínio tem gêmeo, não é stub nem copy "em breve" |
 | 98 | **Ship / hide / delete** | FE+BE | Módulo órfão ou raso tem decisão §38 explícita no scorecard |
 | 99 | **Deep link / FCM da tela** | FE | Toque de notificação e query params documentados; payload vazio proposto em §22 |
 | 100 | **Freeze de produção** | FE+BE | A tela consta na planilha §28.1 com os cinco eixos verdes; o app só sobe com §39 |
+| 101 | **Profundidade de affordance** | FE | P0 oferece o vocabulário que o contrato já expõe (§36.2); gap sem API = proposta, não botão morto |
+| 102 | **Reimplementação honesta** | FE | Rota reaberta neste programa; lote visual anterior não foi usado como isenção (anti A29) |
 
 ---
 
@@ -1460,7 +1517,7 @@ Extras da v1, generalizados para todo o app. Avaliados junto dos 80. **93–100 
 
 ## 28. Playbook de implementação em massa
 
-Objetivo: **paridade operacional + pele deste arquivo + anatomia do tipo certo + job completo + voltar + teclado + freeze**. Visual sozinho não é o objetivo.
+Objetivo: **reimplementação do zero até a loja (§0.6)** — paridade operacional + pele + anatomia + amplitude + profundidade + voltar + teclado + freeze. Visual sozinho não é o objetivo. Lote visual anterior não encerra rota.
 
 ### 28.0 Ruflo no Cursor
 
@@ -1472,7 +1529,7 @@ O playbook deste capítulo vive no skill do repo (`.cursor/skills/ruflo/SKILL.md
 2. Um chat **Agent** novo nesse workspace (não um chat só com o app).
 3. Digitar `/ruflo` e confirmar com **Alt+Enter** (Windows/Linux) ou **Option+Enter** (Mac), ou **Use as Mode**. O badge fica no input até sair do modo.
 4. Escolher o modelo no picker do chat. O skill não trava modelo.
-5. Pedir o lote (primeiro: **lote 0 de core** se A22/A23 ainda forem o default — ver §0.5; senão S6, no máximo 3 telas). O Ruflo lê este arquivo, `docs/CONTRATO_APP_BACKEND.md` e o código do backend; não precisa colar o playbook.
+5. Pedir o lote (este programa: **reimplementação §0.6**). Primeiro: **lote 0 de core** se A22/A23 ainda forem o default — ver §0.5; senão S6, no máximo 3 telas, **mesmo que já tenham sido restiladas**. O Ruflo lê este arquivo, `docs/CONTRATO_APP_BACKEND.md` e o código do backend; não precisa colar o playbook.
 
 Git separado: `focux-app` em `main`, `focux-backend` em `master`. Nunca um commit atravessando os dois. Visual no app; proposta §22.2 no scorecard; implementação no backend só do que §29 libera (nunca auth/tenant/pagamento/migration/endpoint novo sem contrato).
 
@@ -1490,14 +1547,16 @@ Entregável único, sem tocar em código: **planilha de rotas**, uma linha por d
 | Pai lógico | Fallback de `safePopOrGo` |
 | Tem input? | Sim/não — se sim, contrato §14.2 aplica |
 | Estrutura atual | O que está lá hoje (ex.: "inset-grouped") |
-| Divergência | Anti-padrão identificado (§31, incl. A21–A28) |
+| Divergência | Anti-padrão identificado (§31, incl. A21–A29) |
 | P0 atual / correto | Qual é a ação primária e como está tratada |
 | Job mínimo §37 | O que o domínio exige vs. o que a tela faz hoje |
 | Endpoint(s) | Caminho de dados |
 | Decisão §38 | ship / hide / delete (se aplicável) |
+| Lote visual anterior | `reabrir` (default neste programa). `—` só se o scorecard **deste** arquivo (v2.2, 93–102) já existe nesta rota |
+| Profundidade P0 | Affordances do contrato vs UI |
 | Lote | Agrupamento de execução |
 
-Nada de "editar no escuro": se houver dúvida sobre qual tela é, listar candidatas e perguntar. **Sem esta planilha, o Ruflo não começa lote de tipo.** Inventário incompleto é como editar no escuro em escala.
+Nada de "editar no escuro": se houver dúvida sobre qual tela é, listar candidatas e perguntar. **Sem esta planilha, o Ruflo não começa lote de tipo.** Inventário incompleto é como editar no escuro em escala. **Toda rota começa em `reabrir`.** Lote só de pele não muda isso (§0.6, A29).
 
 **Lote 0 — core de produção (antes de S6 se ainda não feito).** Extrair/corrigir no core, PR próprio, sem misturar tela de produto:
 
@@ -1547,6 +1606,7 @@ Consistência intra-tipo é o que faz o app parecer desenhado. Ordem sugerida po
 10. Chats de bugfix/git/limpeza **não** reabrem o playbook inteiro — só o pedaço que o bug toca.
 11. **Voltar + teclado + job** entram no mesmo PR da tela. Não abrir "PR de polish" para A21/A22/A23 da tela que o lote acabou de tocar.
 12. **Espera entre tipos.** Não começa o próximo tipo sozinho. Satélites de §37 só depois do tipo correspondente (um desafio S4 não fura a fila na frente de `/alunos`).
+13. **Reimplementação (§0.6).** Não pular rota “já atacada”. O lote desta tela cobre os cinco eixos + profundidade, ou a rota permanece vermelha na planilha.
 
 ### 28.5 Definição de pronto por tela
 
@@ -1557,15 +1617,16 @@ Consistência intra-tipo é o que faz o app parecer desenhado. Ordem sugerida po
 - [ ] Quatro estados implementados (§13)
 - [ ] **Voltar:** `safePopOrGo` + pai lógico; push, `go`/deep link e FCM voltam (§14.1)
 - [ ] **Teclado:** se a tela tem input, contrato §14.2; sheet respeita `viewInsets` (§14.3)
-- [ ] **Job completo:** potencial mínimo do domínio em §37 coberto, ou hide/delete em §38
+- [ ] **Amplitude §36.1 + profundidade §36.2:** job mínimo e affordances do P0 cujo contrato existe
 - [ ] Regras de §16–§21 verificadas
 - [ ] Bloco de proposta de backend entregue (§22)
 - [ ] Mortos removidos (§30)
 - [ ] Analyze + testes do caminho tocado passaram
 - [ ] Scorecard + "Precisa da sua decisão" (pode ser vazio)
-- [ ] Pilares 93–100 com nota ou N/A justificado
+- [ ] Pilares 93–102 com nota ou N/A justificado
+- [ ] Esta rota **não** foi pulada por lote visual anterior (A29)
 
-**Tela não pronta (exemplos que o Ruflo já viu e não pode repetir):** seta que não volta; teclado iPhone que só some matando o app; hub que só lista; detalhe sem ação primária do domínio; empty sem CTA; destino no Perfil que abre módulo stub.
+**Tela não pronta (exemplos que o Ruflo já viu e não pode repetir):** seta que não volta; teclado iPhone que só some matando o app; hub que só lista; detalhe sem ação primária do domínio; compositor só-texto com mídia no contrato; empty sem CTA; destino no Perfil que abre módulo stub; **pular porque “já restilamos ontem”**.
 
 ## 29. O que pode aplicar sozinho vs. o que só propor
 
@@ -1573,8 +1634,8 @@ Espelha a regra Cursor `focux-10-10`. Na dúvida: **propor**, nunca auto-aplicar
 
 | Pode editar direto | Só propor e esperar aprovação |
 |---|---|
-| Visual, UX, tipografia, densidade, a11y, motion, navegação de UI, **voltar (`safePopOrGo`)**, **teclado/sheets**, empty/loading/erro, job de domínio cujo **contrato já existe**, hide de destino raso no catálogo, performance **client-side**, SRP/limpeza que **não** muda contrato nem regra | Regra de negócio, IA, gates de plano, PII, auth/sessão, tenant/RLS, LGPD, auditoria, secrets, rate limit, contrato API/BFF, cache **server**, validação de domínio, idempotência, paginação BE, Flyway, observabilidade BE, testes de contrato, telemetria de produto, **ligar módulo órfão com P0 de autorização/plano aberto** |
-| Pilares típicos: 1–2, 4, 6–8, 13–51, 69–72, 74, 76, 78–80, 81–91, **93–97, 99–100 (FE)** | Pilares típicos: 3, 9, 11, 52–68, 73, 75, 77, 92, **98 quando a decisão é ship de módulo novo** |
+| Visual, UX, tipografia, densidade, a11y, motion, navegação de UI, **voltar (`safePopOrGo`)**, **teclado/sheets**, empty/loading/erro, job de domínio e **profundidade de affordance** cujo **contrato já existe**, hide de destino raso no catálogo, **reabrir rota já restilada**, performance **client-side**, SRP/limpeza que **não** muda contrato nem regra | Regra de negócio, IA, gates de plano, PII, auth/sessão, tenant/RLS, LGPD, auditoria, secrets, rate limit, contrato API/BFF, cache **server**, validação de domínio, idempotência, paginação BE, Flyway, observabilidade BE, testes de contrato, telemetria de produto, **ligar módulo órfão com P0 de autorização/plano aberto** |
+| Pilares típicos: 1–2, 4, 6–8, 13–51, 69–72, 74, 76, 78–80, 81–91, **93–97, 99–102 (FE)** | Pilares típicos: 3, 9, 11, 52–68, 73, 75, 77, 92, **98 quando a decisão é ship de módulo novo** |
 
 **Nunca editar sozinho:** auth, tenant, pagamento, migration, RLS, endpoint novo sem contrato.
 
@@ -1624,6 +1685,7 @@ Catálogo de defeitos. Cada um tem nome para poder ser citado em revisão.
 | **A26** | Destino 404 interno | Linha de ferramentas / deep link / FCM abre rota vazia ou órfã | Ligar, hide, ou delete; nunca chevron para lugar nenhum |
 | **A27** | P0 atrás do teclado | CTA full-width invisível com teclado aberto | Footer sticky com `viewInsets` (§14.2) |
 | **A28** | Freeze sem planilha | Lote visual encerrado; rotas fora do inventário §28.1 | Inventário completo; §39 só com cinco eixos verdes |
+| **A29** | Já elevado, pular | “Restilamos ontem” / scorecard só de pele usado para isentar a rota | Reabrir no programa §0.6; cinco eixos + §36.2 |
 
 ## 32. Gates verificáveis
 
@@ -1668,6 +1730,8 @@ Pai lógico (voltar): <rota>
 Input / teclado: <não | sim — contrato 14.2>
 P0: <ação primária e tratamento>
 Job mínimo §37: <coberto | gap: ... | hide/delete §38>
+Profundidade P0 §36.2: <affordances do contrato vs UI>
+Reimplementação §0.6: <reaberta | NÃO pular — A29>
 Estados: loading / vazio / erro / freshness — <ok | o que falta>
 Caminhos de entrada: push / go / FCM — <ok | o que falta>
 Endpoints: <lista>
@@ -1679,19 +1743,19 @@ Checagens: analyze <ok|falhou> · testes <quais>
 
 Colunas: `#` · `Pilar` · `Cat` · `Lado` · `FE` · `BE` · `Nota` · `Meta` · `Evidência`.
 Meta é sempre 10. `N/A` quando o pilar não se aplica à tela — com justificativa na evidência.
-Incluir **81–100**. Sem 93–95 o scorecard mente.
+Incluir **81–102**. Sem 93–95 e 101–102 o scorecard mente.
 Fechar com: **Nota geral (pilares com nota, N/A fora): X/10.**
 
 ### 33.3 Blocos finais
 
 1. **Proposta de backend** — template de §22.2, obrigatório.
 2. **Precisa da sua decisão** — lista de escolhas que dependem do dono do produto (pode ser vazia). Itens típicos v2.1: ship/hide/delete de módulo raso; pai lógico ambíguo; gêmeo aluno ausente.
-3. **Riscos de produção desta tela** — voltar / teclado / job. Uma linha cada. "Nenhum" só com evidência.
+3. **Riscos de produção desta tela** — voltar / teclado / amplitude / profundidade. Uma linha cada. "Nenhum" só com evidência.
 
 ### 33.4 Checklist rápido antes do ship
 
 - [ ] Tipo de superfície declarado; job da rota claro; chrome/dock no shell certo
-- [ ] Esqueleto do tipo respeitado; nenhum anti-padrão de §31 (incl. A21–A28)
+- [ ] Esqueleto do tipo respeitado; nenhum anti-padrão de §31 (incl. A21–A29)
 - [ ] 1 P0 no tratamento do tipo; ≤2 P1; ≤1 `emphasize` por viewport
 - [ ] Densidade dentro de §12 (≤3 sinais/linha; agregação a partir de 3 repetições)
 - [ ] Loading / vazio / erro / retry / freshness
@@ -1704,7 +1768,8 @@ Fechar com: **Nota geral (pilares com nota, N/A fora): X/10.**
 - [ ] Sem `Flexible` unbounded; sem overflow com teclado/landscape
 - [ ] `safePopOrGo` no leading; três caminhos de entrada voltam
 - [ ] Teclado iOS: unfocus, viewInsets, CTA visível, back não freeze
-- [ ] Job mínimo §37 coberto ou decisão §38 no scorecard
+- [ ] Amplitude §37 + profundidade §36.2 cobertas ou decisão §38 no scorecard
+- [ ] Rota reaberta neste programa — lote visual anterior não isenta (A29)
 - [ ] Nada de auth/pagamento/migration/IA autoaplicada neste diff
 - [ ] Fold antigo limpo; testes do fold velho atualizados
 - [ ] Analyze + testes do caminho tocado passaram
@@ -1922,13 +1987,17 @@ Em formulário, o grupo inset é **correto** — ele agrupa campos relacionados,
 
 ---
 
-# Parte VII — Produção (v2.1)
+# Parte VII — Produção (v2.1–2.2)
 
-Esta parte não inventa produto. Ela afirma o que **já existe** no Focux (rotas, endpoints, papéis Personal/Aluno) e o mínimo operacional para cada domínio poder ir à loja. O Ruflo implementa o mínimo. Feature nova fora desta lista = decisão do dono, não lote.
+Esta parte não inventa produto. Ela afirma o que **já existe** no Focux (rotas, endpoints, papéis Personal/Aluno) e o mínimo operacional para cada domínio poder ir à loja. O Ruflo implementa amplitude **e** profundidade no contrato vivo. Feature nova fora desta lista = decisão do dono, não lote. Telas já restiladas **não** estão fora: ver §0.6.
 
-## 36. Job completo: tela rasa é regressão
+## 36. Job completo: amplitude e profundidade
 
-**Tela rasa (A21).** A pele está correta, o tipo até pode estar certo, mas a operação cabe em uma frase pobre: "ver lista", "ver log", "criar um título". O personal de academia/estúdio espera o job inteiro do domínio.
+Dois eixos. Faltar qualquer um reprova o lote. “Enviar mensagem” com um campo de texto, quando o contrato já tem mídia, é profundidade pobre — não é job cumprido.
+
+### 36.1 Amplitude (ciclo do domínio)
+
+**Tela rasa em amplitude (A21).** A pele está correta, o tipo até pode estar certo, mas a operação cabe em uma frase pobre: "ver lista", "ver log", "criar um título". O personal espera o ciclo: criar / atribuir / pausar / encerrar / notificar — o que o domínio já tem no BE.
 
 **Teste de uma pergunta, obrigatório no scorecard:**
 
@@ -1936,14 +2005,28 @@ Esta parte não inventa produto. Ela afirma o que **já existe** no Focux (rotas
 
 Se a resposta honesta for só "olhar", a tela não está pronta. S1 decide e age. S3 entende e age. S4 encontra, filtra e cria. S5 captura e confirma. S8 executa. S6 converte.
 
-**Como completar sem inventar produto:**
+### 36.2 Profundidade de affordance (o mesmo job, rico)
+
+**Tela rasa em profundidade (A21 no P0).** O job principal existe, mas a interação ficou pobre. Exemplo normativo: conversa cujo P0 é **enviar mensagem** — texto só, enquanto o backend e o app já conhecem imagem, vídeo, áudio, reação, reply, editar/apagar. Completar profundidade **não** é inventar produto: é ligar o vocabulário que o contrato já expõe.
+
+**Teste obrigatório no scorecard:**
+
+> "Quais affordances o contrato/BE (e o código já escrito no app) oferecem para o P0 desta tela, e quais a UI realmente mostra?"
+
+| Contrato do P0 | O que o Ruflo faz |
+|---|---|
+| Endpoint/campo/tipo **já existe** e a UI não oferece | Implementar no FE no mesmo lote (§29) |
+| UI mostra controle **sem** contrato | Remover ou desabilitar; propor no §22.2. Botão morto é A26 |
+| Affordances novas (tipo, storage, permissão, rate limit) | Propor e esperar. Não criar API sozinho |
+
+**Como completar sem inventar produto (os dois eixos):**
 
 1. Listar o que o **backend já expõe** para o domínio (grep do controller + `CONTRATO_APP_BACKEND.md` + call sites no app).
-2. Listar o que a **UI faz hoje**.
-3. O gap é o lote de job — no mesmo tipo de superfície, no mesmo ship visual quando couber, senão PR imediato do mesmo tipo.
+2. Listar o que a **UI faz hoje** (amplitude) e o que o **P0 permite tocar** (profundidade).
+3. O gap é o lote — no mesmo tipo, no mesmo ship quando couber.
 4. Se o backend não tem o endpoint: **propor** em §22.2 (P0/P1). Não desenhar botão morto.
-5. Se o backend tem e a UI não chama: **implementar** no FE (está em §29 como UX/navegação, desde que o contrato exista).
-6. Se ninguém deveria usar ainda: **hide** no catálogo (§38). Chevron para módulo morto é A26.
+5. Se o backend tem e a UI não chama: **implementar** no FE.
+6. Se ninguém deveria usar ainda: **hide** no catálogo (§38).
 
 **Sinais de tela rasa (qualquer um já reprova o lote):**
 
@@ -1953,6 +2036,8 @@ Se a resposta honesta for só "olhar", a tela não está pronta. S1 decide e age
 - "Em breve" / placeholder / leaderboard-only / log-only em rota de produção.
 - Gêmeo aluno ausente ou stub enquanto o personal opera o mesmo domínio (A25).
 - Métricas sem ação, ou ação sem contexto (número órfão + A4 juntos).
+- P0 com um único modo de entrada quando o contrato já tem vários (texto sem mídia; criar sem atribuir; ver sem agir).
+- Lote anterior só de pele usado como desculpa para não reabrir (A29).
 
 ## 37. Catálogo SaaS fitness: potencial mínimo por domínio
 
@@ -1974,7 +2059,7 @@ Para cada linha: o Ruflo, ao tocar qualquer tela do domínio, fecha o **mínimo*
 | **Agenda** | `/agenda`, `/agenda/novo`, `/agenda/aluno` | S1/S5 | Ver o dia, criar, remarcar/cancelar se o contrato existir, empty do dia com CTA. Ocupação/período do BE: usar ou propor, não ignorar em silêncio. |
 | **Check-in / execução** | `/checkin`, `/checkin/executar`, histórico, presencial, `/checkin/treinos` | S1/S8/S4 | Iniciar, pausar, avançar, concluir; progresso sobrevive background; sair com confirm. Histórico encontrável. Presencial não mistura lista de biblioteca com o alvo de execução (A18). |
 | **Financeiro** | `/financeiro`, `/financeiro/aluno`, `/financeiro/mensalidades/:id` | S1/S3 | Cobrar, marcar pago, atrasadas, detalhe da mensalidade com P0. Lote marcar-pago do BE: se a UI não tem, propor no scorecard — não deixar o personal cobrando um a um se o contrato de lote existe. `double` no contrato é dívida, não trava visual. |
-| **Chat** | `/chat/inbox`, `/chat/aluno`, `/alunos/:id/chat` | S4 + conversa | Inbox com unread **do chat** (não misturar com notificações). Enviar, mídia que o contrato já tem, busca na conversa. Teclado: §14.2 rigoroso — composer é o freeze clássico. |
+| **Chat** | `/chat/inbox`, `/chat/aluno`, `/alunos/:id/chat` | S4 + conversa | Inbox com unread **do chat**. Amplitude: enviar, ler, buscar, estado da conversa. **Profundidade do compositor (§36.2):** tudo que `POST /api/chat/enviar`, upload, reações, editar/apagar, tipos de mídia **já** no contrato — texto, imagem, vídeo, áudio, emoji/reação. Não deixar “só texto” se o BE e o app já conhecem mídia. Teclado §14.2 rigoroso. |
 | **IA copiloto** | `/ia/copiloto`, `/ia/chat`, `/ia/aluno`, progressão | S1/S7 | Opt-in, nunca autoaplicar no first paint. Quota e gate via capability. Insight com CTA que executa ou empurra a rota certa. Timeout vira erro, não loading infinito. |
 
 ### 37.2 Relacionamento, crescimento e marca
@@ -2065,15 +2150,15 @@ O Ruflo **não** escolhe ship de módulo com P0 de autorização/plano aberto. E
 
 ## 39. Freeze de produção
 
-> **Subir para a loja só com este freeze verde.** O Ruflo não declara "acabou o design" no lugar deste capítulo.
+> **Subir para a loja só com este freeze verde.** O Ruflo não declara "acabou o design" nem "acabaram os lotes S1–S9" no lugar deste capítulo. O programa §0.6 só termina aqui.
 
 ### 39.1 Quem assina o quê
 
 | Papel | Assina |
 |---|---|
-| Ruflo (agente) | Planilha §28.1 com cinco eixos por rota; scorecards; gates de FE; propostas §22; hide de A26 |
+| Ruflo (agente) | Planilha §28.1 com **todas** as rotas em `reabrir` ou verdes neste programa; scorecards v2.2; gates de FE; propostas §22; hide de A26; **nenhuma rota pulada por lote visual (A29)** |
 | Dono do produto | Itens §38 ainda em "Precisa da sua decisão"; aceite de P0 de backend que **não** quebram o app mas são risco (CI BE, RBAC, idempotência MP, timezone) |
-| Ninguém | "Visual 10/10, o resto depois" |
+| Ninguém | "Visual 10/10, o resto depois" · "já restilamos essa tela" |
 
 ### 39.2 Checklist do app (FE) — tudo bloqueante
 
@@ -2083,6 +2168,8 @@ O Ruflo **não** escolhe ship de módulo com P0 de autorização/plano aberto. E
 - [ ] Zero A22 amostral: satélites abertos por push, por `go` e por busca voltam.
 - [ ] Zero A23 amostral em **iPhone físico**: login, cadastro, editar aluno, chat, sheet de form, busca S4, OTP, wallet.
 - [ ] Zero A21 nos âncoras de §37.1 (núcleo). Satélites de 37.2–37.4: ship completo **ou** hide.
+- [ ] Profundidade §36.2 nos P0 de núcleo (chat/mídia, aluno 360, treino, financeiro, composer).
+- [ ] Nenhuma rota isenta por lote visual anterior (A29). Planilha começa em `reabrir`.
 - [ ] Gêmeos aluno de 37.5 não são stub.
 - [ ] Dark e light nos âncoras.
 - [ ] `flutter analyze --fatal-warnings --fatal-infos` verde.
@@ -2131,7 +2218,8 @@ No chat, formato curto:
 # Freeze de produção
 Planilha: <N rotas> · cinco eixos verdes: <N> · hide: <lista> · delete: <lista>
 A22/A23: <ok em device / gaps>
-Job §37: núcleo <ok> · satélites <ok | hide: ...>
+Job §37: núcleo <ok> · profundidade <ok | gaps> · satélites <ok | hide: ...>
+A29 (nenhuma rota pulada): <ok | lista>
 Gates §32: <ok | faltando>
 Analyze: <ok>
 P0 BE ainda abertos (dono): <lista>
@@ -2250,7 +2338,7 @@ Auditoria concluída em 2026-08-25 sobre `/perfil` + `/perfil/ferramentas` — *
 
 **Reclassificação v2:** `/perfil` e `/perfil/ferramentas` são **S2**. A auditoria segue válida. O que mudou é o alcance: o esqueleto desta tela **não** é o esqueleto padrão do app.
 
-**Nota v2.1:** este scorecard histórico não pontua pilares 93–100. Não usar como modelo de freeze: um 10/10 de 2026-08-25 não afirma voltar/teclado/job/freeze.
+**Nota v2.2:** este scorecard histórico não pontua pilares 93–102. Não usar como modelo de freeze nem como isenção de rota no programa §0.6.
 
 ## B. Mortos: não reintroduzir
 
@@ -2258,6 +2346,6 @@ Auditoria concluída em 2026-08-25 sobre `/perfil` + `/perfil/ferramentas` — *
 
 **Picker:** `_AlunosSheetCheckRow` e rows custom com `InkWell` + `Icons.check` em sheets de seleção. Highlight de seleção recuado dentro de `FxSettingsGroup` sem `edgeToEdgeRows`.
 
-**Padrões proibidos (§31):** CTA com chevron (A2), inset-grouped fora de S2 (A1), CTA full-width em hub/ajustes (A7), botão branco sobre preto (A8), `showError(context, '$e')` (A11), `if (plano == 'FREE')` em widget (A12), tela rasa (A21), voltar morto (A22), teclado preso (A23), overlay cru (A24), gêmeo stub (A25), destino morto (A26), P0 atrás do teclado (A27), freeze sem planilha (A28).
+**Padrões proibidos (§31):** CTA com chevron (A2), inset-grouped fora de S2 (A1), CTA full-width em hub/ajustes (A7), botão branco sobre preto (A8), `showError(context, '$e')` (A11), `if (plano == 'FREE')` em widget (A12), tela rasa (A21), voltar morto (A22), teclado preso (A23), overlay cru (A24), gêmeo stub (A25), destino morto (A26), P0 atrás do teclado (A27), freeze sem planilha (A28), já elevado pular (A29).
 
 **Regra geral:** ao remover, remover de verdade — arquivo, campos, testes do fold antigo, no mesmo commit (§30).
