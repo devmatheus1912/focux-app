@@ -53,5 +53,7 @@ void main() {
     expect(screen, isNot(contains('class _NoResultsState')));
     expect(screen, contains('ProductEvents.treinosViewed'));
     expect(screen, contains('ProductEvents.treinosHelpOpened'));
+    expect(screen, contains('TreinoInsetActionSheet'));
+    expect(screen, isNot(contains('_TreinoActionTile')));
   });
 }

@@ -32,24 +32,73 @@ class TreinoInsetActionSpec {
   final VoidCallback onTap;
 }
 
-List<Widget> treinoInsetActionTiles({
+List<Widget> treinoInsetActionChildren({
   required List<TreinoInsetActionSpec> actions,
   Color? accent,
 }) {
+  final nav = [
+    for (final a in actions)
+      if (a.showChevron && !a.danger) a,
+  ];
+  final commands = [
+    for (final a in actions)
+      if (!a.showChevron && !a.danger) a,
+  ];
+  final dangers = [
+    for (final a in actions)
+      if (a.danger) a,
+  ];
+
   return [
-    for (var i = 0; i < actions.length; i++)
-      FxSettingsTile(
-        icon: actions[i].icon,
+    if (nav.isNotEmpty)
+      FxSettingsGroup(
         accent: accent,
-        label: actions[i].label,
-        subtitle: actions[i].subtitle,
-        value: '',
-        danger: actions[i].danger,
-        highlight: actions[i].highlight,
-        picker: actions[i].showChevron,
-        showDivider: i < actions.length - 1,
-        onTap: actions[i].onTap,
+        children: [
+          for (var i = 0; i < nav.length; i++)
+            FxSettingsTile(
+              icon: nav[i].icon,
+              accent: accent,
+              label: nav[i].label,
+              subtitle: nav[i].subtitle,
+              value: '',
+              highlight: nav[i].highlight,
+              showDivider: i < nav.length - 1,
+              onTap: nav[i].onTap,
+            ),
+        ],
       ),
+    for (final command in commands) ...[
+      const SizedBox(height: FxSettingsLayout.groupGap),
+      TextButton(
+        onPressed: command.onTap,
+        style: TextButton.styleFrom(
+          minimumSize: const Size(
+            TreinosLayout.touchTarget,
+            TreinosLayout.touchTarget,
+          ),
+          alignment: Alignment.centerLeft,
+        ),
+        child: Text(command.label),
+      ),
+    ],
+    for (final danger in dangers) ...[
+      const SizedBox(height: FxSettingsLayout.groupGap),
+      SizedBox(
+        height: 52,
+        child: ElevatedButton(
+          onPressed: danger.onTap,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: EagleTokens.bad,
+            foregroundColor: Colors.white,
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+          ),
+          child: Text(danger.label),
+        ),
+      ),
+    ],
   ];
 }
 
@@ -78,9 +127,9 @@ class TreinoInsetActionSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final primary = accent ?? Theme.of(context).colorScheme.primary;
     final soft = BrandPalette.softened(primary);
-    final group = FxSettingsGroup(
-      accent: primary,
-      children: treinoInsetActionTiles(actions: actions, accent: soft),
+    final groupChildren = treinoInsetActionChildren(
+      actions: actions,
+      accent: soft,
     );
 
     return TreinoHomeSheetSurface(
@@ -102,7 +151,7 @@ class TreinoInsetActionSheet extends StatelessWidget {
             ),
           ),
           const SizedBox(height: FxSettingsLayout.headerToGroup),
-          group,
+          ...groupChildren,
         ],
       ),
     );
