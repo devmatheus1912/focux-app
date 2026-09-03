@@ -14,6 +14,9 @@ void main() {
     expect(panel, contains('ExerciseLibraryBrowseMode.musculo'));
     expect(panel, contains('exercicioPickerStatsProvider'));
     expect(panel, contains('Grupos musculares'));
+    expect(panel, contains('FxInsetPickerOption.list'));
+    expect(panel, contains('edgeToEdgeRows: true'));
+    expect(panel, isNot(contains('FxSettingsTile')));
     expect(panel, isNot(contains('ExerciseLibraryBrowseMode.movimento')));
     expect(panel, isNot(contains("label: 'Movimento'")));
     expect(panel, isNot(contains('numeric: true')));

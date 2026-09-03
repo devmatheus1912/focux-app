@@ -16,6 +16,7 @@ void main() {
 
     expect(library, contains('class ExerciseLibraryPanel'));
     expect(library, contains('FxSettingsGroup'));
+    expect(library, contains('FxInsetPickerOption.list'));
     expect(library, contains('ExerciseLibraryBrowseMode'));
     expect(library, contains('Recentes'));
     expect(filters, contains('FxInsetPickerOption.list'));

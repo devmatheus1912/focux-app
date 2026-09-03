@@ -386,10 +386,6 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
                                       'Cada lado executado separadamente (ex.: 12 por braço).',
                                   value: '',
                                   showDivider: false,
-                                  onTap:
-                                      () => setState(
-                                        () => _unilateral = !_unilateral,
-                                      ),
                                   accessory: Switch.adaptive(
                                     value: _unilateral,
                                     onChanged:

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/fx_settings_layout.dart';
+import '../../../../core/theme/tokens_strip.dart';
 import '../../../../core/widgets/fx_home_sheet.dart';
 import '../../../../core/widgets/fx_icon.dart';
 import '../../../../core/widgets/fx_inset_picker_sheet.dart';
@@ -127,6 +128,7 @@ class _ExerciciosFilterSheetState extends State<_ExerciciosFilterSheet> {
                           exerciciosModalidadeTodas(),
                         ),
                         highlight: _filter.modalidade != null,
+                        picker: true,
                         onTap:
                             () => _pick<Modalidade>(
                               title: 'Modalidade',
@@ -146,6 +148,7 @@ class _ExerciciosFilterSheetState extends State<_ExerciciosFilterSheet> {
                           exerciciosGrupoTodos(),
                         ),
                         highlight: _filter.grupo != null,
+                        picker: true,
                         onTap:
                             () => _pick<GrupoMuscular>(
                               title: 'Grupo muscular',
@@ -164,6 +167,7 @@ class _ExerciciosFilterSheetState extends State<_ExerciciosFilterSheet> {
                           exerciciosEquipamentoTodos(),
                         ),
                         highlight: _filter.equipamento != null,
+                        picker: true,
                         onTap:
                             () => _pick<Equipamento>(
                               title: 'Equipamento',
@@ -183,6 +187,7 @@ class _ExerciciosFilterSheetState extends State<_ExerciciosFilterSheet> {
                           exerciciosNivelTodos(),
                         ),
                         highlight: _filter.dificuldade != null,
+                        picker: true,
                         showDivider: false,
                         onTap:
                             () => _pick<Dificuldade>(
@@ -249,19 +254,24 @@ class _ExerciciosFilterSheetState extends State<_ExerciciosFilterSheet> {
                   ),
                   if (_filter.hasFacet) ...[
                     const SizedBox(height: FxSettingsLayout.groupGap),
-                    FxSettingsGroup(
-                      children: [
-                        FxSettingsTile(
-                          fxIcon: 'x',
-                          label: exerciciosLimparFiltros(),
-                          value: '',
-                          showDivider: false,
-                          onTap:
-                              () => _emit(
-                                ExerciciosUiFilter(query: _filter.query),
-                              ),
+                    SizedBox(
+                      height: 52,
+                      child: OutlinedButton(
+                        onPressed:
+                            () => _emit(
+                              ExerciciosUiFilter(query: _filter.query),
+                            ),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor:
+                              Theme.of(context).colorScheme.primary,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(
+                              TokensStrip.rButton,
+                            ),
+                          ),
                         ),
-                      ],
+                        child: Text(exerciciosLimparFiltros()),
+                      ),
                     ),
                   ],
                 ],

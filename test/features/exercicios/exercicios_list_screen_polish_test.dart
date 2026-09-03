@@ -49,8 +49,11 @@ void main() {
     expect(sheet, contains('FxSettingsGroup'));
     expect(sheet, contains('FxSettingsTile'));
     expect(sheet, contains('showFxInsetPickerSheet'));
+    expect(sheet, contains('picker: true'));
+    expect(sheet, contains('OutlinedButton'));
     expect(sheet, isNot(contains('FilterChip')));
     expect(sheet, isNot(contains('FxToggleChip')));
     expect(sheet, contains('Switch.adaptive'));
+    expect(sheet, isNot(contains("label: exerciciosLimparFiltros()")));
   });
 }
