@@ -10,6 +10,7 @@ import '../../exercicios/services/biblioteca_bootstrap.dart';
 import '../../dashboard/utils/dashboard_home_prefetch.dart';
 import '../../alunos/utils/alunos_home_prefetch.dart';
 import '../providers/auth_provider.dart';
+import '../utils/splash_navigation.dart';
 import '../widgets/auth_shell.dart';
 import '../widgets/cinematic_splash_scene.dart';
 import '../../../core/theme/focux_system_chrome.dart';
@@ -63,19 +64,25 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     ).animate(CurvedAnimation(parent: _fadeCtrl, curve: Curves.easeInCubic));
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      if (mounted && !TokensStrip.prefersReducedMotion(context)) {
+      if (!mounted) return;
+      final reduceMotion = TokensStrip.prefersReducedMotion(context);
+      if (!reduceMotion) {
         _ambientCtrl.repeat();
       }
       final compact = await _resolveQuickSplash();
       if (!mounted) return;
+      final budget = SplashMotionBudget(
+        compact: compact,
+        reduceMotion: reduceMotion,
+      );
       if (compact) {
         setState(() => _compactSplash = true);
-        _entryCtrl.duration = const Duration(milliseconds: 420);
-        _progressCtrl.duration = const Duration(milliseconds: 900);
-        _fadeCtrl.duration = const Duration(milliseconds: 240);
       }
+      _entryCtrl.duration = budget.entry;
+      _progressCtrl.duration = budget.progress;
+      _fadeCtrl.duration = budget.fade;
       _entryCtrl.forward();
-      _bootstrap(compact: compact);
+      _bootstrap(budget);
     });
   }
 
@@ -96,15 +103,13 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     return prefs.getBool('onboarding_done_v3') ?? false;
   }
 
-  Future<void> _bootstrap({required bool compact}) async {
-    final bootstrapFuture = _resolveNavigationTarget(quick: compact);
-    final progressFuture = _progressCtrl.animateTo(
-      0.92,
-      curve: Curves.easeOutCubic,
-    );
-    final minDelay = Future<void>.delayed(
-      Duration(milliseconds: compact ? 380 : 800),
-    );
+  Future<void> _bootstrap(SplashMotionBudget budget) async {
+    final bootstrapFuture = _resolveNavigationTarget(budget);
+    final progressFuture =
+        budget.progress == Duration.zero
+            ? _progressCtrl.animateTo(0.92, duration: Duration.zero)
+            : _progressCtrl.animateTo(0.92, curve: Curves.easeOutCubic);
+    final minDelay = Future<void>.delayed(budget.minVisible);
 
     final target = await bootstrapFuture;
     await Future.wait([progressFuture, minDelay]);
@@ -112,7 +117,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
 
     await _progressCtrl.animateTo(
       1,
-      duration: Duration(milliseconds: compact ? 180 : 300),
+      duration: budget.progressFinish,
       curve: Curves.easeOut,
     );
     if (!mounted) return;
@@ -123,8 +128,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     context.go(target);
   }
 
-  Future<String> _resolveNavigationTarget({bool quick = false}) async {
-    await Future<void>.delayed(Duration(milliseconds: quick ? 100 : 420));
+  Future<String> _resolveNavigationTarget(SplashMotionBudget budget) async {
+    await Future<void>.delayed(budget.resolveDelay);
 
     final authStatus = ref.read(authProvider);
     if (authStatus == AuthStatus.authenticated) {
@@ -138,7 +143,10 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     if (role == UserRole.aluno) {
       final requiresPasswordChange = ref.read(requiresPasswordChangeProvider);
       if (requiresPasswordChange) {
-        return '/aluno/definir-senha';
+        return splashAlunoTarget(
+          requiresPasswordChange: true,
+          activationSeen: false,
+        );
       }
 
       try {
@@ -146,7 +154,10 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
         final prefs = await SharedPreferences.getInstance();
         final onboardingSeen =
             prefs.getBool('aluno_activation_seen_${aluno.id}') ?? false;
-        return onboardingSeen ? '/dashboard/aluno' : '/aluno/ativacao';
+        return splashAlunoTarget(
+          requiresPasswordChange: false,
+          activationSeen: onboardingSeen,
+        );
       } catch (_) {
         return '/dashboard/aluno';
       }
@@ -162,13 +173,11 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       );
       final prefs = await SharedPreferences.getInstance();
       final promoShown = prefs.getBool('promo_shown_${perfil.id}') ?? false;
-      final trialUsed = perfil.trialUsed ?? false;
-      final plano = perfil.plano.toUpperCase();
-
-      if (!promoShown && !trialUsed && plano == 'FREE') {
-        return '/promo-enterprise';
-      }
-      return '/dashboard/personal';
+      return splashPersonalTarget(
+        promoShown: promoShown,
+        trialUsed: perfil.trialUsed ?? false,
+        plano: perfil.plano,
+      );
     } catch (_) {
       return '/dashboard/personal';
     }
@@ -177,7 +186,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   Future<String> _unauthenticatedTarget() async {
     final prefs = await SharedPreferences.getInstance();
     final onboardingDone = prefs.getBool('onboarding_done_v3') ?? false;
-    return onboardingDone ? '/login' : '/onboarding';
+    return splashGuestTarget(onboardingDone: onboardingDone);
   }
 
   @override
@@ -186,26 +195,32 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       label: 'Focux',
       child: AnnotatedRegion<SystemUiOverlayStyle>(
         value: FocuxSystemChrome.dark,
-        child: Scaffold(
-          backgroundColor: TokensStrip.cinematicBg,
-          extendBody: true,
-          body: AuthShell(
-            animateGridIn: false,
-            child: AnimatedBuilder(
-              animation: Listenable.merge([
-                _ambientCtrl,
-                _entryCtrl,
-                _progressCtrl,
-                _fadeCtrl,
-              ]),
-              builder:
-                  (context, _) => CinematicSplashScene(
-                    progress: _progressCtrl.value,
-                    ambient: _ambientCtrl,
-                    entry: _entryCtrl,
-                    fadeOut: _fadeOut,
-                    compact: _compactSplash,
-                  ),
+        child: PopScope(
+          canPop: false,
+          child: Scaffold(
+            backgroundColor: TokensStrip.cinematicBg,
+            extendBody: true,
+            body: AuthShell(
+              animateGridIn: false,
+              child: PopScope(
+                canPop: false,
+                child: AnimatedBuilder(
+                  animation: Listenable.merge([
+                    _ambientCtrl,
+                    _entryCtrl,
+                    _progressCtrl,
+                    _fadeCtrl,
+                  ]),
+                  builder:
+                      (context, _) => CinematicSplashScene(
+                        progress: _progressCtrl.value,
+                        ambient: _ambientCtrl,
+                        entry: _entryCtrl,
+                        fadeOut: _fadeOut,
+                        compact: _compactSplash,
+                      ),
+                ),
+              ),
             ),
           ),
         ),

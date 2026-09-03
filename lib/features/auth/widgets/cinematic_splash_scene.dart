@@ -6,7 +6,6 @@ import '../../../core/brand/focux_brand_copy.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/hero_teal.dart';
 import '../../../core/theme/tokens_strip.dart';
-import '../../../core/utils/motion_preferences.dart';
 import '../../../core/widgets/focux_brand_tagline.dart';
 import '../../../core/widgets/focux_official_logo.dart';
 
@@ -31,7 +30,7 @@ class CinematicSplashScene extends StatelessWidget {
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
     final size = MediaQuery.sizeOf(context);
-    final reduceMotion = reduceMotionOf(context);
+    final reduceMotion = TokensStrip.prefersReducedMotion(context);
 
     return AnimatedBuilder(
       animation: Listenable.merge([ambient, entry, fadeOut]),
