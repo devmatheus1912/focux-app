@@ -198,7 +198,7 @@ void main() {
     expect(slivers, contains('DashboardLayout.foldCard'));
   });
 
-  test('Home opera o dia em grupos inset ChatGPT/iOS', () {
+  test('Home opera o dia em métrica e satellite', () {
     final tile = File(
       'lib/features/dashboard/widgets/command_action_tile.dart',
     ).readAsStringSync();
@@ -216,9 +216,9 @@ void main() {
     expect(tile, isNot(contains('entranceIndex')));
     expect(panel, contains('CommandActionTile'));
     expect(panel, isNot(contains('FxSettingsGroup')));
-    expect(finance, contains('FxSettingsTile'));
+    expect(finance, contains('OperationalMetricTile'));
     expect(finance, isNot(contains('DashboardHomeActionChip')));
-    expect(aderencia, contains('FxSettingsTile'));
+    expect(aderencia, contains('FxSatelliteListTile'));
     expect(aderencia, isNot(contains('DashboardHomeActionChip')));
   });
 

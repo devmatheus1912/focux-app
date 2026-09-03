@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/analytics/analytics_service.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_icon.dart';
-import '../../../core/widgets/fx_settings_tile.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../data/command_center_data.dart';
 import '../utils/dashboard_microcopy.dart';
-import '../utils/dashboard_radar_items.dart';
 
 Future<void> showDashboardRadarSheet(
   BuildContext parentContext, {
@@ -53,7 +53,6 @@ Future<void> showDashboardRadarSheet(
                     item: items[i],
                     index: i,
                     total: items.length,
-                    showDivider: i < items.length - 1,
                     onOpen: () => _openAluno(
                       parent: parentContext,
                       sheet: sheetContext,
@@ -98,14 +97,12 @@ class DashboardRadarTile extends StatelessWidget {
     required this.item,
     required this.index,
     required this.total,
-    required this.showDivider,
     this.onOpen,
   });
 
   final AlunoScoreResumo item;
   final int index;
   final int total;
-  final bool showDivider;
   final VoidCallback? onOpen;
 
   @override
@@ -117,27 +114,33 @@ class DashboardRadarTile extends StatelessWidget {
 
     return Tooltip(
       message: DashboardMicrocopy.scoreComoCalculamos,
-      child: FxSettingsTile(
-        fxIcon: dashboardRadarIcon(item.risco),
-        label: nome,
-        subtitle: subtitle,
-        value: '${item.score}',
-        numeric: true,
-        showDivider: showDivider,
-        semanticsLabel: semantics,
-        onTap: () {
-          if (onOpen != null) {
-            onOpen!();
-            return;
-          }
-          _trackRadarTap(item);
-          final url = item.acaoUrl.trim();
-          if (url.isNotEmpty) {
-            context.push(url);
-          } else {
-            context.push('/alunos/${item.alunoId}');
-          }
-        },
+      child: Semantics(
+        label: semantics,
+        button: true,
+        child: FxSatelliteListTile(
+          title: nome,
+          subtitle: Text(subtitle),
+          trailing: Text(
+            '${item.score}',
+            style: FocuxHubTypography.bodyMuted(
+              color: fxScreenMute(context),
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          onTap: () {
+            if (onOpen != null) {
+              onOpen!();
+              return;
+            }
+            _trackRadarTap(item);
+            final url = item.acaoUrl.trim();
+            if (url.isNotEmpty) {
+              context.push(url);
+            } else {
+              context.push('/alunos/${item.alunoId}');
+            }
+          },
+        ),
       ),
     );
   }

@@ -81,7 +81,7 @@ void main() {
     expect(theme, contains('VisualDensity.compact'));
   });
 
-  test('dashboard uses inset groups and fold limits for density', () {
+  test('dashboard uses satellite lists and fold limits for density', () {
     final dashboard = [
       readScreenSourceBundle(
         'lib/features/dashboard/screens/personal_dashboard_screen.dart',
@@ -99,7 +99,7 @@ void main() {
         'lib/features/dashboard/widgets/dashboard_pulse_strip.dart',
       ).readAsStringSync(),
     ].join('\n');
-    expect(dashboard, contains('FxSettingsGroup'));
+    expect(dashboard, contains('FxSatelliteListTile'));
     expect(dashboard, contains('dashboardRadarFoldLimit'));
     expect(dashboard, contains('maxLines'));
   });

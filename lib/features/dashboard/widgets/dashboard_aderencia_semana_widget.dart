@@ -2,10 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/fx_settings_layout.dart';
-import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/fx_utils.dart';
-import '../../../core/widgets/fx_settings_group.dart';
-import '../../../core/widgets/fx_settings_tile.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../constants/dashboard_layout.dart';
 import '../providers/aderencia_provider.dart';
 import '../utils/dashboard_home_focus.dart';
@@ -96,13 +94,10 @@ class DashboardAderenciaSemanaWidget extends StatelessWidget {
                       : () => context.push('/dashboard/qualidade'),
             )
           else
-            FxSettingsGroup(
+            Column(
               children: [
-                for (var i = 0; i < items.length; i++)
-                  _AderenciaTile(
-                    item: items[i],
-                    showDivider: i < items.length - 1,
-                  ),
+                for (final item in items)
+                  _AderenciaTile(item: item),
               ],
             ),
         ],
@@ -112,10 +107,9 @@ class DashboardAderenciaSemanaWidget extends StatelessWidget {
 }
 
 class _AderenciaTile extends StatelessWidget {
-  const _AderenciaTile({required this.item, required this.showDivider});
+  const _AderenciaTile({required this.item});
 
   final AderenciaAlunoResumo item;
-  final bool showDivider;
 
   @override
   Widget build(BuildContext context) {
@@ -125,16 +119,22 @@ class _AderenciaTile extends StatelessWidget {
       if (objetivo != null && objetivo.isNotEmpty) objetivo,
       '${item.totalCheckinsSemana} check-ins',
     ].join(' · ');
-    return FxSettingsTile(
-      fxIcon: 'trend',
-      label: nome,
-      subtitle: subtitle,
-      value: '${item.aderenciaPercent}%',
-      numeric: true,
-      showDivider: showDivider,
-      semanticsLabel:
+    return Semantics(
+      label:
           '$nome. $subtitle. Aderência ${item.aderenciaPercent} por cento. Abrir aluno',
-      onTap: () => context.push('/alunos/${item.alunoId}'),
+      button: true,
+      child: FxSatelliteListTile(
+        title: nome,
+        subtitle: Text(subtitle),
+        trailing: Text(
+          '${item.aderenciaPercent}%',
+          style: FocuxHubTypography.bodyMuted(
+            color: fxScreenMute(context),
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        onTap: () => context.push('/alunos/${item.alunoId}'),
+      ),
     );
   }
 }
@@ -168,62 +168,41 @@ class DashboardAderenciaSemanaEmptyCard extends StatelessWidget {
     final showPrimary = !quiet && primaryAction != null && onPrimary != null;
     final showSecondary =
         showPrimary && secondaryAction != null && onSecondary != null;
+    final subtitle = Text(
+      body,
+      style: FocuxHubTypography.bodyMuted(color: mute),
+    );
 
     if (!showPrimary) {
-      return FxSettingsGroup(
-        children: [
-          ConstrainedBox(
-            constraints: const BoxConstraints(
-              minHeight: FxSettingsLayout.rowMinHeight,
-            ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: TokensStrip.s3),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: FocuxHubTypography.cardTitle(
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    body,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: FocuxHubTypography.bodyMuted(color: mute),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
+      return FxSatelliteListTile(
+        title: title,
+        subtitle: subtitle,
       );
     }
 
-    return FxSettingsGroup(
-      accent: primary,
+    return Column(
       children: [
-        FxSettingsTile(
-          fxIcon: 'calendar',
-          label: title,
-          value: primaryAction!,
-          onTap: onPrimary!,
-          accent: primary,
-          showDivider: showSecondary,
-          semanticsLabel: '$title. $body. $primaryAction',
+        Semantics(
+          label: '$title. $body. $primaryAction',
+          button: true,
+          child: FxSatelliteListTile(
+            title: title,
+            subtitle: subtitle,
+            trailing: Text(
+              primaryAction!,
+              style: FocuxHubTypography.bodyMuted(
+                color: primary,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            accent: primary,
+            onTap: onPrimary,
+          ),
         ),
         if (showSecondary)
-          FxSettingsTile(
-            fxIcon: 'route',
-            label: secondaryAction!,
-            value: '',
-            onTap: onSecondary!,
-            accent: primary,
-            showDivider: false,
+          FxSatelliteListTile(
+            title: secondaryAction!,
+            onTap: onSecondary,
           ),
       ],
     );

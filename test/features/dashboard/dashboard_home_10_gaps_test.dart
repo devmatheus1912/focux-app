@@ -121,14 +121,18 @@ void main() {
       );
     });
 
-    test('radar strip is inset group, not accordion', () {
+    test('radar strip is satellite list, not accordion', () {
       final src =
           File(
             'lib/features/dashboard/widgets/dashboard_base_radar_strip.dart',
+          ).readAsStringSync() +
+          File(
+            'lib/features/dashboard/widgets/dashboard_radar_sheet.dart',
           ).readAsStringSync();
-      expect(src, contains('FxSettingsGroup'));
+      expect(src, contains('FxSatelliteListTile'));
       expect(src, contains('DashboardRadarTile'));
       expect(src, contains('radarVerTodos'));
+      expect(src, isNot(contains('FxSettingsGroup')));
       expect(src, isNot(contains('DashboardCollapsibleSection')));
       expect(src, isNot(contains('DashboardHorizontalScrollPeek')));
     });

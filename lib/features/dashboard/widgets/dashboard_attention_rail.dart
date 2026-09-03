@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_icon.dart';
-import '../../../core/widgets/fx_settings_group.dart';
-import '../../../core/widgets/fx_settings_tile.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../alunos/data/aluno_repository.dart';
 import '../../financeiro/data/financeiro_repository.dart';
 import '../constants/dashboard_layout.dart';
@@ -49,17 +49,12 @@ class DashboardAttentionRail extends StatelessWidget {
                 : null,
           ),
           const SizedBox(height: FxSettingsLayout.headerToGroup),
-          FxSettingsGroup(
-            children: [
-              for (var i = 0; i < split.fold.length; i++)
-                _AttentionTile(
-                  entry: split.fold[i],
-                  index: i,
-                  total: split.total,
-                  showDivider: i < split.fold.length - 1,
-                ),
-            ],
-          ),
+          for (var i = 0; i < split.fold.length; i++)
+            _AttentionTile(
+              entry: split.fold[i],
+              index: i,
+              total: split.total,
+            ),
         ],
       ),
     );
@@ -106,7 +101,6 @@ class DashboardAttentionRail extends StatelessWidget {
                       entry: items[i],
                       index: i,
                       total: items.length,
-                      showDivider: i < items.length - 1,
                       onOpen: () {
                         Navigator.of(sheet).pop();
                         _open(parent, items[i]);
@@ -136,26 +130,19 @@ class _AttentionTile extends StatelessWidget {
     required this.entry,
     required this.index,
     required this.total,
-    required this.showDivider,
     this.onOpen,
   });
 
   final DashboardAttentionEntry entry;
   final int index;
   final int total;
-  final bool showDivider;
   final VoidCallback? onOpen;
 
   @override
   Widget build(BuildContext context) {
     final nome = fxTitleCaseName(entry.nome);
-    return FxSettingsTile(
-      fxIcon: entry.icon,
-      label: nome,
-      subtitle: '${entry.titulo} · ${entry.subt}',
-      value: entry.acao,
-      showDivider: showDivider,
-      semanticsLabel: dashboardAttentionItemSemantics(
+    return Semantics(
+      label: dashboardAttentionItemSemantics(
         index: index + 1,
         total: total,
         nome: nome,
@@ -163,7 +150,19 @@ class _AttentionTile extends StatelessWidget {
         subt: entry.subt,
         acao: entry.acao,
       ),
-      onTap: onOpen ?? () => _open(context, entry),
+      button: true,
+      child: FxSatelliteListTile(
+        title: nome,
+        subtitle: Text('${entry.titulo} · ${entry.subt}'),
+        trailing: Text(
+          entry.acao,
+          style: FocuxHubTypography.bodyMuted(
+            color: fxScreenMute(context),
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        onTap: onOpen ?? () => _open(context, entry),
+      ),
     );
   }
 }
