@@ -60,14 +60,20 @@ void main() {
   });
 
   test('checkin screen surfaces automatic evolution feedback', () {
-    final screen = File(
-      'lib/features/checkin/screens/checkin_screen.dart',
-    ).readAsStringSync();
+    final screen =
+        File(
+          'lib/features/checkin/screens/checkin_screen.dart',
+        ).readAsStringSync();
+    final sheets =
+        File(
+          'lib/features/checkin/widgets/checkin_execucao_sheets.dart',
+        ).readAsStringSync();
 
-    expect(screen, contains('Evolucao registrada'));
+    expect(screen, contains('showCheckinEvolucaoSheet'));
     expect(screen, contains('evolucoesPerformance'));
     expect(screen, contains('evolucoesCarga'));
-    expect(screen, contains('mensagem tambem ficou salva no chat'));
+    expect(sheets, contains('Evolução registrada'));
+    expect(sheets, contains('mensagem também ficou salva no chat'));
   });
 
   test('student dashboard keeps persistent performance evolution card', () {

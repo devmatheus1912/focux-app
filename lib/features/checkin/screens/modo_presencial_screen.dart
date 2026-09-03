@@ -4,17 +4,21 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_typography.dart';
-import '../../../core/widgets/fx_motion.dart';
-import '../data/checkin_repository.dart';
-import '../providers/checkin_provider.dart';
-import '../../../core/utils/friendly_error.dart';
-import 'package:focux_app/core/widgets/fx_empty_state.dart';
-import 'package:focux_app/core/widgets/fx_error_state.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/utils/friendly_error.dart';
+import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_confirm_sheet.dart';
+import '../../../core/widgets/fx_empty_state.dart';
+import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_motion.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../dashboard/utils/dashboard_readability.dart';
-import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
+import '../data/checkin_repository.dart';
+import '../providers/checkin_provider.dart';
+import '../utils/checkin_execucao_display.dart';
+import '../widgets/checkin_timer_widgets.dart';
 
 /// Landscape-optimized training screen for in-person coaching sessions.
 ///
@@ -73,7 +77,7 @@ class _State extends ConsumerState<ModoPresencialScreen> {
         _exec = e;
         _loading = false;
       });
-      _timer = Timer.periodic(const Duration(seconds: 1), (_) {
+      _timer ??= Timer.periodic(const Duration(seconds: 1), (_) {
         if (mounted) setState(() => _elapsed += const Duration(seconds: 1));
       });
     } catch (e) {
@@ -117,7 +121,11 @@ class _State extends ConsumerState<ModoPresencialScreen> {
             repeticoes: ex.repeticoes,
           );
       await _start();
-    } catch (_) {}
+    } catch (e) {
+      if (mounted) {
+        FeedbackHelper.showError(context, friendlyError(e));
+      }
+    }
   }
 
   void _next() {
@@ -130,8 +138,22 @@ class _State extends ConsumerState<ModoPresencialScreen> {
     if (_currentIdx > 0) setState(() => _currentIdx--);
   }
 
-  String _fmt(Duration d) =>
-      '${d.inMinutes.toString().padLeft(2, '0')}:${(d.inSeconds % 60).toString().padLeft(2, '0')}';
+  String _fmt(Duration d) => checkinDurationLabel(d);
+
+  Future<void> _sair() async {
+    final doneSeries =
+        _exec?.exercicios.fold<int>(0, (sum, e) => sum + e.seriesFeitas) ?? 0;
+    if (doneSeries > 0 || _elapsed.inSeconds > 30) {
+      final ok = await showFxConfirmSheet(
+        context,
+        title: 'Sair do treino?',
+        message: 'O tempo e as séries já marcadas ficam salvos.',
+        confirmLabel: 'Sair',
+      );
+      if (!ok || !mounted) return;
+    }
+    Navigator.pop(context);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -140,7 +162,7 @@ class _State extends ConsumerState<ModoPresencialScreen> {
       return fxScreenA11yScope(
         label: 'Modo Presencial',
         child: FxShellScaffold(
-          useMesh: true,
+          useMesh: false,
           constrainWidth: false,
           body: const SkeletonList(count: 4),
         ),
@@ -150,7 +172,7 @@ class _State extends ConsumerState<ModoPresencialScreen> {
       return fxScreenA11yScope(
         label: 'Modo Presencial',
         child: FxShellScaffold(
-          useMesh: true,
+          useMesh: false,
           constrainWidth: false,
           body: FxErrorState(
             chromeOnDark: true,
@@ -166,7 +188,7 @@ class _State extends ConsumerState<ModoPresencialScreen> {
       return fxScreenA11yScope(
         label: 'Modo Presencial',
         child: FxShellScaffold(
-          useMesh: true,
+          useMesh: false,
           constrainWidth: false,
           body: FxEmptyState(
             icon: 'dumbbell',
@@ -186,66 +208,28 @@ class _State extends ConsumerState<ModoPresencialScreen> {
     final total = _exec!.exercicios.length;
     final done = _exec!.exercicios.where((e) => e.concluido).length;
 
-    return fxScreenA11yScope(
-      label: 'Modo Presencial',
-      child: FxShellScaffold(
-        useMesh: true,
-        constrainWidth: false,
-        body:
-            _resting
-                ? _restView(primary)
-                : _trainingView(ex, total, done, primary),
-      ),
-    );
-  }
-
-  Widget _restView(Color primary) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            'DESCANSO',
-            style: FocuxTypography.headline(color: heroTealMuted(0.54)).copyWith(
-              fontWeight: FontWeight.w700,
-              letterSpacing: 4,
-            ),
-          ),
-          const SizedBox(height: TokensStrip.s4),
-          Text(
-            '$_restSecs',
-            style: TextStyle(
-              color: heroTealInk(),
-              fontSize: 120,
-              fontWeight: FontWeight.w900,
-            ),
-          ),
-          const SizedBox(height: TokensStrip.s5),
-          SizedBox(
-            width: 200,
-            child: LinearProgressIndicator(
-              value: _restSecs > 0 ? _restSecs / 60 : 0,
-              backgroundColor: Colors.white12,
-              color: primary,
-              minHeight: 8,
-            ),
-          ),
-          const SizedBox(height: 32),
-          ElevatedButton(
-            onPressed: () {
-              _restTimer?.cancel();
-              setState(() => _resting = false);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.white12,
-              padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
-            ),
-            child: Text(
-              'PULAR',
-              style: FocuxHubTypography.cardTitle(color: heroTealInk()),
-            ),
-          ),
-        ],
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        _sair();
+      },
+      child: fxScreenA11yScope(
+        label: 'Modo Presencial',
+        child: FxShellScaffold(
+          useMesh: false,
+          constrainWidth: false,
+          body:
+              _resting
+                  ? CheckinRestFocusView(
+                    seconds: _restSecs,
+                    onSkip: () {
+                      _restTimer?.cancel();
+                      setState(() => _resting = false);
+                    },
+                  )
+                  : _trainingView(ex, total, done, primary),
+        ),
       ),
     );
   }
@@ -267,7 +251,7 @@ class _State extends ConsumerState<ModoPresencialScreen> {
             children: [
               IconButton(
                 icon: Icon(Icons.close, color: heroTealMuted(0.54), size: 32),
-                onPressed: () => Navigator.pop(context),
+                onPressed: _sair,
               ),
               Column(
                 children: [
@@ -338,68 +322,34 @@ class _State extends ConsumerState<ModoPresencialScreen> {
                 const SizedBox(height: 8),
                 Text(
                   ex.exercicioNome,
-                  style: TextStyle(
-                    color: heroTealInk(),
-                    fontSize: 36,
-                    fontWeight: FontWeight.w900,
-                  ),
+                  style: FocuxTypography.headline(color: heroTealInk()),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: TokensStrip.s4),
-                Row(
-                  children: [
-                    _InfoChip(
-                      icon: Icons.repeat,
-                      label: '${ex.series ?? 3} séries',
-                    ),
-                    const SizedBox(width: 16),
-                    _InfoChip(
-                      icon: Icons.fitness_center,
-                      label: ex.repeticoes ?? '12 reps',
-                    ),
-                    if (ex.cargaKg != null && ex.cargaKg! > 0) ...[
-                      const SizedBox(width: 16),
-                      _InfoChip(
-                        icon: Icons.monitor_weight,
-                        label: '${ex.cargaKg}kg',
-                      ),
-                    ],
-                  ],
+                Text(
+                  checkinSerieKpiLabel(ex.seriesFeitas, ex.series),
+                  style: FocuxHubTypography.kpi(
+                    color: heroTealInk(),
+                    fontSize: TokensStrip.fontH1,
+                    fontWeight: FontWeight.w600,
+                  ).copyWith(
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                  ),
                 ),
-                const SizedBox(height: TokensStrip.s5),
-                // ── Series progress ──────────────────────────────────
-                Row(
-                  children: List.generate(ex.series ?? 3, (i) {
-                    final isDone = i < ex.seriesFeitas;
-                    return Padding(
-                      padding: const EdgeInsets.only(right: 8),
-                      child: Container(
-                        width: 48,
-                        height: 48,
-                        decoration: BoxDecoration(
-                          color: isDone ? primary : Colors.white12,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Center(
-                          child:
-                              isDone
-                                  ? Icon(
-                                    Icons.check,
-                                    color: heroTealInk(),
-                                    size: 28,
-                                  )
-                                  : Text(
-                                    '${i + 1}',
-                                    style: FocuxHubTypography.kpi(
-                                      color: heroTealMuted(0.54),
-                                      fontSize: FocuxHubTypography.metricMd,
-                                    ),
-                                  ),
-                        ),
-                      ),
-                    );
-                  }),
+                const SizedBox(height: TokensStrip.s2),
+                Text(
+                  checkinSerieContextLine(
+                    index: _currentIdx + 1,
+                    total: total,
+                    seriesReps: checkinSeriesRepsLabel(
+                      ex.series,
+                      ex.repeticoes,
+                    ),
+                    carga: checkinCargaLabel(ex.cargaKg),
+                    descansoSegundos: ex.descansoSegundos,
+                  ),
+                  style: FocuxTypography.bodySmall(color: heroTealMuted(0.70)),
                 ),
               ],
             ),
@@ -416,9 +366,9 @@ class _State extends ConsumerState<ModoPresencialScreen> {
               if (!ex.concluido) ...[
                 SizedBox(
                   width: double.infinity,
-                  height: 72,
+                  height: checkinExecutionControlMin,
                   child: FxLiquidPrimaryButton(
-                    label: 'SÉRIE',
+                    label: checkinRegistrarLabel(first: ex.seriesFeitas <= 0),
                     icon: Icons.check_rounded,
                     onPressed: () => _completeSerie(ex),
                   ),
@@ -491,7 +441,10 @@ class _State extends ConsumerState<ModoPresencialScreen> {
                       children: [
                         Text(
                           'PRÓXIMO',
-                          style: TextStyle(color: heroTealMuted(0.54), fontSize: 13),
+                          style: TextStyle(
+                            color: heroTealMuted(0.54),
+                            fontSize: 13,
+                          ),
                         ),
                         SizedBox(width: 4),
                         Icon(
@@ -509,34 +462,4 @@ class _State extends ConsumerState<ModoPresencialScreen> {
       ],
     );
   }
-}
-
-class _InfoChip extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  const _InfoChip({required this.icon, required this.label});
-
-  @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-    decoration: BoxDecoration(
-      color: heroTealMuted(0.12),
-      borderRadius: BorderRadius.circular(10),
-    ),
-    child: Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, color: heroTealMuted(0.54), size: 16),
-        const SizedBox(width: 6),
-        Text(
-          label,
-          style: TextStyle(
-            color: heroTealMuted(0.70),
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ],
-    ),
-  );
 }

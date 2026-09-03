@@ -8,24 +8,25 @@ import '../../../core/router/safe_navigation.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/shell_chrome.dart';
+import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_celebration_overlay.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
+import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
-import '../../../core/widgets/fx_form_sheet.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_motion.dart';
-import '../data/checkin_repository.dart';
-import '../providers/checkin_provider.dart';
-import '../../../core/widgets/feedback_helper.dart';
-import '../../../core/widgets/fx_empty_state.dart';
-import 'package:focux_app/core/widgets/fx_celebration_overlay.dart';
-import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
-import '../widgets/checkin_header_widgets.dart';
+import '../../../core/widgets/feedback_helper.dart';
+import '../data/checkin_repository.dart';
+import '../providers/checkin_provider.dart';
+import '../utils/checkin_execucao_display.dart';
 import '../widgets/checkin_exercise_widgets.dart';
+import '../widgets/checkin_execucao_sheets.dart';
+import '../widgets/checkin_header_widgets.dart';
 import '../widgets/checkin_serie_detail_widgets.dart';
 import '../widgets/checkin_timer_widgets.dart';
-import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 
 class CheckinScreen extends ConsumerStatefulWidget {
   final int treinoId;
@@ -44,7 +45,6 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
   Duration _duration = Duration.zero;
   bool _showRestTimer = false;
   int _restSeconds = 60;
-  int _restTotalSeconds = 60;
   Timer? _restTimer;
   int? _focoTreinoExercicioId;
 
@@ -167,49 +167,11 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
     }
   }
 
-  Future<void> _setFeedback(ExecucaoExercicio ee, String value) async {
-    if (_execucao == null) return;
-    HapticFeedback.selectionClick();
-    final selected = ee.feedback == value;
-    final nextFeedback = selected ? null : value;
-    final nextRpe = selected ? null : _rpeForFeedback(value);
-    final nextDor = !selected && value == 'DOR';
-    try {
-      final updated = await ref
-          .read(checkinRepositoryProvider)
-          .marcarExercicio(
-            _execucao!.id!,
-            ee.treinoExercicioId,
-            ee.seriesFeitas,
-            feedback: nextFeedback,
-            rpe: nextRpe,
-            dor: nextDor,
-          );
-      if (!mounted) return;
-      _applyUpdated(updated);
-    } catch (e) {
-      if (mounted) {
-        FeedbackHelper.showError(context, friendlyError(e));
-      }
-    }
-  }
-
-  int _rpeForFeedback(String value) {
-    return switch (value) {
-      'FACIL' => 6,
-      'OK' => 7,
-      'DIFICIL' => 9,
-      'DOR' => 10,
-      _ => 7,
-    };
-  }
-
   void _startRestTimer(int seconds) {
     _restTimer?.cancel();
     setState(() {
       _showRestTimer = true;
       _restSeconds = seconds.clamp(15, 600).toInt();
-      _restTotalSeconds = _restSeconds;
     });
     _restTimer = Timer.periodic(const Duration(seconds: 1), (_) {
       if (!mounted) return;
@@ -257,7 +219,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
                   )
                   .toList();
       if (evolucoes.isNotEmpty) {
-        await _showEvolucaoPerformance(evolucoes);
+        await showCheckinEvolucaoSheet(context, evolucoes: evolucoes);
         if (!mounted) return;
       } else {
         await FxCelebrationOverlay.show(
@@ -280,79 +242,6 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
         });
       }
     }
-  }
-
-  Future<void> _showEvolucaoPerformance(
-    List<EvolucaoPerformance> evolucoes,
-  ) async {
-    if (!mounted) return;
-    final primary = Theme.of(context).colorScheme.primary;
-    await showFxNoticeSheet(
-      context,
-      title: 'Evolucao registrada',
-      icon: Icons.trending_up_rounded,
-      actionLabel: 'Continuar',
-      message:
-          'Voce evoluiu neste treino. A mensagem tambem ficou salva no chat com seu personal.',
-      body: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          for (final evolucao in evolucoes.take(4))
-            Padding(
-              padding: const EdgeInsets.only(bottom: 10),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(Icons.trending_up_rounded, color: primary, size: 20),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      '${_labelEvolucao(evolucao.tipo)} em ${evolucao.exercicioNome}: '
-                      '${_fmtValor(evolucao.valorAnterior, evolucao.unidade)} -> ${_fmtValor(evolucao.valorAtual, evolucao.unidade)}'
-                      '${evolucao.percentual == null ? '' : ' (+${evolucao.percentual}%)'}',
-                      style: const TextStyle(fontWeight: FontWeight.w700),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-
-  String _fmt(Duration d) {
-    final h = d.inHours;
-    final m = d.inMinutes.remainder(60);
-    final s = d.inSeconds.remainder(60);
-    if (h > 0) {
-      return '${h.toString().padLeft(2, '0')}:${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}';
-    }
-    return '${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}';
-  }
-
-  String _labelEvolucao(String tipo) {
-    switch (tipo) {
-      case 'REPETICOES':
-        return 'Repeticoes';
-      case 'VOLUME':
-        return 'Volume';
-      default:
-        return 'Carga';
-    }
-  }
-
-  String _fmtValor(double value, String unidade) {
-    final base = _fmtKg(value);
-    if (unidade.isEmpty) return base;
-    return '$base $unidade';
-  }
-
-  String _fmtKg(double value) {
-    final fixed = value.toStringAsFixed(
-      value.truncateToDouble() == value ? 0 : 1,
-    );
-    return fixed.replaceAll('.', ',');
   }
 
   void _applyUpdated(ExecucaoExercicio updated) {
@@ -395,7 +284,10 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
 
   Future<void> _sair() async {
     final exercicios = _execucao?.exercicios ?? [];
-    final doneSeries = exercicios.fold<int>(0, (sum, e) => sum + e.seriesFeitas);
+    final doneSeries = exercicios.fold<int>(
+      0,
+      (sum, e) => sum + e.seriesFeitas,
+    );
     if (doneSeries > 0 || _duration.inSeconds > 30) {
       final ok = await showFxConfirmSheet(
         context,
@@ -409,51 +301,9 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
   }
 
   Future<void> _abrirFila(List<ExecucaoExercicio> exercicios) async {
-    final picked = await showFxHomeSheet<int>(
-      context,
-      builder: (ctx) {
-        final isDark = Theme.of(ctx).brightness == Brightness.dark;
-        return FxHomeSheetSurface(
-          isDark: isDark,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              FxHomeSheetHandle(isDark: isDark),
-              const SizedBox(height: TokensStrip.s4),
-              FxHomeSheetHeader(
-                isDark: isDark,
-                title: 'Fila do treino',
-                subtitle: '${exercicios.length} exercícios',
-                leading: const Icon(Icons.format_list_numbered_rounded, size: 18),
-              ),
-              const SizedBox(height: TokensStrip.s3),
-              for (final item in exercicios)
-                ListTile(
-                  title: Text(item.exercicioNome),
-                  subtitle: Text(
-                    item.concluido
-                        ? 'Concluído'
-                        : '${item.seriesFeitas}/${item.series ?? 0} séries',
-                  ),
-                  onTap: () => Navigator.of(ctx).pop(item.treinoExercicioId),
-                ),
-            ],
-          ),
-        );
-      },
-    );
+    final picked = await showCheckinFilaSheet(context, exercicios: exercicios);
     if (picked == null || !mounted) return;
     setState(() => _focoTreinoExercicioId = picked);
-  }
-
-  String _nextExerciseLabel(List<ExecucaoExercicio> exercicios) {
-    final next =
-        exercicios
-            .where((e) => !e.concluido)
-            .cast<ExecucaoExercicio?>()
-            .firstOrNull;
-    return next?.exercicioNome ?? 'Finalizar treino';
   }
 
   @override
@@ -462,11 +312,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
     final dark = chrome.isDark;
     final primary = Theme.of(context).colorScheme.primary;
     final brand = dark ? BrandPalette.accent(primary) : primary;
-    final brandDeep = BrandPalette.deep(primary);
-    final brandSoft = BrandPalette.soft(primary, dark: dark);
-    final ink = chrome.ink;
     final mute = chrome.mute;
-    final line = chrome.line;
 
     if (_loading) {
       return fxScreenA11yScope(
@@ -515,18 +361,10 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
 
     final exercicios = _execucao?.exercicios ?? [];
     final concluidos = exercicios.where((e) => e.concluido).length;
-    final totalSeries = exercicios.fold<int>(
-      0,
-      (sum, e) => sum + (e.series ?? 0),
-    );
-    final doneSeries = exercicios.fold<int>(
-      0,
-      (sum, e) => sum + e.seriesFeitas,
-    );
-    final progresso = exercicios.isEmpty ? 0.0 : concluidos / exercicios.length;
     final current = exercicios.isEmpty ? null : _currentExercise(exercicios);
-    final currentIndex =
-        current == null ? 0 : exercicios.indexOf(current) + 1;
+    final currentIndex = current == null ? 0 : exercicios.indexOf(current) + 1;
+    final allDone =
+        exercicios.isNotEmpty && exercicios.every((e) => e.concluido);
 
     return PopScope(
       canPop: false,
@@ -540,137 +378,111 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
           useMesh: false,
           constrainWidth: false,
           safeArea: false,
-          body: Stack(
+          body: Column(
             children: [
-              Column(
-                children: [
-                  Expanded(
-                    child: CustomScrollView(
-                      slivers: [
-                        SliverToBoxAdapter(
-                          child: CheckinWorkoutHeader(
-                            treinoNome: _execucao?.treinoNome ?? 'Treino',
-                            duration: _fmt(_duration),
-                            progress: progresso,
-                            concluido: concluidos,
-                            total: exercicios.length,
-                            doneSeries: doneSeries,
-                            totalSeries: totalSeries,
-                            nextExercise: _nextExerciseLabel(exercicios),
-                            brand: brand,
-                            brandDeep: brandDeep,
-                            brandSoft: brandSoft,
-                            ink: ink,
-                            mute: mute,
-                            line: line,
-                            dark: dark,
-                            onBack: _sair,
-                          ),
-                        ),
-                        if (exercicios.isEmpty)
-                          const SliverFillRemaining(
-                            hasScrollBody: false,
-                            child: FxEmptyState(
-                              icon: 'dumbbell',
-                              title: 'Treino sem exercícios',
-                              subtitle:
-                                  'Seu personal ainda não liberou a lista de exercícios deste treino.',
-                            ),
-                          )
-                        else if (current != null)
-                          SliverPadding(
-                            padding: const EdgeInsets.fromLTRB(
-                              TokensStrip.s4,
-                              14,
-                              16,
-                              8,
-                            ),
-                            sliver: SliverToBoxAdapter(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: [
-                                  CheckinSerieCard(
-                                    ee: current,
-                                    index: currentIndex,
-                                    total: exercicios.length,
-                                    dark: dark,
-                                    brand: brand,
-                                    ink: ink,
-                                    mute: mute,
-                                    line: line,
-                                    feedback: current.feedback,
-                                    onFeedback:
-                                        (value) => _setFeedback(current, value),
-                                    onMarcar: (s) => _marcar(current, s),
-                                    onSerieDetalhada:
-                                        (numero, serie) =>
-                                            _registrarSerieDetalhada(
-                                              current,
-                                              numero: numero,
-                                              serie: serie,
-                                            ),
-                                  ),
-                                  if (exercicios.length > 1)
-                                    Align(
-                                      alignment: Alignment.centerLeft,
-                                      child: TextButton(
-                                        onPressed: () => _abrirFila(exercicios),
-                                        child: Text(
-                                          'Ver fila · ${exercicios.length} exercícios',
-                                        ),
-                                      ),
-                                    ),
-                                ],
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                  if (exercicios.isNotEmpty)
-                    SafeArea(
-                      top: false,
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(
-                          TokensStrip.s4,
-                          TokensStrip.s2,
-                          16,
-                          TokensStrip.s3,
-                        ),
-                        child: SizedBox(
-                          height: 64,
-                          child: FxLiquidPrimaryButton(
-                            label: 'Finalizar treino',
-                            icon: Icons.flag_rounded,
-                            onPressed: _concluindo ? null : _concluir,
-                            loading: _concluindo,
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
+              CheckinWorkoutHeader(
+                treinoNome: _execucao?.treinoNome ?? 'Treino',
+                contextLine: checkinChromeContextLine(
+                  duration: checkinDurationLabel(_duration),
+                  concluido: concluidos,
+                  total: exercicios.length,
+                ),
+                onBack: _sair,
+                onHelp:
+                    current != null && checkinExerciseHasTips(current)
+                        ? () =>
+                            showCheckinExerciseTipsSheet(context, ee: current)
+                        : null,
               ),
-              if (_showRestTimer)
-                Positioned(
-                  left: 0,
-                  right: 0,
-                  bottom: 88,
-                  child: Center(
-                    child: CheckinRestTimerDock(
-                      seconds: _restSeconds,
-                      totalSeconds: _restTotalSeconds,
-                      brand: brand,
-                      dark: dark,
-                      ink: ink,
-                      mute: mute,
-                      line: line,
-                      onSkip: () {
-                        _restTimer?.cancel();
-                        setState(() {
-                          _showRestTimer = false;
-                        });
-                      },
+              Expanded(
+                child:
+                    _showRestTimer
+                        ? CheckinRestFocusView(
+                          seconds: _restSeconds,
+                          onSkip: () {
+                            _restTimer?.cancel();
+                            setState(() => _showRestTimer = false);
+                          },
+                        )
+                        : exercicios.isEmpty
+                        ? const FxEmptyState(
+                          icon: 'dumbbell',
+                          title: 'Treino sem exercícios',
+                          subtitle:
+                              'Seu personal ainda não liberou a lista de exercícios deste treino.',
+                        )
+                        : current == null
+                        ? const SizedBox.shrink()
+                        : ListView(
+                          padding: EdgeInsets.zero,
+                          children: [
+                            CheckinSerieCard(
+                              ee: current,
+                              index: currentIndex,
+                              total: exercicios.length,
+                              onRegistrar:
+                                  () => _registrarSerieDetalhada(
+                                    current,
+                                    numero: current.seriesFeitas + 1,
+                                  ),
+                              onDesfazer:
+                                  current.seriesFeitas > 0
+                                      ? () => _marcar(
+                                        current,
+                                        current.seriesFeitas - 1,
+                                      )
+                                      : null,
+                              onOpenCoach:
+                                  () => showCheckinCoachSheet(
+                                    context,
+                                    ee: current,
+                                  ),
+                              onOpenDemo:
+                                  checkinExerciseHasDemo(current)
+                                      ? () => showCheckinDemoSheet(
+                                        context,
+                                        ee: current,
+                                      )
+                                      : null,
+                            ),
+                            if (exercicios.length > 1)
+                              Center(
+                                child: TextButton(
+                                  onPressed: () => _abrirFila(exercicios),
+                                  child: Text(
+                                    'Ver fila · ${exercicios.length} exercícios',
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+              ),
+              if (exercicios.isNotEmpty && !_showRestTimer)
+                SafeArea(
+                  top: false,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      TokensStrip.s4,
+                      TokensStrip.s2,
+                      TokensStrip.s4,
+                      TokensStrip.s3,
                     ),
+                    child:
+                        allDone
+                            ? SizedBox(
+                              height: checkinExecutionControlMin,
+                              child: FxLiquidPrimaryButton(
+                                label: checkinFinalizarLabel(),
+                                icon: Icons.flag_rounded,
+                                onPressed: _concluindo ? null : _concluir,
+                                loading: _concluindo,
+                                loadingLabel: 'Finalizando…',
+                              ),
+                            )
+                            : TextButton(
+                              onPressed: _concluindo ? null : _concluir,
+                              child: Text(checkinFinalizarLabel()),
+                            ),
                   ),
                 ),
             ],
