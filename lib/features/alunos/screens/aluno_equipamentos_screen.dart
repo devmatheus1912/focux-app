@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/router/safe_navigation.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -11,10 +12,9 @@ import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
-import '../../../core/widgets/fx_settings_group.dart';
-import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
+import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../exercicios/data/enums.dart';
 import '../../exercicios/data/exercicio_taxonomy_labels.dart';
 import '../providers/alunos_provider.dart';
@@ -132,56 +132,56 @@ class _AlunoEquipamentosScreenState
                 );
               },
               child: FxContentWidthLimiter(
-                child: ListView(
+                child: ListView.builder(
+                  physics: const AlwaysScrollableScrollPhysics(),
                   padding: const EdgeInsets.fromLTRB(
                     FxSettingsLayout.pageInset,
                     TokensStrip.s3,
                     FxSettingsLayout.pageInset,
                     TokensStrip.s6,
                   ),
-                  children: [
-                    FxSettingsGroup(
-                      header: 'Disponíveis',
-                      caption:
-                          'Filtra substituições inteligentes para não prescrever o que o aluno não consegue executar.',
-                      children: [
-                        for (var i = 0; i < Equipamento.values.length; i++)
-                          FxSettingsTile(
-                            fxIcon: equipamentoFxIcon(Equipamento.values[i]),
-                            label:
-                                TaxonomyLabels.equipamento[Equipamento
-                                    .values[i]] ??
-                                Equipamento.values[i].backendName,
-                            value: equipamentoChoiceValue(
-                              current.contains(Equipamento.values[i]),
-                            ),
-                            highlight: current.contains(Equipamento.values[i]),
-                            showDivider: i != Equipamento.values.length - 1,
-                            onTap:
-                                _saving
-                                    ? () {}
-                                    : () => _toggle(Equipamento.values[i]),
-                          ),
-                      ],
-                    ),
-                    const SizedBox(height: FxSettingsLayout.groupGap),
-                    FxSettingsGroup(
-                      children: [
-                        FxSettingsTile(
-                          fxIcon: 'x',
-                          label: 'Sem restrição',
-                          subtitle:
-                              'Não filtrar substituições por equipamento.',
-                          value: '',
-                          showDivider: false,
-                          onTap:
-                              _saving
-                                  ? () {}
-                                  : () => setState(() => _selected = {}),
+                  itemCount: Equipamento.values.length + 2,
+                  itemBuilder: (context, i) {
+                    if (i == 0) {
+                      return const Padding(
+                        padding: EdgeInsets.only(bottom: TokensStrip.s3),
+                        child: DashboardSectionHeader(title: 'Disponíveis'),
+                      );
+                    }
+                    if (i == Equipamento.values.length + 1) {
+                      return FxSatelliteListTile(
+                        title: 'Sem restrição',
+                        subtitle: const Text(
+                          'Não filtrar substituições por equipamento.',
                         ),
-                      ],
-                    ),
-                  ],
+                        onTap: _saving
+                            ? null
+                            : () => setState(() => _selected = {}),
+                      );
+                    }
+                    final equipamento = Equipamento.values[i - 1];
+                    final selected = current.contains(equipamento);
+                    final primary =
+                        Theme.of(context).colorScheme.primary;
+                    return FxSatelliteListTile(
+                      title:
+                          TaxonomyLabels.equipamento[equipamento] ??
+                          equipamento.backendName,
+                      trailing: Text(
+                        equipamentoChoiceValue(selected),
+                        style: FocuxHubTypography.bodyMuted(
+                          color: selected
+                              ? primary
+                              : fxScreenMute(context),
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      accent: selected ? primary : null,
+                      onTap: _saving
+                          ? null
+                          : () => _toggle(equipamento),
+                    );
+                  },
                 ),
               ),
             );

@@ -11,8 +11,9 @@ void main() {
     expect(screen, anyOf(contains('FxContentWidthLimiter'), isNot(contains('constrainWidth: false'))));
     expect(screen, anyOf(contains('friendlyError'), contains('DashboardErrorState'), contains('FxEmptyState'), contains('_erro'), contains('_TrainingEmptyState'), contains('ref.invalidate')));
     expect(screen, contains('SkeletonList'));
-    expect(screen, contains('FxSettingsGroup'));
-    expect(screen, contains('FxSettingsTile'));
+    expect(screen, isNot(contains('FxSettingsGroup')));
+    expect(screen, contains('FxSatelliteListTile'));
+    expect(screen, contains('ListView.builder'));
     expect(screen, contains('FxContentWidthLimiter'));
     expect(screen, contains('RefreshIndicator'));
     expect(screen, contains('ShellHeaderIconButton'));
