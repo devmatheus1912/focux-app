@@ -3,9 +3,9 @@ import 'package:go_router/go_router.dart';
 import 'package:rive/rive.dart';
 
 import '../../../core/theme/brand_palette.dart';
-import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../planos/paywall/paywall_catalog.dart';
@@ -138,20 +138,9 @@ class AssinaturaSuccessScreen extends StatelessWidget {
                 Semantics(
                   button: true,
                   label: 'Começar agora no dashboard',
-                  child: FilledButton(
+                  child: FxLiquidPrimaryButton(
+                    label: 'Começar agora',
                     onPressed: () => context.go('/dashboard/personal'),
-                    style: FilledButton.styleFrom(
-                      backgroundColor: accent,
-                      foregroundColor: EagleTokens.inkDeep,
-                      minimumSize: const Size.fromHeight(52),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(TokensStrip.rMd),
-                      ),
-                    ),
-                    child: const Text(
-                      'Começar agora',
-                      style: TextStyle(fontWeight: FontWeight.w900),
-                    ),
                   ),
                 ),
               ],

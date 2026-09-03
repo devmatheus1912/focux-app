@@ -8,6 +8,8 @@ void main() {
     expect(screen, anyOf(contains('fxScreenA11yScope'), contains('Semantics(')));
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(screen, contains('FxShellScaffold'));
+    expect(screen, contains('FxLiquidPrimaryButton'));
+    expect(screen, isNot(contains('FilledButton')));
     expect(screen, anyOf(contains('FxContentWidthLimiter'), isNot(contains('constrainWidth: false'))));
   });
 }

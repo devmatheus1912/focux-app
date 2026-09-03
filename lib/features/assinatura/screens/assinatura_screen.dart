@@ -12,6 +12,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/legal/focux_legal.dart';
 import '../../../core/router/safe_navigation.dart';
+import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
