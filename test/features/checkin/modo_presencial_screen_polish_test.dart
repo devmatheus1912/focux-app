@@ -18,6 +18,9 @@ void main() {
     expect(screen, contains('checkinExecutionControlMin'));
     expect(screen, isNot(contains('LinearProgressIndicator')));
     expect(screen, isNot(contains('_InfoChip')));
+    expect(screen, isNot(contains('Colors.white')));
+    expect(screen, isNot(contains('SkeletonList')));
+    expect(screen, contains('FxLoading'));
     expect(
       screen,
       anyOf(

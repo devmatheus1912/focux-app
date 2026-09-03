@@ -14,10 +14,10 @@ import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
+import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
-import '../../../core/widgets/skeleton_loader.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../data/checkin_repository.dart';
 import '../providers/checkin_provider.dart';
@@ -301,7 +301,11 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
   }
 
   Future<void> _abrirFila(List<ExecucaoExercicio> exercicios) async {
-    final picked = await showCheckinFilaSheet(context, exercicios: exercicios);
+    final picked = await showCheckinFilaSheet(
+      context,
+      exercicios: exercicios,
+      selectedId: _currentExercise(exercicios).treinoExercicioId,
+    );
     if (picked == null || !mounted) return;
     setState(() => _focoTreinoExercicioId = picked);
   }
@@ -320,9 +324,15 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
         child: FxShellScaffold(
           useMesh: false,
           constrainWidth: false,
-          body: const Padding(
-            padding: EdgeInsets.all(TokensStrip.s4),
-            child: SkeletonList(count: 5),
+          body: Padding(
+            padding: const EdgeInsets.all(TokensStrip.s4),
+            child: Center(
+              child: FxLoading.sectionShimmer(
+                context,
+                height: 180,
+                showHeader: false,
+              ),
+            ),
           ),
         ),
       );
@@ -413,45 +423,46 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
                         )
                         : current == null
                         ? const SizedBox.shrink()
-                        : ListView(
-                          padding: EdgeInsets.zero,
+                        : Column(
                           children: [
-                            CheckinSerieCard(
-                              ee: current,
-                              index: currentIndex,
-                              total: exercicios.length,
-                              onRegistrar:
-                                  () => _registrarSerieDetalhada(
-                                    current,
-                                    numero: current.seriesFeitas + 1,
-                                  ),
-                              onDesfazer:
-                                  current.seriesFeitas > 0
-                                      ? () => _marcar(
+                            Expanded(
+                              child: SingleChildScrollView(
+                                child: CheckinSerieCard(
+                                  ee: current,
+                                  index: currentIndex,
+                                  total: exercicios.length,
+                                  onRegistrar:
+                                      () => _registrarSerieDetalhada(
                                         current,
-                                        current.seriesFeitas - 1,
-                                      )
-                                      : null,
-                              onOpenCoach:
-                                  () => showCheckinCoachSheet(
-                                    context,
-                                    ee: current,
-                                  ),
-                              onOpenDemo:
-                                  checkinExerciseHasDemo(current)
-                                      ? () => showCheckinDemoSheet(
+                                        numero: current.seriesFeitas + 1,
+                                      ),
+                                  onDesfazer:
+                                      current.seriesFeitas > 0
+                                          ? () => _marcar(
+                                            current,
+                                            current.seriesFeitas - 1,
+                                          )
+                                          : null,
+                                  onOpenCoach:
+                                      () => showCheckinCoachSheet(
                                         context,
                                         ee: current,
-                                      )
-                                      : null,
+                                      ),
+                                  onOpenDemo:
+                                      checkinExerciseHasDemo(current)
+                                          ? () => showCheckinDemoSheet(
+                                            context,
+                                            ee: current,
+                                          )
+                                          : null,
+                                ),
+                              ),
                             ),
                             if (exercicios.length > 1)
-                              Center(
-                                child: TextButton(
-                                  onPressed: () => _abrirFila(exercicios),
-                                  child: Text(
-                                    'Ver fila · ${exercicios.length} exercícios',
-                                  ),
+                              TextButton(
+                                onPressed: () => _abrirFila(exercicios),
+                                child: Text(
+                                  'Ver fila · ${exercicios.length} exercícios',
                                 ),
                               ),
                           ],

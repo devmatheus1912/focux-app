@@ -43,10 +43,24 @@ void main() {
     expect(screen, contains('CheckinRestFocusView'));
     expect(screen, contains('checkinExecutionControlMin'));
     expect(screen, contains('checkinFinalizarLabel'));
+    expect(screen, contains('selectedId:'));
+    expect(screen, contains('FxLoading'));
+    expect(screen, isNot(contains('ListView(')));
+    expect(screen, isNot(contains('SkeletonList')));
     expect(screen, isNot(contains('CheckinRestTimerDock')));
     expect(screen, isNot(contains('CheckinLiveCoachingCard')));
     expect(screen, isNot(contains('CheckinLiveBadge')));
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(16));
+  });
+
+  test('fila do checkin é picker inset, sem ListTile', () {
+    final sheet = readScreenSourceBundle(
+      'lib/features/checkin/widgets/checkin_execucao_sheets.dart',
+    );
+    expect(sheet, contains('showFxInsetPickerSheet'));
+    expect(sheet, contains('FxInsetPickerSheetItem'));
+    expect(sheet, contains('selectedId'));
+    expect(sheet, isNot(contains('ListTile(')));
   });
 
   test('checkin header é S8 sem badge ao vivo', () {

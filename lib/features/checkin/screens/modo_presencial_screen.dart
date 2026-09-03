@@ -10,10 +10,10 @@ import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
-import '../../../core/widgets/skeleton_loader.dart';
 import '../../dashboard/utils/dashboard_readability.dart';
 import '../data/checkin_repository.dart';
 import '../providers/checkin_provider.dart';
@@ -164,7 +164,16 @@ class _State extends ConsumerState<ModoPresencialScreen> {
         child: FxShellScaffold(
           useMesh: false,
           constrainWidth: false,
-          body: const SkeletonList(count: 4),
+          body: Padding(
+            padding: const EdgeInsets.all(TokensStrip.s4),
+            child: Center(
+              child: FxLoading.sectionShimmer(
+                context,
+                height: 180,
+                showHeader: false,
+              ),
+            ),
+          ),
         ),
       );
     }
@@ -250,7 +259,14 @@ class _State extends ConsumerState<ModoPresencialScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               IconButton(
-                icon: Icon(Icons.close, color: heroTealMuted(0.54), size: 32),
+                tooltip: 'Sair',
+                style: IconButton.styleFrom(
+                  minimumSize: const Size(
+                    checkinExecutionControlMin,
+                    checkinExecutionControlMin,
+                  ),
+                ),
+                icon: Icon(Icons.close, color: heroTealMuted(0.54), size: 28),
                 onPressed: _sair,
               ),
               Column(
@@ -274,25 +290,41 @@ class _State extends ConsumerState<ModoPresencialScreen> {
                   ),
                 ],
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+              Column(
                 children: [
                   IconButton(
+                    tooltip: 'Exercício anterior',
+                    style: IconButton.styleFrom(
+                      minimumSize: const Size(
+                        checkinExecutionControlMin,
+                        checkinExecutionControlMin,
+                      ),
+                    ),
                     icon: Icon(
                       Icons.arrow_back_ios,
-                      color: _currentIdx > 0 ? Colors.white : Colors.white24,
-                      size: 28,
+                      color:
+                          _currentIdx > 0
+                              ? heroTealInk()
+                              : heroTealMuted(0.24),
+                      size: 22,
                     ),
                     onPressed: _currentIdx > 0 ? _prev : null,
                   ),
                   IconButton(
+                    tooltip: 'Próximo exercício',
+                    style: IconButton.styleFrom(
+                      minimumSize: const Size(
+                        checkinExecutionControlMin,
+                        checkinExecutionControlMin,
+                      ),
+                    ),
                     icon: Icon(
                       Icons.arrow_forward_ios,
                       color:
                           _currentIdx < total - 1
-                              ? Colors.white
-                              : Colors.white24,
-                      size: 28,
+                              ? heroTealInk()
+                              : heroTealMuted(0.24),
+                      size: 22,
                     ),
                     onPressed: _currentIdx < total - 1 ? _next : null,
                   ),
@@ -311,7 +343,7 @@ class _State extends ConsumerState<ModoPresencialScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  'EXERCÍCIO ${_currentIdx + 1} DE $total',
+                  'Exercício ${_currentIdx + 1} de $total',
                   style: TextStyle(
                     color: heroTealMuted(0.38),
                     fontSize: 14,
@@ -376,7 +408,7 @@ class _State extends ConsumerState<ModoPresencialScreen> {
                 const SizedBox(height: 12),
                 SizedBox(
                   width: double.infinity,
-                  height: 56,
+                  height: checkinExecutionControlMin,
                   child: OutlinedButton(
                     onPressed: () => _startRest(ex.descansoSegundos ?? 60),
                     style: OutlinedButton.styleFrom(
@@ -391,7 +423,7 @@ class _State extends ConsumerState<ModoPresencialScreen> {
                         Icon(Icons.timer, color: heroTealMuted(0.70), size: 22),
                         SizedBox(width: 8),
                         Text(
-                          'DESCANSO',
+                          'Descanso',
                           style: TextStyle(
                             color: heroTealMuted(0.70),
                             fontSize: 13,
@@ -418,7 +450,7 @@ class _State extends ConsumerState<ModoPresencialScreen> {
                       ),
                       SizedBox(height: 8),
                       Text(
-                        'CONCLUÍDO',
+                        'Concluído',
                         style: TextStyle(
                           color: EagleTokens.good,
                           fontSize: 14,
@@ -433,14 +465,14 @@ class _State extends ConsumerState<ModoPresencialScreen> {
               if (_currentIdx < (_exec!.exercicios.length - 1))
                 SizedBox(
                   width: double.infinity,
-                  height: 48,
+                  height: checkinExecutionControlMin,
                   child: TextButton(
                     onPressed: _next,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          'PRÓXIMO',
+                          'Próximo',
                           style: TextStyle(
                             color: heroTealMuted(0.54),
                             fontSize: 13,
