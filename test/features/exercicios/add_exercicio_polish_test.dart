@@ -31,7 +31,7 @@ void main() {
     expect(screen, contains('FxLiquidPrimaryButton'));
     expect(screen, contains('bottomNavigationBar'));
     expect(screen, isNot(contains('DashboardHomeActionChip')));
-    expect(screen, contains('FxInsetPickerRow'));
+    expect(screen, contains('disclosure: true'));
     expect(screen, contains('FxHelpIconButton'));
     expect(screen, contains('showNovoExercicioHelpSheet'));
     expect(screen, isNot(contains('onHelpTap')));

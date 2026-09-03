@@ -172,7 +172,7 @@ class _CollapsibleSection extends StatelessWidget {
                   ? 'Toque para esconder descrição, erros e contraindicações.'
                   : 'Opcional — aparece para o aluno na ficha do exercício.',
           value: '',
-          picker: true,
+          disclosure: true,
           showDivider: expanded,
           onTap: onToggle,
         ),

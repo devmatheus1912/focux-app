@@ -220,7 +220,6 @@ class _IdentidadeVisualScreenState
                                   fxIcon: 'article',
                                   label: identidadeLandingEditorLabel(),
                                   value: 'Landing',
-                                  picker: true,
                                   showDivider: false,
                                   onTap:
                                       () => openLandingEditorOrUpgrade(
@@ -300,19 +299,21 @@ class _IdentidadeVisualScreenState
                                 ),
                                 if (hasWhiteLabel) ...[
                                   const SizedBox(height: 10),
-                                  FxSettingsGroup(
-                                    children: [
-                                      FxSettingsTile(
-                                        fxIcon: 'target',
-                                        label: identidadeRestaurarCoresLabel(),
-                                        value: 'Padrão Focux',
-                                        showDivider: false,
-                                        onTap:
-                                            () => _pedirRestaurarCores(
-                                              hasWhiteLabel: hasWhiteLabel,
-                                            ),
+                                  TextButton(
+                                    onPressed:
+                                        () => _pedirRestaurarCores(
+                                          hasWhiteLabel: hasWhiteLabel,
+                                        ),
+                                    style: TextButton.styleFrom(
+                                      minimumSize: const Size(
+                                        FxSettingsLayout.rowMinHeight,
+                                        FxSettingsLayout.rowMinHeight,
                                       ),
-                                    ],
+                                      alignment: Alignment.centerLeft,
+                                    ),
+                                    child: Text(
+                                      identidadeRestaurarCoresLabel(),
+                                    ),
                                   ),
                                 ],
                               ],

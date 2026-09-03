@@ -78,22 +78,12 @@ class _OnboardingHeader extends StatelessWidget {
                     accent: Theme.of(context).colorScheme.primary,
                     elevationLevel: 3,
                   ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        FocuxBrandCopy.onboardingSkip,
-                        style: FocuxHubTypography.bodyMuted(
-                          color: heroTealInk().withValues(alpha: 0.78),
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      Icon(
-                        Icons.chevron_right_rounded,
-                        size: 16,
-                        color: heroTealInk().withValues(alpha: 0.55),
-                      ),
-                    ],
+                  child: Text(
+                    FocuxBrandCopy.onboardingSkip,
+                    style: FocuxHubTypography.bodyMuted(
+                      color: heroTealInk().withValues(alpha: 0.78),
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ),
