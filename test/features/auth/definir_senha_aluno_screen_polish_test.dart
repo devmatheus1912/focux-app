@@ -21,6 +21,7 @@ void main() {
     expect(screen, contains('keyboardDismissBehavior'));
     expect(screen, contains('authUnfocusAndLeave'));
     expect(screen, contains('AutofillHints.newPassword'));
+    expect(screen, contains('ProductEvents.passwordDefined'));
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(4));
   });
 }

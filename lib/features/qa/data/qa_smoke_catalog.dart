@@ -418,7 +418,7 @@ const qaSmokeEndpoints = <QaSmokeEndpoint>[
     id: 'exercises',
     area: 'exercicios',
     method: 'GET',
-    path: '/api/exercicios',
+    path: '/api/exercicios/v2',
     authMode: 'PERSONAL',
     expectedAnonymousStatus: 403,
   ),
