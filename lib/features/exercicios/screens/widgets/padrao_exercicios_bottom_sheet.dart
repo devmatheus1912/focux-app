@@ -291,6 +291,7 @@ class _ExerciseChoiceTile extends StatelessWidget {
       label: exercicio.nomeDisplay,
       subtitle: subtitle,
       value: '',
+      picker: true,
       showDivider: showDivider,
       onTap: onTap,
       accessory: Row(

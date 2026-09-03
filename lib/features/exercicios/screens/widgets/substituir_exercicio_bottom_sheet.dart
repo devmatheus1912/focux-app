@@ -303,6 +303,7 @@ class _AlternativaTile extends StatelessWidget {
       label: exercicio.nomeDisplay,
       subtitle: meta,
       value: '${item.score.clamp(0, 100)}%',
+      picker: true,
       showDivider: showDivider,
       onTap: onTap,
       accessory:
