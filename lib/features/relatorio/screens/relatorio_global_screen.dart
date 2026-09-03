@@ -4,7 +4,10 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/router/safe_navigation.dart';
+import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
+import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feature_gate.dart';
@@ -12,10 +15,10 @@ import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
-import '../../../core/widgets/fx_settings_group.dart';
-import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/operational_metric_tile.dart';
 import '../../../core/widgets/skeleton_loader.dart';
+import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../subscription/models/subscription_plan.dart';
 import '../data/relatorio_repository.dart';
@@ -178,51 +181,64 @@ class _RelatorioGlobalScreenState extends ConsumerState<RelatorioGlobalScreen> {
                         110,
                       ),
                       children: [
-                        FxSettingsGroup(
-                          header: 'Base',
-                          caption:
-                              'Média de todos os alunos, não só do ranking.',
-                          children: [
-                            FxSettingsTile(
-                              fxIcon: 'trend',
-                              label: 'Aderência média',
-                              value: relatorioAderenciaMediaLabel(
-                                dados.aderenciaMediaGeral,
-                              ),
-                              numeric: true,
-                              onTap: () {},
-                            ),
-                            FxSettingsTile(
-                              fxIcon: 'users',
-                              label: 'Alunos',
-                              value: '${dados.totalAlunos}',
-                              numeric: true,
-                              showDivider: false,
-                              onTap: () => context.go('/alunos'),
-                            ),
-                          ],
+                        const DashboardSectionHeader(title: 'Base'),
+                        const SizedBox(height: TokensStrip.s3),
+                        OperationalMetricTile(
+                          label: 'Aderência média',
+                          value: relatorioAderenciaMediaLabel(
+                            dados.aderenciaMediaGeral,
+                          ),
+                          hint: 'Média de todos os alunos, não só do ranking',
+                          color: primary,
+                          isDark: isDark,
                         ),
-                        const SizedBox(height: FxSettingsLayout.groupGap),
-                        FxSettingsGroup(
-                          header: 'Mais comprometidos',
-                          caption: 'Toque para o relatório do aluno.',
-                          children: _rankingTiles(
-                            dados.maisComprometidos,
-                            emptyLabel: 'Ainda não há treinos concluídos',
-                            emptyIcon: 'trend',
-                            attention: false,
+                        const SizedBox(height: TokensStrip.s2),
+                        InkWell(
+                          onTap: () => context.go('/alunos'),
+                          borderRadius: BorderRadius.circular(12),
+                          child: OperationalMetricTile(
+                            label: 'Alunos',
+                            value: '${dados.totalAlunos}',
+                            hint: 'Abrir a lista da base',
+                            color: primary,
+                            isDark: isDark,
                           ),
                         ),
-                        const SizedBox(height: FxSettingsLayout.groupGap),
-                        FxSettingsGroup(
-                          header: 'Precisam de atenção',
-                          caption: 'Priorize contato. Isso não é o motor de alertas.',
-                          children: _rankingTiles(
-                            dados.menosComprometidos,
-                            emptyLabel: 'Ninguém precisa de atenção extra',
-                            emptyIcon: 'alert-triangle',
-                            attention: true,
+                        const SizedBox(height: TokensStrip.s5),
+                        const DashboardSectionHeader(
+                          title: 'Mais comprometidos',
+                        ),
+                        const SizedBox(height: TokensStrip.s2),
+                        Text(
+                          'Toque para o relatório do aluno.',
+                          style: FocuxHubTypography.bodyMuted(
+                            color: fxScreenMute(context),
+                            fontWeight: FontWeight.w600,
                           ),
+                        ),
+                        const SizedBox(height: TokensStrip.s3),
+                        ..._rankingTiles(
+                          dados.maisComprometidos,
+                          emptyLabel: 'Ainda não há treinos concluídos',
+                          attention: false,
+                        ),
+                        const SizedBox(height: TokensStrip.s5),
+                        const DashboardSectionHeader(
+                          title: 'Precisam de atenção',
+                        ),
+                        const SizedBox(height: TokensStrip.s2),
+                        Text(
+                          'Priorize contato. Isso não é o motor de alertas.',
+                          style: FocuxHubTypography.bodyMuted(
+                            color: fxScreenMute(context),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: TokensStrip.s3),
+                        ..._rankingTiles(
+                          dados.menosComprometidos,
+                          emptyLabel: 'Ninguém precisa de atenção extra',
+                          attention: true,
                         ),
                       ],
                     ),
@@ -235,46 +251,55 @@ class _RelatorioGlobalScreenState extends ConsumerState<RelatorioGlobalScreen> {
   List<Widget> _rankingTiles(
     List<ResumoAluno> alunos, {
     required String emptyLabel,
-    required String emptyIcon,
     required bool attention,
   }) {
     if (alunos.isEmpty) {
       return [
-        FxSettingsTile(
-          fxIcon: emptyIcon,
-          label: emptyLabel,
-          value: '',
-          showDivider: false,
-          onTap: () {},
-        ),
+        FxSatelliteListTile(title: emptyLabel),
       ];
     }
     return [
       for (var i = 0; i < alunos.length; i++)
-        FxSettingsTile(
-          fxIcon: attention ? 'alert-triangle' : 'trend',
-          label: alunos[i].alunoNome,
-          subtitle: relatorioTreinosSubtitle(
-            alunos[i].treinosConcluidos,
-            alunos[i].totalTreinos,
-          ),
-          value: relatorioAderenciaPercentLabel(
-            alunos[i].treinosConcluidos,
-            alunos[i].totalTreinos,
-          ),
-          highlight: !attention && i == 0,
-          danger:
-              attention &&
-              alunos[i].totalTreinos > 0 &&
-              alunos[i].treinosConcluidos * 100 <
-                  alunos[i].totalTreinos * 50,
-          showDivider: i < alunos.length - 1,
-          semanticsLabel:
+        Semantics(
+          label:
               '${alunos[i].alunoNome}. '
               '${relatorioAderenciaPercentLabel(alunos[i].treinosConcluidos, alunos[i].totalTreinos)}. '
               '${relatorioTreinosSubtitle(alunos[i].treinosConcluidos, alunos[i].totalTreinos)}. '
               '${relatorioUltimoTreinoLabel(alunos[i].ultimoTreino)}',
-          onTap: () => _abrirRelatorioAluno(alunos[i]),
+          button: true,
+          child: FxSatelliteListTile(
+            title: alunos[i].alunoNome,
+            subtitle: Text(
+              relatorioTreinosSubtitle(
+                alunos[i].treinosConcluidos,
+                alunos[i].totalTreinos,
+              ),
+            ),
+            trailing: Text(
+              relatorioAderenciaPercentLabel(
+                alunos[i].treinosConcluidos,
+                alunos[i].totalTreinos,
+              ),
+              style: FocuxHubTypography.bodyMuted(
+                color: attention &&
+                        alunos[i].totalTreinos > 0 &&
+                        alunos[i].treinosConcluidos * 100 <
+                            alunos[i].totalTreinos * 50
+                    ? EagleTokens.bad
+                    : fxScreenMute(context),
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            accent: !attention && i == 0
+                ? Theme.of(context).colorScheme.primary
+                : attention &&
+                        alunos[i].totalTreinos > 0 &&
+                        alunos[i].treinosConcluidos * 100 <
+                            alunos[i].totalTreinos * 50
+                    ? EagleTokens.bad
+                    : null,
+            onTap: () => _abrirRelatorioAluno(alunos[i]),
+          ),
         ),
     ];
   }

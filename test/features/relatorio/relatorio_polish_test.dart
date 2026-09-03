@@ -12,7 +12,8 @@ void main() {
     );
 
     expect(screen, contains('fxScreenA11yScope'));
-    expect(screen, contains('FxSettingsGroup'));
+    expect(screen, isNot(contains('FxSettingsGroup')));
+    expect(screen, contains('OperationalMetricTile'));
     expect(screen, contains('FxHelpIconButton'));
     expect(screen, contains('friendlyError'));
     expect(screen, contains('Exportar relatório em PDF'));
@@ -20,7 +21,8 @@ void main() {
     expect(screen, isNot(contains('_PeriodPill')));
 
     expect(global, contains('fxScreenA11yScope'));
-    expect(global, contains('FxSettingsGroup'));
+    expect(global, isNot(contains('FxSettingsGroup')));
+    expect(global, contains('OperationalMetricTile'));
     expect(global, contains('FxHelpIconButton'));
     expect(global, contains('relatoriosHubViewed'));
     expect(global, isNot(contains('dashboardHeroCaptionOnTeal')));

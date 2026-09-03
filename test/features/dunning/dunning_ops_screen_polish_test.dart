@@ -10,7 +10,10 @@ void main() {
     expect(screen, contains('fxScreenA11yScope'));
     expect(screen, contains('FxShellScaffold'));
     expect(screen, contains('FxHelpIconButton'));
-    expect(screen, contains('FxSettingsGroup'));
+    expect(screen, isNot(contains('FxSettingsGroup')));
+    expect(screen, contains('OperationalMetricTile'));
+    expect(screen, contains('FxSatelliteListTile'));
+    expect(screen, contains('DashboardSectionHeader'));
     expect(screen, contains('FxEmptyState'));
     expect(screen, contains('FxErrorState'));
     expect(screen, contains('SkeletonList'));
@@ -25,7 +28,6 @@ void main() {
     expect(screen, isNot(contains('Aluno #')));
     expect(screen, isNot(contains('aluno_id')));
     expect(screen, isNot(contains('FxSatellitePanel')));
-    expect(screen, isNot(contains('FxSatelliteListTile')));
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(screen, isNot(contains('FilledButton')));
   });
