@@ -3,9 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
-import '../../../core/widgets/fx_settings_group.dart';
-import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../health/data/health_repository.dart';
 import '../models/ia_copilot_insight.dart';
 
@@ -124,48 +123,64 @@ class IaCopilotReadinessCard extends StatelessWidget {
     final visibleChecks = checks.take(2).toList();
     assert(modeDisplay.isNotEmpty && chrome.ink.a >= 0);
 
-    return FxSettingsGroup(
-      header: headline,
-      caption: promise,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        FxSettingsTile(
-          icon: icon,
-          label: alunoNome == null
+        DashboardSectionHeader(title: headline),
+        const SizedBox(height: TokensStrip.s2),
+        Text(
+          promise,
+          style: TextStyle(
+            color: mute,
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            height: 1.35,
+          ),
+        ),
+        const SizedBox(height: TokensStrip.s3),
+        FxSatelliteListTile(
+          title: alunoNome == null
               ? 'Escolha um aluno para analisar.'
               : 'Personalizado para $alunoNome.',
           subtitle: visibleChecks.isEmpty
               ? null
-              : visibleChecks.join(' · '),
-          value: 'Revisável',
-          showDivider: recoveryAsync != null,
-          accent: primary,
-          mute: mute,
-          onTap: () {},
+              : Text(visibleChecks.join(' · ')),
+          trailing: Text(
+            'Revisável',
+            style: TextStyle(
+              color: mute,
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          leading: Icon(icon, color: primary, size: 20),
         ),
         if (recoveryAsync != null)
           recoveryAsync!.when(
-            loading: () => FxSettingsTile(
-              icon: Icons.watch_outlined,
-              label: 'Sync wearable...',
-              value: '',
-              showDivider: false,
-              accent: primary,
-              mute: mute,
-              onTap: () {},
+            loading: () => FxSatelliteListTile(
+              title: 'Sync wearable...',
+              leading: Icon(Icons.watch_outlined, color: primary, size: 20),
             ),
             error: (_, __) => const SizedBox.shrink(),
-            data: (snapshot) => FxSettingsTile(
-              icon: snapshot == null
-                  ? Icons.watch_off_outlined
-                  : Icons.favorite_outline,
-              label: snapshot == null
+            data: (snapshot) => FxSatelliteListTile(
+              title: snapshot == null
                   ? 'Sem wearable'
                   : '${snapshot.recoveryScore}% prontidao',
-              value: 'Análise IA',
-              showDivider: false,
-              accent: primary,
-              mute: mute,
-              onTap: () {},
+              trailing: Text(
+                'Análise IA',
+                style: TextStyle(
+                  color: mute,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              leading: Icon(
+                snapshot == null
+                    ? Icons.watch_off_outlined
+                    : Icons.favorite_outline,
+                color: primary,
+                size: 20,
+              ),
             ),
           ),
       ],

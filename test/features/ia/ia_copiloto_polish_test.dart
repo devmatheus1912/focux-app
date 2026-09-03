@@ -30,7 +30,8 @@ void main() {
     expect(shellWidgets, contains('IaCopilotResultActionBar'));
     expect(shellWidgets, contains('DashboardHomeActionChip'));
     expect(shellWidgets, contains('FxConversionTextLink'));
-    expect(shellWidgets, contains('FxInsetPickerOption'));
+    expect(shellWidgets, contains('FxToggleChip'));
+    expect(shellWidgets, isNot(contains('FxSettingsGroup')));
     expect(actionsPart, contains('explicitChildNodes: true'));
     expect(shellWidgets, contains('Como funciona'));
     expect(screen, contains('não monta fichas de treino'));
