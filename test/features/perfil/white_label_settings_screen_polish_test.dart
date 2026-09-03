@@ -10,6 +10,9 @@ void main() {
     expect(screen, contains('FxShellScaffold'));
     expect(screen, anyOf(contains('FxContentWidthLimiter'), isNot(contains('constrainWidth: false'))));
     expect(screen, anyOf(contains('friendlyError'), contains('DashboardErrorState'), contains('FxEmptyState'), contains('_erro'), contains('_TrainingEmptyState'), contains('ref.invalidate')));
-    expect(screen, anyOf(contains('FxLoading'), contains('SkeletonLoader'), contains('SkeletonList'), contains('DashboardShimmer'), contains('Shimmer'), contains('IaCopilotInsightsLoading'), contains('_loading')));
+    expect(screen, contains('FxLiquidPrimaryButton'));
+    expect(screen, contains('bottomNavigationBar'));
+    expect(screen, contains('SkeletonList'));
+    expect(screen, isNot(contains('FilledButton')));
   });
 }

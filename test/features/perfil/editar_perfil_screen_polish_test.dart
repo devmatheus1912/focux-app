@@ -20,7 +20,9 @@ void main() {
     expect(screen, contains('friendlyError'));
     expect(screen, contains('FxLoading'));
     expect(screen, contains('FxSettingsGroup'));
-    expect(screen, contains('DashboardHomeActionChip'));
+    expect(screen, contains('FxLiquidPrimaryButton'));
+    expect(screen, contains('bottomNavigationBar'));
+    expect(screen, isNot(contains('DashboardHomeActionChip')));
     expect(screen, contains("'Salvando…'"));
     expect(screen, contains('Salvando alterações do perfil'));
     expect(screen, contains('FxHelpIconButton'));
