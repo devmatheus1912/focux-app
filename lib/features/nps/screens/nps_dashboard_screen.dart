@@ -2,19 +2,27 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
+import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/fx_strip_card.dart';
+import '../../../core/widgets/operational_metric_tile.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../../dashboard/widgets/dashboard_home_action_chip.dart';
+import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../data/nps_repository.dart';
+import '../utils/nps_display.dart';
 
 class NpsDashboardScreen extends ConsumerStatefulWidget {
   const NpsDashboardScreen({super.key});
@@ -75,247 +83,230 @@ class _NpsDashboardScreenState extends ConsumerState<NpsDashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final chrome = ShellChrome.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
-    final isDark = chrome.isDark;
     final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
+    final resumo = _resumo;
+    final empty = resumo == null || resumo.total == 0;
+    final firstDetrator = firstNpsDetrator(_recentes);
+
     return fxScreenA11yScope(
-      label: 'NPS & Satisfação',
+      label: 'NPS',
       child: FxShellScaffold(
         useMesh: true,
+        constrainWidth: false,
         appBar: FxShellAppBar(
-          title: 'NPS & Satisfação',
+          title: 'NPS',
           subtitle: freshnessLabel,
-          onBack: () => context.pop(),
+          onBack: () => safePopOrGo(context, '/dashboard/personal'),
+          actions: [
+            FxHelpIconButton(
+              tooltip: 'Como usar o NPS',
+              onTap:
+                  () => showFxHelpSheet(
+                    context,
+                    title: 'NPS',
+                    subtitle: 'Satisfação da base e o próximo contato.',
+                    tips: const [
+                      FxHelpTip('Score', 'O card do topo é o NPS da operação.'),
+                      FxHelpTip(
+                        'Detrator',
+                        'Nota 6 ou menos pede contato no mesmo dia.',
+                      ),
+                      FxHelpTip(
+                        'Recentes',
+                        'Os 3 últimos feedbacks ficam no fold.',
+                      ),
+                    ],
+                  ),
+            ),
+          ],
         ),
         body:
             _loading
                 ? const SkeletonList(count: 6)
                 : _erro != null
                 ? FxErrorState(
-                  chromeOnDark: chrome.isDark,
+                  chromeOnDark: isDark,
                   primary: primary,
                   message: _erro!,
                   onRetry: _load,
                 )
                 : RefreshIndicator(
+                  color: primary,
                   onRefresh: _load,
-                  child: ListView(
-                    padding: const EdgeInsets.all(TokensStrip.s4),
-                    children: [
-                      if (_resumo != null) ...[
-                        FxSatellitePanel(
-                          accent: primary,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  child:
+                      empty
+                          ? ListView(
+                            physics: const AlwaysScrollableScrollPhysics(),
                             children: [
-                              _kpi('NPS', _resumo!.npsScore.toStringAsFixed(1)),
-                              _kpi('Média', _resumo!.media.toStringAsFixed(1)),
-                              _kpi('Respostas', '${_resumo!.total}'),
+                              const SizedBox(height: 48),
+                              FxEmptyState(
+                                icon: 'star',
+                                title: 'Nenhuma resposta ainda',
+                                subtitle:
+                                    'Assim que seus alunos responderem à pesquisa, o feedback aparece aqui.',
+                                action: FxEmptyAction(
+                                  label: 'Ver alunos',
+                                  onTap:
+                                      () => goPersonalShellTab(
+                                        context,
+                                        '/alunos',
+                                      ),
+                                ),
+                              ),
                             ],
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: _segmento(
-                                'Promotores',
-                                _resumo!.promotores,
-                                _resumo!.total,
-                                EagleTokens.good,
-                                Icons.sentiment_very_satisfied,
-                              ),
+                          )
+                          : FxContentWidthLimiter(
+                            child: ListView(
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              keyboardDismissBehavior:
+                                  ScrollViewKeyboardDismissBehavior.onDrag,
+                              padding: const EdgeInsets.all(TokensStrip.s4),
+                              children: [
+                                _NpsFocusCard(
+                                  resumo: resumo,
+                                  firstDetrator: firstDetrator,
+                                  isDark: isDark,
+                                  onContatar: _contatarDetrator,
+                                ),
+                                const SizedBox(height: TokensStrip.s4),
+                                OperationalMetricTile(
+                                  label: 'Detratores',
+                                  value: '${resumo.detratores}',
+                                  hint: '${resumo.promotores} promotores',
+                                  color: EagleTokens.bad,
+                                  isDark: isDark,
+                                  emphasis:
+                                      resumo.detratores > 0
+                                          ? OperationalMetricEmphasis.alert
+                                          : OperationalMetricEmphasis.normal,
+                                ),
+                                const SizedBox(height: TokensStrip.s2),
+                                OperationalMetricTile(
+                                  label: 'Média',
+                                  value: resumo.media.toStringAsFixed(1),
+                                  hint: '${resumo.total} respostas',
+                                  color: primary,
+                                  isDark: isDark,
+                                ),
+                                const SizedBox(height: TokensStrip.s4),
+                                const DashboardSectionHeader(
+                                  title: 'Feedback recente',
+                                ),
+                                const SizedBox(height: TokensStrip.s2),
+                                for (final item in npsRecentPreview(_recentes))
+                                  _NpsTile(
+                                    item: item,
+                                    onContatar:
+                                        npsIsDetrator(item.score) &&
+                                                item.alunoId != null
+                                            ? () => _contatarDetrator(item)
+                                            : null,
+                                  ),
+                              ],
                             ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: _segmento(
-                                'Neutros',
-                                _resumo!.neutros,
-                                _resumo!.total,
-                                EagleTokens.gold,
-                                Icons.sentiment_neutral,
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: _segmento(
-                                'Detratores',
-                                _resumo!.detratores,
-                                _resumo!.total,
-                                EagleTokens.bad,
-                                Icons.sentiment_very_dissatisfied,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                      const SizedBox(height: 16),
-                      const Text(
-                        'Feedback recente',
-                        style: TextStyle(fontWeight: FontWeight.w600),
-                      ),
-                      const SizedBox(height: 8),
-                      if (_recentes.isEmpty)
-                        const FxEmptyState(
-                          icon: 'star',
-                          title: 'Nenhuma resposta ainda',
-                          subtitle:
-                              'Assim que seus alunos responderem à pesquisa, o feedback aparece aqui.',
-                        ),
-                      ..._recentes.map((n) {
-                        if (n.score <= 6) {
-                          return _detratorCard(n, isDark: isDark);
-                        }
-                        final scoreColor = EagleTokens.npsScoreColor(
-                          n.score,
-                          isDark: isDark,
-                        );
-                        return FxSatelliteListTile(
-                          margin: const EdgeInsets.only(bottom: 8),
-                          title:
-                              n.comentario?.isNotEmpty == true
-                                  ? n.comentario!
-                                  : 'Sem comentário',
-                          titleCase: false,
-                          accent: scoreColor,
-                          subtitle: Text(
-                            '${_classify(n.score)} · ${n.criadoEm}',
                           ),
-                          leading: CircleAvatar(
-                            backgroundColor: scoreColor,
-                            foregroundColor: Colors.white,
-                            child: Text('${n.score}'),
-                          ),
-                        );
-                      }),
-                    ],
-                  ),
                 ),
       ),
     );
   }
+}
 
-  Widget _detratorCard(NpsItem n, {required bool isDark}) {
-    final detractorColor = EagleTokens.npsScoreColor(n.score, isDark: isDark);
-    return FxSatellitePanel(
-      accent: detractorColor,
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(12),
+class _NpsFocusCard extends StatelessWidget {
+  const _NpsFocusCard({
+    required this.resumo,
+    required this.firstDetrator,
+    required this.isDark,
+    required this.onContatar,
+  });
+
+  final NpsResumo resumo;
+  final NpsItem? firstDetrator;
+  final bool isDark;
+  final void Function(NpsItem item) onContatar;
+
+  @override
+  Widget build(BuildContext context) {
+    final chrome = ShellChrome.forDark(isDark);
+    return FxStripCard(
+      emphasize: true,
+      semanticsLabel: 'NPS ${resumo.npsScore.toStringAsFixed(1)}',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              CircleAvatar(
-                backgroundColor: detractorColor,
-                foregroundColor: Colors.white,
-                radius: 18,
-                child: Text(
-                  '${n.score}',
-                  style: FocuxHubTypography.bodyMuted(color: Colors.white),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      n.alunoNome?.isNotEmpty == true
-                          ? n.alunoNome!
-                          : 'Detrator',
-                      style: const TextStyle(fontWeight: FontWeight.w700),
-                    ),
-                    Text(
-                      'Detrator · ${n.criadoEm}',
-                      style: FocuxHubTypography.bodyMuted(
-                        color: ShellChrome.of(context).mute,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          if (n.comentario?.isNotEmpty == true) ...[
-            const SizedBox(height: 10),
-            Text(n.comentario!, style: const TextStyle(height: 1.4)),
-          ],
-          const SizedBox(height: 12),
+          Text('NPS', style: FocuxHubTypography.chip(chrome.mute)),
+          const SizedBox(height: 6),
           Text(
-            'Playbook: entre em contato para entender o problema e recuperar a confiança.',
-            style: FocuxHubTypography.bodyMuted(
-              color: Theme.of(context).colorScheme.onSurface,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: 10),
-          FilledButton.icon(
-            onPressed: n.alunoId != null ? () => _contatarDetrator(n) : null,
-            icon: const Icon(Icons.chat_bubble_outline, size: 18),
-            label: const Text('Entrar em contato'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _kpi(String label, String value) => Column(
-    children: [
-      Text(
-        value,
-        style: FocuxHubTypography.kpi(
-          color: Theme.of(context).colorScheme.onSurface,
-          fontSize: FocuxHubTypography.metricLg,
-        ),
-      ),
-      Text(
-        label,
-        style: FocuxHubTypography.bodyMuted(
-          color: Theme.of(context).colorScheme.onSurfaceVariant,
-        ),
-      ),
-    ],
-  );
-
-  Widget _segmento(
-    String label,
-    int valor,
-    int total,
-    Color color,
-    IconData icon,
-  ) {
-    final pct = total > 0 ? (valor * 100 / total).round() : 0;
-    return FxSatellitePanel(
-      accent: color,
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-      child: Column(
-        children: [
-          Icon(icon, color: color, size: 20),
-          const SizedBox(height: 4),
-          Text(
-            '$valor',
+            resumo.npsScore.toStringAsFixed(1),
             style: FocuxHubTypography.kpi(
-              color: color,
-              fontSize: FocuxHubTypography.metricEm,
+              color: chrome.ink,
+              fontSize: FocuxHubTypography.metricLg,
             ),
           ),
+          const SizedBox(height: 6),
           Text(
-            '$pct% · $label',
-            style: FocuxHubTypography.chip(
-              Theme.of(context).colorScheme.onSurfaceVariant,
+            resumo.detratores == 0
+                ? 'Sem detrator no recorte'
+                : '${resumo.detratores} ${resumo.detratores == 1 ? 'detrator' : 'detratores'} para contato',
+            style: FocuxHubTypography.body(
+              color: chrome.ink,
+            ).copyWith(fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: TokensStrip.s3),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: DashboardHomeActionChip(
+              label:
+                  firstDetrator == null
+                      ? 'Ver alunos'
+                      : 'Contatar detrator',
+              accent:
+                  firstDetrator == null
+                      ? Theme.of(context).colorScheme.primary
+                      : EagleTokens.bad,
+              isDark: isDark,
+              onPressed: () {
+                final alvo = firstDetrator;
+                if (alvo == null) {
+                  goPersonalShellTab(context, '/alunos');
+                  return;
+                }
+                onContatar(alvo);
+              },
             ),
-            textAlign: TextAlign.center,
           ),
         ],
       ),
     );
   }
+}
 
-  String _classify(int score) {
-    if (score >= 9) return 'Promotor';
-    if (score >= 7) return 'Neutro';
-    return 'Detrator';
+class _NpsTile extends StatelessWidget {
+  const _NpsTile({required this.item, this.onContatar});
+
+  final NpsItem item;
+  final VoidCallback? onContatar;
+
+  @override
+  Widget build(BuildContext context) {
+    final detrator = npsIsDetrator(item.score);
+    return FxSatelliteListTile(
+      title:
+          item.comentario?.trim().isNotEmpty == true
+              ? item.comentario!.trim()
+              : (item.alunoNome ?? 'Sem comentário'),
+      titleCase: false,
+      subtitle: Text('${npsClassify(item.score)} · ${item.criadoEm}'),
+      accent: detrator ? EagleTokens.bad : null,
+      trailing: Text(
+        '${item.score}',
+        style: FocuxHubTypography.bodyMuted(
+          color: fxScreenMute(context),
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+      onTap: onContatar,
+    );
   }
 }

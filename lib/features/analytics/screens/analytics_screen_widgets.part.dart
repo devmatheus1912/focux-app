@@ -16,93 +16,82 @@ class _AnalyticsBody extends StatelessWidget {
 
     return CustomScrollView(
       physics: const AlwaysScrollableScrollPhysics(),
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       slivers: [
-        // ── Header ──────────────────────────────────────────────────────────
-        SliverSafeArea(
-          bottom: false,
-          sliver: SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 10, 20, 8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Column(
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(
+              TokensStrip.s4,
+              TokensStrip.s2,
+              TokensStrip.s4,
+              TokensStrip.s4,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Semantics(
+                  label:
+                      'Inadimplência ${churn.toStringAsFixed(1)} por cento',
+                  child: FxStripCard(
+                  emphasize: true,
+                  semanticsLabel:
+                      'Inadimplência ${churn.toStringAsFixed(1)} por cento',
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'OPERACIONAL',
-                        style: TextStyle(
-                          color: brand,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 0.8,
+                        'Inadimplência',
+                        style: FocuxHubTypography.chip(mute),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        '${churn.toStringAsFixed(1)}%',
+                        style: FocuxHubTypography.kpi(
+                          color: ink,
+                          fontSize: FocuxHubTypography.metricLg,
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 6),
                       Text(
-                        'Analytics',
-                        style: TextStyle(
+                        data.inadimplentes == 0
+                            ? 'Nenhuma cobrança em atraso'
+                            : '${data.inadimplentes} ${data.inadimplentes == 1 ? 'aluno' : 'alunos'} em atraso',
+                        style: FocuxHubTypography.body(
                           color: ink,
-                          fontSize: 28,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: -0.5,
+                        ).copyWith(fontWeight: FontWeight.w700),
+                      ),
+                      const SizedBox(height: TokensStrip.s3),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: DashboardHomeActionChip(
+                          label: 'Ver financeiro',
+                          accent:
+                              data.inadimplentes > 0
+                                  ? EagleTokens.bad
+                                  : brand,
+                          isDark: dark,
+                          onPressed: () => context.push('/financeiro'),
                         ),
                       ),
                     ],
                   ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 7,
-                    ),
-                    decoration: fxListCardDecoration(
-                      context,
-                      accent: brand,
-                      radius: 10,
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(Icons.sync, color: mute, size: 13),
-                        const SizedBox(width: 5),
-                        Text(
-                          'Tempo real',
-                          style: TextStyle(
-                            color: ink,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-
-        // ── KPIs principais ─────────────────────────────────────────────────
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 8, 16, 16),
-            child: GridView.count(
-              crossAxisCount: 2,
-              crossAxisSpacing: 10,
-              mainAxisSpacing: 10,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              childAspectRatio: 1.5,
-              children: [
-                _KpiCard(label: 'WAU', value: '${data.wau}'),
-                _KpiCard(label: 'MAU', value: '${data.mau}'),
-                _KpiCard(
-                  label: 'CHURN',
-                  value: '${churn.toStringAsFixed(1)}%',
                 ),
-                _KpiCard(
-                  label: 'RET D30',
+                ),
+                const SizedBox(height: TokensStrip.s3),
+                OperationalMetricTile(
+                  label: 'WAU',
+                  value: '${data.wau}',
+                  hint: 'MAU ${data.mau}',
+                  color: brand,
+                  isDark: dark,
+                ),
+                const SizedBox(height: TokensStrip.s2),
+                OperationalMetricTile(
+                  label: 'Retenção D30',
                   value: '${data.retencaoD30.toStringAsFixed(1)}%',
+                  hint: 'D7 ${data.retencaoD7.toStringAsFixed(1)}%',
+                  color: EagleTokens.good,
+                  isDark: dark,
                 ),
               ],
             ),
@@ -159,62 +148,6 @@ class _AnalyticsBody extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-// ─── KPI card ─────────────────────────────────────────────────────────────────
-
-class _KpiCard extends StatelessWidget {
-  final String label;
-  final String value;
-
-  const _KpiCard({
-    required this.label,
-    required this.value,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final chrome = ShellChrome.of(context);
-    final ink = chrome.ink;
-    final mute = chrome.mute;
-    final line = chrome.line;
-    final primary = Theme.of(context).colorScheme.primary;
-
-    return Semantics(
-      label: '$label: $value',
-      child: Container(
-        padding: const EdgeInsets.all(14),
-        decoration: fxListCardDecoration(
-          context,
-          accent: primary,
-          radius: 18,
-        ).copyWith(border: Border.all(color: line)),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              label.toUpperCase(),
-              style: TextStyle(
-                color: mute,
-                fontSize: 10,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 0.8,
-              ),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              value,
-              style: FocuxTypography.display(color: ink).copyWith(
-                fontSize: 26,
-                fontWeight: FontWeight.w700,
-                height: 1,
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }
