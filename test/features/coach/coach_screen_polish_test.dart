@@ -17,6 +17,11 @@ void main() {
     expect(screen, contains('emphasize: true'));
     expect(screen, contains('FxEmptyAction'));
     expect(screen, contains('keyboardDismissBehavior'));
+    expect(screen, contains('getHome'));
+    expect(screen, contains('Abrir aluno'));
+    expect(screen, contains('homeCoachDismissed'));
+    expect(screen, contains('Como calculamos'));
+    expect(screen, contains('ShellChrome.forDark'));
     expect(screen, isNot(contains('CircularProgressIndicator')));
   });
 }

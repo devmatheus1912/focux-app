@@ -83,6 +83,7 @@ class AnalyticsDashboard {
   final FunilAtivacao? funil;
   final List<WauSemanal> evolucaoWau;
   final List<CohortRetencao> cohort;
+  final DateTime? fetchedAt;
 
   const AnalyticsDashboard({
     required this.totalAlunos,
@@ -95,6 +96,7 @@ class AnalyticsDashboard {
     this.funil,
     required this.evolucaoWau,
     required this.cohort,
+    this.fetchedAt,
   });
 
   factory AnalyticsDashboard.fromJson(Map<String, dynamic> j) =>
@@ -118,6 +120,7 @@ class AnalyticsDashboard {
             ((j['cohort'] as List?) ?? [])
                 .map((e) => CohortRetencao.fromJson(e as Map<String, dynamic>))
                 .toList(),
+        fetchedAt: DateTime.tryParse(j['fetchedAt']?.toString() ?? ''),
       );
 }
 
@@ -129,7 +132,7 @@ class AnalyticsRepository {
   AnalyticsRepository(ApiClient c) : _dio = c.dio;
 
   Future<AnalyticsDashboard> getDashboard() async {
-    final r = await _dio.get('/api/analytics');
+    final r = await _dio.get('/api/analytics/home');
     return AnalyticsDashboard.fromJson(r.data as Map<String, dynamic>);
   }
 

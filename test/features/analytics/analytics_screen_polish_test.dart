@@ -21,5 +21,8 @@ void main() {
     expect(screen, isNot(contains('class _KpiCard')));
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(screen, contains('RefreshIndicator'));
+    expect(screen, contains('financeiroViewed'));
+    expect(screen, contains('Como calculamos'));
+    expect(screen, contains('isDark'));
   });
 }

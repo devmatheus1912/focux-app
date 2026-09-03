@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/analytics/analytics_service.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
@@ -92,6 +93,7 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
                     title: 'Saúde da base',
                     subtitle: 'Quem está em risco e o que fazer agora.',
                     tips: const [
+                      FxHelpTip('Como calculamos', retencaoComoCalculamos),
                       FxHelpTip(
                         'Risco alto',
                         'O card do topo é quem precisa de contato hoje.',
@@ -99,10 +101,6 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
                       FxHelpTip(
                         'Lista',
                         'Os 3 primeiros já vêm do servidor, ordenados por risco.',
-                      ),
-                      FxHelpTip(
-                        'Cálculo',
-                        'A rotina atualiza os scores aos domingos.',
                       ),
                     ],
                   ),
@@ -136,11 +134,12 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
                                     'Cadastre alunos e aguarde a primeira leitura.',
                                 action: FxEmptyAction(
                                   label: 'Ver alunos',
-                                  onTap:
-                                      () => goPersonalShellTab(
-                                        context,
-                                        '/alunos',
-                                      ),
+                                  onTap: () {
+                                    AnalyticsService.instance.track(
+                                      ProductEvents.alunosViewed,
+                                    );
+                                    goPersonalShellTab(context, '/alunos');
+                                  },
                                 ),
                               ),
                             ],
@@ -167,10 +166,16 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
                                           : null,
                                   onAction:
                                       home.alto + home.medio + home.saudavel > 3
-                                          ? () => goPersonalShellTab(
-                                            context,
-                                            '/alunos?filtro=risco',
-                                          )
+                                          ? () {
+                                            AnalyticsService.instance.track(
+                                              ProductEvents.alunosFilterChanged,
+                                              props: {'filtro': 'risco'},
+                                            );
+                                            goPersonalShellTab(
+                                              context,
+                                              '/alunos?filtro=risco',
+                                            );
+                                          }
                                           : null,
                                 ),
                                 const SizedBox(height: TokensStrip.s2),
@@ -244,9 +249,14 @@ class _RetencaoFocusCard extends StatelessWidget {
               onPressed: () {
                 final alvo = firstAlto;
                 if (alvo == null) {
+                  AnalyticsService.instance.track(ProductEvents.alunosViewed);
                   goPersonalShellTab(context, '/alunos');
                   return;
                 }
+                AnalyticsService.instance.track(
+                  ProductEvents.alertaRiscoOpened,
+                  props: {'alunoId': alvo.alunoId},
+                );
                 context.push('/alunos/${alvo.alunoId}');
               },
             ),

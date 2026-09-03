@@ -21,5 +21,9 @@ void main() {
     expect(screen, isNot(contains('FilledButton')));
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(screen, contains('RefreshIndicator'));
+    expect(screen, contains('chatThreadOpened'));
+    expect(screen, contains('Como calculamos'));
+    expect(screen, contains("queryParameters['filtro']"));
+    expect(screen, contains('isDark'));
   });
 }

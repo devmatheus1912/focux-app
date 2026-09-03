@@ -17,3 +17,13 @@ NpsItem? firstNpsDetrator(List<NpsItem> items) {
 
 List<NpsItem> npsRecentPreview(List<NpsItem> items) =>
     items.take(3).toList(growable: false);
+
+const npsComoCalculamos =
+    'Promotores (9–10) menos detratores (0–6), em % do total.';
+
+List<NpsItem> npsItemsForFiltro(List<NpsItem> items, String? filtro) {
+  if (filtro == 'detratores') {
+    return items.where((item) => npsIsDetrator(item.score)).toList();
+  }
+  return items;
+}
