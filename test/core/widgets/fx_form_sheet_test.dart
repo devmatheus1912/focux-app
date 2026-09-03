@@ -26,17 +26,21 @@ void main() {
     );
 
     await tester.tap(find.text('abrir'));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
     expect(find.text('Novo item'), findsOneWidget);
 
     await tester.tap(find.text('Cancelar'));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
     expect(result, isFalse);
 
     await tester.tap(find.text('abrir'));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
     await tester.tap(find.text('Criar'));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
     expect(result, isTrue);
   });
 
@@ -59,10 +63,12 @@ void main() {
     );
 
     await tester.tap(find.text('avisar'));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
     expect(find.text('Pronto'), findsOneWidget);
     await tester.tap(find.text('Entendi'));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
     expect(find.text('Pronto'), findsNothing);
   });
 }

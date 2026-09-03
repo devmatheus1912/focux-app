@@ -6,6 +6,7 @@ import '../theme/design_tokens.dart';
 import '../theme/focux_hub_typography.dart';
 import '../theme/tokens_strip.dart';
 import 'fx_home_sheet.dart';
+import 'fx_motion.dart';
 
 /// Sheet de formulário curto — substitui `AlertDialog` com campos.
 ///
@@ -111,24 +112,30 @@ class _FxFormSheet extends StatelessWidget {
             child: SingleChildScrollView(child: child),
           ),
           const SizedBox(height: 20),
-          SizedBox(
-            height: 52,
-            child: ElevatedButton(
-              onPressed: () {
-                if (destructive) HapticFeedback.heavyImpact();
-                Navigator.of(context).pop(true);
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: accent,
-                foregroundColor: onAccent,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
+          if (destructive)
+            SizedBox(
+              height: 52,
+              child: ElevatedButton(
+                onPressed: () {
+                  HapticFeedback.heavyImpact();
+                  Navigator.of(context).pop(true);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: accent,
+                  foregroundColor: onAccent,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  elevation: 0,
                 ),
-                elevation: 0,
+                child: Text(confirmLabel),
               ),
-              child: Text(confirmLabel),
+            )
+          else
+            FxLiquidPrimaryButton(
+              label: confirmLabel,
+              onPressed: () => Navigator.of(context).pop(true),
             ),
-          ),
           const SizedBox(height: 10),
           SizedBox(
             height: 48,
@@ -216,20 +223,9 @@ class _FxNoticeSheet extends StatelessWidget {
           ),
           const SizedBox(height: 20),
           ...extraActions,
-          SizedBox(
-            height: 52,
-            child: ElevatedButton(
-              onPressed: () => Navigator.of(context).pop(),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: primary,
-                foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                elevation: 0,
-              ),
-              child: Text(actionLabel),
-            ),
+          FxLiquidPrimaryButton(
+            label: actionLabel,
+            onPressed: () => Navigator.of(context).pop(),
           ),
         ],
       ),

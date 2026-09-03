@@ -19,6 +19,7 @@ import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_icon.dart';
 import '../../../core/widgets/fx_inset_picker_sheet.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
