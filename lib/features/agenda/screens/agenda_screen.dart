@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/config/env.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -36,7 +37,7 @@ import '../../../core/widgets/skeleton_loader.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import 'package:focux_app/core/widgets/fx_shell_scaffold.dart';
 import '../../dashboard/constants/dashboard_layout.dart';
-import '../../dashboard/utils/dashboard_readability.dart';
+import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../widgets/agenda_form_sheets.dart';
 
 part 'agenda_screen_actions.part.dart';
@@ -132,8 +133,7 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
   }
 
   Future<void> _novoAgendamento({DateTime? slot}) async {
-    final selectedDate =
-        slot ?? _weekStart.add(Duration(days: _selectedIdx));
+    final selectedDate = slot ?? _weekStart.add(Duration(days: _selectedIdx));
     await context.push('/agenda/novo', extra: selectedDate);
     if (!mounted) return;
     _load(force: true);
@@ -218,6 +218,7 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
       label: 'Agenda',
       child: FxShellScaffold(
         useMesh: true,
+        constrainWidth: false,
         extendBody: true,
         safeArea: false,
         body: SafeArea(
@@ -229,7 +230,9 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                 AgendaHubHeader(
                   freshnessLabel: freshnessLabel,
                   onHelp: () {
-                    AnalyticsService.instance.track(ProductEvents.agendaHelpOpened);
+                    AnalyticsService.instance.track(
+                      ProductEvents.agendaHelpOpened,
+                    );
                     showAgendaHelpSheet(context);
                   },
                   onIcal: _copyIcalLink,
@@ -251,9 +254,10 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                   child: Row(
                     children: List.generate(7, (i) {
                       final dayDate = _weekStart.add(Duration(days: i));
-                      final count = agendaVisibleEvents(
-                        eventosMap[i] ?? const <Agendamento>[],
-                      ).length;
+                      final count =
+                          agendaVisibleEvents(
+                            eventosMap[i] ?? const <Agendamento>[],
+                          ).length;
                       return Expanded(
                         child: Padding(
                           padding: EdgeInsets.only(
@@ -287,64 +291,64 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                       TokensStrip.s4,
                       TokensStrip.s2,
                     ),
-                    child: Text(
-                      dayHeading,
-                      style: dashboardPageTitleStyle(
-                        context,
-                        color: chrome.ink,
-                      ).copyWith(fontSize: 16),
-                    ),
+                    child: DashboardSectionHeader(title: dayHeading),
                   ),
                 Expanded(
-                  child: _erro != null
-                      ? FxErrorState(
-                          chromeOnDark: isDark,
-                          primary: primary,
-                          message: friendlyError(_erro!),
-                          onRetry: () => _load(force: true),
-                        )
-                      : _loading
-                      ? const SkeletonList(count: 4)
-                      : RefreshIndicator(
-                          color: primary,
-                          onRefresh: () {
-                            AnalyticsService.instance.track(
-                              ProductEvents.agendaRefreshed,
-                            );
-                            return _load(force: true);
-                          },
-                          child: visible.isEmpty
-                              ? CustomScrollView(
-                                  physics:
-                                      const AlwaysScrollableScrollPhysics(),
-                                  slivers: [
-                                    SliverPadding(
-                                      padding: EdgeInsets.fromLTRB(
-                                        TokensStrip.s4,
-                                        TokensStrip.s1,
-                                        TokensStrip.s4,
+                  child:
+                      _erro != null
+                          ? FxErrorState(
+                            chromeOnDark: isDark,
+                            primary: primary,
+                            message: friendlyError(_erro!),
+                            onRetry: () => _load(force: true),
+                          )
+                          : _loading
+                          ? const SkeletonList(count: 4)
+                          : RefreshIndicator(
+                            color: primary,
+                            onRefresh: () {
+                              AnalyticsService.instance.track(
+                                ProductEvents.agendaRefreshed,
+                              );
+                              return _load(force: true);
+                            },
+                            child:
+                                visible.isEmpty
+                                    ? CustomScrollView(
+                                      physics:
+                                          const AlwaysScrollableScrollPhysics(),
+                                      keyboardDismissBehavior:
+                                          ScrollViewKeyboardDismissBehavior
+                                              .onDrag,
+                                      slivers: [
+                                        SliverPadding(
+                                          padding: EdgeInsets.fromLTRB(
+                                            TokensStrip.s4,
+                                            TokensStrip.s1,
+                                            TokensStrip.s4,
+                                            DashboardLayout.bottomDockClearance,
+                                          ),
+                                          sliver: SliverToBoxAdapter(
+                                            child: AgendaDayEmptyPanel(
+                                              dayLabel: dayHeading,
+                                              onNew: () => _novoAgendamento(),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    )
+                                    : ListView(
+                                      physics:
+                                          const AlwaysScrollableScrollPhysics(),
+                                      keyboardDismissBehavior:
+                                          ScrollViewKeyboardDismissBehavior
+                                              .onDrag,
+                                      padding: const EdgeInsets.fromLTRB(
+                                        FxSettingsLayout.pageInset,
+                                        0,
+                                        FxSettingsLayout.pageInset,
                                         DashboardLayout.bottomDockClearance,
                                       ),
-                                      sliver: SliverToBoxAdapter(
-                                        child: AgendaDayEmptyPanel(
-                                          dayLabel: dayHeading,
-                                          onNew: () => _novoAgendamento(),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                )
-                              : ListView(
-                                  physics:
-                                      const AlwaysScrollableScrollPhysics(),
-                                  padding: const EdgeInsets.fromLTRB(
-                                    FxSettingsLayout.pageInset,
-                                    0,
-                                    FxSettingsLayout.pageInset,
-                                    DashboardLayout.bottomDockClearance,
-                                  ),
-                                  children: [
-                                    FxSettingsGroup(
                                       children: [
                                         for (var i = 0; i < lane.length; i++)
                                           if (lane[i] is AgendaLaneGap)
@@ -353,11 +357,13 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                                                 (lane[i] as AgendaLaneGap)
                                                     .duration,
                                               ),
-                                              showDivider: i < lane.length - 1,
-                                              onTap: () => _novoAgendamento(
-                                                slot: (lane[i] as AgendaLaneGap)
-                                                    .from,
-                                              ),
+                                              onTap:
+                                                  () => _novoAgendamento(
+                                                    slot:
+                                                        (lane[i]
+                                                                as AgendaLaneGap)
+                                                            .from,
+                                                  ),
                                             )
                                           else
                                             AgendaEventCard(
@@ -372,34 +378,32 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                                               emphasized:
                                                   (lane[i] as AgendaLaneEvent)
                                                       .next,
-                                              showDivider: i < lane.length - 1,
-                                              onTap: () =>
-                                                  _openAgendamentoDetails(
-                                                (lane[i] as AgendaLaneEvent)
-                                                    .agendamento,
-                                              ),
+                                              onTap:
+                                                  () => _openAgendamentoDetails(
+                                                    (lane[i] as AgendaLaneEvent)
+                                                        .agendamento,
+                                                  ),
                                             ),
+                                        if (cancelled > 0) ...[
+                                          const SizedBox(
+                                            height:
+                                                FxSettingsLayout
+                                                    .footerAfterGroup,
+                                          ),
+                                          Text(
+                                            cancelled == 1
+                                                ? '1 horário cancelado oculto'
+                                                : '$cancelled horários cancelados ocultos',
+                                            textAlign: TextAlign.center,
+                                            style: FocuxHubTypography.bodyMuted(
+                                              color: chrome.mute,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ],
                                       ],
                                     ),
-                                    if (cancelled > 0) ...[
-                                      const SizedBox(
-                                        height: FxSettingsLayout.footerAfterGroup,
-                                      ),
-                                      Text(
-                                        cancelled == 1
-                                            ? '1 horário cancelado oculto'
-                                            : '$cancelled horários cancelados ocultos',
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                          color: chrome.mute,
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                    ],
-                                  ],
-                                ),
-                        ),
+                          ),
                 ),
               ],
             ),

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../support/screen_source_bundle.dart';
@@ -46,6 +48,29 @@ void main() {
     expect(screen, isNot(contains('ListTile(')));
     expect(screen, isNot(contains('MaterialPageRoute')));
     expect(screen, isNot(contains('quem sera atendido')));
+    expect(screen, contains('constrainWidth: false'));
+    expect(
+      File(
+        'lib/features/agenda/widgets/agenda_next_banner.dart',
+      ).readAsStringSync(),
+      allOf(
+        contains('FxStripCard'),
+        contains('emphasize: true'),
+        contains('FxSatelliteListTile'),
+      ),
+    );
+    expect(
+      File(
+        'lib/features/agenda/widgets/agenda_event_card.dart',
+      ).readAsStringSync(),
+      contains('FxSatelliteListTile'),
+    );
+    expect(
+      File(
+        'lib/features/agenda/widgets/agenda_day_empty_panel.dart',
+      ).readAsStringSync(),
+      allOf(contains('FxEmptyState'), contains('FxEmptyAction')),
+    );
     expect(screen, contains('_eventActions'));
     expect(screen, contains('_danger'));
     expect(screen, isNot(contains('Icons.delete_outline_rounded')));
