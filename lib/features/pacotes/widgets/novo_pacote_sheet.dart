@@ -28,18 +28,6 @@ Future<bool> showNovoPacoteSheet(
   return created ?? false;
 }
 
-/// Confirma desativação antes de remover da vitrine.
-Future<bool> confirmDesativarPacote(BuildContext context, String titulo) {
-  return showFxConfirmSheet(
-    context,
-    title: pacoteDesativarConfirmTitle(),
-    message: pacoteDesativarConfirmMessage(titulo),
-    icon: Icons.delete_outline_rounded,
-    confirmLabel: pacoteDesativarConfirmLabel(),
-    destructive: true,
-  );
-}
-
 class _NovoPacoteSheet extends StatefulWidget {
   const _NovoPacoteSheet({required this.repo});
 

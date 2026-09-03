@@ -10,14 +10,28 @@ import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/motion_preferences.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../data/pacote_repository.dart';
+import '../utils/pacote_display.dart';
 
 part 'pacotes_storefront_widgets_private.part.dart';
+
+/// Confirma desativação antes de remover da vitrine.
+Future<bool> confirmDesativarPacote(BuildContext context, String titulo) {
+  return showFxConfirmSheet(
+    context,
+    title: pacoteDesativarConfirmTitle(),
+    message: pacoteDesativarConfirmMessage(titulo),
+    icon: Icons.delete_outline_rounded,
+    confirmLabel: pacoteDesativarConfirmLabel(),
+    destructive: true,
+  );
+}
 
 /// Skeleton de carregamento — alinhado ao Setup D0.
 class PacotesStorefrontSkeleton extends StatelessWidget {

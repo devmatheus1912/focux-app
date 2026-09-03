@@ -34,6 +34,8 @@ void main() {
     expect(sheet, contains('label: pacoteCriarTileLabel()'));
     expect(sheet, contains('Switch.adaptive'));
     expect(hub, isNot(contains('FxLiquidPrimaryButton')));
+    expect(hub, contains('confirmDesativarPacote'));
+    expect(sheet, isNot(contains('confirmDesativarPacote')));
     expect(hub, contains("child: const Text('Copiar link')"));
     expect(hub, isNot(contains("label: 'Copiar link'")));
     expect(sheet, isNot(contains('FxLiquidSecondaryButton')));
