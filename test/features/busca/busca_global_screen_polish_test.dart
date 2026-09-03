@@ -13,13 +13,14 @@ void main() {
     expect(screen, contains('FxContentWidthLimiter'));
     expect(screen, contains('friendlyError'));
     expect(screen, contains('SkeletonList'));
-    expect(screen, contains('FxSettingsGroup'));
-    expect(screen, contains('FxSettingsTile'));
+    expect(screen, contains('FxToggleChip'));
     expect(screen, contains('FxSettingsLayout'));
     expect(screen, contains('ShellHeaderIconButton'));
     expect(screen, contains("icon: 'x'"));
-    expect(screen, contains('AlunoInsetFormField'));
+    expect(screen, contains('FxHelpIconButton'));
     expect(screen, contains('showFxHelpSheet'));
+    expect(screen, isNot(contains('FxSettingsGroup')));
+    expect(screen, isNot(contains('AlunoInsetFormField')));
     expect(screen, isNot(contains('FilterChip')));
     expect(screen, isNot(contains('ChoiceChip')));
     expect(screen, isNot(contains('FxLiquidPrimaryButton')));
@@ -34,9 +35,10 @@ void main() {
     final results = readScreenSourceBundle(
       'lib/features/busca/screens/widgets/busca_global_results.dart',
     );
-    expect(results, contains('FxSettingsGroup'));
-    expect(results, contains('FxSettingsTile'));
+    expect(results, contains('FxSatelliteListTile'));
+    expect(results, contains('DashboardSectionHeader'));
     expect(results, contains('FxEmptyState'));
+    expect(results, isNot(contains('FxSettingsGroup')));
     expect(results, isNot(contains('FilterChip')));
     expect(results, isNot(contains('CircleAvatar')));
     expect(results, isNot(contains('Icons.person')));

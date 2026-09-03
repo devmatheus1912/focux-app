@@ -22,11 +22,13 @@ void main() {
     expect(screen, contains('showFxInsetPickerSheet'));
     expect(screen, contains('IndexedStack'));
     expect(screen, contains('copySensitiveToClipboard'));
-    expect(screen, contains('FxSettingsGroup'));
+    expect(screen, contains('FxSatelliteListTile'));
+    expect(screen, contains('DashboardSectionHeader'));
+    expect(screen, isNot(contains('FxSettingsGroup')));
     expect(screen, isNot(contains('TabBar')));
     expect(screen, isNot(contains('TabBarView')));
     expect(screen, isNot(contains('TabController')));
-    expect(screen, isNot(contains('FxSatelliteListTile')));
+    expect(screen, contains('FxSatelliteListTile'));
     expect(screen, isNot(contains('Clipboard.setData')));
   });
 }

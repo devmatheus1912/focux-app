@@ -15,12 +15,11 @@ import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
+import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
-import '../../../core/widgets/fx_settings_group.dart';
-import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/fx_toggle_chip.dart';
 import '../../../core/widgets/skeleton_loader.dart';
-import '../../alunos/widgets/aluno_inset_form_field.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../data/busca_repository.dart';
 import '../models/busca_global_models.dart';
@@ -174,6 +173,10 @@ class _BuscaGlobalScreenState extends ConsumerState<BuscaGlobalScreen> {
         appBar: FxShellAppBar(
           title: 'Busca',
           actions: [
+            FxHelpIconButton(
+              tooltip: 'Como buscar',
+              onTap: _showHelp,
+            ),
             if (hasQuery)
               Padding(
                 padding: const EdgeInsets.only(right: TokensStrip.s3),
@@ -205,43 +208,36 @@ class _BuscaGlobalScreenState extends ConsumerState<BuscaGlobalScreen> {
                 TokensStrip.s6,
               ),
               children: [
-                FxSettingsGroup(
-                  header: 'Consulta',
-                  caption: buscaMinQuerySubtitle(),
-                  helpTooltip: 'Como buscar',
-                  onHelpTap: _showHelp,
-                  children: [
-                    AlunoInsetFormField(
-                      controller: _ctrl,
-                      focusNode: _focus,
-                      label: 'Campo de busca global',
-                      hint: buscaHint(),
-                      icon: Icons.search,
-                      showDivider: false,
+                TextField(
+                  controller: _ctrl,
+                  focusNode: _focus,
+                  decoration: InputDecoration(
+                    hintText: buscaHint(),
+                    prefixIcon: const Icon(Icons.search_rounded),
+                    filled: true,
+                    fillColor: chrome.cardFill,
+                    border: FxInputDeco.outlineBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide(color: chrome.line),
                     ),
-                  ],
+                  ),
                 ),
-                const SizedBox(height: FxSettingsLayout.groupGap),
-                FxSettingsGroup(
-                  header: 'Mostrar',
+                const SizedBox(height: TokensStrip.s3),
+                Wrap(
+                  spacing: TokensStrip.s2,
+                  runSpacing: TokensStrip.s2,
                   children: [
-                    for (var i = 0; i < BuscaTipo.values.length; i++)
-                      FxSettingsTile(
-                        fxIcon: buscaTipoFxIcon(BuscaTipo.values[i]),
-                        label: BuscaTipo.values[i].label,
-                        value: buscaFilterValue(
-                          BuscaTipo.values[i] == filter,
-                        ),
-                        highlight: BuscaTipo.values[i] == filter,
-                        showDivider: i != BuscaTipo.values.length - 1,
-                        onTap:
-                            () =>
-                                ref.read(buscaFilterProvider.notifier).state =
-                                    BuscaTipo.values[i],
+                    for (final tipo in BuscaTipo.values)
+                      FxToggleChip(
+                        label: tipo.label,
+                        selected: tipo == filter,
+                        isDark: chrome.isDark,
+                        onTap: () =>
+                            ref.read(buscaFilterProvider.notifier).state = tipo,
                       ),
                   ],
                 ),
-                const SizedBox(height: FxSettingsLayout.groupGap),
+                const SizedBox(height: TokensStrip.s4),
                 resultAsync.when(
                   loading: () => const SkeletonList(count: 6),
                   error:

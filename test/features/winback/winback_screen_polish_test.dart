@@ -19,12 +19,14 @@ void main() {
     expect(screen, contains('SkeletonList'));
     expect(screen, contains('RefreshIndicator'));
     expect(screen, contains('FxHubFreshness.fromFetchedAt'));
-    expect(screen, contains('FxSettingsGroup'));
+    expect(screen, contains('FxSatelliteListTile'));
+    expect(screen, contains('DashboardHomeActionChip'));
+    expect(screen, isNot(contains('FxSettingsGroup')));
     expect(screen, isNot(contains('TabBar')));
     expect(screen, isNot(contains('TabBarView')));
     expect(screen, isNot(contains('DropdownButton')));
     expect(screen, isNot(contains('FloatingActionButton')));
-    expect(screen, isNot(contains('FxSatelliteListTile')));
+    expect(screen, contains('FxSatelliteListTile'));
     expect(screen, isNot(contains('FxSatellitePanel')));
     expect(screen, isNot(contains(r'showError(context, $e)')));
   });

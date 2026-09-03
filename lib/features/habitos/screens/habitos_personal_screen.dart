@@ -3,8 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/analytics/analytics_service.dart';
+import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
+import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feedback_helper.dart';
@@ -17,9 +20,8 @@ import '../../../core/widgets/fx_form_sheet.dart';
 import '../../../core/widgets/fx_inset_picker_row.dart';
 import '../../../core/widgets/fx_inset_picker_sheet.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
-import '../../../core/widgets/fx_settings_group.dart';
-import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../features/alunos/widgets/aluno_inset_form_field.dart';
 import '../../../features/auth/providers/auth_provider.dart';
@@ -285,26 +287,36 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
                 onTap: _novoHabito,
               ),
             )
-          else
-            FxSettingsGroup(
-              header: 'Hábitos cadastrados',
-              caption: 'Toque para desativar. Vale para todos os seus alunos.',
-              children: [
-                for (var i = 0; i < _habitos.length; i++)
-                  FxSettingsTile(
-                    fxIcon: 'circle-check',
-                    label: _habitos[i].titulo,
-                    subtitle: habitoSubtitle(
-                      descricao: _habitos[i].descricao,
-                      metaSemanal: _habitos[i].metaSemanal,
-                    ),
-                    value: habitoMetaValue(_habitos[i].metaSemanal),
-                    numeric: true,
-                    showDivider: i != _habitos.length - 1,
-                    onTap: () => _desativar(_habitos[i]),
-                  ),
-              ],
+          else ...[
+            const DashboardSectionHeader(title: 'Hábitos cadastrados'),
+            const SizedBox(height: TokensStrip.s2),
+            Text(
+              'Toque para desativar. Vale para todos os seus alunos.',
+              style: FocuxHubTypography.bodyMuted(
+                color: fxScreenMute(context),
+                fontWeight: FontWeight.w600,
+              ),
             ),
+            const SizedBox(height: TokensStrip.s3),
+            for (final habito in _habitos)
+              FxSatelliteListTile(
+                title: habito.titulo,
+                subtitle: Text(
+                  habitoSubtitle(
+                    descricao: habito.descricao,
+                    metaSemanal: habito.metaSemanal,
+                  ),
+                ),
+                trailing: Text(
+                  habitoMetaValue(habito.metaSemanal),
+                  style: FocuxHubTypography.bodyMuted(
+                    color: fxScreenMute(context),
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                onTap: () => _desativar(habito),
+              ),
+          ],
           const SizedBox(height: FxSettingsLayout.groupGap),
           if (_compliance.isEmpty)
             const FxEmptyState(
@@ -312,35 +324,30 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
               title: 'Sem dados ainda',
               subtitle: 'Cadastre hábitos e os alunos vão começar a marcar.',
             )
-          else
-            FxSettingsGroup(
-              header: 'Compliance da semana',
-              caption: 'Toque para abrir o aluno.',
-              children: [
-                for (var i = 0; i < _compliance.length; i++)
-                  FxSettingsTile(
-                    fxIcon: habitoComplianceFxIcon(
-                      _compliance[i].compliancePct,
-                    ),
-                    label: habitoComplianceLabel(_compliance[i].alunoNome),
-                    subtitle: habitoComplianceSubtitle(
-                      _compliance[i].checksSemana,
-                    ),
-                    value: habitoComplianceValue(
-                      _compliance[i].compliancePct,
-                    ),
-                    numeric: true,
-                    danger: habitoComplianceDanger(
-                      _compliance[i].compliancePct,
-                    ),
-                    showDivider: i != _compliance.length - 1,
-                    onTap:
-                        () => context.push(
-                          '/alunos/${_compliance[i].alunoId}',
-                        ),
+          else ...[
+            const DashboardSectionHeader(title: 'Compliance da semana'),
+            const SizedBox(height: TokensStrip.s3),
+            for (final item in _compliance)
+              FxSatelliteListTile(
+                title: habitoComplianceLabel(item.alunoNome),
+                subtitle: Text(
+                  habitoComplianceSubtitle(item.checksSemana),
+                ),
+                trailing: Text(
+                  habitoComplianceValue(item.compliancePct),
+                  style: FocuxHubTypography.bodyMuted(
+                    color: habitoComplianceDanger(item.compliancePct)
+                        ? EagleTokens.bad
+                        : fxScreenMute(context),
+                    fontWeight: FontWeight.w700,
                   ),
-              ],
-            ),
+                ),
+                accent: habitoComplianceDanger(item.compliancePct)
+                    ? EagleTokens.bad
+                    : null,
+                onTap: () => context.push('/alunos/${item.alunoId}'),
+              ),
+          ],
         ],
       ),
     );

@@ -7,7 +7,9 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/router/safe_navigation.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
+import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feedback_helper.dart';
@@ -16,12 +18,12 @@ import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_form_sheet.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
-import '../../../core/widgets/fx_settings_grouped_list.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../alunos/widgets/aluno_avatar.dart';
+import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../data/alertas_repository.dart';
 import '../widgets/alertas_help_sheet.dart';
 
@@ -284,95 +286,79 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
                       ),
                     ],
                   )
-                  : FxSettingsGroupedList(
-                header: _alertas.length == 1
-                    ? '1 em risco'
-                    : '${_alertas.length} em risco',
-                caption:
-                    'Toque para o detalhe. Segure para mensagem ou resolver.',
-                itemCount: rows.length,
-                itemBuilder: (context, i) {
-                  final row = rows[i];
-                  if (row.config != null) {
-                    final config = row.config!;
-                    return FxSettingsTile(
-                      fxIcon: 'target',
-                      label: 'Quando dispara',
-                      subtitle:
-                          'Sem treino acima de ${config.diasSemTreino} dias ou aderência abaixo de ${config.aderenciaMinima}%.',
-                      value:
-                          '${config.diasSemTreino}d · ${config.aderenciaMinima}%',
-                      showDivider: i < rows.length - 1,
-                      onTap: _abrirConfig,
-                    );
-                  }
-                  final alerta = row.alerta!;
-                  final showSection =
-                      i == 0 || rows[i - 1].section != row.section;
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      if (showSection && row.section == 'medio')
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(
-                            FxSettingsLayout.groupPadH,
-                            10,
-                            FxSettingsLayout.groupPadH,
-                            4,
-                          ),
-                          child: Text(
-                            'Médio',
-                            style: FxSettingsLayout.sectionHeader(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onSurface
-                                  .withValues(alpha: 0.55),
-                            ),
-                          ),
-                        ),
-                      if (showSection && row.section == 'alto' && altos.isNotEmpty)
-                        Padding(
-                          padding: EdgeInsets.fromLTRB(
-                            FxSettingsLayout.groupPadH,
-                            i == 0 ? 0 : 10,
-                            FxSettingsLayout.groupPadH,
-                            4,
-                          ),
-                          child: Text(
-                            'Alto',
-                            style: FxSettingsLayout.sectionHeader(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onSurface
-                                  .withValues(alpha: 0.55),
-                            ),
-                          ),
-                        ),
-                      FxSettingsTile(
-                        fxIcon: alerta.score >= 2
-                            ? 'alert-triangle'
-                            : 'bell',
-                        label: alerta.alunoNome,
-                        subtitle: alerta.motivos.isEmpty
-                            ? null
-                            : alerta.motivos.first,
-                        value: '${alerta.diasSemTreino ?? 0}d',
-                        highlight: alerta.score >= 2,
-                        showDivider: i < rows.length - 1,
-                        accessory: AlunoAvatar(
-                          name: alerta.alunoNome,
-                          variant: AlunoAvatarVariant.strip,
-                        ),
-                        semanticsLabel:
-                            '${alerta.alunoNome}. Score ${alerta.score}. '
-                            '${alerta.motivos.join('. ')}',
-                        onTap: () => _openAlerta(alerta),
-                        onLongPress: () => _openActions(alerta),
+                  : ListView.builder(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: const EdgeInsets.fromLTRB(
+                        FxSettingsLayout.pageInset,
+                        TokensStrip.s3,
+                        FxSettingsLayout.pageInset,
+                        TokensStrip.s6,
                       ),
-                    ],
-                  );
-                },
-              ),
+                      itemCount: rows.length,
+                      itemBuilder: (context, i) {
+                        final row = rows[i];
+                        if (row.config != null) {
+                          final config = row.config!;
+                          return FxSatelliteListTile(
+                            title: 'Quando dispara',
+                            subtitle: Text(
+                              'Sem treino acima de ${config.diasSemTreino} dias ou aderência abaixo de ${config.aderenciaMinima}%.',
+                            ),
+                            trailing: Text(
+                              '${config.diasSemTreino}d · ${config.aderenciaMinima}%',
+                              style: FocuxHubTypography.bodyMuted(
+                                color: fxScreenMute(context),
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            onTap: _abrirConfig,
+                          );
+                        }
+                        final alerta = row.alerta!;
+                        final showSection =
+                            i == 0 || rows[i - 1].section != row.section;
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            if (showSection && row.section == 'alto')
+                              const Padding(
+                                padding: EdgeInsets.only(bottom: TokensStrip.s2),
+                                child: DashboardSectionHeader(title: 'Alto'),
+                              ),
+                            if (showSection && row.section == 'medio')
+                              const Padding(
+                                padding: EdgeInsets.only(
+                                  top: TokensStrip.s2,
+                                  bottom: TokensStrip.s2,
+                                ),
+                                child: DashboardSectionHeader(title: 'Médio'),
+                              ),
+                            GestureDetector(
+                              onLongPress: () => _openActions(alerta),
+                              child: FxSatelliteListTile(
+                                title: alerta.alunoNome,
+                                subtitle: alerta.motivos.isEmpty
+                                    ? null
+                                    : Text(alerta.motivos.first),
+                                leading: AlunoAvatar(
+                                  name: alerta.alunoNome,
+                                  variant: AlunoAvatarVariant.strip,
+                                ),
+                                trailing: Text(
+                                  '${alerta.diasSemTreino ?? 0}d',
+                                  style: FocuxHubTypography.bodyMuted(
+                                    color: fxScreenMute(context),
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                accent: alerta.score >= 2 ? brand : null,
+                                onTap: () => _openAlerta(alerta),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
             ),
       ),
     );

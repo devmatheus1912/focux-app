@@ -167,25 +167,27 @@ class _SearchResultTile extends StatelessWidget {
   final bool isDark;
   final Color ink;
   final Color mute;
-  final bool showDivider;
   const _SearchResultTile({
     required this.msg,
     required this.isDark,
     required this.ink,
     required this.mute,
-    this.showDivider = true,
   });
 
   @override
   Widget build(BuildContext context) {
     assert(isDark || !isDark);
     assert(ink.a >= 0 && mute.a >= 0);
-    return FxSettingsTile(
-      fxIcon: 'chat',
-      label: msg.remetente == 'PERSONAL' ? 'Você' : 'Aluno',
-      subtitle: msg.conteudo,
-      value: fxTimeAgo(msg.enviadoEm),
-      showDivider: showDivider,
+    return FxSatelliteListTile(
+      title: msg.remetente == 'PERSONAL' ? 'Você' : 'Aluno',
+      subtitle: Text(msg.conteudo),
+      trailing: Text(
+        fxTimeAgo(msg.enviadoEm),
+        style: FocuxHubTypography.bodyMuted(
+          color: mute,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
       onTap: () {
         if (msg.alunoId != null) {
           context.push('/alunos/${msg.alunoId}/chat');
@@ -200,7 +202,6 @@ class _InboxTile extends StatelessWidget {
   final bool isDark;
   final bool selected;
   final bool selecting;
-  final bool showDivider;
   final VoidCallback onTap;
   final VoidCallback? onLongPress;
 
@@ -209,7 +210,6 @@ class _InboxTile extends StatelessWidget {
     required this.isDark,
     this.selected = false,
     this.selecting = false,
-    this.showDivider = true,
     required this.onTap,
     this.onLongPress,
   });
@@ -221,27 +221,31 @@ class _InboxTile extends StatelessWidget {
         ? 'Você: ${item.ultimaMensagem}'
         : item.ultimaMensagem;
     final unread = item.naoLidas;
-    return FxSettingsTile(
-      icon: selecting && selected ? Icons.check_rounded : null,
-      fxIcon: selecting && selected ? null : 'chat',
-      label: item.alunoNome,
-      subtitle: preview,
-      value: unread > 0
-          ? (unread > 99 ? '99+' : '$unread')
-          : fxTimeAgo(item.enviadoEm),
-      highlight: unread > 0 || selected,
-      numeric: unread > 0,
-      showDivider: showDivider,
-      accessory: AlunoAvatar(
-        name: item.alunoNome,
-        photoUrl: item.fotoUrl,
-        variant: AlunoAvatarVariant.strip,
-      ),
-      semanticsLabel: unread > 0
-          ? '${item.alunoNome}. $unread não lidas. $preview'
-          : '${item.alunoNome}. $preview',
-      onTap: onTap,
+    final primary = Theme.of(context).colorScheme.primary;
+    return GestureDetector(
       onLongPress: onLongPress,
+      child: FxSatelliteListTile(
+        title: item.alunoNome,
+        subtitle: Text(preview),
+        leading: selecting && selected
+            ? Icon(Icons.check_rounded, color: primary)
+            : AlunoAvatar(
+              name: item.alunoNome,
+              photoUrl: item.fotoUrl,
+              variant: AlunoAvatarVariant.strip,
+            ),
+        trailing: Text(
+          unread > 0
+              ? (unread > 99 ? '99+' : '$unread')
+              : fxTimeAgo(item.enviadoEm),
+          style: FocuxHubTypography.bodyMuted(
+            color: unread > 0 ? primary : fxScreenMute(context),
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        accent: unread > 0 || selected ? primary : null,
+        onTap: onTap,
+      ),
     );
   }
 }
@@ -315,15 +319,19 @@ class _InboxTabPane extends StatelessWidget {
         return RefreshIndicator(
           color: primary,
           onRefresh: onRefresh,
-          child: FxSettingsGroupedList(
+          child: ListView.builder(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.fromLTRB(
+              FxSettingsLayout.pageInset,
+              TokensStrip.s3,
+              FxSettingsLayout.pageInset,
+              TokensStrip.s6,
+            ),
             itemCount: items.length + (showLoadMore ? 1 : 0),
             itemBuilder: (context, i) {
               if (showLoadMore && i >= items.length) {
-                return FxSettingsTile(
-                  fxIcon: 'chat',
-                  label: loadingMore ? 'Carregando…' : 'Carregar mais',
-                  value: '',
-                  showDivider: false,
+                return FxSatelliteListTile(
+                  title: loadingMore ? 'Carregando…' : 'Carregar mais',
                   onTap: () {
                     if (loadingMore) return;
                     onLoadMore?.call();
@@ -368,7 +376,6 @@ class _InboxTabPane extends StatelessWidget {
                   isDark: isDark,
                   selected: selectedAlunoIds.contains(item.alunoId),
                   selecting: selectionActive,
-                  showDivider: i < items.length - 1 || showLoadMore,
                   onTap: () {
                     if (selectionActive) {
                       onToggleSelection(item.alunoId);

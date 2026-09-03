@@ -376,14 +376,19 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen> {
         subtitle: 'Tente outro termo ou revise a grafia.',
       );
     }
-    return FxSettingsGroupedList(
+    return ListView.builder(
+      padding: const EdgeInsets.fromLTRB(
+        FxSettingsLayout.pageInset,
+        TokensStrip.s2,
+        FxSettingsLayout.pageInset,
+        TokensStrip.s6,
+      ),
       itemCount: _searchResults!.length,
       itemBuilder: (context, i) => _SearchResultTile(
         msg: _searchResults![i],
         isDark: isDark,
         ink: ink,
         mute: mute,
-        showDivider: i < _searchResults!.length - 1,
       ),
     );
   }

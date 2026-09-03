@@ -3,8 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/analytics/analytics_service.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
+import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/clipboard_sensitive.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/utils/pt_br_display.dart';
@@ -18,9 +20,8 @@ import '../../../core/widgets/fx_form_sheet.dart';
 import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_inset_picker_sheet.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
-import '../../../core/widgets/fx_settings_group.dart';
-import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../pacotes/data/pacote_repository.dart';
@@ -267,28 +268,34 @@ class _LojaScreenState extends ConsumerState<LojaScreen> {
           32,
         ),
         children: [
-          FxSettingsGroup(
-            header: 'Vitrine',
-            caption: 'Toque no pacote para gerar um PIX.',
-            children: [
-              for (var i = 0; i < _pacotes.length; i++)
-                FxSettingsTile(
-                  fxIcon: 'spark',
-                  label: _pacotes[i].titulo,
-                  subtitle: lojaPacoteSubtitle(
-                    descricao: _pacotes[i].descricao,
-                    duracaoMeses: _pacotes[i].duracaoMeses,
-                  ),
-                  value: formatBrlCurrency(
-                    _pacotes[i].valor,
-                    showDecimals: false,
-                  ),
-                  numeric: true,
-                  showDivider: i != _pacotes.length - 1,
-                  onTap: () => _checkoutPacote(_pacotes[i]),
-                ),
-            ],
+          const DashboardSectionHeader(title: 'Vitrine'),
+          const SizedBox(height: TokensStrip.s2),
+          Text(
+            'Toque no pacote para gerar um PIX.',
+            style: FocuxHubTypography.bodyMuted(
+              color: fxScreenMute(context),
+              fontWeight: FontWeight.w600,
+            ),
           ),
+          const SizedBox(height: TokensStrip.s3),
+          for (final pacote in _pacotes)
+            FxSatelliteListTile(
+              title: pacote.titulo,
+              subtitle: Text(
+                lojaPacoteSubtitle(
+                  descricao: pacote.descricao,
+                  duracaoMeses: pacote.duracaoMeses,
+                ),
+              ),
+              trailing: Text(
+                formatBrlCurrency(pacote.valor, showDecimals: false),
+                style: FocuxHubTypography.bodyMuted(
+                  color: fxScreenMute(context),
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              onTap: () => _checkoutPacote(pacote),
+            ),
         ],
       ),
     );
@@ -322,29 +329,37 @@ class _LojaScreenState extends ConsumerState<LojaScreen> {
           32,
         ),
         children: [
-          FxSettingsGroup(
-            header: 'Pedidos',
-            caption: 'PIX gerados nesta loja.',
-            children: [
-              for (var i = 0; i < _pedidos.length; i++)
-                FxSettingsTile(
-                  fxIcon: lojaPedidoFxIcon(_pedidos[i].status),
-                  label: lojaPedidoLabel(
-                    buyerNome: _pedidos[i].buyerNome,
-                    buyerEmail: _pedidos[i].buyerEmail,
-                  ),
-                  subtitle: lojaPedidoSubtitle(
-                    buyerNome: _pedidos[i].buyerNome,
-                    buyerEmail: _pedidos[i].buyerEmail,
-                    status: _pedidos[i].status,
-                  ),
-                  value: formatBrlCurrency(_pedidos[i].valor),
-                  numeric: true,
-                  showDivider: i != _pedidos.length - 1,
-                  onTap: () {},
-                ),
-            ],
+          const DashboardSectionHeader(title: 'Pedidos'),
+          const SizedBox(height: TokensStrip.s2),
+          Text(
+            'PIX gerados nesta loja.',
+            style: FocuxHubTypography.bodyMuted(
+              color: fxScreenMute(context),
+              fontWeight: FontWeight.w600,
+            ),
           ),
+          const SizedBox(height: TokensStrip.s3),
+          for (final pedido in _pedidos)
+            FxSatelliteListTile(
+              title: lojaPedidoLabel(
+                buyerNome: pedido.buyerNome,
+                buyerEmail: pedido.buyerEmail,
+              ),
+              subtitle: Text(
+                lojaPedidoSubtitle(
+                  buyerNome: pedido.buyerNome,
+                  buyerEmail: pedido.buyerEmail,
+                  status: pedido.status,
+                ),
+              ),
+              trailing: Text(
+                formatBrlCurrency(pedido.valor),
+                style: FocuxHubTypography.bodyMuted(
+                  color: fxScreenMute(context),
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
         ],
       ),
     );
