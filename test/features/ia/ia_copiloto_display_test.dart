@@ -10,5 +10,6 @@ void main() {
     expect(iaCopilotoCriarTarefaConfirmTitle(), contains('Salvar tarefa'));
     expect(iaCopilotoAbrirAlunoLabel(), 'Abrir aluno');
     expect(iaCopilotoVerTarefaLabel(), 'Ver tarefa');
+    expect(iaCopilotoComoCalculamos, contains('você pede'));
   });
 }

@@ -1,3 +1,6 @@
+const iaCopilotoComoCalculamos =
+    'A IA só gera quando você pede. Nada entra no aluno sem revisão.';
+
 String iaCopilotoGerarLabel(String modeDisplay) => 'Gerar $modeDisplay';
 
 String iaCopilotoGerarConfirmTitle(String modeDisplay) =>

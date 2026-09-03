@@ -35,6 +35,11 @@ void main() {
     expect(shellWidgets, isNot(contains('FxSettingsGroup')));
     expect(actionsPart, contains('explicitChildNodes: true'));
     expect(shellWidgets, contains('Como funciona'));
+    expect(
+      File('lib/features/ia/widgets/ia_copiloto_help_sheet.dart')
+          .readAsStringSync(),
+      contains('Como calculamos'),
+    );
     expect(screen, contains('não monta fichas de treino'));
     expect(actionsPart, contains('showFxHomeSheet'));
     expect(actionsPart, contains('FxHomeSheetSurface'));
