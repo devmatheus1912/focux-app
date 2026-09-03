@@ -280,12 +280,6 @@ class StorefrontLinkCard extends StatelessWidget {
             FxSettingsGroup(
               children: [
                 FxSettingsTile(
-                  fxIcon: 'route',
-                  label: 'Copiar link',
-                  value: 'WhatsApp',
-                  onTap: onCopy,
-                ),
-                FxSettingsTile(
                   fxIcon: 'article',
                   label: 'Ver como cliente',
                   value: 'Abrir',
@@ -293,6 +287,13 @@ class StorefrontLinkCard extends StatelessWidget {
                   onTap: onPreview,
                 ),
               ],
+            ),
+            Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: TextButton(
+                onPressed: onCopy,
+                child: const Text('Copiar link'),
+              ),
             ),
           ],
         ),

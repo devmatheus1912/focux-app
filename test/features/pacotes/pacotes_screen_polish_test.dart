@@ -27,6 +27,8 @@ void main() {
     expect(sheet, contains('showFxConfirmSheet'));
     expect(sheet, contains('pacoteCriarConfirmTitle'));
     expect(sheet, isNot(contains('FxLiquidPrimaryButton')));
+    expect(sheet, contains("child: const Text('Copiar link')"));
+    expect(sheet, isNot(contains("label: 'Copiar link'")));
     expect(sheet, isNot(contains('FxLiquidSecondaryButton')));
     expect(sheet, isNot(contains('ChoiceChip')));
     expect(sheet, isNot(contains('DropdownButton')));
