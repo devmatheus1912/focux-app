@@ -29,5 +29,9 @@ void main() {
     expect(notificacaoBadgeTooltip(3), '3 notificações');
     expect(notificacaoBadgeTooltip(9), '9 notificações');
     expect(notificacaoBadgeTooltip(12), '9 ou mais notificações');
+    expect(notificacaoCountLabel(0), 'Nenhuma');
+    expect(notificacaoCountLabel(1), '1 aviso');
+    expect(notificacaoCountLabel(4), '4 avisos');
+    expect(notificacaoComoCalculamos, contains('Radar'));
   });
 }

@@ -11,6 +11,7 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
@@ -20,7 +21,6 @@ import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../data/notificacoes_repository.dart';
 import '../notificacao_display.dart';
-import '../widgets/notificacoes_help_sheet.dart';
 
 part 'notificacoes_screen_widgets.part.dart';
 
@@ -111,9 +111,17 @@ class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
       label: 'Notificações',
       child: FxShellScaffold(
         useMesh: true,
+        constrainWidth: false,
         appBar: FxShellAppBar(
           title: 'Notificações',
-          subtitle: FxHubFreshness.fromFetchedAt(_fetchedAt),
+          subtitle: async.maybeWhen(
+            data: (inbox) {
+              final freshness = FxHubFreshness.fromFetchedAt(_fetchedAt);
+              final count = notificacaoCountLabel(inbox.total);
+              return freshness == null ? count : '$count · $freshness';
+            },
+            orElse: () => FxHubFreshness.fromFetchedAt(_fetchedAt),
+          ),
           onBack: () => safePopOrGo(context, home),
           actions: [
             FxHelpIconButton(
@@ -122,7 +130,22 @@ class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
                 AnalyticsService.instance.track(
                   ProductEvents.notificacoesHelpOpened,
                 );
-                showNotificacoesHelpSheet(context);
+                showFxHelpSheet(
+                  context,
+                  title: 'Notificações',
+                  subtitle: 'O que pediu ação. O destino abre no toque.',
+                  tips: const [
+                    FxHelpTip('Como calculamos', notificacaoComoCalculamos),
+                    FxHelpTip(
+                      'Lista',
+                      'Hoje, ontem e anteriores. Toque abre o aluno, o treino ou o aviso.',
+                    ),
+                    FxHelpTip(
+                      'Não lidas',
+                      'Ficam em destaque. Ler todas zera o sino da Home.',
+                    ),
+                  ],
+                );
               },
             ),
             if (unreadCount > 0)
@@ -166,19 +189,32 @@ class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
             final items = inbox.items;
             final rows = _buildNotificationRows(items);
             if (rows.isEmpty) {
-              return FxEmptyState(
-                icon: 'circle-check',
-                title: 'Tudo em ordem',
-                subtitle:
-                    'Alertas, mensagens e o Radar Focux aparecem aqui quando pedem ação.',
+              return ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                children: [
+                  const SizedBox(height: 48),
+                  FxEmptyState(
+                    icon: 'circle-check',
+                    title: 'Tudo em ordem',
+                    subtitle:
+                        'Alertas, mensagens e o Radar Focux aparecem aqui quando pedem ação.',
+                    action: FxEmptyAction(
+                      label: 'Ir para o Hoje',
+                      onTap: () => goPersonalShellTab(context, home),
+                    ),
+                  ),
+                ],
               );
             }
             final extra = inbox.hasMore ? 1 : 0;
             return RefreshIndicator(
               color: primary,
               onRefresh: reload,
-              child: ListView.builder(
+              child: FxContentWidthLimiter(
+                child: ListView.builder(
                 physics: const AlwaysScrollableScrollPhysics(),
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
                 padding: const EdgeInsets.fromLTRB(
                   FxSettingsLayout.pageInset,
                   TokensStrip.s3,
@@ -234,6 +270,7 @@ class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
                     ],
                   );
                 },
+              ),
               ),
             );
           },

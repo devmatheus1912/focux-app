@@ -44,6 +44,15 @@ String habitoComplianceFxIcon(int pct) {
 
 bool habitoComplianceDanger(int pct) => pct < 40;
 
+const habitoComoCalculamos =
+    'Compliance é checks da semana sobre a meta. Vale para todos os alunos ativos.';
+
+String habitoCountLabel(int count) {
+  if (count <= 0) return 'Nenhum hábito';
+  if (count == 1) return '1 hábito';
+  return '$count hábitos';
+}
+
 String habitoHubSubtitle(String? freshness) {
   const base = 'Coaching diário e aderência';
   final stamp = freshness?.trim();

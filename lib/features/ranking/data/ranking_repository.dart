@@ -1,5 +1,7 @@
 import 'package:dio/dio.dart';
+
 import '../../../core/api/api_client.dart';
+import '../../../core/api/pagina.dart';
 
 class RankingItem {
   final int personalId;
@@ -19,23 +21,29 @@ class RankingItem {
   });
 
   factory RankingItem.fromJson(Map<String, dynamic> j) => RankingItem(
-        personalId: j['personalId'] as int,
-        nome: j['nome'] as String,
-        logoUrl: j['logoUrl'] as String?,
-        totalAlunosAtivos: j['totalAlunosAtivos'] as int,
-        posicao: j['posicao'] as int,
-        descontoPercentual: j['descontoPercentual'] as int?,
-      );
+    personalId: (j['personalId'] as num).toInt(),
+    nome: j['nome'] as String? ?? 'Personal',
+    logoUrl: j['logoUrl'] as String?,
+    totalAlunosAtivos: (j['totalAlunosAtivos'] as num?)?.toInt() ?? 0,
+    posicao: (j['posicao'] as num?)?.toInt() ?? 0,
+    descontoPercentual: (j['descontoPercentual'] as num?)?.toInt(),
+  );
 }
 
 class RankingRepository {
   final Dio _dio;
   RankingRepository(ApiClient client) : _dio = client.dio;
 
-  Future<List<RankingItem>> listarTop() async {
-    final r = await _dio.get('/api/ranking');
-    return (r.data as List)
-        .map((e) => RankingItem.fromJson(e as Map<String, dynamic>))
-        .toList();
+  static const pageSize = 20;
+
+  Future<Pagina<RankingItem>> listar({int page = 0}) async {
+    final r = await _dio.get(
+      '/api/ranking',
+      queryParameters: {'page': page, 'size': pageSize},
+    );
+    return Pagina.fromJson(
+      r.data as Map<String, dynamic>,
+      (item) => RankingItem.fromJson(item as Map<String, dynamic>),
+    );
   }
 }

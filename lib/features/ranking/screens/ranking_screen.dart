@@ -1,283 +1,212 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../features/auth/providers/auth_provider.dart';
+
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/focux_hub_typography.dart';
-import '../../../core/theme/focux_typography.dart';
-import '../../../core/theme/brand_palette.dart';
-import '../../../core/theme/design_tokens.dart';
-import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/ux/fx_hub_freshness.dart';
+import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
+import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_help.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
-import '../../../core/widgets/fx_screen_a11y.dart';
-import '../../dashboard/widgets/dashboard_error_state.dart';
+import '../../auth/providers/auth_provider.dart';
+import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../data/ranking_repository.dart';
+import '../utils/ranking_display.dart';
 
-final rankingProvider = FutureProvider.autoDispose<List<RankingItem>>((
-  ref,
-) async {
-  return RankingRepository(ref.read(apiClientProvider)).listarTop();
-});
+final _repoProvider = Provider(
+  (ref) => RankingRepository(ref.read(apiClientProvider)),
+);
 
-class RankingScreen extends ConsumerWidget {
+class RankingScreen extends ConsumerStatefulWidget {
   const RankingScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final rankingAsync = ref.watch(rankingProvider);
-    final theme = Theme.of(context);
-
-    return fxScreenA11yScope(
-      label: 'Ranking de Personais',
-      child: FxShellScaffold(
-        useMesh: true,
-        appBar: FxShellAppBar(
-          title: 'Ranking de Personais',
-          subtitle: 'Pódio do mês e classificação geral',
-          onBack: () => safePopOrGo(context, '/dashboard/personal'),
-        ),
-        body: rankingAsync.when(
-          loading: () => const SkeletonList(count: 5),
-          error:
-              (e, _) => DashboardErrorState(
-                chromeOnDark: ShellChrome.of(context).isDark,
-                primary: Theme.of(context).colorScheme.primary,
-                message: friendlyError(e),
-                onRetry: () => ref.invalidate(rankingProvider),
-              ),
-          data: (ranking) {
-            final top3 = ranking.where((r) => r.posicao <= 3).toList();
-            final demais = ranking.where((r) => r.posicao > 3).toList();
-
-            return RefreshIndicator(
-              onRefresh: () async => ref.invalidate(rankingProvider),
-              child: ListView(
-                padding: const EdgeInsets.all(TokensStrip.s4),
-                physics: const AlwaysScrollableScrollPhysics(),
-                children: [
-                  if (ranking.isEmpty)
-                    const Padding(
-                      padding: EdgeInsets.only(top: 48),
-                      child: FxEmptyState(
-                        icon: 'star',
-                        title: 'Ranking ainda sem dados',
-                        subtitle:
-                            'A classificação do mês aparece aqui quando houver personais com alunos ativos.',
-                      ),
-                    ),
-                  // Pódio
-                  if (top3.isNotEmpty) ...[
-                    Text('Pódio do Mês', style: theme.textTheme.titleMedium),
-                    const SizedBox(height: 12),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        if (top3.length >= 2)
-                          _PodioCard(
-                            item: top3[1],
-                            medalha: '🥈',
-                            alturaBase: 80,
-                          ),
-                        if (top3.isNotEmpty)
-                          _PodioCard(
-                            item: top3[0],
-                            medalha: '🥇',
-                            alturaBase: 110,
-                          ),
-                        if (top3.length >= 3)
-                          _PodioCard(
-                            item: top3[2],
-                            medalha: '🥉',
-                            alturaBase: 60,
-                          ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Container(
-                      margin: EdgeInsets.all(TokensStrip.s4),
-                      padding: const EdgeInsets.all(TokensStrip.s4),
-                      decoration: BoxDecoration(
-                        color: EagleTokens.goldSoft,
-                        borderRadius: BorderRadius.circular(TokensStrip.rCard),
-                        border: Border.all(
-                          color: EagleTokens.rankingGoldBorder,
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(
-                            Icons.card_giftcard,
-                            color: EagleTokens.warnDeep,
-                            size: 24,
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text(
-                                  'Prêmio do mês',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w700,
-                                    color: EagleTokens.warnDeep,
-                                  ),
-                                ),
-                                Text(
-                                  '1º lugar: 20% off • 2º lugar: 15% off • 3º lugar: 10% off',
-                                  style: const TextStyle(
-                                    fontSize: 13,
-                                    color: EagleTokens.warnDeep,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: TokensStrip.s4),
-                  ],
-
-                  // Lista completa
-                  if (demais.isNotEmpty) ...[
-                    Text(
-                      'Classificação geral',
-                      style: theme.textTheme.titleMedium,
-                    ),
-                    const SizedBox(height: 8),
-                    ...demais.map((item) => _RankingTile(item: item)),
-                  ],
-                ],
-              ),
-            );
-          },
-        ),
-      ),
-    );
-  }
+  ConsumerState<RankingScreen> createState() => _RankingScreenState();
 }
 
-class _PodioCard extends StatelessWidget {
-  final RankingItem item;
-  final String medalha;
-  final double alturaBase;
+class _RankingScreenState extends ConsumerState<RankingScreen> {
+  List<RankingItem> _items = [];
+  var _page = 0;
+  var _hasMore = false;
+  var _total = 0;
+  var _loading = true;
+  var _carregandoMais = false;
+  String? _erro;
+  DateTime? _fetchedAt;
 
-  const _PodioCard({
-    required this.item,
-    required this.medalha,
-    required this.alturaBase,
-  });
+  @override
+  void initState() {
+    super.initState();
+    _carregar();
+  }
+
+  Future<void> _carregar() async {
+    setState(() {
+      _loading = true;
+      _erro = null;
+    });
+    try {
+      final page = await ref.read(_repoProvider).listar();
+      if (!mounted) return;
+      setState(() {
+        _items = page.content;
+        _page = page.page ?? 0;
+        _hasMore = page.hasNext;
+        _total = page.totalElements ?? page.content.length;
+        _loading = false;
+        _fetchedAt = DateTime.now();
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+        _erro = friendlyError(e);
+      });
+    }
+  }
+
+  Future<void> _carregarMais() async {
+    if (_carregandoMais || !_hasMore) return;
+    setState(() => _carregandoMais = true);
+    try {
+      final next = await ref.read(_repoProvider).listar(page: _page + 1);
+      if (!mounted) return;
+      final seen = _items.map((i) => i.personalId).toSet();
+      setState(() {
+        _items = [
+          ..._items,
+          ...next.content.where((i) => seen.add(i.personalId)),
+        ];
+        _page = next.page ?? _page + 1;
+        _hasMore = next.hasNext;
+        _total = next.totalElements ?? _total;
+        _carregandoMais = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _carregandoMais = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
-    final primarySoft = BrandPalette.soft(primary, dark: isDark);
-    final isGold = item.posicao == 1;
-    return Expanded(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 4),
-        child: Column(
-          children: [
-            Text(medalha, style: const TextStyle(fontSize: 28)),
-            const SizedBox(height: 4),
-            CircleAvatar(
-              radius: 28,
-              backgroundColor: isDark ? EagleTokens.darkCard : primarySoft,
-              backgroundImage:
-                  item.logoUrl != null ? NetworkImage(item.logoUrl!) : null,
-              child:
-                  item.logoUrl == null
-                      ? Text(
-                        item.nome.isNotEmpty ? item.nome[0].toUpperCase() : '?',
-                        style: FocuxTypography.headline(
-                          color: isDark ? EagleTokens.darkInk : primary,
-                        ),
-                      )
-                      : null,
-            ),
-            const SizedBox(height: 6),
-            Text(
-              item.nome,
-              style: theme.textTheme.bodySmall?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-              textAlign: TextAlign.center,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-            Text(
-              '${item.totalAlunosAtivos} alunos',
-              style: theme.textTheme.bodySmall?.copyWith(color: primary),
-            ),
-            Container(
-              height: alturaBase,
-              decoration: BoxDecoration(
-                color:
-                    isGold
-                        ? null
-                        : (isDark ? EagleTokens.darkCard : primarySoft),
-                gradient:
-                    isGold
-                        ? LinearGradient(
-                          colors: [primary, BrandPalette.deep(primary)],
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                        )
-                        : null,
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(8),
-                ),
-              ),
-              alignment: Alignment.center,
-              child: Text(
-                '${item.posicao}',
-                style: FocuxHubTypography.kpi(
-                  color: isGold ? Colors.white : primary,
-                  fontSize: FocuxHubTypography.metricLg,
-                  fontWeight: FontWeight.w800,
-                ),
+    final freshness = FxHubFreshness.fromFetchedAt(_fetchedAt);
+
+    return fxScreenA11yScope(
+      label: 'Ranking de personais',
+      child: FxShellScaffold(
+        useMesh: true,
+        constrainWidth: false,
+        appBar: FxShellAppBar(
+          title: 'Ranking de personais',
+          subtitle: _loading
+              ? freshness
+              : '${rankingCountLabel(_total)}${freshness == null ? '' : ' · $freshness'}',
+          onBack: () => safePopOrGo(context, '/dashboard/personal'),
+          actions: [
+            FxHelpIconButton(
+              tooltip: 'Como ler o ranking',
+              onTap: () => showFxHelpSheet(
+                context,
+                title: 'Ranking',
+                subtitle: 'Quem tem mais alunos ativos neste mês.',
+                tips: const [
+                  FxHelpTip('Como calculamos', rankingComoCalculamos),
+                  FxHelpTip(
+                    'Pódio',
+                    'Os 3 primeiros levam desconto na assinatura Focux.',
+                  ),
+                  FxHelpTip(
+                    'Lista',
+                    'A posição não abre o personal. É um placar, não o 360.',
+                  ),
+                ],
               ),
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _RankingTile extends StatelessWidget {
-  final RankingItem item;
-  const _RankingTile({required this.item});
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final primarySoft = BrandPalette.soft(
-      Theme.of(context).colorScheme.primary,
-      dark: isDark,
-    );
-    final primary = Theme.of(context).colorScheme.primary;
-    return FxSatelliteListTile(
-      accent: primary,
-      title: item.nome,
-      titleCase: false,
-      subtitle: Text('${item.totalAlunosAtivos} alunos ativos'),
-      leading: CircleAvatar(
-        backgroundColor: isDark ? EagleTokens.darkCard : primarySoft,
-        child: Text(
-          '${item.posicao}',
-          style: TextStyle(
-            color: isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
+        body: _loading
+            ? const SkeletonList(count: 6)
+            : _erro != null
+            ? FxErrorState(
+              chromeOnDark: isDark,
+              primary: primary,
+              message: _erro!,
+              onRetry: _carregar,
+            )
+            : RefreshIndicator(
+              color: primary,
+              onRefresh: _carregar,
+              child: _items.isEmpty
+                  ? ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    children: [
+                      const SizedBox(height: 48),
+                      FxEmptyState(
+                        icon: 'star',
+                        title: 'Ranking ainda sem dados',
+                        subtitle:
+                            'A classificação aparece quando houver personais com alunos ativos.',
+                        action: FxEmptyAction(
+                          label: 'Ir para o Hoje',
+                          onTap: () => goPersonalShellTab(
+                            context,
+                            '/dashboard/personal',
+                          ),
+                        ),
+                      ),
+                    ],
+                  )
+                  : FxContentWidthLimiter(
+                    child: ListView.builder(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      keyboardDismissBehavior:
+                          ScrollViewKeyboardDismissBehavior.onDrag,
+                      padding: const EdgeInsets.all(TokensStrip.s4),
+                      itemCount: _items.length + (_hasMore ? 2 : 1),
+                      itemBuilder: (context, index) {
+                        if (index == 0) {
+                          return const Padding(
+                            padding: EdgeInsets.only(bottom: TokensStrip.s3),
+                            child: DashboardSectionHeader(title: 'Classificação'),
+                          );
+                        }
+                        if (_hasMore && index == _items.length + 1) {
+                          return FxSatelliteListTile(
+                            title: _carregandoMais
+                                ? 'Carregando…'
+                                : 'Carregar mais',
+                            onTap: _carregandoMais ? null : _carregarMais,
+                          );
+                        }
+                        final item = _items[index - 1];
+                        return FxSatelliteListTile(
+                          title: item.nome,
+                          subtitle: Text(rankingAlunosLabel(item.totalAlunosAtivos)),
+                          trailing: Text(
+                            rankingPosicaoLabel(item.posicao),
+                            style: FocuxHubTypography.bodyMuted(
+                              color: item.posicao <= 3
+                                  ? Theme.of(context).colorScheme.primary
+                                  : fxScreenMute(context),
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          accent: item.posicao == 1
+                              ? Theme.of(context).colorScheme.primary
+                              : null,
+                        );
+                      },
+                    ),
+                  ),
+            ),
       ),
     );
   }

@@ -1,3 +1,12 @@
+const notificacaoComoCalculamos =
+    'Tudo que pediu ação: alerta, chat e Radar. Não é o sino do inbox.';
+
+String notificacaoCountLabel(int count) {
+  if (count <= 0) return 'Nenhuma';
+  if (count == 1) return '1 aviso';
+  return '$count avisos';
+}
+
 const _nameParticles = {'de', 'da', 'do', 'dos', 'das', 'e'};
 
 /// Title-case person names from API payloads (e.g. `thales` → `Thales`).

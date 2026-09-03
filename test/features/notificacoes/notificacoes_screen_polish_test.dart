@@ -18,6 +18,11 @@ void main() {
     expect(screen, contains('RefreshIndicator'));
     expect(screen, contains('notificacoesViewed'));
     expect(screen, contains('Carregar mais'));
+    expect(screen, contains('constrainWidth: false'));
+    expect(screen, contains('FxContentWidthLimiter'));
+    expect(screen, contains('Como calculamos'));
+    expect(screen, contains('keyboardDismissBehavior'));
+    expect(screen, contains('goPersonalShellTab'));
     expect(screen, isNot(contains('CircularProgressIndicator')));
   });
 }
