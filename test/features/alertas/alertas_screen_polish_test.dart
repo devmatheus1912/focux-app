@@ -19,6 +19,7 @@ void main() {
     expect(screen, contains('getHome()'));
     expect(screen, contains('/alertas/config'));
     expect(screen, contains('alertasHubViewed'));
+    expect(screen, contains('alertaAdiarCtaLabel'));
     expect(screen, isNot(contains('MOTOR ANTI-CHURN')));
     expect(screen, isNot(contains('saudaveis')));
     expect(screen, isNot(contains('CircularProgressIndicator')));

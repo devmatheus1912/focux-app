@@ -6,7 +6,8 @@ Future<void> showAlertasConfigHelpSheet(BuildContext context) {
   return showFxHelpSheet(
     context,
     title: 'Quando dispara',
-    subtitle: 'Estes limiares valem para a lista de alertas e para o risco no 360.',
+    subtitle:
+        'Estes limiares valem para a lista de alertas e para o risco no 360.',
     tips: const [
       FxHelpTip(
         'Dias sem treino',
@@ -20,7 +21,7 @@ Future<void> showAlertasConfigHelpSheet(BuildContext context) {
       ),
       FxHelpTip(
         'Salvar',
-        'Vale na hora. Resolver um aluno na lista continua sendo snooze de 24h, não muda o limiar.',
+        'Vale na hora. Adiar 24h na lista continua sendo snooze, não muda o limiar.',
         icon: 'circle-check',
       ),
     ],

@@ -20,6 +20,7 @@ void main() {
     expect(screen, contains('IaSafetyDisclaimer'));
     expect(screen, contains('alertasDetalheViewed'));
     expect(screen, contains('Melhorar com IA'));
+    expect(screen, contains('alertaAdiarCtaLabel'));
     expect(screen, contains('aplicarSugestaoIa'));
     expect(screen, contains('/alunos/\${widget.alunoId}/chat'));
     expect(screen, isNot(contains('alunoEmail')));

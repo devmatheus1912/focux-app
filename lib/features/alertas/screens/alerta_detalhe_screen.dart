@@ -154,7 +154,7 @@ class _AlertaDetalheScreenState extends ConsumerState<AlertaDetalheScreen> {
         ref.read(apiClientProvider),
       ).resolver(widget.alunoId);
       if (!mounted) return;
-      FeedbackHelper.showSuccess(context, 'Alerta resolvido.');
+      FeedbackHelper.showSuccess(context, alertaAdiadoSuccessMessage());
       safePopOrGo(context, '/alertas');
     } catch (e) {
       if (!mounted) return;
@@ -168,9 +168,10 @@ class _AlertaDetalheScreenState extends ConsumerState<AlertaDetalheScreen> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
-    final nome = _detalhe?.alunoNome.isNotEmpty == true
-        ? _detalhe!.alunoNome
-        : widget.alunoNome;
+    final nome =
+        _detalhe?.alunoNome.isNotEmpty == true
+            ? _detalhe!.alunoNome
+            : widget.alunoNome;
 
     return fxScreenA11yScope(
       label: 'Alerta — $nome',
@@ -192,148 +193,154 @@ class _AlertaDetalheScreenState extends ConsumerState<AlertaDetalheScreen> {
             ),
           ],
         ),
-        body: _loading
-            ? const Padding(
-              padding: EdgeInsets.all(FxSettingsLayout.pageInset),
-              child: SkeletonList(count: 6),
-            )
-            : _erro != null
-            ? FxErrorState(
-              chromeOnDark: isDark,
-              primary: primary,
-              message: _erro!,
-              onRetry: _load,
-            )
-            : _detalhe == null
-            ? FxEmptyState(
-              icon: 'alert-triangle',
-              title: 'Sem dados deste alerta',
-              subtitle:
-                  'Não encontramos o detalhe agora. Puxe para atualizar.',
-              action: FxEmptyAction(label: 'Tentar de novo', onTap: _load),
-            )
-            : Column(
-              children: [
-                Expanded(
-                  child: RefreshIndicator(
-                    color: primary,
-                    onRefresh: () async {
-                      AnalyticsService.instance.track(
-                        ProductEvents.alertasDetalheRefreshed,
-                      );
-                      await _load();
-                    },
-                    child: ListView(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      padding: const EdgeInsets.fromLTRB(
-                        FxSettingsLayout.pageInset,
-                        TokensStrip.s4,
-                        FxSettingsLayout.pageInset,
-                        TokensStrip.s4,
-                      ),
-                      children: [
-                        OperationalMetricTile(
-                          label: 'Último treino',
-                          value: alertaUltimoTreinoLabel(
-                            _detalhe!.ultimoTreino,
+        body:
+            _loading
+                ? const Padding(
+                  padding: EdgeInsets.all(FxSettingsLayout.pageInset),
+                  child: SkeletonList(count: 6),
+                )
+                : _erro != null
+                ? FxErrorState(
+                  chromeOnDark: isDark,
+                  primary: primary,
+                  message: _erro!,
+                  onRetry: _load,
+                )
+                : _detalhe == null
+                ? FxEmptyState(
+                  icon: 'alert-triangle',
+                  title: 'Sem dados deste alerta',
+                  subtitle:
+                      'Não encontramos o detalhe agora. Puxe para atualizar.',
+                  action: FxEmptyAction(label: 'Tentar de novo', onTap: _load),
+                )
+                : Column(
+                  children: [
+                    Expanded(
+                      child: RefreshIndicator(
+                        color: primary,
+                        onRefresh: () async {
+                          AnalyticsService.instance.track(
+                            ProductEvents.alertasDetalheRefreshed,
+                          );
+                          await _load();
+                        },
+                        child: ListView(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          padding: const EdgeInsets.fromLTRB(
+                            FxSettingsLayout.pageInset,
+                            TokensStrip.s4,
+                            FxSettingsLayout.pageInset,
+                            TokensStrip.s4,
                           ),
-                          hint: alertaCheckinsLabel(_detalhe!.checkIns30Dias),
-                          color: primary,
-                          isDark: isDark,
-                          emphasis: OperationalMetricEmphasis.alert,
-                        ),
-                        const SizedBox(height: TokensStrip.s3),
-                        OperationalMetricTile(
-                          label: 'Mensalidade',
-                          value: alertaStatusFinanceiroLabel(
-                            _detalhe!.statusFinanceiro,
-                          ),
-                          hint: 'Situação financeira',
-                          color:
-                              alertaStatusFinanceiroRuim(
-                                    _detalhe!.statusFinanceiro,
-                                  )
-                                  ? EagleTokens.bad
-                                  : primary,
-                          isDark: isDark,
-                          emphasis:
-                              alertaStatusFinanceiroRuim(
-                                    _detalhe!.statusFinanceiro,
-                                  )
-                                  ? OperationalMetricEmphasis.alert
-                                  : OperationalMetricEmphasis.normal,
-                        ),
-                        const SizedBox(height: TokensStrip.s4),
-                        Text(
-                          _detalhe!.sugestaoIa.trim().isEmpty
-                              ? 'Sem sugestão agora. Fale com o aluno pelo chat.'
-                              : _detalhe!.sugestaoIa.trim(),
-                          style: FocuxHubTypography.bodyMuted(
-                            color: fxScreenMute(context),
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(height: TokensStrip.s3),
-                        const IaSafetyDisclaimer(compact: true),
-                        const SizedBox(height: TokensStrip.s4),
-                        Wrap(
-                          spacing: TokensStrip.s2,
-                          runSpacing: TokensStrip.s2,
                           children: [
-                            DashboardHomeActionChip(
-                              label: 'Chat',
-                              accent: primary,
+                            OperationalMetricTile(
+                              label: 'Último treino',
+                              value: alertaUltimoTreinoLabel(
+                                _detalhe!.ultimoTreino,
+                              ),
+                              hint: alertaCheckinsLabel(
+                                _detalhe!.checkIns30Dias,
+                              ),
+                              color: primary,
                               isDark: isDark,
-                              onPressed: () => context.push(
-                                '/alunos/${widget.alunoId}/chat',
-                                extra: nome,
+                              emphasis: OperationalMetricEmphasis.alert,
+                            ),
+                            const SizedBox(height: TokensStrip.s3),
+                            OperationalMetricTile(
+                              label: 'Mensalidade',
+                              value: alertaStatusFinanceiroLabel(
+                                _detalhe!.statusFinanceiro,
+                              ),
+                              hint: 'Situação financeira',
+                              color:
+                                  alertaStatusFinanceiroRuim(
+                                        _detalhe!.statusFinanceiro,
+                                      )
+                                      ? EagleTokens.bad
+                                      : primary,
+                              isDark: isDark,
+                              emphasis:
+                                  alertaStatusFinanceiroRuim(
+                                        _detalhe!.statusFinanceiro,
+                                      )
+                                      ? OperationalMetricEmphasis.alert
+                                      : OperationalMetricEmphasis.normal,
+                            ),
+                            const SizedBox(height: TokensStrip.s4),
+                            Text(
+                              _detalhe!.sugestaoIa.trim().isEmpty
+                                  ? 'Sem sugestão agora. Fale com o aluno pelo chat.'
+                                  : _detalhe!.sugestaoIa.trim(),
+                              style: FocuxHubTypography.bodyMuted(
+                                color: fxScreenMute(context),
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
-                            DashboardHomeActionChip(
-                              label: 'Relatório',
-                              accent: primary,
-                              isDark: isDark,
-                              onPressed: () => context.push(
-                                '/alunos/${widget.alunoId}/relatorio',
-                                extra: nome,
-                              ),
-                            ),
-                            DashboardHomeActionChip(
-                              label: _gerandoIa
-                                  ? 'Gerando…'
-                                  : _detalhe!.sugestaoFonte == 'IA'
-                                  ? 'Gerar outra'
-                                  : 'Melhorar com IA',
-                              accent: primary,
-                              isDark: isDark,
-                              enabled: !_gerandoIa,
-                              onPressed: _gerarIa,
+                            const SizedBox(height: TokensStrip.s3),
+                            const IaSafetyDisclaimer(compact: true),
+                            const SizedBox(height: TokensStrip.s4),
+                            Wrap(
+                              spacing: TokensStrip.s2,
+                              runSpacing: TokensStrip.s2,
+                              children: [
+                                DashboardHomeActionChip(
+                                  label: 'Chat',
+                                  accent: primary,
+                                  isDark: isDark,
+                                  onPressed:
+                                      () => context.push(
+                                        '/alunos/${widget.alunoId}/chat',
+                                        extra: nome,
+                                      ),
+                                ),
+                                DashboardHomeActionChip(
+                                  label: 'Relatório',
+                                  accent: primary,
+                                  isDark: isDark,
+                                  onPressed:
+                                      () => context.push(
+                                        '/alunos/${widget.alunoId}/relatorio',
+                                        extra: nome,
+                                      ),
+                                ),
+                                DashboardHomeActionChip(
+                                  label:
+                                      _gerandoIa
+                                          ? 'Gerando…'
+                                          : _detalhe!.sugestaoFonte == 'IA'
+                                          ? 'Gerar outra'
+                                          : 'Melhorar com IA',
+                                  accent: primary,
+                                  isDark: isDark,
+                                  enabled: !_gerandoIa,
+                                  onPressed: _gerarIa,
+                                ),
+                              ],
                             ),
                           ],
                         ),
-                      ],
+                      ),
                     ),
-                  ),
+                    SafeArea(
+                      top: false,
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(
+                          FxSettingsLayout.pageInset,
+                          TokensStrip.s2,
+                          FxSettingsLayout.pageInset,
+                          TokensStrip.s3,
+                        ),
+                        child: FxLiquidPrimaryButton(
+                          label: alertaAdiarCtaLabel(),
+                          loading: _resolving,
+                          loadingLabel: alertaAdiarLoadingLabel(),
+                          onPressed: _resolving ? null : _resolver,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                SafeArea(
-                  top: false,
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(
-                      FxSettingsLayout.pageInset,
-                      TokensStrip.s2,
-                      FxSettingsLayout.pageInset,
-                      TokensStrip.s3,
-                    ),
-                    child: FxLiquidPrimaryButton(
-                      label: 'Resolver alerta',
-                      loading: _resolving,
-                      loadingLabel: 'Resolvendo…',
-                      onPressed: _resolving ? null : _resolver,
-                    ),
-                  ),
-                ),
-              ],
-            ),
       ),
     );
   }

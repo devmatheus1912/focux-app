@@ -10,7 +10,7 @@ Future<void> showAlertasHelpSheet(BuildContext context) {
     tips: const [
       FxHelpTip(
         'Lista',
-        'Alto e médio. Toque no aluno para ver o detalhe. Segure para escrever ou resolver.',
+        'Alto e médio. Toque no aluno para ver o detalhe. Segure para escrever ou adiar 24h.',
         icon: 'alert-triangle',
       ),
       FxHelpTip(
@@ -19,8 +19,8 @@ Future<void> showAlertasHelpSheet(BuildContext context) {
         icon: 'target',
       ),
       FxHelpTip(
-        'Resolver',
-        'Tira o aluno desta caixa. Não apaga o histórico nem o 360.',
+        'Adiar 24h',
+        'Tira o aluno desta caixa por um dia. Não apaga o histórico nem o 360.',
         icon: 'circle-check',
       ),
     ],

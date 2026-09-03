@@ -25,6 +25,7 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../../alunos/widgets/aluno_avatar.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../data/alertas_repository.dart';
+import '../utils/alerta_detalhe_display.dart';
 import '../widgets/alertas_help_sheet.dart';
 
 class AlertasScreen extends ConsumerStatefulWidget {
@@ -107,7 +108,7 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
       ).resolver(alerta.alunoId);
       setState(() => _alertas.removeWhere((a) => a.alunoId == alerta.alunoId));
       if (mounted) {
-        FeedbackHelper.showSuccess(context, 'Alerta resolvido.');
+        FeedbackHelper.showSuccess(context, alertaAdiadoSuccessMessage());
       }
     } catch (e) {
       if (mounted) {
@@ -183,9 +184,10 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
                 isDark: isDark,
                 leading: const Icon(Icons.person_outline_rounded, size: 18),
                 title: alerta.alunoNome,
-                subtitle: alerta.motivos.isEmpty
-                    ? 'O que você quer fazer agora?'
-                    : alerta.motivos.first,
+                subtitle:
+                    alerta.motivos.isEmpty
+                        ? 'O que você quer fazer agora?'
+                        : alerta.motivos.first,
               ),
               FxSettingsTile(
                 fxIcon: 'message-circle',
@@ -198,7 +200,7 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
               ),
               FxSettingsTile(
                 fxIcon: 'circle-check',
-                label: 'Resolver',
+                label: alertaAdiarCtaLabel(),
                 value: '',
                 showDivider: false,
                 onTap: () {
@@ -245,121 +247,131 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
             ),
           ],
         ),
-        body: _loading
-            ? const Padding(
-              padding: EdgeInsets.all(FxSettingsLayout.pageInset),
-              child: SkeletonList(count: 6),
-            )
-            : _erro != null
-            ? FxErrorState(
-              chromeOnDark: isDark,
-              primary: brand,
-              message: _erro!,
-              onRetry: _load,
-            )
-            : RefreshIndicator(
-              color: brand,
-              onRefresh: () async {
-                AnalyticsService.instance.track(
-                  ProductEvents.alertasHubRefreshed,
-                );
-                await _load();
-              },
-              child: _alertas.isEmpty
-                  ? ListView(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    children: [
-                      SizedBox(
-                        height: 320,
-                        child: FxEmptyState(
-                          icon: 'circle-check',
-                          title: 'Nenhum aluno em risco',
-                          subtitle:
-                              'Avisamos aqui quando alguém esfriar. Você pode apertar ou folgar os limiares.',
-                          action: _config == null
-                              ? null
-                              : FxEmptyAction(
-                                label: 'Ajustar limiares',
-                                onTap: _abrirConfig,
-                              ),
-                        ),
-                      ),
-                    ],
-                  )
-                  : ListView.builder(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      padding: const EdgeInsets.fromLTRB(
-                        FxSettingsLayout.pageInset,
-                        TokensStrip.s3,
-                        FxSettingsLayout.pageInset,
-                        TokensStrip.s6,
-                      ),
-                      itemCount: rows.length,
-                      itemBuilder: (context, i) {
-                        final row = rows[i];
-                        if (row.config != null) {
-                          final config = row.config!;
-                          return FxSatelliteListTile(
-                            title: 'Quando dispara',
-                            subtitle: Text(
-                              'Sem treino acima de ${config.diasSemTreino} dias ou aderência abaixo de ${config.aderenciaMinima}%.',
-                            ),
-                            trailing: Text(
-                              '${config.diasSemTreino}d · ${config.aderenciaMinima}%',
-                              style: FocuxHubTypography.bodyMuted(
-                                color: fxScreenMute(context),
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            onTap: _abrirConfig,
-                          );
-                        }
-                        final alerta = row.alerta!;
-                        final showSection =
-                            i == 0 || rows[i - 1].section != row.section;
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            if (showSection && row.section == 'alto')
-                              const Padding(
-                                padding: EdgeInsets.only(bottom: TokensStrip.s2),
-                                child: DashboardSectionHeader(title: 'Alto'),
-                              ),
-                            if (showSection && row.section == 'medio')
-                              const Padding(
-                                padding: EdgeInsets.only(
-                                  top: TokensStrip.s2,
-                                  bottom: TokensStrip.s2,
+        body:
+            _loading
+                ? const Padding(
+                  padding: EdgeInsets.all(FxSettingsLayout.pageInset),
+                  child: SkeletonList(count: 6),
+                )
+                : _erro != null
+                ? FxErrorState(
+                  chromeOnDark: isDark,
+                  primary: brand,
+                  message: _erro!,
+                  onRetry: _load,
+                )
+                : RefreshIndicator(
+                  color: brand,
+                  onRefresh: () async {
+                    AnalyticsService.instance.track(
+                      ProductEvents.alertasHubRefreshed,
+                    );
+                    await _load();
+                  },
+                  child:
+                      _alertas.isEmpty
+                          ? ListView(
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            children: [
+                              SizedBox(
+                                height: 320,
+                                child: FxEmptyState(
+                                  icon: 'circle-check',
+                                  title: 'Nenhum aluno em risco',
+                                  subtitle:
+                                      'Avisamos aqui quando alguém esfriar. Você pode apertar ou folgar os limiares.',
+                                  action:
+                                      _config == null
+                                          ? null
+                                          : FxEmptyAction(
+                                            label: 'Ajustar limiares',
+                                            onTap: _abrirConfig,
+                                          ),
                                 ),
-                                child: DashboardSectionHeader(title: 'Médio'),
                               ),
-                            GestureDetector(
-                              onLongPress: () => _openActions(alerta),
-                              child: FxSatelliteListTile(
-                                title: alerta.alunoNome,
-                                subtitle: alerta.motivos.isEmpty
-                                    ? null
-                                    : Text(alerta.motivos.first),
-                                leading: AlunoAvatar(
-                                  name: alerta.alunoNome,
-                                  variant: AlunoAvatarVariant.strip,
-                                ),
-                                trailing: Text(
-                                  '${alerta.diasSemTreino ?? 0}d',
-                                  style: FocuxHubTypography.bodyMuted(
-                                    color: fxScreenMute(context),
-                                    fontWeight: FontWeight.w600,
+                            ],
+                          )
+                          : ListView.builder(
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            padding: const EdgeInsets.fromLTRB(
+                              FxSettingsLayout.pageInset,
+                              TokensStrip.s3,
+                              FxSettingsLayout.pageInset,
+                              TokensStrip.s6,
+                            ),
+                            itemCount: rows.length,
+                            itemBuilder: (context, i) {
+                              final row = rows[i];
+                              if (row.config != null) {
+                                final config = row.config!;
+                                return FxSatelliteListTile(
+                                  title: 'Quando dispara',
+                                  subtitle: Text(
+                                    'Sem treino acima de ${config.diasSemTreino} dias ou aderência abaixo de ${config.aderenciaMinima}%.',
                                   ),
-                                ),
-                                accent: alerta.score >= 2 ? brand : null,
-                                onTap: () => _openAlerta(alerta),
-                              ),
-                            ),
-                          ],
-                        );
-                      },
-                    ),
-            ),
+                                  trailing: Text(
+                                    '${config.diasSemTreino}d · ${config.aderenciaMinima}%',
+                                    style: FocuxHubTypography.bodyMuted(
+                                      color: fxScreenMute(context),
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  onTap: _abrirConfig,
+                                );
+                              }
+                              final alerta = row.alerta!;
+                              final showSection =
+                                  i == 0 || rows[i - 1].section != row.section;
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  if (showSection && row.section == 'alto')
+                                    const Padding(
+                                      padding: EdgeInsets.only(
+                                        bottom: TokensStrip.s2,
+                                      ),
+                                      child: DashboardSectionHeader(
+                                        title: 'Alto',
+                                      ),
+                                    ),
+                                  if (showSection && row.section == 'medio')
+                                    const Padding(
+                                      padding: EdgeInsets.only(
+                                        top: TokensStrip.s2,
+                                        bottom: TokensStrip.s2,
+                                      ),
+                                      child: DashboardSectionHeader(
+                                        title: 'Médio',
+                                      ),
+                                    ),
+                                  GestureDetector(
+                                    onLongPress: () => _openActions(alerta),
+                                    child: FxSatelliteListTile(
+                                      title: alerta.alunoNome,
+                                      subtitle:
+                                          alerta.motivos.isEmpty
+                                              ? null
+                                              : Text(alerta.motivos.first),
+                                      leading: AlunoAvatar(
+                                        name: alerta.alunoNome,
+                                        variant: AlunoAvatarVariant.strip,
+                                      ),
+                                      trailing: Text(
+                                        '${alerta.diasSemTreino ?? 0}d',
+                                        style: FocuxHubTypography.bodyMuted(
+                                          color: fxScreenMute(context),
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                      accent: alerta.score >= 2 ? brand : null,
+                                      onTap: () => _openAlerta(alerta),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
+                          ),
+                ),
       ),
     );
   }
