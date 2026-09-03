@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/analytics/analytics_service.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
@@ -73,6 +74,10 @@ class _NpsDashboardScreenState extends ConsumerState<NpsDashboardScreen> {
   void _contatarDetrator(NpsItem item) {
     final alunoId = item.alunoId;
     if (alunoId == null) return;
+    AnalyticsService.instance.track(
+      ProductEvents.chatThreadOpened,
+      props: {'alunoId': alunoId},
+    );
     final nome = item.alunoNome;
     if (nome != null && nome.isNotEmpty) {
       context.push('/alunos/$alunoId/chat', extra: nome);
@@ -88,6 +93,8 @@ class _NpsDashboardScreenState extends ConsumerState<NpsDashboardScreen> {
     final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
     final resumo = _resumo;
     final empty = resumo == null || resumo.total == 0;
+    final filtro = GoRouterState.of(context).uri.queryParameters['filtro'];
+    final recentes = npsItemsForFiltro(_recentes, filtro);
     final firstDetrator = firstNpsDetrator(_recentes);
 
     return fxScreenA11yScope(
@@ -108,14 +115,11 @@ class _NpsDashboardScreenState extends ConsumerState<NpsDashboardScreen> {
                     title: 'NPS',
                     subtitle: 'Satisfação da base e o próximo contato.',
                     tips: const [
+                      FxHelpTip('Como calculamos', npsComoCalculamos),
                       FxHelpTip('Score', 'O card do topo é o NPS da operação.'),
                       FxHelpTip(
                         'Detrator',
                         'Nota 6 ou menos pede contato no mesmo dia.',
-                      ),
-                      FxHelpTip(
-                        'Recentes',
-                        'Os 3 últimos feedbacks ficam no fold.',
                       ),
                     ],
                   ),
@@ -148,11 +152,12 @@ class _NpsDashboardScreenState extends ConsumerState<NpsDashboardScreen> {
                                     'Assim que seus alunos responderem à pesquisa, o feedback aparece aqui.',
                                 action: FxEmptyAction(
                                   label: 'Ver alunos',
-                                  onTap:
-                                      () => goPersonalShellTab(
-                                        context,
-                                        '/alunos',
-                                      ),
+                                  onTap: () {
+                                    AnalyticsService.instance.track(
+                                      ProductEvents.alunosViewed,
+                                    );
+                                    goPersonalShellTab(context, '/alunos');
+                                  },
                                 ),
                               ),
                             ],
@@ -195,7 +200,7 @@ class _NpsDashboardScreenState extends ConsumerState<NpsDashboardScreen> {
                                   title: 'Feedback recente',
                                 ),
                                 const SizedBox(height: TokensStrip.s2),
-                                for (final item in npsRecentPreview(_recentes))
+                                for (final item in npsRecentPreview(recentes))
                                   _NpsTile(
                                     item: item,
                                     onContatar:
@@ -269,6 +274,7 @@ class _NpsFocusCard extends StatelessWidget {
               onPressed: () {
                 final alvo = firstDetrator;
                 if (alvo == null) {
+                  AnalyticsService.instance.track(ProductEvents.alunosViewed);
                   goPersonalShellTab(context, '/alunos');
                   return;
                 }

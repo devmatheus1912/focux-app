@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/analytics/analytics_service.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
@@ -25,6 +26,7 @@ import '../../dashboard/widgets/dashboard_error_state.dart';
 import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../data/analytics_repository.dart';
 import '../providers/analytics_provider.dart';
+import '../utils/analytics_display.dart';
 
 part 'analytics_screen_widgets.part.dart';
 
@@ -75,7 +77,11 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
         useMesh: true,
         appBar: FxShellAppBar(
           title: 'Analytics',
-          subtitle: freshnessLabel,
+          subtitle:
+              freshnessLabel ??
+              FxHubFreshness.fromFetchedAt(
+                async.asData?.value.fetchedAt,
+              ),
           onBack: () => safePopOrGo(context, '/dashboard/personal'),
           actions: [
             FxHelpIconButton(
@@ -86,13 +92,10 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                     title: 'Analytics',
                     subtitle: 'Pulso da base: atividade, churn e retenção.',
                     tips: const [
+                      FxHelpTip('Como calculamos', analyticsComoCalculamos),
                       FxHelpTip(
                         'Churn',
                         'O card do topo é a inadimplência da operação.',
-                      ),
-                      FxHelpTip(
-                        'WAU',
-                        'Quem treinou na semana. Compare com o mês.',
                       ),
                     ],
                   ),
@@ -118,7 +121,10 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                       'Cadastre alunos para ver analytics operacional da base.',
                   action: FxEmptyAction(
                     label: 'Ver alunos',
-                    onTap: () => goPersonalShellTab(context, '/alunos'),
+                    onTap: () {
+                      AnalyticsService.instance.track(ProductEvents.alunosViewed);
+                      goPersonalShellTab(context, '/alunos');
+                    },
                   ),
                 );
               }

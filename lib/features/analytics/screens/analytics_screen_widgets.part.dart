@@ -70,7 +70,12 @@ class _AnalyticsBody extends StatelessWidget {
                                   ? EagleTokens.bad
                                   : brand,
                           isDark: dark,
-                          onPressed: () => context.push('/financeiro'),
+                          onPressed: () {
+                            AnalyticsService.instance.track(
+                              ProductEvents.financeiroViewed,
+                            );
+                            context.push('/financeiro');
+                          },
                         ),
                       ),
                     ],

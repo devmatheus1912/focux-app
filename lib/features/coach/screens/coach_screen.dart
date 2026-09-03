@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../core/analytics/analytics_service.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
@@ -20,30 +22,20 @@ import '../../dashboard/providers/dashboard_provider.dart';
 import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../data/coach_proativo_repository.dart';
-import '../widgets/coach_proativo_card.dart';
+import '../utils/coach_display.dart';
 
-class CoachScreen extends ConsumerStatefulWidget {
+final coachHomeProvider = FutureProvider.autoDispose<CoachHome>((ref) {
+  return CoachProativoRepository(ref.read(apiClientProvider)).getHome();
+});
+
+class CoachScreen extends ConsumerWidget {
   const CoachScreen({super.key});
 
   @override
-  ConsumerState<CoachScreen> createState() => _CoachScreenState();
-}
-
-class _CoachScreenState extends ConsumerState<CoachScreen> {
-  DateTime? _fetchedAt;
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
-    final mensagens = ref.watch(coachMensagensProvider);
-    ref.listen(coachMensagensProvider, (_, next) {
-      if (!next.hasValue || next.isLoading) return;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        setState(() => _fetchedAt = DateTime.now());
-      });
-    });
+    final home = ref.watch(coachHomeProvider);
 
     return fxScreenA11yScope(
       label: 'Coach proativo',
@@ -52,9 +44,10 @@ class _CoachScreenState extends ConsumerState<CoachScreen> {
         constrainWidth: false,
         appBar: FxShellAppBar(
           title: 'Coach',
-          subtitle:
-              FxHubFreshness.fromFetchedAt(_fetchedAt) ??
-              'Orientações automáticas',
+          subtitle: home.maybeWhen(
+            data: (data) => FxHubFreshness.fromFetchedAt(data.fetchedAt),
+            orElse: () => 'Orientações automáticas',
+          ),
           onBack: () => safePopOrGo(context, '/dashboard/personal'),
           actions: [
             FxHelpIconButton(
@@ -65,20 +58,21 @@ class _CoachScreenState extends ConsumerState<CoachScreen> {
                     title: 'Coach',
                     subtitle: 'O que merece atenção agora.',
                     tips: const [
+                      FxHelpTip('Como calculamos', coachComoCalculamos),
                       FxHelpTip(
                         'Pendente',
                         'O card do topo é a próxima orientação.',
                       ),
                       FxHelpTip(
-                        'Entendi',
-                        'Marca a mensagem como lida sem apagar o histórico.',
+                        'Abrir aluno',
+                        'O job é ir ao aluno. Entendi só arquiva a fila.',
                       ),
                     ],
                   ),
             ),
           ],
         ),
-        body: mensagens.when(
+        body: home.when(
           loading:
               () => const Padding(
                 padding: EdgeInsets.all(TokensStrip.s4),
@@ -89,10 +83,10 @@ class _CoachScreenState extends ConsumerState<CoachScreen> {
                 chromeOnDark: isDark,
                 primary: primary,
                 message: friendlyError(e),
-                onRetry: () => ref.invalidate(coachMensagensProvider),
+                onRetry: () => ref.invalidate(coachHomeProvider),
               ),
-          data: (msgs) {
-            if (msgs.isEmpty) {
+          data: (data) {
+            if (data.isEmpty) {
               return FxEmptyState(
                 icon: 'spark',
                 title: 'Nenhuma orientação agora',
@@ -105,13 +99,12 @@ class _CoachScreenState extends ConsumerState<CoachScreen> {
                 ),
               );
             }
-            final unread = msgs.where((m) => !m.lido).toList(growable: false);
-            final focus = unread.isNotEmpty ? unread.first : msgs.first;
+            final focus = data.focus ?? data.fila.first;
             return RefreshIndicator(
               color: primary,
               onRefresh: () async {
-                ref.invalidate(coachMensagensProvider);
-                await ref.read(coachMensagensProvider.future);
+                ref.invalidate(coachHomeProvider);
+                await ref.read(coachHomeProvider.future);
               },
               child: FxContentWidthLimiter(
                 child: ListView(
@@ -122,20 +115,31 @@ class _CoachScreenState extends ConsumerState<CoachScreen> {
                   children: [
                     _CoachFocusCard(
                       focus: focus,
-                      pending: unread.length,
+                      pending: data.pending,
                       isDark: isDark,
+                      onOpen: () {
+                        context.push(coachRota(focus));
+                      },
                       onAck: () async {
+                        AnalyticsService.instance.track(
+                          ProductEvents.homeCoachDismissed,
+                        );
                         await CoachProativoRepository(
                           ref.read(apiClientProvider),
                         ).marcarLido(focus.id);
-                        ref.invalidate(coachMensagensProvider);
+                        ref.invalidate(coachHomeProvider);
                         ref.invalidate(alunoDashboardHomeProvider);
                       },
                     ),
                     const SizedBox(height: TokensStrip.s4),
                     const DashboardSectionHeader(title: 'Fila'),
                     const SizedBox(height: TokensStrip.s2),
-                    CoachProativoCard(isDark: isDark, mensagens: msgs),
+                    for (final item in data.fila)
+                      FxSatelliteListTile(
+                        title: item.alunoNome,
+                        subtitle: Text(item.mensagem),
+                        onTap: () => context.push(coachRota(item)),
+                      ),
                   ],
                 ),
               ),
@@ -152,12 +156,14 @@ class _CoachFocusCard extends StatelessWidget {
     required this.focus,
     required this.pending,
     required this.isDark,
+    required this.onOpen,
     required this.onAck,
   });
 
-  final CoachMensagem focus;
+  final CoachHomeItem focus;
   final int pending;
   final bool isDark;
+  final VoidCallback onOpen;
   final VoidCallback onAck;
 
   @override
@@ -183,20 +189,34 @@ class _CoachFocusCard extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            focus.mensagem,
+            focus.alunoNome,
             style: FocuxHubTypography.body(
               color: chrome.ink,
             ).copyWith(fontWeight: FontWeight.w700),
           ),
+          const SizedBox(height: 4),
+          Text(
+            focus.mensagem,
+            style: FocuxHubTypography.body(color: chrome.mute),
+          ),
           const SizedBox(height: TokensStrip.s3),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: DashboardHomeActionChip(
-              label: 'Entendi',
-              accent: Theme.of(context).colorScheme.primary,
-              isDark: isDark,
-              onPressed: onAck,
-            ),
+          Wrap(
+            spacing: TokensStrip.s2,
+            runSpacing: TokensStrip.s2,
+            children: [
+              DashboardHomeActionChip(
+                label: 'Abrir aluno',
+                accent: Theme.of(context).colorScheme.primary,
+                isDark: isDark,
+                onPressed: onOpen,
+              ),
+              DashboardHomeActionChip(
+                label: 'Entendi',
+                accent: chrome.mute,
+                isDark: isDark,
+                onPressed: onAck,
+              ),
+            ],
           ),
         ],
       ),
