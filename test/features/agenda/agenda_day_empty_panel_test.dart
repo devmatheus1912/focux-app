@@ -4,7 +4,9 @@ import 'package:focux_app/features/agenda/utils/agenda_schedule.dart';
 import 'package:focux_app/features/agenda/widgets/agenda_day_empty_panel.dart';
 
 void main() {
-  testWidgets('empty do dia traz data, copy e CTA no mesmo card', (tester) async {
+  testWidgets('empty do dia traz data, copy e CTA no mesmo card', (
+    tester,
+  ) async {
     var tapped = false;
     await tester.pumpWidget(
       MaterialApp(
@@ -22,7 +24,7 @@ void main() {
     expect(find.text(agendaEmptyDayHint()), findsOneWidget);
     expect(find.text('Novo'), findsOneWidget);
 
-    await tester.tap(find.text('Dia livre'));
+    await tester.tap(find.text('Novo'));
     await tester.pump();
     expect(tapped, isTrue);
   });

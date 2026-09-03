@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../../core/widgets/fx_settings_group.dart';
-import '../../../core/widgets/fx_settings_tile.dart';
+import '../../../core/widgets/fx_empty_state.dart';
+import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../utils/agenda_schedule.dart';
 
 class AgendaDayEmptyPanel extends StatelessWidget {
@@ -22,19 +22,21 @@ class AgendaDayEmptyPanel extends StatelessWidget {
     return Semantics(
       container: true,
       label: '$dayLabel. Dia livre. $hint',
-      child: FxSettingsGroup(
-        header: dayLabel,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          FxSettingsTile(
-            fxIcon: 'calendar',
-            label: 'Dia livre',
+          DashboardSectionHeader(title: dayLabel),
+          FxEmptyState(
+            icon: 'calendar',
+            title: 'Dia livre',
             subtitle: hint,
-            value: 'Novo',
-            showDivider: false,
-            onTap: () {
-              HapticFeedback.lightImpact();
-              onNew();
-            },
+            action: FxEmptyAction(
+              label: 'Novo',
+              onTap: () {
+                HapticFeedback.lightImpact();
+                onNew();
+              },
+            ),
           ),
         ],
       ),
