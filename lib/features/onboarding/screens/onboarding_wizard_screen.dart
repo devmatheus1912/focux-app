@@ -6,17 +6,19 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/analytics/analytics_service.dart';
+import '../../../core/theme/brand_palette.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
-import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
+import '../../../core/widgets/fx_icon.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -26,7 +28,6 @@ import '../../dashboard/providers/dashboard_provider.dart';
 import '../../dashboard/utils/dashboard_home_client_cache.dart';
 import '../../planos/data/plano_features_bff_cache.dart';
 import '../../dashboard/utils/dashboard_onboarding_logic.dart';
-import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../data/onboarding_repository.dart';
 import '../data/onboarding_wizard_client_cache.dart';
 import '../utils/onboarding_wizard_display.dart';
@@ -49,7 +50,6 @@ class _OnboardingWizardScreenState
   String? _erro;
   int _previousCompleted = 0;
   bool _celebratedAllDone = false;
-  DateTime? _fetchedAt;
   bool _viewTracked = false;
   bool _ttvTracked = false;
   bool _concluindo = false;
@@ -59,18 +59,6 @@ class _OnboardingWizardScreenState
   void initState() {
     super.initState();
     _load();
-  }
-
-  String get _appBarSubtitle {
-    final remaining = _wizard?.remainingMinutes ?? 10;
-    final mins = remaining <= 0 ? 'pronto' : '~$remaining min';
-    final freshness = FxHubFreshness.fromFetchedAt(_fetchedAt);
-    if (freshness == null) {
-      return remaining <= 0
-          ? 'Tudo pronto por aqui'
-          : 'Deixe seu espaço pronto em cerca de $remaining min';
-    }
-    return '$freshness · $mins';
   }
 
   void _evictHomeCaches() {
@@ -89,7 +77,6 @@ class _OnboardingWizardScreenState
           _wizard = cached;
           _loading = false;
           _erro = null;
-          _fetchedAt = OnboardingWizardClientCache.fetchedAt;
           _previousCompleted = cached.completedCount;
         });
       } else {
@@ -119,7 +106,6 @@ class _OnboardingWizardScreenState
         _loading = false;
         _erro = null;
         _previousCompleted = completed;
-        _fetchedAt = DateTime.now();
       });
       _trackViewedOnce(w);
       _trackTtvOnce();
@@ -193,11 +179,18 @@ class _OnboardingWizardScreenState
     context.go('/dashboard/personal');
   }
 
+  bool get _allDone {
+    final wizard = _wizard;
+    if (wizard == null) return false;
+    return wizard.allStepsDone || wizard.wizardCompleto;
+  }
+
   @override
   Widget build(BuildContext context) {
     final wizard = _wizard;
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
+    final ready = !_loading && _erro == null && wizard != null;
 
     return fxScreenA11yScope(
       label: 'Primeiros passos, configuração inicial',
@@ -205,29 +198,57 @@ class _OnboardingWizardScreenState
         useMesh: true,
         appBar: FxShellAppBar(
           title: 'Primeiros passos',
-          subtitle: _appBarSubtitle,
-          onBack: _sairSemConcluir,
+          subtitle:
+              wizard == null
+                  ? null
+                  : wizardEtapaLabel(
+                    completedCount: wizard.completedCount,
+                    totalCount: wizard.totalCount,
+                    allDone: _allDone,
+                  ),
+          leadingWidth: 108,
+          leading: TextButton(
+            onPressed: _sairSemConcluir,
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            child: Text(wizardFazerDepoisLabel()),
+          ),
           actions: [
             FxHelpIconButton(
               tooltip: wizardHelpTitle(),
               onTap: _abrirAjuda,
             ),
-            Padding(
-              padding: const EdgeInsets.only(right: TokensStrip.s3),
-              child: Center(
-                child: Semantics(
-                  button: true,
-                  label: 'Fechar',
-                  child: ShellHeaderIconButton(
-                    icon: 'x',
-                    tooltip: 'Fechar',
-                    onTap: _sairSemConcluir,
-                  ),
-                ),
-              ),
-            ),
           ],
         ),
+        bottomNavigationBar:
+            ready
+                ? SafeArea(
+                  top: false,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      FxSettingsLayout.pageInset,
+                      TokensStrip.s2,
+                      FxSettingsLayout.pageInset,
+                      TokensStrip.s3,
+                    ),
+                    child: FxLiquidPrimaryButton(
+                      label: wizardStickyLabel(allDone: _allDone),
+                      loading: _concluindo,
+                      loadingLabel: 'Concluindo…',
+                      onPressed:
+                          _allDone
+                              ? _pedirConcluir
+                              : () => _abrirStep(
+                                wizard.nextActionRoute,
+                                fromChip: true,
+                              ),
+                    ),
+                  ),
+                )
+                : null,
         body:
             _loading && wizard == null
                 ? const SkeletonList(count: 5)
@@ -251,68 +272,15 @@ class _OnboardingWizardScreenState
                 : RefreshIndicator(
                   onRefresh: _refresh,
                   child: FxContentWidthLimiter(
-                    child: Stack(
-                      children: [
-                        Column(
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(
-                                FxSettingsLayout.pageInset,
-                                TokensStrip.s3,
-                                FxSettingsLayout.pageInset,
-                                0,
-                              ),
-                              child: SetupProgressHeroCard(
-                                progressPercent: wizard.progressPercent,
-                                completedCount: wizard.completedCount,
-                                totalCount: wizard.totalCount,
-                              ),
-                            ),
-                            Expanded(
-                              child: ListView(
-                                padding: const EdgeInsets.fromLTRB(
-                                  FxSettingsLayout.pageInset,
-                                  FxSettingsLayout.headerToGroup,
-                                  FxSettingsLayout.pageInset,
-                                  TokensStrip.s9 + TokensStrip.s2,
-                                ),
-                                physics:
-                                    const AlwaysScrollableScrollPhysics(),
-                                children: _buildStepList(wizard),
-                              ),
-                            ),
-                          ],
-                        ),
-                        Align(
-                          alignment: Alignment.bottomCenter,
-                          child: SafeArea(
-                            top: false,
-                            child: Padding(
-                              padding: const EdgeInsets.fromLTRB(
-                                FxSettingsLayout.pageInset,
-                                TokensStrip.s2,
-                                FxSettingsLayout.pageInset,
-                                TokensStrip.s3,
-                              ),
-                              child: FxLiquidPrimaryButton(
-                                label: wizardStickyLabel(
-                                  allDone:
-                                      wizard.allStepsDone ||
-                                      wizard.wizardCompleto,
-                                ),
-                                onPressed:
-                                    wizard.allStepsDone ||
-                                            wizard.wizardCompleto
-                                        ? _pedirConcluir
-                                        : () => _abrirStep(
-                                          wizard.nextActionRoute,
-                                          fromChip: true,
-                                        ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
+                    child: ListView(
+                      padding: const EdgeInsets.fromLTRB(
+                        FxSettingsLayout.pageInset,
+                        FxSettingsLayout.headerToGroup,
+                        FxSettingsLayout.pageInset,
+                        TokensStrip.s5,
+                      ),
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      children: _buildCurrentStep(wizard, chrome),
                     ),
                   ),
                 ),
@@ -320,34 +288,83 @@ class _OnboardingWizardScreenState
     );
   }
 
-  List<Widget> _buildStepList(OnboardingWizard wizard) {
+  List<Widget> _buildCurrentStep(
+    OnboardingWizard wizard,
+    ShellPalette chrome,
+  ) {
     final pending = wizard.steps.where((s) => !s.completed).toList();
     final completed = wizard.steps.where((s) => s.completed).toList();
+    final current = pending.isEmpty ? null : pending.first;
+    final later = pending.length > 1
+        ? pending.skip(1).map((s) => s.title).toList()
+        : const <String>[];
+    final doneCaption = wizardTitlesCaption(
+      prefix: 'Já feito:',
+      titles: completed.map((s) => s.title).toList(),
+    );
+    final laterCaption = wizardTitlesCaption(prefix: 'Depois:', titles: later);
+    final remaining = wizard.remainingMinutes;
+    final title = current?.title ?? wizardDoneTitle();
+    final body =
+        current == null
+            ? wizardDoneBody()
+            : (current.description.trim().isEmpty
+                ? null
+                : current.description.trim());
+    final minutes =
+        current != null && current.estimatedMinutes > 0
+            ? '~${current.estimatedMinutes} min'
+            : remaining > 0 && current != null
+            ? '~$remaining min'
+            : '';
+
+    final brand = BrandPalette.softened(Theme.of(context).colorScheme.primary);
 
     return [
-      if (wizard.allStepsDone) const SetupAllDoneBanner(),
-      if (pending.isNotEmpty)
-        for (var i = 0; i < pending.length; i++)
-          SetupStepCard(
-            title: pending[i].title,
-            description: pending[i].description,
-            estimatedMinutes: pending[i].estimatedMinutes,
-            icon: pending[i].icon,
-            completed: false,
-            showDivider: i < pending.length - 1,
-            onTap: () => _abrirStep(pending[i].actionRoute),
+      Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          FxIcon(
+            name:
+                current == null
+                    ? 'spark'
+                    : setupStepFxIconName(current.icon),
+            size: FxSettingsLayout.iconSize,
+            color: brand,
           ),
-      if (completed.isNotEmpty) ...[
-        if (pending.isNotEmpty)
-          const SizedBox(height: FxSettingsLayout.groupGap),
-        const DashboardSectionHeader(title: 'Concluídos'),
-        for (var i = 0; i < completed.length; i++)
-          SetupStepCard(
-            title: completed[i].title,
-            icon: completed[i].icon,
-            completed: true,
-            showDivider: i < completed.length - 1,
+          const SizedBox(width: FxSettingsLayout.iconGap),
+          Expanded(
+            child: Text(
+              title,
+              style: FocuxHubTypography.sectionTitle(
+                context,
+                color: chrome.ink,
+              ),
+            ),
           ),
+        ],
+      ),
+      if (body != null && body.isNotEmpty) ...[
+        const SizedBox(height: TokensStrip.s2),
+        Text(body, style: FocuxHubTypography.bodyMuted(color: chrome.mute)),
+      ],
+      if (minutes.isNotEmpty) ...[
+        const SizedBox(height: TokensStrip.s2),
+        Text(minutes, style: FocuxHubTypography.bodyMuted(color: chrome.mute)),
+      ],
+      if (doneCaption.isNotEmpty) ...[
+        const SizedBox(height: TokensStrip.s4),
+        Text(
+          doneCaption,
+          style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+        ),
+      ],
+      if (laterCaption.isNotEmpty) ...[
+        const SizedBox(height: TokensStrip.s2),
+        Text(
+          laterCaption,
+          style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+        ),
       ],
     ];
   }

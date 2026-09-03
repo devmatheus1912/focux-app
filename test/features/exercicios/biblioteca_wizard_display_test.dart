@@ -1,13 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:focux_app/features/exercicios/data/biblioteca_wizard_draft.dart';
 import 'package:focux_app/features/exercicios/data/enums.dart';
 import 'package:focux_app/features/exercicios/models/curated_biblioteca.dart';
 import 'package:focux_app/features/exercicios/utils/biblioteca_wizard_display.dart';
 
 void main() {
-  test('bibliotecaChoiceValue', () {
-    expect(bibliotecaChoiceValue(true), 'Sim');
-    expect(bibliotecaChoiceValue(false), 'Não');
-  });
+  tearDown(BibliotecaWizardDraftCache.clear);
 
   test('bibliotecaPreviewTitle', () {
     expect(bibliotecaPreviewTitle(0), 'Nenhum exercício encontrado');
@@ -29,6 +27,28 @@ void main() {
     expect(text, contains('Musculação'));
     expect(text, contains('Cardio'));
     expect(text, contains('Outdoor'));
+  });
+
+  test('etapa e pergunta de cada passo', () {
+    expect(bibliotecaEtapaLabel(0), 'Etapa 1 de 3');
+    expect(bibliotecaEtapaLabel(2), 'Etapa 3 de 3');
+    expect(bibliotecaQuestionTitle(0), contains('modalidades'));
+    expect(bibliotecaContinueLabel(step: 0), 'Continuar');
+    expect(bibliotecaContinueLabel(step: 2), 'Carregar biblioteca');
+  });
+
+  test('rascunho retoma etapa e escolhas', () {
+    BibliotecaWizardDraftCache.put(
+      const BibliotecaWizardDraft(
+        step: 1,
+        modalidades: {Modalidade.cardio},
+        espacos: {Espaco.outdoor},
+      ),
+    );
+    final draft = BibliotecaWizardDraftCache.get();
+    expect(draft?.step, 1);
+    expect(draft?.modalidades, {Modalidade.cardio});
+    expect(draft?.espacos, {Espaco.outdoor});
   });
 
   test('CuratedBibliotecaPreview.fromJson', () {
