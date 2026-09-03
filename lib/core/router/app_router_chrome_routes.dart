@@ -66,7 +66,7 @@ import '../../features/alertas/screens/alerta_detalhe_screen.dart';
 import '../../features/alertas/screens/alertas_config_screen.dart';
 import '../../features/relatorio/screens/relatorio_global_screen.dart';
 import '../../features/avaliacao/screens/evolucao_comparativo_screen.dart';
-import '../../features/agenda/screens/agenda_screen.dart';
+import '../../features/agenda/screens/novo_agendamento_screen.dart';
 import '../../features/agenda/screens/agenda_aluno_screen.dart';
 import '../../features/feedback/screens/feedback_video_screen.dart';
 import '../../features/busca/screens/busca_global_screen.dart';

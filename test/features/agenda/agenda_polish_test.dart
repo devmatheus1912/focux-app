@@ -9,13 +9,13 @@ void main() {
     );
     final router = readRouterSourceBundle();
 
-    expect(screen, contains('NovoAgendamentoScreen'));
     expect(screen, contains("context.push('/agenda/novo'"));
-    expect(screen, contains('Selecione quem será atendido'));
-    expect(screen, contains('AlunoInsetFormField'));
     expect(screen, contains('FxShellScaffold'));
-    expect(screen, contains('agendaNovoTileLabel()'));
-    expect(screen, isNot(contains('label: agendaNovoTileLabel')));
+    expect(screen, isNot(contains('NovoAgendamentoScreen')));
+    expect(screen, isNot(contains('AlunoInsetFormField')));
+    expect(screen, isNot(contains('agendaNovoTileLabel()')));
+    expect(screen, isNot(contains('agendaHorarioConfirmLabel()')));
+    expect(screen, isNot(contains('Selecione quem será atendido')));
     expect(screen, contains('showFxConfirmSheet'));
     expect(screen, contains('showFxHomeSheet'));
     expect(screen, contains('FxHomeSheetSurface'));
@@ -36,8 +36,8 @@ void main() {
     expect(screen, isNot(contains('LayoutBuilder(')));
     expect(screen, contains('listarSemana'));
     expect(screen, contains('RefreshIndicator'));
-    expect(screen, contains('maskEmailForList'));
     expect(screen, contains('agendaEventSessionNote'));
+    expect(screen, isNot(contains('maskEmailForList')));
     expect(screen, isNot(contains('FxLiquidPrimaryButton')));
     expect(screen, isNot(contains('FxLiquidSecondaryButton')));
     expect(screen, contains('_AgendaMetaStrip'));
@@ -46,13 +46,12 @@ void main() {
     expect(screen, isNot(contains('ListTile(')));
     expect(screen, isNot(contains('MaterialPageRoute')));
     expect(screen, isNot(contains('quem sera atendido')));
-    expect(screen, contains('ShellHeaderIconButton'));
     expect(screen, contains('_eventActions'));
     expect(screen, contains('_danger'));
     expect(screen, isNot(contains('Icons.delete_outline_rounded')));
     expect(screen, isNot(contains('? () {}')));
     expect(screen, isNot(contains('label: agendaHorarioConfirmLabel')));
-    expect(screen, contains('agendaHorarioConfirmLabel()'));
+    expect(screen, isNot(contains('agendaHorarioConfirmLabel()')));
 
     expect(router, contains("path: '/agenda/novo'"));
     expect(router, contains('NovoAgendamentoScreen('));

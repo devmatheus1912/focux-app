@@ -18,20 +18,24 @@ void main() {
   });
 
   test('novo plano usa form inset', () {
-    final sheet = readScreenSourceBundle(
+    final hub = readScreenSourceBundle(
       'lib/features/pacotes/widgets/pacotes_storefront_widgets.dart',
+    );
+    final sheet = readScreenSourceBundle(
+      'lib/features/pacotes/widgets/novo_pacote_sheet.dart',
     );
     expect(sheet, contains('AlunoInsetFormField'));
     expect(sheet, contains('showFxInsetPickerSheet'));
     expect(sheet, contains('FxSettingsGroup'));
     expect(sheet, contains('showFxConfirmSheet'));
     expect(sheet, contains('pacoteCriarConfirmTitle'));
-    expect(sheet, isNot(contains('FxLiquidPrimaryButton')));
-    expect(sheet, isNot(contains('label: pacoteCriarTileLabel')));
-    expect(sheet, contains('pacoteCriarTileLabel()'));
+    expect(sheet, contains('FxLiquidPrimaryButton'));
+    expect(sheet, isNot(contains('ElevatedButton')));
+    expect(sheet, contains('label: pacoteCriarTileLabel()'));
     expect(sheet, contains('Switch.adaptive'));
-    expect(sheet, contains("child: const Text('Copiar link')"));
-    expect(sheet, isNot(contains("label: 'Copiar link'")));
+    expect(hub, isNot(contains('FxLiquidPrimaryButton')));
+    expect(hub, contains("child: const Text('Copiar link')"));
+    expect(hub, isNot(contains("label: 'Copiar link'")));
     expect(sheet, isNot(contains('FxLiquidSecondaryButton')));
     expect(sheet, isNot(contains('ChoiceChip')));
     expect(sheet, isNot(contains('DropdownButton')));
