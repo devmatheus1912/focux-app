@@ -32,5 +32,8 @@ void main() {
     expect(screen, contains('form == null || !form.validate()'));
     expect(screen, contains('ensureFooter: true'));
     expect(screen, isNot(contains(r'$_email')));
+    expect(screen, contains('keyboardDismissBehavior'));
+    expect(screen, contains('authUnfocusAndLeave'));
+    expect(screen, contains('authUnfocusAndGo'));
   });
 }

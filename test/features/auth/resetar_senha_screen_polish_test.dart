@@ -50,5 +50,9 @@ void main() {
     expect(screen, contains('form == null || !form.validate()'));
     expect(screen, contains('ensureFooter: true'));
     expect(screen, isNot(contains('debugPrint')));
+    expect(screen, contains('keyboardDismissBehavior'));
+    expect(screen, contains('authUnfocusAndLeave'));
+    expect(screen, contains('authUnfocusAndGo'));
+    expect(screen, contains('AutofillHints.newPassword'));
   });
 }

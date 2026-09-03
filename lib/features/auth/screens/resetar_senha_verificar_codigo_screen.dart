@@ -89,7 +89,7 @@ class _ResetarSenhaVerificarCodigoScreenState
                   ),
                   child: AuthStickyRoleBar(
                     roleLabel: _isAluno ? 'ALUNO' : 'PERSONAL',
-                    onBack: () => context.go(_esqueciPath),
+                    onBack: () => authUnfocusAndLeave(context, _esqueciPath),
                   ),
                 ),
                 Expanded(
@@ -100,83 +100,88 @@ class _ResetarSenhaVerificarCodigoScreenState
                       bottomExtra: TokensStrip.s5,
                       ensureFooter: true,
                     ),
+                    keyboardDismissBehavior:
+                        ScrollViewKeyboardDismissBehavior.onDrag,
                     child: Form(
                       key: _formKey,
-                      child: AuthFormEntrance(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Center(
-                              child: FxConversionLockup(
-                                width: authLogoWidthFor(
-                                  context,
-                                  withTagline: true,
+                      child: AutofillGroup(
+                        child: AuthFormEntrance(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Center(
+                                child: FxConversionLockup(
+                                  width: authLogoWidthFor(
+                                    context,
+                                    withTagline: true,
+                                  ),
+                                  semanticLabel:
+                                      _isAluno
+                                          ? 'Focux ALUNO'
+                                          : 'Focux PERSONAL',
+                                  aluno: _isAluno,
                                 ),
-                                semanticLabel:
-                                    _isAluno
-                                        ? 'Focux ALUNO'
-                                        : 'Focux PERSONAL',
-                                aluno: _isAluno,
                               ),
-                            ),
-                            const SizedBox(height: TokensStrip.s4),
-                            Row(
-                              children: [
-                                Expanded(
+                              const SizedBox(height: TokensStrip.s4),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      resetCodigoHelpTitle(),
+                                      style: authPageTitleStyle(context),
+                                    ),
+                                  ),
+                                  FxHelpIconButton(
+                                    tooltip: resetCodigoHelpTitle(),
+                                    onTap: _abrirAjuda,
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Enviamos 6 dígitos para ${resetCodigoEmailHint(_email)}. '
+                                'Válido por 10 minutos.',
+                                style: authSubtitleStyle().copyWith(
+                                  height: 1.5,
+                                ),
+                              ),
+                              const SizedBox(height: 24),
+                              AuthOtpField(
+                                controller: _codeController,
+                                resendSeconds: resendSeconds,
+                                sending: _resending,
+                                disabled: _email.isEmpty,
+                                onResend: () {
+                                  unawaited(_pedirReenviar());
+                                },
+                              ),
+                              if (_error != null) ...[
+                                const SizedBox(height: 12),
+                                Semantics(
+                                  liveRegion: true,
                                   child: Text(
-                                    resetCodigoHelpTitle(),
-                                    style: authPageTitleStyle(context),
+                                    _error!,
+                                    style: authInlineErrorStyle(),
                                   ),
                                 ),
-                                FxHelpIconButton(
-                                  tooltip: resetCodigoHelpTitle(),
-                                  onTap: _abrirAjuda,
-                                ),
                               ],
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Enviamos 6 dígitos para ${resetCodigoEmailHint(_email)}. '
-                              'Válido por 10 minutos.',
-                              style: authSubtitleStyle().copyWith(height: 1.5),
-                            ),
-                            const SizedBox(height: 24),
-                            AuthOtpField(
-                              controller: _codeController,
-                              resendSeconds: resendSeconds,
-                              sending: _resending,
-                              disabled: _email.isEmpty,
-                              onResend: () {
-                                unawaited(_pedirReenviar());
-                              },
-                            ),
-                            if (_error != null) ...[
-                              const SizedBox(height: 12),
-                              Semantics(
-                                liveRegion: true,
-                                child: Text(
-                                  _error!,
-                                  style: authInlineErrorStyle(),
-                                ),
+                              const SizedBox(height: 20),
+                              FxLiquidPrimaryButton(
+                                label: resetCodigoContinuarLabel(),
+                                loading: _loading,
+                                loadingLabel: resetCodigoContinuandoLabel(),
+                                onPressed: _loading ? null : _pedirContinuar,
+                              ),
+                              FxConversionTextLink(
+                                text: '',
+                                actionText: resetCodigoVoltarLoginLabel(),
+                                onTap: () {
+                                  if (_loading) return;
+                                  authUnfocusAndGo(context, _loginPath);
+                                },
                               ),
                             ],
-                            const SizedBox(height: 20),
-                            FxLiquidPrimaryButton(
-                              label: resetCodigoContinuarLabel(),
-                              loading: _loading,
-                              loadingLabel: resetCodigoContinuandoLabel(),
-                              onPressed:
-                                  _loading ? null : _pedirContinuar,
-                            ),
-                            FxConversionTextLink(
-                              text: '',
-                              actionText: resetCodigoVoltarLoginLabel(),
-                              onTap: () {
-                                if (_loading) return;
-                                context.go(_loginPath);
-                              },
-                            ),
-                          ],
+                          ),
                         ),
                       ),
                     ),
