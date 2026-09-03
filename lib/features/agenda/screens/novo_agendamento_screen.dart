@@ -166,7 +166,6 @@ class _NovoAgendamentoScreenState extends ConsumerState<NovoAgendamentoScreen> {
   @override
   Widget build(BuildContext context) {
     final alunosAsync = ref.watch(alunosProvider);
-    final enabled = _canSave && !_saving;
 
     return fxScreenA11yScope(
       label: 'Novo agendamento',
@@ -176,26 +175,6 @@ class _NovoAgendamentoScreenState extends ConsumerState<NovoAgendamentoScreen> {
           title: 'Novo agendamento',
           subtitle: 'AGENDA',
           onBack: () => safePopOrGo(context, '/agenda'),
-          actions: [
-            Padding(
-              padding: const EdgeInsets.only(right: TokensStrip.s3),
-              child: Center(
-                child: Semantics(
-                  button: true,
-                  enabled: enabled,
-                  label:
-                      _saving
-                          ? 'Agendando atendimento'
-                          : agendaNovoSalvarTooltip(),
-                  child: ShellHeaderIconButton(
-                    icon: 'circle-check',
-                    tooltip: agendaNovoSalvarTooltip(),
-                    onTap: _saving ? null : _salvar,
-                  ),
-                ),
-              ),
-            ),
-          ],
         ),
         body: ListView(
           padding: const EdgeInsets.fromLTRB(
