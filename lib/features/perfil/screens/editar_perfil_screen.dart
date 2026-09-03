@@ -27,7 +27,6 @@ import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
-import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../../pacotes/providers/pacotes_provider.dart';
 import '../data/perfil_repository.dart';
 import '../providers/perfil_provider.dart';
@@ -248,17 +247,42 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
             const SizedBox(width: TokensStrip.s2),
           ],
         ),
-        body: Stack(
-          children: [
-            SafeArea(
-              bottom: false,
-              child: SingleChildScrollView(
-                padding: EdgeInsets.fromLTRB(
-                  TokensStrip.s4,
-                  6,
-                  TokensStrip.s4,
-                  88 + MediaQuery.paddingOf(context).bottom,
-                ),
+        bottomNavigationBar: SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(
+              TokensStrip.s4,
+              TokensStrip.s2,
+              TokensStrip.s4,
+              TokensStrip.s3,
+            ),
+            child: Semantics(
+              button: true,
+              enabled: _canSubmit,
+              label:
+                  _loading
+                      ? 'Salvando alterações do perfil'
+                      : _canSubmit
+                      ? 'Salvar alterações do perfil'
+                      : 'Salvar. Faça uma alteração para habilitar',
+              child: FxLiquidPrimaryButton(
+                label: _loading ? 'Salvando…' : 'Salvar',
+                loading: _loading,
+                loadingLabel: 'Salvando…',
+                onPressed: _canSubmit ? _submit : null,
+              ),
+            ),
+          ),
+        ),
+        body: SafeArea(
+          bottom: false,
+          child: SingleChildScrollView(
+            padding: EdgeInsets.fromLTRB(
+              TokensStrip.s4,
+              6,
+              TokensStrip.s4,
+              TokensStrip.s6,
+            ),
                 child: Form(
                   key: _formKey,
                   child: Column(
@@ -404,38 +428,6 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
                 ),
               ),
             ),
-            Align(
-              alignment: AlignmentDirectional.bottomEnd,
-              child: SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                    TokensStrip.s4,
-                    0,
-                    TokensStrip.s4,
-                    12,
-                  ),
-                  child: Semantics(
-                    button: true,
-                    enabled: _canSubmit,
-                    label:
-                        _loading
-                            ? 'Salvando alterações do perfil'
-                            : _canSubmit
-                            ? 'Salvar alterações do perfil'
-                            : 'Salvar. Faça uma alteração para habilitar',
-                    child: DashboardHomeActionChip(
-                      label: _loading ? 'Salvando…' : 'Salvar',
-                      accent: primary,
-                      isDark: isDark,
-                      enabled: _canSubmit,
-                      onPressed: _submit,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

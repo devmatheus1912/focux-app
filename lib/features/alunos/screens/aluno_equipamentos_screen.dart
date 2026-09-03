@@ -11,6 +11,7 @@ import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
@@ -86,22 +87,28 @@ class _AlunoEquipamentosScreenState
           title: 'Equipamentos',
           subtitle: satelliteFirstName(alunoAsync.valueOrNull?.nome),
           onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
-          actions: [
-            Padding(
-              padding: const EdgeInsets.only(right: TokensStrip.s3),
-              child: Center(
-                child: Semantics(
-                  button: true,
-                  label: 'Salvar',
-                  child: ShellHeaderIconButton(
-                    icon: 'circle-check',
-                    tooltip: 'Salvar',
-                    onTap: _saving ? () {} : _save,
-                  ),
-                ),
+        ),
+        bottomNavigationBar: SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(
+              FxSettingsLayout.pageInset,
+              TokensStrip.s2,
+              FxSettingsLayout.pageInset,
+              TokensStrip.s3,
+            ),
+            child: Semantics(
+              button: true,
+              enabled: !_saving,
+              label: _saving ? 'Salvando equipamentos' : 'Salvar',
+              child: FxLiquidPrimaryButton(
+                label: 'Salvar',
+                loading: _saving,
+                loadingLabel: 'Salvando…',
+                onPressed: _saving ? null : _save,
               ),
             ),
-          ],
+          ),
         ),
         body: alunoAsync.when(
           loading:
@@ -138,7 +145,7 @@ class _AlunoEquipamentosScreenState
                     FxSettingsLayout.pageInset,
                     TokensStrip.s3,
                     FxSettingsLayout.pageInset,
-                    TokensStrip.s6,
+                    88,
                   ),
                   itemCount: Equipamento.values.length + 2,
                   itemBuilder: (context, i) {

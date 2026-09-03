@@ -16,8 +16,10 @@ void main() {
     expect(screen, contains('ListView.builder'));
     expect(screen, contains('FxContentWidthLimiter'));
     expect(screen, contains('RefreshIndicator'));
-    expect(screen, contains('ShellHeaderIconButton'));
-    expect(screen, contains("icon: 'circle-check'"));
+    expect(screen, contains('FxLiquidPrimaryButton'));
+    expect(screen, contains('bottomNavigationBar'));
+    expect(screen, isNot(contains("icon: 'circle-check'")));
+    expect(screen, isNot(contains('ShellHeaderIconButton')));
     expect(screen, isNot(contains('FilterChip')));
     expect(screen, isNot(contains('OutlinedButton')));
     expect(screen, isNot(contains('Icons.check_rounded')));

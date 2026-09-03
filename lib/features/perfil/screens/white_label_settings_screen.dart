@@ -7,6 +7,8 @@ import '../../../core/config/env.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
+import '../../../core/theme/tokens_strip.dart';
+import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/feature_gate.dart';
@@ -14,6 +16,7 @@ import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
@@ -112,6 +115,31 @@ class _WhiteLabelSettingsScreenState
             onPressed: () => context.pop(),
           ),
         ),
+        bottomNavigationBar:
+            config == null
+                ? null
+                : SafeArea(
+                  top: false,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      FxSettingsLayout.pageInset,
+                      TokensStrip.s2,
+                      FxSettingsLayout.pageInset,
+                      TokensStrip.s3,
+                    ),
+                    child: Semantics(
+                      button: true,
+                      enabled: !_salvando,
+                      label: 'Salvar configurações de marca própria',
+                      child: FxLiquidPrimaryButton(
+                        label: 'Salvar configurações',
+                        loading: _salvando,
+                        loadingLabel: 'Salvando…',
+                        onPressed: _salvando ? null : _salvar,
+                      ),
+                    ),
+                  ),
+                ),
         body: FxContentWidthLimiter(
           child:
               config == null
@@ -125,7 +153,7 @@ class _WhiteLabelSettingsScreenState
                       )
                       : const SkeletonList(count: 5))
                   : ListView(
-                padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 88),
                 children: [
                   _sectionTitle('App do aluno'),
                   Semantics(
@@ -282,23 +310,6 @@ class _WhiteLabelSettingsScreenState
                           color: Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  Semantics(
-                    button: true,
-                    enabled: !_salvando,
-                    label: 'Salvar configurações de marca própria',
-                    child: FilledButton(
-                      onPressed: _salvando ? null : _salvar,
-                      child:
-                          _salvando
-                              ? const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: FxLoading(strokeWidth: 2),
-                              )
-                              : const Text('Salvar configurações'),
                     ),
                   ),
                 ],
