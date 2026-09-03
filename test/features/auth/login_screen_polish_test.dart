@@ -83,6 +83,9 @@ void main() {
     expect(screen, contains('authUnfocusAndGo'));
     expect(screen, contains('FxConversionDivider'));
     expect(shell, contains('FxKeyboardPopScope'));
-    expect(shell, contains('onTapOutside'));
+    expect(
+      readScreenSourceBundle('lib/features/auth/widgets/auth_field.dart'),
+      contains('onTapOutside'),
+    );
   });
 }

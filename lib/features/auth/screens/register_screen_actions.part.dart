@@ -54,9 +54,7 @@ extension on _RegisterScreenState {
     final email = _emailController.text.trim();
     if (email.isEmpty || !email.contains('@')) {
       setState(
-        () =>
-            _error =
-                'Informe um e-mail válido antes de enviar o código.',
+        () => _error = 'Informe um e-mail válido antes de enviar o código.',
       );
       return;
     }
@@ -69,9 +67,9 @@ extension on _RegisterScreenState {
     HapticFeedback.selectionClick();
 
     try {
-      final result = await ref.read(authProvider.notifier).enviarCodigoEmail(
-        email,
-      );
+      final result = await ref
+          .read(authProvider.notifier)
+          .enviarCodigoEmail(email);
       if (!mounted) return;
       if (!result.codigoEnviado) {
         HapticFeedback.heavyImpact();
@@ -137,10 +135,22 @@ extension on _RegisterScreenState {
       }
 
       ref.invalidate(perfilProvider);
+      unawaited(
+        AnalyticsService.instance.track(
+          ProductEvents.signupSuccess,
+          props: {'role': 'personal', 'method': 'email'},
+        ),
+      );
       context.go('/dashboard/personal');
     } catch (error) {
       HapticFeedback.heavyImpact();
       if (!mounted) return;
+      unawaited(
+        AnalyticsService.instance.track(
+          ProductEvents.signupFailure,
+          props: {'role': 'personal', 'method': 'email'},
+        ),
+      );
       setState(() {
         _error = mapRegisterError(error);
       });
@@ -182,17 +192,28 @@ extension on _RegisterScreenState {
         throw StateError('Google nao retornou idToken.');
       }
 
-      await ref.read(authProvider.notifier).loginGoogle(
-        idToken: idToken,
-        isAluno: false,
-      );
+      await ref
+          .read(authProvider.notifier)
+          .loginGoogle(idToken: idToken, isAluno: false);
 
       if (!mounted) return;
       ref.invalidate(perfilProvider);
+      unawaited(
+        AnalyticsService.instance.track(
+          ProductEvents.signupSuccess,
+          props: {'role': 'personal', 'method': 'google'},
+        ),
+      );
       context.go('/dashboard/personal');
     } catch (error) {
       HapticFeedback.heavyImpact();
       if (!mounted) return;
+      unawaited(
+        AnalyticsService.instance.track(
+          ProductEvents.signupFailure,
+          props: {'role': 'personal', 'method': 'google'},
+        ),
+      );
       setState(() => _error = mapGoogleSignInError(error, isAluno: false));
     } finally {
       if (mounted) setState(() => _loadingGoogle = false);

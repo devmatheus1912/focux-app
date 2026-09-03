@@ -91,6 +91,34 @@ void main() {
     expect(mapDefinirSenhaError(dio(400)), contains('8 caracteres'));
   });
 
+  test('mapRegisterAlunoError distingue convite e e-mail duplicado', () {
+    expect(
+      mapRegisterAlunoError(dio(400, 'Convite inválido ou expirado')),
+      contains('Convite inválido'),
+    );
+    expect(
+      mapRegisterAlunoError(dio(409, 'Convite já foi utilizado')),
+      contains('já foi utilizado'),
+    );
+    expect(
+      mapRegisterAlunoError(
+        DioException(
+          requestOptions: RequestOptions(path: '/api/auth/register/aluno'),
+          response: Response(
+            requestOptions: RequestOptions(path: '/api/auth/register/aluno'),
+            statusCode: 409,
+            data: {
+              'erro': 'E-mail já cadastrado neste espaço',
+              'codigo': 'EMAIL_JA_CADASTRADO_NO_ESPACO',
+            },
+          ),
+          type: DioExceptionType.badResponse,
+        ),
+      ),
+      'Este e-mail já está em uso neste espaço.',
+    );
+  });
+
   test('mapGoogleSignInError humaniza timeout do proxy', () {
     expect(
       mapGoogleSignInError(

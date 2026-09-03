@@ -41,6 +41,7 @@ void main() {
     expect(screen, contains('registerEnviarCodigoLabel'));
     expect(screen, contains('enviarCodigoEmail'));
     expect(screen, contains('mapRegisterError'));
+    expect(screen, contains('ProductEvents.signupSuccess'));
     expect(screen, contains('mapSignupCodeError'));
     expect(screen, isNot(contains('currentState!.validate')));
     expect(screen, contains('form == null || !form.validate()'));

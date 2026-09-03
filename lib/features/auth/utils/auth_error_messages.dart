@@ -147,6 +147,11 @@ String mapDefinirSenhaError(Object error) {
 
 /// Cadastro personal (e-mail/senha + código).
 String mapRegisterError(Object error) {
+  final api = ApiError.from(error);
+  final codigo = api?.codigo;
+  if (codigo != null && ApiErrorCodes.alreadyExists.contains(codigo)) {
+    return 'Este e-mail já está em uso.';
+  }
   if (error is DioException) {
     final statusCode = error.response?.statusCode;
     if (statusCode == null) return 'Sem conexão com o servidor.';
@@ -166,6 +171,27 @@ String mapRegisterError(Object error) {
     if (msg != null) return msg;
   }
   return 'Não foi possível criar a conta agora.';
+}
+
+/// Cadastro aluno via convite.
+String mapRegisterAlunoError(Object error) {
+  final api = ApiError.from(error);
+  final codigo = api?.codigo;
+  if (codigo != null && ApiErrorCodes.alreadyExists.contains(codigo)) {
+    return 'Este e-mail já está em uso neste espaço.';
+  }
+  if (error is DioException) {
+    final statusCode = error.response?.statusCode ?? api?.status;
+    if (statusCode == null) return 'Sem conexão com o servidor.';
+    if (statusCode == 409) {
+      return _backendMessage(error) ?? 'Este convite já foi utilizado.';
+    }
+    if (statusCode == 400) {
+      return _backendMessage(error) ??
+          'Convite inválido ou expirado. Peça um novo código ao seu personal.';
+    }
+  }
+  return mapRegisterError(error);
 }
 
 /// Envio do código de verificação no cadastro.
@@ -226,7 +252,8 @@ String mapGoogleSignInError(Object error, {required bool isAluno}) {
   }
   if (error is PlatformException) {
     final code = error.code;
-    final detail = '${error.message ?? ''} ${error.details ?? ''}'.toLowerCase();
+    final detail =
+        '${error.message ?? ''} ${error.details ?? ''}'.toLowerCase();
     if (code == 'sign_in_failed' &&
         (detail.contains('10') || detail.contains('developer_error'))) {
       return 'Google Sign-In não está liberado para este APK de release. '

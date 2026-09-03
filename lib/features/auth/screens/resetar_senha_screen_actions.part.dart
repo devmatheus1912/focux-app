@@ -47,12 +47,20 @@ extension on _ResetarSenhaScreenState {
     HapticFeedback.mediumImpact();
 
     try {
-      await ref.read(authRepositoryProvider).confirmarResetSenha(
-        resetNonce: _resetNonce,
-        novaSenha: _senhaController.text,
-      );
+      await ref
+          .read(authRepositoryProvider)
+          .confirmarResetSenha(
+            resetNonce: _resetNonce,
+            novaSenha: _senhaController.text,
+          );
       if (!mounted) return;
       setState(() => _message = resetSenhaSucesso());
+      unawaited(
+        AnalyticsService.instance.track(
+          ProductEvents.passwordResetCompleted,
+          props: {'role': _isAluno ? 'aluno' : 'personal'},
+        ),
+      );
       _goLoginTimer?.cancel();
       _goLoginTimer = Timer(const Duration(milliseconds: 900), () {
         if (mounted) context.go(_loginPath);
