@@ -19,11 +19,10 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../core/utils/pt_br_display.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
-import '../../../core/widgets/fx_settings_group.dart';
-import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../dashboard/utils/dashboard_home_snapshot.dart';
 import '../../dashboard/utils/dashboard_screen_helpers.dart';
+import '../../dashboard/widgets/dashboard_section_header.dart';
 
 part 'financeiro_dashboard_screen_state.part.dart';
 part 'financeiro_dashboard_screen_widgets.part.dart';

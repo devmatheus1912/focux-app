@@ -8,7 +8,9 @@ void main() {
     expect(screen, anyOf(contains('fxScreenA11yScope'), contains('Semantics(')));
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(screen, isNot(contains('FxShellScaffold(')));
-    expect(screen, contains('FxSettingsGroup'));
+    expect(screen, contains('OperationalMetricTile'));
+    expect(screen, contains('DashboardHomeActionChip'));
+    expect(screen, isNot(contains('FxSettingsGroup')));
     expect(screen, contains('showFxInsetPickerSheet'));
     expect(screen, isNot(contains('_NavArrow')));
     expect(screen, isNot(contains('Icons.chevron')));

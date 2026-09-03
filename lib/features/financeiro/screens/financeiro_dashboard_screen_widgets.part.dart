@@ -246,24 +246,36 @@ class _FinanceiroVencimentosGroup extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: FxSettingsLayout.pageInset),
-      child: FxSettingsGroup(
-        header: 'Vencimentos',
-        caption: 'Cobre em Mensalidades.',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          for (var i = 0; i < items.length; i++)
-            FxSettingsTile(
-              fxIcon: items[i].status == 'ATRASADO'
-                  ? 'alert-triangle'
-                  : 'clock',
-              label: items[i].alunoNome,
-              subtitle: _vencimentoSubtitle(items[i]),
-              value: formatBrlCurrency(items[i].valor, showDecimals: false),
-              numeric: true,
-              danger: items[i].status == 'ATRASADO',
-              showDivider: i < items.length - 1,
+          const DashboardSectionHeader(title: 'Vencimentos'),
+          const SizedBox(height: TokensStrip.s2),
+          Text(
+            'Cobre em Mensalidades.',
+            style: FocuxHubTypography.bodyMuted(
+              color: fxScreenMute(context),
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: TokensStrip.s3),
+          for (final item in items)
+            FxSatelliteListTile(
+              title: item.alunoNome,
+              subtitle: Text(_vencimentoSubtitle(item)),
+              trailing: Text(
+                formatBrlCurrency(item.valor, showDecimals: false),
+                style: FocuxHubTypography.bodyMuted(
+                  color: item.status == 'ATRASADO'
+                      ? EagleTokens.bad
+                      : fxScreenMute(context),
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              accent: item.status == 'ATRASADO' ? EagleTokens.bad : null,
               onTap: () => _openAlunoOrMensalidades(
                 context,
-                items[i].alunoId,
+                item.alunoId,
                 source: 'vencimento',
               ),
             ),
@@ -290,17 +302,22 @@ class _FinanceiroTopAlunosGroup extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: FxSettingsLayout.pageInset),
-      child: FxSettingsGroup(
-        header: 'Top alunos · acumulado',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          const DashboardSectionHeader(title: 'Top alunos · acumulado'),
+          const SizedBox(height: TokensStrip.s3),
           for (var i = 0; i < items.length; i++)
-            FxSettingsTile(
-              fxIcon: 'users',
-              label: items[i].alunoNome,
-              subtitle: '#${i + 1}',
-              value: formatBrlCurrency(items[i].totalPago, showDecimals: false),
-              numeric: true,
-              showDivider: i < items.length - 1,
+            FxSatelliteListTile(
+              title: items[i].alunoNome,
+              subtitle: Text('#${i + 1}'),
+              trailing: Text(
+                formatBrlCurrency(items[i].totalPago, showDecimals: false),
+                style: FocuxHubTypography.bodyMuted(
+                  color: fxScreenMute(context),
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
               onTap: () => _openAlunoOrMensalidades(
                 context,
                 items[i].alunoId,
