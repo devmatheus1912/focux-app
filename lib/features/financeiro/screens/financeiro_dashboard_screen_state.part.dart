@@ -1,6 +1,5 @@
 part of 'financeiro_dashboard_screen.dart';
 
-
 class _FinanceiroDashboardScreenState
     extends ConsumerState<FinanceiroDashboardScreen> {
   FinanceiroDashboard? _data;
@@ -72,6 +71,13 @@ class _FinanceiroDashboardScreenState
               d.zeroCta?.trim().isNotEmpty == true
                   ? d.zeroCta!
                   : 'Lance cobranças e mensalidades para ver o dashboard.',
+          action: FxEmptyAction(
+            label: 'Abrir mensalidades',
+            onTap:
+                () => FinanceiroHubScope.maybeOf(
+                  context,
+                )?.goToMensalidades(source: 'empty'),
+          ),
         ),
       );
     }
@@ -84,6 +90,7 @@ class _FinanceiroDashboardScreenState
           return _load(force: true);
         },
         child: ListView(
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           padding: const EdgeInsets.only(bottom: 110),
           children: [
             const Padding(

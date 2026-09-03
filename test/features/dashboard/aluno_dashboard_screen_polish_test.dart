@@ -49,5 +49,14 @@ void main() {
     expect(screen, contains('showFxHomeSheet'));
     expect(screen, isNot(contains('showModalBottomSheet')));
     expect(screen, isNot(contains('useSafeArea: true')));
+    expect(screen, contains('showBack: false'));
+    expect(screen, contains('constrainWidth: false'));
+    expect(screen, contains('FxContentWidthLimiter'));
+    expect(screen, contains('keyboardDismissBehavior'));
+    expect(screen, contains('FxStripCard'));
+    expect(screen, contains('emphasize: true'));
+    expect(screen, contains('DashboardHomeActionChip'));
+    expect(screen, contains('Ver catálogo'));
+    expect(screen, isNot(contains('class _AlunoProfileCard')));
   });
 }

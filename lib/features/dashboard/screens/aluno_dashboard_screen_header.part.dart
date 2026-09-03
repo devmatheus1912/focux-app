@@ -237,108 +237,58 @@ class _TodayFocusCard extends StatelessWidget {
     final action = experience.action;
     final score = experience.score;
     final primary = Theme.of(context).colorScheme.primary;
-    final onPrimary = Theme.of(context).colorScheme.onPrimary;
-    final softText = onPrimary.withValues(alpha: 0.72);
+    final chrome = ShellChrome.of(context);
+    final ink = chrome.ink;
+    final mute = chrome.mute;
 
-    return Container(
-      padding: const EdgeInsets.all(TokensStrip.s4),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [primary, BrandPalette.deep(primary)],
-        ),
-        borderRadius: BorderRadius.circular(26),
-        boxShadow: [
-          BoxShadow(
-            color: primary.withValues(alpha: isDark ? 0.16 : 0.22),
-            blurRadius: 24,
-            offset: const Offset(0, 12),
-          ),
-        ],
-      ),
+    return FxStripCard(
+      emphasize: true,
+      glowStrength: 0.06,
+      semanticsLabel: '${action.title}. ${action.description}. ${action.cta}',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.14),
-                  borderRadius: BorderRadius.circular(999),
-                ),
-                child: Text(
-                  action.eyebrow,
-                  style: TextStyle(
-                    color: softText,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ),
+              Text(action.eyebrow, style: FocuxHubTypography.chip(mute)),
               const Spacer(),
-              Icon(Icons.verified_outlined, color: softText, size: 18),
+              Icon(Icons.verified_outlined, color: mute, size: 18),
               const SizedBox(width: 6),
               Text(
                 'Focux ${score.value}',
-                style: TextStyle(
-                  color: softText,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                ),
+                style: FocuxHubTypography.chip(mute),
               ),
             ],
           ),
           const SizedBox(height: 12),
           Text(
             action.title,
-            style: TextStyle(
-              color: onPrimary,
-              fontSize: 23,
-              fontWeight: FontWeight.w900,
-              height: 1.05,
-            ),
+            style: FocuxHubTypography.pageTitle(context, color: ink),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: 7),
           Text(
             action.description,
-            style: TextStyle(color: softText, fontSize: 12.5, height: 1.35),
+            style: FocuxHubTypography.bodyMuted(color: mute),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: 14),
           Row(
             children: [
-              Expanded(
-                child: FilledButton(
-                  onPressed:
-                      () =>
-                          context.push(action.route, extra: action.routeExtra),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: primary,
-                    minimumSize: const Size(0, 44),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                  ),
-                  child: Text(
-                    action.cta,
-                    style: const TextStyle(fontWeight: FontWeight.w900),
-                  ),
-                ),
+              DashboardHomeActionChip(
+                label: action.cta,
+                accent: primary,
+                isDark: isDark,
+                onPressed:
+                    () => context.push(action.route, extra: action.routeExtra),
               ),
-              const SizedBox(width: 10),
+              const Spacer(),
               _WorkoutMetricPill(
                 value: '${score.value}',
                 label: 'score',
-                onPrimary: onPrimary,
+                onPrimary: ink,
               ),
             ],
           ),
@@ -350,20 +300,17 @@ class _TodayFocusCard extends StatelessWidget {
               _WorkoutInsightPill(
                 icon: Icons.trending_up_rounded,
                 label: score.rhythmLabel,
-                onPrimary: onPrimary,
+                onPrimary: mute,
               ),
               _WorkoutInsightPill(
                 icon: Icons.person_pin_circle_outlined,
                 label: score.riskLabel,
-                onPrimary: onPrimary,
+                onPrimary: mute,
               ),
             ],
           ),
           const SizedBox(height: 10),
-          _HomeNarrativeRail(
-            items: experience.narratives,
-            onPrimary: onPrimary,
-          ),
+          _HomeNarrativeRail(items: experience.narratives, onPrimary: mute),
         ],
       ),
     );
@@ -435,7 +382,7 @@ class _WorkoutMetricPill extends StatelessWidget {
       width: 68,
       height: 44,
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.14),
+        color: onPrimary.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
@@ -479,7 +426,7 @@ class _WorkoutInsightPill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 7),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.10),
+        color: onPrimary.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(999),
       ),
       child: Row(

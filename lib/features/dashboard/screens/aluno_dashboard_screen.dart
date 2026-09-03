@@ -8,16 +8,23 @@ import '../../../core/providers/personal_brand_provider.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_empty_state.dart';
-import '../../../core/widgets/fx_hub_header.dart';
+import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/fx_settings_group.dart';
+import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
+import '../../../core/widgets/fx_strip_card.dart';
+import '../widgets/dashboard_home_action_chip.dart';
+import '../widgets/dashboard_section_header.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../alunos/data/aluno_repository.dart';
 import '../../alunos/providers/alunos_provider.dart';
@@ -60,10 +67,36 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
       label: 'Meu Treino',
       child: FxShellScaffold(
         useMesh: true,
+        constrainWidth: false,
         appBar: FxShellAppBar(
           title: 'Meu Treino',
-          leading: const SizedBox(width: 8),
+          subtitle: homeAsync.when(
+            data: (home) => FxHubFreshness.fromFetchedAt(home.fetchedAt),
+            loading: () => null,
+            error: (_, __) => null,
+          ),
+          showBack: false,
           actions: [
+            FxHelpIconButton(
+              tooltip: 'Como usar o Meu Treino',
+              onTap:
+                  () => showFxHelpSheet(
+                    context,
+                    title: 'Meu Treino',
+                    subtitle: 'O que fazer agora e os atalhos do dia.',
+                    tips: const [
+                      FxHelpTip('Foco', 'A ação do dia fica no card do topo.'),
+                      FxHelpTip(
+                        'Treinos',
+                        'Check-in e histórico ficam em Treinos.',
+                      ),
+                      FxHelpTip(
+                        'Mais',
+                        'O catálogo abre o restante sem lotar o início.',
+                      ),
+                    ],
+                  ),
+            ),
             homeAsync.when(
               data:
                   (home) => NotificacaoBadgeButton(
@@ -117,79 +150,77 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
               historico: home.historico,
               mensagens: home.chat.toSyntheticMessages(),
             );
-            final freshness = FxHubFreshness.fromFetchedAt(home.fetchedAt);
 
             return RefreshIndicator(
               onRefresh: () async {
                 ref.invalidate(alunoDashboardHomeProvider);
                 await ref.read(alunoDashboardHomeProvider.future);
               },
-              child: SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.all(TokensStrip.s4),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    FxHubHeader(
-                      title: 'Meu Treino',
-                      freshnessLabel: freshness,
-                      quietChrome: true,
-                    ),
-                    const SizedBox(height: 12),
-                    _TodayFocusCard(experience: experience, isDark: isDark),
-                    const SizedBox(height: 12),
-                    AlunoRecoveryCard(isDark: isDark, snapshot: home.recovery),
-                    const SizedBox(height: 12),
-                    CoachProativoCard(
-                      isDark: isDark,
-                      mensagens: home.coachMensagens,
-                    ),
-                    const SizedBox(height: 12),
-                    AlunoUpsellCarousel(ofertas: home.upsellPendentes),
-                    const SizedBox(height: 12),
-                    _AlunoHeroCard(
-                      aluno: home.aluno,
-                      brand: home.personalBrand,
-                      isDark: isDark,
-                    ),
-                    const SizedBox(height: 12),
-                    if (home.treinos.isEmpty && home.historico.isEmpty)
-                      FxEmptyState(
-                        icon: 'dumbbell',
-                        title: 'Nenhum treino ainda',
-                        subtitle:
-                            'Quando houver treinos ou check-ins, o progresso aparece aqui.',
-                        action: FxEmptyAction(
-                          label: 'Ver treinos',
-                          onTap: () => context.push('/checkin/treinos'),
+              child: FxContentWidthLimiter(
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  keyboardDismissBehavior:
+                      ScrollViewKeyboardDismissBehavior.onDrag,
+                  padding: const EdgeInsets.all(TokensStrip.s4),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      _TodayFocusCard(experience: experience, isDark: isDark),
+                      const SizedBox(height: 12),
+                      AlunoRecoveryCard(
+                        isDark: isDark,
+                        snapshot: home.recovery,
+                      ),
+                      const SizedBox(height: 12),
+                      CoachProativoCard(
+                        isDark: isDark,
+                        mensagens: home.coachMensagens,
+                      ),
+                      const SizedBox(height: 12),
+                      AlunoUpsellCarousel(ofertas: home.upsellPendentes),
+                      const SizedBox(height: 12),
+                      _AlunoHeroCard(
+                        aluno: home.aluno,
+                        brand: home.personalBrand,
+                        isDark: isDark,
+                      ),
+                      const SizedBox(height: 12),
+                      if (home.treinos.isEmpty && home.historico.isEmpty)
+                        FxEmptyState(
+                          icon: 'dumbbell',
+                          title: 'Nenhum treino ainda',
+                          subtitle:
+                              'Quando houver treinos ou check-ins, o progresso aparece aqui.',
+                          action: FxEmptyAction(
+                            label: 'Ver treinos',
+                            onTap: () => context.push('/checkin/treinos'),
+                          ),
+                        )
+                      else
+                        ProgressoSemanalWidget(
+                          treinos: home.treinos,
+                          historico: home.historico,
                         ),
-                      )
-                    else
-                      ProgressoSemanalWidget(
+                      const SizedBox(height: TokensStrip.s4),
+                      _PerformanceEvolutionCard(
+                        historicoAsync: AsyncValue.data(home.historico),
+                        isDark: isDark,
+                      ),
+                      const SizedBox(height: TokensStrip.s4),
+                      _StudentJourneyCard(
+                        aluno: home.aluno,
                         treinos: home.treinos,
-                        historico: home.historico,
+                        medidasAsync: AsyncValue.data(home.medidas),
+                        historicoAsync: AsyncValue.data(home.historico),
+                        chatAsync: AsyncValue.data(
+                          home.chat.toSyntheticMessages(),
+                        ),
+                        isDark: isDark,
                       ),
-                    const SizedBox(height: TokensStrip.s4),
-                    _PerformanceEvolutionCard(
-                      historicoAsync: AsyncValue.data(home.historico),
-                      isDark: isDark,
-                    ),
-                    const SizedBox(height: TokensStrip.s4),
-                    _StudentJourneyCard(
-                      aluno: home.aluno,
-                      treinos: home.treinos,
-                      medidasAsync: AsyncValue.data(home.medidas),
-                      historicoAsync: AsyncValue.data(home.historico),
-                      chatAsync: AsyncValue.data(
-                        home.chat.toSyntheticMessages(),
-                      ),
-                      isDark: isDark,
-                    ),
-                    const SizedBox(height: TokensStrip.s5),
-                    _StudentToolsSection(isDark: isDark),
-                    const SizedBox(height: 20),
-                    _AlunoProfileCard(aluno: home.aluno, isDark: isDark),
-                  ],
+                      const SizedBox(height: TokensStrip.s5),
+                      const _StudentToolsSection(),
+                    ],
+                  ),
                 ),
               ),
             );

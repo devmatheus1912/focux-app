@@ -41,9 +41,10 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen> {
   @override
   void initState() {
     super.initState();
-    _view = widget.initialAlunoId != null
-        ? FinanceiroHubView.mensalidades
-        : FinanceiroHubView.resumo;
+    _view =
+        widget.initialAlunoId != null
+            ? FinanceiroHubView.mensalidades
+            : FinanceiroHubView.resumo;
   }
 
   Future<void> _abrirVista() async {
@@ -53,10 +54,7 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen> {
       selected: _view,
       items: [
         for (final v in FinanceiroHubView.values)
-          FxInsetPickerSheetItem(
-            value: v,
-            label: financeiroHubViewLabel(v),
-          ),
+          FxInsetPickerSheetItem(value: v, label: financeiroHubViewLabel(v)),
       ],
     );
     if (!mounted || picked == null || picked == _view) return;
@@ -116,9 +114,7 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen> {
           _ttvTracked = true;
           AnalyticsService.instance.track(
             ProductEvents.financeiroTtv,
-            props: {
-              'ms': DateTime.now().difference(_openedAt).inMilliseconds,
-            },
+            props: {'ms': DateTime.now().difference(_openedAt).inMilliseconds},
           );
         }
       });
@@ -137,6 +133,7 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen> {
       label: 'Financeiro',
       child: FxShellScaffold(
         useMesh: true,
+        constrainWidth: false,
         appBar: FxShellAppBar(
           title: 'Financeiro',
           subtitle: financeiroHubSubtitle(

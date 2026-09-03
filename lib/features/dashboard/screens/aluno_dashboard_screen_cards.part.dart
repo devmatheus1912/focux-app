@@ -135,9 +135,15 @@ class _StudentJourneyCardState extends ConsumerState<_StudentJourneyCard> {
             ),
           ),
           const SizedBox(height: 12),
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton.icon(
+          Align(
+            alignment: Alignment.centerLeft,
+            child: DashboardHomeActionChip(
+              label:
+                  plan.tasks.isEmpty
+                      ? 'Ver plano completo'
+                      : 'Ver plano completo (${plan.tasks.length})',
+              accent: primary,
+              isDark: widget.isDark,
               onPressed:
                   () => _showAlunoPlanSheet(
                     context,
@@ -146,12 +152,6 @@ class _StudentJourneyCardState extends ConsumerState<_StudentJourneyCard> {
                     plan: plan,
                     onOpenTask: _openTask,
                   ),
-              icon: const Icon(Icons.view_agenda_outlined, size: 17),
-              label: Text(
-                plan.tasks.isEmpty
-                    ? 'Ver plano completo'
-                    : 'Ver plano completo (${plan.tasks.length})',
-              ),
             ),
           ),
         ],

@@ -5,16 +5,21 @@ import '../../../core/brand/focux_microcopy.dart';
 import '../../../core/health/health_service.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
-import '../../../core/theme/focux_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/fx_strip_card.dart';
+import '../../../core/widgets/operational_metric_tile.dart';
 import '../../../core/widgets/skeleton_loader.dart';
+import '../../dashboard/widgets/dashboard_home_action_chip.dart';
+import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../../core/health/home_widget_service.dart';
 import '../data/health_repository.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
@@ -130,14 +135,38 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
     final primary = Theme.of(context).colorScheme.primary;
 
     return fxScreenA11yScope(
-      label: 'Saúde & Wearables',
+      label: 'Saúde',
       child: FxShellScaffold(
         useMesh: true,
+        constrainWidth: false,
         appBar: FxShellAppBar(
-          title: 'Saúde & Wearables',
+          title: 'Saúde',
           subtitle:
               FxHubFreshness.fromFetchedAt(_fetchedAt) ??
-              'Dados do Apple Health e Google Fit',
+              'Apple Health e Google Fit',
+          showBack: false,
+          actions: [
+            FxHelpIconButton(
+              tooltip: 'Como usar Saúde',
+              onTap:
+                  () => showFxHelpSheet(
+                    context,
+                    title: 'Saúde',
+                    subtitle: 'Prontidão do dia a partir do wearable.',
+                    tips: const [
+                      FxHelpTip(
+                        'Conectar',
+                        'Autorize o Apple Health ou o Google Fit.',
+                      ),
+                      FxHelpTip('Prontidão', 'O card do topo é o foco do dia.'),
+                      FxHelpTip(
+                        'Desconectar',
+                        'Revogue o acesso no fim da tela.',
+                      ),
+                    ],
+                  ),
+            ),
+          ],
         ),
         body:
             _loading
@@ -158,7 +187,7 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
                 )
                 : !_authorized
                 ? _buildAuthPrompt()
-                : _buildDashboard(isDark, primary),
+                : FxContentWidthLimiter(child: _buildDashboard(isDark)),
       ),
     );
   }
@@ -173,180 +202,101 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
     );
   }
 
-  Widget _buildDashboard(bool isDark, Color primary) {
+  Widget _buildDashboard(bool isDark) {
     final s = _summary!;
     final recovery = _recovery ?? RecoverySnapshot.fromSummary(s);
     final chrome = ShellChrome.forDark(isDark);
     return RefreshIndicator(
       onRefresh: _loadData,
       child: ListView(
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         padding: const EdgeInsets.all(TokensStrip.s4),
         children: [
-          Container(
-            padding: const EdgeInsets.all(18),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(TokensStrip.rCard),
-              gradient: LinearGradient(
-                colors: [primary, primary.withValues(alpha: 0.72)],
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: primary.withValues(alpha: 0.24),
-                  blurRadius: 22,
-                  offset: const Offset(0, 10),
-                ),
-              ],
-            ),
+          FxStripCard(
+            emphasize: true,
+            glowStrength: 0.06,
+            semanticsLabel:
+                'Prontidão ${recovery.recoveryScore} por cento. ${recovery.recoveryLabel}',
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Text('Prontidão', style: FocuxHubTypography.chip(chrome.mute)),
+                const SizedBox(height: 6),
                 Text(
-                  'Prontidao ${recovery.recoveryScore}%',
-                  style: FocuxTypography.headline(color: Colors.white),
+                  '${recovery.recoveryScore}%',
+                  style: FocuxHubTypography.kpi(
+                    color: chrome.ink,
+                    fontSize: FocuxHubTypography.metricLg,
+                  ),
                 ),
                 const SizedBox(height: 6),
                 Text(
                   recovery.recoveryLabel,
                   style: FocuxHubTypography.body(
-                    color: Colors.white,
+                    color: chrome.ink,
                   ).copyWith(fontWeight: FontWeight.w700),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   recovery.recoveryHint,
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.82),
-                    height: 1.35,
-                  ),
+                  style: FocuxHubTypography.bodyMuted(color: chrome.mute),
                 ),
               ],
             ),
           ),
           const SizedBox(height: TokensStrip.s4),
-          Text(
-            'Resumo de Hoje',
-            style: FocuxTypography.headline(color: chrome.ink),
+          const DashboardSectionHeader(title: 'Resumo de hoje'),
+          const SizedBox(height: TokensStrip.s3),
+          OperationalMetricTile(
+            label: 'Passos',
+            value: '${s.steps}',
+            hint: 'Hoje',
+            color: EagleTokens.good,
+            isDark: isDark,
           ),
-          const SizedBox(height: TokensStrip.s4),
-          Row(
-            children: [
-              Expanded(
-                child: _MetricCard(
-                  icon: Icons.directions_walk,
-                  label: 'Passos',
-                  value: '${s.steps}',
-                  color: EagleTokens.good,
-                  isDark: isDark,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _MetricCard(
-                  icon: Icons.local_fire_department,
-                  label: 'Calorias',
-                  value: '${s.caloriesBurned.toInt()} kcal',
-                  color: EagleTokens.warn,
-                  isDark: isDark,
-                ),
-              ),
-            ],
+          const SizedBox(height: TokensStrip.s2),
+          OperationalMetricTile(
+            label: 'Calorias',
+            value: '${s.caloriesBurned.toInt()} kcal',
+            hint: 'Gasto estimado',
+            color: EagleTokens.warn,
+            isDark: isDark,
           ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: _MetricCard(
-                  icon: Icons.favorite,
-                  label: 'FC Média',
-                  value:
-                      s.avgHeartRate > 0
-                          ? '${s.avgHeartRate.toInt()} bpm'
-                          : '--',
-                  color: EagleTokens.bad,
-                  isDark: isDark,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _MetricCard(
-                  icon: Icons.bedtime,
-                  label: 'Sono',
-                  value:
-                      s.sleepHours > 0
-                          ? '${s.sleepHours.toStringAsFixed(1)}h'
-                          : '--',
-                  color: EagleTokens.purple,
-                  isDark: isDark,
-                ),
-              ),
-            ],
+          const SizedBox(height: TokensStrip.s2),
+          OperationalMetricTile(
+            label: 'FC média',
+            value: s.avgHeartRate > 0 ? '${s.avgHeartRate.toInt()} bpm' : '--',
+            hint: 'Frequência',
+            color: EagleTokens.bad,
+            isDark: isDark,
+          ),
+          const SizedBox(height: TokensStrip.s2),
+          OperationalMetricTile(
+            label: 'Sono',
+            value:
+                s.sleepHours > 0 ? '${s.sleepHours.toStringAsFixed(1)}h' : '--',
+            hint: 'Última noite',
+            color: EagleTokens.purple,
+            isDark: isDark,
           ),
           const SizedBox(height: TokensStrip.s5),
-          OutlinedButton.icon(
-            onPressed: () async {
-              HapticFeedback.mediumImpact();
-              await HealthService.revokeAccess();
-              if (mounted) {
-                setState(() {
-                  _authorized = false;
-                  _summary = null;
-                });
-              }
-            },
-            icon: const Icon(Icons.link_off, size: 18),
-            label: const Text('Desconectar saúde'),
-            style: OutlinedButton.styleFrom(foregroundColor: EagleTokens.bad),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _MetricCard extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String value;
-  final Color color;
-  final bool isDark;
-
-  const _MetricCard({
-    required this.icon,
-    required this.label,
-    required this.value,
-    required this.color,
-    required this.isDark,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final chrome = ShellChrome.forDark(isDark);
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: chrome.listCard(primary: color),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(10),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: DashboardHomeActionChip(
+              label: 'Desconectar saúde',
+              accent: EagleTokens.bad,
+              isDark: isDark,
+              onPressed: () async {
+                HapticFeedback.mediumImpact();
+                await HealthService.revokeAccess();
+                if (mounted) {
+                  setState(() {
+                    _authorized = false;
+                    _summary = null;
+                  });
+                }
+              },
             ),
-            child: Icon(icon, color: color, size: 20),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            value,
-            style: FocuxHubTypography.kpi(
-              color: chrome.ink,
-              fontSize: FocuxHubTypography.metricLg,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: FocuxHubTypography.bodyMuted(color: chrome.mute),
           ),
         ],
       ),
