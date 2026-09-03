@@ -140,7 +140,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   ),
                   child: AuthStickyRoleBar(
                     roleLabel: 'PERSONAL',
-                    onBack: () => context.go('/login?role=personal'),
+                    onBack:
+                        () => authUnfocusAndLeave(
+                          context,
+                          '/login?role=personal',
+                        ),
                   ),
                 ),
                 Expanded(
@@ -155,253 +159,285 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         ScrollViewKeyboardDismissBehavior.onDrag,
                     child: Form(
                       key: _formKey,
-                      child: AuthFormEntrance(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                      Center(
-                        child: FxConversionLockup(
-                          width: authLogoWidthFor(
-                            context,
-                            withTagline: true,
-                          ),
-                          semanticLabel: 'Focux PERSONAL',
-                        ),
-                      ),
-                      const SizedBox(height: TokensStrip.s4),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              'Criar conta',
-                              style: authPageTitleStyle(context),
-                            ),
-                          ),
-                          FxHelpIconButton(
-                            tooltip: registerHelpTitle(),
-                            onTap: _abrirAjuda,
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        'Comece com sua conta e escolha o plano depois.',
-                        style: authSubtitleStyle(
-                          color: heroTealSurface(0.82),
-                        ),
-                      ),
-                      const SizedBox(height: 18),
-                      if (_emailDeliveryAvailable == false) ...[
-                        const AuthOperationalNotice(
-                          icon: Icons.mail_lock_outlined,
-                          title: 'E-mail temporariamente indisponível',
-                          text:
-                              'Não conseguimos enviar códigos agora. '
-                              'Use Entrar com Google ou tente de novo mais tarde.',
-                        ),
-                        const SizedBox(height: 12),
-                      ],
-                    AuthField(
-                      label: 'Nome completo',
-                      controller: _nameController,
-                      hintText: 'Seu nome',
-                      icon: Icons.person_outline_rounded,
-                      textInputAction: TextInputAction.next,
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'Informe o nome.';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 10),
-                    AuthField(
-                      label: 'E-mail',
-                      controller: _emailController,
-                      hintText: 'seu@email.com',
-                      icon: Icons.mail_outline_rounded,
-                      keyboardType: TextInputType.emailAddress,
-                      textInputAction: TextInputAction.next,
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'Informe o e-mail.';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 10),
-                    AuthField(
-                      label: 'Código do e-mail',
-                      controller: _codeController,
-                      hintText: '6 dígitos',
-                      icon: Icons.pin_outlined,
-                      keyboardType: TextInputType.number,
-                      textInputAction: TextInputAction.next,
-                      autofillHints: const [AutofillHints.oneTimeCode],
-                      inputFormatters: [
-                        FilteringTextInputFormatter.digitsOnly,
-                        LengthLimitingTextInputFormatter(6),
-                      ],
-                      validator: (value) {
-                        if (value == null || value.trim().length != 6) {
-                          return 'Informe o código de 6 dígitos.';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: TokensStrip.s2),
-                    FxLiquidSecondaryButton(
-                      label:
-                          _sendingCode
-                              ? registerEnviandoCodigoLabel()
-                              : _resendSeconds > 0
-                              ? '${registerEnviarCodigoLabel()} (${_resendSeconds}s)'
-                              : registerEnviarCodigoLabel(),
-                      onPressed:
-                          _sendingCode || _resendSeconds > 0
-                              ? null
-                              : _pedirEnviarCodigo,
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      _codeSent
-                          ? 'Código enviado. Válido por 10 minutos.'
-                          : 'Toque em Enviar para receber o código no e-mail.',
-                      style: FocuxHubTypography.bodyMuted(
-                        color: heroTealSurface(0.72),
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    AuthField(
-                      label: 'Senha',
-                      controller: _passwordController,
-                      hintText: 'Mín. 8 caracteres',
-                      icon: Icons.lock_outline_rounded,
-                      obscureText: !_showPassword,
-                      textInputAction: TextInputAction.next,
-                      focusNode: _passwordFocus,
-                      validator: (value) {
-                        if (value == null || value.length < 8) {
-                          return 'A senha precisa ter no mínimo 8 caracteres.';
-                        }
-                        return null;
-                      },
-                      suffix: IconButton(
-                        onPressed: () {
-                          setState(() {
-                            _showPassword = !_showPassword;
-                          });
-                        },
-                        icon: Icon(
-                          _showPassword
-                              ? Icons.visibility_off_outlined
-                              : Icons.visibility_outlined,
-                          color: heroTealSurface(0.82),
-                          size: 18,
-                        ),
-                      ),
-                    ),
-                    if (_passwordFocused ||
-                        _passwordController.text.isNotEmpty) ...[
-                      const SizedBox(height: 8),
-                      PasswordStrengthMeter(password: _passwordController.text),
-                    ],
-                    const SizedBox(height: 10),
-                    AuthField(
-                      label: 'Telefone / WhatsApp',
-                      controller: _phoneController,
-                      hintText: '(11) 99999-0000',
-                      icon: Icons.phone_iphone_rounded,
-                      keyboardType: TextInputType.phone,
-                      textInputAction: TextInputAction.done,
-                      inputFormatters: [BrPhone.formatter()],
-                      validator: BrPhone.validateOptional,
-                      onFieldSubmitted: (_) => _pedirCriarConta(),
-                    ),
-                    const SizedBox(height: 22),
-                    if (_error != null) ...[
-                      Semantics(
-                        liveRegion: true,
-                        child: Text(
-                          _error!,
-                          style: authInlineErrorStyle(),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                    ],
-                    FxLiquidPrimaryButton(
-                      label: registerCriarLabel(),
-                      loading: _loading,
-                      loadingLabel: registerCriandoLabel(),
-                      onPressed:
-                          _loading || _loadingGoogle
-                              ? null
-                              : _pedirCriarConta,
-                    ),
-                    FxConversionTextLink(
-                      text: '',
-                      actionText:
-                          FocuxBrandCopy.onboardingExistingAccountCta,
-                      onTap: () {
-                        if (_loading) return;
-                        context.go('/login?role=personal');
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    const _AuthDivider(label: 'ou cadastre com'),
-                    const SizedBox(height: 12),
-                    GoogleSignInButton(
-                      label: 'Cadastrar com Google',
-                      isLoading: _loadingGoogle,
-                      dark: true,
-                      onPressed: _loadingGoogle ? null : _submitGoogle,
-                    ),
-                    const SizedBox(height: TokensStrip.s4),
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: TokensStrip.s2),
-                      child: Center(
-                        child: Text.rich(
-                          TextSpan(
-                            style: FocuxHubTypography.bodyMuted(
-                              color: heroTealSurface(0.78),
-                              height: 1.45,
-                            ),
+                      child: AutofillGroup(
+                        child: AuthFormEntrance(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const TextSpan(
-                                text: 'Ao criar, você concorda com os ',
-                              ),
-                              TextSpan(
-                                text: 'Termos de uso',
-                                style: TextStyle(
-                                  color: primary,
-                                  fontWeight: FontWeight.w700,
+                              Center(
+                                child: FxConversionLockup(
+                                  width: authLogoWidthFor(
+                                    context,
+                                    withTagline: true,
+                                  ),
+                                  semanticLabel: 'Focux PERSONAL',
                                 ),
-                                recognizer:
-                                    TapGestureRecognizer()
-                                      ..onTap = () => FocuxLegal.openTerms(),
                               ),
-                              const TextSpan(text: ' e a '),
-                              TextSpan(
-                                text: 'Política de privacidade',
-                                style: TextStyle(
-                                  color: primary,
-                                  fontWeight: FontWeight.w700,
+                              const SizedBox(height: TokensStrip.s4),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      'Criar conta',
+                                      style: authPageTitleStyle(context),
+                                    ),
+                                  ),
+                                  FxHelpIconButton(
+                                    tooltip: registerHelpTitle(),
+                                    onTap: _abrirAjuda,
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 6),
+                              Text(
+                                'Comece com sua conta e escolha o plano depois.',
+                                style: authSubtitleStyle(
+                                  color: heroTealSurface(0.82),
                                 ),
-                                recognizer:
-                                    TapGestureRecognizer()
-                                      ..onTap =
-                                          () => FocuxLegal.openPrivacy(),
                               ),
-                              const TextSpan(text: '.'),
+                              const SizedBox(height: 18),
+                              if (_emailDeliveryAvailable == false) ...[
+                                AuthOperationalNotice(
+                                  icon: Icons.mail_lock_outlined,
+                                  title: 'E-mail temporariamente indisponível',
+                                  text:
+                                      Env.googleWebClientId.isNotEmpty
+                                          ? 'Não conseguimos enviar códigos agora. '
+                                              'Use Entrar com Google ou tente de novo mais tarde.'
+                                          : 'Não conseguimos enviar códigos agora. '
+                                              'Tente de novo mais tarde.',
+                                ),
+                                const SizedBox(height: 12),
+                              ],
+                              AuthField(
+                                label: 'Nome completo',
+                                controller: _nameController,
+                                hintText: 'Seu nome',
+                                icon: Icons.person_outline_rounded,
+                                textInputAction: TextInputAction.next,
+                                autofillHints: const [AutofillHints.name],
+                                validator: (value) {
+                                  if (value == null || value.trim().isEmpty) {
+                                    return 'Informe o nome.';
+                                  }
+                                  return null;
+                                },
+                              ),
+                              const SizedBox(height: 10),
+                              AuthField(
+                                label: 'E-mail',
+                                controller: _emailController,
+                                hintText: 'seu@email.com',
+                                icon: Icons.mail_outline_rounded,
+                                keyboardType: TextInputType.emailAddress,
+                                textInputAction: TextInputAction.next,
+                                autofillHints: const [AutofillHints.email],
+                                validator: (value) {
+                                  if (value == null || value.trim().isEmpty) {
+                                    return 'Informe o e-mail.';
+                                  }
+                                  return null;
+                                },
+                              ),
+                              const SizedBox(height: 10),
+                              AuthField(
+                                label: 'Código do e-mail',
+                                controller: _codeController,
+                                hintText: '6 dígitos',
+                                icon: Icons.pin_outlined,
+                                keyboardType: TextInputType.number,
+                                textInputAction: TextInputAction.next,
+                                autofillHints: const [
+                                  AutofillHints.oneTimeCode,
+                                ],
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.digitsOnly,
+                                  LengthLimitingTextInputFormatter(6),
+                                ],
+                                validator: (value) {
+                                  if (value == null ||
+                                      value.trim().length != 6) {
+                                    return 'Informe o código de 6 dígitos.';
+                                  }
+                                  return null;
+                                },
+                              ),
+                              const SizedBox(height: TokensStrip.s2),
+                              FxLiquidSecondaryButton(
+                                label:
+                                    _sendingCode
+                                        ? registerEnviandoCodigoLabel()
+                                        : _resendSeconds > 0
+                                        ? '${registerEnviarCodigoLabel()} (${_resendSeconds}s)'
+                                        : registerEnviarCodigoLabel(),
+                                onPressed:
+                                    _sendingCode || _resendSeconds > 0
+                                        ? null
+                                        : _pedirEnviarCodigo,
+                              ),
+                              const SizedBox(height: 6),
+                              Text(
+                                _codeSent
+                                    ? 'Código enviado. Válido por 10 minutos.'
+                                    : 'Toque em Enviar para receber o código no e-mail.',
+                                style: FocuxHubTypography.bodyMuted(
+                                  color: heroTealSurface(0.72),
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              AuthField(
+                                label: 'Senha',
+                                controller: _passwordController,
+                                hintText: 'Mín. 8 caracteres',
+                                icon: Icons.lock_outline_rounded,
+                                obscureText: !_showPassword,
+                                textInputAction: TextInputAction.next,
+                                autofillHints: const [
+                                  AutofillHints.newPassword,
+                                ],
+                                focusNode: _passwordFocus,
+                                validator: (value) {
+                                  if (value == null || value.length < 8) {
+                                    return 'A senha precisa ter no mínimo 8 caracteres.';
+                                  }
+                                  return null;
+                                },
+                                suffix: IconButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      _showPassword = !_showPassword;
+                                    });
+                                  },
+                                  icon: Icon(
+                                    _showPassword
+                                        ? Icons.visibility_off_outlined
+                                        : Icons.visibility_outlined,
+                                    color: heroTealSurface(0.82),
+                                    size: 18,
+                                  ),
+                                ),
+                              ),
+                              if (_passwordFocused ||
+                                  _passwordController.text.isNotEmpty) ...[
+                                const SizedBox(height: 8),
+                                PasswordStrengthMeter(
+                                  password: _passwordController.text,
+                                ),
+                              ],
+                              const SizedBox(height: 10),
+                              AuthField(
+                                label: 'Telefone / WhatsApp',
+                                controller: _phoneController,
+                                hintText: '(11) 99999-0000',
+                                icon: Icons.phone_iphone_rounded,
+                                keyboardType: TextInputType.phone,
+                                textInputAction: TextInputAction.done,
+                                autofillHints: const [
+                                  AutofillHints.telephoneNumber,
+                                ],
+                                inputFormatters: [BrPhone.formatter()],
+                                validator: BrPhone.validateOptional,
+                                onFieldSubmitted: (_) => _pedirCriarConta(),
+                              ),
+                              const SizedBox(height: 22),
+                              if (_error != null) ...[
+                                Semantics(
+                                  liveRegion: true,
+                                  child: Text(
+                                    _error!,
+                                    style: authInlineErrorStyle(),
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                              ],
+                              FxLiquidPrimaryButton(
+                                label: registerCriarLabel(),
+                                loading: _loading,
+                                loadingLabel: registerCriandoLabel(),
+                                onPressed:
+                                    _loading || _loadingGoogle
+                                        ? null
+                                        : _pedirCriarConta,
+                              ),
+                              FxConversionTextLink(
+                                text: '',
+                                actionText:
+                                    FocuxBrandCopy.onboardingExistingAccountCta,
+                                onTap: () {
+                                  if (_loading) return;
+                                  authUnfocusAndGo(
+                                    context,
+                                    '/login?role=personal',
+                                  );
+                                },
+                              ),
+                              if (Env.googleWebClientId.isNotEmpty) ...[
+                                const SizedBox(height: 16),
+                                const FxConversionDivider(
+                                  label: 'ou cadastre com',
+                                ),
+                                const SizedBox(height: 12),
+                                GoogleSignInButton(
+                                  label: 'Cadastrar com Google',
+                                  isLoading: _loadingGoogle,
+                                  dark: true,
+                                  onPressed:
+                                      _loadingGoogle ? null : _submitGoogle,
+                                ),
+                              ],
+                              const SizedBox(height: TokensStrip.s4),
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                  bottom: TokensStrip.s2,
+                                ),
+                                child: Center(
+                                  child: Text.rich(
+                                    TextSpan(
+                                      style: FocuxHubTypography.bodyMuted(
+                                        color: heroTealSurface(0.78),
+                                        height: 1.45,
+                                      ),
+                                      children: [
+                                        const TextSpan(
+                                          text:
+                                              'Ao criar, você concorda com os ',
+                                        ),
+                                        TextSpan(
+                                          text: 'Termos de uso',
+                                          style: TextStyle(
+                                            color: primary,
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                          recognizer:
+                                              TapGestureRecognizer()
+                                                ..onTap =
+                                                    () =>
+                                                        FocuxLegal.openTerms(),
+                                        ),
+                                        const TextSpan(text: ' e a '),
+                                        TextSpan(
+                                          text: 'Política de privacidade',
+                                          style: TextStyle(
+                                            color: primary,
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                          recognizer:
+                                              TapGestureRecognizer()
+                                                ..onTap =
+                                                    () =>
+                                                        FocuxLegal.openPrivacy(),
+                                        ),
+                                        const TextSpan(text: '.'),
+                                      ],
+                                    ),
+                                    textAlign: TextAlign.center,
+                                    softWrap: true,
+                                  ),
+                                ),
+                              ),
                             ],
                           ),
-                          textAlign: TextAlign.center,
-                          softWrap: true,
-                        ),
-                      ),
-                    ),
-                          ],
                         ),
                       ),
                     ),
@@ -412,36 +448,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           ),
         ),
       ),
-    );
-  }
-}
-
-class _AuthDivider extends StatelessWidget {
-  final String label;
-
-  const _AuthDivider({required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: Divider(color: heroTealSurface(0.22), height: 1),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10),
-          child: Text(
-            label,
-            style: FocuxHubTypography.bodyMuted(
-              color: heroTealSurface(0.82),
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
-        Expanded(
-          child: Divider(color: heroTealSurface(0.22), height: 1),
-        ),
-      ],
     );
   }
 }

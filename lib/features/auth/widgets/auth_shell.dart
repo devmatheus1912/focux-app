@@ -26,7 +26,12 @@ import '../../../core/widgets/mesh_scope.dart';
 import '../utils/auth_layout.dart';
 
 export '../utils/auth_layout.dart'
-    show kAuthFormLogoWidth, authLogoWidthFor, authScrollPadding;
+    show
+        kAuthFormLogoWidth,
+        authLogoWidthFor,
+        authScrollPadding,
+        authUnfocusAndGo,
+        authUnfocusAndLeave;
 
 class AuthShell extends StatelessWidget {
   const AuthShell({
@@ -72,7 +77,9 @@ class AuthShell extends StatelessWidget {
         animateGridIn: animateGridIn,
         child: MeshScope(
           active: true,
-          child: SafeArea(child: FxKeyboardDismissScope(child: content)),
+          child: FxKeyboardPopScope(
+            child: SafeArea(child: FxKeyboardDismissScope(child: content)),
+          ),
         ),
       ),
     );
@@ -401,6 +408,7 @@ class AuthField extends StatelessWidget {
           autofillHints: autofillHints,
           validator: validator,
           obscureText: obscureText,
+          onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
           onFieldSubmitted: onFieldSubmitted,
           style: FocuxHubTypography.body(color: heroTealInk()),
           decoration: InputDecoration(
@@ -461,7 +469,10 @@ class AuthBackButton extends StatelessWidget {
     final icon = Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: onTap,
+        onTap: () {
+          FxKeyboardDismissScope.dismiss();
+          onTap();
+        },
         customBorder: const CircleBorder(),
         child: Ink(
           width: 38,

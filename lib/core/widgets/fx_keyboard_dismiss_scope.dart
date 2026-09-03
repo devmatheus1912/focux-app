@@ -25,3 +25,22 @@ class FxKeyboardDismissScope extends StatelessWidget {
     );
   }
 }
+
+/// Back do SO com teclado aberto fecha o teclado em vez de sair da rota (§14.2.11).
+class FxKeyboardPopScope extends StatelessWidget {
+  const FxKeyboardPopScope({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
+    return PopScope(
+      canPop: !keyboardOpen,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) FxKeyboardDismissScope.dismiss();
+      },
+      child: child,
+    );
+  }
+}

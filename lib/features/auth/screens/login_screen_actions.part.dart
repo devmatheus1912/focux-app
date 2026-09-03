@@ -50,11 +50,13 @@ extension on _LoginScreenState {
           });
           return;
         }
-        await ref.read(authProvider.notifier).loginAluno(
-          _emailController.text.trim(),
-          _passwordController.text,
-          personalSlug: _personalSlug,
-        );
+        await ref
+            .read(authProvider.notifier)
+            .loginAluno(
+              _emailController.text.trim(),
+              _passwordController.text,
+              personalSlug: _personalSlug,
+            );
         if (!mounted) return;
         _trackLogin(success: true, method: 'password');
         final requiresChange =
@@ -119,11 +121,13 @@ extension on _LoginScreenState {
           (_personalSlug == null || _personalSlug!.trim().isEmpty)) {
         throw StateError('PERSONAL_SLUG_REQUIRED');
       }
-      await ref.read(authProvider.notifier).loginGoogle(
-        idToken: idToken,
-        isAluno: _isAluno,
-        personalSlug: _isAluno ? _personalSlug : null,
-      );
+      await ref
+          .read(authProvider.notifier)
+          .loginGoogle(
+            idToken: idToken,
+            isAluno: _isAluno,
+            personalSlug: _isAluno ? _personalSlug : null,
+          );
       if (!mounted) return;
       _trackLogin(success: true, method: 'google');
       if (_isAluno) {
@@ -164,31 +168,5 @@ extension on _LoginScreenState {
       // Prefetch best-effort — Home ainda é o destino.
     }
     return fallback;
-  }
-}
-
-class _AuthDivider extends StatelessWidget {
-  final String label;
-
-  const _AuthDivider({required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(child: Divider(color: heroTealSurface(0.2), height: 1)),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10),
-          child: Text(
-            label,
-            style: FocuxHubTypography.bodyMuted(
-              color: heroTealSurface(0.82),
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
-        Expanded(child: Divider(color: heroTealSurface(0.2), height: 1)),
-      ],
-    );
   }
 }

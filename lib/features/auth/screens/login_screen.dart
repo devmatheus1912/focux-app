@@ -13,7 +13,6 @@ import '../../../core/api/api_error.dart';
 import '../../../core/auth/session_cache_evictor.dart';
 import '../../../core/config/env.dart';
 import '../../../core/theme/focux_hub_typography.dart';
-import '../../../core/theme/hero_teal.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_conversion.dart';
@@ -158,179 +157,209 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         ),
         child: Scaffold(
           body: AuthShell(
-            child: SingleChildScrollView(
-              padding: authScrollPadding(context, top: 40, bottomExtra: 24),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minHeight: MediaQuery.of(context).size.height - 100,
-                ),
-                child: Form(
-                  key: _formKey,
-                  child: AuthFormEntrance(
-                    child: Column(
-                      children: [
-                        const SizedBox(height: 2),
-                        AuthLoginBrandHeader(isAluno: _isAluno),
-                        const SizedBox(height: 14),
-                        AuthGlassCard(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final scrollPad = authScrollPadding(
+                  context,
+                  top: 40,
+                  bottomExtra: 24,
+                  ensureFooter: true,
+                );
+                final minBody = (constraints.maxHeight - scrollPad.vertical)
+                    .clamp(0.0, constraints.maxHeight);
+                return SingleChildScrollView(
+                  padding: scrollPad,
+                  keyboardDismissBehavior:
+                      ScrollViewKeyboardDismissBehavior.onDrag,
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(minHeight: minBody),
+                    child: Form(
+                      key: _formKey,
+                      child: AutofillGroup(
+                        child: AuthFormEntrance(
                           child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                      loginEntrarLabel(),
-                                      style: authPageTitleStyle(context),
+                              const SizedBox(height: 2),
+                              AuthLoginBrandHeader(isAluno: _isAluno),
+                              const SizedBox(height: 14),
+                              AuthGlassCard(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Expanded(
+                                          child: Text(
+                                            loginEntrarLabel(),
+                                            style: authPageTitleStyle(context),
+                                          ),
+                                        ),
+                                        FxHelpIconButton(
+                                          tooltip: loginHelpTitle(),
+                                          onTap: _abrirAjuda,
+                                        ),
+                                      ],
                                     ),
-                                  ),
-                                  FxHelpIconButton(
-                                    tooltip: loginHelpTitle(),
-                                    onTap: _abrirAjuda,
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 16),
-                              AuthRoleToggle(
-                                isAluno: _isAluno,
-                                onPersonalTap: () {
-                                  if (_isAluno) {
-                                    HapticFeedback.selectionClick();
-                                    setState(() => _isAluno = false);
-                                  }
-                                },
-                                onAlunoTap: () {
-                                  if (!_isAluno) {
-                                    HapticFeedback.selectionClick();
-                                    setState(() => _isAluno = true);
-                                  }
-                                },
-                              ),
-                              const SizedBox(height: 16),
-                              AuthField(
-                                label: 'E-mail',
-                                controller: _emailController,
-                                hintText: 'seu@email.com',
-                                icon: Icons.person_outline_rounded,
-                                keyboardType: TextInputType.emailAddress,
-                                textInputAction: TextInputAction.next,
-                                validator: (value) {
-                                  if (value == null || value.trim().isEmpty) {
-                                    return 'Informe o e-mail.';
-                                  }
-                                  return null;
-                                },
-                              ),
-                              const SizedBox(height: 12),
-                              AuthField(
-                                label: 'Senha',
-                                controller: _passwordController,
-                                hintText: '••••••••',
-                                icon: Icons.lock_outline_rounded,
-                                obscureText: !_showPassword,
-                                textInputAction: TextInputAction.done,
-                                onFieldSubmitted: (_) => _submit(),
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'Informe a senha.';
-                                  }
-                                  return null;
-                                },
-                                suffix: Semantics(
-                                  button: true,
-                                  label:
-                                      _showPassword
-                                          ? 'Ocultar senha'
-                                          : 'Mostrar senha',
-                                  child: TextButton(
-                                    onPressed: () {
-                                      setState(() {
-                                        _showPassword = !_showPassword;
-                                      });
-                                    },
-                                    child: Text(
-                                      _showPassword ? 'Ocultar' : 'Ver',
-                                      style: FocuxHubTypography.chip(primary),
+                                    const SizedBox(height: 16),
+                                    AuthRoleToggle(
+                                      isAluno: _isAluno,
+                                      onPersonalTap: () {
+                                        if (_isAluno) {
+                                          HapticFeedback.selectionClick();
+                                          setState(() => _isAluno = false);
+                                        }
+                                      },
+                                      onAlunoTap: () {
+                                        if (!_isAluno) {
+                                          HapticFeedback.selectionClick();
+                                          setState(() => _isAluno = true);
+                                        }
+                                      },
                                     ),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: TokensStrip.s2),
-                              Align(
-                                alignment: Alignment.centerRight,
-                                child: FxConversionTextLink(
-                                  text: '',
-                                  actionText: loginEsqueciLabel(),
-                                  onTap:
-                                      () => context.go(
-                                        loginEsqueciPath(
-                                          isAluno: _isAluno,
-                                          personalSlug: _personalSlug,
+                                    const SizedBox(height: 16),
+                                    AuthField(
+                                      label: 'E-mail',
+                                      controller: _emailController,
+                                      hintText: 'seu@email.com',
+                                      icon: Icons.person_outline_rounded,
+                                      keyboardType: TextInputType.emailAddress,
+                                      textInputAction: TextInputAction.next,
+                                      autofillHints: const [
+                                        AutofillHints.email,
+                                      ],
+                                      validator: (value) {
+                                        if (value == null ||
+                                            value.trim().isEmpty) {
+                                          return 'Informe o e-mail.';
+                                        }
+                                        return null;
+                                      },
+                                    ),
+                                    const SizedBox(height: 12),
+                                    AuthField(
+                                      label: 'Senha',
+                                      controller: _passwordController,
+                                      hintText: '••••••••',
+                                      icon: Icons.lock_outline_rounded,
+                                      obscureText: !_showPassword,
+                                      textInputAction: TextInputAction.done,
+                                      autofillHints: const [
+                                        AutofillHints.password,
+                                      ],
+                                      onFieldSubmitted: (_) => _submit(),
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return 'Informe a senha.';
+                                        }
+                                        return null;
+                                      },
+                                      suffix: Semantics(
+                                        button: true,
+                                        label:
+                                            _showPassword
+                                                ? 'Ocultar senha'
+                                                : 'Mostrar senha',
+                                        child: TextButton(
+                                          onPressed: () {
+                                            setState(() {
+                                              _showPassword = !_showPassword;
+                                            });
+                                          },
+                                          child: Text(
+                                            _showPassword ? 'Ocultar' : 'Ver',
+                                            style: FocuxHubTypography.chip(
+                                              primary,
+                                            ),
+                                          ),
                                         ),
                                       ),
+                                    ),
+                                    const SizedBox(height: TokensStrip.s2),
+                                    Align(
+                                      alignment: Alignment.centerRight,
+                                      child: FxConversionTextLink(
+                                        text: '',
+                                        actionText: loginEsqueciLabel(),
+                                        onTap:
+                                            () => authUnfocusAndGo(
+                                              context,
+                                              loginEsqueciPath(
+                                                isAluno: _isAluno,
+                                                personalSlug: _personalSlug,
+                                              ),
+                                            ),
+                                      ),
+                                    ),
+                                    if (_error != null) ...[
+                                      Semantics(
+                                        liveRegion: true,
+                                        child: Text(
+                                          _error!,
+                                          style: authInlineErrorStyle(),
+                                        ),
+                                      ),
+                                      const SizedBox(height: TokensStrip.s3),
+                                    ],
+                                    FxLiquidPrimaryButton(
+                                      label: loginEntrarLabel(),
+                                      loading: _loading,
+                                      loadingLabel: loginEntrandoLabel(),
+                                      onPressed:
+                                          _loading || _loadingGoogle
+                                              ? null
+                                              : _submit,
+                                    ),
+                                    if (_googleEnabled ||
+                                        _googleStatusNote != null) ...[
+                                      const SizedBox(height: 12),
+                                      const FxConversionDivider(
+                                        label: 'ou continue com',
+                                      ),
+                                      const SizedBox(height: 12),
+                                    ],
+                                    if (_googleEnabled) ...[
+                                      GoogleSignInButton(
+                                        onPressed:
+                                            _loadingGoogle
+                                                ? null
+                                                : _submitGoogle,
+                                        isLoading: _loadingGoogle,
+                                        dark: true,
+                                      ),
+                                    ],
+                                    if (_googleStatusNote != null) ...[
+                                      if (_googleEnabled)
+                                        const SizedBox(height: 12),
+                                      AuthOperationalNotice(
+                                        icon: Icons.g_mobiledata_rounded,
+                                        title:
+                                            _googleStatusTitle ??
+                                            'Google pendente no ambiente',
+                                        text: _googleStatusNote!,
+                                        action: _googleStatusAction,
+                                      ),
+                                    ],
+                                  ],
                                 ),
                               ),
-                              if (_error != null) ...[
-                                Semantics(
-                                  liveRegion: true,
-                                  child: Text(
-                                    _error!,
-                                    style: authInlineErrorStyle(),
-                                  ),
-                                ),
-                                const SizedBox(height: TokensStrip.s3),
-                              ],
-                              FxLiquidPrimaryButton(
-                                label: loginEntrarLabel(),
-                                loading: _loading,
-                                loadingLabel: loginEntrandoLabel(),
-                                onPressed:
-                                    _loading || _loadingGoogle
-                                        ? null
-                                        : _submit,
+                              const SizedBox(height: TokensStrip.s4),
+                              FxConversionTextLink(
+                                text: 'Não tem conta? ',
+                                actionText: loginCriarContaLabel(),
+                                onTap:
+                                    () => authUnfocusAndGo(
+                                      context,
+                                      loginRegisterPath(isAluno: _isAluno),
+                                    ),
                               ),
-                              if (_googleEnabled ||
-                                  _googleStatusNote != null) ...[
-                                const SizedBox(height: 12),
-                                const _AuthDivider(label: 'ou continue com'),
-                                const SizedBox(height: 12),
-                              ],
-                              if (_googleEnabled) ...[
-                                GoogleSignInButton(
-                                  onPressed:
-                                      _loadingGoogle ? null : _submitGoogle,
-                                  isLoading: _loadingGoogle,
-                                  dark: true,
-                                ),
-                              ],
-                              if (_googleStatusNote != null) ...[
-                                if (_googleEnabled) const SizedBox(height: 12),
-                                AuthOperationalNotice(
-                                  icon: Icons.g_mobiledata_rounded,
-                                  title:
-                                      _googleStatusTitle ??
-                                      'Google pendente no ambiente',
-                                  text: _googleStatusNote!,
-                                  action: _googleStatusAction,
-                                ),
-                              ],
                             ],
                           ),
                         ),
-                        const SizedBox(height: TokensStrip.s4),
-                        FxConversionTextLink(
-                          text: 'Não tem conta? ',
-                          actionText: loginCriarContaLabel(),
-                          onTap:
-                              () => context.go(
-                                loginRegisterPath(isAluno: _isAluno),
-                              ),
-                        ),
-                      ],
+                      ),
                     ),
                   ),
-                ),
-              ),
+                );
+              },
             ),
           ),
         ),
@@ -338,4 +367,3 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     );
   }
 }
-

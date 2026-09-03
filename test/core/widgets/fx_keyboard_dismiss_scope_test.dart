@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/core/widgets/fx_keyboard_dismiss_scope.dart';
@@ -55,5 +57,14 @@ void main() {
 
     await tester.tap(find.byTooltip('Voltar'));
     expect(tapped, isTrue);
+  });
+
+  test('FxKeyboardPopScope fecha o teclado em vez de pop', () {
+    final src = File(
+      'lib/core/widgets/fx_keyboard_dismiss_scope.dart',
+    ).readAsStringSync();
+    expect(src, contains('class FxKeyboardPopScope'));
+    expect(src, contains('canPop: !keyboardOpen'));
+    expect(src, contains('FxKeyboardDismissScope.dismiss()'));
   });
 }

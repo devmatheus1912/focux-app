@@ -7,7 +7,10 @@ void main() {
     final screen = readScreenSourceBundle(
       'lib/features/auth/screens/esqueci_senha_screen.dart',
     );
-    expect(screen, anyOf(contains('fxScreenA11yScope'), contains('Semantics(')));
+    expect(
+      screen,
+      anyOf(contains('fxScreenA11yScope'), contains('Semantics(')),
+    );
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(
       screen,
@@ -58,5 +61,9 @@ void main() {
     expect(screen, contains('mapEsqueciSenhaError'));
     expect(screen, contains('form == null || !form.validate()'));
     expect(screen, contains('AuthOperationalNotice'));
+    expect(screen, contains('keyboardDismissBehavior'));
+    expect(screen, contains('authUnfocusAndLeave'));
+    expect(screen, contains('authUnfocusAndGo'));
+    expect(screen, contains('AutofillHints.email'));
   });
 }
