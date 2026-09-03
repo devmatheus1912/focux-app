@@ -4,7 +4,9 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/router/safe_navigation.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
+import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
@@ -12,9 +14,8 @@ import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
-import '../../../core/widgets/fx_settings_grouped_list.dart';
-import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../alunos/widgets/aluno_avatar.dart';
 import '../models/checkin_personal_home.dart';
@@ -138,54 +139,58 @@ class _CheckinPersonalHubScreenState
                 ref.invalidate(checkinPersonalHomeProvider);
                 await ref.read(checkinPersonalHomeProvider.future);
               },
-              child: FxSettingsGroupedList(
-                header: home.checkinsHoje == 1
-                    ? '1 check-in hoje'
-                    : '${home.checkinsHoje} check-ins hoje',
-                caption: home.semana.isEmpty
-                    ? 'Toque no aluno para abrir o 360.'
-                    : 'Hoje e os 6 dias anteriores. Toque para abrir o 360.',
+              child: ListView.builder(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.fromLTRB(
+                  FxSettingsLayout.pageInset,
+                  TokensStrip.s3,
+                  FxSettingsLayout.pageInset,
+                  TokensStrip.s6,
+                ),
                 itemCount: rows.length,
                 itemBuilder: (context, i) {
                   final row = rows[i];
-                  final showSection = i == 0 || rows[i - 1].section != row.section;
+                  final showSection =
+                      i == 0 || rows[i - 1].section != row.section;
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      if (showSection && row.section == 'semana')
+                      if (showSection && row.section == 'hoje')
                         Padding(
-                          padding: const EdgeInsets.fromLTRB(
-                            FxSettingsLayout.groupPadH,
-                            10,
-                            FxSettingsLayout.groupPadH,
-                            4,
-                          ),
-                          child: Text(
-                            'Últimos 6 dias',
-                            style: FxSettingsLayout.sectionHeader(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onSurface
-                                  .withValues(alpha: 0.55),
-                            ),
+                          padding: const EdgeInsets.only(bottom: TokensStrip.s2),
+                          child: DashboardSectionHeader(
+                            title: home.checkinsHoje == 1
+                                ? '1 check-in hoje'
+                                : '${home.checkinsHoje} check-ins hoje',
                           ),
                         ),
-                      FxSettingsTile(
-                        fxIcon: 'circle-check',
-                        label: row.item.alunoNome,
-                        subtitle: row.item.treinoNome,
-                        value: row.item.iniciadoEm == null
-                            ? ''
-                            : fxTimeAgo(row.item.iniciadoEm!),
-                        showDivider: i < rows.length - 1,
-                        accessory: AlunoAvatar(
+                      if (showSection && row.section == 'semana')
+                        const Padding(
+                          padding: EdgeInsets.only(
+                            top: TokensStrip.s2,
+                            bottom: TokensStrip.s2,
+                          ),
+                          child: DashboardSectionHeader(title: 'Últimos 6 dias'),
+                        ),
+                      FxSatelliteListTile(
+                        title: row.item.alunoNome,
+                        subtitle: Text(row.item.treinoNome),
+                        leading: AlunoAvatar(
                           name: row.item.alunoNome,
                           photoUrl: row.item.fotoUrl,
                           variant: AlunoAvatarVariant.strip,
                         ),
-                        semanticsLabel:
-                            '${row.item.alunoNome}. ${row.item.treinoNome}',
-                        onTap: () => context.push('/alunos/${row.item.alunoId}'),
+                        trailing: row.item.iniciadoEm == null
+                            ? null
+                            : Text(
+                              fxTimeAgo(row.item.iniciadoEm!),
+                              style: FocuxHubTypography.bodyMuted(
+                                color: fxScreenMute(context),
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                        onTap: () =>
+                            context.push('/alunos/${row.item.alunoId}'),
                       ),
                     ],
                   );

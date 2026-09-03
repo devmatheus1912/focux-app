@@ -5,7 +5,9 @@ import 'package:go_router/go_router.dart';
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/router/role_home.dart';
 import '../../../core/router/safe_navigation.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
+import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feedback_helper.dart';
@@ -13,9 +15,8 @@ import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
-import '../../../core/widgets/fx_settings_grouped_list.dart';
-import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../data/notificacoes_repository.dart';
 import '../notificacao_display.dart';
@@ -172,33 +173,32 @@ class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
                     'Alertas, mensagens e o Radar Focux aparecem aqui quando pedem ação.',
               );
             }
-            final unread = unreadCount;
             final extra = inbox.hasMore ? 1 : 0;
             return RefreshIndicator(
               color: primary,
               onRefresh: reload,
-              child: FxSettingsGroupedList(
-                header: unread == 0
-                    ? 'Tudo lido'
-                    : unread == 1
-                    ? '1 não lida'
-                    : '$unread não lidas',
-                caption: 'Toque para abrir o destino. Ler todas zera o sino.',
+              child: ListView.builder(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.fromLTRB(
+                  FxSettingsLayout.pageInset,
+                  TokensStrip.s3,
+                  FxSettingsLayout.pageInset,
+                  TokensStrip.s6,
+                ),
                 itemCount: rows.length + extra,
                 itemBuilder: (context, i) {
                   if (i >= rows.length) {
-                    return FxSettingsTile(
-                      fxIcon: 'bell',
-                      label: inbox.loadingMore
+                    return FxSatelliteListTile(
+                      title: inbox.loadingMore
                           ? 'Carregando…'
                           : 'Carregar mais',
                       subtitle: inbox.loadingMore
                           ? null
-                          : 'Mais ${inbox.total - items.length} nesta caixa.',
-                      value: '',
-                      showDivider: false,
+                          : Text(
+                            'Mais ${inbox.total - items.length} nesta caixa.',
+                          ),
                       onTap: inbox.loadingMore
-                          ? () {}
+                          ? null
                           : () => ref
                               .read(notificacoesProvider.notifier)
                               .loadMore(),
@@ -212,33 +212,23 @@ class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
                     children: [
                       if (showDay)
                         Padding(
-                          padding: EdgeInsets.fromLTRB(
-                            FxSettingsLayout.groupPadH,
-                            i == 0 ? 0 : 10,
-                            FxSettingsLayout.groupPadH,
-                            4,
+                          padding: EdgeInsets.only(
+                            top: i == 0 ? 0 : TokensStrip.s3,
+                            bottom: TokensStrip.s2,
                           ),
-                          child: Text(
-                            row.dayGroup,
-                            style: FxSettingsLayout.sectionHeader(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onSurface
-                                  .withValues(alpha: 0.55),
-                            ),
+                          child: DashboardSectionHeader(title: row.dayGroup),
+                        ),
+                      FxSatelliteListTile(
+                        title: notificationHumanTitle(row.item),
+                        subtitle: Text(notificationSubtitle(row.item)),
+                        trailing: Text(
+                          notificationTimeLabel(row.item.criadaEm),
+                          style: FocuxHubTypography.bodyMuted(
+                            color: fxScreenMute(context),
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
-                      FxSettingsTile(
-                        fxIcon: notificationFxIcon(row.item),
-                        label: notificationHumanTitle(row.item),
-                        subtitle: notificationSubtitle(row.item),
-                        value: notificationTimeLabel(row.item.criadaEm),
-                        highlight: !row.item.lida,
-                        showDivider: i < rows.length - 1 || inbox.hasMore,
-                        semanticsLabel:
-                            '${row.item.lida ? '' : 'Não lida. '}'
-                            '${notificationHumanTitle(row.item)}. '
-                            '${row.item.mensagem}',
+                        accent: row.item.lida ? null : primary,
                         onTap: () => openItem(row.item),
                       ),
                     ],

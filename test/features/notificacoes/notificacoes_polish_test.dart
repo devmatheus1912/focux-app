@@ -11,7 +11,8 @@ void main() {
     expect(screen, contains('FxHubFreshness'));
     expect(screen, contains('formatDisplayName'));
     expect(screen, contains('Todas marcadas como lidas.'));
-    expect(screen, contains('FxSettingsGroupedList'));
+    expect(screen, contains('FxSatelliteListTile'));
+    expect(screen, isNot(contains('FxSettingsGroupedList')));
     expect(screen, contains('FxHelpIconButton'));
     expect(screen, contains('roleHomePath'));
     expect(screen, contains('Semantics('));
