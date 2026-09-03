@@ -164,7 +164,7 @@ class _NovoAgendamentoScreenState extends ConsumerState<NovoAgendamentoScreen> {
                   child: ShellHeaderIconButton(
                     icon: 'circle-check',
                     tooltip: agendaNovoSalvarTooltip(),
-                    onTap: _saving ? () {} : _salvar,
+                    onTap: _saving ? null : _salvar,
                   ),
                 ),
               ),
@@ -256,16 +256,22 @@ class _NovoAgendamentoScreenState extends ConsumerState<NovoAgendamentoScreen> {
               ],
             ),
             const SizedBox(height: TokensStrip.s3),
-            FxSettingsGroup(
-              children: [
-                FxSettingsTile(
-                  fxIcon: 'circle-check',
-                  label: agendaNovoTileLabel(),
-                  value: _saving ? 'Agendando…' : 'Confirmar',
-                  showDivider: false,
-                  onTap: _saving ? () {} : _salvar,
+            SizedBox(
+              height: 52,
+              child: ElevatedButton(
+                onPressed: _saving ? null : _salvar,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(TokensStrip.rButton),
+                  ),
                 ),
-              ],
+                child: Text(
+                  _saving ? 'Agendando…' : agendaNovoTileLabel(),
+                ),
+              ),
             ),
           ],
         ),

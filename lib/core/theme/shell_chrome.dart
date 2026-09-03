@@ -138,7 +138,7 @@ class ShellHeaderIconButton extends StatelessWidget {
   });
 
   final String icon;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
   final double size;
   final int badgeCount;
   final String? tooltip;
