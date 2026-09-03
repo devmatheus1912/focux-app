@@ -3,8 +3,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
+import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feedback_helper.dart';
@@ -15,10 +18,9 @@ import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_form_sheet.dart';
 import '../../../core/widgets/fx_inset_picker_sheet.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
-import '../../../core/widgets/fx_settings_group.dart';
-import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
+import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../../features/alunos/widgets/aluno_inset_form_field.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../alunos/utils/satellite_screen_utils.dart';
@@ -275,53 +277,73 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
   Widget _buildBody() {
     return RefreshIndicator(
       onRefresh: _load,
-      child: ListView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(
-          FxSettingsLayout.pageInset,
-          8,
-          FxSettingsLayout.pageInset,
-          32,
-        ),
-        children: [
-          if (_feedbacks.isEmpty)
-            FxEmptyState(
-              key: const ValueKey('feedback_video_empty'),
-              icon: 'spark',
-              title: 'Nenhum feedback de vídeo',
-              subtitle:
-                  widget.alunoNome != null
-                      ? 'Peça a ${satelliteFirstName(widget.alunoNome)} um vídeo de execução ou registre o primeiro feedback técnico.'
-                      : 'Registre o primeiro feedback técnico com URL do vídeo e comentário.',
-              action: FxEmptyAction(
-                label: 'Novo feedback',
-                onTap: _novoFeedback,
+      child: _feedbacks.isEmpty
+          ? ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.fromLTRB(
+                FxSettingsLayout.pageInset,
+                8,
+                FxSettingsLayout.pageInset,
+                32,
               ),
-            )
-          else
-            FxSettingsGroup(
-              header: 'Feedbacks',
-              caption: 'Toque para assistir ou remover. Score IA quando houver.',
               children: [
-                for (var i = 0; i < _feedbacks.length; i++)
-                  FxSettingsTile(
-                    fxIcon: feedbackVideoFxIcon(_feedbacks[i].aiScore),
-                    label: feedbackVideoLabel(_feedbacks[i].comentario),
-                    subtitle: feedbackVideoSubtitle(
-                      criadoEm: _feedbacks[i].criadoEm,
-                      aiScore: _feedbacks[i].aiScore,
-                      statusAnalise: _feedbacks[i].statusAnalise,
-                    ),
-                    value: feedbackVideoValue(_feedbacks[i].aiScore),
-                    numeric: _feedbacks[i].aiScore != null,
-                    danger: feedbackVideoDanger(_feedbacks[i].aiScore),
-                    showDivider: i != _feedbacks.length - 1,
-                    onTap: () => _abrirAcoes(_feedbacks[i]),
+                FxEmptyState(
+                  key: const ValueKey('feedback_video_empty'),
+                  icon: 'spark',
+                  title: 'Nenhum feedback de vídeo',
+                  subtitle:
+                      widget.alunoNome != null
+                          ? 'Peça a ${satelliteFirstName(widget.alunoNome)} um vídeo de execução ou registre o primeiro feedback técnico.'
+                          : 'Registre o primeiro feedback técnico com URL do vídeo e comentário.',
+                  action: FxEmptyAction(
+                    label: 'Novo feedback',
+                    onTap: _novoFeedback,
                   ),
+                ),
               ],
+            )
+          : ListView.builder(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.fromLTRB(
+                FxSettingsLayout.pageInset,
+                TokensStrip.s3,
+                FxSettingsLayout.pageInset,
+                TokensStrip.s6,
+              ),
+              itemCount: _feedbacks.length + 1,
+              itemBuilder: (context, i) {
+                if (i == 0) {
+                  return const Padding(
+                    padding: EdgeInsets.only(bottom: TokensStrip.s3),
+                    child: DashboardSectionHeader(title: 'Feedbacks'),
+                  );
+                }
+                final item = _feedbacks[i - 1];
+                return FxSatelliteListTile(
+                  title: feedbackVideoLabel(item.comentario),
+                  subtitle: Text(
+                    feedbackVideoSubtitle(
+                      criadoEm: item.criadoEm,
+                      aiScore: item.aiScore,
+                      statusAnalise: item.statusAnalise,
+                    ),
+                  ),
+                  trailing: Text(
+                    feedbackVideoValue(item.aiScore),
+                    style: FocuxHubTypography.bodyMuted(
+                      color: feedbackVideoDanger(item.aiScore)
+                          ? EagleTokens.bad
+                          : fxScreenMute(context),
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  accent: feedbackVideoDanger(item.aiScore)
+                      ? EagleTokens.bad
+                      : null,
+                  onTap: () => _abrirAcoes(item),
+                );
+              },
             ),
-        ],
-      ),
     );
   }
 }
