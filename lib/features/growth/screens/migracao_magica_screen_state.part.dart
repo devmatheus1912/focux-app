@@ -10,12 +10,12 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
   Uint8List? _importedPhotoBytes;
   List<MigracaoAlunoLinha>? _alunosEncontrados;
   bool _emptyResult = false;
+  MigracaoFonte _fonte = MigracaoFonte.texto;
 
-  static const _passos = [
-    'Importe planilha, foto/print (OCR no celular) ou cole texto',
-    'Revise, edite ou remova linhas antes de confirmar',
-    'Confirme e salve: duplicados são ignorados automaticamente',
-  ];
+  bool get _isReviewing =>
+      _alunosEncontrados != null && _alunosEncontrados!.isNotEmpty;
+
+  bool get _captureBusy => _isLoading || _isImportingFile;
 
   @override
   void initState() {
@@ -33,6 +33,27 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
       ..removeListener(_onDraftChanged)
       ..dispose();
     super.dispose();
+  }
+
+  void _voltarRevisao() {
+    setState(() {
+      _alunosEncontrados = null;
+      _emptyResult = false;
+    });
+  }
+
+  void _continuarCaptura() {
+    switch (_fonte) {
+      case MigracaoFonte.planilha:
+        _importarArquivo();
+        break;
+      case MigracaoFonte.foto:
+        _subirFoto();
+        break;
+      case MigracaoFonte.texto:
+        _processarMigracao();
+        break;
+    }
   }
 
   @override
@@ -91,6 +112,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
           useMesh: true,
           appBar: FxShellAppBar(
             title: 'Migração Focux',
+            subtitle: migracaoEtapaLabel(reviewing: _isReviewing),
             onBack: _handleBack,
             actions: [
               FxHelpIconButton(
@@ -113,6 +135,52 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
               ),
             ],
           ),
+          bottomNavigationBar: SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(
+                FxSettingsLayout.pageInset,
+                TokensStrip.s2,
+                FxSettingsLayout.pageInset,
+                TokensStrip.s3,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (_isReviewing)
+                    TextButton(
+                      onPressed: _isSaving ? null : _voltarRevisao,
+                      child: Text(migracaoVoltarLabel()),
+                    ),
+                  FxLiquidPrimaryButton(
+                    label:
+                        _isReviewing
+                            ? (_isSaving
+                                ? migracaoSalvandoLabel()
+                                : migracaoSalvarLabel(
+                                  (alunos ?? const [])
+                                      .where((a) => !a.duplicado)
+                                      .length,
+                                ))
+                            : migracaoContinueCaptureLabel(
+                              fonte: _fonte,
+                              loading: _captureBusy,
+                            ),
+                    loading: _isReviewing ? _isSaving : _captureBusy,
+                    onPressed:
+                        _isReviewing
+                            ? (_isSaving ? null : _salvarAlunos)
+                            : (_captureBusy
+                                ? null
+                                : (_fonte == MigracaoFonte.texto &&
+                                        _controller.text.trim().isEmpty
+                                    ? null
+                                    : _continuarCaptura)),
+                  ),
+                ],
+              ),
+            ),
+          ),
           body: SingleChildScrollView(
             padding: const EdgeInsets.fromLTRB(
               FxSettingsLayout.pageInset,
@@ -123,208 +191,34 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-              _stagger(
-                context,
-                index: 0,
-                child: Semantics(
-                  header: true,
-                  label:
-                      'Importe alunos com planilha, foto de app concorrente ou texto colado.',
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            width: 32,
-                            height: 32,
-                            decoration: BoxDecoration(
-                              color:
-                                  isDark
-                                      ? Colors.white.withValues(alpha: 0.15)
-                                      : brandSoft,
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            alignment: Alignment.center,
-                            child: Icon(
-                              Icons.auto_awesome,
-                              size: 16,
-                              color: brand,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            'IA FOCUX',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: brand,
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: 0.6,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: TokensStrip.s2),
-                      Text(
-                        'Importe alunos',
-                        style: FocuxTypography.display(color: ink).copyWith(
-                          fontSize: 28,
-                          letterSpacing: -0.5,
-                          height: 1.1,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        'Planilha (.csv, .xlsx), print de app concorrente ou texto — '
-                        'análise automática no app. Você revisa antes de salvar.',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: mute,
-                          height: 1.55,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+              Text(
+                migracaoQuestionTitle(reviewing: _isReviewing),
+                style: FocuxHubTypography.sectionTitle(context, color: ink),
+              ),
+              const SizedBox(height: TokensStrip.s2),
+              Text(
+                migracaoQuestionCaption(reviewing: _isReviewing),
+                style: FocuxHubTypography.bodyMuted(color: mute),
+              ),
+              if (!_isReviewing) ...[
+              const SizedBox(height: FxSettingsLayout.headerToGroup),
+              Wrap(
+                spacing: TokensStrip.s2,
+                runSpacing: TokensStrip.s2,
+                children: [
+                  for (final fonte in MigracaoFonte.values)
+                    FxToggleChip(
+                      label: migracaoFonteLabel(fonte),
+                      selected: _fonte == fonte,
+                      isDark: isDark,
+                      showCheckmark: true,
+                      onTap: _captureBusy
+                          ? () {}
+                          : () => setState(() => _fonte = fonte),
+                    ),
+                ],
               ),
               const SizedBox(height: TokensStrip.s3),
-              _stagger(
-                context,
-                index: 1,
-                child: Semantics(
-                  label:
-                      'Dica: prints de apps concorrentes como MFIT e Trainerize podem ser importados por foto.',
-                  child: Container(
-                    padding: const EdgeInsets.all(TokensStrip.s3),
-                    decoration: BoxDecoration(
-                      color: brandSofter,
-                      borderRadius: BorderRadius.circular(TokensStrip.rSm),
-                      border: Border.all(
-                        color: brand.withValues(alpha: isDark ? 0.35 : 0.22),
-                      ),
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Icon(
-                          Icons.screenshot_monitor_rounded,
-                          color: brand,
-                          size: 22,
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Veio de outro app?',
-                                style: FocuxHubTypography.cardTitle(color: ink),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'Suba um print da lista de alunos (MFIT, Trainerize, Excel, WhatsApp). '
-                                'OCR no celular lê a tela — sem redigitar. Pro: '
-                                '${MigracaoFotoLimits.pro} fotos/mês · Enterprise: '
-                                '${MigracaoFotoLimits.enterprise}/mês.',
-                                style: TextStyle(
-                                  fontSize: 12.5,
-                                  color: mute,
-                                  height: 1.45,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: TokensStrip.s4),
-              _stagger(
-                context,
-                index: 2,
-                child: Semantics(
-                  label: 'Como funciona em três passos',
-                  child: Container(
-                    padding: const EdgeInsets.fromLTRB(
-                      TokensStrip.s5,
-                      20,
-                      TokensStrip.s5,
-                      18,
-                    ),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(24),
-                      gradient:
-                          isDark
-                              ? LinearGradient(
-                                colors: [brandDeep, EagleTokens.cinematicBg],
-                              )
-                              : LinearGradient(colors: [brand, brandDeep]),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Como funciona',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white,
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        ..._passos.asMap().entries.map((entry) {
-                          return Semantics(
-                            label: 'Passo ${entry.key + 1}. ${entry.value}',
-                            child: Padding(
-                              padding: const EdgeInsets.only(bottom: 10),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Container(
-                                    width: 22,
-                                    height: 22,
-                                    decoration: BoxDecoration(
-                                      color: Colors.white.withValues(
-                                        alpha: 0.2,
-                                      ),
-                                      shape: BoxShape.circle,
-                                    ),
-                                    alignment: Alignment.center,
-                                    child: Text(
-                                      '${entry.key + 1}',
-                                      style: AppTypography.mono(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w700,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 10),
-                                  Expanded(
-                                    child: Text(
-                                      entry.value,
-                                      style: TextStyle(
-                                        fontSize: 13,
-                                        color: Colors.white.withValues(
-                                          alpha: 0.88,
-                                        ),
-                                        height: 1.45,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        }),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: TokensStrip.s4),
               _stagger(
                 context,
                 index: 3,
@@ -435,45 +329,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                         ),
                       ],
                       const SizedBox(height: TokensStrip.s3),
-                      FxSettingsGroup(
-                        children: [
-                          FxSettingsTile(
-                            fxIcon: 'article',
-                            label: _isImportingFile
-                                ? migracaoPlanilhaLendoLabel()
-                                : migracaoPlanilhaLabel(),
-                            value: '',
-                            accent: brand,
-                            mute: mute,
-                            onTap: (_isLoading || _isImportingFile)
-                                ? () {}
-                                : _importarArquivo,
-                          ),
-                          FxSettingsTile(
-                            fxIcon: 'spark',
-                            label: migracaoColarLabel(),
-                            value: '',
-                            accent: brand,
-                            mute: mute,
-                            onTap: _isLoading ? () {} : _colarClipboard,
-                          ),
-                          FxSettingsTile(
-                            fxIcon: 'plus',
-                            label: _isLoading && _importedPhotoBytes != null
-                                ? migracaoFotoLendoLabel()
-                                : migracaoFotoLabel(),
-                            value: '',
-                            showDivider: false,
-                            accent: brand,
-                            mute: mute,
-                            semanticsLabel:
-                                'Subir foto ou print de app concorrente',
-                            onTap: (_isLoading || _isImportingFile)
-                                ? () {}
-                                : _subirFoto,
-                          ),
-                        ],
-                      ),
+                      if (_fonte == MigracaoFonte.texto) ...[
                       Semantics(
                         label:
                             'Campo para colar dados desestruturados dos alunos',
@@ -514,31 +370,16 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                           ),
                         ),
                       ),
-                      if (_controller.text.trim().isNotEmpty) ...[
-                        const SizedBox(height: TokensStrip.s3),
-                        FxSettingsGroup(
-                          children: [
-                            FxSettingsTile(
-                              fxIcon: 'spark',
-                              label: _isLoading && _importedPhotoBytes == null
-                                  ? migracaoIniciarAnalisandoLabel()
-                                  : migracaoIniciarLabel(),
-                              value: '',
-                              showDivider: false,
-                              highlight: true,
-                              accent: brand,
-                              mute: mute,
-                              onTap: (_isLoading && _importedPhotoBytes == null)
-                                  ? () {}
-                                  : _processarMigracao,
-                            ),
-                          ],
-                        ),
+                      TextButton(
+                        onPressed: _captureBusy ? null : _colarClipboard,
+                        child: Text(migracaoColarLabel()),
+                      ),
                       ],
                     ],
                   ),
                 ),
               ),
+              ],
               AnimatedSwitcher(
                 duration: _motionDuration(context),
                 switchInCurve: Curves.easeOutCubic,
@@ -749,24 +590,6 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
               );
             }),
             const SizedBox(height: TokensStrip.s3),
-            FxSettingsGroup(
-              children: [
-                FxSettingsTile(
-                  fxIcon: 'circle-check',
-                  label: _isSaving
-                      ? migracaoSalvandoLabel()
-                      : migracaoSalvarLabel(
-                          alunos.where((a) => !a.duplicado).length,
-                        ),
-                  value: '',
-                  showDivider: false,
-                  highlight: true,
-                  accent: brand,
-                  mute: mute,
-                  onTap: _isSaving ? () {} : _salvarAlunos,
-                ),
-              ],
-            ),
           ],
         ),
       ),
