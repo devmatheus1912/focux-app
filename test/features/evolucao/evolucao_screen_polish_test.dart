@@ -21,7 +21,9 @@ void main() {
     expect(screen, contains('getHome'));
     expect(screen, contains('showFxInsetPickerSheet'));
     expect(screen, contains('IndexedStack'));
-    expect(screen, contains('FxSettingsGroup'));
+    expect(screen, isNot(contains('FxSettingsGroup')));
+    expect(screen, contains('FxSatelliteListTile'));
+    expect(screen, contains('DashboardSectionHeader'));
     expect(screen, contains('RefreshIndicator'));
     expect(screen, isNot(contains('TabBar')));
     expect(screen, isNot(contains('TabBarView')));

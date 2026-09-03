@@ -3,8 +3,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/router/safe_navigation.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
+import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
@@ -12,10 +14,10 @@ import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_inset_picker_sheet.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
-import '../../../core/widgets/fx_settings_group.dart';
-import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
+import '../../dashboard/widgets/dashboard_home_action_chip.dart';
+import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/evolucao_repository.dart';
 import '../utils/engajamento_display.dart';
@@ -131,69 +133,96 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
   }
 
   Widget _buildBody() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
     return RefreshIndicator(
       onRefresh: _load,
-      child: ListView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(
-          FxSettingsLayout.pageInset,
-          8,
-          FxSettingsLayout.pageInset,
-          32,
-        ),
-        children: [
-          FxSettingsGroup(
-            header: 'Período',
-            children: [
-              FxSettingsTile(
-                fxIcon: 'calendar',
-                label: 'Janela',
-                value: engajamentoPeriodoLabel(_dias),
-                picker: true,
-                showDivider: false,
-                onTap: _pickPeriodo,
+      child: _eventos.isEmpty
+          ? ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.fromLTRB(
+                FxSettingsLayout.pageInset,
+                8,
+                FxSettingsLayout.pageInset,
+                32,
               ),
-            ],
-          ),
-          if (_eventos.isEmpty)
-            FxEmptyState(
-              icon: 'trend',
-              title: 'Nenhum evento registrado',
-              subtitle:
-                  'Treinos, medidas e mensagens do aluno aparecem aqui na janela escolhida.',
-              action:
-                  _dias == 90
-                      ? null
-                      : FxEmptyAction(
-                        label: 'Ver 90 dias',
-                        onTap: _verNoventaDias,
-                      ),
-            )
-          else
-            FxSettingsGroup(
-              header: 'Eventos',
-              caption:
-                  'Treinos, medidas e mensagens nos últimos ${engajamentoPeriodoLabel(_dias)}.',
               children: [
-                for (var i = 0; i < _eventos.length; i++)
-                  FxSettingsTile(
-                    fxIcon: engajamentoFxIcon(_eventos[i].tipo),
-                    label: engajamentoEventoLabel(
-                      _eventos[i].descricao,
-                      _eventos[i].tipo,
-                    ),
-                    subtitle: engajamentoEventoSubtitle(
-                      tipo: _eventos[i].tipo,
-                      dataHora: _eventos[i].dataHora,
-                    ),
-                    value: engajamentoWhenLabel(_eventos[i].dataHora),
-                    showDivider: i != _eventos.length - 1,
-                    onTap: () {},
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: DashboardHomeActionChip(
+                    label: engajamentoPeriodoLabel(_dias),
+                    accent: primary,
+                    isDark: isDark,
+                    onPressed: _pickPeriodo,
                   ),
+                ),
+                const SizedBox(height: TokensStrip.s5),
+                FxEmptyState(
+                  icon: 'trend',
+                  title: 'Nenhum evento registrado',
+                  subtitle:
+                      'Treinos, medidas e mensagens do aluno aparecem aqui na janela escolhida.',
+                  action:
+                      _dias == 90
+                          ? null
+                          : FxEmptyAction(
+                            label: 'Ver 90 dias',
+                            onTap: _verNoventaDias,
+                          ),
+                ),
               ],
+            )
+          : ListView.builder(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.fromLTRB(
+                FxSettingsLayout.pageInset,
+                TokensStrip.s3,
+                FxSettingsLayout.pageInset,
+                TokensStrip.s6,
+              ),
+              itemCount: _eventos.length + 1,
+              itemBuilder: (context, i) {
+                if (i == 0) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: DashboardHomeActionChip(
+                          label: engajamentoPeriodoLabel(_dias),
+                          accent: primary,
+                          isDark: isDark,
+                          onPressed: _pickPeriodo,
+                        ),
+                      ),
+                      const SizedBox(height: TokensStrip.s5),
+                      const DashboardSectionHeader(title: 'Eventos'),
+                      const SizedBox(height: TokensStrip.s3),
+                    ],
+                  );
+                }
+                final evento = _eventos[i - 1];
+                return FxSatelliteListTile(
+                  title: engajamentoEventoLabel(
+                    evento.descricao,
+                    evento.tipo,
+                  ),
+                  subtitle: Text(
+                    engajamentoEventoSubtitle(
+                      tipo: evento.tipo,
+                      dataHora: evento.dataHora,
+                    ),
+                  ),
+                  trailing: Text(
+                    engajamentoWhenLabel(evento.dataHora),
+                    style: FocuxHubTypography.bodyMuted(
+                      color: fxScreenMute(context),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                );
+              },
             ),
-        ],
-      ),
     );
   }
 }

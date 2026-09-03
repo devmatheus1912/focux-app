@@ -64,39 +64,43 @@ class _TabMedidas extends StatelessWidget {
             ),
             children: [
               if (weightData.length > 1) ...[
-                FxSettingsGroup(
-                  header: 'Peso',
-                  caption: 'Últimas medidas com peso.',
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      child: FxSparkline(
-                        data: weightData,
-                        width: 320,
-                        height: 72,
-                        color: EagleTokens.good,
-                        fill: true,
-                      ),
-                    ),
-                  ],
+                const DashboardSectionHeader(title: 'Peso'),
+                const SizedBox(height: TokensStrip.s2),
+                Text(
+                  'Últimas medidas com peso.',
+                  style: FocuxHubTypography.bodyMuted(
+                    color: fxScreenMute(context),
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-                const SizedBox(height: FxSettingsLayout.groupGap),
+                const SizedBox(height: TokensStrip.s3),
+                Container(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  decoration: fxListCardDecoration(context),
+                  child: FxSparkline(
+                    data: weightData,
+                    width: 320,
+                    height: 72,
+                    color: EagleTokens.good,
+                    fill: true,
+                  ),
+                ),
+                const SizedBox(height: TokensStrip.s5),
               ],
-              FxSettingsGroup(
-                header: 'Medidas',
-                children: [
-                  for (var i = 0; i < ordenada.length; i++)
-                    FxSettingsTile(
-                      fxIcon: 'trend',
-                      label: evolucaoMedidaLabel(ordenada[i]),
-                      subtitle: evolucaoMedidaSubtitle(ordenada[i]),
-                      value: evolucaoMedidaValue(ordenada[i]),
-                      numeric: true,
-                      showDivider: i != ordenada.length - 1,
-                      onTap: () {},
+              const DashboardSectionHeader(title: 'Medidas'),
+              const SizedBox(height: TokensStrip.s3),
+              for (final medida in ordenada)
+                FxSatelliteListTile(
+                  title: evolucaoMedidaLabel(medida),
+                  subtitle: Text(evolucaoMedidaSubtitle(medida)),
+                  trailing: Text(
+                    evolucaoMedidaValue(medida),
+                    style: FocuxHubTypography.bodyMuted(
+                      color: fxScreenMute(context),
+                      fontWeight: FontWeight.w700,
                     ),
-                ],
-              ),
+                  ),
+                ),
             ],
           ),
         );
@@ -167,21 +171,20 @@ class _TabRecordes extends StatelessWidget {
               32,
             ),
             children: [
-              FxSettingsGroup(
-                header: 'Recordes',
-                children: [
-                  for (var i = 0; i < ordenada.length; i++)
-                    FxSettingsTile(
-                      fxIcon: 'star',
-                      label: ordenada[i].exercicioNome,
-                      subtitle: evolucaoRecordeSubtitle(ordenada[i]),
-                      value: evolucaoRecordeValue(ordenada[i]),
-                      numeric: true,
-                      showDivider: i != ordenada.length - 1,
-                      onTap: () {},
+              const DashboardSectionHeader(title: 'Recordes'),
+              const SizedBox(height: TokensStrip.s3),
+              for (final recorde in ordenada)
+                FxSatelliteListTile(
+                  title: recorde.exercicioNome,
+                  subtitle: Text(evolucaoRecordeSubtitle(recorde)),
+                  trailing: Text(
+                    evolucaoRecordeValue(recorde),
+                    style: FocuxHubTypography.bodyMuted(
+                      color: fxScreenMute(context),
+                      fontWeight: FontWeight.w700,
                     ),
-                ],
-              ),
+                  ),
+                ),
             ],
           ),
         );
