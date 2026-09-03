@@ -4,10 +4,19 @@ import '../../support/screen_source_bundle.dart';
 
 void main() {
   test('coach cumpre contrato Tier S+', () {
-    final screen = readScreenSourceBundle('lib/features/coach/screens/coach_screen.dart');
-    expect(screen, anyOf(contains('fxScreenA11yScope'), contains('Semantics(')));
-    expect(screen, isNot(contains('CircularProgressIndicator')));
+    final screen = readScreenSourceBundle(
+      'lib/features/coach/screens/coach_screen.dart',
+    );
+    expect(screen, contains('fxScreenA11yScope'));
     expect(screen, contains('FxShellScaffold'));
-    expect(screen, anyOf(contains('FxContentWidthLimiter'), isNot(contains('constrainWidth: false'))));
+    expect(screen, contains('constrainWidth: false'));
+    expect(screen, contains('FxContentWidthLimiter'));
+    expect(screen, contains("safePopOrGo(context, '/dashboard/personal')"));
+    expect(screen, contains('FxHelpIconButton'));
+    expect(screen, contains('FxStripCard'));
+    expect(screen, contains('emphasize: true'));
+    expect(screen, contains('FxEmptyAction'));
+    expect(screen, contains('keyboardDismissBehavior'));
+    expect(screen, isNot(contains('CircularProgressIndicator')));
   });
 }

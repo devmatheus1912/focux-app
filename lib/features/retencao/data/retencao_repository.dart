@@ -1,6 +1,5 @@
 import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
-import '../../../core/api/pagina.dart';
 
 class RetencaoAlunoScore {
   final int alunoId;
@@ -36,21 +35,48 @@ class RetencaoAlunoScore {
       );
 }
 
+class RetencaoHome {
+  const RetencaoHome({
+    required this.alto,
+    required this.medio,
+    required this.saudavel,
+    required this.top3,
+    this.fetchedAt,
+  });
+
+  final int alto;
+  final int medio;
+  final int saudavel;
+  final List<RetencaoAlunoScore> top3;
+  final DateTime? fetchedAt;
+
+  bool get isEmpty => alto == 0 && medio == 0 && saudavel == 0 && top3.isEmpty;
+
+  factory RetencaoHome.fromJson(Map<String, dynamic> j) {
+    return RetencaoHome(
+      alto: (j['alto'] as num?)?.toInt() ?? 0,
+      medio: (j['medio'] as num?)?.toInt() ?? 0,
+      saudavel: (j['saudavel'] as num?)?.toInt() ?? 0,
+      top3:
+          ((j['top3'] as List?) ?? const [])
+              .whereType<Map>()
+              .map(
+                (e) => RetencaoAlunoScore.fromJson(
+                  Map<String, dynamic>.from(e),
+                ),
+              )
+              .toList(),
+      fetchedAt: DateTime.tryParse(j['fetchedAt']?.toString() ?? ''),
+    );
+  }
+}
+
 class RetencaoRepository {
   final Dio _dio;
   RetencaoRepository(ApiClient c) : _dio = c.dio;
 
-  Future<List<RetencaoAlunoScore>> listarBase() async {
-    final r = await _dio.get(
-      '/api/retencao/base',
-      queryParameters: {'page': 0, 'size': 100},
-    );
-    final pagina = Pagina.fromJson(
-      Map<String, dynamic>.from(r.data as Map),
-      (raw) => RetencaoAlunoScore.fromJson(
-        Map<String, dynamic>.from(raw as Map),
-      ),
-    );
-    return pagina.content;
+  Future<RetencaoHome> getHome() async {
+    final r = await _dio.get('/api/retencao/home');
+    return RetencaoHome.fromJson(Map<String, dynamic>.from(r.data as Map));
   }
 }

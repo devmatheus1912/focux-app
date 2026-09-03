@@ -13,7 +13,6 @@ import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
-import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_strip_card.dart';
@@ -37,10 +36,9 @@ class ChurnDashboardScreen extends ConsumerStatefulWidget {
 }
 
 class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
-  List<RetencaoAlunoScore> _scores = [];
+  RetencaoHome? _home;
   bool _loading = true;
   String? _error;
-  DateTime? _fetchedAt;
 
   @override
   void initState() {
@@ -54,12 +52,11 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
       _error = null;
     });
     try {
-      final list = await ref.read(retencaoRepositoryProvider).listarBase();
+      final home = await ref.read(retencaoRepositoryProvider).getHome();
       if (!mounted) return;
       setState(() {
-        _scores = list;
+        _home = home;
         _loading = false;
-        _fetchedAt = DateTime.now();
       });
     } catch (e) {
       if (!mounted) return;
@@ -74,9 +71,8 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
-    final sorted = sortedRetencaoScores(_scores);
-    final counts = retencaoRiskCounts(_scores);
-    final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
+    final home = _home;
+    final freshnessLabel = FxHubFreshness.fromFetchedAt(home?.fetchedAt);
 
     return fxScreenA11yScope(
       label: 'Saúde da base',
@@ -102,7 +98,7 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
                       ),
                       FxHelpTip(
                         'Lista',
-                        'Os 3 primeiros já vêm ordenados por risco.',
+                        'Os 3 primeiros já vêm do servidor, ordenados por risco.',
                       ),
                       FxHelpTip(
                         'Cálculo',
@@ -127,7 +123,7 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
                   color: primary,
                   onRefresh: _load,
                   child:
-                      sorted.isEmpty
+                      home == null || home.isEmpty
                           ? ListView(
                             physics: const AlwaysScrollableScrollPhysics(),
                             children: [
@@ -161,26 +157,24 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
                                 40,
                               ),
                               children: [
-                                _RetencaoFocusCard(
-                                  counts: counts,
-                                  firstAlto: firstAltoRetencao(sorted),
-                                  isDark: isDark,
-                                ),
+                                _RetencaoFocusCard(home: home, isDark: isDark),
                                 const SizedBox(height: TokensStrip.s4),
                                 DashboardSectionHeader(
                                   title: 'Quem olhar agora',
                                   actionLabel:
-                                      sorted.length > 3 ? 'Ver todos' : null,
+                                      home.alto + home.medio + home.saudavel > 3
+                                          ? 'Ver todos'
+                                          : null,
                                   onAction:
-                                      sorted.length > 3
-                                          ? () => _showRetencaoCatalog(
+                                      home.alto + home.medio + home.saudavel > 3
+                                          ? () => goPersonalShellTab(
                                             context,
-                                            items: sorted,
+                                            '/alunos?filtro=risco',
                                           )
                                           : null,
                                 ),
                                 const SizedBox(height: TokensStrip.s2),
-                                for (final score in sorted.take(3))
+                                for (final score in home.top3)
                                   _RetencaoTile(score: score),
                               ],
                             ),
@@ -192,20 +186,16 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
 }
 
 class _RetencaoFocusCard extends StatelessWidget {
-  const _RetencaoFocusCard({
-    required this.counts,
-    required this.firstAlto,
-    required this.isDark,
-  });
+  const _RetencaoFocusCard({required this.home, required this.isDark});
 
-  final ({int alto, int medio, int saudavel}) counts;
-  final RetencaoAlunoScore? firstAlto;
+  final RetencaoHome home;
   final bool isDark;
 
   @override
   Widget build(BuildContext context) {
     final chrome = ShellChrome.forDark(isDark);
-    final alto = counts.alto;
+    final alto = home.alto;
+    final firstAlto = firstAltoRetencao(home.top3);
     return FxStripCard(
       emphasize: true,
       semanticsLabel:
@@ -237,7 +227,7 @@ class _RetencaoFocusCard extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            '${counts.medio} médios · ${counts.saudavel} saudáveis',
+            '${home.medio} médios · ${home.saudavel} saudáveis',
             style: FocuxHubTypography.bodyMuted(color: chrome.mute),
           ),
           const SizedBox(height: TokensStrip.s3),
@@ -284,33 +274,4 @@ class _RetencaoTile extends StatelessWidget {
       onTap: () => context.push('/alunos/${score.alunoId}'),
     );
   }
-}
-
-void _showRetencaoCatalog(
-  BuildContext context, {
-  required List<RetencaoAlunoScore> items,
-}) {
-  showFxHomeSheet<void>(
-    context,
-    builder: (ctx) {
-      return FxHomeSheetSurface(
-        isDark: Theme.of(ctx).brightness == Brightness.dark,
-        child: ListView(
-          shrinkWrap: true,
-          children: [
-            FxHomeSheetHeader(
-              title: 'Base',
-              subtitle: 'Ordenada por risco.',
-              leading: Icon(
-                Icons.favorite_outline,
-                size: 18,
-                color: Theme.of(ctx).colorScheme.primary,
-              ),
-            ),
-            for (final score in items) _RetencaoTile(score: score),
-          ],
-        ),
-      );
-    },
-  );
 }

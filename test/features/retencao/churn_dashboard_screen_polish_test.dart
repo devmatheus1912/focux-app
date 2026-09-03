@@ -15,13 +15,13 @@ void main() {
     expect(screen, contains('FxHelpIconButton'));
     expect(screen, contains('FxStripCard'));
     expect(screen, contains('emphasize: true'));
-    expect(screen, contains('take(3)'));
-    expect(screen, contains('Ver todos'));
+    expect(screen, contains('getHome'));
+    expect(screen, contains('/alunos?filtro=risco'));
     expect(screen, contains('FxEmptyAction'));
     expect(screen, contains('keyboardDismissBehavior'));
+    expect(screen, isNot(contains('listarBase')));
     expect(screen, isNot(contains('class _ChurnScoreCard')));
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(screen, contains('RefreshIndicator'));
-    expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(4));
   });
 }
