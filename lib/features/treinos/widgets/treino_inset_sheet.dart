@@ -150,20 +150,23 @@ class TreinoInsetConfirmSheet extends StatelessWidget {
             ),
           ),
           const SizedBox(height: FxSettingsLayout.groupGap),
-          FxSettingsGroup(
-            children: [
-              FxSettingsTile(
-                icon: headerIcon,
-                label: confirmLabel,
-                value: '',
-                danger: true,
-                showDivider: false,
-                onTap: () {
-                  HapticFeedback.mediumImpact();
-                  Navigator.of(context).pop(true);
-                },
+          SizedBox(
+            height: 52,
+            child: ElevatedButton(
+              onPressed: () {
+                HapticFeedback.mediumImpact();
+                Navigator.of(context).pop(true);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: EagleTokens.bad,
+                foregroundColor: Colors.white,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
               ),
-            ],
+              child: Text(confirmLabel),
+            ),
           ),
           const SizedBox(height: FxSettingsLayout.footerAfterGroup),
           Center(
