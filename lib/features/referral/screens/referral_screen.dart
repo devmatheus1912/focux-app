@@ -6,6 +6,7 @@ import '../../../core/analytics/analytics_service.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
+import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/clipboard_sensitive.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
@@ -14,9 +15,10 @@ import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
-import '../../../core/widgets/fx_settings_group.dart';
-import '../../../core/widgets/fx_settings_tile.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/operational_metric_tile.dart';
+import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/referral_repository.dart';
@@ -127,12 +129,14 @@ class _ReferralScreenState extends ConsumerState<ReferralScreen> {
                   message: _erro!,
                   onRetry: _load,
                 )
-                : FxContentWidthLimiter(child: _buildBody()),
+                : FxContentWidthLimiter(
+                  child: _buildBody(isDark: chrome.isDark, primary: primary),
+                ),
       ),
     );
   }
 
-  Widget _buildBody() {
+  Widget _buildBody({required bool isDark, required Color primary}) {
     final info = _info;
     if (info == null || referralCodigoLabel(info.codigo) == '—') {
       return RefreshIndicator(
@@ -150,63 +154,60 @@ class _ReferralScreenState extends ConsumerState<ReferralScreen> {
         ),
       );
     }
-    return RefreshIndicator(
-      onRefresh: _load,
-      child: ListView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(
-          FxSettingsLayout.pageInset,
-          8,
-          FxSettingsLayout.pageInset,
-          32,
+    return Column(
+      children: [
+        Expanded(
+          child: RefreshIndicator(
+            onRefresh: _load,
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.fromLTRB(
+                FxSettingsLayout.pageInset,
+                TokensStrip.s4,
+                FxSettingsLayout.pageInset,
+                TokensStrip.s4,
+              ),
+              children: [
+                OperationalMetricTile(
+                  label: 'Seu código',
+                  value: referralCodigoLabel(info.codigo),
+                  hint: referralUsosLabel(info.usosTotais),
+                  color: primary,
+                  isDark: isDark,
+                ),
+                const SizedBox(height: TokensStrip.s4),
+                Wrap(
+                  spacing: TokensStrip.s2,
+                  runSpacing: TokensStrip.s2,
+                  children: [
+                    DashboardHomeActionChip(
+                      label: 'Só o link',
+                      accent: primary,
+                      isDark: isDark,
+                      onPressed: _copiarLink,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
         ),
-        children: [
-          FxSettingsGroup(
-            header: 'Seu código',
-            caption:
-                'Quando o personal indicado assinar, você ganha 30 dias extras.',
-            children: [
-              FxSettingsTile(
-                fxIcon: 'users',
-                label: 'Código',
-                value: referralCodigoLabel(info.codigo),
-                highlight: true,
-                onTap: _share,
-              ),
-              FxSettingsTile(
-                fxIcon: 'star',
-                label: 'Indicações',
-                value: referralUsosLabel(info.usosTotais),
-                numeric: true,
-                showDivider: false,
-                onTap: () {},
-              ),
-            ],
+        SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(
+              FxSettingsLayout.pageInset,
+              TokensStrip.s2,
+              FxSettingsLayout.pageInset,
+              TokensStrip.s3,
+            ),
+            child: FxLiquidPrimaryButton(
+              label: 'Copiar convite',
+              onPressed: _share,
+            ),
           ),
-          FxSettingsGroup(
-            header: 'Compartilhar',
-            caption:
-                'O convite some da área de transferência em 1 min.',
-            children: [
-              FxSettingsTile(
-                fxIcon: 'spark',
-                label: 'Copiar convite',
-                subtitle: 'Código + link para WhatsApp ou Instagram.',
-                value: 'Copiar',
-                highlight: true,
-                onTap: _share,
-              ),
-              FxSettingsTile(
-                fxIcon: 'route',
-                label: 'Só o link',
-                value: 'Copiar',
-                showDivider: false,
-                onTap: _copiarLink,
-              ),
-            ],
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

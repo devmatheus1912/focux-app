@@ -19,7 +19,7 @@ void main() {
     expect(screen, contains('exerciseVideoUploadConfirmTitle'));
     expect(screen, contains('exerciseVideoRemoveConfirmTitle'));
     expect(screen, contains('exerciseVideoUploadSuccess'));
-    expect(screen, isNot(contains('FxLiquidPrimaryButton')));
+    expect(screen, contains('FxLiquidPrimaryButton'));
     expect(screen, isNot(contains('FxLiquidSecondaryButton')));
     expect(screen, isNot(contains('ExerciseVideoUploadStrip')));
     expect(screen, contains('_PrescriptionReadinessPanel'));

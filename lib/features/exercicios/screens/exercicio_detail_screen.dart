@@ -15,6 +15,7 @@ import '../providers/exercicios_provider.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_conversion.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_form_sheet.dart';

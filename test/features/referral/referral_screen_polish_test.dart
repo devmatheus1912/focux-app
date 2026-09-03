@@ -19,7 +19,9 @@ void main() {
     expect(screen, contains('SkeletonList'));
     expect(screen, contains('RefreshIndicator'));
     expect(screen, contains('FxHubFreshness.fromFetchedAt'));
-    expect(screen, contains('FxSettingsGroup'));
+    expect(screen, contains('OperationalMetricTile'));
+    expect(screen, contains('FxLiquidPrimaryButton'));
+    expect(screen, isNot(contains('FxSettingsGroup')));
     expect(screen, contains('copySensitiveToClipboard'));
     expect(screen, contains('referral_link_shared'));
     expect(screen, isNot(contains("props: {'codigo'")));

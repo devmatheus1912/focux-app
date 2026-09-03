@@ -8,6 +8,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/fx_settings_layout.dart';
+import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/clipboard_sensitive.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
@@ -16,9 +17,10 @@ import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
-import '../../../core/widgets/fx_settings_group.dart';
-import '../../../core/widgets/fx_settings_tile.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/operational_metric_tile.dart';
+import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../data/convite_repository.dart';
 import '../providers/convite_provider.dart';
@@ -215,91 +217,94 @@ class _ConvitesScreenState extends ConsumerState<ConvitesScreen> {
               message: _error!,
               onRetry: _load,
             )
-            : RefreshIndicator(
-              color: primary,
-              onRefresh: _load,
-              child: ListView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.fromLTRB(
-                  FxSettingsLayout.pageInset,
-                  8,
-                  FxSettingsLayout.pageInset,
-                  110,
+            : Column(
+              children: [
+                Expanded(
+                  child: RefreshIndicator(
+                    color: primary,
+                    onRefresh: _load,
+                    child: ListView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: const EdgeInsets.fromLTRB(
+                        FxSettingsLayout.pageInset,
+                        TokensStrip.s4,
+                        FxSettingsLayout.pageInset,
+                        TokensStrip.s4,
+                      ),
+                      children: [
+                        if (!ativo)
+                          SizedBox(
+                            height: 280,
+                            child: FxEmptyState(
+                              icon: 'users',
+                              title: 'Nenhum convite ativo',
+                              subtitle:
+                                  'Gere um link de um uso. O aluno cria a conta e troca a senha no primeiro acesso.',
+                            ),
+                          )
+                        else ...[
+                          OperationalMetricTile(
+                            label: 'Link vigente',
+                            value: conviteRemainingLabel(
+                              _convite!.expiraEm,
+                              DateTime.now(),
+                            ),
+                            hint: 'Um uso. Some da área de transferência em 1 min.',
+                            color: primary,
+                            isDark: isDark,
+                          ),
+                          const SizedBox(height: TokensStrip.s4),
+                          Wrap(
+                            spacing: TokensStrip.s2,
+                            runSpacing: TokensStrip.s2,
+                            children: [
+                              DashboardHomeActionChip(
+                                label: 'Copiar',
+                                accent: primary,
+                                isDark: isDark,
+                                onPressed: _copiar,
+                              ),
+                              DashboardHomeActionChip(
+                                label: 'WhatsApp',
+                                accent: primary,
+                                isDark: isDark,
+                                onPressed: _compartilharWhatsApp,
+                              ),
+                            ],
+                          ),
+                        ],
+                        if (_error != null) ...[
+                          const SizedBox(height: TokensStrip.s4),
+                          FxErrorState(
+                            chromeOnDark: isDark,
+                            primary: primary,
+                            title: 'Não gerou',
+                            message: _error!,
+                            onRetry: _gerar,
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
                 ),
-                children: [
-                  if (!ativo) ...[
-                    SizedBox(
-                      height: 280,
-                      child: FxEmptyState(
-                        icon: 'users',
-                        title: 'Nenhum convite ativo',
-                        subtitle:
-                            'Gere um link de um uso. O aluno cria a conta e troca a senha no primeiro acesso.',
-                        action: FxEmptyAction(
-                          label: _generating ? 'Gerando…' : 'Gerar link',
-                          onTap: _generating ? () {} : _gerar,
-                        ),
-                      ),
+                SafeArea(
+                  top: false,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      FxSettingsLayout.pageInset,
+                      TokensStrip.s2,
+                      FxSettingsLayout.pageInset,
+                      TokensStrip.s3,
                     ),
-                    if (_error != null)
-                      FxErrorState(
-                        chromeOnDark: isDark,
-                        primary: primary,
-                        title: 'Não gerou',
-                        message: _error!,
-                        onRetry: _gerar,
-                      ),
-                  ] else ...[
-                    FxSettingsGroup(
-                      header: 'Link vigente',
-                      caption:
-                          'Um uso. Expira em ${conviteRemainingLabel(_convite!.expiraEm, DateTime.now())}.',
-                      children: [
-                        FxSettingsTile(
-                          fxIcon: 'route',
-                          label: 'Copiar link',
-                          value: '1 min',
-                          onTap: _copiar,
-                        ),
-                        FxSettingsTile(
-                          fxIcon: 'message-circle',
-                          label: 'Enviar no WhatsApp',
-                          value: '',
-                          showDivider: false,
-                          onTap: _compartilharWhatsApp,
-                        ),
-                      ],
+                    child: FxLiquidPrimaryButton(
+                      label: ativo ? 'Gerar novo link' : 'Gerar link',
+                      loading: _generating,
+                      loadingLabel: 'Gerando…',
+                      onPressed: _generating ? null : _gerar,
                     ),
-                    const SizedBox(height: FxSettingsLayout.groupGap),
-                    FxSettingsGroup(
-                      header: 'Outro convite',
-                      caption:
-                          'O anterior deixa de valer só quando expirar ou for usado.',
-                      children: [
-                        FxSettingsTile(
-                          fxIcon: 'plus',
-                          label: _generating
-                              ? 'Gerando…'
-                              : 'Gerar novo link',
-                          value: '',
-                          showDivider: false,
-                          onTap: _generating ? () {} : _gerar,
-                        ),
-                      ],
-                    ),
-                    if (_error != null) ...[
-                      const SizedBox(height: FxSettingsLayout.groupGap),
-                      FxErrorState(
-                        chromeOnDark: isDark,
-                        primary: primary,
-                        title: 'Não gerou',
-                        message: _error!,
-                        onRetry: _gerar,
-                      ),
-                    ],
-                  ],
-                ],
-              ),
+                  ),
+                ),
+              ],
             ),
       ),
     );

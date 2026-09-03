@@ -152,18 +152,6 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
             data:
                 (ex) => [
                   IconButton(
-                    tooltip: 'Editar exercício',
-                    onPressed: () async {
-                      final saved = await context.push<bool>(
-                        '/exercicios/${widget.exercicioId}/editar',
-                      );
-                      if (saved == true && context.mounted) {
-                        ref.invalidate(exercicioProvider(widget.exercicioId));
-                      }
-                    },
-                    icon: Icon(Icons.edit_outlined, color: mute),
-                  ),
-                  IconButton(
                     tooltip:
                         ex.favoritado
                             ? 'Remover dos favoritos'
@@ -195,73 +183,109 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
                   title: 'Não conseguimos carregar o exercício',
                 ),
             data:
-                (ex) => FxContentWidthLimiter(
-                  child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(
-                    FxSettingsLayout.pageInset,
-                    8,
-                    FxSettingsLayout.pageInset,
-                    32,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Text(
-                        ex.nome,
-                        style: Theme.of(context).textTheme.headlineSmall
-                            ?.copyWith(fontWeight: FontWeight.w900, color: ink),
-                      ),
-                      const SizedBox(height: 10),
-                      _ExerciseEssentials(exercicio: ex),
-                      const SizedBox(height: 14),
-                      _OwnVideoPanel(
-                        hasVideo: ex.videoUrl?.isNotEmpty == true,
-                        uploading: _uploadingVideo,
-                        onUpload:
-                            () => _pickAndUploadVideo(
-                              context,
-                              hasVideo: ex.videoUrl?.isNotEmpty == true,
-                            ),
-                        onRemove: () => _removeOwnVideo(context),
-                      ),
-                      if (ex.videoUrl?.isNotEmpty == true) ...[
-                        const SizedBox(height: 12),
-                        _VideoPlayer(url: ex.videoUrl!),
-                      ] else if (ex.gifUrl != null ||
-                          ex.thumbnailUrl != null) ...[
-                        const SizedBox(height: 12),
-                        _ExercisePreviewImage(
-                          url: ex.gifUrl ?? ex.thumbnailUrl!,
+                (ex) => Column(
+                  children: [
+                    Expanded(
+                      child: FxContentWidthLimiter(
+                        child: SingleChildScrollView(
+                          padding: const EdgeInsets.fromLTRB(
+                            FxSettingsLayout.pageInset,
+                            8,
+                            FxSettingsLayout.pageInset,
+                            32,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Text(
+                                ex.nome,
+                                style: Theme.of(context).textTheme.headlineSmall
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.w900,
+                                      color: ink,
+                                    ),
+                              ),
+                              const SizedBox(height: 10),
+                              _ExerciseEssentials(exercicio: ex),
+                              const SizedBox(height: 14),
+                              _OwnVideoPanel(
+                                hasVideo: ex.videoUrl?.isNotEmpty == true,
+                                uploading: _uploadingVideo,
+                                onUpload:
+                                    () => _pickAndUploadVideo(
+                                      context,
+                                      hasVideo:
+                                          ex.videoUrl?.isNotEmpty == true,
+                                    ),
+                                onRemove: () => _removeOwnVideo(context),
+                              ),
+                              if (ex.videoUrl?.isNotEmpty == true) ...[
+                                const SizedBox(height: 12),
+                                _VideoPlayer(url: ex.videoUrl!),
+                              ] else if (ex.gifUrl != null ||
+                                  ex.thumbnailUrl != null) ...[
+                                const SizedBox(height: 12),
+                                _ExercisePreviewImage(
+                                  url: ex.gifUrl ?? ex.thumbnailUrl!,
+                                ),
+                              ],
+                              if (ex.descricao?.trim().isNotEmpty == true) ...[
+                                const SizedBox(height: 14),
+                                _SimpleInfoCard(
+                                  icon: Icons.menu_book_rounded,
+                                  title: 'Como orientar',
+                                  text: ex.descricao!.trim(),
+                                ),
+                              ],
+                              if (ex.errosComuns?.trim().isNotEmpty == true ||
+                                  ex.contraindicacoes?.trim().isNotEmpty ==
+                                      true ||
+                                  ex.substitutos?.trim().isNotEmpty ==
+                                      true) ...[
+                                const SizedBox(height: 12),
+                                _GuidanceExpansion(exercicio: ex),
+                              ],
+                              const SizedBox(height: 12),
+                              _TechnicalDataExpansion(
+                                exercicio: ex,
+                                onChangeEditorial:
+                                    (status) => _updateEditorialReview(
+                                      context,
+                                      status,
+                                      ex.editorialNotes,
+                                    ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ],
-                      if (ex.descricao?.trim().isNotEmpty == true) ...[
-                        const SizedBox(height: 14),
-                        _SimpleInfoCard(
-                          icon: Icons.menu_book_rounded,
-                          title: 'Como orientar',
-                          text: ex.descricao!.trim(),
-                        ),
-                      ],
-                      if (ex.errosComuns?.trim().isNotEmpty == true ||
-                          ex.contraindicacoes?.trim().isNotEmpty == true ||
-                          ex.substitutos?.trim().isNotEmpty == true) ...[
-                        const SizedBox(height: 12),
-                        _GuidanceExpansion(exercicio: ex),
-                      ],
-                      const SizedBox(height: 12),
-                      _TechnicalDataExpansion(
-                        exercicio: ex,
-                        onChangeEditorial:
-                            (status) => _updateEditorialReview(
-                              context,
-                              status,
-                              ex.editorialNotes,
-                            ),
                       ),
-                    ],
-                  ),
+                    ),
+                    SafeArea(
+                      top: false,
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(
+                          FxSettingsLayout.pageInset,
+                          TokensStrip.s2,
+                          FxSettingsLayout.pageInset,
+                          TokensStrip.s3,
+                        ),
+                        child: FxLiquidPrimaryButton(
+                          label: 'Editar exercício',
+                          onPressed: () async {
+                            final saved = await context.push<bool>(
+                              '/exercicios/${widget.exercicioId}/editar',
+                            );
+                            if (saved == true && context.mounted) {
+                              ref.invalidate(
+                                exercicioProvider(widget.exercicioId),
+                              );
+                            }
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ),
             ),
           ),
         ),
