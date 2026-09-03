@@ -96,20 +96,33 @@ class AlertaDetalhe {
 class AlertasHomeBundle {
   final List<AlertaRisco> riscos;
   final AlertasConfiguracao configuracao;
+  final int page;
+  final int totalRiscos;
+  final bool hasNext;
 
-  const AlertasHomeBundle({required this.riscos, required this.configuracao});
+  const AlertasHomeBundle({
+    required this.riscos,
+    required this.configuracao,
+    this.page = 0,
+    this.totalRiscos = 0,
+    this.hasNext = false,
+  });
 
   factory AlertasHomeBundle.fromJson(Map<String, dynamic> j) {
     final configJson = j['configuracao'];
+    final riscos =
+        ((j['riscos'] as List?) ?? const [])
+            .map((e) => AlertaRisco.fromJson(e as Map<String, dynamic>))
+            .toList();
     return AlertasHomeBundle(
-      riscos:
-          ((j['riscos'] as List?) ?? const [])
-              .map((e) => AlertaRisco.fromJson(e as Map<String, dynamic>))
-              .toList(),
+      riscos: riscos,
       configuracao:
           configJson is Map<String, dynamic>
               ? AlertasConfiguracao.fromJson(configJson)
               : AlertasConfiguracao(diasSemTreino: 7, aderenciaMinima: 60),
+      page: (j['page'] as num?)?.toInt() ?? 0,
+      totalRiscos: (j['totalRiscos'] as num?)?.toInt() ?? riscos.length,
+      hasNext: j['hasNext'] == true,
     );
   }
 }
@@ -118,9 +131,14 @@ class AlertasRepository {
   final Dio _dio;
   AlertasRepository(ApiClient c) : _dio = c.dio;
 
+  static const pageSize = 20;
+
   /// BFF tipado — first paint da tela Alertas (riscos + configuração).
-  Future<AlertasHomeBundle> getHome() async {
-    final r = await _dio.get('/api/alertas/home');
+  Future<AlertasHomeBundle> getHome({int page = 0}) async {
+    final r = await _dio.get(
+      '/api/alertas/home',
+      queryParameters: {'page': page, 'size': pageSize},
+    );
     return AlertasHomeBundle.fromJson(r.data as Map<String, dynamic>);
   }
 

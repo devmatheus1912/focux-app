@@ -8,6 +8,7 @@ import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
@@ -25,19 +26,31 @@ import '../models/gamificacao_badge_tile.dart';
 import '../providers/gamificacao_provider.dart';
 import '../utils/gamificacao_display.dart';
 
-class GamificacaoScreen extends ConsumerWidget {
+class GamificacaoScreen extends ConsumerStatefulWidget {
   const GamificacaoScreen({super.key});
 
-  Future<void> _refresh(WidgetRef ref) async {
+  @override
+  ConsumerState<GamificacaoScreen> createState() => _GamificacaoScreenState();
+}
+
+class _GamificacaoScreenState extends ConsumerState<GamificacaoScreen> {
+  DateTime? _fetchedAt;
+
+  Future<void> _refresh() async {
     ref.invalidate(gamificacaoProvider);
     await ref.read(gamificacaoProvider.future);
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
     final async = ref.watch(gamificacaoProvider);
+    ref.listen(gamificacaoProvider, (_, next) {
+      if (next.hasValue) {
+        setState(() => _fetchedAt = DateTime.now());
+      }
+    });
 
     return fxScreenA11yScope(
       label: 'Minha evolução',
@@ -46,6 +59,7 @@ class GamificacaoScreen extends ConsumerWidget {
         constrainWidth: false,
         appBar: FxShellAppBar(
           title: 'Minha evolução',
+          subtitle: FxHubFreshness.fromFetchedAt(_fetchedAt),
           onBack: () => safePopOrGo(context, '/perfil/ferramentas'),
           actions: [
             FxHelpIconButton(
@@ -69,13 +83,13 @@ class GamificacaoScreen extends ConsumerWidget {
             chromeOnDark: isDark,
             primary: primary,
             message: friendlyError(e),
-            onRetry: () => _refresh(ref),
+            onRetry: _refresh,
           ),
           data: (data) {
             final empty = data.totalTreinos == 0 && data.badges.isEmpty;
             return RefreshIndicator(
               color: primary,
-              onRefresh: () => _refresh(ref),
+              onRefresh: _refresh,
               child: empty
                   ? ListView(
                     physics: const AlwaysScrollableScrollPhysics(),
