@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/analytics/analytics_service.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -10,9 +11,12 @@ import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_help.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
+import '../data/biblioteca_wizard_draft.dart';
 import '../data/enums.dart';
 import '../models/curated_biblioteca.dart';
 import '../providers/exercicios_provider.dart';
@@ -43,29 +47,63 @@ class _OnboardingBibliotecaWizardState
     Espaco.casaEquipada,
   };
 
+  @override
+  void initState() {
+    super.initState();
+    final draft = BibliotecaWizardDraftCache.get();
+    if (draft == null) return;
+    _step = draft.step >= bibliotecaWizardVisibleSteps ? 2 : draft.step;
+    _modalidades
+      ..clear()
+      ..addAll(draft.modalidades);
+    _espacos
+      ..clear()
+      ..addAll(draft.espacos);
+    if (_step >= 2) {
+      _previewFuture = ref
+          .read(exercicioRepositoryProvider)
+          .previewCuratedV2(modalidades: _modalidades, espacos: _espacos);
+    }
+  }
+
+  void _persistDraft() {
+    if (_importing) return;
+    BibliotecaWizardDraftCache.put(
+      BibliotecaWizardDraft(
+        step: _step >= bibliotecaWizardVisibleSteps ? 2 : _step,
+        modalidades: Set<Modalidade>.of(_modalidades),
+        espacos: Set<Espaco>.of(_espacos),
+      ),
+    );
+  }
+
   void _toggleModalidade(Modalidade value) {
     setState(() {
       _modalidades.contains(value)
           ? _modalidades.remove(value)
           : _modalidades.add(value);
     });
+    _persistDraft();
   }
 
   void _toggleEspaco(Espaco value) {
     setState(() {
       _espacos.contains(value) ? _espacos.remove(value) : _espacos.add(value);
     });
+    _persistDraft();
   }
 
   void _pular() {
     if (_importing) return;
     AnalyticsService.instance.track('wizard_skipped');
+    BibliotecaWizardDraftCache.clear();
     context.pop(false);
   }
 
   void _voltar() {
     if (_importing || _step <= 0) return;
     setState(() => _step -= 1);
+    _persistDraft();
   }
 
   void _next() {
@@ -85,13 +123,11 @@ class _OnboardingBibliotecaWizardState
       }
       _step += 1;
     });
+    _persistDraft();
   }
 
   Future<void> _importar() async {
-    setState(() {
-      _importing = true;
-      _step = 3;
-    });
+    setState(() => _importing = true);
     try {
       final result = await ref
           .read(exercicioRepositoryProvider)
@@ -106,6 +142,7 @@ class _OnboardingBibliotecaWizardState
           'importados': result.importados,
         },
       );
+      BibliotecaWizardDraftCache.clear();
       if (!mounted) return;
       FeedbackHelper.showSuccess(
         context,
@@ -114,10 +151,8 @@ class _OnboardingBibliotecaWizardState
       context.pop(true);
     } catch (e) {
       if (!mounted) return;
-      setState(() {
-        _importing = false;
-        _step = 2;
-      });
+      setState(() => _importing = false);
+      _persistDraft();
       FeedbackHelper.showError(context, friendlyError(e));
     }
   }
@@ -130,53 +165,100 @@ class _OnboardingBibliotecaWizardState
     });
   }
 
+  void _abrirAjuda() {
+    showFxHelpSheet(
+      context,
+      title: bibliotecaHelpTitle(),
+      subtitle: bibliotecaHelpSubtitle(),
+      tips: [
+        FxHelpTip('Etapas', bibliotecaHelpPassosBody(), icon: 'route'),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final chrome = ShellChrome.of(context);
     final canGoNext =
         (_step == 0 && _modalidades.isNotEmpty) ||
-        (_step == 1 && _espacos.isNotEmpty);
-
+        (_step == 1 && _espacos.isNotEmpty) ||
+        _step >= 2;
     return fxScreenA11yScope(
       label: 'Biblioteca curada',
       child: FxShellScaffold(
         useMesh: true,
         appBar: FxShellAppBar(
           title: 'Biblioteca curada',
-          subtitle: 'Monte sua base de exercícios em minutos',
-          onBack: _importing ? () {} : _pular,
+          subtitle: bibliotecaEtapaLabel(_step),
+          leadingWidth: 88,
+          leading: TextButton(
+            onPressed: _importing ? null : _pular,
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            child: Text(bibliotecaPularLabel()),
+          ),
           actions: [
-            Padding(
-              padding: const EdgeInsets.only(right: TokensStrip.s3),
-              child: Center(
-                child: Semantics(
-                  button: true,
-                  label: 'Pular',
-                  child: ShellHeaderIconButton(
-                    icon: 'x',
-                    tooltip: 'Pular',
-                    onTap: _pular,
-                  ),
-                ),
-              ),
+            FxHelpIconButton(
+              tooltip: bibliotecaHelpTitle(),
+              onTap: _abrirAjuda,
             ),
           ],
+        ),
+        bottomNavigationBar: SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(
+              FxSettingsLayout.pageInset,
+              TokensStrip.s2,
+              FxSettingsLayout.pageInset,
+              TokensStrip.s3,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (_step > 0)
+                  TextButton(
+                    onPressed: _importing ? null : _voltar,
+                    child: Text(bibliotecaVoltarLabel()),
+                  ),
+                FxLiquidPrimaryButton(
+                  label: bibliotecaContinueLabel(step: _step),
+                  loading: _importing,
+                  loadingLabel: 'Carregando…',
+                  onPressed:
+                      _importing
+                          ? null
+                          : _step < 2
+                          ? (canGoNext ? _next : null)
+                          : _importar,
+                ),
+              ],
+            ),
+          ),
         ),
         body: FxContentWidthLimiter(
           child: BibliotecaWizardPagePadding(
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                BibliotecaWizardProgress(step: _step),
+                Text(
+                  bibliotecaQuestionTitle(_step),
+                  style: FocuxHubTypography.sectionTitle(
+                    context,
+                    color: chrome.ink,
+                  ),
+                ),
+                const SizedBox(height: TokensStrip.s2),
+                Text(
+                  bibliotecaQuestionCaption(_step),
+                  style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+                ),
                 const SizedBox(height: FxSettingsLayout.headerToGroup),
                 Expanded(
                   child: SingleChildScrollView(child: _content()),
-                ),
-                BibliotecaWizardActions(
-                  step: _step,
-                  canContinue: canGoNext,
-                  importing: _importing,
-                  onBack: _voltar,
-                  onContinue: _next,
-                  onImport: _importar,
                 ),
               ],
             ),
@@ -214,7 +296,8 @@ class _OnboardingBibliotecaWizardState
             modalidades: _modalidades,
             espacos: _espacos,
             preview:
-                snapshot.data ?? const CuratedBibliotecaPreview(totalCandidatos: 0),
+                snapshot.data ??
+                const CuratedBibliotecaPreview(totalCandidatos: 0),
           );
         },
       ),

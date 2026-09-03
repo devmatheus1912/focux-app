@@ -4,47 +4,22 @@ import 'package:focux_app/features/onboarding/data/onboarding_repository.dart';
 import '../../support/screen_source_bundle.dart';
 
 void main() {
-  test('onboarding wizard cumpre contrato Tier S+', () {
+  test('onboarding wizard cumpre contrato S9', () {
     final screen = readScreenSourceBundle(
       'lib/features/onboarding/screens/onboarding_wizard_screen.dart',
     );
     expect(screen, anyOf(contains('fxScreenA11yScope'), contains('Semantics(')));
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(screen, contains('FxShellScaffold'));
-    expect(
-      screen,
-      anyOf(
-        contains('FxContentWidthLimiter'),
-        isNot(contains('constrainWidth: false')),
-      ),
-    );
-    expect(
-      screen,
-      anyOf(
-        contains('friendlyError'),
-        contains('DashboardErrorState'),
-        contains('FxEmptyState'),
-        contains('_erro'),
-        contains('_TrainingEmptyState'),
-        contains('ref.invalidate'),
-      ),
-    );
-    expect(
-      screen,
-      anyOf(
-        contains('FxLoading'),
-        contains('SkeletonLoader'),
-        contains('SkeletonList'),
-        contains('DashboardShimmer'),
-        contains('Shimmer'),
-        contains('IaCopilotInsightsLoading'),
-        contains('_loading'),
-      ),
-    );
+    expect(screen, contains('FxContentWidthLimiter'));
+    expect(screen, contains('friendlyError'));
+    expect(screen, contains('SkeletonList'));
     expect(screen, contains('RefreshIndicator'));
-    expect(screen, contains('DashboardSectionHeader'));
     expect(screen, contains('FxLiquidPrimaryButton'));
-    expect(screen, contains('FxHubFreshness'));
+    expect(screen, contains('bottomNavigationBar'));
+    expect(screen, contains('wizardEtapaLabel'));
+    expect(screen, contains('wizardFazerDepoisLabel'));
+    expect(screen, contains('FocuxHubTypography.sectionTitle'));
     expect(screen, contains('ProductEvents.setupWizardViewed'));
     expect(screen, contains('ProductEvents.setupWizardContinue'));
     expect(screen, contains('ProductEvents.setupWizardCompleted'));
@@ -52,46 +27,16 @@ void main() {
     expect(screen, contains('OnboardingWizardClientCache'));
     expect(screen, contains('_load(silent: true)'));
     expect(screen, contains('dismissForSession'));
-    expect(screen, contains("icon: 'x'"));
-    expect(screen, contains("tooltip: 'Fechar'"));
     expect(screen, contains('FxHelpIconButton'));
     expect(screen, contains('showFxConfirmSheet'));
     expect(screen, contains('wizardStickyLabel'));
     expect(screen, contains('_pedirConcluir'));
     expect(screen, isNot(contains('DashboardPrioritiesOverlay')));
     expect(screen, isNot(contains('FxSettingsGroup')));
-  });
-
-  test('wizard fold segue pele do Perfil', () {
-    final widgets = readScreenSourceBundle(
-      'lib/features/onboarding/widgets/setup_step_widgets.dart',
-    );
-    expect(widgets, contains('FxSettingsLayout.iconSize'));
-    expect(widgets, contains('FocuxHubTypography'));
-    expect(widgets, contains('minHeight: 4'));
-    expect(widgets, contains('maxLines: 1'));
-    expect(widgets, isNot(contains('maxLines: 2')));
-    expect(widgets, isNot(contains('Próximo:')));
-    expect(widgets, isNot(contains('isLead')));
-    expect(widgets, isNot(contains('SetupWizardCta')));
-    expect(widgets, isNot(contains('DashboardHomeActionChip')));
-    expect(widgets, isNot(contains('setupStepUsesMaterialIcon')));
-    expect(widgets, isNot(contains('SetupStepEntrance')));
-    expect(widgets, isNot(contains('AGORA')));
-    expect(widgets, isNot(contains('_SetupStepIconBadge')));
-    expect(widgets, isNot(contains('SetupCompletedStepsCollapse')));
-    expect(widgets, isNot(contains('DashboardHeroGridPainter')));
-    expect(widgets, isNot(contains('FxLiquidPrimaryButton')));
-  });
-
-  test('wizard lista usa inset compacto e tempo restante', () {
-    final screen = readScreenSourceBundle(
-      'lib/features/onboarding/screens/onboarding_wizard_screen.dart',
-    );
-    expect(screen, contains('FxSettingsLayout.headerToGroup'));
-    expect(screen, contains('remainingMinutes'));
-    expect(screen, isNot(contains('SetupStepEntrance')));
-    expect(screen, isNot(contains('nextActionLabel:')));
+    expect(screen, isNot(contains('SetupStepCard')));
+    expect(screen, isNot(contains('SetupProgressHeroCard')));
+    expect(screen, isNot(contains("icon: 'x'")));
+    expect(screen, isNot(contains('DashboardSectionHeader')));
   });
 
   test('remainingMinutes soma só os passos pendentes', () {
