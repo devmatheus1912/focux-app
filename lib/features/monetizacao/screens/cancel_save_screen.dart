@@ -10,9 +10,11 @@ import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_conversion.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_form_sheet.dart';
 import '../../../core/widgets/fx_input_deco.dart';
+import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -193,90 +195,91 @@ class _CancelSaveScreenState extends ConsumerState<CancelSaveScreen> {
 
     return fxScreenA11yScope(
       label: 'Antes de cancelar a assinatura',
-      child: FxShellScaffold(
-        useMesh: true,
-        appBar: FxShellAppBar(
-          title: 'Antes de cancelar…',
-          onBack:
-              () => context.canPop() ? context.pop() : context.go('/assinatura'),
-        ),
-        body: ListView(
-          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          padding: EdgeInsets.fromLTRB(
-            TokensStrip.s5,
-            TokensStrip.s2,
-            TokensStrip.s5,
-            TokensStrip.s6 + MediaQuery.viewInsetsOf(context).bottom,
+      child: FxKeyboardPopScope(
+        child: FxShellScaffold(
+          useMesh: true,
+          appBar: const FxShellAppBar(
+            title: 'Antes de cancelar…',
+            fallbackLocation: '/assinatura',
           ),
-          children: [
-            Text(
-              'Que pena que você quer ir embora.',
-              style: TokensStrip.h2(color: ink),
+          body: ListView(
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            padding: EdgeInsets.fromLTRB(
+              TokensStrip.s5,
+              TokensStrip.s2,
+              TokensStrip.s5,
+              TokensStrip.s6 + MediaQuery.viewInsetsOf(context).bottom,
             ),
-            const SizedBox(height: TokensStrip.s2),
-            Text(
-              'Selecione um motivo — mostramos uma alternativa personalizada aqui embaixo.',
-              style: TokensStrip.bodyMuted(
-                color: secondary,
-              ).copyWith(fontSize: TokensStrip.fontBodySm, height: 1.45),
-            ),
-            const SizedBox(height: TokensStrip.s5),
-            for (final m in _motivos) ...[
-              _MotivoTile(
-                motivo: m,
-                selected: _motivoSelecionado == m.codigo,
-                ink: ink,
-                mute: mute,
-                primary: primary,
-                isDark: isDark,
-                onTap: () => _selecionarMotivo(m.codigo),
+            children: [
+              Text(
+                'Que pena que você quer ir embora.',
+                style: TokensStrip.h2(color: ink),
               ),
               const SizedBox(height: TokensStrip.s2),
-            ],
-            const SizedBox(height: TokensStrip.s2),
-            AnimatedSwitcher(
-              duration:
-                  TokensStrip.prefersReducedMotion(context)
-                      ? Duration.zero
-                      : const Duration(milliseconds: 220),
-              switchInCurve: Curves.easeOutCubic,
-              switchOutCurve: Curves.easeInCubic,
-              child:
-                  _carregandoOferta
-                      ? const Padding(
-                        key: ValueKey('loading'),
-                        padding: EdgeInsets.symmetric(vertical: 8),
-                        child: SkeletonList(count: 3),
-                      )
-                      : _erroOferta != null
-                      ? Padding(
-                        key: const ValueKey('error'),
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        child: FxErrorState(
-                          chromeOnDark: isDark,
+              Text(
+                'Selecione um motivo — mostramos uma alternativa personalizada aqui embaixo.',
+                style: TokensStrip.bodyMuted(
+                  color: secondary,
+                ).copyWith(fontSize: TokensStrip.fontBodySm, height: 1.45),
+              ),
+              const SizedBox(height: TokensStrip.s5),
+              for (final m in _motivos) ...[
+                _MotivoTile(
+                  motivo: m,
+                  selected: _motivoSelecionado == m.codigo,
+                  ink: ink,
+                  mute: mute,
+                  primary: primary,
+                  isDark: isDark,
+                  onTap: () => _selecionarMotivo(m.codigo),
+                ),
+                const SizedBox(height: TokensStrip.s2),
+              ],
+              const SizedBox(height: TokensStrip.s2),
+              AnimatedSwitcher(
+                duration:
+                    TokensStrip.prefersReducedMotion(context)
+                        ? Duration.zero
+                        : const Duration(milliseconds: 220),
+                switchInCurve: Curves.easeOutCubic,
+                switchOutCurve: Curves.easeInCubic,
+                child:
+                    _carregandoOferta
+                        ? const Padding(
+                          key: ValueKey('loading'),
+                          padding: EdgeInsets.symmetric(vertical: 8),
+                          child: SkeletonList(count: 3),
+                        )
+                        : _erroOferta != null
+                        ? Padding(
+                          key: const ValueKey('error'),
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          child: FxErrorState(
+                            chromeOnDark: isDark,
+                            primary: primary,
+                            message: _erroOferta!,
+                            title: 'Alternativa indisponível',
+                            onRetry:
+                                () => _selecionarMotivo(_motivoSelecionado!),
+                          ),
+                        )
+                        : _oferta != null
+                        ? _OfertaCard(
+                          key: ValueKey(_oferta!.tipo),
+                          oferta: _oferta!,
+                          enviando: _enviando,
+                          ink: ink,
+                          mute: mute,
                           primary: primary,
-                          message: _erroOferta!,
-                          title: 'Alternativa indisponível',
-                          onRetry:
-                              () => _selecionarMotivo(_motivoSelecionado!),
-                        ),
-                      )
-                      : _oferta != null
-                      ? _OfertaCard(
-                        key: ValueKey(_oferta!.tipo),
-                        oferta: _oferta!,
-                        enviando: _enviando,
-                        ink: ink,
-                        mute: mute,
-                        primary: primary,
-                        isDark: isDark,
-                        onAceitar: () => _responder(true),
-                        onRecusar: () => _responder(false),
-                        onFeedback: (txt) => _feedback = txt,
-                      )
-                      : const SizedBox.shrink(key: ValueKey('empty')),
-            ),
-          ],
+                          isDark: isDark,
+                          onAceitar: () => _responder(true),
+                          onRecusar: () => _responder(false),
+                          onFeedback: (txt) => _feedback = txt,
+                        )
+                        : const SizedBox.shrink(key: ValueKey('empty')),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -452,6 +455,7 @@ class _OfertaCard extends StatelessWidget {
           TextField(
             maxLines: 3,
             maxLength: 2000,
+            onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
             decoration: FxInputDeco.build(
               context,
               'Feedback (opcional)',
@@ -472,19 +476,11 @@ class _OfertaCard extends StatelessWidget {
             onPressed: enviando ? null : onAceitar,
           ),
           const SizedBox(height: 10),
-          Center(
-            child: TextButton(
-              onPressed: enviando ? null : onRecusar,
-              style: TextButton.styleFrom(minimumSize: const Size(44, 44)),
-              child: Text(
-                'Cancelar mesmo assim',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: primary,
-                ),
-              ),
-            ),
+          FxConversionTextLink(
+            text: '',
+            actionText: 'Cancelar mesmo assim',
+            onTap: enviando ? null : onRecusar,
+            actionColor: primary,
           ),
         ],
       ),

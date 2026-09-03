@@ -8,6 +8,12 @@ void main() {
     expect(screen, anyOf(contains('fxScreenA11yScope'), contains('Semantics(')));
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(screen, contains('FxShellScaffold'));
+    expect(screen, contains("fallbackLocation: '/assinatura'"));
+    expect(screen, contains('FxKeyboardPopScope'));
+    expect(screen, contains('onTapOutside'));
+    expect(screen, contains('FxConversionTextLink'));
+    expect(screen, contains('keyboardDismissBehavior'));
+    expect(screen, isNot(contains('context.pop()')));
     expect(screen, anyOf(contains('FxContentWidthLimiter'), isNot(contains('constrainWidth: false'))));
   });
 }
