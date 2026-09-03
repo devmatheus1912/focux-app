@@ -42,8 +42,8 @@ void main() {
       ),
     );
     expect(screen, contains('RefreshIndicator'));
-    expect(screen, contains('FxSettingsGroup'));
-    expect(screen, contains('DashboardPrioritiesOverlay'));
+    expect(screen, contains('DashboardSectionHeader'));
+    expect(screen, contains('FxLiquidPrimaryButton'));
     expect(screen, contains('FxHubFreshness'));
     expect(screen, contains('ProductEvents.setupWizardViewed'));
     expect(screen, contains('ProductEvents.setupWizardContinue'));
@@ -58,7 +58,8 @@ void main() {
     expect(screen, contains('showFxConfirmSheet'));
     expect(screen, contains('wizardStickyLabel'));
     expect(screen, contains('_pedirConcluir'));
-    expect(screen, isNot(contains('FxLiquidPrimaryButton')));
+    expect(screen, isNot(contains('DashboardPrioritiesOverlay')));
+    expect(screen, isNot(contains('FxSettingsGroup')));
   });
 
   test('wizard fold segue pele do Perfil', () {

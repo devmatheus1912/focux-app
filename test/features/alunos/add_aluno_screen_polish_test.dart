@@ -18,12 +18,13 @@ void main() {
     expect(senha, contains('copySensitiveToClipboard'));
     expect(senha, isNot(contains('FxLiquidPrimaryButton')));
     expect(screen, contains('Outro objetivo'));
-    expect(screen, contains('ShellHeaderIconButton'));
-    expect(screen, contains("icon: 'circle-check'"));
+    expect(screen, isNot(contains('ShellHeaderIconButton')));
+    expect(screen, isNot(contains("icon: 'circle-check'")));
     expect(screen, contains('showFxConfirmSheet'));
     expect(screen, contains('FxContentWidthLimiter'));
-    expect(screen, isNot(contains('FxLiquidPrimaryButton')));
-    expect(screen, isNot(contains('bottomNavigationBar')));
+    expect(screen, contains('FxLiquidPrimaryButton'));
+    expect(screen, contains('bottomNavigationBar'));
+    expect(screen, contains("child: const Text('Cancelar')"));
     expect(screen, isNot(contains('DashboardHomeActionChip')));
     expect(screen, contains('enabled: _canSubmit && !_loading'));
     expect(screen, contains('FxErrorState'));

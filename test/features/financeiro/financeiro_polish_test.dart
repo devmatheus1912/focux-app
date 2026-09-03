@@ -35,6 +35,20 @@ void main() {
     expect(tab, isNot(contains('Clipboard.setData')));
   });
 
+  test('mensalidade detalhe busca por id sem extra', () {
+    final repo = readScreenSourceBundle(
+      'lib/features/financeiro/data/financeiro_repository.dart',
+    );
+    final router = readScreenSourceBundle(
+      'lib/core/router/app_router_chrome_routes.dart',
+    );
+    expect(repo, contains("get('/api/financeiro/mensalidades/\$id')"));
+    expect(repo, contains('Future<Mensalidade> buscar(int id)'));
+    expect(router, contains('FinanceiroMensalidadeDetailScreen('));
+    expect(router, contains('mensalidadeId: id'));
+    expect(router, isNot(contains("extra is! Mensalidade")));
+  });
+
   test('mensalidade detalhe é S3 com sticky transacional', () {
     final detail = readScreenSourceBundle(
       'lib/features/financeiro/screens/financeiro_mensalidade_detail_screen.dart',

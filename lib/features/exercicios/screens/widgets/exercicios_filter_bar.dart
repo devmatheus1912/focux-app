@@ -4,9 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../../core/theme/fx_settings_layout.dart';
-import '../../../../core/widgets/fx_settings_group.dart';
-import '../../../../core/widgets/fx_settings_tile.dart';
-import '../../../alunos/widgets/aluno_inset_form_field.dart';
+import '../../../../core/theme/shell_chrome.dart';
+import '../../../../core/theme/tokens_strip.dart';
+import '../../../../core/widgets/fx_icon.dart';
+import '../../../../core/widgets/fx_input_deco.dart';
+import '../../../../core/widgets/fx_toggle_chip.dart';
 import '../../models/exercicios_ui_filter.dart';
 import '../../utils/exercicios_filter_display.dart';
 import 'exercicios_filter_sheet.dart';
@@ -80,6 +82,10 @@ class _ExerciciosFilterBarState extends State<ExerciciosFilterBar> {
 
   @override
   Widget build(BuildContext context) {
+    final chrome = ShellChrome.of(context);
+    final primary = Theme.of(context).colorScheme.primary;
+    final mute = chrome.mute;
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         FxSettingsLayout.pageInset,
@@ -88,35 +94,58 @@ class _ExerciciosFilterBarState extends State<ExerciciosFilterBar> {
         FxSettingsLayout.groupGap,
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          FxSettingsGroup(
-            children: [
-              AlunoInsetFormField(
-                controller: _ctrl,
-                label: exerciciosSearchLabel(),
-                hint: exerciciosSearchHint(),
-                icon: Icons.search,
-                showDivider: false,
+          TextField(
+            controller: _ctrl,
+            decoration: InputDecoration(
+              hintText: exerciciosSearchHint(),
+              hintStyle: TextStyle(
+                color: mute,
+                fontSize: 13.5,
+                fontWeight: FontWeight.w600,
               ),
-            ],
+              prefixIcon: Padding(
+                padding: const EdgeInsets.all(12),
+                child: FxIcon(name: 'search', size: 18, color: mute),
+              ),
+              filled: true,
+              fillColor: chrome.cardFill,
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 12,
+              ),
+              border: FxInputDeco.outlineBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide(color: chrome.line),
+              ),
+              enabledBorder: FxInputDeco.outlineBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide(color: chrome.line),
+              ),
+              focusedBorder: FxInputDeco.outlineBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide(color: primary, width: 1.6),
+              ),
+              isDense: true,
+            ),
           ),
-          const SizedBox(height: FxSettingsLayout.headerToGroup),
-          FxSettingsGroup(
+          const SizedBox(height: TokensStrip.s3),
+          Wrap(
+            spacing: TokensStrip.s2,
+            runSpacing: TokensStrip.s2,
             children: [
-              FxSettingsTile(
-                fxIcon: 'target',
+              FxToggleChip(
                 label: exerciciosFiltrosHeader(),
-                value: exerciciosFilterSummary(widget.filter),
-                highlight: widget.filter.hasFacet,
-                showDivider: widget.filter.hasActive,
+                selected: widget.filter.hasFacet,
+                isDark: chrome.isDark,
                 onTap: _openFilters,
               ),
               if (widget.filter.hasActive)
-                FxSettingsTile(
-                  fxIcon: 'x',
+                FxToggleChip(
                   label: exerciciosLimparFiltros(),
-                  value: '',
-                  showDivider: false,
+                  selected: false,
+                  isDark: chrome.isDark,
                   onTap: () {
                     _debounce?.cancel();
                     _ctrl.clear();

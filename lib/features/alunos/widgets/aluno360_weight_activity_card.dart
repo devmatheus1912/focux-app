@@ -5,9 +5,10 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_loading.dart';
-import '../../../core/widgets/fx_settings_group.dart';
-import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_sparkline.dart';
+import '../../../core/widgets/operational_metric_tile.dart';
+import '../../dashboard/widgets/dashboard_home_action_chip.dart';
+import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../constants/aluno_360_layout.dart';
 import '../data/aluno_repository.dart';
 import '../providers/aluno_detail_providers.dart';
@@ -48,30 +49,38 @@ class Aluno360WeightActivityCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final pesoHistoricoAsync = ref.watch(alunoPesoHistoricoProvider(alunoId));
     final primary = Theme.of(context).colorScheme.primary;
-    final trendColor = primary;
     final showRadarHint = hasRadarP0 && !suppressRadarHint && aluno.peso == null;
 
     return Semantics(
       container: true,
       label: 'Peso e tendência corporal',
-      child: FxSettingsGroup(
-        header: 'Peso · tendência',
-        helpTooltip: 'Ajuda sobre peso e tendência',
-        onHelpTap: () => showAluno360PesoHelpSheet(context),
-        accent: primary,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          FxSettingsTile(
-            icon: Icons.monitor_weight_outlined,
-            label: 'Peso atual',
-            subtitle:
-                showRadarHint ? 'Mapa corporal pendente no radar' : null,
-            value:
-                aluno.peso == null
-                    ? '—'
-                    : '${aluno.peso!.toStringAsFixed(1)} kg',
-            numeric: aluno.peso != null,
-            onTap: () => _openEvolucao(context),
+          DashboardSectionHeader(
+            title: 'Peso · tendência',
+            actionLabel: 'Ajuda',
+            onAction: () => showAluno360PesoHelpSheet(context),
           ),
+          const SizedBox(height: TokensStrip.s3),
+          InkWell(
+            onTap: () => _openEvolucao(context),
+            borderRadius: BorderRadius.circular(12),
+            child: OperationalMetricTile(
+              label: 'Peso atual',
+              value:
+                  aluno.peso == null
+                      ? '—'
+                      : '${aluno.peso!.toStringAsFixed(1)} kg',
+              hint:
+                  showRadarHint
+                      ? 'Mapa corporal pendente no radar'
+                      : 'Toque para abrir evolução',
+              color: primary,
+              isDark: isDark,
+            ),
+          ),
+          const SizedBox(height: TokensStrip.s2),
           pesoHistoricoAsync.when(
             loading:
                 () => Padding(
@@ -83,12 +92,14 @@ class Aluno360WeightActivityCard extends ConsumerWidget {
                   ),
                 ),
             error:
-                (_, __) => FxSettingsTile(
-                  icon: Icons.history_rounded,
-                  label: 'Histórico de medições',
-                  subtitle: 'Não foi possível carregar agora',
-                  value: '',
-                  onTap: () => _openEvolucao(context),
+                (_, __) => Align(
+                  alignment: Alignment.centerLeft,
+                  child: DashboardHomeActionChip(
+                    label: 'Tentar histórico',
+                    accent: primary,
+                    isDark: isDark,
+                    onPressed: () => _openEvolucao(context),
+                  ),
                 ),
             data: (series) {
               final weightSeries = resolveWeightSeriesForAluno(
@@ -96,13 +107,14 @@ class Aluno360WeightActivityCard extends ConsumerWidget {
                 aluno.peso,
               );
               if (weightSeries.isEmpty) {
-                return FxSettingsTile(
-                  icon: Icons.add_chart_outlined,
-                  label: 'Registrar primeira medida',
-                  subtitle: 'Abrir evolução corporal',
-                  value: '',
-                  showDivider: false,
-                  onTap: () => _openEvolucao(context),
+                return Align(
+                  alignment: Alignment.centerLeft,
+                  child: DashboardHomeActionChip(
+                    label: 'Registrar primeira medida',
+                    accent: primary,
+                    isDark: isDark,
+                    onPressed: () => _openEvolucao(context),
+                  ),
                 );
               }
               final delta =
@@ -112,33 +124,33 @@ class Aluno360WeightActivityCard extends ConsumerWidget {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(0, 4, 0, 8),
-                    child: Semantics(
-                      button: true,
-                      label: 'Abrir histórico de medições corporais',
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(14),
-                        onTap: () => _openEvolucao(context),
-                        child: Aluno360WeightTrendSparkline(
-                          values: weightSeries,
-                          deltaKg: delta,
-                          color: trendColor,
-                          trackColor: primary.withValues(
-                            alpha: isDark ? 0.18 : 0.12,
-                          ),
-                          isDark: isDark,
+                  Semantics(
+                    button: true,
+                    label: 'Abrir histórico de medições corporais',
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(14),
+                      onTap: () => _openEvolucao(context),
+                      child:               Aluno360WeightTrendSparkline(
+                        values: weightSeries,
+                        deltaKg: delta,
+                        color: primary,
+                        ink: ink,
+                        trackColor: primary.withValues(
+                          alpha: isDark ? 0.18 : 0.12,
                         ),
+                        isDark: isDark,
                       ),
                     ),
                   ),
-                  FxSettingsTile(
-                    icon: Icons.straighten_outlined,
-                    label: 'Ver radar e medidas',
-                    subtitle: 'Evolução corporal completa',
-                    value: '',
-                    showDivider: false,
-                    onTap: () => _openEvolucao(context),
+                  const SizedBox(height: TokensStrip.s2),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: DashboardHomeActionChip(
+                      label: 'Ver radar e medidas',
+                      accent: primary,
+                      isDark: isDark,
+                      onPressed: () => _openEvolucao(context),
+                    ),
                   ),
                 ],
               );
@@ -156,6 +168,7 @@ class Aluno360WeightTrendSparkline extends StatelessWidget {
     required this.values,
     required this.deltaKg,
     required this.color,
+    required this.ink,
     required this.trackColor,
     required this.isDark,
   });
@@ -163,6 +176,7 @@ class Aluno360WeightTrendSparkline extends StatelessWidget {
   final List<double> values;
   final double deltaKg;
   final Color color;
+  final Color ink;
   final Color trackColor;
   final bool isDark;
 
@@ -200,7 +214,7 @@ class Aluno360WeightTrendSparkline extends StatelessWidget {
                     'Últimas medições',
                     style: Aluno360Layout.captionStyle(
                       context,
-                    ).copyWith(color: mute, fontWeight: FontWeight.w600),
+                    ).copyWith(color: ink.withValues(alpha: 0.72), fontWeight: FontWeight.w600),
                   ),
                 ),
                 Text(

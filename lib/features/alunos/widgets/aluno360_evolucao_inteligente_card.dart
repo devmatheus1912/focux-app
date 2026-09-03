@@ -3,18 +3,19 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/utils/motion_preferences.dart';
 import '../../../core/widgets/fx_loading.dart';
-import '../../../core/widgets/fx_settings_group.dart';
-import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_sparkline.dart';
+import '../../../core/widgets/operational_metric_tile.dart';
+import '../../dashboard/widgets/dashboard_home_action_chip.dart';
+import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../constants/aluno_360_layout.dart';
 import '../data/aluno_repository.dart';
 import '../utils/aluno360_evolucao_inteligente_logic.dart';
 import 'aluno360_help_sheets.dart';
-import 'aluno360_inset_empty_actions.dart';
 import 'aluno_outreach_message_sheet.dart';
 
 class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
@@ -96,12 +97,15 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
           () => Semantics(
             container: true,
             label: 'Evolução inteligente, carregando',
-            child: FxSettingsGroup(
-              header: 'Evolução inteligente',
-              helpTooltip: 'Ajuda sobre evolução inteligente',
-              onHelpTap: () => showAluno360EvolucaoInteligenteHelpSheet(context),
-              accent: primary,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                DashboardSectionHeader(
+                  title: 'Evolução inteligente',
+                  actionLabel: 'Ajuda',
+                  onAction:
+                      () => showAluno360EvolucaoInteligenteHelpSheet(context),
+                ),
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   child: FxLoading.sectionShimmer(context, height: 160),
@@ -113,16 +117,24 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
           (e, _) => Semantics(
             container: true,
             label: 'Evolução inteligente indisponível',
-            child: FxSettingsGroup(
-              header: 'Evolução inteligente',
-              caption: friendlyError(
-                e,
-                fallback: 'Evolução inteligente indisponível.',
-              ),
-              helpTooltip: 'Ajuda sobre evolução inteligente',
-              onHelpTap: () => showAluno360EvolucaoInteligenteHelpSheet(context),
-              accent: primary,
-              children: const [SizedBox.shrink()],
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                DashboardSectionHeader(
+                  title: 'Evolução inteligente',
+                  actionLabel: 'Ajuda',
+                  onAction:
+                      () => showAluno360EvolucaoInteligenteHelpSheet(context),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  friendlyError(
+                    e,
+                    fallback: 'Evolução inteligente indisponível.',
+                  ),
+                  style: Aluno360Layout.metaStyle(context).copyWith(color: mute),
+                ),
+              ],
             ),
           ),
       data: (ev) {
@@ -139,20 +151,27 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
         return Semantics(
           container: true,
           label: 'Evolução inteligente, sinal ${sinalLabel(ev.sinal)}',
-          child: FxSettingsGroup(
-            header: 'Evolução inteligente',
-            caption:
-                isEmptySignal
-                    ? (timelineHasSignals
-                        ? '$firstName já aparece na linha do tempo. '
-                            'Peça um check-in para liberar volume e tendência.'
-                        : 'Peça um check-in a $firstName para começar '
-                            'a montar volume, tendência e próximos passos.')
-                    : null,
-            helpTooltip: 'Ajuda sobre evolução inteligente',
-            onHelpTap: () => showAluno360EvolucaoInteligenteHelpSheet(context),
-            accent: primary,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              DashboardSectionHeader(
+                title: 'Evolução inteligente',
+                actionLabel: 'Ajuda',
+                onAction:
+                    () => showAluno360EvolucaoInteligenteHelpSheet(context),
+              ),
+              if (isEmptySignal) ...[
+                const SizedBox(height: 4),
+                Text(
+                  timelineHasSignals
+                      ? '$firstName já aparece na linha do tempo. '
+                          'Peça um check-in para liberar volume e tendência.'
+                      : 'Peça um check-in a $firstName para começar '
+                          'a montar volume, tendência e próximos passos.',
+                  style: Aluno360Layout.metaStyle(context).copyWith(color: mute),
+                ),
+              ],
+              const SizedBox(height: TokensStrip.s3),
               if (refreshing) ...[
                 Padding(
                   padding: const EdgeInsets.only(top: 4, bottom: 8),
@@ -178,42 +197,47 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
                             key: const ValueKey('aluno360_evolucao_empty'),
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              ...aluno360InsetEmptyActionTiles([
-                                Aluno360InsetEmptyActionSpec(
-                                  icon: Icons.message_outlined,
-                                  label: 'Pedir check-in',
-                                  subtitle: 'Mensagem pronta para enviar',
-                                  highlight: true,
-                                  onTap: () => _openCheckinMessage(context),
-                                ),
-                                Aluno360InsetEmptyActionSpec(
-                                  icon: Icons.chat_bubble_outline,
-                                  label: 'Abrir chat',
-                                  onTap:
-                                      () => context.push(
-                                        '/alunos/$alunoId/chat',
-                                        extra: alunoNome,
-                                      ),
-                                ),
-                                if (!timelineHasSignals)
-                                  Aluno360InsetEmptyActionSpec(
-                                    icon: Icons.fitness_center_rounded,
-                                    label: 'Ver treinos',
-                                    onTap: () => _openTreinos(context),
+                              Wrap(
+                                spacing: TokensStrip.s2,
+                                runSpacing: TokensStrip.s2,
+                                children: [
+                                  DashboardHomeActionChip(
+                                    label: 'Pedir check-in',
+                                    accent: primary,
+                                    isDark: isDark,
+                                    onPressed:
+                                        () => _openCheckinMessage(context),
                                   ),
-                                if (hasRadarP0 && !timelineHasSignals)
-                                  Aluno360InsetEmptyActionSpec(
-                                    icon: Icons.radar_outlined,
-                                    accent: EagleTokens.warn,
-                                    label: 'Radar pede mapa corporal',
-                                    subtitle: 'Prioridade P0 na evolução corporal',
-                                    onTap:
+                                  DashboardHomeActionChip(
+                                    label: 'Abrir chat',
+                                    accent: primary,
+                                    isDark: isDark,
+                                    onPressed:
                                         () => context.push(
-                                          '/alunos/$alunoId/evolucao',
+                                          '/alunos/$alunoId/chat',
                                           extra: alunoNome,
                                         ),
                                   ),
-                              ]),
+                                  if (!timelineHasSignals)
+                                    DashboardHomeActionChip(
+                                      label: 'Ver treinos',
+                                      accent: primary,
+                                      isDark: isDark,
+                                      onPressed: () => _openTreinos(context),
+                                    ),
+                                  if (hasRadarP0 && !timelineHasSignals)
+                                    DashboardHomeActionChip(
+                                      label: 'Radar corporal',
+                                      accent: EagleTokens.warn,
+                                      isDark: isDark,
+                                      onPressed:
+                                          () => context.push(
+                                            '/alunos/$alunoId/evolucao',
+                                            extra: alunoNome,
+                                          ),
+                                    ),
+                                ],
+                              ),
                             ],
                           ),
                         )
@@ -222,13 +246,21 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              FxSettingsTile(
-                                icon: Icons.insights_outlined,
-                                accent: sigColor,
-                                label: 'Sinal de evolução',
-                                subtitle: ev.resumo,
-                                value: sinalLabel(ev.sinal),
+                              InkWell(
                                 onTap: () => _openTreinos(context),
+                                borderRadius: BorderRadius.circular(12),
+                                child: OperationalMetricTile(
+                                  label: 'Sinal de evolução',
+                                  value: sinalLabel(ev.sinal),
+                                  hint: ev.resumo,
+                                  color: sigColor,
+                                  isDark: isDark,
+                                  emphasis:
+                                      ev.sinal == 'QUEDA' ||
+                                              ev.sinal == 'PLATÔ'
+                                          ? OperationalMetricEmphasis.alert
+                                          : OperationalMetricEmphasis.normal,
+                                ),
                               ),
                               if (sparklineData.isNotEmpty) ...[
                                 Padding(
@@ -246,71 +278,77 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
                                   ),
                                 ),
                               ],
-                              FxSettingsTile(
-                                icon: Icons.bar_chart_rounded,
-                                label: 'Volume semanal',
-                                value: ev.volumeSemanal.toStringAsFixed(0),
-                                numeric: true,
+                              const SizedBox(height: TokensStrip.s2),
+                              InkWell(
                                 onTap: () => _openTreinos(context),
+                                borderRadius: BorderRadius.circular(12),
+                                child: OperationalMetricTile(
+                                  label: 'Volume semanal',
+                                  value: ev.volumeSemanal.toStringAsFixed(0),
+                                  hint: 'Carga da semana',
+                                  color: primary,
+                                  isDark: isDark,
+                                ),
                               ),
-                              FxSettingsTile(
-                                icon: Icons.calendar_month_outlined,
-                                label: 'Volume mensal',
-                                value: ev.volumeMensal.toStringAsFixed(0),
-                                numeric: true,
+                              const SizedBox(height: TokensStrip.s2),
+                              InkWell(
                                 onTap: () => _openTreinos(context),
+                                borderRadius: BorderRadius.circular(12),
+                                child: OperationalMetricTile(
+                                  label: 'Volume mensal',
+                                  value: ev.volumeMensal.toStringAsFixed(0),
+                                  hint: 'Carga do mês',
+                                  color: primary,
+                                  isDark: isDark,
+                                ),
                               ),
-                              if (ev.tendenciaVolumePct != null)
-                                FxSettingsTile(
-                                  icon: Icons.trending_up_rounded,
-                                  accent:
-                                      ev.tendenciaVolumePct! >= 0
-                                          ? EagleTokens.good
-                                          : EagleTokens.bad,
-                                  label: 'Tendência de volume',
-                                  value:
-                                      '${ev.tendenciaVolumePct! > 0 ? '+' : ''}${ev.tendenciaVolumePct}%',
-                                  numeric: true,
+                              if (ev.tendenciaVolumePct != null) ...[
+                                const SizedBox(height: TokensStrip.s2),
+                                InkWell(
                                   onTap: () => _openTreinos(context),
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: OperationalMetricTile(
+                                    label: 'Tendência de volume',
+                                    value:
+                                        '${ev.tendenciaVolumePct! > 0 ? '+' : ''}${ev.tendenciaVolumePct}%',
+                                    hint: 'Variação recente',
+                                    color:
+                                        ev.tendenciaVolumePct! >= 0
+                                            ? EagleTokens.good
+                                            : EagleTokens.bad,
+                                    isDark: isDark,
+                                  ),
                                 ),
-                              if (ev.ultimoPrExercicio != null &&
-                                  ev.ultimoPrExercicio!.isNotEmpty)
-                                FxSettingsTile(
-                                  icon: Icons.emoji_events_outlined,
-                                  accent: EagleTokens.good,
-                                  label:
-                                      ev.ultimoPrLabel != null &&
-                                              ev.ultimoPrLabel!.isNotEmpty
-                                          ? 'Recorde · ${ev.ultimoPrLabel}'
-                                          : 'Recorde recente',
-                                  subtitle: ev.ultimoPrExercicio,
-                                  value: '',
-                                  onTap: () => _openTreinos(context),
+                              ],
+                              if (ev.proximaAcao.trim().isNotEmpty) ...[
+                                const SizedBox(height: TokensStrip.s3),
+                                Text(
+                                  ev.proximaAcao,
+                                  style: Aluno360Layout.metaStyle(context)
+                                      .copyWith(color: mute),
                                 ),
-                              FxSettingsTile(
-                                icon: Icons.flag_outlined,
-                                label: 'Próxima ação',
-                                subtitle: ev.proximaAcao,
-                                value: '',
-                                onTap: () => _openTreinos(context),
+                              ],
+                              const SizedBox(height: TokensStrip.s3),
+                              Wrap(
+                                spacing: TokensStrip.s2,
+                                runSpacing: TokensStrip.s2,
+                                children: [
+                                  DashboardHomeActionChip(
+                                    label: 'Ajustar treino',
+                                    accent: primary,
+                                    isDark: isDark,
+                                    onPressed: () => _openTreinos(context),
+                                  ),
+                                  if (ev.sugerirCopiloto &&
+                                      onOpenCopilot != null)
+                                    DashboardHomeActionChip(
+                                      label: 'Abrir Copiloto',
+                                      accent: primary,
+                                      isDark: isDark,
+                                      onPressed: onOpenCopilot!,
+                                    ),
+                                ],
                               ),
-                              FxSettingsTile(
-                                icon: Icons.fitness_center_rounded,
-                                label: 'Ajustar treino',
-                                subtitle: 'Revisar carga e exercícios',
-                                value: '',
-                                onTap: () => _openTreinos(context),
-                              ),
-                              if (ev.sugerirCopiloto && onOpenCopilot != null)
-                                FxSettingsTile(
-                                  icon: Icons.auto_awesome,
-                                  label: 'Abrir Copiloto',
-                                  subtitle:
-                                      'Transforme a próxima ação em mensagem',
-                                  value: '',
-                                  showDivider: false,
-                                  onTap: onOpenCopilot!,
-                                ),
                             ],
                           ),
                         ),

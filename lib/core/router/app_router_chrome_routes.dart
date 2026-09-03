@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../features/alunos/data/aluno_repository.dart';
@@ -571,16 +572,29 @@ RouteBase buildChromeShellRoute() {
           ),
           GoRoute(
             path: '/financeiro/mensalidades/:id',
-            redirect:
-                (context, state) =>
-                    state.extra is Mensalidade ? null : '/financeiro',
-            pageBuilder:
-                (context, state) => fxTransitionPage(
+            pageBuilder: (context, state) {
+              final id = int.tryParse(state.pathParameters['id'] ?? '');
+              if (id == null) {
+                return fxTransitionPage(
                   state: state,
-                  child: FinanceiroMensalidadeDetailScreen(
-                    mensalidade: state.extra as Mensalidade,
-                  ),
+                  child: const SizedBox.shrink(),
+                );
+              }
+              return fxTransitionPage(
+                state: state,
+                child: FinanceiroMensalidadeDetailScreen(
+                  mensalidadeId: id,
+                  initial:
+                      state.extra is Mensalidade
+                          ? state.extra as Mensalidade
+                          : null,
                 ),
+              );
+            },
+            redirect: (context, state) {
+              final id = int.tryParse(state.pathParameters['id'] ?? '');
+              return id == null ? '/financeiro' : null;
+            },
           ),
 
           // Feed

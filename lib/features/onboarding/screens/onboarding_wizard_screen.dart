@@ -6,7 +6,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/analytics/analytics_service.dart';
-import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -18,8 +17,8 @@ import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
-import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -27,7 +26,7 @@ import '../../dashboard/providers/dashboard_provider.dart';
 import '../../dashboard/utils/dashboard_home_client_cache.dart';
 import '../../planos/data/plano_features_bff_cache.dart';
 import '../../dashboard/utils/dashboard_onboarding_logic.dart';
-import '../../dashboard/widgets/dashboard_command_center_sticky_header.dart';
+import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../data/onboarding_repository.dart';
 import '../data/onboarding_wizard_client_cache.dart';
 import '../utils/onboarding_wizard_display.dart';
@@ -199,7 +198,6 @@ class _OnboardingWizardScreenState
     final wizard = _wizard;
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
-    final accent = BrandPalette.softened(primary);
 
     return fxScreenA11yScope(
       label: 'Primeiros passos, configuração inicial',
@@ -285,20 +283,34 @@ class _OnboardingWizardScreenState
                             ),
                           ],
                         ),
-                        DashboardPrioritiesOverlay(
-                          isDark: chrome.isDark,
-                          primary: accent,
-                          label: wizardStickyLabel(
-                            allDone:
-                                wizard.allStepsDone || wizard.wizardCompleto,
+                        Align(
+                          alignment: Alignment.bottomCenter,
+                          child: SafeArea(
+                            top: false,
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(
+                                FxSettingsLayout.pageInset,
+                                TokensStrip.s2,
+                                FxSettingsLayout.pageInset,
+                                TokensStrip.s3,
+                              ),
+                              child: FxLiquidPrimaryButton(
+                                label: wizardStickyLabel(
+                                  allDone:
+                                      wizard.allStepsDone ||
+                                      wizard.wizardCompleto,
+                                ),
+                                onPressed:
+                                    wizard.allStepsDone ||
+                                            wizard.wizardCompleto
+                                        ? _pedirConcluir
+                                        : () => _abrirStep(
+                                          wizard.nextActionRoute,
+                                          fromChip: true,
+                                        ),
+                              ),
+                            ),
                           ),
-                          onTap:
-                              wizard.allStepsDone || wizard.wizardCompleto
-                                  ? _pedirConcluir
-                                  : () => _abrirStep(
-                                    wizard.nextActionRoute,
-                                    fromChip: true,
-                                  ),
                         ),
                       ],
                     ),
@@ -315,35 +327,27 @@ class _OnboardingWizardScreenState
     return [
       if (wizard.allStepsDone) const SetupAllDoneBanner(),
       if (pending.isNotEmpty)
-        FxSettingsGroup(
-          children: [
-            for (var i = 0; i < pending.length; i++)
-              SetupStepCard(
-                title: pending[i].title,
-                description: pending[i].description,
-                estimatedMinutes: pending[i].estimatedMinutes,
-                icon: pending[i].icon,
-                completed: false,
-                showDivider: i < pending.length - 1,
-                onTap: () => _abrirStep(pending[i].actionRoute),
-              ),
-          ],
-        ),
+        for (var i = 0; i < pending.length; i++)
+          SetupStepCard(
+            title: pending[i].title,
+            description: pending[i].description,
+            estimatedMinutes: pending[i].estimatedMinutes,
+            icon: pending[i].icon,
+            completed: false,
+            showDivider: i < pending.length - 1,
+            onTap: () => _abrirStep(pending[i].actionRoute),
+          ),
       if (completed.isNotEmpty) ...[
         if (pending.isNotEmpty)
           const SizedBox(height: FxSettingsLayout.groupGap),
-        FxSettingsGroup(
-          header: 'Concluídos',
-          children: [
-            for (var i = 0; i < completed.length; i++)
-              SetupStepCard(
-                title: completed[i].title,
-                icon: completed[i].icon,
-                completed: true,
-                showDivider: i < completed.length - 1,
-              ),
-          ],
-        ),
+        const DashboardSectionHeader(title: 'Concluídos'),
+        for (var i = 0; i < completed.length; i++)
+          SetupStepCard(
+            title: completed[i].title,
+            icon: completed[i].icon,
+            completed: true,
+            showDivider: i < completed.length - 1,
+          ),
       ],
     ];
   }

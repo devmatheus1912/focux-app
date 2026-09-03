@@ -19,6 +19,7 @@ Não serão tocados. Estão em produção e funcionam:
 |---|---|
 | `Page` do Spring (`content`, `number`, `size`, `totalElements`, `totalPages`, `last`) | `GET /api/exercicios/v2`, `GET /api/exercicios/picker` |
 | `mensalidades`, `page`, `size`, `hasMore` | `GET /api/financeiro/mensalidades` |
+| objeto (`id`, `alunoId`, `alunoNome`, `valor`, `status`…) | `GET /api/financeiro/mensalidades/{id}` |
 | `items`, `page`, `total`, `hasMore` | `GET /api/notificacoes` |
 
 O chat atual (`items`, `nextBeforeId`, `hasMore`) entra na mesma lista: legado,
