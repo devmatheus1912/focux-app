@@ -47,7 +47,7 @@ class _IaCopilotCreateTaskSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final dark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
-    final brand = dark ? BrandPalette.accent(primary) : primary;
+    final brand = BrandPalette.softened(primary);
     final ink = dark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final mute = dark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final line = dark ? EagleTokens.darkLine : TokensStrip.borderDefault;

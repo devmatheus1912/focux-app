@@ -74,7 +74,7 @@ extension IaCopilotScreenActions on _IaCopilotoScreenState {
                           vertical: 6,
                         ),
                         decoration: BoxDecoration(
-                          color: BrandPalette.soft(primary, dark: dark),
+                          color: primary.withValues(alpha: dark ? 0.16 : 0.10),
                           borderRadius: BorderRadius.circular(999),
                         ),
                         child: Text(
@@ -168,9 +168,8 @@ extension IaCopilotScreenActions on _IaCopilotoScreenState {
                                             color:
                                                 selected
                                                     ? primary
-                                                    : BrandPalette.soft(
-                                                      primary,
-                                                      dark: dark,
+                                                    : primary.withValues(
+                                                      alpha: dark ? 0.16 : 0.10,
                                                     ),
                                             shape: BoxShape.circle,
                                           ),
@@ -252,6 +251,7 @@ extension IaCopilotScreenActions on _IaCopilotoScreenState {
       _proximaAcao = null;
       _tarefaCriada = false;
       _tarefaPersistida = false;
+      _aplicando = false;
     });
   }
 
@@ -287,6 +287,7 @@ extension IaCopilotScreenActions on _IaCopilotoScreenState {
       _geracaoMs = 0;
       _tarefaCriada = false;
       _tarefaPersistida = false;
+      _aplicando = false;
     });
     final stopwatch = Stopwatch()..start();
     try {
@@ -434,78 +435,5 @@ extension IaCopilotScreenActions on _IaCopilotoScreenState {
       acaoInicial: acaoInicial,
       motivoInicial: motivoInicial,
     );
-  }
-
-  Future<void> _abrirMenu() async {
-    final dark = Theme.of(context).brightness == Brightness.dark;
-    final primary = Theme.of(context).colorScheme.primary;
-    final ink = dark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final mute = dark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-
-    final action = await showFxHomeSheet<String>(
-      context,
-      builder: (ctx) {
-        return FxHomeSheetSurface(
-          isDark: dark,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              FxHomeSheetHandle(isDark: dark),
-              SizedBox(height: TokensStrip.s4),
-              FxHomeSheetHeader(
-                isDark: dark,
-                title: 'Ações das recomendações',
-                subtitle: 'Atualize, troque o aluno ou limpe este resultado.',
-                leading: Icon(Icons.tune_outlined, color: primary, size: 18),
-              ),
-              SizedBox(height: TokensStrip.s4),
-              IaCopilotMenuAction(
-                icon: Icons.person_search_outlined,
-                title: 'Trocar aluno',
-                subtitle: 'Gera novas recomendações para outro aluno.',
-                ink: ink,
-                mute: mute,
-                onTap: () => Navigator.of(ctx).pop('trocar'),
-              ),
-              IaCopilotMenuAction(
-                icon: Icons.refresh_rounded,
-                title: 'Atualizar insights',
-                subtitle: 'Recalcula as recomendações para este aluno.',
-                ink: ink,
-                mute: mute,
-                onTap: () => Navigator.of(ctx).pop('atualizar'),
-              ),
-              IaCopilotMenuAction(
-                icon: Icons.cleaning_services_outlined,
-                title: 'Limpar resultado',
-                subtitle: 'Volta para o estado inicial do Copiloto.',
-                ink: ink,
-                mute: mute,
-                onTap: () => Navigator.of(ctx).pop('limpar'),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-
-    if (!mounted || action == null) return;
-    switch (action) {
-      case 'trocar':
-        await _selecionarAluno();
-        break;
-      case 'atualizar':
-        await _gerar();
-        break;
-      case 'limpar':
-        setState(() {
-          _gerado = false;
-          _proximaAcao = null;
-          _tarefaCriada = false;
-          _tarefaPersistida = false;
-          _erro = null;
-        });
-        break;
-    }
   }
 }

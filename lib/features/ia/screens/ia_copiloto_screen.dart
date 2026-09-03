@@ -35,9 +35,12 @@ import '../models/ia_copilot_proxima_acao.dart';
 import '../models/ia_copiloto_home.dart';
 import '../widgets/ia_copilot_insight_widgets.dart';
 import '../utils/ia_copiloto_display.dart';
+import '../../alunos/utils/aluno360_copilot_executar_logic.dart';
+import '../../alunos/widgets/aluno360_copilot_executar_confirm.dart';
 import 'package:focux_app/core/widgets/fx_home_sheet.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 part 'ia_copiloto_screen_actions.part.dart';
+part 'ia_copiloto_screen_apply.part.dart';
 part 'ia_copiloto_screen_state.part.dart';
 part 'ia_copiloto_screen_build.part.dart';
 

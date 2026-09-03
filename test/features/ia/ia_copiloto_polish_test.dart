@@ -50,7 +50,12 @@ void main() {
     expect(insightWidgets, contains('IaCopilotInsight'));
     expect(insightWidgets, contains('insight.detalhe'));
     expect(screen, isNot(contains('Ações do rascunho')));
-    expect(actionsPart, contains('Ações das recomendações'));
+    expect(screen, contains('Ações das recomendações'));
+    expect(screen, contains('showCopilotExecutarConfirmSheet'));
+    expect(screen, contains('BrandPalette.softened'));
+    expect(screen, isNot(contains('BrandPalette.soft(')));
+    expect(screen, isNot(contains('BrandPalette.accent')));
+    expect(screen, isNot(contains('BrandPalette.deep')));
     expect(actionsPart, contains('showIaCopilotCreateTaskSheet'));
     expect(screen, contains('showFxConfirmSheet'));
     expect(screen, contains('iaCopilotoGerarConfirmTitle'));
@@ -67,6 +72,8 @@ void main() {
       allOf(
         contains('FxLiquidPrimaryButton'),
         contains('iaCopilotoCriarTarefaLabel'),
+        contains('BrandPalette.softened'),
+        isNot(contains('BrandPalette.accent')),
         isNot(contains('FxSettingsTile')),
       ),
     );
