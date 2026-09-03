@@ -153,6 +153,7 @@ class _TemplateTile extends StatelessWidget {
       label: template.nome,
       subtitle: templateSplitTileSubtitle(template),
       value: '',
+      picker: true,
       showDivider: showDivider,
       onTap: onTap,
     );
