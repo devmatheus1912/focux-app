@@ -9,8 +9,16 @@ void main() {
     );
     expect(screen, contains('fxScreenA11yScope'));
     expect(screen, contains('FxShellScaffold'));
+    expect(screen, contains('constrainWidth: false'));
+    expect(screen, contains('FxContentWidthLimiter'));
+    expect(screen, contains("safePopOrGo(context, '/dashboard/personal')"));
     expect(screen, contains('FxHelpIconButton'));
+    expect(screen, contains('FxStripCard'));
+    expect(screen, contains('emphasize: true'));
     expect(screen, contains('FxSatelliteListTile'));
+    expect(screen, contains('take(3)'));
+    expect(screen, contains('Ver todos'));
+    expect(screen, contains('keyboardDismissBehavior'));
     expect(screen, isNot(contains('FxSettingsGroupedList')));
     expect(screen, contains('FxEmptyState'));
     expect(screen, contains('FxErrorState'));

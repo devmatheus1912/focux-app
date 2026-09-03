@@ -6,18 +6,23 @@ import '../../../core/analytics/analytics_service.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
+import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
+import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
-import '../../dashboard/widgets/dashboard_section_header.dart';
+import '../../../core/widgets/fx_strip_card.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../alunos/widgets/aluno_avatar.dart';
+import '../../dashboard/widgets/dashboard_home_action_chip.dart';
+import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../models/checkin_personal_home.dart';
 import '../providers/checkin_provider.dart';
 import '../widgets/checkin_personal_help_sheet.dart';
@@ -82,6 +87,7 @@ class _CheckinPersonalHubScreenState
       label: 'Check-ins',
       child: FxShellScaffold(
         useMesh: true,
+        constrainWidth: false,
         appBar: FxShellAppBar(
           title: 'Check-ins',
           subtitle: freshness,
@@ -112,12 +118,7 @@ class _CheckinPersonalHubScreenState
                 onRetry: () => ref.invalidate(checkinPersonalHomeProvider),
               ),
           data: (home) {
-            final rows = <_HubRow>[
-              for (final item in home.hoje) _HubRow(item: item, section: 'hoje'),
-              for (final item in home.semana)
-                _HubRow(item: item, section: 'semana'),
-            ];
-            if (rows.isEmpty) {
+            if (home.hoje.isEmpty && home.semana.isEmpty) {
               return FxEmptyState(
                 icon: 'dumbbell',
                 title: 'Nenhum check-in nesta semana',
@@ -126,7 +127,7 @@ class _CheckinPersonalHubScreenState
                     'A conta de hoje é a mesma do pulso da Home.',
                 action: FxEmptyAction(
                   label: 'Ver alunos',
-                  onTap: () => context.go('/alunos'),
+                  onTap: () => goPersonalShellTab(context, '/alunos'),
                 ),
               );
             }
@@ -139,62 +140,38 @@ class _CheckinPersonalHubScreenState
                 ref.invalidate(checkinPersonalHomeProvider);
                 await ref.read(checkinPersonalHomeProvider.future);
               },
-              child: ListView.builder(
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.fromLTRB(
-                  FxSettingsLayout.pageInset,
-                  TokensStrip.s3,
-                  FxSettingsLayout.pageInset,
-                  TokensStrip.s6,
-                ),
-                itemCount: rows.length,
-                itemBuilder: (context, i) {
-                  final row = rows[i];
-                  final showSection =
-                      i == 0 || rows[i - 1].section != row.section;
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      if (showSection && row.section == 'hoje')
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: TokensStrip.s2),
-                          child: DashboardSectionHeader(
-                            title: home.checkinsHoje == 1
+              child: FxContentWidthLimiter(
+                child: ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  keyboardDismissBehavior:
+                      ScrollViewKeyboardDismissBehavior.onDrag,
+                  padding: const EdgeInsets.fromLTRB(
+                    FxSettingsLayout.pageInset,
+                    TokensStrip.s3,
+                    FxSettingsLayout.pageInset,
+                    TokensStrip.s6,
+                  ),
+                  children: [
+                    _CheckinTodayCard(home: home, isDark: isDark),
+                    if (home.hoje.isNotEmpty) ...[
+                      const SizedBox(height: TokensStrip.s4),
+                      _CheckinSection(
+                        title:
+                            home.checkinsHoje == 1
                                 ? '1 check-in hoje'
                                 : '${home.checkinsHoje} check-ins hoje',
-                          ),
-                        ),
-                      if (showSection && row.section == 'semana')
-                        const Padding(
-                          padding: EdgeInsets.only(
-                            top: TokensStrip.s2,
-                            bottom: TokensStrip.s2,
-                          ),
-                          child: DashboardSectionHeader(title: 'Últimos 6 dias'),
-                        ),
-                      FxSatelliteListTile(
-                        title: row.item.alunoNome,
-                        subtitle: Text(row.item.treinoNome),
-                        leading: AlunoAvatar(
-                          name: row.item.alunoNome,
-                          photoUrl: row.item.fotoUrl,
-                          variant: AlunoAvatarVariant.strip,
-                        ),
-                        trailing: row.item.iniciadoEm == null
-                            ? null
-                            : Text(
-                              fxTimeAgo(row.item.iniciadoEm!),
-                              style: FocuxHubTypography.bodyMuted(
-                                color: fxScreenMute(context),
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                        onTap: () =>
-                            context.push('/alunos/${row.item.alunoId}'),
+                        items: home.hoje,
                       ),
                     ],
-                  );
-                },
+                    if (home.semana.isNotEmpty) ...[
+                      const SizedBox(height: TokensStrip.s4),
+                      _CheckinSection(
+                        title: 'Últimos 6 dias',
+                        items: home.semana,
+                      ),
+                    ],
+                  ],
+                ),
               ),
             );
           },
@@ -204,9 +181,141 @@ class _CheckinPersonalHubScreenState
   }
 }
 
-class _HubRow {
-  const _HubRow({required this.item, required this.section});
+class _CheckinTodayCard extends StatelessWidget {
+  const _CheckinTodayCard({required this.home, required this.isDark});
+
+  final CheckinPersonalHomeBundle home;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    final chrome = ShellChrome.forDark(isDark);
+    final count = home.checkinsHoje;
+    return FxStripCard(
+      emphasize: true,
+      semanticsLabel:
+          count == 1 ? '1 check-in hoje' : '$count check-ins hoje',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Hoje', style: FocuxHubTypography.chip(chrome.mute)),
+          const SizedBox(height: 6),
+          Text(
+            '$count',
+            style: FocuxHubTypography.kpi(
+              color: chrome.ink,
+              fontSize: FocuxHubTypography.metricLg,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            count == 0
+                ? 'Ninguém concluiu treino ainda'
+                : count == 1
+                ? 'Treino concluído'
+                : 'Treinos concluídos',
+            style: FocuxHubTypography.body(
+              color: chrome.ink,
+            ).copyWith(fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: TokensStrip.s3),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: DashboardHomeActionChip(
+              label: 'Ver alunos',
+              accent: Theme.of(context).colorScheme.primary,
+              isDark: isDark,
+              onPressed: () => goPersonalShellTab(context, '/alunos'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CheckinSection extends StatelessWidget {
+  const _CheckinSection({required this.title, required this.items});
+
+  final String title;
+  final List<CheckinPersonalItem> items;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        DashboardSectionHeader(
+          title: title,
+          actionLabel: items.length > 3 ? 'Ver todos' : null,
+          onAction:
+              items.length > 3
+                  ? () => _showCheckinCatalog(context, title: title, items: items)
+                  : null,
+        ),
+        const SizedBox(height: TokensStrip.s2),
+        for (final item in items.take(3)) _CheckinTile(item: item),
+      ],
+    );
+  }
+}
+
+class _CheckinTile extends StatelessWidget {
+  const _CheckinTile({required this.item});
 
   final CheckinPersonalItem item;
-  final String section;
+
+  @override
+  Widget build(BuildContext context) {
+    return FxSatelliteListTile(
+      title: item.alunoNome,
+      subtitle: Text(item.treinoNome),
+      leading: AlunoAvatar(
+        name: item.alunoNome,
+        photoUrl: item.fotoUrl,
+        variant: AlunoAvatarVariant.strip,
+      ),
+      trailing:
+          item.iniciadoEm == null
+              ? null
+              : Text(
+                fxTimeAgo(item.iniciadoEm!),
+                style: FocuxHubTypography.bodyMuted(
+                  color: fxScreenMute(context),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+      onTap: () => context.push('/alunos/${item.alunoId}'),
+    );
+  }
+}
+
+void _showCheckinCatalog(
+  BuildContext context, {
+  required String title,
+  required List<CheckinPersonalItem> items,
+}) {
+  showFxHomeSheet<void>(
+    context,
+    builder: (ctx) {
+      return FxHomeSheetSurface(
+        isDark: Theme.of(ctx).brightness == Brightness.dark,
+        child: ListView(
+          shrinkWrap: true,
+          children: [
+            FxHomeSheetHeader(
+              title: title,
+              subtitle: '${items.length} check-ins neste recorte.',
+              leading: Icon(
+                Icons.fitness_center,
+                size: 18,
+                color: Theme.of(ctx).colorScheme.primary,
+              ),
+            ),
+            for (final item in items) _CheckinTile(item: item),
+          ],
+        ),
+      );
+    },
+  );
 }

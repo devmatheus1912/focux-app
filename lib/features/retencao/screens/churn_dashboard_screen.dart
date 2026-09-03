@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -7,49 +6,27 @@ import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
+import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
-import '../../../core/utils/fx_utils.dart';
+import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
-import '../../../core/widgets/fx_motion.dart';
-import '../../../features/alunos/utils/alunos_list_utils.dart';
-import '../../../features/auth/providers/auth_provider.dart';
-import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_error_state.dart';
-import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/fx_help.dart';
+import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/fx_strip_card.dart';
 import '../../../core/widgets/skeleton_loader.dart';
+import '../../auth/providers/auth_provider.dart';
+import '../../dashboard/widgets/dashboard_home_action_chip.dart';
+import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../data/retencao_repository.dart';
+import '../utils/retencao_display.dart';
 
 final retencaoRepositoryProvider = Provider(
   (ref) => RetencaoRepository(ref.read(apiClientProvider)),
 );
-
-String _riscoLabel(String risco) => switch (risco.trim().toUpperCase()) {
-  'ALTO' => 'Risco alto',
-  'MEDIO' || 'MÉDIO' => 'Risco médio',
-  'BAIXO' => 'Saudável',
-  _ => risco,
-};
-
-int _riscoSortOrder(String risco) => switch (risco.trim().toUpperCase()) {
-  'ALTO' => 0,
-  'MEDIO' || 'MÉDIO' => 1,
-  'BAIXO' => 2,
-  _ => 3,
-};
-
-List<RetencaoAlunoScore> _sortedScores(List<RetencaoAlunoScore> scores) {
-  final copy = List<RetencaoAlunoScore>.from(scores);
-  copy.sort((a, b) {
-    final risk = _riscoSortOrder(
-      a.riscoChurn,
-    ).compareTo(_riscoSortOrder(b.riscoChurn));
-    if (risk != 0) return risk;
-    return b.scoreAtual.compareTo(a.scoreAtual);
-  });
-  return copy;
-}
 
 class ChurnDashboardScreen extends ConsumerStatefulWidget {
   const ChurnDashboardScreen({super.key});
@@ -95,36 +72,53 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final chrome = ShellChrome.of(context);
-    final isDark = chrome.isDark;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
-    final sorted = _sortedScores(_scores);
-    final alto =
-        _scores.where((s) => s.riscoChurn.toUpperCase() == 'ALTO').length;
-    final medio =
-        _scores.where((s) {
-          final r = s.riscoChurn.toUpperCase();
-          return r == 'MEDIO' || r == 'MÉDIO';
-        }).length;
-    final saudavel =
-        _scores.where((s) => s.riscoChurn.toUpperCase() == 'BAIXO').length;
+    final sorted = sortedRetencaoScores(_scores);
+    final counts = retencaoRiskCounts(_scores);
     final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
 
     return fxScreenA11yScope(
       label: 'Saúde da base',
       child: FxShellScaffold(
         useMesh: true,
+        constrainWidth: false,
         appBar: FxShellAppBar(
           title: 'Saúde da base',
           subtitle: freshnessLabel ?? 'Score de retenção por aluno',
           onBack: () => safePopOrGo(context, '/dashboard/personal'),
+          actions: [
+            FxHelpIconButton(
+              tooltip: 'Como usar a retenção',
+              onTap:
+                  () => showFxHelpSheet(
+                    context,
+                    title: 'Saúde da base',
+                    subtitle: 'Quem está em risco e o que fazer agora.',
+                    tips: const [
+                      FxHelpTip(
+                        'Risco alto',
+                        'O card do topo é quem precisa de contato hoje.',
+                      ),
+                      FxHelpTip(
+                        'Lista',
+                        'Os 3 primeiros já vêm ordenados por risco.',
+                      ),
+                      FxHelpTip(
+                        'Cálculo',
+                        'A rotina atualiza os scores aos domingos.',
+                      ),
+                    ],
+                  ),
+            ),
+          ],
         ),
         body:
             _loading
                 ? const SkeletonList(count: 6)
                 : _error != null
                 ? FxErrorState(
-                  chromeOnDark: chrome.isDark,
+                  chromeOnDark: isDark,
                   primary: primary,
                   message: _error!,
                   onRetry: _load,
@@ -136,68 +130,60 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
                       sorted.isEmpty
                           ? ListView(
                             physics: const AlwaysScrollableScrollPhysics(),
-                            children: const [
-                              SizedBox(height: 48),
+                            children: [
+                              const SizedBox(height: 48),
                               FxEmptyState(
                                 icon: 'activity',
                                 title: 'Scores em breve',
                                 subtitle:
                                     'A rotina calcula os scores aos domingos. '
                                     'Cadastre alunos e aguarde a primeira leitura.',
+                                action: FxEmptyAction(
+                                  label: 'Ver alunos',
+                                  onTap:
+                                      () => goPersonalShellTab(
+                                        context,
+                                        '/alunos',
+                                      ),
+                                ),
                               ),
                             ],
                           )
-                          : CustomScrollView(
-                            physics: const AlwaysScrollableScrollPhysics(),
-                            slivers: [
-                              SliverToBoxAdapter(
-                                child: Padding(
-                                  padding: const EdgeInsets.fromLTRB(
-                                    TokensStrip.s4,
-                                    8,
-                                    TokensStrip.s4,
-                                    14,
-                                  ),
-                                  child: _ChurnSummaryStrip(
-                                    alto: alto,
-                                    medio: medio,
-                                    saudavel: saudavel,
-                                    isDark: isDark,
-                                    primary: primary,
-                                  ),
-                                ),
+                          : FxContentWidthLimiter(
+                            child: ListView(
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              keyboardDismissBehavior:
+                                  ScrollViewKeyboardDismissBehavior.onDrag,
+                              padding: const EdgeInsets.fromLTRB(
+                                TokensStrip.s4,
+                                TokensStrip.s2,
+                                TokensStrip.s4,
+                                40,
                               ),
-                              SliverPadding(
-                                padding: const EdgeInsets.fromLTRB(
-                                  TokensStrip.s4,
-                                  0,
-                                  TokensStrip.s4,
-                                  24,
+                              children: [
+                                _RetencaoFocusCard(
+                                  counts: counts,
+                                  firstAlto: firstAltoRetencao(sorted),
+                                  isDark: isDark,
                                 ),
-                                sliver: SliverList.separated(
-                                  itemCount: sorted.length,
-                                  separatorBuilder:
-                                      (_, __) => const SizedBox(height: 10),
-                                  itemBuilder: (context, index) {
-                                    final score = sorted[index];
-                                    return FxStaggerItem(
-                                      index: index,
-                                      child: _ChurnScoreCard(
-                                        score: score,
-                                        isDark: isDark,
-                                        primary: primary,
-                                        onTap: () {
-                                          HapticFeedback.selectionClick();
-                                          context.push(
-                                            '/alunos/${score.alunoId}',
-                                          );
-                                        },
-                                      ),
-                                    );
-                                  },
+                                const SizedBox(height: TokensStrip.s4),
+                                DashboardSectionHeader(
+                                  title: 'Quem olhar agora',
+                                  actionLabel:
+                                      sorted.length > 3 ? 'Ver todos' : null,
+                                  onAction:
+                                      sorted.length > 3
+                                          ? () => _showRetencaoCatalog(
+                                            context,
+                                            items: sorted,
+                                          )
+                                          : null,
                                 ),
-                              ),
-                            ],
+                                const SizedBox(height: TokensStrip.s2),
+                                for (final score in sorted.take(3))
+                                  _RetencaoTile(score: score),
+                              ],
+                            ),
                           ),
                 ),
       ),
@@ -205,246 +191,126 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
   }
 }
 
-class _ChurnSummaryStrip extends StatelessWidget {
-  final int alto;
-  final int medio;
-  final int saudavel;
-  final bool isDark;
-  final Color primary;
-
-  const _ChurnSummaryStrip({
-    required this.alto,
-    required this.medio,
-    required this.saudavel,
+class _RetencaoFocusCard extends StatelessWidget {
+  const _RetencaoFocusCard({
+    required this.counts,
+    required this.firstAlto,
     required this.isDark,
-    required this.primary,
   });
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: fxListCardDecoration(context, accent: primary, radius: 20),
-      child: Row(
-        children: [
-          Expanded(
-            child: _SummaryChip(
-              label: 'Alto',
-              value: alto,
-              fg: EagleTokens.bad,
-              bg: EagleTokens.badSoft,
-            ),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: _SummaryChip(
-              label: 'Médio',
-              value: medio,
-              fg: EagleTokens.warn,
-              bg: EagleTokens.warnSoft,
-            ),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: _SummaryChip(
-              label: 'Saudável',
-              value: saudavel,
-              fg: EagleTokens.good,
-              bg: EagleTokens.goodSoft,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _SummaryChip extends StatelessWidget {
-  final String label;
-  final int value;
-  final Color fg;
-  final Color bg;
-
-  const _SummaryChip({
-    required this.label,
-    required this.value,
-    required this.fg,
-    required this.bg,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final ink = fxScreenInk(context);
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: Column(
-        children: [
-          Text(
-            '$value',
-            style: FocuxHubTypography.metric(
-              color: fg,
-              fontSize: FocuxHubTypography.metricMd,
-              fontWeight: FontWeight.w700,
-              height: 1,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: FocuxHubTypography.chip(ink.withValues(alpha: 0.72)),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ChurnScoreCard extends StatelessWidget {
-  final RetencaoAlunoScore score;
+  final ({int alto, int medio, int saudavel}) counts;
+  final RetencaoAlunoScore? firstAlto;
   final bool isDark;
-  final Color primary;
-  final VoidCallback onTap;
-
-  const _ChurnScoreCard({
-    required this.score,
-    required this.isDark,
-    required this.primary,
-    required this.onTap,
-  });
 
   @override
   Widget build(BuildContext context) {
     final chrome = ShellChrome.forDark(isDark);
-    final ink = chrome.ink;
-    final mute = chrome.mute;
-    final nome = fxTitleCaseName(score.alunoNome);
-    final riskLabel = _riscoLabel(score.riscoChurn);
-    final (pillFg, pillBg) = alunoHeroRiscoMetricBadgeColors(
-      isDark,
-      score.riscoChurn,
-    );
-    final accent =
-        score.riscoChurn.toUpperCase() == 'ALTO' ? EagleTokens.bad : null;
-    final delta = score.delta;
-    final deltaColor =
-        delta > 0
-            ? EagleTokens.bad
-            : delta < 0
-            ? EagleTokens.good
-            : mute;
-
-    return Semantics(
-      button: true,
-      label: '$nome. Score ${score.scoreAtual}. $riskLabel.',
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(TokensStrip.rCard),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-          decoration: chrome.listCard(
-            primary: accent ?? primary,
-            radius: TokensStrip.rCard,
-            selected: score.riscoChurn.toUpperCase() == 'ALTO',
+    final alto = counts.alto;
+    return FxStripCard(
+      emphasize: true,
+      semanticsLabel:
+          alto == 0
+              ? 'Nenhum aluno em risco alto'
+              : '$alto em risco alto',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Risco alto', style: FocuxHubTypography.chip(chrome.mute)),
+          const SizedBox(height: 6),
+          Text(
+            '$alto',
+            style: FocuxHubTypography.kpi(
+              color: chrome.ink,
+              fontSize: FocuxHubTypography.metricLg,
+            ),
           ),
-          child: Row(
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: pillBg,
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  fxInitials(nome),
-                  style: FocuxHubTypography.cardTitle(color: pillFg),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      nome,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: FocuxHubTypography.body(color: ink).copyWith(
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: -0.2,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        Text(
-                          'Score ',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: mute,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        Text(
-                          '${score.scoreAtual}',
-                          style: AppTypography.mono(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700,
-                            color: ink,
-                          ),
-                        ),
-                        if (delta != 0) ...[
-                          const SizedBox(width: 6),
-                          Icon(
-                            delta > 0
-                                ? Icons.trending_up_rounded
-                                : Icons.trending_down_rounded,
-                            size: 14,
-                            color: deltaColor,
-                          ),
-                          Text(
-                            delta > 0 ? '+$delta' : '$delta',
-                            style: AppTypography.mono(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w700,
-                              color: deltaColor,
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 5,
-                ),
-                decoration: BoxDecoration(
-                  color: pillBg,
-                  borderRadius: BorderRadius.circular(999),
-                ),
-                child: Text(
-                  riskLabel,
-                  style: FocuxHubTypography.chip(pillFg).copyWith(
-                    letterSpacing: 0.2,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 4),
-              Icon(Icons.chevron_right_rounded, size: 20, color: mute),
-            ],
+          const SizedBox(height: 6),
+          Text(
+            alto == 0
+                ? 'Ninguém em alerta agora'
+                : alto == 1
+                ? 'Aluno precisa de contato'
+                : 'Alunos precisam de contato',
+            style: FocuxHubTypography.body(
+              color: chrome.ink,
+            ).copyWith(fontWeight: FontWeight.w700),
           ),
-        ),
+          const SizedBox(height: 8),
+          Text(
+            '${counts.medio} médios · ${counts.saudavel} saudáveis',
+            style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+          ),
+          const SizedBox(height: TokensStrip.s3),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: DashboardHomeActionChip(
+              label:
+                  firstAlto == null ? 'Ver alunos' : 'Abrir o mais crítico',
+              accent:
+                  alto > 0
+                      ? EagleTokens.bad
+                      : Theme.of(context).colorScheme.primary,
+              isDark: isDark,
+              onPressed: () {
+                final alvo = firstAlto;
+                if (alvo == null) {
+                  goPersonalShellTab(context, '/alunos');
+                  return;
+                }
+                context.push('/alunos/${alvo.alunoId}');
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
+}
+
+class _RetencaoTile extends StatelessWidget {
+  const _RetencaoTile({required this.score});
+
+  final RetencaoAlunoScore score;
+
+  @override
+  Widget build(BuildContext context) {
+    final alto = retencaoRiscoAlto(score.riscoChurn);
+    return FxSatelliteListTile(
+      title: score.alunoNome,
+      subtitle: Text(
+        'Score ${score.scoreAtual} · ${retencaoRiscoLabel(score.riscoChurn)}',
+      ),
+      accent: alto ? EagleTokens.bad : null,
+      onTap: () => context.push('/alunos/${score.alunoId}'),
+    );
+  }
+}
+
+void _showRetencaoCatalog(
+  BuildContext context, {
+  required List<RetencaoAlunoScore> items,
+}) {
+  showFxHomeSheet<void>(
+    context,
+    builder: (ctx) {
+      return FxHomeSheetSurface(
+        isDark: Theme.of(ctx).brightness == Brightness.dark,
+        child: ListView(
+          shrinkWrap: true,
+          children: [
+            FxHomeSheetHeader(
+              title: 'Base',
+              subtitle: 'Ordenada por risco.',
+              leading: Icon(
+                Icons.favorite_outline,
+                size: 18,
+                color: Theme.of(ctx).colorScheme.primary,
+              ),
+            ),
+            for (final score in items) _RetencaoTile(score: score),
+          ],
+        ),
+      );
+    },
+  );
 }
