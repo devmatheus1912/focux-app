@@ -5,26 +5,28 @@ import '../../../core/analytics/analytics_service.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
-import '../../../core/theme/fx_settings_layout.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feature_gate.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
+import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/fx_strip_card.dart';
 import '../../../core/widgets/operational_metric_tile.dart';
 import '../../../core/widgets/skeleton_loader.dart';
+import '../../auth/providers/auth_provider.dart';
+import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
-import '../../../features/auth/providers/auth_provider.dart';
 import '../../subscription/models/subscription_plan.dart';
 import '../data/dunning_repository.dart';
 import '../utils/dunning_ops_display.dart';
-import '../widgets/dunning_ops_help_sheet.dart';
 
 final _repoProvider = Provider(
   (ref) => DunningRepository(ref.read(apiClientProvider)),
@@ -50,6 +52,7 @@ class _DunningOpsScreenState extends ConsumerState<DunningOpsScreen> {
   DateTime? _fetchedAt;
   var _viewTracked = false;
   var _ttvTracked = false;
+  var _mostrarTodas = false;
 
   @override
   void initState() {
@@ -72,6 +75,7 @@ class _DunningOpsScreenState extends ConsumerState<DunningOpsScreen> {
         _page = home.page;
         _fetchedAt = DateTime.now();
         _loading = false;
+        _mostrarTodas = false;
       });
       _trackViewIfNeeded();
     } catch (e) {
@@ -125,13 +129,17 @@ class _DunningOpsScreenState extends ConsumerState<DunningOpsScreen> {
     }
   }
 
+  void _abrirFinanceiro() {
+    AnalyticsService.instance.track(ProductEvents.financeiroViewed);
+    goPersonalShellTab(context, '/financeiro');
+  }
+
   Future<void> _marcarRecuperado(DunningFalha falha) async {
     final ok = await showFxConfirmSheet(
       context,
       title: 'Marcar como recuperada?',
       subtitle: dunningFalhaTitulo(falha.alunoNome, falha.contexto),
-      message:
-          'A falha some da lista. Use só se o pagamento já entrou.',
+      message: 'A falha some da lista. Use só se o pagamento já entrou.',
       confirmLabel: 'Marcar recuperada',
     );
     if (!ok || !mounted) return;
@@ -162,6 +170,9 @@ class _DunningOpsScreenState extends ConsumerState<DunningOpsScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
     final snap = _snapshot;
+    final firstFalha = _falhas.isEmpty ? null : _falhas.first;
+    final preview =
+        _mostrarTodas ? _falhas : dunningFalhasPreview(_falhas);
 
     return fxScreenA11yScope(
       label: 'Cobrança auto',
@@ -171,10 +182,11 @@ class _DunningOpsScreenState extends ConsumerState<DunningOpsScreen> {
         capability: 'financeiro',
         child: FxShellScaffold(
           useMesh: true,
+          constrainWidth: false,
           appBar: FxShellAppBar(
             title: 'Cobrança auto',
             subtitle: FxHubFreshness.fromFetchedAt(_fetchedAt),
-            onBack: () => safePopOrGo(context, '/dashboard/personal'),
+            onBack: () => safePopOrGo(context, '/financeiro'),
             actions: [
               FxHelpIconButton(
                 tooltip: 'Como usar a cobrança automática',
@@ -182,16 +194,29 @@ class _DunningOpsScreenState extends ConsumerState<DunningOpsScreen> {
                   AnalyticsService.instance.track(
                     ProductEvents.dunningHubHelpOpened,
                   );
-                  showDunningOpsHelpSheet(context);
+                  showFxHelpSheet(
+                    context,
+                    title: 'Cobrança auto',
+                    subtitle:
+                        'Falhas de pagamento da base. A taxa é a mesma da Receita recorrente.',
+                    tips: const [
+                      FxHelpTip('Como calculamos', dunningComoCalculamos),
+                      FxHelpTip(
+                        'Em aberto',
+                        'Toque na falha para marcar recuperada quando o pagamento entrar.',
+                      ),
+                      FxHelpTip(
+                        'Assinatura Focux',
+                        'É a sua assinatura do app, não a mensalidade do aluno.',
+                      ),
+                    ],
+                  );
                 },
               ),
             ],
           ),
           body: _loading
-              ? const Padding(
-                padding: EdgeInsets.all(FxSettingsLayout.pageInset),
-                child: SkeletonList(count: 6),
-              )
+              ? const SkeletonList(count: 6)
               : _erro != null
               ? FxErrorState(
                 chromeOnDark: isDark,
@@ -207,142 +232,196 @@ class _DunningOpsScreenState extends ConsumerState<DunningOpsScreen> {
                   );
                   await _carregar();
                 },
-                child: ListView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  padding: const EdgeInsets.fromLTRB(
-                    FxSettingsLayout.pageInset,
-                    8,
-                    FxSettingsLayout.pageInset,
-                    110,
-                  ),
-                  children: [
-                    if (snap != null) ...[
-                      const DashboardSectionHeader(title: 'Recuperação'),
-                      const SizedBox(height: TokensStrip.s2),
-                      Text(
-                        'A taxa é a mesma da Receita recorrente.',
-                        style: FocuxHubTypography.bodyMuted(
-                          color: fxScreenMute(context),
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(height: TokensStrip.s3),
-                      OperationalMetricTile(
-                        label: 'Taxa',
-                        value: dunningRateLabel(snap.recoveryRate),
-                        hint: dunningTaxaFraca(
-                          snap.recoveryRate,
-                          snap.total,
-                        )
-                            ? 'Abaixo de metade das tentativas'
-                            : 'Recuperação no recorte',
-                        color: dunningTaxaFraca(
-                          snap.recoveryRate,
-                          snap.total,
-                        )
-                            ? EagleTokens.bad
-                            : EagleTokens.moneyGreen,
-                        isDark: isDark,
-                        emphasis: dunningTaxaFraca(
-                          snap.recoveryRate,
-                          snap.total,
-                        )
-                            ? OperationalMetricEmphasis.alert
-                            : OperationalMetricEmphasis.normal,
-                      ),
-                      const SizedBox(height: TokensStrip.s2),
-                      OperationalMetricTile(
-                        label: 'Em aberto',
-                        value: '${snap.abertas}',
-                        hint: snap.abertas > 0
-                            ? 'Toque na falha para marcar recuperada'
-                            : 'Nenhuma falha em aberto',
-                        color: snap.abertas > 0
-                            ? EagleTokens.bad
-                            : EagleTokens.moneyGreen,
-                        isDark: isDark,
-                        emphasis: snap.abertas > 0
-                            ? OperationalMetricEmphasis.alert
-                            : OperationalMetricEmphasis.normal,
-                      ),
-                      const SizedBox(height: TokensStrip.s2),
-                      OperationalMetricTile(
-                        label: 'Recuperadas',
-                        value: dunningRecuperadasLabel(
-                          snap.recuperadas,
-                          snap.total,
-                        ),
-                        hint: 'Já voltaram a pagar',
-                        color: primary,
-                        isDark: isDark,
-                      ),
-                      const SizedBox(height: TokensStrip.s5),
-                    ],
-                    if (_falhas.isEmpty)
-                      SizedBox(
-                        height: 280,
-                        child: FxEmptyState(
+                child: snap == null || (snap.abertas == 0 && _falhas.isEmpty)
+                    ? ListView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      children: [
+                        const SizedBox(height: 48),
+                        FxEmptyState(
                           icon: 'circle-check',
                           title: 'Tudo em dia',
-                          subtitle:
-                              'Nenhuma falha de pagamento em aberto.',
+                          subtitle: 'Nenhuma falha de pagamento em aberto.',
                           action: FxEmptyAction(
-                            label: 'Atualizar',
-                            onTap: _carregar,
+                            label: 'Ver financeiro',
+                            onTap: _abrirFinanceiro,
                           ),
                         ),
-                      )
-                    else ...[
-                      const DashboardSectionHeader(title: 'Em aberto'),
-                      const SizedBox(height: TokensStrip.s2),
-                      Text(
-                        'Toque para marcar como recuperada.',
-                        style: FocuxHubTypography.bodyMuted(
-                          color: fxScreenMute(context),
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(height: TokensStrip.s3),
-                      for (final falha in _falhas)
-                        FxSatelliteListTile(
-                          title: dunningFalhaTitulo(
-                            falha.alunoNome,
-                            falha.contexto,
+                      ],
+                    )
+                    : FxContentWidthLimiter(
+                      child: ListView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        keyboardDismissBehavior:
+                            ScrollViewKeyboardDismissBehavior.onDrag,
+                        padding: const EdgeInsets.all(TokensStrip.s4),
+                        children: [
+                          _DunningFocusCard(
+                            snap: snap,
+                            firstFalha: firstFalha,
+                            isDark: isDark,
+                            onMarcar: firstFalha == null
+                                ? _abrirFinanceiro
+                                : () => _marcarRecuperado(firstFalha),
+                            onFinanceiro: _abrirFinanceiro,
                           ),
-                          subtitle: Text(
-                            dunningFalhaSubtitle(
-                              contexto: falha.contexto,
-                              alunoNome: falha.alunoNome,
-                              motivo: falha.motivo,
-                              tentativa: falha.tentativa,
+                          const SizedBox(height: TokensStrip.s4),
+                          OperationalMetricTile(
+                            label: 'Taxa',
+                            value: dunningRateLabel(snap.recoveryRate),
+                            hint: dunningTaxaFraca(
+                              snap.recoveryRate,
+                              snap.total,
+                            )
+                                ? 'Abaixo de metade das tentativas'
+                                : 'Recuperação no recorte',
+                            color: dunningTaxaFraca(
+                              snap.recoveryRate,
+                              snap.total,
+                            )
+                                ? EagleTokens.bad
+                                : EagleTokens.moneyGreen,
+                            isDark: isDark,
+                            emphasis: dunningTaxaFraca(
+                              snap.recoveryRate,
+                              snap.total,
+                            )
+                                ? OperationalMetricEmphasis.alert
+                                : OperationalMetricEmphasis.normal,
+                          ),
+                          const SizedBox(height: TokensStrip.s2),
+                          OperationalMetricTile(
+                            label: 'Recuperadas',
+                            value: dunningRecuperadasLabel(
+                              snap.recuperadas,
+                              snap.total,
                             ),
+                            hint: 'Já voltaram a pagar',
+                            color: primary,
+                            isDark: isDark,
                           ),
-                          trailing: Text(
-                            _marcandoId == falha.id
-                                ? '…'
-                                : dunningMoneyLabel(falha.valor),
+                          const SizedBox(height: TokensStrip.s4),
+                          const DashboardSectionHeader(title: 'Em aberto'),
+                          const SizedBox(height: TokensStrip.s2),
+                          Text(
+                            'Toque para marcar como recuperada.',
                             style: FocuxHubTypography.bodyMuted(
-                              color: EagleTokens.bad,
-                              fontWeight: FontWeight.w700,
+                              color: fxScreenMute(context),
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
-                          accent: EagleTokens.bad,
-                          onTap: _marcandoId == falha.id
-                              ? null
-                              : () => _marcarRecuperado(falha),
-                        ),
-                      if (_hasMore)
-                        FxSatelliteListTile(
-                          title: _carregandoMais
-                              ? 'Carregando…'
-                              : 'Carregar mais',
-                          onTap: _carregandoMais ? null : _carregarMais,
-                        ),
-                    ],
-                  ],
-                ),
+                          const SizedBox(height: TokensStrip.s3),
+                          if (_falhas.isEmpty)
+                            const FxSatelliteListTile(
+                              title: 'Nenhuma falha na lista',
+                            )
+                          else ...[
+                            for (final falha in preview)
+                              FxSatelliteListTile(
+                                title: dunningFalhaTitulo(
+                                  falha.alunoNome,
+                                  falha.contexto,
+                                ),
+                                subtitle: Text(
+                                  dunningFalhaSubtitle(
+                                    contexto: falha.contexto,
+                                    alunoNome: falha.alunoNome,
+                                    motivo: falha.motivo,
+                                    tentativa: falha.tentativa,
+                                  ),
+                                ),
+                                trailing: Text(
+                                  _marcandoId == falha.id
+                                      ? '…'
+                                      : dunningMoneyLabel(falha.valor),
+                                  style: FocuxHubTypography.bodyMuted(
+                                    color: EagleTokens.bad,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                accent: EagleTokens.bad,
+                                onTap: _marcandoId == falha.id
+                                    ? null
+                                    : () => _marcarRecuperado(falha),
+                              ),
+                            if (!_mostrarTodas && _falhas.length > 3)
+                              FxSatelliteListTile(
+                                title: 'Ver mais',
+                                onTap: () => setState(() => _mostrarTodas = true),
+                              )
+                            else if (_hasMore)
+                              FxSatelliteListTile(
+                                title: _carregandoMais
+                                    ? 'Carregando…'
+                                    : 'Carregar mais',
+                                onTap: _carregandoMais ? null : _carregarMais,
+                              ),
+                          ],
+                        ],
+                      ),
+                    ),
               ),
         ),
+      ),
+    );
+  }
+}
+
+class _DunningFocusCard extends StatelessWidget {
+  const _DunningFocusCard({
+    required this.snap,
+    required this.firstFalha,
+    required this.isDark,
+    required this.onMarcar,
+    required this.onFinanceiro,
+  });
+
+  final DunningSnapshot snap;
+  final DunningFalha? firstFalha;
+  final bool isDark;
+  final VoidCallback onMarcar;
+  final VoidCallback onFinanceiro;
+
+  @override
+  Widget build(BuildContext context) {
+    final chrome = ShellChrome.forDark(isDark);
+    final abertas = snap.abertas;
+    return FxStripCard(
+      emphasize: true,
+      semanticsLabel: '$abertas falhas em aberto',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Em aberto', style: FocuxHubTypography.chip(chrome.mute)),
+          const SizedBox(height: 6),
+          Text(
+            '$abertas',
+            style: FocuxHubTypography.kpi(
+              color: chrome.ink,
+              fontSize: FocuxHubTypography.metricLg,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            abertas == 0
+                ? 'Nenhuma falha em aberto'
+                : 'Taxa ${dunningRateLabel(snap.recoveryRate)}',
+            style: FocuxHubTypography.body(
+              color: chrome.ink,
+            ).copyWith(fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: TokensStrip.s3),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: DashboardHomeActionChip(
+              label: firstFalha == null ? 'Ver financeiro' : 'Marcar primeira',
+              accent: firstFalha == null
+                  ? Theme.of(context).colorScheme.primary
+                  : EagleTokens.bad,
+              isDark: isDark,
+              onPressed: firstFalha == null ? onFinanceiro : onMarcar,
+            ),
+          ),
+        ],
       ),
     );
   }

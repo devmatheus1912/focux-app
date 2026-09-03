@@ -9,6 +9,14 @@ void main() {
     );
     expect(screen, contains('fxScreenA11yScope'));
     expect(screen, contains('FxShellScaffold'));
+    expect(screen, contains('constrainWidth: false'));
+    expect(screen, contains('FxContentWidthLimiter'));
+    expect(screen, contains('FxStripCard'));
+    expect(screen, contains('emphasize: true'));
+    expect(screen, contains('DashboardHomeActionChip'));
+    expect(screen, contains('keyboardDismissBehavior'));
+    expect(screen, contains('Como calculamos'));
+    expect(screen, contains('goPersonalShellTab'));
     expect(screen, contains('FxHelpIconButton'));
     expect(screen, isNot(contains('FxSettingsGroup')));
     expect(screen, contains('OperationalMetricTile'));

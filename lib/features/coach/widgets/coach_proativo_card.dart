@@ -10,6 +10,10 @@ final coachMensagensProvider = FutureProvider<List<CoachMensagem>>((ref) async {
   return CoachProativoRepository(ref.read(apiClientProvider)).mensagens();
 });
 
+final coachHomeProvider = FutureProvider.autoDispose<CoachHome>((ref) {
+  return CoachProativoRepository(ref.read(apiClientProvider)).getHome();
+});
+
 class CoachProativoCard extends ConsumerStatefulWidget {
   const CoachProativoCard({super.key, required this.isDark, this.mensagens});
   final bool isDark;

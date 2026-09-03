@@ -22,6 +22,7 @@ import 'dashboard_attention_rail.dart';
 import 'dashboard_base_radar_strip.dart';
 import 'dashboard_command_center_section.dart';
 import 'dashboard_day_focus_banner.dart';
+import 'dashboard_home_action_chip.dart';
 import 'dashboard_home_coach_banner.dart';
 import 'dashboard_home_header.dart';
 import 'dashboard_pulse_strip.dart';
@@ -63,6 +64,8 @@ List<Widget> buildDashboardHomePrimarySlivers({
   bool showCoachBanner = false,
   VoidCallback? onDismissCoach,
   List<AlunoScoreResumo> alunosScore = const [],
+  int coachPending = 0,
+  String? coachPendingLabel,
 }) {
   final alunosAtivos = snap.alunosAtivos;
   final riscoAlto = snap.riscoAlto;
@@ -110,6 +113,21 @@ List<Widget> buildDashboardHomePrimarySlivers({
         child: DashboardHomeCoachBanner(
           isDark: isDark,
           onDismiss: dismissCoach,
+        ),
+      ),
+    if (coachPending > 0 && coachPendingLabel != null)
+      SliverToBoxAdapter(
+        child: Padding(
+          padding: DashboardLayout.foldCard,
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: DashboardHomeActionChip(
+              label: coachPendingLabel,
+              accent: primary,
+              isDark: isDark,
+              onPressed: () => context.push('/coach'),
+            ),
+          ),
         ),
       ),
     SliverToBoxAdapter(

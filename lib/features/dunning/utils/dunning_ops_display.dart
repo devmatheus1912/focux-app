@@ -50,3 +50,9 @@ String dunningRecuperadasLabel(int recuperadas, int total) =>
     '$recuperadas de $total';
 
 bool dunningTaxaFraca(double rate, int total) => total > 0 && rate < 50;
+
+List<T> dunningFalhasPreview<T>(List<T> items) =>
+    items.take(3).toList(growable: false);
+
+const dunningComoCalculamos =
+    'Recuperadas dividido pelo total de falhas no recorte. É a mesma taxa da Receita recorrente.';

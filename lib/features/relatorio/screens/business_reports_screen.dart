@@ -6,24 +6,26 @@ import '../../../core/analytics/analytics_service.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
-import '../../../core/theme/fx_settings_layout.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feature_gate.dart';
+import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/fx_strip_card.dart';
 import '../../../core/widgets/operational_metric_tile.dart';
 import '../../../core/widgets/skeleton_loader.dart';
+import '../../auth/providers/auth_provider.dart';
+import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
-import '../../../features/auth/providers/auth_provider.dart';
 import '../../subscription/models/subscription_plan.dart';
 import '../data/business_repository.dart';
 import '../utils/business_reports_display.dart';
-import '../widgets/business_reports_help_sheet.dart';
 
 final _repoProvider = Provider(
   (ref) => BusinessRepository(ref.read(apiClientProvider)),
@@ -93,6 +95,11 @@ class _BusinessReportsScreenState extends ConsumerState<BusinessReportsScreen> {
     }
   }
 
+  void _abrirFinanceiro() {
+    AnalyticsService.instance.track(ProductEvents.financeiroViewed);
+    goPersonalShellTab(context, '/financeiro');
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -107,6 +114,7 @@ class _BusinessReportsScreenState extends ConsumerState<BusinessReportsScreen> {
         capability: 'relatorios',
         child: FxShellScaffold(
           useMesh: true,
+          constrainWidth: false,
           appBar: FxShellAppBar(
             title: 'Receita recorrente',
             subtitle: FxHubFreshness.fromFetchedAt(_fetchedAt),
@@ -118,16 +126,29 @@ class _BusinessReportsScreenState extends ConsumerState<BusinessReportsScreen> {
                   AnalyticsService.instance.track(
                     ProductEvents.businessReportsHelpOpened,
                   );
-                  showBusinessReportsHelpSheet(context);
+                  showFxHelpSheet(
+                    context,
+                    title: 'Receita recorrente',
+                    subtitle:
+                        'MRR e retenção da base. Cobrança auto continua em Dunning.',
+                    tips: const [
+                      FxHelpTip('Como calculamos', businessComoCalculamos),
+                      FxHelpTip(
+                        'NDR',
+                        'Acima de 100% a base cresce em reais.',
+                      ),
+                      FxHelpTip(
+                        'Cobrança',
+                        'A recuperação é a mesma do Dunning.',
+                      ),
+                    ],
+                  );
                 },
               ),
             ],
           ),
           body: _loading
-              ? const Padding(
-                padding: EdgeInsets.all(FxSettingsLayout.pageInset),
-                child: SkeletonList(count: 6),
-              )
+              ? const SkeletonList(count: 6)
               : _erro != null
               ? FxErrorState(
                 chromeOnDark: isDark,
@@ -147,91 +168,46 @@ class _BusinessReportsScreenState extends ConsumerState<BusinessReportsScreen> {
                     ? ListView(
                       physics: const AlwaysScrollableScrollPhysics(),
                       children: [
-                        SizedBox(
-                          height: 320,
-                          child: FxEmptyState(
-                            icon: 'coin',
-                            title: 'Sem dados de receita',
-                            subtitle:
-                                'Quando houver mensalidades, o MRR e a retenção aparecem aqui.',
-                            action: FxEmptyAction(
-                              label: 'Tentar de novo',
-                              onTap: _carregar,
-                            ),
+                        const SizedBox(height: 48),
+                        FxEmptyState(
+                          icon: 'coin',
+                          title: 'Sem dados de receita',
+                          subtitle:
+                              'Quando houver mensalidades, o MRR e a retenção aparecem aqui.',
+                          action: FxEmptyAction(
+                            label: 'Ver financeiro',
+                            onTap: _abrirFinanceiro,
                           ),
                         ),
                       ],
                     )
-                    : ListView(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      padding: const EdgeInsets.fromLTRB(
-                        FxSettingsLayout.pageInset,
-                        8,
-                        FxSettingsLayout.pageInset,
-                        110,
-                      ),
-                      children: [
-                        const DashboardSectionHeader(title: 'Mês'),
-                        const SizedBox(height: TokensStrip.s3),
-                        InkWell(
-                          onTap: () => context.push('/financeiro'),
-                          borderRadius: BorderRadius.circular(12),
-                          child: OperationalMetricTile(
-                            label: 'Recebido',
-                            value: businessMoneyLabel(snap.mrrAtual),
-                            hint:
-                                'Previsto ${businessMoneyLabel(snap.mrrPrevisto)}',
-                            color: EagleTokens.moneyGreen,
+                    : FxContentWidthLimiter(
+                      child: ListView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        keyboardDismissBehavior:
+                            ScrollViewKeyboardDismissBehavior.onDrag,
+                        padding: const EdgeInsets.all(TokensStrip.s4),
+                        children: [
+                          _BusinessFocusCard(
+                            snap: snap,
                             isDark: isDark,
+                            onFinanceiro: _abrirFinanceiro,
                           ),
-                        ),
-                        const SizedBox(height: TokensStrip.s2),
-                        InkWell(
-                          onTap: () => context.push('/financeiro'),
-                          borderRadius: BorderRadius.circular(12),
-                          child: OperationalMetricTile(
-                            label: 'Mês anterior',
-                            value: businessMoneyLabel(snap.mrrAnterior),
-                            hint: 'Comparar no financeiro',
-                            color: primary,
+                          const SizedBox(height: TokensStrip.s4),
+                          OperationalMetricTile(
+                            label: 'NDR',
+                            value: '${snap.ndrPct.toStringAsFixed(1)}%',
+                            hint: businessNdrStatus(snap.ndrPct),
+                            color: businessNdrRuim(snap.ndrPct)
+                                ? EagleTokens.bad
+                                : EagleTokens.moneyGreen,
                             isDark: isDark,
+                            emphasis: businessNdrRuim(snap.ndrPct)
+                                ? OperationalMetricEmphasis.alert
+                                : OperationalMetricEmphasis.normal,
                           ),
-                        ),
-                        const SizedBox(height: TokensStrip.s5),
-                        const DashboardSectionHeader(title: 'Retenção'),
-                        const SizedBox(height: TokensStrip.s3),
-                        OperationalMetricTile(
-                          label: 'NDR',
-                          value: '${snap.ndrPct.toStringAsFixed(1)}%',
-                          hint: businessNdrStatus(snap.ndrPct),
-                          color: businessNdrRuim(snap.ndrPct)
-                              ? EagleTokens.bad
-                              : EagleTokens.moneyGreen,
-                          isDark: isDark,
-                          emphasis: businessNdrRuim(snap.ndrPct)
-                              ? OperationalMetricEmphasis.alert
-                              : OperationalMetricEmphasis.normal,
-                        ),
-                        const SizedBox(height: TokensStrip.s2),
-                        InkWell(
-                          onTap: () => context.go('/alunos'),
-                          borderRadius: BorderRadius.circular(12),
-                          child: OperationalMetricTile(
-                            label: 'Alunos ativos',
-                            value: businessAlunosLabel(
-                              snap.alunosAtivos,
-                              snap.alunosTotal,
-                            ),
-                            hint: 'Abrir a base',
-                            color: primary,
-                            isDark: isDark,
-                          ),
-                        ),
-                        const SizedBox(height: TokensStrip.s2),
-                        InkWell(
-                          onTap: () => context.push('/financeiro'),
-                          borderRadius: BorderRadius.circular(12),
-                          child: OperationalMetricTile(
+                          const SizedBox(height: TokensStrip.s2),
+                          OperationalMetricTile(
                             label: 'Inadimplentes',
                             value: '${snap.inadimplentes}',
                             hint: snap.inadimplentes > 0
@@ -245,49 +221,93 @@ class _BusinessReportsScreenState extends ConsumerState<BusinessReportsScreen> {
                                 ? OperationalMetricEmphasis.alert
                                 : OperationalMetricEmphasis.normal,
                           ),
-                        ),
-                        const SizedBox(height: TokensStrip.s5),
-                        const DashboardSectionHeader(title: 'Ticket'),
-                        const SizedBox(height: TokensStrip.s3),
-                        OperationalMetricTile(
-                          label: 'ARPA',
-                          value: businessMoneyLabel(snap.arpa),
-                          hint:
-                              'LTV ${businessMoneyLabel(snap.ltvProxy)}',
-                          color: primary,
-                          isDark: isDark,
-                        ),
-                        const SizedBox(height: TokensStrip.s5),
-                        const DashboardSectionHeader(
-                          title: 'Cobrança e ativação',
-                        ),
-                        const SizedBox(height: TokensStrip.s2),
-                        Text(
-                          'A recuperação é a mesma do Dunning.',
-                          style: FocuxHubTypography.bodyMuted(
-                            color: fxScreenMute(context),
-                            fontWeight: FontWeight.w600,
+                          const SizedBox(height: TokensStrip.s4),
+                          const DashboardSectionHeader(
+                            title: 'Cobrança e ativação',
                           ),
-                        ),
-                        const SizedBox(height: TokensStrip.s3),
-                        FxSatelliteListTile(
-                          title: 'Recuperação',
-                          subtitle: Text(
-                            '${snap.dunningRecoveryPct.toStringAsFixed(1)}% · ${businessDunningFalhasLabel(snap.dunningAbertas)}',
+                          const SizedBox(height: TokensStrip.s2),
+                          FxSatelliteListTile(
+                            title: 'Recuperação',
+                            subtitle: Text(
+                              '${snap.dunningRecoveryPct.toStringAsFixed(1)}% · ${businessDunningFalhasLabel(snap.dunningAbertas)}',
+                            ),
+                            onTap: () => context.push('/dunning'),
                           ),
-                          onTap: () => context.push('/dunning'),
-                        ),
-                        OperationalMetricTile(
-                          label: 'Ativação',
-                          value: '${snap.pqlScore} pts',
-                          hint: businessPqlLabel(snap.pqlClassificacao),
-                          color: primary,
-                          isDark: isDark,
-                        ),
-                      ],
+                          const SizedBox(height: TokensStrip.s4),
+                          const DashboardSectionHeader(title: 'Mais'),
+                          const SizedBox(height: TokensStrip.s2),
+                          OperationalMetricTile(
+                            label: 'ARPA',
+                            value: businessMoneyLabel(snap.arpa),
+                            hint: 'LTV ${businessMoneyLabel(snap.ltvProxy)}',
+                            color: primary,
+                            isDark: isDark,
+                          ),
+                          const SizedBox(height: TokensStrip.s2),
+                          OperationalMetricTile(
+                            label: 'Ativação',
+                            value: '${snap.pqlScore} pts',
+                            hint: businessPqlLabel(snap.pqlClassificacao),
+                            color: primary,
+                            isDark: isDark,
+                          ),
+                        ],
+                      ),
                     ),
               ),
         ),
+      ),
+    );
+  }
+}
+
+class _BusinessFocusCard extends StatelessWidget {
+  const _BusinessFocusCard({
+    required this.snap,
+    required this.isDark,
+    required this.onFinanceiro,
+  });
+
+  final BusinessSnapshot snap;
+  final bool isDark;
+  final VoidCallback onFinanceiro;
+
+  @override
+  Widget build(BuildContext context) {
+    final chrome = ShellChrome.forDark(isDark);
+    return FxStripCard(
+      emphasize: true,
+      semanticsLabel: 'Recebido ${businessMoneyLabel(snap.mrrAtual)}',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Recebido', style: FocuxHubTypography.chip(chrome.mute)),
+          const SizedBox(height: 6),
+          Text(
+            businessMoneyLabel(snap.mrrAtual),
+            style: FocuxHubTypography.kpi(
+              color: chrome.ink,
+              fontSize: FocuxHubTypography.metricLg,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Previsto ${businessMoneyLabel(snap.mrrPrevisto)}',
+            style: FocuxHubTypography.body(
+              color: chrome.ink,
+            ).copyWith(fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: TokensStrip.s3),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: DashboardHomeActionChip(
+              label: 'Ver financeiro',
+              accent: EagleTokens.moneyGreen,
+              isDark: isDark,
+              onPressed: onFinanceiro,
+            ),
+          ),
+        ],
       ),
     );
   }

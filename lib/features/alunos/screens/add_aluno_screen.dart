@@ -218,7 +218,10 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
       unawaited(
         AnalyticsService.instance.track(
           ProductEvents.alunoCreated,
-          props: {'has_whatsapp': whatsapp != null},
+          props: {
+            'has_whatsapp': whatsapp != null,
+            'alunoId': novoAluno.id,
+          },
         ),
       );
       if (novoAluno.senhaProvisoria != null) {

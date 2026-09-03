@@ -30,5 +30,8 @@ void main() {
       ),
       '/alunos/4',
     );
+    expect(coachPendingChipLabel(0), isNull);
+    expect(coachPendingChipLabel(1), '1 recado do coach');
+    expect(coachPendingChipLabel(3), '3 recados do coach');
   });
 }
