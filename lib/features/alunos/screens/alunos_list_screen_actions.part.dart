@@ -126,17 +126,9 @@ class _AlunosBulkActionsSheetState extends State<_AlunosBulkActionsSheet> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             if (widget.mostrarMarcarPago) ...[
-              FxSettingsGroup(
-                header: 'Pagamento',
-                children: [
-                  FxSettingsTile(
-                    icon: Icons.payments_rounded,
-                    label: 'Marcar mensalidade como paga',
-                    value: '',
-                    showDivider: false,
-                    onTap: widget.onMarcarPagos,
-                  ),
-                ],
+              FxLiquidSecondaryButton(
+                label: 'Marcar mensalidade como paga',
+                onPressed: widget.onMarcarPagos,
               ),
               const SizedBox(height: FxSettingsLayout.groupGap),
             ],
@@ -168,34 +160,25 @@ class _AlunosBulkActionsSheetState extends State<_AlunosBulkActionsSheet> {
               ),
             ),
             const SizedBox(height: FxSettingsLayout.groupGap),
-            FxSettingsGroup(
-              accent: Theme.of(context).colorScheme.primary,
-              children: [
-                FxSettingsTile(
-                  icon: Icons.done_all_rounded,
-                  accent: BrandPalette.softened(
-                    Theme.of(context).colorScheme.primary,
-                  ),
-                  label: 'Aplicar status',
-                  value: '',
-                  highlight: true,
-                  showDivider: false,
-                  onTap: () => widget.onAtualizarStatus(_statusSelecionado),
-                ),
-              ],
+            FxLiquidPrimaryButton(
+              label: 'Aplicar status',
+              onPressed: () => widget.onAtualizarStatus(_statusSelecionado),
             ),
             const SizedBox(height: FxSettingsLayout.groupGap),
-            FxSettingsGroup(
-              children: [
-                FxSettingsTile(
-                  icon: Icons.delete_outline_rounded,
-                  label: 'Excluir selecionados',
-                  value: '',
-                  danger: true,
-                  showDivider: false,
-                  onTap: widget.onExcluir,
+            SizedBox(
+              height: 52,
+              child: ElevatedButton(
+                onPressed: widget.onExcluir,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: EagleTokens.bad,
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                 ),
-              ],
+                child: const Text('Excluir selecionados'),
+              ),
             ),
           ],
         ),
@@ -249,16 +232,24 @@ class _ExcluirAlunosSheet extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 22),
-          Align(
-            alignment: Alignment.center,
-            child: DashboardHomeActionChip(
-              label: 'Excluir $count ${count == 1 ? 'aluno' : 'alunos'}',
-              accent: EagleTokens.bad,
-              isDark: isDark,
+          SizedBox(
+            height: 52,
+            child: ElevatedButton(
               onPressed: () {
                 HapticFeedback.heavyImpact();
                 Navigator.of(context).pop(true);
               },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: EagleTokens.bad,
+                foregroundColor: Colors.white,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+              child: Text(
+                'Excluir $count ${count == 1 ? 'aluno' : 'alunos'}',
+              ),
             ),
           ),
           const SizedBox(height: 10),

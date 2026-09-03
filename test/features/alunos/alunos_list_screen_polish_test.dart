@@ -13,6 +13,10 @@ void main() {
     expect(screen, contains('_AlunosListRefreshing'));
     expect(screen, contains('_displayHome'));
     expect(screen, contains('showStartPeek'));
+    expect(screen, contains('FxLiquidPrimaryButton'));
+    expect(screen, contains('FxLiquidSecondaryButton'));
+    expect(screen, contains('Aplicar status'));
+    expect(screen, isNot(contains('FxSettingsTile')));
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(screen, isNot(contains('FxGlowSurface')));
   });

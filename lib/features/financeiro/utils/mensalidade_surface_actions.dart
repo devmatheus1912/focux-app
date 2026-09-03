@@ -13,6 +13,7 @@ import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_form_sheet.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_icon.dart';
 import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_inset_picker_sheet.dart';
@@ -365,17 +366,14 @@ Future<Mensalidade?> showEditarMensalidadeSheet({
                         ],
                       ),
                       const SizedBox(height: TokensStrip.s3),
-                      FxSettingsGroup(
-                        children: [
-                          FxSettingsTile(
-                            fxIcon: 'circle-check',
-                            label: financeiroSalvarMensalidadeTileLabel(),
-                            value: salvando ? 'Salvando…' : 'Confirmar',
-                            showDivider: false,
-                            onTap:
-                                salvando
-                                    ? () {}
-                                    : () async {
+                      FxLiquidPrimaryButton(
+                        label: financeiroSalvarMensalidadeTileLabel(),
+                        loading: salvando,
+                        loadingLabel: 'Salvando…',
+                        onPressed:
+                            salvando
+                                ? null
+                                : () async {
                                       if (!formKey.currentState!.validate()) {
                                         return;
                                       }
@@ -427,8 +425,6 @@ Future<Mensalidade?> showEditarMensalidadeSheet({
                                         }
                                       }
                                     },
-                          ),
-                        ],
                       ),
                     ],
                   ),
