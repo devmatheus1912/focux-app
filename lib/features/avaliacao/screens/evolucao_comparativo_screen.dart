@@ -16,9 +16,8 @@ import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_premium_entrance.dart';
-import '../../../core/widgets/fx_settings_group.dart';
-import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../evolucao/data/evolucao_repository.dart';
@@ -247,23 +246,24 @@ class _EvolucaoComparativoScreenState
               ],
             ),
             const SizedBox(height: TokensStrip.s4),
-            FxSettingsGroup(
-              caption: evolucaoComparativoJanelaCaption(
+            const DashboardSectionHeader(title: 'Janela'),
+            const SizedBox(height: TokensStrip.s2),
+            Text(
+              evolucaoComparativoJanelaCaption(
                 primeira: evolucaoComparativoFmtData(c.primeira.avaliadoEm),
                 atual: evolucaoComparativoFmtData(c.atual.avaliadoEm),
               ),
-              children: [
-                FxSettingsTile(
-                  fxIcon: 'message-circle',
-                  label: evolucaoComparativoShareTileLabel(),
-                  value:
-                      _compartilhando
-                          ? 'Enviando…'
-                          : evolucaoComparativoShareTileValue(),
-                  onTap: _compartilhando ? () {} : _compartilhar,
-                  showDivider: false,
-                ),
-              ],
+              style: TextStyle(fontSize: 12, color: chrome.mute),
+            ),
+            const SizedBox(height: TokensStrip.s3),
+            FxSatelliteListTile(
+              title: evolucaoComparativoShareTileLabel(),
+              subtitle: Text(
+                _compartilhando
+                    ? 'Enviando…'
+                    : evolucaoComparativoShareTileValue(),
+              ),
+              onTap: _compartilhando ? null : _compartilhar,
             ),
           ],
         ),

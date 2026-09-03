@@ -35,7 +35,8 @@ void main() {
       ),
     );
     expect(screen, contains('SkeletonList'));
-    expect(screen, contains('FxSettingsGroup'));
+    expect(screen, isNot(contains('FxSettingsGroup')));
+    expect(screen, contains('FxSatelliteListTile'));
     expect(screen, contains('ShellHeaderIconButton'));
     expect(screen, contains("icon: 'message-circle'"));
     expect(screen, contains('showFxConfirmSheet'));
