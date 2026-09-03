@@ -16,12 +16,14 @@ void main() {
     expect(screen, contains('FxSettingsGroup'));
     expect(screen, contains('FxSettingsTile'));
     expect(screen, contains('FxSettingsLayout'));
-    expect(screen, contains('ShellHeaderIconButton'));
-    expect(screen, contains("icon: 'circle-check'"));
+    expect(screen, contains('FxHelpIconButton'));
     expect(screen, contains('AlunoInsetFormField'));
     expect(screen, contains('showFxConfirmSheet'));
     expect(screen, contains('showFxHelpSheet'));
-    expect(screen, isNot(contains('FxLiquidPrimaryButton')));
+    expect(screen, contains('FxLiquidPrimaryButton'));
+    expect(screen, contains('bottomNavigationBar'));
+    expect(screen, isNot(contains('ShellHeaderIconButton')));
+    expect(screen, isNot(contains("icon: 'circle-check'")));
     expect(screen, isNot(contains('FilterChip')));
     expect(screen, isNot(contains('_AudienceChip')));
     expect(screen, isNot(contains('_DesignField')));

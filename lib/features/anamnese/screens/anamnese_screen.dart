@@ -5,13 +5,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
+import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_inset_picker_sheet.dart';
-import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
@@ -266,30 +267,43 @@ class _AnamneseScreenState extends ConsumerState<AnamneseScreen> {
               tooltip: 'Exportar PDF',
               onTap: _exportarPdf,
             ),
-            Semantics(
-              button: true,
-              label: _saving ? 'Salvando anamnese' : 'Salvar anamnese',
-              child: TextButton(
-                onPressed: _saving ? null : _salvar,
-                child:
-                    _saving
-                        ? const FxLoading(size: 18, strokeWidth: 2)
-                        : const Text('Salvar'),
-              ),
-            ),
           ],
         ),
-        body: FxContentWidthLimiter(
-          child: RefreshIndicator(
-            onRefresh: _load,
-            child: ListView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.fromLTRB(
-                FxSettingsLayout.pageInset,
-                8,
-                FxSettingsLayout.pageInset,
-                32,
+        bottomNavigationBar: SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(
+              FxSettingsLayout.pageInset,
+              TokensStrip.s2,
+              FxSettingsLayout.pageInset,
+              TokensStrip.s3,
+            ),
+            child: Semantics(
+              button: true,
+              enabled: !_saving,
+              label: _saving ? 'Salvando anamnese' : 'Salvar anamnese',
+              child: FxLiquidPrimaryButton(
+                label: 'Salvar',
+                loading: _saving,
+                loadingLabel: 'Salvando…',
+                onPressed: _saving ? null : _salvar,
               ),
+            ),
+          ),
+        ),
+        body: SafeArea(
+          bottom: false,
+          child: FxContentWidthLimiter(
+            child: RefreshIndicator(
+              onRefresh: _load,
+              child: ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.fromLTRB(
+                  FxSettingsLayout.pageInset,
+                  8,
+                  FxSettingsLayout.pageInset,
+                  24,
+                ),
               children: [
                 FxSettingsGroup(
                   header: 'Básico',
@@ -403,6 +417,7 @@ class _AnamneseScreenState extends ConsumerState<AnamneseScreen> {
           ),
         ),
       ),
-    );
+    ),
+  );
   }
 }

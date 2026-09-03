@@ -20,6 +20,9 @@ void main() {
     expect(screen, contains('FxSettingsGroup'));
     expect(screen, contains('showFxInsetPickerSheet'));
     expect(screen, contains('RefreshIndicator'));
+    expect(screen, contains('FxLiquidPrimaryButton'));
+    expect(screen, contains('bottomNavigationBar'));
+    expect(screen, isNot(contains('TextButton')));
     expect(screen, isNot(contains('TabBar')));
     expect(screen, isNot(contains('TabBarView')));
     expect(screen, isNot(contains('TabController')));

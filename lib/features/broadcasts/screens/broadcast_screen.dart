@@ -12,6 +12,7 @@ import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
@@ -140,44 +141,56 @@ class _BroadcastScreenState extends ConsumerState<BroadcastScreen> {
           title: 'Broadcasts',
           subtitle: freshnessLabel ?? 'Mensagem para a base',
           actions: [
-            Padding(
-              padding: const EdgeInsets.only(right: TokensStrip.s3),
-              child: Center(
-                child: Semantics(
-                  button: true,
-                  label: 'Enviar',
-                  child: ShellHeaderIconButton(
-                    icon: 'circle-check',
-                    tooltip: 'Enviar',
-                    onTap: _enviando ? () {} : _enviar,
-                  ),
-                ),
-              ),
+            FxHelpIconButton(
+              tooltip: 'Como funciona o broadcast',
+              onTap: _showHelp,
             ),
           ],
         ),
-        body: RefreshIndicator(
-          onRefresh: () async {
-            ref.invalidate(_broadcastHistoricoProvider);
-            await ref.read(_broadcastHistoricoProvider.future);
-          },
-          child: FxContentWidthLimiter(
-            child: Form(
-              key: _formKey,
-              child: ListView(
-                padding: const EdgeInsets.fromLTRB(
-                  FxSettingsLayout.pageInset,
-                  TokensStrip.s3,
-                  FxSettingsLayout.pageInset,
-                  TokensStrip.s6,
-                ),
-                children: [
-                  FxSettingsGroup(
-                    header: 'Nova mensagem',
-                    caption: 'Título e texto da notificação push.',
-                    helpTooltip: 'Como funciona o broadcast',
-                    onHelpTap: _showHelp,
-                    children: [
+        bottomNavigationBar: SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(
+              FxSettingsLayout.pageInset,
+              TokensStrip.s2,
+              FxSettingsLayout.pageInset,
+              TokensStrip.s3,
+            ),
+            child: Semantics(
+              button: true,
+              enabled: !_enviando,
+              label: _enviando ? 'Enviando broadcast' : 'Enviar',
+              child: FxLiquidPrimaryButton(
+                label: 'Enviar',
+                loading: _enviando,
+                loadingLabel: 'Enviando…',
+                onPressed: _enviando ? null : _enviar,
+              ),
+            ),
+          ),
+        ),
+        body: SafeArea(
+          bottom: false,
+          child: RefreshIndicator(
+            onRefresh: () async {
+              ref.invalidate(_broadcastHistoricoProvider);
+              await ref.read(_broadcastHistoricoProvider.future);
+            },
+            child: FxContentWidthLimiter(
+              child: Form(
+                key: _formKey,
+                child: ListView(
+                  padding: const EdgeInsets.fromLTRB(
+                    FxSettingsLayout.pageInset,
+                    TokensStrip.s3,
+                    FxSettingsLayout.pageInset,
+                    24,
+                  ),
+                  children: [
+                    FxSettingsGroup(
+                      header: 'Nova mensagem',
+                      caption: 'Título e texto da notificação push.',
+                      children: [
                       AlunoInsetFormField(
                         controller: _tituloCtrl,
                         label: 'Título',
@@ -253,6 +266,7 @@ class _BroadcastScreenState extends ConsumerState<BroadcastScreen> {
           ),
         ),
       ),
-    );
+    ),
+  );
   }
 }
