@@ -438,6 +438,7 @@ GET	/api/upsell/aluno/{alunoId}/pendentes	AL	UpsellController.java:71
 GET	/api/upsell/me/pendentes	AL	UpsellController.java:80
 GET	/api/upsell/ofertas	AL	UpsellController.java:36
 POST	/api/upsell/ofertas	AR	UpsellController.java:47
+PATCH	/api/upsell/ofertas/{id}	AR	UpsellController.java:67
 POST	/api/v1/migracao/confirmar	CRO	MigracaoMagicaController.java:89
 GET	/api/v1/migracao/foto/quota	CRO	MigracaoMagicaController.java:60
 POST	/api/v1/migracao/foto/registrar	CRO	MigracaoMagicaController.java:69

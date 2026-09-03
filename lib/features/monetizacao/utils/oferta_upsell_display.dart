@@ -18,10 +18,7 @@ String ofertaGatilhoLabel(String? tipo) {
   }
 }
 
-String ofertaSubtitle({
-  required String tipoGatilho,
-  String? descricao,
-}) {
+String ofertaSubtitle({required String tipoGatilho, String? descricao}) {
   final gatilho = ofertaGatilhoLabel(tipoGatilho);
   final desc = descricao?.trim();
   if (desc == null || desc.isEmpty) return gatilho;
@@ -36,3 +33,8 @@ String ofertaHubSubtitle(String? freshness) {
   if (stamp == null || stamp.isEmpty) return base;
   return '$base · $stamp';
 }
+
+String ofertaStatusLabel({required bool ativo}) => ativo ? 'Ativa' : 'Pausada';
+
+String ofertaSectionTitle({required bool ativo}) =>
+    ativo ? 'Ativas' : 'Pausadas';

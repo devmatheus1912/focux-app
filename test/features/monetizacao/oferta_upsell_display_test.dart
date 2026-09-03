@@ -21,6 +21,13 @@ void main() {
     expect(ofertaValorLabel(199), 'R\$ 199,00');
   });
 
+  test('ofertaStatusLabel e seção', () {
+    expect(ofertaStatusLabel(ativo: true), 'Ativa');
+    expect(ofertaStatusLabel(ativo: false), 'Pausada');
+    expect(ofertaSectionTitle(ativo: true), 'Ativas');
+    expect(ofertaSectionTitle(ativo: false), 'Pausadas');
+  });
+
   test('ofertaHubSubtitle junta freshness', () {
     expect(ofertaHubSubtitle(null), 'Gatilho, valor e copy da oferta');
     expect(

@@ -4,10 +4,18 @@ import '../../support/screen_source_bundle.dart';
 
 void main() {
   test('ofertas upsell cumpre contrato Tier S+', () {
-    final screen = readScreenSourceBundle(
-      'lib/features/monetizacao/screens/ofertas_upsell_screen.dart',
+    final screen = [
+      readScreenSourceBundle(
+        'lib/features/monetizacao/screens/ofertas_upsell_screen.dart',
+      ),
+      readScreenSourceBundle(
+        'lib/features/monetizacao/widgets/oferta_upsell_editor.dart',
+      ),
+    ].join('\n');
+    expect(
+      screen,
+      anyOf(contains('fxScreenA11yScope'), contains('Semantics(')),
     );
-    expect(screen, anyOf(contains('fxScreenA11yScope'), contains('Semantics(')));
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(screen, contains('FxShellScaffold'));
     expect(screen, contains('FxContentWidthLimiter'));
@@ -17,14 +25,17 @@ void main() {
     expect(screen, contains('RefreshIndicator'));
     expect(screen, contains('FxHubFreshness.fromFetchedAt'));
     expect(screen, contains('showFxInsetPickerSheet'));
+    expect(screen, contains('showOfertaUpsellEditor'));
+    expect(screen, contains('repo.atualizar'));
     expect(screen, isNot(contains('FxSettingsGroup')));
     expect(screen, contains('FxSatelliteListTile'));
-    expect(screen, contains('ListView.builder'));
     expect(screen, contains("fallbackLocation: '/assinatura'"));
     expect(screen, contains('keyboardDismissBehavior'));
     expect(screen, isNot(contains('context.pop()')));
     expect(screen, contains('ofertaGatilhoValues'));
-    expect(screen, contains("tipoGatilho: tipoGatilho"));
+    expect(screen, contains('ofertaSectionTitle'));
+    expect(screen, contains('ofertaStatusLabel'));
+    expect(screen, contains('Nenhuma oferta ainda'));
     expect(screen, isNot(contains('TabBar')));
     expect(screen, isNot(contains('TabBarView')));
     expect(screen, isNot(contains('DropdownButton')));
