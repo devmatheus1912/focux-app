@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../design_system/focux_surfaces.dart';
+import '../router/safe_navigation.dart';
 import '../theme/focux_hub_typography.dart';
 import '../theme/shell_chrome.dart';
 import '../theme/tokens_strip.dart';
@@ -9,6 +11,7 @@ import 'cinematic_mesh_background.dart';
 import 'fx_content_width_limiter.dart';
 import 'fx_glass_surface.dart';
 import 'fx_icon.dart';
+import 'fx_keyboard_dismiss_scope.dart';
 import 'mesh_scope.dart';
 import 'fx_premium_entrance.dart';
 
@@ -24,6 +27,7 @@ class FxShellScaffold extends StatelessWidget {
     this.useMesh = false,
     this.safeArea = true,
     this.constrainWidth = true,
+    this.dismissKeyboard,
   });
 
   final PreferredSizeWidget? appBar;
@@ -36,6 +40,10 @@ class FxShellScaffold extends StatelessWidget {
 
   /// Tier S+: limita largura do body em telas satélite (hubs full-bleed usam false).
   final bool constrainWidth;
+
+  /// `null` infere pelo catálogo (`FocuxSurfaces.hasInput`). S5/S6/S7 devem
+  /// ficar com teclado dismissível (§14.2).
+  final bool? dismissKeyboard;
 
   @override
   Widget build(BuildContext context) {
@@ -50,13 +58,14 @@ class FxShellScaffold extends StatelessWidget {
 
     Widget content = inner;
     if (safeArea) {
-      content = SafeArea(
-        bottom: bottomNavigationBar == null,
-        child: inner,
-      );
+      content = SafeArea(bottom: bottomNavigationBar == null, child: inner);
     }
     if (bottomNavigationBar != null) {
       content = SizedBox.expand(child: content);
+    }
+    final dismiss = dismissKeyboard ?? FocuxSurfaces.hasInputOf(context);
+    if (dismiss) {
+      content = FxKeyboardDismissScope(child: content);
     }
     content = FxPremiumEntrance(child: content);
 
@@ -102,6 +111,8 @@ class FxShellAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.leading,
     this.leadingWidth,
     this.onBack,
+    this.fallbackLocation,
+    this.showBack,
     this.centerTitle = false,
   });
 
@@ -111,6 +122,12 @@ class FxShellAppBar extends StatelessWidget implements PreferredSizeWidget {
   final Widget? leading;
   final double? leadingWidth;
   final VoidCallback? onBack;
+
+  /// Pai lógico de [safePopOrGo] (§14.1). Se omitido, usa `FocuxSurfaces`.
+  final String? fallbackLocation;
+
+  /// `false` esconde a seta (tab do shell / login raiz). `null` infere.
+  final bool? showBack;
 
   /// `false` (padrão): leading — operação, listas, título + subtítulo de contexto.
   /// `true`: centro — só modais/sheets curtos; evitar em telas com scroll denso.
@@ -128,19 +145,40 @@ class FxShellAppBar extends StatelessWidget implements PreferredSizeWidget {
     final titleCrossAxis =
         centerTitle ? CrossAxisAlignment.center : CrossAxisAlignment.start;
 
-    final backButton =
-        leading ??
-        IconButton(
-          onPressed: onBack ?? () => Navigator.maybePop(context),
-          icon: Container(
-            width: 38,
-            height: 38,
-            decoration: chrome.headerAction(radius: 12),
-            child: Center(
-              child: FxIcon(name: 'arrow-left', size: 18, color: ink),
-            ),
+    final resolvedParent =
+        fallbackLocation ?? FocuxSurfaces.logicalParentOf(context);
+    final inferredBack =
+        showBack ?? (resolvedParent != null && resolvedParent.isNotEmpty);
+    final shouldShowBack = leading != null || onBack != null || inferredBack;
+
+    final Widget? backButton;
+    if (leading != null) {
+      backButton = leading;
+    } else if (shouldShowBack) {
+      backButton = IconButton(
+        tooltip: 'Voltar',
+        onPressed: () {
+          FxKeyboardDismissScope.dismiss();
+          if (onBack != null) {
+            onBack!();
+            return;
+          }
+          final parent = resolvedParent;
+          if (parent == null || parent.isEmpty) return;
+          safePopOrGo(context, parent);
+        },
+        icon: Container(
+          width: 38,
+          height: 38,
+          decoration: chrome.headerAction(radius: 12),
+          child: Center(
+            child: FxIcon(name: 'arrow-left', size: 18, color: ink),
           ),
-        );
+        ),
+      );
+    } else {
+      backButton = null;
+    }
 
     final titleWidget =
         subtitle == null
@@ -189,7 +227,7 @@ class FxShellAppBar extends StatelessWidget implements PreferredSizeWidget {
               IgnorePointer(
                 child: Opacity(
                   opacity: 0,
-                  child: backButton,
+                  child: backButton ?? const SizedBox(width: 38, height: 38),
                 ),
               ),
             ]
@@ -202,7 +240,9 @@ class FxShellAppBar extends StatelessWidget implements PreferredSizeWidget {
       centerTitle: centerTitle,
       automaticallyImplyLeading: false,
       leading: backButton,
-      leadingWidth: leadingWidth ?? (leading != null ? 92 : 56),
+      leadingWidth:
+          leadingWidth ??
+          (backButton == null ? 0 : (leading != null ? 92 : 56)),
       title: titleWidget,
       actions: balancedActions,
     );
@@ -356,10 +396,9 @@ class FxSatelliteListTile extends StatelessWidget {
         trailing: trailing,
         title: Text(
           displayTitle,
-          style: FocuxHubTypography.body(color: ink).copyWith(
-            fontWeight: FontWeight.w700,
-            letterSpacing: -0.15,
-          ),
+          style: FocuxHubTypography.body(
+            color: ink,
+          ).copyWith(fontWeight: FontWeight.w700, letterSpacing: -0.15),
         ),
         subtitle:
             subtitle == null

@@ -204,9 +204,10 @@ void main() {
         File(
           'lib/features/perfil/screens/identidade_visual_screen.dart',
         ).readAsStringSync();
-    final agenda = readScreenSourceBundle(
-      'lib/features/agenda/screens/agenda_screen.dart',
-    );
+    final agendaNovo =
+        File(
+          'lib/features/agenda/screens/novo_agendamento_screen.dart',
+        ).readAsStringSync();
     final avaliacao =
         File(
           'lib/features/avaliacao/screens/evolucao_comparativo_screen.dart',
@@ -234,7 +235,7 @@ void main() {
       contains("safePopOrGo(context, '/dashboard/personal')"),
     );
     expect(identidade, contains("safePopOrGo(context, '/dashboard/personal')"));
-    expect(agenda, contains("safePopOrGo(context, '/agenda')"));
+    expect(agendaNovo, contains("safePopOrGo(context, '/agenda')"));
     expect(
       avaliacao,
       contains("safePopOrGo(context, '/alunos/\${widget.alunoId}')"),

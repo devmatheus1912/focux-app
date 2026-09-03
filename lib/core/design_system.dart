@@ -36,6 +36,8 @@
 ///   `FxErrorState`/`friendlyError` + retry; vazio = `FxEmptyState` com CTA.
 ///
 /// ## Catálogo de pilares (gates de contrato leem ESTE arquivo)
+/// Superfícies — FocuxSurfaces — surface_taxonomy_contract_test —
+/// rota → S1–S9, voltar previsível, teclado.
 /// Acessibilidade — FocuxA11y — accessibility_pillar_contract_test —
 /// TalkBack / VoiceOver.
 /// Hierarquia visual & foco — FocuxHubTypography + TokensStrip.layer* —
@@ -79,6 +81,8 @@ export 'theme/brand_palette.dart' show BrandPalette;
 export 'theme/focux_hub_typography.dart' show FocuxHubTypography;
 export 'theme/shell_chrome.dart' show ShellChrome;
 export 'theme/hero_teal.dart';
+export 'design_system/focux_surfaces.dart'
+    show FocuxSurfaces, FocuxSurfaceSpec, FocuxSurfaceType, FocuxSurfaceMatch;
 export 'widgets/fx_shell_scaffold.dart'
     show
         FxShellScaffold,
@@ -87,6 +91,7 @@ export 'widgets/fx_shell_scaffold.dart'
         fxStripCardDecoration,
         fxListCardDecoration,
         fxListTileCardShell;
+export 'widgets/fx_keyboard_dismiss_scope.dart' show FxKeyboardDismissScope;
 export 'widgets/fx_strip_card.dart' show FxStripCard;
 export 'widgets/fx_home_sheet.dart';
 export 'widgets/fx_confirm_sheet.dart' show showFxConfirmSheet;

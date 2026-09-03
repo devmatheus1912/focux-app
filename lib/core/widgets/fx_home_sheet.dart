@@ -7,6 +7,7 @@ import '../theme/fx_settings_layout.dart';
 import '../theme/hero_teal.dart';
 import '../theme/shell_chrome.dart';
 import '../theme/tokens_strip.dart';
+import 'fx_keyboard_dismiss_scope.dart';
 import 'fx_shell_scaffold.dart';
 
 /// Chrome canônico de sheet — paridade Command Priorities / ajuda da Home.
@@ -267,7 +268,10 @@ class FxHomeSheetHeader extends StatelessWidget {
         trailing ??
             IconButton(
               tooltip: 'Fechar',
-              onPressed: () => Navigator.of(context).maybePop(),
+              onPressed: () {
+                FxKeyboardDismissScope.dismiss();
+                Navigator.of(context).maybePop();
+              },
               style: IconButton.styleFrom(
                 minimumSize: const Size(
                   FxHomeSheetChrome.touchTarget,
@@ -332,7 +336,13 @@ class FxHomeSheetScaffold extends StatelessWidget {
           if (scroll)
             Flexible(
               fit: FlexFit.loose,
-              child: SingleChildScrollView(child: child),
+              child: FxKeyboardDismissScope(
+                child: SingleChildScrollView(
+                  keyboardDismissBehavior:
+                      ScrollViewKeyboardDismissBehavior.onDrag,
+                  child: child,
+                ),
+              ),
             )
           else
             child,

@@ -20,6 +20,7 @@ import '../../../core/widgets/focux_official_logo.dart';
 import '../../../core/widgets/focux_brand_tagline.dart';
 import '../../../core/widgets/fx_conversion.dart';
 import '../../../core/widgets/cinematic_mesh_background.dart';
+import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_premium_entrance.dart';
 import '../../../core/widgets/mesh_scope.dart';
 import '../utils/auth_layout.dart';
@@ -71,7 +72,7 @@ class AuthShell extends StatelessWidget {
         animateGridIn: animateGridIn,
         child: MeshScope(
           active: true,
-          child: SafeArea(child: content),
+          child: SafeArea(child: FxKeyboardDismissScope(child: content)),
         ),
       ),
     );
@@ -134,7 +135,8 @@ class AuthLoginBrandHeader extends ConsumerWidget {
     final logoWidth = authLogoWidthFor(context, withTagline: true);
     final reduceMotion = TokensStrip.prefersReducedMotion(context);
     return AnimatedSwitcher(
-      duration: reduceMotion ? Duration.zero : const Duration(milliseconds: 280),
+      duration:
+          reduceMotion ? Duration.zero : const Duration(milliseconds: 280),
       switchInCurve: Curves.easeOutCubic,
       switchOutCurve: Curves.easeInCubic,
       child: FxConversionLockup(
@@ -244,9 +246,10 @@ class AuthRoleToggle extends StatelessWidget {
           child: GestureDetector(
             onTap: onTap,
             child: AnimatedContainer(
-              duration: TokensStrip.prefersReducedMotion(context)
-                  ? Duration.zero
-                  : const Duration(milliseconds: 180),
+              duration:
+                  TokensStrip.prefersReducedMotion(context)
+                      ? Duration.zero
+                      : const Duration(milliseconds: 180),
               curve: Curves.easeOutCubic,
               padding: const EdgeInsets.symmetric(vertical: TokensStrip.s3),
               decoration: BoxDecoration(
