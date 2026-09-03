@@ -33,5 +33,8 @@ void main() {
     expect(notificacaoCountLabel(1), '1 aviso');
     expect(notificacaoCountLabel(4), '4 avisos');
     expect(notificacaoComoCalculamos, contains('Radar'));
+    expect(notificacaoSearchEmptyTitle(''), 'Tudo em ordem');
+    expect(notificacaoSearchEmptyTitle('treino'), 'Nenhum aviso encontrado');
+    expect(notificacaoSearchEmptySubtitle('treino'), contains('texto'));
   });
 }

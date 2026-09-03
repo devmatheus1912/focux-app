@@ -7,6 +7,13 @@ String notificacaoCountLabel(int count) {
   return '$count avisos';
 }
 
+String notificacaoSearchEmptyTitle(String query) =>
+    query.trim().isEmpty ? 'Tudo em ordem' : 'Nenhum aviso encontrado';
+
+String notificacaoSearchEmptySubtitle(String query) => query.trim().isEmpty
+    ? 'Alertas, mensagens e o Radar Focux aparecem aqui quando pedem ação.'
+    : 'Nada com esse texto nesta caixa.';
+
 const _nameParticles = {'de', 'da', 'do', 'dos', 'das', 'e'};
 
 /// Title-case person names from API payloads (e.g. `thales` → `Thales`).

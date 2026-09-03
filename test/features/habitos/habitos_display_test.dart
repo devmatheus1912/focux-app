@@ -50,5 +50,8 @@ void main() {
     expect(habitoCountLabel(1), '1 hábito');
     expect(habitoCountLabel(3), '3 hábitos');
     expect(habitoComoCalculamos, contains('checks'));
+    expect(habitoComplianceEmptyTitle(''), 'Sem dados ainda');
+    expect(habitoComplianceEmptyTitle('ana'), 'Nenhum aluno encontrado');
+    expect(habitoComplianceEmptySubtitle('ana'), contains('nome'));
   });
 }

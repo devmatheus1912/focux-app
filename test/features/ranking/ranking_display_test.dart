@@ -10,5 +10,8 @@ void main() {
     expect(rankingAlunosLabel(3), '3 alunos ativos');
     expect(rankingPosicaoLabel(1), '1º');
     expect(rankingComoCalculamos, contains('alunos ativos'));
+    expect(rankingSearchEmptyTitle(''), 'Ranking ainda sem dados');
+    expect(rankingSearchEmptyTitle('ana'), 'Nenhum personal encontrado');
+    expect(rankingSearchEmptySubtitle('ana'), contains('nome'));
   });
 }

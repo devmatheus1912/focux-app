@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focux_app/core/widgets/fx_input_deco.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/analytics/analytics_service.dart';
@@ -33,9 +36,27 @@ class NotificacoesScreen extends ConsumerStatefulWidget {
 
 class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
   final _openedAt = DateTime.now();
+  final _searchCtrl = TextEditingController();
+  Timer? _debounce;
   DateTime? _fetchedAt;
   var _viewTracked = false;
   var _ttvTracked = false;
+
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    _searchCtrl.dispose();
+    super.dispose();
+  }
+
+  void _onQueryChanged(String value) {
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 350), () {
+      final next = value.trim();
+      if (next == ref.read(notificacoesQueryProvider)) return;
+      ref.read(notificacoesQueryProvider.notifier).state = next;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -83,6 +104,7 @@ class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
     final unreadCount =
         ref.watch(notificacoesNaoLidasProvider).valueOrNull ??
         (async.valueOrNull?.items.where((item) => !item.lida).length ?? 0);
+    final query = ref.watch(notificacoesQueryProvider);
 
     Future<void> reload() async {
       AnalyticsService.instance.track(ProductEvents.notificacoesRefreshed);
@@ -172,7 +194,38 @@ class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
               ),
           ],
         ),
-        body: async.when(
+        body: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                TokensStrip.s4,
+                TokensStrip.s2,
+                TokensStrip.s4,
+                TokensStrip.s2,
+              ),
+              child: TextField(
+                controller: _searchCtrl,
+                textInputAction: TextInputAction.search,
+                onChanged: _onQueryChanged,
+                onSubmitted: (value) {
+                  _debounce?.cancel();
+                  final next = value.trim();
+                  if (next == ref.read(notificacoesQueryProvider)) return;
+                  ref.read(notificacoesQueryProvider.notifier).state = next;
+                },
+                onTapOutside: (_) =>
+                    FocusManager.instance.primaryFocus?.unfocus(),
+                decoration: InputDecoration(
+                  hintText: 'Buscar aviso',
+                  prefixIcon: const Icon(Icons.search_rounded),
+                  border: FxInputDeco.outlineBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                ),
+              ),
+            ),
+            Expanded(
+              child: async.when(
           loading:
               () => const Padding(
                 padding: EdgeInsets.all(FxSettingsLayout.pageInset),
@@ -195,13 +248,14 @@ class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
                   const SizedBox(height: 48),
                   FxEmptyState(
                     icon: 'circle-check',
-                    title: 'Tudo em ordem',
-                    subtitle:
-                        'Alertas, mensagens e o Radar Focux aparecem aqui quando pedem ação.',
-                    action: FxEmptyAction(
+                    title: notificacaoSearchEmptyTitle(query),
+                    subtitle: notificacaoSearchEmptySubtitle(query),
+                    action: query.isEmpty
+                        ? FxEmptyAction(
                       label: 'Ir para o Hoje',
                       onTap: () => goPersonalShellTab(context, home),
-                    ),
+                    )
+                        : null,
                   ),
                 ],
               );
@@ -274,6 +328,9 @@ class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
               ),
             );
           },
+        ),
+              ),
+          ],
         ),
       ),
     );

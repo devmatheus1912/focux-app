@@ -24,5 +24,7 @@ void main() {
     expect(screen, isNot(contains('FilledButton')));
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(screen, isNot(contains('Pódio do Mês')));
+    expect(screen, contains('Buscar personal'));
+    expect(screen, contains('onTapOutside'));
   });
 }

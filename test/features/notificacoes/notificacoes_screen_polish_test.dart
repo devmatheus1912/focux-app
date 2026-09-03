@@ -24,5 +24,7 @@ void main() {
     expect(screen, contains('keyboardDismissBehavior'));
     expect(screen, contains('goPersonalShellTab'));
     expect(screen, isNot(contains('CircularProgressIndicator')));
+    expect(screen, contains('Buscar aviso'));
+    expect(screen, contains('onTapOutside'));
   });
 }

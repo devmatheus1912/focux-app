@@ -101,14 +101,17 @@ class NotificacoesInbox {
   }
 }
 
+final notificacoesQueryProvider = StateProvider<String>((ref) => '');
+
 class NotificacoesInboxNotifier extends AsyncNotifier<NotificacoesInbox> {
   static const pageSize = 30;
 
   @override
   Future<NotificacoesInbox> build() {
+    final q = ref.watch(notificacoesQueryProvider);
     return ref
         .read(notificacoesRepositoryProvider)
-        .listar(page: 0, size: pageSize);
+        .listar(page: 0, size: pageSize, q: q);
   }
 
   Future<void> loadMore() async {
@@ -118,7 +121,11 @@ class NotificacoesInboxNotifier extends AsyncNotifier<NotificacoesInbox> {
     try {
       final next = await ref
           .read(notificacoesRepositoryProvider)
-          .listar(page: current.page + 1, size: pageSize);
+          .listar(
+            page: current.page + 1,
+            size: pageSize,
+            q: ref.read(notificacoesQueryProvider),
+          );
       final seen = current.items.map((item) => item.id).toSet();
       state = AsyncData(
         NotificacoesInbox(
@@ -142,10 +149,19 @@ class NotificacoesRepository {
 
   NotificacoesRepository(ApiClient client) : _dio = client.dio;
 
-  Future<NotificacoesInbox> listar({int page = 0, int size = 30}) async {
+  Future<NotificacoesInbox> listar({
+    int page = 0,
+    int size = 30,
+    String q = '',
+  }) async {
+    final query = q.trim();
     final response = await _dio.get(
       '/api/notificacoes',
-      queryParameters: {'page': page, 'size': size},
+      queryParameters: {
+        'page': page,
+        'size': size,
+        if (query.isNotEmpty) 'q': query,
+      },
     );
     return NotificacoesInbox.fromJson(response.data as Map<String, dynamic>);
   }

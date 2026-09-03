@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focux_app/core/widgets/fx_input_deco.dart';
 
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/focux_hub_typography.dart';
@@ -30,6 +33,9 @@ class RankingScreen extends ConsumerStatefulWidget {
 }
 
 class _RankingScreenState extends ConsumerState<RankingScreen> {
+  final _searchCtrl = TextEditingController();
+  Timer? _debounce;
+  var _query = '';
   List<RankingItem> _items = [];
   var _page = 0;
   var _hasMore = false;
@@ -45,13 +51,30 @@ class _RankingScreenState extends ConsumerState<RankingScreen> {
     _carregar();
   }
 
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    _searchCtrl.dispose();
+    super.dispose();
+  }
+
+  void _onQueryChanged(String value) {
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 350), () {
+      final next = value.trim();
+      if (next == _query) return;
+      _query = next;
+      _carregar();
+    });
+  }
+
   Future<void> _carregar() async {
     setState(() {
       _loading = true;
       _erro = null;
     });
     try {
-      final page = await ref.read(_repoProvider).listar();
+      final page = await ref.read(_repoProvider).listar(q: _query);
       if (!mounted) return;
       setState(() {
         _items = page.content;
@@ -74,7 +97,9 @@ class _RankingScreenState extends ConsumerState<RankingScreen> {
     if (_carregandoMais || !_hasMore) return;
     setState(() => _carregandoMais = true);
     try {
-      final next = await ref.read(_repoProvider).listar(page: _page + 1);
+      final next = await ref
+          .read(_repoProvider)
+          .listar(page: _page + 1, q: _query);
       if (!mounted) return;
       final seen = _items.map((i) => i.personalId).toSet();
       setState(() {
@@ -141,26 +166,61 @@ class _RankingScreenState extends ConsumerState<RankingScreen> {
               message: _erro!,
               onRetry: _carregar,
             )
-            : RefreshIndicator(
+            : Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    TokensStrip.s4,
+                    TokensStrip.s2,
+                    TokensStrip.s4,
+                    TokensStrip.s2,
+                  ),
+                  child: TextField(
+                    controller: _searchCtrl,
+                    textInputAction: TextInputAction.search,
+                    onChanged: _onQueryChanged,
+                    onSubmitted: (value) {
+                      _debounce?.cancel();
+                      final next = value.trim();
+                      if (next == _query && _items.isNotEmpty) return;
+                      _query = next;
+                      _carregar();
+                    },
+                    onTapOutside: (_) =>
+                        FocusManager.instance.primaryFocus?.unfocus(),
+                    decoration: InputDecoration(
+                      hintText: 'Buscar personal',
+                      prefixIcon: const Icon(Icons.search_rounded),
+                      border: FxInputDeco.outlineBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: RefreshIndicator(
               color: primary,
               onRefresh: _carregar,
               child: _items.isEmpty
                   ? ListView(
                     physics: const AlwaysScrollableScrollPhysics(),
+                    keyboardDismissBehavior:
+                        ScrollViewKeyboardDismissBehavior.onDrag,
                     children: [
                       const SizedBox(height: 48),
                       FxEmptyState(
                         icon: 'star',
-                        title: 'Ranking ainda sem dados',
-                        subtitle:
-                            'A classificação aparece quando houver personais com alunos ativos.',
-                        action: FxEmptyAction(
+                        title: rankingSearchEmptyTitle(_query),
+                        subtitle: rankingSearchEmptySubtitle(_query),
+                        action: _query.isEmpty
+                            ? FxEmptyAction(
                           label: 'Ir para o Hoje',
                           onTap: () => goPersonalShellTab(
                             context,
                             '/dashboard/personal',
                           ),
-                        ),
+                        )
+                            : null,
                       ),
                     ],
                   )
@@ -206,6 +266,9 @@ class _RankingScreenState extends ConsumerState<RankingScreen> {
                       },
                     ),
                   ),
+                  ),
+                ),
+              ],
             ),
       ),
     );

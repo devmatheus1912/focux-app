@@ -14,3 +14,10 @@ String rankingAlunosLabel(int count) {
 }
 
 String rankingPosicaoLabel(int posicao) => '$posicaoº';
+
+String rankingSearchEmptyTitle(String query) =>
+    query.trim().isEmpty ? 'Ranking ainda sem dados' : 'Nenhum personal encontrado';
+
+String rankingSearchEmptySubtitle(String query) => query.trim().isEmpty
+    ? 'A classificação aparece quando houver personais com alunos ativos.'
+    : 'Nada com esse nome neste ranking.';
