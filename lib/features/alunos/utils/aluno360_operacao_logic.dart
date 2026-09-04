@@ -8,7 +8,14 @@ import '../data/aluno_repository.dart';
 import 'aluno360_copilot_logic.dart';
 import 'aluno_hero_signal.dart';
 
-enum OperacaoStickyDestination { chat, commandCenter, evolucao, editAluno }
+enum OperacaoStickyDestination {
+  chat,
+  commandCenter,
+  evolucao,
+  editAluno,
+  financeiro,
+  treino,
+}
 
 /// Sticky bar action resolved from 360 payload and queue state.
 class OperacaoStickyAction {
@@ -120,6 +127,18 @@ OperacaoStickyDestination resolveOperacaoStickyDestination(
       lower.contains('medida')) {
     return OperacaoStickyDestination.evolucao;
   }
+  if (lower.contains('financeir') ||
+      lower.contains('inadimpl') ||
+      lower.contains('cobrar') ||
+      lower.contains('mensalidade') ||
+      lower.contains('pagamento')) {
+    return OperacaoStickyDestination.financeiro;
+  }
+  if (lower.contains('atribuir') ||
+      lower.contains('prescrever') ||
+      (lower.contains('treino') && lower.contains('montar'))) {
+    return OperacaoStickyDestination.treino;
+  }
   if (acaoSugereChat(acao) || (followUpDue && acao.trim().isEmpty)) {
     return OperacaoStickyDestination.chat;
   }
@@ -137,6 +156,8 @@ IconData stickyIconForDestination(OperacaoStickyDestination destination) {
     OperacaoStickyDestination.evolucao => Icons.monitor_weight_outlined,
     OperacaoStickyDestination.editAluno => Icons.edit_outlined,
     OperacaoStickyDestination.commandCenter => Icons.dashboard_outlined,
+    OperacaoStickyDestination.financeiro => Icons.payments_outlined,
+    OperacaoStickyDestination.treino => Icons.fitness_center_outlined,
   };
 }
 
@@ -158,6 +179,13 @@ OperacaoStickyAction resolveOperacaoStickyAction({
   }
 
   if (acao.isEmpty) {
+    if (aluno.inadimplente || aluno.statusFinanceiro == 'INADIMPLENTE') {
+      return OperacaoStickyAction(
+        label: 'Cobrar mensalidade',
+        icon: stickyIconForDestination(OperacaoStickyDestination.financeiro),
+        destination: OperacaoStickyDestination.financeiro,
+      );
+    }
     if (followUpDue) {
       return OperacaoStickyAction(
         label: 'Abrir chat',

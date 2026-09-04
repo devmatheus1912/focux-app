@@ -110,7 +110,7 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
         _tabController.index == 0 && resolvedAlunoAsync.hasValue;
 
     return fxScreenA11yScope(
-      label: 'Aluno Detail',
+      label: 'Ficha do aluno',
       child: Scaffold(
         backgroundColor: Colors.transparent,
         body: Stack(

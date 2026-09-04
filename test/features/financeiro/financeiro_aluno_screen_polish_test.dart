@@ -21,6 +21,7 @@ void main() {
     expect(screen, contains('FxLiquidPrimaryButton'));
     expect(screen, contains('OperationalMetricTile'));
     expect(screen, contains('/chat/aluno'));
+    expect(screen, contains('showFinanceiroAlunoCobrancaSheet'));
     expect(screen, contains('circle-check'));
     expect(screen, isNot(contains('check-circle')));
     expect(screen, isNot(contains('Aluno #')));

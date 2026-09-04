@@ -221,6 +221,11 @@ ENTERPRISE. Com o campo presente, ele vence o mapa.
 
 ---
 
+Push aluno já existente leva `type` + `route` no `data` (tap no app
+empilha a rota). Sem job novo: mensalidade → `/financeiro/aluno`;
+treino / engajamento / upsell / automação → `/dashboard/aluno`;
+chat copiloto → `/chat/aluno`. Recorrência e referral não têm push.
+
 ## 3. `DELETE /api/fcm/token` — confirmado, P0 fechado no servidor
 
 ### 3.1 O contrato está correto

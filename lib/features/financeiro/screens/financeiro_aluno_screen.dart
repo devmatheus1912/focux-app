@@ -26,6 +26,7 @@ import '../../../features/alunos/utils/satellite_screen_utils.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/financeiro_repository.dart';
 import '../utils/financeiro_hub_display.dart';
+import '../widgets/financeiro_aluno_cobranca_sheet.dart';
 import '../widgets/financeiro_aluno_help_sheet.dart';
 
 class FinanceiroAlunoScreen extends ConsumerStatefulWidget {
@@ -253,6 +254,16 @@ class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
                                               item.mesReferencia,
                                             ),
                                         titleCase: false,
+                                        onTap:
+                                            () =>
+                                                showFinanceiroAlunoCobrancaSheet(
+                                                  context,
+                                                  item: item,
+                                                  onFalar:
+                                                      () => context.push(
+                                                        '/chat/aluno',
+                                                      ),
+                                                ),
                                         subtitle: Text(
                                           financeiroMensalidadeStatusLabel(
                                             item.status,

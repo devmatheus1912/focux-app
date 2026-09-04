@@ -97,6 +97,60 @@ void main() {
       expect(action.destination, OperacaoStickyDestination.chat);
     });
 
+    test('routes alinhar financeiro to cobrar', () {
+      final action = resolveOperacaoStickyAction(
+        aluno: _aluno(),
+        proximaAcao: const ProximaAcaoResumo(
+          acao: 'Alinhar financeiro com o aluno',
+          motivo: 'Radar',
+          fonte: 'RADAR',
+          prioridade: 'P1',
+        ),
+        hasOpenTask: false,
+        followUpDue: false,
+      );
+      expect(action.label, 'Alinhar financeiro');
+      expect(action.destination, OperacaoStickyDestination.financeiro);
+    });
+
+    test('empty next action on inadimplente cobras', () {
+      final action = resolveOperacaoStickyAction(
+        aluno: Aluno(
+          id: 1,
+          nome: 'Teste',
+          email: 't@test.com',
+          status: 'ATIVO',
+          statusFinanceiro: 'INADIMPLENTE',
+          inadimplente: true,
+        ),
+        proximaAcao: const ProximaAcaoResumo(
+          acao: '',
+          motivo: 'x',
+          fonte: 'PADRAO',
+          prioridade: 'P2',
+        ),
+        hasOpenTask: false,
+        followUpDue: true,
+      );
+      expect(action.label, 'Cobrar mensalidade');
+      expect(action.destination, OperacaoStickyDestination.financeiro);
+    });
+
+    test('routes atribuir treino to treinos list', () {
+      final action = resolveOperacaoStickyAction(
+        aluno: _aluno(),
+        proximaAcao: const ProximaAcaoResumo(
+          acao: 'Atribuir treino da semana',
+          motivo: 'Radar',
+          fonte: 'RADAR',
+          prioridade: 'P1',
+        ),
+        hasOpenTask: false,
+        followUpDue: false,
+      );
+      expect(action.destination, OperacaoStickyDestination.treino);
+    });
+
     test('routes mapa corporal to evolucao with aligned label', () {
       final action = resolveOperacaoStickyAction(
         aluno: _aluno(),

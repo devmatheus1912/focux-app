@@ -90,6 +90,10 @@ class Aluno360OperacaoStickyCtaBar extends ConsumerWidget {
           openEvolucao();
         case OperacaoStickyDestination.editAluno:
           openEditAluno();
+        case OperacaoStickyDestination.financeiro:
+          context.push('/financeiro?alunoId=$alunoId');
+        case OperacaoStickyDestination.treino:
+          context.push('/alunos/$alunoId/treinos-list', extra: aluno.nome);
       }
     }
 
