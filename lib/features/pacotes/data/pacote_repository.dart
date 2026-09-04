@@ -96,7 +96,6 @@ class PacoteRepository {
     required double valor,
     int duracaoMeses = 1,
     bool incluiTreino = true,
-    bool incluiNutri = false,
     bool incluiConsultoria = false,
     bool destaque = false,
   }) async {
@@ -108,7 +107,8 @@ class PacoteRepository {
         'valor': valor,
         'duracaoMeses': duracaoMeses,
         'incluiTreino': incluiTreino,
-        'incluiNutri': incluiNutri,
+        // Backend ainda aceita o campo; app não oferece dieta/nutri.
+        'incluiNutri': false,
         'incluiConsultoria': incluiConsultoria,
         'destaque': destaque,
       },

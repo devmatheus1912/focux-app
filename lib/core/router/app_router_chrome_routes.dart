@@ -97,9 +97,6 @@ import '../../features/relatorio/screens/business_reports_screen.dart';
 import '../../features/growth/screens/migracao_magica_screen.dart';
 import '../../features/gamificacao/screens/gamificacao_screen.dart';
 import '../../features/anamnese/screens/anamnese_screen.dart';
-import '../../features/alimentar/screens/alimentar_screen.dart';
-import '../../features/alimentar/screens/plano_alimentar_detail_screen.dart';
-import '../../features/alimentar/data/alimentar_repository.dart';
 import '../../features/ia/screens/ia_progressao_screen.dart';
 import '../../features/chat/screens/chat_screen.dart';
 import '../../features/perfil/screens/wallet_screen.dart';
@@ -245,39 +242,6 @@ RouteBase buildChromeShellRoute() {
               final id = intPathParam(state, 'id');
               if (id == null) return '/alunos';
               return '/alunos/$id/anamnese';
-            },
-          ),
-          GoRoute(
-            path: '/alunos/:id/alimentar',
-            redirect:
-                (context, state) =>
-                    intPathParam(state, 'id') == null ? '/alunos' : null,
-            builder:
-                (context, state) => AlimentarScreen(
-                  alunoId: intPathParam(state, 'id')!,
-                  alunoNome: stringRouteExtra(state),
-                ),
-          ),
-          GoRoute(
-            path: '/alunos/:id/alimentar/:planoId',
-            redirect: (context, state) {
-              final alunoId = intPathParam(state, 'id');
-              final planoId = intPathParam(state, 'planoId');
-              if (alunoId == null) return '/alunos';
-              if (planoId == null) return '/alunos/$alunoId/alimentar';
-              return null;
-            },
-            builder: (context, state) {
-              final planoId = intPathParam(state, 'planoId')!;
-              final extra =
-                  state.extra is PlanoAlimentar
-                      ? state.extra as PlanoAlimentar
-                      : null;
-              return PlanoAlimentarDetailScreen(
-                alunoId: intPathParam(state, 'id')!,
-                planoId: planoId,
-                initial: extra != null && extra.id == planoId ? extra : null,
-              );
             },
           ),
           GoRoute(

@@ -77,12 +77,6 @@ GET	/api/alunos/{alunoId}/fotos	CL	EvolucaoController.java:62
 POST	/api/alunos/{alunoId}/fotos	C	EvolucaoController.java:67
 GET	/api/alunos/{alunoId}/medidas	CL	EvolucaoController.java:31
 POST	/api/alunos/{alunoId}/medidas	C	EvolucaoController.java:36
-GET	/api/alunos/{alunoId}/planos-alimentares	CL	PlanoAlimentarController.java:19
-POST	/api/alunos/{alunoId}/planos-alimentares	C	PlanoAlimentarController.java:24
-GET	/api/alunos/{alunoId}/planos-alimentares/{planoId}/refeicoes	CL	RefeicaoController.java:24
-POST	/api/alunos/{alunoId}/planos-alimentares/{planoId}/refeicoes	C	RefeicaoController.java:29
-DELETE	/api/alunos/{alunoId}/planos-alimentares/{planoId}/refeicoes/{id}	C	RefeicaoController.java:42
-PUT	/api/alunos/{alunoId}/planos-alimentares/{planoId}/refeicoes/{id}	C	RefeicaoController.java:36
 GET	/api/alunos/{alunoId}/recordes	CL	EvolucaoController.java:43
 POST	/api/alunos/{alunoId}/recordes	C	EvolucaoController.java:48
 GET	/api/alunos/{alunoId}/treinos	CRL	TreinoController.java:87
@@ -295,8 +289,6 @@ GET	/api/ia/copiloto/analise-performance/{alunoId}	AR	IaController.java:119
 GET	/api/ia/copiloto/home	CRO	IaCopilotoHomeController.java:40
 GET	/api/ia/copiloto/insights	CROL	IaCopilotoController.java:55
 GET	/api/ia/copiloto/proxima-acao/{alunoId}	CRO	IaCopilotoController.java:31
-POST	/api/ia/gerar-dieta	AR	IaController.java:37
-POST	/api/ia/gerar-dieta-estruturada	AR	IaController.java:75
 POST	/api/ia/gerar-treino	AR	IaController.java:29
 POST	/api/ia/progressao-carga	ARO	IaController.java:45
 GET	/api/ia/progressao/sugestoes	AL	IaController.java:93

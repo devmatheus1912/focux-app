@@ -6,7 +6,7 @@ String iaAlunoHubViewLabel(IaAlunoHubView view) => switch (view) {
 };
 
 String iaAlunoHubSubtitle(IaAlunoHubView view) => switch (view) {
-  IaAlunoHubView.chat => 'Pergunte sobre treino, dieta ou saúde',
+  IaAlunoHubView.chat => 'Pergunte sobre treino ou saúde',
   IaAlunoHubView.progressao => 'Recomendações de carga, só se você pedir',
 };
 
@@ -14,4 +14,4 @@ const iaAlunoComoCalculamos =
     'Chat e progressão só rodam se você pedir. Nada é aplicado sozinho.';
 
 const iaChatComoCalculamos =
-    'O assistente responde ao que você escreve. Não aplica treino nem dieta.';
+    'O assistente responde ao que você escreve. Não aplica treino sozinho.';

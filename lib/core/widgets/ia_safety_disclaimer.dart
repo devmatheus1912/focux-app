@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../core/theme/design_tokens.dart';
 
 /// Disclaimer de segurança exibido em TODAS as telas que geram
-/// conteúdo via IA (treino, dieta, progressão, chat).
+/// conteúdo via IA (treino, progressão, chat).
 ///
 /// Atende requisito de Apple/Google Store:
 ///   - Apps que geram recomendações de saúde precisam informar
@@ -15,9 +15,9 @@ class IaSafetyDisclaimer extends StatelessWidget {
 
   static const _defaultText =
       'As sugestões geradas por IA são apenas orientações iniciais e '
-      'não substituem a avaliação de um profissional de Educação Física '
-      'ou Nutrição. Sempre consulte um especialista antes de adotar '
-      'qualquer plano de treino ou dieta.';
+      'não substituem a avaliação de um profissional de Educação Física. '
+      'Sempre consulte um especialista antes de adotar qualquer plano de treino. '
+      'Para alimentação, procure um nutricionista.';
 
   @override
   Widget build(BuildContext context) {
