@@ -25,8 +25,25 @@ void main() {
 
   test('copy de adiar 24h fala a verdade do snooze', () {
     expect(alertaAdiarCtaLabel(), 'Adiar 24h');
-    expect(alertaAdiarLoadingLabel(), 'Adiando…');
     expect(alertaAdiadoSuccessMessage(), 'Alerta adiado por 24h.');
+    expect(alertaEnviarMensagemCtaLabel(), 'Enviar mensagem');
+    expect(alertaEnviandoLabel(), 'Enviando…');
+    expect(alertaMensagemEnviadaSuccess(), 'Mensagem enviada.');
+  });
+
+  test('alertaMensagemDraft prefere sugestão e cai no rascunho com nome', () {
+    expect(
+      alertaMensagemDraft(alunoNome: 'Ana Silva', sugestao: '  Manda um oi  '),
+      'Manda um oi',
+    );
+    expect(
+      alertaMensagemDraft(alunoNome: 'Ana Silva'),
+      'Olá Ana! Vi que faz um tempo que não treina. Que tal retomarmos hoje?',
+    );
+    expect(
+      alertaMensagemDraft(alunoNome: '  '),
+      'Olá! Vi que faz um tempo que não treina. Que tal retomarmos hoje?',
+    );
   });
 
   test('AlertaDetalhe ignora e-mail no payload', () {

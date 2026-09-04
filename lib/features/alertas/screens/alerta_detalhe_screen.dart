@@ -31,6 +31,7 @@ import '../../subscription/widgets/upgrade_prompt_sheet.dart';
 import '../data/alertas_repository.dart';
 import '../utils/alerta_detalhe_display.dart';
 import '../widgets/alerta_detalhe_help_sheet.dart';
+import '../widgets/alerta_enviar_mensagem_sheet.dart';
 
 class AlertaDetalheScreen extends ConsumerStatefulWidget {
   final int alunoId;
@@ -57,6 +58,7 @@ class _AlertaDetalheScreenState extends ConsumerState<AlertaDetalheScreen> {
   var _ttvTracked = false;
   var _resolving = false;
   var _gerandoIa = false;
+  var _enviando = false;
 
   @override
   void initState() {
@@ -145,6 +147,34 @@ class _AlertaDetalheScreenState extends ConsumerState<AlertaDetalheScreen> {
       }
     } finally {
       if (mounted) setState(() => _gerandoIa = false);
+    }
+  }
+
+  Future<void> _enviarMensagem() async {
+    if (_enviando) return;
+    final texto = await showAlertaEnviarMensagemSheet(
+      context,
+      draft: alertaMensagemDraft(
+        alunoNome:
+            _detalhe?.alunoNome.isNotEmpty == true
+                ? _detalhe!.alunoNome
+                : widget.alunoNome,
+        sugestao: _detalhe?.sugestaoIa,
+      ),
+    );
+    if (texto == null || !mounted) return;
+    setState(() => _enviando = true);
+    try {
+      await AlertasRepository(
+        ref.read(apiClientProvider),
+      ).enviarMensagemChat(widget.alunoId, texto);
+      if (!mounted) return;
+      FeedbackHelper.showSuccess(context, alertaMensagemEnviadaSuccess());
+    } catch (e) {
+      if (!mounted) return;
+      FeedbackHelper.showError(context, friendlyError(e));
+    } finally {
+      if (mounted) setState(() => _enviando = false);
     }
   }
 
@@ -358,6 +388,13 @@ class _AlertaDetalheScreenState extends ConsumerState<AlertaDetalheScreen> {
                                       ),
                                 ),
                                 DashboardHomeActionChip(
+                                  label: alertaAdiarCtaLabel(),
+                                  accent: primary,
+                                  isDark: isDark,
+                                  enabled: !_resolving,
+                                  onPressed: _resolver,
+                                ),
+                                DashboardHomeActionChip(
                                   label: 'Relatório',
                                   accent: primary,
                                   isDark: isDark,
@@ -397,10 +434,10 @@ class _AlertaDetalheScreenState extends ConsumerState<AlertaDetalheScreen> {
                               MediaQuery.viewInsetsOf(context).bottom,
                         ),
                         child: FxLiquidPrimaryButton(
-                          label: alertaAdiarCtaLabel(),
-                          loading: _resolving,
-                          loadingLabel: alertaAdiarLoadingLabel(),
-                          onPressed: _resolving ? null : _resolver,
+                          label: alertaEnviarMensagemCtaLabel(),
+                          loading: _enviando,
+                          loadingLabel: alertaEnviandoLabel(),
+                          onPressed: _enviando ? null : _enviarMensagem,
                         ),
                       ),
                     ),

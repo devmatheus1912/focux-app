@@ -26,7 +26,8 @@ void main() {
     expect(screen, contains('alertasHubViewed'));
     expect(screen, contains('alertaAdiarCtaLabel'));
     expect(screen, contains('FxLiquidPrimaryButton'));
-    expect(screen, contains('Enviar mensagem'));
+    expect(screen, contains('alertaEnviarMensagemCtaLabel'));
+    expect(screen, contains('showAlertaEnviarMensagemSheet'));
     expect(screen, isNot(contains("fxIcon: 'message-circle'")));
     expect(screen, isNot(contains('MOTOR ANTI-CHURN')));
     expect(screen, isNot(contains('saudaveis')));

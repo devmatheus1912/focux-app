@@ -11,9 +11,27 @@ String alertaCountLabel(int count) {
 
 String alertaAdiarCtaLabel() => 'Adiar 24h';
 
-String alertaAdiarLoadingLabel() => 'Adiando…';
-
 String alertaAdiadoSuccessMessage() => 'Alerta adiado por 24h.';
+
+String alertaEnviarMensagemCtaLabel() => 'Enviar mensagem';
+
+String alertaEnviandoLabel() => 'Enviando…';
+
+String alertaMensagemEnviadaSuccess() => 'Mensagem enviada.';
+
+String alertaMensagemDraft({
+  required String alunoNome,
+  String? sugestao,
+}) {
+  final fromSugestao = sugestao?.trim() ?? '';
+  if (fromSugestao.isNotEmpty) return fromSugestao;
+  final trimmed = alunoNome.trim();
+  if (trimmed.isEmpty) {
+    return 'Olá! Vi que faz um tempo que não treina. Que tal retomarmos hoje?';
+  }
+  final first = trimmed.split(RegExp(r'\s+')).first;
+  return 'Olá $first! Vi que faz um tempo que não treina. Que tal retomarmos hoje?';
+}
 
 String alertaUltimoTreinoLabel(String? raw) {
   final value = raw?.trim() ?? '';

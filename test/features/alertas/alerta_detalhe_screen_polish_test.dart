@@ -23,6 +23,9 @@ void main() {
     expect(screen, contains('alertasDetalheViewed'));
     expect(screen, contains('Melhorar com IA'));
     expect(screen, contains('alertaAdiarCtaLabel'));
+    expect(screen, contains('enviarMensagemChat'));
+    expect(screen, contains('showAlertaEnviarMensagemSheet'));
+    expect(screen, contains('alertaEnviarMensagemCtaLabel'));
     expect(screen, contains('aplicarSugestaoIa'));
     expect(screen, contains('viewInsetsOf'));
     expect(screen, contains('FxContentWidthLimiter'));
