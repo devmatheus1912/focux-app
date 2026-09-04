@@ -93,4 +93,26 @@ void main() {
       'Próxima revisão',
     );
   });
+
+  test('opções de revisão são horizontes fixos', () {
+    final ops = planoSucessoRevisaoOpcoes(DateTime(2026, 9, 4));
+    expect(ops.map((o) => o.dias).toList(), planoSucessoRevisaoHorizontes);
+    expect(ops.first.label, 'Em 7 dias');
+    expect(ops.first.subtitle, '11/09');
+    expect(ops.first.data, DateTime(2026, 9, 11));
+    expect(
+      planoSucessoRevisaoOpcaoSelecionada(
+        opcoes: ops,
+        atual: DateTime(2026, 9, 18),
+      ),
+      DateTime(2026, 9, 18),
+    );
+    expect(
+      planoSucessoRevisaoOpcaoSelecionada(
+        opcoes: ops,
+        atual: DateTime(2026, 10, 1),
+      ),
+      isNull,
+    );
+  });
 }

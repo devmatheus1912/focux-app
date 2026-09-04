@@ -47,3 +47,71 @@ String alimentarFxIcon(int? caloriasDia) {
   if (caloriasDia == null) return 'target';
   return 'flame';
 }
+
+String alimentarKcalMetricValue(int? caloriasDia) {
+  if (caloriasDia == null) return '—';
+  return '$caloriasDia';
+}
+
+String alimentarKcalMetricHint(int? caloriasDia) {
+  if (caloriasDia == null) return 'Sem meta diária';
+  return 'kcal por dia';
+}
+
+String alimentarRefeicoesMetricValue(int count) => '$count';
+
+String alimentarRefeicoesMetricHint(int count) {
+  if (count <= 0) return 'Adicione a primeira';
+  if (count == 1) return '1 refeição prescrita';
+  return '$count refeições prescritas';
+}
+
+String alimentarMacrosMetricValue({
+  int? proteinaG,
+  int? carboidratoG,
+  int? gorduraG,
+}) {
+  if (proteinaG == null && carboidratoG == null && gorduraG == null) {
+    return '—';
+  }
+  final parts = <String>[];
+  if (proteinaG != null) parts.add('${proteinaG}p');
+  if (carboidratoG != null) parts.add('${carboidratoG}c');
+  if (gorduraG != null) parts.add('${gorduraG}g');
+  return parts.join(' · ');
+}
+
+String alimentarMacrosMetricHint({
+  int? proteinaG,
+  int? carboidratoG,
+  int? gorduraG,
+}) {
+  if (proteinaG != null && carboidratoG != null && gorduraG != null) {
+    return 'Proteína, carbo e gordura';
+  }
+  if (proteinaG == null && carboidratoG == null && gorduraG == null) {
+    return 'Sem macros no plano';
+  }
+  return 'Macros parciais';
+}
+
+String alimentarRefeicaoTitle(String nome, String? horario) {
+  final hora = horario?.trim();
+  if (hora == null || hora.isEmpty) return nome;
+  return '$nome · $hora';
+}
+
+String alimentarRefeicaoSubtitle({
+  int? calorias,
+  int? proteinaG,
+  int? carboG,
+  int? gorduraG,
+}) {
+  final parts = <String>[];
+  if (calorias != null) parts.add(alimentarRefeicaoKcalLabel(calorias));
+  if (proteinaG != null) parts.add('${proteinaG}g prot');
+  if (carboG != null) parts.add('${carboG}g carbo');
+  if (gorduraG != null) parts.add('${gorduraG}g gord');
+  if (parts.isEmpty) return 'Sem macros nesta refeição';
+  return parts.join(' · ');
+}

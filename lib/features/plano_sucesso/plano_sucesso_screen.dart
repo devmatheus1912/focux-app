@@ -16,6 +16,7 @@ import '../../core/widgets/fx_error_state.dart';
 import '../../core/widgets/fx_form_sheet.dart';
 import '../../core/widgets/fx_help.dart';
 import '../../core/widgets/fx_hub_header.dart';
+import '../../core/widgets/fx_inset_picker_sheet.dart';
 import '../../core/widgets/fx_icon.dart';
 import '../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../core/widgets/fx_motion.dart';
@@ -167,14 +168,27 @@ class _PlanoSucessoScreenState extends State<PlanoSucessoScreen> {
       plano.proximaRevisao.day,
     );
     if (initial.isBefore(today)) initial = today;
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: initial,
-      firstDate: today,
-      lastDate: DateTime(today.year + 2, today.month, today.day),
-      helpText: 'Próxima revisão',
-      cancelText: 'Cancelar',
-      confirmText: 'Salvar',
+    final opcoes = planoSucessoRevisaoOpcoes(today);
+    final picked = await showFxInsetPickerSheet<DateTime>(
+      context,
+      title: 'Próxima revisão',
+      subtitle: 'Quando você revisa este plano com o aluno.',
+      headerIcon: Icons.event_outlined,
+      selected: planoSucessoRevisaoOpcaoSelecionada(
+        opcoes: opcoes,
+        atual: initial,
+      ),
+      sameValue:
+          (a, b) => a.year == b.year && a.month == b.month && a.day == b.day,
+      items: [
+        for (final opcao in opcoes)
+          FxInsetPickerSheetItem(
+            value: opcao.data,
+            label: opcao.label,
+            subtitle: opcao.subtitle,
+            icon: Icons.event_outlined,
+          ),
+      ],
     );
     if (picked == null || !mounted) return;
     FxKeyboardDismissScope.dismiss();

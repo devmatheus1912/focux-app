@@ -20,7 +20,7 @@ Future<void> showPlanoSucessoHelpSheet(BuildContext context) {
       ),
       FxHelpTip(
         'Revisão',
-        'Com etapas em aberto, o calendário no topo remarca o prazo. Plano completo usa o botão de baixo.',
+        'Com etapas em aberto, o ícone de calendário remarca o prazo. Plano completo usa o botão de baixo.',
         icon: 'calendar',
       ),
     ],
