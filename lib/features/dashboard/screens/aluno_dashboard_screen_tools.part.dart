@@ -14,6 +14,13 @@ class _StudentToolsSection extends StatelessWidget {
         featured: true,
       ),
       _StudentToolAction(
+        icon: Icons.assignment_outlined,
+        title: 'Anamnese',
+        subtitle: 'Ficha de saúde',
+        route: '/aluno/anamnese',
+        featured: true,
+      ),
+      _StudentToolAction(
         icon: Icons.track_changes_outlined,
         title: 'Hábitos',
         subtitle: 'Metas diárias',
@@ -152,4 +159,38 @@ class _StudentToolAction {
     required this.route,
     this.featured = false,
   });
+}
+
+/// Banner no Meu Treino quando a anamnese pede ação do aluno.
+class _AlunoAnamneseCta extends ConsumerWidget {
+  const _AlunoAnamneseCta();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final async = ref.watch(minhaAnamneseProvider);
+    return async.when(
+      data: (a) {
+        if (!a.alunoDevePreencher) return const SizedBox.shrink();
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(FxSettingsLayout.groupRadius),
+              onTap: () => context.push('/aluno/anamnese'),
+              child: AnamneseStatusBanner(
+                title: anamneseAlunoCtaTitle(a),
+                body: anamneseAlunoCtaBody(a),
+                tone: a.isPrecisaAtestado
+                    ? AnamneseBannerTone.warn
+                    : AnamneseBannerTone.info,
+              ),
+            ),
+          ),
+        );
+      },
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
+    );
+  }
 }

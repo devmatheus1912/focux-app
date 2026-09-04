@@ -12,7 +12,6 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../alunos/data/aluno_repository.dart';
 import '../../alunos/providers/alunos_provider.dart';
-import '../../anamnese/data/anamnese_repository.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../evolucao/data/evolucao_repository.dart';
 import '../utils/birth_date_api_format.dart';

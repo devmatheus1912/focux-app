@@ -70,6 +70,8 @@ bool isAlunoOnlyLocation(String path) {
     '/aluno/ativacao',
     '/aluno/perfil',
     '/aluno/definir-senha',
+    '/aluno/anamnese',
+    '/aluno/habitos',
     '/evolucao',
     '/chat/aluno',
     '/financeiro/aluno',
@@ -134,6 +136,7 @@ bool isPersonalOnlyLocation(String path) {
   }
 
   return path.startsWith('/alunos/') ||
+      path.startsWith('/personal/alunos/') ||
       path.startsWith('/treinos/') ||
       path.startsWith('/exercicios') ||
       path.startsWith('/financeiro/mensalidades') ||
