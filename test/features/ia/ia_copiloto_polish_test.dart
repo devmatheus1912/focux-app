@@ -5,7 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../support/screen_source_bundle.dart';
 
 void main() {
-  test('copiloto usa polish: shell, semantics e barra fixa', () {
+  test('copiloto usa polish: shell, semantics e chip overlay S1', () {
     final screen = readScreenSourceBundle(
       'lib/features/ia/screens/ia_copiloto_screen.dart',
     );
@@ -35,18 +35,20 @@ void main() {
       2,
       reason: 'P0 só em Gerar + sticky de resultado — seletor de aluno é tonal',
     );
-    expect(shellWidgets, contains('FxConversionTextLink'));
+    expect(shellWidgets, contains('DashboardPrioritiesOverlay'));
+    expect(shellWidgets, contains('scrollReserve'));
+    expect(shellWidgets, isNot(contains('FxConversionTextLink')));
+    expect(shellWidgets, isNot(contains('chrome.cardFill')));
     expect(shellWidgets, contains('FxToggleChip'));
     expect(shellWidgets, contains('person_outline_rounded'));
     expect(shellWidgets, contains('Pronto para revisão'));
     expect(shellWidgets, isNot(contains('Recomendações prontas')));
-    expect(shellWidgets, contains('chrome.cardFill'));
     expect(shellWidgets, isNot(contains('FxSettingsGroup')));
     expect(shellWidgets, isNot(contains('SafeArea(')));
-    expect(shellWidgets, isNot(contains('scrollReserve')));
-    expect(screen, contains('bottomNavigationBar:'));
-    expect(screen, isNot(contains('IaCopilotResultActionBar.scrollReserve')));
-    expect(screen, isNot(contains('bottom: _gerado ? 108')));
+    expect(screen, isNot(contains('bottomNavigationBar:')));
+    expect(screen, contains('IaCopilotResultActionBar.scrollReserve'));
+    expect(screen, contains('Positioned('));
+    expect(screen, contains('Stack('));
     expect(screen, contains('if (!_gerado)'));
     expect(screen, contains('IaCopilotReadinessCard'));
     expect(actionsPart, contains('explicitChildNodes: true'));

@@ -3,17 +3,15 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
-import '../../../core/theme/fx_settings_layout.dart';
-import '../../../core/widgets/fx_conversion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_toggle_chip.dart';
 import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../utils/ia_copiloto_display.dart';
 
-/// Footer de resultado após gerar — [Scaffold.bottomNavigationBar].
-/// Sem SafeArea: o [MainShell] já aplica `FxDock.shellClearance`.
-/// Superfície opaca evita insights “vazando” por baixo do CTA.
+/// Chip sticky S1 após gerar — paridade [DashboardPrioritiesOverlay].
+/// Overlay flutuante (não barra `bottomNavigationBar` / S3–S5).
+/// O pai posiciona no Stack; scroll reserva folga para não cobrir Insights.
 class IaCopilotResultActionBar extends StatelessWidget {
   const IaCopilotResultActionBar({
     super.key,
@@ -28,36 +26,50 @@ class IaCopilotResultActionBar extends StatelessWidget {
   final VoidCallback onPrimary;
   final VoidCallback onMore;
 
+  /// Folga de scroll quando o overlay está visível (chip + link + padding).
+  static const double scrollReserve = 96;
+
   @override
   Widget build(BuildContext context) {
-    final chrome = ShellChrome.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Material(
-      color: chrome.cardFill.withValues(alpha: isDark ? 0.96 : 0.94),
-      elevation: 0,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(
-          FxSettingsLayout.pageInset,
-          TokensStrip.s2,
-          FxSettingsLayout.pageInset,
-          TokensStrip.s3,
-        ),
+    final moreLabel = iaCopilotoMaisAcoesLabel();
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        TokensStrip.s4,
+        0,
+        TokensStrip.s4,
+        10,
+      ),
+      child: Align(
+        alignment: AlignmentDirectional.bottomStart,
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Align(
-              alignment: Alignment.centerLeft,
-              child: DashboardHomeActionChip(
-                label: primaryLabel ?? iaCopilotoCriarTarefaLabel(),
-                accent: brand,
-                isDark: isDark,
-                onPressed: onPrimary,
-              ),
+            DashboardHomeActionChip(
+              label: primaryLabel ?? iaCopilotoCriarTarefaLabel(),
+              accent: brand,
+              isDark: isDark,
+              onPressed: onPrimary,
             ),
-            FxConversionTextLink(
-              text: '',
-              actionText: iaCopilotoMaisAcoesLabel(),
-              onTap: onMore,
+            Semantics(
+              button: true,
+              label: moreLabel,
+              child: InkWell(
+                onTap: onMore,
+                borderRadius: BorderRadius.circular(TokensStrip.rSm),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(4, 10, 12, 4),
+                  child: Text(
+                    moreLabel,
+                    style: TextStyle(
+                      color: brand,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ),
             ),
           ],
         ),
