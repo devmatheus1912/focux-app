@@ -29,6 +29,16 @@ String alertaCheckinsLabel(int count) {
   return '$count em 30 dias';
 }
 
+String alertaHubSubtitle({
+  required String statusFinanceiro,
+  String? freshness,
+}) {
+  final parts = <String>[alertaStatusFinanceiroLabel(statusFinanceiro)];
+  final stamp = freshness?.trim();
+  if (stamp != null && stamp.isNotEmpty) parts.add(stamp);
+  return parts.join(' · ');
+}
+
 String alertaStatusFinanceiroLabel(String raw) {
   final value = raw.trim();
   if (value.isEmpty) return 'Sem dado';

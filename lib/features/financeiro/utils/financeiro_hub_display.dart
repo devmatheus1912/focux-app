@@ -78,6 +78,18 @@ String financeiroMensalidadeSubtitle(String status, String mesReferencia) {
       '${financeiroMensalidadeMesLabel(mesReferencia)}';
 }
 
+String financeiroMensalidadeHubSubtitle({
+  required String mes,
+  String? freshness,
+}) {
+  final parts = <String>[];
+  final month = mes.trim();
+  if (month.isNotEmpty) parts.add(month);
+  final stamp = freshness?.trim();
+  if (stamp != null && stamp.isNotEmpty) parts.add(stamp);
+  return parts.join(' · ');
+}
+
 const _meses = [
   '',
   'Janeiro',

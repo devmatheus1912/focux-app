@@ -60,6 +60,11 @@ void main() {
       leadListSubtitle('há 1 min'),
       'Funil de prospects · há 1 min',
     );
+    expect(leadHubSubtitle(status: 'LEAD'), 'Lead');
+    expect(
+      leadHubSubtitle(status: 'LEAD', freshness: 'Atualizado agora'),
+      'Lead · Atualizado agora',
+    );
     expect(
       leadCardSubtitle(objetivo: 'Emagrecer', origem: 'Instagram'),
       'Emagrecer',

@@ -18,6 +18,7 @@ import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_hub_header.dart';
+import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/ia_safety_disclaimer.dart';
 import '../../../core/widgets/operational_metric_tile.dart';
@@ -203,16 +204,67 @@ class _AlertaDetalheScreenState extends ConsumerState<AlertaDetalheScreen> {
                 ? FxErrorState(
                   chromeOnDark: isDark,
                   primary: primary,
+                  title: 'Não conseguimos carregar o alerta',
                   message: _erro!,
                   onRetry: _load,
                 )
                 : _detalhe == null
-                ? FxEmptyState(
-                  icon: 'alert-triangle',
-                  title: 'Sem dados deste alerta',
-                  subtitle:
-                      'Não encontramos o detalhe agora. Puxe para atualizar.',
-                  action: FxEmptyAction(label: 'Tentar de novo', onTap: _load),
+                ? Column(
+                  children: [
+                    Expanded(
+                      child: RefreshIndicator(
+                        color: primary,
+                        onRefresh: _load,
+                        child: FxContentWidthLimiter(
+                          child: ListView(
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            padding: const EdgeInsets.fromLTRB(
+                              FxSettingsLayout.pageInset,
+                              TokensStrip.s4,
+                              FxSettingsLayout.pageInset,
+                              TokensStrip.s4,
+                            ),
+                            children: [
+                              FxHubHeader(
+                                title: nome,
+                                subtitle: FxHubFreshness.fromFetchedAt(
+                                      _fetchedAt,
+                                    ) ??
+                                    'Sem dados agora',
+                              ),
+                              const SizedBox(height: TokensStrip.s4),
+                              FxEmptyState(
+                                icon: 'alert-triangle',
+                                title: 'Sem dados deste alerta',
+                                subtitle:
+                                    'Não encontramos o detalhe agora. Puxe para atualizar.',
+                                action: FxEmptyAction(
+                                  label: 'Tentar de novo',
+                                  onTap: _load,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    SafeArea(
+                      top: false,
+                      child: Padding(
+                        padding: EdgeInsets.fromLTRB(
+                          FxSettingsLayout.pageInset,
+                          TokensStrip.s2,
+                          FxSettingsLayout.pageInset,
+                          TokensStrip.s3 +
+                              MediaQuery.viewInsetsOf(context).bottom,
+                        ),
+                        child: FxLiquidPrimaryButton(
+                          label: 'Tentar de novo',
+                          onPressed: _load,
+                        ),
+                      ),
+                    ),
+                  ],
                 )
                 : Column(
                   children: [
@@ -225,7 +277,8 @@ class _AlertaDetalheScreenState extends ConsumerState<AlertaDetalheScreen> {
                           );
                           await _load();
                         },
-                        child: ListView(
+                        child: FxContentWidthLimiter(
+                          child: ListView(
                           physics: const AlwaysScrollableScrollPhysics(),
                           padding: const EdgeInsets.fromLTRB(
                             FxSettingsLayout.pageInset,
@@ -236,11 +289,11 @@ class _AlertaDetalheScreenState extends ConsumerState<AlertaDetalheScreen> {
                           children: [
                             FxHubHeader(
                               title: nome,
-                              freshnessLabel: FxHubFreshness.fromFetchedAt(
-                                _fetchedAt,
-                              ),
-                              subtitle: alertaStatusFinanceiroLabel(
-                                _detalhe!.statusFinanceiro,
+                              subtitle: alertaHubSubtitle(
+                                statusFinanceiro: _detalhe!.statusFinanceiro,
+                                freshness: FxHubFreshness.fromFetchedAt(
+                                  _fetchedAt,
+                                ),
                               ),
                             ),
                             const SizedBox(height: TokensStrip.s4),
@@ -332,14 +385,16 @@ class _AlertaDetalheScreenState extends ConsumerState<AlertaDetalheScreen> {
                         ),
                       ),
                     ),
+                    ),
                     SafeArea(
                       top: false,
                       child: Padding(
-                        padding: const EdgeInsets.fromLTRB(
+                        padding: EdgeInsets.fromLTRB(
                           FxSettingsLayout.pageInset,
                           TokensStrip.s2,
                           FxSettingsLayout.pageInset,
-                          TokensStrip.s3,
+                          TokensStrip.s3 +
+                              MediaQuery.viewInsetsOf(context).bottom,
                         ),
                         child: FxLiquidPrimaryButton(
                           label: alertaAdiarCtaLabel(),
