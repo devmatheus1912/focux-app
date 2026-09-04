@@ -87,5 +87,25 @@ void main() {
       '450 kcal · 40g prot',
     );
     expect(alimentarRefeicaoSubtitle(), 'Sem macros nesta refeição');
+    expect(alimentarCampoNumerico(null), '');
+    expect(alimentarCampoNumerico(40), '40');
+    expect(
+      alimentarRefeicaoPayload(
+        nome: ' Café ',
+        horario: '07:30',
+        calorias: '450',
+        proteina: '',
+        carbo: '50',
+        gordura: '',
+        alimentos: 'aveia',
+      ),
+      {
+        'nomeRefeicao': 'Café',
+        'horario': '07:30',
+        'calorias': 450,
+        'carboG': 50,
+        'alimentos': 'aveia',
+      },
+    );
   });
 }

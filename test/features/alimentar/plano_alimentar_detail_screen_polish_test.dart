@@ -22,7 +22,8 @@ void main() {
     expect(screen, contains('RefreshIndicator'));
     expect(screen, contains('FxHubFreshness.fromFetchedAt'));
     expect(screen, contains('viewInsetsOf'));
-    expect(screen, contains('showFxFormSheet'));
+    expect(screen, contains('atualizarRefeicao'));
+    expect(screen, contains('_abrirRefeicaoSheet'));
     expect(screen, contains('showFxConfirmSheet'));
     expect(screen, contains('IaQuotaUpgrade.guardBeforeRequest'));
     expect(screen, contains('.obter('));

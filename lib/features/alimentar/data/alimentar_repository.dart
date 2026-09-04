@@ -115,6 +115,19 @@ class AlimentarRepository {
     return Refeicao.fromJson(r.data as Map<String, dynamic>);
   }
 
+  Future<Refeicao> atualizarRefeicao(
+    int alunoId,
+    int planoId,
+    int refeicaoId,
+    Map<String, dynamic> data,
+  ) async {
+    final r = await _dio.put(
+      '/api/alunos/$alunoId/planos-alimentares/$planoId/refeicoes/$refeicaoId',
+      data: data,
+    );
+    return Refeicao.fromJson(r.data as Map<String, dynamic>);
+  }
+
   Future<void> excluirRefeicao(int alunoId, int planoId, int refeicaoId) async {
     await _dio.delete(
       '/api/alunos/$alunoId/planos-alimentares/$planoId/refeicoes/$refeicaoId',

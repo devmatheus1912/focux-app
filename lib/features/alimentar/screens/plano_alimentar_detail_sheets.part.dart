@@ -1,26 +1,37 @@
 part of 'plano_alimentar_detail_screen.dart';
 
 extension on _PlanoAlimentarDetailScreenState {
-  Future<void> _abrirNovaRefeicao() async {
+  Future<void> _abrirNovaRefeicao() => _abrirRefeicaoSheet();
+
+  Future<void> _abrirRefeicaoSheet({Refeicao? existing}) async {
     if (_plano == null) return;
     HapticFeedback.selectionClick();
-    final nome = TextEditingController();
-    final horario = TextEditingController();
-    final cal = TextEditingController();
-    final prot = TextEditingController();
-    final carbo = TextEditingController();
-    final gord = TextEditingController();
-    final alimentos = TextEditingController();
-    var created = false;
+    final nome = TextEditingController(text: existing?.nomeRefeicao ?? '');
+    final horario = TextEditingController(text: existing?.horario ?? '');
+    final cal = TextEditingController(
+      text: alimentarCampoNumerico(existing?.calorias),
+    );
+    final prot = TextEditingController(
+      text: alimentarCampoNumerico(existing?.proteinaG),
+    );
+    final carbo = TextEditingController(
+      text: alimentarCampoNumerico(existing?.carboG),
+    );
+    final gord = TextEditingController(
+      text: alimentarCampoNumerico(existing?.gorduraG),
+    );
+    final alimentos = TextEditingController(text: existing?.alimentos ?? '');
+    final editing = existing != null;
+    var saved = false;
 
     try {
       if (!mounted) return;
       final ok = await showFxFormSheet(
         context,
-        title: 'Nova refeição',
-        subtitle: 'Adicione horário, macros e alimentos.',
+        title: editing ? 'Editar refeição' : 'Nova refeição',
+        subtitle: 'Horário, macros e alimentos deste plano.',
         icon: Icons.restaurant_outlined,
-        confirmLabel: 'Adicionar refeição',
+        confirmLabel: editing ? 'Salvar' : 'Adicionar refeição',
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -76,20 +87,27 @@ extension on _PlanoAlimentarDetailScreenState {
         FeedbackHelper.showWarn(context, 'Nome da refeição é obrigatório.');
         return;
       }
-      await AlimentarRepository(ref.read(apiClientProvider)).criarRefeicao(
-        widget.alunoId,
-        plano.id,
-        {
-          'nomeRefeicao': nome.text.trim(),
-          if (horario.text.isNotEmpty) 'horario': horario.text.trim(),
-          if (cal.text.isNotEmpty) 'calorias': int.tryParse(cal.text),
-          if (prot.text.isNotEmpty) 'proteinaG': int.tryParse(prot.text),
-          if (carbo.text.isNotEmpty) 'carboG': int.tryParse(carbo.text),
-          if (gord.text.isNotEmpty) 'gorduraG': int.tryParse(gord.text),
-          if (alimentos.text.isNotEmpty) 'alimentos': alimentos.text.trim(),
-        },
+      final payload = alimentarRefeicaoPayload(
+        nome: nome.text,
+        horario: horario.text,
+        calorias: cal.text,
+        proteina: prot.text,
+        carbo: carbo.text,
+        gordura: gord.text,
+        alimentos: alimentos.text,
       );
-      created = true;
+      final repo = AlimentarRepository(ref.read(apiClientProvider));
+      if (editing) {
+        await repo.atualizarRefeicao(
+          widget.alunoId,
+          plano.id,
+          existing.id,
+          payload,
+        );
+      } else {
+        await repo.criarRefeicao(widget.alunoId, plano.id, payload);
+      }
+      saved = true;
     } catch (e) {
       if (mounted) {
         FeedbackHelper.showError(context, friendlyError(e));
@@ -103,7 +121,7 @@ extension on _PlanoAlimentarDetailScreenState {
       gord.dispose();
       alimentos.dispose();
     }
-    if (created) await _load();
+    if (saved) await _load();
   }
 
   Future<void> _abrirGerarIa() async {

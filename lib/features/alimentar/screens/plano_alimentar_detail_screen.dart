@@ -292,6 +292,7 @@ class _PlanoAlimentarDetailScreenState
                       onPressed: () => _excluir(r),
                       icon: Icon(Icons.delete_outline_rounded, color: mute),
                     ),
+                    onTap: () => _abrirRefeicaoSheet(existing: r),
                   );
                 },
               ),
