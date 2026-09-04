@@ -14,6 +14,7 @@ import '../constants/aluno_360_layout.dart';
 import '../data/aluno_repository.dart';
 import '../providers/aluno_followup_provider.dart';
 import '../utils/aluno360_a11y.dart';
+import '../utils/aluno360_followup_dates.dart';
 import '../utils/aluno360_operacao_logic.dart';
 
 class Aluno360FollowUpCard extends ConsumerStatefulWidget {
@@ -54,11 +55,7 @@ class _Aluno360FollowUpCardState extends ConsumerState<Aluno360FollowUpCard> {
     await _runAction(() => actions.clearFollowUp(aluno.id), 'Follow-up limpo');
   }
 
-  String _formatDate(DateTime date) {
-    final d = date.day.toString().padLeft(2, '0');
-    final m = date.month.toString().padLeft(2, '0');
-    return '$d/$m/${date.year}';
-  }
+  String _formatDate(DateTime date) => alunoFollowUpDateLabel(date);
 
   String _formatTime(DateTime value) {
     final h = value.hour.toString().padLeft(2, '0');
@@ -121,14 +118,27 @@ class _Aluno360FollowUpCardState extends ConsumerState<Aluno360FollowUpCard> {
 
   Future<void> _pickFollowUpDate() async {
     if (_busy) return;
-    final now = DateTime.now();
-    final current = aluno.followUpDate;
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: current ?? now,
-      firstDate: now.subtract(const Duration(days: 1)),
-      lastDate: now.add(const Duration(days: 365)),
-      helpText: 'Próximo contato',
+    final options = alunoFollowUpDateOptions(DateTime.now());
+    final picked = await showFxInsetPickerSheet<DateTime>(
+      context,
+      title: 'Próximo contato',
+      subtitle: 'Quando você fala de novo com ${aluno.nome}.',
+      headerIcon: Icons.event_outlined,
+      selected: alunoFollowUpDateSelected(
+        options: options,
+        current: aluno.followUpDate,
+      ),
+      sameValue:
+          (a, b) => a.year == b.year && a.month == b.month && a.day == b.day,
+      items: [
+        for (final option in options)
+          FxInsetPickerSheetItem(
+            value: option.date,
+            label: option.label,
+            subtitle: option.subtitle,
+            icon: Icons.event_outlined,
+          ),
+      ],
     );
     if (picked == null) return;
     await _runAction(

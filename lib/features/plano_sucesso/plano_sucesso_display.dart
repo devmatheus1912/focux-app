@@ -87,3 +87,47 @@ String planoSucessoRevisaoMetricHint(DateTime? data) {
   if (data == null) return 'Sem data de revisão';
   return 'Próxima revisão';
 }
+
+class PlanoSucessoRevisaoOpcao {
+  const PlanoSucessoRevisaoOpcao({
+    required this.dias,
+    required this.data,
+    required this.label,
+    required this.subtitle,
+  });
+
+  final int dias;
+  final DateTime data;
+  final String label;
+  final String subtitle;
+}
+
+const planoSucessoRevisaoHorizontes = [7, 14, 21, 30, 45, 60];
+
+List<PlanoSucessoRevisaoOpcao> planoSucessoRevisaoOpcoes(DateTime today) {
+  final base = DateTime(today.year, today.month, today.day);
+  return [
+    for (final dias in planoSucessoRevisaoHorizontes)
+      PlanoSucessoRevisaoOpcao(
+        dias: dias,
+        data: base.add(Duration(days: dias)),
+        label: 'Em $dias dias',
+        subtitle: planoSucessoRevisaoLabel(base.add(Duration(days: dias))),
+      ),
+  ];
+}
+
+DateTime? planoSucessoRevisaoOpcaoSelecionada({
+  required List<PlanoSucessoRevisaoOpcao> opcoes,
+  required DateTime atual,
+}) {
+  final day = DateTime(atual.year, atual.month, atual.day);
+  for (final opcao in opcoes) {
+    if (opcao.data.year == day.year &&
+        opcao.data.month == day.month &&
+        opcao.data.day == day.day) {
+      return opcao.data;
+    }
+  }
+  return null;
+}

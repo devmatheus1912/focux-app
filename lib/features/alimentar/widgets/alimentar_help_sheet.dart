@@ -21,3 +21,28 @@ Future<void> showAlimentarHelpSheet(BuildContext context) {
     ],
   );
 }
+
+Future<void> showAlimentarPlanoHelpSheet(BuildContext context) {
+  return showFxHelpSheet(
+    context,
+    title: 'Como usar este plano',
+    subtitle: 'Refeições, macros e dieta com IA.',
+    tips: const [
+      FxHelpTip(
+        'Nova refeição',
+        'O botão de baixo adiciona horário, macros e alimentos neste plano.',
+        icon: 'plus',
+      ),
+      FxHelpTip(
+        'IA',
+        'O ícone de spark gera a dieta. Você confirma os dados antes; nada entra sozinho.',
+        icon: 'spark',
+      ),
+      FxHelpTip(
+        'Remover',
+        'A lixeira na refeição pede confirmação e some só daquele item.',
+        icon: 'x',
+      ),
+    ],
+  );
+}

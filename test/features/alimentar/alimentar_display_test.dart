@@ -48,4 +48,44 @@ void main() {
     expect(alimentarFxIcon(null), 'target');
     expect(alimentarFxIcon(1800), 'flame');
   });
+
+  test('métricas e refeição do detalhe', () {
+    expect(alimentarKcalMetricValue(null), '—');
+    expect(alimentarKcalMetricValue(1800), '1800');
+    expect(alimentarKcalMetricHint(null), 'Sem meta diária');
+    expect(alimentarKcalMetricHint(1800), 'kcal por dia');
+    expect(alimentarRefeicoesMetricValue(0), '0');
+    expect(alimentarRefeicoesMetricHint(0), 'Adicione a primeira');
+    expect(alimentarRefeicoesMetricHint(1), '1 refeição prescrita');
+    expect(alimentarRefeicoesMetricHint(3), '3 refeições prescritas');
+    expect(
+      alimentarMacrosMetricValue(
+        proteinaG: 180,
+        carboidratoG: 250,
+        gorduraG: 60,
+      ),
+      '180p · 250c · 60g',
+    );
+    expect(alimentarMacrosMetricValue(), '—');
+    expect(
+      alimentarMacrosMetricHint(
+        proteinaG: 180,
+        carboidratoG: 250,
+        gorduraG: 60,
+      ),
+      'Proteína, carbo e gordura',
+    );
+    expect(alimentarMacrosMetricHint(), 'Sem macros no plano');
+    expect(
+      alimentarMacrosMetricHint(proteinaG: 180),
+      'Macros parciais',
+    );
+    expect(alimentarRefeicaoTitle('Café', '07:30'), 'Café · 07:30');
+    expect(alimentarRefeicaoTitle('Café', null), 'Café');
+    expect(
+      alimentarRefeicaoSubtitle(calorias: 450, proteinaG: 40),
+      '450 kcal · 40g prot',
+    );
+    expect(alimentarRefeicaoSubtitle(), 'Sem macros nesta refeição');
+  });
 }
