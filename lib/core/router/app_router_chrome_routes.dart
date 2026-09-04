@@ -257,16 +257,18 @@ RouteBase buildChromeShellRoute() {
               final planoId = intPathParam(state, 'planoId');
               if (alunoId == null) return '/alunos';
               if (planoId == null) return '/alunos/$alunoId/alimentar';
-              if (state.extra is PlanoAlimentar) {
-                final extra = state.extra as PlanoAlimentar;
-                if (extra.id == planoId) return null;
-              }
-              return '/alunos/$alunoId/alimentar';
+              return null;
             },
             builder: (context, state) {
+              final planoId = intPathParam(state, 'planoId')!;
+              final extra =
+                  state.extra is PlanoAlimentar
+                      ? state.extra as PlanoAlimentar
+                      : null;
               return PlanoAlimentarDetailScreen(
                 alunoId: intPathParam(state, 'id')!,
-                plano: state.extra as PlanoAlimentar,
+                planoId: planoId,
+                initial: extra != null && extra.id == planoId ? extra : null,
               );
             },
           ),

@@ -19,6 +19,7 @@ void main() {
     expect(screen, contains('RefreshIndicator'));
     expect(screen, contains('showDatePicker'));
     expect(screen, contains('revisarPlano'));
+    expect(screen, contains('FxKeyboardDismissScope.dismiss'));
     expect(screen, contains("icon: 'calendar'"));
     expect(screen, contains('FxEmptyState'));
     expect(screen, contains('SkeletonList'));

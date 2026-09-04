@@ -1,3 +1,5 @@
+import '../data/alimentar_repository.dart';
+
 String alimentarKcalLabel(int? caloriasDia) {
   if (caloriasDia == null) return 'Sem meta';
   return '$caloriasDia kcal/dia';
@@ -32,4 +34,16 @@ String alimentarRefeicaoKcalLabel(int? calorias) {
 String alimentarPlanosMetricHint(int count) {
   if (count <= 0) return 'Crie o primeiro plano';
   return 'Toque para abrir as refeições';
+}
+
+PlanoAlimentar? alimentarPlanoById(List<PlanoAlimentar> planos, int planoId) {
+  for (final plano in planos) {
+    if (plano.id == planoId) return plano;
+  }
+  return null;
+}
+
+String alimentarFxIcon(int? caloriasDia) {
+  if (caloriasDia == null) return 'target';
+  return 'flame';
 }

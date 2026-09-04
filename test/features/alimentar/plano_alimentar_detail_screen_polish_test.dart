@@ -19,6 +19,7 @@ void main() {
     expect(screen, contains('showFxFormSheet'));
     expect(screen, contains('showFxConfirmSheet'));
     expect(screen, contains('IaQuotaUpgrade.guardBeforeRequest'));
+    expect(screen, contains('.obter('));
     expect(screen, contains('_MacroBar'));
     expect(screen, isNot(contains('TabBar')));
     expect(screen, isNot(contains('TabBarView')));

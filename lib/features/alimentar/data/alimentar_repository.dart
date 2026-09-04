@@ -78,6 +78,14 @@ class AlimentarRepository {
     return (r.data as List).map((e) => PlanoAlimentar.fromJson(e)).toList();
   }
 
+  Future<PlanoAlimentar?> obter(int alunoId, int planoId) async {
+    final planos = await listar(alunoId);
+    for (final plano in planos) {
+      if (plano.id == planoId) return plano;
+    }
+    return null;
+  }
+
   Future<PlanoAlimentar> criar(int alunoId, Map<String, dynamic> data) async =>
       PlanoAlimentar.fromJson(
         (await _dio.post(
