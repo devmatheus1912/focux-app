@@ -25,6 +25,7 @@ import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../models/checkin_personal_home.dart';
 import '../providers/checkin_provider.dart';
+import '../utils/checkin_personal_display.dart';
 import '../widgets/checkin_personal_help_sheet.dart';
 
 class CheckinPersonalHubScreen extends ConsumerStatefulWidget {
@@ -222,10 +223,18 @@ class _CheckinTodayCard extends StatelessWidget {
           Align(
             alignment: Alignment.centerLeft,
             child: DashboardHomeActionChip(
-              label: 'Ver alunos',
+              label: checkinFocusAction(home).label,
               accent: Theme.of(context).colorScheme.primary,
               isDark: isDark,
-              onPressed: () => goPersonalShellTab(context, '/alunos'),
+              onPressed: () {
+                final focus = checkinFocusAction(home);
+                final alunoId = focus.alunoId;
+                if (alunoId != null) {
+                  context.push('/alunos/$alunoId');
+                  return;
+                }
+                goPersonalShellTab(context, '/alunos');
+              },
             ),
           ),
         ],

@@ -49,6 +49,10 @@ void main() {
     expect(screen, contains('FxStripCard'));
     expect(screen, contains('OperationalMetricTile'));
     expect(screen, contains('Prontidão'));
+    expect(screen, contains('Como calculamos'));
+    expect(screen, contains('saudeAtualizarLabel'));
+    expect(screen, contains('showFxConfirmSheet'));
+    expect(screen, contains('FxConversionTextLink'));
     expect(screen, isNot(contains('class _MetricCard')));
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(16));
   });

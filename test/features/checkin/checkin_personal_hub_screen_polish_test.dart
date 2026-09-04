@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../support/screen_source_bundle.dart';
@@ -13,6 +15,12 @@ void main() {
     expect(screen, contains('FxContentWidthLimiter'));
     expect(screen, contains("safePopOrGo(context, '/dashboard/personal')"));
     expect(screen, contains('FxHelpIconButton'));
+    expect(screen, contains('checkinFocusAction'));
+    expect(
+      File('lib/features/checkin/widgets/checkin_personal_help_sheet.dart')
+          .readAsStringSync(),
+      contains('Como calculamos'),
+    );
     expect(screen, contains('FxStripCard'));
     expect(screen, contains('emphasize: true'));
     expect(screen, contains('FxSatelliteListTile'));

@@ -80,6 +80,7 @@ class _QualidadeOperacionalScreenState
                     title: 'Qualidade',
                     subtitle: 'Como a operação se compara ao mercado.',
                     tips: const [
+                      FxHelpTip('Como calculamos', qualidadeComoCalculamos),
                       FxHelpTip(
                         'Índice',
                         'O card do topo é o recorte do dia.',
