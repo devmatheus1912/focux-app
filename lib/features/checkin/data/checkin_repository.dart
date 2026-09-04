@@ -413,8 +413,21 @@ class CheckinRepository {
         .toList();
   }
 
-  Future<CheckinPersonalHomeBundle> personalHome() async {
-    final r = await _dio.get('/api/checkin/personal/home');
+  static const personalHomePageSize = 20;
+
+  Future<CheckinPersonalHomeBundle> personalHome({
+    int page = 0,
+    String? q,
+  }) async {
+    final query = q?.trim() ?? '';
+    final r = await _dio.get(
+      '/api/checkin/personal/home',
+      queryParameters: {
+        'page': page,
+        'size': personalHomePageSize,
+        if (query.isNotEmpty) 'q': query,
+      },
+    );
     return CheckinPersonalHomeBundle.fromJson(
       Map<String, dynamic>.from(r.data as Map),
     );
