@@ -63,8 +63,10 @@ class AvaliacaoFisica {
 
 class SnapshotAvaliacao {
   final double? pesoKg;
+  final double? alturaCm;
   final double? imc;
   final double? percGordura;
+  final double? percMassa;
   final double? massaMuscular;
   final double? circCintura;
   final double? circQuadril;
@@ -74,8 +76,10 @@ class SnapshotAvaliacao {
 
   SnapshotAvaliacao({
     this.pesoKg,
+    this.alturaCm,
     this.imc,
     this.percGordura,
+    this.percMassa,
     this.massaMuscular,
     this.circCintura,
     this.circQuadril,
@@ -87,9 +91,11 @@ class SnapshotAvaliacao {
   factory SnapshotAvaliacao.fromJson(Map<String, dynamic> j) =>
       SnapshotAvaliacao(
         pesoKg: (j['pesoKg'] as num?)?.toDouble(),
+        alturaCm: (j['alturaCm'] as num?)?.toDouble(),
         imc: (j['imc'] as num?)?.toDouble(),
         percGordura:
             (j['percGordura'] ?? j['percentualGordura'] as num?)?.toDouble(),
+        percMassa: (j['percMassa'] as num?)?.toDouble(),
         massaMuscular: (j['massaMuscular'] as num?)?.toDouble(),
         circCintura: (j['circCintura'] ?? j['cinturaCm'] as num?)?.toDouble(),
         circQuadril: (j['circQuadril'] ?? j['quadrilCm'] as num?)?.toDouble(),
@@ -102,16 +108,28 @@ class SnapshotAvaliacao {
 class ComparativoEvolucao {
   final SnapshotAvaliacao primeira;
   final SnapshotAvaliacao atual;
+  final double? diferencaPeso;
 
-  ComparativoEvolucao({required this.primeira, required this.atual});
+  ComparativoEvolucao({
+    required this.primeira,
+    required this.atual,
+    this.diferencaPeso,
+  });
 
-  factory ComparativoEvolucao.fromJson(Map<String, dynamic> j) =>
-      ComparativoEvolucao(
-        primeira: SnapshotAvaliacao.fromJson(
-          j['primeira'] as Map<String, dynamic>,
-        ),
-        atual: SnapshotAvaliacao.fromJson(j['atual'] as Map<String, dynamic>),
-      );
+  factory ComparativoEvolucao.fromJson(Map<String, dynamic> j) {
+    final primeiraRaw = j['primeira'];
+    final atualRaw = j['atual'] ?? j['ultima'];
+    if (primeiraRaw is! Map || atualRaw is! Map) {
+      throw const FormatException('Comparativo sem primeira e última avaliação');
+    }
+    return ComparativoEvolucao(
+      primeira: SnapshotAvaliacao.fromJson(
+        Map<String, dynamic>.from(primeiraRaw),
+      ),
+      atual: SnapshotAvaliacao.fromJson(Map<String, dynamic>.from(atualRaw)),
+      diferencaPeso: (j['diferencaPeso'] as num?)?.toDouble(),
+    );
+  }
 }
 
 class AvaliacaoRepository {

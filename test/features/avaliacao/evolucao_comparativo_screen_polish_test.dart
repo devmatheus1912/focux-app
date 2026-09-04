@@ -11,37 +11,19 @@ void main() {
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(screen, contains('FxShellScaffold'));
     expect(screen, contains('FxContentWidthLimiter'));
-    expect(
-      screen,
-      anyOf(
-        contains('friendlyError'),
-        contains('DashboardErrorState'),
-        contains('FxEmptyState'),
-        contains('_erro'),
-        contains('_TrainingEmptyState'),
-        contains('ref.invalidate'),
-      ),
-    );
-    expect(
-      screen,
-      anyOf(
-        contains('FxLoading'),
-        contains('SkeletonLoader'),
-        contains('SkeletonList'),
-        contains('DashboardShimmer'),
-        contains('Shimmer'),
-        contains('IaCopilotInsightsLoading'),
-        contains('_loading'),
-      ),
-    );
+    expect(screen, contains('friendlyError'));
+    expect(screen, contains('FxEmptyState'));
     expect(screen, contains('SkeletonList'));
-    expect(screen, isNot(contains('FxSettingsGroup')));
-    expect(screen, contains('FxSatelliteListTile'));
-    expect(screen, contains('ShellHeaderIconButton'));
-    expect(screen, contains("icon: 'message-circle'"));
+    expect(screen, contains('RefreshIndicator'));
+    expect(screen, contains('FxHubHeader'));
+    expect(screen, contains('OperationalMetricTile'));
+    expect(screen, contains('FxLiquidPrimaryButton'));
+    expect(screen, contains('FxHelpIconButton'));
+    expect(screen, contains('showFxFormSheet'));
     expect(screen, contains('showFxConfirmSheet'));
     expect(screen, contains('showFxHelpSheet'));
-    expect(screen, isNot(contains('FxLiquidPrimaryButton')));
+    expect(screen, contains('.registrar('));
+    expect(screen, isNot(contains('FxSettingsGroup')));
     expect(screen, isNot(contains('person_add')));
     expect(screen, isNot(contains('DropdownButton')));
     expect(screen, isNot(contains('FloatingActionButton')));

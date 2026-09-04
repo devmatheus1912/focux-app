@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/router/safe_navigation.dart';
@@ -8,13 +7,18 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/utils/fx_utils.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/feature_gate.dart';
+import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
+import '../../../core/widgets/fx_hub_header.dart';
 import '../../../core/widgets/fx_inset_picker_sheet.dart';
+import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/operational_metric_tile.dart';
@@ -159,6 +163,7 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
           ),
     );
     if (!mounted || range == null) return;
+    FxKeyboardDismissScope.dismiss();
     setState(() => _rangeCustom = range);
     await _carregarDados();
   }
@@ -200,12 +205,9 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
-    final freshness = FxHubFreshness.fromFetchedAt(_fetchedAt);
-    final subtitle =
-        freshness == null
-            ? widget.alunoNome
-            : '${widget.alunoNome} · $freshness';
     final dados = _dados;
+    final hasData = dados != null && dados.treinosTotal > 0;
+    final showSticky = !_loading && _erro == null && hasData;
 
     return fxScreenA11yScope(
       label: 'Relatório — ${widget.alunoNome}',
@@ -214,202 +216,196 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
         requiredPlan: SubscriptionPlan.PRO,
         capability: 'relatorios',
         child: FxShellScaffold(
-        useMesh: true,
-        appBar: FxShellAppBar(
-          title: 'Relatório',
-          subtitle: subtitle,
-          onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
-          actions: [
-            FxHelpIconButton(
-              tooltip: 'Como ler este relatório',
-              onTap: () {
-                AnalyticsService.instance.track(
-                  ProductEvents.relatorioAlunoHelpOpened,
-                );
-                showRelatorioAlunoHelpSheet(context);
-              },
-            ),
-          ],
-        ),
-        body: _loading
-            ? const Padding(
-              padding: EdgeInsets.all(FxSettingsLayout.pageInset),
-              child: SkeletonList(count: 6),
-            )
-            : _erro != null
-            ? FxErrorState(
-              chromeOnDark: isDark,
-              primary: primary,
-              title: 'Não conseguimos carregar o relatório',
-              message: _erro!,
-              onRetry: _carregarDados,
-            )
-            : RefreshIndicator(
-              color: primary,
-              onRefresh: () async {
-                AnalyticsService.instance.track(
-                  ProductEvents.relatorioAlunoRefreshed,
-                );
-                await _carregarDados();
-              },
-              child: ListView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.fromLTRB(
-                  FxSettingsLayout.pageInset,
-                  8,
-                  FxSettingsLayout.pageInset,
-                  110,
-                ),
-                children: [
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: DashboardHomeActionChip(
-                      label: relatorioAlunoPeriodoValueLabel(
-                        dias: _dias,
-                        inicio: _rangeCustom?.start,
-                        fim: _rangeCustom?.end,
-                      ),
-                      accent: primary,
-                      isDark: isDark,
-                      onPressed: _abrirPeriodo,
+          useMesh: true,
+          appBar: FxShellAppBar(
+            title: 'Relatório',
+            onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
+            actions: [
+              FxHelpIconButton(
+                tooltip: 'Como ler este relatório',
+                onTap: () {
+                  AnalyticsService.instance.track(
+                    ProductEvents.relatorioAlunoHelpOpened,
+                  );
+                  showRelatorioAlunoHelpSheet(context);
+                },
+              ),
+            ],
+          ),
+          body: Column(
+            children: [
+              Expanded(child: _buildBody(isDark: isDark, primary: primary)),
+              if (showSticky)
+                SafeArea(
+                  top: false,
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      FxSettingsLayout.pageInset,
+                      TokensStrip.s2,
+                      FxSettingsLayout.pageInset,
+                      TokensStrip.s3 + MediaQuery.viewInsetsOf(context).bottom,
                     ),
-                  ),
-                  if (dados == null || dados.treinosTotal == 0) ...[
-                    const SizedBox(height: TokensStrip.s5),
-                    SizedBox(
-                      height: 280,
-                      child: FxEmptyState(
-                        icon: 'trend',
-                        title: 'Sem dados neste período',
-                        subtitle:
-                            'Quando ${satelliteFirstName(widget.alunoNome)} concluir treinos, o relatório aparece aqui.',
-                        action: FxEmptyAction(
-                          label: 'Atualizar',
-                          onTap: _carregarDados,
-                        ),
-                      ),
-                    ),
-                  ] else ...[
-                    const SizedBox(height: TokensStrip.s5),
-                    const DashboardSectionHeader(title: 'Aderência'),
-                    const SizedBox(height: TokensStrip.s3),
-                    OperationalMetricTile(
-                      label: 'Taxa',
-                      value: relatorioAderenciaMediaLabel(
-                        dados.taxaAderenciaPercent,
-                      ),
-                      hint: relatorioAlunoAderenciaStatus(
-                        dados.taxaAderenciaPercent,
-                      ),
-                      color: relatorioAlunoAderenciaBaixa(
-                        dados.taxaAderenciaPercent,
-                      )
-                          ? EagleTokens.bad
-                          : EagleTokens.moneyGreen,
-                      isDark: isDark,
-                      emphasis: relatorioAlunoAderenciaBaixa(
-                        dados.taxaAderenciaPercent,
-                      )
-                          ? OperationalMetricEmphasis.alert
-                          : OperationalMetricEmphasis.normal,
-                    ),
-                    const SizedBox(height: TokensStrip.s2),
-                    OperationalMetricTile(
-                      label: 'Treinos concluídos',
-                      value:
-                          '${dados.treinosConcluidos} / ${dados.treinosTotal}',
-                      hint: 'Concluídos sobre o total neste recorte',
-                      color: primary,
-                      isDark: isDark,
-                    ),
-                    const SizedBox(height: TokensStrip.s2),
-                    OperationalMetricTile(
-                      label: 'Dias analisados',
-                      value: '${dados.diasAnalisados}',
-                      hint: 'Tamanho do recorte',
-                      color: primary,
-                      isDark: isDark,
-                    ),
-                    if (_comparativo != null) ...[
-                      const SizedBox(height: TokensStrip.s5),
-                      const DashboardSectionHeader(
-                        title: 'Versus o recorte anterior',
-                      ),
-                      const SizedBox(height: TokensStrip.s3),
-                      OperationalMetricTile(
-                        label: 'Este período',
-                        value: relatorioAderenciaMediaLabel(
-                          _comparativo!.aderenciaAtual,
-                        ),
-                        hint: relatorioAlunoCheckinsLabel(
-                          _comparativo!.checkInsAtual,
-                        ),
-                        color: primary,
-                        isDark: isDark,
-                      ),
-                      const SizedBox(height: TokensStrip.s2),
-                      OperationalMetricTile(
-                        label: 'Anterior',
-                        value: relatorioAderenciaMediaLabel(
-                          _comparativo!.aderenciaAnterior,
-                        ),
-                        hint: relatorioAlunoCheckinsLabel(
-                          _comparativo!.checkInsAnterior,
-                        ),
-                        color: primary,
-                        isDark: isDark,
-                      ),
-                      const SizedBox(height: TokensStrip.s2),
-                      OperationalMetricTile(
-                        label: 'Variação',
-                        value: relatorioAlunoDeltaLabel(
-                          _comparativo!.deltaPercent,
-                        ),
-                        hint: 'Mesmo número de dias, logo antes deste',
-                        color: _comparativo!.deltaPercent < 0
-                            ? EagleTokens.bad
-                            : EagleTokens.moneyGreen,
-                        isDark: isDark,
-                        emphasis: _comparativo!.deltaPercent < 0
-                            ? OperationalMetricEmphasis.alert
-                            : OperationalMetricEmphasis.normal,
-                      ),
-                    ],
-                    const SizedBox(height: TokensStrip.s5),
-                    const DashboardSectionHeader(title: 'Ações'),
-                    const SizedBox(height: TokensStrip.s3),
-                    Semantics(
+                    child: Semantics(
                       button: true,
                       label: 'Exportar relatório em PDF',
-                      child: FxSatelliteListTile(
-                        title: _exporting
-                            ? 'Gerando PDF…'
-                            : 'Exportar PDF',
-                        onTap: _exporting ? null : _exportarPdf,
+                      child: FxLiquidPrimaryButton(
+                        label: relatorioAlunoStickyExport(),
+                        loading: _exporting,
+                        onPressed: _exporting ? null : _exportarPdf,
                       ),
                     ),
-                    if (relatorioAlunoAderenciaBaixa(
-                      dados.taxaAderenciaPercent,
-                    ))
-                      FxSatelliteListTile(
-                        title: 'Pedir check-in',
-                        onTap: () => showAlunoCheckinMessageSheet(
-                          context,
-                          alunoId: widget.alunoId,
-                          alunoNome: widget.alunoNome,
-                        ),
-                      ),
-                    FxSatelliteListTile(
-                      title: 'Abrir o 360',
-                      onTap: () => context.push(
-                        '/alunos/${widget.alunoId}',
-                        extra: widget.alunoNome,
-                      ),
-                    ),
-                  ],
-                ],
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBody({required bool isDark, required Color primary}) {
+    final dados = _dados;
+    if (_loading) {
+      return const Padding(
+        padding: EdgeInsets.all(FxSettingsLayout.pageInset),
+        child: SkeletonList(count: 6),
+      );
+    }
+    if (_erro != null) {
+      return FxErrorState(
+        chromeOnDark: isDark,
+        primary: primary,
+        title: 'Não conseguimos carregar o relatório',
+        message: _erro!,
+        onRetry: _carregarDados,
+      );
+    }
+    return RefreshIndicator(
+      color: primary,
+      onRefresh: () async {
+        AnalyticsService.instance.track(ProductEvents.relatorioAlunoRefreshed);
+        await _carregarDados();
+      },
+      child: FxContentWidthLimiter(
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.fromLTRB(
+            FxSettingsLayout.pageInset,
+            TokensStrip.s4,
+            FxSettingsLayout.pageInset,
+            TokensStrip.s6,
+          ),
+          children: [
+            FxHubHeader(
+              title: fxTitleCaseName(widget.alunoNome),
+              subtitle: relatorioAlunoHubSubtitle(
+                alunoNome: widget.alunoNome,
+                diasAnalisados: dados?.diasAnalisados ?? 0,
+                freshness: FxHubFreshness.fromFetchedAt(_fetchedAt),
               ),
             ),
+            const SizedBox(height: TokensStrip.s3),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: DashboardHomeActionChip(
+                label: relatorioAlunoPeriodoValueLabel(
+                  dias: _dias,
+                  inicio: _rangeCustom?.start,
+                  fim: _rangeCustom?.end,
+                ),
+                accent: primary,
+                isDark: isDark,
+                onPressed: _abrirPeriodo,
+              ),
+            ),
+            if (dados == null || dados.treinosTotal == 0) ...[
+              const SizedBox(height: TokensStrip.s5),
+              FxEmptyState(
+                icon: 'trend',
+                title: 'Sem dados neste período',
+                subtitle:
+                    'Quando ${satelliteFirstName(widget.alunoNome)} concluir treinos, o relatório aparece aqui.',
+                action: FxEmptyAction(
+                  label: 'Atualizar',
+                  onTap: _carregarDados,
+                ),
+              ),
+            ] else ...[
+              Padding(
+                padding: const EdgeInsets.only(
+                  top: TokensStrip.s4,
+                  bottom: TokensStrip.s3,
+                ),
+                child: OperationalMetricTile(
+                  label: 'Taxa',
+                  value: relatorioAderenciaMediaLabel(dados.taxaAderenciaPercent),
+                  hint: relatorioAlunoAderenciaStatus(dados.taxaAderenciaPercent),
+                  color:
+                      relatorioAlunoAderenciaBaixa(dados.taxaAderenciaPercent)
+                          ? EagleTokens.bad
+                          : EagleTokens.moneyGreen,
+                  isDark: isDark,
+                  emphasis:
+                      relatorioAlunoAderenciaBaixa(dados.taxaAderenciaPercent)
+                          ? OperationalMetricEmphasis.alert
+                          : OperationalMetricEmphasis.normal,
+                ),
+              ),
+              OperationalMetricTile(
+                label: 'Treinos concluídos',
+                value: '${dados.treinosConcluidos} / ${dados.treinosTotal}',
+                hint: 'Concluídos sobre o total neste recorte',
+                color: primary,
+                isDark: isDark,
+              ),
+              if (_comparativo != null) ...[
+                const SizedBox(height: TokensStrip.s2),
+                OperationalMetricTile(
+                  label: 'Variação',
+                  value: relatorioAlunoDeltaLabel(_comparativo!.deltaPercent),
+                  hint: 'Mesmo número de dias, logo antes deste',
+                  color:
+                      _comparativo!.deltaPercent < 0
+                          ? EagleTokens.bad
+                          : EagleTokens.moneyGreen,
+                  isDark: isDark,
+                  emphasis:
+                      _comparativo!.deltaPercent < 0
+                          ? OperationalMetricEmphasis.alert
+                          : OperationalMetricEmphasis.normal,
+                ),
+                const SizedBox(height: TokensStrip.s5),
+                const DashboardSectionHeader(title: 'Versus o recorte anterior'),
+                const SizedBox(height: TokensStrip.s3),
+                FxSatelliteListTile(
+                  title: 'Este período',
+                  subtitle: Text(
+                    '${relatorioAderenciaMediaLabel(_comparativo!.aderenciaAtual)} · ${relatorioAlunoCheckinsLabel(_comparativo!.checkInsAtual)}',
+                  ),
+                ),
+                FxSatelliteListTile(
+                  title: 'Anterior',
+                  subtitle: Text(
+                    '${relatorioAderenciaMediaLabel(_comparativo!.aderenciaAnterior)} · ${relatorioAlunoCheckinsLabel(_comparativo!.checkInsAnterior)}',
+                  ),
+                ),
+              ],
+              if (relatorioAlunoAderenciaBaixa(dados.taxaAderenciaPercent)) ...[
+                const SizedBox(height: TokensStrip.s5),
+                const DashboardSectionHeader(title: 'Próxima ação'),
+                const SizedBox(height: TokensStrip.s3),
+                FxSatelliteListTile(
+                  title: 'Pedir check-in',
+                  onTap:
+                      () => showAlunoCheckinMessageSheet(
+                        context,
+                        alunoId: widget.alunoId,
+                        alunoNome: widget.alunoNome,
+                      ),
+                ),
+              ],
+            ],
+          ],
         ),
       ),
     );

@@ -14,9 +14,12 @@ void main() {
     expect(screen, contains('friendlyError'));
     expect(screen, contains('IaProgressaoLoadingSkeleton'));
     expect(screen, contains('_loading'));
-    expect(screen, contains('FxSettingsGroup'));
+    expect(screen, isNot(contains('FxSettingsGroup')));
+    expect(screen, contains('FxHubHeader'));
+    expect(screen, contains('OperationalMetricTile'));
     expect(screen, contains('AlunoInsetFormField'));
-    expect(screen, contains('bottomNavigationBar'));
+    expect(screen, contains('FxKeyboardPopScope'));
+    expect(screen, contains('viewInsetsOf'));
     expect(screen, contains('FxLiquidPrimaryButton'));
     expect(screen, contains('progressaoStickyLabel'));
     expect(screen, isNot(contains('ShellHeaderIconButton')));

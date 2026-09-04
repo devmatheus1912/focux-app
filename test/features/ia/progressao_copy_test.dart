@@ -15,6 +15,8 @@ void main() {
     expect(progressaoHubSubtitle('  Ana  '), 'Ana · só se você pedir');
     expect(progressaoStickyLabel(hasResult: false), 'Gerar progressão');
     expect(progressaoStickyLabel(hasResult: true), 'Gerar outra');
+    expect(progressaoPendingMetricHint(0), 'Nada pendente neste aluno');
+    expect(progressaoPendingMetricHint(1), '1 sugestão para revisar');
     expect(progressaoStickyLoadingLabel(), 'Gerando…');
     expect(progressaoConfirmTitle(), 'Gerar progressão com IA?');
     expect(progressaoConfirmLabel(), 'Gerar');

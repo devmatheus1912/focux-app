@@ -20,6 +20,12 @@ String progressaoConfirmMessage() =>
 
 String progressaoConfirmLabel() => 'Gerar';
 
+String progressaoPendingMetricHint(int count) {
+  if (count <= 0) return 'Nada pendente neste aluno';
+  if (count == 1) return '1 sugestão para revisar';
+  return '$count sugestões para revisar';
+}
+
 String progressaoPendingReviewLabel(int count) {
   if (count <= 0) return 'Revisar sugestões pendentes';
   if (count == 1) return 'Revisar 1 sugestão pendente';

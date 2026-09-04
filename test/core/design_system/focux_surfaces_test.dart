@@ -32,6 +32,14 @@ void main() {
     expect(FocuxSurfaces.resolveParent(match), '/alunos/9');
   });
 
+  test('progressao de carga is S3 with keyboard input', () {
+    final match = FocuxSurfaces.resolve('/alunos/9/ia/progressao');
+    expect(match, isNotNull);
+    expect(match!.spec.type, FocuxSurfaceType.s3);
+    expect(match.spec.hasInput, isTrue);
+    expect(FocuxSurfaces.resolveParent(match), '/alunos/9');
+  });
+
   test('shell tabs do not show a back affordance', () {
     final match = FocuxSurfaces.resolve('/dashboard/personal');
     expect(match!.spec.shellTab, isTrue);
