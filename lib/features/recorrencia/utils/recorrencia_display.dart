@@ -12,6 +12,8 @@ String recorrenciaStatusLabel(String? status) {
       return 'Pendente';
     case 'ATIVA':
       return 'Ativa';
+    case 'PAUSADA':
+      return 'Pausada';
     case 'CANCELADA':
       return 'Cancelada';
     case '':
@@ -37,6 +39,8 @@ String recorrenciaFxIcon(String status) {
   switch (status.trim().toUpperCase()) {
     case 'ATIVA':
       return 'circle-check';
+    case 'PAUSADA':
+      return 'alert-triangle';
     case 'CANCELADA':
       return 'alert-triangle';
     default:
@@ -81,5 +85,44 @@ String recorrenciaAlunoEmptySubtitle(String? freshness) {
   return '$base · $stamp';
 }
 
-String recorrenciaAlunoStickyLabel({required bool podeAutorizar}) =>
-    podeAutorizar ? 'Autorizar pagamento' : 'Falar com o personal';
+enum RecorrenciaAlunoStickyKind { autorizar, pausar, retomar, chat }
+
+RecorrenciaAlunoStickyKind recorrenciaAlunoStickyKind({
+  required String? status,
+  String? initPoint,
+}) {
+  if (recorrenciaTemLinkCheckout(status ?? '', initPoint)) {
+    return RecorrenciaAlunoStickyKind.autorizar;
+  }
+  switch ((status ?? '').trim().toUpperCase()) {
+    case 'ATIVA':
+      return RecorrenciaAlunoStickyKind.pausar;
+    case 'PAUSADA':
+      return RecorrenciaAlunoStickyKind.retomar;
+    default:
+      return RecorrenciaAlunoStickyKind.chat;
+  }
+}
+
+String recorrenciaAlunoStickyLabel(RecorrenciaAlunoStickyKind kind) {
+  switch (kind) {
+    case RecorrenciaAlunoStickyKind.autorizar:
+      return 'Autorizar pagamento';
+    case RecorrenciaAlunoStickyKind.pausar:
+      return 'Pausar cobrança';
+    case RecorrenciaAlunoStickyKind.retomar:
+      return 'Retomar cobrança';
+    case RecorrenciaAlunoStickyKind.chat:
+      return 'Falar com o personal';
+  }
+}
+
+String recorrenciaPausarConfirmTitle() => 'Pausar a cobrança automática?';
+
+String recorrenciaPausarConfirmMessage() =>
+    'As próximas mensalidades não são cobradas até você retomar.';
+
+String recorrenciaRetomarConfirmTitle() => 'Retomar a cobrança automática?';
+
+String recorrenciaRetomarConfirmMessage() =>
+    'O Mercado Pago volta a cobrar todo mês.';

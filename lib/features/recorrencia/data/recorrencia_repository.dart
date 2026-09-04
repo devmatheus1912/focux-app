@@ -60,4 +60,14 @@ class RecorrenciaRepository {
     if (r.data == null) return null;
     return RecorrenciaAssinatura.fromJson(r.data as Map<String, dynamic>);
   }
+
+  Future<RecorrenciaAssinatura> pausarMinha() async {
+    final r = await _dio.post('/api/recorrencia/minha/pausar');
+    return RecorrenciaAssinatura.fromJson(r.data as Map<String, dynamic>);
+  }
+
+  Future<RecorrenciaAssinatura> retomarMinha() async {
+    final r = await _dio.post('/api/recorrencia/minha/retomar');
+    return RecorrenciaAssinatura.fromJson(r.data as Map<String, dynamic>);
+  }
 }

@@ -229,33 +229,10 @@ final alunoPesoHistoricoProvider = FutureProvider.family<List<double>, int>((
   ref,
   alunoId,
 ) async {
-  final avaliacoes = await AvaliacaoRepository(
+  return AvaliacaoRepository(
     ref.read(apiClientProvider),
-  ).listar(alunoId);
-
-  final dated =
-      avaliacoes
-          .where((a) => a.pesoKg != null)
-          .map(
-            (a) => (
-              date: _avaliacaoSortKey(a.avaliadoEm ?? a.criadoEm),
-              peso: a.pesoKg!,
-            ),
-          )
-          .toList()
-        ..sort((a, b) => a.date.compareTo(b.date));
-
-  final series = dated.map((e) => e.peso).toList();
-  if (series.length <= 7) return series;
-  return series.sublist(series.length - 7);
+  ).listarPesoHistorico(alunoId);
 });
-
-DateTime _avaliacaoSortKey(String? raw) {
-  if (raw == null || raw.trim().isEmpty) {
-    return DateTime.fromMillisecondsSinceEpoch(0);
-  }
-  return DateTime.tryParse(raw) ?? DateTime.fromMillisecondsSinceEpoch(0);
-}
 
 Future<void> invalidateAluno360Providers(WidgetRef ref, int alunoId) async {
   ref.invalidate(aluno360Provider(alunoId));

@@ -10,12 +10,12 @@ Future<void> showRecorrenciaAlunoHelpSheet(BuildContext context) {
     tips: const [
       FxHelpTip(
         'Status',
-        'Pendente espera você autorizar. Ativa cobra sozinha no vencimento.',
+        'Pendente espera você autorizar. Ativa cobra sozinha. Pausada não cobra até retomar.',
         icon: 'coin',
       ),
       FxHelpTip(
         'Autorizar',
-        'Pendente abre o Mercado Pago. Sem assinatura, o botão chama o personal no chat.',
+        'Pendente abre o Mercado Pago. Ativa pode pausar. Pausada pode retomar. Sem assinatura, o botão chama o personal no chat.',
         icon: 'spark',
       ),
     ],
