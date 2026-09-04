@@ -22,6 +22,11 @@ void main() {
     );
   });
 
+  test('alimentarPlanosMetricHint', () {
+    expect(alimentarPlanosMetricHint(0), 'Crie o primeiro plano');
+    expect(alimentarPlanosMetricHint(2), 'Toque para abrir as refeições');
+  });
+
   test('alimentarDetailSubtitle e kcal da refeição', () {
     expect(alimentarDetailSubtitle(null), 'Refeições e macros do plano');
     expect(

@@ -8,20 +8,26 @@ import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/utils/fx_utils.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_form_sheet.dart';
+import '../../../core/widgets/fx_help.dart';
+import '../../../core/widgets/fx_hub_header.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/operational_metric_tile.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../features/alunos/widgets/aluno_inset_form_field.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../alunos/utils/satellite_screen_utils.dart';
 import '../data/alimentar_repository.dart';
 import '../utils/alimentar_display.dart';
+import '../widgets/alimentar_help_sheet.dart';
 import 'plano_alimentar_detail_screen.dart';
 
 class AlimentarScreen extends ConsumerStatefulWidget {
@@ -183,155 +189,159 @@ class _AlimentarScreenState extends ConsumerState<AlimentarScreen> {
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
     final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
+    final showSticky = !_loading && _erro == null;
     return fxScreenA11yScope(
       label: 'Planos Alimentares',
       child: FxShellScaffold(
         useMesh: true,
         appBar: FxShellAppBar(
-          title: 'Planos Alimentares',
-          subtitle: alimentarHubSubtitle(
-            alunoNome: widget.alunoNome,
-            freshness: freshnessLabel,
-          ),
+          title: 'Planos alimentares',
           onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
           actions: [
-            ShellHeaderIconButton(
-              icon: 'plus',
-              tooltip: 'Criar plano',
-              onTap: _novoPlano,
+            FxHelpIconButton(
+              tooltip: 'Como usar a nutrição',
+              onTap: () => showAlimentarHelpSheet(context),
             ),
           ],
         ),
-        body:
-            _loading
-                ? const Padding(
-                  padding: EdgeInsets.all(FxSettingsLayout.pageInset),
-                  child: SkeletonList(count: 5),
-                )
-                : _erro != null
-                ? FxErrorState(
-                  chromeOnDark: chrome.isDark,
-                  primary: primary,
-                  message: _erro!,
-                  onRetry: _load,
-                  title: 'Não conseguimos carregar os planos',
-                )
-                : FxContentWidthLimiter(child: _buildBody(primary)),
+        body: Column(
+          children: [
+            Expanded(
+              child:
+                  _loading
+                      ? const Padding(
+                        padding: EdgeInsets.all(FxSettingsLayout.pageInset),
+                        child: SkeletonList(count: 5),
+                      )
+                      : _erro != null
+                      ? FxErrorState(
+                        chromeOnDark: chrome.isDark,
+                        primary: primary,
+                        message: _erro!,
+                        onRetry: _load,
+                        title: 'Não conseguimos carregar os planos',
+                      )
+                      : FxContentWidthLimiter(child: _buildBody(primary, freshnessLabel)),
+            ),
+            if (showSticky)
+              SafeArea(
+                top: false,
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    FxSettingsLayout.pageInset,
+                    TokensStrip.s2,
+                    FxSettingsLayout.pageInset,
+                    TokensStrip.s3 + MediaQuery.viewInsetsOf(context).bottom,
+                  ),
+                  child: FxLiquidPrimaryButton(
+                    label: 'Criar plano',
+                    onPressed: _novoPlano,
+                  ),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildBody(Color primary) {
+  Widget _buildBody(Color primary, String? freshnessLabel) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final nome = widget.alunoNome?.trim();
+    final header = FxHubHeader(
+      title:
+          nome != null && nome.isNotEmpty
+              ? fxTitleCaseName(nome)
+              : 'Nutrição',
+      subtitle: alimentarHubSubtitle(
+        alunoNome: widget.alunoNome,
+        freshness: freshnessLabel,
+      ),
+    );
+    final metric = Padding(
+      padding: const EdgeInsets.only(
+        top: TokensStrip.s4,
+        bottom: TokensStrip.s3,
+      ),
+      child: OperationalMetricTile(
+        label: 'Planos',
+        value: '${_planos.length}',
+        hint: alimentarPlanosMetricHint(_planos.length),
+        color: primary,
+        isDark: isDark,
+      ),
+    );
+
     if (_planos.isEmpty) {
       return RefreshIndicator(
         onRefresh: _load,
-        child: satelliteEmptyBody(
-          child: FxEmptyState(
-            key: const ValueKey('alimentar_empty'),
-            icon: 'target',
-            title: 'Nenhum plano alimentar',
-            subtitle:
-                widget.alunoNome != null
-                    ? 'Monte o primeiro plano de ${satelliteFirstName(widget.alunoNome)} com metas de calorias e macros.'
-                    : 'Crie o primeiro plano com metas de calorias e macros.',
-            action: FxEmptyAction(label: 'Criar plano', onTap: _novoPlano),
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.fromLTRB(
+            FxSettingsLayout.pageInset,
+            TokensStrip.s4,
+            FxSettingsLayout.pageInset,
+            32,
           ),
+          children: [
+            header,
+            metric,
+            FxEmptyState(
+              key: const ValueKey('alimentar_empty'),
+              icon: 'target',
+              title: 'Nenhum plano alimentar',
+              subtitle:
+                  widget.alunoNome != null
+                      ? 'Monte o primeiro plano de ${satelliteFirstName(widget.alunoNome)} com metas de calorias e macros.'
+                      : 'Crie o primeiro plano com metas de calorias e macros.',
+            ),
+          ],
         ),
       );
     }
     return RefreshIndicator(
       onRefresh: _load,
       child: ListView.builder(
+        physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.fromLTRB(
           FxSettingsLayout.pageInset,
-          8,
+          TokensStrip.s4,
           FxSettingsLayout.pageInset,
           32,
         ),
-        itemCount: _planos.length,
+        itemCount: _planos.length + 2,
         itemBuilder: (_, i) {
-          final p = _planos[i];
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: DecoratedBox(
-              decoration: fxListCardDecoration(context),
-              child: InkWell(
-                onTap: () => _abrirPlano(p),
-                child: Padding(
-                  padding: const EdgeInsets.all(TokensStrip.s4),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              p.nome,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w700,
-                                fontSize: 16,
-                              ),
-                            ),
-                          ),
-                          const Icon(
-                            Icons.chevron_right,
-                            color: TokensStrip.textSecondary,
-                          ),
-                        ],
-                      ),
-                      Text(
-                        alimentarKcalLabel(p.caloriasDia),
-                        style: TextStyle(color: primary),
-                      ),
-                      if (p.proteinaG != null ||
-                          p.carboidratoG != null ||
-                          p.gorduraG != null) ...[
-                        const SizedBox(height: 10),
-                        _MacroBar(
-                          proteinaG: p.proteinaG,
-                          carboidratoG: p.carboidratoG,
-                          gorduraG: p.gorduraG,
-                        ),
-                      ],
-                      const SizedBox(height: 8),
-                      Wrap(
-                        spacing: 16,
-                        children: [
-                          if (p.proteinaG != null)
-                            _macro(
-                              'Proteína',
-                              '${p.proteinaG}g',
-                              EagleTokens.bad,
-                            ),
-                          if (p.carboidratoG != null)
-                            _macro(
-                              'Carbo',
-                              '${p.carboidratoG}g',
-                              EagleTokens.warn,
-                            ),
-                          if (p.gorduraG != null)
-                            _macro(
-                              'Gordura',
-                              '${p.gorduraG}g',
-                              EagleTokens.macroFat,
-                            ),
-                        ],
-                      ),
-                    ],
+          if (i == 0) return header;
+          if (i == 1) return metric;
+          final p = _planos[i - 2];
+          final hasMacros =
+              p.proteinaG != null ||
+              p.carboidratoG != null ||
+              p.gorduraG != null;
+          return FxSatelliteListTile(
+            title: p.nome,
+            titleCase: false,
+            isThreeLine: hasMacros,
+            onTap: () => _abrirPlano(p),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(alimentarKcalLabel(p.caloriasDia)),
+                if (hasMacros) ...[
+                  const SizedBox(height: 8),
+                  _MacroBar(
+                    proteinaG: p.proteinaG,
+                    carboidratoG: p.carboidratoG,
+                    gorduraG: p.gorduraG,
                   ),
-                ),
-              ),
+                ],
+              ],
             ),
           );
         },
       ),
     );
   }
-
-  Widget _macro(String label, String value, Color color) => Chip(
-    label: Text('$label: $value'),
-    backgroundColor: color.withValues(alpha: 0.15),
-  );
 }
 
 class _MacroBar extends StatelessWidget {

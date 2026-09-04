@@ -32,23 +32,35 @@ class PlanoSucessoProvider with ChangeNotifier {
     }
   }
 
+  Future<void> criarPlano({
+    required int alunoId,
+    required String objetivoPrincipal,
+    required List<String> titulosMarcos,
+  }) async {
+    await _api.dio.post(
+      '/api/planos-sucesso',
+      data: {
+        'alunoId': alunoId,
+        'objetivoPrincipal': objetivoPrincipal,
+        'titulosMarcos': titulosMarcos,
+      },
+    );
+    final res = await _api.dio.get('/api/planos-sucesso/aluno/$alunoId');
+    _plano = PlanoSucesso.fromJson(res.data);
+    _erro = null;
+    notifyListeners();
+  }
+
   Future<void> atingirMarco(int marcoId) async {
-    try {
-      await _api.dio.patch('/api/planos-sucesso/marcos/$marcoId/atingir');
-      if (_plano != null) {
-        final index = _plano!.marcos.indexWhere((m) => m.id == marcoId);
-        if (index != -1) {
-          _plano!.marcos[index] = MarcoSucesso(
-            id: marcoId,
-            titulo: _plano!.marcos[index].titulo,
-            atingido: true,
-          );
-          notifyListeners();
-        }
-      }
-    } catch (e) {
-      debugPrint(e.toString());
-      rethrow;
-    }
+    await _api.dio.patch('/api/planos-sucesso/marcos/$marcoId/atingir');
+    if (_plano == null) return;
+    final index = _plano!.marcos.indexWhere((m) => m.id == marcoId);
+    if (index == -1) return;
+    _plano!.marcos[index] = MarcoSucesso(
+      id: marcoId,
+      titulo: _plano!.marcos[index].titulo,
+      atingido: true,
+    );
+    notifyListeners();
   }
 }

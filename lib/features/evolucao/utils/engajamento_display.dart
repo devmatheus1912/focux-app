@@ -73,3 +73,8 @@ String engajamentoHubSubtitle({
   if (stamp != null && stamp.isNotEmpty) parts.add(stamp);
   return parts.join(' · ');
 }
+
+String engajamentoEventosMetricHint(int count, int dias) {
+  if (count <= 0) return 'Nada em ${engajamentoPeriodoLabel(dias)}';
+  return engajamentoPeriodoLabel(dias);
+}

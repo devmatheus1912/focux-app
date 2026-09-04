@@ -56,4 +56,9 @@ void main() {
       'Aluno · 60 dias · há 1 min',
     );
   });
+
+  test('engajamentoEventosMetricHint', () {
+    expect(engajamentoEventosMetricHint(0, 30), 'Nada em 30 dias');
+    expect(engajamentoEventosMetricHint(4, 90), '90 dias');
+  });
 }
