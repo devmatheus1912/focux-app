@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/router/safe_navigation.dart';
@@ -9,6 +10,7 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
@@ -93,6 +95,7 @@ class _RecorrenciaAlunoScreenState
       assinatura?.status ?? '',
       assinatura?.initPoint,
     );
+    final showSticky = !_loading && _erro == null;
 
     return fxScreenA11yScope(
       label: 'Minha assinatura',
@@ -122,74 +125,94 @@ class _RecorrenciaAlunoScreenState
                 : Column(
                   children: [
                     Expanded(
-                      child: RefreshIndicator(
-                        onRefresh: _load,
-                        child: ListView(
-                          padding: const EdgeInsets.fromLTRB(
-                            FxSettingsLayout.pageInset,
-                            TokensStrip.s4,
-                            FxSettingsLayout.pageInset,
-                            TokensStrip.s4,
-                          ),
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          children: [
-                            if (assinatura == null)
-                              const Padding(
-                                padding: EdgeInsets.only(top: 48),
-                                child: FxEmptyState(
+                      child: FxContentWidthLimiter(
+                        child: RefreshIndicator(
+                          onRefresh: _load,
+                          child: ListView(
+                            padding: const EdgeInsets.fromLTRB(
+                              FxSettingsLayout.pageInset,
+                              TokensStrip.s4,
+                              FxSettingsLayout.pageInset,
+                              TokensStrip.s4,
+                            ),
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            children: [
+                              if (assinatura == null) ...[
+                                FxHubHeader(
+                                  title: 'Sem assinatura ainda',
+                                  subtitle: recorrenciaAlunoEmptySubtitle(
+                                    freshnessLabel,
+                                  ),
+                                ),
+                                const SizedBox(height: TokensStrip.s4),
+                                OperationalMetricTile(
+                                  label: 'Valor mensal',
+                                  value: '—',
+                                  hint: 'Quando o personal criar a cobrança',
+                                  color: primary,
+                                  isDark: isDark,
+                                  emphasis: OperationalMetricEmphasis.muted,
+                                ),
+                                const SizedBox(height: TokensStrip.s4),
+                                const FxEmptyState(
                                   icon: 'coin',
                                   title: 'Sem assinatura recorrente ainda',
                                   subtitle:
                                       'Seu personal ainda não configurou cobrança automática mensal.',
                                 ),
-                              )
-                            else ...[
-                              FxHubHeader(
-                                title: recorrenciaStatusLabel(
-                                  assinatura.status,
-                                ),
-                                freshnessLabel: freshnessLabel,
-                                subtitle:
-                                    assinatura.proximaCobranca == null
-                                        ? 'Cobrança mensal'
-                                        : 'Próxima: ${assinatura.proximaCobranca}',
-                              ),
-                              const SizedBox(height: TokensStrip.s4),
-                              OperationalMetricTile(
-                                label: 'Valor mensal',
-                                value: assinatura.valor.format(),
-                                hint: 'Mercado Pago',
-                                color: primary,
-                                isDark: isDark,
-                              ),
-                              if (assinatura.proximaCobranca != null) ...[
-                                const SizedBox(height: TokensStrip.s3),
-                                Text(
-                                  'A cobrança seguinte entra em ${assinatura.proximaCobranca}.',
-                                  style: FocuxHubTypography.bodyMuted(
-                                    color: fxScreenMute(context),
-                                    fontWeight: FontWeight.w600,
+                              ] else ...[
+                                FxHubHeader(
+                                  title: recorrenciaStatusLabel(
+                                    assinatura.status,
+                                  ),
+                                  subtitle: recorrenciaAlunoHubSubtitle(
+                                    proximaCobranca: assinatura.proximaCobranca,
+                                    freshness: freshnessLabel,
                                   ),
                                 ),
+                                const SizedBox(height: TokensStrip.s4),
+                                OperationalMetricTile(
+                                  label: 'Valor mensal',
+                                  value: assinatura.valor.format(),
+                                  hint: 'Mercado Pago',
+                                  color: primary,
+                                  isDark: isDark,
+                                ),
+                                if (assinatura.proximaCobranca != null) ...[
+                                  const SizedBox(height: TokensStrip.s3),
+                                  Text(
+                                    'A cobrança seguinte entra em ${assinatura.proximaCobranca}.',
+                                    style: FocuxHubTypography.bodyMuted(
+                                      color: fxScreenMute(context),
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
                               ],
                             ],
-                          ],
+                          ),
                         ),
                       ),
                     ),
-                    if (podeAutorizar)
+                    if (showSticky)
                       SafeArea(
                         top: false,
                         child: Padding(
-                          padding: const EdgeInsets.fromLTRB(
+                          padding: EdgeInsets.fromLTRB(
                             FxSettingsLayout.pageInset,
                             TokensStrip.s2,
                             FxSettingsLayout.pageInset,
-                            TokensStrip.s3,
+                            TokensStrip.s3 +
+                                MediaQuery.viewInsetsOf(context).bottom,
                           ),
                           child: FxLiquidPrimaryButton(
-                            label: 'Autorizar pagamento',
-                            onPressed: _autorizar,
+                            label: recorrenciaAlunoStickyLabel(
+                              podeAutorizar: podeAutorizar,
+                            ),
+                            onPressed:
+                                podeAutorizar
+                                    ? _autorizar
+                                    : () => context.push('/chat/aluno'),
                           ),
                         ),
                       ),

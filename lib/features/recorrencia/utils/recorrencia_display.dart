@@ -61,3 +61,25 @@ String recorrenciaHubSubtitle(String? freshness) {
   if (stamp == null || stamp.isEmpty) return base;
   return '$base · $stamp';
 }
+
+String recorrenciaAlunoHubSubtitle({
+  String? proximaCobranca,
+  String? freshness,
+}) {
+  final prox = proximaCobranca?.trim();
+  final base =
+      (prox == null || prox.isEmpty) ? 'Cobrança mensal' : 'Próxima: $prox';
+  final stamp = freshness?.trim();
+  if (stamp == null || stamp.isEmpty) return base;
+  return '$base · $stamp';
+}
+
+String recorrenciaAlunoEmptySubtitle(String? freshness) {
+  const base = 'Ainda sem cobrança automática';
+  final stamp = freshness?.trim();
+  if (stamp == null || stamp.isEmpty) return base;
+  return '$base · $stamp';
+}
+
+String recorrenciaAlunoStickyLabel({required bool podeAutorizar}) =>
+    podeAutorizar ? 'Autorizar pagamento' : 'Falar com o personal';

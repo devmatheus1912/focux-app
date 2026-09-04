@@ -62,5 +62,10 @@ void main() {
     expect(walletSalvarConfirmTitle(), 'Salvar dados da carteira?');
     expect(walletDiscardTitle(), 'Descartar alterações?');
     expect(walletChavePixMax, 120);
+    expect(walletHubSubtitle(), 'PIX e banco dos recebimentos');
+    expect(
+      walletRecebidoHint(previsto: 'R\$ 1.000,00', percent: 40),
+      '40% de R\$ 1.000,00 previsto',
+    );
   });
 }

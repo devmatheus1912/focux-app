@@ -23,6 +23,17 @@ String financeiroHubSubtitle({
   return '$vista · $fresh';
 }
 
+String financeiroAlunoHubSubtitle({
+  required int lancamentos,
+  String? freshness,
+}) {
+  final count =
+      lancamentos == 1 ? '1 lançamento' : '$lancamentos lançamentos';
+  final fresh = freshness?.trim();
+  if (fresh == null || fresh.isEmpty) return count;
+  return '$count · $fresh';
+}
+
 String financeiroAlunoContextLabel(String? nome) {
   final n = nome?.trim();
   if (n == null || n.isEmpty) return 'Mensalidades deste aluno';

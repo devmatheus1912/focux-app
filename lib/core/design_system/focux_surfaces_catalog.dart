@@ -222,7 +222,11 @@ const Map<String, FocuxSurfaceSpec> focuxSurfaceCatalog = {
     hasInput: true,
     logicalParent: _perfil,
   ),
-  '/perfil/wallet': FocuxSurfaceSpec(type: _s3, logicalParent: _perfil),
+  '/perfil/wallet': FocuxSurfaceSpec(
+    type: _s3,
+    hasInput: true,
+    logicalParent: _perfil,
+  ),
   '/perfil/ferramentas': FocuxSurfaceSpec(type: _s2, logicalParent: _perfil),
   '/identidade-visual': FocuxSurfaceSpec(
     type: _s5,

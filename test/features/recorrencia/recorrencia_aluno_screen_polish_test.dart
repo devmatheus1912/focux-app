@@ -16,7 +16,10 @@ void main() {
     expect(screen, contains('safePopOrGo'));
     expect(screen, contains('FxLiquidPrimaryButton'));
     expect(screen, contains('OperationalMetricTile'));
-    expect(screen, contains('Autorizar pagamento'));
+    expect(screen, contains('recorrenciaAlunoStickyLabel'));
+    expect(screen, contains('FxContentWidthLimiter'));
+    expect(screen, contains('/chat/aluno'));
+    expect(screen, contains('viewInsetsOf'));
     expect(screen, isNot(contains('FilledButton')));
   });
 }

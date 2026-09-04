@@ -15,13 +15,23 @@ void main() {
     expect(screen, contains('AlunoInsetFormField'));
     expect(screen, contains('showFxConfirmSheet'));
     expect(screen, contains('showFxInsetPickerSheet'));
-    expect(screen, contains('FxSettingsGroup'));
+    expect(screen, isNot(contains('FxSettingsGroup')));
+    expect(screen, contains('FxHubHeader'));
+    expect(screen, contains('OperationalMetricTile'));
     expect(screen, contains('copySensitiveToClipboard'));
     expect(screen, contains('FxLiquidPrimaryButton'));
-    expect(screen, contains('bottomNavigationBar'));
+    expect(screen, contains('viewInsetsOf'));
+    expect(screen, contains('FxKeyboardPopScope'));
+    expect(screen, contains('safePopOrGo'));
+    expect(screen, contains('showFxHelpSheet'));
+    expect(screen, isNot(contains('bottomNavigationBar')));
     expect(screen, isNot(contains('FxLiquidSecondaryButton')));
     expect(screen, isNot(contains('showDialog')));
-    expect(screen, isNot(contains('ListTile(')));
+    expect(screen, contains('FxSatelliteListTile'));
+    expect(
+      screen.replaceAll('FxSatelliteListTile(', ''),
+      isNot(contains('ListTile(')),
+    );
     expect(screen, contains('_ResumoMensalCard'));
   });
 }

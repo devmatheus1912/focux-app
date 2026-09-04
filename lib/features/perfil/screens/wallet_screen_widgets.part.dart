@@ -1,5 +1,109 @@
 part of 'wallet_screen.dart';
 
+class _WalletFormFields extends StatelessWidget {
+  const _WalletFormFields({
+    required this.tipoChavePix,
+    required this.chavePixCtrl,
+    required this.bancoCtrl,
+    required this.agenciaCtrl,
+    required this.contaCtrl,
+    required this.carregando,
+    required this.onSelecionarTipo,
+    required this.onCopiarChave,
+  });
+
+  final String? tipoChavePix;
+  final TextEditingController chavePixCtrl;
+  final TextEditingController bancoCtrl;
+  final TextEditingController agenciaCtrl;
+  final TextEditingController contaCtrl;
+  final bool carregando;
+  final VoidCallback onSelecionarTipo;
+  final VoidCallback onCopiarChave;
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        FxHubHeader(
+          title: 'Recebimentos',
+          subtitle: walletHubSubtitle(),
+        ),
+        const SizedBox(height: TokensStrip.s4),
+        const _ResumoMensalCard(),
+        const SizedBox(height: TokensStrip.s4),
+        DashboardSectionHeader(title: walletPixSectionTitle()),
+        const SizedBox(height: TokensStrip.s2),
+        FxSettingsTile(
+          fxIcon: 'pix',
+          label: 'Tipo de chave',
+          value:
+              tipoChavePix == null
+                  ? 'Selecionar'
+                  : WalletPixValidation.labelForTipo(tipoChavePix!),
+          picker: true,
+          onTap: carregando ? null : onSelecionarTipo,
+        ),
+        AlunoInsetFormField(
+          controller: chavePixCtrl,
+          label: 'Chave PIX',
+          icon: Icons.pix_rounded,
+          hint: WalletPixValidation.hintForTipo(tipoChavePix),
+          keyboardType: WalletPixValidation.keyboardForTipo(tipoChavePix),
+          inputFormatters: [
+            ...WalletPixValidation.formattersForTipo(tipoChavePix),
+            LengthLimitingTextInputFormatter(walletChavePixMax),
+          ],
+          validator:
+              (v) => WalletPixValidation.validateChave(tipoChavePix, v ?? ''),
+          showDivider: false,
+        ),
+        if (chavePixCtrl.text.trim().isNotEmpty)
+          FxSatelliteListTile(
+            title: walletCopiarTileLabel(),
+            titleCase: false,
+            onTap: carregando ? null : onCopiarChave,
+            leading: FxIcon(name: 'pix', size: 18, color: primary),
+          ),
+        const SizedBox(height: TokensStrip.s4),
+        DashboardSectionHeader(title: walletBancoSectionTitle()),
+        const SizedBox(height: TokensStrip.s2),
+        AlunoInsetFormField(
+          controller: bancoCtrl,
+          label: 'Banco',
+          icon: Icons.account_balance_outlined,
+          hint: 'Ex.: Nubank, Itaú, Bradesco',
+          textCapitalization: TextCapitalization.words,
+          inputFormatters: [
+            LengthLimitingTextInputFormatter(walletBancoMax),
+          ],
+        ),
+        AlunoInsetFormField(
+          controller: agenciaCtrl,
+          label: 'Agência',
+          icon: Icons.tag_outlined,
+          keyboardType: TextInputType.number,
+          inputFormatters: [
+            FilteringTextInputFormatter.digitsOnly,
+            LengthLimitingTextInputFormatter(walletAgenciaMax),
+          ],
+        ),
+        AlunoInsetFormField(
+          controller: contaCtrl,
+          label: 'Conta',
+          icon: Icons.numbers_rounded,
+          keyboardType: TextInputType.text,
+          inputFormatters: WalletPixValidation.formattersForConta(),
+          showDivider: false,
+        ),
+      ],
+    );
+  }
+}
+
 class _ResumoMensalCard extends ConsumerStatefulWidget {
   const _ResumoMensalCard();
 
@@ -45,7 +149,9 @@ class _ResumoMensalCardState extends ConsumerState<_ResumoMensalCard> {
 
   @override
   Widget build(BuildContext context) {
-    if (_loading) return const _ResumoMensalSkeleton();
+    if (_loading) {
+      return const SkeletonLoader(height: 72, borderRadius: 12);
+    }
     if (_error != null) {
       return FxErrorState(
         chromeOnDark: ShellChrome.of(context).isDark,
@@ -56,181 +162,66 @@ class _ResumoMensalCardState extends ConsumerState<_ResumoMensalCard> {
       );
     }
     final resumo = _resumo;
-    if (resumo == null ||
-        (resumo.totalPrevisto.isZero &&
-            resumo.totalRecebido.isZero &&
-            resumo.inadimplentes == 0)) {
+    if (resumo == null) {
       return FxEmptyState(
         icon: 'pix',
         title: 'Nenhum movimento neste mês',
         subtitle: 'Quando houver cobranças, o resumo aparece aqui.',
         action: FxEmptyAction(
-          label: 'Ver financeiro',
+          label: walletVerFinanceiroLabel(),
           onTap: () => context.push('/financeiro'),
         ),
       );
     }
 
     final primary = Theme.of(context).colorScheme.primary;
-    final chrome = ShellChrome.of(context);
-    final mute = chrome.mute;
-    final line = chrome.line;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final inadimplentes = resumo.inadimplentes;
+    final semMovimento =
+        resumo.totalPrevisto.isZero &&
+        resumo.totalRecebido.isZero &&
+        inadimplentes == 0;
     final percentRecebido =
         resumo.totalPrevisto.isZero
-            ? 0.0
-            : resumo.totalRecebido.ratioOf(resumo.totalPrevisto).clamp(0.0, 1.0);
+            ? 0
+            : (resumo.totalRecebido.ratioOf(resumo.totalPrevisto).clamp(0.0, 1.0) *
+                    100)
+                .round();
     final periodoLabel = monthYearLabelPtBr(_periodo);
 
-    return Semantics(
-      button: true,
-      label:
-          'Resumo financeiro de $periodoLabel. '
-          'Recebido ${resumo.totalRecebido.format()}. '
-          'Previsto ${resumo.totalPrevisto.format()}. '
-          '$inadimplentes inadimplentes.',
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(TokensStrip.rCard),
-          onTap: () => context.push('/financeiro'),
-          child: Container(
-            padding: const EdgeInsets.all(TokensStrip.s4),
-            decoration: fxListCardDecoration(context, accent: primary),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        'Resumo · $periodoLabel',
-                        style: FocuxHubTypography.cardTitle(
-                          color: Theme.of(context).colorScheme.onSurface,
-                        ),
-                      ),
-                    ),
-                    Icon(Icons.chevron_right_rounded, color: mute, size: 22),
-                  ],
-                ),
-                const SizedBox(height: TokensStrip.s3),
-                Row(
-                  children: [
-                    Expanded(
-                      child: _Stat(
-                        label: 'Recebido',
-                        valor: resumo.totalRecebido.format(),
-                        color: EagleTokens.good,
-                      ),
-                    ),
-                    Expanded(
-                      child: _Stat(
-                        label: 'Previsto',
-                        valor: resumo.totalPrevisto.format(),
-                        color: primary,
-                      ),
-                    ),
-                    Expanded(
-                      child: _Stat(
-                        label: 'Inadimplentes',
-                        valor: '$inadimplentes',
-                        color: inadimplentes > 0 ? EagleTokens.bad : mute,
-                      ),
-                    ),
-                  ],
-                ),
-                if (resumo.totalPrevisto.isPositive) ...[
-                  const SizedBox(height: TokensStrip.s3),
-                  Semantics(
-                    label:
-                        '${(percentRecebido * 100).round()} por cento do previsto recebido',
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(999),
-                      child: LinearProgressIndicator(
-                        value: percentRecebido,
-                        minHeight: 6,
-                        backgroundColor: line,
-                        color: primary,
-                      ),
-                    ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        OperationalMetricTile(
+          label: 'Recebido · $periodoLabel',
+          value: resumo.totalRecebido.format(),
+          hint:
+              semMovimento
+                  ? 'Nenhuma cobrança neste mês'
+                  : walletRecebidoHint(
+                    previsto: resumo.totalPrevisto.format(),
+                    percent: percentRecebido,
                   ),
-                  const SizedBox(height: 6),
-                  Text(
-                    '${(percentRecebido * 100).round()}% do previsto recebido',
-                    style: FocuxHubTypography.bodyMuted(color: mute),
-                  ),
-                ],
-                const SizedBox(height: TokensStrip.s2),
-                Text(
-                  'Ver financeiro completo',
-                  style: FocuxHubTypography.bodyMuted(
-                    color: primary,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ],
-            ),
-          ),
+          color: semMovimento ? primary : EagleTokens.good,
+          isDark: isDark,
         ),
-      ),
-    );
-  }
-}
-
-class _ResumoMensalSkeleton extends StatelessWidget {
-  const _ResumoMensalSkeleton();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(TokensStrip.s4),
-      decoration: fxListCardDecoration(context),
-      child: const Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SkeletonLoader(height: 16, width: 160, borderRadius: 8),
-          SizedBox(height: TokensStrip.s3),
-          Row(
-            children: [
-              Expanded(child: SkeletonLoader(height: 42, borderRadius: 10)),
-              SizedBox(width: TokensStrip.s3),
-              Expanded(child: SkeletonLoader(height: 42, borderRadius: 10)),
-              SizedBox(width: TokensStrip.s3),
-              Expanded(child: SkeletonLoader(height: 42, borderRadius: 10)),
-            ],
+        if (inadimplentes > 0) ...[
+          const SizedBox(height: TokensStrip.s3),
+          OperationalMetricTile(
+            label: 'Inadimplentes',
+            value: '$inadimplentes',
+            hint: 'Cobranças em atraso neste mês',
+            color: EagleTokens.bad,
+            isDark: isDark,
+            emphasis: OperationalMetricEmphasis.alert,
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _Stat extends StatelessWidget {
-  final String label;
-  final String valor;
-  final Color color;
-
-  const _Stat({required this.label, required this.valor, required this.color});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: FocuxHubTypography.bodyMuted(
-            color: ShellChrome.of(context).mute,
-          ),
-        ),
-        const SizedBox(height: 2),
-        FittedBox(
-          fit: BoxFit.scaleDown,
-          alignment: Alignment.centerLeft,
-          child: Text(
-            valor,
-            style: FocuxHubTypography.cardTitle(color: color),
-          ),
+        const SizedBox(height: TokensStrip.s2),
+        FxSatelliteListTile(
+          title: walletVerFinanceiroLabel(),
+          titleCase: false,
+          onTap: () => context.push('/financeiro'),
+          leading: FxIcon(name: 'coin', size: 18, color: primary),
         ),
       ],
     );

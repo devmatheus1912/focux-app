@@ -165,6 +165,19 @@ String walletDiscardMessage() =>
 
 String walletCopiarTileLabel() => 'Copiar chave PIX';
 
+String walletHubSubtitle() => 'PIX e banco dos recebimentos';
+
+String walletPixSectionTitle() => 'Dados PIX';
+
+String walletBancoSectionTitle() => 'Dados bancários';
+
+String walletVerFinanceiroLabel() => 'Ver financeiro';
+
+String walletRecebidoHint({
+  required String previsto,
+  required int percent,
+}) => '$percent% de $previsto previsto';
+
 class _CpfInputFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(

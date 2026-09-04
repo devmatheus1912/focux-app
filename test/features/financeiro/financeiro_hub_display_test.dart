@@ -22,6 +22,17 @@ void main() {
     );
   });
 
+  test('financeiroAlunoHubSubtitle junta count e freshness', () {
+    expect(
+      financeiroAlunoHubSubtitle(lancamentos: 0, freshness: null),
+      '0 lançamentos',
+    );
+    expect(
+      financeiroAlunoHubSubtitle(lancamentos: 1, freshness: 'há 1 min'),
+      '1 lançamento · há 1 min',
+    );
+  });
+
   test('financeiroAlunoContextLabel nunca expõe id', () {
     expect(
       financeiroAlunoContextLabel('Ana Silva'),

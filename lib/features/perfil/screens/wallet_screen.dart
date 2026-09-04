@@ -3,8 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
-import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -13,17 +13,23 @@ import '../../../core/utils/friendly_error.dart';
 import '../../../core/utils/pt_br_display.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
+import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_help.dart';
+import '../../../core/widgets/fx_hub_header.dart';
+import '../../../core/widgets/fx_icon.dart';
 import '../../../core/widgets/fx_inset_picker_sheet.dart';
+import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
-import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/operational_metric_tile.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../alunos/widgets/aluno_inset_form_field.dart';
+import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../financeiro/data/financeiro_repository.dart';
 import '../data/perfil_repository.dart';
 import '../providers/perfil_provider.dart';
@@ -130,12 +136,32 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
   }
 
   Future<void> _handleBack() async {
-    if (!_hasUnsavedChanges) {
-      if (mounted) context.pop();
-      return;
+    if (_hasUnsavedChanges) {
+      final discard = await _confirmDiscard();
+      if (!discard || !mounted) return;
     }
-    final discard = await _confirmDiscard();
-    if (discard && mounted) context.pop();
+    if (!mounted) return;
+    safePopOrGo(context, '/perfil');
+  }
+
+  void _showHelp() {
+    showFxHelpSheet(
+      context,
+      title: 'Carteira e PIX',
+      subtitle: walletHubSubtitle(),
+      tips: const [
+        FxHelpTip(
+          'Receber',
+          'A chave PIX é o que o aluno usa para te pagar. Banco e agência são opcionais.',
+          icon: 'pix',
+        ),
+        FxHelpTip(
+          'Salvar',
+          'Confirme no botão de baixo. Só então a chave vale nos recebimentos.',
+          icon: 'circle-check',
+        ),
+      ],
+    );
   }
 
   Future<void> _salvar() async {
@@ -226,148 +252,90 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
 
-    return PopScope(
-      canPop: !_hasUnsavedChanges,
-      onPopInvokedWithResult: (didPop, _) async {
-        if (didPop) return;
-        await _handleBack();
-      },
-      child: fxScreenA11yScope(
-        label: 'Carteira e PIX',
-        child: FxShellScaffold(
-          useMesh: true,
-          appBar: FxShellAppBar(
-            title: 'Carteira e PIX',
-            subtitle: 'RECEBIMENTOS',
-            onBack: _handleBack,
-          ),
-          bottomNavigationBar: SafeArea(
-            top: false,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(
-                FxSettingsLayout.pageInset,
-                TokensStrip.s2,
-                FxSettingsLayout.pageInset,
-                TokensStrip.s3,
-              ),
-              child: FxLiquidPrimaryButton(
-                label: walletSalvarTileLabel(),
-                loading: _carregando,
-                loadingLabel: 'Salvando…',
-                onPressed: _carregando ? null : _salvar,
-              ),
+    return fxScreenA11yScope(
+      label: 'Carteira e PIX',
+      child: FxKeyboardPopScope(
+        child: PopScope(
+          canPop: !_hasUnsavedChanges,
+          onPopInvokedWithResult: (didPop, _) async {
+            if (didPop) return;
+            if (MediaQuery.viewInsetsOf(context).bottom > 0) return;
+            await _handleBack();
+          },
+          child: FxShellScaffold(
+            useMesh: true,
+            appBar: FxShellAppBar(
+              title: 'Carteira e PIX',
+              onBack: _handleBack,
+              actions: [
+                FxHelpIconButton(
+                  tooltip: 'Como usar a carteira',
+                  onTap: _showHelp,
+                ),
+              ],
             ),
-          ),
-          body: perfilAsync.when(
-            loading: () => const SkeletonList(count: 5),
-            error:
-                (e, _) => FxErrorState(
-                  chromeOnDark: chrome.isDark,
-                  primary: primary,
-                  message: friendlyError(e),
-                  onRetry: () => ref.invalidate(perfilProvider),
-                  title: 'Não conseguimos carregar a carteira',
-                ),
-            data: (perfil) {
-              _preencherDadosAtuais(perfil);
-              return Form(
-                key: _formKey,
-                child: ListView(
-                  padding: const EdgeInsets.fromLTRB(
-                    FxSettingsLayout.pageInset,
-                    8,
-                    FxSettingsLayout.pageInset,
-                    32,
-                  ),
-                  children: [
-                    const _ResumoMensalCard(),
-                    const SizedBox(height: TokensStrip.s3),
-                    FxSettingsGroup(
-                      header: 'Dados PIX',
-                      caption:
-                          'Configure PIX e dados bancários para receber dos alunos.',
-                      children: [
-                        FxSettingsTile(
-                          fxIcon: 'coin',
-                          label: 'Tipo de chave',
-                          value:
-                              _tipoChavePix == null
-                                  ? 'Selecionar'
-                                  : WalletPixValidation.labelForTipo(
-                                    _tipoChavePix!,
-                                  ),
-                          picker: true,
-                          onTap: _carregando ? null : _selecionarTipoPix,
+            body: Column(
+              children: [
+                Expanded(
+                  child: perfilAsync.when(
+                    loading: () => const SkeletonList(count: 5),
+                    error:
+                        (e, _) => FxErrorState(
+                          chromeOnDark: chrome.isDark,
+                          primary: primary,
+                          message: friendlyError(e),
+                          onRetry: () => ref.invalidate(perfilProvider),
+                          title: 'Não conseguimos carregar a carteira',
                         ),
-                        AlunoInsetFormField(
-                          controller: _chavePixCtrl,
-                          label: 'Chave PIX',
-                          icon: Icons.pix_rounded,
-                          hint: WalletPixValidation.hintForTipo(_tipoChavePix),
-                          keyboardType: WalletPixValidation.keyboardForTipo(
-                            _tipoChavePix,
+                    data: (perfil) {
+                      _preencherDadosAtuais(perfil);
+                      return Form(
+                        key: _formKey,
+                        child: ListView(
+                          padding: const EdgeInsets.fromLTRB(
+                            FxSettingsLayout.pageInset,
+                            TokensStrip.s4,
+                            FxSettingsLayout.pageInset,
+                            TokensStrip.s4,
                           ),
-                          inputFormatters: [
-                            ...WalletPixValidation.formattersForTipo(
-                              _tipoChavePix,
-                            ),
-                            LengthLimitingTextInputFormatter(walletChavePixMax),
-                          ],
-                          validator:
-                              (v) => WalletPixValidation.validateChave(
-                                _tipoChavePix,
-                                v ?? '',
+                          children: [
+                            FxContentWidthLimiter(
+                              child: _WalletFormFields(
+                                tipoChavePix: _tipoChavePix,
+                                chavePixCtrl: _chavePixCtrl,
+                                bancoCtrl: _bancoCtrl,
+                                agenciaCtrl: _agenciaCtrl,
+                                contaCtrl: _contaCtrl,
+                                carregando: _carregando,
+                                onSelecionarTipo: _selecionarTipoPix,
+                                onCopiarChave: _copiarChavePix,
                               ),
-                          showDivider: false,
-                        ),
-                        if (_chavePixCtrl.text.trim().isNotEmpty)
-                          TextButton(
-                            onPressed: _carregando ? null : _copiarChavePix,
-                            child: Text(walletCopiarTileLabel()),
-                          ),
-                      ],
-                    ),
-                    const SizedBox(height: TokensStrip.s3),
-                    FxSettingsGroup(
-                      header: 'Dados bancários',
-                      caption:
-                          'Opcional — complementa o PIX para transferências.',
-                      children: [
-                        AlunoInsetFormField(
-                          controller: _bancoCtrl,
-                          label: 'Banco',
-                          icon: Icons.account_balance_outlined,
-                          hint: 'Ex.: Nubank, Itaú, Bradesco',
-                          textCapitalization: TextCapitalization.words,
-                          inputFormatters: [
-                            LengthLimitingTextInputFormatter(walletBancoMax),
+                            ),
                           ],
                         ),
-                        AlunoInsetFormField(
-                          controller: _agenciaCtrl,
-                          label: 'Agência',
-                          icon: Icons.tag_outlined,
-                          keyboardType: TextInputType.number,
-                          inputFormatters: [
-                            FilteringTextInputFormatter.digitsOnly,
-                            LengthLimitingTextInputFormatter(walletAgenciaMax),
-                          ],
-                        ),
-                        AlunoInsetFormField(
-                          controller: _contaCtrl,
-                          label: 'Conta',
-                          icon: Icons.numbers_rounded,
-                          keyboardType: TextInputType.text,
-                          inputFormatters:
-                              WalletPixValidation.formattersForConta(),
-                          showDivider: false,
-                        ),
-                      ],
-                    ),
-                  ],
+                      );
+                    },
+                  ),
                 ),
-              );
-            },
+                SafeArea(
+                  top: false,
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      FxSettingsLayout.pageInset,
+                      TokensStrip.s2,
+                      FxSettingsLayout.pageInset,
+                      TokensStrip.s3 + MediaQuery.viewInsetsOf(context).bottom,
+                    ),
+                    child: FxLiquidPrimaryButton(
+                      label: walletSalvarTileLabel(),
+                      loading: _carregando,
+                      loadingLabel: 'Salvando…',
+                      onPressed: _carregando ? null : _salvar,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

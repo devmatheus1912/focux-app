@@ -21,6 +21,8 @@ void main() {
     expect(screen, contains('FxLiquidPrimaryButton'));
     expect(screen, contains('OperationalMetricTile'));
     expect(screen, contains('/chat/aluno'));
+    expect(screen, contains('viewInsetsOf'));
+    expect(screen, contains('FocuxHubTypography.metric'));
     expect(screen, contains('showFinanceiroAlunoCobrancaSheet'));
     expect(screen, contains('circle-check'));
     expect(screen, isNot(contains('check-circle')));
