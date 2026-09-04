@@ -26,7 +26,11 @@ class DashboardHeaderProfileAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final neon = BrandPalette.accent(primary);
+    // Marca do personal (pilar 8) — softened lê teal no dark;
+    // accent clareava demais e parecia anel neutro.
+    final brand = BrandPalette.softened(primary);
+    final ring = brand.withValues(alpha: isDark ? 0.92 : 0.78);
+    final glow = brand.withValues(alpha: isDark ? 0.22 : 0.14);
     final outer = size;
     final avatarRadius = (outer - _ring * 2 - _gap * 2) / 2;
     return Semantics(
@@ -45,7 +49,7 @@ class DashboardHeaderProfileAvatar extends StatelessWidget {
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: neon.withValues(alpha: isDark ? 0.16 : 0.12),
+                      color: glow,
                       blurRadius: isDark ? 8 : 6,
                     ),
                   ],
@@ -58,17 +62,14 @@ class DashboardHeaderProfileAvatar extends StatelessWidget {
               child: InkWell(
                 onTap: onTap,
                 customBorder: const CircleBorder(),
-                splashColor: neon.withValues(alpha: 0.12),
-                highlightColor: neon.withValues(alpha: 0.06),
+                splashColor: brand.withValues(alpha: 0.12),
+                highlightColor: brand.withValues(alpha: 0.06),
                 child: Container(
                   width: outer,
                   height: outer,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    border: Border.all(
-                      color: neon.withValues(alpha: isDark ? 0.98 : 0.88),
-                      width: _ring,
-                    ),
+                    border: Border.all(color: ring, width: _ring),
                   ),
                   padding: const EdgeInsets.all(_gap),
                   child: ClipOval(
