@@ -41,6 +41,37 @@ void main() {
     handle.dispose();
   });
 
+  testWidgets('alert emphasis keeps fill/border without side rail', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _wrap(
+        const OperationalMetricTile(
+          label: 'Risco',
+          value: '3',
+          hint: 'Alunos pedem contato',
+          color: EagleTokens.warn,
+          isDark: false,
+          emphasis: OperationalMetricEmphasis.alert,
+        ),
+        textScaleFactor: 1,
+      ),
+    );
+
+    final decorated = tester.widgetList<DecoratedBox>(find.byType(DecoratedBox));
+    expect(
+      decorated.any((w) {
+        final d = w.decoration;
+        return d is BoxDecoration &&
+            d.borderRadius == BorderRadius.circular(999);
+      }),
+      isFalse,
+      reason: 'alert não usa rail lateral (barra 3px)',
+    );
+    expect(find.text('RISCO'), findsOneWidget);
+    expect(find.text('3'), findsOneWidget);
+  });
+
   for (final scale in [1.3, 2.0]) {
     testWidgets('OperationalMetricTile layout survives textScaler $scale', (
       tester,
