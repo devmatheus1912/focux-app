@@ -24,6 +24,8 @@ void main() {
     expect(relatorioUltimoTreinoLabel(''), 'Sem treinos');
     expect(relatorioUltimoTreinoLabel('2026-08-31'), '31 de agosto de 2026');
     expect(relatorioRankingPreview([1, 2, 3, 4]), [1, 2, 3]);
+    expect(relatorioAderenciaPct(3, 4), 75);
+    expect(relatorioAderenciaPct(1, 0), 0);
     expect(
       relatorioRankingSearch(['Ana', 'Bia', 'Cris'], 'bi', (nome) => nome),
       ['Bia'],

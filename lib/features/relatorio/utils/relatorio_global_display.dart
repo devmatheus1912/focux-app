@@ -1,4 +1,5 @@
 import '../../../core/utils/fx_utils.dart';
+import '../data/relatorio_repository.dart';
 
 String relatorioAderenciaMediaLabel(double media) {
   return '${media.clamp(0, 100).toStringAsFixed(1)}%';
@@ -16,8 +17,37 @@ String relatorioTreinosSubtitle(int concluidos, int total) {
   return '$concluidos de $total treinos concluídos';
 }
 
+double relatorioAderenciaPct(int concluidos, int total) {
+  if (total <= 0) return 0;
+  return concluidos * 100.0 / total;
+}
+
 List<T> relatorioRankingPreview<T>(List<T> items) =>
     items.take(3).toList(growable: false);
+
+List<ResumoAluno> relatorioCatalogoMais(ResumoGlobal dados) {
+  final source = dados.itens.isNotEmpty ? dados.itens : dados.maisComprometidos;
+  final copy = List<ResumoAluno>.of(source);
+  copy.sort(
+    (a, b) => relatorioAderenciaPct(
+      b.treinosConcluidos,
+      b.totalTreinos,
+    ).compareTo(relatorioAderenciaPct(a.treinosConcluidos, a.totalTreinos)),
+  );
+  return copy;
+}
+
+List<ResumoAluno> relatorioCatalogoMenos(ResumoGlobal dados) {
+  final source = dados.itens.isNotEmpty ? dados.itens : dados.menosComprometidos;
+  final copy = List<ResumoAluno>.of(source);
+  copy.sort(
+    (a, b) => relatorioAderenciaPct(
+      a.treinosConcluidos,
+      a.totalTreinos,
+    ).compareTo(relatorioAderenciaPct(b.treinosConcluidos, b.totalTreinos)),
+  );
+  return copy;
+}
 
 List<T> relatorioRankingSearch<T>(
   List<T> items,

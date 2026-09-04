@@ -26,6 +26,9 @@ void main() {
     expect(screen, contains('SkeletonList'));
     expect(screen, contains('RefreshIndicator'));
     expect(screen, contains('FxHubFreshness.fromFetchedAt'));
+    expect(screen, contains('emphasize: true'));
+    expect(screen, contains('FxInputDeco.build'));
+    expect(screen, contains('DashboardHomeActionChip'));
     expect(screen, contains('FxSatelliteListTile'));
     expect(screen, contains('FxEmptyAction'));
     expect(screen, isNot(contains('FxSettingsGroup')));

@@ -27,6 +27,7 @@ import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../subscription/models/subscription_plan.dart';
 import '../data/dunning_repository.dart';
 import '../utils/dunning_ops_display.dart';
+import '../widgets/dunning_catalog_sheet.dart';
 
 final _repoProvider = Provider(
   (ref) => DunningRepository(ref.read(apiClientProvider)),
@@ -46,13 +47,11 @@ class _DunningOpsScreenState extends ConsumerState<DunningOpsScreen> {
   var _hasMore = false;
   var _page = 0;
   var _loading = true;
-  var _carregandoMais = false;
   String? _erro;
   int? _marcandoId;
   DateTime? _fetchedAt;
   var _viewTracked = false;
   var _ttvTracked = false;
-  var _mostrarTodas = false;
 
   @override
   void initState() {
@@ -75,7 +74,6 @@ class _DunningOpsScreenState extends ConsumerState<DunningOpsScreen> {
         _page = home.page;
         _fetchedAt = DateTime.now();
         _loading = false;
-        _mostrarTodas = false;
       });
       _trackViewIfNeeded();
     } catch (e) {
@@ -87,28 +85,20 @@ class _DunningOpsScreenState extends ConsumerState<DunningOpsScreen> {
     }
   }
 
-  Future<void> _carregarMais() async {
-    if (_carregandoMais || !_hasMore) return;
-    setState(() => _carregandoMais = true);
-    try {
-      final home = await ref.read(_repoProvider).getHome(page: _page + 1);
-      if (!mounted) return;
-      final seen = _falhas.map((f) => f.id).toSet();
-      setState(() {
-        _snapshot = home.snapshot;
-        _falhas = [
-          ..._falhas,
-          ...home.falhas.where((f) => seen.add(f.id)),
-        ];
-        _hasMore = home.hasMore;
-        _page = home.page;
-        _carregandoMais = false;
-      });
-    } catch (e) {
-      if (!mounted) return;
-      setState(() => _carregandoMais = false);
-      FeedbackHelper.showError(context, friendlyError(e));
-    }
+  void _abrirCatalogo() {
+    final snap = _snapshot;
+    if (snap == null) return;
+    showDunningCatalogSheet(
+      context,
+      firstPage: DunningHomeBundle(
+        snapshot: snap,
+        falhas: _falhas,
+        page: _page,
+        hasMore: _hasMore,
+      ),
+      repo: ref.read(_repoProvider),
+      onMarcar: _marcarRecuperado,
+    );
   }
 
   void _trackViewIfNeeded() {
@@ -134,7 +124,7 @@ class _DunningOpsScreenState extends ConsumerState<DunningOpsScreen> {
     goPersonalShellTab(context, '/financeiro');
   }
 
-  Future<void> _marcarRecuperado(DunningFalha falha) async {
+  Future<bool> _marcarRecuperado(DunningFalha falha) async {
     final ok = await showFxConfirmSheet(
       context,
       title: 'Marcar como recuperada?',
@@ -142,7 +132,7 @@ class _DunningOpsScreenState extends ConsumerState<DunningOpsScreen> {
       message: 'A falha some da lista. Use só se o pagamento já entrou.',
       confirmLabel: 'Marcar recuperada',
     );
-    if (!ok || !mounted) return;
+    if (!ok || !mounted) return false;
 
     AnalyticsService.instance.track(
       ProductEvents.dunningMarkedRecovered,
@@ -154,12 +144,14 @@ class _DunningOpsScreenState extends ConsumerState<DunningOpsScreen> {
     setState(() => _marcandoId = falha.id);
     try {
       await ref.read(_repoProvider).marcarRecuperado(falha.id);
-      if (!mounted) return;
+      if (!mounted) return false;
       FeedbackHelper.showSuccess(context, 'Falha marcada como recuperada.');
       await _carregar();
+      return true;
     } catch (e) {
-      if (!mounted) return;
+      if (!mounted) return false;
       FeedbackHelper.showError(context, friendlyError(e));
+      return false;
     } finally {
       if (mounted) setState(() => _marcandoId = null);
     }
@@ -171,8 +163,7 @@ class _DunningOpsScreenState extends ConsumerState<DunningOpsScreen> {
     final primary = Theme.of(context).colorScheme.primary;
     final snap = _snapshot;
     final firstFalha = _falhas.isEmpty ? null : _falhas.first;
-    final preview =
-        _mostrarTodas ? _falhas : dunningFalhasPreview(_falhas);
+    final preview = dunningFalhasPreview(_falhas);
 
     return fxScreenA11yScope(
       label: 'Cobrança auto',
@@ -343,17 +334,10 @@ class _DunningOpsScreenState extends ConsumerState<DunningOpsScreen> {
                                     ? null
                                     : () => _marcarRecuperado(falha),
                               ),
-                            if (!_mostrarTodas && _falhas.length > 3)
+                            if (_falhas.length > 3 || _hasMore)
                               FxSatelliteListTile(
                                 title: 'Ver mais',
-                                onTap: () => setState(() => _mostrarTodas = true),
-                              )
-                            else if (_hasMore)
-                              FxSatelliteListTile(
-                                title: _carregandoMais
-                                    ? 'Carregando…'
-                                    : 'Carregar mais',
-                                onTap: _carregandoMais ? null : _carregarMais,
+                                onTap: _abrirCatalogo,
                               ),
                           ],
                         ],

@@ -35,6 +35,13 @@ void main() {
     expect(tab, isNot(contains('check-circle')));
     expect(tab, isNot(contains('DropdownButtonFormField')));
     expect(tab, isNot(contains('Clipboard.setData')));
+
+    final dashboard = readScreenSourceBundle(
+      'lib/features/financeiro/screens/financeiro_dashboard_screen.dart',
+    );
+    expect(dashboard, contains('emphasize: true'));
+    expect(dashboard, contains('Ver mensalidades'));
+    expect(dashboard, contains('FxStripCard'));
   });
 
   test('mensalidade detalhe busca por id sem extra', () {
