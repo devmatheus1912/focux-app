@@ -197,20 +197,37 @@ class DashboardRepository {
     return DashboardHomeBundle.fromJson(response.data as Map<String, dynamic>);
   }
 
+  static const iaCommandActionsPageSize = 20;
+
+  Future<IaCommandActionsPage> getIaCommandActionsPage({
+    String? status,
+    int? alunoId,
+    int page = 0,
+    String? q,
+  }) async {
+    final query = q?.trim() ?? '';
+    final response = await _dio.get(
+      '/api/dashboard/command-center/actions/ia',
+      queryParameters: {
+        'page': page,
+        'size': iaCommandActionsPageSize,
+        if (status != null && status.isNotEmpty) 'status': status,
+        if (alunoId != null) 'alunoId': alunoId,
+        if (query.isNotEmpty) 'q': query,
+      },
+    );
+    return IaCommandActionsPage.fromJson(response.data);
+  }
+
   Future<List<FilaAcaoResumo>> getIaCommandActions({
     String? status,
     int? alunoId,
   }) async {
-    final response = await _dio.get(
-      '/api/dashboard/command-center/actions/ia',
-      queryParameters: {
-        if (status != null && status.isNotEmpty) 'status': status,
-        if (alunoId != null) 'alunoId': alunoId,
-      },
+    final page = await getIaCommandActionsPage(
+      status: status,
+      alunoId: alunoId,
     );
-    return (response.data as List)
-        .map((item) => FilaAcaoResumo.fromJson(item as Map<String, dynamic>))
-        .toList();
+    return page.itens;
   }
 
   Future<void> completeCommandAction(String actionKey) async {

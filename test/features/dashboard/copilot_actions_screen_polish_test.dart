@@ -24,6 +24,9 @@ void main() {
     expect(screen, isNot(contains('BrandPalette.accent')));
     expect(screen, contains('_CopilotTaskCard'));
     expect(screen, contains('_RadarSignalCard'));
+    expect(screen, contains('Buscar tarefa'));
+    expect(screen, contains('Carregar mais'));
+    expect(screen, contains('onTapOutside'));
     expect(screen, isNot(contains('FxLiquidPrimaryButton')));
     expect(screen, isNot(contains('_StatusSegmentedControl')));
     expect(screen, isNot(contains('_MiniActionButton')));

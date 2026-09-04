@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -15,6 +17,7 @@ import '../../../core/widgets/fx_dock.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
+import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_inset_picker_sheet.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../widgets/dashboard_home_action_chip.dart';
@@ -27,14 +30,14 @@ import 'package:focux_app/core/widgets/skeleton_loader.dart';
 
 part 'copilot_actions_screen_widgets.part.dart';
 
-final iaActionsProvider = FutureProvider.family<List<FilaAcaoResumo>, String>((
-  ref,
-  status,
-) {
-  return ref
-      .read(dashboardRepositoryProvider)
-      .getIaCommandActions(status: status);
-});
+typedef IaActionsQuery = ({String status, String q});
+
+final iaActionsProvider =
+    FutureProvider.family<IaCommandActionsPage, IaActionsQuery>((ref, query) {
+      return ref
+          .read(dashboardRepositoryProvider)
+          .getIaCommandActionsPage(status: query.status, q: query.q);
+    });
 
 class CopilotActionsScreen extends ConsumerStatefulWidget {
   const CopilotActionsScreen({super.key});
@@ -45,25 +48,46 @@ class CopilotActionsScreen extends ConsumerStatefulWidget {
 }
 
 class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
+  final _search = TextEditingController();
+  Timer? _debounce;
   String _status = copilotActionsStatusAberto;
+  String _query = '';
+  final _extra = <FilaAcaoResumo>[];
+  var _extraHasNext = false;
+  var _extraPage = 0;
+  var _loadingMore = false;
   DateTime? _fetchedAt;
+
+  IaActionsQuery get _queryKey => (status: _status, q: _query);
+
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    _search.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final dark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
     final brand = BrandPalette.softened(primary);
-    ref.listen<AsyncValue<List<FilaAcaoResumo>>>(iaActionsProvider(_status), (
+    ref.listen<AsyncValue<IaCommandActionsPage>>(iaActionsProvider(_queryKey), (
       _,
       next,
     ) {
       if (!next.isLoading && next.hasValue) {
-        setState(() => _fetchedAt = DateTime.now());
+        setState(() {
+          _fetchedAt = DateTime.now();
+          _extra.clear();
+          _extraHasNext = false;
+          _extraPage = 0;
+        });
       }
     });
     final ink = dark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final mute = dark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-    final actionsAsync = ref.watch(iaActionsProvider(_status));
+    final actionsAsync = ref.watch(iaActionsProvider(_queryKey));
 
     return fxScreenA11yScope(
       label: 'Tarefas IA',
@@ -118,14 +142,26 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
                 FxSettingsLayout.pageInset,
                 TokensStrip.s2,
               ),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: DashboardHomeActionChip(
-                  label: copilotActionsStatusLabel(_status),
-                  accent: brand,
-                  isDark: dark,
-                  onPressed: _abrirFiltro,
-                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  DashboardHomeActionChip(
+                    label: copilotActionsStatusLabel(_status),
+                    accent: brand,
+                    isDark: dark,
+                    onPressed: _abrirFiltro,
+                  ),
+                  const SizedBox(height: TokensStrip.s2),
+                  TextField(
+                    controller: _search,
+                    textInputAction: TextInputAction.search,
+                    onChanged: _onSearchChanged,
+                    onSubmitted: _onSearchSubmitted,
+                    onTapOutside:
+                        (_) => FocusManager.instance.primaryFocus?.unfocus(),
+                    decoration: FxInputDeco.build(context, 'Buscar tarefa'),
+                  ),
+                ],
               ),
             ),
             Expanded(
@@ -138,7 +174,14 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
                       message: friendlyError(e),
                       onRetry: _refresh,
                     ),
-                data: (actions) {
+                data: (page) {
+                  final seen = page.itens.map((item) => item.actionKey).toSet();
+                  final actions = [
+                    ...page.itens,
+                    ..._extra.where((item) => seen.add(item.actionKey)),
+                  ];
+                  final hasNext =
+                      _extra.isEmpty ? page.hasNext : _extraHasNext;
                   final copilot =
                       actions
                           .where((action) => action.tipo == 'IA_COPILOTO')
@@ -152,6 +195,8 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
                     return RefreshIndicator(
                       onRefresh: _refresh,
                       child: ListView(
+                        keyboardDismissBehavior:
+                            ScrollViewKeyboardDismissBehavior.onDrag,
                         padding: const EdgeInsets.fromLTRB(
                           FxSettingsLayout.pageInset,
                           TokensStrip.s4,
@@ -176,6 +221,8 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
                   return RefreshIndicator(
                     onRefresh: _refresh,
                     child: ListView(
+                      keyboardDismissBehavior:
+                          ScrollViewKeyboardDismissBehavior.onDrag,
                       padding: const EdgeInsets.fromLTRB(
                         FxSettingsLayout.pageInset,
                         10,
@@ -236,6 +283,17 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
                             const SizedBox(height: 8),
                           ],
                         ],
+                        if (hasNext)
+                          FxSatelliteListTile(
+                            title: _loadingMore ? 'Carregando…' : 'Carregar mais',
+                            subtitle:
+                                _loadingMore
+                                    ? null
+                                    : Text(
+                                      'Mais ${(page.totalItens - actions.length).clamp(0, 999)} nesta lista.',
+                                    ),
+                            onTap: _loadingMore ? null : () => _carregarMais(page),
+                          ),
                       ],
                     ),
                   );
@@ -263,7 +321,54 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
       ],
     );
     if (!mounted || picked == null || picked == _status) return;
-    setState(() => _status = picked);
+    setState(() {
+      _status = picked;
+      _extra.clear();
+      _extraHasNext = false;
+      _extraPage = 0;
+    });
+  }
+
+  void _onSearchChanged(String value) {
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 350), () {
+      _onSearchSubmitted(value);
+    });
+  }
+
+  void _onSearchSubmitted(String value) {
+    final next = value.trim();
+    if (next == _query) return;
+    setState(() {
+      _query = next;
+      _extra.clear();
+      _extraHasNext = false;
+      _extraPage = 0;
+    });
+  }
+
+  Future<void> _carregarMais(IaCommandActionsPage first) async {
+    if (_loadingMore) return;
+    final currentPage = _extra.isEmpty ? first.page : _extraPage;
+    setState(() => _loadingMore = true);
+    try {
+      final next = await ref
+          .read(dashboardRepositoryProvider)
+          .getIaCommandActionsPage(
+            status: _status,
+            q: _query,
+            page: currentPage + 1,
+          );
+      if (!mounted) return;
+      setState(() {
+        _extra.addAll(next.itens);
+        _extraPage = next.page;
+        _extraHasNext = next.hasNext;
+        _loadingMore = false;
+      });
+    } catch (_) {
+      if (mounted) setState(() => _loadingMore = false);
+    }
   }
 
   void _abrirAjuda() {
@@ -286,8 +391,11 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
   }
 
   Future<void> _refresh() async {
-    ref.invalidate(iaActionsProvider(_status));
-    await ref.read(iaActionsProvider(_status).future);
+    _extra.clear();
+    _extraHasNext = false;
+    _extraPage = 0;
+    ref.invalidate(iaActionsProvider(_queryKey));
+    await ref.read(iaActionsProvider(_queryKey).future);
   }
 
   void _openAction(BuildContext context, FilaAcaoResumo action) {
@@ -351,7 +459,7 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
     try {
       await action();
       if (!mounted) return;
-      ref.invalidate(iaActionsProvider(_status));
+      ref.invalidate(iaActionsProvider(_queryKey));
       ref.invalidate(dashboardHomeProvider);
       ref.invalidate(commandCenterProvider);
       FeedbackHelper.showInfo(context, successMessage);
