@@ -34,21 +34,19 @@ Future<String?> pickMensalidadeMesReferencia(
   BuildContext ctx, {
   required String atual,
 }) async {
-  final now = DateTime.now();
-  final initial = DateTime.tryParse(atual) ?? DateTime(now.year, now.month, 1);
-  final picked = await showDatePicker(
-    context: ctx,
-    initialDate: initial,
-    firstDate: DateTime(2020),
-    lastDate: DateTime(now.year + 5),
-    helpText: 'Selecione o mês de referência',
-    fieldLabelText: 'Mês/Ano',
-    initialEntryMode: DatePickerEntryMode.calendarOnly,
-    selectableDayPredicate: (day) => day.day == 1,
+  final ops = financeiroMesReferenciaOpcoes(atual: atual);
+  final selected = financeiroMesReferenciaKey(atual);
+  final picked = await showFxInsetPickerSheet<String>(
+    ctx,
+    title: 'Mês de referência',
+    selected: selected,
+    items: [
+      for (final o in ops)
+        FxInsetPickerSheetItem(value: o.key, label: o.label),
+    ],
   );
   if (picked == null) return null;
-  final mes = picked.month.toString().padLeft(2, '0');
-  return '${picked.year}-$mes-01';
+  return financeiroMesReferenciaIso(picked);
 }
 
 Future<Mensalidade?> confirmarPagarMensalidade({

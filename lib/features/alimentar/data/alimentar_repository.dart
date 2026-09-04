@@ -79,11 +79,15 @@ class AlimentarRepository {
   }
 
   Future<PlanoAlimentar?> obter(int alunoId, int planoId) async {
-    final planos = await listar(alunoId);
-    for (final plano in planos) {
-      if (plano.id == planoId) return plano;
+    try {
+      final r = await _dio.get(
+        '/api/alunos/$alunoId/planos-alimentares/$planoId',
+      );
+      return PlanoAlimentar.fromJson(r.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 404) return null;
+      rethrow;
     }
-    return null;
   }
 
   Future<PlanoAlimentar> criar(int alunoId, Map<String, dynamic> data) async =>

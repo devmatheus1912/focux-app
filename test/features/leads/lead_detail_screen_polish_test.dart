@@ -17,6 +17,7 @@ void main() {
     expect(screen, contains('SkeletonList'));
     expect(screen, contains('friendlyError'));
     expect(screen, contains('showFxInsetPickerSheet'));
+    expect(screen, isNot(contains('showDatePicker')));
     expect(screen, contains('OperationalMetricTile'));
     expect(screen, contains('FxLiquidPrimaryButton'));
     expect(screen, contains('FxHubHeader'));

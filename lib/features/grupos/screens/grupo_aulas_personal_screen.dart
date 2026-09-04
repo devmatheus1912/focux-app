@@ -16,6 +16,7 @@ import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_form_sheet.dart';
 import '../../../core/widgets/fx_inset_picker_row.dart';
+import '../../../core/widgets/fx_inset_picker_sheet.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
@@ -79,19 +80,41 @@ class _GrupoAulasPersonalScreenState
     required DateTime firstDate,
     required DateTime lastDate,
   }) async {
-    final date = await showDatePicker(
-      context: context,
-      initialDate: initial,
+    final today = DateTime.now();
+    final options = grupoAulaDateOptions(
       firstDate: firstDate,
       lastDate: lastDate,
+      initial: initial,
+      now: today,
     );
-    if (date == null || !context.mounted) return null;
+    final pickedDate = await showFxInsetPickerSheet<DateTime>(
+      context,
+      title: 'Data',
+      selected: grupoAulaDay(initial),
+      sameValue: grupoAulaSameDay,
+      items: [
+        for (final day in options)
+          FxInsetPickerSheetItem(
+            value: day,
+            label: grupoAulaDateOptionLabel(day, today),
+            subtitle: grupoAulaDateLabel(day),
+            icon: Icons.event_outlined,
+          ),
+      ],
+    );
+    if (pickedDate == null || !context.mounted) return null;
     final time = await showTimePicker(
       context: context,
       initialTime: TimeOfDay.fromDateTime(initial),
     );
     if (time == null) return null;
-    return DateTime(date.year, date.month, date.day, time.hour, time.minute);
+    return DateTime(
+      pickedDate.year,
+      pickedDate.month,
+      pickedDate.day,
+      time.hour,
+      time.minute,
+    );
   }
 
   Future<void> _criar() async {

@@ -6,6 +6,64 @@ String grupoAulaWhenLabel(DateTime d) {
   return '$day/$month $hour:$minute';
 }
 
+String grupoAulaDateLabel(DateTime d) {
+  final day = d.day.toString().padLeft(2, '0');
+  final month = d.month.toString().padLeft(2, '0');
+  return '$day/$month';
+}
+
+bool grupoAulaSameDay(DateTime a, DateTime b) =>
+    a.year == b.year && a.month == b.month && a.day == b.day;
+
+DateTime grupoAulaDay(DateTime d) => DateTime(d.year, d.month, d.day);
+
+const grupoAulaDateHorizons = [0, 1, 3, 7, 14, 30];
+
+String grupoAulaDateOptionLabel(DateTime date, DateTime today) {
+  final d = grupoAulaDay(date);
+  final t = grupoAulaDay(today);
+  final diff = d.difference(t).inDays;
+  if (diff == 0) return 'Hoje';
+  if (diff == 1) return 'Amanhã';
+  if (diff == -1) return 'Ontem';
+  if (diff > 1) return 'Em $diff dias';
+  return 'Há ${-diff} dias';
+}
+
+List<DateTime> grupoAulaDateOptions({
+  required DateTime firstDate,
+  required DateTime lastDate,
+  DateTime? initial,
+  DateTime? now,
+}) {
+  final first = grupoAulaDay(firstDate);
+  final last = grupoAulaDay(lastDate);
+  final span = last.difference(first).inDays;
+  if (span <= 2) {
+    final out = <DateTime>[];
+    for (var d = first; !d.isAfter(last); d = d.add(const Duration(days: 1))) {
+      out.add(d);
+    }
+    return out;
+  }
+  final today = grupoAulaDay(now ?? DateTime.now());
+  final out = <DateTime>[];
+  for (final h in grupoAulaDateHorizons) {
+    final d = today.add(Duration(days: h));
+    if (d.isBefore(first) || d.isAfter(last)) continue;
+    if (!out.any((x) => grupoAulaSameDay(x, d))) out.add(d);
+  }
+  if (initial != null) {
+    final i = grupoAulaDay(initial);
+    if (!i.isBefore(first) &&
+        !i.isAfter(last) &&
+        !out.any((x) => grupoAulaSameDay(x, i))) {
+      out.insert(0, i);
+    }
+  }
+  return out;
+}
+
 String grupoAulaVagasLabel({
   required int inscritos,
   required int capacidadeMax,
