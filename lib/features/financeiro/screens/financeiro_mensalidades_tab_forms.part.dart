@@ -186,11 +186,8 @@ extension FinanceiroMensalidadesTabForms on _FinanceiroMensalidadesTabState {
                                       setModalState(() => salvando = true);
                                       try {
                                         final alunoId = alunoSelecionadoId!;
-                                        final valor = double.parse(
-                                          valorCtrl.text.trim().replaceAll(
-                                            ',',
-                                            '.',
-                                          ),
+                                        final valor = FxMoney.fromInput(
+                                          valorCtrl.text,
                                         );
                                         await FinanceiroRepository(
                                           ref.read(apiClientProvider),

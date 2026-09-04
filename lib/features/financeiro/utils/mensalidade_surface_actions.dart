@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/analytics/analytics_service.dart';
+import '../../../core/money/fx_money.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/clipboard_sensitive.dart';
@@ -254,7 +255,7 @@ Future<Mensalidade?> showEditarMensalidadeSheet({
   required Mensalidade m,
 }) async {
   const statuses = ['PENDENTE', 'PAGO', 'ATRASADO'];
-  final valorCtrl = TextEditingController(text: m.valor.toStringAsFixed(2));
+  final valorCtrl = TextEditingController(text: m.valor.wire);
   var mesReferencia = m.mesReferencia;
   var selectedStatus = m.status;
   var salvando = false;
@@ -398,11 +399,8 @@ Future<Mensalidade?> showEditarMensalidadeSheet({
                                       if (!ok) return;
                                       setModalState(() => salvando = true);
                                       try {
-                                        final valor = double.parse(
-                                          valorCtrl.text.trim().replaceAll(
-                                            ',',
-                                            '.',
-                                          ),
+                                        final valor = FxMoney.fromInput(
+                                          valorCtrl.text,
                                         );
                                         final updated = await mensalidadeRepo(
                                           ref,

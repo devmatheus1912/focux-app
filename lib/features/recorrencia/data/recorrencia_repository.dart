@@ -1,11 +1,12 @@
 import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
+import '../../../core/money/fx_money.dart';
 
 class RecorrenciaAssinatura {
   final int id;
   final int alunoId;
   final String? alunoNome;
-  final double valor;
+  final FxMoney valor;
   final String status;
   final String? initPoint;
   final String? proximaCobranca;
@@ -13,19 +14,19 @@ class RecorrenciaAssinatura {
   RecorrenciaAssinatura({
     required this.id,
     required this.alunoId,
-    required this.valor,
+    required Object valor,
     required this.status,
     this.alunoNome,
     this.initPoint,
     this.proximaCobranca,
-  });
+  }) : valor = FxMoney.parse(valor);
 
   factory RecorrenciaAssinatura.fromJson(Map<String, dynamic> j) =>
       RecorrenciaAssinatura(
         id: (j['id'] as num).toInt(),
         alunoId: (j['alunoId'] as num).toInt(),
         alunoNome: j['alunoNome'] as String?,
-        valor: (j['valor'] as num?)?.toDouble() ?? 0,
+        valor: j['valor'] ?? 0,
         status: j['status'] as String? ?? 'PENDENTE',
         initPoint: j['initPoint'] as String?,
         proximaCobranca: j['proximaCobranca'] as String?,
@@ -45,11 +46,11 @@ class RecorrenciaRepository {
 
   Future<RecorrenciaAssinatura> criar({
     required int alunoId,
-    required double valor,
+    required FxMoney valor,
   }) async {
     final r = await _dio.post(
       '/api/recorrencia',
-      data: {'alunoId': alunoId, 'valor': valor},
+      data: {'alunoId': alunoId, 'valor': valor.wire},
     );
     return RecorrenciaAssinatura.fromJson(r.data as Map<String, dynamic>);
   }

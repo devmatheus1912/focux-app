@@ -8,8 +8,8 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/money/fx_money.dart';
 import '../../../core/utils/friendly_error.dart';
-import '../../../core/utils/pt_br_display.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_empty_state.dart';
@@ -394,10 +394,7 @@ class _FinanceiroMensalidadesTabState
                                       overdue ? EagleTokens.bad : primary,
                                 ),
                                 trailing: Text(
-                                  formatBrlCurrency(
-                                    item.valor,
-                                    showDecimals: false,
-                                  ),
+                                  item.valor.format(showDecimals: false),
                                   style: TextStyle(
                                     color: chrome.ink,
                                     fontWeight: FontWeight.w700,

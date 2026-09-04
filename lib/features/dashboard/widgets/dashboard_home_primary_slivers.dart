@@ -104,7 +104,7 @@ List<Widget> buildDashboardHomePrimarySlivers({
                   temTreinos: primeiroTreinoCriado || checkinsHoje > 0,
                   temFinanceiro:
                       finData != null &&
-                      (finData.receitaMes > 0 ||
+                      (finData.receitaMes.isPositive ||
                           finData.vencimentosProximos.isNotEmpty),
                 ),
       ),

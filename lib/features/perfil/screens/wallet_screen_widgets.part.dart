@@ -57,8 +57,8 @@ class _ResumoMensalCardState extends ConsumerState<_ResumoMensalCard> {
     }
     final resumo = _resumo;
     if (resumo == null ||
-        (resumo.totalPrevisto == 0 &&
-            resumo.totalRecebido == 0 &&
+        (resumo.totalPrevisto.isZero &&
+            resumo.totalRecebido.isZero &&
             resumo.inadimplentes == 0)) {
       return FxEmptyState(
         icon: 'pix',
@@ -77,17 +77,17 @@ class _ResumoMensalCardState extends ConsumerState<_ResumoMensalCard> {
     final line = chrome.line;
     final inadimplentes = resumo.inadimplentes;
     final percentRecebido =
-        resumo.totalPrevisto <= 0
+        resumo.totalPrevisto.isZero
             ? 0.0
-            : (resumo.totalRecebido / resumo.totalPrevisto).clamp(0.0, 1.0);
+            : resumo.totalRecebido.ratioOf(resumo.totalPrevisto).clamp(0.0, 1.0);
     final periodoLabel = monthYearLabelPtBr(_periodo);
 
     return Semantics(
       button: true,
       label:
           'Resumo financeiro de $periodoLabel. '
-          'Recebido ${formatBrlCurrency(resumo.totalRecebido)}. '
-          'Previsto ${formatBrlCurrency(resumo.totalPrevisto)}. '
+          'Recebido ${resumo.totalRecebido.format()}. '
+          'Previsto ${resumo.totalPrevisto.format()}. '
           '$inadimplentes inadimplentes.',
       child: Material(
         color: Colors.transparent,
@@ -119,14 +119,14 @@ class _ResumoMensalCardState extends ConsumerState<_ResumoMensalCard> {
                     Expanded(
                       child: _Stat(
                         label: 'Recebido',
-                        valor: formatBrlCurrency(resumo.totalRecebido),
+                        valor: resumo.totalRecebido.format(),
                         color: EagleTokens.good,
                       ),
                     ),
                     Expanded(
                       child: _Stat(
                         label: 'Previsto',
-                        valor: formatBrlCurrency(resumo.totalPrevisto),
+                        valor: resumo.totalPrevisto.format(),
                         color: primary,
                       ),
                     ),
@@ -139,7 +139,7 @@ class _ResumoMensalCardState extends ConsumerState<_ResumoMensalCard> {
                     ),
                   ],
                 ),
-                if (resumo.totalPrevisto > 0) ...[
+                if (resumo.totalPrevisto.isPositive) ...[
                   const SizedBox(height: TokensStrip.s3),
                   Semantics(
                     label:

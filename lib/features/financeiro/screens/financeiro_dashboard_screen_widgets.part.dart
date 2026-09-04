@@ -8,15 +8,15 @@ class _FinanceiroKpiGroup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final mes = DashboardHomeSnapshot.monthNames[DateTime.now().month - 1];
-    final pendente = math.max(0.0, data.previsaoReceita - data.receitaMes);
-    final progressRaw =
-        data.previsaoReceita > 0 ? data.receitaMes / data.previsaoReceita : 0.0;
+    final pendente = (data.previsaoReceita - data.receitaMes).positiveOrZero;
+    final progressRaw = data.receitaMes.ratioOf(data.previsaoReceita);
     final metaSuperada =
-        data.previsaoReceita > 0 && data.receitaMes >= data.previsaoReceita;
-    final recebido = formatBrlCurrency(data.receitaMes, showDecimals: false);
-    final pendenteLabel = formatBrlCurrency(pendente, showDecimals: false);
+        data.previsaoReceita.isPositive &&
+        data.receitaMes >= data.previsaoReceita;
+    final recebido = data.receitaMes.format(showDecimals: false);
+    final pendenteLabel = pendente.format(showDecimals: false);
     final metaLabel = financePercentLabel(progressRaw, exceeded: metaSuperada);
-    final showTicket = data.receitaMes > 0 && data.ticketMedio > 0;
+    final showTicket = data.receitaMes.isPositive && data.ticketMedio.isPositive;
     final inadimpl = data.totalInadimplentes;
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -54,7 +54,7 @@ class _FinanceiroKpiGroup extends StatelessWidget {
                   Text(
                     metaSuperada
                         ? 'Meta superada'
-                        : pendente > 0
+                        : pendente.isPositive
                         ? 'Faltam $pendenteLabel para a meta'
                         : 'Meta do mês sob controle',
                     style: FocuxHubTypography.body(
@@ -103,7 +103,7 @@ class _FinanceiroKpiGroup extends StatelessWidget {
                 value: metaLabel,
                 hint:
                     showTicket
-                        ? 'Ticket ${formatBrlCurrency(data.ticketMedio, showDecimals: false)}'
+                        ? 'Ticket ${data.ticketMedio.format(showDecimals: false)}'
                         : 'Acompanhe a meta do mês',
                 color: Theme.of(context).colorScheme.primary,
                 isDark: isDark,
@@ -132,8 +132,8 @@ class _EvolucaoChart extends StatelessWidget {
     final primaryDeep = BrandPalette.deep(primary);
     final primaryAccent = BrandPalette.accent(primary);
 
-    final maxV = items.map((e) => e.recebido).reduce(math.max);
-    final chartMax = maxV <= 0 ? 100.0 : maxV;
+    final maxV = items.map((e) => e.recebido.cents).reduce(math.max);
+    final chartMax = maxV <= 0 ? 10000.0 : maxV.toDouble();
 
     return Padding(
       padding: const EdgeInsets.symmetric(
@@ -164,8 +164,10 @@ class _EvolucaoChart extends StatelessWidget {
                     builder: (_) {
                       final prev = items[items.length - 2].recebido;
                       final curr = items.last.recebido;
-                      if (prev > 0) {
-                        final diff = ((curr - prev) / prev * 100).round();
+                      if (prev.isPositive) {
+                        final diff =
+                            ((curr.cents - prev.cents) / prev.cents * 100)
+                                .round();
                         final sign = diff > 0 ? '+' : '';
                         return Text(
                           '$sign$diff% vs ${items[items.length - 2].mes.substring(5)}',
@@ -185,7 +187,10 @@ class _EvolucaoChart extends StatelessWidget {
                 children:
                     items.asMap().entries.map((e) {
                       final isLast = e.key == items.length - 1;
-                      final h = (e.value.recebido / chartMax).clamp(0.05, 1.0);
+                      final h = (e.value.recebido.cents / chartMax).clamp(
+                        0.05,
+                        1.0,
+                      );
 
                       final mes = e.value.mes;
                       final label = mes.length >= 7 ? mes.substring(5) : mes;
@@ -195,7 +200,7 @@ class _EvolucaoChart extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
                             Text(
-                              '${(e.value.recebido / 1000).toStringAsFixed(1)}k',
+                              '${(e.value.recebido.cents / 100000).toStringAsFixed(1)}k',
                               style: TextStyle(
                                 fontSize: 9.5,
                                 color: isLast ? ink : mute,
@@ -305,7 +310,7 @@ class _FinanceiroVencimentosGroup extends StatelessWidget {
               title: item.alunoNome,
               subtitle: Text(_vencimentoSubtitle(item)),
               trailing: Text(
-                formatBrlCurrency(item.valor, showDecimals: false),
+                item.valor.format(showDecimals: false),
                 style: FocuxHubTypography.bodyMuted(
                   color:
                       item.status == 'ATRASADO'
@@ -366,7 +371,7 @@ class _FinanceiroTopAlunosGroup extends StatelessWidget {
               title: visible[i].alunoNome,
               subtitle: Text('#${i + 1}'),
               trailing: Text(
-                formatBrlCurrency(visible[i].totalPago, showDecimals: false),
+                visible[i].totalPago.format(showDecimals: false),
                 style: FocuxHubTypography.bodyMuted(
                   color: fxScreenMute(context),
                   fontWeight: FontWeight.w700,

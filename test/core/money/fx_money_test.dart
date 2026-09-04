@@ -1,0 +1,18 @@
+import 'package:flutter_test/flutter_test.dart';
+import 'package:focux_app/core/money/fx_money.dart';
+
+void main() {
+  test('parse arredonda para centavos sem somar em double', () {
+    expect(FxMoney.parse(199.9).cents, 19990);
+    expect(FxMoney.parse('1.200,50').cents, 120050);
+    expect(FxMoney.parse('199,90').cents, 19990);
+    expect(FxMoney.parse(null).isZero, isTrue);
+    expect((FxMoney.parse(1500) - FxMoney.parse(1200)).cents, 30000);
+    expect(FxMoney.parse(1200).wire, '1200.00');
+    expect(FxMoney.parse(199.9).format(showDecimals: true), 'R\$ 199,90');
+  });
+
+  test('fromInput rejeita vazio', () {
+    expect(() => FxMoney.fromInput(''), throwsFormatException);
+  });
+}

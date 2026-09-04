@@ -1,25 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:focux_app/core/widgets/fx_empty_state.dart';
-import 'package:focux_app/core/widgets/fx_error_state.dart';
-import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
-import 'package:focux_app/core/widgets/fx_shell_scaffold.dart';
-import 'package:focux_app/core/widgets/skeleton_loader.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/brand/focux_microcopy.dart';
+import '../../../core/money/fx_money.dart';
+import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
-import '../../../core/utils/pt_br_display.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
+import '../../../core/widgets/fx_empty_state.dart';
+import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_help.dart';
+import '../../../core/widgets/fx_hub_header.dart';
 import '../../../core/widgets/fx_icon.dart';
+import '../../../core/widgets/fx_motion.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/operational_metric_tile.dart';
+import '../../../core/widgets/skeleton_loader.dart';
 import '../../../features/alunos/utils/satellite_screen_utils.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/financeiro_repository.dart';
 import '../utils/financeiro_hub_display.dart';
+import '../widgets/financeiro_aluno_help_sheet.dart';
 
 class FinanceiroAlunoScreen extends ConsumerStatefulWidget {
   const FinanceiroAlunoScreen({super.key});
@@ -96,117 +103,212 @@ class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
     }
   }
 
+  List<Mensalidade> get _abertas =>
+      _mensalidades
+          .where((m) => m.status == 'PENDENTE' || m.status == 'ATRASADO')
+          .toList();
+
+  FxMoney get _abertoTotal =>
+      _abertas.fold(FxMoney.zero, (sum, item) => sum + item.valor);
+
+  int get _atrasadas =>
+      _mensalidades.where((m) => m.status == 'ATRASADO').length;
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
     final freshness = FxHubFreshness.fromFetchedAt(_fetchedAt);
+    final showSticky = _abertas.isNotEmpty && !_loading && _erro == null;
 
     return fxScreenA11yScope(
       label: 'Minhas mensalidades',
       child: FxShellScaffold(
         useMesh: true,
         appBar: FxShellAppBar(
-          title: 'Minhas mensalidades',
-          subtitle: freshness ?? 'Suas cobranças',
+          title: 'Mensalidades',
+          onBack: () => safePopOrGo(context, '/dashboard/aluno'),
+          actions: [
+            FxHelpIconButton(
+              tooltip: 'Como usar suas mensalidades',
+              onTap: () => showFinanceiroAlunoHelpSheet(context),
+            ),
+          ],
         ),
-        body: FxContentWidthLimiter(
-          child:
-              _loading
-                  ? const Padding(
-                    padding: EdgeInsets.only(top: TokensStrip.s4),
-                    child: SkeletonList(count: 5),
-                  )
-                  : _erro != null
-                  ? FxErrorState(
-                    chromeOnDark: isDark,
-                    primary: primary,
-                    title: FocuxMicrocopy.naoFoiPossivelCarregar,
-                    message: _erro!,
-                    onRetry: _carregar,
-                  )
-                  : RefreshIndicator(
-                    onRefresh: _carregar,
-                    child:
-                        _mensalidades.isEmpty
-                            ? ListView(
-                              physics: const AlwaysScrollableScrollPhysics(),
-                              children: const [
-                                SizedBox(height: 72),
-                                FxEmptyState(
-                                  icon: 'coin',
-                                  title: 'Nenhuma mensalidade',
-                                  subtitle:
-                                      'Quando seu personal lançar uma cobrança, ela aparece aqui.',
-                                ),
-                              ],
-                            )
-                            : ListView.builder(
-                              physics: const AlwaysScrollableScrollPhysics(),
-                              padding: const EdgeInsets.fromLTRB(
-                                FxSettingsLayout.pageInset,
-                                8,
-                                FxSettingsLayout.pageInset,
-                                32,
-                              ),
-                              itemCount:
-                                  _mensalidades.length + (_hasMore ? 1 : 0),
-                              itemBuilder: (context, i) {
-                                if (i >= _mensalidades.length) {
-                                  return FxSatelliteListTile(
-                                    title:
-                                        _carregandoMais
-                                            ? 'Carregando…'
-                                            : 'Carregar mais',
-                                    titleCase: false,
-                                    onTap:
-                                        _carregandoMais ? null : _carregarMais,
-                                    leading: FxIcon(
-                                      name: 'plus',
-                                      size: 18,
-                                      color: primary,
+        body: Column(
+          children: [
+            Expanded(
+              child: FxContentWidthLimiter(
+                child:
+                    _loading
+                        ? const Padding(
+                          padding: EdgeInsets.only(top: TokensStrip.s4),
+                          child: SkeletonList(count: 5),
+                        )
+                        : _erro != null
+                        ? FxErrorState(
+                          chromeOnDark: isDark,
+                          primary: primary,
+                          title: FocuxMicrocopy.naoFoiPossivelCarregar,
+                          message: _erro!,
+                          onRetry: _carregar,
+                        )
+                        : RefreshIndicator(
+                          onRefresh: _carregar,
+                          child:
+                              _mensalidades.isEmpty
+                                  ? ListView(
+                                    physics:
+                                        const AlwaysScrollableScrollPhysics(),
+                                    children: const [
+                                      SizedBox(height: 72),
+                                      FxEmptyState(
+                                        icon: 'coin',
+                                        title: 'Nenhuma mensalidade',
+                                        subtitle:
+                                            'Quando seu personal lançar uma cobrança, ela aparece aqui.',
+                                      ),
+                                    ],
+                                  )
+                                  : ListView.builder(
+                                    physics:
+                                        const AlwaysScrollableScrollPhysics(),
+                                    padding: const EdgeInsets.fromLTRB(
+                                      FxSettingsLayout.pageInset,
+                                      TokensStrip.s4,
+                                      FxSettingsLayout.pageInset,
+                                      32,
                                     ),
-                                  );
-                                }
-                                final item = _mensalidades[i];
-                                final overdue = item.status == 'ATRASADO';
-                                return FxSatelliteListTile(
-                                  title: financeiroMensalidadeMesPorExtenso(
-                                    item.mesReferencia,
+                                    itemCount:
+                                        _mensalidades.length +
+                                        3 +
+                                        (_hasMore ? 1 : 0),
+                                    itemBuilder: (context, i) {
+                                      if (i == 0) {
+                                        return FxHubHeader(
+                                          title: 'Suas cobranças',
+                                          freshnessLabel: freshness,
+                                          subtitle:
+                                              '${_mensalidades.length} lançamentos',
+                                        );
+                                      }
+                                      if (i == 1) {
+                                        return Padding(
+                                          padding: const EdgeInsets.only(
+                                            top: TokensStrip.s4,
+                                            bottom: TokensStrip.s3,
+                                          ),
+                                          child: OperationalMetricTile(
+                                            label: 'Em aberto',
+                                            value: _abertoTotal.format(
+                                              showDecimals: false,
+                                            ),
+                                            hint:
+                                                _atrasadas == 0
+                                                    ? 'Nada atrasado'
+                                                    : '$_atrasadas atrasada${_atrasadas == 1 ? '' : 's'}',
+                                            color:
+                                                _atrasadas > 0
+                                                    ? EagleTokens.bad
+                                                    : primary,
+                                            isDark: isDark,
+                                            emphasis:
+                                                _atrasadas > 0
+                                                    ? OperationalMetricEmphasis
+                                                        .alert
+                                                    : OperationalMetricEmphasis
+                                                        .normal,
+                                          ),
+                                        );
+                                      }
+                                      if (i == 2) {
+                                        return const SizedBox(
+                                          height: TokensStrip.s2,
+                                        );
+                                      }
+                                      final itemIndex = i - 3;
+                                      if (itemIndex >= _mensalidades.length) {
+                                        return FxSatelliteListTile(
+                                          title:
+                                              _carregandoMais
+                                                  ? 'Carregando…'
+                                                  : 'Carregar mais',
+                                          titleCase: false,
+                                          onTap:
+                                              _carregandoMais
+                                                  ? null
+                                                  : _carregarMais,
+                                          leading: FxIcon(
+                                            name: 'plus',
+                                            size: 18,
+                                            color: primary,
+                                          ),
+                                        );
+                                      }
+                                      final item = _mensalidades[itemIndex];
+                                      final overdue = item.status == 'ATRASADO';
+                                      return FxSatelliteListTile(
+                                        title:
+                                            financeiroMensalidadeMesPorExtenso(
+                                              item.mesReferencia,
+                                            ),
+                                        titleCase: false,
+                                        subtitle: Text(
+                                          financeiroMensalidadeStatusLabel(
+                                            item.status,
+                                          ),
+                                        ),
+                                        accent:
+                                            overdue
+                                                ? EagleTokens.bad
+                                                : primary,
+                                        leading: FxIcon(
+                                          name:
+                                              overdue
+                                                  ? 'alert-triangle'
+                                                  : item.status == 'PAGO'
+                                                  ? 'circle-check'
+                                                  : 'coin',
+                                          size: 18,
+                                          color:
+                                              overdue
+                                                  ? EagleTokens.bad
+                                                  : primary,
+                                        ),
+                                        trailing: Text(
+                                          item.valor.format(
+                                            showDecimals: false,
+                                          ),
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.w700,
+                                            fontFeatures: [
+                                              FontFeature.tabularFigures(),
+                                            ],
+                                          ),
+                                        ),
+                                      );
+                                    },
                                   ),
-                                  titleCase: false,
-                                  subtitle: Text(
-                                    financeiroMensalidadeStatusLabel(
-                                      item.status,
-                                    ),
-                                  ),
-                                  accent: overdue ? EagleTokens.bad : primary,
-                                  leading: FxIcon(
-                                    name:
-                                        overdue
-                                            ? 'alert-triangle'
-                                            : item.status == 'PAGO'
-                                            ? 'circle-check'
-                                            : 'coin',
-                                    size: 18,
-                                    color: overdue ? EagleTokens.bad : primary,
-                                  ),
-                                  trailing: Text(
-                                    formatBrlCurrency(
-                                      item.valor,
-                                      showDecimals: false,
-                                    ),
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.w700,
-                                      fontFeatures: const [
-                                        FontFeature.tabularFigures(),
-                                      ],
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
+                        ),
+              ),
+            ),
+            if (showSticky)
+              SafeArea(
+                top: false,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    FxSettingsLayout.pageInset,
+                    TokensStrip.s2,
+                    FxSettingsLayout.pageInset,
+                    TokensStrip.s3,
                   ),
+                  child: FxLiquidPrimaryButton(
+                    label: 'Falar com o personal',
+                    onPressed: () => context.push('/chat/aluno'),
+                  ),
+                ),
+              ),
+          ],
         ),
       ),
     );

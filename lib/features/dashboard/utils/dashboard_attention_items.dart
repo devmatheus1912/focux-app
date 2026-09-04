@@ -1,4 +1,3 @@
-import '../../../core/utils/pt_br_display.dart';
 import '../../alunos/data/aluno_repository.dart';
 import '../../financeiro/data/financeiro_repository.dart';
 import 'dashboard_screen_helpers.dart';
@@ -54,7 +53,7 @@ List<DashboardAttentionEntry> dashboardAttentionEntries({
       DashboardAttentionEntry(
         nome: venc.alunoNome,
         titulo: 'Inadimplente',
-        subt: '${formatBrlCurrency(venc.valor, showDecimals: false)} pendente',
+        subt: '${venc.valor.format(showDecimals: false)} pendente',
         acao: 'Cobrar',
         route: '/financeiro',
         icon: 'dollar-sign',

@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
+import '../../../core/money/fx_money.dart';
 import '../../planos/data/planos_repository.dart';
 
 class PixData {
@@ -27,7 +28,7 @@ class Mensalidade {
   final int id;
   final int alunoId;
   final String alunoNome;
-  final double valor;
+  final FxMoney valor;
   final String mesReferencia;
   final String status;
   final String? pagoEm;
@@ -36,17 +37,17 @@ class Mensalidade {
     required this.id,
     required this.alunoId,
     required this.alunoNome,
-    required this.valor,
+    required Object valor,
     required this.mesReferencia,
     required this.status,
     this.pagoEm,
-  });
+  }) : valor = FxMoney.parse(valor);
 
   factory Mensalidade.fromJson(Map<String, dynamic> j) => Mensalidade(
     id: j['id'] as int,
     alunoId: j['alunoId'] as int,
     alunoNome: j['alunoNome'] as String,
-    valor: (j['valor'] as num).toDouble(),
+    valor: j['valor'],
     mesReferencia: j['mesReferencia'] as String,
     status: j['status'] as String,
     pagoEm: j['pagoEm'] as String?,
@@ -57,7 +58,7 @@ class VencimentoItem {
   final int mensalidadeId;
   final int? alunoId;
   final String alunoNome;
-  final double valor;
+  final FxMoney valor;
   final String mesReferencia;
   final String status;
 
@@ -65,16 +66,16 @@ class VencimentoItem {
     required this.mensalidadeId,
     this.alunoId,
     required this.alunoNome,
-    required this.valor,
+    required Object valor,
     required this.mesReferencia,
     required this.status,
-  });
+  }) : valor = FxMoney.parse(valor);
 
   factory VencimentoItem.fromJson(Map<String, dynamic> j) => VencimentoItem(
     mensalidadeId: j['mensalidadeId'] as int,
     alunoId: (j['alunoId'] as num?)?.toInt(),
     alunoNome: j['alunoNome'] as String,
-    valor: (j['valor'] as num).toDouble(),
+    valor: j['valor'],
     mesReferencia: j['mesReferencia'] as String,
     status: j['status'] as String,
   );
@@ -83,64 +84,65 @@ class VencimentoItem {
 class TopAlunoItem {
   final int alunoId;
   final String alunoNome;
-  final double totalPago;
+  final FxMoney totalPago;
 
   TopAlunoItem({
     required this.alunoId,
     required this.alunoNome,
-    required this.totalPago,
-  });
+    required Object totalPago,
+  }) : totalPago = FxMoney.parse(totalPago);
 
   factory TopAlunoItem.fromJson(Map<String, dynamic> j) => TopAlunoItem(
     alunoId: j['alunoId'] as int,
     alunoNome: j['alunoNome'] as String,
-    totalPago: (j['totalPago'] as num).toDouble(),
+    totalPago: j['totalPago'],
   );
 }
 
 class EvolucaoMensalItem {
   final String mes;
-  final double recebido;
+  final FxMoney recebido;
 
-  EvolucaoMensalItem({required this.mes, required this.recebido});
+  EvolucaoMensalItem({required this.mes, required Object recebido})
+    : recebido = FxMoney.parse(recebido);
 
   factory EvolucaoMensalItem.fromJson(Map<String, dynamic> j) =>
-      EvolucaoMensalItem(
-        mes: j['mes'] as String,
-        recebido: (j['recebido'] as num).toDouble(),
-      );
+      EvolucaoMensalItem(mes: j['mes'] as String, recebido: j['recebido']);
 }
 
 class FinanceiroDashboard {
-  final double receitaMes;
-  final double receitaAcumulada;
-  final double ticketMedio;
+  final FxMoney receitaMes;
+  final FxMoney receitaAcumulada;
+  final FxMoney ticketMedio;
   final int totalInadimplentes;
-  final double previsaoReceita;
+  final FxMoney previsaoReceita;
   final List<VencimentoItem> vencimentosProximos;
   final List<TopAlunoItem> topAlunos;
   final List<EvolucaoMensalItem> evolucaoMensal;
   final String? zeroCta;
 
   FinanceiroDashboard({
-    required this.receitaMes,
-    required this.receitaAcumulada,
-    required this.ticketMedio,
+    required Object receitaMes,
+    required Object receitaAcumulada,
+    required Object ticketMedio,
     required this.totalInadimplentes,
-    required this.previsaoReceita,
+    required Object previsaoReceita,
     required this.vencimentosProximos,
     required this.topAlunos,
     required this.evolucaoMensal,
     this.zeroCta,
-  });
+  }) : receitaMes = FxMoney.parse(receitaMes),
+       receitaAcumulada = FxMoney.parse(receitaAcumulada),
+       ticketMedio = FxMoney.parse(ticketMedio),
+       previsaoReceita = FxMoney.parse(previsaoReceita);
 
   factory FinanceiroDashboard.fromJson(Map<String, dynamic> j) =>
       FinanceiroDashboard(
-        receitaMes: (j['receitaMes'] as num).toDouble(),
-        receitaAcumulada: (j['receitaAcumulada'] as num).toDouble(),
-        ticketMedio: (j['ticketMedio'] as num).toDouble(),
+        receitaMes: j['receitaMes'],
+        receitaAcumulada: j['receitaAcumulada'],
+        ticketMedio: j['ticketMedio'],
         totalInadimplentes: j['totalInadimplentes'] as int,
-        previsaoReceita: (j['previsaoReceita'] as num).toDouble(),
+        previsaoReceita: j['previsaoReceita'],
         zeroCta: j['zeroCta'] as String?,
         vencimentosProximos:
             (j['vencimentosProximos'] as List)
@@ -160,28 +162,31 @@ class FinanceiroDashboard {
 }
 
 class ResumoMensal {
-  final double totalRecebido;
-  final double totalPrevisto;
+  final FxMoney totalRecebido;
+  final FxMoney totalPrevisto;
   final int inadimplentes;
-  final double ticketMedio;
-  final double acumuladoAnual;
+  final FxMoney ticketMedio;
+  final FxMoney acumuladoAnual;
 
   ResumoMensal({
-    required this.totalRecebido,
-    required this.totalPrevisto,
+    required Object totalRecebido,
+    required Object totalPrevisto,
     required this.inadimplentes,
-    required this.ticketMedio,
-    required this.acumuladoAnual,
-  });
+    required Object ticketMedio,
+    required Object acumuladoAnual,
+  }) : totalRecebido = FxMoney.parse(totalRecebido),
+       totalPrevisto = FxMoney.parse(totalPrevisto),
+       ticketMedio = FxMoney.parse(ticketMedio),
+       acumuladoAnual = FxMoney.parse(acumuladoAnual);
 
   factory ResumoMensal.fromJson(Map<String, dynamic> j) => ResumoMensal(
-    totalRecebido: (j['totalRecebido'] as num? ?? 0).toDouble(),
-    totalPrevisto: (j['totalPrevisto'] as num? ?? 0).toDouble(),
+    totalRecebido: j['totalRecebido'] ?? 0,
+    totalPrevisto: j['totalPrevisto'] ?? 0,
     inadimplentes:
         (j['inadimplentes'] as num? ?? j['totalInadimplentes'] as num? ?? 0)
             .toInt(),
-    ticketMedio: (j['ticketMedio'] as num? ?? 0).toDouble(),
-    acumuladoAnual: (j['acumuladoAnual'] as num? ?? 0).toDouble(),
+    ticketMedio: j['ticketMedio'] ?? 0,
+    acumuladoAnual: j['acumuladoAnual'] ?? 0,
   );
 }
 
@@ -254,14 +259,14 @@ class FinanceiroRepository {
 
   Future<Mensalidade> criar(
     int alunoId,
-    double valor,
+    FxMoney valor,
     String mesReferencia,
   ) async {
     final r = await _dio.post(
       '/api/financeiro/mensalidades',
       data: {
         'alunoId': alunoId,
-        'valor': valor,
+        'valor': valor.wire,
         'mesReferencia': mesReferencia,
       },
       // Aluno + mês já identificam a mensalidade: duas submissões são a
@@ -291,12 +296,12 @@ class FinanceiroRepository {
 
   Future<Mensalidade> editarMensalidade(
     int id, {
-    double? valor,
+    FxMoney? valor,
     String? mesReferencia,
     String? status,
   }) async {
     final body = <String, dynamic>{};
-    if (valor != null) body['valor'] = valor;
+    if (valor != null) body['valor'] = valor.wire;
     if (mesReferencia != null) body['mesReferencia'] = mesReferencia;
     if (status != null) body['status'] = status;
     final r = await _dio.put('/api/financeiro/mensalidades/$id', data: body);
