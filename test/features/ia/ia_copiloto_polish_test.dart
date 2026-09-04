@@ -29,10 +29,16 @@ void main() {
     expect(screen, isNot(contains('FxSettingsGroup')));
     expect(screen, isNot(contains('FxSettingsTile')));
     expect(shellWidgets, contains('IaCopilotResultActionBar'));
+    expect(shellWidgets, contains('scrollReserve'));
     expect(shellWidgets, contains('DashboardHomeActionChip'));
     expect(shellWidgets, contains('FxConversionTextLink'));
     expect(shellWidgets, contains('FxToggleChip'));
     expect(shellWidgets, isNot(contains('FxSettingsGroup')));
+    expect(shellWidgets, isNot(contains('SafeArea(')));
+    expect(screen, contains('IaCopilotResultActionBar.scrollReserve'));
+    expect(screen, contains('Positioned('));
+    expect(screen, isNot(contains('bottomNavigationBar:')));
+    expect(screen, isNot(contains('bottom: _gerado ? 108')));
     expect(actionsPart, contains('explicitChildNodes: true'));
     expect(shellWidgets, contains('Como funciona'));
     expect(

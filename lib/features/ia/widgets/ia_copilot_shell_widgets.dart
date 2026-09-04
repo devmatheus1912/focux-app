@@ -11,6 +11,8 @@ import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../utils/ia_copiloto_display.dart';
 
+/// Chip overlay S1 (paridade Home/Perfil) — não usar como
+/// [Scaffold.bottomNavigationBar] dentro do [MainShell] (dock já limpa a base).
 class IaCopilotResultActionBar extends StatelessWidget {
   const IaCopilotResultActionBar({
     super.key,
@@ -20,6 +22,9 @@ class IaCopilotResultActionBar extends StatelessWidget {
     this.primaryLabel,
   });
 
+  /// Chip (~48) + link (min 48) + paddings — folga do scroll sob o overlay.
+  static const double scrollReserve = 128;
+
   final Color brand;
   final String? primaryLabel;
   final VoidCallback onPrimary;
@@ -27,34 +32,32 @@ class IaCopilotResultActionBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      top: false,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(
-          FxSettingsLayout.pageInset,
-          10,
-          FxSettingsLayout.pageInset,
-          12,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Align(
-              alignment: Alignment.centerLeft,
-              child: DashboardHomeActionChip(
-                label: primaryLabel ?? iaCopilotoCriarTarefaLabel(),
-                accent: brand,
-                isDark: Theme.of(context).brightness == Brightness.dark,
-                onPressed: onPrimary,
-              ),
+    // Sem SafeArea: o MainShell já aplica FxDock.shellClearance.
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        FxSettingsLayout.pageInset,
+        8,
+        FxSettingsLayout.pageInset,
+        8,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Align(
+            alignment: Alignment.centerLeft,
+            child: DashboardHomeActionChip(
+              label: primaryLabel ?? iaCopilotoCriarTarefaLabel(),
+              accent: brand,
+              isDark: Theme.of(context).brightness == Brightness.dark,
+              onPressed: onPrimary,
             ),
-            FxConversionTextLink(
-              text: '',
-              actionText: iaCopilotoMaisAcoesLabel(),
-              onTap: onMore,
-            ),
-          ],
-        ),
+          ),
+          FxConversionTextLink(
+            text: '',
+            actionText: iaCopilotoMaisAcoesLabel(),
+            onTap: onMore,
+          ),
+        ],
       ),
     );
   }
