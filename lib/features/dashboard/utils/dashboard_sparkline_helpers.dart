@@ -42,5 +42,5 @@ List<double> dashboardReceitaSparklineMensal(
       evolucao.length <= maxPoints
           ? evolucao
           : evolucao.sublist(evolucao.length - maxPoints);
-  return slice.map((e) => e.recebido).toList(growable: false);
+  return slice.map((e) => e.recebido.cents / 100.0).toList(growable: false);
 }

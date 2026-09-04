@@ -16,6 +16,11 @@ void main() {
     expect(screen, contains('ListView.builder'));
     expect(screen, contains('Carregar mais'));
     expect(screen, contains('FxHubFreshness'));
+    expect(screen, contains('FxHubHeader'));
+    expect(screen, contains('safePopOrGo'));
+    expect(screen, contains('FxLiquidPrimaryButton'));
+    expect(screen, contains('OperationalMetricTile'));
+    expect(screen, contains('/chat/aluno'));
     expect(screen, contains('circle-check'));
     expect(screen, isNot(contains('check-circle')));
     expect(screen, isNot(contains('Aluno #')));

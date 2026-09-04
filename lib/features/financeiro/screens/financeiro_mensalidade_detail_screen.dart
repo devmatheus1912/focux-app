@@ -8,7 +8,6 @@ import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/utils/friendly_error.dart';
-import '../../../core/utils/pt_br_display.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
@@ -253,10 +252,7 @@ class _DetailBody extends StatelessWidget {
               const SizedBox(height: TokensStrip.s4),
               OperationalMetricTile(
                 label: status,
-                value: formatBrlCurrency(
-                  mensalidade.valor,
-                  showDecimals: false,
-                ),
+                value: mensalidade.valor.format(showDecimals: false),
                 hint: mes,
                 color: statusColor,
                 isDark: isDark,

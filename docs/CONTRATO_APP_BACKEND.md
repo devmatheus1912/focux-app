@@ -304,7 +304,7 @@ não foi reescrito.
 | Item | Libera | Estado |
 |---|---|---|
 | RBAC P0 | — (sem tela) | Fechado |
-| Webhook MercadoPago | financeiro | Fechado. `double` no contrato continua dívida |
+| Webhook MercadoPago | financeiro | Fechado. Resumo/somas em `BigDecimal`; JSON de dinheiro ainda número |
 | `FocuxClock` America/Sao_Paulo | S1 hubs + números de S3 | Fechado |
 | Gates de plano + `codigo` | S6 paywall | Fechado |
 | Timeouts IA (connect 5s / read 30s) | IA | Fechado |

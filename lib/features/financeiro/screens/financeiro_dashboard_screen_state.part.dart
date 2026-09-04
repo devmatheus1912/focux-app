@@ -57,7 +57,7 @@ class _FinanceiroDashboardScreenState
     final d = _data!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final zeroData =
-        d.receitaMes <= 0 &&
+        !d.receitaMes.isPositive &&
         d.vencimentosProximos.isEmpty &&
         d.topAlunos.isEmpty;
 

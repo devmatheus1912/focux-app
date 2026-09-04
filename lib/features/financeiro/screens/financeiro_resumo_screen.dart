@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import '../../../core/money/fx_money.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/utils/friendly_error.dart';
-import '../../../core/utils/pt_br_display.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
@@ -198,9 +198,9 @@ class _FinanceiroResumoScreenState
           borderRadius: BorderRadius.circular(12),
           child: OperationalMetricTile(
             label: 'Recebido',
-            value: formatBrlCurrency(r.totalRecebido, showDecimals: false),
+            value: r.totalRecebido.format(showDecimals: false),
             hint:
-                'Previsto ${formatBrlCurrency(r.totalPrevisto, showDecimals: false)}',
+                'Previsto ${r.totalPrevisto.format(showDecimals: false)}',
             color: EagleTokens.moneyGreen,
             isDark: isDark,
           ),
@@ -215,7 +215,7 @@ class _FinanceiroResumoScreenState
             label: 'Inadimplentes',
             value: '${r.inadimplentes}',
             hint:
-                'Ticket ${formatBrlCurrency(r.ticketMedio, showDecimals: false)}',
+                'Ticket ${r.ticketMedio.format(showDecimals: false)}',
             color: r.inadimplentes > 0
                 ? EagleTokens.bad
                 : Theme.of(context).colorScheme.primary,
@@ -233,7 +233,7 @@ class _FinanceiroResumoScreenState
           borderRadius: BorderRadius.circular(12),
           child: OperationalMetricTile(
             label: 'Acumulado anual',
-            value: formatBrlCurrency(r.acumuladoAnual, showDecimals: false),
+            value: r.acumuladoAnual.format(showDecimals: false),
             hint: 'Soma do ano em curso',
             color: Theme.of(context).colorScheme.primary,
             isDark: isDark,
@@ -253,13 +253,14 @@ class _DonutChartCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double recebido = resumo.totalRecebido;
-    final double previsto = resumo.totalPrevisto;
-    final double pendente = previsto > recebido ? (previsto - recebido) : 0;
+    final recebido = resumo.totalRecebido;
+    final previsto = resumo.totalPrevisto;
+    final pendente =
+        previsto > recebido ? previsto - recebido : FxMoney.zero;
 
-    final bool isEmpty = previsto == 0;
+    final bool isEmpty = previsto.isZero;
     final double percentRecebido =
-        isEmpty ? 0 : (recebido / previsto * 100).clamp(0, 100);
+        isEmpty ? 0 : (recebido.ratioOf(previsto) * 100).clamp(0, 100);
 
     final ink = fxScreenInk(context);
     final mute = fxScreenMute(context);
@@ -292,14 +293,14 @@ class _DonutChartCard extends StatelessWidget {
                             ]
                             : [
                               PieChartSectionData(
-                                value: recebido,
+                                value: recebido.cents.toDouble(),
                                 color: EagleTokens.good,
                                 radius: 24,
                                 showTitle: false,
                               ),
-                              if (pendente > 0)
+                              if (pendente.isPositive)
                                 PieChartSectionData(
-                                  value: pendente,
+                                  value: pendente.cents.toDouble(),
                                   color: EagleTokens.warn.withValues(
                                     alpha: 0.5,
                                   ),

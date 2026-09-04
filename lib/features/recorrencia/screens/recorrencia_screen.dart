@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../core/money/fx_money.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
@@ -148,7 +149,9 @@ class _RecorrenciaScreenState extends ConsumerState<RecorrenciaScreen> {
 
       final r = await RecorrenciaRepository(ref.read(apiClientProvider)).criar(
         alunoId: alunoId,
-        valor: double.tryParse(valorCtrl.text.replaceAll(',', '.')) ?? 199,
+        valor: FxMoney.fromInput(
+          valorCtrl.text.trim().isEmpty ? '199' : valorCtrl.text,
+        ),
       );
       final link = r.initPoint?.trim();
       if (link != null && link.isNotEmpty) {

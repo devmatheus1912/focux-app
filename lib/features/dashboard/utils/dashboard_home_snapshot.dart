@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import '../../../core/money/fx_money.dart';
 import '../../alunos/data/aluno_repository.dart';
 import '../../checkin/data/checkin_repository.dart';
 import '../../financeiro/data/financeiro_repository.dart';
@@ -96,12 +97,11 @@ class DashboardHomeSnapshot {
     final clock = now ?? DateTime.now();
     final data = home.personal;
     final mes = monthNames[clock.month - 1];
-    final receitaAtual = finData?.receitaMes ?? 0;
-    final metaReceita = finData?.previsaoReceita ?? 0;
-    final pendente =
-        (metaReceita - receitaAtual).clamp(0.0, double.infinity);
-    final progressRaw = metaReceita > 0 ? receitaAtual / metaReceita : 0.0;
-    final metaSuperada = metaReceita > 0 && receitaAtual >= metaReceita;
+    final receitaAtual = finData?.receitaMes ?? FxMoney.zero;
+    final metaReceita = finData?.previsaoReceita ?? FxMoney.zero;
+    final pendente = (metaReceita - receitaAtual).positiveOrZero;
+    final progressRaw = receitaAtual.ratioOf(metaReceita);
+    final metaSuperada = metaReceita.isPositive && receitaAtual >= metaReceita;
 
     final alunosAtivos =
         alunos != null
@@ -246,9 +246,9 @@ class DashboardHomeSnapshot {
 
     return DashboardHomeSnapshot(
       mesLabel: mes,
-      pendente: pendente.toDouble(),
-      metaReceita: metaReceita,
-      receitaAtual: receitaAtual,
+      pendente: pendente.cents / 100.0,
+      metaReceita: metaReceita.cents / 100.0,
+      receitaAtual: receitaAtual.cents / 100.0,
       progressRaw: progressRaw,
       metaSuperada: metaSuperada,
       alunosAtivos: alunosAtivos,

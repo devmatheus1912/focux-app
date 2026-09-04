@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/money/fx_money.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/utils/pt_br_display.dart';
@@ -87,8 +88,8 @@ class _FinanceTiles extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ticket = finData?.ticketMedio ?? 0;
-    final showTicket = receitaAtual > 0 && ticket > 0;
+    final ticket = finData?.ticketMedio ?? FxMoney.zero;
+    final showTicket = receitaAtual > 0 && ticket.isPositive;
     final inadimpl = finData?.totalInadimplentes ?? 0;
     final metaLabel = financePercentLabel(
       progressRaw,
@@ -144,7 +145,7 @@ class _FinanceTiles extends StatelessWidget {
               label: 'Meta',
               value: metaLabel,
               hint: showTicket
-                  ? 'Ticket ${formatBrlCurrency(ticket, showDecimals: false)}'
+                  ? 'Ticket ${ticket.format(showDecimals: false)}'
                   : 'Acompanhe a meta do mês',
               color: Theme.of(context).colorScheme.primary,
               isDark: Theme.of(context).brightness == Brightness.dark,

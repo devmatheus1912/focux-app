@@ -1,4 +1,4 @@
-import '../../../core/utils/pt_br_display.dart';
+import '../../../core/money/fx_money.dart';
 
 String recorrenciaAlunoLabel(String? alunoNome) {
   final nome = alunoNome?.trim();
@@ -31,7 +31,7 @@ String recorrenciaSubtitle({
   return '$label · Próx: $prox';
 }
 
-String recorrenciaValorLabel(num valor) => formatBrlCurrency(valor);
+String recorrenciaValorLabel(FxMoney valor) => valor.format();
 
 String recorrenciaFxIcon(String status) {
   switch (status.trim().toUpperCase()) {

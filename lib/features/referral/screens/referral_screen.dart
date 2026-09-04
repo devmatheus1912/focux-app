@@ -14,6 +14,8 @@ import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_help.dart';
+import '../../../core/widgets/fx_hub_header.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -23,6 +25,7 @@ import '../../../core/widgets/skeleton_loader.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/referral_repository.dart';
 import '../utils/referral_display.dart';
+import '../widgets/referral_help_sheet.dart';
 
 final referralRepositoryProvider = Provider(
   (ref) => ReferralRepository(ref.read(apiClientProvider)),
@@ -114,7 +117,13 @@ class _ReferralScreenState extends ConsumerState<ReferralScreen> {
         appBar: FxShellAppBar(
           title: 'Indique e ganhe',
           subtitle: referralHubSubtitle(freshness),
-          onBack: () => safePopOrGo(context, '/dashboard/personal'),
+          onBack: () => safePopOrGo(context, '/perfil'),
+          actions: [
+            FxHelpIconButton(
+              tooltip: 'Como indicar e ganhar',
+              onTap: () => showReferralHelpSheet(context),
+            ),
+          ],
         ),
         body:
             _loading
@@ -130,13 +139,21 @@ class _ReferralScreenState extends ConsumerState<ReferralScreen> {
                   onRetry: _load,
                 )
                 : FxContentWidthLimiter(
-                  child: _buildBody(isDark: chrome.isDark, primary: primary),
+                  child: _buildBody(
+                    isDark: chrome.isDark,
+                    primary: primary,
+                    freshness: freshness,
+                  ),
                 ),
       ),
     );
   }
 
-  Widget _buildBody({required bool isDark, required Color primary}) {
+  Widget _buildBody({
+    required bool isDark,
+    required Color primary,
+    required String? freshness,
+  }) {
     final info = _info;
     if (info == null || referralCodigoLabel(info.codigo) == '—') {
       return RefreshIndicator(
@@ -168,6 +185,12 @@ class _ReferralScreenState extends ConsumerState<ReferralScreen> {
                 TokensStrip.s4,
               ),
               children: [
+                FxHubHeader(
+                  title: referralCodigoLabel(info.codigo),
+                  freshnessLabel: freshness,
+                  subtitle: referralUsosLabel(info.usosTotais),
+                ),
+                const SizedBox(height: TokensStrip.s4),
                 OperationalMetricTile(
                   label: 'Seu código',
                   value: referralCodigoLabel(info.codigo),
