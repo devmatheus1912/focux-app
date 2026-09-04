@@ -16,10 +16,23 @@ void main() {
         },
       ],
       'semana': [],
+      'itens': [
+        {
+          'id': 9,
+          'alunoId': 3,
+          'alunoNome': 'Ana',
+          'treinoNome': 'Full body',
+        },
+      ],
+      'page': 0,
+      'totalItens': 1,
+      'hasNext': false,
     });
     expect(bundle.checkinsHoje, 1);
     expect(bundle.hoje.single.alunoId, 3);
     expect(bundle.hoje.single.treinoNome, 'Full body');
     expect(bundle.semana, isEmpty);
+    expect(bundle.itens.single.alunoId, 3);
+    expect(bundle.hasNext, isFalse);
   });
 }

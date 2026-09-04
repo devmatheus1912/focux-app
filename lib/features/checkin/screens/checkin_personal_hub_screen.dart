@@ -15,7 +15,6 @@ import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
-import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_strip_card.dart';
@@ -26,6 +25,7 @@ import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../models/checkin_personal_home.dart';
 import '../providers/checkin_provider.dart';
 import '../utils/checkin_personal_display.dart';
+import '../widgets/checkin_personal_catalog_sheet.dart';
 import '../widgets/checkin_personal_help_sheet.dart';
 
 class CheckinPersonalHubScreen extends ConsumerStatefulWidget {
@@ -162,6 +162,7 @@ class _CheckinPersonalHubScreenState
                                 ? '1 check-in hoje'
                                 : '${home.checkinsHoje} check-ins hoje',
                         items: home.hoje,
+                        home: home,
                       ),
                     ],
                     if (home.semana.isNotEmpty) ...[
@@ -169,6 +170,7 @@ class _CheckinPersonalHubScreenState
                       _CheckinSection(
                         title: 'Últimos 6 dias',
                         items: home.semana,
+                        home: home,
                       ),
                     ],
                   ],
@@ -243,23 +245,34 @@ class _CheckinTodayCard extends StatelessWidget {
   }
 }
 
-class _CheckinSection extends StatelessWidget {
-  const _CheckinSection({required this.title, required this.items});
+class _CheckinSection extends ConsumerWidget {
+  const _CheckinSection({
+    required this.title,
+    required this.items,
+    required this.home,
+  });
 
   final String title;
   final List<CheckinPersonalItem> items;
+  final CheckinPersonalHomeBundle home;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final showAll = home.hasNext || home.totalItens > 3;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         DashboardSectionHeader(
           title: title,
-          actionLabel: items.length > 3 ? 'Ver todos' : null,
+          actionLabel: showAll ? 'Ver todos' : null,
           onAction:
-              items.length > 3
-                  ? () => _showCheckinCatalog(context, title: title, items: items)
+              showAll
+                  ? () => showCheckinPersonalCatalogSheet(
+                    context,
+                    title: title,
+                    firstPage: home,
+                    repo: ref.read(checkinRepositoryProvider),
+                  )
                   : null,
         ),
         const SizedBox(height: TokensStrip.s2),
@@ -297,34 +310,4 @@ class _CheckinTile extends StatelessWidget {
       onTap: () => context.push('/alunos/${item.alunoId}'),
     );
   }
-}
-
-void _showCheckinCatalog(
-  BuildContext context, {
-  required String title,
-  required List<CheckinPersonalItem> items,
-}) {
-  showFxHomeSheet<void>(
-    context,
-    builder: (ctx) {
-      return FxHomeSheetSurface(
-        isDark: Theme.of(ctx).brightness == Brightness.dark,
-        child: ListView(
-          shrinkWrap: true,
-          children: [
-            FxHomeSheetHeader(
-              title: title,
-              subtitle: '${items.length} check-ins neste recorte.',
-              leading: Icon(
-                Icons.fitness_center,
-                size: 18,
-                color: Theme.of(ctx).colorScheme.primary,
-              ),
-            ),
-            for (final item in items) _CheckinTile(item: item),
-          ],
-        ),
-      );
-    },
-  );
 }

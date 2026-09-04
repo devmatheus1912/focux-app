@@ -16,10 +16,16 @@ void main() {
     expect(screen, contains("safePopOrGo(context, '/dashboard/personal')"));
     expect(screen, contains('FxHelpIconButton'));
     expect(screen, contains('checkinFocusAction'));
+    expect(screen, contains('showCheckinPersonalCatalogSheet'));
     expect(
       File('lib/features/checkin/widgets/checkin_personal_help_sheet.dart')
           .readAsStringSync(),
       contains('Como calculamos'),
+    );
+    expect(
+      File('lib/features/checkin/widgets/checkin_personal_catalog_sheet.dart')
+          .readAsStringSync(),
+      allOf(contains('Carregar mais'), contains('onTapOutside')),
     );
     expect(screen, contains('FxStripCard'));
     expect(screen, contains('emphasize: true'));
