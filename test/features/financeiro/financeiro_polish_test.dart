@@ -67,6 +67,9 @@ void main() {
     );
     expect(detail, contains('FxLiquidPrimaryButton'));
     expect(detail, contains('Marcar como paga'));
+    expect(detail, contains('FxHubHeader'));
+    expect(detail, contains('FxHelpIconButton'));
+    expect(detail, contains('safePopOrGo'));
     expect(detail, contains('OperationalMetricTile'));
     expect(detail, contains('confirmarPagarMensalidade'));
     expect(detail, contains('mostrarPixMensalidade'));

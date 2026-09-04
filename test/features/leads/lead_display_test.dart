@@ -25,6 +25,21 @@ void main() {
     expect(leadPodeConverter('LEAD'), isTrue);
     expect(leadPodeConverter('ATIVO'), isFalse);
     expect(leadPodeConverter('CONVERTIDO'), isFalse);
+    expect(
+      leadStickyAction(status: 'LEAD', temTelefone: true),
+      LeadStickyAction.converter,
+    );
+    expect(
+      leadStickyAction(status: 'ATIVO', temTelefone: true),
+      LeadStickyAction.whatsapp,
+    );
+    expect(
+      leadStickyAction(status: 'CONVERTIDO', temTelefone: false),
+      LeadStickyAction.followUp,
+    );
+    expect(leadStickyP0Label(LeadStickyAction.converter), 'Converter em aluno');
+    expect(leadStickyP0Label(LeadStickyAction.whatsapp), 'WhatsApp');
+    expect(leadStickyP0Label(LeadStickyAction.followUp), 'Definir follow-up');
     expect(leadStatusDanger('INADIMPLENTE'), isTrue);
     expect(leadStatusDanger('LEAD'), isFalse);
   });

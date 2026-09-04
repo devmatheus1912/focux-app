@@ -46,6 +46,55 @@ void main() {
     expect(find.text('root'), findsOneWidget);
   });
 
+  testWidgets('safePopOrGo devolve result quando pode pop', (tester) async {
+    Object? popped;
+
+    final router = GoRouter(
+      routes: [
+        GoRoute(
+          path: '/',
+          builder: (context, state) => Scaffold(
+            body: Builder(
+              builder: (context) {
+                return TextButton(
+                  onPressed: () async {
+                    popped = await context.push<Object?>('/child');
+                  },
+                  child: const Text('open'),
+                );
+              },
+            ),
+          ),
+          routes: [
+            GoRoute(
+              path: 'child',
+              builder: (context, state) => Scaffold(
+                body: Builder(
+                  builder: (context) {
+                    return TextButton(
+                      onPressed: () =>
+                          safePopOrGo(context, '/fallback', result: 'changed'),
+                      child: const Text('back'),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('back'));
+    await tester.pumpAndSettle();
+
+    expect(popped, 'changed');
+    expect(find.text('open'), findsOneWidget);
+  });
+
   testWidgets('goPersonalShellTab navigates with context.go', (tester) async {
     late BuildContext navContext;
 

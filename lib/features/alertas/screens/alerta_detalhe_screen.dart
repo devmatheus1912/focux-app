@@ -17,6 +17,7 @@ import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
+import '../../../core/widgets/fx_hub_header.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/ia_safety_disclaimer.dart';
 import '../../../core/widgets/operational_metric_tile.dart';
@@ -178,8 +179,7 @@ class _AlertaDetalheScreenState extends ConsumerState<AlertaDetalheScreen> {
       child: FxShellScaffold(
         useMesh: true,
         appBar: FxShellAppBar(
-          title: nome,
-          subtitle: FxHubFreshness.fromFetchedAt(_fetchedAt),
+          title: 'Alerta',
           onBack: () => safePopOrGo(context, '/alertas'),
           actions: [
             FxHelpIconButton(
@@ -234,6 +234,16 @@ class _AlertaDetalheScreenState extends ConsumerState<AlertaDetalheScreen> {
                             TokensStrip.s4,
                           ),
                           children: [
+                            FxHubHeader(
+                              title: nome,
+                              freshnessLabel: FxHubFreshness.fromFetchedAt(
+                                _fetchedAt,
+                              ),
+                              subtitle: alertaStatusFinanceiroLabel(
+                                _detalhe!.statusFinanceiro,
+                              ),
+                            ),
+                            const SizedBox(height: TokensStrip.s4),
                             OperationalMetricTile(
                               label: 'Último treino',
                               value: alertaUltimoTreinoLabel(

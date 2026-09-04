@@ -19,6 +19,11 @@ void main() {
     expect(screen, contains('showFxInsetPickerSheet'));
     expect(screen, contains('OperationalMetricTile'));
     expect(screen, contains('FxLiquidPrimaryButton'));
+    expect(screen, contains('FxHubHeader'));
+    expect(screen, contains('FxHelpIconButton'));
+    expect(screen, contains('safePopOrGo'));
+    expect(screen, contains('leadStickyP0Label'));
+    expect(screen, contains('UpgradePromptSheet.showFromError'));
     expect(screen, contains('DashboardHomeActionChip'));
     expect(screen, contains('showFxConfirmSheet'));
     expect(screen, isNot(contains('FxSettingsGroup')));
