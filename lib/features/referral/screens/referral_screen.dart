@@ -192,8 +192,8 @@ class _ReferralScreenState extends ConsumerState<ReferralScreen> {
                 ),
                 const SizedBox(height: TokensStrip.s4),
                 OperationalMetricTile(
-                  label: 'Seu código',
-                  value: referralCodigoLabel(info.codigo),
+                  label: 'Conversões',
+                  value: '${info.usosTotais}',
                   hint: referralUsosLabel(info.usosTotais),
                   color: primary,
                   isDark: isDark,
