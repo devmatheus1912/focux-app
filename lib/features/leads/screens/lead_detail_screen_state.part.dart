@@ -76,6 +76,24 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
     }
   }
 
+  Future<void> _refresh() async {
+    final id = _lead?.id ?? widget.leadId;
+    if (id == null) return;
+    try {
+      final lead = await LeadRepository(ref.read(apiClientProvider)).buscar(id);
+      if (!mounted) return;
+      setState(() {
+        _lead = lead;
+        _fetchedAt = DateTime.now();
+      });
+      await _carregarInteracoes();
+    } catch (e) {
+      if (mounted) {
+        FeedbackHelper.showError(context, friendlyError(e));
+      }
+    }
+  }
+
   Future<void> _ligar() async {
     if (_activeLead.telefone == null) return;
     final uri = Uri.parse('tel:${_activeLead.telefone}');
@@ -314,6 +332,7 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
                     chromeOnDark:
                         Theme.of(context).brightness == Brightness.dark,
                     primary: Theme.of(context).colorScheme.primary,
+                    title: 'Não conseguimos carregar o lead',
                     message:
                         _erroLead ?? 'Não encontramos os dados deste lead.',
                     onRetry: _carregarLead,
@@ -357,7 +376,9 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
           children: [
             Expanded(
               child: FxContentWidthLimiter(
-                child: _LeadDetailContent(
+                child: RefreshIndicator(
+                  onRefresh: _refresh,
+                  child: _LeadDetailContent(
                   lead: lead,
                   loadingInteracoes: _loadingInteracoes,
                   interacoes: _interacoes,
@@ -370,16 +391,17 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
                   onArquivar: _arquivar,
                   onNovaInteracao: _novaInteracao,
                 ),
+                ),
               ),
             ),
             SafeArea(
               top: false,
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(
+                padding: EdgeInsets.fromLTRB(
                   FxSettingsLayout.pageInset,
                   TokensStrip.s2,
                   FxSettingsLayout.pageInset,
-                  TokensStrip.s3,
+                  TokensStrip.s3 + MediaQuery.viewInsetsOf(context).bottom,
                 ),
                 child: FxLiquidPrimaryButton(
                   label: leadStickyP0Label(sticky),

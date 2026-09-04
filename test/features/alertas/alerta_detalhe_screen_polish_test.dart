@@ -24,6 +24,9 @@ void main() {
     expect(screen, contains('Melhorar com IA'));
     expect(screen, contains('alertaAdiarCtaLabel'));
     expect(screen, contains('aplicarSugestaoIa'));
+    expect(screen, contains('viewInsetsOf'));
+    expect(screen, contains('FxContentWidthLimiter'));
+    expect(screen, contains('alertaHubSubtitle'));
     expect(screen, contains('/alunos/\${widget.alunoId}/chat'));
     expect(screen, isNot(contains('alunoEmail')));
     expect(screen, isNot(contains('LinearProgressIndicator')));

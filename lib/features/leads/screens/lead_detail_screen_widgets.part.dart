@@ -44,6 +44,7 @@ class _LeadDetailContent extends StatelessWidget {
     ].join(' · ');
 
     return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.fromLTRB(
         FxSettingsLayout.pageInset,
         TokensStrip.s4,
@@ -53,8 +54,10 @@ class _LeadDetailContent extends StatelessWidget {
       children: [
         FxHubHeader(
           title: lead.nome,
-          freshnessLabel: freshnessLabel,
-          subtitle: leadStatusLabel(lead.status),
+          subtitle: leadHubSubtitle(
+            status: lead.status,
+            freshness: freshnessLabel,
+          ),
         ),
         const SizedBox(height: TokensStrip.s4),
         OperationalMetricTile(

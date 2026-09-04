@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
@@ -9,6 +10,8 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_content_width_limiter.dart';
+import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_hub_header.dart';
@@ -74,10 +77,14 @@ class _FinanceiroMensalidadeDetailScreenState
       });
     } catch (e) {
       if (!mounted) return;
+      final message = friendlyError(e);
       setState(() {
-        _erro = friendlyError(e);
+        _erro = message;
         _loading = false;
       });
+      if (_mensalidade != null) {
+        FeedbackHelper.showError(context, message);
+      }
     }
   }
 
@@ -157,25 +164,36 @@ class _FinanceiroMensalidadeDetailScreenState
           body:
               _loading && m == null
                   ? const Padding(
-                    padding: EdgeInsets.only(top: TokensStrip.s4),
+                    padding: EdgeInsets.all(FxSettingsLayout.pageInset),
                     child: SkeletonList(count: 3),
                   )
                   : _erro != null && m == null
                   ? FxErrorState(
                     chromeOnDark: isDark,
                     primary: primary,
+                    title: 'Não conseguimos carregar a mensalidade',
                     message: _erro!,
                     onRetry: _carregar,
                   )
                   : m == null
-                  ? const SizedBox.shrink()
+                  ? FxEmptyState(
+                    icon: 'dollar-sign',
+                    title: 'Mensalidade não encontrada',
+                    subtitle: 'Puxe para atualizar ou volte ao financeiro.',
+                    action: FxEmptyAction(
+                      label: 'Tentar de novo',
+                      onTap: _carregar,
+                    ),
+                  )
                   : _DetailBody(
                     mensalidade: m,
                     freshnessLabel: FxHubFreshness.fromFetchedAt(_fetchedAt),
                     pending: _pending(m),
                     paying: _paying,
+                    onRefresh: _carregar,
                     onPay: _pagar,
                     onEdit: _editar,
+                    onOpenAluno: () => context.push('/alunos/${m.alunoId}'),
                     onPix:
                         () => mostrarPixMensalidade(
                           context: context,
@@ -207,8 +225,10 @@ class _DetailBody extends StatelessWidget {
     required this.freshnessLabel,
     required this.pending,
     required this.paying,
+    required this.onRefresh,
     required this.onPay,
     required this.onEdit,
+    required this.onOpenAluno,
     required this.onPix,
     required this.onChat,
     required this.onContato,
@@ -218,8 +238,10 @@ class _DetailBody extends StatelessWidget {
   final String? freshnessLabel;
   final bool pending;
   final bool paying;
+  final Future<void> Function() onRefresh;
   final VoidCallback onPay;
   final VoidCallback onEdit;
+  final VoidCallback onOpenAluno;
   final VoidCallback onPix;
   final VoidCallback onChat;
   final VoidCallback onContato;
@@ -236,19 +258,25 @@ class _DetailBody extends StatelessWidget {
     return Column(
       children: [
         Expanded(
-          child: ListView(
-            padding: const EdgeInsets.fromLTRB(
-              FxSettingsLayout.pageInset,
-              TokensStrip.s4,
-              FxSettingsLayout.pageInset,
-              24,
-            ),
-            children: [
-              FxHubHeader(
-                title: mensalidade.alunoNome,
-                freshnessLabel: freshnessLabel,
-                subtitle: mes,
-              ),
+          child: RefreshIndicator(
+            onRefresh: onRefresh,
+            child: FxContentWidthLimiter(
+              child: ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.fromLTRB(
+                  FxSettingsLayout.pageInset,
+                  TokensStrip.s4,
+                  FxSettingsLayout.pageInset,
+                  24,
+                ),
+                children: [
+                  FxHubHeader(
+                    title: mensalidade.alunoNome,
+                    subtitle: financeiroMensalidadeHubSubtitle(
+                      mes: mes,
+                      freshness: freshnessLabel,
+                    ),
+                  ),
               const SizedBox(height: TokensStrip.s4),
               OperationalMetricTile(
                 label: status,
@@ -294,26 +322,27 @@ class _DetailBody extends StatelessWidget {
                   ],
                 ],
               ),
-            ],
-          ),
-        ),
-        if (pending)
-          SafeArea(
-            top: false,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(
-                FxSettingsLayout.pageInset,
-                TokensStrip.s2,
-                FxSettingsLayout.pageInset,
-                TokensStrip.s3,
-              ),
-              child: FxLiquidPrimaryButton(
-                label: 'Marcar como paga',
-                loading: paying,
-                onPressed: paying ? null : onPay,
+                ],
               ),
             ),
           ),
+        ),
+        SafeArea(
+          top: false,
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(
+              FxSettingsLayout.pageInset,
+              TokensStrip.s2,
+              FxSettingsLayout.pageInset,
+              TokensStrip.s3 + MediaQuery.viewInsetsOf(context).bottom,
+            ),
+            child: FxLiquidPrimaryButton(
+              label: pending ? 'Marcar como paga' : 'Abrir aluno',
+              loading: paying,
+              onPressed: paying ? null : (pending ? onPay : onOpenAluno),
+            ),
+          ),
+        ),
       ],
     );
   }

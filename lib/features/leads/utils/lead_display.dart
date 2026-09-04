@@ -146,6 +146,16 @@ String leadFollowUpValue(String? proximoContato) {
   }
 }
 
+String leadHubSubtitle({
+  required String? status,
+  String? freshness,
+}) {
+  final parts = <String>[leadStatusLabel(status)];
+  final stamp = freshness?.trim();
+  if (stamp != null && stamp.isNotEmpty) parts.add(stamp);
+  return parts.join(' · ');
+}
+
 String leadListSubtitle(String? freshness) {
   const base = 'Funil de prospects';
   final stamp = freshness?.trim();

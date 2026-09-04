@@ -26,6 +26,9 @@ void main() {
     expect(screen, contains('UpgradePromptSheet.showFromError'));
     expect(screen, contains('DashboardHomeActionChip'));
     expect(screen, contains('showFxConfirmSheet'));
+    expect(screen, contains('viewInsetsOf'));
+    expect(screen, contains('RefreshIndicator'));
+    expect(screen, contains('leadHubSubtitle'));
     expect(screen, isNot(contains('FxSettingsGroup')));
     expect(screen, isNot(contains('DropdownButton')));
     expect(screen, isNot(contains('FloatingActionButton')));

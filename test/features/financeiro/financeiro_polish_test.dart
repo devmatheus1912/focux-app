@@ -76,6 +76,12 @@ void main() {
     expect(detail, contains('cobrarMensalidadeViaChat'));
     expect(detail, contains('registrarContatoMensalidade'));
     expect(detail, contains('showEditarMensalidadeSheet'));
+    expect(detail, contains('viewInsetsOf'));
+    expect(detail, contains('FxContentWidthLimiter'));
+    expect(detail, contains('RefreshIndicator'));
+    expect(detail, contains('financeiroMensalidadeHubSubtitle'));
+    expect(detail, contains('Abrir aluno'));
+    expect(detail, contains('FxEmptyState'));
     expect(detail, isNot(contains("context.pop('pay')")));
     expect(detail, isNot(contains('FxSettingsGroup')));
     final actions = readScreenSourceBundle(

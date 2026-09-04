@@ -47,6 +47,17 @@ void main() {
     expect(detalhe.podeGerarIa, isTrue);
   });
 
+  test('alertaHubSubtitle junta status e freshness', () {
+    expect(alertaHubSubtitle(statusFinanceiro: 'ATIVO'), 'Em dia');
+    expect(
+      alertaHubSubtitle(
+        statusFinanceiro: 'INADIMPLENTE',
+        freshness: 'Atualizado agora',
+      ),
+      'Em atraso · Atualizado agora',
+    );
+  });
+
   test('alertaCountLabel e como calculamos', () {
     expect(alertaCountLabel(0), 'Nenhum em risco');
     expect(alertaCountLabel(1), '1 aluno em risco');
