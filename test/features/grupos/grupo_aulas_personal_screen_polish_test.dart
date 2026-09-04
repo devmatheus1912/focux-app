@@ -17,6 +17,9 @@ void main() {
     expect(screen, contains('RefreshIndicator'));
     expect(screen, contains('FxHubFreshness.fromFetchedAt'));
     expect(screen, contains('showFxFormSheet'));
+    expect(screen, contains('showFxInsetPickerSheet'));
+    expect(screen, contains('showTimePicker'));
+    expect(screen, isNot(contains('showDatePicker')));
     expect(screen, isNot(contains('FxSettingsGroup')));
     expect(screen, contains('FxSatelliteListTile'));
     expect(screen, contains('ListView.builder'));

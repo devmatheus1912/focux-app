@@ -191,12 +191,27 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
         inicial = DateTime.parse(_activeLead.proximoContato!);
       } catch (_) {}
     }
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: inicial ?? now.add(const Duration(days: 3)),
-      firstDate: now,
-      lastDate: now.add(const Duration(days: 365)),
-      helpText: 'Selecione a data de follow-up',
+    final options = alunoFollowUpDateOptions(now);
+    final picked = await showFxInsetPickerSheet<DateTime>(
+      context,
+      title: 'Follow-up',
+      subtitle: 'Quando você fala de novo com este lead.',
+      headerIcon: Icons.event_outlined,
+      selected: alunoFollowUpDateSelected(
+        options: options,
+        current: inicial,
+      ),
+      sameValue:
+          (a, b) => a.year == b.year && a.month == b.month && a.day == b.day,
+      items: [
+        for (final option in options)
+          FxInsetPickerSheetItem(
+            value: option.date,
+            label: option.label,
+            subtitle: option.subtitle,
+            icon: Icons.event_outlined,
+          ),
+      ],
     );
     if (picked == null) return;
     final dataStr =

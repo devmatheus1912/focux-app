@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../support/screen_source_bundle.dart';
@@ -27,6 +29,16 @@ void main() {
     expect(screen, contains('showFxConfirmSheet'));
     expect(screen, contains('IaQuotaUpgrade.guardBeforeRequest'));
     expect(screen, contains('.obter('));
+    expect(
+      File(
+        'lib/features/alimentar/data/alimentar_repository.dart',
+      ).readAsStringSync(),
+      allOf(
+        contains('/planos-alimentares/\$planoId'),
+        contains('statusCode == 404'),
+        isNot(contains('final planos = await listar(alunoId)')),
+      ),
+    );
     expect(screen, contains('FxSatelliteListTile'));
     expect(screen, contains('FxIcon'));
     expect(

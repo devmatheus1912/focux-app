@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../support/screen_source_bundle.dart';
@@ -27,6 +29,15 @@ void main() {
     expect(tab, isNot(contains("'Lançando…' : 'Confirmar'")));
     expect(tab, contains('showFxConfirmSheet'));
     expect(tab, contains('pickMensalidadeMesReferencia'));
+    expect(
+      File(
+        'lib/features/financeiro/utils/mensalidade_surface_actions.dart',
+      ).readAsStringSync(),
+      allOf(
+        contains('showFxInsetPickerSheet'),
+        isNot(contains('showDatePicker')),
+      ),
+    );
     expect(tab, contains('Carregar mais'));
     expect(tab, contains('marcarLotePago'));
     expect(tab, contains('Marcar lote'));

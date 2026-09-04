@@ -135,6 +135,28 @@ List<FinanceiroMesOpcao> financeiroMesOpcoes({
   return out;
 }
 
+String financeiroMesReferenciaKey(String atual, {DateTime? agora}) {
+  final now = agora ?? DateTime.now();
+  final parsed = DateTime.tryParse(atual) ?? DateTime(now.year, now.month, 1);
+  return FinanceiroMesOpcao(ano: parsed.year, mes: parsed.month).key;
+}
+
+String financeiroMesReferenciaIso(String key) => '$key-01';
+
+List<FinanceiroMesOpcao> financeiroMesReferenciaOpcoes({
+  required String atual,
+  DateTime? agora,
+}) {
+  final now = agora ?? DateTime.now();
+  final parsed = DateTime.tryParse(atual) ?? DateTime(now.year, now.month, 1);
+  final current = FinanceiroMesOpcao(ano: parsed.year, mes: parsed.month);
+  var ops = financeiroMesOpcoes(agora: now);
+  if (!ops.any((o) => o.key == current.key)) {
+    ops = [current, ...ops];
+  }
+  return ops;
+}
+
 String financeiroSalvarMensalidadeConfirmTitle() => 'Salvar mensalidade?';
 
 String financeiroSalvarMensalidadeConfirmMessage() =>

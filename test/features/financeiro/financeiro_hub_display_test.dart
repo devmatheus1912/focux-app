@@ -86,6 +86,16 @@ void main() {
     expect(financeiroMesTitulo(9, 2026), 'Setembro 2026');
   });
 
+  test('mês de referência injeta o atual se estiver fora da janela', () {
+    final ops = financeiroMesReferenciaOpcoes(
+      atual: '2024-01-01',
+      agora: DateTime(2026, 9, 1),
+    );
+    expect(ops.first.key, '2024-01');
+    expect(financeiroMesReferenciaKey('2026-09-01'), '2026-09');
+    expect(financeiroMesReferenciaIso('2026-09'), '2026-09-01');
+  });
+
   test('copy das sheets de lançar e salvar', () {
     expect(financeiroSalvarMensalidadeConfirmTitle(), 'Salvar mensalidade?');
     expect(financeiroLancarMensalidadeConfirmTitle(), 'Lançar mensalidade?');

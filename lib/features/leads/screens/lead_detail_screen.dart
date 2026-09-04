@@ -27,6 +27,7 @@ import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/operational_metric_tile.dart';
 import '../../../core/widgets/skeleton_loader.dart';
+import '../../alunos/utils/aluno360_followup_dates.dart';
 import '../../alunos/widgets/aluno_inset_form_field.dart';
 import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
