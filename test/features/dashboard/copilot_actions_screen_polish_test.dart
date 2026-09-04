@@ -17,6 +17,11 @@ void main() {
     expect(screen, contains('showFxConfirmSheet'));
     expect(screen, contains('showFxInsetPickerSheet'));
     expect(screen, contains('FxHelpIconButton'));
+    expect(screen, contains('Como calculamos'));
+    expect(screen, contains('constrainWidth: false'));
+    expect(screen, contains('FxContentWidthLimiter'));
+    expect(screen, contains('BrandPalette.softened'));
+    expect(screen, isNot(contains('BrandPalette.accent')));
     expect(screen, contains('_CopilotTaskCard'));
     expect(screen, contains('_RadarSignalCard'));
     expect(screen, isNot(contains('FxLiquidPrimaryButton')));

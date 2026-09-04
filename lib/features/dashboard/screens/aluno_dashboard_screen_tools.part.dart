@@ -122,23 +122,15 @@ void _showAlunoToolsCatalog(
               subtitle: 'Acesso ao restante da conta.',
               leading: Icon(Icons.apps_outlined, size: 18, color: primary),
             ),
-            FxSettingsGroup(
-              children: [
-                for (var i = 0; i < tools.length; i++)
-                  FxSettingsTile(
-                    icon: tools[i].icon,
-                    label: tools[i].title,
-                    subtitle: tools[i].subtitle,
-                    value: '',
-                    disclosure: true,
-                    showDivider: i < tools.length - 1,
-                    onTap: () {
-                      Navigator.pop(ctx);
-                      context.push(tools[i].route);
-                    },
-                  ),
-              ],
-            ),
+            for (final tool in tools)
+              FxSatelliteListTile(
+                title: tool.title,
+                subtitle: Text(tool.subtitle),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  context.push(tool.route);
+                },
+              ),
           ],
         ),
       );

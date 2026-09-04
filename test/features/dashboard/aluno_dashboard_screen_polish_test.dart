@@ -57,6 +57,9 @@ void main() {
     expect(screen, contains('emphasize: true'));
     expect(screen, contains('DashboardHomeActionChip'));
     expect(screen, contains('Ver catálogo'));
+    expect(screen, contains('Como calculamos'));
+    expect(screen, isNot(contains('FxSettingsGroup')));
+    expect(screen, isNot(contains('FxSettingsTile')));
     expect(screen, isNot(contains('class _AlunoProfileCard')));
   });
 }

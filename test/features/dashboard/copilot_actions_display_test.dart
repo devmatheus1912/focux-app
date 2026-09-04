@@ -12,5 +12,6 @@ void main() {
     expect(copilotActionsOpenAlunoLabel(false), 'Revisar aluno');
     expect(copilotActionsOpenAlunoLabel(true), 'Ver aluno');
     expect(copilotActionsSectionDetail(copilotActionsStatusAberto, 2), '2 abertas');
+    expect(copilotActionsComoCalculamos, contains('Radar'));
   });
 }

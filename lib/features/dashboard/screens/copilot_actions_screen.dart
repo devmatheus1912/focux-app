@@ -7,8 +7,10 @@ import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
+import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_dock.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
@@ -44,12 +46,21 @@ class CopilotActionsScreen extends ConsumerStatefulWidget {
 
 class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
   String _status = copilotActionsStatusAberto;
+  DateTime? _fetchedAt;
 
   @override
   Widget build(BuildContext context) {
     final dark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
-    final brand = dark ? BrandPalette.accent(primary) : primary;
+    final brand = BrandPalette.softened(primary);
+    ref.listen<AsyncValue<List<FilaAcaoResumo>>>(iaActionsProvider(_status), (
+      _,
+      next,
+    ) {
+      if (!next.isLoading && next.hasValue) {
+        setState(() => _fetchedAt = DateTime.now());
+      }
+    });
     final ink = dark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final mute = dark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final actionsAsync = ref.watch(iaActionsProvider(_status));
@@ -58,9 +69,11 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
       label: 'Tarefas IA',
       child: FxShellScaffold(
         useMesh: true,
+        constrainWidth: false,
         appBar: FxShellAppBar(
           title: 'Tarefas IA',
-          subtitle: 'Centro de Comando',
+          subtitle:
+              FxHubFreshness.fromFetchedAt(_fetchedAt) ?? 'Centro de Comando',
           onBack: () => safePopOrGo(context, '/dashboard/personal'),
           actions: [
             FxHelpIconButton(
@@ -95,7 +108,8 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
             ),
           ),
         ),
-        body: Column(
+        body: FxContentWidthLimiter(
+          child: Column(
           children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(
@@ -230,6 +244,7 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
             ),
           ],
         ),
+        ),
       ),
     );
   }
@@ -257,6 +272,7 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
       title: copilotActionsHelpTitle(),
       subtitle: copilotActionsHelpSubtitle(),
       tips: const [
+        FxHelpTip('Como calculamos', copilotActionsComoCalculamos),
         FxHelpTip(
           'Copiloto',
           'Tarefas que você salvou a partir de um insight. Revisar o aluno não conclui a tarefa.',

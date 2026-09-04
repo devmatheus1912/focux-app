@@ -18,8 +18,6 @@ import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_loading.dart';
-import '../../../core/widgets/fx_settings_group.dart';
-import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_strip_card.dart';
@@ -40,6 +38,7 @@ import '../../notificacoes/widgets/notificacao_badge_button.dart';
 import '../../nps/widgets/nps_prompt_dialog.dart';
 import '../data/aluno_autonomy_plan.dart';
 import '../providers/dashboard_provider.dart';
+import '../utils/aluno_home_display.dart';
 import 'progresso_semanal_widget.dart';
 
 part 'aluno_dashboard_screen_header.part.dart';
@@ -85,6 +84,7 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
                     title: 'Meu Treino',
                     subtitle: 'O que fazer agora e os atalhos do dia.',
                     tips: const [
+                      FxHelpTip('Como calculamos', alunoHomeComoCalculamos),
                       FxHelpTip('Foco', 'A ação do dia fica no card do topo.'),
                       FxHelpTip(
                         'Treinos',
