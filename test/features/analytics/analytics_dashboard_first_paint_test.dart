@@ -24,7 +24,9 @@ void main() {
     expect(repo, contains('AnalyticsDashboard.fromJson'));
     expect(repo, isNot(contains('getWau')));
     expect(repo, isNot(contains('getCohort')));
+    expect(repo, isNot(contains('getFunil')));
     expect(repo, isNot(contains("'/api/analytics/wau'")));
+    expect(repo, isNot(contains("'/api/analytics/funil'")));
   });
 
   test('AnalyticsDashboard.fromJson já traz evolucaoWau e cohort', () {

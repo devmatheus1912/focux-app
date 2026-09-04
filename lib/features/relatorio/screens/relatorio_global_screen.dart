@@ -26,6 +26,8 @@ import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../subscription/models/subscription_plan.dart';
 import '../data/relatorio_repository.dart';
 import '../utils/relatorio_global_display.dart';
+import '../widgets/relatorio_ranking_catalog_sheet.dart';
+import '../widgets/relatorio_ranking_tile.dart';
 
 class RelatorioGlobalScreen extends ConsumerStatefulWidget {
   const RelatorioGlobalScreen({super.key});
@@ -110,6 +112,20 @@ class _RelatorioGlobalScreenState extends ConsumerState<RelatorioGlobalScreen> {
     );
   }
 
+  void _abrirRanking({
+    required String title,
+    required List<ResumoAluno> alunos,
+    required bool attention,
+  }) {
+    showRelatorioRankingCatalogSheet(
+      context,
+      title: title,
+      alunos: alunos,
+      attention: attention,
+      onAluno: _abrirRelatorioAluno,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -145,7 +161,7 @@ class _RelatorioGlobalScreenState extends ConsumerState<RelatorioGlobalScreen> {
                       FxHelpTip('Como calculamos', relatorioComoCalculamos),
                       FxHelpTip(
                         'Rankings',
-                        'Toque no aluno para o relatório dele.',
+                        'O fold mostra 3. Ver mais abre a base ordenada. Toque no aluno para o relatório dele.',
                       ),
                       FxHelpTip(
                         'Atenção',
@@ -222,7 +238,11 @@ class _RelatorioGlobalScreenState extends ConsumerState<RelatorioGlobalScreen> {
                                     : null,
                             onAction:
                                 dados.maisComprometidos.length > 3
-                                    ? _abrirAlunos
+                                    ? () => _abrirRanking(
+                                      title: 'Mais comprometidos',
+                                      alunos: dados.maisComprometidos,
+                                      attention: false,
+                                    )
                                     : null,
                           ),
                           const SizedBox(height: TokensStrip.s2),
@@ -240,7 +260,11 @@ class _RelatorioGlobalScreenState extends ConsumerState<RelatorioGlobalScreen> {
                                     : null,
                             onAction:
                                 dados.menosComprometidos.length > 3
-                                    ? _abrirAlunos
+                                    ? () => _abrirRanking(
+                                      title: 'Precisam de atenção',
+                                      alunos: dados.menosComprometidos,
+                                      attention: true,
+                                    )
                                     : null,
                           ),
                           const SizedBox(height: TokensStrip.s2),
@@ -270,46 +294,11 @@ class _RelatorioGlobalScreenState extends ConsumerState<RelatorioGlobalScreen> {
     }
     return [
       for (var i = 0; i < alunos.length; i++)
-        Semantics(
-          label:
-              '${alunos[i].alunoNome}. '
-              '${relatorioAderenciaPercentLabel(alunos[i].treinosConcluidos, alunos[i].totalTreinos)}. '
-              '${relatorioTreinosSubtitle(alunos[i].treinosConcluidos, alunos[i].totalTreinos)}. '
-              '${relatorioUltimoTreinoLabel(alunos[i].ultimoTreino)}',
-          button: true,
-          child: FxSatelliteListTile(
-            title: alunos[i].alunoNome,
-            subtitle: Text(
-              relatorioTreinosSubtitle(
-                alunos[i].treinosConcluidos,
-                alunos[i].totalTreinos,
-              ),
-            ),
-            trailing: Text(
-              relatorioAderenciaPercentLabel(
-                alunos[i].treinosConcluidos,
-                alunos[i].totalTreinos,
-              ),
-              style: FocuxHubTypography.bodyMuted(
-                color: attention &&
-                        alunos[i].totalTreinos > 0 &&
-                        alunos[i].treinosConcluidos * 100 <
-                            alunos[i].totalTreinos * 50
-                    ? EagleTokens.bad
-                    : fxScreenMute(context),
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            accent: !attention && i == 0
-                ? Theme.of(context).colorScheme.primary
-                : attention &&
-                        alunos[i].totalTreinos > 0 &&
-                        alunos[i].treinosConcluidos * 100 <
-                            alunos[i].totalTreinos * 50
-                    ? EagleTokens.bad
-                    : null,
-            onTap: () => _abrirRelatorioAluno(alunos[i]),
-          ),
+        RelatorioRankingTile(
+          aluno: alunos[i],
+          attention: attention,
+          accentFirst: !attention && i == 0,
+          onTap: () => _abrirRelatorioAluno(alunos[i]),
         ),
     ];
   }

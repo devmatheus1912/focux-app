@@ -30,6 +30,7 @@ void main() {
     expect(screen, contains('keyboardDismissBehavior'));
     expect(screen, contains('Como calculamos'));
     expect(screen, contains('goPersonalShellTab'));
+    expect(screen, contains('showRelatorioRankingCatalogSheet'));
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(screen, isNot(contains('bar-chart-2')));
     expect(screen, isNot(contains('dashboardHeroCaptionOnTeal')));
