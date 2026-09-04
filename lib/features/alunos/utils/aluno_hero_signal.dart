@@ -153,11 +153,17 @@ String alunoHeroIdentitySubtitle({
   required bool objectiveDefined,
   required String objective,
   required String contextLine,
+  String? freshness,
 }) {
-  if (compactContactPriority) {
-    return objective;
+  final base =
+      compactContactPriority
+          ? objective
+          : (objectiveDefined ? '$objective · $contextLine' : contextLine);
+  final stamp = freshness?.trim();
+  if (stamp == null || stamp.isEmpty || compactContactPriority) {
+    return base;
   }
-  return objectiveDefined ? '$objective · $contextLine' : contextLine;
+  return '$base · $stamp';
 }
 
 String? alunoHeroMetricEyebrow(AlunoHeroPrimarySignal signal) {

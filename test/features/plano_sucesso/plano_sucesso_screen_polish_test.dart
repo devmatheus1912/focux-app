@@ -25,6 +25,8 @@ void main() {
     expect(screen, contains('SkeletonList'));
     expect(screen, contains('friendlyError'));
     expect(screen, contains("safePopOrGo(context, '/alunos/\${widget.alunoId}')"));
+    expect(screen, contains('viewInsetsOf'));
+    expect(screen, contains('planoSucessoHubSubtitle'));
     expect(screen, isNot(contains('LinearGradient')));
     expect(screen, isNot(contains('Colors.white70')));
     expect(screen, isNot(contains('_SuccessRing')));

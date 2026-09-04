@@ -55,3 +55,35 @@ String planoSucessoStickyLabel({
   if (proximo != null) return 'Marcar etapa';
   return 'Remarcar revisão';
 }
+
+String planoSucessoHubSubtitle({
+  required String base,
+  String? freshness,
+}) {
+  final parts = <String>[base];
+  final stamp = freshness?.trim();
+  if (stamp != null && stamp.isNotEmpty) parts.add(stamp);
+  return parts.join(' · ');
+}
+
+String planoSucessoEtapasValue(int done, int total) => '$done/$total';
+
+String planoSucessoEtapasHint({
+  required int done,
+  required int total,
+  required MarcoSucesso? proximo,
+}) {
+  if (total <= 0) return 'Nenhuma etapa ainda';
+  if (proximo == null) return 'Todas as etapas feitas';
+  return '$done de $total · próxima etapa';
+}
+
+String planoSucessoRevisaoMetricValue(DateTime? data) {
+  if (data == null) return '—';
+  return planoSucessoRevisaoLabel(data);
+}
+
+String planoSucessoRevisaoMetricHint(DateTime? data) {
+  if (data == null) return 'Sem data de revisão';
+  return 'Próxima revisão';
+}

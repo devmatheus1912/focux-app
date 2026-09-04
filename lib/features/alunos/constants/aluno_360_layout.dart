@@ -69,7 +69,9 @@ abstract final class Aluno360Layout {
 
   /// Bottom padding so Operação content clears the sticky overlay CTA.
   static double stickyBarTotalHeight(BuildContext context) {
-    return stickyBarContentHeight + MediaQuery.paddingOf(context).bottom;
+    return stickyBarContentHeight +
+        MediaQuery.paddingOf(context).bottom +
+        MediaQuery.viewInsetsOf(context).bottom;
   }
 
   static double operacaoScrollBottomReserve(

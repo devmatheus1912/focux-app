@@ -116,11 +116,11 @@ class Aluno360OperacaoStickyCtaBar extends ConsumerWidget {
         label: 'Ações rápidas da aba operação',
         child: Padding(
           key: const ValueKey('aluno360_operacao_sticky_cta'),
-          padding: const EdgeInsets.fromLTRB(
+          padding: EdgeInsets.fromLTRB(
             TokensStrip.s4,
             0,
             TokensStrip.s4,
-            10,
+            10 + MediaQuery.viewInsetsOf(context).bottom,
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,

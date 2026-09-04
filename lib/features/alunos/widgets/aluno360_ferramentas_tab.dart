@@ -126,6 +126,7 @@ class Aluno360FerramentasTab extends StatelessWidget {
               button: true,
               child: FxSatelliteListTile(
                 title: 'Medidas em dia',
+                titleCase: false,
                 subtitle: Text(completeSummary),
                 accent: primary,
                 onTap: () => context.push(evolucaoRoute, extra: aluno.nome),
@@ -135,6 +136,7 @@ class Aluno360FerramentasTab extends StatelessWidget {
             ...rows.map(
               (row) => FxSatelliteListTile(
                 title: row.label,
+                titleCase: false,
                 subtitle: Text(row.subtitle),
                 trailing: Text(row.value),
                 leading: Icon(_measurementIcon(row.field), color: primary),
