@@ -92,6 +92,5 @@ bool isPersonalPath(String path) {
       path.startsWith('/exercicios') ||
       path.startsWith('/alertas/') ||
       path.startsWith('/avaliacao/') ||
-      path.startsWith('/anamnese/') ||
-      path.startsWith('/alimentar/');
+      path.startsWith('/anamnese/');
 }

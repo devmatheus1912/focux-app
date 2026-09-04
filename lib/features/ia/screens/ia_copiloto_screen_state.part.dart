@@ -18,15 +18,13 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
   final DateTime _openedAt = DateTime.now();
   bool _viewTracked = false;
   bool _ttvTracked = false;
-  final _modes = ['Treino', 'Dieta', 'Progressão'];
+  final _modes = ['Treino', 'Progressão'];
 
   String get _mode => _modes[_modeIdx];
   String get _modeDisplay => _mode == 'Progressão' ? 'Progresso' : _mode;
 
   IconData get _modeIcon {
     switch (_mode) {
-      case 'Dieta':
-        return Icons.restaurant_menu_outlined;
       case 'Progressão':
         return Icons.trending_up_outlined;
       default:
@@ -36,8 +34,6 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
 
   String get _readinessHeadline {
     switch (_mode) {
-      case 'Dieta':
-        return 'Recomendações · Dieta';
       case 'Progressão':
         return 'Recomendações · Progresso';
       default:
@@ -47,8 +43,6 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
 
   String get _modePromise {
     switch (_mode) {
-      case 'Dieta':
-        return 'Analisa objetivo e rotina do aluno e sugere pontos de atenção. O plano alimentar continua sendo montado por você.';
       case 'Progressão':
         return 'Lê histórico, check-ins e aderência para sugerir ajuste de carga, volume ou frequência — você decide o que aplicar.';
       default:
@@ -58,12 +52,6 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
 
   List<String> get _modeChecks {
     switch (_mode) {
-      case 'Dieta':
-        return [
-          'Objetivo do aluno',
-          'Rotina declarada',
-          'Alertas para revisão',
-        ];
       case 'Progressão':
         return ['Histórico recente', 'Prontidão wearable', 'Próxima ação'];
       default:
@@ -100,8 +88,6 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
 
   String get _howItWorksPreview {
     switch (_mode) {
-      case 'Dieta':
-        return 'O Copiloto não cria plano alimentar no app. Ele gera recomendações em texto para você revisar e montar a prescrição com autonomia.';
       case 'Progressão':
         return 'O Copiloto sugere ajustes com base em dados do aluno. Nada altera treino ou carga automaticamente — você revisa e aplica no atendimento.';
       default:
@@ -111,8 +97,6 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
 
   String get _resultNote {
     switch (_mode) {
-      case 'Dieta':
-        return 'Recomendações de dieta para revisão. Monte o plano no fluxo que você já usa — nada é aplicado ao aluno automaticamente.';
       case 'Progressão':
         return 'Recomendações de progressão com base em check-ins e histórico. Revise antes de ajustar carga ou volume na prática.';
       default:

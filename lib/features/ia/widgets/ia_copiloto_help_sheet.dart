@@ -17,7 +17,7 @@ Future<void> showIaCopilotoHelpSheet(BuildContext context) {
       ),
       FxHelpTip(
         'Modo',
-        'Treino, Dieta ou Progresso mudam o recorte. A IA não troca sozinha.',
+        'Treino ou Progresso mudam o recorte. A IA não troca sozinha.',
         icon: 'spark',
       ),
       FxHelpTip(
@@ -27,7 +27,7 @@ Future<void> showIaCopilotoHelpSheet(BuildContext context) {
       ),
       FxHelpTip(
         'Tarefa',
-        'Criar tarefa manda o recorte para o Command Center. Não aplica treino nem dieta.',
+        'Criar tarefa manda o recorte para o Command Center. Não aplica treino sozinho.',
         icon: 'article',
       ),
     ],

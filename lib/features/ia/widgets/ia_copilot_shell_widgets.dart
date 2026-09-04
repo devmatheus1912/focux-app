@@ -171,8 +171,6 @@ class IaCopilotModeSelector extends StatelessWidget {
 
   IconData _icon(String mode) {
     switch (mode) {
-      case 'Dieta':
-        return Icons.restaurant_menu_outlined;
       case 'Progressão':
         return Icons.trending_up_outlined;
       default:

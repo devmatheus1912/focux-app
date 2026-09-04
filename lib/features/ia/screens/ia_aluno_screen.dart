@@ -293,7 +293,7 @@ class _ChatTabState extends ConsumerState<_ChatTab> {
                         icon: 'spark',
                         title: 'Comece uma conversa',
                         subtitle:
-                            'Pergunte sobre treino, dieta ou saúde ao assistente.',
+                            'Pergunte sobre treino ou saúde ao assistente.',
                         action: FxEmptyAction(
                           label: 'Escrever pergunta',
                           onTap: () => _focus.requestFocus(),
