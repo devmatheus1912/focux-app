@@ -102,7 +102,7 @@ abstract final class FocuxBrandCopy {
       // Slide 2 = checklist; métricas só no slide 1 (hero budget).
       metrics: [],
       features: [
-        'Modos Treino, Dieta e Progressão por aluno',
+        'Modos Treino e Progressão por aluno',
         'Mensalidades com PIX, QR e alerta de inadimplência',
         'Ações do Copiloto caem direto na sua fila do dia',
       ],

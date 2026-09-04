@@ -180,7 +180,7 @@ Future<void> showAluno360FerramentasHelpSheet(BuildContext context) {
       ),
       FxHelpTip(
         'Perfil & gestão',
-        'Anamnese, mensalidades, chat, dieta e feedback em vídeo.',
+        'Anamnese, mensalidades, chat e feedback em vídeo.',
         icon: 'people',
       ),
     ],

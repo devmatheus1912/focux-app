@@ -45,8 +45,6 @@ void main() {
     expect(sources, contains("state.extra is Aluno"));
     expect(sources, contains("path: '/perfil/editar'"));
     expect(sources, contains("state.extra is PerfilPersonal"));
-    expect(sources, contains("path: '/alunos/:id/alimentar/:planoId'"));
-    expect(sources, contains("state.extra is PlanoAlimentar"));
     expect(sources, contains("path: '/checkin/executar'"));
     expect(sources, contains('treinoIdFromState(state) == null'));
     expect(sources, contains("state.uri.queryParameters['treinoId']"));
@@ -54,6 +52,8 @@ void main() {
 
     expect(sources, isNot(contains('state.extra as int')));
     expect(sources, isNot(contains('state.extra as String?')));
+    expect(sources, isNot(contains("path: '/alunos/:id/alimentar'")));
+    expect(sources, isNot(contains('PlanoAlimentar')));
   });
 
   test('router protects dynamic id paths from invalid ids', () {
@@ -129,7 +129,9 @@ void main() {
     expect(helper, contains('context.go(fallbackLocation)'));
     expect(helper, contains('void safePopOr'));
     expect(checkin, contains("safePopOrGo(context, '/checkin/treinos')"));
-    expect(copilot, contains('safePopOr('));
+    // Copiloto é tab do shell — sem seta/safePop (showBack: false).
+    expect(copilot, contains("showBack: false"));
+    expect(copilot, isNot(contains('safePopOr(')));
     expect(
       chat,
       contains("_isAlunoMode ? '/dashboard/aluno' : '/dashboard/personal'"),
@@ -160,14 +162,6 @@ void main() {
         File(
           'lib/features/avaliacao/screens/evolucao_comparativo_screen.dart',
         ).readAsStringSync();
-    final alimentar =
-        File(
-          'lib/features/alimentar/screens/alimentar_screen.dart',
-        ).readAsStringSync();
-    final planoAlimentar =
-        File(
-          'lib/features/alimentar/screens/plano_alimentar_detail_screen.dart',
-        ).readAsStringSync();
 
     // /agenda é tab do shell (FocuxNavigation.shellTabPaths) — sem back para a
     // Home; o fallback dela é coberto em 'residual back controls'.
@@ -179,14 +173,6 @@ void main() {
     expect(
       avaliacao,
       contains("safePopOrGo(context, '/alunos/\${widget.alunoId}')"),
-    );
-    expect(
-      alimentar,
-      contains("safePopOrGo(context, '/alunos/\${widget.alunoId}')"),
-    );
-    expect(
-      planoAlimentar,
-      contains("safePopOrGo(context, '/alunos/\${widget.alunoId}/alimentar')"),
     );
   });
 

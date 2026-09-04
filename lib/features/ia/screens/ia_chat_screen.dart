@@ -131,7 +131,7 @@ class _IaChatScreenState extends ConsumerState<IaChatScreen> {
                   FxHelpTip('Como calculamos', iaChatComoCalculamos),
                   FxHelpTip(
                     'Copiloto',
-                    'Para gerar treino, dieta ou progresso, use o Copiloto.',
+                    'Para gerar treino ou progresso, use o Copiloto.',
                   ),
                 ],
               ),
@@ -170,7 +170,7 @@ class _IaChatScreenState extends ConsumerState<IaChatScreen> {
                             icon: 'spark',
                             title: 'Comece uma conversa',
                             subtitle:
-                                'Pergunte ao seu assistente de fitness sobre treino, dieta ou negócio.',
+                                'Pergunte ao seu assistente de fitness sobre treino ou negócio.',
                             action: FxEmptyAction(
                               label: 'Abrir Copiloto',
                               onTap: () =>
@@ -240,7 +240,7 @@ class _IaChatScreenState extends ConsumerState<IaChatScreen> {
             IaChatComposer(
               controller: _ctrl,
               loading: _loading,
-              hint: 'Pergunte sobre treino, dieta...',
+              hint: 'Pergunte sobre treino...',
               onSend: _enviar,
             ),
           ],
