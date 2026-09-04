@@ -6,6 +6,8 @@ class _LeadDetailContent extends StatelessWidget {
     required this.loadingInteracoes,
     required this.interacoes,
     required this.isDark,
+    required this.freshnessLabel,
+    required this.sticky,
     required this.onDefinirFollowUp,
     required this.onLigar,
     required this.onWhatsapp,
@@ -17,6 +19,8 @@ class _LeadDetailContent extends StatelessWidget {
   final bool loadingInteracoes;
   final List<LeadInteracao> interacoes;
   final bool isDark;
+  final String? freshnessLabel;
+  final LeadStickyAction sticky;
   final VoidCallback onDefinirFollowUp;
   final VoidCallback onLigar;
   final VoidCallback onWhatsapp;
@@ -47,6 +51,12 @@ class _LeadDetailContent extends StatelessWidget {
         32,
       ),
       children: [
+        FxHubHeader(
+          title: lead.nome,
+          freshnessLabel: freshnessLabel,
+          subtitle: leadStatusLabel(lead.status),
+        ),
+        const SizedBox(height: TokensStrip.s4),
         OperationalMetricTile(
           label: leadStatusLabel(lead.status),
           value: leadFollowUpValue(lead.proximoContato),
@@ -63,12 +73,13 @@ class _LeadDetailContent extends StatelessWidget {
           spacing: TokensStrip.s2,
           runSpacing: TokensStrip.s2,
           children: [
-            DashboardHomeActionChip(
-              label: 'Follow-up',
-              accent: primary,
-              isDark: isDark,
-              onPressed: onDefinirFollowUp,
-            ),
+            if (sticky != LeadStickyAction.followUp)
+              DashboardHomeActionChip(
+                label: 'Follow-up',
+                accent: primary,
+                isDark: isDark,
+                onPressed: onDefinirFollowUp,
+              ),
             if (temTelefone) ...[
               DashboardHomeActionChip(
                 label: 'Ligar',
@@ -76,12 +87,13 @@ class _LeadDetailContent extends StatelessWidget {
                 isDark: isDark,
                 onPressed: onLigar,
               ),
-              DashboardHomeActionChip(
-                label: 'WhatsApp',
-                accent: primary,
-                isDark: isDark,
-                onPressed: onWhatsapp,
-              ),
+              if (sticky != LeadStickyAction.whatsapp)
+                DashboardHomeActionChip(
+                  label: 'WhatsApp',
+                  accent: primary,
+                  isDark: isDark,
+                  onPressed: onWhatsapp,
+                ),
             ],
           ],
         ),

@@ -75,6 +75,28 @@ bool leadPodeConverter(String status) {
   return value != 'CONVERTIDO' && value != 'ATIVO';
 }
 
+enum LeadStickyAction { converter, whatsapp, followUp }
+
+LeadStickyAction leadStickyAction({
+  required String status,
+  required bool temTelefone,
+}) {
+  if (leadPodeConverter(status)) return LeadStickyAction.converter;
+  if (temTelefone) return LeadStickyAction.whatsapp;
+  return LeadStickyAction.followUp;
+}
+
+String leadStickyP0Label(LeadStickyAction action) {
+  switch (action) {
+    case LeadStickyAction.converter:
+      return 'Converter em aluno';
+    case LeadStickyAction.whatsapp:
+      return 'WhatsApp';
+    case LeadStickyAction.followUp:
+      return 'Definir follow-up';
+  }
+}
+
 bool leadStatusDanger(String status) {
   final value = status.trim().toUpperCase();
   return value == 'INADIMPLENTE' || value == 'CANCELADO';

@@ -56,7 +56,7 @@ class FxHubHeader extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: FocuxHubTypography.pageTitle(context, color: ink),
+                    style: FocuxHubTypography.sectionTitle(context, color: ink),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),

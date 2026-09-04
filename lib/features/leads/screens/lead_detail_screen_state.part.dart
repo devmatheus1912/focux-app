@@ -6,6 +6,7 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
   bool _loadingLead = false;
   bool _loadingInteracoes = true;
   String? _erroLead;
+  DateTime? _fetchedAt;
 
   Lead get _activeLead {
     final lead = _lead;
@@ -20,6 +21,7 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
     super.initState();
     if (widget.lead != null) {
       _lead = widget.lead;
+      _fetchedAt = DateTime.now();
       _carregarInteracoes();
     } else {
       _carregarLead();
@@ -39,6 +41,7 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
         setState(() {
           _lead = lead;
           _loadingLead = false;
+          _fetchedAt = DateTime.now();
         });
         _carregarInteracoes();
       }
@@ -127,9 +130,16 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
         safePopOrGo(context, '/leads');
       }
     } catch (e) {
-      if (mounted) {
-        FeedbackHelper.showError(context, friendlyError(e));
-      }
+      if (!mounted) return;
+      final surfaced = await UpgradePromptSheet.showFromError(
+        context,
+        e,
+        fallbackFeatureName: 'Alunos',
+        fallbackCapability: 'alunos',
+        source: 'lead_converter',
+      );
+      if (surfaced || !mounted) return;
+      FeedbackHelper.showError(context, friendlyError(e));
     }
   }
 
@@ -200,6 +210,14 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
     );
     if (!mounted || picked == null || picked == _activeLead.status) return;
     await _mudarStatus(picked);
+  }
+
+  Future<void> _onSticky(LeadStickyAction action) {
+    return switch (action) {
+      LeadStickyAction.converter => _converter(),
+      LeadStickyAction.whatsapp => _whatsapp(),
+      LeadStickyAction.followUp => _definirFollowUp(),
+    };
   }
 
   Future<void> _novaInteracao() async {
@@ -282,6 +300,12 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
           appBar: FxShellAppBar(
             title: 'Lead',
             onBack: () => safePopOrGo(context, '/leads'),
+            actions: [
+              FxHelpIconButton(
+                tooltip: 'Como usar este lead',
+                onTap: () => showLeadDetailHelpSheet(context),
+              ),
+            ],
           ),
           body:
               _loadingLead
@@ -299,16 +323,24 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
     }
 
     final lead = _lead!;
+    final temTelefone = lead.telefone?.trim().isNotEmpty == true;
+    final sticky = leadStickyAction(
+      status: lead.status,
+      temTelefone: temTelefone,
+    );
 
     return fxScreenA11yScope(
       label: 'Lead ${lead.nome}',
       child: FxShellScaffold(
         useMesh: true,
         appBar: FxShellAppBar(
-          title: lead.nome,
-          subtitle: leadStatusLabel(lead.status),
+          title: 'Lead',
           onBack: () => safePopOrGo(context, '/leads'),
           actions: [
+            FxHelpIconButton(
+              tooltip: 'Como usar este lead',
+              onTap: () => showLeadDetailHelpSheet(context),
+            ),
             ShellHeaderIconButton(
               icon: 'trend',
               tooltip: 'Mudar status',
@@ -330,6 +362,8 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
                   loadingInteracoes: _loadingInteracoes,
                   interacoes: _interacoes,
                   isDark: Theme.of(context).brightness == Brightness.dark,
+                  freshnessLabel: FxHubFreshness.fromFetchedAt(_fetchedAt),
+                  sticky: sticky,
                   onDefinirFollowUp: _definirFollowUp,
                   onLigar: _ligar,
                   onWhatsapp: _whatsapp,
@@ -338,22 +372,21 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
                 ),
               ),
             ),
-            if (leadPodeConverter(lead.status))
-              SafeArea(
-                top: false,
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                    FxSettingsLayout.pageInset,
-                    TokensStrip.s2,
-                    FxSettingsLayout.pageInset,
-                    TokensStrip.s3,
-                  ),
-                  child: FxLiquidPrimaryButton(
-                    label: 'Converter em aluno',
-                    onPressed: _converter,
-                  ),
+            SafeArea(
+              top: false,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  FxSettingsLayout.pageInset,
+                  TokensStrip.s2,
+                  FxSettingsLayout.pageInset,
+                  TokensStrip.s3,
+                ),
+                child: FxLiquidPrimaryButton(
+                  label: leadStickyP0Label(sticky),
+                  onPressed: () => _onSticky(sticky),
                 ),
               ),
+            ),
           ],
         ),
       ),

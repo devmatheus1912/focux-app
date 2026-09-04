@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
+import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/utils/pt_br_display.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_help.dart';
+import '../../../core/widgets/fx_hub_header.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -20,6 +23,7 @@ import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../data/financeiro_repository.dart';
 import '../utils/financeiro_hub_display.dart';
 import '../utils/mensalidade_surface_actions.dart';
+import '../widgets/financeiro_mensalidade_help_sheet.dart';
 
 class FinanceiroMensalidadeDetailScreen extends ConsumerStatefulWidget {
   const FinanceiroMensalidadeDetailScreen({
@@ -43,6 +47,7 @@ class _FinanceiroMensalidadeDetailScreenState
   var _paying = false;
   var _changed = false;
   String? _erro;
+  DateTime? _fetchedAt;
 
   @override
   void initState() {
@@ -50,6 +55,8 @@ class _FinanceiroMensalidadeDetailScreenState
     _mensalidade = widget.initial;
     if (_mensalidade == null) {
       _carregar();
+    } else {
+      _fetchedAt = DateTime.now();
     }
   }
 
@@ -64,6 +71,7 @@ class _FinanceiroMensalidadeDetailScreenState
       setState(() {
         _mensalidade = loaded;
         _loading = false;
+        _fetchedAt = DateTime.now();
       });
     } catch (e) {
       if (!mounted) return;
@@ -78,8 +86,11 @@ class _FinanceiroMensalidadeDetailScreenState
       m.status == 'PENDENTE' || m.status == 'ATRASADO';
 
   void _leave() {
-    if (!context.canPop()) return;
-    context.pop(_changed ? 'changed' : null);
+    safePopOrGo(
+      context,
+      '/financeiro',
+      result: _changed ? 'changed' : null,
+    );
   }
 
   void _apply(Mensalidade updated) {
@@ -135,12 +146,14 @@ class _FinanceiroMensalidadeDetailScreenState
         child: FxShellScaffold(
           useMesh: true,
           appBar: FxShellAppBar(
-            title: m?.alunoNome ?? 'Mensalidade',
-            subtitle:
-                m == null
-                    ? null
-                    : financeiroMensalidadeMesPorExtenso(m.mesReferencia),
+            title: 'Mensalidade',
             onBack: _leave,
+            actions: [
+              FxHelpIconButton(
+                tooltip: 'Como usar esta mensalidade',
+                onTap: () => showFinanceiroMensalidadeHelpSheet(context),
+              ),
+            ],
           ),
           body:
               _loading && m == null
@@ -159,6 +172,7 @@ class _FinanceiroMensalidadeDetailScreenState
                   ? const SizedBox.shrink()
                   : _DetailBody(
                     mensalidade: m,
+                    freshnessLabel: FxHubFreshness.fromFetchedAt(_fetchedAt),
                     pending: _pending(m),
                     paying: _paying,
                     onPay: _pagar,
@@ -191,6 +205,7 @@ class _FinanceiroMensalidadeDetailScreenState
 class _DetailBody extends StatelessWidget {
   const _DetailBody({
     required this.mensalidade,
+    required this.freshnessLabel,
     required this.pending,
     required this.paying,
     required this.onPay,
@@ -201,6 +216,7 @@ class _DetailBody extends StatelessWidget {
   });
 
   final Mensalidade mensalidade;
+  final String? freshnessLabel;
   final bool pending;
   final bool paying;
   final VoidCallback onPay;
@@ -229,6 +245,12 @@ class _DetailBody extends StatelessWidget {
               24,
             ),
             children: [
+              FxHubHeader(
+                title: mensalidade.alunoNome,
+                freshnessLabel: freshnessLabel,
+                subtitle: mes,
+              ),
+              const SizedBox(height: TokensStrip.s4),
               OperationalMetricTile(
                 label: status,
                 value: formatBrlCurrency(

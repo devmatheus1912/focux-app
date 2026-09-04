@@ -10,6 +10,8 @@ void main() {
     expect(screen, contains('fxScreenA11yScope'));
     expect(screen, contains('FxShellScaffold'));
     expect(screen, contains('FxHelpIconButton'));
+    expect(screen, contains('FxHubHeader'));
+    expect(screen, contains('safePopOrGo'));
     expect(screen, contains('OperationalMetricTile'));
     expect(screen, contains('FxLiquidPrimaryButton'));
     expect(screen, contains('DashboardHomeActionChip'));

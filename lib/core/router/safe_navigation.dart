@@ -1,10 +1,14 @@
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
-void safePopOrGo(BuildContext context, String fallbackLocation) {
+void safePopOrGo(
+  BuildContext context,
+  String fallbackLocation, {
+  Object? result,
+}) {
   if (!context.mounted) return;
   if (context.canPop()) {
-    context.pop();
+    context.pop(result);
     return;
   }
   final currentLocation = GoRouterState.of(context).uri.toString();
