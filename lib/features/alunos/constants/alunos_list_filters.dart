@@ -1,5 +1,11 @@
 enum AlunoFiltro { todos, contatoHoje, ativos, inadimplentes, risco, novos }
 
+String alunosListCountLabel(int total) {
+  if (total <= 0) return 'Nenhum aluno';
+  if (total == 1) return '1 aluno';
+  return '$total alunos';
+}
+
 enum AlunoOrdenacao { prioridade, nome, semFoto }
 
 String alunosSelectionTitle(int count) =>

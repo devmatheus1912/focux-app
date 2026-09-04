@@ -81,4 +81,39 @@ void main() {
     expect(alertaCountLabel(3), '3 alunos em risco');
     expect(alertaComoCalculamos, contains('aderência'));
   });
+
+  test('alertaListSubtitle junta contagem e freshness', () {
+    expect(alertaListSubtitle(totalRiscos: 2), '2 alunos em risco');
+    expect(
+      alertaListSubtitle(totalRiscos: 1, freshness: 'Atualizado agora'),
+      '1 aluno em risco · Atualizado agora',
+    );
+  });
+
+  test('alertaMatchesQuery filtra por nome ou motivo', () {
+    expect(
+      alertaMatchesQuery(
+        alunoNome: 'Ana Silva',
+        motivos: const ['Sem treino há 10 dias'],
+        query: 'ana',
+      ),
+      isTrue,
+    );
+    expect(
+      alertaMatchesQuery(
+        alunoNome: 'Ana Silva',
+        motivos: const ['Sem treino há 10 dias'],
+        query: 'aderência',
+      ),
+      isFalse,
+    );
+    expect(
+      alertaMatchesQuery(
+        alunoNome: 'Ana Silva',
+        motivos: const ['Sem treino há 10 dias'],
+        query: 'treino',
+      ),
+      isTrue,
+    );
+  });
 }

@@ -28,6 +28,10 @@ void main() {
     expect(screen, contains('FxLiquidPrimaryButton'));
     expect(screen, contains('alertaEnviarMensagemCtaLabel'));
     expect(screen, contains('showAlertaEnviarMensagemSheet'));
+    expect(screen, contains('Buscar aluno ou motivo'));
+    expect(screen, contains('alertaMatchesQuery'));
+    expect(screen, contains('alertaListSubtitle'));
+    expect(screen, contains('Quando dispara'));
     expect(screen, isNot(contains("fxIcon: 'message-circle'")));
     expect(screen, isNot(contains('MOTOR ANTI-CHURN')));
     expect(screen, isNot(contains('saudaveis')));

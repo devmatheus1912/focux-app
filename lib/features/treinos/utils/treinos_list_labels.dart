@@ -1,3 +1,5 @@
+import '../../../core/ux/fx_hub_freshness.dart';
+
 /// Rótulos plurais da lista de treinos — lógica pura fora da UI.
 abstract final class TreinosListLabels {
   TreinosListLabels._();
@@ -17,6 +19,17 @@ abstract final class TreinosListLabels {
     required int prontos,
     required int exercises,
   }) => '${readyCount(prontos)} · $exercises exercícios';
+
+  static String countLabel(int count) {
+    if (count <= 0) return 'Nenhum treino';
+    if (count == 1) return '1 treino';
+    return '$count treinos';
+  }
+
+  static String listSubtitle({
+    required int count,
+    String? freshness,
+  }) => FxHubFreshness.joinCount(countLabel(count), freshness);
 
   static String selectionCount(int count) =>
       count == 1 ? '1 selecionado' : '$count selecionados';

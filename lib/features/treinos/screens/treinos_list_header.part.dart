@@ -10,7 +10,6 @@ class _TreinosHeader extends StatelessWidget {
     required this.selectedCount,
     required this.onBack,
     required this.onHelp,
-    required this.onCreate,
     required this.onSelectAll,
     required this.onCancelSelection,
   });
@@ -23,7 +22,6 @@ class _TreinosHeader extends StatelessWidget {
   final int selectedCount;
   final VoidCallback? onBack;
   final VoidCallback onHelp;
-  final VoidCallback onCreate;
   final VoidCallback? onSelectAll;
   final VoidCallback onCancelSelection;
 
@@ -178,32 +176,6 @@ class _TreinosHeader extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(width: TreinosLayout.headerChromeGap),
-                Semantics(
-                  button: true,
-                  label: 'Criar treino',
-                  child: Material(
-                    color: primary,
-                    elevation: isDark ? 3 : 1,
-                    shadowColor: primary.withValues(
-                      alpha: isDark ? 0.35 : 0.18,
-                    ),
-                    shape: const CircleBorder(),
-                    child: InkWell(
-                      onTap: onCreate,
-                      customBorder: const CircleBorder(),
-                      child: const SizedBox(
-                        width: TreinosLayout.headerChromeSize,
-                        height: TreinosLayout.headerChromeSize,
-                        child: Icon(
-                          Icons.add_rounded,
-                          size: 22,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
               ],
             ],
           ),
@@ -340,11 +312,12 @@ class _TreinosBulkBar extends StatelessWidget {
     return AnimatedPadding(
       duration:
           reduceMotion ? Duration.zero : const Duration(milliseconds: 200),
-      padding: const EdgeInsets.fromLTRB(
+      padding: EdgeInsets.fromLTRB(
         TreinosLayout.screenPadding,
         8,
         TreinosLayout.screenPadding,
-        TreinosLayout.bulkBarPaddingBottom,
+        TreinosLayout.bulkBarPaddingBottom +
+            MediaQuery.viewInsetsOf(context).bottom,
       ),
       child: Row(
         children: [

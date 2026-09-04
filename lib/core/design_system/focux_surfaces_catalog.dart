@@ -66,8 +66,16 @@ const Map<String, FocuxSurfaceSpec> focuxSurfaceCatalog = {
     logicalParent: '/onboarding',
   ),
   '/dashboard/personal': _s1Tab,
-  '/alunos': _s4Tab,
-  '/treinos': _s4Tab,
+  '/alunos': FocuxSurfaceSpec(
+    type: _s4,
+    shellTab: true,
+    hasInput: true,
+  ),
+  '/treinos': FocuxSurfaceSpec(
+    type: _s4,
+    shellTab: true,
+    hasInput: true,
+  ),
   '/agenda': _s1Tab,
   '/ia/copiloto': _s1Tab,
   '/dashboard/aluno': _s1Tab,
@@ -260,7 +268,11 @@ const Map<String, FocuxSurfaceSpec> focuxSurfaceCatalog = {
   ),
   '/feed': FocuxSurfaceSpec(type: _s4, logicalParent: _home),
   '/feed/aluno': FocuxSurfaceSpec(type: _s4, logicalParent: _alunoHome),
-  '/leads': FocuxSurfaceSpec(type: _s4, logicalParent: _home),
+  '/leads': FocuxSurfaceSpec(
+    type: _s4,
+    hasInput: true,
+    logicalParent: _home,
+  ),
   '/leads/kanban': FocuxSurfaceSpec(type: _s4, logicalParent: '/leads'),
   '/leads/novo': FocuxSurfaceSpec(
     type: _s5,
@@ -268,7 +280,11 @@ const Map<String, FocuxSurfaceSpec> focuxSurfaceCatalog = {
     logicalParent: '/leads',
   ),
   '/leads/:id': FocuxSurfaceSpec(type: _s3, logicalParent: '/leads'),
-  '/alertas': FocuxSurfaceSpec(type: _s4, logicalParent: _home),
+  '/alertas': FocuxSurfaceSpec(
+    type: _s4,
+    hasInput: true,
+    logicalParent: _home,
+  ),
   '/alertas/aluno/:id': FocuxSurfaceSpec(type: _s3, logicalParent: '/alertas'),
   '/alertas/config': FocuxSurfaceSpec(
     type: _s5,

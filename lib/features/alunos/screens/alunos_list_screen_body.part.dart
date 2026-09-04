@@ -10,12 +10,15 @@ extension AlunosListScreenBody on _AlunosListScreenState {
               final primary = Theme.of(context).colorScheme.primary;
               final ink = chrome.ink;
               final mute = chrome.mute;
-              final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
               final alunos = [
                 ...home.alunos,
                 ...ref.watch(alunosHomeTailProvider).alunos,
               ];
               final stats = home.stats;
+              final freshnessLabel = FxHubFreshness.joinCount(
+                alunosListCountLabel(stats.total),
+                FxHubFreshness.fromFetchedAt(_fetchedAt),
+              );
               final diasLimite = home.alertasConfig.diasSemTreino;
               final filtrados = alunos;
               final ativosCount = stats.totalAtivos;
@@ -159,6 +162,8 @@ extension AlunosListScreenBody on _AlunosListScreenState {
                                   child: ListView.separated(
                                   physics:
                                       const AlwaysScrollableScrollPhysics(),
+                                  keyboardDismissBehavior:
+                                      ScrollViewKeyboardDismissBehavior.onDrag,
                                   padding: EdgeInsets.only(
                                     left: AlunosLayout.screenPadding,
                                     right: AlunosLayout.screenPadding,
@@ -228,11 +233,12 @@ extension AlunosListScreenBody on _AlunosListScreenState {
                               ? SafeArea(
                                 top: false,
                                 child: Padding(
-                                  padding: const EdgeInsets.fromLTRB(
+                                  padding: EdgeInsets.fromLTRB(
                                     TokensStrip.s4,
                                     8,
                                     TokensStrip.s4,
-                                    AlunosLayout.bulkBarPaddingBottom,
+                                    AlunosLayout.bulkBarPaddingBottom +
+                                        MediaQuery.viewInsetsOf(context).bottom,
                                   ),
                                   child: Row(
                                     children: [

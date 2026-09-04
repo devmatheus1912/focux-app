@@ -1,4 +1,5 @@
 import '../../../core/utils/fx_utils.dart';
+import '../../../core/ux/fx_hub_freshness.dart';
 
 const alertaComoCalculamos =
     'Dispara se ficou sem treino além do prazo ou se a aderência caiu abaixo do limiar.';
@@ -7,6 +8,25 @@ String alertaCountLabel(int count) {
   if (count <= 0) return 'Nenhum em risco';
   if (count == 1) return '1 aluno em risco';
   return '$count alunos em risco';
+}
+
+String alertaListSubtitle({
+  required int totalRiscos,
+  String? freshness,
+}) => FxHubFreshness.joinCount(alertaCountLabel(totalRiscos), freshness);
+
+bool alertaMatchesQuery({
+  required String alunoNome,
+  required List<String> motivos,
+  required String query,
+}) {
+  final q = query.trim().toLowerCase();
+  if (q.isEmpty) return true;
+  if (alunoNome.toLowerCase().contains(q)) return true;
+  for (final motivo in motivos) {
+    if (motivo.toLowerCase().contains(q)) return true;
+  }
+  return false;
 }
 
 String alertaAdiarCtaLabel() => 'Adiar 24h';
