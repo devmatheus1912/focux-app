@@ -283,17 +283,6 @@ class Aluno360FerramentasModulesGrid extends ConsumerWidget {
           ),
           FxSatelliteListTile(
             titleCase: false,
-            title: 'Dieta',
-            subtitle: const Text('Plano alimentar atual'),
-            accent: primary,
-            onTap:
-                () => context.push(
-                  '/alunos/$alunoId/alimentar',
-                  extra: aluno.nome,
-                ),
-          ),
-          FxSatelliteListTile(
-            titleCase: false,
             title: 'Feedback em vídeo',
             subtitle: Text(
               feedbackLocked

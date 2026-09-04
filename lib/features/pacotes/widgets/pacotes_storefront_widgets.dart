@@ -425,7 +425,6 @@ class PacoteStorefrontCard extends StatelessWidget {
             runSpacing: 6,
             children: [
               if (pacote.incluiTreino) const _PacoteTag('Treino'),
-              if (pacote.incluiNutri) const _PacoteTag('Nutrição'),
               if (pacote.incluiConsultoria) const _PacoteTag('Consultoria'),
               _PacoteTag(
                 '${pacote.duracaoMeses} ${pacote.duracaoMeses == 1 ? 'mês' : 'meses'}',

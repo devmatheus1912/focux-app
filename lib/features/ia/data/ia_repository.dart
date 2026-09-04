@@ -134,32 +134,6 @@ class IaRepository {
     });
   }
 
-  Future<String> gerarDieta(
-    int alunoId, {
-    String? objetivo,
-    int? pesoKg,
-    int? alturaCm,
-    String? restricoes,
-    int? caloriasAlvo,
-  }) async {
-    return _withIaErrorContext(() async {
-      final r = await _dio.post(
-        '/api/ia/gerar-dieta',
-        options: _iaOpts,
-        data: {
-          'alunoId': alunoId,
-          if (objetivo != null && objetivo.isNotEmpty) 'objetivo': objetivo,
-          if (pesoKg != null) 'pesoKg': pesoKg,
-          if (alturaCm != null) 'alturaCm': alturaCm,
-          if (restricoes != null && restricoes.isNotEmpty)
-            'restricoesAlimentares': restricoes,
-          if (caloriasAlvo != null) 'caloriasAlvo': caloriasAlvo,
-        },
-      );
-      return r.data['resposta'] as String;
-    });
-  }
-
   Future<String> chat(String mensagem, {int? alunoId}) async {
     return _withIaErrorContext(() async {
       final r = await _dio.post(

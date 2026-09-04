@@ -714,7 +714,7 @@ O restante deste capítulo é **contrato de produção**. Quebrar 14.1 ou 14.2 e
 6. Sheet S7: back do SO fecha o sheet, não a rota de baixo. `PopScope` no sheet, não na página, quando o overlay está aberto.
 7. Três caminhos de entrada, os três voltam: (a) `push` da lista; (b) `go` / deep link / busca; (c) toque de notificação FCM. QA que só testa (a) não fecha A22.
 
-**Pai lógico — regra.** Se a rota é `/alunos/:id/alimentar`, o pai é `/alunos/:id`, não `/dashboard/personal`. Se a rota é `/desafios` aberta pelo catálogo de ferramentas, o pai é `/perfil/ferramentas` **ou** `/dashboard/personal` conforme o `GoRouterState` de origem; na dúvida, usar o fallback do catálogo que abriu a tela, documentado na rota.
+**Pai lógico — regra.** Se a rota é `/alunos/:id/anamnese`, o pai é `/alunos/:id`, não `/dashboard/personal`. Se a rota é `/desafios` aberta pelo catálogo de ferramentas, o pai é `/perfil/ferramentas` **ou** `/dashboard/personal` conforme o `GoRouterState` de origem; na dúvida, usar o fallback do catálogo que abriu a tela, documentado na rota.
 
 **Gate.** Teste de contrato: toda `FxShellAppBar` em arquivo de screen satélite contém `safePopOrGo` ou `fallbackLocation`. Omissão falha o CI (§32).
 
@@ -2053,7 +2053,7 @@ Para cada linha: o Ruflo, ao tocar qualquer tela do domínio, fecha o **mínimo*
 | **Onboarding** | `/onboarding`, `/onboarding/wizard`, `/setup/identidade` | S9 | Uma decisão por etapa; persistir; retomar; Voltar; identidade mínima para operar. First-run guiado, nunca empty da Home sem rumo. |
 | **Hoje** | `/dashboard/personal` | S1 | Foco do dia, ≤3 ações, rails top-N, freshness, busca/help/catálogo por deep link. Sem teaser de IA duplicado. |
 | **Alunos (lista)** | `/alunos`, `/kanban`, `/alunos/novo`, `/alunos/acoes-massa` | S4/S5 | Busca, filtros, status, criar, ações em massa que o BE já tem. Kanban se existir rota: mover etapa de verdade, não maquete. |
-| **Aluno 360** | `/alunos/:id`, editar, equipamentos | S3/S5 | Identidade + 2–4 métricas + seções nomeáveis + sticky P0 do momento (cobrar **ou** escrever **ou** atribuir — o que o foco do aluno pedir). Atalhos para treino, financeiro, chat, evolução, anamnese, alimentar **funcionam** (A26). |
+| **Aluno 360** | `/alunos/:id`, editar, equipamentos | S3/S5 | Identidade + 2–4 métricas + seções nomeáveis + sticky P0 do momento (cobrar **ou** escrever **ou** atribuir — o que o foco do aluno pedir). Atalhos para treino, financeiro, chat, evolução, anamnese **funcionam** (A26). |
 | **Treinos** | `/treinos`, `/treinos/novo`, `/treinos/:id`, add exercício | S4/S5/S3 | Listar, criar, montar, atribuir, duplicar, excluir com confirm. Picker de exercício canônico. |
 | **Exercícios** | `/exercicios`, novo, detalhe, wizard biblioteca | S4/S3/S5/S9 | Catálogo, busca, CRUD, filtros, wizard de biblioteca. Preview de vídeo não pode ser copy "em breve" se a rota existe — ou player, ou hide do atalho. |
 | **Agenda** | `/agenda`, `/agenda/novo`, `/agenda/aluno` | S1/S5 | Ver o dia, criar, remarcar/cancelar se o contrato existir, empty do dia com CTA. Ocupação/período do BE: usar ou propor, não ignorar em silêncio. |
@@ -2088,8 +2088,7 @@ Para cada linha: o Ruflo, ao tocar qualquer tela do domínio, fecha o **mínimo*
 | **NPS** | `/nps` | S1 | Ver score, listar respostas, filtrar detratores com atalho (chat/aluno). Prompt de coleta no momento certo, não diálogo cru fora do chrome. |
 | **Depoimentos** | `/depoimentos`, `/depoimentos-aluno` | S4/S5 | Solicitar, aprovar, publicar. Aluno consegue enviar. |
 | **Evolução / fotos / comparativo / engajamento** | `/evolucao`, fotos, comparativo, `/alunos/:id/engajamento` | S3/S4 | Registrar medida/foto, comparar, ler aderência **com** próxima ação. |
-| **Anamnese** | `/alunos/:id/anamnese` · `/aluno/anamnese` | S3 / S5 | Personal solicita e revisa (só leitura da ficha). Aluno preenche PAR-Q+/saúde/hábitos/treino. Deep link: `type=anamnese`. |
-| **Alimentar** | `/alunos/:id/alimentar` | S3/S5 | Ver plano, editar refeições que o contrato permite, atribuir ao aluno. |
+| **Anamnese** | `/alunos/:id/anamnese` · `/aluno/anamnese` | S3 / S5 | Personal solicita e revisa (só leitura da ficha). Aluno preenche PAR-Q+/saúde/hábitos/treino. `restricoesAlimentares` é contexto de saúde — **não** é plano alimentar/dieta. Deep link: `type=anamnese`. |
 | **Grupos / aulas** | `/grupo-aulas` + gêmeo aluno | S1/S4 | Turma, presença, aviso. Não é lista morta. |
 | **Recorrência** | `/recorrencia` + gêmeo aluno | S3/S5 | Ver ciclo, pausar/retomar se o BE tem, não só texto. |
 | **Galeria / feedback de vídeo / pose** | `/galeria`, feedback-videos, form-check | S4/S8 | Upload, revisar, devolver. Pose coach: status do BE (`/api/pose-coach/status`) consumido; se gated, sheet de upgrade, não tela muda. |

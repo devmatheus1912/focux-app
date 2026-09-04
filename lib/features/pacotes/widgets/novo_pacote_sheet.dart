@@ -45,7 +45,6 @@ class _NovoPacoteSheetState extends State<_NovoPacoteSheet> {
 
   int _duracao = 1;
   bool _treino = true;
-  bool _nutri = false;
   bool _consultoria = false;
   bool _destaque = false;
   bool _enviando = false;
@@ -99,7 +98,6 @@ class _NovoPacoteSheetState extends State<_NovoPacoteSheet> {
         valor: double.parse(_valorCtrl.text.trim().replaceAll(',', '.')),
         duracaoMeses: _duracao,
         incluiTreino: _treino,
-        incluiNutri: _nutri,
         incluiConsultoria: _consultoria,
         destaque: _destaque,
       );
@@ -233,18 +231,6 @@ class _NovoPacoteSheetState extends State<_NovoPacoteSheet> {
                           _enviando
                               ? null
                               : (v) => setState(() => _treino = v),
-                    ),
-                  ),
-                  FxSettingsTile(
-                    fxIcon: 'spark',
-                    label: 'Nutrição',
-                    value: pacoteIncluiValue(_nutri),
-                    accessory: Switch.adaptive(
-                      value: _nutri,
-                      onChanged:
-                          _enviando
-                              ? null
-                              : (v) => setState(() => _nutri = v),
                     ),
                   ),
                   FxSettingsTile(
