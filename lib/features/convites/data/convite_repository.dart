@@ -34,14 +34,23 @@ class Convite {
 class ConviteValidacao {
   final bool valido;
   final String? personalNome;
+  final String? personalSlug;
   final String? mensagem;
 
-  ConviteValidacao({required this.valido, this.personalNome, this.mensagem});
+  ConviteValidacao({
+    required this.valido,
+    this.personalNome,
+    this.personalSlug,
+    this.mensagem,
+  });
 
   factory ConviteValidacao.fromJson(Map<String, dynamic> json) =>
       ConviteValidacao(
         valido: json['valido'] as bool? ?? false,
         personalNome: json['personalNome'] as String?,
+        personalSlug:
+            (json['personalSlug'] as String?) ??
+            (json['slug'] as String?),
         mensagem: json['mensagem'] as String?,
       );
 }

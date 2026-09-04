@@ -80,6 +80,10 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+        <!-- Entrega App Links / deep links ao Flutter (GoRouter). -->
+        <meta-data
+            android:name="flutter_deeplinking_enabled"
+            android:value="true" />
         <!-- FCM -->
         <service
             android:name="com.google.firebase.messaging.FirebaseMessagingService"

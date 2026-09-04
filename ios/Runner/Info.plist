@@ -76,12 +76,17 @@
 		<key>CFBundleURLTypes</key>
 		<array>
 			<dict>
+				<key>CFBundleURLName</key>
+				<string>com.focux.focuxApp</string>
 				<key>CFBundleURLSchemes</key>
 				<array>
 					<string>focux</string>
 				</array>
 			</dict>
 		</array>
+		<!-- Flutter 3.16+: entrega Universal Links / App Links ao GoRouter. -->
+		<key>FlutterDeepLinkingEnabled</key>
+		<true/>
 		<key>UIStatusBarHidden</key>
 		<true/>
 		<key>UIViewControllerBasedStatusBarAppearance</key>
