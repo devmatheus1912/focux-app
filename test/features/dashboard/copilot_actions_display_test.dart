@@ -13,5 +13,6 @@ void main() {
     expect(copilotActionsOpenAlunoLabel(true), 'Ver aluno');
     expect(copilotActionsSectionDetail(copilotActionsStatusAberto, 2), '2 abertas');
     expect(copilotActionsComoCalculamos, contains('Radar'));
+    expect(copilotActionsComoCalculamos, contains('pagina'));
   });
 }

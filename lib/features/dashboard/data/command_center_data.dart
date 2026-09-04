@@ -322,6 +322,56 @@ class FilaAcaoResumo {
   );
 }
 
+class IaCommandActionsPage {
+  const IaCommandActionsPage({
+    required this.itens,
+    this.page = 0,
+    this.totalItens = 0,
+    this.hasNext = false,
+  });
+
+  final List<FilaAcaoResumo> itens;
+  final int page;
+  final int totalItens;
+  final bool hasNext;
+
+  factory IaCommandActionsPage.fromJson(dynamic data) {
+    if (data is List) {
+      final itens =
+          data
+              .whereType<Map>()
+              .map(
+                (row) => FilaAcaoResumo.fromJson(Map<String, dynamic>.from(row)),
+              )
+              .toList();
+      return IaCommandActionsPage(
+        itens: itens,
+        totalItens: itens.length,
+      );
+    }
+    final json = Map<String, dynamic>.from(data as Map);
+    final raw = json['content'] ?? json['itens'];
+    final itens =
+        raw is List
+            ? raw
+                .whereType<Map>()
+                .map(
+                  (row) =>
+                      FilaAcaoResumo.fromJson(Map<String, dynamic>.from(row)),
+                )
+                .toList()
+            : const <FilaAcaoResumo>[];
+    return IaCommandActionsPage(
+      itens: itens,
+      page: (json['page'] as num?)?.toInt() ?? 0,
+      totalItens: (json['totalElements'] as num?)?.toInt() ??
+          (json['totalItens'] as num?)?.toInt() ??
+          itens.length,
+      hasNext: json['hasNext'] == true,
+    );
+  }
+}
+
 class MensalidadeResumo {
   final int id;
   final String nomeAluno;

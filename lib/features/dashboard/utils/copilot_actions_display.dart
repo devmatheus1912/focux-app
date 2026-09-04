@@ -52,7 +52,7 @@ String copilotActionsHelpSubtitle() =>
     'Copiloto e sinais do Radar. Nada some sem você confirmar.';
 
 const copilotActionsComoCalculamos =
-    'Abertas são tarefas salvas do Copiloto e sinais do Radar ainda sem conclusão. Nada some sozinho.';
+    'Abertas são tarefas salvas do Copiloto e sinais do Radar ainda sem conclusão. A lista pagina e busca no título. Nada some sozinho.';
 
 String copilotActionsSectionDetail(String status, int count) {
   final suffix = switch (status) {
