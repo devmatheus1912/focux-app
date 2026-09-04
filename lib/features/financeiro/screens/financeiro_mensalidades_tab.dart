@@ -29,6 +29,7 @@ import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../../alunos/providers/alunos_provider.dart';
 import '../../alunos/widgets/aluno_inset_form_field.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../../subscription/widgets/upgrade_prompt_sheet.dart';
 import '../data/financeiro_repository.dart';
 import '../providers/financeiro_provider.dart';
 import '../utils/financeiro_hub_display.dart';
@@ -60,6 +61,8 @@ class _FinanceiroMensalidadesTabState
   var _carregandoMais = false;
   String? _erro;
   var _buscaAtiva = '';
+  var _modoSelecao = false;
+  final _selecionados = <int>{};
   final TextEditingController _searchCtrl = TextEditingController();
   Timer? _debounce;
 
@@ -300,14 +303,38 @@ class _FinanceiroMensalidadesTabState
                             FxSettingsLayout.pageInset,
                             8,
                           ),
-                          child: Align(
-                            alignment: Alignment.centerLeft,
-                            child: DashboardHomeActionChip(
-                              label: 'Atualizar atrasos',
-                              accent: primary,
-                              isDark: chrome.isDark,
-                              onPressed: _atualizarAtrasos,
-                            ),
+                          child: Wrap(
+                            spacing: TokensStrip.s2,
+                            runSpacing: TokensStrip.s2,
+                            children: [
+                              DashboardHomeActionChip(
+                                label: 'Atualizar atrasos',
+                                accent: primary,
+                                isDark: chrome.isDark,
+                                onPressed: _atualizarAtrasos,
+                              ),
+                              if (_items.any(
+                                (m) => financeiroStatusAberto(m.status),
+                              ))
+                                DashboardHomeActionChip(
+                                  label: financeiroLotePagoChipLabel(
+                                    modoSelecao: _modoSelecao,
+                                    selecionados: _selecionados.length,
+                                  ),
+                                  accent: EagleTokens.moneyGreen,
+                                  isDark: chrome.isDark,
+                                  onPressed: _modoSelecao
+                                      ? _confirmarLotePago
+                                      : _entrarModoLote,
+                                ),
+                              if (_modoSelecao)
+                                DashboardHomeActionChip(
+                                  label: 'Cancelar',
+                                  accent: chrome.mute,
+                                  isDark: chrome.isDark,
+                                  onPressed: _sairModoLote,
+                                ),
+                            ],
                           ),
                         ),
                         Expanded(
@@ -338,6 +365,9 @@ class _FinanceiroMensalidadesTabState
                               }
                               final item = _items[i];
                               final overdue = item.status == 'ATRASADO';
+                              final selected = _selecionados.contains(
+                                item.alunoId,
+                              );
                               return FxSatelliteListTile(
                                 title: item.alunoNome,
                                 subtitle: Text(
@@ -346,11 +376,15 @@ class _FinanceiroMensalidadesTabState
                                     item.mesReferencia,
                                   ),
                                 ),
-                                onTap: () => _abrirAcoes(item),
+                                onTap: () => _modoSelecao
+                                    ? _toggleLote(item)
+                                    : _abrirAcoes(item),
                                 accent: overdue ? EagleTokens.bad : primary,
                                 leading: FxIcon(
                                   name:
-                                      overdue
+                                      _modoSelecao && selected
+                                          ? 'circle-check'
+                                          : overdue
                                           ? 'alert-triangle'
                                           : item.status == 'PAGO'
                                           ? 'circle-check'

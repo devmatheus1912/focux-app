@@ -213,6 +213,15 @@ class FinanceiroRepository {
     await _dio.patch('/api/financeiro/mensalidades/atualizar-atrasos');
   }
 
+  Future<void> marcarLotePago(List<int> alunoIds) async {
+    final ids = alunoIds.toSet().toList();
+    await _dio.post(
+      '/api/financeiro/mensalidades/lote-pago',
+      data: {'alunoIds': ids},
+      options: ApiClient.idempotent('mensalidade-lote-${ids.join('-')}'),
+    );
+  }
+
   /// BFF first paint — dashboard + primeira página + resumo + planoFeatures.
   Future<FinanceiroHomeBundle> getHome() async {
     final r = await _dio.get('/api/financeiro/home');

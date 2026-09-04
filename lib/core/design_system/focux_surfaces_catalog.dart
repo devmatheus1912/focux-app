@@ -301,7 +301,11 @@ const Map<String, FocuxSurfaceSpec> focuxSurfaceCatalog = {
     logicalParent: _perfil,
   ),
   '/dunning': FocuxSurfaceSpec(type: _s1, logicalParent: '/financeiro'),
-  '/winback': FocuxSurfaceSpec(type: _s4, logicalParent: _home),
+  '/winback': FocuxSurfaceSpec(
+    type: _s1,
+    hasInput: true,
+    logicalParent: _home,
+  ),
   '/relatorio/business': FocuxSurfaceSpec(type: _s1, logicalParent: _home),
   '/recorrencia': FocuxSurfaceSpec(type: _s4, logicalParent: '/financeiro'),
   '/nps': FocuxSurfaceSpec(type: _s1, logicalParent: _home),

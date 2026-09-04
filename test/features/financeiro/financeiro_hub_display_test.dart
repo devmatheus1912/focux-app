@@ -71,4 +71,22 @@ void main() {
     expect(financeiroAlunoPickerValue(null), 'Selecionar');
     expect(financeiroAlunoPickerValue('Ana'), 'Ana');
   });
+
+  test('lote pago só em mensalidade aberta', () {
+    expect(financeiroStatusAberto('ATRASADO'), isTrue);
+    expect(financeiroStatusAberto('PENDENTE'), isTrue);
+    expect(financeiroStatusAberto('pago'), isFalse);
+    expect(
+      financeiroLotePagoChipLabel(modoSelecao: false, selecionados: 0),
+      'Marcar lote',
+    );
+    expect(
+      financeiroLotePagoChipLabel(modoSelecao: true, selecionados: 2),
+      'Marcar 2 pagos',
+    );
+    expect(
+      financeiroLotePagoConfirmMessage(1),
+      contains('deste aluno'),
+    );
+  });
 }

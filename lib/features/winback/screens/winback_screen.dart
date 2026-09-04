@@ -137,6 +137,19 @@ class _WinbackScreenState extends ConsumerState<WinbackScreen> {
     context.push('/alunos/$id', extra: entry.alunoNome);
   }
 
+  void _abrirChat(WinbackLogEntry entry) {
+    final id = entry.alunoId;
+    if (id == null || id <= 0) return;
+    context.push('/alunos/$id/chat', extra: entry.alunoNome);
+  }
+
+  void _abrirCobranca(WinbackLogEntry entry) {
+    final id = entry.alunoId;
+    if (id == null || id <= 0) return;
+    AnalyticsService.instance.track(ProductEvents.financeiroViewed);
+    context.push('/financeiro?alunoId=$id');
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -254,6 +267,8 @@ class _WinbackScreenState extends ConsumerState<WinbackScreen> {
                                   first: first,
                                   isDark: isDark,
                                   onAluno: () => _abrirAluno(first),
+                                  onChat: () => _abrirChat(first),
+                                  onCobrar: () => _abrirCobranca(first),
                                   onRetencao: _abrirRetencao,
                                 ),
                                 const SizedBox(height: TokensStrip.s4),
@@ -308,6 +323,8 @@ class _WinbackFocusCard extends StatelessWidget {
     required this.first,
     required this.isDark,
     required this.onAluno,
+    required this.onChat,
+    required this.onCobrar,
     required this.onRetencao,
   });
 
@@ -315,6 +332,8 @@ class _WinbackFocusCard extends StatelessWidget {
   final WinbackLogEntry first;
   final bool isDark;
   final VoidCallback onAluno;
+  final VoidCallback onChat;
+  final VoidCallback onCobrar;
   final VoidCallback onRetencao;
 
   @override
@@ -323,38 +342,60 @@ class _WinbackFocusCard extends StatelessWidget {
     final canOpen = first.alunoId != null && first.alunoId! > 0;
     return FxStripCard(
       emphasize: true,
-      semanticsLabel: '${winbackCountLabel(total)}. Último ${winbackAlunoLabel(first.alunoNome)}',
+      semanticsLabel:
+          '${winbackCountLabel(total)}. Último ${winbackAlunoLabel(first.alunoNome)}',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text('Último envio', style: FocuxHubTypography.chip(chrome.mute)),
           const SizedBox(height: 6),
-          Text(
-            winbackAlunoLabel(first.alunoNome),
-            style: FocuxHubTypography.kpi(
-              color: chrome.ink,
-              fontSize: FocuxHubTypography.metricLg,
+          InkWell(
+            onTap: canOpen ? onAluno : null,
+            child: Text(
+              winbackAlunoLabel(first.alunoNome),
+              style: FocuxHubTypography.kpi(
+                color: chrome.ink,
+                fontSize: FocuxHubTypography.metricLg,
+              ),
             ),
           ),
-          const SizedBox(height: 6),
-          Text(
-            '${winbackCountLabel(total)} · ${winbackTipoLabel(first.tipo)}',
-            style: FocuxHubTypography.body(
-              color: chrome.ink,
-            ).copyWith(fontWeight: FontWeight.w700),
-          ),
-          const SizedBox(height: TokensStrip.s3),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: DashboardHomeActionChip(
-              label: canOpen ? 'Ver aluno' : 'Saúde da base',
-              accent: canOpen ? EagleTokens.bad : Theme.of(context).colorScheme.primary,
-              isDark: isDark,
-              onPressed: canOpen ? onAluno : onRetencao,
+            const SizedBox(height: 6),
+            Text(
+              '${winbackCountLabel(total)} · ${winbackTipoLabel(first.tipo)}',
+              style: FocuxHubTypography.body(
+                color: chrome.ink,
+              ).copyWith(fontWeight: FontWeight.w700),
             ),
-          ),
-        ],
-      ),
+            const SizedBox(height: TokensStrip.s3),
+            Wrap(
+              spacing: TokensStrip.s2,
+              runSpacing: TokensStrip.s2,
+              children: [
+                if (canOpen)
+                  DashboardHomeActionChip(
+                    label: 'Escrever',
+                    accent: Theme.of(context).colorScheme.primary,
+                    isDark: isDark,
+                    onPressed: onChat,
+                  ),
+                if (canOpen)
+                  DashboardHomeActionChip(
+                    label: 'Cobrar',
+                    accent: EagleTokens.moneyGreen,
+                    isDark: isDark,
+                    onPressed: onCobrar,
+                  ),
+                if (!canOpen)
+                  DashboardHomeActionChip(
+                    label: 'Saúde da base',
+                    accent: Theme.of(context).colorScheme.primary,
+                    isDark: isDark,
+                    onPressed: onRetencao,
+                  ),
+              ],
+            ),
+          ],
+        ),
     );
   }
 }
