@@ -1,38 +1,19 @@
 part of 'perfil_aluno_screen.dart';
 
 class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
-  static const _niveisAtividade = [
-    ('SEDENTARIO', 'Sedentario'),
-    ('LEVE', 'Leve'),
-    ('MODERADO', 'Moderado'),
-    ('INTENSO', 'Intenso'),
-    ('MUITO_INTENSO', 'Muito intenso'),
-  ];
-
   final _formKey = GlobalKey<FormState>();
   final _nome = TextEditingController();
   final _email = TextEditingController();
   final _telefone = TextEditingController();
   final _whatsapp = TextEditingController();
   final _objetivo = TextEditingController();
-  final _objetivoDetalhado = TextEditingController();
   final _genero = TextEditingController();
   final _tipoConsultoria = TextEditingController();
   final _peso = TextEditingController();
   final _altura = TextEditingController();
   final _dataNascimento = TextEditingController();
-  final _lesoes = TextEditingController();
-  final _medicamentos = TextEditingController();
-  final _historicoMedico = TextEditingController();
-  final _cirurgias = TextEditingController();
-  final _doresCronicas = TextEditingController();
-  final _preferenciasTreino = TextEditingController();
-  final _restricoesAlimentares = TextEditingController();
-  final _observacoes = TextEditingController();
 
   String? _fotoUrl;
-  String? _nivelAtividade;
-  int _disponibilidadeSemanal = 3;
   bool _loaded = false;
   bool _saving = false;
   bool _uploading = false;
@@ -45,20 +26,11 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
     _telefone.dispose();
     _whatsapp.dispose();
     _objetivo.dispose();
-    _objetivoDetalhado.dispose();
     _genero.dispose();
     _tipoConsultoria.dispose();
     _peso.dispose();
     _altura.dispose();
     _dataNascimento.dispose();
-    _lesoes.dispose();
-    _medicamentos.dispose();
-    _historicoMedico.dispose();
-    _cirurgias.dispose();
-    _doresCronicas.dispose();
-    _preferenciasTreino.dispose();
-    _restricoesAlimentares.dispose();
-    _observacoes.dispose();
     super.dispose();
   }
 
@@ -76,33 +48,7 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
     _altura.text = aluno.altura?.toString() ?? '';
     _dataNascimento.text = aluno.dataNascimento ?? '';
     _fotoUrl = aluno.fotoUrl;
-
-    try {
-      final anamnese =
-          await AnamneseRepository(ref.read(apiClientProvider)).buscarMinha();
-      if (!mounted) return;
-      setState(() {
-        _objetivo.text =
-            _objetivo.text.trim().isNotEmpty
-                ? _objetivo.text
-                : (anamnese.objetivo ?? '');
-        _nivelAtividade = anamnese.nivelAtividade;
-        _lesoes.text = anamnese.lesoes ?? '';
-        _medicamentos.text = anamnese.medicamentos ?? '';
-        _historicoMedico.text = anamnese.historicoMedico ?? '';
-        _cirurgias.text = anamnese.cirurgias ?? '';
-        _doresCronicas.text = anamnese.doresCronicas ?? '';
-        _objetivoDetalhado.text = anamnese.objetivoDetalhado ?? '';
-        _disponibilidadeSemanal = anamnese.disponibilidadeSemanal ?? 3;
-        _preferenciasTreino.text = anamnese.preferenciasTreino ?? '';
-        _restricoesAlimentares.text = anamnese.restricoesAlimentares ?? '';
-        _observacoes.text = anamnese.observacoes ?? '';
-      });
-    } catch (_) {
-      if (mounted) {
-        setState(() {});
-      }
-    }
+    if (mounted) setState(() {});
   }
 
   Future<void> _pickFoto() async {
@@ -140,7 +86,6 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
     setState(() => _saving = true);
     try {
       final alunoRepo = ref.read(alunoRepositoryProvider);
-      final anamneseRepo = AnamneseRepository(ref.read(apiClientProvider));
       await alunoRepo.atualizarMe({
         'nome': _nome.text.trim(),
         'email': _email.text.trim(),
@@ -153,20 +98,6 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
         'altura': double.tryParse(_altura.text.trim().replaceAll(',', '.')),
         'dataNascimento': normalizeBirthDateForApi(_dataNascimento.text),
         'fotoUrl': _fotoUrl,
-      });
-      await anamneseRepo.salvarMinha({
-        'objetivo': _objetivo.text.trim(),
-        'nivelAtividade': _nivelAtividade,
-        'lesoes': _lesoes.text.trim(),
-        'medicamentos': _medicamentos.text.trim(),
-        'observacoes': _observacoes.text.trim(),
-        'historicoMedico': _historicoMedico.text.trim(),
-        'cirurgias': _cirurgias.text.trim(),
-        'doresCronicas': _doresCronicas.text.trim(),
-        'objetivoDetalhado': _objetivoDetalhado.text.trim(),
-        'disponibilidadeSemanal': _disponibilidadeSemanal,
-        'preferenciasTreino': _preferenciasTreino.text.trim(),
-        'restricoesAlimentares': _restricoesAlimentares.text.trim(),
       });
       ref.invalidate(alunoPerfilHomeProvider);
       ref.invalidate(alunoMeProvider);
@@ -252,10 +183,6 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
       _peso.text,
       _altura.text,
       _dataNascimento.text,
-      _nivelAtividade ?? '',
-      _objetivoDetalhado.text,
-      _preferenciasTreino.text,
-      _restricoesAlimentares.text,
     ];
     final filled = values.where((value) => value.trim().isNotEmpty).length;
     return ((filled / values.length) * 100).round();
@@ -266,20 +193,11 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
     return 'Definir objetivo principal';
   }
 
-  String _disponibilidadeLabel() {
-    return '$_disponibilidadeSemanal dias por semana';
-  }
-
   List<Widget> _summaryChips(Aluno aluno, bool isDark) {
     final chips = <Widget>[
       _ProfileChip(
         icon: Icons.flag_outlined,
         label: _metaPrincipal(),
-        isDark: isDark,
-      ),
-      _ProfileChip(
-        icon: Icons.calendar_today_outlined,
-        label: _disponibilidadeLabel(),
         isDark: isDark,
       ),
     ];
@@ -859,12 +777,6 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
                           maxLines: 2,
                         ),
                         _Field(
-                          controller: _objetivoDetalhado,
-                          label: 'Objetivo detalhado',
-                          icon: Icons.track_changes_outlined,
-                          maxLines: 3,
-                        ),
-                        _Field(
                           controller: _tipoConsultoria,
                           label: 'Tipo de consultoria',
                           icon: Icons.fitness_center,
@@ -953,116 +865,33 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
                     ),
                     const SizedBox(height: 14),
                     _SectionCard(
-                      title: 'Saúde e restrições',
+                      title: 'Anamnese',
                       subtitle:
-                          'Informações que deixam treino e dieta mais seguros.',
+                          'PAR-Q+, saúde, hábitos e objetivos — preenchidos na ficha dedicada.',
                       isDark: isDark,
                       children: [
-                        DropdownButtonFormField<String>(
-                          initialValue: _nivelAtividade,
-                          decoration: FxInputDeco.build(
-                            context,
-                            'Nível de atividade',
-                            icon: Icons.insights_outlined,
+                        ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          leading: Icon(
+                            Icons.assignment_outlined,
+                            color: primary,
                           ),
-                          items:
-                              _niveisAtividade
-                                  .map(
-                                    (item) => DropdownMenuItem<String>(
-                                      value: item.$1,
-                                      child: Text(item.$2),
-                                    ),
-                                  )
-                                  .toList(),
-                          onChanged:
-                              (value) =>
-                                  setState(() => _nivelAtividade = value),
-                        ),
-                        const SizedBox(height: 12),
-                        _Field(
-                          controller: _lesoes,
-                          label: 'Lesões ou limitações',
-                          icon: Icons.healing_outlined,
-                          maxLines: 3,
-                        ),
-                        _Field(
-                          controller: _medicamentos,
-                          label: 'Medicamentos em uso',
-                          icon: Icons.medication_outlined,
-                          maxLines: 2,
-                        ),
-                        _Field(
-                          controller: _historicoMedico,
-                          label: 'Histórico médico',
-                          icon: Icons.local_hospital_outlined,
-                          maxLines: 3,
-                        ),
-                        _Field(
-                          controller: _cirurgias,
-                          label: 'Cirurgias realizadas',
-                          icon: Icons.personal_injury_outlined,
-                          maxLines: 2,
-                        ),
-                        _Field(
-                          controller: _doresCronicas,
-                          label: 'Dores crônicas',
-                          icon: Icons.accessibility_new_outlined,
-                          maxLines: 2,
-                        ),
-                        _Field(
-                          controller: _restricoesAlimentares,
-                          label: 'Restrições alimentares',
-                          icon: Icons.no_food_outlined,
-                          maxLines: 2,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 14),
-                    _SectionCard(
-                      title: 'Rotina de treino',
-                      subtitle:
-                          'Preferências e disponibilidade para o plano fazer sentido.',
-                      isDark: isDark,
-                      children: [
-                        Text(
-                          'Disponibilidade semanal',
-                          style: TextStyle(
-                            color: ink,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700,
+                          title: Text(
+                            'Abrir minha anamnese',
+                            style: TextStyle(
+                              color: ink,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 8),
-                        SegmentedButton<int>(
-                          showSelectedIcon: false,
-                          multiSelectionEnabled: false,
-                          selected: {_disponibilidadeSemanal},
-                          segments: const [
-                            ButtonSegment(value: 1, label: Text('1')),
-                            ButtonSegment(value: 2, label: Text('2')),
-                            ButtonSegment(value: 3, label: Text('3')),
-                            ButtonSegment(value: 4, label: Text('4')),
-                            ButtonSegment(value: 5, label: Text('5')),
-                            ButtonSegment(value: 6, label: Text('6')),
-                            ButtonSegment(value: 7, label: Text('7')),
-                          ],
-                          onSelectionChanged:
-                              (values) => setState(
-                                () => _disponibilidadeSemanal = values.first,
-                              ),
-                        ),
-                        const SizedBox(height: 12),
-                        _Field(
-                          controller: _preferenciasTreino,
-                          label: 'Preferências de treino',
-                          icon: Icons.sports_gymnastics_outlined,
-                          maxLines: 3,
-                        ),
-                        _Field(
-                          controller: _observacoes,
-                          label: 'Observações para o personal',
-                          icon: Icons.sticky_note_2_outlined,
-                          maxLines: 3,
+                          subtitle: Text(
+                            'Quando o personal solicitar, preencha aqui.',
+                            style: TextStyle(color: mute, fontSize: 13),
+                          ),
+                          trailing: Icon(
+                            Icons.chevron_right,
+                            color: mute,
+                          ),
+                          onTap: () => context.push('/aluno/anamnese'),
                         ),
                       ],
                     ),

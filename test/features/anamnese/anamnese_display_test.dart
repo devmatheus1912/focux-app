@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:focux_app/features/anamnese/data/anamnese_repository.dart';
 import 'package:focux_app/features/anamnese/utils/anamnese_display.dart';
 
 void main() {
@@ -16,5 +17,43 @@ void main() {
     expect(anamneseDisponibilidadeClamp(null), 3);
     expect(anamneseDisponibilidadeClamp(0), 1);
     expect(anamneseDisponibilidadeClamp(9), 7);
+  });
+
+  test('status labels e flags', () {
+    expect(anamneseStatusLabel(AnamneseStatus.solicitada), 'Solicitada');
+    expect(anamneseStatusLabel(AnamneseStatus.precisaAtestado), 'Precisa atestado');
+    expect(anamneseBoolLabel(true), 'Sim');
+    expect(anamneseBoolLabel(false), 'Não');
+    expect(anamneseBoolLabel(null), '—');
+
+    final solicitada = Anamnese(status: AnamneseStatus.solicitada);
+    expect(solicitada.alunoDevePreencher, isTrue);
+    expect(solicitada.personalPodeRevisar, isFalse);
+
+    final preenchida = Anamnese(status: AnamneseStatus.preenchida);
+    expect(preenchida.alunoDevePreencher, isFalse);
+    expect(preenchida.personalPodeRevisar, isTrue);
+  });
+
+  test('fromJson mapeia contrato novo', () {
+    final a = Anamnese.fromJson({
+      'status': 'PREENCHIDA',
+      'parqPositivo': true,
+      'parqCompleto': true,
+      'alertas': ['PAR-Q+', 'CV'],
+      'parqCondicaoCardiaca': true,
+      'parqDorPeitoAtividade': false,
+      'sonoHoras': 7,
+      'historicoAtividade': 'Musculação 2 anos',
+      'algoMais': 'Prefiro noite',
+      'notasProfissional': 'Ok',
+    });
+    expect(a.status, AnamneseStatus.preenchida);
+    expect(a.parqPositivo, isTrue);
+    expect(a.alertas, ['PAR-Q+', 'CV']);
+    expect(a.parqCondicaoCardiaca, isTrue);
+    expect(a.sonoHoras, 7);
+    expect(a.historicoAtividade, 'Musculação 2 anos');
+    expect(anamneseParqValue(a, 'parqCondicaoCardiaca'), isTrue);
   });
 }
