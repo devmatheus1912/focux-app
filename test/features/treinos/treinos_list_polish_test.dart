@@ -63,6 +63,11 @@ void main() {
     expect(screen, contains('TreinoSheetChromeHeader'));
     expect(screen, contains('treino_home_sheet.dart'));
     expect(screen, contains('ConstrainedBox('));
+    expect(screen, contains('FxLiquidPrimaryButton'));
+    expect(screen, contains('keyboardDismissBehavior'));
+    expect(screen, contains('viewInsetsOf'));
+    expect(screen, contains('TreinosListLabels.listSubtitle'));
+    expect(screen, isNot(contains('Icons.add_rounded')));
     expect(screen, isNot(contains('Ações em lote')));
     expect(screen, isNot(contains('Abra, atribua ou replique este plano')));
     expect(

@@ -14,6 +14,16 @@ void main() {
     expect(TreinosListLabels.templateCount(4), '4 templates');
   });
 
+  test('listSubtitle junta contagem e freshness', () {
+    expect(TreinosListLabels.countLabel(0), 'Nenhum treino');
+    expect(TreinosListLabels.countLabel(1), '1 treino');
+    expect(TreinosListLabels.countLabel(4), '4 treinos');
+    expect(
+      TreinosListLabels.listSubtitle(count: 3, freshness: 'Atualizado agora'),
+      '3 treinos · Atualizado agora',
+    );
+  });
+
   test('cardMeta is honest: counts or em montagem, never fake duration', () {
     expect(
       TreinosListLabels.cardMeta(

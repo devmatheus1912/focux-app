@@ -16,6 +16,8 @@ void main() {
     expect(screen, contains('FxLiquidPrimaryButton'));
     expect(screen, contains('FxLiquidSecondaryButton'));
     expect(screen, contains('Aplicar status'));
+    expect(screen, contains('keyboardDismissBehavior'));
+    expect(screen, contains('viewInsetsOf'));
     expect(screen, isNot(contains('FxSettingsTile')));
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(screen, isNot(contains('FxGlowSurface')));

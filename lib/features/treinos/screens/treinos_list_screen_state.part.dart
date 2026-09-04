@@ -371,6 +371,15 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
                       .where((treino) => _selectedIds.contains(treino.id))
                       .toList();
               final singlePlan = treinos.length == 1;
+              final headerSubtitle = TreinosListLabels.listSubtitle(
+                count: treinos.length,
+                freshness: freshnessLabel,
+              );
+              final createLabel =
+                  widget.alunoId == null
+                      ? (uiHints?.createCtaLabel ?? 'Criar treino')
+                      : 'Criar treino';
+              final showStickyCreate = !_selectionMode;
 
               return Column(
                 children: [
@@ -380,13 +389,15 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
                       onRefresh: refresh,
                       child: CustomScrollView(
                         physics: const AlwaysScrollableScrollPhysics(),
+                        keyboardDismissBehavior:
+                            ScrollViewKeyboardDismissBehavior.onDrag,
                         slivers: [
                           SliverToBoxAdapter(
                             child: _TreinosHeader(
                               alunoId: widget.alunoId,
                               alunoNome: widget.alunoNome,
                               isDark: isDark,
-                              freshnessLabel: freshnessLabel,
+                              freshnessLabel: headerSubtitle,
                               selectionMode: _selectionMode,
                               selectedCount: _selectedIds.length,
                               onBack:
@@ -397,7 +408,6 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
                                         '/alunos/${widget.alunoId}',
                                       ),
                               onHelp: _openHelp,
-                              onCreate: createWorkout,
                               onSelectAll:
                                   filteredTreinos.isEmpty
                                       ? null
@@ -449,11 +459,7 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
                                               alunoNome: widget.alunoNome,
                                             ),
                                     action: FxEmptyAction(
-                                      label:
-                                          widget.alunoId == null
-                                              ? (uiHints?.createCtaLabel ??
-                                                  'Criar treino')
-                                              : 'Criar treino',
+                                      label: createLabel,
                                       onTap: createWorkout,
                                     ),
                                   ),
@@ -628,6 +634,23 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
                         );
                         _deleteTreinos(selectedTreinos, source: 'bulk');
                       },
+                    )
+                  else if (showStickyCreate)
+                    SafeArea(
+                      top: false,
+                      child: Padding(
+                        padding: EdgeInsets.fromLTRB(
+                          TreinosLayout.screenPadding,
+                          TokensStrip.s2,
+                          TreinosLayout.screenPadding,
+                          TokensStrip.s3 +
+                              MediaQuery.viewInsetsOf(context).bottom,
+                        ),
+                        child: FxLiquidPrimaryButton(
+                          label: createLabel,
+                          onPressed: createWorkout,
+                        ),
+                      ),
                     ),
                 ],
               );

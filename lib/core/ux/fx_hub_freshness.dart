@@ -16,4 +16,11 @@ abstract final class FxHubFreshness {
     if (fetchedAt == null) return null;
     return atualizadoHa((now ?? DateTime.now()).difference(fetchedAt));
   }
+
+  /// Subtítulo S4: contagem e freshness no mesmo papel, separados por ` · `.
+  static String joinCount(String countLabel, String? freshness) {
+    final stamp = freshness?.trim();
+    if (stamp == null || stamp.isEmpty) return countLabel;
+    return '$countLabel · $stamp';
+  }
 }
