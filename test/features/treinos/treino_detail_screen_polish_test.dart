@@ -81,6 +81,8 @@ void main() {
     expect(screen, isNot(contains('ChoiceChip')));
     expect(screen, isNot(contains('DropdownButtonFormField')));
     expect(screen, contains('FxHubFreshness.fromFetchedAt'));
+    expect(screen, contains('FxHubHeader'));
+    expect(screen, contains('OperationalMetricTile'));
     expect(screen, contains('FxHelpIconButton'));
     expect(screen, contains('showTreinoDetailHelpSheet'));
     expect(screen, contains('RefreshIndicator'));

@@ -2,6 +2,7 @@ part of 'exercicio_detail_screen.dart';
 
 class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
   bool _uploadingVideo = false;
+  DateTime? _fetchedAt;
 
   Future<void> _toggleFavorito(BuildContext context, bool favoritado) async {
     final repo = ref.read(exercicioRepositoryProvider);
@@ -136,7 +137,6 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
 
     final chrome = ShellChrome.of(context);
     final isDark = chrome.isDark;
-    final ink = chrome.ink;
     final mute = chrome.mute;
     final primary = Theme.of(context).colorScheme.primary;
 
@@ -146,27 +146,32 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
         useMesh: true,
         appBar: FxShellAppBar(
           title: 'Exercício',
-          subtitle: 'DETALHES',
           onBack: () => safePopOrGo(context, '/exercicios'),
-          actions: exercicioAsync.maybeWhen(
-            data:
-                (ex) => [
-                  IconButton(
-                    tooltip:
+          actions: [
+            FxHelpIconButton(
+              tooltip: 'Como usar este exercício',
+              onTap: () => showExercicioDetailHelpSheet(context),
+            ),
+            ...exercicioAsync.maybeWhen(
+              data:
+                  (ex) => [
+                    IconButton(
+                      tooltip:
+                          ex.favoritado
+                              ? 'Remover dos favoritos'
+                              : 'Adicionar aos favoritos',
+                      onPressed: () => _toggleFavorito(context, ex.favoritado),
+                      icon: Icon(
                         ex.favoritado
-                            ? 'Remover dos favoritos'
-                            : 'Adicionar aos favoritos',
-                    onPressed: () => _toggleFavorito(context, ex.favoritado),
-                    icon: Icon(
-                      ex.favoritado
-                          ? Icons.star_rounded
-                          : Icons.star_border_rounded,
-                      color: ex.favoritado ? EagleTokens.warn : mute,
+                            ? Icons.star_rounded
+                            : Icons.star_border_rounded,
+                        color: ex.favoritado ? EagleTokens.warn : mute,
+                      ),
                     ),
-                  ),
-                ],
-            orElse: () => const <Widget>[],
-          ),
+                  ],
+              orElse: () => const <Widget>[],
+            ),
+          ],
         ),
         body: SafeArea(
           bottom: false,
@@ -183,7 +188,10 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
                   title: 'Não conseguimos carregar o exercício',
                 ),
             data:
-                (ex) => Column(
+                (ex) {
+                  _fetchedAt ??= DateTime.now();
+                  final grupo = _grupoLabel(ex);
+                  return Column(
                   children: [
                     Expanded(
                       child: FxContentWidthLimiter(
@@ -197,15 +205,22 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              Text(
-                                ex.nome,
-                                style: Theme.of(context).textTheme.headlineSmall
-                                    ?.copyWith(
-                                      fontWeight: FontWeight.w900,
-                                      color: ink,
-                                    ),
+                              FxHubHeader(
+                                title: ex.nome,
+                                freshnessLabel: FxHubFreshness.fromFetchedAt(
+                                  _fetchedAt,
+                                ),
+                                subtitle: grupo,
                               ),
-                              const SizedBox(height: 10),
+                              const SizedBox(height: TokensStrip.s4),
+                              OperationalMetricTile(
+                                label: 'Grupo',
+                                value: grupo ?? '—',
+                                hint: _modalidadeLabel(ex) ?? 'Cadastro',
+                                color: primary,
+                                isDark: isDark,
+                              ),
+                              const SizedBox(height: 14),
                               _ExerciseEssentials(exercicio: ex),
                               const SizedBox(height: 14),
                               _OwnVideoPanel(
@@ -285,7 +300,8 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
                       ),
                     ),
                   ],
-                ),
+                );
+                },
             ),
           ),
         ),

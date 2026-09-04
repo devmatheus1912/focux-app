@@ -18,6 +18,13 @@ String evolucaoHubSubtitle({
   return '$label · $stamp';
 }
 
+String evolucaoPesoAtual(List<MedidaCorporal> medidas) {
+  final comPeso = [...medidas.where((m) => m.peso != null)]
+    ..sort((a, b) => a.data.compareTo(b.data));
+  if (comPeso.isEmpty) return '—';
+  return '${comPeso.last.peso!.toStringAsFixed(1)} kg';
+}
+
 String evolucaoVariacaoPeso(List<MedidaCorporal> medidas) {
   final comPeso = medidas.where((m) => m.peso != null).toList();
   if (comPeso.length < 2) return '';

@@ -36,6 +36,17 @@ void main() {
     );
   });
 
+  test('evolucaoPesoAtual usa a última medida com peso', () {
+    expect(evolucaoPesoAtual(const []), '—');
+    expect(
+      evolucaoPesoAtual([
+        MedidaCorporal(id: 1, data: '2026-01-01', peso: 80),
+        MedidaCorporal(id: 2, data: '2026-03-01', peso: 78.5),
+      ]),
+      '78.5 kg',
+    );
+  });
+
   test('evolucaoMedida e recorde labels', () {
     final medida = MedidaCorporal(
       id: 1,
