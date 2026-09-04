@@ -6,6 +6,7 @@ import '../../../core/brand/focux_microcopy.dart';
 import '../../../core/money/fx_money.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
@@ -120,7 +121,11 @@ class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
     final freshness = FxHubFreshness.fromFetchedAt(_fetchedAt);
-    final showSticky = _abertas.isNotEmpty && !_loading && _erro == null;
+    final showSticky = !_loading && _erro == null;
+    final hubSubtitle = financeiroAlunoHubSubtitle(
+      lancamentos: _mensalidades.length,
+      freshness: freshness,
+    );
 
     return fxScreenA11yScope(
       label: 'Minhas mensalidades',
@@ -161,9 +166,29 @@ class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
                                   ? ListView(
                                     physics:
                                         const AlwaysScrollableScrollPhysics(),
-                                    children: const [
-                                      SizedBox(height: 72),
-                                      FxEmptyState(
+                                    padding: const EdgeInsets.fromLTRB(
+                                      FxSettingsLayout.pageInset,
+                                      TokensStrip.s4,
+                                      FxSettingsLayout.pageInset,
+                                      32,
+                                    ),
+                                    children: [
+                                      FxHubHeader(
+                                        title: 'Suas cobranças',
+                                        subtitle: hubSubtitle,
+                                      ),
+                                      const SizedBox(height: TokensStrip.s4),
+                                      OperationalMetricTile(
+                                        label: 'Em aberto',
+                                        value: _abertoTotal.format(
+                                          showDecimals: false,
+                                        ),
+                                        hint: 'Nada atrasado',
+                                        color: primary,
+                                        isDark: isDark,
+                                      ),
+                                      const SizedBox(height: TokensStrip.s4),
+                                      const FxEmptyState(
                                         icon: 'coin',
                                         title: 'Nenhuma mensalidade',
                                         subtitle:
@@ -188,9 +213,7 @@ class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
                                       if (i == 0) {
                                         return FxHubHeader(
                                           title: 'Suas cobranças',
-                                          freshnessLabel: freshness,
-                                          subtitle:
-                                              '${_mensalidades.length} lançamentos',
+                                          subtitle: hubSubtitle,
                                         );
                                       }
                                       if (i == 1) {
@@ -290,11 +313,11 @@ class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
                                           item.valor.format(
                                             showDecimals: false,
                                           ),
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.w700,
-                                            fontFeatures: [
-                                              FontFeature.tabularFigures(),
-                                            ],
+                                          style: FocuxHubTypography.metric(
+                                            color:
+                                                Theme.of(
+                                                  context,
+                                                ).colorScheme.onSurface,
                                           ),
                                         ),
                                       );
@@ -307,11 +330,11 @@ class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
               SafeArea(
                 top: false,
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(
+                  padding: EdgeInsets.fromLTRB(
                     FxSettingsLayout.pageInset,
                     TokensStrip.s2,
                     FxSettingsLayout.pageInset,
-                    TokensStrip.s3,
+                    TokensStrip.s3 + MediaQuery.viewInsetsOf(context).bottom,
                   ),
                   child: FxLiquidPrimaryButton(
                     label: 'Falar com o personal',

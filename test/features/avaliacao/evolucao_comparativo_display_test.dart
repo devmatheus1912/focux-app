@@ -50,6 +50,20 @@ void main() {
     );
   });
 
+  test('braço e coxa só entram com medida', () {
+    final c = ComparativoEvolucao.fromJson({
+      'primeira': {'pesoKg': 80, 'alturaCm': 180, 'circBraco': 32},
+      'ultima': {'pesoKg': 78, 'alturaCm': 180},
+    });
+    final labels =
+        evolucaoComparativoMetricas(primeira: c.primeira, atual: c.atual)
+            .map((m) => m.label)
+            .toList();
+    expect(labels, contains('Braço'));
+    expect(labels, isNot(contains('Coxa')));
+    expect(labels, isNot(contains('Quadril')));
+  });
+
   test('delta respeita o sentido da métrica', () {
     final downGood = evolucaoComparativoDelta(
       primeira: 80,

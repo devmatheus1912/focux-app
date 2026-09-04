@@ -132,13 +132,31 @@ class ComparativoEvolucao {
   }
 }
 
+/// Aceita lista crua (legado) ou envelope `PaginaResponse` (`content` / `items`).
+List<AvaliacaoFisica> avaliacoesFromResponse(dynamic data) {
+  final raw = switch (data) {
+    List list => list,
+    Map map => map['content'] ?? map['items'] ?? map['itens'],
+    _ => null,
+  };
+  if (raw is! List) return const [];
+  return [
+    for (final row in raw)
+      if (row is Map)
+        AvaliacaoFisica.fromJson(Map<String, dynamic>.from(row)),
+  ];
+}
+
 class AvaliacaoRepository {
   final Dio _dio;
   AvaliacaoRepository(ApiClient c) : _dio = c.dio;
 
   Future<List<AvaliacaoFisica>> listar(int alunoId) async {
-    final r = await _dio.get('/api/alunos/$alunoId/avaliacoes');
-    return (r.data as List).map((e) => AvaliacaoFisica.fromJson(e)).toList();
+    final r = await _dio.get(
+      '/api/alunos/$alunoId/avaliacoes',
+      queryParameters: const {'page': 0, 'size': 100},
+    );
+    return avaliacoesFromResponse(r.data);
   }
 
   Future<AvaliacaoFisica> registrar(

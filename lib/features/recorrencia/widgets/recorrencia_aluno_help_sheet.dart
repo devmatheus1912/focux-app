@@ -15,7 +15,7 @@ Future<void> showRecorrenciaAlunoHelpSheet(BuildContext context) {
       ),
       FxHelpTip(
         'Autorizar',
-        'O botão abre o Mercado Pago. Sem assinatura, peça ao personal para criar.',
+        'Pendente abre o Mercado Pago. Sem assinatura, o botão chama o personal no chat.',
         icon: 'spark',
       ),
     ],
