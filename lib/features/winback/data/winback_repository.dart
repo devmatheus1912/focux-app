@@ -27,6 +27,55 @@ class WinbackLogEntry {
       );
 }
 
+class WinbackLogPage {
+  const WinbackLogPage({
+    required this.itens,
+    this.page = 0,
+    this.totalItens = 0,
+    this.hasNext = false,
+  });
+
+  final List<WinbackLogEntry> itens;
+  final int page;
+  final int totalItens;
+  final bool hasNext;
+
+  factory WinbackLogPage.fromJson(dynamic raw) {
+    if (raw is List) {
+      final itens =
+          raw
+              .whereType<Map>()
+              .map(
+                (row) =>
+                    WinbackLogEntry.fromJson(Map<String, dynamic>.from(row)),
+              )
+              .toList();
+      return WinbackLogPage(itens: itens, totalItens: itens.length);
+    }
+    final json = raw is Map<String, dynamic> ? raw : const <String, dynamic>{};
+    final list = json['content'] ?? json['itens'];
+    final itens =
+        list is List
+            ? list
+                .whereType<Map>()
+                .map(
+                  (row) =>
+                      WinbackLogEntry.fromJson(Map<String, dynamic>.from(row)),
+                )
+                .toList()
+            : const <WinbackLogEntry>[];
+    return WinbackLogPage(
+      itens: itens,
+      page: (json['page'] as num?)?.toInt() ?? 0,
+      totalItens:
+          (json['totalElements'] as num?)?.toInt() ??
+          (json['totalItens'] as num?)?.toInt() ??
+          itens.length,
+      hasNext: json['hasNext'] == true,
+    );
+  }
+}
+
 class WinbackRepository {
   final Dio _dio;
 
@@ -34,7 +83,7 @@ class WinbackRepository {
 
   static const pageSize = 20;
 
-  Future<List<WinbackLogEntry>> log({int page = 0, String q = ''}) async {
+  Future<WinbackLogPage> log({int page = 0, String q = ''}) async {
     final query = q.trim();
     final response = await _dio.get(
       '/api/winback/log',
@@ -44,8 +93,6 @@ class WinbackRepository {
         if (query.isNotEmpty) 'q': query,
       },
     );
-    return (response.data as List<dynamic>)
-        .map((e) => WinbackLogEntry.fromJson(e as Map<String, dynamic>))
-        .toList();
+    return WinbackLogPage.fromJson(response.data);
   }
 }

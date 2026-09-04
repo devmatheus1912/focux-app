@@ -104,11 +104,12 @@ PATCH	/api/alunos/{id}/operacao-focus	C	AlunoController.java:226
 PATCH	/api/alunos/{id}/status-financeiro	C	AlunoController.java:183
 GET	/api/alunos/{id}/timeline-360	CRL	AlunoController.java:131
 GET	/api/alunos/{id}/timeline-360/page	CRP	AlunoController.java:140
-GET	/api/analytics	C	AnalyticsController.java:22
-GET	/api/analytics/cohort	CL	AnalyticsController.java:40
-POST	/api/analytics/evento	C	AnalyticsController.java:47
-GET	/api/analytics/funil	C	AnalyticsController.java:28
-GET	/api/analytics/wau	CL	AnalyticsController.java:34
+GET	/api/analytics	C	AnalyticsController.java:37
+GET	/api/analytics/cohort	C	AnalyticsController.java:85
+POST	/api/analytics/evento	C	AnalyticsController.java:95
+GET	/api/analytics/funil	C	AnalyticsController.java:69
+GET	/api/analytics/home	C	AnalyticsController.java:46
+GET	/api/analytics/wau	C	AnalyticsController.java:77
 GET	/api/auditoria	CPE	AuditoriaController.java:22
 GET	/api/auditoria/recentes	CLE	AuditoriaController.java:30
 GET	/api/auditoria/recurso/{recurso}	CLE	AuditoriaController.java:36

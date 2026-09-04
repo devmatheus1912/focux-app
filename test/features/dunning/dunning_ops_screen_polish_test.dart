@@ -29,7 +29,8 @@ void main() {
     expect(screen, contains('FeatureGate'));
     expect(screen, contains('showFxConfirmSheet'));
     expect(screen, contains('dunningHubViewed'));
-    expect(screen, contains('Carregar mais'));
+    expect(screen, contains('showDunningCatalogSheet'));
+    expect(screen, contains('Ver mais'));
     expect(screen, contains('alunoNome'));
     expect(screen, contains('circle-check'));
     expect(screen, isNot(contains('check-circle')));

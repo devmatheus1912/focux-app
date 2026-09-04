@@ -30,20 +30,49 @@ class _FinanceiroKpiGroup extends StatelessWidget {
             'Recebido $recebido. Pendente $pendenteLabel. $metaLabel',
         child: Column(
           children: [
-            InkWell(
-              onTap: () => _openMensalidades(context, source: 'kpi'),
-              borderRadius: BorderRadius.circular(12),
-              child: OperationalMetricTile(
-                label: 'Recebido · $mes',
-                value: recebido,
-                hint:
+            FxStripCard(
+              emphasize: true,
+              semanticsLabel: 'Recebido $recebido em $mes',
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Recebido · $mes',
+                    style: FocuxHubTypography.chip(
+                      ShellChrome.forDark(isDark).mute,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    recebido,
+                    style: FocuxHubTypography.kpi(
+                      color: ShellChrome.forDark(isDark).ink,
+                      fontSize: FocuxHubTypography.metricLg,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
                     metaSuperada
                         ? 'Meta superada'
                         : pendente > 0
                         ? 'Faltam $pendenteLabel para a meta'
                         : 'Meta do mês sob controle',
-                color: EagleTokens.moneyGreen,
-                isDark: isDark,
+                    style: FocuxHubTypography.body(
+                      color: ShellChrome.forDark(isDark).ink,
+                    ).copyWith(fontWeight: FontWeight.w700),
+                  ),
+                  const SizedBox(height: TokensStrip.s3),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: DashboardHomeActionChip(
+                      label: 'Ver mensalidades',
+                      accent: EagleTokens.moneyGreen,
+                      isDark: isDark,
+                      onPressed: () =>
+                          _openMensalidades(context, source: 'kpi'),
+                    ),
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: TokensStrip.s2),

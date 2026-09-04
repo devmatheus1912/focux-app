@@ -131,7 +131,11 @@ class _RelatorioGlobalScreenState extends ConsumerState<RelatorioGlobalScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
     final dados = _dados;
-    final firstAtencao = firstRelatorioAtencao(dados?.menosComprometidos ?? []);
+    final catalogoMais =
+        dados == null ? const <ResumoAluno>[] : relatorioCatalogoMais(dados);
+    final catalogoMenos =
+        dados == null ? const <ResumoAluno>[] : relatorioCatalogoMenos(dados);
+    final firstAtencao = firstRelatorioAtencao(catalogoMenos);
 
     return fxScreenA11yScope(
       label: 'Relatórios',
@@ -233,14 +237,12 @@ class _RelatorioGlobalScreenState extends ConsumerState<RelatorioGlobalScreen> {
                           DashboardSectionHeader(
                             title: 'Mais comprometidos',
                             actionLabel:
-                                dados.maisComprometidos.length > 3
-                                    ? 'Ver mais'
-                                    : null,
+                                catalogoMais.length > 3 ? 'Ver mais' : null,
                             onAction:
-                                dados.maisComprometidos.length > 3
+                                catalogoMais.length > 3
                                     ? () => _abrirRanking(
                                       title: 'Mais comprometidos',
-                                      alunos: dados.maisComprometidos,
+                                      alunos: catalogoMais,
                                       attention: false,
                                     )
                                     : null,
@@ -255,14 +257,12 @@ class _RelatorioGlobalScreenState extends ConsumerState<RelatorioGlobalScreen> {
                           DashboardSectionHeader(
                             title: 'Precisam de atenção',
                             actionLabel:
-                                dados.menosComprometidos.length > 3
-                                    ? 'Ver mais'
-                                    : null,
+                                catalogoMenos.length > 3 ? 'Ver mais' : null,
                             onAction:
-                                dados.menosComprometidos.length > 3
+                                catalogoMenos.length > 3
                                     ? () => _abrirRanking(
                                       title: 'Precisam de atenção',
-                                      alunos: dados.menosComprometidos,
+                                      alunos: catalogoMenos,
                                       attention: true,
                                     )
                                     : null,

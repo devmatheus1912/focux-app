@@ -12,14 +12,18 @@ import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
+import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/fx_strip_card.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../data/winback_repository.dart';
 import '../utils/winback_display.dart';
@@ -42,6 +46,7 @@ class _WinbackScreenState extends ConsumerState<WinbackScreen> {
   List<WinbackLogEntry> _entries = [];
   var _page = 0;
   var _hasMore = false;
+  var _total = 0;
   var _loading = true;
   var _carregandoMais = false;
   String? _erro;
@@ -76,12 +81,13 @@ class _WinbackScreenState extends ConsumerState<WinbackScreen> {
       _erro = null;
     });
     try {
-      final entries = await ref.read(winbackRepositoryProvider).log(q: _query);
+      final page = await ref.read(winbackRepositoryProvider).log(q: _query);
       if (!mounted) return;
       setState(() {
-        _entries = entries;
-        _page = 0;
-        _hasMore = entries.length >= WinbackRepository.pageSize;
+        _entries = List.of(page.itens);
+        _page = page.page;
+        _hasMore = page.hasNext;
+        _total = page.totalItens;
         _loading = false;
         _fetchedAt = DateTime.now();
       });
@@ -102,10 +108,15 @@ class _WinbackScreenState extends ConsumerState<WinbackScreen> {
           .read(winbackRepositoryProvider)
           .log(page: _page + 1, q: _query);
       if (!mounted) return;
+      final seen = _entries.map((e) => '${e.alunoId}-${e.enviadoEm}').toSet();
       setState(() {
-        _entries = [..._entries, ...next];
-        _page += 1;
-        _hasMore = next.length >= WinbackRepository.pageSize;
+        _entries = [
+          ..._entries,
+          ...next.itens.where((e) => seen.add('${e.alunoId}-${e.enviadoEm}')),
+        ];
+        _page = next.page;
+        _hasMore = next.hasNext;
+        _total = next.totalItens;
         _carregandoMais = false;
       });
     } catch (e) {
@@ -139,9 +150,7 @@ class _WinbackScreenState extends ConsumerState<WinbackScreen> {
         constrainWidth: false,
         appBar: FxShellAppBar(
           title: 'Win-back automático',
-          subtitle: _loading
-              ? winbackHubSubtitle(freshness)
-              : '${winbackCountLabel(_entries.length)}${freshness == null ? '' : ' · $freshness'}',
+          subtitle: winbackHubSubtitle(freshness),
           onBack: () => safePopOrGo(context, '/dashboard/personal'),
           actions: [
             FxHelpIconButton(
@@ -196,13 +205,7 @@ class _WinbackScreenState extends ConsumerState<WinbackScreen> {
                     },
                     onTapOutside: (_) =>
                         FocusManager.instance.primaryFocus?.unfocus(),
-                    decoration: InputDecoration(
-                      hintText: 'Buscar aluno',
-                      prefixIcon: const Icon(Icons.search_rounded),
-                      border: FxInputDeco.outlineBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    ),
+                    decoration: FxInputDeco.build(context, 'Buscar aluno'),
                   ),
                 ),
                 Expanded(
@@ -238,9 +241,25 @@ class _WinbackScreenState extends ConsumerState<WinbackScreen> {
                       itemCount: _entries.length + (_hasMore ? 2 : 1),
                       itemBuilder: (context, index) {
                         if (index == 0) {
-                          return const Padding(
-                            padding: EdgeInsets.only(bottom: TokensStrip.s3),
-                            child: DashboardSectionHeader(title: 'Envios'),
+                          final first = _entries.first;
+                          return Padding(
+                            padding: const EdgeInsets.only(
+                              bottom: TokensStrip.s3,
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                _WinbackFocusCard(
+                                  total: _total,
+                                  first: first,
+                                  isDark: isDark,
+                                  onAluno: () => _abrirAluno(first),
+                                  onRetencao: _abrirRetencao,
+                                ),
+                                const SizedBox(height: TokensStrip.s4),
+                                const DashboardSectionHeader(title: 'Envios'),
+                              ],
+                            ),
                           );
                         }
                         if (_hasMore && index == _entries.length + 1) {
@@ -278,6 +297,63 @@ class _WinbackScreenState extends ConsumerState<WinbackScreen> {
                 ),
               ],
             ),
+      ),
+    );
+  }
+}
+
+class _WinbackFocusCard extends StatelessWidget {
+  const _WinbackFocusCard({
+    required this.total,
+    required this.first,
+    required this.isDark,
+    required this.onAluno,
+    required this.onRetencao,
+  });
+
+  final int total;
+  final WinbackLogEntry first;
+  final bool isDark;
+  final VoidCallback onAluno;
+  final VoidCallback onRetencao;
+
+  @override
+  Widget build(BuildContext context) {
+    final chrome = ShellChrome.forDark(isDark);
+    final canOpen = first.alunoId != null && first.alunoId! > 0;
+    return FxStripCard(
+      emphasize: true,
+      semanticsLabel: '${winbackCountLabel(total)}. Último ${winbackAlunoLabel(first.alunoNome)}',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Último envio', style: FocuxHubTypography.chip(chrome.mute)),
+          const SizedBox(height: 6),
+          Text(
+            winbackAlunoLabel(first.alunoNome),
+            style: FocuxHubTypography.kpi(
+              color: chrome.ink,
+              fontSize: FocuxHubTypography.metricLg,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            '${winbackCountLabel(total)} · ${winbackTipoLabel(first.tipo)}',
+            style: FocuxHubTypography.body(
+              color: chrome.ink,
+            ).copyWith(fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: TokensStrip.s3),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: DashboardHomeActionChip(
+              label: canOpen ? 'Ver aluno' : 'Saúde da base',
+              accent: canOpen ? EagleTokens.bad : Theme.of(context).colorScheme.primary,
+              isDark: isDark,
+              onPressed: canOpen ? onAluno : onRetencao,
+            ),
+          ),
+        ],
       ),
     );
   }

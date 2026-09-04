@@ -101,28 +101,34 @@ class RelatoriosHomeBundle {
 class ResumoGlobal {
   final double aderenciaMediaGeral;
   final int totalAlunos;
+  final List<ResumoAluno> itens;
   final List<ResumoAluno> maisComprometidos;
   final List<ResumoAluno> menosComprometidos;
 
   ResumoGlobal({
     required this.aderenciaMediaGeral,
     required this.totalAlunos,
+    required this.itens,
     required this.maisComprometidos,
     required this.menosComprometidos,
   });
 
-  factory ResumoGlobal.fromJson(Map<String, dynamic> j) => ResumoGlobal(
-    aderenciaMediaGeral: (j['aderenciaMediaGeral'] as num).toDouble(),
-    totalAlunos: (j['totalAlunos'] as num).toInt(),
-    maisComprometidos:
-        (j['maisComprometidos'] as List)
+  factory ResumoGlobal.fromJson(Map<String, dynamic> j) {
+    List<ResumoAluno> parse(String key) =>
+        ((j[key] as List?) ?? const [])
             .map((e) => ResumoAluno.fromJson(e as Map<String, dynamic>))
-            .toList(),
-    menosComprometidos:
-        (j['menosComprometidos'] as List)
-            .map((e) => ResumoAluno.fromJson(e as Map<String, dynamic>))
-            .toList(),
-  );
+            .toList();
+    final mais = parse('maisComprometidos');
+    final menos = parse('menosComprometidos');
+    final itens = parse('itens');
+    return ResumoGlobal(
+      aderenciaMediaGeral: (j['aderenciaMediaGeral'] as num).toDouble(),
+      totalAlunos: (j['totalAlunos'] as num).toInt(),
+      itens: itens.isNotEmpty ? itens : [...mais, ...menos],
+      maisComprometidos: mais,
+      menosComprometidos: menos,
+    );
+  }
 }
 
 class RelatorioRepository {
