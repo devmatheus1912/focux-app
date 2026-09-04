@@ -23,8 +23,13 @@ import '../../../core/widgets/fx_screen_a11y.dart';
 
 class RegisterAlunoScreen extends ConsumerStatefulWidget {
   final String? personalSlug;
+  final String? conviteToken;
 
-  const RegisterAlunoScreen({super.key, this.personalSlug});
+  const RegisterAlunoScreen({
+    super.key,
+    this.personalSlug,
+    this.conviteToken,
+  });
 
   @override
   ConsumerState<RegisterAlunoScreen> createState() =>
@@ -46,6 +51,10 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen> {
   @override
   void initState() {
     super.initState();
+    final token = widget.conviteToken?.trim();
+    if (token != null && token.isNotEmpty) {
+      _conviteCtrl.text = token;
+    }
     _senhaCtrl.addListener(() {
       if (mounted) setState(() {});
     });
@@ -139,7 +148,13 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen> {
                   child: AuthStickyRoleBar(
                     roleLabel: 'ALUNO',
                     onBack:
-                        () => authUnfocusAndLeave(context, '/login?role=aluno'),
+                        () => authUnfocusAndLeave(
+                          context,
+                          widget.personalSlug == null ||
+                                  widget.personalSlug!.trim().isEmpty
+                              ? '/login?role=aluno'
+                              : '/login?role=aluno&p=${Uri.encodeComponent(widget.personalSlug!.trim())}',
+                        ),
                   ),
                 ),
                 Expanded(
@@ -343,9 +358,12 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen> {
                                     FocuxBrandCopy.authInviteExistingAccountCta,
                                 onTap: () {
                                   if (_loading) return;
+                                  final slug = widget.personalSlug?.trim();
                                   authUnfocusAndGo(
                                     context,
-                                    '/login?role=aluno',
+                                    slug == null || slug.isEmpty
+                                        ? '/login?role=aluno'
+                                        : '/login?role=aluno&p=${Uri.encodeComponent(slug)}',
                                   );
                                 },
                               ),

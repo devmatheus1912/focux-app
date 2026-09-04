@@ -102,8 +102,8 @@ void main() {
       expect(redirect, contains("path == '$publicPath'"));
     }
     expect(redirect, contains("path.startsWith('/resetar-senha/')"));
-
-    expect(redirect, isNot(contains("path.startsWith('/p/')")));
+    expect(redirect, contains("path.startsWith('/p/')"));
+    expect(redirect, contains("path.startsWith('/convite/')"));
     expect(router, isNot(contains("path == '/ia'")));
     expect(router, isNot(contains("path == '/aluno'")));
     expect(router, isNot(contains("path == '/personal'")));

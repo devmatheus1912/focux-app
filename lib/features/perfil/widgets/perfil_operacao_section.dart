@@ -50,6 +50,14 @@ class PerfilOperacaoSection extends StatelessWidget {
           onTap: () => context.push('/migracao-magica'),
         ),
         FxSettingsTile(
+          icon: Icons.person_add_alt_1_outlined,
+          label: 'Convites',
+          value: 'Link de cadastro',
+          mute: mute,
+          line: line,
+          onTap: () => context.push('/convites'),
+        ),
+        FxSettingsTile(
           icon: Icons.apps_outlined,
           label: 'Mais ferramentas',
           value: 'Crescimento e loja',
