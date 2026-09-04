@@ -77,29 +77,25 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
               ),
             ],
           ),
-          bottomNavigationBar:
-              _gerado
-                  ? IaCopilotResultActionBar(
-                    brand: brand,
-                    primaryLabel: _resultPrimaryLabel,
-                    onPrimary: _resultPrimaryAction,
-                    onMore:
-                        () => _abrirMenu(
-                          includeCreateTask: _resultUsesApplyOrProgressao,
-                        ),
-                  )
-                  : null,
           body: SafeArea(
             bottom: false,
-            child: FxContentWidthLimiter(
-              child: SingleChildScrollView(
-                clipBehavior: Clip.hardEdge,
-                keyboardDismissBehavior:
-                    ScrollViewKeyboardDismissBehavior.onDrag,
-                padding: const EdgeInsets.only(bottom: 24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                FxContentWidthLimiter(
+                  child: SingleChildScrollView(
+                    clipBehavior: Clip.hardEdge,
+                    keyboardDismissBehavior:
+                        ScrollViewKeyboardDismissBehavior.onDrag,
+                    padding: EdgeInsets.only(
+                      bottom:
+                          _gerado
+                              ? IaCopilotResultActionBar.scrollReserve
+                              : 24,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
                     SizedBox(height: TokensStrip.s3),
 
                     Padding(
@@ -444,6 +440,23 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
                   ],
                 ),
               ),
+            ),
+                if (_gerado)
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    child: IaCopilotResultActionBar(
+                      brand: brand,
+                      primaryLabel: _resultPrimaryLabel,
+                      onPrimary: _resultPrimaryAction,
+                      onMore:
+                          () => _abrirMenu(
+                            includeCreateTask: _resultUsesApplyOrProgressao,
+                          ),
+                    ),
+                  ),
+              ],
             ),
           ),
         ),
