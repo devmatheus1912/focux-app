@@ -55,6 +55,32 @@ void main() {
         'Hipertrofia · Priorize contato hoje',
       );
     });
+
+    test('joins freshness outside contact priority', () {
+      expect(
+        alunoHeroIdentitySubtitle(
+          compactContactPriority: false,
+          objectiveDefined: true,
+          objective: 'Hipertrofia',
+          contextLine: 'Priorize contato hoje',
+          freshness: 'Atualizado agora',
+        ),
+        'Hipertrofia · Priorize contato hoje · Atualizado agora',
+      );
+    });
+
+    test('contact priority omits freshness', () {
+      expect(
+        alunoHeroIdentitySubtitle(
+          compactContactPriority: true,
+          objectiveDefined: true,
+          objective: 'Hipertrofia',
+          contextLine: 'Priorize contato hoje',
+          freshness: 'Atualizado agora',
+        ),
+        'Hipertrofia',
+      );
+    });
   });
 
   group('alunoHeroMetricEyebrow', () {

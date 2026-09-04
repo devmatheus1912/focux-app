@@ -104,6 +104,7 @@ class Aluno360FerramentasModulesGrid extends ConsumerWidget {
           ),
           const SizedBox(height: TokensStrip.s3),
           FxSatelliteListTile(
+            titleCase: false,
             title: 'Treinos',
             subtitle: Text(
               aluno.diasSemTreino == null
@@ -120,6 +121,7 @@ class Aluno360FerramentasModulesGrid extends ConsumerWidget {
                 ),
           ),
           FxSatelliteListTile(
+            titleCase: false,
             title: 'Equipamentos',
             subtitle: Text(
               aluno.equipamentosDisponiveis.isEmpty
@@ -130,6 +132,7 @@ class Aluno360FerramentasModulesGrid extends ConsumerWidget {
             onTap: () => context.push('/alunos/$alunoId/equipamentos'),
           ),
           FxSatelliteListTile(
+            titleCase: false,
             title: 'IA Progresso',
             subtitle: Text(
               iaLocked ? 'Disponível no $iaPlan' : 'Carga sugerida pela IA',
@@ -153,6 +156,7 @@ class Aluno360FerramentasModulesGrid extends ConsumerWidget {
                 ),
           ),
           FxSatelliteListTile(
+            titleCase: false,
             title: 'Composição corporal',
             subtitle: Text(
               bf != null || massaMagra != null
@@ -169,6 +173,7 @@ class Aluno360FerramentasModulesGrid extends ConsumerWidget {
             onTap: () => context.push(evolucaoRoute, extra: aluno.nome),
           ),
           FxSatelliteListTile(
+            titleCase: false,
             title: 'Aderência',
             subtitle: Text(
               Aluno360FerramentasLogic.aderenciaModuleSub(
@@ -198,6 +203,7 @@ class Aluno360FerramentasModulesGrid extends ConsumerWidget {
                 ),
           ),
           FxSatelliteListTile(
+            titleCase: false,
             title: 'Plano de sucesso',
             subtitle: const Text('Metas e marcos do aluno'),
             accent: primary,
@@ -219,6 +225,7 @@ class Aluno360FerramentasModulesGrid extends ConsumerWidget {
           ),
           const SizedBox(height: TokensStrip.s3),
           FxSatelliteListTile(
+            titleCase: false,
             title: 'Anamnese',
             subtitle: Text(
               perfilCompletion >= 85
@@ -232,6 +239,7 @@ class Aluno360FerramentasModulesGrid extends ConsumerWidget {
             onTap: () => context.push('/alunos/$alunoId/anamnese'),
           ),
           FxSatelliteListTile(
+            titleCase: false,
             title: 'Mensalidades',
             subtitle: Text(
               aluno.statusFinanceiro == 'INADIMPLENTE'
@@ -248,6 +256,7 @@ class Aluno360FerramentasModulesGrid extends ConsumerWidget {
             onTap: () => context.push('/financeiro?alunoId=$alunoId'),
           ),
           FxSatelliteListTile(
+            titleCase: false,
             title: 'Chat',
             subtitle: const Text('Conversa direta com o aluno'),
             accent: primary,
@@ -258,6 +267,7 @@ class Aluno360FerramentasModulesGrid extends ConsumerWidget {
                 ),
           ),
           FxSatelliteListTile(
+            titleCase: false,
             title: 'Dieta',
             subtitle: const Text('Plano alimentar atual'),
             accent: primary,
@@ -268,6 +278,7 @@ class Aluno360FerramentasModulesGrid extends ConsumerWidget {
                 ),
           ),
           FxSatelliteListTile(
+            titleCase: false,
             title: 'Feedback em vídeo',
             subtitle: Text(
               feedbackLocked

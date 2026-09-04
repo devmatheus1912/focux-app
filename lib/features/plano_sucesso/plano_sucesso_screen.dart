@@ -314,18 +314,25 @@ class _PlanoSucessoScreenState extends State<PlanoSucessoScreen> {
         children: [
           FxHubHeader(
             title: headerTitle,
-            subtitle:
-                freshness == null || freshness.isEmpty
-                    ? 'Metas e prazos do aluno'
-                    : 'Metas e prazos · $freshness',
+            subtitle: planoSucessoHubSubtitle(
+              base: 'Metas e prazos do aluno',
+              freshness: freshness,
+            ),
           ),
           const SizedBox(height: TokensStrip.s4),
-          OperationalMetricTile(
-            label: 'Progresso',
-            value: '0%',
-            hint: 'Nenhum plano ativo',
-            color: primary,
+          ..._planoMetricTiles(
+            primary: primary,
             isDark: isDark,
+            progressoValue: '0%',
+            progressoHint: 'Nenhum plano ativo',
+            etapasValue: planoSucessoEtapasValue(0, 0),
+            etapasHint: planoSucessoEtapasHint(
+              done: 0,
+              total: 0,
+              proximo: null,
+            ),
+            revisaoValue: planoSucessoRevisaoMetricValue(null),
+            revisaoHint: planoSucessoRevisaoMetricHint(null),
           ),
           const SizedBox(height: TokensStrip.s5),
           FxEmptyState(
@@ -354,22 +361,29 @@ class _PlanoSucessoScreenState extends State<PlanoSucessoScreen> {
       children: [
         FxHubHeader(
           title: headerTitle,
-          subtitle:
-              freshness == null || freshness.isEmpty
-                  ? plano.objetivoPrincipal
-                  : '${plano.objetivoPrincipal} · $freshness',
+          subtitle: planoSucessoHubSubtitle(
+            base: plano.objetivoPrincipal,
+            freshness: freshness,
+          ),
         ),
         const SizedBox(height: TokensStrip.s4),
-        OperationalMetricTile(
-          label: 'Progresso',
-          value: planoSucessoPercentLabel(done, total),
-          hint: planoSucessoMetricHint(
+        ..._planoMetricTiles(
+          primary: primary,
+          isDark: isDark,
+          progressoValue: planoSucessoPercentLabel(done, total),
+          progressoHint: planoSucessoMetricHint(
             done: done,
             total: total,
             proximaRevisao: plano.proximaRevisao,
           ),
-          color: primary,
-          isDark: isDark,
+          etapasValue: planoSucessoEtapasValue(done, total),
+          etapasHint: planoSucessoEtapasHint(
+            done: done,
+            total: total,
+            proximo: proximo,
+          ),
+          revisaoValue: planoSucessoRevisaoMetricValue(plano.proximaRevisao),
+          revisaoHint: planoSucessoRevisaoMetricHint(plano.proximaRevisao),
         ),
         const SizedBox(height: TokensStrip.s5),
         for (var i = 0; i < plano.marcos.length; i++)
@@ -394,5 +408,35 @@ class _PlanoSucessoScreenState extends State<PlanoSucessoScreen> {
           ),
       ],
     );
+  }
+
+  List<Widget> _planoMetricTiles({
+    required Color primary,
+    required bool isDark,
+    required String progressoValue,
+    required String progressoHint,
+    required String etapasValue,
+    required String etapasHint,
+    required String revisaoValue,
+    required String revisaoHint,
+  }) {
+    Widget tile(String label, String value, String hint) {
+      return Padding(
+        padding: const EdgeInsets.only(bottom: TokensStrip.s2),
+        child: OperationalMetricTile(
+          label: label,
+          value: value,
+          hint: hint,
+          color: primary,
+          isDark: isDark,
+        ),
+      );
+    }
+
+    return [
+      tile('Progresso', progressoValue, progressoHint),
+      tile('Etapas', etapasValue, etapasHint),
+      tile('Revisão', revisaoValue, revisaoHint),
+    ];
   }
 }

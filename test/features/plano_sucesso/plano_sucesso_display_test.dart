@@ -58,5 +58,39 @@ void main() {
       planoSucessoMarcoSubtitle(atingido: false, atual: false),
       'Pendente',
     );
+    expect(
+      planoSucessoHubSubtitle(base: 'Metas e prazos do aluno'),
+      'Metas e prazos do aluno',
+    );
+    expect(
+      planoSucessoHubSubtitle(
+        base: 'Emagrecer 8 kg',
+        freshness: 'Atualizado agora',
+      ),
+      'Emagrecer 8 kg · Atualizado agora',
+    );
+    expect(planoSucessoEtapasValue(1, 4), '1/4');
+    expect(
+      planoSucessoEtapasHint(done: 0, total: 0, proximo: null),
+      'Nenhuma etapa ainda',
+    );
+    expect(
+      planoSucessoEtapasHint(done: 4, total: 4, proximo: null),
+      'Todas as etapas feitas',
+    );
+    expect(
+      planoSucessoEtapasHint(done: 1, total: 4, proximo: pendente),
+      '1 de 4 · próxima etapa',
+    );
+    expect(planoSucessoRevisaoMetricValue(null), '—');
+    expect(
+      planoSucessoRevisaoMetricValue(DateTime(2026, 9, 3)),
+      '03/09',
+    );
+    expect(planoSucessoRevisaoMetricHint(null), 'Sem data de revisão');
+    expect(
+      planoSucessoRevisaoMetricHint(DateTime(2026, 9, 3)),
+      'Próxima revisão',
+    );
   });
 }

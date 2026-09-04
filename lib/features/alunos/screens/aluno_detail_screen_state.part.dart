@@ -5,6 +5,7 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
   late TabController _tabController;
   bool _entrancePlayed = false;
   String? _lastFocusSyncSignature;
+  DateTime? _fetchedAt;
 
   int get alunoId => widget.alunoId;
 
@@ -31,6 +32,16 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
   void dispose() {
     _tabController.dispose();
     super.dispose();
+  }
+
+  void _markFetched() {
+    if (!mounted) return;
+    setState(() => _fetchedAt = DateTime.now());
+  }
+
+  Future<void> _reload360() async {
+    await invalidateAluno360Providers(ref, alunoId);
+    _markFetched();
   }
 
   @override
@@ -108,11 +119,26 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
     final proximaAcao360 = aluno360Async.valueOrNull?.proximaAcao;
     final showOperacaoSticky =
         _tabController.index == 0 && resolvedAlunoAsync.hasValue;
+    final showErrorChrome =
+        !loadingPrimary &&
+        !loadingFallback &&
+        resolvedAlunoAsync.hasError &&
+        !resolvedAlunoAsync.hasValue;
+    final freshness = FxHubFreshness.fromFetchedAt(_fetchedAt);
 
     return fxScreenA11yScope(
       label: 'Ficha do aluno',
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
+      child: FxShellScaffold(
+        useMesh: true,
+        constrainWidth: false,
+        safeArea: false,
+        appBar:
+            showErrorChrome
+                ? FxShellAppBar(
+                  title: 'Ficha do aluno',
+                  onBack: () => safePopOrGo(context, '/alunos'),
+                )
+                : null,
         body: Stack(
           fit: StackFit.expand,
           children: [
@@ -146,9 +172,7 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                           fallback:
                               'Não foi possível carregar os dados do aluno.',
                         ),
-                        onRetry: () {
-                          invalidateAluno360Providers(ref, alunoId);
-                        },
+                        onRetry: _reload360,
                         title: 'Não conseguimos carregar o aluno',
                       ),
                   data: (aluno) {
@@ -215,9 +239,14 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                       }
                     }
 
+                    if (_fetchedAt == null) {
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        if (mounted && _fetchedAt == null) _markFetched();
+                      });
+                    }
+
                     return RefreshIndicator(
-                      onRefresh:
-                          () => invalidateAluno360Providers(ref, alunoId),
+                      onRefresh: _reload360,
                       child: CustomScrollView(
                         physics: const AlwaysScrollableScrollPhysics(),
                         slivers: [
@@ -231,6 +260,7 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                                 isDark: isDark,
                                 primary: primary,
                                 compactContactPriority: compactHero,
+                                freshnessLabel: freshness,
                                 onDefineObjective:
                                     alunoObjectiveIsDefined(aluno.objetivo)
                                         ? null
@@ -241,10 +271,7 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                                                 extra: aluno,
                                               );
                                           if (updated == true) {
-                                            invalidateAluno360Providers(
-                                              ref,
-                                              alunoId,
-                                            );
+                                            await _reload360();
                                           }
                                         },
                               ),
@@ -342,10 +369,7 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                                         extra: aluno,
                                       );
                                       if (updated == true) {
-                                        invalidateAluno360Providers(
-                                          ref,
-                                          alunoId,
-                                        );
+                                        await _reload360();
                                       }
                                     },
                                     onEvolve:
