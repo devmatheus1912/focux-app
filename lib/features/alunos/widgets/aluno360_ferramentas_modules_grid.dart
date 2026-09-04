@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../anamnese/providers/anamnese_provider.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../planos/utils/effective_plano_features.dart';
 import '../../subscription/widgets/upgrade_prompt_sheet.dart';
@@ -228,14 +229,28 @@ class Aluno360FerramentasModulesGrid extends ConsumerWidget {
             titleCase: false,
             title: 'Anamnese',
             subtitle: Text(
-              perfilCompletion >= 85
-                  ? 'Perfil completo'
-                  : 'Completar cadastro',
+              ref.watch(alunoAnamneseProvider(alunoId)).when(
+                data: (a) => Aluno360FerramentasLogic.anamneseSubtitle(a.status),
+                loading: () => 'Carregando ficha…',
+                error: (_, __) => 'Solicitar e revisar',
+              ),
             ),
             trailing: Text(
-              Aluno360FerramentasLogic.anamneseValue(perfilCompletion),
+              ref.watch(alunoAnamneseProvider(alunoId)).when(
+                data: (a) => Aluno360FerramentasLogic.anamneseValue(a.status),
+                loading: () => '…',
+                error: (_, __) => 'Abrir',
+              ),
             ),
-            accent: perfilCompletion < 85 ? EagleTokens.warn : primary,
+            accent: ref.watch(alunoAnamneseProvider(alunoId)).when(
+              data:
+                  (a) =>
+                      Aluno360FerramentasLogic.anamneseNeedsAttention(a.status)
+                          ? EagleTokens.warn
+                          : primary,
+              loading: () => primary,
+              error: (_, __) => EagleTokens.warn,
+            ),
             onTap: () => context.push('/alunos/$alunoId/anamnese'),
           ),
           FxSatelliteListTile(

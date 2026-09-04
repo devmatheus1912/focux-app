@@ -169,9 +169,44 @@ abstract final class Aluno360FerramentasLogic {
     return bf == null || massaMagra == null;
   }
 
-  static String anamneseValue(int perfilCompletion) {
-    if (perfilCompletion >= 85) return 'OK';
-    return '$perfilCompletion%';
+  static String anamneseValue(String? status) {
+    switch (status) {
+      case 'SOLICITADA':
+        return 'Pendente';
+      case 'PREENCHIDA':
+        return 'Revisar';
+      case 'REVISADA':
+        return 'OK';
+      case 'PRECISA_ATESTADO':
+        return 'Atestado';
+      case 'NAO_INICIADA':
+      default:
+        return 'Solicitar';
+    }
+  }
+
+  static String anamneseSubtitle(String? status) {
+    switch (status) {
+      case 'SOLICITADA':
+        return 'Aguardando o aluno preencher';
+      case 'PREENCHIDA':
+        return 'Pronta para revisão';
+      case 'REVISADA':
+        return 'Ficha revisada';
+      case 'PRECISA_ATESTADO':
+        return 'Aguardando atestado';
+      case 'NAO_INICIADA':
+      default:
+        return 'Aluno preenche · você revisa';
+    }
+  }
+
+  static bool anamneseNeedsAttention(String? status) {
+    return status == 'SOLICITADA' ||
+        status == 'PREENCHIDA' ||
+        status == 'PRECISA_ATESTADO' ||
+        status == null ||
+        status == 'NAO_INICIADA';
   }
 
   static bool aderenciaNeedsAttention({

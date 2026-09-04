@@ -9,6 +9,7 @@ import '../../features/health/screens/health_dashboard_screen.dart';
 import '../../features/habitos/screens/habitos_aluno_screen.dart';
 import '../../features/recorrencia/screens/recorrencia_aluno_screen.dart';
 import '../../features/grupos/screens/grupo_aulas_aluno_screen.dart';
+import '../../features/anamnese/screens/anamnese_aluno_screen.dart';
 import '../../features/feedback/screens/feedback_aluno_screen.dart';
 import '../widgets/fx_route_chrome.dart';
 
@@ -78,6 +79,12 @@ List<RouteBase> buildAlunoRoutes() {
       GoRoute(
         path: '/aluno/form-check',
         builder: (context, state) => const FxRouteChrome(child: FeedbackAlunoScreen()),
+      ),
+      GoRoute(
+        path: '/aluno/anamnese',
+        builder:
+            (context, state) =>
+                const FxRouteChrome(child: AnamneseAlunoScreen()),
       ),
       GoRoute(
         path: '/evolucao',
