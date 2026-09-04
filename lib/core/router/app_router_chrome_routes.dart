@@ -240,6 +240,14 @@ RouteBase buildChromeShellRoute() {
                     AnamneseScreen(alunoId: intPathParam(state, 'id')!),
           ),
           GoRoute(
+            path: '/personal/alunos/:id/anamnese',
+            redirect: (context, state) {
+              final id = intPathParam(state, 'id');
+              if (id == null) return '/alunos';
+              return '/alunos/$id/anamnese';
+            },
+          ),
+          GoRoute(
             path: '/alunos/:id/alimentar',
             redirect:
                 (context, state) =>

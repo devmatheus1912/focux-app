@@ -112,8 +112,11 @@ void main() {
         ),
         'OK',
       );
-      expect(Aluno360FerramentasLogic.anamneseValue(90), 'OK');
-      expect(Aluno360FerramentasLogic.anamneseValue(62), '62%');
+      expect(Aluno360FerramentasLogic.anamneseValue('REVISADA'), 'OK');
+      expect(Aluno360FerramentasLogic.anamneseValue('PREENCHIDA'), 'Revisar');
+      expect(Aluno360FerramentasLogic.anamneseValue('SOLICITADA'), 'Pendente');
+      expect(Aluno360FerramentasLogic.anamneseNeedsAttention('PREENCHIDA'), isTrue);
+      expect(Aluno360FerramentasLogic.anamneseNeedsAttention('REVISADA'), isFalse);
     });
 
     test('measurements complete and gated modules helpers', () {

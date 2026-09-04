@@ -8,6 +8,7 @@ import '../../../core/providers/personal_brand_provider.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
+import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
@@ -24,6 +25,9 @@ import '../../../core/widgets/fx_strip_card.dart';
 import '../widgets/dashboard_home_action_chip.dart';
 import '../widgets/dashboard_section_header.dart';
 import '../../../core/widgets/skeleton_loader.dart';
+import '../../anamnese/providers/anamnese_provider.dart';
+import '../../anamnese/widgets/anamnese_status_banner.dart';
+import '../../anamnese/utils/anamnese_display.dart';
 import '../../alunos/data/aluno_repository.dart';
 import '../../alunos/providers/alunos_provider.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -154,6 +158,7 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
             return RefreshIndicator(
               onRefresh: () async {
                 ref.invalidate(alunoDashboardHomeProvider);
+                ref.invalidate(minhaAnamneseProvider);
                 await ref.read(alunoDashboardHomeProvider.future);
               },
               child: FxContentWidthLimiter(
@@ -167,6 +172,7 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
                     children: [
                       _TodayFocusCard(experience: experience, isDark: isDark),
                       const SizedBox(height: 12),
+                      _AlunoAnamneseCta(),
                       AlunoRecoveryCard(
                         isDark: isDark,
                         snapshot: home.recovery,

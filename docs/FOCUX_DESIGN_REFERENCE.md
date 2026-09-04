@@ -2088,7 +2088,7 @@ Para cada linha: o Ruflo, ao tocar qualquer tela do domínio, fecha o **mínimo*
 | **NPS** | `/nps` | S1 | Ver score, listar respostas, filtrar detratores com atalho (chat/aluno). Prompt de coleta no momento certo, não diálogo cru fora do chrome. |
 | **Depoimentos** | `/depoimentos`, `/depoimentos-aluno` | S4/S5 | Solicitar, aprovar, publicar. Aluno consegue enviar. |
 | **Evolução / fotos / comparativo / engajamento** | `/evolucao`, fotos, comparativo, `/alunos/:id/engajamento` | S3/S4 | Registrar medida/foto, comparar, ler aderência **com** próxima ação. |
-| **Anamnese** | `/alunos/:id/anamnese` | S5/S3 | Preencher, salvar, reler. Teclado §14.2. |
+| **Anamnese** | `/alunos/:id/anamnese` · `/aluno/anamnese` | S3 / S5 | Personal solicita e revisa (só leitura da ficha). Aluno preenche PAR-Q+/saúde/hábitos/treino. Deep link: `type=anamnese`. |
 | **Alimentar** | `/alunos/:id/alimentar` | S3/S5 | Ver plano, editar refeições que o contrato permite, atribuir ao aluno. |
 | **Grupos / aulas** | `/grupo-aulas` + gêmeo aluno | S1/S4 | Turma, presença, aviso. Não é lista morta. |
 | **Recorrência** | `/recorrencia` + gêmeo aluno | S3/S5 | Ver ciclo, pausar/retomar se o BE tem, não só texto. |
