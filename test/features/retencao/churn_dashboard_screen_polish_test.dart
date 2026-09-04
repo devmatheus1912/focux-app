@@ -16,10 +16,10 @@ void main() {
     expect(screen, contains('FxStripCard'));
     expect(screen, contains('emphasize: true'));
     expect(screen, contains('getHome'));
-    expect(screen, contains('/alunos?filtro=risco'));
+    expect(screen, contains('showRetencaoCatalogSheet'));
     expect(screen, contains('FxEmptyAction'));
     expect(screen, contains('keyboardDismissBehavior'));
-    expect(screen, isNot(contains('listarBase')));
+    expect(screen, isNot(contains('/alunos?filtro=risco')));
     expect(screen, isNot(contains('class _ChurnScoreCard')));
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(screen, contains('RefreshIndicator'));

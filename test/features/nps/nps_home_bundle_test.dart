@@ -30,6 +30,8 @@ void main() {
     expect(bundle.recentes.first.alunoNome, 'Ana');
     expect(bundle.recentes.first.score, 9);
     expect(bundle.recentes.first.alunoId, 2);
+    expect(bundle.itens.single.alunoId, 2);
+    expect(bundle.hasNext, isFalse);
   });
 
   test('NpsHomeBundle tolerates missing resumo and recentes', () {

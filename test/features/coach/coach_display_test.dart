@@ -33,5 +33,6 @@ void main() {
     expect(coachPendingChipLabel(0), isNull);
     expect(coachPendingChipLabel(1), '1 recado do coach');
     expect(coachPendingChipLabel(3), '3 recados do coach');
+    expect(coachComoCalculamos, contains('catálogo'));
   });
 }

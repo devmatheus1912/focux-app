@@ -23,6 +23,7 @@ import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../data/coach_proativo_repository.dart';
 import '../utils/coach_display.dart';
+import '../widgets/coach_catalog_sheet.dart';
 import '../widgets/coach_proativo_card.dart';
 
 class CoachScreen extends ConsumerWidget {
@@ -129,7 +130,25 @@ class CoachScreen extends ConsumerWidget {
                       },
                     ),
                     const SizedBox(height: TokensStrip.s4),
-                    const DashboardSectionHeader(title: 'Fila'),
+                    DashboardSectionHeader(
+                      title: 'Fila',
+                      actionLabel:
+                          data.hasNext || data.totalItens > 3
+                              ? 'Ver todos'
+                              : null,
+                      onAction:
+                          data.hasNext || data.totalItens > 3
+                              ? () {
+                                showCoachCatalogSheet(
+                                  context,
+                                  firstPage: data,
+                                  repo: CoachProativoRepository(
+                                    ref.read(apiClientProvider),
+                                  ),
+                                );
+                              }
+                              : null,
+                    ),
                     const SizedBox(height: TokensStrip.s2),
                     for (final item in data.fila)
                       FxSatelliteListTile(

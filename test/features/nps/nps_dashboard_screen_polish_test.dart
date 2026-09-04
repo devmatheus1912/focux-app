@@ -23,6 +23,8 @@ void main() {
     expect(screen, contains('RefreshIndicator'));
     expect(screen, contains('chatThreadOpened'));
     expect(screen, contains('Como calculamos'));
+    expect(screen, contains('showNpsCatalogSheet'));
+    expect(screen, contains('Ver todos'));
     expect(screen, contains("queryParameters['filtro']"));
     expect(screen, contains('isDark'));
   });

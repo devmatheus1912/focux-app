@@ -19,6 +19,8 @@ void main() {
     expect(screen, contains('keyboardDismissBehavior'));
     expect(screen, contains('coachHomeProvider'));
     expect(screen, contains('Abrir aluno'));
+    expect(screen, contains('showCoachCatalogSheet'));
+    expect(screen, contains('Ver todos'));
     expect(screen, contains('homeCoachDismissed'));
     expect(screen, contains('Como calculamos'));
     expect(screen, contains('ShellChrome.forDark'));

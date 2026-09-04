@@ -71,12 +71,65 @@ class RetencaoHome {
   }
 }
 
+class RetencaoBasePage {
+  const RetencaoBasePage({
+    required this.itens,
+    this.page = 0,
+    this.totalItens = 0,
+    this.hasNext = false,
+  });
+
+  final List<RetencaoAlunoScore> itens;
+  final int page;
+  final int totalItens;
+  final bool hasNext;
+
+  factory RetencaoBasePage.fromJson(Map<String, dynamic> json) {
+    final raw = json['content'] ?? json['itens'];
+    final itens =
+        raw is List
+            ? raw
+                .whereType<Map>()
+                .map(
+                  (row) => RetencaoAlunoScore.fromJson(
+                    Map<String, dynamic>.from(row),
+                  ),
+                )
+                .toList()
+            : const <RetencaoAlunoScore>[];
+    return RetencaoBasePage(
+      itens: itens,
+      page: (json['page'] as num?)?.toInt() ?? 0,
+      totalItens:
+          (json['totalElements'] as num?)?.toInt() ??
+          (json['totalItens'] as num?)?.toInt() ??
+          itens.length,
+      hasNext: json['hasNext'] == true,
+    );
+  }
+}
+
 class RetencaoRepository {
   final Dio _dio;
   RetencaoRepository(ApiClient c) : _dio = c.dio;
 
+  static const basePageSize = 20;
+
   Future<RetencaoHome> getHome() async {
     final r = await _dio.get('/api/retencao/home');
     return RetencaoHome.fromJson(Map<String, dynamic>.from(r.data as Map));
+  }
+
+  Future<RetencaoBasePage> listarBase({int page = 0, String? q}) async {
+    final query = q?.trim() ?? '';
+    final r = await _dio.get(
+      '/api/retencao/base',
+      queryParameters: {
+        'page': page,
+        'size': basePageSize,
+        if (query.isNotEmpty) 'q': query,
+      },
+    );
+    return RetencaoBasePage.fromJson(Map<String, dynamic>.from(r.data as Map));
   }
 }

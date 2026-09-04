@@ -18,5 +18,6 @@ void main() {
     expect(npsRecentPreview(items), hasLength(3));
     expect(npsItemsForFiltro(items, 'detratores').map((e) => e.id), [2, 4]);
     expect(npsComoCalculamos, contains('Promotores'));
+    expect(npsComoCalculamos, contains('catálogo'));
   });
 }

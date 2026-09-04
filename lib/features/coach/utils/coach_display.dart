@@ -1,7 +1,7 @@
 import '../data/coach_proativo_repository.dart';
 
 const coachComoCalculamos =
-    'Treino parado, sono curto ou sequência quebrada. Abrir o aluno fecha o job.';
+    'Treino parado, sono curto ou sequência quebrada. O catálogo pagina as não lidas. Abrir o aluno fecha o job.';
 
 String? coachPendingChipLabel(int pending) {
   if (pending <= 0) return null;
