@@ -60,6 +60,8 @@ bool isPublicLocation(String path) {
       path == '/esqueci-senha' ||
       path == '/resetar-senha' ||
       path.startsWith('/resetar-senha/') ||
+      path.startsWith('/p/') ||
+      path.startsWith('/convite/') ||
       (kDebugMode && path.startsWith('/qa/'));
 }
 

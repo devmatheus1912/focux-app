@@ -12,10 +12,12 @@ import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../features/auth/providers/auth_provider.dart';
+import '../../../features/perfil/providers/perfil_provider.dart';
 import '../constants/aluno_360_layout.dart';
 import '../data/aluno_repository.dart';
 import '../providers/alunos_provider.dart';
 import '../widgets/aluno_delete_confirm_sheet.dart';
+import 'aluno_invite_copy.dart';
 
 String alunoDeleteConfirmToken(String nome) {
   final trimmed = nome.trim();
@@ -71,8 +73,14 @@ Future<void> confirmarGerarSenhaAlunoDetail(
       ref.read(apiClientProvider),
     ).gerarSenhaProvisoria(aluno.id);
     ref.invalidate(alunoProvider(aluno.id));
+    final slug = ref.read(perfilProvider).valueOrNull?.slug;
     if (context.mounted) {
-      showAlunoNovaSenhaProvisoriaSheet(context, aluno, senha);
+      showAlunoNovaSenhaProvisoriaSheet(
+        context,
+        aluno,
+        senha,
+        personalSlug: slug,
+      );
     }
   } catch (e) {
     if (context.mounted) {
@@ -87,8 +95,9 @@ Future<void> confirmarGerarSenhaAlunoDetail(
 void showAlunoNovaSenhaProvisoriaSheet(
   BuildContext context,
   Aluno aluno,
-  String senha,
-) {
+  String senha, {
+  String? personalSlug,
+}) {
   final chrome = ShellChrome.of(context);
   final primary = Theme.of(context).colorScheme.primary;
   final ink = chrome.ink;
@@ -96,7 +105,12 @@ void showAlunoNovaSenhaProvisoriaSheet(
   final line = chrome.line;
   final whatsappNumber = (aluno.whatsapp ?? '').replaceAll(RegExp(r'\D'), '');
   final hasWhatsapp = whatsappNumber.isNotEmpty;
-  final mensagem = alunoSenhaProvisoriaMessage(aluno, senha);
+  final mensagem = alunoSenhaProvisoriaMessage(
+    nome: aluno.nome,
+    email: aluno.email,
+    senha: senha,
+    personalSlug: personalSlug,
+  );
   final firstName =
       aluno.nome.trim().isEmpty
           ? 'o aluno'
@@ -237,15 +251,4 @@ void showAlunoNovaSenhaProvisoriaSheet(
       );
     },
   );
-}
-
-String alunoSenhaProvisoriaMessage(Aluno aluno, String senha) {
-  final primeiroNome =
-      aluno.nome.trim().isEmpty
-          ? 'tudo bem'
-          : aluno.nome.trim().split(RegExp(r'\s+')).first;
-  return 'Olá $primeiroNome! Redefinimos seu acesso ao Focux.\n\n'
-      'Entre com seu e-mail: ${aluno.email}\n'
-      'Senha provisória: $senha\n\n'
-      'No primeiro acesso, troque por uma senha sua.';
 }

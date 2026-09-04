@@ -89,6 +89,10 @@ class Env {
   /// Landing HTML pública servida pelo backend (`/p/{slug}`).
   static String landingPageUrl(String slug) => '$_webBase/p/$slug';
 
+  /// Link de acesso do aluno com slug.
+  /// Usa `/p/{slug}` (App Link já registrado); no app redireciona para login.
+  static String alunoLoginUrl(String slug) => landingPageUrl(slug.trim());
+
   /// Página de captura de leads (`/c/{slug}`).
   static String capturaPageUrl(String slug) => '$_webBase/c/$slug';
 

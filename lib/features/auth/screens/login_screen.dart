@@ -43,6 +43,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _slugController = TextEditingController();
   bool _loading = false;
   bool _loadingGoogle = false;
   bool _showPassword = false;
@@ -87,7 +88,24 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final slug = params['p']?.trim();
     if (slug != null && slug.isNotEmpty) {
       _personalSlug = slug;
+      _slugController.text = slug;
     }
+  }
+
+  String? get _effectivePersonalSlug {
+    final fromField = _slugController.text.trim();
+    if (fromField.isNotEmpty) return fromField;
+    final fromQuery = _personalSlug?.trim();
+    if (fromQuery != null && fromQuery.isNotEmpty) return fromQuery;
+    return null;
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    _slugController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadCapabilities() async {
@@ -135,13 +153,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         }
       });
     }
-  }
-
-  @override
-  void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
-    super.dispose();
   }
 
   @override
@@ -216,6 +227,29 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                         }
                                       },
                                     ),
+                                    if (_isAluno) ...[
+                                      const SizedBox(height: 16),
+                                      AuthField(
+                                        label: loginSlugFieldLabel(),
+                                        controller: _slugController,
+                                        hintText: loginSlugFieldHint(),
+                                        icon: Icons.link_rounded,
+                                        textInputAction: TextInputAction.next,
+                                        inputFormatters: [
+                                          FilteringTextInputFormatter.allow(
+                                            RegExp(r'[a-zA-Z0-9\-_]'),
+                                          ),
+                                        ],
+                                        validator: (value) {
+                                          if (!_isAluno) return null;
+                                          if (value == null ||
+                                              value.trim().isEmpty) {
+                                            return loginSlugMissingError();
+                                          }
+                                          return null;
+                                        },
+                                      ),
+                                    ],
                                     const SizedBox(height: 16),
                                     AuthField(
                                       label: 'E-mail',
@@ -285,7 +319,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                               context,
                                               loginEsqueciPath(
                                                 isAluno: _isAluno,
-                                                personalSlug: _personalSlug,
+                                                personalSlug:
+                                                    _effectivePersonalSlug,
                                               ),
                                             ),
                                       ),
@@ -349,7 +384,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 onTap:
                                     () => authUnfocusAndGo(
                                       context,
-                                      loginRegisterPath(isAluno: _isAluno),
+                                      loginRegisterPath(
+                                        isAluno: _isAluno,
+                                        personalSlug: _effectivePersonalSlug,
+                                      ),
                                     ),
                               ),
                             ],
