@@ -35,5 +35,7 @@ void main() {
     );
     expect(qualidadeNextAction(data()).route, '/alunos');
     expect(qualidadeNextAction(data()).shellTab, isTrue);
+    expect(qualidadeComoCalculamos, contains('ticket'));
+    expect(qualidadeComoCalculamos, contains('retenção'));
   });
 }

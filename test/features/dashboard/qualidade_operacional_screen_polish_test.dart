@@ -13,6 +13,7 @@ void main() {
     expect(screen, contains('FxContentWidthLimiter'));
     expect(screen, contains("safePopOrGo(context, '/dashboard/personal')"));
     expect(screen, contains('FxHelpIconButton'));
+    expect(screen, contains('Como calculamos'));
     expect(screen, contains('FxStripCard'));
     expect(screen, contains('emphasize: true'));
     expect(screen, contains('OperationalMetricTile'));

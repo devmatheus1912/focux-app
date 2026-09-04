@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/widgets/fx_help.dart';
+import '../utils/checkin_personal_display.dart';
 
 Future<void> showCheckinPersonalHelpSheet(BuildContext context) {
   return showFxHelpSheet(
@@ -8,6 +9,7 @@ Future<void> showCheckinPersonalHelpSheet(BuildContext context) {
     title: 'Como usar os check-ins',
     subtitle: 'Quem treinou. O live continua no app do aluno.',
     tips: const [
+      FxHelpTip('Como calculamos', checkinComoCalculamos),
       FxHelpTip(
         'Hoje',
         'Mesma conta do pulso da Home: só check-ins concluídos hoje.',

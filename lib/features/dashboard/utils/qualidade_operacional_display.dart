@@ -1,5 +1,8 @@
 import '../data/qualidade_operacional.dart';
 
+const qualidadeComoCalculamos =
+    'Índice 0–100: metade ticket vs mercado, metade retenção (ativos / ativos+inativos) vs mercado.';
+
 enum QualidadeScoreBand { excellent, good, attention }
 
 QualidadeScoreBand qualidadeScoreBand(int score) {

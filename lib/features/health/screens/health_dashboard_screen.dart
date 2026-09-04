@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/brand/focux_microcopy.dart';
 import '../../../core/health/health_service.dart';
@@ -9,7 +8,9 @@ import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
+import '../../../core/widgets/fx_conversion.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
@@ -22,6 +23,7 @@ import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../../core/health/home_widget_service.dart';
 import '../data/health_repository.dart';
+import '../utils/health_dashboard_display.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
 
 /// Screen showing synced Apple Health / Google Fit data.
@@ -129,6 +131,25 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
     }
   }
 
+  Future<void> _desconectar() async {
+    final ok = await showFxConfirmSheet(
+      context,
+      title: saudeDesconectarConfirmTitle(),
+      message: saudeDesconectarConfirmMessage(),
+      confirmLabel: saudeDesconectarLabel(),
+      destructive: true,
+    );
+    if (!ok || !mounted) return;
+    await HealthService.revokeAccess();
+    if (!mounted) return;
+    setState(() {
+      _authorized = false;
+      _summary = null;
+      _recovery = null;
+      _fetchedAt = null;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -154,6 +175,7 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
                     title: 'Saúde',
                     subtitle: 'Prontidão do dia a partir do wearable.',
                     tips: const [
+                      FxHelpTip('Como calculamos', saudeComoCalculamos),
                       FxHelpTip(
                         'Conectar',
                         'Autorize o Apple Health ou o Google Fit.',
@@ -283,20 +305,16 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
           Align(
             alignment: Alignment.centerLeft,
             child: DashboardHomeActionChip(
-              label: 'Desconectar saúde',
-              accent: EagleTokens.bad,
+              label: saudeAtualizarLabel(),
+              accent: Theme.of(context).colorScheme.primary,
               isDark: isDark,
-              onPressed: () async {
-                HapticFeedback.mediumImpact();
-                await HealthService.revokeAccess();
-                if (mounted) {
-                  setState(() {
-                    _authorized = false;
-                    _summary = null;
-                  });
-                }
-              },
+              onPressed: _loadData,
             ),
+          ),
+          FxConversionTextLink(
+            text: '',
+            actionText: saudeDesconectarLabel(),
+            onTap: _desconectar,
           ),
         ],
       ),
