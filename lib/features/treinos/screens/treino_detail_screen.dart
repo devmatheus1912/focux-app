@@ -7,7 +7,6 @@ import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/hero_teal.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
-import '../../../core/widgets/fx_icon.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -100,45 +99,42 @@ class TreinoDetailScreen extends ConsumerWidget {
         },
         child: FxShellScaffold(
           useMesh: true,
-          constrainWidth: false,
-          safeArea: false,
+          appBar: FxShellAppBar(
+            title: 'Treino',
+            onBack: () => _popTreinoDetail(context, alunoId: alunoId),
+            actions: [
+              FxHelpIconButton(
+                tooltip: 'Como montar este treino',
+                onTap: () async {
+                  AnalyticsService.instance.track(
+                    ProductEvents.treinoDetailHelpOpened,
+                    props: {'id': treinoId},
+                  );
+                  await showTreinoDetailHelpSheet(context);
+                },
+              ),
+              _TreinoDetailOverflowButton(
+                treinoId: treinoId,
+                alunoId: alunoId,
+                isDark: isDark,
+              ),
+            ],
+          ),
           body: treinoAsync.when(
             skipLoadingOnReload: true,
             skipLoadingOnRefresh: true,
             loading:
-                () => SafeArea(
-                  child: Stack(
-                    children: [
-                      const Padding(
-                        padding: EdgeInsets.fromLTRB(TokensStrip.s5, 86, 20, 0),
-                        child: SkeletonList(count: 6),
-                      ),
-                      Positioned(
-                        top: 8,
-                        left: TokensStrip.s5 - 4,
-                        child: _TreinoDetailBackButton(alunoId: alunoId),
-                      ),
-                    ],
-                  ),
+                () => const Padding(
+                  padding: EdgeInsets.all(FxSettingsLayout.pageInset),
+                  child: SkeletonList(count: 6),
                 ),
             error:
-                (e, _) => SafeArea(
-                  child: Stack(
-                    children: [
-                      FxErrorState(
-                        chromeOnDark: isDark,
-                        primary: primary,
-                        title: 'Não conseguimos carregar o treino',
-                        message: friendlyError(e),
-                        onRetry: () => ref.invalidate(treinoProvider(treinoId)),
-                      ),
-                      Positioned(
-                        top: 8,
-                        left: TokensStrip.s5 - 4,
-                        child: _TreinoDetailBackButton(alunoId: alunoId),
-                      ),
-                    ],
-                  ),
+                (e, _) => FxErrorState(
+                  chromeOnDark: isDark,
+                  primary: primary,
+                  title: 'Não conseguimos carregar o treino',
+                  message: friendlyError(e),
+                  onRetry: () => ref.invalidate(treinoProvider(treinoId)),
                 ),
             data:
                 (treino) => _TrackOnce(
@@ -204,14 +200,6 @@ class _TreinoDetailFreshState extends ConsumerState<_TreinoDetailFresh> {
     if (mounted) setState(() => _fetchedAt = DateTime.now());
   }
 
-  Future<void> _openHelp() async {
-    AnalyticsService.instance.track(
-      ProductEvents.treinoDetailHelpOpened,
-      props: {'id': widget.treinoId},
-    );
-    await showTreinoDetailHelpSheet(context);
-  }
-
   @override
   Widget build(BuildContext context) {
     final treino = ref
@@ -224,9 +212,38 @@ class _TreinoDetailFreshState extends ConsumerState<_TreinoDetailFresh> {
       alunoNome: widget.alunoNome,
       isDark: widget.isDark,
       freshnessLabel: FxHubFreshness.fromFetchedAt(_fetchedAt),
-      onHelp: _openHelp,
       onRefresh: _refresh,
       ref: ref,
+    );
+  }
+}
+
+class _TreinoDetailOverflowButton extends ConsumerWidget {
+  const _TreinoDetailOverflowButton({
+    required this.treinoId,
+    required this.alunoId,
+    required this.isDark,
+  });
+
+  final int treinoId;
+  final int? alunoId;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final treino = ref.watch(treinoProvider(treinoId)).asData?.value;
+    if (treino == null) return const SizedBox.shrink();
+    return IconButton(
+      tooltip: 'Opções do treino',
+      onPressed: () => _openTreinoDetailMenu(
+        context: context,
+        ref: ref,
+        treino: treino,
+        treinoId: treinoId,
+        alunoId: alunoId,
+        isDark: isDark,
+      ),
+      icon: const Icon(Icons.more_horiz_rounded),
     );
   }
 }

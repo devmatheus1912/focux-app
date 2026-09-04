@@ -1,51 +1,13 @@
 part of 'treino_detail_screen.dart';
 
-class _TreinoDetailBackButton extends StatelessWidget {
-  final int? alunoId;
-
-  const _TreinoDetailBackButton({required this.alunoId});
-
-  @override
-  Widget build(BuildContext context) {
-    final chrome = ShellChrome.of(context);
-
-    return IconButton(
-      onPressed: () => _popTreinoDetail(context, alunoId: alunoId),
-      icon: Container(
-        width: TreinosLayout.headerChromeSize,
-        height: TreinosLayout.headerChromeSize,
-        decoration: chrome.headerAction(radius: 12),
-        child: Center(
-          child: FxIcon(name: 'arrow-left', size: 18, color: chrome.ink),
-        ),
-      ),
-    );
-  }
-}
-
-class _TreinoDetailBody extends StatelessWidget {
-  final Treino treino;
-  final int treinoId;
-  final int? alunoId;
-  final String? alunoNome;
-  final bool isDark;
-  final String? freshnessLabel;
-  final VoidCallback onHelp;
-  final Future<void> Function() onRefresh;
-  final WidgetRef ref;
-  const _TreinoDetailBody({
-    required this.treino,
-    required this.treinoId,
-    required this.alunoId,
-    required this.alunoNome,
-    required this.isDark,
-    required this.freshnessLabel,
-    required this.onHelp,
-    required this.onRefresh,
-    required this.ref,
-  });
-
-  Future<void> _openMenu(BuildContext context) async {
+Future<void> _openTreinoDetailMenu({
+  required BuildContext context,
+  required WidgetRef ref,
+  required Treino treino,
+  required int treinoId,
+  required int? alunoId,
+  required bool isDark,
+}) async {
     AnalyticsService.instance.track(
       ProductEvents.treinoDetailMenuOpened,
       props: {'id': treinoId},
@@ -241,7 +203,7 @@ class _TreinoDetailBody extends StatelessWidget {
           invalidateTreinosCaches(ref);
           if (context.mounted) {
             FeedbackHelper.showSuccess(context, 'Treino excluído.');
-            context.pop(true);
+            _popTreinoDetail(context, alunoId: alunoId);
           }
         } catch (e) {
           if (context.mounted) {
@@ -250,7 +212,27 @@ class _TreinoDetailBody extends StatelessWidget {
         }
         break;
     }
-  }
+}
+
+class _TreinoDetailBody extends StatelessWidget {
+  final Treino treino;
+  final int treinoId;
+  final int? alunoId;
+  final String? alunoNome;
+  final bool isDark;
+  final String? freshnessLabel;
+  final Future<void> Function() onRefresh;
+  final WidgetRef ref;
+  const _TreinoDetailBody({
+    required this.treino,
+    required this.treinoId,
+    required this.alunoId,
+    required this.alunoNome,
+    required this.isDark,
+    required this.freshnessLabel,
+    required this.onRefresh,
+    required this.ref,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -301,54 +283,13 @@ class _TreinoDetailBody extends StatelessWidget {
       children: [
         Expanded(
           child: RefreshIndicator(
-      onRefresh: onRefresh,
-      child: FxContentWidthLimiter(
-        child: CustomScrollView(
-          physics: const AlwaysScrollableScrollPhysics(
-            parent: BouncingScrollPhysics(),
-          ),
-          slivers: [
-            SliverAppBar(
-              pinned: true,
-              automaticallyImplyLeading: false,
-              backgroundColor: fxTransparent,
-              surfaceTintColor: fxTransparent,
-              elevation: 0,
-              scrolledUnderElevation: 0,
-              leadingWidth: 52,
-              leading: Padding(
-                padding: const EdgeInsets.only(left: 4),
-                child: _TreinoDetailBackButton(alunoId: alunoId),
-              ),
-              actions: [
-                Padding(
-                  padding: const EdgeInsets.only(
-                    right: TreinosLayout.headerChromeGap,
-                  ),
-                  child: FxHelpIconButton(
-                    tooltip: 'Como montar este treino',
-                    onTap: onHelp,
-                  ),
+            onRefresh: onRefresh,
+            child: FxContentWidthLimiter(
+              child: CustomScrollView(
+                physics: const AlwaysScrollableScrollPhysics(
+                  parent: BouncingScrollPhysics(),
                 ),
-                Padding(
-                  padding: const EdgeInsets.only(right: TokensStrip.s3),
-                  child: IconButton(
-                    tooltip: 'Opções do treino',
-                    onPressed: () => _openMenu(context),
-                    icon: Container(
-                      width: TreinosLayout.headerChromeSize,
-                      height: TreinosLayout.headerChromeSize,
-                      decoration: chrome.headerAction(radius: 12),
-                      child: Icon(
-                        Icons.more_horiz_rounded,
-                        size: 18,
-                        color: chrome.ink,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
+                slivers: [
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(
@@ -464,11 +405,11 @@ class _TreinoDetailBody extends StatelessWidget {
         SafeArea(
           top: false,
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(
+            padding: EdgeInsets.fromLTRB(
               FxSettingsLayout.pageInset,
               TokensStrip.s2,
               FxSettingsLayout.pageInset,
-              TokensStrip.s3,
+              TokensStrip.s3 + MediaQuery.viewInsetsOf(context).bottom,
             ),
             child: FxLiquidPrimaryButton(
               label: 'Adicionar exercício',

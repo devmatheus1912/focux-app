@@ -28,4 +28,12 @@ void main() {
       '30 dias extras no plano · Atualizado agora',
     );
   });
+
+  test('referralHeaderSubtitle junta usos e freshness', () {
+    expect(referralHeaderSubtitle(usos: 0, freshness: null), 'Nenhuma ainda');
+    expect(
+      referralHeaderSubtitle(usos: 2, freshness: 'Atualizado agora'),
+      '2 convertidas · Atualizado agora',
+    );
+  });
 }

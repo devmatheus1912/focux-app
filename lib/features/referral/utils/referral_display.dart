@@ -28,3 +28,13 @@ String referralHubSubtitle(String? freshness) {
   if (stamp == null || stamp.isEmpty) return base;
   return '$base · $stamp';
 }
+
+String referralHeaderSubtitle({
+  required int usos,
+  String? freshness,
+}) {
+  final parts = <String>[referralUsosLabel(usos)];
+  final stamp = freshness?.trim();
+  if (stamp != null && stamp.isNotEmpty) parts.add(stamp);
+  return parts.join(' · ');
+}
