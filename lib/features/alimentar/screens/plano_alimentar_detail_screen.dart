@@ -29,12 +29,14 @@ part 'plano_alimentar_detail_widgets.part.dart';
 
 class PlanoAlimentarDetailScreen extends ConsumerStatefulWidget {
   final int alunoId;
-  final PlanoAlimentar plano;
+  final int planoId;
+  final PlanoAlimentar? initial;
 
   const PlanoAlimentarDetailScreen({
     super.key,
     required this.alunoId,
-    required this.plano,
+    required this.planoId,
+    this.initial,
   });
 
   @override
@@ -44,6 +46,7 @@ class PlanoAlimentarDetailScreen extends ConsumerStatefulWidget {
 
 class _PlanoAlimentarDetailScreenState
     extends ConsumerState<PlanoAlimentarDetailScreen> {
+  PlanoAlimentar? _plano;
   List<Refeicao> _refeicoes = [];
   bool _loading = true;
   String? _erro;
@@ -52,6 +55,10 @@ class _PlanoAlimentarDetailScreenState
   @override
   void initState() {
     super.initState();
+    final seed = widget.initial;
+    if (seed != null && seed.id == widget.planoId) {
+      _plano = seed;
+    }
     _load();
   }
 
@@ -62,9 +69,24 @@ class _PlanoAlimentarDetailScreenState
     });
     try {
       final repo = AlimentarRepository(ref.read(apiClientProvider));
-      final lista = await repo.listarRefeicoes(widget.alunoId, widget.plano.id);
+      var plano = _plano;
+      if (plano == null || plano.id != widget.planoId) {
+        plano = await repo.obter(widget.alunoId, widget.planoId);
+      }
+      if (plano == null) {
+        if (!mounted) return;
+        setState(() {
+          _plano = null;
+          _refeicoes = [];
+          _loading = false;
+          _erro = 'Este plano não está mais disponível.';
+        });
+        return;
+      }
+      final lista = await repo.listarRefeicoes(widget.alunoId, plano.id);
       if (!mounted) return;
       setState(() {
+        _plano = plano;
         _refeicoes = lista;
         _loading = false;
         _fetchedAt = DateTime.now();
@@ -89,9 +111,11 @@ class _PlanoAlimentarDetailScreenState
       destructive: true,
     );
     if (!ok || !mounted) return;
+    final plano = _plano;
+    if (plano == null) return;
     try {
       final repo = AlimentarRepository(ref.read(apiClientProvider));
-      await repo.excluirRefeicao(widget.alunoId, widget.plano.id, r.id);
+      await repo.excluirRefeicao(widget.alunoId, plano.id, r.id);
       if (mounted) {
         setState(() => _refeicoes.removeWhere((x) => x.id == r.id));
         FeedbackHelper.showSuccess(context, 'Refeição removida.');
@@ -104,6 +128,7 @@ class _PlanoAlimentarDetailScreenState
   }
 
   Future<void> _abrirNovaRefeicao() async {
+    if (_plano == null) return;
     HapticFeedback.selectionClick();
     final nome = TextEditingController();
     final horario = TextEditingController();
@@ -170,15 +195,16 @@ class _PlanoAlimentarDetailScreenState
         ),
       );
       if (ok != true) return;
+      if (!mounted) return;
+      final plano = _plano;
+      if (plano == null) return;
       if (nome.text.trim().isEmpty) {
-        if (mounted) {
-          FeedbackHelper.showWarn(context, 'Nome da refeição é obrigatório.');
-        }
+        FeedbackHelper.showWarn(context, 'Nome da refeição é obrigatório.');
         return;
       }
       await AlimentarRepository(ref.read(apiClientProvider)).criarRefeicao(
         widget.alunoId,
-        widget.plano.id,
+        plano.id,
         {
           'nomeRefeicao': nome.text.trim(),
           if (horario.text.isNotEmpty) 'horario': horario.text.trim(),
@@ -207,6 +233,7 @@ class _PlanoAlimentarDetailScreenState
   }
 
   Future<void> _abrirGerarIa() async {
+    if (_plano == null) return;
     final objetivoCtrl = TextEditingController(text: 'Hipertrofia');
     final calCtrl = TextEditingController(text: '2500');
     final refCtrl = TextEditingController(text: '4');
@@ -247,12 +274,14 @@ class _PlanoAlimentarDetailScreenState
 
       if (confirm != true) return;
       if (!mounted) return;
+      final plano = _plano;
+      if (plano == null) return;
       if (!await IaQuotaUpgrade.guardBeforeRequest(context, ref)) return;
 
       setState(() => _loading = true);
       await AlimentarRepository(ref.read(apiClientProvider)).gerarDietaIa(
         widget.alunoId,
-        widget.plano.id,
+        plano.id,
         objetivo: objetivoCtrl.text,
         caloriasAlvo: int.tryParse(calCtrl.text),
         numeroRefeicoes: int.tryParse(refCtrl.text),
@@ -279,29 +308,32 @@ class _PlanoAlimentarDetailScreenState
 
   @override
   Widget build(BuildContext context) {
-    final p = widget.plano;
+    final p = _plano;
     final chrome = ShellChrome.of(context);
     final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
+    final ready = p != null && _erro == null;
     return fxScreenA11yScope(
       label: 'Plano alimentar',
       child: FxShellScaffold(
         useMesh: true,
         appBar: FxShellAppBar(
-          title: p.nome,
+          title: p?.nome ?? 'Plano alimentar',
           subtitle: alimentarDetailSubtitle(freshnessLabel),
           onBack:
               () => safePopOrGo(context, '/alunos/${widget.alunoId}/alimentar'),
           actions: [
-            ShellHeaderIconButton(
-              icon: 'spark',
-              tooltip: 'Gerar dieta IA',
-              onTap: _abrirGerarIa,
-            ),
-            ShellHeaderIconButton(
-              icon: 'plus',
-              tooltip: 'Nova refeição',
-              onTap: _abrirNovaRefeicao,
-            ),
+            if (ready)
+              ShellHeaderIconButton(
+                icon: 'spark',
+                tooltip: 'Gerar dieta IA',
+                onTap: _abrirGerarIa,
+              ),
+            if (ready)
+              ShellHeaderIconButton(
+                icon: 'plus',
+                tooltip: 'Nova refeição',
+                onTap: _abrirNovaRefeicao,
+              ),
           ],
         ),
         body: FxContentWidthLimiter(child: _buildBody(chrome)),
@@ -310,14 +342,15 @@ class _PlanoAlimentarDetailScreenState
   }
 
   Widget _buildBody(ShellPalette chrome) {
-    final p = widget.plano;
+    final p = _plano;
     final primary = Theme.of(context).colorScheme.primary;
     return Column(
       children: [
-        if (p.caloriasDia != null ||
-            p.proteinaG != null ||
-            p.carboidratoG != null ||
-            p.gorduraG != null)
+        if (p != null &&
+            (p.caloriasDia != null ||
+                p.proteinaG != null ||
+                p.carboidratoG != null ||
+                p.gorduraG != null))
           PlanoAlimentarMacroHeader(plano: p),
         Expanded(
           child:

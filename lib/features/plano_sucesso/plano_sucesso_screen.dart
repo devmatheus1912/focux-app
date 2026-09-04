@@ -17,6 +17,7 @@ import '../../core/widgets/fx_form_sheet.dart';
 import '../../core/widgets/fx_help.dart';
 import '../../core/widgets/fx_hub_header.dart';
 import '../../core/widgets/fx_icon.dart';
+import '../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../core/widgets/fx_motion.dart';
 import '../../core/widgets/fx_screen_a11y.dart';
 import '../../core/widgets/fx_shell_scaffold.dart';
@@ -176,6 +177,7 @@ class _PlanoSucessoScreenState extends State<PlanoSucessoScreen> {
       confirmText: 'Salvar',
     );
     if (picked == null || !mounted) return;
+    FxKeyboardDismissScope.dismiss();
     try {
       await context.read<PlanoSucessoProvider>().revisarPlano(
         planoId: plano.id,
