@@ -28,6 +28,8 @@ void main() {
     expect(tab, contains('showFxConfirmSheet'));
     expect(tab, contains('pickMensalidadeMesReferencia'));
     expect(tab, contains('Carregar mais'));
+    expect(tab, contains('marcarLotePago'));
+    expect(tab, contains('Marcar lote'));
     expect(tab, contains('FxErrorState'));
     expect(tab, contains('FeedbackHelper.showSuccess'));
     expect(tab, isNot(contains('class _MiniAction')));
@@ -51,6 +53,7 @@ void main() {
     final router = readScreenSourceBundle(
       'lib/core/router/app_router_chrome_routes.dart',
     );
+    expect(repo, contains('/api/financeiro/mensalidades/lote-pago'));
     expect(repo, contains("get('/api/financeiro/mensalidades/\$id')"));
     expect(repo, contains('Future<Mensalidade> buscar(int id)'));
     expect(router, contains('FinanceiroMensalidadeDetailScreen('));

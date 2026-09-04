@@ -126,6 +126,30 @@ String financeiroSalvarMensalidadeTileLabel() => 'Salvar';
 
 String financeiroLancarMensalidadeTileLabel() => 'Lançar';
 
+bool financeiroStatusAberto(String status) =>
+    status.trim().toUpperCase() != 'PAGO';
+
+String financeiroLotePagoChipLabel({
+  required bool modoSelecao,
+  required int selecionados,
+}) {
+  if (!modoSelecao) return 'Marcar lote';
+  if (selecionados <= 0) return 'Selecione alunos';
+  return selecionados == 1
+      ? 'Marcar 1 aluno pago'
+      : 'Marcar $selecionados pagos';
+}
+
+String financeiroLotePagoConfirmMessage(int alunos) =>
+    alunos == 1
+        ? 'Marca como pago as mensalidades em aberto deste aluno.'
+        : 'Marca como pago as mensalidades em aberto destes $alunos alunos.';
+
+String financeiroLotePagoSuccess(int alunos) =>
+    alunos == 1
+        ? 'Mensalidades deste aluno marcadas como pagas.'
+        : 'Mensalidades de $alunos alunos marcadas como pagas.';
+
 String financeiroMesPickerValue(String mesReferencia) {
   final raw = mesReferencia.trim();
   if (raw.isEmpty) return 'Selecionar';

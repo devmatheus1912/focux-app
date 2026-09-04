@@ -1,5 +1,6 @@
 /// Tipos que o BE já agrega em `/api/analytics` (CADASTRO / CHECKIN).
 /// Só mapeia ProductEvents existentes — sem nome novo.
+/// CHECKIN do funil nasce em `CheckinService.concluir`, não no app.
 String? productEventToFunnelTipo(String event) {
   return switch (event) {
     'aluno_created' => 'CADASTRO',
