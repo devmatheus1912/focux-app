@@ -114,23 +114,17 @@ class IaCopilotStudentSelector extends StatelessWidget {
   const IaCopilotStudentSelector({
     super.key,
     required this.alunoNome,
-    required this.brand,
-    this.ink,
-    required this.mute,
     required this.onTap,
   });
 
   final String? alunoNome;
-  final Color brand;
-  final Color? ink;
-  final Color mute;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final selected = alunoNome != null;
+    final dark = Theme.of(context).brightness == Brightness.dark;
 
-    assert((ink == null || ink!.a >= 0) && mute.a >= 0);
     return Semantics(
       button: true,
       label:
@@ -139,11 +133,14 @@ class IaCopilotStudentSelector extends StatelessWidget {
               : 'Selecionar aluno',
       child: Align(
         alignment: Alignment.centerLeft,
-        child: DashboardHomeActionChip(
+        // Tonal — não compete com o P0 (Gerar / sticky de resultado). §11/§12.
+        child: FxToggleChip(
           label: selected ? alunoNome! : 'Selecionar aluno',
-          accent: brand,
-          isDark: Theme.of(context).brightness == Brightness.dark,
-          onPressed: onTap,
+          icon: Icons.person_outline_rounded,
+          selected: selected,
+          isDark: dark,
+          showCheckmark: selected,
+          onTap: onTap,
         ),
       ),
     );
@@ -426,6 +423,41 @@ class IaCopilotGenerationStatus extends StatelessWidget {
         elapsedMs >= 1000
             ? '${(elapsedMs / 1000).toStringAsFixed(1)}s'
             : '${elapsedMs}ms';
+
+    // Pós-gerar: linha compacta — não empurra Insights abaixo do fold (§9 S1 / pilar 13).
+    if (gerado && !gerando) {
+      assert(mode.isNotEmpty);
+      return Row(
+        children: [
+          const Icon(
+            Icons.check_circle_rounded,
+            color: EagleTokens.copilotSuccess,
+            size: 16,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              'Pronto para revisão',
+              style: TextStyle(
+                color: ink,
+                fontSize: 12.5,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+          if (elapsedMs > 0)
+            Text(
+              elapsed,
+              style: TextStyle(
+                color: mute,
+                fontSize: 11,
+                fontFamily: 'monospace',
+              ),
+            ),
+        ],
+      );
+    }
+
     final primary = Theme.of(context).colorScheme.primary;
 
     return Container(
@@ -435,85 +467,39 @@ class IaCopilotGenerationStatus extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  Container(
-                    width: 8,
-                    height: 8,
-                    decoration: const BoxDecoration(
-                      color: EagleTokens.copilotSuccess,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    gerando
-                        ? 'Gerando recomendações...'
-                        : 'Recomendações prontas',
-                    style: TextStyle(
-                      color: ink,
-                      fontSize: 12.5,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ],
+              Container(
+                width: 8,
+                height: 8,
+                decoration: const BoxDecoration(
+                  color: EagleTokens.copilotSuccess,
+                  shape: BoxShape.circle,
+                ),
               ),
-              if (!gerando && elapsedMs > 0)
-                Text(
-                  elapsed,
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Gerando recomendações...',
                   style: TextStyle(
-                    color: mute,
-                    fontSize: 11,
-                    fontFamily: 'monospace',
+                    color: ink,
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
+              ),
             ],
           ),
           const SizedBox(height: 10),
           ClipRRect(
             borderRadius: BorderRadius.circular(999),
             child: LinearProgressIndicator(
-              value: gerado ? 1.0 : null,
               minHeight: 6,
               backgroundColor: wash,
-              valueColor: const AlwaysStoppedAnimation(EagleTokens.copilotSuccess),
+              valueColor: const AlwaysStoppedAnimation(
+                EagleTokens.copilotSuccess,
+              ),
             ),
           ),
-          if (gerado) ...[
-            const SizedBox(height: 12),
-            Wrap(
-              spacing: 10,
-              runSpacing: 8,
-              children:
-                  [
-                    'Histórico analisado',
-                    'Sinais priorizados',
-                    'Pronto para sua revisão',
-                  ].map((s) {
-                    return Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(
-                          Icons.check_circle,
-                          color: EagleTokens.copilotSuccess,
-                          size: 13,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          s,
-                          style: const TextStyle(
-                            color: EagleTokens.copilotSuccess,
-                            fontSize: 10.8,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ],
-                    );
-                  }).toList(),
-            ),
-          ],
         ],
       ),
     );
