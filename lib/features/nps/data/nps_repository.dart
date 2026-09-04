@@ -58,15 +58,37 @@ class NpsItem {
 class NpsHomeBundle {
   final NpsResumo resumo;
   final List<NpsItem> recentes;
+  final List<NpsItem> itens;
+  final int page;
+  final int totalItens;
+  final bool hasNext;
 
-  const NpsHomeBundle({required this.resumo, required this.recentes});
+  const NpsHomeBundle({
+    required this.resumo,
+    required this.recentes,
+    this.itens = const [],
+    this.page = 0,
+    this.totalItens = 0,
+    this.hasNext = false,
+  });
 
   factory NpsHomeBundle.fromJson(Map<String, dynamic> j) {
     final resumoJson = j['resumo'];
+    List<NpsItem> parse(String key) {
+      final raw = j[key];
+      if (raw is! List) return const [];
+      return raw
+          .whereType<Map>()
+          .map((e) => NpsItem.fromJson(Map<String, dynamic>.from(e)))
+          .toList();
+    }
+
+    final recentes = parse('recentes');
+    final itens = parse('itens');
     return NpsHomeBundle(
       resumo:
-          resumoJson is Map<String, dynamic>
-              ? NpsResumo.fromJson(resumoJson)
+          resumoJson is Map
+              ? NpsResumo.fromJson(Map<String, dynamic>.from(resumoJson))
               : NpsResumo(
                 total: 0,
                 npsScore: 0,
@@ -75,10 +97,13 @@ class NpsHomeBundle {
                 detratores: 0,
                 neutros: 0,
               ),
-      recentes:
-          ((j['recentes'] as List?) ?? const [])
-              .map((e) => NpsItem.fromJson(e as Map<String, dynamic>))
-              .toList(),
+      recentes: recentes,
+      itens: itens.isEmpty ? recentes : itens,
+      page: (j['page'] as num?)?.toInt() ?? 0,
+      totalItens:
+          (j['totalItens'] as num?)?.toInt() ??
+          (itens.isEmpty ? recentes.length : itens.length),
+      hasNext: j['hasNext'] == true,
     );
   }
 }
@@ -103,9 +128,18 @@ class NpsRepository {
     );
   }
 
-  /// BFF tipado — first paint da tela NPS (resumo + recentes).
-  Future<NpsHomeBundle> getHome() async {
-    final r = await _dio.get('/api/nps/home');
-    return NpsHomeBundle.fromJson(r.data as Map<String, dynamic>);
+  static const homePageSize = 20;
+
+  Future<NpsHomeBundle> getHome({int page = 0, String? q}) async {
+    final query = q?.trim() ?? '';
+    final r = await _dio.get(
+      '/api/nps/home',
+      queryParameters: {
+        'page': page,
+        'size': homePageSize,
+        if (query.isNotEmpty) 'q': query,
+      },
+    );
+    return NpsHomeBundle.fromJson(Map<String, dynamic>.from(r.data as Map));
   }
 }

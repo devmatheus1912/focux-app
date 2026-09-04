@@ -23,6 +23,7 @@ import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../data/retencao_repository.dart';
 import '../utils/retencao_display.dart';
+import '../widgets/retencao_catalog_sheet.dart';
 
 final retencaoRepositoryProvider = Provider(
   (ref) => RetencaoRepository(ref.read(apiClientProvider)),
@@ -100,7 +101,7 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
                       ),
                       FxHelpTip(
                         'Lista',
-                        'Os 3 primeiros já vêm do servidor, ordenados por risco.',
+                        'Os 3 primeiros já vêm do servidor. Ver todos abre a base paginada.',
                       ),
                     ],
                   ),
@@ -167,13 +168,11 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
                                   onAction:
                                       home.alto + home.medio + home.saudavel > 3
                                           ? () {
-                                            AnalyticsService.instance.track(
-                                              ProductEvents.alunosFilterChanged,
-                                              props: {'filtro': 'risco'},
-                                            );
-                                            goPersonalShellTab(
+                                            showRetencaoCatalogSheet(
                                               context,
-                                              '/alunos?filtro=risco',
+                                              repo: ref.read(
+                                                retencaoRepositoryProvider,
+                                              ),
                                             );
                                           }
                                           : null,

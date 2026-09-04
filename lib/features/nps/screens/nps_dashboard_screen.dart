@@ -24,6 +24,7 @@ import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../data/nps_repository.dart';
 import '../utils/nps_display.dart';
+import '../widgets/nps_catalog_sheet.dart';
 
 class NpsDashboardScreen extends ConsumerStatefulWidget {
   const NpsDashboardScreen({super.key});
@@ -35,6 +36,7 @@ class NpsDashboardScreen extends ConsumerStatefulWidget {
 class _NpsDashboardScreenState extends ConsumerState<NpsDashboardScreen> {
   NpsResumo? _resumo;
   List<NpsItem> _recentes = [];
+  NpsHomeBundle? _bundle;
   bool _loading = true;
   String? _erro;
   DateTime? _fetchedAt;
@@ -55,6 +57,7 @@ class _NpsDashboardScreenState extends ConsumerState<NpsDashboardScreen> {
       final home = await repo.getHome();
       if (mounted) {
         setState(() {
+          _bundle = home;
           _resumo = home.resumo;
           _recentes = home.recentes;
           _loading = false;
@@ -196,8 +199,33 @@ class _NpsDashboardScreenState extends ConsumerState<NpsDashboardScreen> {
                                   isDark: isDark,
                                 ),
                                 const SizedBox(height: TokensStrip.s4),
-                                const DashboardSectionHeader(
+                                DashboardSectionHeader(
                                   title: 'Feedback recente',
+                                  actionLabel:
+                                      (_bundle?.hasNext ?? false) ||
+                                              (_bundle?.totalItens ??
+                                                      recentes.length) >
+                                                  3
+                                          ? 'Ver todos'
+                                          : null,
+                                  onAction:
+                                      (_bundle?.hasNext ?? false) ||
+                                              (_bundle?.totalItens ??
+                                                      recentes.length) >
+                                                  3
+                                          ? () {
+                                            final bundle = _bundle;
+                                            if (bundle == null) return;
+                                            showNpsCatalogSheet(
+                                              context,
+                                              firstPage: bundle,
+                                              repo: NpsRepository(
+                                                ref.read(apiClientProvider),
+                                              ),
+                                              onContatar: _contatarDetrator,
+                                            );
+                                          }
+                                          : null,
                                 ),
                                 const SizedBox(height: TokensStrip.s2),
                                 for (final item in npsRecentPreview(recentes))

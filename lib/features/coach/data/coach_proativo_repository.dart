@@ -63,22 +63,36 @@ class CoachHome {
     required this.pending,
     required this.fila,
     this.focus,
+    this.itens = const [],
+    this.page = 0,
+    this.totalItens = 0,
+    this.hasNext = false,
     this.fetchedAt,
   });
 
   final int pending;
   final CoachHomeItem? focus;
   final List<CoachHomeItem> fila;
+  final List<CoachHomeItem> itens;
+  final int page;
+  final int totalItens;
+  final bool hasNext;
   final DateTime? fetchedAt;
 
   bool get isEmpty => pending == 0 && fila.isEmpty && focus == null;
 
   factory CoachHome.fromJson(Map<String, dynamic> j) {
-    final fila =
-        ((j['fila'] as List?) ?? const [])
-            .whereType<Map>()
-            .map((e) => CoachHomeItem.fromJson(Map<String, dynamic>.from(e)))
-            .toList(growable: false);
+    List<CoachHomeItem> parse(String key) {
+      final raw = j[key];
+      if (raw is! List) return const [];
+      return raw
+          .whereType<Map>()
+          .map((e) => CoachHomeItem.fromJson(Map<String, dynamic>.from(e)))
+          .toList(growable: false);
+    }
+
+    final fila = parse('fila');
+    final itens = parse('itens');
     final focusJson = j['focus'];
     return CoachHome(
       pending: (j['pending'] as num?)?.toInt() ?? 0,
@@ -87,6 +101,12 @@ class CoachHome {
               ? CoachHomeItem.fromJson(Map<String, dynamic>.from(focusJson))
               : null,
       fila: fila,
+      itens: itens.isEmpty ? fila : itens,
+      page: (j['page'] as num?)?.toInt() ?? 0,
+      totalItens:
+          (j['totalItens'] as num?)?.toInt() ??
+          (itens.isEmpty ? fila.length : itens.length),
+      hasNext: j['hasNext'] == true,
       fetchedAt: DateTime.tryParse(j['fetchedAt']?.toString() ?? ''),
     );
   }
@@ -103,8 +123,18 @@ class CoachProativoRepository {
         .toList();
   }
 
-  Future<CoachHome> getHome() async {
-    final r = await _dio.get('/api/coach-proativo/home');
+  static const homePageSize = 20;
+
+  Future<CoachHome> getHome({int page = 0, String? q}) async {
+    final query = q?.trim() ?? '';
+    final r = await _dio.get(
+      '/api/coach-proativo/home',
+      queryParameters: {
+        'page': page,
+        'size': homePageSize,
+        if (query.isNotEmpty) 'q': query,
+      },
+    );
     return CoachHome.fromJson(Map<String, dynamic>.from(r.data as Map));
   }
 
