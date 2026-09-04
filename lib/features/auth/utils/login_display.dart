@@ -18,8 +18,14 @@ String loginEsqueciPath({required bool isAluno, String? personalSlug}) {
   return '/esqueci-senha?role=$role';
 }
 
-String loginRegisterPath({required bool isAluno}) =>
-    isAluno ? '/register/aluno' : '/register';
+String loginRegisterPath({required bool isAluno, String? personalSlug}) {
+  if (!isAluno) return '/register';
+  final slug = personalSlug?.trim();
+  if (slug != null && slug.isNotEmpty) {
+    return '/register/aluno?p=${Uri.encodeComponent(slug)}';
+  }
+  return '/register/aluno';
+}
 
 String loginHelpTitle() => 'Entrar no Focux';
 
@@ -30,4 +36,11 @@ String loginHelpPersonalBody() =>
     'E-mail e senha, ou Google. A Home abre depois do login.';
 
 String loginHelpAlunoBody() =>
-    'Abra o convite com ?p=slug. Sem o slug o app não acha a ficha.';
+    'Abra o link do personal (?p=slug) ou digite o código do personal abaixo.';
+
+String loginSlugMissingError() =>
+    'Informe o código do seu personal ou abra o link (?p=slug).';
+
+String loginSlugFieldLabel() => 'Código do personal';
+
+String loginSlugFieldHint() => 'ex.: joao-silva';

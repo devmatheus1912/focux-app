@@ -18,6 +18,7 @@ Future<void> showAddAlunoSenhaSheet({
   required BuildContext context,
   required Aluno aluno,
   required VoidCallback onDone,
+  String? personalSlug,
 }) {
   final isDark = Theme.of(context).brightness == Brightness.dark;
   final chrome = ShellChrome.forDark(isDark);
@@ -28,6 +29,7 @@ Future<void> showAddAlunoSenhaSheet({
     nome: aluno.nome,
     email: aluno.email,
     senhaProvisoria: senha,
+    personalSlug: personalSlug,
   );
 
   Future<void> copyConvite() async {

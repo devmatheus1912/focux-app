@@ -35,6 +35,25 @@ List<RouteBase> buildAuthRoutes() {
     GoRoute(path: '/ia', redirect: (context, state) => '/ia/copiloto'),
     GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
     GoRoute(
+      path: '/p/:slug',
+      redirect: (context, state) {
+        final slug = state.pathParameters['slug']?.trim();
+        if (slug == null || slug.isEmpty) return '/login?role=aluno';
+        return '/login?role=aluno&p=${Uri.encodeComponent(slug)}';
+      },
+    ),
+    GoRoute(
+      path: '/convite/:token',
+      redirect: (context, state) {
+        final token = state.pathParameters['token']?.trim();
+        if (token == null || token.isEmpty) return '/register/aluno';
+        final params = <String, String>{'token': token};
+        final p = state.uri.queryParameters['p']?.trim();
+        if (p != null && p.isNotEmpty) params['p'] = p;
+        return Uri(path: '/register/aluno', queryParameters: params).toString();
+      },
+    ),
+    GoRoute(
       path: '/register',
       builder: (context, state) => RegisterScreen(
         referralCodigo: state.uri.queryParameters['ref'],
@@ -44,6 +63,7 @@ List<RouteBase> buildAuthRoutes() {
       path: '/register/aluno',
       builder: (context, state) => RegisterAlunoScreen(
         personalSlug: state.uri.queryParameters['p'],
+        conviteToken: state.uri.queryParameters['token'],
       ),
     ),
     GoRoute(

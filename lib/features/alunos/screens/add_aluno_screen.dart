@@ -25,6 +25,7 @@ import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../providers/alunos_provider.dart';
 import '../utils/add_aluno_display.dart';
+import '../../perfil/providers/perfil_provider.dart';
 import '../../subscription/widgets/upgrade_prompt_sheet.dart';
 import '../widgets/add_aluno_help_sheet.dart';
 import '../widgets/add_aluno_senha_sheet.dart';
@@ -228,6 +229,7 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
         await showAddAlunoSenhaSheet(
           context: context,
           aluno: novoAluno,
+          personalSlug: ref.read(perfilProvider).valueOrNull?.slug,
           onDone: () {
             if (mounted) context.pop(true);
           },

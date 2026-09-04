@@ -15,7 +15,12 @@ void main() {
     );
     expect(loginRegisterPath(isAluno: false), '/register');
     expect(loginRegisterPath(isAluno: true), '/register/aluno');
+    expect(
+      loginRegisterPath(isAluno: true, personalSlug: 'joao'),
+      '/register/aluno?p=joao',
+    );
     expect(loginEntrarLabel(), 'Entrar');
-    expect(loginHelpAlunoBody(), contains('?p=slug'));
+    expect(loginHelpAlunoBody(), contains('código do personal'));
+    expect(loginSlugMissingError(), contains('código'));
   });
 }

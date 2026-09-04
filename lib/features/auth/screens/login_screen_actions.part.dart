@@ -42,10 +42,10 @@ extension on _LoginScreenState {
 
     try {
       if (_isAluno) {
-        if (_personalSlug == null || _personalSlug!.trim().isEmpty) {
+        final slug = _effectivePersonalSlug;
+        if (slug == null || slug.isEmpty) {
           setState(() {
-            _error =
-                'Abra o link do seu personal (?p=slug) para entrar como aluno.';
+            _error = loginSlugMissingError();
             _loading = false;
           });
           return;
@@ -55,7 +55,7 @@ extension on _LoginScreenState {
             .loginAluno(
               _emailController.text.trim(),
               _passwordController.text,
-              personalSlug: _personalSlug,
+              personalSlug: slug,
             );
         if (!mounted) return;
         _trackLogin(success: true, method: 'password');
@@ -118,7 +118,8 @@ extension on _LoginScreenState {
         throw StateError('Google nao retornou idToken.');
       }
       if (_isAluno &&
-          (_personalSlug == null || _personalSlug!.trim().isEmpty)) {
+          (_effectivePersonalSlug == null ||
+              _effectivePersonalSlug!.isEmpty)) {
         throw StateError('PERSONAL_SLUG_REQUIRED');
       }
       await ref
@@ -126,7 +127,7 @@ extension on _LoginScreenState {
           .loginGoogle(
             idToken: idToken,
             isAluno: _isAluno,
-            personalSlug: _isAluno ? _personalSlug : null,
+            personalSlug: _isAluno ? _effectivePersonalSlug : null,
           );
       if (!mounted) return;
       _trackLogin(success: true, method: 'google');
