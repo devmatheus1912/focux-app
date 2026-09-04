@@ -11,8 +11,9 @@ import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../utils/ia_copiloto_display.dart';
 
-/// Chip overlay S1 (paridade Home/Perfil) — não usar como
-/// [Scaffold.bottomNavigationBar] dentro do [MainShell] (dock já limpa a base).
+/// Footer de resultado após gerar — [Scaffold.bottomNavigationBar].
+/// Sem SafeArea: o [MainShell] já aplica `FxDock.shellClearance`.
+/// Superfície opaca evita insights “vazando” por baixo do CTA.
 class IaCopilotResultActionBar extends StatelessWidget {
   const IaCopilotResultActionBar({
     super.key,
@@ -22,9 +23,6 @@ class IaCopilotResultActionBar extends StatelessWidget {
     this.primaryLabel,
   });
 
-  /// Chip (~48) + link (min 48) + paddings — folga do scroll sob o overlay.
-  static const double scrollReserve = 128;
-
   final Color brand;
   final String? primaryLabel;
   final VoidCallback onPrimary;
@@ -32,32 +30,37 @@ class IaCopilotResultActionBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Sem SafeArea: o MainShell já aplica FxDock.shellClearance.
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        FxSettingsLayout.pageInset,
-        8,
-        FxSettingsLayout.pageInset,
-        8,
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Align(
-            alignment: Alignment.centerLeft,
-            child: DashboardHomeActionChip(
-              label: primaryLabel ?? iaCopilotoCriarTarefaLabel(),
-              accent: brand,
-              isDark: Theme.of(context).brightness == Brightness.dark,
-              onPressed: onPrimary,
+    final chrome = ShellChrome.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Material(
+      color: chrome.cardFill.withValues(alpha: isDark ? 0.96 : 0.94),
+      elevation: 0,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(
+          FxSettingsLayout.pageInset,
+          TokensStrip.s2,
+          FxSettingsLayout.pageInset,
+          TokensStrip.s3,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Align(
+              alignment: Alignment.centerLeft,
+              child: DashboardHomeActionChip(
+                label: primaryLabel ?? iaCopilotoCriarTarefaLabel(),
+                accent: brand,
+                isDark: isDark,
+                onPressed: onPrimary,
+              ),
             ),
-          ),
-          FxConversionTextLink(
-            text: '',
-            actionText: iaCopilotoMaisAcoesLabel(),
-            onTap: onMore,
-          ),
-        ],
+            FxConversionTextLink(
+              text: '',
+              actionText: iaCopilotoMaisAcoesLabel(),
+              onTap: onMore,
+            ),
+          ],
+        ),
       ),
     );
   }
