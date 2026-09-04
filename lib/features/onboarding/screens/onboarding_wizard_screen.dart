@@ -210,11 +210,18 @@ class _OnboardingWizardScreenState
           leading: TextButton(
             onPressed: _sairSemConcluir,
             style: TextButton.styleFrom(
+              foregroundColor: chrome.mute,
               padding: const EdgeInsets.symmetric(horizontal: 8),
               minimumSize: Size.zero,
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
-            child: Text(wizardFazerDepoisLabel()),
+            child: Text(
+              wizardFazerDepoisLabel(),
+              style: FocuxHubTypography.bodyMuted(
+                color: chrome.mute,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ),
           actions: [
             FxHelpIconButton(
@@ -319,6 +326,16 @@ class _OnboardingWizardScreenState
             : '';
 
     final brand = BrandPalette.softened(Theme.of(context).colorScheme.primary);
+    // Contexto (Já feito / Depois) fica abaixo do foco — §11/§12.
+    final contextStyle = FocuxHubTypography.bodyMuted(
+      color: chrome.mute,
+      fontWeight: FontWeight.w500,
+      height: 1.35,
+    ).copyWith(fontSize: TokensStrip.fontBodySm);
+    final metaStyle = FocuxHubTypography.bodyMuted(
+      color: chrome.mute,
+      fontWeight: FontWeight.w500,
+    ).copyWith(fontSize: TokensStrip.fontBodySm);
 
     return [
       Row(
@@ -350,21 +367,26 @@ class _OnboardingWizardScreenState
       ],
       if (minutes.isNotEmpty) ...[
         const SizedBox(height: TokensStrip.s2),
-        Text(minutes, style: FocuxHubTypography.bodyMuted(color: chrome.mute)),
+        Text(minutes, style: metaStyle),
       ],
-      if (doneCaption.isNotEmpty) ...[
-        const SizedBox(height: TokensStrip.s4),
-        Text(
-          doneCaption,
-          style: FocuxHubTypography.bodyMuted(color: chrome.mute),
-        ),
-      ],
-      if (laterCaption.isNotEmpty) ...[
-        const SizedBox(height: TokensStrip.s2),
-        Text(
-          laterCaption,
-          style: FocuxHubTypography.bodyMuted(color: chrome.mute),
-        ),
+      if (doneCaption.isNotEmpty || laterCaption.isNotEmpty) ...[
+        const SizedBox(height: TokensStrip.s6),
+        if (doneCaption.isNotEmpty)
+          Text(
+            doneCaption,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: contextStyle,
+          ),
+        if (laterCaption.isNotEmpty) ...[
+          if (doneCaption.isNotEmpty) const SizedBox(height: TokensStrip.s2),
+          Text(
+            laterCaption,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: contextStyle,
+          ),
+        ],
       ],
     ];
   }
