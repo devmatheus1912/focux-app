@@ -44,4 +44,32 @@ void main() {
     expect(avaliacoesFromResponse({'content': null}), isEmpty);
     expect(avaliacoesFromResponse(null), isEmpty);
   });
+
+  test('pagina expõe hasNext e pesos newest-first viram série cronológica', () {
+    final p0 = avaliacoesPaginaFromResponse({
+      'content': [
+        {'id': 3, 'pesoKg': 78.0},
+        {'id': 2, 'pesoKg': 79.0},
+        {'id': 1},
+      ],
+      'hasNext': true,
+    });
+    expect(p0.hasNext, isTrue);
+    expect(p0.content, hasLength(3));
+
+    final p1 = avaliacoesPaginaFromResponse({
+      'content': [
+        {'id': 0, 'pesoKg': 80.0},
+      ],
+      'hasNext': false,
+    });
+    expect(
+      pesosHistoricoFromPaginas([p0, p1], maxPontos: 7),
+      [80.0, 79.0, 78.0],
+    );
+    expect(
+      pesosHistoricoFromPaginas([p0], maxPontos: 2),
+      [79.0, 78.0],
+    );
+  });
 }

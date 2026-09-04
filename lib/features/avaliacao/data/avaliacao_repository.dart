@@ -147,16 +147,71 @@ List<AvaliacaoFisica> avaliacoesFromResponse(dynamic data) {
   ];
 }
 
+class AvaliacoesPagina {
+  const AvaliacoesPagina({required this.content, required this.hasNext});
+
+  final List<AvaliacaoFisica> content;
+  final bool hasNext;
+}
+
+AvaliacoesPagina avaliacoesPaginaFromResponse(dynamic data) {
+  return AvaliacoesPagina(
+    content: avaliacoesFromResponse(data),
+    hasNext: data is Map && data['hasNext'] == true,
+  );
+}
+
+/// Páginas newest-first → até [maxPontos] pesos, do mais antigo ao mais novo.
+List<double> pesosHistoricoFromPaginas(
+  Iterable<AvaliacoesPagina> paginas, {
+  int maxPontos = 7,
+}) {
+  final newestFirst = <double>[];
+  for (final pagina in paginas) {
+    for (final row in pagina.content) {
+      final peso = row.pesoKg;
+      if (peso == null) continue;
+      newestFirst.add(peso);
+      if (newestFirst.length >= maxPontos) {
+        return newestFirst.reversed.toList();
+      }
+    }
+    if (!pagina.hasNext) break;
+  }
+  return newestFirst.reversed.toList();
+}
+
 class AvaliacaoRepository {
   final Dio _dio;
   AvaliacaoRepository(ApiClient c) : _dio = c.dio;
 
   Future<List<AvaliacaoFisica>> listar(int alunoId) async {
+    final pagina = await listarPagina(alunoId, page: 0, size: 100);
+    return pagina.content;
+  }
+
+  Future<AvaliacoesPagina> listarPagina(
+    int alunoId, {
+    int page = 0,
+    int size = 100,
+  }) async {
     final r = await _dio.get(
       '/api/alunos/$alunoId/avaliacoes',
-      queryParameters: const {'page': 0, 'size': 100},
+      queryParameters: {'page': page, 'size': size},
     );
-    return avaliacoesFromResponse(r.data);
+    return avaliacoesPaginaFromResponse(r.data);
+  }
+
+  /// Até 7 pesos mais recentes, andando páginas newest-first.
+  Future<List<double>> listarPesoHistorico(int alunoId) async {
+    final paginas = <AvaliacoesPagina>[];
+    for (var page = 0; page < 5; page++) {
+      final pagina = await listarPagina(alunoId, page: page, size: 100);
+      paginas.add(pagina);
+      final collected = pesosHistoricoFromPaginas(paginas);
+      if (collected.length >= 7 || !pagina.hasNext) return collected;
+    }
+    return pesosHistoricoFromPaginas(paginas);
   }
 
   Future<AvaliacaoFisica> registrar(

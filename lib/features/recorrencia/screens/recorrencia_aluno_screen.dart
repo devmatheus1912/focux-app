@@ -10,6 +10,7 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
@@ -37,6 +38,7 @@ class _RecorrenciaAlunoScreenState
     extends ConsumerState<RecorrenciaAlunoScreen> {
   RecorrenciaAssinatura? _assinatura;
   bool _loading = true;
+  bool _mutando = false;
   String? _erro;
   DateTime? _fetchedAt;
 
@@ -85,15 +87,72 @@ class _RecorrenciaAlunoScreenState
     }
   }
 
+  Future<void> _pausar() async {
+    final ok = await showFxConfirmSheet(
+      context,
+      title: recorrenciaPausarConfirmTitle(),
+      message: recorrenciaPausarConfirmMessage(),
+      confirmLabel: recorrenciaAlunoStickyLabel(
+        RecorrenciaAlunoStickyKind.pausar,
+      ),
+    );
+    if (!ok || !mounted) return;
+    setState(() => _mutando = true);
+    try {
+      final a =
+          await RecorrenciaRepository(ref.read(apiClientProvider)).pausarMinha();
+      if (!mounted) return;
+      setState(() {
+        _assinatura = a;
+        _fetchedAt = DateTime.now();
+      });
+      FeedbackHelper.showSuccess(context, 'Cobrança pausada.');
+    } catch (e) {
+      if (!mounted) return;
+      FeedbackHelper.showError(context, friendlyError(e));
+    } finally {
+      if (mounted) setState(() => _mutando = false);
+    }
+  }
+
+  Future<void> _retomar() async {
+    final ok = await showFxConfirmSheet(
+      context,
+      title: recorrenciaRetomarConfirmTitle(),
+      message: recorrenciaRetomarConfirmMessage(),
+      confirmLabel: recorrenciaAlunoStickyLabel(
+        RecorrenciaAlunoStickyKind.retomar,
+      ),
+    );
+    if (!ok || !mounted) return;
+    setState(() => _mutando = true);
+    try {
+      final a = await RecorrenciaRepository(
+        ref.read(apiClientProvider),
+      ).retomarMinha();
+      if (!mounted) return;
+      setState(() {
+        _assinatura = a;
+        _fetchedAt = DateTime.now();
+      });
+      FeedbackHelper.showSuccess(context, 'Cobrança retomada.');
+    } catch (e) {
+      if (!mounted) return;
+      FeedbackHelper.showError(context, friendlyError(e));
+    } finally {
+      if (mounted) setState(() => _mutando = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
     final assinatura = _assinatura;
-    final podeAutorizar = recorrenciaTemLinkCheckout(
-      assinatura?.status ?? '',
-      assinatura?.initPoint,
+    final stickyKind = recorrenciaAlunoStickyKind(
+      status: assinatura?.status,
+      initPoint: assinatura?.initPoint,
     );
     final showSticky = !_loading && _erro == null;
 
@@ -206,13 +265,22 @@ class _RecorrenciaAlunoScreenState
                                 MediaQuery.viewInsetsOf(context).bottom,
                           ),
                           child: FxLiquidPrimaryButton(
-                            label: recorrenciaAlunoStickyLabel(
-                              podeAutorizar: podeAutorizar,
-                            ),
+                            label: recorrenciaAlunoStickyLabel(stickyKind),
+                            loading: _mutando,
+                            loadingLabel: 'Salvando…',
                             onPressed:
-                                podeAutorizar
-                                    ? _autorizar
-                                    : () => context.push('/chat/aluno'),
+                                _mutando
+                                    ? null
+                                    : switch (stickyKind) {
+                                      RecorrenciaAlunoStickyKind.autorizar =>
+                                        _autorizar,
+                                      RecorrenciaAlunoStickyKind.pausar =>
+                                        _pausar,
+                                      RecorrenciaAlunoStickyKind.retomar =>
+                                        _retomar,
+                                      RecorrenciaAlunoStickyKind.chat =>
+                                        () => context.push('/chat/aluno'),
+                                    },
                           ),
                         ),
                       ),

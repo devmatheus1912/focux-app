@@ -12,6 +12,7 @@ void main() {
   test('recorrenciaStatusLabel em PT-BR', () {
     expect(recorrenciaStatusLabel('PENDENTE'), 'Pendente');
     expect(recorrenciaStatusLabel('ativa'), 'Ativa');
+    expect(recorrenciaStatusLabel('PAUSADA'), 'Pausada');
     expect(recorrenciaStatusLabel('CANCELADA'), 'Cancelada');
     expect(recorrenciaStatusLabel(''), 'Sem status');
     expect(recorrenciaStatusLabel(null), 'Sem status');
@@ -40,11 +41,35 @@ void main() {
 
   test('recorrencia aluno sticky e subtitle', () {
     expect(
-      recorrenciaAlunoStickyLabel(podeAutorizar: true),
+      recorrenciaAlunoStickyKind(status: 'PENDENTE', initPoint: 'https://mp'),
+      RecorrenciaAlunoStickyKind.autorizar,
+    );
+    expect(
+      recorrenciaAlunoStickyKind(status: 'ATIVA'),
+      RecorrenciaAlunoStickyKind.pausar,
+    );
+    expect(
+      recorrenciaAlunoStickyKind(status: 'PAUSADA'),
+      RecorrenciaAlunoStickyKind.retomar,
+    );
+    expect(
+      recorrenciaAlunoStickyKind(status: null),
+      RecorrenciaAlunoStickyKind.chat,
+    );
+    expect(
+      recorrenciaAlunoStickyLabel(RecorrenciaAlunoStickyKind.autorizar),
       'Autorizar pagamento',
     );
     expect(
-      recorrenciaAlunoStickyLabel(podeAutorizar: false),
+      recorrenciaAlunoStickyLabel(RecorrenciaAlunoStickyKind.pausar),
+      'Pausar cobrança',
+    );
+    expect(
+      recorrenciaAlunoStickyLabel(RecorrenciaAlunoStickyKind.retomar),
+      'Retomar cobrança',
+    );
+    expect(
+      recorrenciaAlunoStickyLabel(RecorrenciaAlunoStickyKind.chat),
       'Falar com o personal',
     );
     expect(
