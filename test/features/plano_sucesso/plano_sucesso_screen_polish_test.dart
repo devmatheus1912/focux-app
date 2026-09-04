@@ -17,6 +17,9 @@ void main() {
     expect(screen, contains('FxHelpIconButton'));
     expect(screen, contains('showPlanoSucessoHelpSheet'));
     expect(screen, contains('RefreshIndicator'));
+    expect(screen, contains('showDatePicker'));
+    expect(screen, contains('revisarPlano'));
+    expect(screen, contains("icon: 'calendar'"));
     expect(screen, contains('FxEmptyState'));
     expect(screen, contains('SkeletonList'));
     expect(screen, contains('friendlyError'));

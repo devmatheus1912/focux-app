@@ -154,6 +154,43 @@ class _PlanoSucessoScreenState extends State<PlanoSucessoScreen> {
     }
   }
 
+  Future<void> _remarcarRevisao() async {
+    final plano = context.read<PlanoSucessoProvider>().plano;
+    if (plano == null) return;
+    HapticFeedback.selectionClick();
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    var initial = DateTime(
+      plano.proximaRevisao.year,
+      plano.proximaRevisao.month,
+      plano.proximaRevisao.day,
+    );
+    if (initial.isBefore(today)) initial = today;
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: initial,
+      firstDate: today,
+      lastDate: DateTime(today.year + 2, today.month, today.day),
+      helpText: 'Próxima revisão',
+      cancelText: 'Cancelar',
+      confirmText: 'Salvar',
+    );
+    if (picked == null || !mounted) return;
+    try {
+      await context.read<PlanoSucessoProvider>().revisarPlano(
+        planoId: plano.id,
+        alunoId: widget.alunoId,
+        novaProximaRevisao: picked,
+      );
+      if (!mounted) return;
+      setState(() => _fetchedAt = DateTime.now());
+      FeedbackHelper.showSuccess(context, 'Revisão remarcada.');
+    } catch (e) {
+      if (!mounted) return;
+      FeedbackHelper.showError(context, friendlyError(e));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<PlanoSucessoProvider>();
@@ -163,11 +200,12 @@ class _PlanoSucessoScreenState extends State<PlanoSucessoScreen> {
     final plano = provider.plano;
     final proximo =
         plano == null ? null : planoSucessoProximoMarco(plano.marcos);
-    final showSticky =
-        !provider.isLoading &&
-        provider.erro == null &&
-        (plano == null || proximo != null);
-    final stickyLabel = planoSucessoStickyLabel(proximo);
+    final showSticky = !provider.isLoading && provider.erro == null;
+    final stickyLabel = planoSucessoStickyLabel(
+      hasPlano: plano != null,
+      proximo: proximo,
+    );
+    final showCalendario = plano != null && proximo != null;
 
     return fxScreenA11yScope(
       label: 'Plano de Sucesso',
@@ -181,6 +219,12 @@ class _PlanoSucessoScreenState extends State<PlanoSucessoScreen> {
               tooltip: 'Como usar o plano de sucesso',
               onTap: () => showPlanoSucessoHelpSheet(context),
             ),
+            if (showCalendario)
+              ShellHeaderIconButton(
+                icon: 'calendar',
+                tooltip: 'Remarcar revisão',
+                onTap: _remarcarRevisao,
+              ),
           ],
         ),
         body: Column(
@@ -230,7 +274,9 @@ class _PlanoSucessoScreenState extends State<PlanoSucessoScreen> {
                     onPressed:
                         plano == null
                             ? _criarPlano
-                            : () => _marcarMarco(provider, proximo!.id),
+                            : proximo != null
+                            ? () => _marcarMarco(provider, proximo.id)
+                            : _remarcarRevisao,
                   ),
                 ),
               ),

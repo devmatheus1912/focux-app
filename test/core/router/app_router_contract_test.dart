@@ -45,6 +45,8 @@ void main() {
     expect(sources, contains("state.extra is Aluno"));
     expect(sources, contains("path: '/perfil/editar'"));
     expect(sources, contains("state.extra is PerfilPersonal"));
+    expect(sources, contains("path: '/alunos/:id/alimentar/:planoId'"));
+    expect(sources, contains("state.extra is PlanoAlimentar"));
     expect(sources, contains("path: '/checkin/executar'"));
     expect(sources, contains('treinoIdFromState(state) == null'));
     expect(sources, contains("state.uri.queryParameters['treinoId']"));

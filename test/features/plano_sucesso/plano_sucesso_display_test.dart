@@ -33,8 +33,19 @@ void main() {
     ];
     expect(planoSucessoProximoMarco(marcos), same(pendente));
     expect(planoSucessoProximoMarco(const []), isNull);
-    expect(planoSucessoStickyLabel(null), 'Criar plano');
-    expect(planoSucessoStickyLabel(pendente), 'Marcar etapa');
+    expect(
+      planoSucessoStickyLabel(hasPlano: false, proximo: null),
+      'Criar plano',
+    );
+    expect(
+      planoSucessoStickyLabel(hasPlano: true, proximo: pendente),
+      'Marcar etapa',
+    );
+    expect(
+      planoSucessoStickyLabel(hasPlano: true, proximo: null),
+      'Remarcar revisão',
+    );
+    expect(planoSucessoRevisaoIso(DateTime(2026, 9, 3)), '2026-09-03');
     expect(
       planoSucessoMarcoSubtitle(atingido: true, atual: false),
       'Etapa concluída',

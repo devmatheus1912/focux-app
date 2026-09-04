@@ -18,6 +18,11 @@ Future<void> showPlanoSucessoHelpSheet(BuildContext context) {
         'Sem plano, o mesmo botão pede o objetivo e as primeiras etapas.',
         icon: 'plus',
       ),
+      FxHelpTip(
+        'Revisão',
+        'Com etapas em aberto, o calendário no topo remarca o prazo. Plano completo usa o botão de baixo.',
+        icon: 'calendar',
+      ),
     ],
   );
 }
