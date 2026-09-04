@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/widgets/fx_help.dart';
+import '../utils/agenda_display.dart';
 
 Future<void> showAgendaHelpSheet(BuildContext context) {
   return showFxHelpSheet(
@@ -8,6 +9,7 @@ Future<void> showAgendaHelpSheet(BuildContext context) {
     title: 'Como usar a agenda',
     subtitle: 'O dia do personal: próximo horário, lacunas e a ficha do aluno.',
     tips: const [
+      FxHelpTip('Como calculamos', agendaComoCalculamos),
       FxHelpTip(
         'Próximo',
         'O card em destaque é o próximo atendimento de hoje. Toque para abrir, confirmar ou concluir.',

@@ -69,6 +69,11 @@ void main() {
     expect(screen, contains('keyboardDismissBehavior'));
     expect(screen, contains('DashboardSectionHeader'));
     expect(
+      File('lib/features/agenda/widgets/agenda_help_sheet.dart')
+          .readAsStringSync(),
+      contains('Como calculamos'),
+    );
+    expect(
       File('lib/features/agenda/screens/agenda_screen.dart').readAsStringSync(),
       isNot(contains('FxSettingsGroup')),
     );
