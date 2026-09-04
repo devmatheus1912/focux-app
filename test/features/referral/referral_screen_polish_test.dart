@@ -27,6 +27,9 @@ void main() {
     expect(screen, isNot(contains('FxSettingsGroup')));
     expect(screen, contains('copySensitiveToClipboard'));
     expect(screen, contains('referral_link_shared'));
+    expect(screen, contains('viewInsetsOf'));
+    expect(screen, contains('referralHeaderSubtitle'));
+    expect(screen, contains('Não conseguimos carregar a indicação'));
     expect(screen, isNot(contains("props: {'codigo'")));
     expect(screen, isNot(contains('TabBar')));
     expect(screen, isNot(contains('TabBarView')));

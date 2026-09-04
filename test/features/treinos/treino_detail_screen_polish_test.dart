@@ -85,6 +85,10 @@ void main() {
     expect(screen, contains('OperationalMetricTile'));
     expect(screen, contains('FxHelpIconButton'));
     expect(screen, contains('showTreinoDetailHelpSheet'));
+    expect(screen, contains('FxShellAppBar'));
+    expect(screen, contains('viewInsetsOf'));
+    expect(screen, isNot(contains('_TreinoDetailBackButton')));
+    expect(screen, isNot(contains('constrainWidth: false')));
     expect(screen, contains('RefreshIndicator'));
     expect(screen, contains('FxContentWidthLimiter'));
     expect(screen, contains('treino_detail_grouping.dart'));

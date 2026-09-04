@@ -22,6 +22,7 @@ import '../../../core/widgets/fx_form_sheet.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_hub_header.dart';
+import '../../../core/widgets/fx_icon.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -32,6 +33,7 @@ import '../../../core/widgets/skeleton_loader.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
+import '../utils/exercicio_detail_display.dart';
 import '../utils/exercise_video_upload_spec.dart';
 import '../widgets/exercicio_detail_help_sheet.dart';
 

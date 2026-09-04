@@ -28,5 +28,9 @@ void main() {
     expect(screen, contains('OperationalMetricTile'));
     expect(screen, contains('FxHelpIconButton'));
     expect(screen, contains('showExercicioDetailHelpSheet'));
+    expect(screen, contains('viewInsetsOf'));
+    expect(screen, contains('RefreshIndicator'));
+    expect(screen, contains('exercicioHubSubtitle'));
+    expect(screen, contains("name: 'star'"));
   });
 }

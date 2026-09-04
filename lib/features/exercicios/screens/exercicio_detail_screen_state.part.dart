@@ -131,6 +131,12 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
     }
   }
 
+  Future<void> _refresh() async {
+    ref.invalidate(exercicioProvider(widget.exercicioId));
+    await ref.read(exercicioProvider(widget.exercicioId).future);
+    if (mounted) setState(() => _fetchedAt = DateTime.now());
+  }
+
   @override
   Widget build(BuildContext context) {
     final exercicioAsync = ref.watch(exercicioProvider(widget.exercicioId));
@@ -161,10 +167,9 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
                               ? 'Remover dos favoritos'
                               : 'Adicionar aos favoritos',
                       onPressed: () => _toggleFavorito(context, ex.favoritado),
-                      icon: Icon(
-                        ex.favoritado
-                            ? Icons.star_rounded
-                            : Icons.star_border_rounded,
+                      icon: FxIcon(
+                        name: 'star',
+                        size: 22,
                         color: ex.favoritado ? EagleTokens.warn : mute,
                       ),
                     ),
@@ -173,9 +178,7 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
             ),
           ],
         ),
-        body: SafeArea(
-          bottom: false,
-          child: exercicioAsync.when(
+        body: exercicioAsync.when(
             loading: () => const SkeletonList(count: 5),
             error:
                 (e, _) => FxErrorState(
@@ -191,27 +194,31 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
                 (ex) {
                   _fetchedAt ??= DateTime.now();
                   final grupo = _grupoLabel(ex);
+                  final freshness = FxHubFreshness.fromFetchedAt(_fetchedAt);
                   return Column(
                   children: [
                     Expanded(
-                      child: FxContentWidthLimiter(
-                        child: SingleChildScrollView(
-                          padding: const EdgeInsets.fromLTRB(
-                            FxSettingsLayout.pageInset,
-                            8,
-                            FxSettingsLayout.pageInset,
-                            32,
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              FxHubHeader(
-                                title: ex.nome,
-                                freshnessLabel: FxHubFreshness.fromFetchedAt(
-                                  _fetchedAt,
+                      child: RefreshIndicator(
+                        onRefresh: _refresh,
+                        child: FxContentWidthLimiter(
+                          child: SingleChildScrollView(
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            padding: const EdgeInsets.fromLTRB(
+                              FxSettingsLayout.pageInset,
+                              8,
+                              FxSettingsLayout.pageInset,
+                              32,
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                FxHubHeader(
+                                  title: ex.nome,
+                                  subtitle: exercicioHubSubtitle(
+                                    grupo: grupo,
+                                    freshness: freshness,
+                                  ),
                                 ),
-                                subtitle: grupo,
-                              ),
                               const SizedBox(height: TokensStrip.s4),
                               OperationalMetricTile(
                                 label: 'Grupo',
@@ -275,14 +282,16 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
                         ),
                       ),
                     ),
+                    ),
                     SafeArea(
                       top: false,
                       child: Padding(
-                        padding: const EdgeInsets.fromLTRB(
+                        padding: EdgeInsets.fromLTRB(
                           FxSettingsLayout.pageInset,
                           TokensStrip.s2,
                           FxSettingsLayout.pageInset,
-                          TokensStrip.s3,
+                          TokensStrip.s3 +
+                              MediaQuery.viewInsetsOf(context).bottom,
                         ),
                         child: FxLiquidPrimaryButton(
                           label: 'Editar exercício',
@@ -302,9 +311,8 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
                   ],
                 );
                 },
-            ),
-          ),
         ),
+      ),
     );
   }
 }

@@ -137,6 +137,7 @@ class _ReferralScreenState extends ConsumerState<ReferralScreen> {
                   primary: primary,
                   message: _erro!,
                   onRetry: _load,
+                  title: 'Não conseguimos carregar a indicação',
                 )
                 : FxContentWidthLimiter(
                   child: _buildBody(
@@ -156,19 +157,55 @@ class _ReferralScreenState extends ConsumerState<ReferralScreen> {
   }) {
     final info = _info;
     if (info == null || referralCodigoLabel(info.codigo) == '—') {
-      return RefreshIndicator(
-        onRefresh: _load,
-        child: ListView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          children: [
-            FxEmptyState(
-              icon: 'users',
-              title: 'Código ainda não disponível',
-              subtitle: 'Puxe para atualizar. O servidor cria o código no primeiro acesso.',
-              action: FxEmptyAction(label: 'Tentar de novo', onTap: _load),
+      return Column(
+        children: [
+          Expanded(
+            child: RefreshIndicator(
+              onRefresh: _load,
+              child: ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.fromLTRB(
+                  FxSettingsLayout.pageInset,
+                  TokensStrip.s4,
+                  FxSettingsLayout.pageInset,
+                  TokensStrip.s4,
+                ),
+                children: [
+                  FxHubHeader(
+                    title: 'Seu convite',
+                    subtitle: referralHubSubtitle(freshness),
+                  ),
+                  const SizedBox(height: TokensStrip.s4),
+                  FxEmptyState(
+                    icon: 'users',
+                    title: 'Código ainda não disponível',
+                    subtitle:
+                        'Puxe para atualizar. O servidor cria o código no primeiro acesso.',
+                    action: FxEmptyAction(
+                      label: 'Tentar de novo',
+                      onTap: _load,
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ],
-        ),
+          ),
+          SafeArea(
+            top: false,
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(
+                FxSettingsLayout.pageInset,
+                TokensStrip.s2,
+                FxSettingsLayout.pageInset,
+                TokensStrip.s3 + MediaQuery.viewInsetsOf(context).bottom,
+              ),
+              child: FxLiquidPrimaryButton(
+                label: 'Tentar de novo',
+                onPressed: _load,
+              ),
+            ),
+          ),
+        ],
       );
     }
     return Column(
@@ -187,8 +224,10 @@ class _ReferralScreenState extends ConsumerState<ReferralScreen> {
               children: [
                 FxHubHeader(
                   title: referralCodigoLabel(info.codigo),
-                  freshnessLabel: freshness,
-                  subtitle: referralUsosLabel(info.usosTotais),
+                  subtitle: referralHeaderSubtitle(
+                    usos: info.usosTotais,
+                    freshness: freshness,
+                  ),
                 ),
                 const SizedBox(height: TokensStrip.s4),
                 OperationalMetricTile(
@@ -218,11 +257,11 @@ class _ReferralScreenState extends ConsumerState<ReferralScreen> {
         SafeArea(
           top: false,
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(
+            padding: EdgeInsets.fromLTRB(
               FxSettingsLayout.pageInset,
               TokensStrip.s2,
               FxSettingsLayout.pageInset,
-              TokensStrip.s3,
+              TokensStrip.s3 + MediaQuery.viewInsetsOf(context).bottom,
             ),
             child: FxLiquidPrimaryButton(
               label: 'Copiar convite',
