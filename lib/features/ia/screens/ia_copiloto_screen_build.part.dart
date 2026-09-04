@@ -125,9 +125,6 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
                               )
                               : IaCopilotStudentSelector(
                                 alunoNome: _selectedAlunoNome,
-                                brand: brand,
-                                ink: ink,
-                                mute: mute,
                                 onTap: _selecionarAluno,
                               ),
                     ),
@@ -158,46 +155,46 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
                       ),
                     ),
 
-                    // Contexto e preparo
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(
-                        TokensStrip.s4,
-                        0,
-                        16,
-                        14,
+                    // Pre-gerar: contexto + disclaimer (somem após resultado — fold livre p/ Insights).
+                    if (!_gerado) ...[
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(
+                          TokensStrip.s4,
+                          0,
+                          16,
+                          14,
+                        ),
+                        child: IaCopilotReadinessCard(
+                          headline: _readinessHeadline,
+                          modeDisplay: _modeDisplay,
+                          icon: _modeIcon,
+                          promise: _modePromise,
+                          checks: _modeChecks,
+                          alunoNome: _selectedAlunoNome,
+                          recoveryAsync:
+                              _selectedAlunoId == null
+                                  ? null
+                                  : ref.watch(
+                                    copilotRecoveryProvider(_selectedAlunoId!),
+                                  ),
+                        ),
                       ),
-                      child: IaCopilotReadinessCard(
-                        headline: _readinessHeadline,
-                        modeDisplay: _modeDisplay,
-                        icon: _modeIcon,
-                        promise: _modePromise,
-                        checks: _modeChecks,
-                        alunoNome: _selectedAlunoNome,
-                        recoveryAsync:
-                            _selectedAlunoId == null
-                                ? null
-                                : ref.watch(
-                                  copilotRecoveryProvider(_selectedAlunoId!),
-                                ),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(
+                          FxSettingsLayout.pageInset,
+                          0,
+                          FxSettingsLayout.pageInset,
+                          12,
+                        ),
+                        child: IaCopilotSafetyNote(
+                          ink: ink,
+                          mute: mute,
+                          brand: brand,
+                        ),
                       ),
-                    ),
+                    ],
 
-                    // Safety disclaimer
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(
-                        FxSettingsLayout.pageInset,
-                        0,
-                        FxSettingsLayout.pageInset,
-                        12,
-                      ),
-                      child: IaCopilotSafetyNote(
-                        ink: ink,
-                        mute: mute,
-                        brand: brand,
-                      ),
-                    ),
-
-                    // Generate button / progress
+                    // Gerar (P0 pré-resultado) / progresso / status compacto pós-gerar
                     Padding(
                       padding: const EdgeInsets.fromLTRB(
                         FxSettingsLayout.pageInset,
@@ -240,7 +237,7 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
                         ),
                       ),
 
-                    // Result card — vinculado ao backend (/api/ia/copiloto/insights)
+                    // Resultado — Insights above the fold (pilar 13); sticky = único P0.
                     if (_erro != null) ...[
                       Padding(
                         padding: const EdgeInsets.fromLTRB(
