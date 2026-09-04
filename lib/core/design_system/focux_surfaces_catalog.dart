@@ -303,6 +303,16 @@ const Map<String, FocuxSurfaceSpec> focuxSurfaceCatalog = {
   ),
   '/relatorios/global': FocuxSurfaceSpec(type: _s1, logicalParent: _home),
   '/convites': FocuxSurfaceSpec(type: _s4, logicalParent: _home),
+  '/convite/:token': FocuxSurfaceSpec(
+    type: _s6,
+    hasInput: true,
+    logicalParent: '/login',
+  ),
+  '/p/:slug': FocuxSurfaceSpec(
+    type: _s6,
+    hasInput: true,
+    logicalParent: '/login',
+  ),
   '/planos': FocuxSurfaceSpec(type: _s6, logicalParent: _perfil),
   '/paywall': FocuxSurfaceSpec(type: _s6, logicalParent: _home),
   '/assinatura': FocuxSurfaceSpec(type: _s6, logicalParent: _perfil),

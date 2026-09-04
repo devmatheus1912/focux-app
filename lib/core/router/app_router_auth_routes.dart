@@ -8,6 +8,7 @@ import '../../features/auth/screens/register_screen.dart';
 import '../../features/auth/screens/resetar_senha_verificar_codigo_screen.dart';
 import '../../features/auth/screens/resetar_senha_screen.dart';
 import '../../features/auth/screens/splash_screen.dart';
+import '../../features/convites/screens/convite_deep_link_screen.dart';
 import '../../features/onboarding/screens/onboarding_screen.dart';
 import 'role_home.dart';
 
@@ -44,13 +45,12 @@ List<RouteBase> buildAuthRoutes() {
     ),
     GoRoute(
       path: '/convite/:token',
-      redirect: (context, state) {
-        final token = state.pathParameters['token']?.trim();
-        if (token == null || token.isEmpty) return '/register/aluno';
-        final params = <String, String>{'token': token};
-        final p = state.uri.queryParameters['p']?.trim();
-        if (p != null && p.isNotEmpty) params['p'] = p;
-        return Uri(path: '/register/aluno', queryParameters: params).toString();
+      builder: (context, state) {
+        final token = state.pathParameters['token']?.trim() ?? '';
+        return ConviteDeepLinkScreen(
+          token: token,
+          initialSlug: state.uri.queryParameters['p'],
+        );
       },
     ),
     GoRoute(
