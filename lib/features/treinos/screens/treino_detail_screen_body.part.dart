@@ -358,49 +358,29 @@ class _TreinoDetailBody extends StatelessWidget {
                   TokensStrip.s3,
                 ),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Text(
-                      contextLabel,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: FocuxHubTypography.eyebrow(
-                        context,
-                        color: chrome.mute,
-                      ),
-                    ),
-                    SizedBox(height: TokensStrip.s1),
-                    Text(
-                      displayName,
-                      style: FocuxHubTypography.pageTitle(
-                        context,
-                        color: chrome.ink,
-                      ),
-                    ),
-                    SizedBox(height: TokensStrip.s2),
-                    Text(
-                      metaLine,
-                      style: FocuxHubTypography.bodyMuted(
-                        color: chrome.mute,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    if (freshnessLabel != null &&
-                        freshnessLabel!.isNotEmpty) ...[
-                      SizedBox(height: TokensStrip.s1),
-                      Semantics(
-                        liveRegion: true,
-                        child: Text(
+                    FxHubHeader(
+                      title: displayName,
+                      subtitle: [
+                        contextLabel,
+                        metaLine,
+                        if (freshnessLabel != null &&
+                            freshnessLabel!.isNotEmpty)
                           freshnessLabel!,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: FocuxHubTypography.bodyMuted(
-                            color: chrome.mute,
-                            fontWeight: FontWeight.w600,
-                          ).copyWith(fontSize: 11),
-                        ),
-                      ),
-                    ],
+                      ].where((s) => s.trim().isNotEmpty).join(' · '),
+                    ),
+                    const SizedBox(height: TokensStrip.s4),
+                    OperationalMetricTile(
+                      label: 'Exercícios',
+                      value: '${orderedExercises.length}',
+                      hint:
+                          orderedExercises.isEmpty
+                              ? 'Monte a lista'
+                              : metaLine,
+                      color: primary,
+                      isDark: isDark,
+                    ),
                   ],
                 ),
               ),

@@ -25,6 +25,11 @@ void main() {
     expect(screen, contains('FxSatelliteListTile'));
     expect(screen, contains('DashboardSectionHeader'));
     expect(screen, contains('RefreshIndicator'));
+    expect(screen, contains('FxHubHeader'));
+    expect(screen, contains('OperationalMetricTile'));
+    expect(screen, contains('FxLiquidPrimaryButton'));
+    expect(screen, contains('FxHelpIconButton'));
+    expect(screen, contains('showEvolucaoHelpSheet'));
     expect(screen, isNot(contains('TabBar')));
     expect(screen, isNot(contains('TabBarView')));
     expect(screen, isNot(contains('TabController')));

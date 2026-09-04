@@ -8,15 +8,21 @@ import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/utils/fx_utils.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_form_sheet.dart';
+import '../../../core/widgets/fx_help.dart';
+import '../../../core/widgets/fx_hub_header.dart';
 import '../../../core/widgets/fx_inset_picker_sheet.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/operational_metric_tile.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../../core/widgets/fx_sparkline.dart';
 import '../../../core/widgets/skeleton_loader.dart';
@@ -24,6 +30,7 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../../alunos/utils/satellite_screen_utils.dart';
 import '../data/evolucao_repository.dart';
 import '../utils/evolucao_display.dart';
+import '../widgets/evolucao_help_sheet.dart';
 
 part 'evolucao_screen_widgets.part.dart';
 
@@ -50,6 +57,7 @@ class EvolucaoScreen extends ConsumerStatefulWidget {
 
 class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
   EvolucaoHubView _view = EvolucaoHubView.medidas;
+  DateTime? _fetchedAt;
 
   Future<void> _abrirVista() async {
     final picked = await showFxInsetPickerSheet<EvolucaoHubView>(
@@ -78,58 +86,127 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
     final homeAsync = ref.watch(evolucaoHomeProvider(widget.alunoId));
     final medidasAsync = homeAsync.whenData((h) => h.medidas);
     final recordesAsync = homeAsync.whenData((h) => h.recordes);
-    final variacao = medidasAsync.whenOrNull(
-      data: evolucaoVariacaoPeso,
-    );
+    final medidas = medidasAsync.asData?.value;
+    final variacao = medidas == null ? null : evolucaoVariacaoPeso(medidas);
+    if (homeAsync.hasValue && _fetchedAt == null) {
+      _fetchedAt = DateTime.now();
+    }
+    final chrome = ShellChrome.of(context);
+    final primary = Theme.of(context).colorScheme.primary;
 
     return fxScreenA11yScope(
       label: 'Evolução — ${widget.alunoNome}',
       child: FxShellScaffold(
         useMesh: true,
         appBar: FxShellAppBar(
-          title: 'Evolução — ${widget.alunoNome}',
+          title: 'Evolução',
           subtitle: evolucaoHubSubtitle(view: _view, variacao: variacao),
           onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
           actions: [
+            FxHelpIconButton(
+              tooltip: 'Como usar a evolução',
+              onTap: () => showEvolucaoHelpSheet(context),
+            ),
             ShellHeaderIconButton(
               icon: 'trend',
               tooltip: 'Trocar visão',
               onTap: _abrirVista,
             ),
-            ShellHeaderIconButton(
-              icon: 'plus',
-              tooltip:
-                  _view == EvolucaoHubView.medidas
-                      ? 'Registrar medida'
-                      : 'Registrar recorde',
-              onTap: _registrar,
-            ),
           ],
         ),
-        body: FxContentWidthLimiter(
-          child: IndexedStack(
-            index: _view.index,
-            children: [
-              _TabMedidas(
-                alunoNome: widget.alunoNome,
-                medidasAsync: medidasAsync,
-                onRegister: _mostrarDialogMedida,
-                onRetry:
-                    () => ref.invalidate(
-                      evolucaoHomeProvider(widget.alunoId),
+        body: Column(
+          children: [
+            Expanded(
+              child: FxContentWidthLimiter(
+                child: Column(
+                  children: [
+                    if (homeAsync.hasValue)
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(
+                          FxSettingsLayout.pageInset,
+                          TokensStrip.s4,
+                          FxSettingsLayout.pageInset,
+                          TokensStrip.s2,
+                        ),
+                        child: Column(
+                          children: [
+                            FxHubHeader(
+                              title: fxTitleCaseName(widget.alunoNome),
+                              freshnessLabel: FxHubFreshness.fromFetchedAt(
+                                _fetchedAt,
+                              ),
+                              subtitle: evolucaoHubViewLabel(_view),
+                            ),
+                            const SizedBox(height: TokensStrip.s4),
+                            OperationalMetricTile(
+                              label:
+                                  _view == EvolucaoHubView.medidas
+                                      ? 'Peso'
+                                      : 'Recordes',
+                              value:
+                                  _view == EvolucaoHubView.medidas
+                                      ? evolucaoPesoAtual(medidas ?? const [])
+                                      : '${recordesAsync.asData?.value.length ?? 0}',
+                              hint:
+                                  _view == EvolucaoHubView.medidas
+                                      ? (variacao == null || variacao.isEmpty
+                                          ? 'Registre duas medidas para ver a variação'
+                                          : variacao)
+                                      : 'Marcas pessoais',
+                              color: primary,
+                              isDark: chrome.isDark,
+                            ),
+                          ],
+                        ),
+                      ),
+                    Expanded(
+                      child: IndexedStack(
+                        index: _view.index,
+                        children: [
+                          _TabMedidas(
+                            alunoNome: widget.alunoNome,
+                            medidasAsync: medidasAsync,
+                            onRegister: _mostrarDialogMedida,
+                            onRetry:
+                                () => ref.invalidate(
+                                  evolucaoHomeProvider(widget.alunoId),
+                                ),
+                          ),
+                          _TabRecordes(
+                            alunoNome: widget.alunoNome,
+                            recordesAsync: recordesAsync,
+                            onRegister: _mostrarDialogRecorde,
+                            onRetry:
+                                () => ref.invalidate(
+                                  evolucaoHomeProvider(widget.alunoId),
+                                ),
+                          ),
+                        ],
+                      ),
                     ),
+                  ],
+                ),
               ),
-              _TabRecordes(
-                alunoNome: widget.alunoNome,
-                recordesAsync: recordesAsync,
-                onRegister: _mostrarDialogRecorde,
-                onRetry:
-                    () => ref.invalidate(
-                      evolucaoHomeProvider(widget.alunoId),
-                    ),
+            ),
+            SafeArea(
+              top: false,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  FxSettingsLayout.pageInset,
+                  TokensStrip.s2,
+                  FxSettingsLayout.pageInset,
+                  TokensStrip.s3,
+                ),
+                child: FxLiquidPrimaryButton(
+                  label:
+                      _view == EvolucaoHubView.medidas
+                          ? 'Registrar medida'
+                          : 'Registrar recorde',
+                  onPressed: _registrar,
+                ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
