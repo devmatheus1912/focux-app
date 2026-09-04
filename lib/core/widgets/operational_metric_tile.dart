@@ -58,6 +58,8 @@ class OperationalMetricTile extends StatelessWidget {
     final mute = fxScreenMute(context);
     final labelColor = Color.lerp(ink, color, isDark ? 0.22 : 0.18)!;
     final hintColor = Color.lerp(mute, ink, isDark ? 0.55 : 0.72)!;
+    // Alert = warn fill/borda mais fortes; sem rail lateral (alinha o stack
+    // de métricas na Home — §11 secundário não compete com P0).
     final tile = Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: operationalMetricDecoration(
@@ -65,61 +67,42 @@ class OperationalMetricTile extends StatelessWidget {
         isDark: isDark,
         emphasis: emphasis,
       ),
-      child: IntrinsicHeight(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-          if (emphasis == OperationalMetricEmphasis.alert) ...[
-            Container(
-              width: 3,
-              margin: const EdgeInsets.only(right: 10),
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: isDark ? 0.88 : 0.78),
-                borderRadius: BorderRadius.circular(999),
-              ),
-            ),
-          ],
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label.toUpperCase(),
-                  style: FocuxHubTypography.chip(labelColor).copyWith(
-                    letterSpacing: 0.4,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    if (leadingIcon != null) ...[
-                      Icon(leadingIcon, size: 17, color: color),
-                      const SizedBox(width: 5),
-                    ],
-                    Flexible(
-                      child: Text(
-                        value,
-                        style: FocuxHubTypography.kpi(
-                          color: ink,
-                          fontSize: FocuxHubTypography.metricMd,
-                        ).copyWith(letterSpacing: 0.2),
-                      ),
-                    ),
-                  ],
-                ),
-                Text(
-                  hint,
-                  style: FocuxHubTypography.bodyMuted(
-                    color: hintColor,
-                    fontWeight: FontWeight.w600,
-                    height: 1.2,
-                  ),
-                ),
-              ],
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label.toUpperCase(),
+            style: FocuxHubTypography.chip(labelColor).copyWith(
+              letterSpacing: 0.4,
             ),
           ),
-          ],
-        ),
+          const SizedBox(height: 4),
+          Row(
+            children: [
+              if (leadingIcon != null) ...[
+                Icon(leadingIcon, size: 17, color: color),
+                const SizedBox(width: 5),
+              ],
+              Flexible(
+                child: Text(
+                  value,
+                  style: FocuxHubTypography.kpi(
+                    color: ink,
+                    fontSize: FocuxHubTypography.metricMd,
+                  ).copyWith(letterSpacing: 0.2),
+                ),
+              ),
+            ],
+          ),
+          Text(
+            hint,
+            style: FocuxHubTypography.bodyMuted(
+              color: hintColor,
+              fontWeight: FontWeight.w600,
+              height: 1.2,
+            ),
+          ),
+        ],
       ),
     );
 
