@@ -28,3 +28,8 @@ String alimentarRefeicaoKcalLabel(int? calorias) {
   if (calorias == null) return 'Sem kcal';
   return '$calorias kcal';
 }
+
+String alimentarPlanosMetricHint(int count) {
+  if (count <= 0) return 'Crie o primeiro plano';
+  return 'Toque para abrir as refeições';
+}

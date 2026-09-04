@@ -16,7 +16,14 @@ void main() {
     expect(screen, contains('SkeletonList'));
     expect(screen, contains('RefreshIndicator'));
     expect(screen, contains('FxHubFreshness.fromFetchedAt'));
+    expect(screen, contains('FxHubHeader'));
+    expect(screen, contains('OperationalMetricTile'));
+    expect(screen, contains('FxLiquidPrimaryButton'));
+    expect(screen, contains('FxHelpIconButton'));
+    expect(screen, contains('showAlimentarHelpSheet'));
+    expect(screen, contains("safePopOrGo(context, '/alunos/\${widget.alunoId}')"));
     expect(screen, contains('showFxFormSheet'));
+    expect(screen, contains('FxSatelliteListTile'));
     expect(screen, contains('_MacroBar'));
     expect(screen, isNot(contains('TabBar')));
     expect(screen, isNot(contains('TabBarView')));
@@ -24,6 +31,7 @@ void main() {
     expect(screen, isNot(contains('FloatingActionButton')));
     expect(screen, isNot(contains('_NovoPlanoScreen')));
     expect(screen, isNot(contains(r'showError(context, $e)')));
+    expect(screen, isNot(contains('Aluno #')));
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(16));
   });
 }
