@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:focux_app/core/widgets/fx_input_deco.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 import 'package:go_router/go_router.dart';
 
@@ -16,7 +15,6 @@ import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
-import '../../../core/widgets/fx_form_sheet.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_motion.dart';
@@ -27,6 +25,7 @@ import '../../alunos/widgets/aluno_avatar.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../data/alertas_repository.dart';
 import '../utils/alerta_detalhe_display.dart';
+import '../widgets/alerta_enviar_mensagem_sheet.dart';
 
 class AlertasScreen extends ConsumerStatefulWidget {
   const AlertasScreen({super.key});
@@ -152,35 +151,18 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
   }
 
   Future<void> _enviarMensagemChat(AlertaRisco alerta) async {
-    final ctrl = TextEditingController(
-      text:
-          'Olá ${alerta.alunoNome.split(' ').first}! Vi que faz um tempo que não treina. Que tal retomarmos hoje?',
-    );
-
-    final confirm = await showFxFormSheet(
+    final texto = await showAlertaEnviarMensagemSheet(
       context,
-      title: 'Enviar mensagem',
-      icon: Icons.send_rounded,
-      confirmLabel: 'Enviar',
-      child: TextField(
-        controller: ctrl,
-        maxLines: 3,
-        decoration: InputDecoration(
-          border: FxInputDeco.outlineBorder(
-            borderRadius: BorderRadius.circular(14),
-          ),
-        ),
-      ),
+      draft: alertaMensagemDraft(alunoNome: alerta.alunoNome),
     );
-
-    if (confirm != true || ctrl.text.trim().isEmpty) return;
+    if (texto == null || !mounted) return;
 
     try {
       await AlertasRepository(
         ref.read(apiClientProvider),
-      ).enviarMensagemChat(alerta.alunoId, ctrl.text.trim());
+      ).enviarMensagemChat(alerta.alunoId, texto);
       if (mounted) {
-        FeedbackHelper.showSuccess(context, 'Mensagem enviada.');
+        FeedbackHelper.showSuccess(context, alertaMensagemEnviadaSuccess());
       }
     } catch (e) {
       if (mounted) {
@@ -225,7 +207,7 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
               ),
               const SizedBox(height: TokensStrip.s3),
               FxLiquidPrimaryButton(
-                label: 'Enviar mensagem',
+                label: alertaEnviarMensagemCtaLabel(),
                 onPressed: () {
                   Navigator.pop(sheetContext);
                   _enviarMensagemChat(alerta);
