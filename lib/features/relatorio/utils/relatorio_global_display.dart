@@ -19,6 +19,18 @@ String relatorioTreinosSubtitle(int concluidos, int total) {
 List<T> relatorioRankingPreview<T>(List<T> items) =>
     items.take(3).toList(growable: false);
 
+List<T> relatorioRankingSearch<T>(
+  List<T> items,
+  String q,
+  String Function(T item) nomeOf,
+) {
+  final needle = q.trim().toLowerCase();
+  if (needle.isEmpty) return List.of(items);
+  return items
+      .where((item) => nomeOf(item).toLowerCase().contains(needle))
+      .toList(growable: false);
+}
+
 T? firstRelatorioAtencao<T>(List<T> menosComprometidos) =>
     menosComprometidos.isEmpty ? null : menosComprometidos.first;
 

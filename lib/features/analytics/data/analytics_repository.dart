@@ -135,9 +135,4 @@ class AnalyticsRepository {
     final r = await _dio.get('/api/analytics/home');
     return AnalyticsDashboard.fromJson(r.data as Map<String, dynamic>);
   }
-
-  Future<FunilAtivacao> getFunil() async {
-    final r = await _dio.get('/api/analytics/funil');
-    return FunilAtivacao.fromJson(r.data as Map<String, dynamic>);
-  }
 }
