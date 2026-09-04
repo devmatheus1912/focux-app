@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import '../../core/api/api_client.dart';
 import '../../core/utils/friendly_error.dart';
+import 'plano_sucesso_display.dart';
 import 'plano_sucesso_model.dart';
 
 class PlanoSucessoProvider with ChangeNotifier {
@@ -61,6 +62,21 @@ class PlanoSucessoProvider with ChangeNotifier {
       titulo: _plano!.marcos[index].titulo,
       atingido: true,
     );
+    notifyListeners();
+  }
+
+  Future<void> revisarPlano({
+    required int planoId,
+    required int alunoId,
+    required DateTime novaProximaRevisao,
+  }) async {
+    await _api.dio.patch(
+      '/api/planos-sucesso/$planoId/revisar',
+      data: {'novaProximaRevisao': planoSucessoRevisaoIso(novaProximaRevisao)},
+    );
+    final res = await _api.dio.get('/api/planos-sucesso/aluno/$alunoId');
+    _plano = PlanoSucesso.fromJson(res.data);
+    _erro = null;
     notifyListeners();
   }
 }

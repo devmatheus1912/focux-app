@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
@@ -28,7 +29,6 @@ import '../../alunos/utils/satellite_screen_utils.dart';
 import '../data/alimentar_repository.dart';
 import '../utils/alimentar_display.dart';
 import '../widgets/alimentar_help_sheet.dart';
-import 'plano_alimentar_detail_screen.dart';
 
 class AlimentarScreen extends ConsumerStatefulWidget {
   final int alunoId;
@@ -172,15 +172,9 @@ class _AlimentarScreenState extends ConsumerState<AlimentarScreen> {
   }
 
   void _abrirPlano(PlanoAlimentar plano) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder:
-            (_) => PlanoAlimentarDetailScreen(
-              alunoId: widget.alunoId,
-              plano: plano,
-            ),
-      ),
+    context.push(
+      '/alunos/${widget.alunoId}/alimentar/${plano.id}',
+      extra: plano,
     );
   }
 

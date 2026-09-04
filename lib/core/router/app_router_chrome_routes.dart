@@ -98,6 +98,8 @@ import '../../features/growth/screens/migracao_magica_screen.dart';
 import '../../features/gamificacao/screens/gamificacao_screen.dart';
 import '../../features/anamnese/screens/anamnese_screen.dart';
 import '../../features/alimentar/screens/alimentar_screen.dart';
+import '../../features/alimentar/screens/plano_alimentar_detail_screen.dart';
+import '../../features/alimentar/data/alimentar_repository.dart';
 import '../../features/ia/screens/ia_progressao_screen.dart';
 import '../../features/chat/screens/chat_screen.dart';
 import '../../features/perfil/screens/wallet_screen.dart';
@@ -247,6 +249,26 @@ RouteBase buildChromeShellRoute() {
                   alunoId: intPathParam(state, 'id')!,
                   alunoNome: stringRouteExtra(state),
                 ),
+          ),
+          GoRoute(
+            path: '/alunos/:id/alimentar/:planoId',
+            redirect: (context, state) {
+              final alunoId = intPathParam(state, 'id');
+              final planoId = intPathParam(state, 'planoId');
+              if (alunoId == null) return '/alunos';
+              if (planoId == null) return '/alunos/$alunoId/alimentar';
+              if (state.extra is PlanoAlimentar) {
+                final extra = state.extra as PlanoAlimentar;
+                if (extra.id == planoId) return null;
+              }
+              return '/alunos/$alunoId/alimentar';
+            },
+            builder: (context, state) {
+              return PlanoAlimentarDetailScreen(
+                alunoId: intPathParam(state, 'id')!,
+                plano: state.extra as PlanoAlimentar,
+              );
+            },
           ),
           GoRoute(
             path: '/alunos/:id/treinos-list',

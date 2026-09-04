@@ -25,6 +25,8 @@ void main() {
     expect(screen, contains('showFxFormSheet'));
     expect(screen, contains('FxSatelliteListTile'));
     expect(screen, contains('_MacroBar'));
+    expect(screen, contains("'/alunos/\${widget.alunoId}/alimentar/\${plano.id}'"));
+    expect(screen, isNot(contains('Navigator.push')));
     expect(screen, isNot(contains('TabBar')));
     expect(screen, isNot(contains('TabBarView')));
     expect(screen, isNot(contains('DropdownButton')));

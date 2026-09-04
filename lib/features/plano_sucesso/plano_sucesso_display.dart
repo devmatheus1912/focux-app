@@ -40,7 +40,18 @@ MarcoSucesso? planoSucessoProximoMarco(List<MarcoSucesso> marcos) {
   return null;
 }
 
-String planoSucessoStickyLabel(MarcoSucesso? proximo) {
-  if (proximo == null) return 'Criar plano';
-  return 'Marcar etapa';
+String planoSucessoRevisaoIso(DateTime data) {
+  final y = data.year.toString().padLeft(4, '0');
+  final m = data.month.toString().padLeft(2, '0');
+  final d = data.day.toString().padLeft(2, '0');
+  return '$y-$m-$d';
+}
+
+String planoSucessoStickyLabel({
+  required bool hasPlano,
+  required MarcoSucesso? proximo,
+}) {
+  if (!hasPlano) return 'Criar plano';
+  if (proximo != null) return 'Marcar etapa';
+  return 'Remarcar revisão';
 }
