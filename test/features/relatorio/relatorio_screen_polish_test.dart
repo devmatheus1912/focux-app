@@ -11,9 +11,11 @@ void main() {
     expect(screen, contains('FxShellScaffold'));
     expect(screen, contains('FxHelpIconButton'));
     expect(screen, isNot(contains('FxSettingsGroup')));
+    expect(screen, contains('FxHubHeader'));
     expect(screen, contains('OperationalMetricTile'));
-    expect(screen, contains('DashboardHomeActionChip'));
-    expect(screen, contains('FxEmptyState'));
+    expect(screen, contains('FxLiquidPrimaryButton'));
+    expect(screen, contains('FxContentWidthLimiter'));
+    expect(screen, contains('relatorioAlunoStickyExport'));
     expect(screen, contains('FxErrorState'));
     expect(screen, contains('SkeletonList'));
     expect(screen, contains('RefreshIndicator'));

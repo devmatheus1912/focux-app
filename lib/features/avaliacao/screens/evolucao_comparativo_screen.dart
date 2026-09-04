@@ -6,19 +6,25 @@ import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/utils/fx_utils.dart';
+import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_form_sheet.dart';
 import '../../../core/widgets/fx_help.dart';
-import '../../../core/widgets/fx_premium_entrance.dart';
+import '../../../core/widgets/fx_hub_header.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
-import '../../dashboard/widgets/dashboard_section_header.dart';
+import '../../../core/widgets/operational_metric_tile.dart';
 import '../../../core/widgets/skeleton_loader.dart';
+import '../../../features/alunos/widgets/aluno_inset_form_field.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../evolucao/data/evolucao_repository.dart';
 import '../data/avaliacao_repository.dart';
@@ -45,6 +51,8 @@ class _EvolucaoComparativoScreenState
   String? _erro;
   bool _semAvaliacao = false;
   bool _compartilhando = false;
+  bool _registrando = false;
+  DateTime? _fetchedAt;
 
   @override
   void initState() {
@@ -66,14 +74,15 @@ class _EvolucaoComparativoScreenState
       setState(() {
         _comparativo = c;
         _loading = false;
+        _fetchedAt = DateTime.now();
       });
     } catch (e) {
       final msg = friendlyError(e);
-      final eh404 = msg.contains('404') || msg.contains('Not Found');
       if (!mounted) return;
       setState(() {
-        if (eh404) {
+        if (evolucaoComparativoIsEmptyError(msg)) {
           _semAvaliacao = true;
+          _comparativo = null;
         } else {
           _erro = msg;
         }
@@ -125,10 +134,7 @@ class _EvolucaoComparativoScreenState
       ).compartilharEvolucao(widget.alunoId);
       if (!mounted) return;
       HapticFeedback.heavyImpact();
-      FeedbackHelper.showSuccess(
-        context,
-        'Evolução compartilhada via chat.',
-      );
+      FeedbackHelper.showSuccess(context, 'Evolução compartilhada via chat.');
     } catch (e) {
       if (mounted) {
         FeedbackHelper.showError(
@@ -141,133 +147,248 @@ class _EvolucaoComparativoScreenState
     }
   }
 
+  Future<void> _registrar() async {
+    if (_registrando) return;
+    HapticFeedback.selectionClick();
+    final peso = TextEditingController();
+    final altura = TextEditingController();
+    final gordura = TextEditingController();
+    final cintura = TextEditingController();
+    var saved = false;
+    try {
+      if (!mounted) return;
+      final ok = await showFxFormSheet(
+        context,
+        title: 'Nova avaliação',
+        subtitle: 'Peso é obrigatório. O resto entra se você tiver.',
+        icon: Icons.monitor_weight_outlined,
+        confirmLabel: 'Salvar',
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AlunoInsetFormField(
+              controller: peso,
+              label: 'Peso (kg)',
+              icon: Icons.monitor_weight_outlined,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            ),
+            AlunoInsetFormField(
+              controller: altura,
+              label: 'Altura (cm)',
+              icon: Icons.height_outlined,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            ),
+            AlunoInsetFormField(
+              controller: gordura,
+              label: '% Gordura',
+              icon: Icons.percent_outlined,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            ),
+            AlunoInsetFormField(
+              controller: cintura,
+              label: 'Cintura (cm)',
+              icon: Icons.straighten_outlined,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              showDivider: false,
+            ),
+          ],
+        ),
+      );
+      if (ok != true) return;
+      final pesoKg = double.tryParse(peso.text.trim().replaceAll(',', '.'));
+      if (pesoKg == null) {
+        if (mounted) {
+          FeedbackHelper.showWarn(context, 'Informe o peso em kg.');
+        }
+        return;
+      }
+      setState(() => _registrando = true);
+      await AvaliacaoRepository(ref.read(apiClientProvider)).registrar(
+        widget.alunoId,
+        {
+          'pesoKg': pesoKg,
+          if (altura.text.trim().isNotEmpty)
+            'alturaCm': double.tryParse(altura.text.trim().replaceAll(',', '.')),
+          if (gordura.text.trim().isNotEmpty)
+            'percGordura':
+                double.tryParse(gordura.text.trim().replaceAll(',', '.')),
+          if (cintura.text.trim().isNotEmpty)
+            'cinturaCm':
+                double.tryParse(cintura.text.trim().replaceAll(',', '.')),
+        },
+      );
+      saved = true;
+    } catch (e) {
+      if (mounted) {
+        FeedbackHelper.showError(context, friendlyError(e));
+      }
+    } finally {
+      peso.dispose();
+      altura.dispose();
+      gordura.dispose();
+      cintura.dispose();
+      if (mounted) setState(() => _registrando = false);
+    }
+    if (saved) await _load();
+  }
+
   @override
   Widget build(BuildContext context) {
     final chrome = ShellChrome.of(context);
-    final isDark = chrome.isDark;
     final primary = Theme.of(context).colorScheme.primary;
-    final canShare = !_loading && _comparativo != null && !_compartilhando;
+    final showSticky = !_loading && _erro == null;
+    final empty = _semAvaliacao || _comparativo == null;
     return fxScreenA11yScope(
       label: 'Evolução de ${widget.alunoNome}',
       child: FxShellScaffold(
         useMesh: true,
         appBar: FxShellAppBar(
-          title: 'Evolução de ${widget.alunoNome}',
-          subtitle: evolucaoComparativoHubSubtitle(),
+          title: 'Comparativo',
           onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
           actions: [
             FxHelpIconButton(tooltip: 'Como comparar', onTap: _showHelp),
-            Padding(
-              padding: const EdgeInsets.only(right: TokensStrip.s3),
-              child: Center(
-                child: Semantics(
-                  button: true,
-                  enabled: canShare,
-                  label:
-                      _compartilhando
-                          ? 'Enviando resumo da evolução'
-                          : evolucaoComparativoShareTooltip(),
-                  child: ShellHeaderIconButton(
-                    icon: 'message-circle',
-                    tooltip: evolucaoComparativoShareTooltip(),
-                    onTap: canShare ? _compartilhar : () {},
+          ],
+        ),
+        body: Column(
+          children: [
+            Expanded(
+              child:
+                  _loading
+                      ? const Padding(
+                        padding: EdgeInsets.all(FxSettingsLayout.pageInset),
+                        child: SkeletonList(count: 4),
+                      )
+                      : _erro != null
+                      ? FxErrorState(
+                        chromeOnDark: chrome.isDark,
+                        primary: primary,
+                        message: _erro!,
+                        onRetry: _load,
+                        title: 'Não conseguimos carregar o comparativo',
+                      )
+                      : FxContentWidthLimiter(child: _buildBody()),
+            ),
+            if (showSticky)
+              SafeArea(
+                top: false,
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    FxSettingsLayout.pageInset,
+                    TokensStrip.s2,
+                    FxSettingsLayout.pageInset,
+                    TokensStrip.s3 + MediaQuery.viewInsetsOf(context).bottom,
+                  ),
+                  child: FxLiquidPrimaryButton(
+                    label:
+                        empty
+                            ? evolucaoComparativoStickyRegistrar()
+                            : evolucaoComparativoStickyShare(),
+                    loading: _compartilhando || _registrando,
+                    onPressed:
+                        empty
+                            ? (_registrando ? null : _registrar)
+                            : (_compartilhando ? null : _compartilhar),
                   ),
                 ),
               ),
-            ),
           ],
-        ),
-        body: FxPremiumEntrance(
-          child: _loading
-              ? const SkeletonList(count: 4)
-              : _erro != null
-              ? FxErrorState(
-                chromeOnDark: isDark,
-                primary: primary,
-                message: _erro!,
-                onRetry: _load,
-                title: 'Não conseguimos carregar o comparativo',
-              )
-              : _semAvaliacao
-              ? FxEmptyState(
-                icon: 'trend',
-                title: 'Nenhuma avaliação para comparar',
-                subtitle:
-                    'Registre ao menos duas avaliações físicas para ver a evolução.',
-                action: FxEmptyAction(
-                  label: 'Voltar ao Aluno 360',
-                  onTap:
-                      () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
-                ),
-              )
-              : _buildConteudo(_comparativo!),
         ),
       ),
     );
   }
 
-  Widget _buildConteudo(ComparativoEvolucao c) {
-    final chrome = ShellChrome.of(context);
-    return FxContentWidthLimiter(
-      child: SingleChildScrollView(
+  Widget _buildBody() {
+    final c = _comparativo;
+    if (c == null || _semAvaliacao) {
+      return RefreshIndicator(
+        onRefresh: _load,
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.fromLTRB(
+            FxSettingsLayout.pageInset,
+            TokensStrip.s4,
+            FxSettingsLayout.pageInset,
+            32,
+          ),
+          children: [
+            FxHubHeader(
+              title: fxTitleCaseName(widget.alunoNome),
+              subtitle: evolucaoComparativoHubSubtitle(),
+            ),
+            const SizedBox(height: TokensStrip.s5),
+            FxEmptyState(
+              icon: 'trend',
+              title: 'Nenhuma avaliação para comparar',
+              subtitle:
+                  'Registre ao menos duas avaliações físicas para ver a evolução.',
+            ),
+          ],
+        ),
+      );
+    }
+    return RefreshIndicator(
+      onRefresh: _load,
+      child: ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.fromLTRB(
           FxSettingsLayout.pageInset,
-          8,
+          TokensStrip.s4,
           FxSettingsLayout.pageInset,
-          24,
+          TokensStrip.s6,
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            EvolucaoComparativoTable(primeira: c.primeira, atual: c.atual),
-            const SizedBox(height: TokensStrip.s3),
-            Row(
-              children: [
-                const Icon(Icons.circle, size: 10, color: EagleTokens.good),
-                const SizedBox(width: 4),
-                Text(
-                  'Melhora',
-                  style: TextStyle(fontSize: 12, color: chrome.mute),
-                ),
-                const SizedBox(width: 12),
-                const Icon(Icons.circle, size: 10, color: EagleTokens.bad),
-                const SizedBox(width: 4),
-                Text(
-                  'Piora',
-                  style: TextStyle(fontSize: 12, color: chrome.mute),
-                ),
-                const SizedBox(width: 12),
-                Icon(Icons.circle, size: 10, color: chrome.mute),
-                const SizedBox(width: 4),
-                Text(
-                  'Sem alteração',
-                  style: TextStyle(fontSize: 12, color: chrome.mute),
-                ),
-              ],
-            ),
-            const SizedBox(height: TokensStrip.s4),
-            const DashboardSectionHeader(title: 'Janela'),
-            const SizedBox(height: TokensStrip.s2),
-            Text(
+        children: [
+          FxHubHeader(
+            title: fxTitleCaseName(widget.alunoNome),
+            subtitle: [
               evolucaoComparativoJanelaCaption(
                 primeira: evolucaoComparativoFmtData(c.primeira.avaliadoEm),
                 atual: evolucaoComparativoFmtData(c.atual.avaliadoEm),
               ),
-              style: TextStyle(fontSize: 12, color: chrome.mute),
+              if (FxHubFreshness.fromFetchedAt(_fetchedAt) case final fresh?)
+                fresh,
+            ].join(' · '),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(
+              top: TokensStrip.s4,
+              bottom: TokensStrip.s3,
             ),
-            const SizedBox(height: TokensStrip.s3),
-            FxSatelliteListTile(
-              title: evolucaoComparativoShareTileLabel(),
-              subtitle: Text(
-                _compartilhando
-                    ? 'Enviando…'
-                    : evolucaoComparativoShareTileValue(),
-              ),
-              onTap: _compartilhando ? null : _compartilhar,
+            child: OperationalMetricTile(
+              label: 'Peso atual',
+              value: evolucaoComparativoFmtValor(c.atual.pesoKg, 'kg'),
+              hint: evolucaoComparativoPesoMetricHint(c.diferencaPeso),
+              color: Theme.of(context).colorScheme.primary,
+              isDark: Theme.of(context).brightness == Brightness.dark,
             ),
-          ],
-        ),
+          ),
+          EvolucaoComparativoTable(primeira: c.primeira, atual: c.atual),
+          const SizedBox(height: TokensStrip.s3),
+          _LegendaComparativo(),
+        ],
       ),
+    );
+  }
+}
+
+class _LegendaComparativo extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final mute = ShellChrome.of(context).mute;
+    final style = FocuxHubTypography.bodyMuted(color: mute);
+    return Row(
+      children: [
+        const Icon(Icons.circle, size: 10, color: EagleTokens.good),
+        const SizedBox(width: TokensStrip.s1),
+        Text('Melhora', style: style),
+        const SizedBox(width: TokensStrip.s3),
+        const Icon(Icons.circle, size: 10, color: EagleTokens.bad),
+        const SizedBox(width: TokensStrip.s1),
+        Text('Piora', style: style),
+        const SizedBox(width: TokensStrip.s3),
+        Icon(Icons.circle, size: 10, color: mute),
+        const SizedBox(width: TokensStrip.s1),
+        Text('Sem alteração', style: style),
+      ],
     );
   }
 }

@@ -1,4 +1,5 @@
 import '../../../core/utils/fx_utils.dart';
+import '../data/avaliacao_repository.dart';
 
 enum EvolucaoComparativoDeltaTone { better, worse, same, missing }
 
@@ -20,11 +21,121 @@ class EvolucaoComparativoDelta {
 
 String evolucaoComparativoHubSubtitle() => 'Primeira vs atual avaliação';
 
-String evolucaoComparativoShareTooltip() => 'Compartilhar no chat';
+String evolucaoComparativoStickyShare() => 'Compartilhar no chat';
 
-String evolucaoComparativoShareTileLabel() => 'Compartilhar via Chat';
+String evolucaoComparativoStickyRegistrar() => 'Registrar avaliação';
 
-String evolucaoComparativoShareTileValue() => 'Enviar resumo';
+bool evolucaoComparativoIsEmptyError(String message) {
+  final lower = message.toLowerCase();
+  return lower.contains('404') ||
+      lower.contains('not found') ||
+      lower.contains('não encontrado') ||
+      lower.contains('nao encontrado') ||
+      lower.contains('nenhuma avaliação') ||
+      lower.contains('nenhuma avaliacao');
+}
+
+String evolucaoComparativoPesoMetricHint(double? delta) {
+  if (delta == null) return 'Peso da última avaliação';
+  if (delta == 0) return 'Peso igual ao da primeira';
+  final signed = '${delta > 0 ? '+' : ''}${delta.toStringAsFixed(1)} kg';
+  return 'Desde a primeira: $signed';
+}
+
+double? evolucaoComparativoImc(double? pesoKg, double? alturaCm) {
+  if (pesoKg == null || alturaCm == null || alturaCm <= 0) return null;
+  final metros = alturaCm / 100;
+  return pesoKg / (metros * metros);
+}
+
+class EvolucaoComparativoMetrica {
+  const EvolucaoComparativoMetrica({
+    required this.label,
+    required this.unidade,
+    required this.primeira,
+    required this.atual,
+    required this.menorEMelhor,
+  });
+
+  final String label;
+  final String unidade;
+  final double? primeira;
+  final double? atual;
+  final bool menorEMelhor;
+
+  bool get visivel => primeira != null || atual != null;
+}
+
+List<EvolucaoComparativoMetrica> evolucaoComparativoMetricas({
+  required SnapshotAvaliacao primeira,
+  required SnapshotAvaliacao atual,
+}) {
+  return [
+    EvolucaoComparativoMetrica(
+      label: 'Peso',
+      unidade: 'kg',
+      primeira: primeira.pesoKg,
+      atual: atual.pesoKg,
+      menorEMelhor: true,
+    ),
+    EvolucaoComparativoMetrica(
+      label: 'IMC',
+      unidade: '',
+      primeira: primeira.imc ?? evolucaoComparativoImc(primeira.pesoKg, primeira.alturaCm),
+      atual: atual.imc ?? evolucaoComparativoImc(atual.pesoKg, atual.alturaCm),
+      menorEMelhor: true,
+    ),
+    EvolucaoComparativoMetrica(
+      label: '% Gordura',
+      unidade: '%',
+      primeira: primeira.percGordura,
+      atual: atual.percGordura,
+      menorEMelhor: true,
+    ),
+    EvolucaoComparativoMetrica(
+      label: '% Massa',
+      unidade: '%',
+      primeira: primeira.percMassa,
+      atual: atual.percMassa,
+      menorEMelhor: false,
+    ),
+    EvolucaoComparativoMetrica(
+      label: 'Massa muscular',
+      unidade: 'kg',
+      primeira: primeira.massaMuscular,
+      atual: atual.massaMuscular,
+      menorEMelhor: false,
+    ),
+    EvolucaoComparativoMetrica(
+      label: 'Cintura',
+      unidade: 'cm',
+      primeira: primeira.circCintura,
+      atual: atual.circCintura,
+      menorEMelhor: true,
+    ),
+    EvolucaoComparativoMetrica(
+      label: 'Quadril',
+      unidade: 'cm',
+      primeira: primeira.circQuadril,
+      atual: atual.circQuadril,
+      menorEMelhor: true,
+    ),
+    EvolucaoComparativoMetrica(
+      label: 'Braço',
+      unidade: 'cm',
+      primeira: primeira.circBraco,
+      atual: atual.circBraco,
+      menorEMelhor: false,
+    ),
+    EvolucaoComparativoMetrica(
+      label: 'Coxa',
+      unidade: 'cm',
+      primeira: primeira.circCoxa,
+      atual: atual.circCoxa,
+      menorEMelhor: false,
+    ),
+  ].where((row) => row.visivel).toList();
+}
 
 String evolucaoComparativoConfirmTitle() => 'Compartilhar no chat?';
 

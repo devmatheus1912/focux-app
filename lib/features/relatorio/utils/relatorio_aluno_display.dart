@@ -80,3 +80,16 @@ String relatorioAlunoCheckinsLabel(int count) {
   if (count == 1) return '1 check-in';
   return '$count check-ins';
 }
+
+String relatorioAlunoStickyExport() => 'Exportar PDF';
+
+String relatorioAlunoHubSubtitle({
+  required String alunoNome,
+  required int diasAnalisados,
+  String? freshness,
+}) {
+  final dias =
+      diasAnalisados <= 0 ? alunoNome : '$alunoNome · $diasAnalisados dias';
+  if (freshness == null || freshness.isEmpty) return dias;
+  return '$dias · $freshness';
+}

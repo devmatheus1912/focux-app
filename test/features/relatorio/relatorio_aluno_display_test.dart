@@ -45,4 +45,20 @@ void main() {
     expect(relatorioAlunoCheckinsLabel(1), '1 check-in');
     expect(relatorioAlunoCheckinsLabel(8), '8 check-ins');
   });
+
+  test('hub e sticky do relatório do aluno', () {
+    expect(relatorioAlunoStickyExport(), 'Exportar PDF');
+    expect(
+      relatorioAlunoHubSubtitle(alunoNome: 'Ana', diasAnalisados: 30),
+      'Ana · 30 dias',
+    );
+    expect(
+      relatorioAlunoHubSubtitle(
+        alunoNome: 'Ana',
+        diasAnalisados: 30,
+        freshness: 'há 1 min',
+      ),
+      'Ana · 30 dias · há 1 min',
+    );
+  });
 }

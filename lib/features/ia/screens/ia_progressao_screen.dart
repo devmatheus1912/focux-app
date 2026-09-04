@@ -18,21 +18,25 @@ import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
+import '../../../core/widgets/fx_hub_header.dart';
+import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_motion.dart';
-import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
-import '../../../core/widgets/ia_safety_disclaimer.dart';
+import '../../../core/widgets/operational_metric_tile.dart';
 import '../../../features/alunos/constants/aluno_360_layout.dart';
 import '../../../features/alunos/widgets/aluno_inset_form_field.dart';
 import '../../../features/auth/providers/auth_provider.dart';
+import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../data/ia_repository.dart';
 import '../models/ia_progressao_carga_result.dart';
+import '../providers/progressao_sugestoes_provider.dart';
 import '../utils/ia_progressao_input_normalizer.dart';
 import '../utils/progressao_aceitar_route_args.dart';
 import '../utils/progressao_copy.dart';
 import '../widgets/ia_progressao_loading_skeleton.dart';
 import '../widgets/ia_progressao_result_view.dart';
 import '../widgets/ia_quota_upgrade.dart';
+import '../../../core/widgets/ia_safety_disclaimer.dart';
 
 class IaProgressaoScreen extends ConsumerStatefulWidget {
   final int alunoId;
@@ -223,6 +227,7 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
       setState(() => _resultado = r);
       _scrollToResult();
       if (r.sugestoesRegistradas > 0) {
+        ref.invalidate(progressaoSugestoesProvider(widget.alunoId));
         FeedbackHelper.showSuccess(
           context,
           progressaoSavedForReviewSnack(r.sugestoesRegistradas),
@@ -257,145 +262,177 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
   Widget build(BuildContext context) {
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final pending =
+        ref.watch(progressaoSugestoesProvider(widget.alunoId)).valueOrNull ??
+        const [];
     return fxScreenA11yScope(
       label: 'Progressão de Carga',
-      child: FxShellScaffold(
-        useMesh: true,
-        appBar: FxShellAppBar(
-          title: 'Progressão de Carga',
-          subtitle: progressaoHubSubtitle(widget.alunoNome),
-          onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
-          actions: [
-            FxHelpIconButton(
-              tooltip: 'Como pedir progressão',
-              onTap: _showHelp,
-            ),
-          ],
-        ),
-        bottomNavigationBar: SafeArea(
-          top: false,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(
-              FxSettingsLayout.pageInset,
-              TokensStrip.s2,
-              FxSettingsLayout.pageInset,
-              TokensStrip.s3,
-            ),
-            child: Semantics(
-              button: true,
-              enabled: !_loading,
-              label:
-                  _loading
-                      ? 'Gerando progressão com IA'
-                      : progressaoStickyLabel(hasResult: _resultado != null),
-              child: FxLiquidPrimaryButton(
-                label: progressaoStickyLabel(hasResult: _resultado != null),
-                loading: _loading,
-                loadingLabel: progressaoStickyLoadingLabel(),
-                onPressed: _loading ? null : _gerar,
+      child: FxKeyboardPopScope(
+        child: FxShellScaffold(
+          useMesh: true,
+          appBar: FxShellAppBar(
+            title: 'Progressão de carga',
+            onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
+            actions: [
+              FxHelpIconButton(
+                tooltip: 'Como pedir progressão',
+                onTap: _showHelp,
               ),
-            ),
+            ],
           ),
-        ),
-        body: SafeArea(
-          bottom: false,
-          child: SingleChildScrollView(
-            controller: _scrollController,
-            padding: const EdgeInsets.fromLTRB(
-              FxSettingsLayout.pageInset,
-              8,
-              FxSettingsLayout.pageInset,
-              TokensStrip.s4,
-            ),
-            child: Aluno360Layout.operacaoContentWidthLimiter(
-              child: FxContentWidthLimiter(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    FxSettingsGroup(
-                      header: 'Pedido',
-                      caption:
-                          'Objetivo e histórico são opcionais. A IA não aplica sozinha.',
-                      children: [
-                        AlunoInsetFormField(
-                          controller: _objetivo,
-                          label: 'Objetivo',
-                          hint: 'Hipertrofia, força, emagrecimento',
-                          icon: Icons.flag_outlined,
-                          textCapitalization: TextCapitalization.sentences,
-                          inputFormatters: [
-                            LengthLimitingTextInputFormatter(
-                              progressaoObjetivoMax,
-                            ),
-                          ],
-                        ),
-                        AlunoInsetFormField(
-                          controller: _historico,
-                          label: 'Histórico recente',
-                          hint: 'Supino 80kg 3x8, Agachamento 100kg 4x6',
-                          icon: Icons.notes_outlined,
-                          maxLines: 5,
-                          showDivider: false,
-                          inputFormatters: [
-                            LengthLimitingTextInputFormatter(
-                              progressaoHistoricoMax,
-                            ),
-                          ],
-                        ),
-                      ],
+          body: Column(
+            children: [
+              Expanded(
+                child: SafeArea(
+                  bottom: false,
+                  child: SingleChildScrollView(
+                    controller: _scrollController,
+                    padding: const EdgeInsets.fromLTRB(
+                      FxSettingsLayout.pageInset,
+                      TokensStrip.s4,
+                      FxSettingsLayout.pageInset,
+                      TokensStrip.s4,
                     ),
-                    const SizedBox(height: TokensStrip.s3),
-                    const IaSafetyDisclaimer(compact: true),
-                    if (_loading) const IaProgressaoLoadingSkeleton(),
-                    if (_erro != null) ...[
-                      const SizedBox(height: TokensStrip.s4),
-                      FxErrorState(
-                        chromeOnDark: chrome.isDark,
-                        primary: primary,
-                        message: _erro!,
-                        onRetry: _gerar,
-                      ),
-                    ],
-                    if (_resultado != null) ...[
-                      KeyedSubtree(
-                        key: _resultKey,
+                    child: Aluno360Layout.operacaoContentWidthLimiter(
+                      child: FxContentWidthLimiter(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            const SizedBox(height: 20),
-                            IaProgressaoResultView(
-                              result: _resultado!,
-                              alunoNome: widget.alunoNome,
-                              onExportPdf: () => _exportarPdf(_resultado!),
-                              onApplyTreino: () {
-                                FeedbackHelper.showInfo(
-                                  context,
-                                  'Abra o treino ativo para conferir ou ajustar as cargas.',
-                                );
-                                context.push(
-                                  '/alunos/${widget.alunoId}/treinos-list',
-                                  extra: widget.alunoNome,
-                                );
-                              },
-                              onReviewSuggestions:
-                                  () => context.push(
-                                    '/ia/progressao/aceitar',
-                                    extra:
-                                        ProgressaoAceitarRouteArgs(
-                                          returnTo: '/alunos/${widget.alunoId}',
-                                          alunoId: widget.alunoId,
-                                          alunoNome: widget.alunoNome,
-                                        ).toExtra(),
-                                  ),
+                            FxHubHeader(
+                              title: widget.alunoNome,
+                              subtitle: progressaoHubSubtitle(widget.alunoNome),
                             ),
+                            Padding(
+                              padding: const EdgeInsets.only(
+                                top: TokensStrip.s4,
+                                bottom: TokensStrip.s3,
+                              ),
+                              child: OperationalMetricTile(
+                                label: 'Pendentes',
+                                value: '${pending.length}',
+                                hint: progressaoPendingMetricHint(
+                                  pending.length,
+                                ),
+                                color: primary,
+                                isDark: isDark,
+                              ),
+                            ),
+                            const DashboardSectionHeader(title: 'Pedido'),
+                            const SizedBox(height: TokensStrip.s2),
+                            AlunoInsetFormField(
+                              controller: _objetivo,
+                              label: 'Objetivo',
+                              hint: 'Hipertrofia, força, emagrecimento',
+                              icon: Icons.flag_outlined,
+                              textCapitalization: TextCapitalization.sentences,
+                              inputFormatters: [
+                                LengthLimitingTextInputFormatter(
+                                  progressaoObjetivoMax,
+                                ),
+                              ],
+                            ),
+                            AlunoInsetFormField(
+                              controller: _historico,
+                              label: 'Histórico recente',
+                              hint: 'Supino 80kg 3x8, Agachamento 100kg 4x6',
+                              icon: Icons.notes_outlined,
+                              maxLines: 5,
+                              showDivider: false,
+                              inputFormatters: [
+                                LengthLimitingTextInputFormatter(
+                                  progressaoHistoricoMax,
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: TokensStrip.s3),
+                            const IaSafetyDisclaimer(compact: true),
+                            if (_loading) const IaProgressaoLoadingSkeleton(),
+                            if (_erro != null) ...[
+                              const SizedBox(height: TokensStrip.s4),
+                              FxErrorState(
+                                chromeOnDark: chrome.isDark,
+                                primary: primary,
+                                message: _erro!,
+                                onRetry: _gerar,
+                              ),
+                            ],
+                            if (_resultado != null) ...[
+                              KeyedSubtree(
+                                key: _resultKey,
+                                child: Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  children: [
+                                    const SizedBox(height: TokensStrip.s5),
+                                    IaProgressaoResultView(
+                                      result: _resultado!,
+                                      alunoNome: widget.alunoNome,
+                                      onExportPdf:
+                                          () => _exportarPdf(_resultado!),
+                                      onApplyTreino: () {
+                                        FeedbackHelper.showInfo(
+                                          context,
+                                          'Abra o treino ativo para conferir ou ajustar as cargas.',
+                                        );
+                                        context.push(
+                                          '/alunos/${widget.alunoId}/treinos-list',
+                                          extra: widget.alunoNome,
+                                        );
+                                      },
+                                      onReviewSuggestions:
+                                          () => context.push(
+                                            '/ia/progressao/aceitar',
+                                            extra:
+                                                ProgressaoAceitarRouteArgs(
+                                                  returnTo:
+                                                      '/alunos/${widget.alunoId}',
+                                                  alunoId: widget.alunoId,
+                                                  alunoNome: widget.alunoNome,
+                                                ).toExtra(),
+                                          ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ],
                         ),
                       ),
-                    ],
-                  ],
+                    ),
+                  ),
                 ),
               ),
-            ),
+              SafeArea(
+                top: false,
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    FxSettingsLayout.pageInset,
+                    TokensStrip.s2,
+                    FxSettingsLayout.pageInset,
+                    TokensStrip.s3 + MediaQuery.viewInsetsOf(context).bottom,
+                  ),
+                  child: Semantics(
+                    button: true,
+                    enabled: !_loading,
+                    label:
+                        _loading
+                            ? 'Gerando progressão com IA'
+                            : progressaoStickyLabel(
+                              hasResult: _resultado != null,
+                            ),
+                    child: FxLiquidPrimaryButton(
+                      label: progressaoStickyLabel(
+                        hasResult: _resultado != null,
+                      ),
+                      loading: _loading,
+                      loadingLabel: progressaoStickyLoadingLabel(),
+                      onPressed: _loading ? null : _gerar,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),
