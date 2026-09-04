@@ -115,3 +115,25 @@ String alimentarRefeicaoSubtitle({
   if (parts.isEmpty) return 'Sem macros nesta refeição';
   return parts.join(' · ');
 }
+
+String alimentarCampoNumerico(int? value) => value == null ? '' : '$value';
+
+Map<String, dynamic> alimentarRefeicaoPayload({
+  required String nome,
+  required String horario,
+  required String calorias,
+  required String proteina,
+  required String carbo,
+  required String gordura,
+  required String alimentos,
+}) {
+  return {
+    'nomeRefeicao': nome.trim(),
+    if (horario.trim().isNotEmpty) 'horario': horario.trim(),
+    if (calorias.trim().isNotEmpty) 'calorias': int.tryParse(calorias.trim()),
+    if (proteina.trim().isNotEmpty) 'proteinaG': int.tryParse(proteina.trim()),
+    if (carbo.trim().isNotEmpty) 'carboG': int.tryParse(carbo.trim()),
+    if (gordura.trim().isNotEmpty) 'gorduraG': int.tryParse(gordura.trim()),
+    if (alimentos.trim().isNotEmpty) 'alimentos': alimentos.trim(),
+  };
+}

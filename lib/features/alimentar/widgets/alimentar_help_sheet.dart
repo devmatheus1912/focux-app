@@ -30,7 +30,7 @@ Future<void> showAlimentarPlanoHelpSheet(BuildContext context) {
     tips: const [
       FxHelpTip(
         'Nova refeição',
-        'O botão de baixo adiciona horário, macros e alimentos neste plano.',
+        'O botão de baixo adiciona horário, macros e alimentos neste plano. Toque numa refeição para editar.',
         icon: 'plus',
       ),
       FxHelpTip(
