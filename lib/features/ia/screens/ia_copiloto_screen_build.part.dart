@@ -9,7 +9,6 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
     final wash = primary.withValues(alpha: dark ? 0.16 : 0.10);
     final ink = chrome.ink;
     final mute = chrome.mute;
-    final line = chrome.line;
     final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
     final homeAsync = ref.watch(iaCopilotoHomeProvider);
     final home = homeAsync.valueOrNull;
@@ -71,7 +70,6 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
               IaCopilotHeaderStatus(
                 dark: dark,
                 brand: brand,
-                line: line,
                 ink: ink,
                 quotaLabel: quotaLabel,
               ),
@@ -136,10 +134,7 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
                       child: IaCopilotModeSelector(
                         modes: _modes,
                         selectedIndex: _modeIdx,
-                        brand: brand,
                         dark: dark,
-                        line: line,
-                        mute: mute,
                         onSelect: (index) {
                           if (index == _modeIdx) return;
                           AnalyticsService.instance.track(
@@ -183,9 +178,7 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
                           12,
                         ),
                         child: IaCopilotSafetyNote(
-                          ink: ink,
                           mute: mute,
-                          brand: brand,
                         ),
                       ),
                     ],
@@ -209,7 +202,6 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
                                 gerando: _gerando,
                                 gerado: _gerado,
                                 elapsedMs: _geracaoMs,
-                                mode: _modeDisplay,
                                 ink: ink,
                                 mute: mute,
                                 wash: wash,
