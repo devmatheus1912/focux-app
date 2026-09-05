@@ -75,24 +75,7 @@ class PaywallCatalog {
     _ => null,
   };
 
-  static const List<({String value, String label})> socialProof = [
-    (value: '2.847', label: 'personais ativos'),
-    (value: '4.9★', label: 'App Store · 312 avaliações'),
-    (value: '43', label: 'upgrades esta semana'),
-  ];
 
-  static const List<({String value, String label, Color color})> roiStrip = [
-    (value: '5×', label: 'ROI médio em 2 anos', color: brand),
-    (value: '25%+', label: 'Lucro com +5% retenção', color: tierEnterprise),
-    (value: 'R\$ 8.000', label: 'MRR com 20 alunos', color: green),
-    (value: '< 1%', label: 'Faturamento = Pro', color: brand),
-    (
-      value: 'R\$ 50/mês',
-      label: 'Substitui R\$ 1–3k agência',
-      color: brandDeep,
-    ),
-    (value: '40%', label: 'Menos inadimplência c/ PIX', color: green),
-  ];
 
   static const List<PaywallComparisonRow> comparisonFreeVsPro = [
     PaywallComparisonRow(feature: 'Alunos', free: '3', paid: '30'),

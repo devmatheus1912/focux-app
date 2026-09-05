@@ -39,7 +39,6 @@ class PaywallCompareStage extends StatelessWidget {
     required this.mute,
     required this.isDark,
     this.line,
-    this.roiTag,
     this.onBillingPeriod,
     this.fillViewport = false,
     this.managementMode = false,
@@ -56,7 +55,6 @@ class PaywallCompareStage extends StatelessWidget {
   final Color mute;
   final bool isDark;
   final Color? line;
-  final String? roiTag;
 
   /// Preenche o viewport restante (sem faixa branca entre o card e o sticky).
   final bool fillViewport;
@@ -80,9 +78,7 @@ class PaywallCompareStage extends StatelessWidget {
         managementMode && selectedPlan == currentPlan;
     final tag = managingCurrent
         ? null
-        : (roiTag != null && roiTag!.trim().isNotEmpty)
-            ? roiTag!.trim()
-            : PaywallCatalog.roiTagForPlan(selectedPlan);
+        : PaywallCatalog.roiTagForPlan(selectedPlan);
 
     final card = AnimatedSwitcher(
       duration: duration,
