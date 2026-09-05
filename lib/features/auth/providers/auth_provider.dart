@@ -134,6 +134,26 @@ class AuthNotifier extends StateNotifier<AuthStatus> {
     state = AuthStatus.authenticated;
   }
 
+  Future<void> loginApple({
+    required String identityToken,
+    required bool isAluno,
+    String? fullName,
+    String? email,
+    String? personalSlug,
+  }) async {
+    await _repo.loginApple(
+      identityToken: identityToken,
+      isAluno: isAluno,
+      fullName: fullName,
+      email: email,
+      personalSlug: personalSlug,
+    );
+    _currentRole = isAluno ? UserRole.aluno : UserRole.personal;
+    _isAdmin = await SecureStorage.getIsAdmin();
+    _requiresPasswordChange = false;
+    state = AuthStatus.authenticated;
+  }
+
   Future<void> registerAluno(
     String nome,
     String email,

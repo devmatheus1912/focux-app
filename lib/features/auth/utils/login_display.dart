@@ -33,7 +33,7 @@ String loginHelpSubtitle() =>
     'Personal usa e-mail da conta. Aluno entra pelo link do personal.';
 
 String loginHelpPersonalBody() =>
-    'E-mail e senha, ou Google. A Home abre depois do login.';
+    'E-mail e senha, Apple ou Google. A Home abre depois do login.';
 
 String loginHelpAlunoBody() =>
     'Abra o link do personal (?p=slug) ou digite o código do personal abaixo.';

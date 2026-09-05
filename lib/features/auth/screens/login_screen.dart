@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io' show Platform;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -19,12 +20,14 @@ import '../../../features/perfil/providers/perfil_provider.dart';
 import '../../dashboard/utils/dashboard_home_prefetch.dart';
 import '../../alunos/utils/alunos_home_prefetch.dart';
 import '../providers/auth_provider.dart';
+import '../services/apple_sign_in_service.dart';
 import '../services/google_sign_in_service.dart';
 import '../utils/auth_error_messages.dart';
 import '../utils/login_display.dart';
 import '../utils/post_login_redirect.dart';
 import '../widgets/auth_operational_notice.dart';
 import '../widgets/auth_shell.dart';
+import '../widgets/apple_sign_in_button.dart';
 import '../widgets/google_sign_in_button.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 
@@ -44,6 +47,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _slugController = TextEditingController();
   bool _loading = false;
   bool _loadingGoogle = false;
+  bool _loadingApple = false;
+  bool _appleEnabled = false;
   bool _showPassword = false;
   bool _googleEnabled = false;
   String? _googleStatusTitle;
@@ -109,10 +114,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Future<void> _loadCapabilities() async {
     try {
       final status = await ref.read(authRepositoryProvider).environmentStatus();
+      bool appleEnabled = false;
+      try {
+        final caps = await ref.read(authRepositoryProvider).capabilities();
+        appleEnabled = caps.appleSignInEnabled;
+      } catch (_) {}
       if (!mounted) return;
       final appClientConfigured = Env.googleWebClientId.isNotEmpty;
+      // iOS: Apple é o social principal; Google oculto até GIDClientID estável em TF.
+      final showGoogle = appClientConfigured && !Platform.isIOS;
       setState(() {
-        _googleEnabled = appClientConfigured;
+        _appleEnabled = appleEnabled && AppleSignInService.isSupportedPlatform;
+        _googleEnabled = showGoogle;
         if (!appClientConfigured) {
           _googleStatusTitle = 'Google pendente no app';
           _googleStatusNote =
@@ -135,19 +148,31 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       });
     } catch (_) {
       if (!mounted) return;
+      bool appleEnabled = false;
+      try {
+        final caps = await ref.read(authRepositoryProvider).capabilities();
+        appleEnabled = caps.appleSignInEnabled;
+      } catch (_) {}
+      if (!mounted) return;
       final appClientConfigured = Env.googleWebClientId.isNotEmpty;
+      final showGoogle = appClientConfigured && !Platform.isIOS;
       setState(() {
-        _googleEnabled = appClientConfigured;
-        if (appClientConfigured) {
+        _appleEnabled = appleEnabled && AppleSignInService.isSupportedPlatform;
+        _googleEnabled = showGoogle;
+        if (showGoogle) {
           _googleStatusTitle = null;
           _googleStatusNote = null;
           _googleStatusAction = null;
-        } else {
+        } else if (!appClientConfigured && !Platform.isIOS) {
           _googleStatusTitle = 'Google pendente no app';
           _googleStatusNote =
               'Este build ainda nao recebeu o GOOGLE_WEB_CLIENT_ID, entao o botao fica bloqueado mesmo com o backend online.';
           _googleStatusAction =
               'Gerar o build com GOOGLE_WEB_CLIENT_ID e validar em staging.';
+        } else {
+          _googleStatusTitle = null;
+          _googleStatusNote = null;
+          _googleStatusAction = null;
         }
       });
     }
@@ -338,17 +363,28 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                       loading: _loading,
                                       loadingLabel: loginEntrandoLabel(),
                                       onPressed:
-                                          _loading || _loadingGoogle
+                                          _loading || _loadingGoogle || _loadingApple
                                               ? null
                                               : _submit,
                                     ),
-                                    if (_googleEnabled ||
+                                    if (_appleEnabled ||
+                                        _googleEnabled ||
                                         _googleStatusNote != null) ...[
                                       const SizedBox(height: 12),
                                       const FxConversionDivider(
                                         label: 'ou continue com',
                                       ),
                                       const SizedBox(height: 12),
+                                    ],
+                                    if (_appleEnabled) ...[
+                                      AppleSignInButton(
+                                        onPressed:
+                                            _loadingApple || _loading || _loadingGoogle
+                                                ? null
+                                                : _submitApple,
+                                        isLoading: _loadingApple,
+                                      ),
+                                      if (_googleEnabled) const SizedBox(height: 10),
                                     ],
                                     if (_googleEnabled) ...[
                                       GoogleSignInButton(

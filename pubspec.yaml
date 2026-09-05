@@ -74,6 +74,7 @@ dependencies:
   file_picker: ^8.1.7
   csv: ^6.0.0
   excel: ^4.0.6
+  sign_in_with_apple: ^7.0.1
 
 dev_dependencies:
   flutter_test:
