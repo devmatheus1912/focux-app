@@ -191,4 +191,27 @@ void main() {
       contains('?p=slug'),
     );
   });
+
+  test('mapMfaVerifyError cobre inválido e expirado', () {
+    expect(
+      mapMfaVerifyError(dio(400, 'Código inválido.')),
+      'Código inválido.',
+    );
+    expect(mapMfaVerifyError(dio(410)), contains('expirou'));
+    expect(
+      mapMfaVerifyError(StateError('MFA_STILL_REQUIRED')),
+      contains('MFA'),
+    );
+  });
+
+  test('mapMfaSetupError cobre senha e código', () {
+    expect(
+      mapMfaSetupError(dio(400, 'Senha incorreta.')),
+      'Senha incorreta.',
+    );
+    expect(
+      mapMfaSetupError(dio(401)).toLowerCase(),
+      contains('senha'),
+    );
+  });
 }

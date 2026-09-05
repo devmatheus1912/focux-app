@@ -32,6 +32,7 @@ bool isPublicAuthPath(String path) {
       path == '/dashboard' ||
       path == '/dashboard/home' ||
       path == '/login' ||
+      path == '/login/mfa' ||
       path == '/register' ||
       path == '/register/aluno' ||
       path == '/onboarding' ||
@@ -79,6 +80,7 @@ bool isPersonalPath(String path) {
       path == '/relatorios/global' ||
       path == '/suporte' ||
       path == '/perfil' ||
+      path == '/perfil/mfa' ||
       path == '/identidade-visual' ||
       path == '/setup/identidade' ||
       path == '/planos' ||

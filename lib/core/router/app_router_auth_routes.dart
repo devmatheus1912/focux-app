@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import '../../features/auth/screens/definir_senha_aluno_screen.dart';
 import '../../features/auth/screens/esqueci_senha_screen.dart';
 import '../../features/auth/screens/login_screen.dart';
+import '../../features/auth/screens/mfa_verify_screen.dart';
 import '../../features/auth/screens/register_aluno_screen.dart';
 import '../../features/auth/screens/register_screen.dart';
 import '../../features/auth/screens/resetar_senha_verificar_codigo_screen.dart';
@@ -35,6 +36,10 @@ List<RouteBase> buildAuthRoutes() {
     ),
     GoRoute(path: '/ia', redirect: (context, state) => '/ia/copiloto'),
     GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
+    GoRoute(
+      path: '/login/mfa',
+      builder: (context, state) => const MfaVerifyScreen(),
+    ),
     GoRoute(
       path: '/p/:slug',
       redirect: (context, state) {
