@@ -108,17 +108,8 @@ extension AssinaturaScreenBuildBody on _AssinaturaScreenState {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // S6: lockup só em conversão (FREE). Assinante ativo →
-                  // hero = status do plano no CompareStage ("Seu plano …").
-                  if (isAcquisition) ...[
-                    Center(
-                      child: FxConversionLockup(
-                        width: authLogoWidthFor(context, withTagline: true),
-                        semanticLabel: 'Focux Personal',
-                      ),
-                    ),
-                    const SizedBox(height: TokensStrip.s3),
-                  ],
+                  // Planos in-app: sem lockup de marca — o AppBar já identifica
+                  // a superfície; o CompareStage abre com o job (Assinar / Seu plano).
                   if (usage != null &&
                       ((widget.blockedFeature != null &&
                               widget.blockedFeature!.isNotEmpty) ||

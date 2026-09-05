@@ -67,8 +67,7 @@ void main() {
     final body = File(
       'lib/features/assinatura/screens/assinatura_screen_build_body.part.dart',
     ).readAsStringSync();
-    expect(body, contains('FxConversionLockup'));
-    expect(body, contains('if (isAcquisition)'));
+    expect(body, isNot(contains('FxConversionLockup')));
     expect(body, contains('PaywallCompareStage'));
     expect(body, isNot(contains('PaywallPlanStudio')));
     expect(body, isNot(contains('PaywallRichPlanCard')));
