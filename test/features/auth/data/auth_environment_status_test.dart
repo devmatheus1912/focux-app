@@ -23,8 +23,9 @@ void main() {
       'nextActions': ['Configurar SMTP_HOST.'],
     });
 
-    expect(status.productionReady, isFalse);
-    expect(status.missing, contains('SMTP_HOST'));
+    // Campos mortos (status/productionReady/missing/severity) são ignorados no parse.
+    expect(status.passwordResetReady, isFalse);
+    expect(status.googleSignInReady, isFalse);
     expect(status.firstIssueFor('password_reset')?.title, 'Host SMTP ausente');
     expect(status.nextActions.single, 'Configurar SMTP_HOST.');
   });

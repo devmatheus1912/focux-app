@@ -24,13 +24,11 @@ class PasswordResetRequestResult {
 
 class AuthCapabilities {
   final bool passwordResetEmailAvailable;
-  final bool googleSignInEnabled;
   final bool appleSignInEnabled;
   final bool personalMfaTotpAvailable;
 
   const AuthCapabilities({
     required this.passwordResetEmailAvailable,
-    required this.googleSignInEnabled,
     required this.appleSignInEnabled,
     required this.personalMfaTotpAvailable,
   });
@@ -39,7 +37,6 @@ class AuthCapabilities {
     return AuthCapabilities(
       passwordResetEmailAvailable:
           json['passwordResetEmailAvailable'] as bool? ?? false,
-      googleSignInEnabled: json['googleSignInEnabled'] as bool? ?? false,
       appleSignInEnabled: json['appleSignInEnabled'] as bool? ?? false,
       personalMfaTotpAvailable:
           json['personalMfaTotpAvailable'] as bool? ?? false,
@@ -126,14 +123,12 @@ class EnviarCodigoEmailResult {
 
 class AuthEnvironmentIssue {
   final String area;
-  final String severity;
   final String title;
   final String detail;
   final String action;
 
   const AuthEnvironmentIssue({
     required this.area,
-    required this.severity,
     required this.title,
     required this.detail,
     required this.action,
@@ -142,7 +137,6 @@ class AuthEnvironmentIssue {
   factory AuthEnvironmentIssue.fromJson(Map<String, dynamic> json) {
     return AuthEnvironmentIssue(
       area: json['area'] as String? ?? '',
-      severity: json['severity'] as String? ?? 'INFO',
       title: json['title'] as String? ?? 'Configuracao pendente',
       detail: json['detail'] as String? ?? '',
       action: json['action'] as String? ?? '',
@@ -151,30 +145,20 @@ class AuthEnvironmentIssue {
 }
 
 class AuthEnvironmentStatus {
-  final String status;
-  final bool productionReady;
   final bool passwordResetReady;
   final bool googleSignInReady;
-  final bool googleSignInEnabled;
-  final bool googleClientIdsConfigured;
   final bool appleSignInReady;
   final bool appleSignInEnabled;
   final bool appleClientIdsConfigured;
-  final List<String> missing;
   final List<AuthEnvironmentIssue> issues;
   final List<String> nextActions;
 
   const AuthEnvironmentStatus({
-    required this.status,
-    required this.productionReady,
     required this.passwordResetReady,
     required this.googleSignInReady,
-    required this.googleSignInEnabled,
-    required this.googleClientIdsConfigured,
     required this.appleSignInReady,
     required this.appleSignInEnabled,
     required this.appleClientIdsConfigured,
-    required this.missing,
     required this.issues,
     required this.nextActions,
   });
@@ -182,23 +166,13 @@ class AuthEnvironmentStatus {
   factory AuthEnvironmentStatus.fromJson(Map<String, dynamic> json) {
     final rawIssues = json['issues'];
     final rawActions = json['nextActions'];
-    final rawMissing = json['missing'];
     return AuthEnvironmentStatus(
-      status: json['status'] as String? ?? 'UNKNOWN',
-      productionReady: json['productionReady'] as bool? ?? false,
       passwordResetReady: json['passwordResetReady'] as bool? ?? false,
       googleSignInReady: json['googleSignInReady'] as bool? ?? false,
-      googleSignInEnabled: json['googleSignInEnabled'] as bool? ?? false,
-      googleClientIdsConfigured:
-          json['googleClientIdsConfigured'] as bool? ?? false,
       appleSignInReady: json['appleSignInReady'] as bool? ?? false,
       appleSignInEnabled: json['appleSignInEnabled'] as bool? ?? false,
       appleClientIdsConfigured:
           json['appleClientIdsConfigured'] as bool? ?? false,
-      missing:
-          rawMissing is List
-              ? rawMissing.map((item) => item.toString()).toList()
-              : const [],
       issues:
           rawIssues is List
               ? rawIssues

@@ -111,12 +111,6 @@ class Env {
   /// Página de captura de leads (`/c/{slug}`).
   static String capturaPageUrl(String slug) => '$_webBase/c/$slug';
 
-  /// Label curto para UI (host + path) — URL real servida hoje.
-  static String landingPageLabel(String slug) {
-    final uri = Uri.parse(landingPageUrl(slug));
-    return '${uri.host}/p/$slug';
-  }
-
   static const String _brandWebHost = 'focuxpersonal.com';
 
   /// Host amigável para exibir links públicos (marca quando infra é Railway etc.).

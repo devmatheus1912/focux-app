@@ -83,14 +83,12 @@ class IaCopilotHeaderStatus extends StatelessWidget {
     super.key,
     required this.dark,
     required this.brand,
-    required this.line,
     required this.ink,
     this.quotaLabel = 'Pronto',
   });
 
   final bool dark;
   final Color brand;
-  final Color line;
   final Color ink;
   final String quotaLabel;
 
@@ -164,19 +162,13 @@ class IaCopilotModeSelector extends StatelessWidget {
     super.key,
     required this.modes,
     required this.selectedIndex,
-    required this.brand,
     required this.dark,
-    required this.line,
-    required this.mute,
     required this.onSelect,
   });
 
   final List<String> modes;
   final int selectedIndex;
-  final Color brand;
   final bool dark;
-  final Color line;
-  final Color mute;
   final ValueChanged<int> onSelect;
 
   String _label(String mode) => mode == 'Progressão' ? 'Progresso' : mode;
@@ -192,8 +184,6 @@ class IaCopilotModeSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    assert(dark || !dark);
-    assert(line.a >= 0 && mute.a >= 0);
     return Semantics(
       label: 'Modo do Copiloto',
       child: Column(
@@ -224,18 +214,13 @@ class IaCopilotModeSelector extends StatelessWidget {
 class IaCopilotSafetyNote extends StatelessWidget {
   const IaCopilotSafetyNote({
     super.key,
-    required this.ink,
     required this.mute,
-    required this.brand,
   });
 
-  final Color ink;
   final Color mute;
-  final Color brand;
 
   @override
   Widget build(BuildContext context) {
-    assert(ink.a >= 0 && brand.a >= 0);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -415,7 +400,6 @@ class IaCopilotGenerationStatus extends StatelessWidget {
     required this.gerando,
     required this.gerado,
     required this.elapsedMs,
-    required this.mode,
     required this.ink,
     required this.mute,
     required this.wash,
@@ -424,7 +408,6 @@ class IaCopilotGenerationStatus extends StatelessWidget {
   final bool gerando;
   final bool gerado;
   final int elapsedMs;
-  final String mode;
   final Color ink;
   final Color mute;
   final Color wash;
@@ -438,7 +421,6 @@ class IaCopilotGenerationStatus extends StatelessWidget {
 
     // Pós-gerar: linha compacta — não empurra Insights abaixo do fold (§9 S1 / pilar 13).
     if (gerado && !gerando) {
-      assert(mode.isNotEmpty);
       return Row(
         children: [
           const Icon(
