@@ -177,15 +177,16 @@ extension on _RegisterScreenState {
     HapticFeedback.mediumImpact();
 
     try {
-      final result = await GoogleSignInService().signInForIdToken();
-      if (result == null) return;
-      final idToken = result.idToken;
+      final google = await GoogleSignInService().signInForIdToken();
+      if (google == null) return;
+      final idToken = google.idToken;
 
-      await ref
+      final loginResult = await ref
           .read(authProvider.notifier)
           .loginGoogle(idToken: idToken, isAluno: false);
 
       if (!mounted) return;
+      if (await _maybeOpenMfa(loginResult, method: 'google')) return;
       ref.invalidate(perfilProvider);
       unawaited(
         AnalyticsService.instance.track(
@@ -222,7 +223,7 @@ extension on _RegisterScreenState {
       final credential = await const AppleSignInService().signIn();
       if (credential == null) return;
 
-      await ref.read(authProvider.notifier).loginApple(
+      final result = await ref.read(authProvider.notifier).loginApple(
             identityToken: credential.identityToken,
             isAluno: false,
             fullName: credential.fullName,
@@ -230,6 +231,7 @@ extension on _RegisterScreenState {
           );
 
       if (!mounted) return;
+      if (await _maybeOpenMfa(result, method: 'apple')) return;
       ref.invalidate(perfilProvider);
       unawaited(
         AnalyticsService.instance.track(
@@ -251,5 +253,32 @@ extension on _RegisterScreenState {
     } finally {
       if (mounted) setState(() => _loadingApple = false);
     }
+  }
+
+  /// Conta existente com MFA: token só em memória → tela do autenticador.
+  Future<bool> _maybeOpenMfa(
+    AuthLoginResult result, {
+    required String method,
+  }) async {
+    if (!result.mfaRequired) return false;
+    final token = result.mfaToken?.trim();
+    if (token == null || token.isEmpty) {
+      setState(() => _error = 'Não foi possível iniciar a verificação MFA.');
+      return true;
+    }
+    ref.read(mfaChallengeProvider.notifier).state = MfaChallenge(
+      mfaToken: token,
+    );
+    unawaited(
+      AnalyticsService.instance.track(
+        ProductEvents.signupSuccess,
+        props: {
+          'role': 'personal',
+          'method': '${method}_mfa_pending',
+        },
+      ),
+    );
+    context.go('/login/mfa');
+    return true;
   }
 }
