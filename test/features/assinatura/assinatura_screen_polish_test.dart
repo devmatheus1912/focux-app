@@ -68,6 +68,22 @@ void main() {
       'lib/features/assinatura/screens/assinatura_screen_build_body.part.dart',
     ).readAsStringSync();
     expect(body, isNot(contains('FxConversionLockup')));
+    expect(
+      File('lib/features/planos/paywall/paywall_vitrine.dart').readAsStringSync(),
+      isNot(contains('socialProof')),
+    );
+    expect(
+      File('lib/features/planos/paywall/paywall_vitrine.dart').readAsStringSync(),
+      isNot(contains('roiStrip')),
+    );
+    expect(
+      File('lib/features/planos/paywall/paywall_catalog.dart').readAsStringSync(),
+      isNot(contains('socialProof')),
+    );
+    expect(
+      File('lib/features/planos/paywall/paywall_catalog.dart').readAsStringSync(),
+      isNot(contains('roiStrip')),
+    );
     expect(body, contains('PaywallCompareStage'));
     expect(body, isNot(contains('PaywallPlanStudio')));
     expect(body, isNot(contains('PaywallRichPlanCard')));
