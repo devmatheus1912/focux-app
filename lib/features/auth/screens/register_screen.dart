@@ -1,13 +1,10 @@
 import 'dart:async';
-import 'dart:io' show Platform;
 
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import '../../../core/brand/focux_brand_copy.dart';
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/config/env.dart';
@@ -27,6 +24,7 @@ import '../utils/auth_error_messages.dart';
 import '../utils/register_display.dart';
 import '../widgets/auth_operational_notice.dart';
 import '../widgets/auth_shell.dart';
+import '../services/google_sign_in_service.dart';
 import '../widgets/google_sign_in_button.dart';
 import '../widgets/password_strength_meter.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
