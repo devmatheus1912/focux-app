@@ -21,6 +21,7 @@ import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../features/perfil/providers/perfil_provider.dart';
 import '../providers/auth_provider.dart';
+import '../data/auth_repository.dart';
 import '../utils/auth_error_messages.dart';
 import '../utils/register_display.dart';
 import '../widgets/auth_operational_notice.dart';
@@ -92,23 +93,40 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   Future<void> _loadCapabilities() async {
     try {
+      AuthEnvironmentStatus? status;
+      try {
+        status = await ref.read(authRepositoryProvider).environmentStatus();
+      } catch (_) {}
       final caps = await ref.read(authRepositoryProvider).capabilities();
       if (!mounted) return;
       final showGoogle =
           Env.googleWebClientId.isNotEmpty && !Platform.isIOS;
+      final appleOffered = resolveAppleSignInOffered(
+        capabilitiesEnabled: caps.appleSignInEnabled,
+        environmentStatus: status,
+      );
       setState(() {
         _emailDeliveryAvailable = caps.passwordResetEmailAvailable;
         _appleEnabled =
-            caps.appleSignInEnabled && AppleSignInService.isSupportedPlatform;
+            appleOffered && AppleSignInService.isSupportedPlatform;
         _googleEnabled = showGoogle;
       });
     } catch (_) {
       if (!mounted) return;
+      AuthEnvironmentStatus? status;
+      try {
+        status = await ref.read(authRepositoryProvider).environmentStatus();
+      } catch (_) {}
       final showGoogle =
           Env.googleWebClientId.isNotEmpty && !Platform.isIOS;
+      final appleOffered = resolveAppleSignInOffered(
+        capabilitiesEnabled: false,
+        environmentStatus: status,
+      );
       setState(() {
         _emailDeliveryAvailable = null;
-        _appleEnabled = false;
+        _appleEnabled =
+            appleOffered && AppleSignInService.isSupportedPlatform;
         _googleEnabled = showGoogle;
       });
     }
