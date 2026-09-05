@@ -75,6 +75,10 @@ void main() {
     expect(screen, contains('ProductEvents.loginSuccess'));
     expect(screen, contains('AuthRoleToggle'));
     expect(screen, contains('GoogleSignInButton'));
+    expect(screen, contains('AppleSignInButton'));
+    expect(screen, contains('_submitApple'));
+    expect(screen, contains('appleSignInEnabled'));
+    expect(screen, contains('!Platform.isIOS'));
     expect(screen, contains('AuthField'));
     expect(screen, contains('LayoutBuilder'));
     expect(screen, contains('keyboardDismissBehavior'));

@@ -31,6 +31,7 @@ extension on _LoginScreenState {
   }
 
   Future<void> _submit() async {
+    if (_loading || _loadingGoogle || _loadingApple) return;
     final form = _formKey.currentState;
     if (form == null || !form.validate()) return;
 
@@ -94,7 +95,7 @@ extension on _LoginScreenState {
   }
 
   Future<void> _submitGoogle() async {
-    if (_loading || _loadingGoogle) return;
+    if (_loading || _loadingGoogle || _loadingApple) return;
     setState(() {
       _loadingGoogle = true;
       _error = null;
@@ -136,6 +137,52 @@ extension on _LoginScreenState {
       if (mounted) setState(() => _loadingGoogle = false);
     }
   }
+
+  Future<void> _submitApple() async {
+    if (_loading || _loadingGoogle || _loadingApple) return;
+    setState(() {
+      _loadingApple = true;
+      _error = null;
+    });
+    HapticFeedback.mediumImpact();
+    try {
+      final credential = await const AppleSignInService().signIn();
+      if (credential == null) return;
+      if (_isAluno &&
+          (_effectivePersonalSlug == null ||
+              _effectivePersonalSlug!.isEmpty)) {
+        throw StateError('PERSONAL_SLUG_REQUIRED');
+      }
+      await ref
+          .read(authProvider.notifier)
+          .loginApple(
+            identityToken: credential.identityToken,
+            isAluno: _isAluno,
+            fullName: credential.fullName,
+            email: credential.email,
+            personalSlug: _isAluno ? _effectivePersonalSlug : null,
+          );
+      if (!mounted) return;
+      _trackLogin(success: true, method: 'apple');
+      if (_isAluno) {
+        context.go(_postLoginRedirect(context, isAluno: true));
+      } else {
+        context.go(await _postPersonalLoginRedirect(context));
+      }
+    } catch (error) {
+      HapticFeedback.heavyImpact();
+      if (!mounted) return;
+      _trackLogin(
+        success: false,
+        method: 'apple',
+        codigo: ApiError.from(error)?.codigo,
+      );
+      setState(() => _error = mapAppleSignInError(error, isAluno: _isAluno));
+    } finally {
+      if (mounted) setState(() => _loadingApple = false);
+    }
+  }
+
 
   String _postLoginRedirect(BuildContext context, {required bool isAluno}) {
     final fallback = isAluno ? '/dashboard/aluno' : '/dashboard/personal';

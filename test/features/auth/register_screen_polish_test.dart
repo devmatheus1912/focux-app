@@ -64,6 +64,10 @@ void main() {
     expect(screen, contains('showFxConfirmSheet'));
     expect(screen, contains('PasswordStrengthMeter'));
     expect(screen, contains('GoogleSignInButton'));
+    expect(screen, contains('AppleSignInButton'));
+    expect(screen, contains('_submitApple'));
+    expect(screen, contains('appleSignInEnabled'));
+    expect(screen, contains('!Platform.isIOS'));
     expect(screen, contains('FocuxLegal'));
     expect(screen, contains('keyboardDismissBehavior'));
     expect(screen, contains('authUnfocusAndLeave'));
@@ -71,7 +75,7 @@ void main() {
     expect(screen, contains('AutofillHints.email'));
     expect(screen, contains('AutofillHints.newPassword'));
     expect(screen, contains('FxConversionDivider'));
-    expect(screen, contains('Env.googleWebClientId'));
+    expect(screen, contains('_googleEnabled'));
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(8));
   });
 }
