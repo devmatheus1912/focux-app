@@ -8,6 +8,7 @@ extension on _RegisterScreenState {
       subtitle: registerHelpSubtitle(),
       tips: [
         FxHelpTip('Código', registerHelpCodigoBody(), icon: 'spark'),
+        FxHelpTip('Apple', registerHelpAppleBody(), icon: 'users'),
         FxHelpTip('Google', registerHelpGoogleBody(), icon: 'users'),
       ],
     );
@@ -16,6 +17,8 @@ extension on _RegisterScreenState {
   Future<void> _pedirEnviarCodigo() async {
     if (_sendingCode ||
         _loading ||
+        _loadingGoogle ||
+        _loadingApple ||
         _resendSeconds > 0 ||
         _emailDeliveryAvailable == false) {
       return;
@@ -31,7 +34,7 @@ extension on _RegisterScreenState {
   }
 
   Future<void> _pedirCriarConta() async {
-    if (_loading || _loadingGoogle) return;
+    if (_loading || _loadingGoogle || _loadingApple) return;
     final form = _formKey.currentState;
     if (form == null || !form.validate()) return;
     if (!_codeSent && _codeController.text.trim().isEmpty) {
@@ -100,6 +103,7 @@ extension on _RegisterScreenState {
   }
 
   Future<void> _submit() async {
+    if (_loading || _loadingGoogle || _loadingApple) return;
     final form = _formKey.currentState;
     if (form == null || !form.validate()) {
       return;
@@ -164,7 +168,7 @@ extension on _RegisterScreenState {
   }
 
   Future<void> _submitGoogle() async {
-    if (_loading || _loadingGoogle) return;
+    if (_loading || _loadingGoogle || _loadingApple) return;
 
     setState(() {
       _loadingGoogle = true;
@@ -202,6 +206,50 @@ extension on _RegisterScreenState {
       setState(() => _error = mapGoogleSignInError(error, isAluno: false));
     } finally {
       if (mounted) setState(() => _loadingGoogle = false);
+    }
+  }
+
+  Future<void> _submitApple() async {
+    if (_loading || _loadingGoogle || _loadingApple) return;
+
+    setState(() {
+      _loadingApple = true;
+      _error = null;
+    });
+    HapticFeedback.mediumImpact();
+
+    try {
+      final credential = await const AppleSignInService().signIn();
+      if (credential == null) return;
+
+      await ref.read(authProvider.notifier).loginApple(
+            identityToken: credential.identityToken,
+            isAluno: false,
+            fullName: credential.fullName,
+            email: credential.email,
+          );
+
+      if (!mounted) return;
+      ref.invalidate(perfilProvider);
+      unawaited(
+        AnalyticsService.instance.track(
+          ProductEvents.signupSuccess,
+          props: {'role': 'personal', 'method': 'apple'},
+        ),
+      );
+      context.go('/dashboard/personal');
+    } catch (error) {
+      HapticFeedback.heavyImpact();
+      if (!mounted) return;
+      unawaited(
+        AnalyticsService.instance.track(
+          ProductEvents.signupFailure,
+          props: {'role': 'personal', 'method': 'apple'},
+        ),
+      );
+      setState(() => _error = mapAppleSignInError(error, isAluno: false));
+    } finally {
+      if (mounted) setState(() => _loadingApple = false);
     }
   }
 }
