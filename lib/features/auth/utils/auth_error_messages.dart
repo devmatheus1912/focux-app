@@ -254,13 +254,25 @@ String mapGoogleSignInError(Object error, {required bool isAluno}) {
     final code = error.code;
     final detail =
         '${error.message ?? ''} ${error.details ?? ''}'.toLowerCase();
+    if (code == 'google_sign_in_config' ||
+        code == 'google_sign_in' ||
+        detail.contains('client id') ||
+        detail.contains('clientid') ||
+        detail.contains('url scheme') ||
+        detail.contains('gidconfiguration')) {
+      return 'Google Sign-In não está configurado neste build. '
+          'Atualize o app ou use e-mail e senha.';
+    }
     if (code == 'sign_in_failed' &&
         (detail.contains('10') || detail.contains('developer_error'))) {
       return 'Google Sign-In não está liberado para este APK de release. '
           'No Firebase, cadastre o SHA-1 do keystore de release do app.';
     }
-    if (code == 'sign_in_canceled') {
+    if (code == 'sign_in_canceled' || code == 'sign_in_cancelled') {
       return 'Login com Google cancelado.';
+    }
+    if (code == 'network_error') {
+      return 'Sem conexão para entrar com Google. Verifique a internet.';
     }
   }
   if (error is StateError) {
