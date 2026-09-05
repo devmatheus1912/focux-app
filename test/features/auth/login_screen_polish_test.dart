@@ -78,6 +78,8 @@ void main() {
     expect(screen, contains('AppleSignInButton'));
     expect(screen, contains('_submitApple'));
     expect(screen, contains('appleSignInEnabled'));
+    expect(screen, contains('resolveAppleSignInOffered'));
+    expect(screen, contains('environmentStatus'));
     expect(screen, contains('!Platform.isIOS'));
     expect(screen, contains('AuthField'));
     expect(screen, contains('LayoutBuilder'));
