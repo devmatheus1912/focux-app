@@ -72,6 +72,11 @@
 			<string>fetch</string>
 			<string>remote-notification</string>
 		</array>
+		<!-- Google Sign-In (GIDSignIn). Sem GIDClientID + reversed URL scheme o SDK aborta (SIGABRT). -->
+		<!-- CLIENT_ID alinhado ao OAuth iOS/Web do projeto 868715549357; se GoogleService-Info.plist
+		     trouxer outro CLIENT_ID, rode ios/scripts/sync_google_signin_url_scheme.sh e atualize. -->
+		<key>GIDClientID</key>
+		<string>868715549357-kjut1ja3ab79j6pp3pquk2nha48atbcs.apps.googleusercontent.com</string>
 		<!-- Deep link / URL scheme -->
 		<key>CFBundleURLTypes</key>
 		<array>
@@ -81,6 +86,17 @@
 				<key>CFBundleURLSchemes</key>
 				<array>
 					<string>focux</string>
+				</array>
+			</dict>
+			<dict>
+				<key>CFBundleTypeRole</key>
+				<string>Editor</string>
+				<key>CFBundleURLName</key>
+				<string>GoogleSignIn</string>
+				<key>CFBundleURLSchemes</key>
+				<array>
+					<!-- REVERSED_CLIENT_ID do CLIENT_ID acima (obrigatório para GIDSignIn). -->
+					<string>com.googleusercontent.apps.868715549357-kjut1ja3ab79j6pp3pquk2nha48atbcs</string>
 				</array>
 			</dict>
 		</array>
