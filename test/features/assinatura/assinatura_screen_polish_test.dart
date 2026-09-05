@@ -68,6 +68,22 @@ void main() {
       'lib/features/assinatura/screens/assinatura_screen_build_body.part.dart',
     ).readAsStringSync();
     expect(body, isNot(contains('FxConversionLockup')));
+    expect(
+      File('lib/features/planos/paywall/paywall_vitrine.dart').readAsStringSync(),
+      isNot(contains('socialProof')),
+    );
+    expect(
+      File('lib/features/planos/paywall/paywall_vitrine.dart').readAsStringSync(),
+      isNot(contains('roiStrip')),
+    );
+    expect(
+      File('lib/features/planos/paywall/paywall_catalog.dart').readAsStringSync(),
+      isNot(contains('socialProof')),
+    );
+    expect(
+      File('lib/features/planos/paywall/paywall_catalog.dart').readAsStringSync(),
+      isNot(contains('roiStrip')),
+    );
     expect(body, contains('PaywallCompareStage'));
     expect(body, isNot(contains('PaywallPlanStudio')));
     expect(body, isNot(contains('PaywallRichPlanCard')));
@@ -92,6 +108,11 @@ void main() {
     expect(build, contains('AnimatedSwitcher'));
     expect(build, contains('Continuar no FREE'));
     expect(build, contains('Compras bloqueadas no aparelho'));
+    expect(build, contains('managementMode'));
+    expect(build, contains("title: managementMode ? 'Assinatura' : 'Planos'"));
+    expect(build, contains("'Cancelar'"));
+    expect(build, contains('TextButton('));
+    expect(build, isNot(contains('Icons.cancel_outlined')));
 
     final body = File(
       'lib/features/assinatura/screens/assinatura_screen_build_body.part.dart',
@@ -100,6 +121,7 @@ void main() {
     expect(body, contains('AlwaysScrollableScrollPhysics'));
     expect(body, contains('SliverFillRemaining'));
     expect(body, contains('fillViewport: true'));
+    expect(body, contains('managementMode'));
     expect(body, isNot(contains('TokensStrip.s8 * 3')));
 
     final stage = File(
@@ -108,6 +130,7 @@ void main() {
     expect(stage, contains('_PlanTabs'));
     expect(stage, contains('_CompareCard'));
     expect(stage, contains('fillViewport'));
+    expect(stage, contains('managementMode'));
     expect(stage, contains('FocuxHubTypography.sectionTitle'));
     expect(stage, contains('paywallNumberStyle'));
     expect(stage, contains('FocuxHubTypography.kpi'));

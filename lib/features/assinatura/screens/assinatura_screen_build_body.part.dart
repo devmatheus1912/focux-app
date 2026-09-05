@@ -13,6 +13,7 @@ extension AssinaturaScreenBuildBody on _AssinaturaScreenState {
     required PaywallVitrineSnapshot? vitrine,
     required SubscriptionPlan? paywallNextTier,
     required bool paywallHasUpgradeAbove,
+    bool managementMode = false,
   }) {
     final sortedPlans = [...planosList]..sort(
       (a, b) => subscriptionPlanFromApi(
@@ -81,11 +82,13 @@ extension AssinaturaScreenBuildBody on _AssinaturaScreenState {
             );
 
     final storeOk = kIsWeb || !subscriptionUsesNativeStore || _storeAvailable;
+    final managingCurrent = managementMode && selPlan == currentPlan;
     final showBilling =
         selPlan != SubscriptionPlan.FREE &&
         !kIsWeb &&
         subscriptionUsesNativeStore &&
-        storeOk;
+        storeOk &&
+        !managingCurrent;
 
     return RefreshIndicator(
       onRefresh: () async {
@@ -132,6 +135,7 @@ extension AssinaturaScreenBuildBody on _AssinaturaScreenState {
                   Expanded(
                     child: PaywallCompareStage(
                       fillViewport: true,
+                      managementMode: managementMode,
                       plans: tabPlans,
                       currentPlan: currentPlan,
                       selectedPlan: selPlan,

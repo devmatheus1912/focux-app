@@ -8,8 +8,7 @@ void main() {
     expect(PaywallCatalog.comparisonFreeVsEnterprise.length, 9);
   });
 
-  test('roi strip match reference', () {
-    expect(PaywallCatalog.roiStrip.length, 6);
+  test('upgradeTriggers match reference', () {
     expect(PaywallCatalog.upgradeTriggers.length, 8);
   });
 

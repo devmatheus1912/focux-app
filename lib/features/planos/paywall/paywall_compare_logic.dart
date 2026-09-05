@@ -63,6 +63,17 @@ String paywallCompareHeadline({
   return 'Ver ${paywallPrettyName(selected)}';
 }
 
+String paywallCompareSubtitle({
+  required SubscriptionPlan selected,
+  required SubscriptionPlan current,
+  required bool managementMode,
+}) {
+  if (managementMode && selected == current) {
+    return 'Status, cobrança na loja e cancelamento — sem vitrine de upgrade.';
+  }
+  return PaywallCatalog.subtitleForPlan(selected);
+}
+
 bool paywallCompareCellIncluded(String value) {
   final t = value.trim();
   return t.isNotEmpty && t != '—';
@@ -72,6 +83,7 @@ PaywallCompareView buildPaywallCompareView({
   required SubscriptionPlan selected,
   required SubscriptionPlan current,
   List<PaywallComparisonRow>? rows,
+  bool managementMode = false,
 }) {
   const baseline = SubscriptionPlan.FREE;
   final showTwo = selected != SubscriptionPlan.FREE;
@@ -95,15 +107,22 @@ PaywallCompareView buildPaywallCompareView({
           })
           .toList(growable: false);
 
+  final managingCurrent = managementMode && selected == current;
+
   return PaywallCompareView(
     selected: selected,
     baseline: baseline,
     headline: paywallCompareHeadline(selected: selected, current: current),
-    subtitle: PaywallCatalog.subtitleForPlan(selected),
+    subtitle: paywallCompareSubtitle(
+      selected: selected,
+      current: current,
+      managementMode: managementMode,
+    ),
     baselineColumnLabel: paywallTabLabel(baseline),
     selectedColumnLabel: paywallTabLabel(selected),
     rows: mapped,
     showTwoColumns: showTwo,
-    showBillingToggle: selected != SubscriptionPlan.FREE,
+    // Gestão do plano máximo: sem toggle mensal/anual (não há checkout de upgrade).
+    showBillingToggle: selected != SubscriptionPlan.FREE && !managingCurrent,
   );
 }
