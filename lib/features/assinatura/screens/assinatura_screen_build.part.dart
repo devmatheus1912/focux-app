@@ -233,10 +233,14 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
           'Desligue para testar compras. Conta FREE segue ativa.';
     }
 
+    // Sem tier acima (ex.: Enterprise): superfície de gestão, não paywall.
+    final managementMode =
+        currentPlan != SubscriptionPlan.FREE && !paywallHasUpgradeAbove;
+
     return FxShellScaffold(
       useMesh: true,
       appBar: FxShellAppBar(
-        title: 'Planos',
+        title: managementMode ? 'Assinatura' : 'Planos',
         subtitle: FxHubFreshness.fromFetchedAt(_paywallFetchedAt),
         onBack: () {
           FxKeyboardDismissScope.dismiss();
@@ -247,10 +251,15 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
             Semantics(
               button: true,
               label: 'Cancelar assinatura',
-              child: IconButton(
-                icon: const Icon(Icons.cancel_outlined),
-                tooltip: 'Cancelar assinatura',
+              child: TextButton(
                 onPressed: () => context.push('/cancel-save'),
+                child: Text(
+                  'Cancelar',
+                  style: TokensStrip.body(color: primary).copyWith(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                  ),
+                ),
               ),
             ),
         ],
@@ -368,6 +377,7 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
             vitrine: vitrine,
             paywallNextTier: paywallNextTier,
             paywallHasUpgradeAbove: paywallHasUpgradeAbove,
+            managementMode: managementMode,
           );
         },
       ),
