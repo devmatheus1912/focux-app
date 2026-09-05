@@ -42,6 +42,7 @@ class PaywallCompareStage extends StatelessWidget {
     this.roiTag,
     this.onBillingPeriod,
     this.fillViewport = false,
+    this.managementMode = false,
   });
 
   final List<SubscriptionPlan> plans;
@@ -60,20 +61,28 @@ class PaywallCompareStage extends StatelessWidget {
   /// Preenche o viewport restante (sem faixa branca entre o card e o sticky).
   final bool fillViewport;
 
+  /// Plano máximo ativo: status / loja / cancelar — não vitrine de upgrade.
+  final bool managementMode;
+
   @override
   Widget build(BuildContext context) {
     final view = buildPaywallCompareView(
       selected: selectedPlan,
       current: currentPlan,
       rows: comparisonRows,
+      managementMode: managementMode,
     );
     final accent = PaywallCatalog.accentForPlan(selectedPlan);
     final reduced = TokensStrip.prefersReducedMotion(context);
     final duration =
         reduced ? Duration.zero : const Duration(milliseconds: 220);
-    final tag = (roiTag != null && roiTag!.trim().isNotEmpty)
-        ? roiTag!.trim()
-        : PaywallCatalog.roiTagForPlan(selectedPlan);
+    final managingCurrent =
+        managementMode && selectedPlan == currentPlan;
+    final tag = managingCurrent
+        ? null
+        : (roiTag != null && roiTag!.trim().isNotEmpty)
+            ? roiTag!.trim()
+            : PaywallCatalog.roiTagForPlan(selectedPlan);
 
     final card = AnimatedSwitcher(
       duration: duration,
