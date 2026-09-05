@@ -64,6 +64,23 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
   bool _uploadingPhoto = false;
   var _viewTracked = false;
   DateTime? _fetchedAt;
+  bool _mfaAvailable = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadMfaCapability();
+  }
+
+  Future<void> _loadMfaCapability() async {
+    try {
+      final caps = await ref.read(authRepositoryProvider).capabilities();
+      if (!mounted) return;
+      setState(() => _mfaAvailable = caps.personalMfaTotpAvailable);
+    } catch (_) {
+      // MFA tile fica oculto se capabilities falhar.
+    }
+  }
 
   Future<void> _refreshHub() async {
     ref.invalidate(perfilProvider);
@@ -255,7 +272,8 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
               perfil: perfil,
               dashboard: cachedPersonal,
               uploadingPhoto: _uploadingPhoto,
-              freshnessLabel: freshnessLabel,
+              showMfa: _mfaAvailable,
+freshnessLabel: freshnessLabel,
               onRefresh: _refreshHub,
               onPickPhoto: _pickAndUploadPhoto,
               onEditPerfil: () => _openEditPerfil(perfil),
@@ -285,7 +303,8 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
                     instagram: perfil.instagram,
                   ),
                   uploadingPhoto: _uploadingPhoto,
-                  loadingMetrics: true,
+                  showMfa: _mfaAvailable,
+loadingMetrics: true,
                   freshnessLabel: freshnessLabel,
                   onRefresh: _refreshHub,
                   onPickPhoto: _pickAndUploadPhoto,
@@ -312,7 +331,8 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
                     instagram: perfil.instagram,
                   ),
                   uploadingPhoto: _uploadingPhoto,
-                  freshnessLabel: freshnessLabel,
+                  showMfa: _mfaAvailable,
+freshnessLabel: freshnessLabel,
                   onRefresh: _refreshHub,
                   onPickPhoto: _pickAndUploadPhoto,
                   onEditPerfil: () => _openEditPerfil(perfil),
@@ -327,7 +347,8 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
                   perfil: perfil,
                   dashboard: dashboard,
                   uploadingPhoto: _uploadingPhoto,
-                  freshnessLabel: freshnessLabel,
+                  showMfa: _mfaAvailable,
+freshnessLabel: freshnessLabel,
                   onRefresh: _refreshHub,
                   onPickPhoto: _pickAndUploadPhoto,
                   onEditPerfil: () => _openEditPerfil(perfil),

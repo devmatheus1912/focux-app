@@ -54,6 +54,7 @@ bool isPublicLocation(String path) {
       path == '/dashboard' ||
       path == '/dashboard/home' ||
       path == '/login' ||
+      path == '/login/mfa' ||
       path == '/register' ||
       path == '/register/aluno' ||
       path == '/onboarding' ||
@@ -116,6 +117,7 @@ bool isPersonalOnlyLocation(String path) {
     '/perfil/editar',
     '/perfil/wallet',
     '/perfil/ferramentas',
+    '/perfil/mfa',
     '/identidade-visual',
     '/white-label',
     '/setup/identidade',

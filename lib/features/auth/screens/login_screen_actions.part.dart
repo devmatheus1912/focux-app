@@ -68,10 +68,11 @@ extension on _LoginScreenState {
               : _postLoginRedirect(context, isAluno: true),
         );
       } else {
-        await ref
+        final result = await ref
             .read(authProvider.notifier)
             .login(_emailController.text.trim(), _passwordController.text);
         if (!mounted) return;
+        if (await _maybeOpenMfa(result, method: 'password')) return;
         _trackLogin(success: true, method: 'password');
         context.go(await _postPersonalLoginRedirect(context));
       }
@@ -94,6 +95,27 @@ extension on _LoginScreenState {
     }
   }
 
+  /// Se o backend pediu MFA, guarda mfaToken em memória e abre a challenge.
+  Future<bool> _maybeOpenMfa(
+    AuthLoginResult result, {
+    required String method,
+  }) async {
+    if (!result.mfaRequired) return false;
+    final token = result.mfaToken?.trim();
+    if (token == null || token.isEmpty) {
+      setState(() => _error = 'Não foi possível iniciar a verificação MFA.');
+      return true;
+    }
+    final from = GoRouterState.of(context).uri.queryParameters['from'];
+    ref.read(mfaChallengeProvider.notifier).state = MfaChallenge(
+      mfaToken: token,
+      returnTo: from,
+    );
+    _trackLogin(success: true, method: '${method}_mfa_pending');
+    context.go('/login/mfa');
+    return true;
+  }
+
   Future<void> _submitGoogle() async {
     if (_loading || _loadingGoogle || _loadingApple) return;
     setState(() {
@@ -102,15 +124,15 @@ extension on _LoginScreenState {
     });
     HapticFeedback.mediumImpact();
     try {
-      final result = await GoogleSignInService().signInForIdToken();
-      if (result == null) return;
-      final idToken = result.idToken;
+      final google = await GoogleSignInService().signInForIdToken();
+      if (google == null) return;
+      final idToken = google.idToken;
       if (_isAluno &&
           (_effectivePersonalSlug == null ||
               _effectivePersonalSlug!.isEmpty)) {
         throw StateError('PERSONAL_SLUG_REQUIRED');
       }
-      await ref
+      final result = await ref
           .read(authProvider.notifier)
           .loginGoogle(
             idToken: idToken,
@@ -118,6 +140,9 @@ extension on _LoginScreenState {
             personalSlug: _isAluno ? _effectivePersonalSlug : null,
           );
       if (!mounted) return;
+      if (!_isAluno && await _maybeOpenMfa(result, method: 'google')) {
+        return;
+      }
       _trackLogin(success: true, method: 'google');
       if (_isAluno) {
         context.go(_postLoginRedirect(context, isAluno: true));
@@ -153,7 +178,7 @@ extension on _LoginScreenState {
               _effectivePersonalSlug!.isEmpty)) {
         throw StateError('PERSONAL_SLUG_REQUIRED');
       }
-      await ref
+      final result = await ref
           .read(authProvider.notifier)
           .loginApple(
             identityToken: credential.identityToken,
@@ -163,6 +188,9 @@ extension on _LoginScreenState {
             personalSlug: _isAluno ? _effectivePersonalSlug : null,
           );
       if (!mounted) return;
+      if (!_isAluno && await _maybeOpenMfa(result, method: 'apple')) {
+        return;
+      }
       _trackLogin(success: true, method: 'apple');
       if (_isAluno) {
         context.go(_postLoginRedirect(context, isAluno: true));

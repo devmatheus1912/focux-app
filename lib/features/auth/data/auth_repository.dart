@@ -26,11 +26,13 @@ class AuthCapabilities {
   final bool passwordResetEmailAvailable;
   final bool googleSignInEnabled;
   final bool appleSignInEnabled;
+  final bool personalMfaTotpAvailable;
 
   const AuthCapabilities({
     required this.passwordResetEmailAvailable,
     required this.googleSignInEnabled,
     required this.appleSignInEnabled,
+    required this.personalMfaTotpAvailable,
   });
 
   factory AuthCapabilities.fromJson(Map<String, dynamic> json) {
@@ -39,6 +41,63 @@ class AuthCapabilities {
           json['passwordResetEmailAvailable'] as bool? ?? false,
       googleSignInEnabled: json['googleSignInEnabled'] as bool? ?? false,
       appleSignInEnabled: json['appleSignInEnabled'] as bool? ?? false,
+      personalMfaTotpAvailable:
+          json['personalMfaTotpAvailable'] as bool? ?? false,
+    );
+  }
+}
+
+/// Resultado de login e-mail/Google/Apple (Personal pode exigir MFA).
+class AuthLoginResult {
+  const AuthLoginResult._({required this.mfaRequired, this.mfaToken});
+
+  const AuthLoginResult.authenticated()
+    : this._(mfaRequired: false, mfaToken: null);
+
+  const AuthLoginResult.mfaRequired(String token)
+    : this._(mfaRequired: true, mfaToken: token);
+
+  final bool mfaRequired;
+  final String? mfaToken;
+}
+
+class MfaStatus {
+  const MfaStatus({
+    required this.enabled,
+    required this.recoveryCodesRemaining,
+  });
+
+  final bool enabled;
+  final int recoveryCodesRemaining;
+
+  factory MfaStatus.fromJson(Map<String, dynamic> json) {
+    return MfaStatus(
+      enabled: json['enabled'] as bool? ?? false,
+      recoveryCodesRemaining: json['recoveryCodesRemaining'] as int? ?? 0,
+    );
+  }
+}
+
+class MfaSetupPayload {
+  const MfaSetupPayload({
+    required this.secret,
+    required this.otpauthUri,
+    required this.recoveryCodes,
+  });
+
+  final String secret;
+  final String otpauthUri;
+  final List<String> recoveryCodes;
+
+  factory MfaSetupPayload.fromJson(Map<String, dynamic> json) {
+    final raw = json['recoveryCodes'];
+    return MfaSetupPayload(
+      secret: json['secret'] as String? ?? '',
+      otpauthUri: json['otpauthUri'] as String? ?? '',
+      recoveryCodes:
+          raw is List
+              ? raw.map((e) => e.toString()).where((e) => e.isNotEmpty).toList()
+              : const [],
     );
   }
 }
@@ -197,21 +256,15 @@ class AuthRepository {
     );
   }
 
-  Future<String> loginPersonal(String email, String password) async {
+  Future<AuthLoginResult> loginPersonal(String email, String password) async {
     final response = await _dio.post(
       '/api/auth/login',
       data: {'email': email, 'senha': password},
     );
-    final token = response.data['token'] as String;
-    final refreshToken = response.data['refreshToken'] as String?;
-    final isAdmin = response.data['isAdmin'] as bool? ?? false;
-    await SecureStorage.saveToken(token);
-    if (refreshToken != null) {
-      await SecureStorage.saveRefreshToken(refreshToken);
-    }
-    await SecureStorage.saveRole('PERSONAL');
-    await SecureStorage.saveIsAdmin(isAdmin);
-    return token;
+    return _consumeAuthResponse(
+      response.data as Map<String, dynamic>,
+      fallbackRole: 'PERSONAL',
+    );
   }
 
   Future<String> registerPersonal(
@@ -278,7 +331,7 @@ class AuthRepository {
     return requiresPasswordChange;
   }
 
-  Future<void> loginGoogle({
+  Future<AuthLoginResult> loginGoogle({
     required String idToken,
     required bool isAluno,
     String? personalSlug,
@@ -291,14 +344,14 @@ class AuthRepository {
       data['personalSlug'] = personalSlug.trim();
     }
     final response = await _dio.post('/api/auth/google', data: data);
-    await _persistAuthResponse(
+    return _consumeAuthResponse(
       response.data as Map<String, dynamic>,
       fallbackRole: isAluno ? 'ALUNO' : 'PERSONAL',
     );
   }
 
   /// Sign in with Apple — `POST /api/auth/apple`.
-  Future<void> loginApple({
+  Future<AuthLoginResult> loginApple({
     required String identityToken,
     required bool isAluno,
     String? fullName,
@@ -316,17 +369,74 @@ class AuthRepository {
       data['personalSlug'] = personalSlug.trim();
     }
     final response = await _dio.post('/api/auth/apple', data: data);
-    await _persistAuthResponse(
+    return _consumeAuthResponse(
       response.data as Map<String, dynamic>,
       fallbackRole: isAluno ? 'ALUNO' : 'PERSONAL',
     );
+  }
+
+  /// Login intermediário MFA — `POST /api/auth/mfa/verify`.
+  Future<AuthLoginResult> verifyMfa({
+    required String mfaToken,
+    required String code,
+  }) async {
+    final response = await _dio.post(
+      '/api/auth/mfa/verify',
+      data: {'mfaToken': mfaToken, 'code': code.trim()},
+    );
+    return _consumeAuthResponse(
+      response.data as Map<String, dynamic>,
+      fallbackRole: 'PERSONAL',
+    );
+  }
+
+  Future<MfaStatus> mfaStatus() async {
+    final response = await _dio.get('/api/auth/mfa/status');
+    return MfaStatus.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  Future<MfaSetupPayload> mfaSetup() async {
+    final response = await _dio.post('/api/auth/mfa/setup');
+    return MfaSetupPayload.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  Future<void> mfaConfirm(String code) async {
+    await _dio.post('/api/auth/mfa/confirm', data: {'code': code.trim()});
+  }
+
+  Future<void> mfaDisable({required String senha, required String code}) async {
+    await _dio.post(
+      '/api/auth/mfa/disable',
+      data: {'senha': senha, 'code': code.trim()},
+    );
+  }
+
+  /// Interpreta AuthResponse: MFA challenge (sem persistir) ou sessão completa.
+  Future<AuthLoginResult> _consumeAuthResponse(
+    Map<String, dynamic> body, {
+    required String fallbackRole,
+  }) async {
+    final mfaRequired = body['mfaRequired'] as bool? ?? false;
+    if (mfaRequired) {
+      final mfaToken = (body['mfaToken'] as String?)?.trim();
+      if (mfaToken == null || mfaToken.isEmpty) {
+        throw StateError('MFA_TOKEN_MISSING');
+      }
+      // token/refreshToken vêm null — não persiste sessão.
+      return AuthLoginResult.mfaRequired(mfaToken);
+    }
+    await _persistAuthResponse(body, fallbackRole: fallbackRole);
+    return const AuthLoginResult.authenticated();
   }
 
   Future<void> _persistAuthResponse(
     Map<String, dynamic> body, {
     required String fallbackRole,
   }) async {
-    final token = body['token'] as String;
+    final token = body['token'] as String?;
+    if (token == null || token.isEmpty) {
+      throw StateError('AUTH_TOKEN_MISSING');
+    }
     final refreshToken = body['refreshToken'] as String?;
     final role = body['role'] as String? ?? fallbackRole;
     final isAdmin = body['isAdmin'] as bool? ?? false;
