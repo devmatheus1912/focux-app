@@ -5,6 +5,7 @@ class _PerfilBody extends StatefulWidget {
   final DashboardData dashboard;
   final bool uploadingPhoto;
   final bool loadingMetrics;
+  final bool showMfa;
   final String? freshnessLabel;
   final Future<void> Function() onRefresh;
   final VoidCallback onPickPhoto;
@@ -18,6 +19,7 @@ class _PerfilBody extends StatefulWidget {
     required this.dashboard,
     required this.uploadingPhoto,
     this.loadingMetrics = false,
+    this.showMfa = false,
     this.freshnessLabel,
     required this.onRefresh,
     required this.onPickPhoto,
@@ -270,6 +272,9 @@ class _PerfilBodyState extends State<_PerfilBody> {
                                 child: PerfilContaSegurancaSection(
                                   mute: mute,
                                   line: line,
+                                  showMfa: widget.showMfa,
+                                  onMfaTap:
+                                      () => context.push('/perfil/mfa'),
                                   onLogout: () {
                                     onLogout();
                                   },

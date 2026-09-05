@@ -69,12 +69,14 @@ class AuthNotifier extends StateNotifier<AuthStatus> {
     }
   }
 
-  Future<void> login(String email, String password) async {
-    await _repo.loginPersonal(email, password);
+  Future<AuthLoginResult> login(String email, String password) async {
+    final result = await _repo.loginPersonal(email, password);
+    if (result.mfaRequired) return result;
     _currentRole = UserRole.personal;
     _isAdmin = await SecureStorage.getIsAdmin();
     _requiresPasswordChange = false;
     state = AuthStatus.authenticated;
+    return result;
   }
 
   Future<void> register(
@@ -118,40 +120,69 @@ class AuthNotifier extends StateNotifier<AuthStatus> {
     state = AuthStatus.authenticated;
   }
 
-  Future<void> loginGoogle({
+  Future<AuthLoginResult> loginGoogle({
     required String idToken,
     required bool isAluno,
     String? personalSlug,
   }) async {
-    await _repo.loginGoogle(
+    final result = await _repo.loginGoogle(
       idToken: idToken,
       isAluno: isAluno,
       personalSlug: personalSlug,
     );
+    if (result.mfaRequired) return result;
     _currentRole = isAluno ? UserRole.aluno : UserRole.personal;
     _isAdmin = await SecureStorage.getIsAdmin();
     _requiresPasswordChange = false;
     state = AuthStatus.authenticated;
+    return result;
   }
 
-  Future<void> loginApple({
+  Future<AuthLoginResult> loginApple({
     required String identityToken,
     required bool isAluno,
     String? fullName,
     String? email,
     String? personalSlug,
   }) async {
-    await _repo.loginApple(
+    final result = await _repo.loginApple(
       identityToken: identityToken,
       isAluno: isAluno,
       fullName: fullName,
       email: email,
       personalSlug: personalSlug,
     );
+    if (result.mfaRequired) return result;
     _currentRole = isAluno ? UserRole.aluno : UserRole.personal;
     _isAdmin = await SecureStorage.getIsAdmin();
     _requiresPasswordChange = false;
     state = AuthStatus.authenticated;
+    return result;
+  }
+
+  /// Completa o login após o código TOTP / recovery.
+  Future<void> verifyMfa({
+    required String mfaToken,
+    required String code,
+  }) async {
+    final result = await _repo.verifyMfa(mfaToken: mfaToken, code: code);
+    if (result.mfaRequired) {
+      throw StateError('MFA_STILL_REQUIRED');
+    }
+    _currentRole = UserRole.personal;
+    _isAdmin = await SecureStorage.getIsAdmin();
+    _requiresPasswordChange = false;
+    state = AuthStatus.authenticated;
+  }
+
+  Future<MfaStatus> mfaStatus() => _repo.mfaStatus();
+
+  Future<MfaSetupPayload> mfaSetup() => _repo.mfaSetup();
+
+  Future<void> mfaConfirm(String code) => _repo.mfaConfirm(code);
+
+  Future<void> mfaDisable({required String senha, required String code}) {
+    return _repo.mfaDisable(senha: senha, code: code);
   }
 
   Future<void> registerAluno(
@@ -192,6 +223,16 @@ class AuthNotifier extends StateNotifier<AuthStatus> {
     state = AuthStatus.unauthenticated;
   }
 }
+
+/// MFA token do challenge de login — só em memória (nunca SecureStorage).
+class MfaChallenge {
+  const MfaChallenge({required this.mfaToken, this.returnTo});
+
+  final String mfaToken;
+  final String? returnTo;
+}
+
+final mfaChallengeProvider = StateProvider<MfaChallenge?>((ref) => null);
 
 final authProvider = StateNotifierProvider<AuthNotifier, AuthStatus>(
   (ref) => AuthNotifier(ref.read(authRepositoryProvider)),

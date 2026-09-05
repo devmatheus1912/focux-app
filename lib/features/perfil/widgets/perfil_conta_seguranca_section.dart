@@ -15,12 +15,16 @@ class PerfilContaSegurancaSection extends StatelessWidget {
     required this.line,
     required this.onLogout,
     required this.onDeleteAccount,
+    this.showMfa = false,
+    this.onMfaTap,
   });
 
   final Color mute;
   final Color line;
   final VoidCallback onLogout;
   final VoidCallback onDeleteAccount;
+  final bool showMfa;
+  final VoidCallback? onMfaTap;
 
   @override
   Widget build(BuildContext context) {
@@ -30,6 +34,15 @@ class PerfilContaSegurancaSection extends StatelessWidget {
         FxSettingsGroup(
           header: 'Conta e segurança',
           children: [
+            if (showMfa)
+              FxSettingsTile(
+                icon: Icons.phonelink_lock_outlined,
+                label: 'Autenticação em duas etapas',
+                value: '',
+                mute: mute,
+                line: line,
+                onTap: onMfaTap,
+              ),
             FxSettingsTile(
               icon: Icons.gavel_outlined,
               label: 'Termos de uso',

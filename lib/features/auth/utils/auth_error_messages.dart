@@ -336,3 +336,63 @@ String mapAppleSignInError(Object error, {required bool isAluno}) {
   return 'Não foi possível entrar com Apple agora.';
 }
 
+/// Erros da challenge MFA no login (TOTP / recovery).
+String mapMfaVerifyError(Object error) {
+  if (error is DioException) {
+    final statusCode = error.response?.statusCode;
+    if (statusCode == 401 || statusCode == 400) {
+      return _backendMessage(error) ??
+          'Código inválido. Tente de novo ou use um código de recuperação.';
+    }
+    if (statusCode == 410 || statusCode == 408) {
+      return 'A verificação expirou. Entre de novo e digite o código.';
+    }
+    if (statusCode == 429) {
+      return 'Muitas tentativas. Aguarde um pouco e tente de novo.';
+    }
+    if (statusCode == 502 || statusCode == 504) {
+      return _backendMessage(error) ??
+          'Servidor indisponível no momento. Tente de novo em instantes.';
+    }
+    if (statusCode == null) {
+      return _backendMessage(error) ?? 'Sem conexão com o servidor.';
+    }
+    return _backendMessage(error) ?? 'Erro $statusCode na verificação MFA.';
+  }
+  if (error is StateError && error.message == 'MFA_STILL_REQUIRED') {
+    return 'Ainda é necessário confirmar o código MFA.';
+  }
+  return 'Não foi possível verificar o código MFA.';
+}
+
+/// Erros de setup / disable MFA nas configurações do Personal.
+String mapMfaSetupError(Object error) {
+  if (error is DioException) {
+    final statusCode = error.response?.statusCode;
+    if (statusCode == 400 || statusCode == 401) {
+      return _backendMessage(error) ??
+          'Código ou senha inválidos. Confira e tente de novo.';
+    }
+    if (statusCode == 403) {
+      return _backendMessage(error) ??
+          'Sem permissão para alterar MFA nesta conta.';
+    }
+    if (statusCode == 409) {
+      return _backendMessage(error) ??
+          'MFA já está configurado. Desative antes de gerar um novo.';
+    }
+    if (statusCode == 503) {
+      return 'MFA ainda não está disponível neste ambiente.';
+    }
+    if (statusCode == 502 || statusCode == 504) {
+      return _backendMessage(error) ??
+          'Servidor indisponível no momento. Tente de novo em instantes.';
+    }
+    if (statusCode == null) {
+      return _backendMessage(error) ?? 'Sem conexão com o servidor.';
+    }
+    return _backendMessage(error) ?? 'Erro $statusCode ao configurar MFA.';
+  }
+  return 'Não foi possível atualizar o MFA agora.';
+}
+
