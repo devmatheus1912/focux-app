@@ -136,4 +136,59 @@ void main() {
       'Servidor indisponível no momento. Tente de novo em instantes.',
     );
   });
+
+  test('mapAppleSignInError humaniza 503 / 401 / 400', () {
+    expect(
+      mapAppleSignInError(
+        DioException(
+          requestOptions: RequestOptions(path: '/api/auth/apple'),
+          response: Response(
+            requestOptions: RequestOptions(path: '/api/auth/apple'),
+            statusCode: 503,
+          ),
+          type: DioExceptionType.badResponse,
+        ),
+        isAluno: false,
+      ),
+      contains('ainda não está ativo'),
+    );
+    expect(
+      mapAppleSignInError(
+        DioException(
+          requestOptions: RequestOptions(path: '/api/auth/apple'),
+          response: Response(
+            requestOptions: RequestOptions(path: '/api/auth/apple'),
+            statusCode: 401,
+          ),
+          type: DioExceptionType.badResponse,
+        ),
+        isAluno: false,
+      ),
+      contains('Apple'),
+    );
+    expect(
+      mapAppleSignInError(
+        DioException(
+          requestOptions: RequestOptions(path: '/api/auth/apple'),
+          response: Response(
+            requestOptions: RequestOptions(path: '/api/auth/apple'),
+            statusCode: 400,
+          ),
+          type: DioExceptionType.badResponse,
+        ),
+        isAluno: true,
+      ),
+      contains('e-mail'),
+    );
+  });
+
+  test('mapAppleSignInError exige personalSlug para aluno', () {
+    expect(
+      mapAppleSignInError(
+        StateError('PERSONAL_SLUG_REQUIRED'),
+        isAluno: true,
+      ),
+      contains('?p=slug'),
+    );
+  });
 }

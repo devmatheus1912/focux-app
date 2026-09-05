@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io' show Platform;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -24,7 +25,9 @@ import '../utils/auth_error_messages.dart';
 import '../utils/register_display.dart';
 import '../widgets/auth_operational_notice.dart';
 import '../widgets/auth_shell.dart';
+import '../services/apple_sign_in_service.dart';
 import '../services/google_sign_in_service.dart';
+import '../widgets/apple_sign_in_button.dart';
 import '../widgets/google_sign_in_button.dart';
 import '../widgets/password_strength_meter.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
@@ -50,6 +53,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _passwordFocus = FocusNode();
   bool _loading = false;
   bool _loadingGoogle = false;
+  bool _loadingApple = false;
+  bool _appleEnabled = false;
+  bool _googleEnabled = false;
   bool _sendingCode = false;
   bool _codeSent = false;
   bool _showPassword = false;
@@ -88,12 +94,23 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     try {
       final caps = await ref.read(authRepositoryProvider).capabilities();
       if (!mounted) return;
+      final showGoogle =
+          Env.googleWebClientId.isNotEmpty && !Platform.isIOS;
       setState(() {
         _emailDeliveryAvailable = caps.passwordResetEmailAvailable;
+        _appleEnabled =
+            caps.appleSignInEnabled && AppleSignInService.isSupportedPlatform;
+        _googleEnabled = showGoogle;
       });
     } catch (_) {
       if (!mounted) return;
-      setState(() => _emailDeliveryAvailable = null);
+      final showGoogle =
+          Env.googleWebClientId.isNotEmpty && !Platform.isIOS;
+      setState(() {
+        _emailDeliveryAvailable = null;
+        _appleEnabled = false;
+        _googleEnabled = showGoogle;
+      });
     }
   }
 
@@ -371,19 +388,38 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                   );
                                 },
                               ),
-                              if (Env.googleWebClientId.isNotEmpty) ...[
+                              if (_appleEnabled || _googleEnabled) ...[
                                 const SizedBox(height: 16),
                                 const FxConversionDivider(
                                   label: 'ou cadastre com',
                                 ),
                                 const SizedBox(height: 12),
-                                GoogleSignInButton(
-                                  label: 'Cadastrar com Google',
-                                  isLoading: _loadingGoogle,
-                                  dark: true,
-                                  onPressed:
-                                      _loadingGoogle ? null : _submitGoogle,
-                                ),
+                                if (_appleEnabled) ...[
+                                  AppleSignInButton(
+                                    label: 'Continuar com Apple',
+                                    isLoading: _loadingApple,
+                                    onPressed:
+                                        _loadingApple ||
+                                                _loading ||
+                                                _loadingGoogle
+                                            ? null
+                                            : _submitApple,
+                                  ),
+                                  if (_googleEnabled)
+                                    const SizedBox(height: 10),
+                                ],
+                                if (_googleEnabled)
+                                  GoogleSignInButton(
+                                    label: 'Cadastrar com Google',
+                                    isLoading: _loadingGoogle,
+                                    dark: true,
+                                    onPressed:
+                                        _loadingGoogle ||
+                                                _loading ||
+                                                _loadingApple
+                                            ? null
+                                            : _submitGoogle,
+                                  ),
                               ],
                               const SizedBox(height: TokensStrip.s4),
                               Padding(

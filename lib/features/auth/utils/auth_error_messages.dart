@@ -283,3 +283,56 @@ String mapGoogleSignInError(Object error, {required bool isAluno}) {
   }
   return 'Não foi possível entrar com Google agora.';
 }
+
+/// Mapeia erros do Sign in with Apple para mensagens em pt-BR.
+String mapAppleSignInError(Object error, {required bool isAluno}) {
+  if (error is DioException) {
+    final statusCode = error.response?.statusCode;
+    if (statusCode == 401) {
+      return isAluno
+          ? 'Este Apple ID não está vinculado a um aluno.'
+          : 'Não foi possível validar sua conta Apple.';
+    }
+    if (statusCode == 403) {
+      return 'Conta sem permissão para entrar como ${isAluno ? "aluno" : "personal"}.';
+    }
+    if (statusCode == 503) {
+      return 'Entrar com Apple ainda não está ativo neste ambiente. Use e-mail e senha por enquanto.';
+    }
+    if (statusCode == 400) {
+      return _backendMessage(error) ??
+          'A Apple não enviou e-mail. Tente de novo ou use e-mail e senha.';
+    }
+    if (statusCode == 502 || statusCode == 504) {
+      return _backendMessage(error) ??
+          'Servidor indisponível no momento. Tente de novo em instantes.';
+    }
+    if (statusCode == null) {
+      return _backendMessage(error) ?? 'Sem conexão com o servidor.';
+    }
+    final msg = _backendMessage(error);
+    return msg != null && msg.isNotEmpty
+        ? msg
+        : 'Erro $statusCode no login com Apple.';
+  }
+  if (error is PlatformException) {
+    final code = error.code;
+    if (code == 'apple_sign_in_unsupported' ||
+        code == 'apple_sign_in_unavailable') {
+      return 'Entrar com Apple não está disponível neste aparelho.';
+    }
+    if (code == 'apple_sign_in_no_token') {
+      return 'A Apple não retornou o token. Tente de novo.';
+    }
+    if (code.contains('canceled') || code.contains('cancelled')) {
+      return 'Login com Apple cancelado.';
+    }
+  }
+  if (error is StateError) {
+    if (error.message == 'PERSONAL_SLUG_REQUIRED') {
+      return 'Abra o link do seu personal (?p=slug) para entrar com Apple como aluno.';
+    }
+  }
+  return 'Não foi possível entrar com Apple agora.';
+}
+

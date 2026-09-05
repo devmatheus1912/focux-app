@@ -25,10 +25,12 @@ class PasswordResetRequestResult {
 class AuthCapabilities {
   final bool passwordResetEmailAvailable;
   final bool googleSignInEnabled;
+  final bool appleSignInEnabled;
 
   const AuthCapabilities({
     required this.passwordResetEmailAvailable,
     required this.googleSignInEnabled,
+    required this.appleSignInEnabled,
   });
 
   factory AuthCapabilities.fromJson(Map<String, dynamic> json) {
@@ -36,6 +38,7 @@ class AuthCapabilities {
       passwordResetEmailAvailable:
           json['passwordResetEmailAvailable'] as bool? ?? false,
       googleSignInEnabled: json['googleSignInEnabled'] as bool? ?? false,
+      appleSignInEnabled: json['appleSignInEnabled'] as bool? ?? false,
     );
   }
 }
@@ -264,13 +267,47 @@ class AuthRepository {
       data['personalSlug'] = personalSlug.trim();
     }
     final response = await _dio.post('/api/auth/google', data: data);
-    final token = response.data['token'] as String;
-    final refreshToken = response.data['refreshToken'] as String?;
-    final role =
-        response.data['role'] as String? ?? (isAluno ? 'ALUNO' : 'PERSONAL');
-    final isAdmin = response.data['isAdmin'] as bool? ?? false;
+    await _persistAuthResponse(
+      response.data as Map<String, dynamic>,
+      fallbackRole: isAluno ? 'ALUNO' : 'PERSONAL',
+    );
+  }
+
+  /// Sign in with Apple — `POST /api/auth/apple`.
+  Future<void> loginApple({
+    required String identityToken,
+    required bool isAluno,
+    String? fullName,
+    String? email,
+    String? personalSlug,
+  }) async {
+    final data = <String, dynamic>{
+      'identityToken': identityToken,
+      'role': isAluno ? 'ALUNO' : 'PERSONAL',
+      if (fullName != null && fullName.trim().isNotEmpty)
+        'fullName': fullName.trim(),
+      if (email != null && email.trim().isNotEmpty) 'email': email.trim(),
+    };
+    if (isAluno && personalSlug != null && personalSlug.trim().isNotEmpty) {
+      data['personalSlug'] = personalSlug.trim();
+    }
+    final response = await _dio.post('/api/auth/apple', data: data);
+    await _persistAuthResponse(
+      response.data as Map<String, dynamic>,
+      fallbackRole: isAluno ? 'ALUNO' : 'PERSONAL',
+    );
+  }
+
+  Future<void> _persistAuthResponse(
+    Map<String, dynamic> body, {
+    required String fallbackRole,
+  }) async {
+    final token = body['token'] as String;
+    final refreshToken = body['refreshToken'] as String?;
+    final role = body['role'] as String? ?? fallbackRole;
+    final isAdmin = body['isAdmin'] as bool? ?? false;
     final requiresPasswordChange =
-        response.data['requiresPasswordChange'] as bool? ?? false;
+        body['requiresPasswordChange'] as bool? ?? false;
     await SecureStorage.saveToken(token);
     if (refreshToken != null) {
       await SecureStorage.saveRefreshToken(refreshToken);
