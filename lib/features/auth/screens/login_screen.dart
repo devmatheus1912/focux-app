@@ -20,6 +20,7 @@ import '../../../features/perfil/providers/perfil_provider.dart';
 import '../../dashboard/utils/dashboard_home_prefetch.dart';
 import '../../alunos/utils/alunos_home_prefetch.dart';
 import '../providers/auth_provider.dart';
+import '../data/auth_repository.dart';
 import '../services/apple_sign_in_service.dart';
 import '../services/google_sign_in_service.dart';
 import '../utils/auth_error_messages.dart';
@@ -114,17 +115,22 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Future<void> _loadCapabilities() async {
     try {
       final status = await ref.read(authRepositoryProvider).environmentStatus();
-      bool appleEnabled = false;
+      bool capsApple = false;
       try {
         final caps = await ref.read(authRepositoryProvider).capabilities();
-        appleEnabled = caps.appleSignInEnabled;
+        capsApple = caps.appleSignInEnabled;
       } catch (_) {}
       if (!mounted) return;
+      final appleOffered = resolveAppleSignInOffered(
+        capabilitiesEnabled: capsApple,
+        environmentStatus: status,
+      );
       final appClientConfigured = Env.googleWebClientId.isNotEmpty;
       // iOS: Apple é o social principal; Google oculto até GIDClientID estável em TF.
       final showGoogle = appClientConfigured && !Platform.isIOS;
       setState(() {
-        _appleEnabled = appleEnabled && AppleSignInService.isSupportedPlatform;
+        _appleEnabled =
+            appleOffered && AppleSignInService.isSupportedPlatform;
         _googleEnabled = showGoogle;
         if (!appClientConfigured) {
           _googleStatusTitle = 'Google pendente no app';
@@ -148,16 +154,25 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       });
     } catch (_) {
       if (!mounted) return;
-      bool appleEnabled = false;
+      AuthEnvironmentStatus? status;
+      bool capsApple = false;
+      try {
+        status = await ref.read(authRepositoryProvider).environmentStatus();
+      } catch (_) {}
       try {
         final caps = await ref.read(authRepositoryProvider).capabilities();
-        appleEnabled = caps.appleSignInEnabled;
+        capsApple = caps.appleSignInEnabled;
       } catch (_) {}
       if (!mounted) return;
+      final appleOffered = resolveAppleSignInOffered(
+        capabilitiesEnabled: capsApple,
+        environmentStatus: status,
+      );
       final appClientConfigured = Env.googleWebClientId.isNotEmpty;
       final showGoogle = appClientConfigured && !Platform.isIOS;
       setState(() {
-        _appleEnabled = appleEnabled && AppleSignInService.isSupportedPlatform;
+        _appleEnabled =
+            appleOffered && AppleSignInService.isSupportedPlatform;
         _googleEnabled = showGoogle;
         if (showGoogle) {
           _googleStatusTitle = null;

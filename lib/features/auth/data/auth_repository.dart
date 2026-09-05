@@ -98,6 +98,9 @@ class AuthEnvironmentStatus {
   final bool googleSignInReady;
   final bool googleSignInEnabled;
   final bool googleClientIdsConfigured;
+  final bool appleSignInReady;
+  final bool appleSignInEnabled;
+  final bool appleClientIdsConfigured;
   final List<String> missing;
   final List<AuthEnvironmentIssue> issues;
   final List<String> nextActions;
@@ -109,6 +112,9 @@ class AuthEnvironmentStatus {
     required this.googleSignInReady,
     required this.googleSignInEnabled,
     required this.googleClientIdsConfigured,
+    required this.appleSignInReady,
+    required this.appleSignInEnabled,
+    required this.appleClientIdsConfigured,
     required this.missing,
     required this.issues,
     required this.nextActions,
@@ -126,6 +132,10 @@ class AuthEnvironmentStatus {
       googleSignInEnabled: json['googleSignInEnabled'] as bool? ?? false,
       googleClientIdsConfigured:
           json['googleClientIdsConfigured'] as bool? ?? false,
+      appleSignInReady: json['appleSignInReady'] as bool? ?? false,
+      appleSignInEnabled: json['appleSignInEnabled'] as bool? ?? false,
+      appleClientIdsConfigured:
+          json['appleClientIdsConfigured'] as bool? ?? false,
       missing:
           rawMissing is List
               ? rawMissing.map((item) => item.toString()).toList()
@@ -148,12 +158,26 @@ class AuthEnvironmentStatus {
     );
   }
 
+  /// Produção hoje: capabilities pode vir `false` enquanto environment-status
+  /// já marca Apple pronto/ligado — o botão deve aparecer nesse caso.
+  bool get appleSignInOffered =>
+      appleSignInEnabled || appleSignInReady || appleClientIdsConfigured;
+
   AuthEnvironmentIssue? firstIssueFor(String area) {
     for (final issue in issues) {
       if (issue.area == area) return issue;
     }
     return null;
   }
+}
+
+/// Une capabilities + environment-status (podem divergir no backend).
+bool resolveAppleSignInOffered({
+  required bool capabilitiesEnabled,
+  AuthEnvironmentStatus? environmentStatus,
+}) {
+  if (capabilitiesEnabled) return true;
+  return environmentStatus?.appleSignInOffered ?? false;
 }
 
 class AuthRepository {
