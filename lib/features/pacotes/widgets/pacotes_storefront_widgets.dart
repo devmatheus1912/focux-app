@@ -320,7 +320,7 @@ class PacotesEmptyState extends StatelessWidget {
       icon: 'coin',
       title: 'Crie seu primeiro plano',
       subtitle:
-          'Um plano tem nome, preço e o que está incluso (treino, nutrição…). '
+          'Um plano tem nome, preço e o que está incluso (treino, consultoria…). '
           'Ele aparece na sua página quando alguém abrir seu link.\n\n'
           'Ex.: Musculação · 3 meses · R\$ 500',
       action: FxEmptyAction(label: 'Criar plano', onTap: onCreate),
