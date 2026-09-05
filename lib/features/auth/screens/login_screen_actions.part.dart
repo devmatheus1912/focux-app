@@ -101,22 +101,9 @@ extension on _LoginScreenState {
     });
     HapticFeedback.mediumImpact();
     try {
-      final isAndroid = !kIsWeb && Platform.isAndroid;
-      final google = GoogleSignIn(
-        clientId: isAndroid ? null : Env.googleWebClientId,
-        serverClientId: Env.googleWebClientId,
-        scopes: const ['email', 'profile'],
-      );
-      try {
-        await google.signOut();
-      } catch (_) {}
-      final account = await google.signIn();
-      if (account == null) return;
-      final auth = await account.authentication;
-      final idToken = auth.idToken;
-      if (idToken == null || idToken.isEmpty) {
-        throw StateError('Google nao retornou idToken.');
-      }
+      final result = await GoogleSignInService().signInForIdToken();
+      if (result == null) return;
+      final idToken = result.idToken;
       if (_isAluno &&
           (_effectivePersonalSlug == null ||
               _effectivePersonalSlug!.isEmpty)) {

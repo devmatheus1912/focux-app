@@ -55,13 +55,28 @@ class Env {
   );
 
   /// OAuth client id used by Google Sign-In (web client, used as serverClientId
-  /// on Android). Public identifier, safe to ship hardcoded. Override via
+  /// on Android/iOS). Public identifier, safe to ship hardcoded. Override via
   /// --dart-define=GOOGLE_WEB_CLIENT_ID=... when needed for staging.
   static const String googleWebClientId = String.fromEnvironment(
     'GOOGLE_WEB_CLIENT_ID',
     defaultValue:
         '868715549357-kjut1ja3ab79j6pp3pquk2nha48atbcs.apps.googleusercontent.com',
   );
+
+  /// Optional iOS OAuth **iOS-type** client id (Google Cloud → Credentials).
+  /// Prefer leaving empty so native reads `GIDClientID` / GoogleService-Info.plist.
+  /// Never put the Web client here as Dart `clientId` without a matching
+  /// REVERSED_CLIENT_ID URL scheme — that aborts GIDSignIn (SIGABRT).
+  static const String googleIosClientId = String.fromEnvironment(
+    'GOOGLE_IOS_CLIENT_ID',
+    defaultValue: '',
+  );
+
+  /// iOS client id for `GoogleSignIn(clientId:)` — null uses Info.plist / plist.
+  static String? get googleIosClientIdOrNull {
+    final id = googleIosClientId.trim();
+    return id.isEmpty ? null : id;
+  }
 
   /// Returns the websocket URL. If `WS_URL` is set, uses it verbatim. Otherwise
   /// converts `https://` → `wss://` and `http://` → `ws://` from [apiUrl].

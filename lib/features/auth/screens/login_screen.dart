@@ -1,12 +1,9 @@
 import 'dart:async';
-import 'dart:io' show Platform;
 
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/api/api_error.dart';
@@ -22,6 +19,7 @@ import '../../../features/perfil/providers/perfil_provider.dart';
 import '../../dashboard/utils/dashboard_home_prefetch.dart';
 import '../../alunos/utils/alunos_home_prefetch.dart';
 import '../providers/auth_provider.dart';
+import '../services/google_sign_in_service.dart';
 import '../utils/auth_error_messages.dart';
 import '../utils/login_display.dart';
 import '../utils/post_login_redirect.dart';
