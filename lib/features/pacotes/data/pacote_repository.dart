@@ -8,7 +8,6 @@ class Pacote {
   final double valor;
   final int duracaoMeses;
   final bool incluiTreino;
-  final bool incluiNutri;
   final bool incluiConsultoria;
   final bool destaque;
   final bool ativo;
@@ -19,7 +18,6 @@ class Pacote {
     required this.valor,
     required this.duracaoMeses,
     required this.incluiTreino,
-    required this.incluiNutri,
     required this.incluiConsultoria,
     required this.destaque,
     required this.ativo,
@@ -33,7 +31,6 @@ class Pacote {
     valor: (j['valor'] as num?)?.toDouble() ?? 0,
     duracaoMeses: (j['duracaoMeses'] as num?)?.toInt() ?? 1,
     incluiTreino: j['incluiTreino'] as bool? ?? false,
-    incluiNutri: j['incluiNutri'] as bool? ?? false,
     incluiConsultoria: j['incluiConsultoria'] as bool? ?? false,
     destaque: j['destaque'] as bool? ?? false,
     ativo: j['ativo'] as bool? ?? true,
