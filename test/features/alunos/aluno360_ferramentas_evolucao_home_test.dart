@@ -78,4 +78,19 @@ void main() {
     });
     expect(parsed.composicaoResumo, isNull);
   });
+
+  test('parses additive anamneseResumo.status for Anamnese tile', () {
+    final parsed = Aluno360Ferramentas.fromJson({
+      'anamneseResumo': {'status': 'PREENCHIDA'},
+    });
+    expect(parsed.anamneseResumo, isNotNull);
+    expect(parsed.anamneseResumo!.status, 'PREENCHIDA');
+  });
+
+  test('null anamneseResumo means nao iniciada for the tile', () {
+    final parsed = Aluno360Ferramentas.fromJson({
+      'hasWearableHistory': true,
+    });
+    expect(parsed.anamneseResumo, isNull);
+  });
 }
