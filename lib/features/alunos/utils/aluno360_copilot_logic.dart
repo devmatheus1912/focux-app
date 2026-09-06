@@ -189,6 +189,68 @@ String sanitizeCopilotAcaoWearable(
   return 'Retomar contato e checar como está o treino.';
 }
 
+/// Mutually exclusive card body states for “Prioridade do dia”.
+enum CopilotPriorityCardState {
+  /// No prescription yet (first paint / empty).
+  idle,
+
+  /// Showing proximaAcao from GET /360/operacao (or legacy /360).
+  showingDeterministic,
+
+  /// IA request in flight — keep current card, status line only.
+  refreshingAi,
+
+  /// Showing GET /api/ia/copiloto/proxima-acao response.
+  showingAi,
+
+  /// IA failed — keep deterministic (or offline fallback).
+  errorAi,
+}
+
+bool _copilotSeedHasAction(Map<String, dynamic>? seed360) {
+  final acao = seed360?['acao']?.toString().trim() ?? '';
+  return acao.isNotEmpty;
+}
+
+/// Resolves exclusive display state for the prescription card body.
+CopilotPriorityCardState resolveCopilotPriorityCardState({
+  required Map<String, dynamic>? seed360,
+  required bool forceIa,
+  required AsyncValue<IaCopilotProximaAcao>? iaAsync,
+  required bool iaRefreshing,
+}) {
+  final iaInFlight =
+      iaRefreshing ||
+      (forceIa &&
+          iaAsync != null &&
+          iaAsync.isLoading &&
+          !iaAsync.hasValue);
+
+  if (iaInFlight) {
+    return CopilotPriorityCardState.refreshingAi;
+  }
+
+  if (forceIa && iaAsync != null) {
+    if (iaAsync.hasError && !iaAsync.hasValue) {
+      return CopilotPriorityCardState.errorAi;
+    }
+    if (iaAsync.hasValue) {
+      return CopilotPriorityCardState.showingAi;
+    }
+    return CopilotPriorityCardState.refreshingAi;
+  }
+
+  if (_copilotSeedHasAction(seed360)) {
+    return CopilotPriorityCardState.showingDeterministic;
+  }
+  return CopilotPriorityCardState.idle;
+}
+
+/// Skeleton only when there is no prescription to keep on screen.
+bool copilotPriorityCardAllowsSkeleton(CopilotPriorityCardState state) {
+  return state == CopilotPriorityCardState.idle;
+}
+
 String copilotCardSubtitle({
   required bool forceIa,
   required AsyncValue<IaCopilotProximaAcao>? iaAsync,
@@ -618,7 +680,7 @@ CopilotPrescriptionContent iaErrorCopilotPrescription(String fallback) {
   );
 }
 
-/// Prioridade do dia só entra após geração IA (ou tarefa aberta do copiloto).
+/// True when proximaAcao from /360 is explicitly IA-sourced (legacy gate).
 bool aluno360CopilotHasIaGeneratedContent({
   required ProximaAcaoResumo? proximaAcao360,
   required bool forceIa,
@@ -630,4 +692,19 @@ bool aluno360CopilotHasIaGeneratedContent({
   final fonte = proximaAcao360?.fonte.trim().toUpperCase() ?? '';
   if (fonte != 'IA') return false;
   return proximaAcao360!.acao.trim().isNotEmpty;
+}
+
+/// Card “Prioridade do dia” has something to show (deterministic and/or IA).
+///
+/// Deterministic seed comes from GET /360/operacao — not from copiloto IA.
+bool aluno360CopilotHasPriorityCardContent({
+  required ProximaAcaoResumo? proximaAcao360,
+  required bool forceIa,
+  required bool iaHasValue,
+  required bool hasOpenTask,
+}) {
+  if (hasOpenTask) return true;
+  if (forceIa && iaHasValue) return true;
+  final acao = proximaAcao360?.acao.trim() ?? '';
+  return acao.isNotEmpty;
 }
