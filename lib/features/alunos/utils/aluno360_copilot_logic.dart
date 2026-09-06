@@ -680,20 +680,6 @@ CopilotPrescriptionContent iaErrorCopilotPrescription(String fallback) {
   );
 }
 
-/// True when proximaAcao from /360 is explicitly IA-sourced (legacy gate).
-bool aluno360CopilotHasIaGeneratedContent({
-  required ProximaAcaoResumo? proximaAcao360,
-  required bool forceIa,
-  required bool iaHasValue,
-  required bool hasOpenTask,
-}) {
-  if (hasOpenTask) return true;
-  if (forceIa && iaHasValue) return true;
-  final fonte = proximaAcao360?.fonte.trim().toUpperCase() ?? '';
-  if (fonte != 'IA') return false;
-  return proximaAcao360!.acao.trim().isNotEmpty;
-}
-
 /// Card “Prioridade do dia” has something to show (deterministic and/or IA).
 ///
 /// Deterministic seed comes from GET /360/operacao — not from copiloto IA.
