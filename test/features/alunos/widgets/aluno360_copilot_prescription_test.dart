@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:focux_app/features/alunos/data/aluno_repository.dart';
 import 'package:focux_app/features/alunos/widgets/aluno360_copilot_prescription.dart';
 
 void main() {
@@ -60,4 +62,47 @@ void main() {
     expect(find.text('sem registro recente'), findsOneWidget);
     expect(find.text('aderência 0%'), findsOneWidget);
   });
+
+  testWidgets(
+    'refreshingAi keeps deterministic action visible without skeleton overlay',
+    (tester) async {
+      final aluno = Aluno(
+        id: 7,
+        nome: 'Nathalia Abrantes',
+        email: 'n@test.com',
+        status: 'ATIVO',
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Aluno360CopilotPrescriptionBody(
+              aluno: aluno,
+              primary: Colors.teal,
+              fallback: 'Fallback',
+              seed360: const {
+                'acao':
+                    'Retomar contato com Nathalia e checar como está o treino.',
+                'motivo': 'Sem check-in recente',
+                'fonte': 'RADAR',
+              },
+              forceIa: true,
+              iaAsync: const AsyncValue.loading(),
+              resumoLoading: false,
+              iaRefreshing: true,
+              onPrepareMessage: () {},
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(
+        find.textContaining('Retomar contato com Nathalia'),
+        findsWidgets,
+      );
+      expect(find.text('Preparar mensagem'), findsOneWidget);
+      expect(find.byType(Aluno360CopilotPrescriptionLoading), findsNothing);
+    },
+  );
 }

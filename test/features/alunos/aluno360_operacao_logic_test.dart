@@ -1227,6 +1227,37 @@ void main() {
     });
   });
 
+  group('aluno360CopilotHasPriorityCardContent', () {
+    test('true for deterministic proximaAcao from /360', () {
+      expect(
+        aluno360CopilotHasPriorityCardContent(
+          proximaAcao360: ProximaAcaoResumo(
+            acao: 'Retomar contato',
+            motivo: 'teste',
+            fonte: 'RADAR',
+            prioridade: 'P1',
+          ),
+          forceIa: false,
+          iaHasValue: false,
+          hasOpenTask: false,
+        ),
+        isTrue,
+      );
+    });
+
+    test('false when there is no action yet', () {
+      expect(
+        aluno360CopilotHasPriorityCardContent(
+          proximaAcao360: null,
+          forceIa: false,
+          iaHasValue: false,
+          hasOpenTask: false,
+        ),
+        isFalse,
+      );
+    });
+  });
+
   group('isIsoDateToday', () {
     test('returns true for today ISO date', () {
       final now = DateTime.now();

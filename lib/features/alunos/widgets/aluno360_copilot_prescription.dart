@@ -411,7 +411,6 @@ class Aluno360CopilotPrescriptionBody extends StatelessWidget {
     required this.iaAsync,
     required this.resumoLoading,
     this.bundleLoading = false,
-    this.bundleRefreshing = false,
     this.iaRefreshing = false,
     this.onPrepareMessage,
     this.preferContactPriority = false,
@@ -429,7 +428,6 @@ class Aluno360CopilotPrescriptionBody extends StatelessWidget {
   final AsyncValue<IaCopilotProximaAcao>? iaAsync;
   final bool resumoLoading;
   final bool bundleLoading;
-  final bool bundleRefreshing;
   final bool iaRefreshing;
   final VoidCallback? onPrepareMessage;
   final bool preferContactPriority;
@@ -441,116 +439,49 @@ class Aluno360CopilotPrescriptionBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final isIaLoading =
-        iaRefreshing || (forceIa && (iaAsync?.isLoading ?? false));
-    final isIaData = forceIa && (iaAsync?.hasValue ?? false);
+    final displayState = resolveCopilotPriorityCardState(
+      seed360: seed360,
+      forceIa: forceIa,
+      iaAsync: iaAsync,
+      iaRefreshing: iaRefreshing,
+    );
+    final hasSeed =
+        seed360 != null &&
+        (seed360!['acao']?.toString().trim().isNotEmpty ?? false);
+    final hasIaValue = forceIa && (iaAsync?.hasValue ?? false);
 
-    late final Widget child;
-    if (bundleLoading) {
-      child = Aluno360CopilotPrescriptionLoading(color: primary);
-    } else if (bundleRefreshing && seed360 != null) {
-      child = Stack(
-        children: [
-          Opacity(
-            opacity: 0.5,
-            child: _fromContent(
-              resolveCopilotPrescriptionFromAction(
-                aluno,
-                seed360!,
-                fallback,
-                wearableRelevant: wearableRelevant,
-                contactPriority: contactPriority,
-                statusMetricsVisible: statusMetricsVisible,
-                hideMetricFooter: hideMetricFooter,
-              ),
+    // Never Stack skeleton over an existing prescription (deterministic or IA).
+    final child = switch (displayState) {
+      CopilotPriorityCardState.refreshingAi =>
+        hasIaValue
+            ? _iaContent(iaAsync!.value!)
+            : hasSeed
+            ? _deterministicContent()
+            : Aluno360CopilotPrescriptionLoading(color: primary),
+      CopilotPriorityCardState.showingAi =>
+        hasIaValue
+            ? _iaContent(iaAsync!.value!)
+            : hasSeed
+            ? _deterministicContent()
+            : _fromContent(offlineCopilotPrescription(fallback)),
+      CopilotPriorityCardState.errorAi =>
+        hasSeed
+            ? _deterministicContent()
+            : _fromContent(
+              iaErrorCopilotPrescription(fallback),
+              isIaSuggestion: false,
             ),
-          ),
-          Positioned.fill(
-            child: IgnorePointer(
-              child: Aluno360CopilotPrescriptionLoading(color: primary),
-            ),
-          ),
-        ],
-      );
-    } else if (forceIa && iaAsync != null) {
-      if (isIaLoading && !isIaData) {
-        child = Aluno360CopilotPrescriptionLoading(color: primary);
-      } else if (isIaLoading && isIaData) {
-        child = Stack(
-          children: [
-            Opacity(
-              opacity: 0.45,
-              child: _fromContent(
-                resolveCopilotPrescriptionFromAction(
-                  aluno,
-                  copilotActionFromIa(iaAsync!.value!),
-                  fallback,
-                  wearableRelevant: wearableRelevant,
-                  contactPriority: contactPriority,
-                  statusMetricsVisible: statusMetricsVisible,
-                  hideMetricFooter: hideMetricFooter,
-                ),
-                isIaSuggestion: true,
-              ),
-            ),
-            Positioned.fill(
-              child: IgnorePointer(
-                child: Aluno360CopilotPrescriptionLoading(color: primary),
-              ),
-            ),
-          ],
-        );
-      } else {
-        child = iaAsync!.when(
-          loading: () => Aluno360CopilotPrescriptionLoading(color: primary),
-          error:
-              (_, __) => _fromContent(
-                iaErrorCopilotPrescription(fallback),
-                isIaSuggestion: false,
-              ),
-          data:
-              (action) => _fromContent(
-                resolveCopilotPrescriptionFromAction(
-                  aluno,
-                  copilotActionFromIa(action),
-                  fallback,
-                  wearableRelevant: wearableRelevant,
-                  contactPriority: contactPriority,
-                  statusMetricsVisible: statusMetricsVisible,
-                  hideMetricFooter: hideMetricFooter,
-                ),
-                isIaSuggestion: true,
-              ),
-        );
-      }
-    } else if (seed360 != null) {
-      final seedAcao = (seed360!['acao'] ?? '').toString();
-      final useContactPriority =
-          preferContactPriority && !forceIa && !acaoSugereChat(seedAcao);
-      child = _fromContent(
-        useContactPriority
-            ? contactPriorityPrescriptionContent(
-              aluno,
-              statusMetricsVisible: statusMetricsVisible,
-              hideMetricFooter: hideMetricFooter,
-            )
-            : resolveCopilotPrescriptionFromAction(
-              aluno,
-              seed360!,
-              fallback,
-              wearableRelevant: wearableRelevant,
-              contactPriority: contactPriority,
-              statusMetricsVisible: statusMetricsVisible,
-              hideMetricFooter: hideMetricFooter,
-            ),
-      );
-    } else if (resumoLoading) {
-      child = Aluno360CopilotPrescriptionLoading(color: primary);
-    } else {
-      child = _fromContent(offlineCopilotPrescription(fallback));
-    }
+      CopilotPriorityCardState.showingDeterministic => _deterministicContent(),
+      CopilotPriorityCardState.idle =>
+        (bundleLoading || resumoLoading) &&
+                copilotPriorityCardAllowsSkeleton(displayState)
+            ? Aluno360CopilotPrescriptionLoading(color: primary)
+            : _fromContent(offlineCopilotPrescription(fallback)),
+    };
 
-    final iaAccent = isIaData || isIaLoading;
+    final iaAccent =
+        displayState == CopilotPriorityCardState.showingAi ||
+        displayState == CopilotPriorityCardState.refreshingAi;
 
     return Container(
       width: double.infinity,
@@ -562,6 +493,44 @@ class Aluno360CopilotPrescriptionBody extends StatelessWidget {
         iaAccent: iaAccent,
       ),
       child: child,
+    );
+  }
+
+  Widget _deterministicContent() {
+    final seedAcao = (seed360!['acao'] ?? '').toString();
+    final useContactPriority =
+        preferContactPriority && !forceIa && !acaoSugereChat(seedAcao);
+    return _fromContent(
+      useContactPriority
+          ? contactPriorityPrescriptionContent(
+            aluno,
+            statusMetricsVisible: statusMetricsVisible,
+            hideMetricFooter: hideMetricFooter,
+          )
+          : resolveCopilotPrescriptionFromAction(
+            aluno,
+            seed360!,
+            fallback,
+            wearableRelevant: wearableRelevant,
+            contactPriority: contactPriority,
+            statusMetricsVisible: statusMetricsVisible,
+            hideMetricFooter: hideMetricFooter,
+          ),
+    );
+  }
+
+  Widget _iaContent(IaCopilotProximaAcao action) {
+    return _fromContent(
+      resolveCopilotPrescriptionFromAction(
+        aluno,
+        copilotActionFromIa(action),
+        fallback,
+        wearableRelevant: wearableRelevant,
+        contactPriority: contactPriority,
+        statusMetricsVisible: statusMetricsVisible,
+        hideMetricFooter: hideMetricFooter,
+      ),
+      isIaSuggestion: true,
     );
   }
 

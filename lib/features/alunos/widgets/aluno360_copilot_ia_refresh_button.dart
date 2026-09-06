@@ -33,10 +33,12 @@ class Aluno360CopilotIaRefreshButton extends ConsumerStatefulWidget {
 class Aluno360CopilotIaRefreshButtonState
     extends ConsumerState<Aluno360CopilotIaRefreshButton> {
   var _refreshing = false;
+  var _requestSeq = 0;
 
   Future<void> _refreshIa() async {
-    if (_refreshing) return;
+    final requestSeq = ++_requestSeq;
     setState(() => _refreshing = true);
+    // Keep current card visible; status badge/spinner only.
     ref.read(alunoCopilotIaRefreshingProvider(widget.alunoId).notifier).state =
         true;
     unawaited(
@@ -53,6 +55,7 @@ class Aluno360CopilotIaRefreshButtonState
     try {
       ref.invalidate(alunoCopilotoActionProvider(widget.alunoId));
       await ref.read(alunoCopilotoActionProvider(widget.alunoId).future);
+      if (!_isLatestRequest(requestSeq)) return;
       if (mounted) {
         FeedbackHelper.showOperacaoSuccess(
           context,
@@ -60,8 +63,13 @@ class Aluno360CopilotIaRefreshButtonState
         );
       }
     } catch (e) {
-      ref.read(alunoCopilotoForceIaProvider(widget.alunoId).notifier).state =
-          false;
+      if (!_isLatestRequest(requestSeq)) return;
+      // Keep deterministic card — clear forceIa only when no usable IA value.
+      final ia = ref.read(alunoCopilotoActionProvider(widget.alunoId));
+      if (!ia.hasValue) {
+        ref.read(alunoCopilotoForceIaProvider(widget.alunoId).notifier).state =
+            false;
+      }
       if (!mounted) return;
       if (await surfaceAluno360IaUpgradeIfNeeded(context, e)) {
         return;
@@ -82,12 +90,17 @@ class Aluno360CopilotIaRefreshButtonState
         );
       }
     } finally {
-      ref
-          .read(alunoCopilotIaRefreshingProvider(widget.alunoId).notifier)
-          .state = false;
-      if (mounted) setState(() => _refreshing = false);
+      // Always clear loading for the latest request (stale responses ignored).
+      if (_isLatestRequest(requestSeq)) {
+        ref
+            .read(alunoCopilotIaRefreshingProvider(widget.alunoId).notifier)
+            .state = false;
+        if (mounted) setState(() => _refreshing = false);
+      }
     }
   }
+
+  bool _isLatestRequest(int requestSeq) => requestSeq == _requestSeq;
 
   bool _shouldSurfaceIaRefreshError(Object error) {
     if (error is IaOperationalException) {
@@ -108,7 +121,7 @@ class Aluno360CopilotIaRefreshButtonState
         child: SizedBox(
           width: double.infinity,
           child: FilledButton.icon(
-            onPressed: _refreshing ? null : _refreshIa,
+            onPressed: _refreshIa,
             icon:
                 _refreshing
                     ? FxLoading(
@@ -138,7 +151,7 @@ class Aluno360CopilotIaRefreshButtonState
                 ? 'Atualizando sugestão com IA'
                 : 'Atualizar sugestão com IA',
         child: TextButton.icon(
-          onPressed: _refreshing ? null : _refreshIa,
+          onPressed: _refreshIa,
           style: TextButton.styleFrom(
             visualDensity: VisualDensity.compact,
             minimumSize: const Size(44, 44),
@@ -170,7 +183,7 @@ class Aluno360CopilotIaRefreshButtonState
               ? 'Atualizando sugestão com IA'
               : 'Atualizar sugestão com IA',
       child: IconButton.filledTonal(
-        onPressed: _refreshing ? null : _refreshIa,
+        onPressed: _refreshIa,
         constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
         icon:
             _refreshing
