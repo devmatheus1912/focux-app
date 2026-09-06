@@ -28,7 +28,7 @@ class Aluno360DetailFerramentasTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // BF / massa: only `/360/ferramentas.composicaoResumo` — never Avaliacao.comparativo.
+    // BF / massa / anamnese tile: only `/360/ferramentas` — never sidecars.
     final ferramentasAsync = ref.watch(aluno360FerramentasBundleProvider(alunoId));
     final aderenciaSemanal =
         ref.watch(alunoAderenciaSemanalProvider(alunoId)).valueOrNull;
@@ -41,6 +41,13 @@ class Aluno360DetailFerramentasTab extends ConsumerWidget {
         composicao?.massaMuscular != null
             ? composicao!.massaMuscular!.toStringAsFixed(1)
             : null;
+    final anamneseLoading =
+        ferramentasAsync.isLoading && !ferramentasAsync.hasValue;
+    // null resumo (or null status) ⇒ não iniciada — no GET /anamnese for the tile.
+    final anamneseStatus =
+        ferramentasAsync.hasValue
+            ? ferramentasAsync.valueOrNull?.anamneseResumo?.status
+            : null;
 
     return Aluno360FerramentasTab(
       aluno: aluno,
@@ -48,8 +55,7 @@ class Aluno360DetailFerramentasTab extends ConsumerWidget {
       primary: primary,
       bf: bf,
       massaMagra: massaMagra,
-      measurementsLoading:
-          ferramentasAsync.isLoading && !ferramentasAsync.hasValue,
+      measurementsLoading: anamneseLoading,
       animateEntrance: animateEntrance,
       onEntrancePlayed: onEntrancePlayed,
       modulesSection: Aluno360FerramentasModulesGrid(
@@ -60,6 +66,8 @@ class Aluno360DetailFerramentasTab extends ConsumerWidget {
         bf: bf,
         massaMagra: massaMagra,
         aderenciaSemanal: aderenciaSemanal,
+        anamneseStatus: anamneseStatus,
+        anamneseLoading: anamneseLoading,
       ),
     );
   }
