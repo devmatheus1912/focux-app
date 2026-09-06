@@ -230,7 +230,7 @@ void main() {
     );
   });
 
-  test('aluno 360 first paint: only /360, list preview, short cache, lazy tabs', () {
+  test('aluno 360 progressive: first paint /360/operacao, idle prefetch, lazy tabs', () {
     final screen = _alunoDetailLibrarySource();
     final providers =
         File('lib/features/alunos/providers/aluno_detail_providers.dart')
@@ -247,25 +247,46 @@ void main() {
     final state =
         File('lib/features/alunos/screens/aluno_detail_screen_state.part.dart')
             .readAsStringSync();
+    final repo =
+        File('lib/features/alunos/data/aluno_repository.dart').readAsStringSync();
+    final sticky =
+        File('lib/features/alunos/widgets/aluno360_operacao_sticky_cta.dart')
+            .readAsStringSync();
 
-    expect(providers, contains('Aluno360ClientCache.getIfFresh'));
-    expect(providers, contains('buscarAluno360'));
-    expect(providers, contains('ProductEvents.aluno360FetchDuration'));
+    expect(repo, contains('buscarAluno360Operacao'));
+    expect(repo, contains('/360/operacao'));
+    expect(repo, contains('buscarAluno360Evolucao'));
+    expect(repo, contains('buscarAluno360Ferramentas'));
+    expect(providers, contains('aluno360OperacaoBundleProvider'));
+    expect(providers, contains('buscarAluno360Operacao'));
+    expect(providers, contains('prefetchAluno360SecondaryTabs'));
+    expect(providers, contains('aluno360EvolucaoBundleProvider'));
+    expect(providers, contains('aluno360FerramentasBundleProvider'));
+    expect(providers, contains("endpoint': 'operacao'"));
     expect(cache, contains('ttl = Duration(seconds: 45)'));
+    expect(cache, contains('getOperacaoIfFresh'));
     expect(resolution, contains('shouldWatchAlunoRecoverySidecar'));
     expect(resolution, contains('return false;'));
     expect(resolution, contains('resolveAlunoDetailListPreview'));
-    expect(resolution, contains('evolucaoTabOpened'));
-    expect(state, isNot(contains('ref.watch(alunoAutonomiaResumoProvider')));
-    expect(state, contains('resolveAlunoDetailListPreview'));
-    expect(state, contains('listPreview: listPreview'));
+    expect(resolution, contains('Aluno360Operacao'));
+    expect(state, isNot(contains('ref.watch(aluno360Provider')));
+    expect(state, contains('aluno360OperacaoBundleProvider'));
+    expect(state, contains('prefetchAluno360SecondaryTabs'));
+    expect(state, contains('Priority.idle'));
+    expect(state, contains("source': 'operacao'"));
     expect(state, contains('ProductEvents.aluno360FirstPaint'));
     expect(state, contains('_openedTabs'));
+    expect(state, contains('resolveAlunoDetailListPreview'));
+    expect(state, contains('listPreview: listPreview'));
     expect(skeleton, contains('listPreview'));
     expect(skeleton, contains('AlunoAvatar'));
     expect(screen, contains('listPreview'));
     expect(screen, contains("extra: aluno"));
+    expect(state, isNot(contains('alunoCopilotoForceIaProvider')));
+    expect(sticky, contains('never sidecar GET'));
+    expect(sticky, isNot(contains('ref.watch(alunoOpenIaActionsProvider')));
   });
+
 
   test(
     'aluno 360 polish: tabs, unified status, refresh, altura, sparkline',
