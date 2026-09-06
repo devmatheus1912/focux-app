@@ -18,7 +18,8 @@ final _alunoFallback = Aluno(
   status: 'ATIVO',
 );
 
-final _bundle360 = Aluno360(
+
+final _operacao = Aluno360Operacao(
   aluno: _alunoFrom360,
   autonomiaResumo: const AlunoAutonomiaResumo(
     alunoId: 1,
@@ -27,20 +28,11 @@ final _bundle360 = Aluno360(
     cliques: 0,
     concluidos: 0,
   ),
-  timelinePreview: const [],
   proximaAcao: const ProximaAcaoResumo(
     acao: 'Contatar',
     motivo: 'Teste',
     fonte: 'PADRAO',
     prioridade: 'P2',
-  ),
-  evolucaoInteligente: const EvolucaoInteligente(
-    sinal: 'SEM_DADOS',
-    resumo: '',
-    volumeSemanal: 0,
-    volumeMensal: 0,
-    proximaAcao: '',
-    sugerirCopiloto: false,
   ),
 );
 
@@ -54,29 +46,39 @@ final _recovery = RecoverySnapshot(
   recoveryHint: 'ok',
 );
 
-final _bundle360WithRecovery = Aluno360(
+final _operacaoWithRecovery = Aluno360Operacao(
   aluno: _alunoFrom360,
-  autonomiaResumo: _bundle360.autonomiaResumo,
-  timelinePreview: _bundle360.timelinePreview,
-  proximaAcao: _bundle360.proximaAcao,
-  evolucaoInteligente: _bundle360.evolucaoInteligente,
+  autonomiaResumo: _operacao.autonomiaResumo,
+  proximaAcao: _operacao.proximaAcao,
   recoverySnapshot: _recovery,
 );
+
+final _evolucao = const Aluno360Evolucao(
+  evolucaoInteligente: EvolucaoInteligente(
+    sinal: 'SEM_DADOS',
+    resumo: '',
+    volumeSemanal: 0,
+    volumeMensal: 0,
+    proximaAcao: '',
+    sugerirCopiloto: false,
+  ),
+);
+
 
 void main() {
   group('shouldWatchAlunoDetailFallback', () {
     test('false while loading or when 360 has data', () {
       expect(
-        shouldWatchAlunoDetailFallback(const AsyncLoading<Aluno360>()),
+        shouldWatchAlunoDetailFallback(const AsyncLoading<Aluno360Operacao>()),
         isFalse,
       );
-      expect(shouldWatchAlunoDetailFallback(AsyncData(_bundle360)), isFalse);
+      expect(shouldWatchAlunoDetailFallback(AsyncData(_operacao)), isFalse);
     });
 
     test('true only when 360 failed without value', () {
       expect(
         shouldWatchAlunoDetailFallback(
-          AsyncError<Aluno360>(Exception('360 down'), StackTrace.current),
+          AsyncError<Aluno360Operacao>(Exception('360 down'), StackTrace.current),
         ),
         isTrue,
       );
@@ -87,7 +89,7 @@ void main() {
     test('false while 360 is loading', () {
       expect(
         shouldWatchAlunoRecoverySidecar(
-          const AsyncLoading<Aluno360>(),
+          const AsyncLoading<Aluno360Operacao>(),
           tabIndex: 0,
         ),
         isFalse,
@@ -97,7 +99,7 @@ void main() {
     test('false when 360 has bundled recovery', () {
       expect(
         shouldWatchAlunoRecoverySidecar(
-          AsyncData(_bundle360WithRecovery),
+          AsyncData(_operacaoWithRecovery),
           tabIndex: 0,
         ),
         isFalse,
@@ -106,12 +108,12 @@ void main() {
 
     test('never watches recovery sidecar (bundle-only)', () {
       expect(
-        shouldWatchAlunoRecoverySidecar(AsyncData(_bundle360), tabIndex: 0),
+        shouldWatchAlunoRecoverySidecar(AsyncData(_operacao), tabIndex: 0),
         isFalse,
       );
       expect(
         shouldWatchAlunoRecoverySidecar(
-          AsyncError<Aluno360>(Exception('360 down'), StackTrace.current),
+          AsyncError<Aluno360Operacao>(Exception('360 down'), StackTrace.current),
           tabIndex: 0,
         ),
         isFalse,
@@ -120,7 +122,7 @@ void main() {
 
     test('false on other tabs', () {
       expect(
-        shouldWatchAlunoRecoverySidecar(AsyncData(_bundle360), tabIndex: 1),
+        shouldWatchAlunoRecoverySidecar(AsyncData(_operacao), tabIndex: 1),
         isFalse,
       );
     });
@@ -130,7 +132,7 @@ void main() {
     test('false when evolucao tab not opened yet', () {
       expect(
         shouldWatchAluno360Tab1Sidecars(
-          AsyncError<Aluno360>(Exception('360 down'), StackTrace.current),
+          AsyncError<Aluno360Evolucao>(Exception('360 down'), StackTrace.current),
           tabIndex: 1,
           evolucaoTabOpened: false,
         ),
@@ -141,7 +143,7 @@ void main() {
     test('false while 360 is loading even on tab 1', () {
       expect(
         shouldWatchAluno360Tab1Sidecars(
-          const AsyncLoading<Aluno360>(),
+          const AsyncLoading<Aluno360Evolucao>(),
           tabIndex: 1,
           evolucaoTabOpened: true,
         ),
@@ -151,7 +153,7 @@ void main() {
 
     test('false when 360 has value — prefer bundle fields', () {
       expect(
-        shouldWatchAluno360Tab1Sidecars(AsyncData(_bundle360), tabIndex: 1, evolucaoTabOpened: true),
+        shouldWatchAluno360Tab1Sidecars(AsyncData(_evolucao), tabIndex: 1, evolucaoTabOpened: true),
         isFalse,
       );
     });
@@ -159,7 +161,7 @@ void main() {
     test('true on tab 1 only after 360 error', () {
       expect(
         shouldWatchAluno360Tab1Sidecars(
-          AsyncError<Aluno360>(Exception('360 down'), StackTrace.current),
+          AsyncError<Aluno360Evolucao>(Exception('360 down'), StackTrace.current),
           tabIndex: 1,
           evolucaoTabOpened: true,
         ),
@@ -167,7 +169,7 @@ void main() {
       );
       expect(
         shouldWatchAluno360Tab1Sidecars(
-          AsyncError<Aluno360>(Exception('360 down'), StackTrace.current),
+          AsyncError<Aluno360Evolucao>(Exception('360 down'), StackTrace.current),
           tabIndex: 0,
         ),
         isFalse,
@@ -178,7 +180,7 @@ void main() {
   group('resolveAlunoDetailAlunoAsync', () {
     test('prefers aluno embedded in 360', () {
       final resolved = resolveAlunoDetailAlunoAsync(
-        aluno360Async: AsyncData(_bundle360),
+        operacaoAsync: AsyncData(_operacao),
         alunoFallbackAsync: AsyncData(_alunoFallback),
       );
       expect(resolved.hasValue, isTrue);
@@ -187,7 +189,7 @@ void main() {
 
     test('stays loading while 360 loads (no fallback watch)', () {
       final resolved = resolveAlunoDetailAlunoAsync(
-        aluno360Async: const AsyncLoading<Aluno360>(),
+        operacaoAsync: const AsyncLoading<Aluno360Operacao>(),
       );
       expect(resolved.isLoading, isTrue);
       expect(resolved.hasValue, isFalse);
@@ -195,7 +197,7 @@ void main() {
 
     test('uses alunoProvider fallback when 360 errors', () {
       final resolved = resolveAlunoDetailAlunoAsync(
-        aluno360Async: AsyncError(Exception('360'), StackTrace.current),
+        operacaoAsync: AsyncError(Exception('360'), StackTrace.current),
         alunoFallbackAsync: AsyncData(_alunoFallback),
       );
       expect(resolved.hasValue, isTrue);
@@ -206,7 +208,7 @@ void main() {
       final error = Exception('360');
       final stack = StackTrace.current;
       final resolved = resolveAlunoDetailAlunoAsync(
-        aluno360Async: AsyncError(error, stack),
+        operacaoAsync: AsyncError(error, stack),
       );
       expect(resolved.hasError, isTrue);
       expect(resolved.error, same(error));

@@ -498,6 +498,120 @@ class Aluno360 {
   );
 }
 
+
+/// Progressive Operação payload — GET `/api/alunos/{id}/360/operacao`.
+/// Critical path for Aluno 360 first paint (no monolito `/360`).
+class Aluno360Operacao {
+  final Aluno aluno;
+  final AlunoAutonomiaResumo autonomiaResumo;
+  final ProximaAcaoResumo proximaAcao;
+  final bool? hasOpenCopilotTask;
+  final AderenciaSemanalBundle aderenciaSemanal;
+  final bool? hasWearableHistory;
+  final RecoverySnapshot? recoverySnapshot;
+  final RiscoResumo? riscoResumo;
+  final OperacaoUiHints? operacaoUiHints;
+  final List<FilaAcaoResumo>? openCopilotTasks;
+
+  const Aluno360Operacao({
+    required this.aluno,
+    required this.autonomiaResumo,
+    required this.proximaAcao,
+    this.hasOpenCopilotTask,
+    this.aderenciaSemanal = const AderenciaSemanalBundle(),
+    this.hasWearableHistory,
+    this.recoverySnapshot,
+    this.riscoResumo,
+    this.operacaoUiHints,
+    this.openCopilotTasks,
+  });
+
+  factory Aluno360Operacao.fromJson(Map<String, dynamic> json) =>
+      Aluno360Operacao(
+        aluno: Aluno.fromJson(json['aluno'] as Map<String, dynamic>),
+        autonomiaResumo: AlunoAutonomiaResumo.fromJson(
+          json['autonomiaResumo'] as Map<String, dynamic>,
+        ),
+        proximaAcao: ProximaAcaoResumo.fromJson(
+          json['proximaAcao'] as Map<String, dynamic>,
+        ),
+        hasOpenCopilotTask: json['hasOpenCopilotTask'] as bool?,
+        aderenciaSemanal: AderenciaSemanalBundle.parse(json['aderenciaSemanal']),
+        hasWearableHistory: json['hasWearableHistory'] as bool?,
+        recoverySnapshot:
+            json['recoverySnapshot'] != null
+                ? RecoverySnapshot.fromJson(
+                  json['recoverySnapshot'] as Map<String, dynamic>,
+                )
+                : null,
+        riscoResumo:
+            json['riscoResumo'] != null
+                ? RiscoResumo.fromJson(
+                  json['riscoResumo'] as Map<String, dynamic>,
+                )
+                : null,
+        operacaoUiHints:
+            json['operacaoUiHints'] != null
+                ? OperacaoUiHints.fromJson(
+                  json['operacaoUiHints'] as Map<String, dynamic>,
+                )
+                : null,
+        openCopilotTasks:
+            json.containsKey('openCopilotTasks')
+                ? (json['openCopilotTasks'] as List<dynamic>? ?? const [])
+                    .map(
+                      (e) =>
+                          FilaAcaoResumo.fromJson(e as Map<String, dynamic>),
+                    )
+                    .toList()
+                : null,
+      );
+}
+
+/// Progressive Evolução payload — GET `/api/alunos/{id}/360/evolucao`.
+class Aluno360Evolucao {
+  final EvolucaoInteligente evolucaoInteligente;
+  final List<Timeline360Event> timelinePreview;
+
+  const Aluno360Evolucao({
+    required this.evolucaoInteligente,
+    this.timelinePreview = const [],
+  });
+
+  factory Aluno360Evolucao.fromJson(Map<String, dynamic> json) =>
+      Aluno360Evolucao(
+        evolucaoInteligente: EvolucaoInteligente.fromJson(
+          json['evolucaoInteligente'] as Map<String, dynamic>,
+        ),
+        timelinePreview:
+            (json['timelinePreview'] as List<dynamic>? ?? const [])
+                .map(
+                  (e) => Timeline360Event.fromJson(e as Map<String, dynamic>),
+                )
+                .toList(),
+      );
+}
+
+/// Progressive Ferramentas payload — GET `/api/alunos/{id}/360/ferramentas`.
+class Aluno360Ferramentas {
+  final AderenciaSemanalBundle? aderenciaSemanal;
+  final bool? hasWearableHistory;
+
+  const Aluno360Ferramentas({
+    this.aderenciaSemanal,
+    this.hasWearableHistory,
+  });
+
+  factory Aluno360Ferramentas.fromJson(Map<String, dynamic> json) =>
+      Aluno360Ferramentas(
+        aderenciaSemanal:
+            json['aderenciaSemanal'] != null
+                ? AderenciaSemanalBundle.parse(json['aderenciaSemanal'])
+                : null,
+        hasWearableHistory: json['hasWearableHistory'] as bool?,
+      );
+}
+
 class AlunoAutonomiaResumo {
   final int alunoId;
   final int totalEventos;
@@ -652,6 +766,24 @@ class AlunoRepository {
   Future<Aluno360> buscarAluno360(int id) async {
     final response = await _dio.get('/api/alunos/$id/360');
     return Aluno360.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  /// Critical path — Operação first paint. Do not call legacy `/360` here.
+  Future<Aluno360Operacao> buscarAluno360Operacao(int id) async {
+    final response = await _dio.get('/api/alunos/$id/360/operacao');
+    return Aluno360Operacao.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  /// Prefetch / lazy Evolução tab.
+  Future<Aluno360Evolucao> buscarAluno360Evolucao(int id) async {
+    final response = await _dio.get('/api/alunos/$id/360/evolucao');
+    return Aluno360Evolucao.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  /// Prefetch / lazy Ferramentas tab.
+  Future<Aluno360Ferramentas> buscarAluno360Ferramentas(int id) async {
+    final response = await _dio.get('/api/alunos/$id/360/ferramentas');
+    return Aluno360Ferramentas.fromJson(response.data as Map<String, dynamic>);
   }
 
   Future<Aluno> criar({

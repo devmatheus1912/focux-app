@@ -33,16 +33,14 @@ class Aluno360OperacaoStickyCtaBar extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final primary = Theme.of(context).colorScheme.primary;
     final creating = ref.watch(alunoCopilotCreatingProvider(alunoId));
-    final openActions = ref.watch(alunoOpenIaActionsProvider(alunoId));
+    // Bundle/snapshot only — never sidecar GET /ia on Operação critical path.
     final operacao = ref.watch(aluno360OperacaoProvider(alunoId));
     if (operacao == null) {
       return const SizedBox.shrink();
     }
     final sticky = operacao.stickyAction;
     final effectiveProxima = operacao.effectiveProxima;
-    final hasOpenTask =
-        findOpenCopilotTask(openActions.valueOrNull ?? const []) != null ||
-        hasOpenCopilotTask360;
+    final hasOpenTask = hasOpenCopilotTask360;
     final followUpDue = isAlunoFollowUpDue(aluno);
 
     void openOutreach() {

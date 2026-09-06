@@ -123,7 +123,7 @@ class Aluno360CopilotCard extends ConsumerWidget {
     final forceIa = ref.watch(alunoCopilotoForceIaProvider(aluno.id));
     final iaAsync =
         forceIa ? ref.watch(alunoCopilotoActionProvider(aluno.id)) : null;
-    final bundleAsync = ref.watch(aluno360Provider(aluno.id));
+    final bundleAsync = ref.watch(aluno360OperacaoBundleProvider(aluno.id));
     final bundle = bundleAsync.valueOrNull;
     // Prefer /360 bundle for open tasks — avoid sidecar GET on first paint.
     final AsyncValue<List<FilaAcaoResumo>> openActionsAsync;

@@ -8,6 +8,7 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
   DateTime? _fetchedAt;
   late final DateTime _openedAt;
   bool _loggedFirstPaint = false;
+  bool _secondaryPrefetchScheduled = false;
   final Set<int> _openedTabs = {0};
 
   int get alunoId => widget.alunoId;
@@ -56,20 +57,45 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
       alunoId: alunoId,
       routePreview: widget.listPreview,
     );
-    final aluno360Async = ref.watch(aluno360Provider(alunoId));
-    // First paint: only /360. Watch GET /alunos/{id} solely when 360 failed.
+    final operacaoAsync = ref.watch(aluno360OperacaoBundleProvider(alunoId));
+    // First paint: ONLY /360/operacao. Never monolito /360. Never IA.
     final alunoFallbackAsync =
-        shouldWatchAlunoDetailFallback(aluno360Async)
+        shouldWatchAlunoDetailFallback(operacaoAsync)
             ? ref.watch(alunoProvider(alunoId))
             : null;
     final tabIndex = _tabController.index;
-    // Autonomia comes only from /360 — never sidecar on first paint.
-    final autonomiaResumoAsync =
-        const AsyncValue<AlunoAutonomiaResumo>.loading();
+    final evolucaoTabOpened = _openedTabs.contains(1);
+    final ferramentasTabOpened = _openedTabs.contains(2);
+
+    // Prefetch secondary tabs after Operação is usable (idle priority).
+    if (operacaoAsync.hasValue && !_secondaryPrefetchScheduled) {
+      _secondaryPrefetchScheduled = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        SchedulerBinding.instance.scheduleTask(() {
+          if (!mounted) return;
+          prefetchAluno360SecondaryTabs(ref, alunoId);
+        }, Priority.idle);
+      });
+    }
+
+    // Evolução: watch on tab open or after prefetch kickoff.
+    final AsyncValue<Aluno360Evolucao> evolucaoAsync;
+    if (evolucaoTabOpened || _secondaryPrefetchScheduled) {
+      evolucaoAsync = ref.watch(aluno360EvolucaoBundleProvider(alunoId));
+    } else {
+      evolucaoAsync = const AsyncValue<Aluno360Evolucao>.loading();
+    }
+
+    // Ferramentas prefetch (payload optional — modules still use own providers).
+    if (ferramentasTabOpened || _secondaryPrefetchScheduled) {
+      ref.watch(aluno360FerramentasBundleProvider(alunoId));
+    }
+
     final watchTab1Sidecars = shouldWatchAluno360Tab1Sidecars(
-      aluno360Async,
+      evolucaoAsync,
       tabIndex: tabIndex,
-      evolucaoTabOpened: _openedTabs.contains(1),
+      evolucaoTabOpened: evolucaoTabOpened,
     );
     final evolucaoGranularAsync =
         watchTab1Sidecars
@@ -79,14 +105,19 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
         watchTab1Sidecars
             ? ref.watch(alunoTimeline360ApiProvider(alunoId))
             : const AsyncValue<List<Timeline360Event>>.loading();
-    final bundledRecovery = aluno360Async.valueOrNull?.recoverySnapshot;
+
+    // Autonomia from /360/operacao only — never sidecar on first paint.
+    final autonomiaResumoAsync =
+        const AsyncValue<AlunoAutonomiaResumo>.loading();
+
+    final bundledRecovery = operacaoAsync.valueOrNull?.recoverySnapshot;
     final AsyncValue<RecoverySnapshot?> recoveryAsync;
     if (tabIndex != 0) {
       recoveryAsync = const AsyncValue.data(null);
     } else if (bundledRecovery != null) {
       recoveryAsync = AsyncValue.data(bundledRecovery);
     } else if (shouldWatchAlunoRecoverySidecar(
-      aluno360Async,
+      operacaoAsync,
       tabIndex: tabIndex,
     )) {
       recoveryAsync = ref.watch(alunoRecoveryProvider(alunoId));
@@ -100,33 +131,33 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
     final mute = chrome.mute;
 
     final resolvedAlunoAsync = resolveAlunoDetailAlunoAsync(
-      aluno360Async: aluno360Async,
+      operacaoAsync: operacaoAsync,
       alunoFallbackAsync: alunoFallbackAsync,
     );
 
     AsyncValue<AlunoAutonomiaResumo> resolvedAutonomiaResumoAsync =
         autonomiaResumoAsync;
-    if (aluno360Async.hasValue) {
+    if (operacaoAsync.hasValue) {
       resolvedAutonomiaResumoAsync = AsyncData(
-        aluno360Async.value!.autonomiaResumo,
+        operacaoAsync.value!.autonomiaResumo,
       );
     }
 
     AsyncValue<EvolucaoInteligente> resolvedEvolucaoAsync =
-        aluno360Async.hasValue
-            ? AsyncData(aluno360Async.value!.evolucaoInteligente)
+        evolucaoAsync.hasValue
+            ? AsyncData(evolucaoAsync.value!.evolucaoInteligente)
             : evolucaoGranularAsync;
 
     AsyncValue<List<Timeline360Event>> resolvedTimelineAsync =
-        aluno360Async.hasValue
-            ? AsyncData(aluno360Async.value!.timelinePreview)
+        evolucaoAsync.hasValue
+            ? AsyncData(evolucaoAsync.value!.timelinePreview)
             : timelineGranularAsync;
 
-    final loadingPrimary = aluno360Async.isLoading && !aluno360Async.hasValue;
+    final loadingPrimary = operacaoAsync.isLoading && !operacaoAsync.hasValue;
     final loadingFallback =
         resolvedAlunoAsync.isLoading && !resolvedAlunoAsync.hasValue;
 
-    final proximaAcao360 = aluno360Async.valueOrNull?.proximaAcao;
+    final proximaAcao360 = operacaoAsync.valueOrNull?.proximaAcao;
     final showOperacaoSticky =
         _tabController.index == 0 && resolvedAlunoAsync.hasValue;
     final showErrorChrome =
@@ -180,7 +211,7 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                         chromeOnDark: isDark,
                         primary: primary,
                         message: friendlyError(
-                          aluno360Async.error ?? e,
+                          operacaoAsync.error ?? e,
                           fallback:
                               'Não foi possível carregar os dados do aluno.',
                         ),
@@ -189,7 +220,7 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                       ),
                   data: (aluno) {
                     final perfilCompletion = copilotProfileCompletion(aluno);
-                    final uiHints = aluno360Async.valueOrNull?.operacaoUiHints;
+                    final uiHints = operacaoAsync.valueOrNull?.operacaoUiHints;
                     final proximaForPriority = proximaAcao360;
                     final contactPriority = resolveOperacaoContactPriority(
                       aluno: aluno,
@@ -263,7 +294,7 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                       if (kDebugMode) {
                         debugPrint(
                           '[aluno360] first-paint total=${totalMs}ms '
-                          'id=$alunoId (GET /360 alone should dominate)',
+                          'id=$alunoId (GET /360/operacao alone should dominate)',
                         );
                       }
                       // ignore: unawaited_futures
@@ -273,6 +304,8 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                           'alunoId': alunoId,
                           'durationMs': totalMs,
                           'hadListPreview': listPreview != null,
+                          'source': 'operacao',
+                          'endpoint': '/360/operacao',
                         },
                       );
                     }
@@ -371,12 +404,12 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                                     primary: primary,
                                     proximaAcao360: proximaAcao360,
                                     hasOpenCopilotTask360:
-                                        aluno360Async
+                                        operacaoAsync
                                             .valueOrNull
                                             ?.hasOpenCopilotTask ??
                                         false,
                                     aderenciaSemanal:
-                                        aluno360Async
+                                        operacaoAsync
                                             .valueOrNull
                                             ?.aderenciaSemanal
                                             .diasMaps,
@@ -477,7 +510,7 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                     alunoId: alunoId,
                     proximaAcao360: proximaAcao360,
                     hasOpenCopilotTask360:
-                        aluno360Async.valueOrNull?.hasOpenCopilotTask ?? false,
+                        operacaoAsync.valueOrNull?.hasOpenCopilotTask ?? false,
                     isDark: isDark,
                   ),
                 ),
