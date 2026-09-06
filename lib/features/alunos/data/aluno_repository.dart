@@ -740,17 +740,6 @@ class AlunoRepository {
     return Aluno.fromJson(response.data as Map<String, dynamic>);
   }
 
-  Future<Aluno> atualizarOperacaoFocus(
-    int id, {
-    required bool focusMode,
-  }) async {
-    final response = await _dio.patch(
-      '/api/alunos/$id/operacao-focus',
-      data: {'focusMode': focusMode},
-    );
-    return Aluno.fromJson(response.data as Map<String, dynamic>);
-  }
-
   Future<void> atualizarStatusLote(List<int> ids, String status) async {
     await _dio.patch(
       '/api/alunos/lote/status',

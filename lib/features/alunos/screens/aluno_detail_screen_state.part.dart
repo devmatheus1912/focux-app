@@ -4,7 +4,6 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   bool _entrancePlayed = false;
-  String? _lastFocusSyncSignature;
   DateTime? _fetchedAt;
   late final DateTime _openedAt;
   bool _loggedFirstPaint = false;
@@ -228,38 +227,12 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                       uiHints: uiHints,
                     );
                     final compactHero = contactPriority;
-                    final focusMode = ref.watch(
-                      alunoOperacaoFocusModeProvider(alunoId),
-                    );
                     final topInset = MediaQuery.paddingOf(context).top;
                     final heroBodyHeight = Aluno360Layout.heroBodyHeight(
                       context,
                       compactContactPriority: compactHero,
                     );
                     final displayName = fxTitleCaseName(aluno.nome);
-
-                    final focusSignature =
-                        '${aluno.id}|${aluno.operacaoFocusMode}|$contactPriority|'
-                        '${uiHints?.defaultFocusMode}|${aluno.emRisco}|'
-                        '${aluno.aderenciaPercent}';
-                    if (_lastFocusSyncSignature != focusSignature) {
-                      _lastFocusSyncSignature = focusSignature;
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        if (!mounted) return;
-                        ref
-                            .read(
-                              alunoOperacaoFocusModeProvider(alunoId).notifier,
-                            )
-                            .syncFromAluno(
-                              aluno,
-                              autoDefault: resolveDefaultOperacaoFocusMode(
-                                aluno: aluno,
-                                contactPriority: contactPriority,
-                                uiHints: uiHints,
-                              ),
-                            );
-                      });
-                    }
 
                     void openTabHelp() {
                       AnalyticsService.instance.track(
@@ -367,8 +340,6 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                                     showOperacaoSticky
                                         ? Aluno360Layout.operacaoScrollBottomReserve(
                                           context,
-                                          focusMode:
-                                              tabIndex == 0 && focusMode,
                                         )
                                         : MediaQuery.paddingOf(context).bottom +
                                             8,

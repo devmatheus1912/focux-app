@@ -45,7 +45,7 @@ class _Aluno360OperacaoEntranceState extends State<Aluno360OperacaoEntrance> {
   }
 }
 
-/// Operação tab layout: follow-up → diagnostics (or focus copilot) → quick actions.
+/// Operação tab layout: follow-up → diagnostics → quick actions.
 class Aluno360OperacaoTab extends ConsumerWidget {
   const Aluno360OperacaoTab({
     super.key,
@@ -76,7 +76,6 @@ class Aluno360OperacaoTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final focusMode = ref.watch(alunoOperacaoFocusModeProvider(alunoId));
     final operacaoSnapshot = ref.watch(aluno360OperacaoProvider(alunoId));
     final contactPriority = operacaoSnapshot?.contactPriority ?? false;
 
@@ -118,7 +117,6 @@ class Aluno360OperacaoTab extends ConsumerWidget {
       );
     }
 
-    final motionMs = fxMotionDurationMs(context, normal: 200);
 
     return Semantics(
       container: true,
@@ -135,28 +133,17 @@ class Aluno360OperacaoTab extends ConsumerWidget {
               section(1, followUpCard),
               const SizedBox(height: Aluno360Layout.sectionGap),
             ],
-            AnimatedSize(
-              duration: Duration(milliseconds: motionMs),
-              curve: Curves.easeOutCubic,
-              alignment: Alignment.topCenter,
-              child:
-                  focusMode
-                      ? Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [section(3, copilotCard)],
-                      )
-                      : Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          section(2, diagnosticBody()),
-                          if (recoveryCard != null) ...[
-                            const SizedBox(height: Aluno360Layout.sectionGap),
-                            section(4, recoveryCard!),
-                          ],
-                          const SizedBox(height: Aluno360Layout.sectionGap),
-                          section(5, quickActions),
-                        ],
-                      ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                section(2, diagnosticBody()),
+                if (recoveryCard != null) ...[
+                  const SizedBox(height: Aluno360Layout.sectionGap),
+                  section(4, recoveryCard!),
+                ],
+                const SizedBox(height: Aluno360Layout.sectionGap),
+                section(5, quickActions),
+              ],
             ),
           ],
         ),

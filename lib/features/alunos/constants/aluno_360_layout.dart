@@ -74,13 +74,8 @@ abstract final class Aluno360Layout {
         MediaQuery.viewInsetsOf(context).bottom;
   }
 
-  static double operacaoScrollBottomReserve(
-    BuildContext context, {
-    bool focusMode = false,
-  }) {
-    final base = stickyBarTotalHeight(context) + stickyBarScrimHeight + 16;
-    if (focusMode) return base;
-    return base + 8;
+  static double operacaoScrollBottomReserve(BuildContext context) {
+    return stickyBarTotalHeight(context) + stickyBarScrimHeight + 24;
   }
 
   /// Centers Operação tab content on wide screens.

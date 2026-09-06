@@ -8,7 +8,6 @@ import 'package:focux_app/features/alunos/utils/aluno360_copilot_logic.dart';
 import 'package:focux_app/features/alunos/widgets/aluno360_copilot_executar_confirm.dart';
 import 'package:focux_app/features/alunos/widgets/aluno360_copilot_prescription.dart';
 import 'package:focux_app/features/alunos/widgets/aluno360_operational_status_section.dart';
-import 'package:focux_app/features/alunos/widgets/aluno360_operacao_focus_toggle.dart';
 import 'package:focux_app/features/alunos/widgets/aluno360_student_quick_actions.dart';
 import 'package:focux_app/features/alunos/utils/aluno360_operacao_logic.dart';
 import 'package:focux_app/features/alunos/widgets/aluno360_operacao_sticky_cta.dart';
@@ -203,39 +202,6 @@ void main() {
     );
   });
 
-  testWidgets('focus toggle golden dark active at 390px', (tester) async {
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          alunoOperacaoFocusModeProvider(42).overrideWith(
-            (ref) => AlunoOperacaoFocusModeController(ref, 42)..state = true,
-          ),
-        ],
-        child: MaterialApp(
-          theme: ThemeData(useMaterial3: true, brightness: Brightness.dark),
-          home: MediaQuery(
-            data: const MediaQueryData(size: Size(390, 844)),
-            child: Scaffold(
-              body: Center(
-                child: Aluno360OperacaoFocusModeToggle(
-                  alunoId: 42,
-                  primary: const Color(0xFF12A3A3),
-                  iconOnly: true,
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    await expectLater(
-      find.byType(Aluno360OperacaoFocusModeToggle),
-      matchesGoldenFile('goldens/aluno360_focus_toggle_390_dark_active.png'),
-    );
-  });
-
   testWidgets('executar confirm sheet golden at 390px', (tester) async {
     const spec = CopilotExecutarAcaoSpec(
       backendTipo: 'REDUZIR_CARGA',
@@ -274,34 +240,6 @@ void main() {
     await expectLater(
       find.text('Aplicar ajuste de carga (−15%)'),
       matchesGoldenFile('goldens/aluno360_executar_confirm_390.png'),
-    );
-  });
-
-  testWidgets('focus toggle golden icon-only at 390px', (tester) async {
-    await tester.pumpWidget(
-      ProviderScope(
-        child: MaterialApp(
-          theme: ThemeData(useMaterial3: true, brightness: Brightness.light),
-          home: MediaQuery(
-            data: const MediaQueryData(size: Size(390, 844)),
-            child: Scaffold(
-              body: Center(
-                child: Aluno360OperacaoFocusModeToggle(
-                  alunoId: 42,
-                  primary: const Color(0xFF12A3A3),
-                  iconOnly: true,
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    await expectLater(
-      find.byType(Aluno360OperacaoFocusModeToggle),
-      matchesGoldenFile('goldens/aluno360_focus_toggle_390.png'),
     );
   });
 
