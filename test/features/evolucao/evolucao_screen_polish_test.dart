@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../support/screen_source_bundle.dart';
@@ -18,7 +19,12 @@ void main() {
     expect(screen, contains('FxEmptyState'));
     expect(screen, contains('SkeletonList'));
     expect(screen, contains('evolucaoHomeProvider'));
-    expect(screen, contains('getHome'));
+    final homeProvider = File(
+      'lib/features/evolucao/providers/evolucao_home_provider.dart',
+    ).readAsStringSync();
+    expect(homeProvider, contains('getHome'));
+    expect(homeProvider, contains('EvolucaoHomeClientCache'));
+    expect(homeProvider, contains('prefetchEvolucaoHome'));
     expect(screen, contains('showFxInsetPickerSheet'));
     expect(screen, contains('IndexedStack'));
     expect(screen, isNot(contains('FxSettingsGroup')));
