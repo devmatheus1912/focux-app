@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
-import '../../anamnese/providers/anamnese_provider.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../planos/utils/effective_plano_features.dart';
 import '../../subscription/widgets/upgrade_prompt_sheet.dart';
@@ -26,6 +25,8 @@ class Aluno360FerramentasModulesGrid extends ConsumerWidget {
     this.bf,
     this.massaMagra,
     this.aderenciaSemanal,
+    this.anamneseStatus,
+    this.anamneseLoading = false,
   });
 
   final Aluno aluno;
@@ -35,6 +36,10 @@ class Aluno360FerramentasModulesGrid extends ConsumerWidget {
   final String? bf;
   final String? massaMagra;
   final List<Map<String, dynamic>>? aderenciaSemanal;
+
+  /// From `/360/ferramentas.anamneseResumo.status`. Null = não iniciada.
+  final String? anamneseStatus;
+  final bool anamneseLoading;
 
   void _openGated(
     BuildContext context, {
@@ -229,28 +234,23 @@ class Aluno360FerramentasModulesGrid extends ConsumerWidget {
             titleCase: false,
             title: 'Anamnese',
             subtitle: Text(
-              ref.watch(alunoAnamneseProvider(alunoId)).when(
-                data: (a) => Aluno360FerramentasLogic.anamneseSubtitle(a.status),
-                loading: () => 'Carregando ficha…',
-                error: (_, __) => 'Solicitar e revisar',
-              ),
+              anamneseLoading
+                  ? 'Carregando ficha…'
+                  : Aluno360FerramentasLogic.anamneseSubtitle(anamneseStatus),
             ),
             trailing: Text(
-              ref.watch(alunoAnamneseProvider(alunoId)).when(
-                data: (a) => Aluno360FerramentasLogic.anamneseValue(a.status),
-                loading: () => '…',
-                error: (_, __) => 'Abrir',
-              ),
+              anamneseLoading
+                  ? '…'
+                  : Aluno360FerramentasLogic.anamneseValue(anamneseStatus),
             ),
-            accent: ref.watch(alunoAnamneseProvider(alunoId)).when(
-              data:
-                  (a) =>
-                      Aluno360FerramentasLogic.anamneseNeedsAttention(a.status)
-                          ? EagleTokens.warn
-                          : primary,
-              loading: () => primary,
-              error: (_, __) => EagleTokens.warn,
-            ),
+            accent:
+                anamneseLoading
+                    ? primary
+                    : (Aluno360FerramentasLogic.anamneseNeedsAttention(
+                          anamneseStatus,
+                        )
+                        ? EagleTokens.warn
+                        : primary),
             onTap: () => context.push('/alunos/$alunoId/anamnese'),
           ),
           FxSatelliteListTile(
