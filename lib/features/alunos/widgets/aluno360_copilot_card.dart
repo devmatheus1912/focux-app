@@ -150,13 +150,15 @@ class Aluno360CopilotCard extends ConsumerWidget {
     final iaLoading =
         iaRefreshing ||
         (forceIa && iaAsync != null && iaAsync.isLoading && !iaAsync.hasValue);
-    final hasIaContent = aluno360CopilotHasIaGeneratedContent(
+    final hasPriorityContent = aluno360CopilotHasPriorityCardContent(
       proximaAcao360: proximaAcao360,
       forceIa: forceIa,
       iaHasValue: iaAsync?.hasValue ?? false,
       hasOpenTask: hasOpenTask,
     );
-    if (!hasIaContent && !iaLoading) {
+    // Prompt only when there is no /360 proximaAcao and no IA yet.
+    // IA is never fetched on Operação mount — only via Atualizar / Gerar.
+    if (!hasPriorityContent && !iaLoading) {
       return Aluno360CopilotIaPromptSection(
         alunoId: alunoId,
         primary: primary,
@@ -273,13 +275,18 @@ class Aluno360CopilotCard extends ConsumerWidget {
                 ),
               ),
             ),
+          // Status line / thin bar only — never overlay skeleton on the card body.
           if (iaLoading) ...[
-            ClipRRect(
-              borderRadius: BorderRadius.circular(999),
-              child: LinearProgressIndicator(
-                minHeight: iaRefreshing ? 4 : 3,
-                backgroundColor: primary.withValues(alpha: 0.12),
-                color: primary,
+            Semantics(
+              liveRegion: true,
+              label: caption,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(999),
+                child: LinearProgressIndicator(
+                  minHeight: iaRefreshing ? 4 : 3,
+                  backgroundColor: primary.withValues(alpha: 0.12),
+                  color: primary,
+                ),
               ),
             ),
             const SizedBox(height: 8),
@@ -321,7 +328,6 @@ class Aluno360CopilotCard extends ConsumerWidget {
                 iaRefreshing: iaRefreshing,
                 resumoLoading: resumoAsync.isLoading && !resumoAsync.hasValue,
                 bundleLoading: bundleLoading,
-                bundleRefreshing: bundleRefreshing,
                 preferContactPriority: operacao.contactPriority,
                 wearableRelevant: wearableRelevant,
                 contactPriority: operacao.contactPriority,
