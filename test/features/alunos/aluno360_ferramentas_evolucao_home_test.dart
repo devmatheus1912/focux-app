@@ -59,4 +59,23 @@ void main() {
     EvolucaoHomeClientCache.put(42, bundle.evolucaoHome!);
     expect(EvolucaoHomeClientCache.getIfFresh(42), same(bundle.evolucaoHome));
   });
+
+  test('parses additive composicaoResumo for BF/massa tiles', () {
+    final parsed = Aluno360Ferramentas.fromJson({
+      'composicaoResumo': {
+        'percGordura': 18.5,
+        'massaMuscular': 42.0,
+      },
+    });
+    expect(parsed.composicaoResumo, isNotNull);
+    expect(parsed.composicaoResumo!.percGordura, 18.5);
+    expect(parsed.composicaoResumo!.massaMuscular, 42.0);
+  });
+
+  test('tolerates null composicaoResumo without inventing comparativo', () {
+    final parsed = Aluno360Ferramentas.fromJson({
+      'hasWearableHistory': true,
+    });
+    expect(parsed.composicaoResumo, isNull);
+  });
 }

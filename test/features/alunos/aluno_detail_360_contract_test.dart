@@ -255,6 +255,23 @@ void main() {
     expect(repo, contains('buscarAluno360Evolucao'));
     expect(repo, contains('buscarAluno360Ferramentas'));
     expect(repo, contains('evolucaoHome'));
+    expect(repo, contains('composicaoResumo'));
+    expect(repo, contains('Aluno360ComposicaoResumo'));
+    expect(
+      File('lib/features/alunos/widgets/aluno360_detail_ferramentas_tab.dart')
+          .readAsStringSync(),
+      allOf(
+        contains('composicaoResumo'),
+        contains('aluno360FerramentasBundleProvider'),
+        isNot(contains('alunoMedidasResumoProvider')),
+        isNot(contains('/avaliacoes/comparativo')),
+      ),
+    );
+    expect(
+      File('lib/features/alunos/providers/aluno_detail_providers.dart')
+          .readAsStringSync(),
+      isNot(contains('alunoMedidasResumoProvider')),
+    );
     expect(
       File('lib/features/alunos/providers/aluno_detail_providers.dart')
           .readAsStringSync(),

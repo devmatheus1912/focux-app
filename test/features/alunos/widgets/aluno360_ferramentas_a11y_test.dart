@@ -6,7 +6,6 @@ import 'package:focux_app/features/alunos/data/aluno_repository.dart';
 import 'package:focux_app/features/alunos/providers/aluno_detail_providers.dart';
 import 'package:focux_app/features/alunos/widgets/aluno360_detail_ferramentas_tab.dart';
 import 'package:focux_app/features/alunos/widgets/aluno360_ferramentas_mini_sparkline.dart';
-import 'package:focux_app/features/avaliacao/data/avaliacao_repository.dart';
 import 'package:focux_app/features/planos/data/planos_repository.dart';
 import 'package:focux_app/features/planos/providers/plano_features_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -50,7 +49,9 @@ void main() {
     return ProviderScope(
       overrides: [
         _ferramentasPlanoOverride(),
-        alunoMedidasResumoProvider(42).overrideWith((ref) async => null),
+        aluno360FerramentasBundleProvider(42).overrideWith(
+          (ref) async => const Aluno360Ferramentas(),
+        ),
         alunoAderenciaSemanalProvider(42).overrideWith(
           (ref) async => aderenciaSemanaEndingToday(),
         ),
@@ -122,10 +123,12 @@ void main() {
       ProviderScope(
         overrides: [
           _ferramentasPlanoOverride(),
-          alunoMedidasResumoProvider(99).overrideWith(
-            (ref) async => SnapshotAvaliacao(
-              percGordura: 18.4,
-              massaMuscular: 52.1,
+          aluno360FerramentasBundleProvider(99).overrideWith(
+            (ref) async => const Aluno360Ferramentas(
+              composicaoResumo: Aluno360ComposicaoResumo(
+                percGordura: 18.4,
+                massaMuscular: 52.1,
+              ),
             ),
           ),
           alunoAderenciaSemanalProvider(99).overrideWith((ref) async => []),
