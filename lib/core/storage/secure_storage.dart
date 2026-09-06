@@ -7,13 +7,11 @@ class SecureStorage {
   static const _keyRefreshToken = 'jwt_refresh_token';
   static const _keyRole = 'user_role';
   static const _keyRequiresPasswordChange = 'requires_password_change';
-  static const _keyIsAdmin = 'is_admin';
 
   /// Memória no web (evita JWT em localStorage). Nativo: Keystore/Keychain.
   static String? _webAccessToken;
   static String? _webRefreshToken;
   static String? _webRole;
-  static String? _webIsAdmin;
   static String? _webRequiresPasswordChange;
 
   static const _storage = FlutterSecureStorage(
@@ -65,29 +63,6 @@ class SecureStorage {
     await _storage.delete(key: _keyRole);
   }
 
-  static Future<void> saveIsAdmin(bool value) async {
-    final str = value ? 'true' : 'false';
-    if (kIsWeb) {
-      _webIsAdmin = str;
-      return;
-    }
-    await _storage.write(key: _keyIsAdmin, value: str);
-  }
-
-  static Future<bool> getIsAdmin() async {
-    if (kIsWeb) return _webIsAdmin == 'true';
-    final val = await _storage.read(key: _keyIsAdmin);
-    return val == 'true';
-  }
-
-  static Future<void> deleteIsAdmin() async {
-    if (kIsWeb) {
-      _webIsAdmin = null;
-      return;
-    }
-    await _storage.delete(key: _keyIsAdmin);
-  }
-
   static Future<void> saveRefreshToken(String token) async {
     if (kIsWeb) {
       _webRefreshToken = token;
@@ -137,14 +112,13 @@ class SecureStorage {
       _webAccessToken = null;
       _webRefreshToken = null;
       _webRole = null;
-      _webIsAdmin = null;
       _webRequiresPasswordChange = null;
       // Limpa legado em SharedPreferences (versões antigas).
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove(_keyToken);
       await prefs.remove(_keyRefreshToken);
       await prefs.remove(_keyRole);
-      await prefs.remove(_keyIsAdmin);
+      await prefs.remove('is_admin');
       await prefs.remove(_keyRequiresPasswordChange);
       return;
     }

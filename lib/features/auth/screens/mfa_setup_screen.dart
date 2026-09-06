@@ -8,6 +8,7 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
+import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
@@ -16,6 +17,7 @@ import '../../../core/widgets/fx_settings_tile.dart';
 import '../data/auth_repository.dart';
 import '../providers/auth_provider.dart';
 import '../utils/auth_error_messages.dart';
+import '../utils/mfa_setup_help_sheet.dart';
 
 /// Setup / status / disable MFA TOTP do Personal.
 class MfaSetupScreen extends ConsumerStatefulWidget {
@@ -205,6 +207,13 @@ class _MfaSetupScreenState extends ConsumerState<MfaSetupScreen> {
             icon: const Icon(Icons.arrow_back),
             onPressed: _pop,
           ),
+          actions: [
+            FxHelpIconButton(
+              tooltip: 'Como funciona a autenticação em duas etapas',
+              onTap: () => showMfaSetupHelpSheet(context),
+            ),
+            const SizedBox(width: 8),
+          ],
         ),
         body:
             _loading

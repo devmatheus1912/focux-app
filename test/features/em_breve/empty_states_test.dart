@@ -19,13 +19,13 @@ void main() {
     expect(find.text('Nenhum fluxo ativo'), findsOneWidget);
   });
 
-  test('habit coaching e loja digital seguem na matriz', () {
+  test('pose e loja digital seguem na matriz free vs pro', () {
     expect(
-      PaywallCatalog.comparisonRows.any((r) => r.feature.contains('Habit')),
+      PaywallCatalog.comparisonFreeVsPro.any((r) => r.feature.contains('Pose')),
       isTrue,
     );
     expect(
-      PaywallCatalog.comparisonRows.any(
+      PaywallCatalog.comparisonFreeVsPro.any(
         (r) => r.feature.toLowerCase().contains('loja'),
       ),
       isTrue,

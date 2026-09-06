@@ -252,7 +252,7 @@ void main() {
     expect(providers, contains('buscarAluno360'));
     expect(providers, contains('ProductEvents.aluno360FetchDuration'));
     expect(cache, contains('ttl = Duration(seconds: 45)'));
-    expect(resolution, contains('shouldWatchAlunoAutonomiaSidecar'));
+    expect(resolution, contains('shouldWatchAlunoRecoverySidecar'));
     expect(resolution, contains('return false;'));
     expect(resolution, contains('resolveAlunoDetailListPreview'));
     expect(resolution, contains('evolucaoTabOpened'));

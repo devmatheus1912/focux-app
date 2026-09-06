@@ -13,8 +13,6 @@ final planosRepositoryProvider = Provider<PlanosRepository>(
   (ref) => PlanosRepository(ref.read(apiClientProvider)),
 );
 
-final _planosRepositoryProvider = planosRepositoryProvider;
-
 /// Server-side feature flags do plano atual.
 ///
 /// Se [DashboardHomeClientCache] já tem `planoFeatures` fresco (TTL 90s),
@@ -25,7 +23,7 @@ final planoFeaturesProvider = StateNotifierProvider<
   PlanoFeaturesNotifier,
   AsyncValue<PlanoFeatures>
 >((ref) {
-  final notifier = PlanoFeaturesNotifier(ref.read(_planosRepositoryProvider));
+  final notifier = PlanoFeaturesNotifier(ref.read(planosRepositoryProvider));
   unawaited(notifier.bootstrap());
   return notifier;
 });
