@@ -4,6 +4,7 @@ import '../../ia/providers/ia_copilot_providers.dart';
 import '../../planos/providers/plano_features_provider.dart';
 import '../data/aluno_repository.dart';
 import '../utils/alunos_home_client_cache.dart';
+import '../utils/aluno360_client_cache.dart';
 import '../utils/alunos_home_prefetch.dart';
 
 final alunoRepositoryProvider = Provider<AlunoRepository>(
@@ -142,6 +143,7 @@ final alunoPerfilHomeProvider = FutureProvider<AlunoPerfilHomeBundle>((ref) asyn
 
 void invalidateAlunosCaches(WidgetRef ref) {
   AlunosHomeClientCache.clear();
+  Aluno360ClientCache.clear();
   ref.read(alunosHomeTailProvider.notifier).clear();
   ref.invalidate(alunosHomeProvider);
   ref.invalidate(iaCopilotoHomeProvider);
@@ -149,6 +151,7 @@ void invalidateAlunosCaches(WidgetRef ref) {
 
 void invalidateAlunosCachesRef(Ref ref) {
   AlunosHomeClientCache.clear();
+  Aluno360ClientCache.clear();
   ref.read(alunosHomeTailProvider.notifier).clear();
   ref.invalidate(alunosHomeProvider);
   ref.invalidate(iaCopilotoHomeProvider);

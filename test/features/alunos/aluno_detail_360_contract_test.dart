@@ -230,6 +230,43 @@ void main() {
     );
   });
 
+  test('aluno 360 first paint: only /360, list preview, short cache, lazy tabs', () {
+    final screen = _alunoDetailLibrarySource();
+    final providers =
+        File('lib/features/alunos/providers/aluno_detail_providers.dart')
+            .readAsStringSync();
+    final resolution =
+        File('lib/features/alunos/utils/aluno_detail_aluno_resolution.dart')
+            .readAsStringSync();
+    final cache =
+        File('lib/features/alunos/utils/aluno360_client_cache.dart')
+            .readAsStringSync();
+    final skeleton =
+        File('lib/features/alunos/widgets/aluno_detail_loading_skeleton.dart')
+            .readAsStringSync();
+    final state =
+        File('lib/features/alunos/screens/aluno_detail_screen_state.part.dart')
+            .readAsStringSync();
+
+    expect(providers, contains('Aluno360ClientCache.getIfFresh'));
+    expect(providers, contains('buscarAluno360'));
+    expect(providers, contains('ProductEvents.aluno360FetchDuration'));
+    expect(cache, contains('ttl = Duration(seconds: 45)'));
+    expect(resolution, contains('shouldWatchAlunoAutonomiaSidecar'));
+    expect(resolution, contains('return false;'));
+    expect(resolution, contains('resolveAlunoDetailListPreview'));
+    expect(resolution, contains('evolucaoTabOpened'));
+    expect(state, isNot(contains('ref.watch(alunoAutonomiaResumoProvider')));
+    expect(state, contains('resolveAlunoDetailListPreview'));
+    expect(state, contains('listPreview: listPreview'));
+    expect(state, contains('ProductEvents.aluno360FirstPaint'));
+    expect(state, contains('_openedTabs'));
+    expect(skeleton, contains('listPreview'));
+    expect(skeleton, contains('AlunoAvatar'));
+    expect(screen, contains('listPreview'));
+    expect(screen, contains("extra: aluno"));
+  });
+
   test(
     'aluno 360 polish: tabs, unified status, refresh, altura, sparkline',
     () {

@@ -147,6 +147,7 @@ RouteBase buildChromeShellRoute() {
                   initialTabIndex: parseAlunoDetailTabIndex(
                     state.uri.queryParameters['tab'],
                   ),
+                  listPreview: state.extra is Aluno ? state.extra as Aluno : null,
                 ),
           ),
           GoRoute(

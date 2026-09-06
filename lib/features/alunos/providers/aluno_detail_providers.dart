@@ -12,7 +12,10 @@ import '../data/aluno_copilot_ia_cache_store.dart';
 import '../data/aluno_operacao_focus_store.dart';
 import '../data/aluno_repository.dart';
 import '../utils/aluno360_copilot_logic.dart';
+import '../utils/aluno360_client_cache.dart';
 import '../utils/aluno360_operacao_logic.dart';
+import '../../../core/analytics/analytics_service.dart';
+import 'package:flutter/foundation.dart';
 import 'aluno_timeline360_paged_provider.dart';
 import 'alunos_provider.dart';
 
@@ -22,7 +25,28 @@ final aluno360Provider = FutureProvider.family<Aluno360, int>((
   ref,
   alunoId,
 ) async {
-  return AlunoRepository(ref.read(apiClientProvider)).buscarAluno360(alunoId);
+  final cached = Aluno360ClientCache.getIfFresh(alunoId);
+  if (cached != null) {
+    if (kDebugMode) {
+      debugPrint('[aluno360] cache-hit id=$alunoId age<=${Aluno360ClientCache.ttl.inSeconds}s');
+    }
+    return cached;
+  }
+  final sw = Stopwatch()..start();
+  final bundle =
+      await AlunoRepository(ref.read(apiClientProvider)).buscarAluno360(alunoId);
+  sw.stop();
+  Aluno360ClientCache.put(alunoId, bundle);
+  final ms = sw.elapsedMilliseconds;
+  if (kDebugMode) {
+    debugPrint('[aluno360] GET /api/alunos/$alunoId/360 ${ms}ms');
+  }
+  // ignore: unawaited_futures
+  AnalyticsService.instance.track(
+    ProductEvents.aluno360FetchDuration,
+    props: {'alunoId': alunoId, 'durationMs': ms, 'source': 'network'},
+  );
+  return bundle;
 });
 
 final alunoRecoveryProvider = FutureProvider.family<RecoverySnapshot?, int>((
@@ -150,12 +174,9 @@ final aluno360OperacaoProvider =
       final forceIa = ref.watch(alunoCopilotoForceIaProvider(alunoId));
       final iaAsync =
           forceIa ? ref.watch(alunoCopilotoActionProvider(alunoId)) : null;
-      final recovery =
-          bundle.recoverySnapshot ??
-          ref.watch(alunoRecoveryProvider(alunoId)).valueOrNull;
-      final openActions =
-          ref.watch(alunoOpenIaActionsProvider(alunoId)).valueOrNull ??
-          const [];
+      // Bundle-only on Operação — no recovery/open-IA sidecars after /360.
+      final recovery = bundle.recoverySnapshot;
+      final openActions = bundle.openCopilotTasks ?? const <FilaAcaoResumo>[];
       final hasOpenTask =
           findOpenCopilotTask(openActions) != null ||
           (bundle.hasOpenCopilotTask ?? false);
@@ -235,6 +256,7 @@ final alunoPesoHistoricoProvider = FutureProvider.family<List<double>, int>((
 });
 
 Future<void> invalidateAluno360Providers(WidgetRef ref, int alunoId) async {
+  Aluno360ClientCache.invalidate(alunoId);
   ref.invalidate(aluno360Provider(alunoId));
   ref.invalidate(alunoProvider(alunoId));
   ref.invalidate(alunoRecoveryProvider(alunoId));

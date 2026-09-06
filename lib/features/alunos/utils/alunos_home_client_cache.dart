@@ -86,6 +86,18 @@ abstract final class AlunosHomeClientCache {
     _trim();
   }
 
+  /// Best-effort list preview (nome/foto/status) for Aluno 360 skeleton.
+  static Aluno? findAlunoById(int alunoId, {DateTime? now}) {
+    final clock = now ?? DateTime.now();
+    for (final entry in _entries.values) {
+      if (clock.difference(entry.at) > AlunosHomeQuery.ttl) continue;
+      for (final aluno in entry.bundle.alunos) {
+        if (aluno.id == alunoId) return aluno;
+      }
+    }
+    return null;
+  }
+
   static void clear() {
     _entries.clear();
   }

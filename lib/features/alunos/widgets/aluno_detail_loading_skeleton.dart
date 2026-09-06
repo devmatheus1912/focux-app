@@ -2,8 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../../../core/router/safe_navigation.dart';
+import '../../../core/utils/fx_utils.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../constants/aluno_360_layout.dart';
+import '../data/aluno_repository.dart';
+import '../utils/aluno_hero_signal.dart';
+import 'aluno_avatar.dart';
 import 'aluno360_composite_header.dart';
 
 class AlunoDetailLoadingSkeleton extends StatelessWidget {
@@ -16,6 +20,7 @@ class AlunoDetailLoadingSkeleton extends StatelessWidget {
     required this.mute,
     required this.line,
     required this.sheetFill,
+    this.listPreview,
   });
 
   final TabController tabController;
@@ -25,11 +30,15 @@ class AlunoDetailLoadingSkeleton extends StatelessWidget {
   final Color mute;
   final Color line;
   final Color sheetFill;
+  final Aluno? listPreview;
 
   @override
   Widget build(BuildContext context) {
     final topInset = MediaQuery.paddingOf(context).top;
     final heroBodyHeight = Aluno360Layout.heroBodyHeight(context);
+    final preview = listPreview;
+    final displayName =
+        preview == null ? 'Carregando' : fxTitleCaseName(preview.nome);
 
     return CustomScrollView(
       physics: const NeverScrollableScrollPhysics(),
@@ -42,12 +51,13 @@ class AlunoDetailLoadingSkeleton extends StatelessWidget {
             heroChild: AlunoDetailHeroSkeleton(
               isDark: isDark,
               primary: primary,
+              listPreview: preview,
             ),
             tabController: tabController,
             primary: primary,
             mute: mute,
             line: line,
-            displayName: 'Carregando',
+            displayName: displayName,
             ink: ink,
             isDark: isDark,
             onBack: () => safePopOrGo(context, '/alunos'),
@@ -87,13 +97,71 @@ class AlunoDetailHeroSkeleton extends StatelessWidget {
     super.key,
     required this.isDark,
     required this.primary,
+    this.listPreview,
   });
 
   final bool isDark;
   final Color primary;
+  final Aluno? listPreview;
 
   @override
   Widget build(BuildContext context) {
+    final preview = listPreview;
+    if (preview != null) {
+      final displayName = fxTitleCaseName(preview.nome);
+      final status = alunoHeroStatusVisual(preview);
+      return Container(
+        key: const ValueKey('aluno360_hero_skeleton_preview'),
+        width: double.infinity,
+        height: Aluno360Layout.heroBodyHeight(context),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            AlunoAvatar(
+              name: displayName,
+              photoUrl: preview.fotoUrl,
+              variant: AlunoAvatarVariant.profile,
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    displayName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    status.label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: status.foreground,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            SizedBox(
+              width: 62,
+              height: 38,
+              child: FxLoading.sectionShimmer(context, height: 38),
+            ),
+          ],
+        ),
+      );
+    }
+
     final base =
         isDark
             ? Colors.white.withValues(alpha: 0.08)
