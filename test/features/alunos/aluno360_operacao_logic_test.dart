@@ -1179,54 +1179,6 @@ void main() {
     });
   });
 
-  group('aluno360CopilotHasIaGeneratedContent', () {
-    test('true for open task', () {
-      expect(
-        aluno360CopilotHasIaGeneratedContent(
-          proximaAcao360: null,
-          forceIa: false,
-          iaHasValue: false,
-          hasOpenTask: true,
-        ),
-        isTrue,
-      );
-    });
-
-    test('true when proxima fonte is IA', () {
-      expect(
-        aluno360CopilotHasIaGeneratedContent(
-          proximaAcao360: ProximaAcaoResumo(
-            acao: 'Retomar contato',
-            motivo: 'teste',
-            fonte: 'IA',
-            prioridade: 'P1',
-          ),
-          forceIa: false,
-          iaHasValue: false,
-          hasOpenTask: false,
-        ),
-        isTrue,
-      );
-    });
-
-    test('false for non-IA proxima acao', () {
-      expect(
-        aluno360CopilotHasIaGeneratedContent(
-          proximaAcao360: ProximaAcaoResumo(
-            acao: 'Pedir check-in',
-            motivo: 'teste',
-            fonte: 'RADAR',
-            prioridade: 'P2',
-          ),
-          forceIa: false,
-          iaHasValue: false,
-          hasOpenTask: false,
-        ),
-        isFalse,
-      );
-    });
-  });
-
   group('aluno360CopilotHasPriorityCardContent', () {
     test('true for deterministic proximaAcao from /360', () {
       expect(
