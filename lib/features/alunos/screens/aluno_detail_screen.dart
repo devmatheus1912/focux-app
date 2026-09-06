@@ -32,6 +32,7 @@ import '../widgets/aluno360_detail_operacao_tab.dart';
 import '../widgets/aluno360_operacao_sticky_cta.dart';
 import '../widgets/aluno_detail_hero_card.dart';
 import '../widgets/aluno_detail_loading_skeleton.dart';
+import '../../evolucao/providers/evolucao_home_provider.dart' show prefetchEvolucaoHome;
 
 part 'aluno_detail_screen_state.part.dart';
 

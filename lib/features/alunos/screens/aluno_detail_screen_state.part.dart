@@ -91,6 +91,11 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
       ref.watch(aluno360FerramentasBundleProvider(alunoId));
     }
 
+    // Warm Medidas hub while user is on Ferramentas (kills ~3s cold open).
+    if (ferramentasTabOpened) {
+      prefetchEvolucaoHome(ref, alunoId);
+    }
+
     final watchTab1Sidecars = shouldWatchAluno360Tab1Sidecars(
       evolucaoAsync,
       tabIndex: tabIndex,

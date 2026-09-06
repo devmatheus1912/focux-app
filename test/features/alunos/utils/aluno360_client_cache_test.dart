@@ -69,4 +69,30 @@ void main() {
     expect(Aluno360ClientCache.getOperacaoIfFresh(1), isNull);
     expect(Aluno360ClientCache.getEvolucaoIfFresh(1), isNull);
   });
+
+  test('operacao stale window serves after TTL until staleTtl', () {
+    final now = DateTime(2026, 1, 1, 12);
+    Aluno360ClientCache.putOperacao(1, _operacao, now: now);
+    expect(
+      Aluno360ClientCache.getOperacaoIfFresh(
+        1,
+        now: now.add(const Duration(seconds: 46)),
+      ),
+      isNull,
+    );
+    expect(
+      Aluno360ClientCache.getOperacaoEvenIfStale(
+        1,
+        now: now.add(const Duration(seconds: 46)),
+      ),
+      same(_operacao),
+    );
+    expect(
+      Aluno360ClientCache.getOperacaoEvenIfStale(
+        1,
+        now: now.add(const Duration(minutes: 6)),
+      ),
+      isNull,
+    );
+  });
 }
