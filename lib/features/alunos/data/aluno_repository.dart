@@ -599,6 +599,8 @@ class Aluno360Evolucao {
 ///
 /// Optional [composicaoResumo] seeds BF / massa tiles without
 /// `GET /avaliacoes/comparativo`.
+///
+/// Optional [anamneseResumo] seeds the Anamnese tile without `GET /anamnese`.
 class Aluno360ComposicaoResumo {
   final double? percGordura;
   final double? massaMuscular;
@@ -615,22 +617,35 @@ class Aluno360ComposicaoResumo {
       );
 }
 
+class Aluno360AnamneseResumo {
+  /// Same codes as [AnamneseStatus] (`NAO_INICIADA`, `SOLICITADA`, …).
+  final String? status;
+
+  const Aluno360AnamneseResumo({this.status});
+
+  factory Aluno360AnamneseResumo.fromJson(Map<String, dynamic> json) =>
+      Aluno360AnamneseResumo(status: json['status'] as String?);
+}
+
 class Aluno360Ferramentas {
   final AderenciaSemanalBundle? aderenciaSemanal;
   final bool? hasWearableHistory;
   final EvolucaoHomeBundle? evolucaoHome;
   final Aluno360ComposicaoResumo? composicaoResumo;
+  final Aluno360AnamneseResumo? anamneseResumo;
 
   const Aluno360Ferramentas({
     this.aderenciaSemanal,
     this.hasWearableHistory,
     this.evolucaoHome,
     this.composicaoResumo,
+    this.anamneseResumo,
   });
 
   factory Aluno360Ferramentas.fromJson(Map<String, dynamic> json) {
     final rawHome = json['evolucaoHome'];
     final rawComposicao = json['composicaoResumo'];
+    final rawAnamnese = json['anamneseResumo'];
     return Aluno360Ferramentas(
       aderenciaSemanal:
           json['aderenciaSemanal'] != null
@@ -644,6 +659,10 @@ class Aluno360Ferramentas {
       composicaoResumo:
           rawComposicao is Map<String, dynamic>
               ? Aluno360ComposicaoResumo.fromJson(rawComposicao)
+              : null,
+      anamneseResumo:
+          rawAnamnese is Map<String, dynamic>
+              ? Aluno360AnamneseResumo.fromJson(rawAnamnese)
               : null,
     );
   }
