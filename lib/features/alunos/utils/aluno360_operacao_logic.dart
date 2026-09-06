@@ -479,47 +479,6 @@ bool resolveOperacaoContactPriority({
 }) => uiHints?.contactPriority ??
     isOperacaoContatoPrioritario(aluno: aluno, proximaAcao: proximaAcao);
 
-bool resolveDefaultOperacaoFocusMode({
-  required Aluno aluno,
-  required bool contactPriority,
-  OperacaoUiHints? uiHints,
-}) =>
-    uiHints?.defaultFocusMode ??
-    shouldDefaultOperacaoFocusMode(
-      aluno: aluno,
-      contactPriority: contactPriority,
-    );
-
-/// Hide follow-up row when focus mode + sticky already owns contact outreach.
-bool shouldHideFollowUpInFocusContactMode({
-  required bool focusMode,
-  required bool contactPriority,
-  required OperacaoStickyAction sticky,
-}) {
-  if (!focusMode || !contactPriority) return false;
-  return sticky.isChatAction;
-}
-
-/// Auto-enable focus mode for high-friction operational profiles.
-bool shouldDefaultOperacaoFocusMode({
-  required Aluno aluno,
-  required bool contactPriority,
-}) {
-  // Contato prioritário mantém diagnóstico visível; foco só manual.
-  if (contactPriority) return false;
-  final aderencia = aluno.aderenciaPercent ?? 0;
-  return aluno.emRisco && aderencia <= 0;
-}
-
-/// Hide copilot prescription when sticky CTA already covers contact outreach.
-bool shouldHideCopilotPrescriptionWhenContactPrioritySticky({
-  required bool contactPriority,
-  required OperacaoStickyAction sticky,
-}) {
-  if (!contactPriority) return false;
-  return sticky.isChatAction;
-}
-
 /// Hide copilot lacunas when hero/sticky already covers the same action.
 bool shouldShowCopilotProfileGapsButton(
   Aluno aluno,
@@ -535,6 +494,9 @@ bool shouldShowCopilotProfileGapsButton(
 }
 
 /// Prescription block stays visible during IA refresh even if sticky matches 360.
+///
+/// Contact priority keeps the prescription body (motivo + preparar mensagem);
+/// the sticky CTA remains the primary action and must not hollow the section.
 bool shouldShowCopilotPrescriptionBlock({
   required bool forceIa,
   required OperacaoStickyAction sticky,
@@ -543,12 +505,7 @@ bool shouldShowCopilotPrescriptionBlock({
   bool contactPriority = false,
 }) {
   if (forceIa) return true;
-  if (shouldHideCopilotPrescriptionWhenContactPrioritySticky(
-    contactPriority: contactPriority,
-    sticky: sticky,
-  )) {
-    return false;
-  }
+  if (contactPriority) return true;
   return !shouldHideCopilotPrescriptionWhenMatchesSticky(
     sticky: sticky,
     aluno: aluno,

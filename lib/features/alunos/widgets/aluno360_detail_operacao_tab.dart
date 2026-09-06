@@ -55,14 +55,6 @@ class Aluno360DetailOperacaoTab extends ConsumerWidget {
     final operacaoSnapshot = ref.watch(aluno360OperacaoProvider(alunoId));
     final contactPriority = operacaoSnapshot?.contactPriority ?? false;
     final showRecovery = alunoTemHistoricoWearable(recoveryAsync.valueOrNull);
-    final focusMode = ref.watch(alunoOperacaoFocusModeProvider(alunoId));
-    final hideFollowUp =
-        operacaoSnapshot != null &&
-        shouldHideFollowUpInFocusContactMode(
-          focusMode: focusMode,
-          contactPriority: contactPriority,
-          sticky: operacaoSnapshot.stickyAction,
-        );
 
     return Aluno360OperacaoTab(
       alunoId: alunoId,
@@ -73,7 +65,7 @@ class Aluno360DetailOperacaoTab extends ConsumerWidget {
           financeRisk
               ? Aluno360FinanceRiskBanner(alunoId: alunoId)
               : null,
-      showFollowUp: !hideFollowUp,
+      showFollowUp: true,
       followUpCard: Aluno360FollowUpCard(
         aluno: aluno,
         isDark: isDark,
@@ -95,8 +87,6 @@ class Aluno360DetailOperacaoTab extends ConsumerWidget {
         proximaAcao360: proximaAcao360,
         hasOpenCopilotTask360: hasOpenCopilotTask360,
         isDark: isDark,
-        showFocusToggle: true,
-        focusMode: focusMode,
       ),
       recoveryCard:
           showRecovery
