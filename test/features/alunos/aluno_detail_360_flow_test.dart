@@ -74,7 +74,20 @@ final _aluno360Fixture = Aluno360(
 
 List<Override> _flowOverrides() {
   return [
-    aluno360Provider(_alunoId).overrideWith((ref) async => _aluno360Fixture),
+    aluno360OperacaoBundleProvider(_alunoId).overrideWith((ref) async => _operacaoFixture),
+    aluno360EvolucaoBundleProvider(_alunoId).overrideWith(
+      (ref) async => Aluno360Evolucao(
+        evolucaoInteligente: _aluno360Fixture.evolucaoInteligente,
+        timelinePreview: _aluno360Fixture.timelinePreview,
+      ),
+    ),
+    aluno360FerramentasBundleProvider(_alunoId).overrideWith(
+      (ref) async => Aluno360Ferramentas(
+        aderenciaSemanal: _aluno360Fixture.aderenciaSemanal,
+        hasWearableHistory: _aluno360Fixture.hasWearableHistory,
+      ),
+    ),
+
     alunoProvider(_alunoId).overrideWith((ref) async => _alunoFixture),
     alunoRecoveryProvider(_alunoId).overrideWith((ref) async => null),
     alunoOpenIaActionsProvider(_alunoId).overrideWith((ref) async => const []),
@@ -125,6 +138,20 @@ Widget _wrapFlowDetail() {
     child: MaterialApp.router(routerConfig: router),
   );
 }
+
+
+final _operacaoFixture = Aluno360Operacao(
+  aluno: _aluno360Fixture.aluno,
+  autonomiaResumo: _aluno360Fixture.autonomiaResumo,
+  proximaAcao: _aluno360Fixture.proximaAcao,
+  hasOpenCopilotTask: _aluno360Fixture.hasOpenCopilotTask,
+  aderenciaSemanal: _aluno360Fixture.aderenciaSemanal,
+  hasWearableHistory: _aluno360Fixture.hasWearableHistory,
+  recoverySnapshot: _aluno360Fixture.recoverySnapshot,
+  riscoResumo: _aluno360Fixture.riscoResumo,
+  operacaoUiHints: _aluno360Fixture.operacaoUiHints,
+  openCopilotTasks: _aluno360Fixture.openCopilotTasks,
+);
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
