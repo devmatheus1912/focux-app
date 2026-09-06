@@ -252,22 +252,6 @@ final aluno360OperacaoProvider =
       );
     });
 
-final alunoMedidasResumoProvider =
-    FutureProvider.family<SnapshotAvaliacao?, int>((ref, alunoId) async {
-      try {
-        final comparativo = await AvaliacaoRepository(
-          ref.read(apiClientProvider),
-        ).comparativo(alunoId);
-        final atual = comparativo.atual;
-        final hasData =
-            atual.percGordura != null ||
-            (atual.massaMuscular != null && atual.massaMuscular! > 0);
-        return hasData ? atual : null;
-      } catch (_) {
-        return null;
-      }
-    });
-
 final alunoOpenIaActionsProvider =
     FutureProvider.family<List<FilaAcaoResumo>, int>((ref, alunoId) async {
       try {
@@ -335,7 +319,6 @@ Future<void> invalidateAluno360Providers(WidgetRef ref, int alunoId) async {
   ref.read(alunoCopilotIaRefreshingProvider(alunoId).notifier).state = false;
   ref.invalidate(alunoCopilotoActionProvider(alunoId));
   ref.invalidate(alunoOpenIaActionsProvider(alunoId));
-  ref.invalidate(alunoMedidasResumoProvider(alunoId));
   ref.invalidate(alunoAderenciaSemanalProvider(alunoId));
   ref.invalidate(alunoPesoHistoricoProvider(alunoId));
   await ref.read(aluno360OperacaoBundleProvider(alunoId).future);
