@@ -75,6 +75,8 @@ void main() {
       );
       expect(setup, contains('mfaDisable'));
       expect(setup, contains('QrImageView'));
+      expect(setup, contains('FxHelpIconButton'));
+      expect(setup, contains('showMfaSetupHelpSheet'));
 
       final authRoutes = readScreenSourceBundle(
         'lib/core/router/app_router_auth_routes.dart',

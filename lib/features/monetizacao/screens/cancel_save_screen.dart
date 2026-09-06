@@ -312,12 +312,17 @@ class _MotivoTile extends StatelessWidget {
       mute,
       isDark: isDark,
     );
+    // cardBg is always white; dark mode needs an opaque shell card (ink is light).
+    final palette = ShellChrome.forDark(isDark);
+    // Opaque sheet in dark — translucent glass still washed out over mesh.
+    final cardFill = isDark ? palette.sheetFill : TokensStrip.cardBg;
+
     return Semantics(
       button: true,
       selected: selected,
       label: motivo.label,
       child: Material(
-        color: TokensStrip.cardBg,
+        color: cardFill,
         borderRadius: BorderRadius.circular(14),
         child: InkWell(
           onTap: onTap,
@@ -329,9 +334,9 @@ class _MotivoTile extends StatelessWidget {
                 color:
                     selected
                         ? primary
-                        : TokensStrip.borderDefault.withValues(
-                          alpha: isDark ? 0.5 : 1,
-                        ),
+                        : (isDark
+                            ? palette.line
+                            : TokensStrip.borderDefault),
                 width: selected ? 2 : 1,
               ),
             ),

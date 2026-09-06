@@ -4,7 +4,6 @@ import '../../../core/brand/focux_microcopy.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../subscription/models/subscription_plan.dart';
-import 'paywall_price.dart';
 
 /// Catálogo estático de educação e vitrine — preços vêm do backend/loja.
 class PaywallCatalog {
@@ -14,11 +13,6 @@ class PaywallCatalog {
 
   /// Teal profundo — tier ENTERPRISE e CTAs de upgrade.
   static const Color brandDeep = BrandPalette.defaultInk;
-
-  /// Teal slate — tier ENTERPRISE (premium, sem ouro).
-  static const Color tierEnterprise = EagleTokens.tierEnterprise;
-
-  static const Color green = EagleTokens.brightGreen;
 
   /// Texto secundário com contraste AA em fundos claros (ui-ux-pro-max).
   static Color readableSecondary(
@@ -54,12 +48,6 @@ class PaywallCatalog {
     };
   }
 
-  static String? badgeForPlan(SubscriptionPlan plan) => switch (plan) {
-    SubscriptionPlan.PRO => 'MAIS POPULAR',
-    SubscriptionPlan.ENTERPRISE => 'TRIAL $kPaywallMaxPlanTrialDays DIAS',
-    _ => null,
-  };
-
   static String displayPlanName(SubscriptionPlan plan) => plan.apiName;
 
   static String subtitleForPlan(SubscriptionPlan plan) => switch (plan) {
@@ -74,8 +62,6 @@ class PaywallCatalog {
       'Substitui R\$ 1–3k de agência · 1 aluno novo paga o plano',
     _ => null,
   };
-
-
 
   static const List<PaywallComparisonRow> comparisonFreeVsPro = [
     PaywallComparisonRow(feature: 'Alunos', free: '3', paid: '30'),
@@ -113,9 +99,6 @@ class PaywallCatalog {
     PaywallComparisonRow(feature: 'Pose Coach', free: '—', paid: '✓'),
     PaywallComparisonRow(feature: 'NFSe + equipe (5)', free: '—', paid: '✓'),
   ];
-
-  static const List<PaywallComparisonRow> comparisonRows = comparisonFreeVsPro;
-
 
   /// Mensagem do catálogo de gatilhos para modal in-app (não usar na vitrine Planos).
   static String? modalMessageFor({String? capability, String? featureName}) {

@@ -36,34 +36,22 @@ class CancelSaveOferta {
 }
 
 class CancelSaveResposta {
-  final int id;
   final bool aceita;
-  final DateTime? pausaAte;
-  final int? descontoPct;
   final String mensagem;
   final bool billingApplied;
   final bool requiresStoreAction;
 
   CancelSaveResposta({
-    required this.id,
     required this.aceita,
     required this.mensagem,
-    this.pausaAte,
-    this.descontoPct,
     this.billingApplied = false,
     this.requiresStoreAction = false,
   });
 
   factory CancelSaveResposta.fromJson(Map<String, dynamic> j) =>
       CancelSaveResposta(
-        id: (j['id'] as num).toInt(),
         aceita: j['aceita'] as bool? ?? false,
-        pausaAte:
-            j['pausaAte'] != null
-                ? DateTime.tryParse(j['pausaAte'] as String)
-                : null,
-        descontoPct: (j['descontoPct'] as num?)?.toInt(),
-        mensagem: j['mensagem'] as String? ?? '',
+        mensagem: (j['mensagem'] as String?)?.trim() ?? '',
         billingApplied: j['billingApplied'] as bool? ?? false,
         requiresStoreAction: j['requiresStoreAction'] as bool? ?? false,
       );

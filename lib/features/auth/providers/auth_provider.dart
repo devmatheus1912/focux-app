@@ -31,11 +31,9 @@ enum UserRole { personal, aluno }
 class AuthNotifier extends StateNotifier<AuthStatus> {
   final AuthRepository _repo;
   UserRole? _currentRole;
-  bool _isAdmin = false;
   bool _requiresPasswordChange = false;
 
   UserRole? get currentRole => _currentRole;
-  bool get isAdmin => _isAdmin;
   bool get requiresPasswordChange => _requiresPasswordChange;
 
   AuthNotifier(this._repo) : super(AuthStatus.unknown) {
@@ -45,7 +43,6 @@ class AuthNotifier extends StateNotifier<AuthStatus> {
 
   void _handleSessionInvalidated() {
     _currentRole = null;
-    _isAdmin = false;
     _requiresPasswordChange = false;
     state = AuthStatus.unauthenticated;
   }
@@ -61,7 +58,6 @@ class AuthNotifier extends StateNotifier<AuthStatus> {
     if (token != null) {
       final roleStr = await SecureStorage.getRole();
       _currentRole = roleStr == 'ALUNO' ? UserRole.aluno : UserRole.personal;
-      _isAdmin = await SecureStorage.getIsAdmin();
       _requiresPasswordChange = await SecureStorage.getRequiresPasswordChange();
       state = AuthStatus.authenticated;
     } else {
@@ -73,7 +69,6 @@ class AuthNotifier extends StateNotifier<AuthStatus> {
     final result = await _repo.loginPersonal(email, password);
     if (result.mfaRequired) return result;
     _currentRole = UserRole.personal;
-    _isAdmin = await SecureStorage.getIsAdmin();
     _requiresPasswordChange = false;
     state = AuthStatus.authenticated;
     return result;
@@ -96,7 +91,6 @@ class AuthNotifier extends StateNotifier<AuthStatus> {
       emailCodigo: emailCodigo,
     );
     _currentRole = UserRole.personal;
-    _isAdmin = false;
     _requiresPasswordChange = false;
     state = AuthStatus.authenticated;
   }
@@ -116,7 +110,6 @@ class AuthNotifier extends StateNotifier<AuthStatus> {
       personalSlug: personalSlug,
     );
     _currentRole = UserRole.aluno;
-    _isAdmin = false;
     state = AuthStatus.authenticated;
   }
 
@@ -132,7 +125,6 @@ class AuthNotifier extends StateNotifier<AuthStatus> {
     );
     if (result.mfaRequired) return result;
     _currentRole = isAluno ? UserRole.aluno : UserRole.personal;
-    _isAdmin = await SecureStorage.getIsAdmin();
     _requiresPasswordChange = false;
     state = AuthStatus.authenticated;
     return result;
@@ -154,7 +146,6 @@ class AuthNotifier extends StateNotifier<AuthStatus> {
     );
     if (result.mfaRequired) return result;
     _currentRole = isAluno ? UserRole.aluno : UserRole.personal;
-    _isAdmin = await SecureStorage.getIsAdmin();
     _requiresPasswordChange = false;
     state = AuthStatus.authenticated;
     return result;
@@ -170,7 +161,6 @@ class AuthNotifier extends StateNotifier<AuthStatus> {
       throw StateError('MFA_STILL_REQUIRED');
     }
     _currentRole = UserRole.personal;
-    _isAdmin = await SecureStorage.getIsAdmin();
     _requiresPasswordChange = false;
     state = AuthStatus.authenticated;
   }
@@ -200,7 +190,6 @@ class AuthNotifier extends StateNotifier<AuthStatus> {
       personalSlug: personalSlug,
     );
     _currentRole = UserRole.aluno;
-    _isAdmin = false;
     _requiresPasswordChange = false;
     state = AuthStatus.authenticated;
   }
@@ -218,7 +207,6 @@ class AuthNotifier extends StateNotifier<AuthStatus> {
     await _repo.logout();
     await SessionInvalidator.invalidate(reason: 'logout manual');
     _currentRole = null;
-    _isAdmin = false;
     _requiresPasswordChange = false;
     state = AuthStatus.unauthenticated;
   }
@@ -240,11 +228,6 @@ final authProvider = StateNotifierProvider<AuthNotifier, AuthStatus>(
 
 final userRoleProvider = Provider<UserRole?>((ref) {
   return ref.watch(authProvider.notifier).currentRole;
-});
-
-final isAdminProvider = Provider<bool>((ref) {
-  ref.watch(authProvider);
-  return ref.read(authProvider.notifier).isAdmin;
 });
 
 final requiresPasswordChangeProvider = Provider<bool>((ref) {

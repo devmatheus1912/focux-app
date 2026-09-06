@@ -31,14 +31,6 @@ bool shouldWatchAluno360Tab1Sidecars(
   return aluno360Async.hasError;
 }
 
-/// Autonomia sidecar: never on Aluno Detail — `/360` already embeds the resumo.
-bool shouldWatchAlunoAutonomiaSidecar(
-  AsyncValue<Aluno360> aluno360Async, {
-  required int tabIndex,
-}) {
-  return false;
-}
-
 /// Resolves the aluno shown on Aluno Detail: prefer the 360 payload, else the
 /// optional [alunoFallbackAsync] from [alunoProvider].
 AsyncValue<Aluno> resolveAlunoDetailAlunoAsync({

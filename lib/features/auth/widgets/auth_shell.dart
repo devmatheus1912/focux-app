@@ -15,7 +15,6 @@ import '../../../core/theme/focux_system_chrome.dart';
 import '../../../core/theme/hero_teal.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/theme/tokens_strip.dart';
-import '../../../core/widgets/focux_official_logo.dart';
 import '../../../core/widgets/focux_brand_tagline.dart';
 import '../../../core/widgets/fx_conversion.dart';
 import '../../../core/widgets/cinematic_mesh_background.dart';
@@ -102,30 +101,6 @@ TextStyle authInlineErrorStyle() =>
 /// Sucesso inline padrão das telas auth.
 TextStyle authInlineSuccessStyle() =>
     FocuxHubTypography.bodyMuted(color: EagleTokens.authSuccessSoft);
-
-class AuthLogoMark extends ConsumerWidget {
-  const AuthLogoMark({
-    super.key,
-    this.width = kAuthFormLogoWidth,
-    this.forceOfficial = false,
-  });
-
-  final double width;
-
-  /// Telas públicas de auth devem usar `true` para ignorar logo de sessão.
-  final bool forceOfficial;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final logoUrl = forceOfficial ? null : ref.watch(logoUrlProvider);
-
-    return Semantics(
-      label: 'Focux Personal',
-      image: true,
-      child: FocuxOfficialLogo.full(width: width, logoUrl: logoUrl),
-    );
-  }
-}
 
 /// Cabeçalho do login — lockup S6 oficial. Nunca usa logoUrl de sessão.
 class AuthLoginBrandHeader extends ConsumerWidget {
