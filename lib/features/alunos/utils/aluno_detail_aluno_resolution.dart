@@ -4,50 +4,51 @@ import '../data/aluno_repository.dart';
 import 'alunos_home_client_cache.dart';
 
 /// Whether Aluno Detail should subscribe to [alunoProvider] as GET /alunos/{id}
-/// fallback. First paint uses only `/360`; fallback runs only when 360 failed
-/// with no usable payload.
-bool shouldWatchAlunoDetailFallback(AsyncValue<Aluno360> aluno360Async) {
-  return aluno360Async.hasError && !aluno360Async.hasValue;
+/// fallback. First paint uses only `/360/operacao`; fallback runs only when
+/// operacao failed with no usable payload.
+bool shouldWatchAlunoDetailFallback(AsyncValue<Aluno360Operacao> operacaoAsync) {
+  return operacaoAsync.hasError && !operacaoAsync.hasValue;
 }
 
 /// Recovery sidecar GET: never on first paint / Operação mount.
-/// Prefer the `/360` bundle; missing recovery stays empty (no health waterfall).
+/// Prefer the `/360/operacao` bundle; missing recovery stays empty.
 bool shouldWatchAlunoRecoverySidecar(
-  AsyncValue<Aluno360> aluno360Async, {
+  AsyncValue<Aluno360Operacao> operacaoAsync, {
   required int tabIndex,
 }) {
   return false;
 }
 
-/// Evolução / timeline sidecars: only after the Evolução tab was opened, and
-/// never while `/360` is loading. Prefer bundle fields on success.
+/// Evolução granular sidecars: only after Evolução tab opened **and**
+/// `/360/evolucao` failed. Prefer the evolucao bundle on success.
 bool shouldWatchAluno360Tab1Sidecars(
-  AsyncValue<Aluno360> aluno360Async, {
+  AsyncValue<Aluno360Evolucao> evolucaoAsync, {
   required int tabIndex,
   bool evolucaoTabOpened = false,
 }) {
   if (!evolucaoTabOpened || tabIndex != 1) return false;
-  if (aluno360Async.hasValue) return false;
-  return aluno360Async.hasError;
+  if (evolucaoAsync.hasValue) return false;
+  return evolucaoAsync.hasError;
 }
 
-/// Resolves the aluno shown on Aluno Detail: prefer the 360 payload, else the
-/// optional [alunoFallbackAsync] from [alunoProvider].
+/// Resolves the aluno shown on Aluno Detail: prefer the Operação payload,
+/// else the optional [alunoFallbackAsync] from [alunoProvider].
 AsyncValue<Aluno> resolveAlunoDetailAlunoAsync({
-  required AsyncValue<Aluno360> aluno360Async,
+  required AsyncValue<Aluno360Operacao> operacaoAsync,
   AsyncValue<Aluno>? alunoFallbackAsync,
 }) {
-  if (aluno360Async.hasValue) {
-    return AsyncData(aluno360Async.value!.aluno);
+  if (operacaoAsync.hasValue) {
+    return AsyncData(operacaoAsync.value!.aluno);
   }
-  if (aluno360Async.hasError) {
+  if (operacaoAsync.hasError) {
     return alunoFallbackAsync ??
-        AsyncError(aluno360Async.error!, aluno360Async.stackTrace!);
+        AsyncError(operacaoAsync.error!, operacaoAsync.stackTrace!);
   }
   return const AsyncLoading();
 }
 
-/// Nome/foto/status from list navigation or home cache while `/360` loads.
+/// Nome/foto/status from list navigation or home cache while `/360/operacao`
+/// loads — paints the shell immediately on tap.
 Aluno? resolveAlunoDetailListPreview({
   required int alunoId,
   Aluno? routePreview,

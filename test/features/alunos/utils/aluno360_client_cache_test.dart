@@ -9,8 +9,7 @@ final _aluno = Aluno(
   status: 'ATIVO',
 );
 
-
-final _bundle = Aluno360(
+final _operacao = Aluno360Operacao(
   aluno: _aluno,
   autonomiaResumo: const AlunoAutonomiaResumo(
     alunoId: 1,
@@ -19,13 +18,15 @@ final _bundle = Aluno360(
     cliques: 0,
     concluidos: 0,
   ),
-  timelinePreview: const [],
   proximaAcao: const ProximaAcaoResumo(
     acao: 'Contatar',
     motivo: 'Teste',
     fonte: 'PADRAO',
     prioridade: 'P2',
   ),
+);
+
+final _evolucao = Aluno360Evolucao(
   evolucaoInteligente: const EvolucaoInteligente(
     sinal: 'SEM_DADOS',
     resumo: '',
@@ -36,23 +37,22 @@ final _bundle = Aluno360(
   ),
 );
 
-
 void main() {
   tearDown(Aluno360ClientCache.clear);
 
-  test('returns fresh entry within TTL and misses after', () {
+  test('operacao cache returns fresh entry within TTL and misses after', () {
     final now = DateTime(2026, 1, 1, 12);
-    Aluno360ClientCache.put(1, _bundle, now: now);
-    expect(Aluno360ClientCache.getIfFresh(1, now: now), same(_bundle));
+    Aluno360ClientCache.putOperacao(1, _operacao, now: now);
+    expect(Aluno360ClientCache.getOperacaoIfFresh(1, now: now), same(_operacao));
     expect(
-      Aluno360ClientCache.getIfFresh(
+      Aluno360ClientCache.getOperacaoIfFresh(
         1,
         now: now.add(const Duration(seconds: 44)),
       ),
-      same(_bundle),
+      same(_operacao),
     );
     expect(
-      Aluno360ClientCache.getIfFresh(
+      Aluno360ClientCache.getOperacaoIfFresh(
         1,
         now: now.add(const Duration(seconds: 46)),
       ),
@@ -60,9 +60,13 @@ void main() {
     );
   });
 
-  test('invalidate removes entry', () {
-    Aluno360ClientCache.put(1, _bundle);
+  test('evolucao cache is independent from operacao', () {
+    Aluno360ClientCache.putOperacao(1, _operacao);
+    Aluno360ClientCache.putEvolucao(1, _evolucao);
+    expect(Aluno360ClientCache.getOperacaoIfFresh(1), same(_operacao));
+    expect(Aluno360ClientCache.getEvolucaoIfFresh(1), same(_evolucao));
     Aluno360ClientCache.invalidate(1);
-    expect(Aluno360ClientCache.getIfFresh(1), isNull);
+    expect(Aluno360ClientCache.getOperacaoIfFresh(1), isNull);
+    expect(Aluno360ClientCache.getEvolucaoIfFresh(1), isNull);
   });
 }

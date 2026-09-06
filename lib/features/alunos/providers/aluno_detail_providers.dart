@@ -21,31 +21,100 @@ import 'alunos_provider.dart';
 
 export 'aluno_timeline360_paged_provider.dart';
 
+/// Critical path — GET `/api/alunos/{id}/360/operacao` only.
+final aluno360OperacaoBundleProvider =
+    FutureProvider.family<Aluno360Operacao, int>((ref, alunoId) async {
+  final cached = Aluno360ClientCache.getOperacaoIfFresh(alunoId);
+  if (cached != null) {
+    if (kDebugMode) {
+      debugPrint(
+        '[aluno360] operacao cache-hit id=$alunoId '
+        'age<=${Aluno360ClientCache.ttl.inSeconds}s',
+      );
+    }
+    return cached;
+  }
+  final sw = Stopwatch()..start();
+  final bundle = await AlunoRepository(
+    ref.read(apiClientProvider),
+  ).buscarAluno360Operacao(alunoId);
+  sw.stop();
+  Aluno360ClientCache.putOperacao(alunoId, bundle);
+  final ms = sw.elapsedMilliseconds;
+  if (kDebugMode) {
+    debugPrint('[aluno360] GET /api/alunos/$alunoId/360/operacao ${ms}ms');
+  }
+  // ignore: unawaited_futures
+  AnalyticsService.instance.track(
+    ProductEvents.aluno360FetchDuration,
+    props: {
+      'alunoId': alunoId,
+      'durationMs': ms,
+      'source': 'network',
+      'endpoint': 'operacao',
+    },
+  );
+  return bundle;
+});
+
+/// Prefetch / lazy — GET `/api/alunos/{id}/360/evolucao`.
+final aluno360EvolucaoBundleProvider =
+    FutureProvider.family<Aluno360Evolucao, int>((ref, alunoId) async {
+  final cached = Aluno360ClientCache.getEvolucaoIfFresh(alunoId);
+  if (cached != null) return cached;
+  final sw = Stopwatch()..start();
+  final bundle = await AlunoRepository(
+    ref.read(apiClientProvider),
+  ).buscarAluno360Evolucao(alunoId);
+  sw.stop();
+  Aluno360ClientCache.putEvolucao(alunoId, bundle);
+  if (kDebugMode) {
+    debugPrint(
+      '[aluno360] GET /api/alunos/$alunoId/360/evolucao '
+      '${sw.elapsedMilliseconds}ms',
+    );
+  }
+  return bundle;
+});
+
+/// Prefetch / lazy — GET `/api/alunos/{id}/360/ferramentas`.
+final aluno360FerramentasBundleProvider =
+    FutureProvider.family<Aluno360Ferramentas, int>((ref, alunoId) async {
+  final cached = Aluno360ClientCache.getFerramentasIfFresh(alunoId);
+  if (cached != null) return cached;
+  final sw = Stopwatch()..start();
+  final bundle = await AlunoRepository(
+    ref.read(apiClientProvider),
+  ).buscarAluno360Ferramentas(alunoId);
+  sw.stop();
+  Aluno360ClientCache.putFerramentas(alunoId, bundle);
+  if (kDebugMode) {
+    debugPrint(
+      '[aluno360] GET /api/alunos/$alunoId/360/ferramentas '
+      '${sw.elapsedMilliseconds}ms',
+    );
+  }
+  return bundle;
+});
+
+/// Fire-and-forget after Operação is usable (idle / next frame).
+void prefetchAluno360SecondaryTabs(WidgetRef ref, int alunoId) {
+  // ignore: unawaited_futures
+  ref.read(aluno360EvolucaoBundleProvider(alunoId).future);
+  // ignore: unawaited_futures
+  ref.read(aluno360FerramentasBundleProvider(alunoId).future);
+}
+
+/// @Deprecated monolito `/360` — não usar no first paint.
 final aluno360Provider = FutureProvider.family<Aluno360, int>((
   ref,
   alunoId,
 ) async {
   final cached = Aluno360ClientCache.getIfFresh(alunoId);
-  if (cached != null) {
-    if (kDebugMode) {
-      debugPrint('[aluno360] cache-hit id=$alunoId age<=${Aluno360ClientCache.ttl.inSeconds}s');
-    }
-    return cached;
-  }
-  final sw = Stopwatch()..start();
+  if (cached != null) return cached;
   final bundle =
       await AlunoRepository(ref.read(apiClientProvider)).buscarAluno360(alunoId);
-  sw.stop();
   Aluno360ClientCache.put(alunoId, bundle);
-  final ms = sw.elapsedMilliseconds;
-  if (kDebugMode) {
-    debugPrint('[aluno360] GET /api/alunos/$alunoId/360 ${ms}ms');
-  }
-  // ignore: unawaited_futures
-  AnalyticsService.instance.track(
-    ProductEvents.aluno360FetchDuration,
-    props: {'alunoId': alunoId, 'durationMs': ms, 'source': 'network'},
-  );
   return bundle;
 });
 
@@ -55,10 +124,11 @@ final alunoRecoveryProvider = FutureProvider.family<RecoverySnapshot?, int>((
 ) async {
   try {
     final bundled =
-        (await ref.watch(aluno360Provider(alunoId).future)).recoverySnapshot;
+        (await ref.watch(aluno360OperacaoBundleProvider(alunoId).future))
+            .recoverySnapshot;
     if (bundled != null) return bundled;
   } catch (_) {
-    // 360 failed — sidecar below.
+    // Operação failed — sidecar below.
   }
   return HealthRepository.fromClient(
     ref.read(apiClientProvider),
@@ -168,13 +238,13 @@ final alunoCopilotoActionProvider =
 /// Unified Operação snapshot (sticky + copilot + outreach).
 final aluno360OperacaoProvider =
     Provider.family<Aluno360OperacaoSnapshot?, int>((ref, alunoId) {
-      final bundle = ref.watch(aluno360Provider(alunoId)).valueOrNull;
+      final bundle = ref.watch(aluno360OperacaoBundleProvider(alunoId)).valueOrNull;
       if (bundle == null) return null;
       final aluno = bundle.aluno;
       final forceIa = ref.watch(alunoCopilotoForceIaProvider(alunoId));
       final iaAsync =
           forceIa ? ref.watch(alunoCopilotoActionProvider(alunoId)) : null;
-      // Bundle-only on Operação — no recovery/open-IA sidecars after /360.
+      // Bundle-only on Operação — no recovery/open-IA sidecars after /360/operacao.
       final recovery = bundle.recoverySnapshot;
       final openActions = bundle.openCopilotTasks ?? const <FilaAcaoResumo>[];
       final hasOpenTask =
@@ -217,12 +287,13 @@ final alunoMedidasResumoProvider =
 final alunoOpenIaActionsProvider =
     FutureProvider.family<List<FilaAcaoResumo>, int>((ref, alunoId) async {
       try {
-        final bundle = await ref.watch(aluno360Provider(alunoId).future);
+        final bundle =
+            await ref.watch(aluno360OperacaoBundleProvider(alunoId).future);
         if (bundle.openCopilotTasks != null) {
           return bundle.openCopilotTasks!;
         }
       } catch (_) {
-        // 360 falhou ou payload antigo — sidecar abaixo.
+        // Operação falhou ou payload antigo — sidecar abaixo (nunca no first paint).
       }
       return ref
           .read(dashboardRepositoryProvider)
@@ -241,8 +312,15 @@ final alunoAderenciaSemanalProvider =
       ref,
       alunoId,
     ) async {
-      final aluno360 = await ref.watch(aluno360Provider(alunoId).future);
-      return aluno360.aderenciaSemanal.diasMaps;
+      try {
+        final operacao =
+            await ref.watch(aluno360OperacaoBundleProvider(alunoId).future);
+        return operacao.aderenciaSemanal.diasMaps;
+      } catch (_) {
+        final ferramentas =
+            await ref.watch(aluno360FerramentasBundleProvider(alunoId).future);
+        return ferramentas.aderenciaSemanal?.diasMaps ?? const [];
+      }
     });
 
 /// Last weight measurements from avaliações físicas (up to 7 points, chronological).
@@ -257,6 +335,9 @@ final alunoPesoHistoricoProvider = FutureProvider.family<List<double>, int>((
 
 Future<void> invalidateAluno360Providers(WidgetRef ref, int alunoId) async {
   Aluno360ClientCache.invalidate(alunoId);
+  ref.invalidate(aluno360OperacaoBundleProvider(alunoId));
+  ref.invalidate(aluno360EvolucaoBundleProvider(alunoId));
+  ref.invalidate(aluno360FerramentasBundleProvider(alunoId));
   ref.invalidate(aluno360Provider(alunoId));
   ref.invalidate(alunoProvider(alunoId));
   ref.invalidate(alunoRecoveryProvider(alunoId));
@@ -271,5 +352,6 @@ Future<void> invalidateAluno360Providers(WidgetRef ref, int alunoId) async {
   ref.invalidate(alunoMedidasResumoProvider(alunoId));
   ref.invalidate(alunoAderenciaSemanalProvider(alunoId));
   ref.invalidate(alunoPesoHistoricoProvider(alunoId));
-  await ref.read(aluno360Provider(alunoId).future);
+  await ref.read(aluno360OperacaoBundleProvider(alunoId).future);
 }
+
