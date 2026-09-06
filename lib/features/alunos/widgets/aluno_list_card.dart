@@ -16,6 +16,7 @@ import '../data/aluno_followup_store.dart';
 import '../data/aluno_repository.dart';
 import '../utils/aluno_display_utils.dart';
 import '../utils/alunos_list_sparkline_logic.dart';
+import '../providers/aluno_detail_providers.dart';
 import '../utils/alunos_list_utils.dart';
 import 'aluno_avatar.dart';
 import 'aluno_list_outreach_actions.dart';
@@ -158,7 +159,14 @@ class AlunoListCard extends ConsumerWidget {
           '${adherenceLabel.isEmpty ? '' : ', $adherenceLabel'}',
       child: InkWell(
         onTap:
-            modoSelecao ? onToggle : () => context.push('/alunos/${aluno.id}', extra: aluno),
+            modoSelecao
+            ? onToggle
+            : () {
+              // Kick /360/operacao before the route builds (cuts skeleton wait).
+              // ignore: unawaited_futures
+              ref.read(aluno360OperacaoBundleProvider(aluno.id).future);
+              context.push('/alunos/${aluno.id}', extra: aluno);
+            },
         onLongPress: onLongPress,
         borderRadius: BorderRadius.circular(FxSettingsLayout.groupRadius),
         child: AnimatedContainer(

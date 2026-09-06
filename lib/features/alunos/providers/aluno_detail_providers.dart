@@ -11,6 +11,8 @@ import '../data/aluno_copilot_ia_cache_store.dart';
 import '../data/aluno_repository.dart';
 import '../utils/aluno360_copilot_logic.dart';
 import '../utils/aluno360_client_cache.dart';
+import '../../evolucao/utils/evolucao_home_client_cache.dart';
+import '../../evolucao/providers/evolucao_home_provider.dart';
 import '../utils/aluno360_operacao_logic.dart';
 import '../../../core/analytics/analytics_service.dart';
 import 'package:flutter/foundation.dart';
@@ -32,6 +34,32 @@ final aluno360OperacaoBundleProvider =
     }
     return cached;
   }
+
+  // Stale-while-revalidate: reopen within 5min paints instantly, refresh idle.
+  final stale = Aluno360ClientCache.getOperacaoEvenIfStale(alunoId);
+  if (stale != null) {
+    if (Aluno360ClientCache.claimOperacaoRefresh(alunoId)) {
+      // ignore: unawaited_futures
+      Future(() async {
+        try {
+          final bundle = await AlunoRepository(
+            ref.read(apiClientProvider),
+          ).buscarAluno360Operacao(alunoId);
+          Aluno360ClientCache.putOperacao(alunoId, bundle);
+          ref.invalidateSelf();
+        } catch (_) {
+          // Keep stale paint; next open retries.
+        } finally {
+          Aluno360ClientCache.releaseOperacaoRefresh(alunoId);
+        }
+      });
+    }
+    if (kDebugMode) {
+      debugPrint('[aluno360] operacao stale-hit id=$alunoId (refreshing)');
+    }
+    return stale;
+  }
+
   final sw = Stopwatch()..start();
   final bundle = await AlunoRepository(
     ref.read(apiClientProvider),
@@ -268,6 +296,8 @@ final alunoPesoHistoricoProvider = FutureProvider.family<List<double>, int>((
 
 Future<void> invalidateAluno360Providers(WidgetRef ref, int alunoId) async {
   Aluno360ClientCache.invalidate(alunoId);
+  EvolucaoHomeClientCache.invalidate(alunoId);
+  ref.invalidate(evolucaoHomeProvider(alunoId));
   ref.invalidate(aluno360OperacaoBundleProvider(alunoId));
   ref.invalidate(aluno360EvolucaoBundleProvider(alunoId));
   ref.invalidate(aluno360FerramentasBundleProvider(alunoId));
