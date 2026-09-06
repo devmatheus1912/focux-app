@@ -596,19 +596,41 @@ class Aluno360Evolucao {
 ///
 /// Optional [evolucaoHome] mirrors `GET /api/alunos/{id}/evolucao/home`
 /// so Medidas can warm without a second round-trip.
+///
+/// Optional [composicaoResumo] seeds BF / massa tiles without
+/// `GET /avaliacoes/comparativo`.
+class Aluno360ComposicaoResumo {
+  final double? percGordura;
+  final double? massaMuscular;
+
+  const Aluno360ComposicaoResumo({
+    this.percGordura,
+    this.massaMuscular,
+  });
+
+  factory Aluno360ComposicaoResumo.fromJson(Map<String, dynamic> json) =>
+      Aluno360ComposicaoResumo(
+        percGordura: (json['percGordura'] as num?)?.toDouble(),
+        massaMuscular: (json['massaMuscular'] as num?)?.toDouble(),
+      );
+}
+
 class Aluno360Ferramentas {
   final AderenciaSemanalBundle? aderenciaSemanal;
   final bool? hasWearableHistory;
   final EvolucaoHomeBundle? evolucaoHome;
+  final Aluno360ComposicaoResumo? composicaoResumo;
 
   const Aluno360Ferramentas({
     this.aderenciaSemanal,
     this.hasWearableHistory,
     this.evolucaoHome,
+    this.composicaoResumo,
   });
 
   factory Aluno360Ferramentas.fromJson(Map<String, dynamic> json) {
     final rawHome = json['evolucaoHome'];
+    final rawComposicao = json['composicaoResumo'];
     return Aluno360Ferramentas(
       aderenciaSemanal:
           json['aderenciaSemanal'] != null
@@ -618,6 +640,10 @@ class Aluno360Ferramentas {
       evolucaoHome:
           rawHome is Map<String, dynamic>
               ? EvolucaoHomeBundle.fromJson(rawHome)
+              : null,
+      composicaoResumo:
+          rawComposicao is Map<String, dynamic>
+              ? Aluno360ComposicaoResumo.fromJson(rawComposicao)
               : null,
     );
   }

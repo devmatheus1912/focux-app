@@ -28,17 +28,18 @@ class Aluno360DetailFerramentasTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final medidasAsync = ref.watch(alunoMedidasResumoProvider(alunoId));
+    // BF / massa: only `/360/ferramentas.composicaoResumo` — never Avaliacao.comparativo.
+    final ferramentasAsync = ref.watch(aluno360FerramentasBundleProvider(alunoId));
     final aderenciaSemanal =
         ref.watch(alunoAderenciaSemanalProvider(alunoId)).valueOrNull;
-    final medidas = medidasAsync.valueOrNull;
+    final composicao = ferramentasAsync.valueOrNull?.composicaoResumo;
     final bf =
-        medidas?.percGordura != null
-            ? medidas!.percGordura!.toStringAsFixed(1)
+        composicao?.percGordura != null
+            ? composicao!.percGordura!.toStringAsFixed(1)
             : null;
     final massaMagra =
-        medidas?.massaMuscular != null
-            ? medidas!.massaMuscular!.toStringAsFixed(1)
+        composicao?.massaMuscular != null
+            ? composicao!.massaMuscular!.toStringAsFixed(1)
             : null;
 
     return Aluno360FerramentasTab(
@@ -47,7 +48,8 @@ class Aluno360DetailFerramentasTab extends ConsumerWidget {
       primary: primary,
       bf: bf,
       massaMagra: massaMagra,
-      measurementsLoading: medidasAsync.isLoading && !medidasAsync.hasValue,
+      measurementsLoading:
+          ferramentasAsync.isLoading && !ferramentasAsync.hasValue,
       animateEntrance: animateEntrance,
       onEntrancePlayed: onEntrancePlayed,
       modulesSection: Aluno360FerramentasModulesGrid(

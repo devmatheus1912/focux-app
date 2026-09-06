@@ -119,7 +119,6 @@ List<Override> _beatrizOverrides() {
     alunoRecoveryProvider(_contactPriorityAlunoId).overrideWith((ref) async => null),
     alunoOpenIaActionsProvider(_contactPriorityAlunoId)
         .overrideWith((ref) async => const []),
-    alunoMedidasResumoProvider(_contactPriorityAlunoId).overrideWith((ref) async => null),
     alunoPesoHistoricoProvider(_contactPriorityAlunoId)
         .overrideWith((ref) async => const []),
     alunoEvolucaoInteligenteProvider(_contactPriorityAlunoId)
@@ -223,7 +222,6 @@ List<Override> _aluno360Overrides() {
     alunoProvider(_alunoId).overrideWith((ref) async => _alunoFixture),
     alunoRecoveryProvider(_alunoId).overrideWith((ref) async => null),
     alunoOpenIaActionsProvider(_alunoId).overrideWith((ref) async => const []),
-    alunoMedidasResumoProvider(_alunoId).overrideWith((ref) async => null),
     alunoPesoHistoricoProvider(_alunoId).overrideWith((ref) async => const []),
     alunoEvolucaoInteligenteProvider(_alunoId)
         .overrideWith((ref) async => _emptyEvolucaoFixture),
