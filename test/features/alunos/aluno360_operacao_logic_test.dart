@@ -676,6 +676,25 @@ void main() {
         isFalse,
       );
     });
+
+    test('keeps prescription for contact priority even with chat sticky', () {
+      final aluno = _aluno(emRisco: true);
+      const sticky = OperacaoStickyAction(
+        label: 'Retomar contato',
+        icon: Icons.chat_rounded,
+        destination: OperacaoStickyDestination.chat,
+      );
+      expect(
+        shouldShowCopilotPrescriptionBlock(
+          forceIa: false,
+          sticky: sticky,
+          aluno: aluno,
+          proximaAcaoRaw: 'Retomar contato com Thales e checar o treino.',
+          contactPriority: true,
+        ),
+        isTrue,
+      );
+    });
   });
 
   group('shouldHideCopilotPrescriptionWhenMatchesSticky', () {
@@ -985,102 +1004,12 @@ void main() {
     });
   });
 
-  group('shouldHideFollowUpInFocusContactMode', () {
-    test('hides when focus + contact sticky chat', () {
-      expect(
-        shouldHideFollowUpInFocusContactMode(
-          focusMode: true,
-          contactPriority: true,
-          sticky: const OperacaoStickyAction(
-            label: 'Retomar contato',
-            icon: Icons.chat_rounded,
-            destination: OperacaoStickyDestination.chat,
-          ),
-        ),
-        isTrue,
-      );
-    });
-
-    test('shows when not in focus mode', () {
-      expect(
-        shouldHideFollowUpInFocusContactMode(
-          focusMode: false,
-          contactPriority: true,
-          sticky: const OperacaoStickyAction(
-            label: 'Retomar contato',
-            icon: Icons.chat_rounded,
-            destination: OperacaoStickyDestination.chat,
-          ),
-        ),
-        isFalse,
-      );
-    });
-  });
-
-  group('shouldDefaultOperacaoFocusMode', () {
-    test('disabled for contact priority with zero adherence', () {
-      expect(
-        shouldDefaultOperacaoFocusMode(
-          aluno: _aluno(aderenciaPercent: 0),
-          contactPriority: true,
-        ),
-        isFalse,
-      );
-    });
-
-    test('disabled for contact priority regardless of adherence', () {
-      expect(
-        shouldDefaultOperacaoFocusMode(
-          aluno: _aluno(aderenciaPercent: 55),
-          contactPriority: true,
-        ),
-        isFalse,
-      );
-    });
-
-    test('enabled for em risco with zero adherence without contact priority', () {
-      expect(
-        shouldDefaultOperacaoFocusMode(
-          aluno: _aluno(aderenciaPercent: 0, emRisco: true),
-          contactPriority: false,
-        ),
-        isTrue,
-      );
-    });
-
-    test('disabled for stable profile', () {
-      expect(
-        shouldDefaultOperacaoFocusMode(
-          aluno: _aluno(aderenciaPercent: 80, emRisco: false),
-          contactPriority: false,
-        ),
-        isFalse,
-      );
-    });
-  });
-
   group('padAderenciaWeekToSevenDays', () {
     test('pads empty input to seven distinct days', () {
       final points = padAderenciaWeekToSevenDays(const []);
       expect(points.length, 7);
       expect(points.map((p) => p.date).toSet().length, 7);
       expect(points.every((p) => p.checkins == 0), isTrue);
-    });
-  });
-
-  group('shouldHideCopilotPrescriptionWhenContactPrioritySticky', () {
-    test('hides when sticky is chat under contact priority', () {
-      expect(
-        shouldHideCopilotPrescriptionWhenContactPrioritySticky(
-          contactPriority: true,
-          sticky: const OperacaoStickyAction(
-            label: 'Contato',
-            icon: Icons.chat_rounded,
-            destination: OperacaoStickyDestination.chat,
-          ),
-        ),
-        isTrue,
-      );
     });
   });
 

@@ -38,8 +38,6 @@ String _alunoDetailLibrarySource() {
       'lib/features/alunos/widgets/aluno360_copilot_upgrade_sheet.dart';
   const operationalSectionFile =
       'lib/features/alunos/widgets/aluno360_operational_status_section.dart';
-  const focusToggleFile =
-      'lib/features/alunos/widgets/aluno360_operacao_focus_toggle.dart';
   const copilotSupportFile =
       'lib/features/alunos/widgets/aluno360_copilot_support.dart';
   const stickyCtaFile =
@@ -106,7 +104,6 @@ String _alunoDetailLibrarySource() {
   final copilotUpgradeSheet =
       File(copilotUpgradeSheetFile).readAsStringSync();
   final operationalSection = File(operationalSectionFile).readAsStringSync();
-  final focusToggle = File(focusToggleFile).readAsStringSync();
   final copilotSupport = File(copilotSupportFile).readAsStringSync();
   final stickyCta = File(stickyCtaFile).readAsStringSync();
   final followUp = File(followUpFile).readAsStringSync();
@@ -132,7 +129,7 @@ String _alunoDetailLibrarySource() {
   final detailLoadingSkeleton =
       File(detailLoadingSkeletonFile).readAsStringSync();
   final alunoRepository = File(alunoRepositoryFile).readAsStringSync();
-  return '$main\n$statePart\n$providers\n$heroWidget\n$heroRiskStyle\n$headerWidget\n$operacaoTab\n$operacaoLogic\n$copilotLogic\n$copilotExecutarLogic\n$copilotOutreachLogic\n$copilotTextLogic\n$outreachDisplay\n$outreachSheet\n$copilotCard\n$copilotLockedSection\n$copilotUpgradeSheet\n$operationalSection\n$focusToggle\n$copilotSupport\n$stickyCta\n$followUp\n$copilotTaskActions\n$executarButton\n$financeBanner\n$ferramentasModules\n$timelineCard\n$insetEmptyActions\n$alunoActions\n$deleteConfirmSheet\n$quickActions\n$evolucaoCard\n$adherenceLegend\n$profileGapsSheet\n$iaRepository\n$detailOperacaoTab\n$detailEvolucaoTab\n$detailFerramentasTab\n$recoveryInsight\n$weightActivity\n$detailLoadingSkeleton\n$alunoRepository';
+  return '$main\n$statePart\n$providers\n$heroWidget\n$heroRiskStyle\n$headerWidget\n$operacaoTab\n$operacaoLogic\n$copilotLogic\n$copilotExecutarLogic\n$copilotOutreachLogic\n$copilotTextLogic\n$outreachDisplay\n$outreachSheet\n$copilotCard\n$copilotLockedSection\n$copilotUpgradeSheet\n$operationalSection\n$copilotSupport\n$stickyCta\n$followUp\n$copilotTaskActions\n$executarButton\n$financeBanner\n$ferramentasModules\n$timelineCard\n$insetEmptyActions\n$alunoActions\n$deleteConfirmSheet\n$quickActions\n$evolucaoCard\n$adherenceLegend\n$profileGapsSheet\n$iaRepository\n$detailOperacaoTab\n$detailEvolucaoTab\n$detailFerramentasTab\n$recoveryInsight\n$weightActivity\n$detailLoadingSkeleton\n$alunoRepository';
 }
 
 void main() {
@@ -302,11 +299,9 @@ void main() {
       expect(screen, contains('Status operacional'));
       expect(screen, contains('Índice operacional'));
       expect(screen, contains('Próximo contato:'));
-      expect(screen, contains('alunoOperacaoFocusModeProvider'));
       expect(screen, contains('resolveOperacaoStickyAction'));
       expect(screen, contains('operacaoHeroShowsRisco'));
       expect(screen, contains('shouldShowCopilotProfileGapsButton'));
-      expect(screen, contains('Aluno360OperacaoFocusModeToggle'));
       expect(
         File(
           'lib/features/alunos/utils/aluno360_copilot_logic.dart',
@@ -377,11 +372,8 @@ void main() {
       expect(screen, contains('Aluno360CopilotUpgradeSheet'));
       expect(screen, contains('Aluno360HeroRiskStyle'));
       expect(screen, contains('copySensitiveToClipboard'));
-      expect(
-        screen,
-        isNot(contains('trailing: Aluno360OperacaoFocusModeToggle')),
-      );
-      expect(screen, contains('showFocusToggle: true'));
+      expect(screen, isNot(contains('Aluno360OperacaoFocusModeToggle')));
+      expect(screen, isNot(contains('showFocusToggle')));
       expect(screen, contains('class _IdentityObjectiveRow'));
       expect(screen, contains('alunoObjectiveIsDefined'));
       expect(screen, contains('onDefineObjective'));
@@ -443,9 +435,10 @@ void main() {
     expect(layoutSource, contains('tabSelectedLabelStyle'));
     expect(layoutSource, contains('secondaryActionLabelStyle'));
     expect(layoutSource, contains('FxSettingsLayout.groupRadius'));
-    expect(screen, contains('syncFromAluno'));
+    expect(screen, isNot(contains('syncFromAluno')));
+    expect(screen, isNot(contains('alunoOperacaoFocusModeProvider')));
+    expect(screen, isNot(contains('atualizarOperacaoFocus')));
     expect(screen, contains('operacaoFocusMode'));
-    expect(screen, contains('atualizarOperacaoFocus'));
     expect(layoutSource, contains('insetCardRadius'));
     expect(
       File(

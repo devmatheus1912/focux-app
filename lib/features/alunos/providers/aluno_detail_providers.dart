@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/utils/a11y_announce.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../avaliacao/data/avaliacao_repository.dart';
 import '../../dashboard/data/command_center_data.dart';
@@ -9,7 +8,6 @@ import '../../health/data/health_repository.dart';
 import '../../ia/data/ia_repository.dart';
 import '../../ia/models/ia_copilot_proxima_acao.dart';
 import '../data/aluno_copilot_ia_cache_store.dart';
-import '../data/aluno_operacao_focus_store.dart';
 import '../data/aluno_repository.dart';
 import '../utils/aluno360_copilot_logic.dart';
 import '../utils/aluno360_client_cache.dart';
@@ -144,71 +142,6 @@ final alunoCopilotoForceIaProvider = StateProvider.family<bool, int>(
 final alunoCopilotCreatingProvider = StateProvider.family<bool, int>(
   (ref, alunoId) => false,
 );
-
-/// Operação tab focus mode — hides secondary diagnostics (status grid, wearable, quick actions).
-final alunoOperacaoFocusModeProvider =
-    StateNotifierProvider.family<AlunoOperacaoFocusModeController, bool, int>(
-      (ref, alunoId) => AlunoOperacaoFocusModeController(ref, alunoId),
-    );
-
-class AlunoOperacaoFocusModeController extends StateNotifier<bool> {
-  AlunoOperacaoFocusModeController(this._ref, this.alunoId) : super(false);
-
-  final Ref _ref;
-  final int alunoId;
-
-  /// Server preference wins, then local explicit, then contact-priority auto-default.
-  Future<void> syncFromAluno(Aluno aluno, {required bool autoDefault}) async {
-    try {
-      final server = aluno.operacaoFocusMode;
-      if (server != null) {
-        if (state != server) state = server;
-        await AlunoOperacaoFocusStore.saveExplicit(alunoId, server);
-        return;
-      }
-      await syncAutoDefault(autoDefault: autoDefault);
-    } catch (error) {
-      assert(() {
-        // ignore: avoid_print
-        print('AlunoOperacaoFocusModeController.syncFromAluno: $error');
-        return true;
-      }());
-    }
-  }
-
-  /// Applies contact-priority auto-default unless the personal toggled focus manually.
-  Future<void> syncAutoDefault({required bool autoDefault}) async {
-    try {
-      final explicit = await AlunoOperacaoFocusStore.loadExplicit(alunoId);
-      final next = explicit ?? autoDefault;
-      if (state != next) state = next;
-    } catch (error) {
-      assert(() {
-        // ignore: avoid_print
-        print('AlunoOperacaoFocusModeController.syncAutoDefault: $error');
-        return true;
-      }());
-    }
-  }
-
-  Future<void> setFocus(bool value) async {
-    if (state == value) return;
-    final previous = state;
-    state = value;
-    try {
-      await AlunoOperacaoFocusStore.saveExplicit(alunoId, value);
-      await AlunoRepository(
-        _ref.read(apiClientProvider),
-      ).atualizarOperacaoFocus(alunoId, focusMode: value);
-      fxAnnounceGlobal(value ? 'Modo foco ativado' : 'Modo foco desativado');
-    } catch (error) {
-      state = previous;
-      fxAnnounceGlobal('Não foi possível salvar o modo foco. Tente novamente.');
-    }
-  }
-
-  Future<void> toggle() async => setFocus(!state);
-}
 
 /// Bust IA cache on explicit refresh (see copilot refresh button).
 final alunoCopilotIaSkipCacheProvider = StateProvider.family<bool, int>(

@@ -101,11 +101,12 @@ void main() {
     expect(source, contains('dashboard_day_focus.dart'));
   });
 
-  test('aluno detail exposes operacao focus mode', () {
+  test('aluno detail keeps sticky CTA without operacao focus toggle', () {
     final source = readScreenSourceBundle(
       'lib/features/alunos/screens/aluno_detail_screen.dart',
     );
-    expect(source, contains('alunoOperacaoFocusModeProvider'));
     expect(source, contains('aluno360_operacao_sticky_cta'));
+    expect(source, isNot(contains('alunoOperacaoFocusModeProvider')));
+    expect(source, isNot(contains('Aluno360OperacaoFocusModeToggle')));
   });
 }
