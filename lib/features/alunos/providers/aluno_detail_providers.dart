@@ -107,28 +107,51 @@ final aluno360EvolucaoBundleProvider =
 final aluno360FerramentasBundleProvider =
     FutureProvider.family<Aluno360Ferramentas, int>((ref, alunoId) async {
   final cached = Aluno360ClientCache.getFerramentasIfFresh(alunoId);
-  if (cached != null) return cached;
+  if (cached != null) {
+    _hydrateEvolucaoHomeFromFerramentas(alunoId, cached);
+    return cached;
+  }
   final sw = Stopwatch()..start();
   final bundle = await AlunoRepository(
     ref.read(apiClientProvider),
   ).buscarAluno360Ferramentas(alunoId);
   sw.stop();
   Aluno360ClientCache.putFerramentas(alunoId, bundle);
+  _hydrateEvolucaoHomeFromFerramentas(alunoId, bundle);
   if (kDebugMode) {
     debugPrint(
       '[aluno360] GET /api/alunos/$alunoId/360/ferramentas '
-      '${sw.elapsedMilliseconds}ms',
+      '${sw.elapsedMilliseconds}ms'
+      '${bundle.evolucaoHome != null ? ' +evolucaoHome' : ''}',
     );
   }
   return bundle;
 });
+
+/// Seed Medidas cache from `/360/ferramentas.evolucaoHome`.
+void _hydrateEvolucaoHomeFromFerramentas(
+  int alunoId,
+  Aluno360Ferramentas bundle,
+) {
+  final home = bundle.evolucaoHome;
+  if (home == null) return;
+  EvolucaoHomeClientCache.put(alunoId, home);
+}
 
 /// Fire-and-forget after Operação is usable (idle / next frame).
 void prefetchAluno360SecondaryTabs(WidgetRef ref, int alunoId) {
   // ignore: unawaited_futures
   ref.read(aluno360EvolucaoBundleProvider(alunoId).future);
   // ignore: unawaited_futures
-  ref.read(aluno360FerramentasBundleProvider(alunoId).future);
+  () async {
+    try {
+      await ref.read(aluno360FerramentasBundleProvider(alunoId).future);
+      // Fallback when BE/cliente antigo não manda evolucaoHome.
+      prefetchEvolucaoHome(ref, alunoId);
+    } catch (_) {
+      prefetchEvolucaoHome(ref, alunoId);
+    }
+  }();
 }
 
 /// @Deprecated monolito `/360` — não usar no first paint.
