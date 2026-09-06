@@ -25,7 +25,6 @@ import '../widgets/aluno360_copilot_ia_refresh_button.dart';
 import '../widgets/aluno360_copilot_prescription.dart';
 import '../widgets/aluno360_copilot_support.dart';
 import 'aluno360_help_sheets.dart';
-import 'aluno360_operacao_focus_toggle.dart';
 import 'aluno360_copilot_locked_section.dart';
 import 'aluno360_copilot_ia_prompt_section.dart';
 import '../widgets/aluno_outreach_message_sheet.dart';
@@ -37,8 +36,6 @@ class Aluno360CopilotCard extends ConsumerWidget {
   final ProximaAcaoResumo? proximaAcao360;
   final bool hasOpenCopilotTask360;
   final bool isDark;
-  final bool showFocusToggle;
-  final bool focusMode;
 
   const Aluno360CopilotCard({
     super.key,
@@ -48,8 +45,6 @@ class Aluno360CopilotCard extends ConsumerWidget {
     required this.proximaAcao360,
     required this.hasOpenCopilotTask360,
     required this.isDark,
-    this.showFocusToggle = false,
-    this.focusMode = false,
   });
 
   Future<void> _openProfileGap(
@@ -243,38 +238,16 @@ class Aluno360CopilotCard extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: TokensStrip.s3),
-          if (showFocusToggle)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 4),
-              child: Align(
-                alignment: Alignment.centerRight,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Aluno360OperacaoFocusModeToggle(
-                      alunoId: alunoId,
-                      primary: primary,
-                      iconOnly: true,
-                    ),
-                    Aluno360CopilotIaRefreshButton(
-                      alunoId: aluno.id,
-                      primary: primary,
-                    ),
-                  ],
-                ),
-              ),
-            )
-          else
-            Padding(
-              padding: const EdgeInsets.only(bottom: 4),
-              child: Align(
-                alignment: Alignment.centerRight,
-                child: Aluno360CopilotIaRefreshButton(
-                  alunoId: aluno.id,
-                  primary: primary,
-                ),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 4),
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: Aluno360CopilotIaRefreshButton(
+                alunoId: aluno.id,
+                primary: primary,
               ),
             ),
+          ),
           // Status line / thin bar only — never overlay skeleton on the card body.
           if (iaLoading) ...[
             Semantics(
@@ -291,11 +264,11 @@ class Aluno360CopilotCard extends ConsumerWidget {
             ),
             const SizedBox(height: 8),
           ],
-            if (!hasOpenTask && !focusMode && !operacao.contactPriority) ...[
+            if (!hasOpenTask && !operacao.contactPriority) ...[
               const SizedBox(height: 10),
               Aluno360CopilotSignalsGrid(signals: signals),
             ],
-            if (!hasOpenTask && !focusMode && !operacao.contactPriority)
+            if (!hasOpenTask && !operacao.contactPriority)
               const SizedBox(height: 10),
             if (shouldShowCopilotProfileGapsButton(
               aluno,
@@ -331,8 +304,8 @@ class Aluno360CopilotCard extends ConsumerWidget {
                 preferContactPriority: operacao.contactPriority,
                 wearableRelevant: wearableRelevant,
                 contactPriority: operacao.contactPriority,
-                statusMetricsVisible: !focusMode,
-                hideMetricFooter: focusMode,
+                statusMetricsVisible: true,
+                hideMetricFooter: false,
                 onPrepareMessage:
                     showPrepareInPrescription
                         ? () => _prepararMensagem(
