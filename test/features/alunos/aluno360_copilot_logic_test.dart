@@ -290,6 +290,78 @@ void main() {
     });
   });
 
+  group('resolveCopilotPriorityCardState', () {
+    test('shows deterministic seed without forcing IA', () {
+      expect(
+        resolveCopilotPriorityCardState(
+          seed360: const {'acao': 'Retomar contato com Nathalia'},
+          forceIa: false,
+          iaAsync: null,
+          iaRefreshing: false,
+        ),
+        CopilotPriorityCardState.showingDeterministic,
+      );
+    });
+
+    test('refreshingAi keeps exclusive state even with seed', () {
+      expect(
+        resolveCopilotPriorityCardState(
+          seed360: const {'acao': 'Retomar contato com Nathalia'},
+          forceIa: true,
+          iaAsync: const AsyncValue.loading(),
+          iaRefreshing: true,
+        ),
+        CopilotPriorityCardState.refreshingAi,
+      );
+      expect(
+        copilotPriorityCardAllowsSkeleton(
+          CopilotPriorityCardState.refreshingAi,
+        ),
+        isFalse,
+      );
+    });
+
+    test('showingAi after successful IA response', () {
+      expect(
+        resolveCopilotPriorityCardState(
+          seed360: const {'acao': 'Retomar contato'},
+          forceIa: true,
+          iaAsync: AsyncValue.data(_iaPayload({'acao': 'Mensagem IA'})),
+          iaRefreshing: false,
+        ),
+        CopilotPriorityCardState.showingAi,
+      );
+    });
+
+    test('errorAi when IA fails without prior value', () {
+      expect(
+        resolveCopilotPriorityCardState(
+          seed360: const {'acao': 'Retomar contato'},
+          forceIa: true,
+          iaAsync: AsyncValue.error('timeout', StackTrace.empty),
+          iaRefreshing: false,
+        ),
+        CopilotPriorityCardState.errorAi,
+      );
+    });
+
+    test('idle allows skeleton only without seed', () {
+      expect(
+        resolveCopilotPriorityCardState(
+          seed360: null,
+          forceIa: false,
+          iaAsync: null,
+          iaRefreshing: false,
+        ),
+        CopilotPriorityCardState.idle,
+      );
+      expect(
+        copilotPriorityCardAllowsSkeleton(CopilotPriorityCardState.idle),
+        isTrue,
+      );
+    });
+  });
+
   group('copilotPrescriptionDisplayAction', () {
     test('shortens contact plus wearable IA paragraph', () {
       final aluno = _aluno();
