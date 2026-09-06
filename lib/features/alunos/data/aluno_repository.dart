@@ -593,23 +593,34 @@ class Aluno360Evolucao {
 }
 
 /// Progressive Ferramentas payload — GET `/api/alunos/{id}/360/ferramentas`.
+///
+/// Optional [evolucaoHome] mirrors `GET /api/alunos/{id}/evolucao/home`
+/// so Medidas can warm without a second round-trip.
 class Aluno360Ferramentas {
   final AderenciaSemanalBundle? aderenciaSemanal;
   final bool? hasWearableHistory;
+  final EvolucaoHomeBundle? evolucaoHome;
 
   const Aluno360Ferramentas({
     this.aderenciaSemanal,
     this.hasWearableHistory,
+    this.evolucaoHome,
   });
 
-  factory Aluno360Ferramentas.fromJson(Map<String, dynamic> json) =>
-      Aluno360Ferramentas(
-        aderenciaSemanal:
-            json['aderenciaSemanal'] != null
-                ? AderenciaSemanalBundle.parse(json['aderenciaSemanal'])
-                : null,
-        hasWearableHistory: json['hasWearableHistory'] as bool?,
-      );
+  factory Aluno360Ferramentas.fromJson(Map<String, dynamic> json) {
+    final rawHome = json['evolucaoHome'];
+    return Aluno360Ferramentas(
+      aderenciaSemanal:
+          json['aderenciaSemanal'] != null
+              ? AderenciaSemanalBundle.parse(json['aderenciaSemanal'])
+              : null,
+      hasWearableHistory: json['hasWearableHistory'] as bool?,
+      evolucaoHome:
+          rawHome is Map<String, dynamic>
+              ? EvolucaoHomeBundle.fromJson(rawHome)
+              : null,
+    );
+  }
 }
 
 class AlunoAutonomiaResumo {

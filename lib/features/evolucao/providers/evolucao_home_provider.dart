@@ -17,7 +17,10 @@ final evolucaoHomeProvider = FutureProvider.family<EvolucaoHomeBundle, int>((
 });
 
 /// Warm Medidas hub before the user taps (Ferramentas → Evolução).
+///
+/// Skips network when `/360/ferramentas.evolucaoHome` already hydrated the cache.
 void prefetchEvolucaoHome(WidgetRef ref, int alunoId) {
+  if (EvolucaoHomeClientCache.getIfFresh(alunoId) != null) return;
   // ignore: unawaited_futures
   ref.read(evolucaoHomeProvider(alunoId).future);
 }

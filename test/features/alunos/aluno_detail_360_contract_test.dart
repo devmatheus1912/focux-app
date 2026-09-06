@@ -254,6 +254,17 @@ void main() {
     expect(repo, contains('/360/operacao'));
     expect(repo, contains('buscarAluno360Evolucao'));
     expect(repo, contains('buscarAluno360Ferramentas'));
+    expect(repo, contains('evolucaoHome'));
+    expect(
+      File('lib/features/alunos/providers/aluno_detail_providers.dart')
+          .readAsStringSync(),
+      contains('_hydrateEvolucaoHomeFromFerramentas'),
+    );
+    expect(
+      File('lib/features/evolucao/providers/evolucao_home_provider.dart')
+          .readAsStringSync(),
+      contains('EvolucaoHomeClientCache.getIfFresh'),
+    );
     expect(providers, contains('aluno360OperacaoBundleProvider'));
     expect(providers, contains('buscarAluno360Operacao'));
     expect(providers, contains('prefetchAluno360SecondaryTabs'));
