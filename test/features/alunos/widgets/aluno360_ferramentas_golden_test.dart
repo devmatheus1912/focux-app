@@ -58,7 +58,9 @@ void main() {
     return ProviderScope(
       overrides: [
         _ferramentasPlanoOverride(),
-        alunoMedidasResumoProvider(42).overrideWith((ref) async => null),
+        aluno360FerramentasBundleProvider(42).overrideWith(
+          (ref) async => const Aluno360Ferramentas(),
+        ),
         alunoAderenciaSemanalProvider(42).overrideWith(
           (ref) async => aderenciaSemanaEndingToday(),
         ),
