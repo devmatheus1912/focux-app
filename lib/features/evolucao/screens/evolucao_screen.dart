@@ -30,17 +30,11 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../../alunos/utils/satellite_screen_utils.dart';
 import '../data/evolucao_repository.dart';
 import '../utils/evolucao_display.dart';
+import '../providers/evolucao_home_provider.dart';
+import '../utils/evolucao_home_client_cache.dart';
 import '../widgets/evolucao_help_sheet.dart';
 
 part 'evolucao_screen_widgets.part.dart';
-
-final evolucaoHomeProvider = FutureProvider.family<EvolucaoHomeBundle, int>((
-  ref,
-  alunoId,
-) async {
-  final repo = EvolucaoRepository(ref.read(apiClientProvider));
-  return repo.getHome(alunoId);
-});
 
 class EvolucaoScreen extends ConsumerStatefulWidget {
   final int alunoId;
@@ -247,6 +241,7 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
         quadril: double.tryParse(quadrilCtrl.text.replaceAll(',', '.')),
         braco: double.tryParse(bracoCtrl.text.replaceAll(',', '.')),
       );
+      EvolucaoHomeClientCache.invalidate(widget.alunoId);
       ref.invalidate(evolucaoHomeProvider(widget.alunoId));
       if (!mounted) return;
       FeedbackHelper.showSuccess(context, 'Medida adicionada!');
@@ -312,6 +307,7 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
         unidade: unidadeCtrl.text.trim(),
         observacao: obsCtrl.text.trim(),
       );
+      EvolucaoHomeClientCache.invalidate(widget.alunoId);
       ref.invalidate(evolucaoHomeProvider(widget.alunoId));
       if (!mounted) return;
       FeedbackHelper.showSuccess(context, 'Recorde adicionado!');

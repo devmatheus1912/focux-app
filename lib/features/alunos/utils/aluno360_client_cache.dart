@@ -5,10 +5,14 @@ import '../data/aluno_repository.dart';
 abstract final class Aluno360ClientCache {
   static const ttl = Duration(seconds: 45);
 
+  /// Soft window: serve expired Operação and refresh in background.
+  static const staleTtl = Duration(minutes: 5);
+
   static final _operacao = <int, ({Aluno360Operacao bundle, DateTime at})>{};
   static final _evolucao = <int, ({Aluno360Evolucao bundle, DateTime at})>{};
   static final _ferramentas =
       <int, ({Aluno360Ferramentas bundle, DateTime at})>{};
+  static final _operacaoRefreshing = <int>{};
 
   /// Legacy monolito `/360` — kept for invalidate compatibility only.
   static final _legacy = <int, ({Aluno360 bundle, DateTime at})>{};
@@ -17,11 +21,31 @@ abstract final class Aluno360ClientCache {
     final hit = _operacao[alunoId];
     if (hit == null) return null;
     if ((now ?? DateTime.now()).difference(hit.at) > ttl) {
+      return null;
+    }
+    return hit.bundle;
+  }
+
+  /// Returns Operação even after [ttl], until [staleTtl] elapses.
+  static Aluno360Operacao? getOperacaoEvenIfStale(
+    int alunoId, {
+    DateTime? now,
+  }) {
+    final hit = _operacao[alunoId];
+    if (hit == null) return null;
+    if ((now ?? DateTime.now()).difference(hit.at) > staleTtl) {
       _operacao.remove(alunoId);
       return null;
     }
     return hit.bundle;
   }
+
+  /// Claims background refresh slot for [alunoId] (dedupes concurrent SWR).
+  static bool claimOperacaoRefresh(int alunoId) =>
+      _operacaoRefreshing.add(alunoId);
+
+  static void releaseOperacaoRefresh(int alunoId) =>
+      _operacaoRefreshing.remove(alunoId);
 
   static void putOperacao(int alunoId, Aluno360Operacao bundle, {DateTime? now}) {
     _operacao[alunoId] = (bundle: bundle, at: now ?? DateTime.now());
@@ -83,6 +107,7 @@ abstract final class Aluno360ClientCache {
     _evolucao.remove(alunoId);
     _ferramentas.remove(alunoId);
     _legacy.remove(alunoId);
+    _operacaoRefreshing.remove(alunoId);
   }
 
   static void clear() {
@@ -90,5 +115,6 @@ abstract final class Aluno360ClientCache {
     _evolucao.clear();
     _ferramentas.clear();
     _legacy.clear();
+    _operacaoRefreshing.clear();
   }
 }
