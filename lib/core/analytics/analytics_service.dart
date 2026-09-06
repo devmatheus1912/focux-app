@@ -150,6 +150,8 @@ class ProductEvents {
   static const aluno360OutreachPrepared = 'aluno360_outreach_prepared';
   static const aluno360OutreachChatOpened = 'aluno360_outreach_chat_opened';
   static const aluno360HelpOpened = 'aluno360_help_opened';
+  static const aluno360FetchDuration = 'aluno360_fetch_duration';
+  static const aluno360FirstPaint = 'aluno360_first_paint';
 
   static const homeViewed = 'home_viewed';
   static const homeRefreshed = 'home_refreshed';

@@ -10,6 +10,7 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../dashboard/data/command_action_item.dart';
 import '../../dashboard/widgets/command_action_tile.dart';
+import '../../dashboard/data/command_center_data.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../planos/utils/effective_plano_features.dart';
 import '../../planos/utils/plano_capability.dart';
@@ -122,13 +123,23 @@ class Aluno360CopilotCard extends ConsumerWidget {
     final forceIa = ref.watch(alunoCopilotoForceIaProvider(aluno.id));
     final iaAsync =
         forceIa ? ref.watch(alunoCopilotoActionProvider(aluno.id)) : null;
-    final openActionsAsync = ref.watch(alunoOpenIaActionsProvider(aluno.id));
-    final openTask = findOpenCopilotTask(
-      openActionsAsync.valueOrNull ?? const [],
-    );
-    final hasOpenTask = openTask != null || hasOpenCopilotTask360;
     final bundleAsync = ref.watch(aluno360Provider(aluno.id));
     final bundle = bundleAsync.valueOrNull;
+    // Prefer /360 bundle for open tasks — avoid sidecar GET on first paint.
+    final AsyncValue<List<FilaAcaoResumo>> openActionsAsync;
+    if (bundle?.openCopilotTasks != null) {
+      openActionsAsync = AsyncData(bundle!.openCopilotTasks!);
+    } else if (bundle?.hasOpenCopilotTask != null) {
+      openActionsAsync = const AsyncData([]);
+    } else if (bundle != null) {
+      // Legacy payload without open-task fields — only then sidecar.
+      openActionsAsync = ref.watch(alunoOpenIaActionsProvider(aluno.id));
+    } else {
+      openActionsAsync = const AsyncLoading();
+    }
+    final openActions = openActionsAsync.valueOrNull ?? const <FilaAcaoResumo>[];
+    final openTask = findOpenCopilotTask(openActions);
+    final hasOpenTask = openTask != null || hasOpenCopilotTask360;
     final bundleLoading = bundleAsync.isLoading && !bundleAsync.hasValue;
     final bundleRefreshing = bundleAsync.isRefreshing && bundleAsync.hasValue;
     final operacao = ref.watch(aluno360OperacaoProvider(aluno.id));

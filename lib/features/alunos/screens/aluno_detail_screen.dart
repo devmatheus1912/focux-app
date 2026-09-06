@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -36,11 +37,14 @@ part 'aluno_detail_screen_state.part.dart';
 class AlunoDetailScreen extends ConsumerStatefulWidget {
   final int alunoId;
   final int? initialTabIndex;
+  /// Nome/foto/status from the alunos list for optimistic skeleton.
+  final Aluno? listPreview;
 
   const AlunoDetailScreen({
     super.key,
     required this.alunoId,
     this.initialTabIndex,
+    this.listPreview,
   });
 
   @override

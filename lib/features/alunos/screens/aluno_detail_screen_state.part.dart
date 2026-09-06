@@ -6,20 +6,26 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
   bool _entrancePlayed = false;
   String? _lastFocusSyncSignature;
   DateTime? _fetchedAt;
+  late final DateTime _openedAt;
+  bool _loggedFirstPaint = false;
+  final Set<int> _openedTabs = {0};
 
   int get alunoId => widget.alunoId;
 
   @override
   void initState() {
     super.initState();
+    _openedAt = DateTime.now();
     _tabController = TabController(length: 3, vsync: this);
     _tabController.addListener(() {
       if (!_tabController.indexIsChanging) {
+        _openedTabs.add(_tabController.index);
         setState(() {});
       }
     });
     final tab = widget.initialTabIndex;
     if (tab != null && tab >= 0 && tab < 3) {
+      _openedTabs.add(tab);
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted && _tabController.index != tab) {
           _tabController.index = tab;
@@ -46,6 +52,10 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
 
   @override
   Widget build(BuildContext context) {
+    final listPreview = resolveAlunoDetailListPreview(
+      alunoId: alunoId,
+      routePreview: widget.listPreview,
+    );
     final aluno360Async = ref.watch(aluno360Provider(alunoId));
     // First paint: only /360. Watch GET /alunos/{id} solely when 360 failed.
     final alunoFallbackAsync =
@@ -53,13 +63,13 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
             ? ref.watch(alunoProvider(alunoId))
             : null;
     final tabIndex = _tabController.index;
+    // Autonomia comes only from /360 — never sidecar on first paint.
     final autonomiaResumoAsync =
-        tabIndex == 0 && !aluno360Async.hasValue
-            ? ref.watch(alunoAutonomiaResumoProvider(alunoId))
-            : const AsyncValue<AlunoAutonomiaResumo>.loading();
+        const AsyncValue<AlunoAutonomiaResumo>.loading();
     final watchTab1Sidecars = shouldWatchAluno360Tab1Sidecars(
       aluno360Async,
       tabIndex: tabIndex,
+      evolucaoTabOpened: _openedTabs.contains(1),
     );
     final evolucaoGranularAsync =
         watchTab1Sidecars
@@ -151,6 +161,7 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                   mute: mute,
                   line: chrome.line,
                   sheetFill: chrome.sheetFill,
+                  listPreview: listPreview,
                 )
                 : resolvedAlunoAsync.when(
                   loading:
@@ -162,6 +173,7 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                         mute: mute,
                         line: chrome.line,
                         sheetFill: chrome.sheetFill,
+                        listPreview: listPreview,
                       ),
                   error:
                       (e, _) => FxErrorState(
@@ -243,6 +255,26 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                       WidgetsBinding.instance.addPostFrameCallback((_) {
                         if (mounted && _fetchedAt == null) _markFetched();
                       });
+                    }
+                    if (!_loggedFirstPaint) {
+                      _loggedFirstPaint = true;
+                      final totalMs =
+                          DateTime.now().difference(_openedAt).inMilliseconds;
+                      if (kDebugMode) {
+                        debugPrint(
+                          '[aluno360] first-paint total=${totalMs}ms '
+                          'id=$alunoId (GET /360 alone should dominate)',
+                        );
+                      }
+                      // ignore: unawaited_futures
+                      AnalyticsService.instance.track(
+                        ProductEvents.aluno360FirstPaint,
+                        props: {
+                          'alunoId': alunoId,
+                          'durationMs': totalMs,
+                          'hadListPreview': listPreview != null,
+                        },
+                      );
                     }
 
                     return RefreshIndicator(

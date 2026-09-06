@@ -158,7 +158,7 @@ class AlunoListCard extends ConsumerWidget {
           '${adherenceLabel.isEmpty ? '' : ', $adherenceLabel'}',
       child: InkWell(
         onTap:
-            modoSelecao ? onToggle : () => context.push('/alunos/${aluno.id}'),
+            modoSelecao ? onToggle : () => context.push('/alunos/${aluno.id}', extra: aluno),
         onLongPress: onLongPress,
         borderRadius: BorderRadius.circular(FxSettingsLayout.groupRadius),
         child: AnimatedContainer(
