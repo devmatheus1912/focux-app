@@ -5,19 +5,14 @@ import '../../../core/storage/secure_storage.dart';
 
 class PasswordResetRequestResult {
   final String mensagem;
-  final bool deliveryAvailable;
 
-  const PasswordResetRequestResult({
-    required this.mensagem,
-    required this.deliveryAvailable,
-  });
+  const PasswordResetRequestResult({required this.mensagem});
 
   factory PasswordResetRequestResult.fromJson(Map<String, dynamic> json) {
     return PasswordResetRequestResult(
       mensagem:
           json['mensagem'] as String? ??
           'Se o e-mail estiver cadastrado, voce recebera as instrucoes.',
-      deliveryAvailable: json['deliveryAvailable'] as bool? ?? true,
     );
   }
 }
@@ -269,7 +264,6 @@ class AuthRepository {
       await SecureStorage.saveRefreshToken(refreshToken);
     }
     await SecureStorage.saveRole('PERSONAL');
-    await SecureStorage.saveIsAdmin(false);
     return token;
   }
 
@@ -413,7 +407,6 @@ class AuthRepository {
     }
     final refreshToken = body['refreshToken'] as String?;
     final role = body['role'] as String? ?? fallbackRole;
-    final isAdmin = body['isAdmin'] as bool? ?? false;
     final requiresPasswordChange =
         body['requiresPasswordChange'] as bool? ?? false;
     await SecureStorage.saveToken(token);
@@ -421,7 +414,6 @@ class AuthRepository {
       await SecureStorage.saveRefreshToken(refreshToken);
     }
     await SecureStorage.saveRole(role);
-    await SecureStorage.saveIsAdmin(isAdmin);
     await SecureStorage.saveRequiresPasswordChange(requiresPasswordChange);
   }
 

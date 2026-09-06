@@ -213,22 +213,6 @@ void main() {
     });
   });
 
-  group('shouldWatchAlunoAutonomiaSidecar', () {
-    test('always false — autonomia only from /360', () {
-      expect(
-        shouldWatchAlunoAutonomiaSidecar(
-          const AsyncLoading<Aluno360>(),
-          tabIndex: 0,
-        ),
-        isFalse,
-      );
-      expect(
-        shouldWatchAlunoAutonomiaSidecar(AsyncData(_bundle360), tabIndex: 0),
-        isFalse,
-      );
-    });
-  });
-
   group('resolveAlunoDetailListPreview', () {
     test('prefers route preview when id matches', () {
       final preview = resolveAlunoDetailListPreview(

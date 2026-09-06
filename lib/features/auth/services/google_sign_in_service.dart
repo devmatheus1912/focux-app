@@ -8,10 +8,9 @@ import '../../../core/config/env.dart';
 
 /// Resultado seguro do Google Sign-In (nunca propaga abort nativo como “sucesso”).
 class GoogleSignInIdToken {
-  const GoogleSignInIdToken({required this.idToken, required this.email});
+  const GoogleSignInIdToken({required this.idToken});
 
   final String idToken;
-  final String? email;
 }
 
 /// Encapsula [GoogleSignIn] com config iOS correta e erros recuperáveis.
@@ -58,7 +57,7 @@ class GoogleSignInService {
       if (idToken == null || idToken.isEmpty) {
         throw StateError('Google nao retornou idToken.');
       }
-      return GoogleSignInIdToken(idToken: idToken, email: account.email);
+      return GoogleSignInIdToken(idToken: idToken);
     } on PlatformException {
       rethrow;
     } catch (error, stack) {
