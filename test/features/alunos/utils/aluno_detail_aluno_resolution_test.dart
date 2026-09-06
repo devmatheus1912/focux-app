@@ -104,17 +104,17 @@ void main() {
       );
     });
 
-    test('true when 360 settled without recovery', () {
+    test('never watches recovery sidecar (bundle-only)', () {
       expect(
         shouldWatchAlunoRecoverySidecar(AsyncData(_bundle360), tabIndex: 0),
-        isTrue,
+        isFalse,
       );
       expect(
         shouldWatchAlunoRecoverySidecar(
           AsyncError<Aluno360>(Exception('360 down'), StackTrace.current),
           tabIndex: 0,
         ),
-        isTrue,
+        isFalse,
       );
     });
 
@@ -127,11 +127,23 @@ void main() {
   });
 
   group('shouldWatchAluno360Tab1Sidecars', () {
+    test('false when evolucao tab not opened yet', () {
+      expect(
+        shouldWatchAluno360Tab1Sidecars(
+          AsyncError<Aluno360>(Exception('360 down'), StackTrace.current),
+          tabIndex: 1,
+          evolucaoTabOpened: false,
+        ),
+        isFalse,
+      );
+    });
+
     test('false while 360 is loading even on tab 1', () {
       expect(
         shouldWatchAluno360Tab1Sidecars(
           const AsyncLoading<Aluno360>(),
           tabIndex: 1,
+          evolucaoTabOpened: true,
         ),
         isFalse,
       );
@@ -139,7 +151,7 @@ void main() {
 
     test('false when 360 has value — prefer bundle fields', () {
       expect(
-        shouldWatchAluno360Tab1Sidecars(AsyncData(_bundle360), tabIndex: 1),
+        shouldWatchAluno360Tab1Sidecars(AsyncData(_bundle360), tabIndex: 1, evolucaoTabOpened: true),
         isFalse,
       );
     });
@@ -149,6 +161,7 @@ void main() {
         shouldWatchAluno360Tab1Sidecars(
           AsyncError<Aluno360>(Exception('360 down'), StackTrace.current),
           tabIndex: 1,
+          evolucaoTabOpened: true,
         ),
         isTrue,
       );
@@ -197,6 +210,46 @@ void main() {
       );
       expect(resolved.hasError, isTrue);
       expect(resolved.error, same(error));
+    });
+  });
+
+  group('shouldWatchAlunoAutonomiaSidecar', () {
+    test('always false — autonomia only from /360', () {
+      expect(
+        shouldWatchAlunoAutonomiaSidecar(
+          const AsyncLoading<Aluno360>(),
+          tabIndex: 0,
+        ),
+        isFalse,
+      );
+      expect(
+        shouldWatchAlunoAutonomiaSidecar(AsyncData(_bundle360), tabIndex: 0),
+        isFalse,
+      );
+    });
+  });
+
+  group('resolveAlunoDetailListPreview', () {
+    test('prefers route preview when id matches', () {
+      final preview = resolveAlunoDetailListPreview(
+        alunoId: 1,
+        routePreview: _alunoFallback,
+      );
+      expect(preview?.nome, 'Ana Fallback');
+    });
+
+    test('ignores route preview with other id', () {
+      final other = Aluno(
+        id: 99,
+        nome: 'Outro',
+        email: 'o@test.com',
+        status: 'ATIVO',
+      );
+      final preview = resolveAlunoDetailListPreview(
+        alunoId: 1,
+        routePreview: other,
+      );
+      expect(preview, isNull);
     });
   });
 }
