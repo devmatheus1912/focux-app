@@ -190,7 +190,10 @@ class _ConvitesScreenState extends ConsumerState<ConvitesScreen> {
         useMesh: true,
         appBar: FxShellAppBar(
           title: 'Convidar aluno',
-          subtitle: FxHubFreshness.fromFetchedAt(_fetchedAt),
+          subtitle: FxHubFreshness.joinCount(
+            conviteCountLabel(ativo: ativo),
+            FxHubFreshness.fromFetchedAt(_fetchedAt),
+          ),
           onBack: () => safePopOrGo(context, '/dashboard/personal'),
           actions: [
             FxHelpIconButton(
@@ -225,6 +228,8 @@ class _ConvitesScreenState extends ConsumerState<ConvitesScreen> {
                     onRefresh: _load,
                     child: ListView(
                       physics: const AlwaysScrollableScrollPhysics(),
+                      keyboardDismissBehavior:
+                          ScrollViewKeyboardDismissBehavior.onDrag,
                       padding: const EdgeInsets.fromLTRB(
                         FxSettingsLayout.pageInset,
                         TokensStrip.s4,
@@ -235,11 +240,15 @@ class _ConvitesScreenState extends ConsumerState<ConvitesScreen> {
                         if (!ativo)
                           SizedBox(
                             height: 280,
-                            child: FxEmptyState(
+                            child:                             FxEmptyState(
                               icon: 'users',
                               title: 'Nenhum convite ativo',
                               subtitle:
                                   'Gere um link de um uso. O aluno cria a conta e troca a senha no primeiro acesso.',
+                              action: FxEmptyAction(
+                                label: 'Gerar link',
+                                onTap: _gerar,
+                              ),
                             ),
                           )
                         else ...[
@@ -290,11 +299,12 @@ class _ConvitesScreenState extends ConsumerState<ConvitesScreen> {
                 SafeArea(
                   top: false,
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(
+                    padding: EdgeInsets.fromLTRB(
                       FxSettingsLayout.pageInset,
                       TokensStrip.s2,
                       FxSettingsLayout.pageInset,
-                      TokensStrip.s3,
+                      TokensStrip.s3 +
+                          MediaQuery.viewInsetsOf(context).bottom,
                     ),
                     child: FxLiquidPrimaryButton(
                       label: ativo ? 'Gerar novo link' : 'Gerar link',

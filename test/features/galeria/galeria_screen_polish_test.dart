@@ -13,6 +13,12 @@ void main() {
     expect(screen, anyOf(contains('FxLoading'), contains('SkeletonLoader'), contains('SkeletonList'), contains('DashboardShimmer'), contains('Shimmer'), contains('IaCopilotInsightsLoading'), contains('_loading')));
     expect(screen, contains('MediaUploadService'));
     expect(screen, contains("folder: 'galeria'"));
+    expect(screen, contains('FxLiquidPrimaryButton'));
+    expect(screen, contains('safePopOrGo'));
+    expect(screen, contains('viewInsetsOf'));
+    expect(screen, contains('RefreshIndicator'));
+    expect(screen, contains('galeriaCountLabel'));
+    expect(screen, isNot(contains('Icons.add_photo_alternate_outlined')));
     expect(screen, isNot(contains('focux_unsigned')));
     expect(screen, isNot(contains('api.cloudinary.com')));
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(16));

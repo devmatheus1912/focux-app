@@ -27,6 +27,11 @@ void main() {
     );
   });
 
+  test('conviteCountLabel', () {
+    expect(conviteCountLabel(ativo: false), 'Nenhum convite ativo');
+    expect(conviteCountLabel(ativo: true), '1 convite ativo');
+  });
+
   test('conviteShareMessage inclui o nome', () {
     expect(
       conviteShareMessage(personalNome: 'Ana', shareLink: 'https://x'),

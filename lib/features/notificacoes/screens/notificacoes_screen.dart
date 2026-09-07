@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:focux_app/core/widgets/fx_input_deco.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/analytics/analytics_service.dart';
@@ -203,23 +202,34 @@ class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
                 TokensStrip.s4,
                 TokensStrip.s2,
               ),
-              child: TextField(
-                controller: _searchCtrl,
-                textInputAction: TextInputAction.search,
-                onChanged: _onQueryChanged,
-                onSubmitted: (value) {
-                  _debounce?.cancel();
-                  final next = value.trim();
-                  if (next == ref.read(notificacoesQueryProvider)) return;
-                  ref.read(notificacoesQueryProvider.notifier).state = next;
-                },
-                onTapOutside: (_) =>
-                    FocusManager.instance.primaryFocus?.unfocus(),
-                decoration: InputDecoration(
-                  hintText: 'Buscar aviso',
-                  prefixIcon: const Icon(Icons.search_rounded),
-                  border: FxInputDeco.outlineBorder(
-                    borderRadius: BorderRadius.circular(16),
+              child: DecoratedBox(
+                decoration: fxStripCardDecoration(
+                  context,
+                  accent: primary,
+                  radius: TokensStrip.rCard,
+                  glowStrength: 0.03,
+                ),
+                child: TextField(
+                  controller: _searchCtrl,
+                  textInputAction: TextInputAction.search,
+                  onChanged: _onQueryChanged,
+                  onSubmitted: (value) {
+                    _debounce?.cancel();
+                    final next = value.trim();
+                    if (next == ref.read(notificacoesQueryProvider)) return;
+                    ref.read(notificacoesQueryProvider.notifier).state = next;
+                  },
+                  onTapOutside:
+                      (_) => FocusManager.instance.primaryFocus?.unfocus(),
+                  decoration: const InputDecoration(
+                    isDense: true,
+                    hintText: 'Buscar aviso',
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 12,
+                    ),
+                    prefixIcon: Icon(Icons.search_rounded, size: 20),
                   ),
                 ),
               ),
@@ -244,18 +254,25 @@ class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
             if (rows.isEmpty) {
               return ListView(
                 physics: const AlwaysScrollableScrollPhysics(),
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
                 children: [
                   const SizedBox(height: 48),
                   FxEmptyState(
-                    icon: 'circle-check',
+                    icon: query.isEmpty ? 'circle-check' : 'search',
                     title: notificacaoSearchEmptyTitle(query),
                     subtitle: notificacaoSearchEmptySubtitle(query),
-                    action: query.isEmpty
-                        ? FxEmptyAction(
-                      label: 'Ir para o Hoje',
-                      onTap: () => goPersonalShellTab(context, home),
-                    )
-                        : null,
+                    action: FxEmptyAction(
+                      label: query.isEmpty ? 'Ir para o Hoje' : 'Limpar busca',
+                      onTap: query.isEmpty
+                          ? () => goPersonalShellTab(context, home)
+                          : () {
+                              _debounce?.cancel();
+                              _searchCtrl.clear();
+                              ref.read(notificacoesQueryProvider.notifier).state =
+                                  '';
+                            },
+                    ),
                   ),
                 ],
               );
@@ -269,11 +286,11 @@ class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
                 physics: const AlwaysScrollableScrollPhysics(),
                 keyboardDismissBehavior:
                     ScrollViewKeyboardDismissBehavior.onDrag,
-                padding: const EdgeInsets.fromLTRB(
+                padding: EdgeInsets.fromLTRB(
                   FxSettingsLayout.pageInset,
                   TokensStrip.s3,
                   FxSettingsLayout.pageInset,
-                  TokensStrip.s6,
+                  TokensStrip.s6 + MediaQuery.viewInsetsOf(context).bottom,
                 ),
                 itemCount: rows.length + extra,
                 itemBuilder: (context, i) {
