@@ -316,6 +316,8 @@ class AlunoDashboardHomeBundle {
   final bool npsDeveResponder;
   final RecoverySnapshot? recovery;
   final int streakAtual;
+  final double volumeSemanaKg;
+  final double volumeMesKg;
   final DateTime fetchedAt;
 
   AlunoDashboardHomeBundle({
@@ -331,6 +333,8 @@ class AlunoDashboardHomeBundle {
     this.npsDeveResponder = false,
     this.recovery,
     this.streakAtual = 0,
+    this.volumeSemanaKg = 0,
+    this.volumeMesKg = 0,
     DateTime? fetchedAt,
   }) : fetchedAt = fetchedAt ?? DateTime.now();
 
@@ -376,6 +380,8 @@ class AlunoDashboardHomeBundle {
               )
               : null,
       streakAtual: (json['streakAtual'] as num?)?.toInt() ?? 0,
+      volumeSemanaKg: (json['volumeSemanaKg'] as num?)?.toDouble() ?? 0,
+      volumeMesKg: (json['volumeMesKg'] as num?)?.toDouble() ?? 0,
     );
   }
 }

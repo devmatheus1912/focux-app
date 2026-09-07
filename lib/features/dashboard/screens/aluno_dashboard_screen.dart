@@ -211,6 +211,8 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
                       const SizedBox(height: TokensStrip.s4),
                       _PerformanceEvolutionCard(
                         historicoAsync: AsyncValue.data(home.historico),
+                        volumeSemanaKg: home.volumeSemanaKg,
+                        volumeMesKg: home.volumeMesKg,
                         isDark: isDark,
                       ),
                       const SizedBox(height: TokensStrip.s4),

@@ -493,10 +493,14 @@ class _MiniMetricCard extends StatelessWidget {
 
 class _PerformanceEvolutionCard extends StatelessWidget {
   final AsyncValue<List<ExecucaoTreino>> historicoAsync;
+  final double volumeSemanaKg;
+  final double volumeMesKg;
   final bool isDark;
 
   const _PerformanceEvolutionCard({
     required this.historicoAsync,
+    required this.volumeSemanaKg,
+    required this.volumeMesKg,
     required this.isDark,
   });
 
@@ -522,11 +526,8 @@ class _PerformanceEvolutionCard extends StatelessWidget {
                   .where((treino) => treino.status == 'CONCLUIDO')
                   .toList();
           final ultimaEvolucao = _ultimaEvolucao(treinosConcluidos);
-          final volumeSemana = _volumePeriodo(
-            treinosConcluidos,
-            _inicioSemana(),
-          );
-          final volumeMes = _volumePeriodo(treinosConcluidos, _inicioMes());
+          final volumeSemana = volumeSemanaKg;
+          final volumeMes = volumeMesKg;
 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -649,50 +650,6 @@ class _PerformanceEvolutionCard extends StatelessWidget {
       }
     }
     return null;
-  }
-
-  double _volumePeriodo(List<ExecucaoTreino> historico, DateTime inicio) {
-    return historico
-        .where((treino) {
-          final data = _dataTreino(treino);
-          return data != null && !data.isBefore(inicio);
-        })
-        .fold<double>(0, (total, treino) => total + _volumeTreino(treino));
-  }
-
-  double _volumeTreino(ExecucaoTreino treino) {
-    var total = 0.0;
-    for (final exercicio in treino.exercicios) {
-      for (final serie in exercicio.seriesDetalhes) {
-        final reps = _primeiroNumero(serie.repeticoes);
-        final carga = serie.cargaKg;
-        if (reps != null && carga != null) {
-          total += carga * reps;
-        }
-      }
-    }
-    return total;
-  }
-
-  DateTime? _dataTreino(ExecucaoTreino treino) {
-    return DateTime.tryParse(treino.concluidoEm ?? treino.iniciadoEm ?? '');
-  }
-
-  DateTime _inicioSemana() {
-    final now = DateTime.now();
-    final start = now.subtract(Duration(days: now.weekday - 1));
-    return DateTime(start.year, start.month, start.day);
-  }
-
-  DateTime _inicioMes() {
-    final now = DateTime.now();
-    return DateTime(now.year, now.month);
-  }
-
-  int? _primeiroNumero(String? value) {
-    if (value == null || value.trim().isEmpty) return null;
-    final match = RegExp(r'\d+').firstMatch(value);
-    return match == null ? null : int.tryParse(match.group(0)!);
   }
 
   String _labelEvolucao(String tipo) {
