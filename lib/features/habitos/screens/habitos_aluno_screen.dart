@@ -87,6 +87,7 @@ class _HabitosAlunoScreenState extends ConsumerState<HabitosAlunoScreen> {
                             feitoHoje: result.feito,
                             streakAtual: result.streak,
                             badgeSemana: result.streak >= 7,
+                            alunoId: x.alunoId,
                           )
                           : x,
                 )

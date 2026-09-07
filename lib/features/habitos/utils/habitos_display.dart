@@ -15,10 +15,18 @@ String habitoTemplateValue(String? titulo, {String? icone}) {
   return habitoTemplateLabel(titulo: titulo, icone: icone);
 }
 
-String habitoSubtitle({String? descricao, required int metaSemanal}) {
+String habitoAlcanceLabel(int? alunoId) =>
+    alunoId == null ? habitoAlunoTodosLabel : 'Aluno específico';
+
+String habitoSubtitle({
+  String? descricao,
+  required int metaSemanal,
+  int? alunoId,
+}) {
+  final alcance = habitoAlcanceLabel(alunoId);
   final desc = descricao?.trim();
-  if (desc != null && desc.isNotEmpty) return desc;
-  return 'Meta semanal: ${metaSemanal}x';
+  if (desc != null && desc.isNotEmpty) return '$desc · $alcance';
+  return 'Meta semanal: ${metaSemanal}x · $alcance';
 }
 
 String habitoMetaValue(int metaSemanal) => '${metaSemanal}x';

@@ -8,6 +8,7 @@ import '../../features/dashboard/screens/perfil_aluno_editar_screen.dart';
 import '../../features/checkin/screens/meus_treinos_screen.dart';
 import '../../features/health/screens/health_dashboard_screen.dart';
 import '../../features/habitos/screens/habitos_aluno_screen.dart';
+import '../../features/desafios/screens/desafios_aluno_screen.dart';
 import '../../features/recorrencia/screens/recorrencia_aluno_screen.dart';
 import '../../features/grupos/screens/grupo_aulas_aluno_screen.dart';
 import '../../features/anamnese/screens/anamnese_aluno_screen.dart';
@@ -68,6 +69,12 @@ List<RouteBase> buildAlunoRoutes() {
         builder:
             (context, state) =>
                 const FxRouteChrome(child: HabitosAlunoScreen()),
+      ),
+      GoRoute(
+        path: '/aluno/desafios',
+        builder:
+            (context, state) =>
+                const FxRouteChrome(child: DesafiosAlunoScreen()),
       ),
       GoRoute(
         path: '/aluno/recorrencia',

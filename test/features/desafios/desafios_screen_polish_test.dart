@@ -17,6 +17,8 @@ void main() {
     expect(screen, contains('RefreshIndicator'));
     expect(screen, contains('FxHubFreshness.fromFetchedAt'));
     expect(screen, contains('showFxFormSheet'));
+    expect(screen, contains('showFxConfirmSheet'));
+    expect(screen, contains('encerrar'));
     expect(screen, contains('showFxInsetPickerSheet'));
     expect(screen, contains('safePopOrGo'));
     expect(screen, contains('constrainWidth: false'));

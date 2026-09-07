@@ -42,6 +42,7 @@ class Habito {
   final bool feitoHoje;
   final int streakAtual;
   final bool badgeSemana;
+  final int? alunoId;
 
   Habito({
     required this.id,
@@ -56,6 +57,7 @@ class Habito {
     this.lembreteHora,
     this.streakAtual = 0,
     this.badgeSemana = false,
+    this.alunoId,
   });
 
   factory Habito.fromJson(Map<String, dynamic> j) => Habito(
@@ -71,6 +73,7 @@ class Habito {
     feitoHoje: j['feitoHoje'] as bool? ?? false,
     streakAtual: (j['streakAtual'] as num?)?.toInt() ?? 0,
     badgeSemana: j['badgeSemana'] as bool? ?? false,
+    alunoId: (j['alunoId'] as num?)?.toInt(),
   );
 }
 

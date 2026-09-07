@@ -71,6 +71,13 @@ class DesafioRepository {
         .toList();
   }
 
+  Future<List<Desafio>> meus() async {
+    final r = await _dio.get('/api/desafios/me');
+    return (r.data as List)
+        .map((e) => Desafio.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
   Future<Desafio> criar({
     required String titulo,
     String? descricao,
@@ -91,6 +98,14 @@ class DesafioRepository {
       },
     );
     return Desafio.fromJson(r.data as Map<String, dynamic>);
+  }
+
+  Future<void> encerrar(int id) async {
+    await _dio.post('/api/desafios/$id/encerrar');
+  }
+
+  Future<void> participar(int id) async {
+    await _dio.post('/api/desafios/$id/participar');
   }
 
   Future<List<DesafioLeaderboardEntry>> leaderboard(int id) async {
