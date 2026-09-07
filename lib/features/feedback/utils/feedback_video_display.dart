@@ -32,16 +32,30 @@ String feedbackVideoFxIcon(int? aiScore) {
 
 bool feedbackVideoDanger(int? aiScore) => aiScore != null && aiScore < 40;
 
+String feedbackVideoCountLabel(int count) {
+  if (count == 1) return '1 feedback';
+  return '$count feedbacks';
+}
+
+bool feedbackVideoMatchesQuery({
+  required String comentario,
+  required String query,
+}) {
+  final q = query.trim().toLowerCase();
+  if (q.isEmpty) return true;
+  return comentario.toLowerCase().contains(q);
+}
+
 String feedbackVideoHubSubtitle({
   String? alunoNome,
   String? freshness,
+  int? count,
 }) {
-  const base = 'Análises técnicas de execução';
-  final nome = alunoNome?.trim();
-  final stamp = freshness?.trim();
-  if (nome != null && nome.isNotEmpty && stamp != null && stamp.isNotEmpty) {
-    return '$base · $nome · $stamp';
-  }
-  if (stamp != null && stamp.isNotEmpty) return '$base · $stamp';
-  return base;
+  final parts = <String>[
+    if (count != null) feedbackVideoCountLabel(count)
+    else 'Análises técnicas de execução',
+    if ((alunoNome ?? '').trim().isNotEmpty) alunoNome!.trim(),
+    if ((freshness ?? '').trim().isNotEmpty) freshness!.trim(),
+  ];
+  return parts.join(' · ');
 }

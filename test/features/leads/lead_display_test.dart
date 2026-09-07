@@ -55,11 +55,17 @@ void main() {
   });
 
   test('lead list chrome helpers', () {
-    expect(leadListSubtitle(null), 'Funil de prospects');
+    expect(leadCountLabel(1), '1 lead');
+    expect(leadCountLabel(3), '3 leads');
+    expect(leadListSubtitle(count: 0), '0 leads');
     expect(
-      leadListSubtitle('há 1 min'),
-      'Funil de prospects · há 1 min',
+      leadListSubtitle(count: 3, freshness: 'há 1 min'),
+      '3 leads · há 1 min',
     );
+    expect(leadMatchesQuery(nome: 'Ana Lima', query: 'ana'), isTrue);
+    expect(leadMatchesQuery(nome: 'Ana', objetivo: 'Força', query: 'for'), isTrue);
+    expect(leadMatchesQuery(nome: 'Ana', query: 'xyz'), isFalse);
+    expect(leadListChipStatuses, hasLength(5));
     expect(leadHubSubtitle(status: 'LEAD'), 'Lead');
     expect(
       leadHubSubtitle(status: 'LEAD', freshness: 'Atualizado agora'),

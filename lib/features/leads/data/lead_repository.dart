@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
+import '../../../core/api/pagina.dart';
 import '../../planos/data/planos_repository.dart';
 
 class Lead {
@@ -80,14 +81,31 @@ class LeadRepository {
     return Lead.fromJson(r.data as Map<String, dynamic>);
   }
 
-  Future<List<Lead>> listar({String? status}) async {
+  Future<Pagina<Lead>> listarPagina({
+    String? status,
+    int page = 0,
+    int size = 20,
+  }) async {
     final r = await _dio.get(
       '/api/leads',
-      queryParameters: status != null ? {'status': status} : null,
+      queryParameters: {
+        'page': page,
+        'size': size,
+        if (status != null && status.trim().isNotEmpty) 'status': status,
+      },
     );
-    return (r.data as List)
-        .map((e) => Lead.fromJson(e as Map<String, dynamic>))
-        .toList();
+    final data = r.data;
+    if (data is! Map) {
+      throw FormatException('GET /api/leads devolve Pagina, não lista crua.');
+    }
+    return Pagina.fromJson(
+      Map<String, dynamic>.from(data),
+      (item) => Lead.fromJson(Map<String, dynamic>.from(item as Map)),
+    );
+  }
+
+  Future<List<Lead>> listar({String? status}) async {
+    return (await listarPagina(status: status, page: 0, size: 100)).content;
   }
 
   /// BFF tipado — first paint do Funil de Leads (mesmo SSOT de [listar]).

@@ -14,9 +14,12 @@ import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/fx_toggle_chip.dart';
 import '../../../core/widgets/skeleton_loader.dart';
+import '../../../features/auth/providers/auth_provider.dart';
 import '../../planos/providers/plano_features_provider.dart';
 import '../../subscription/models/subscription_plan.dart';
 import '../data/lead_repository.dart';
@@ -31,43 +34,87 @@ class LeadsListScreen extends ConsumerStatefulWidget {
 }
 
 class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
-  List<Lead> _leads = [];
-  bool _loading = true;
+  final _searchCtrl = TextEditingController();
+  final _leads = <Lead>[];
+  var _loading = true;
+  var _loadingMore = false;
+  var _hasNext = false;
+  var _page = 0;
+  var _total = 0;
   String? _erro;
   DateTime? _fetchedAt;
+  String? _status;
+  var _query = '';
 
   @override
   void initState() {
     super.initState();
-    _load();
+    _load(reset: true);
   }
 
-  Future<void> _load({bool force = false}) async {
-    setState(() {
-      _loading = true;
-      _erro = null;
-    });
+  @override
+  void dispose() {
+    _searchCtrl.dispose();
+    super.dispose();
+  }
+
+  List<Lead> get _visible {
+    return _leads
+        .where(
+          (lead) => leadMatchesQuery(
+            nome: lead.nome,
+            objetivo: lead.objetivo,
+            origem: lead.origem,
+            query: _query,
+          ),
+        )
+        .toList();
+  }
+
+  Future<void> _load({required bool reset}) async {
+    if (reset) {
+      setState(() {
+        _loading = true;
+        _erro = null;
+        _page = 0;
+        _leads.clear();
+        _hasNext = false;
+      });
+    } else {
+      if (_loadingMore || !_hasNext) return;
+      setState(() => _loadingMore = true);
+    }
     try {
-      if (force) invalidateLeadsCaches(ref);
-      final home = await ref.read(leadsHomeProvider.future);
-      final planoFromHome = home.planoFeatures;
-      if (planoFromHome != null) {
-        ref.read(planoFeaturesProvider.notifier).seedFromHome(planoFromHome);
+      if (reset) {
+        invalidateLeadsCaches(ref);
+        final home = await ref.read(leadsHomeProvider.future);
+        final planoFromHome = home.planoFeatures;
+        if (planoFromHome != null) {
+          ref.read(planoFeaturesProvider.notifier).seedFromHome(planoFromHome);
+        }
       }
-      if (mounted) {
-        setState(() {
-          _leads = home.leads;
-          _loading = false;
-          _fetchedAt = DateTime.now();
-        });
-      }
+      final pagina = await LeadRepository(ref.read(apiClientProvider))
+          .listarPagina(
+            status: _status,
+            page: reset ? 0 : _page,
+          );
+      if (!mounted) return;
+      setState(() {
+        _leads.addAll(pagina.content);
+        _hasNext = pagina.hasNext;
+        _page = (pagina.page ?? 0) + 1;
+        _total = pagina.totalElements ?? _leads.length;
+        _loading = false;
+        _loadingMore = false;
+        if (reset) _fetchedAt = DateTime.now();
+      });
     } catch (e) {
-      if (mounted) {
-        setState(() {
-          _loading = false;
-          _erro = friendlyError(e);
-        });
-      }
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+        _loadingMore = false;
+        _erro = friendlyError(e);
+      });
     }
   }
 
@@ -77,12 +124,12 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
       props: {'feature': 'leads', 'action': 'novo'},
     );
     await context.push('/leads/novo');
-    if (mounted) _load(force: true);
+    if (mounted) _load(reset: true);
   }
 
   Future<void> _abrirKanban() async {
     await context.push('/leads/kanban');
-    if (mounted) _load(force: true);
+    if (mounted) _load(reset: true);
   }
 
   Future<void> _abrirLead(Lead lead) async {
@@ -91,17 +138,19 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
       props: {'feature': 'leads', 'action': 'abrir', 'lead_id': lead.id},
     );
     await context.push('/leads/${lead.id}', extra: lead);
-    if (mounted) _load(force: true);
+    if (mounted) _load(reset: true);
   }
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
+    final mute = chrome.mute;
     final plano = ref.watch(planoFeaturesProvider).valueOrNull;
     final showLeadsLimitBanner =
-        plano?.plano == SubscriptionPlan.FREE && _leads.length >= 4;
-    final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
+        plano?.plano == SubscriptionPlan.FREE && _total >= 4;
+    final visible = _visible;
+    final count = _query.trim().isEmpty ? _total : visible.length;
 
     return fxScreenA11yScope(
       label: 'Funil de Leads',
@@ -109,18 +158,16 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
         useMesh: true,
         appBar: FxShellAppBar(
           title: 'Funil de Leads',
-          subtitle: leadListSubtitle(freshnessLabel),
+          subtitle: leadListSubtitle(
+            count: count,
+            freshness: FxHubFreshness.fromFetchedAt(_fetchedAt),
+          ),
           onBack: () => safePopOrGo(context, '/dashboard/personal'),
           actions: [
             ShellHeaderIconButton(
               icon: 'route',
               tooltip: 'Visão Kanban',
               onTap: _abrirKanban,
-            ),
-            ShellHeaderIconButton(
-              icon: 'plus',
-              tooltip: 'Novo lead',
-              onTap: _novoLead,
             ),
           ],
         ),
@@ -138,7 +185,7 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
                       children: [
                         Expanded(
                           child: Text(
-                            leadFreeLimitLabel(_leads.length),
+                            leadFreeLimitLabel(_total),
                             style: const TextStyle(
                               fontWeight: FontWeight.w700,
                               fontSize: 13,
@@ -157,14 +204,113 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
                   ),
                 ),
               ),
-            Expanded(child: _buildBody(isDark: isDark, primary: primary)),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                TokensStrip.s4,
+                TokensStrip.s2,
+                TokensStrip.s4,
+                TokensStrip.s2,
+              ),
+              child: DecoratedBox(
+                decoration: fxStripCardDecoration(
+                  context,
+                  accent: primary,
+                  radius: TokensStrip.rCard,
+                  glowStrength: 0.03,
+                ),
+                child: TextField(
+                  controller: _searchCtrl,
+                  onChanged: (value) => setState(() => _query = value),
+                  onTapOutside:
+                      (_) => FocusManager.instance.primaryFocus?.unfocus(),
+                  textInputAction: TextInputAction.search,
+                  decoration: InputDecoration(
+                    isDense: true,
+                    hintText: 'Buscar lead',
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 12,
+                    ),
+                    prefixIcon: Icon(
+                      Icons.search_rounded,
+                      color: primary,
+                      size: 20,
+                    ),
+                    suffixIcon:
+                        _query.trim().isEmpty
+                            ? null
+                            : IconButton(
+                              tooltip: 'Limpar busca',
+                              onPressed: () {
+                                _searchCtrl.clear();
+                                setState(() => _query = '');
+                              },
+                              icon: Icon(
+                                Icons.close_rounded,
+                                color: mute,
+                                size: 18,
+                              ),
+                            ),
+                  ),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                TokensStrip.s4,
+                0,
+                TokensStrip.s4,
+                TokensStrip.s2,
+              ),
+              child: Wrap(
+                spacing: TokensStrip.s2,
+                runSpacing: TokensStrip.s2,
+                children: [
+                  for (final status in leadListChipStatuses)
+                    FxToggleChip(
+                      label: leadStatusLabel(status),
+                      selected: _status == status,
+                      isDark: chrome.isDark,
+                      onTap: () {
+                        setState(() {
+                          _status = _status == status ? null : status;
+                        });
+                        _load(reset: true);
+                      },
+                    ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: _buildBody(isDark: chrome.isDark, primary: primary),
+            ),
+            if (!_loading && _erro == null)
+              SafeArea(
+                top: false,
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    FxSettingsLayout.pageInset,
+                    TokensStrip.s2,
+                    FxSettingsLayout.pageInset,
+                    TokensStrip.s3 + MediaQuery.viewInsetsOf(context).bottom,
+                  ),
+                  child: FxLiquidPrimaryButton(
+                    label: 'Novo lead',
+                    onPressed: _novoLead,
+                  ),
+                ),
+              ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildBody({required bool isDark, required Color primary}) {
+  Widget _buildBody({
+    required bool isDark,
+    required Color primary,
+  }) {
     if (_loading) {
       return const Padding(
         padding: EdgeInsets.all(FxSettingsLayout.pageInset),
@@ -176,21 +322,28 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
         chromeOnDark: isDark,
         primary: primary,
         message: _erro!,
-        onRetry: () => _load(force: true),
+        onRetry: () => _load(reset: true),
       );
     }
     if (_leads.isEmpty) {
       return FxContentWidthLimiter(
         child: RefreshIndicator(
-          onRefresh: () => _load(force: true),
+          color: primary,
+          onRefresh: () => _load(reset: true),
           child: ListView(
             physics: const AlwaysScrollableScrollPhysics(),
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             children: [
               FxEmptyState(
                 icon: 'users',
-                title: 'Nenhum lead cadastrado',
+                title:
+                    _status == null
+                        ? 'Nenhum lead cadastrado'
+                        : 'Nenhum lead neste status',
                 subtitle:
-                    'Cadastre o primeiro lead para começar a acompanhar o funil.',
+                    _status == null
+                        ? 'Cadastre o primeiro lead para começar a acompanhar o funil.'
+                        : 'Troque o filtro ou cadastre um prospect neste estágio.',
                 action: FxEmptyAction(label: 'Novo lead', onTap: _novoLead),
               ),
             ],
@@ -199,224 +352,80 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
       );
     }
 
-    final leadLeads = _leads.where((lead) => lead.status == 'LEAD').toList();
-    final testeLeads = _leads.where((lead) => lead.status == 'TESTE').toList();
-    final ativoLeads = _leads.where((lead) => lead.status == 'ATIVO').toList();
+    final visible = _visible;
+    if (visible.isEmpty) {
+      return FxContentWidthLimiter(
+        child: RefreshIndicator(
+          color: primary,
+          onRefresh: () => _load(reset: true),
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            children: [
+              FxEmptyState(
+                icon: 'search',
+                title: 'Nenhum lead encontrado',
+                subtitle: 'Ajuste a busca para ver outros prospects.',
+                action: FxEmptyAction(
+                  label: 'Limpar busca',
+                  onTap: () {
+                    _searchCtrl.clear();
+                    setState(() => _query = '');
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
 
-    return RefreshIndicator(
-      onRefresh: () => _load(force: true),
-      child: ListView(
+    final showMore = _hasNext;
+    return FxContentWidthLimiter(
+      child: RefreshIndicator(
+      color: primary,
+      onRefresh: () => _load(reset: true),
+      child: ListView.builder(
         physics: const AlwaysScrollableScrollPhysics(),
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         padding: const EdgeInsets.fromLTRB(
           FxSettingsLayout.pageInset,
           8,
           FxSettingsLayout.pageInset,
           32,
         ),
-        children: [
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _KanbanColumn(
-                  title: leadStatusLabel('LEAD'),
-                  color: primary,
-                  leads: leadLeads,
-                  isDark: isDark,
-                  onTap: _abrirLead,
-                  onAdd: _novoLead,
-                ),
-                const SizedBox(width: 12),
-                _KanbanColumn(
-                  title: leadStatusLabel('TESTE'),
-                  color: EagleTokens.warn,
-                  leads: testeLeads,
-                  isDark: isDark,
-                  onTap: _abrirLead,
-                  onAdd: _novoLead,
-                ),
-                const SizedBox(width: 12),
-                _KanbanColumn(
-                  title: leadStatusLabel('ATIVO'),
-                  color: EagleTokens.good,
-                  leads: ativoLeads,
-                  isDark: isDark,
-                  onTap: _abrirLead,
-                  onAdd: _novoLead,
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _KanbanColumn extends StatelessWidget {
-  final String title;
-  final Color color;
-  final List<Lead> leads;
-  final bool isDark;
-  final ValueChanged<Lead> onTap;
-  final VoidCallback onAdd;
-
-  const _KanbanColumn({
-    required this.title,
-    required this.color,
-    required this.leads,
-    required this.isDark,
-    required this.onTap,
-    required this.onAdd,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-    final border = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
-
-    return SizedBox(
-      width: 240,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(bottom: 10),
-            child: Row(
-              children: [
-                Container(
-                  width: 8,
-                  height: 8,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: color,
-                  ),
-                ),
-                const SizedBox(width: 6),
-                Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: color,
-                    letterSpacing: 0.5,
-                  ),
-                ),
-                const SizedBox(width: 6),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 6,
-                    vertical: 2,
-                  ),
-                  decoration: BoxDecoration(
-                    color: color.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                  child: Text(
-                    '${leads.length}',
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                      color: color,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          for (final lead in leads)
-            _KanbanCard(
-              lead: lead,
-              color: color,
-              isDark: isDark,
-              onTap: () => onTap(lead),
-            ),
-          Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: onAdd,
-              borderRadius: BorderRadius.circular(10),
-              child: Container(
-                margin: const EdgeInsets.only(top: 6),
-                height: 40,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: border, width: 1.5),
-                ),
-                child: Center(
-                  child: Text(
-                    '+ Adicionar',
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: mute,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
+        itemCount: visible.length + (showMore ? 1 : 0),
+        itemBuilder: (context, i) {
+          if (showMore && i == visible.length) {
+            return FxSatelliteListTile(
+              title: _loadingMore ? 'Carregando…' : 'Carregar mais',
+              onTap: _loadingMore ? null : () => _load(reset: false),
+            );
+          }
+          final lead = visible[i];
+          return FxSatelliteListTile(
+            title: lead.nome,
+            subtitle: Text(
+              leadCardSubtitle(
+                objetivo: lead.objetivo,
+                origem: lead.origem,
               ),
             ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _KanbanCard extends StatelessWidget {
-  final Lead lead;
-  final Color color;
-  final bool isDark;
-  final VoidCallback onTap;
-
-  const _KanbanCard({
-    required this.lead,
-    required this.color,
-    required this.isDark,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-    final telefone = lead.telefone?.trim();
-
-    return fxListTileCardShell(
-      context: context,
-      margin: const EdgeInsets.only(bottom: 8),
-      accent: color,
-      child: ListTile(
-        onTap: onTap,
-        contentPadding: const EdgeInsets.fromLTRB(12, 4, 8, 4),
-        title: Text(
-          lead.nome,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: FocuxHubTypography.bodyMuted(
-            color: ink,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        subtitle: Text(
-          leadCardSubtitle(objetivo: lead.objetivo, origem: lead.origem),
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          style: FocuxHubTypography.bodyMuted(color: mute),
-        ),
-        trailing: Wrap(
-          spacing: 6,
-          crossAxisAlignment: WrapCrossAlignment.center,
-          children: [
-            if (telefone != null && telefone.isNotEmpty)
-              Icon(
-                Icons.chat_bubble_outline,
-                size: 16,
-                color: EagleTokens.good,
+            trailing: Text(
+              leadStatusLabel(lead.status),
+              style: FocuxHubTypography.bodyMuted(
+                color:
+                    leadStatusDanger(lead.status)
+                        ? EagleTokens.bad
+                        : fxScreenMute(context),
+                fontWeight: FontWeight.w700,
               ),
-            Icon(Icons.chevron_right_rounded, size: 18, color: mute),
-          ],
-        ),
+            ),
+            accent: leadStatusDanger(lead.status) ? EagleTokens.bad : null,
+            onTap: () => _abrirLead(lead),
+          );
+        },
+      ),
       ),
     );
   }

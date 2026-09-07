@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
@@ -17,10 +18,10 @@ import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_form_sheet.dart';
 import '../../../core/widgets/fx_inset_picker_sheet.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
-import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../../features/alunos/widgets/aluno_inset_form_field.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../alunos/utils/satellite_screen_utils.dart';
@@ -41,42 +42,74 @@ class FeedbackVideoScreen extends ConsumerStatefulWidget {
 }
 
 class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
-  List<FeedbackVideo> _feedbacks = [];
-  bool _loading = true;
+  final _searchCtrl = TextEditingController();
+  final _feedbacks = <FeedbackVideo>[];
+  var _loading = true;
+  var _loadingMore = false;
+  var _hasNext = false;
+  var _page = 0;
+  var _total = 0;
   String? _erro;
   DateTime? _fetchedAt;
+  var _query = '';
 
   @override
   void initState() {
     super.initState();
-    _load();
+    _load(reset: true);
   }
 
-  Future<void> _load() async {
-    setState(() {
-      _loading = true;
-      _erro = null;
-    });
+  @override
+  void dispose() {
+    _searchCtrl.dispose();
+    super.dispose();
+  }
+
+  List<FeedbackVideo> get _visible {
+    return _feedbacks
+        .where(
+          (item) => feedbackVideoMatchesQuery(
+            comentario: item.comentario,
+            query: _query,
+          ),
+        )
+        .toList();
+  }
+
+  Future<void> _load({required bool reset}) async {
+    if (reset) {
+      setState(() {
+        _loading = true;
+        _erro = null;
+        _page = 0;
+        _feedbacks.clear();
+        _hasNext = false;
+      });
+    } else {
+      if (_loadingMore || !_hasNext) return;
+      setState(() => _loadingMore = true);
+    }
     try {
-      final repo = FeedbackVideoRepository(ref.read(apiClientProvider));
-      final r =
-          widget.alunoId != null
-              ? await repo.listarPorAluno(widget.alunoId!)
-              : await repo.listar();
-      if (mounted) {
-        setState(() {
-          _feedbacks = r;
-          _loading = false;
-          _fetchedAt = DateTime.now();
-        });
-      }
+      final pagina = await FeedbackVideoRepository(
+        ref.read(apiClientProvider),
+      ).listarPagina(page: reset ? 0 : _page, alunoId: widget.alunoId);
+      if (!mounted) return;
+      setState(() {
+        _feedbacks.addAll(pagina.content);
+        _hasNext = pagina.hasNext;
+        _page = (pagina.page ?? 0) + 1;
+        _total = pagina.totalElements ?? _feedbacks.length;
+        _loading = false;
+        _loadingMore = false;
+        if (reset) _fetchedAt = DateTime.now();
+      });
     } catch (e) {
-      if (mounted) {
-        setState(() {
-          _erro = friendlyError(e);
-          _loading = false;
-        });
-      }
+      if (!mounted) return;
+      setState(() {
+        _erro = friendlyError(e);
+        _loading = false;
+        _loadingMore = false;
+      });
     }
   }
 
@@ -226,14 +259,16 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
       videoUrlCtrl.dispose();
       comentarioCtrl.dispose();
     }
-    if (created) await _load();
+    if (created) await _load(reset: true);
   }
 
   @override
   Widget build(BuildContext context) {
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
-    final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
+    final mute = chrome.mute;
+    final visible = _visible;
+    final count = _query.trim().isEmpty ? _total : visible.length;
     return fxScreenA11yScope(
       label: 'Feedback de vídeo',
       child: FxShellScaffold(
@@ -245,105 +280,202 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
                   : 'Feedbacks de vídeo',
           subtitle: feedbackVideoHubSubtitle(
             alunoNome: widget.alunoNome,
-            freshness: freshnessLabel,
+            freshness: FxHubFreshness.fromFetchedAt(_fetchedAt),
+            count: count,
           ),
-          actions: [
-            ShellHeaderIconButton(
-              icon: 'plus',
-              tooltip: 'Novo feedback',
-              onTap: _novoFeedback,
+          onBack: () => safePopOrGo(context, '/dashboard/personal'),
+        ),
+        body: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                TokensStrip.s4,
+                TokensStrip.s2,
+                TokensStrip.s4,
+                TokensStrip.s2,
+              ),
+              child: DecoratedBox(
+                decoration: fxStripCardDecoration(
+                  context,
+                  accent: primary,
+                  radius: TokensStrip.rCard,
+                  glowStrength: 0.03,
+                ),
+                child: TextField(
+                  controller: _searchCtrl,
+                  onChanged: (value) => setState(() => _query = value),
+                  onTapOutside:
+                      (_) => FocusManager.instance.primaryFocus?.unfocus(),
+                  textInputAction: TextInputAction.search,
+                  decoration: InputDecoration(
+                    isDense: true,
+                    hintText: 'Buscar comentário',
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 12,
+                    ),
+                    prefixIcon: Icon(
+                      Icons.search_rounded,
+                      color: primary,
+                      size: 20,
+                    ),
+                    suffixIcon:
+                        _query.trim().isEmpty
+                            ? null
+                            : IconButton(
+                              tooltip: 'Limpar busca',
+                              onPressed: () {
+                                _searchCtrl.clear();
+                                setState(() => _query = '');
+                              },
+                              icon: Icon(
+                                Icons.close_rounded,
+                                color: mute,
+                                size: 18,
+                              ),
+                            ),
+                  ),
+                ),
+              ),
             ),
+            Expanded(
+              child:
+                  _loading
+                      ? const Padding(
+                        padding: EdgeInsets.all(FxSettingsLayout.pageInset),
+                        child: SkeletonList(count: 4),
+                      )
+                      : _erro != null
+                      ? FxErrorState(
+                        chromeOnDark: chrome.isDark,
+                        primary: primary,
+                        message: _erro!,
+                        onRetry: () => _load(reset: true),
+                        title: 'Não conseguimos carregar os feedbacks',
+                      )
+                      : FxContentWidthLimiter(child: _buildBody(visible)),
+            ),
+            if (!_loading && _erro == null)
+              SafeArea(
+                top: false,
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    FxSettingsLayout.pageInset,
+                    TokensStrip.s2,
+                    FxSettingsLayout.pageInset,
+                    TokensStrip.s3 + MediaQuery.viewInsetsOf(context).bottom,
+                  ),
+                  child: FxLiquidPrimaryButton(
+                    label: 'Novo feedback',
+                    onPressed: _novoFeedback,
+                  ),
+                ),
+              ),
           ],
         ),
-        body:
-            _loading
-                ? const Padding(
-                  padding: EdgeInsets.all(FxSettingsLayout.pageInset),
-                  child: SkeletonList(count: 4),
-                )
-                : _erro != null
-                ? FxErrorState(
-                  chromeOnDark: chrome.isDark,
-                  primary: primary,
-                  message: _erro!,
-                  onRetry: _load,
-                  title: 'Não conseguimos carregar os feedbacks',
-                )
-                : FxContentWidthLimiter(child: _buildBody()),
       ),
     );
   }
 
-  Widget _buildBody() {
-    return RefreshIndicator(
-      onRefresh: _load,
-      child: _feedbacks.isEmpty
-          ? ListView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.fromLTRB(
-                FxSettingsLayout.pageInset,
-                8,
-                FxSettingsLayout.pageInset,
-                32,
+  Widget _buildBody(List<FeedbackVideo> visible) {
+    final primary = Theme.of(context).colorScheme.primary;
+    if (_feedbacks.isEmpty) {
+      return RefreshIndicator(
+        color: primary,
+        onRefresh: () => _load(reset: true),
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          children: [
+            FxEmptyState(
+              key: const ValueKey('feedback_video_empty'),
+              icon: 'spark',
+              title: 'Nenhum feedback de vídeo',
+              subtitle:
+                  widget.alunoNome != null
+                      ? 'Peça a ${satelliteFirstName(widget.alunoNome)} um vídeo de execução ou registre o primeiro feedback técnico.'
+                      : 'Registre o primeiro feedback técnico com URL do vídeo e comentário.',
+              action: FxEmptyAction(
+                label: 'Novo feedback',
+                onTap: _novoFeedback,
               ),
-              children: [
-                FxEmptyState(
-                  key: const ValueKey('feedback_video_empty'),
-                  icon: 'spark',
-                  title: 'Nenhum feedback de vídeo',
-                  subtitle:
-                      widget.alunoNome != null
-                          ? 'Peça a ${satelliteFirstName(widget.alunoNome)} um vídeo de execução ou registre o primeiro feedback técnico.'
-                          : 'Registre o primeiro feedback técnico com URL do vídeo e comentário.',
-                  action: FxEmptyAction(
-                    label: 'Novo feedback',
-                    onTap: _novoFeedback,
-                  ),
-                ),
-              ],
-            )
-          : ListView.builder(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.fromLTRB(
-                FxSettingsLayout.pageInset,
-                TokensStrip.s3,
-                FxSettingsLayout.pageInset,
-                TokensStrip.s6,
-              ),
-              itemCount: _feedbacks.length + 1,
-              itemBuilder: (context, i) {
-                if (i == 0) {
-                  return const Padding(
-                    padding: EdgeInsets.only(bottom: TokensStrip.s3),
-                    child: DashboardSectionHeader(title: 'Feedbacks'),
-                  );
-                }
-                final item = _feedbacks[i - 1];
-                return FxSatelliteListTile(
-                  title: feedbackVideoLabel(item.comentario),
-                  subtitle: Text(
-                    feedbackVideoSubtitle(
-                      criadoEm: item.criadoEm,
-                      aiScore: item.aiScore,
-                      statusAnalise: item.statusAnalise,
-                    ),
-                  ),
-                  trailing: Text(
-                    feedbackVideoValue(item.aiScore),
-                    style: FocuxHubTypography.bodyMuted(
-                      color: feedbackVideoDanger(item.aiScore)
-                          ? EagleTokens.bad
-                          : fxScreenMute(context),
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  accent: feedbackVideoDanger(item.aiScore)
-                      ? EagleTokens.bad
-                      : null,
-                  onTap: () => _abrirAcoes(item),
-                );
-              },
             ),
+          ],
+        ),
+      );
+    }
+    if (visible.isEmpty) {
+      return RefreshIndicator(
+        color: primary,
+        onRefresh: () => _load(reset: true),
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          children: [
+            FxEmptyState(
+              icon: 'search',
+              title: 'Nenhum feedback encontrado',
+              subtitle: 'Ajuste a busca para ver outros comentários.',
+              action: FxEmptyAction(
+                label: 'Limpar busca',
+                onTap: () {
+                  _searchCtrl.clear();
+                  setState(() => _query = '');
+                },
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final showMore = _hasNext;
+    return RefreshIndicator(
+      color: primary,
+      onRefresh: () => _load(reset: true),
+      child: ListView.builder(
+        physics: const AlwaysScrollableScrollPhysics(),
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+        padding: const EdgeInsets.fromLTRB(
+          FxSettingsLayout.pageInset,
+          TokensStrip.s3,
+          FxSettingsLayout.pageInset,
+          TokensStrip.s6,
+        ),
+        itemCount: visible.length + (showMore ? 1 : 0),
+        itemBuilder: (context, i) {
+          if (showMore && i == visible.length) {
+            return FxSatelliteListTile(
+              title: _loadingMore ? 'Carregando…' : 'Carregar mais',
+              onTap: _loadingMore ? null : () => _load(reset: false),
+            );
+          }
+          final item = visible[i];
+          return FxSatelliteListTile(
+            title: feedbackVideoLabel(item.comentario),
+            subtitle: Text(
+              feedbackVideoSubtitle(
+                criadoEm: item.criadoEm,
+                aiScore: item.aiScore,
+                statusAnalise: item.statusAnalise,
+              ),
+            ),
+            trailing: Text(
+              feedbackVideoValue(item.aiScore),
+              style: FocuxHubTypography.bodyMuted(
+                color:
+                    feedbackVideoDanger(item.aiScore)
+                        ? EagleTokens.bad
+                        : fxScreenMute(context),
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            accent: feedbackVideoDanger(item.aiScore) ? EagleTokens.bad : null,
+            onTap: () => _abrirAcoes(item),
+          );
+        },
+      ),
     );
   }
 }

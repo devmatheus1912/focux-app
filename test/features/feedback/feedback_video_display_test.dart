@@ -33,5 +33,18 @@ void main() {
       feedbackVideoHubSubtitle(alunoNome: 'Ana', freshness: 'há 1 min'),
       'Análises técnicas de execução · Ana · há 1 min',
     );
+    expect(
+      feedbackVideoHubSubtitle(count: 2, freshness: 'há 1 min'),
+      '2 feedbacks · há 1 min',
+    );
+    expect(feedbackVideoCountLabel(1), '1 feedback');
+    expect(
+      feedbackVideoMatchesQuery(comentario: 'Joelhada alta', query: 'joel'),
+      isTrue,
+    );
+    expect(
+      feedbackVideoMatchesQuery(comentario: 'Joelhada', query: 'ombro'),
+      isFalse,
+    );
   });
 }

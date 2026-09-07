@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
+import '../../../core/api/pagina.dart';
 
 class FeedbackVideo {
   final int id;
@@ -45,21 +46,49 @@ class FeedbackVideoRepository {
 
   FeedbackVideoRepository(ApiClient client) : _dio = client.dio;
 
+  Future<Pagina<FeedbackVideo>> listarPagina({
+    int page = 0,
+    int size = 20,
+    int? alunoId,
+  }) async {
+    final path =
+        alunoId == null
+            ? '/api/feedback-videos'
+            : '/api/feedback-videos/aluno/$alunoId';
+    return _pagina(path, page: page, size: size);
+  }
+
   Future<List<FeedbackVideo>> listar() async {
-    final r = await _dio.get('/api/feedback-videos');
-    return (r.data as List).map((e) => FeedbackVideo.fromJson(e)).toList();
+    return (await listarPagina()).content;
   }
 
   Future<List<FeedbackVideo>> listarPorAluno(int alunoId) async {
-    final r = await _dio.get('/api/feedback-videos/aluno/$alunoId');
-    return (r.data as List).map((e) => FeedbackVideo.fromJson(e)).toList();
+    return (await listarPagina(alunoId: alunoId)).content;
   }
 
   Future<List<FeedbackVideo>> meus() async {
-    final r = await _dio.get('/api/feedback-videos/me');
-    return (r.data as List)
-        .map((e) => FeedbackVideo.fromJson(e as Map<String, dynamic>))
-        .toList();
+    return (await _pagina('/api/feedback-videos/me')).content;
+  }
+
+  Future<Pagina<FeedbackVideo>> _pagina(
+    String path, {
+    int page = 0,
+    int size = 20,
+  }) async {
+    final r = await _dio.get(
+      path,
+      queryParameters: {'page': page, 'size': size},
+    );
+    final data = r.data;
+    if (data is! Map) {
+      throw FormatException(
+        'GET $path devolve Pagina, não lista crua.',
+      );
+    }
+    return Pagina.fromJson(
+      Map<String, dynamic>.from(data),
+      (item) => FeedbackVideo.fromJson(Map<String, dynamic>.from(item as Map)),
+    );
   }
 
   Future<FeedbackVideo> registrar({

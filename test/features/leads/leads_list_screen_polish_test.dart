@@ -19,11 +19,16 @@ void main() {
     expect(screen, contains('SkeletonList'));
     expect(screen, contains('RefreshIndicator'));
     expect(screen, contains('FxHubFreshness.fromFetchedAt'));
-    expect(screen, contains('_KanbanColumn'));
+    expect(screen, contains('ListView.builder'));
+    expect(screen, contains('FxSatelliteListTile'));
+    expect(screen, contains('FxLiquidPrimaryButton'));
+    expect(screen, contains('leadListChipStatuses'));
     expect(screen, contains('/leads/kanban'));
+    expect(screen, isNot(contains('_KanbanColumn')));
+    expect(screen, isNot(contains('_KanbanCard')));
     expect(screen, isNot(contains('FloatingActionButton')));
+    expect(screen, isNot(contains("icon: 'plus'")));
     expect(screen, isNot(contains('Icons.person_add')));
-    expect(screen, isNot(contains('_filtroStatus')));
     expect(screen, isNot(contains(r'showError(context, $e)')));
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(16));
   });
