@@ -35,6 +35,11 @@ void main() {
     expect(screen, contains('FxHelpIconButton'));
     expect(screen, contains('chatInboxViewed'));
     expect(screen, contains('Carregar mais'));
+    expect(screen, contains('FxLiquidPrimaryButton'));
+    expect(screen, contains('keyboardDismissBehavior'));
+    expect(screen, contains('viewInsetsOf'));
+    expect(screen, contains('hubCount:'));
+    expect(screen, contains('Nova mensagem'));
     expect(screen, contains('showFxInsetPickerSheet'));
     expect(screen, contains('IndexedStack'));
     expect(screen, contains('ShellHeaderIconButton'));

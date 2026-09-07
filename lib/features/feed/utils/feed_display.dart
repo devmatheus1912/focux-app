@@ -26,11 +26,60 @@ String feedTipoLabel(String? tipo) {
   }
 }
 
-String feedHubSubtitle(String? freshness) {
-  const base = 'Novidades para os seus alunos';
+String feedCountLabel(int count) {
+  if (count <= 0) return 'Nenhuma publicação';
+  if (count == 1) return '1 publicação';
+  return '$count publicações';
+}
+
+String feedHubSubtitle(String? freshness, {int? count}) {
+  final base =
+      count == null ? 'Novidades para os seus alunos' : feedCountLabel(count);
   final stamp = freshness?.trim();
   if (stamp == null || stamp.isEmpty) return base;
   return '$base · $stamp';
+}
+
+bool feedMatchesQuery({
+  required String titulo,
+  required String conteudo,
+  required String query,
+}) {
+  final q = _foldSearch(query);
+  if (q.isEmpty) return true;
+  return _foldSearch(titulo).contains(q) || _foldSearch(conteudo).contains(q);
+}
+
+String _foldSearch(String value) {
+  var out = value.trim().toLowerCase();
+  const pairs = <String, String>{
+    'á': 'a',
+    'à': 'a',
+    'â': 'a',
+    'ã': 'a',
+    'ä': 'a',
+    'é': 'e',
+    'è': 'e',
+    'ê': 'e',
+    'ë': 'e',
+    'í': 'i',
+    'ì': 'i',
+    'î': 'i',
+    'ï': 'i',
+    'ó': 'o',
+    'ò': 'o',
+    'ô': 'o',
+    'õ': 'o',
+    'ö': 'o',
+    'ú': 'u',
+    'ù': 'u',
+    'û': 'u',
+    'ü': 'u',
+    'ç': 'c',
+    'ñ': 'n',
+  };
+  pairs.forEach((from, to) => out = out.replaceAll(from, to));
+  return out;
 }
 
 String feedMidiaCta({required String tipo, required bool hasFile}) {

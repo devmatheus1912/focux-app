@@ -16,12 +16,12 @@ import '../../../core/widgets/fx_form_sheet.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../utils/exercicios_filter_display.dart';
 import '../data/exercise_enum_api.dart';
 import '../data/exercicio_repository.dart';
-import '../data/exercicio_taxonomy_labels.dart';
 import '../providers/exercicio_picker_provider.dart';
 import '../providers/exercicios_provider.dart';
 import 'widgets/exercicios_batch_actions.dart';
@@ -314,10 +314,10 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
     final visible = _visibleItems;
     final chrome = ShellChrome.of(context);
     final isDark = chrome.isDark;
-    final mute = chrome.mute;
     final primary = Theme.of(context).colorScheme.primary;
     final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
     final totalLabel = exerciciosCountLabel(_totalElements);
+    final headerSubtitle = FxHubFreshness.joinCount(totalLabel, freshnessLabel);
 
     return fxScreenA11yScope(
       label: 'Exercícios',
@@ -327,8 +327,8 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
             _selected.isEmpty
                 ? FxShellAppBar(
                   title: 'Exercícios',
-                  subtitle: freshnessLabel ?? 'Biblioteca',
-                  onBack: () => safePopOrGo(context, '/dashboard/personal'),
+                  subtitle: headerSubtitle,
+                  onBack: () => safePopOrGo(context, '/treinos'),
                   actions: [
                     ShellHeaderIconButton(
                       icon: 'circle-check',
@@ -342,11 +342,6 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
                       icon: 'article',
                       tooltip: 'Carregar biblioteca completa',
                       onTap: _abrirBiblioteca,
-                    ),
-                    ShellHeaderIconButton(
-                      icon: 'plus',
-                      tooltip: 'Novo exercício',
-                      onTap: _novoExercicio,
                     ),
                   ],
                 )
@@ -363,9 +358,7 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
                   onSelectAll: _selectAllVisible,
                   onFavorite: _favoriteBatch,
                   onDelete: _deleteBatch,
-                )
-              else
-                const SizedBox.shrink(),
+                ),
               ExerciciosFilterBar(
                 filter: _filter,
                 onChanged: (value) {
@@ -421,64 +414,48 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
                             },
                           ),
                         )
-                        : Column(
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(
-                                TokensStrip.s4,
-                                0,
-                                16,
-                                10,
+                        : ExerciciosListView(
+                          controller: _scrollCtrl,
+                          exercicios: visible,
+                          selectedIds: _selected,
+                          accent: primary,
+                          loadingMore: _loadingMore,
+                          onTap: (exercicio) {
+                            if (_selected.isNotEmpty) {
+                              setState(() {
+                                _selected.contains(exercicio.id)
+                                    ? _selected.remove(exercicio.id)
+                                    : _selected.add(exercicio.id);
+                              });
+                              return;
+                            }
+                            context.push('/exercicios/${exercicio.id}');
+                          },
+                          onLongPress:
+                              (exercicio) => setState(
+                                () => _selected.add(exercicio.id),
                               ),
-                              child: Row(
-                                children: [
-                                  Text(
-                                    totalLabel,
-                                    style: TextStyle(
-                                      color: mute,
-                                      fontWeight: FontWeight.w800,
-                                    ),
-                                  ),
-                                  const Spacer(),
-                                  if (_filter.grupo != null)
-                                    Text(
-                                      TaxonomyLabels.grupo[_filter.grupo!] ??
-                                          '',
-                                      style: TextStyle(color: mute),
-                                    ),
-                                ],
-                              ),
-                            ),
-                            Expanded(
-                              child: ExerciciosListView(
-                                controller: _scrollCtrl,
-                                exercicios: visible,
-                                selectedIds: _selected,
-                                accent: primary,
-                                loadingMore: _loadingMore,
-                                onTap: (exercicio) {
-                                  if (_selected.isNotEmpty) {
-                                    setState(() {
-                                      _selected.contains(exercicio.id)
-                                          ? _selected.remove(exercicio.id)
-                                          : _selected.add(exercicio.id);
-                                    });
-                                    return;
-                                  }
-                                  context.push('/exercicios/${exercicio.id}');
-                                },
-                                onLongPress:
-                                    (exercicio) => setState(
-                                      () => _selected.add(exercicio.id),
-                                    ),
-                                onFavorite: _favorite,
-                                onUploadVideo: _uploadVideo,
-                                onDelete: _deleteOne,
-                              ),
-                            ),
-                          ],
+                          onFavorite: _favorite,
+                          onUploadVideo: _uploadVideo,
+                          onDelete: _deleteOne,
                         ),
               ),
+              if (_selected.isEmpty && !_loading && _error == null)
+                SafeArea(
+                  top: false,
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      TokensStrip.s4,
+                      TokensStrip.s2,
+                      TokensStrip.s4,
+                      TokensStrip.s3 + MediaQuery.viewInsetsOf(context).bottom,
+                    ),
+                    child: FxLiquidPrimaryButton(
+                      label: 'Novo exercício',
+                      onPressed: _novoExercicio,
+                    ),
+                  ),
+                ),
             ],
             ),
           ),

@@ -92,19 +92,27 @@ class FeedRepository {
   final ApiClient _client;
   FeedRepository(this._client);
 
-  Future<List<FeedPost>> listarPersonal() async {
-    final r = await _client.dio.get('/api/feed');
+  Future<Pagina<FeedPost>> listarPersonalPagina({String? cursor}) async {
+    final r = await _client.dio.get(
+      '/api/feed',
+      queryParameters: {
+        if (cursor != null && cursor.isNotEmpty) 'cursor': cursor,
+      },
+    );
     final data = r.data;
     if (data is! Map) {
       throw FormatException(
         'GET /api/feed devolve Pagina, não lista crua.',
       );
     }
-    final pagina = Pagina.fromJson(
+    return Pagina.fromJson(
       Map<String, dynamic>.from(data),
       (item) => FeedPost.fromJson(Map<String, dynamic>.from(item as Map)),
     );
-    return pagina.content;
+  }
+
+  Future<List<FeedPost>> listarPersonal() async {
+    return (await listarPersonalPagina()).content;
   }
 
   Future<List<FeedPost>> listarAluno() async {

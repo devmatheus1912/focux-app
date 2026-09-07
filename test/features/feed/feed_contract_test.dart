@@ -44,15 +44,15 @@ void main() {
   });
 
   test('feed composer uploads media instead of asking for URL', () {
-    final screen = readScreenSourceBundle(
-      'lib/features/feed/screens/feed_screen.dart',
+    final composer = readScreenSourceBundle(
+      'lib/features/feed/widgets/feed_composer_sheet.dart',
     );
 
-    expect(screen, contains('ImagePicker'));
-    expect(screen, contains('MediaUploadService'));
-    expect(screen, contains('feed/images'));
-    expect(screen, contains('feed/videos'));
-    expect(screen, isNot(contains('URL da mídia')));
+    expect(composer, contains('ImagePicker'));
+    expect(composer, contains('MediaUploadService'));
+    expect(composer, contains('feed/images'));
+    expect(composer, contains('feed/videos'));
+    expect(composer, isNot(contains('URL da mídia')));
   });
 
   test('feed listarPersonal/listarAluno parse Pagina, not root List', () {
@@ -60,8 +60,9 @@ void main() {
       'lib/features/feed/data/feed_repository.dart',
     );
     expect(repo, contains('Pagina.fromJson'));
-    expect(repo, contains("dio.get('/api/feed')"));
-    expect(repo, contains("dio.get('/api/feed/aluno')"));
+    expect(repo, contains('listarPersonalPagina'));
+    expect(repo, contains("'/api/feed'"));
+    expect(repo, contains("'/api/feed/aluno'"));
     expect(repo, contains('GET /api/feed devolve Pagina'));
     expect(repo, isNot(contains("get('/api/feed');\n    return (r.data as List)")));
   });

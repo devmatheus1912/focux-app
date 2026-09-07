@@ -6,14 +6,24 @@ String chatInboxHubViewLabel(ChatInboxHubView view) => switch (view) {
   ChatInboxHubView.arquivadas => 'Arquivadas',
 };
 
+String chatInboxCountLabel(int count) {
+  if (count <= 0) return 'Nenhuma conversa';
+  if (count == 1) return '1 conversa';
+  return '$count conversas';
+}
+
 String chatInboxHubSubtitle({
   required ChatInboxHubView view,
+  int? count,
   String? freshness,
 }) {
-  final label = chatInboxHubViewLabel(view);
+  final parts = <String>[
+    if (count != null) chatInboxCountLabel(count),
+    chatInboxHubViewLabel(view),
+  ];
   final stamp = freshness?.trim();
-  if (stamp == null || stamp.isEmpty) return label;
-  return '$label · $stamp';
+  if (stamp != null && stamp.isNotEmpty) parts.add(stamp);
+  return parts.join(' · ');
 }
 
 String chatInboxEmptyTitle(ChatInboxHubView view) => switch (view) {

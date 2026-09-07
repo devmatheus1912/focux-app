@@ -46,7 +46,13 @@ class ExerciciosListView extends StatelessWidget {
 
     return ListView.builder(
       controller: controller,
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+      padding: EdgeInsets.fromLTRB(
+        16,
+        0,
+        16,
+        100 + MediaQuery.viewInsetsOf(context).bottom,
+      ),
       itemCount: exercicios.length + extra,
       itemBuilder: (context, i) {
         if (i >= exercicios.length) {

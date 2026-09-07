@@ -321,6 +321,7 @@ class _InboxTabPane extends StatelessWidget {
           onRefresh: onRefresh,
           child: ListView.builder(
             physics: const AlwaysScrollableScrollPhysics(),
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             padding: const EdgeInsets.fromLTRB(
               FxSettingsLayout.pageInset,
               TokensStrip.s3,

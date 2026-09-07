@@ -17,6 +17,16 @@ void main() {
       ),
       'Não lidas · Atualizado agora',
     );
+    expect(chatInboxCountLabel(0), 'Nenhuma conversa');
+    expect(chatInboxCountLabel(1), '1 conversa');
+    expect(
+      chatInboxHubSubtitle(
+        view: ChatInboxHubView.todas,
+        count: 12,
+        freshness: 'Atualizado agora',
+      ),
+      '12 conversas · Todas · Atualizado agora',
+    );
   });
 
   test('chatInbox empty, seleção e ações', () {
