@@ -94,7 +94,7 @@ void main() {
     expect(screen, contains('dashboard_entry_motion.dart'));
     expect(screen, contains('DashboardDayFocusBanner'));
     expect(screen, contains('DashboardHomeFocusRules'));
-    expect(screen, contains('groupDashboardToolShortcuts'));
+    expect(screen, contains('groupCatalogoHubs'));
     expect(screen, contains('buscarFerramenta'));
     expect(screen, contains('dashboardReadableMuted'));
     expect(screen, contains('dashboardPriorityBadgeColors'));
@@ -113,12 +113,13 @@ void main() {
         ).readAsStringSync();
     expect(shortcutsFile, isNot(contains('roiQuickLinks')));
     expect(shortcutsFile, isNot(contains("label: 'Preços'")));
-    expect(shortcutsFile, contains("label: 'Marca própria'"));
+    expect(shortcutsFile, isNot(contains('static const List')));
+    expect(shortcutsFile, contains('fromEntrada'));
+    expect(shortcutsFile, contains('atalhosHomeFromCatalogo'));
     expect(screen, isNot(contains('retornoRapido')));
     expect(screen, isNot(contains('DashboardRoiQuickLinksRow')));
     expect(screen, contains('DashboardMicrocopy.commandCenterSubtitle'));
     expect(screen, contains('DashboardMicrocopy.verPrioridades'));
-    expect(screen, contains('featuredTools'));
     expect(screen, contains('verCatalogoCompleto'));
     expect(screen, contains('omitSecondarySections'));
     expect(screen, contains('FxHelpIconButton'));
@@ -153,10 +154,13 @@ void main() {
     expect(catalog, contains('DashboardToolShortcutGroup'));
     expect(catalog, contains('ListView.builder'));
     expect(catalog, contains('catalogoSubtitle'));
+    expect(catalog, contains('groupCatalogoHubs'));
+    expect(catalog, contains('ferramentasCatalogoProvider'));
     expect(catalog, isNot(contains('DashboardExpandableToolGroups')));
     expect(catalog, isNot(contains('shortcutAspectRatio')));
     expect(tools, contains('CommandActionTile'));
     expect(tools, contains('FxSettingsLayout.pageInset'));
+    expect(tools, contains('atalhosHomeFromCatalogo'));
     expect(tools, isNot(contains('DashboardShortcutGrid')));
     expect(tools, isNot(contains('shortcutAspectRatio')));
     expect(tools, isNot(contains('AspectRatio')));

@@ -14,6 +14,7 @@ import 'fx_icon.dart';
 import 'fx_keyboard_dismiss_scope.dart';
 import 'mesh_scope.dart';
 import 'fx_premium_entrance.dart';
+import '../../features/ferramentas/widgets/hub_embed_scope.dart';
 
 /// Premium scaffold for shell tabs and standalone screens.
 class FxShellScaffold extends StatelessWidget {
@@ -49,7 +50,8 @@ class FxShellScaffold extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final meshActive = MeshScope.of(context);
-    final needsMesh = useMesh && !meshActive;
+    final embedded = HubEmbedScope.maybeOf(context);
+    final needsMesh = useMesh && !meshActive && !embedded;
 
     Widget inner = body;
     if (constrainWidth) {
@@ -67,12 +69,14 @@ class FxShellScaffold extends StatelessWidget {
     if (dismiss) {
       content = FxKeyboardDismissScope(child: content);
     }
-    content = FxPremiumEntrance(child: content);
+    if (!embedded) {
+      content = FxPremiumEntrance(child: content);
+    }
 
     final scaffold = Scaffold(
       extendBody: extendBody,
       backgroundColor: Colors.transparent,
-      appBar: appBar,
+      appBar: embedded ? null : appBar,
       body: content,
       floatingActionButton: floatingActionButton,
       bottomNavigationBar: bottomNavigationBar,
