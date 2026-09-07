@@ -410,12 +410,18 @@ class CheckinRepository {
   Future<Pagina<ExecucaoTreino>> historico({
     String? cursor,
     int size = 20,
+    String? q,
+    String? status,
   }) async {
+    final query = q?.trim() ?? '';
+    final statusFilter = status?.trim() ?? '';
     final r = await _dio.get(
       '/api/checkin/historico',
       queryParameters: {
         'size': size,
         if (cursor != null && cursor.isNotEmpty) 'cursor': cursor,
+        if (query.isNotEmpty) 'q': query,
+        if (statusFilter.isNotEmpty) 'status': statusFilter,
       },
     );
     final data = r.data;

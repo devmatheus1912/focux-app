@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -45,6 +47,7 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
   DateTime? _fetchedAt;
   String? _status;
   var _query = '';
+  Timer? _searchDebounce;
 
   @override
   void initState() {
@@ -54,21 +57,17 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
 
   @override
   void dispose() {
+    _searchDebounce?.cancel();
     _searchCtrl.dispose();
     super.dispose();
   }
 
-  List<Lead> get _visible {
-    return _leads
-        .where(
-          (lead) => leadMatchesQuery(
-            nome: lead.nome,
-            objetivo: lead.objetivo,
-            origem: lead.origem,
-            query: _query,
-          ),
-        )
-        .toList();
+  void _onQueryChanged(String value) {
+    setState(() => _query = value);
+    _searchDebounce?.cancel();
+    _searchDebounce = Timer(const Duration(milliseconds: 280), () {
+      if (mounted) _load(reset: true);
+    });
   }
 
   Future<void> _load({required bool reset}) async {
@@ -96,6 +95,7 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
       final pagina = await LeadRepository(ref.read(apiClientProvider))
           .listarPagina(
             status: _status,
+            q: _query,
             page: reset ? 0 : _page,
           );
       if (!mounted) return;
@@ -149,8 +149,7 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
     final plano = ref.watch(planoFeaturesProvider).valueOrNull;
     final showLeadsLimitBanner =
         plano?.plano == SubscriptionPlan.FREE && _total >= 4;
-    final visible = _visible;
-    final count = _query.trim().isEmpty ? _total : visible.length;
+    final count = _total;
 
     return fxScreenA11yScope(
       label: 'Funil de Leads',
@@ -220,7 +219,7 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
                 ),
                 child: TextField(
                   controller: _searchCtrl,
-                  onChanged: (value) => setState(() => _query = value),
+                  onChanged: _onQueryChanged,
                   onTapOutside:
                       (_) => FocusManager.instance.primaryFocus?.unfocus(),
                   textInputAction: TextInputAction.search,
@@ -243,8 +242,10 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
                             : IconButton(
                               tooltip: 'Limpar busca',
                               onPressed: () {
+                                _searchDebounce?.cancel();
                                 _searchCtrl.clear();
                                 setState(() => _query = '');
+                                _load(reset: true);
                               },
                               icon: Icon(
                                 Icons.close_rounded,
@@ -326,6 +327,7 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
       );
     }
     if (_leads.isEmpty) {
+      final filtered = _query.trim().isNotEmpty;
       return FxContentWidthLimiter(
         child: RefreshIndicator(
           color: primary,
@@ -334,52 +336,41 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
             physics: const AlwaysScrollableScrollPhysics(),
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             children: [
-              FxEmptyState(
-                icon: 'users',
-                title:
-                    _status == null
-                        ? 'Nenhum lead cadastrado'
-                        : 'Nenhum lead neste status',
-                subtitle:
-                    _status == null
-                        ? 'Cadastre o primeiro lead para começar a acompanhar o funil.'
-                        : 'Troque o filtro ou cadastre um prospect neste estágio.',
-                action: FxEmptyAction(label: 'Novo lead', onTap: _novoLead),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    final visible = _visible;
-    if (visible.isEmpty) {
-      return FxContentWidthLimiter(
-        child: RefreshIndicator(
-          color: primary,
-          onRefresh: () => _load(reset: true),
-          child: ListView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-            children: [
-              FxEmptyState(
-                icon: 'search',
-                title: 'Nenhum lead encontrado',
-                subtitle: 'Ajuste a busca para ver outros prospects.',
-                action: FxEmptyAction(
-                  label: 'Limpar busca',
-                  onTap: () {
-                    _searchCtrl.clear();
-                    setState(() => _query = '');
-                  },
+              if (filtered)
+                FxEmptyState(
+                  icon: 'search',
+                  title: 'Nenhum lead encontrado',
+                  subtitle: 'Ajuste a busca para ver outros prospects.',
+                  action: FxEmptyAction(
+                    label: 'Limpar busca',
+                    onTap: () {
+                      _searchDebounce?.cancel();
+                      _searchCtrl.clear();
+                      setState(() => _query = '');
+                      _load(reset: true);
+                    },
+                  ),
+                )
+              else
+                FxEmptyState(
+                  icon: 'users',
+                  title:
+                      _status == null
+                          ? 'Nenhum lead cadastrado'
+                          : 'Nenhum lead neste status',
+                  subtitle:
+                      _status == null
+                          ? 'Cadastre o primeiro lead para começar a acompanhar o funil.'
+                          : 'Troque o filtro ou cadastre um prospect neste estágio.',
+                  action: FxEmptyAction(label: 'Novo lead', onTap: _novoLead),
                 ),
-              ),
             ],
           ),
         ),
       );
     }
 
+    final visible = _leads;
     final showMore = _hasNext;
     return FxContentWidthLimiter(
       child: RefreshIndicator(

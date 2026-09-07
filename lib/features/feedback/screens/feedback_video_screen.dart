@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -52,6 +54,7 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
   String? _erro;
   DateTime? _fetchedAt;
   var _query = '';
+  Timer? _searchDebounce;
 
   @override
   void initState() {
@@ -61,19 +64,17 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
 
   @override
   void dispose() {
+    _searchDebounce?.cancel();
     _searchCtrl.dispose();
     super.dispose();
   }
 
-  List<FeedbackVideo> get _visible {
-    return _feedbacks
-        .where(
-          (item) => feedbackVideoMatchesQuery(
-            comentario: item.comentario,
-            query: _query,
-          ),
-        )
-        .toList();
+  void _onQueryChanged(String value) {
+    setState(() => _query = value);
+    _searchDebounce?.cancel();
+    _searchDebounce = Timer(const Duration(milliseconds: 280), () {
+      if (mounted) _load(reset: true);
+    });
   }
 
   Future<void> _load({required bool reset}) async {
@@ -92,7 +93,11 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
     try {
       final pagina = await FeedbackVideoRepository(
         ref.read(apiClientProvider),
-      ).listarPagina(page: reset ? 0 : _page, alunoId: widget.alunoId);
+      ).listarPagina(
+        page: reset ? 0 : _page,
+        alunoId: widget.alunoId,
+        q: _query,
+      );
       if (!mounted) return;
       setState(() {
         _feedbacks.addAll(pagina.content);
@@ -267,8 +272,8 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
     final mute = chrome.mute;
-    final visible = _visible;
-    final count = _query.trim().isEmpty ? _total : visible.length;
+    final visible = _feedbacks;
+    final count = _total;
     return fxScreenA11yScope(
       label: 'Feedback de vídeo',
       child: FxShellScaffold(
@@ -303,7 +308,7 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
                 ),
                 child: TextField(
                   controller: _searchCtrl,
-                  onChanged: (value) => setState(() => _query = value),
+                  onChanged: _onQueryChanged,
                   onTapOutside:
                       (_) => FocusManager.instance.primaryFocus?.unfocus(),
                   textInputAction: TextInputAction.search,
@@ -326,8 +331,10 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
                             : IconButton(
                               tooltip: 'Limpar busca',
                               onPressed: () {
+                                _searchDebounce?.cancel();
                                 _searchCtrl.clear();
                                 setState(() => _query = '');
+                                _load(reset: true);
                               },
                               icon: Icon(
                                 Icons.close_rounded,
@@ -380,32 +387,8 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
 
   Widget _buildBody(List<FeedbackVideo> visible) {
     final primary = Theme.of(context).colorScheme.primary;
-    if (_feedbacks.isEmpty) {
-      return RefreshIndicator(
-        color: primary,
-        onRefresh: () => _load(reset: true),
-        child: ListView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          children: [
-            FxEmptyState(
-              key: const ValueKey('feedback_video_empty'),
-              icon: 'spark',
-              title: 'Nenhum feedback de vídeo',
-              subtitle:
-                  widget.alunoNome != null
-                      ? 'Peça a ${satelliteFirstName(widget.alunoNome)} um vídeo de execução ou registre o primeiro feedback técnico.'
-                      : 'Registre o primeiro feedback técnico com URL do vídeo e comentário.',
-              action: FxEmptyAction(
-                label: 'Novo feedback',
-                onTap: _novoFeedback,
-              ),
-            ),
-          ],
-        ),
-      );
-    }
     if (visible.isEmpty) {
+      final filtered = _query.trim().isNotEmpty;
       return RefreshIndicator(
         color: primary,
         onRefresh: () => _load(reset: true),
@@ -413,18 +396,35 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
           physics: const AlwaysScrollableScrollPhysics(),
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           children: [
-            FxEmptyState(
-              icon: 'search',
-              title: 'Nenhum feedback encontrado',
-              subtitle: 'Ajuste a busca para ver outros comentários.',
-              action: FxEmptyAction(
-                label: 'Limpar busca',
-                onTap: () {
-                  _searchCtrl.clear();
-                  setState(() => _query = '');
-                },
+            if (filtered)
+              FxEmptyState(
+                icon: 'search',
+                title: 'Nenhum feedback encontrado',
+                subtitle: 'Ajuste a busca para ver outros comentários.',
+                action: FxEmptyAction(
+                  label: 'Limpar busca',
+                  onTap: () {
+                    _searchDebounce?.cancel();
+                    _searchCtrl.clear();
+                    setState(() => _query = '');
+                    _load(reset: true);
+                  },
+                ),
+              )
+            else
+              FxEmptyState(
+                key: const ValueKey('feedback_video_empty'),
+                icon: 'spark',
+                title: 'Nenhum feedback de vídeo',
+                subtitle:
+                    widget.alunoNome != null
+                        ? 'Peça a ${satelliteFirstName(widget.alunoNome)} um vídeo de execução ou registre o primeiro feedback técnico.'
+                        : 'Registre o primeiro feedback técnico com URL do vídeo e comentário.',
+                action: FxEmptyAction(
+                  label: 'Novo feedback',
+                  onTap: _novoFeedback,
+                ),
               ),
-            ),
           ],
         ),
       );
