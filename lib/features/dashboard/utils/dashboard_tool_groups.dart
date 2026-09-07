@@ -15,7 +15,8 @@ class DashboardToolGroupSection {
   final bool collapsed;
 }
 
-/// Agrupa o catálogo em hubs (≤ 8), com papel secundário recolhível.
+/// Agrupa o catálogo em hubs (≤ 8). Papel secundário fica no fim da lista
+/// (sem accordion — grupos inset quietos).
 List<DashboardToolGroupSection> groupCatalogoHubs(
   FerramentasCatalogo catalogo, {
   String query = '',
@@ -44,6 +45,7 @@ List<DashboardToolGroupSection> groupCatalogoHubs(
         title: hub.titulo,
         subtitulo: hub.subtitulo,
         shortcuts: shortcuts,
+        // `collapsed` = papel secundário (ordem), não accordion Material.
         collapsed: catalogoPapelTier(hub.papel) == CatalogoPapelTier.secundario,
       ),
     );
