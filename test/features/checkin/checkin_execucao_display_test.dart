@@ -34,6 +34,33 @@ void main() {
     );
   });
 
+  test('checkinElapsedSince e rest sobrevivem background', () {
+    final started = DateTime(2026, 9, 7, 18, 0, 0);
+    expect(
+      checkinElapsedSince(
+        started.toIso8601String(),
+        started.add(const Duration(minutes: 8)),
+      ),
+      const Duration(minutes: 8),
+    );
+    expect(checkinElapsedSince(null), Duration.zero);
+    final ends = DateTime.utc(2026, 9, 7, 18, 1, 0);
+    expect(
+      checkinRestRemaining(
+        endsAt: ends,
+        now: DateTime.utc(2026, 9, 7, 18, 0, 40),
+      ),
+      20,
+    );
+    expect(
+      checkinRestRemaining(
+        endsAt: ends,
+        now: DateTime.utc(2026, 9, 7, 18, 2, 0),
+      ),
+      0,
+    );
+  });
+
   test('checkinCargaLabel usa vírgula BR', () {
     expect(checkinCargaLabel(80), '80 kg');
     expect(checkinCargaLabel(7.5), '7,5 kg');

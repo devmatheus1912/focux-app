@@ -219,6 +219,7 @@ class PlanoFeatures {
   final SubscriptionPlan plano;
   final String? planoNomeOriginal;
   final int? limiteAlunos;
+  final int? limiteLeads;
   final int? limiteIaMensal;
   final DateTime? validoAte;
   final bool fromCache;
@@ -251,6 +252,7 @@ class PlanoFeatures {
     this.planoNomeOriginal,
     this.displayName,
     this.limiteAlunos,
+    this.limiteLeads,
     this.limiteIaMensal,
     this.validoAte,
     this.fromCache = false,
@@ -306,11 +308,15 @@ class PlanoFeatures {
 
   factory PlanoFeatures.fromJson(Map<String, dynamic> j) {
     final f = (j['features'] as Map?)?.cast<String, dynamic>() ?? const {};
+    final plano = subscriptionPlanFromApi(j['plano'] as String?);
     return PlanoFeatures(
-      plano: subscriptionPlanFromApi(j['plano'] as String?),
+      plano: plano,
       planoNomeOriginal: j['planoNomeOriginal'] as String?,
       displayName: j['displayName'] as String?,
       limiteAlunos: (j['limiteAlunos'] as num?)?.toInt(),
+      limiteLeads:
+          (j['limiteLeads'] as num?)?.toInt() ??
+          (plano == SubscriptionPlan.FREE ? 5 : null),
       limiteIaMensal: (j['limiteIaMensal'] as num?)?.toInt(),
       validoAte: _parseDateTime(j['validoAte']),
       fromCache: j['fromCache'] as bool? ?? false,
@@ -368,6 +374,10 @@ class PlanoFeatures {
       planoNomeOriginal: planoNomeOriginal,
       displayName: displayName,
       limiteAlunos: limiteAlunosEff,
+      limiteLeads: switch (billing) {
+        SubscriptionPlan.FREE => limiteLeads ?? 5,
+        _ => null,
+      },
       limiteIaMensal: limiteIaEff,
       validoAte: validoAte,
       fromCache: fromCache,
@@ -468,6 +478,7 @@ class PlanoFeatures {
       planoNomeOriginal: planoNomeOriginal,
       displayName: displayName,
       limiteAlunos: limiteAlunos,
+      limiteLeads: limiteLeads,
       limiteIaMensal: limiteIaMensal,
       validoAte: validoAte,
       fromCache: fromCache,
@@ -500,6 +511,7 @@ class PlanoFeatures {
     'plano': plano.name,
     if (planoNomeOriginal != null) 'planoNomeOriginal': planoNomeOriginal,
     if (limiteAlunos != null) 'limiteAlunos': limiteAlunos,
+    if (limiteLeads != null) 'limiteLeads': limiteLeads,
     if (limiteIaMensal != null) 'limiteIaMensal': limiteIaMensal,
     if (limiteMigracaoFotoMensal != null)
       'limiteMigracaoFotoMensal': limiteMigracaoFotoMensal,
@@ -536,6 +548,7 @@ class PlanoFeatures {
       plano: plano,
       planoNomeOriginal: planoNomeOriginal,
       limiteAlunos: limiteAlunos,
+      limiteLeads: limiteLeads,
       limiteIaMensal: limiteIaMensal,
       validoAte: validoAte,
       fromCache: fromCache ?? this.fromCache,
@@ -567,6 +580,7 @@ class PlanoFeatures {
   static const free = PlanoFeatures(
     plano: SubscriptionPlan.FREE,
     limiteAlunos: 3,
+    limiteLeads: 5,
     financeiro: false,
     agenda: true,
     relatorios: false,

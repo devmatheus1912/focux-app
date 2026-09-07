@@ -3,6 +3,23 @@ import '../../../core/theme/tokens_strip.dart';
 /// Thumb-zone minimum for S8 execution controls.
 const double checkinExecutionControlMin = TokensStrip.s8;
 
+Duration checkinElapsedSince(String? iniciadoEm, [DateTime? now]) {
+  final origin = now ?? DateTime.now();
+  if (iniciadoEm == null || iniciadoEm.isEmpty) {
+    return Duration.zero;
+  }
+  try {
+    return origin.difference(DateTime.parse(iniciadoEm).toLocal());
+  } catch (_) {
+    return Duration.zero;
+  }
+}
+
+int checkinRestRemaining({required DateTime endsAt, DateTime? now}) {
+  final left = endsAt.difference(now ?? DateTime.now()).inSeconds;
+  return left < 0 ? 0 : left;
+}
+
 String checkinDurationLabel(Duration d) {
   final h = d.inHours;
   final m = d.inMinutes.remainder(60);

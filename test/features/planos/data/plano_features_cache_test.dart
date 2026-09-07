@@ -26,6 +26,22 @@ void main() {
     expect(features.cacheSavedAt, cachedAt);
     expect(features.syncWarning, 'Usando plano salvo.');
     expect(features.financeiro, isTrue);
+    expect(features.limiteLeads, isNull);
+  });
+
+  test('PlanoFeatures lê limiteLeads e fallback Free', () {
+    expect(
+      PlanoFeatures.fromJson({'plano': 'FREE', 'features': {}}).limiteLeads,
+      5,
+    );
+    expect(
+      PlanoFeatures.fromJson({
+        'plano': 'PRO',
+        'limiteLeads': 5,
+        'features': {},
+      }).limiteLeads,
+      5,
+    );
   });
 
   test('PlanoFeatures can mark stale refresh without changing entitlements', () {

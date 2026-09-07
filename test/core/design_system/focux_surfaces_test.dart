@@ -55,6 +55,20 @@ void main() {
     expect(FocuxSurfaces.resolveParent(match), isNull);
   });
 
+  test('checkin executar e presencial são S8', () {
+    final checkin = FocuxSurfaces.resolve('/checkin/executar');
+    expect(checkin!.spec.type, FocuxSurfaceType.s8);
+    expect(FocuxSurfaces.resolveParent(checkin), '/checkin/treinos');
+
+    final presencial = FocuxSurfaces.resolve('/treino-presencial/12');
+    expect(presencial!.spec.type, FocuxSurfaceType.s8);
+    expect(FocuxSurfaces.resolveParent(presencial), '/treinos/12');
+
+    final feedback = FocuxSurfaces.resolve('/alunos/9/feedback-video');
+    expect(feedback!.spec.type, FocuxSurfaceType.s4);
+    expect(feedback.spec.hasInput, isTrue);
+  });
+
   test('auth recovery parent is login', () {
     final match = FocuxSurfaces.resolve('/esqueci-senha');
     expect(match!.spec.type, FocuxSurfaceType.s6);

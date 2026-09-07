@@ -7,9 +7,10 @@ import '../../../core/theme/focux_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
-import '../../../core/widgets/fx_confirm_sheet.dart';
+import '../../../core/router/safe_navigation.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_execution_chrome.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
@@ -36,20 +37,26 @@ class ModoPresencialScreen extends ConsumerStatefulWidget {
   ConsumerState<ModoPresencialScreen> createState() => _State();
 }
 
-class _State extends ConsumerState<ModoPresencialScreen> {
+class _State extends ConsumerState<ModoPresencialScreen>
+    with WidgetsBindingObserver {
   ExecucaoTreino? _exec;
   bool _loading = true;
   String? _erro;
   int _currentIdx = 0;
   Timer? _timer;
   Duration _elapsed = Duration.zero;
+  DateTime _startedAt = DateTime.now();
   Timer? _restTimer;
+  DateTime? _restEndsAt;
   int _restSecs = 0;
   bool _resting = false;
+
+  String get _parent => '/treinos/${widget.treinoId}';
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.landscapeLeft,
       DeviceOrientation.landscapeRight,
@@ -60,11 +67,31 @@ class _State extends ConsumerState<ModoPresencialScreen> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _timer?.cancel();
     _restTimer?.cancel();
     SystemChrome.setPreferredOrientations(DeviceOrientation.values);
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) _syncClocks();
+  }
+
+  void _syncClocks() {
+    if (!mounted) return;
+    setState(() {
+      _elapsed = DateTime.now().difference(_startedAt);
+      if (_resting && _restEndsAt != null) {
+        _restSecs = checkinRestRemaining(endsAt: _restEndsAt!);
+        if (_restSecs <= 0) {
+          _restTimer?.cancel();
+          _resting = false;
+        }
+      }
+    });
   }
 
   Future<void> _start() async {
@@ -73,12 +100,16 @@ class _State extends ConsumerState<ModoPresencialScreen> {
           .read(checkinRepositoryProvider)
           .iniciar(widget.treinoId);
       if (!mounted) return;
+      _elapsed = checkinElapsedSince(e.iniciadoEm);
+      _startedAt = DateTime.now().subtract(_elapsed);
       setState(() {
         _exec = e;
         _loading = false;
       });
       _timer ??= Timer.periodic(const Duration(seconds: 1), (_) {
-        if (mounted) setState(() => _elapsed += const Duration(seconds: 1));
+        if (mounted) {
+          setState(() => _elapsed = DateTime.now().difference(_startedAt));
+        }
       });
     } catch (e) {
       if (mounted) {
@@ -91,19 +122,22 @@ class _State extends ConsumerState<ModoPresencialScreen> {
   }
 
   void _startRest(int seconds) {
-    setState(() {
-      _resting = true;
-      _restSecs = seconds;
-    });
     HapticFeedback.mediumImpact();
     _restTimer?.cancel();
+    setState(() {
+      _resting = true;
+      _restEndsAt = DateTime.now().add(Duration(seconds: seconds));
+      _restSecs = seconds;
+    });
     _restTimer = Timer.periodic(const Duration(seconds: 1), (_) {
-      if (_restSecs <= 1) {
+      if (!mounted || _restEndsAt == null) return;
+      final left = checkinRestRemaining(endsAt: _restEndsAt!);
+      if (left <= 0) {
         _restTimer?.cancel();
         HapticFeedback.heavyImpact();
-        if (mounted) setState(() => _resting = false);
+        setState(() => _resting = false);
       } else {
-        if (mounted) setState(() => _restSecs--);
+        setState(() => _restSecs = left);
       }
     });
   }
@@ -143,34 +177,32 @@ class _State extends ConsumerState<ModoPresencialScreen> {
   Future<void> _sair() async {
     final doneSeries =
         _exec?.exercicios.fold<int>(0, (sum, e) => sum + e.seriesFeitas) ?? 0;
-    if (doneSeries > 0 || _elapsed.inSeconds > 30) {
-      final ok = await showFxConfirmSheet(
-        context,
-        title: 'Sair do treino?',
-        message: 'O tempo e as séries já marcadas ficam salvos.',
-        confirmLabel: 'Sair',
-      );
-      if (!ok || !mounted) return;
-    }
-    Navigator.pop(context);
+    final ok = await fxConfirmLeaveExecution(
+      context,
+      hasProgress: doneSeries > 0 || _elapsed.inSeconds > 30,
+    );
+    if (!ok || !mounted) return;
+    safePopOrGo(context, _parent);
   }
 
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
     if (_loading) {
-      return fxScreenA11yScope(
-        label: 'Modo Presencial',
-        child: FxShellScaffold(
-          useMesh: false,
-          constrainWidth: false,
-          body: Padding(
-            padding: const EdgeInsets.all(TokensStrip.s4),
-            child: Center(
-              child: FxLoading.sectionShimmer(
-                context,
-                height: 180,
-                showHeader: false,
+      return FxExecutionKeepAwake(
+        child: fxScreenA11yScope(
+          label: 'Modo Presencial',
+          child: FxShellScaffold(
+            useMesh: false,
+            constrainWidth: false,
+            body: Padding(
+              padding: const EdgeInsets.all(TokensStrip.s4),
+              child: Center(
+                child: FxLoading.sectionShimmer(
+                  context,
+                  height: 180,
+                  showHeader: false,
+                ),
               ),
             ),
           ),
@@ -178,35 +210,48 @@ class _State extends ConsumerState<ModoPresencialScreen> {
       );
     }
     if (_erro != null) {
-      return fxScreenA11yScope(
-        label: 'Modo Presencial',
-        child: FxShellScaffold(
-          useMesh: false,
-          constrainWidth: false,
-          body: FxErrorState(
-            chromeOnDark: true,
-            primary: primary,
-            message: _erro!,
-            onRetry: _start,
-            title: 'Não conseguimos iniciar o treino',
+      return FxExecutionKeepAwake(
+        child: fxScreenA11yScope(
+          label: 'Modo Presencial',
+          child: FxShellScaffold(
+            useMesh: false,
+            constrainWidth: false,
+            body: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                FxErrorState(
+                  chromeOnDark: true,
+                  primary: primary,
+                  message: _erro!,
+                  onRetry: _start,
+                  title: 'Não conseguimos iniciar o treino',
+                ),
+                TextButton(
+                  onPressed: () => safePopOrGo(context, _parent),
+                  child: const Text('Voltar ao treino'),
+                ),
+              ],
+            ),
           ),
         ),
       );
     }
     if (_exec == null || _exec!.exercicios.isEmpty) {
-      return fxScreenA11yScope(
-        label: 'Modo Presencial',
-        child: FxShellScaffold(
-          useMesh: false,
-          constrainWidth: false,
-          body: FxEmptyState(
-            icon: 'dumbbell',
-            title: 'Treino não encontrado',
-            subtitle:
-                'Volte e escolha um treino com exercícios para o modo presencial.',
-            action: FxEmptyAction(
-              label: 'Voltar',
-              onTap: () => Navigator.pop(context),
+      return FxExecutionKeepAwake(
+        child: fxScreenA11yScope(
+          label: 'Modo Presencial',
+          child: FxShellScaffold(
+            useMesh: false,
+            constrainWidth: false,
+            body: FxEmptyState(
+              icon: 'dumbbell',
+              title: 'Treino não encontrado',
+              subtitle:
+                  'Volte e escolha um treino com exercícios para o modo presencial.',
+              action: FxEmptyAction(
+                label: 'Voltar',
+                onTap: () => safePopOrGo(context, _parent),
+              ),
             ),
           ),
         ),
@@ -217,27 +262,25 @@ class _State extends ConsumerState<ModoPresencialScreen> {
     final total = _exec!.exercicios.length;
     final done = _exec!.exercicios.where((e) => e.concluido).length;
 
-    return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, _) {
-        if (didPop) return;
-        _sair();
-      },
-      child: fxScreenA11yScope(
-        label: 'Modo Presencial',
-        child: FxShellScaffold(
-          useMesh: false,
-          constrainWidth: false,
-          body:
-              _resting
-                  ? CheckinRestFocusView(
-                    seconds: _restSecs,
-                    onSkip: () {
-                      _restTimer?.cancel();
-                      setState(() => _resting = false);
-                    },
-                  )
-                  : _trainingView(ex, total, done, primary),
+    return FxExecutionKeepAwake(
+      child: FxExecutionPopGuard(
+        onLeave: _sair,
+        child: fxScreenA11yScope(
+          label: 'Modo Presencial',
+          child: FxShellScaffold(
+            useMesh: false,
+            constrainWidth: false,
+            body:
+                _resting
+                    ? CheckinRestFocusView(
+                      seconds: _restSecs,
+                      onSkip: () {
+                        _restTimer?.cancel();
+                        setState(() => _resting = false);
+                      },
+                    )
+                    : _trainingView(ex, total, done, primary),
+          ),
         ),
       ),
     );

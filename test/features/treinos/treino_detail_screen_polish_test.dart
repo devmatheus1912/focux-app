@@ -133,12 +133,18 @@ void main() {
       contains("label: 'Adicionar exercício'"),
     );
     expect(
+      File(
+        'lib/features/treinos/screens/treino_detail_screen_body.part.dart',
+      ).readAsStringSync(),
+      contains("label: 'Modo presencial'"),
+    );
+    expect(
       'showChevron: true'.allMatches(
         File(
           'lib/features/treinos/screens/treino_detail_screen_body.part.dart',
         ).readAsStringSync(),
       ).length,
-      1,
+      2,
     );
     expect(
       File(
