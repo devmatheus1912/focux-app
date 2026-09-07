@@ -16,7 +16,9 @@ void main() {
     expect(screen, contains('ShellHeaderIconButton'));
     expect(screen, isNot(contains('FloatingActionButton')));
     expect(screen, isNot(contains('FilterChip')));
-    expect(screen, isNot(contains('FxLiquidPrimaryButton')));
+    expect(screen, contains('FxLiquidPrimaryButton'));
+    expect(screen, contains('viewInsetsOf'));
+    expect(screen, contains('safePopOrGo(context, \'/treinos\')'));
   });
 
   test('exercicios list rows são S4 satellite', () {
@@ -24,6 +26,7 @@ void main() {
       'lib/features/exercicios/screens/widgets/exercicios_list_view.dart',
     );
     expect(list, contains('ListView.builder'));
+    expect(list, contains('keyboardDismissBehavior'));
     expect(list, isNot(contains('FxSettingsGroup')));
     expect(list, contains('ExercicioCard'));
   });

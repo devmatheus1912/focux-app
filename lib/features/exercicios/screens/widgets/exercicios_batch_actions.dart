@@ -23,7 +23,12 @@ class ExerciciosBatchActions extends StatelessWidget {
       child: SafeArea(
         bottom: false,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(8, 6, 8, 6),
+          padding: EdgeInsets.fromLTRB(
+            8,
+            6,
+            8,
+            6 + MediaQuery.viewInsetsOf(context).bottom,
+          ),
           child: Row(
             children: [
               IconButton(

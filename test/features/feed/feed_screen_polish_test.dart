@@ -22,7 +22,12 @@ void main() {
     expect(screen, contains('showFxHomeSheet'));
     expect(screen, contains('showFxConfirmSheet'));
     expect(screen, contains('FxHubFreshness.fromFetchedAt'));
-    expect(screen, isNot(contains('FxLiquidPrimaryButton')));
+    expect(screen, contains('FxLiquidPrimaryButton'));
+    expect(screen, contains('keyboardDismissBehavior'));
+    expect(screen, contains('viewInsetsOf'));
+    expect(screen, contains('safePopOrGo'));
+    expect(screen, contains('listarPersonalPagina'));
+    expect(screen, contains('Carregar mais'));
     expect(screen, isNot(contains('label: feedPublicarTileLabel')));
     expect(screen, isNot(contains('feedPublicarTileLabel()')));
     expect(screen, isNot(contains('showFxInsetPickerSheet')));

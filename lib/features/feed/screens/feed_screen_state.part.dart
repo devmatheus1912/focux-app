@@ -3,7 +3,12 @@ part of 'feed_screen.dart';
 class _FeedScreenState extends ConsumerState<FeedScreen> {
   final Map<int, int> _curtidasLocais = {};
   final Map<int, int> _comentariosLocais = {};
+  final _searchController = TextEditingController();
   List<FeedPost> _posts = [];
+  var _query = '';
+  var _hasMore = false;
+  var _loadingMore = false;
+  String? _nextCursor;
   bool _loading = true;
   String? _erro;
   DateTime? _fetchedAt;
@@ -14,18 +19,27 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
     _load();
   }
 
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
   Future<void> _load() async {
     setState(() {
       _loading = true;
       _erro = null;
     });
     try {
-      final posts =
-          await FeedRepository(ref.read(apiClientProvider)).listarPersonal();
+      final pagina = await FeedRepository(
+        ref.read(apiClientProvider),
+      ).listarPersonalPagina();
       if (!mounted) return;
       setState(() {
-        _posts = posts;
-        for (final p in posts) {
+        _posts = pagina.content;
+        _hasMore = pagina.hasNext;
+        _nextCursor = pagina.nextCursor;
+        for (final p in pagina.content) {
           _curtidasLocais[p.id] = p.totalCurtidas;
           _comentariosLocais[p.id] = p.totalComentarios;
         }
@@ -39,6 +53,34 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
           _erro = friendlyError(e);
         });
       }
+    }
+  }
+
+  Future<void> _carregarMais() async {
+    if (_loadingMore || !_hasMore || _query.trim().isNotEmpty) return;
+    setState(() => _loadingMore = true);
+    try {
+      final pagina = await FeedRepository(
+        ref.read(apiClientProvider),
+      ).listarPersonalPagina(cursor: _nextCursor);
+      if (!mounted) return;
+      setState(() {
+        final seen = _posts.map((p) => p.id).toSet();
+        for (final p in pagina.content) {
+          if (seen.add(p.id)) {
+            _posts.add(p);
+            _curtidasLocais[p.id] = p.totalCurtidas;
+            _comentariosLocais[p.id] = p.totalComentarios;
+          }
+        }
+        _hasMore = pagina.hasNext;
+        _nextCursor = pagina.nextCursor;
+        _loadingMore = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _loadingMore = false);
+      FeedbackHelper.showError(context, friendlyError(e));
     }
   }
 
@@ -134,13 +176,14 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
     });
   }
 
-  Widget _buildBody(Color primary) {
+  Widget _buildBody(Color primary, List<FeedPost> visible) {
     if (_posts.isEmpty) {
       return RefreshIndicator(
         color: primary,
         onRefresh: _load,
         child: ListView(
           physics: const AlwaysScrollableScrollPhysics(),
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           children: [
             FxEmptyState(
               icon: 'rss',
@@ -156,21 +199,53 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
         ),
       );
     }
+    if (visible.isEmpty) {
+      return RefreshIndicator(
+        color: primary,
+        onRefresh: _load,
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          children: [
+            FxEmptyState(
+              icon: 'search',
+              title: 'Nada encontrado',
+              subtitle: 'Ajuste a busca para achar outra publicação.',
+              action: FxEmptyAction(
+                label: 'Limpar busca',
+                onTap: () {
+                  _searchController.clear();
+                  setState(() => _query = '');
+                },
+              ),
+            ),
+          ],
+        ),
+      );
+    }
 
+    final showMore = _hasMore && _query.trim().isEmpty;
     return RefreshIndicator(
       color: primary,
       onRefresh: _load,
       child: ListView.builder(
         physics: const AlwaysScrollableScrollPhysics(),
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         padding: const EdgeInsets.fromLTRB(
           FxSettingsLayout.pageInset,
           8,
           FxSettingsLayout.pageInset,
           32,
         ),
-        itemCount: _posts.length,
+        itemCount: visible.length + (showMore ? 1 : 0),
         itemBuilder: (_, i) {
-          final p = _posts[i];
+          if (showMore && i == visible.length) {
+            return FxSatelliteListTile(
+              title: _loadingMore ? 'Carregando…' : 'Carregar mais',
+              onTap: _loadingMore ? null : _carregarMais,
+            );
+          }
+          final p = visible[i];
           return _FeedPostCard(
             post: p,
             index: i,
@@ -192,21 +267,26 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
     final chrome = ShellChrome.of(context);
     final isDark = chrome.isDark;
     final primary = Theme.of(context).colorScheme.primary;
+    final mute = chrome.mute;
     final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
+    final visible =
+        _posts
+            .where(
+              (p) => feedMatchesQuery(
+                titulo: p.titulo,
+                conteudo: p.conteudo,
+                query: _query,
+              ),
+            )
+            .toList();
     return fxScreenA11yScope(
       label: 'Feed',
       child: FxShellScaffold(
         useMesh: true,
         appBar: FxShellAppBar(
           title: 'Feed',
-          subtitle: feedHubSubtitle(freshnessLabel),
-          actions: [
-            ShellHeaderIconButton(
-              icon: 'plus',
-              tooltip: 'Nova publicação',
-              onTap: _abrirFormulario,
-            ),
-          ],
+          subtitle: feedHubSubtitle(freshnessLabel, count: _posts.length),
+          onBack: () => safePopOrGo(context, '/dashboard/personal'),
         ),
         body:
             _loading
@@ -221,7 +301,85 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                   message: _erro!,
                   onRetry: _load,
                 )
-                : FxContentWidthLimiter(child: _buildBody(primary)),
+                : Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(
+                        TokensStrip.s4,
+                        TokensStrip.s2,
+                        TokensStrip.s4,
+                        TokensStrip.s2,
+                      ),
+                      child: DecoratedBox(
+                        decoration: fxStripCardDecoration(
+                          context,
+                          accent: primary,
+                          radius: TokensStrip.rCard,
+                          glowStrength: 0.03,
+                        ),
+                        child: TextField(
+                          controller: _searchController,
+                          onChanged: (value) => setState(() => _query = value),
+                          onTapOutside:
+                              (_) =>
+                                  FocusManager.instance.primaryFocus?.unfocus(),
+                          textInputAction: TextInputAction.search,
+                          decoration: InputDecoration(
+                            isDense: true,
+                            hintText: 'Buscar publicação',
+                            border: InputBorder.none,
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 12,
+                            ),
+                            prefixIcon: Icon(
+                              Icons.search_rounded,
+                              color: primary,
+                              size: 20,
+                            ),
+                            suffixIcon:
+                                _query.trim().isEmpty
+                                    ? null
+                                    : IconButton(
+                                      tooltip: 'Limpar busca',
+                                      onPressed: () {
+                                        _searchController.clear();
+                                        setState(() => _query = '');
+                                      },
+                                      icon: Icon(
+                                        Icons.close_rounded,
+                                        color: mute,
+                                        size: 18,
+                                      ),
+                                    ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: FxContentWidthLimiter(
+                        child: _buildBody(primary, visible),
+                      ),
+                    ),
+                    if (!_loading && _erro == null)
+                      SafeArea(
+                        top: false,
+                        child: Padding(
+                          padding: EdgeInsets.fromLTRB(
+                            FxSettingsLayout.pageInset,
+                            TokensStrip.s2,
+                            FxSettingsLayout.pageInset,
+                            TokensStrip.s3 +
+                                MediaQuery.viewInsetsOf(context).bottom,
+                          ),
+                          child: FxLiquidPrimaryButton(
+                            label: 'Nova publicação',
+                            onPressed: _abrirFormulario,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
       ),
     );
   }

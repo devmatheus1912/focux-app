@@ -137,6 +137,7 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen> {
     required Color ink,
     required Color mute,
     required String? freshnessLabel,
+    required int hubCount,
   }) {
     if (_selectionActive) {
       return FxShellAppBar(
@@ -176,6 +177,7 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen> {
       title: 'Mensagens',
       subtitle: chatInboxHubSubtitle(
         view: _view,
+        count: hubCount,
         freshness: freshnessLabel,
       ),
       onBack: () => safePopOrGo(context, '/dashboard/personal'),
@@ -199,11 +201,6 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen> {
           icon: 'chat',
           tooltip: 'Trocar visão',
           onTap: _abrirVista,
-        ),
-        ShellHeaderIconButton(
-          icon: 'plus',
-          tooltip: 'Nova mensagem',
-          onTap: _showAlunoPicker,
         ),
       ],
     );
@@ -255,6 +252,16 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen> {
       });
     }
 
+    final hubCount = switch (_view) {
+      ChatInboxHubView.todas =>
+        (ref.watch(chatInboxProvider).valueOrNull?.length ?? 0) +
+            _extraInbox.length,
+      ChatInboxHubView.naoLidas =>
+        ref.watch(chatInboxUnreadProvider).valueOrNull?.length ?? 0,
+      ChatInboxHubView.arquivadas =>
+        ref.watch(chatInboxArchivedProvider).valueOrNull?.length ?? 0,
+    };
+
     return fxScreenA11yScope(
       label: 'Mensagens',
       child: FxShellScaffold(
@@ -263,10 +270,36 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen> {
           ink: ink,
           mute: mute,
           freshnessLabel: freshnessLabel,
+          hubCount: hubCount,
         ),
-        body: _isSearching
-            ? _buildSearchBody(isDark, ink, mute)
-            : FxContentWidthLimiter(child: _buildHubBody(isDark, primary)),
+        body: Column(
+          children: [
+            Expanded(
+              child:
+                  _isSearching
+                      ? _buildSearchBody(isDark, ink, mute)
+                      : FxContentWidthLimiter(
+                        child: _buildHubBody(isDark, primary),
+                      ),
+            ),
+            if (!_isSearching && !_selectionActive)
+              SafeArea(
+                top: false,
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    FxSettingsLayout.pageInset,
+                    TokensStrip.s2,
+                    FxSettingsLayout.pageInset,
+                    TokensStrip.s3 + MediaQuery.viewInsetsOf(context).bottom,
+                  ),
+                  child: FxLiquidPrimaryButton(
+                    label: 'Nova mensagem',
+                    onPressed: _showAlunoPicker,
+                  ),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -339,6 +372,7 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen> {
           child: TextField(
             controller: _searchCtrl,
             autofocus: true,
+            onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
             style: TextStyle(color: ink, fontSize: 16),
             decoration: InputDecoration(
               hintText: 'Buscar em todas as conversas…',
@@ -377,6 +411,7 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen> {
       );
     }
     return ListView.builder(
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       padding: const EdgeInsets.fromLTRB(
         FxSettingsLayout.pageInset,
         TokensStrip.s2,

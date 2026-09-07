@@ -19,6 +19,20 @@ void main() {
       feedHubSubtitle('há 1 min'),
       'Novidades para os seus alunos · há 1 min',
     );
+    expect(feedCountLabel(0), 'Nenhuma publicação');
+    expect(feedCountLabel(2), '2 publicações');
+    expect(
+      feedHubSubtitle('há 1 min', count: 2),
+      '2 publicações · há 1 min',
+    );
+    expect(
+      feedMatchesQuery(titulo: 'Treino', conteudo: 'Beba água', query: 'agua'),
+      isTrue,
+    );
+    expect(
+      feedMatchesQuery(titulo: 'Treino', conteudo: 'Beba água', query: 'xyz'),
+      isFalse,
+    );
     expect(feedTipoTemMidia('IMAGEM'), isTrue);
     expect(feedTipoTemMidia('VIDEO'), isTrue);
     expect(feedTipoTemMidia('TEXTO'), isFalse);
