@@ -67,8 +67,12 @@ class FeedbackVideoRepository {
     return (await listarPagina(alunoId: alunoId)).content;
   }
 
-  Future<List<FeedbackVideo>> meus() async {
-    return (await _pagina('/api/feedback-videos/me', size: 100)).content;
+  Future<Pagina<FeedbackVideo>> listarMeus({
+    int page = 0,
+    int size = 20,
+    String? q,
+  }) {
+    return _pagina('/api/feedback-videos/me', page: page, size: size, q: q);
   }
 
   Future<Pagina<FeedbackVideo>> _pagina(

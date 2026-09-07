@@ -407,6 +407,15 @@ class CheckinRepository {
     return ExecucaoTreino.fromJson(r.data as Map<String, dynamic>);
   }
 
+  Future<ExecucaoTreino> detalhe(int execucaoId) async {
+    final r = await _dio.get('/api/checkin/$execucaoId');
+    final data = r.data;
+    if (data is! Map) {
+      throw FormatException('GET /api/checkin/{id} devolve a execução.');
+    }
+    return ExecucaoTreino.fromJson(Map<String, dynamic>.from(data));
+  }
+
   Future<Pagina<ExecucaoTreino>> historico({
     String? cursor,
     int size = 20,

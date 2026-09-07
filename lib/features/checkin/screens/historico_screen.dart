@@ -112,8 +112,9 @@ class _HistoricoCheckinScreenState
   void _abrirTreinos() => context.push('/checkin/treinos');
 
   void _abrirItem(ExecucaoTreino entry) {
-    if (historicoConcluido(entry.status)) return;
-    context.push('/checkin/executar', extra: entry.treinoId);
+    final id = entry.id;
+    if (id == null) return;
+    context.push(historicoDetalhePath(id));
   }
 
   @override
@@ -353,7 +354,7 @@ class _HistoricoTile extends StatelessWidget {
         color: concluido ? EagleTokens.good : EagleTokens.warn,
       ),
       accent: concluido ? null : EagleTokens.warn,
-      onTap: concluido ? null : onTap,
+      onTap: entry.id == null ? null : onTap,
     );
   }
 }

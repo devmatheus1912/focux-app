@@ -193,7 +193,16 @@ String leadCardSubtitle({String? objetivo, String? origem}) {
   return leadOrigemLabel(origem);
 }
 
+const leadFreeCap = 5;
+const leadLimitWarnFrom = 4;
+
+bool leadShowsLimitBanner(int count, {required bool isFreePlan}) {
+  return isFreePlan && count >= leadLimitWarnFrom;
+}
+
 String leadFreeLimitLabel(int count) {
-  if (count >= 5) return 'Limite de 5 leads atingido no Free.';
-  return '$count/5 leads no plano Free.';
+  if (count >= leadFreeCap) {
+    return 'Limite de $leadFreeCap leads atingido no Free.';
+  }
+  return '$count/$leadFreeCap leads no plano Free.';
 }

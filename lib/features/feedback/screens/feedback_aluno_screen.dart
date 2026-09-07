@@ -1,22 +1,30 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
+
 import '../../../core/brand/focux_microcopy.dart';
+import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
-import '../../../core/widgets/fx_input_deco.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../data/feedback_video_repository.dart';
+import '../utils/feedback_video_display.dart';
+import '../widgets/feedback_aluno_enviar_sheet.dart';
 
 class FeedbackAlunoScreen extends ConsumerStatefulWidget {
   const FeedbackAlunoScreen({super.key});
@@ -27,43 +35,81 @@ class FeedbackAlunoScreen extends ConsumerStatefulWidget {
 }
 
 class _FeedbackAlunoScreenState extends ConsumerState<FeedbackAlunoScreen> {
-  List<FeedbackVideo> _items = [];
+  final _searchCtrl = TextEditingController();
+  final _items = <FeedbackVideo>[];
   List<ExercicioOpcao> _exercicios = [];
-  bool _loading = true;
+  var _loading = true;
+  var _loadingMore = false;
+  var _hasNext = false;
+  var _page = 0;
   String? _erro;
+  DateTime? _fetchedAt;
+  var _query = '';
+  Timer? _searchDebounce;
 
   @override
   void initState() {
     super.initState();
-    _load();
+    _load(reset: true);
   }
 
-  Future<void> _load() async {
-    setState(() {
-      _loading = true;
-      _erro = null;
+  @override
+  void dispose() {
+    _searchDebounce?.cancel();
+    _searchCtrl.dispose();
+    super.dispose();
+  }
+
+  void _onQueryChanged(String value) {
+    setState(() => _query = value);
+    _searchDebounce?.cancel();
+    _searchDebounce = Timer(const Duration(milliseconds: 280), () {
+      if (mounted) _load(reset: true);
     });
+  }
+
+  Future<void> _load({required bool reset}) async {
+    if (reset) {
+      setState(() {
+        _loading = true;
+        _erro = null;
+        _items.clear();
+        _page = 0;
+        _hasNext = false;
+      });
+    } else {
+      if (_loadingMore || !_hasNext) return;
+      setState(() => _loadingMore = true);
+    }
     try {
       final repo = FeedbackVideoRepository(ref.read(apiClientProvider));
-      final items = await repo.meus();
-      List<ExercicioOpcao> exs = [];
-      try {
-        exs = await repo.exerciciosDisponiveis();
-      } catch (_) {}
-      if (mounted) {
-        setState(() {
-          _items = items;
-          _exercicios = exs;
-          _loading = false;
-        });
+      final pagina = await repo.listarMeus(
+        page: reset ? 0 : _page,
+        q: _query,
+      );
+      List<ExercicioOpcao>? exs;
+      if (reset) {
+        try {
+          exs = await repo.exerciciosDisponiveis();
+        } catch (_) {}
       }
+      if (!mounted) return;
+      setState(() {
+        _items.addAll(pagina.content);
+        _hasNext = pagina.hasNext;
+        _page = (pagina.page ?? 0) + 1;
+        if (exs != null) _exercicios = exs;
+        _loading = false;
+        _loadingMore = false;
+        if (reset) _fetchedAt = DateTime.now();
+      });
     } catch (e) {
-      if (mounted) {
-        setState(() {
-          _erro = friendlyError(e);
-          _loading = false;
-        });
-      }
+      if (!mounted) return;
+      setState(() {
+        _erro = friendlyError(e);
+        _loading = false;
+        _loadingMore = false;
+      });
     }
   }
 
@@ -76,9 +122,9 @@ class _FeedbackAlunoScreenState extends ConsumerState<FeedbackAlunoScreen> {
       return;
     }
 
-    final result = await showFxHomeSheet<_FormResult>(
+    final result = await showFxHomeSheet<FeedbackAlunoFormResult>(
       context,
-      builder: (_) => _EnviarFormSheet(exercicios: _exercicios),
+      builder: (_) => FeedbackAlunoEnviarSheet(exercicios: _exercicios),
     );
     if (result == null) return;
 
@@ -93,7 +139,7 @@ class _FeedbackAlunoScreenState extends ConsumerState<FeedbackAlunoScreen> {
           context,
           'Vídeo enviado! Análise IA em andamento — atualize em alguns segundos.',
         );
-        _load();
+        _load(reset: true);
       }
     } catch (e) {
       if (mounted) FeedbackHelper.showError(context, friendlyError(e));
@@ -110,6 +156,7 @@ class _FeedbackAlunoScreenState extends ConsumerState<FeedbackAlunoScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
     final chrome = ShellChrome.forDark(isDark);
+    final mute = chrome.mute;
 
     return fxScreenA11yScope(
       label: 'Form check',
@@ -117,253 +164,232 @@ class _FeedbackAlunoScreenState extends ConsumerState<FeedbackAlunoScreen> {
         useMesh: true,
         appBar: FxShellAppBar(
           title: 'Form check',
-          subtitle: 'Análise IA da sua execução',
-          onBack: () => context.pop(),
+          subtitle: FxHubFreshness.joinCount(
+            feedbackVideoCountLabel(_items.length),
+            FxHubFreshness.fromFetchedAt(_fetchedAt),
+          ),
+          onBack: () => safePopOrGo(context, '/dashboard/aluno'),
         ),
-        floatingActionButton: FloatingActionButton.extended(
-          onPressed: _enviar,
-          icon: const Icon(Icons.videocam_outlined),
-          label: const Text('Enviar vídeo'),
-        ),
-        body:
-            _loading
-                ? const Padding(
-                  padding: EdgeInsets.all(TokensStrip.s4),
-                  child: SkeletonList(count: 4),
-                )
-                : _erro != null
-                ? FxErrorState(
-                  chromeOnDark: isDark,
-                  primary: primary,
-                  message: _erro!,
-                  onRetry: _load,
-                  title: FocuxMicrocopy.naoFoiPossivelCarregar,
-                )
-                : RefreshIndicator(
-                  onRefresh: _load,
-                  child:
-                      _items.isEmpty
-                          ? ListView(
-                            physics: const AlwaysScrollableScrollPhysics(),
-                            children: const [
-                              SizedBox(height: 48),
-                              FxEmptyState(
-                                icon: 'spark',
-                                title: 'Nenhum vídeo enviado ainda',
-                                subtitle:
-                                    'Toque em Enviar vídeo para receber análise IA da sua execução.',
-                              ),
-                            ],
-                          )
-                          : ListView.separated(
-                            padding: const EdgeInsets.all(TokensStrip.s4),
-                            itemCount: _items.length,
-                            separatorBuilder:
-                                (_, __) => const SizedBox(height: 8),
-                            itemBuilder: (_, i) {
-                              final f = _items[i];
-                              final exNome =
-                                  _exercicios
-                                      .where((e) => e.id == f.exercicioId)
-                                      .map((e) => e.nome)
-                                      .firstOrNull ??
-                                  'Exercício #${f.exercicioId}';
-                              return Container(
-                                decoration: chrome.listCard(primary: primary),
-                                child: ExpansionTile(
-                                  title: Text(
-                                    exNome,
-                                    style: TextStyle(
-                                      color: chrome.ink,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                  subtitle: Text(
-                                    '${f.statusAnalise ?? 'PENDENTE'} · ${f.criadoEm.toLocal().toString().substring(0, 16)}',
-                                    style: TextStyle(color: chrome.mute),
-                                  ),
-                                  leading:
-                                      f.aiScore != null
-                                          ? CircleAvatar(
-                                            backgroundColor: _scoreColor(
-                                              f.aiScore,
-                                            ),
-                                            foregroundColor: Colors.white,
-                                            child: Text('${f.aiScore}'),
-                                          )
-                                          : CircleAvatar(
-                                            backgroundColor: BrandPalette.soft(
-                                              primary,
-                                              dark: isDark,
-                                            ),
-                                            child: Icon(
-                                              Icons.hourglass_empty,
-                                              color: primary,
-                                            ),
-                                          ),
-                                  children: [
-                                    if (f.aiAnalise != null &&
-                                        f.aiAnalise!.isNotEmpty)
-                                      Padding(
-                                        padding: const EdgeInsets.all(16),
-                                        child: Text(
-                                          f.aiAnalise!,
-                                          style: TextStyle(
-                                            height: 1.4,
-                                            color: chrome.ink,
-                                          ),
-                                        ),
-                                      ),
-                                    if (f.comentario.isNotEmpty)
-                                      Padding(
-                                        padding: const EdgeInsets.fromLTRB(
-                                          16,
-                                          0,
-                                          16,
-                                          16,
-                                        ),
-                                        child: Text(
-                                          'Sua nota: ${f.comentario}',
-                                          style: TextStyle(color: chrome.mute),
-                                        ),
-                                      ),
-                                  ],
-                                ),
-                              );
-                            },
-                          ),
-                ),
-      ),
-    );
-  }
-}
-
-class _FormResult {
-  final int exercicioId;
-  final String videoUrl;
-  final String? comentario;
-  _FormResult({
-    required this.exercicioId,
-    required this.videoUrl,
-    this.comentario,
-  });
-}
-
-class _EnviarFormSheet extends StatefulWidget {
-  final List<ExercicioOpcao> exercicios;
-  const _EnviarFormSheet({required this.exercicios});
-
-  @override
-  State<_EnviarFormSheet> createState() => _EnviarFormSheetState();
-}
-
-class _EnviarFormSheetState extends State<_EnviarFormSheet> {
-  int? _exercicioId;
-  final _videoUrl = TextEditingController();
-  final _comentario = TextEditingController();
-
-  @override
-  void initState() {
-    super.initState();
-    _exercicioId = widget.exercicios.first.id;
-  }
-
-  @override
-  void dispose() {
-    _videoUrl.dispose();
-    _comentario.dispose();
-    super.dispose();
-  }
-
-  void _salvar() {
-    final url = _videoUrl.text.trim();
-    if (_exercicioId == null) return;
-    if (url.isEmpty ||
-        !(url.startsWith('http://') || url.startsWith('https://'))) {
-      FeedbackHelper.showError(
-        context,
-        'Cole uma URL válida (https://) do vídeo no YouTube ou Drive.',
-      );
-      return;
-    }
-    Navigator.pop(
-      context,
-      _FormResult(
-        exercicioId: _exercicioId!,
-        videoUrl: url,
-        comentario:
-            _comentario.text.trim().isEmpty ? null : _comentario.text.trim(),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final primary = Theme.of(context).colorScheme.primary;
-    return FxHomeSheetSurface(
-      isDark: isDark,
-      maxHeight:
-          MediaQuery.sizeOf(context).height * FxHomeSheetChrome.maxHeightFactor,
-      child: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          mainAxisSize: MainAxisSize.min,
+        body: Column(
           children: [
-            FxHomeSheetHandle(isDark: isDark),
-            SizedBox(height: TokensStrip.s4),
-            FxHomeSheetHeader(
-              isDark: isDark,
-              title: 'Enviar vídeo para análise',
-              subtitle:
-                  'A IA da Focux retorna pontos positivos, correções e score em segundos.',
-              leading: Icon(Icons.videocam_outlined, color: primary, size: 18),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                TokensStrip.s4,
+                TokensStrip.s2,
+                TokensStrip.s4,
+                TokensStrip.s2,
+              ),
+              child: DecoratedBox(
+                decoration: fxStripCardDecoration(
+                  context,
+                  accent: primary,
+                  radius: TokensStrip.rCard,
+                  glowStrength: 0.03,
+                ),
+                child: TextField(
+                  controller: _searchCtrl,
+                  onChanged: _onQueryChanged,
+                  onTapOutside:
+                      (_) => FocusManager.instance.primaryFocus?.unfocus(),
+                  textInputAction: TextInputAction.search,
+                  decoration: InputDecoration(
+                    isDense: true,
+                    hintText: 'Buscar no comentário',
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 12,
+                    ),
+                    prefixIcon: Icon(
+                      Icons.search_rounded,
+                      color: primary,
+                      size: 20,
+                    ),
+                    suffixIcon:
+                        _query.trim().isEmpty
+                            ? null
+                            : IconButton(
+                              tooltip: 'Limpar busca',
+                              onPressed: () {
+                                _searchDebounce?.cancel();
+                                _searchCtrl.clear();
+                                setState(() => _query = '');
+                                _load(reset: true);
+                              },
+                              icon: Icon(
+                                Icons.close_rounded,
+                                color: mute,
+                                size: 18,
+                              ),
+                            ),
+                  ),
+                ),
+              ),
             ),
-            SizedBox(height: TokensStrip.s3),
-            DropdownButtonFormField<int>(
-              initialValue: _exercicioId,
-              isExpanded: true,
-              decoration: FxInputDeco.build(context, 'Exercício *'),
-              items:
-                  widget.exercicios
-                      .map(
-                        (e) =>
-                            DropdownMenuItem(value: e.id, child: Text(e.nome)),
+            Expanded(
+              child:
+                  _loading
+                      ? const Padding(
+                        padding: EdgeInsets.all(FxSettingsLayout.pageInset),
+                        child: SkeletonList(count: 4),
                       )
-                      .toList(),
-              onChanged: (v) => setState(() => _exercicioId = v),
+                      : _erro != null
+                      ? FxErrorState(
+                        chromeOnDark: isDark,
+                        primary: primary,
+                        message: _erro!,
+                        onRetry: () => _load(reset: true),
+                        title: FocuxMicrocopy.naoFoiPossivelCarregar,
+                      )
+                      : FxContentWidthLimiter(child: _buildList(chrome, primary, isDark)),
             ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _videoUrl,
-              keyboardType: TextInputType.url,
-              decoration: FxInputDeco.build(
-                context,
-                'URL do vídeo *',
-                hint: 'https://youtube.com/...',
+            if (!_loading && _erro == null)
+              SafeArea(
+                top: false,
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    FxSettingsLayout.pageInset,
+                    TokensStrip.s2,
+                    FxSettingsLayout.pageInset,
+                    TokensStrip.s3 + MediaQuery.viewInsetsOf(context).bottom,
+                  ),
+                  child: FxLiquidPrimaryButton(
+                    label: 'Enviar vídeo',
+                    onPressed: _enviar,
+                  ),
+                ),
               ),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _comentario,
-              maxLines: 2,
-              decoration: FxInputDeco.build(
-                context,
-                'O que você quer que a IA observe? (opcional)',
-                hint: 'Ex: amplitude do agachamento, joelho passando do pé',
-              ),
-            ),
-            const SizedBox(height: 20),
-            FilledButton.icon(
-              onPressed: _salvar,
-              icon: const Icon(Icons.send),
-              label: const Text('Enviar para análise'),
-              style: FilledButton.styleFrom(
-                minimumSize: const Size.fromHeight(48),
-              ),
-            ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildList(ShellPalette chrome, Color primary, bool isDark) {
+    if (_items.isEmpty) {
+      final filtered = _query.trim().isNotEmpty;
+      return RefreshIndicator(
+        color: primary,
+        onRefresh: () => _load(reset: true),
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          children: [
+            if (filtered)
+              FxEmptyState(
+                icon: 'search',
+                title: 'Nenhum vídeo encontrado',
+                subtitle: 'Ajuste a busca para ver outros envios.',
+                action: FxEmptyAction(
+                  label: 'Limpar busca',
+                  onTap: () {
+                    _searchDebounce?.cancel();
+                    _searchCtrl.clear();
+                    setState(() => _query = '');
+                    _load(reset: true);
+                  },
+                ),
+              )
+            else
+              FxEmptyState(
+                icon: 'spark',
+                title: 'Nenhum vídeo enviado ainda',
+                subtitle:
+                    'Toque em Enviar vídeo para receber análise IA da sua execução.',
+                action: FxEmptyAction(
+                  label: 'Enviar vídeo',
+                  onTap: _enviar,
+                ),
+              ),
+          ],
+        ),
+      );
+    }
+
+    final showMore = _hasNext;
+    return RefreshIndicator(
+      color: primary,
+      onRefresh: () => _load(reset: true),
+      child: ListView.builder(
+        physics: const AlwaysScrollableScrollPhysics(),
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+        padding: const EdgeInsets.fromLTRB(
+          FxSettingsLayout.pageInset,
+          8,
+          FxSettingsLayout.pageInset,
+          32,
+        ),
+        itemCount: _items.length + (showMore ? 1 : 0),
+        itemBuilder: (_, i) {
+          if (showMore && i == _items.length) {
+            return FxSatelliteListTile(
+              title: _loadingMore ? 'Carregando…' : 'Carregar mais',
+              onTap: _loadingMore ? null : () => _load(reset: false),
+            );
+          }
+          return _videoTile(_items[i], chrome, primary, isDark);
+        },
+      ),
+    );
+  }
+
+  Widget _videoTile(
+    FeedbackVideo f,
+    ShellPalette chrome,
+    Color primary,
+    bool isDark,
+  ) {
+    final exNome =
+        _exercicios
+            .where((e) => e.id == f.exercicioId)
+            .map((e) => e.nome)
+            .firstOrNull ??
+        'Exercício #${f.exercicioId}';
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      decoration: chrome.listCard(primary: primary),
+      child: ExpansionTile(
+        title: Text(
+          exNome,
+          style: TextStyle(color: chrome.ink, fontWeight: FontWeight.w700),
+        ),
+        subtitle: Text(
+          feedbackVideoSubtitle(
+            criadoEm: f.criadoEm,
+            aiScore: f.aiScore,
+            statusAnalise: f.statusAnalise,
+          ),
+          style: TextStyle(color: chrome.mute),
+        ),
+        leading:
+            f.aiScore != null
+                ? CircleAvatar(
+                  backgroundColor: _scoreColor(f.aiScore),
+                  foregroundColor: Colors.white,
+                  child: Text('${f.aiScore}'),
+                )
+                : CircleAvatar(
+                  backgroundColor: BrandPalette.soft(primary, dark: isDark),
+                  child: Icon(Icons.hourglass_empty, color: primary),
+                ),
+        children: [
+          if (f.aiAnalise != null && f.aiAnalise!.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text(
+                f.aiAnalise!,
+                style: TextStyle(height: 1.4, color: chrome.ink),
+              ),
+            ),
+          if (f.comentario.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+              child: Text(
+                'Sua nota: ${f.comentario}',
+                style: TextStyle(color: chrome.mute),
+              ),
+            ),
+        ],
       ),
     );
   }
