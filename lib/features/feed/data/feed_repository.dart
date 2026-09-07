@@ -1,4 +1,5 @@
 import '../../../core/api/api_client.dart';
+import '../../../core/api/pagina.dart';
 
 class FeedPost {
   final int id;
@@ -93,12 +94,32 @@ class FeedRepository {
 
   Future<List<FeedPost>> listarPersonal() async {
     final r = await _client.dio.get('/api/feed');
-    return (r.data as List).map((e) => FeedPost.fromJson(e)).toList();
+    final data = r.data;
+    if (data is! Map) {
+      throw FormatException(
+        'GET /api/feed devolve Pagina, não lista crua.',
+      );
+    }
+    final pagina = Pagina.fromJson(
+      Map<String, dynamic>.from(data),
+      (item) => FeedPost.fromJson(Map<String, dynamic>.from(item as Map)),
+    );
+    return pagina.content;
   }
 
   Future<List<FeedPost>> listarAluno() async {
     final r = await _client.dio.get('/api/feed/aluno');
-    return (r.data as List).map((e) => FeedPost.fromJson(e)).toList();
+    final data = r.data;
+    if (data is! Map) {
+      throw FormatException(
+        'GET /api/feed/aluno devolve Pagina, não lista crua.',
+      );
+    }
+    final pagina = Pagina.fromJson(
+      Map<String, dynamic>.from(data),
+      (item) => FeedPost.fromJson(Map<String, dynamic>.from(item as Map)),
+    );
+    return pagina.content;
   }
 
   Future<FeedPost> criar(

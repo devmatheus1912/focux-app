@@ -13,4 +13,13 @@ void main() {
     expect(screen, anyOf(contains('FxLoading'), contains('SkeletonLoader'), contains('SkeletonList'), contains('DashboardShimmer'), contains('Shimmer'), contains('IaCopilotInsightsLoading'), contains('_loading')));
     expect(screen, contains('RefreshIndicator'));
   });
+
+  test('templates card keeps Ativar from crushing title text', () {
+    final screen = readScreenSourceBundle(
+      'lib/features/automacoes/screens/automacoes_screen.dart',
+    );
+    expect(screen, contains('Expanded('));
+    expect(screen, contains("child: const Text('Ativar')"));
+    expect(screen, isNot(contains('trailing: FilledButton')));
+  });
 }
