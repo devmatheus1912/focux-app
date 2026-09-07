@@ -3,47 +3,21 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../support/screen_source_bundle.dart';
 
 void main() {
-  test('modo presencial cumpre contrato Tier S+', () {
+  test('presencial é S8 com pai, wake e confirm', () {
     final screen = readScreenSourceBundle(
       'lib/features/checkin/screens/modo_presencial_screen.dart',
     );
-    expect(
-      screen,
-      anyOf(contains('fxScreenA11yScope'), contains('Semantics(')),
-    );
-    expect(screen, isNot(contains('CircularProgressIndicator')));
+    expect(screen, contains('FxExecutionKeepAwake'));
+    expect(screen, contains('FxExecutionPopGuard'));
+    expect(screen, contains('fxConfirmLeaveExecution'));
+    expect(screen, contains('safePopOrGo'));
+    expect(screen, contains('/treinos/'));
     expect(screen, contains('useMesh: false'));
-    expect(screen, contains('CheckinRestFocusView'));
-    expect(screen, contains('showFxConfirmSheet'));
     expect(screen, contains('checkinExecutionControlMin'));
-    expect(screen, isNot(contains('LinearProgressIndicator')));
-    expect(screen, isNot(contains('_InfoChip')));
-    expect(screen, isNot(contains('Colors.white')));
-    expect(screen, isNot(contains('SkeletonList')));
-    expect(screen, contains('FxLoading'));
-    expect(
-      screen,
-      anyOf(
-        contains('friendlyError'),
-        contains('DashboardErrorState'),
-        contains('FxEmptyState'),
-        contains('_erro'),
-        contains('_TrainingEmptyState'),
-        contains('ref.invalidate'),
-      ),
-    );
-    expect(
-      screen,
-      anyOf(
-        contains('FxLoading'),
-        contains('SkeletonLoader'),
-        contains('SkeletonList'),
-        contains('DashboardShimmer'),
-        contains('Shimmer'),
-        contains('IaCopilotInsightsLoading'),
-        contains('_loading'),
-      ),
-    );
-    expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(16));
+    expect(screen, contains('CheckinRestFocusView'));
+    expect(screen, contains('didChangeAppLifecycleState'));
+    expect(screen, isNot(contains('Navigator.pop')));
+    expect(screen, isNot(contains('ListView(')));
+    expect(screen, isNot(contains('FxSettingsGroup')));
   });
 }

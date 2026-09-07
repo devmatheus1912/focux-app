@@ -41,6 +41,12 @@ Future<void> _openTreinoDetailMenu({
               onTap: () => Navigator.pop(sheetContext, 'assign'),
             ),
             TreinoInsetActionSpec(
+              icon: Icons.stay_current_landscape_rounded,
+              label: 'Modo presencial',
+              showChevron: true,
+              onTap: () => Navigator.pop(sheetContext, 'presencial'),
+            ),
+            TreinoInsetActionSpec(
               icon: Icons.assignment_ind_rounded,
               label: 'Copiar para aluno',
               onTap: () => Navigator.pop(sheetContext, 'clone'),
@@ -94,6 +100,16 @@ Future<void> _openTreinoDetailMenu({
           alreadyInTreinoIds:
               treino.exercicios.map((item) => item.exercicio.id).toSet(),
         );
+        break;
+      case 'presencial':
+        if (treino.exercicios.isEmpty) {
+          FeedbackHelper.showError(
+            context,
+            'Adicione exercícios antes do modo presencial.',
+          );
+          break;
+        }
+        context.push('/treino-presencial/$treinoId');
         break;
       case 'assign':
         try {

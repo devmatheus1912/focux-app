@@ -346,3 +346,7 @@ fresco de qualquer BFF (`PlanoFeaturesBffCache` ou Home) ou cache local.
 `GET /api/planos/me` fica só para cold start sem cache e para `refresh`
 (compra, FCM `plan_sync`).
 
+`GET /api/planos/me` inclui `limiteLeads` (`Integer`, `null` = ilimitado).
+Free / plano ausente = `5`, o mesmo teto de `LeadService`. O app não
+deriva o banner de leads pelo nome `FREE`.
+

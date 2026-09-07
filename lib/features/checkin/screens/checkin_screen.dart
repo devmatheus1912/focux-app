@@ -10,8 +10,8 @@ import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_celebration_overlay.dart';
-import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_empty_state.dart';
+import '../../../core/widgets/fx_execution_chrome.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_loading.dart';
@@ -36,7 +36,8 @@ class CheckinScreen extends ConsumerStatefulWidget {
   ConsumerState<CheckinScreen> createState() => _CheckinScreenState();
 }
 
-class _CheckinScreenState extends ConsumerState<CheckinScreen> {
+class _CheckinScreenState extends ConsumerState<CheckinScreen>
+    with WidgetsBindingObserver {
   ExecucaoTreino? _execucao;
   bool _loading = true;
   String? _loadError;
@@ -45,20 +46,43 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
   Duration _duration = Duration.zero;
   bool _showRestTimer = false;
   int _restSeconds = 60;
+  DateTime? _restEndsAt;
   Timer? _restTimer;
   int? _focoTreinoExercicioId;
+  DateTime _startedAt = DateTime.now();
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _iniciar();
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _timer?.cancel();
     _restTimer?.cancel();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) _syncClocks();
+  }
+
+  void _syncClocks() {
+    if (!mounted) return;
+    setState(() {
+      _duration = DateTime.now().difference(_startedAt);
+      if (_showRestTimer && _restEndsAt != null) {
+        _restSeconds = checkinRestRemaining(endsAt: _restEndsAt!);
+        if (_restSeconds <= 0) {
+          _restTimer?.cancel();
+          _showRestTimer = false;
+        }
+      }
+    });
   }
 
   Future<void> _iniciar() async {
@@ -75,15 +99,16 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
         _execucao = execucao;
         _loading = false;
       });
-      final startedAt =
+      _startedAt =
           execucao.iniciadoEm == null
               ? DateTime.now()
               : DateTime.parse(execucao.iniciadoEm!).toLocal();
-      _duration = DateTime.now().difference(startedAt);
+      _duration = DateTime.now().difference(_startedAt);
+      _timer?.cancel();
       _timer = Timer.periodic(const Duration(seconds: 1), (_) {
         if (!mounted) return;
         setState(() {
-          _duration = DateTime.now().difference(startedAt);
+          _duration = DateTime.now().difference(_startedAt);
         });
       });
     } catch (e) {
@@ -169,20 +194,23 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
 
   void _startRestTimer(int seconds) {
     _restTimer?.cancel();
+    final clamped = seconds.clamp(15, 600).toInt();
     setState(() {
       _showRestTimer = true;
-      _restSeconds = seconds.clamp(15, 600).toInt();
+      _restEndsAt = DateTime.now().add(Duration(seconds: clamped));
+      _restSeconds = clamped;
     });
     _restTimer = Timer.periodic(const Duration(seconds: 1), (_) {
-      if (!mounted) return;
-      if (_restSeconds <= 0) {
+      if (!mounted || _restEndsAt == null) return;
+      final left = checkinRestRemaining(endsAt: _restEndsAt!);
+      if (left <= 0) {
         _restTimer?.cancel();
         setState(() {
           _showRestTimer = false;
         });
       } else {
         setState(() {
-          _restSeconds--;
+          _restSeconds = left;
         });
       }
     });
@@ -288,15 +316,11 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
       0,
       (sum, e) => sum + e.seriesFeitas,
     );
-    if (doneSeries > 0 || _duration.inSeconds > 30) {
-      final ok = await showFxConfirmSheet(
-        context,
-        title: 'Sair do treino?',
-        message: 'O tempo e as séries já marcadas ficam salvos.',
-        confirmLabel: 'Sair',
-      );
-      if (!ok || !mounted) return;
-    }
+    final ok = await fxConfirmLeaveExecution(
+      context,
+      hasProgress: doneSeries > 0 || _duration.inSeconds > 30,
+    );
+    if (!ok || !mounted) return;
     safePopOrGo(context, '/checkin/treinos');
   }
 
@@ -319,7 +343,8 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
     final mute = chrome.mute;
 
     if (_loading) {
-      return fxScreenA11yScope(
+      return FxExecutionKeepAwake(
+        child: fxScreenA11yScope(
         label: 'Checkin',
         child: FxShellScaffold(
           useMesh: false,
@@ -335,11 +360,13 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
             ),
           ),
         ),
+        ),
       );
     }
 
     if (_loadError != null) {
-      return fxScreenA11yScope(
+      return FxExecutionKeepAwake(
+        child: fxScreenA11yScope(
         label: 'Checkin',
         child: FxShellScaffold(
           useMesh: false,
@@ -366,6 +393,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
             ),
           ),
         ),
+        ),
       );
     }
 
@@ -376,13 +404,10 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
     final allDone =
         exercicios.isNotEmpty && exercicios.every((e) => e.concluido);
 
-    return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, _) {
-        if (didPop) return;
-        _sair();
-      },
-      child: fxScreenA11yScope(
+    return FxExecutionKeepAwake(
+      child: FxExecutionPopGuard(
+        onLeave: _sair,
+        child: fxScreenA11yScope(
         label: 'Checkin',
         child: FxShellScaffold(
           useMesh: false,
@@ -498,6 +523,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
                 ),
             ],
           ),
+        ),
         ),
       ),
     );

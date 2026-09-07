@@ -145,7 +145,7 @@ const Map<String, FocuxSurfaceSpec> focuxSurfaceCatalog = {
   ),
   '/treino-presencial/:id': FocuxSurfaceSpec(
     type: _s8,
-    logicalParent: '/agenda',
+    logicalParent: '/treinos/:id',
   ),
   '/alunos/:id/anamnese': FocuxSurfaceSpec(
     type: _s3,
@@ -168,7 +168,8 @@ const Map<String, FocuxSurfaceSpec> focuxSurfaceCatalog = {
   ),
   '/alunos/:id/chat': FocuxSurfaceSpec(type: _s1, logicalParent: '/alunos/:id'),
   '/alunos/:id/feedback-video': FocuxSurfaceSpec(
-    type: _s8,
+    type: _s4,
+    hasInput: true,
     logicalParent: '/alunos/:id',
   ),
   '/alunos/:id/engajamento': FocuxSurfaceSpec(

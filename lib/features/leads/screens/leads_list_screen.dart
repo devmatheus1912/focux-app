@@ -23,7 +23,6 @@ import '../../../core/widgets/fx_toggle_chip.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../planos/providers/plano_features_provider.dart';
-import '../../subscription/models/subscription_plan.dart';
 import '../data/lead_repository.dart';
 import '../providers/leads_provider.dart';
 import '../utils/lead_display.dart';
@@ -147,9 +146,10 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
     final primary = Theme.of(context).colorScheme.primary;
     final mute = chrome.mute;
     final plano = ref.watch(planoFeaturesProvider).valueOrNull;
+    final limiteLeads = plano?.limiteLeads;
     final showLeadsLimitBanner = leadShowsLimitBanner(
       _total,
-      isFreePlan: plano?.plano == SubscriptionPlan.FREE,
+      limiteLeads: limiteLeads,
     );
     final count = _total;
 
@@ -186,7 +186,7 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
                       children: [
                         Expanded(
                           child: Text(
-                            leadFreeLimitLabel(_total),
+                            leadLimitLabel(_total, limiteLeads!),
                             style: const TextStyle(
                               fontWeight: FontWeight.w700,
                               fontSize: 13,
