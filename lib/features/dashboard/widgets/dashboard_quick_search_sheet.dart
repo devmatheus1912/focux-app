@@ -7,10 +7,12 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_icon.dart';
 import '../../../core/widgets/fx_input_deco.dart';
+import '../../ferramentas/providers/ferramentas_catalogo_provider.dart';
 import '../data/dashboard_tool_shortcuts.dart';
 import '../utils/dashboard_microcopy.dart';
 import '../utils/dashboard_readability.dart';
 import '../utils/dashboard_shortcut_navigation.dart';
+import '../utils/dashboard_tool_groups.dart';
 
 /// Busca rápida: alunos + ferramentas do catálogo.
 Future<void> showDashboardQuickSearchSheet(
@@ -98,14 +100,17 @@ class _QuickSearchSheetState extends ConsumerState<_QuickSearchSheet> {
   @override
   Widget build(BuildContext context) {
     final q = _query.trim().toLowerCase();
-    final all = DashboardToolShortcut.moreTools;
+    final catalogo = ref.watch(ferramentasCatalogoProvider).valueOrNull;
+    final all =
+        catalogo == null
+            ? const <DashboardToolShortcut>[]
+            : [
+              for (final hub in catalogo.hubs) ...catalogLeavesFromHub(hub),
+            ];
     final tools =
         q.isEmpty
             ? all.take(8).toList()
-            : all
-                .where((t) => t.label.toLowerCase().contains(q))
-                .take(12)
-                .toList();
+            : filterDashboardToolShortcuts(all, q).take(12).toList();
     final mute = dashboardReadableCaption(context, isDark: widget.isDark);
 
     return FxHomeSheetSurface(

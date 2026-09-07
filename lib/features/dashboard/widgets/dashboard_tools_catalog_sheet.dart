@@ -6,10 +6,12 @@ import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_input_deco.dart';
+import '../../../core/widgets/skeleton_loader.dart';
+import '../../ferramentas/providers/ferramentas_catalogo_provider.dart';
 import '../../planos/data/planos_repository.dart';
-import '../data/dashboard_tool_shortcuts.dart';
 import '../utils/dashboard_microcopy.dart';
 import '../utils/dashboard_shortcut_navigation.dart';
 import '../utils/dashboard_tool_groups.dart';
@@ -60,14 +62,10 @@ class _DashboardToolsCatalogSheetState
   Widget build(BuildContext context) {
     final chrome = ShellChrome.of(context);
     final brand = BrandPalette.softened(Theme.of(context).colorScheme.primary);
-    final shortcuts = filterDashboardToolShortcuts(
-      DashboardToolShortcut.moreTools,
-      _searchQuery,
-    );
-    final groups = groupDashboardToolShortcuts(shortcuts);
     final maxHeight =
         MediaQuery.sizeOf(context).height *
         FxHomeSheetChrome.expandHeightFactor;
+    final catalogoAsync = widget.parentRef.watch(ferramentasCatalogoProvider);
 
     return FxHomeSheetSurface(
       isDark: widget.isDark,
@@ -166,10 +164,23 @@ class _DashboardToolsCatalogSheetState
             ),
           ),
           Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.only(bottom: TokensStrip.s4),
-              itemCount: groups.isEmpty ? 1 : groups.length,
-              itemBuilder: (context, index) {
+            child: catalogoAsync.when(
+              loading: () => const SkeletonList(count: 6),
+              error:
+                  (e, _) => FxErrorState(
+                    chromeOnDark: widget.isDark,
+                    primary: brand,
+                    message: 'Não deu para carregar o catálogo',
+                    onRetry:
+                        () => widget.parentRef.invalidate(
+                          ferramentasCatalogoProvider,
+                        ),
+                  ),
+              data: (catalogo) {
+                final groups = groupCatalogoHubs(
+                  catalogo,
+                  query: _searchQuery,
+                );
                 if (groups.isEmpty) {
                   return Padding(
                     padding: const EdgeInsets.symmetric(vertical: 28),
@@ -180,28 +191,71 @@ class _DashboardToolsCatalogSheetState
                     ),
                   );
                 }
-                final group = groups[index];
-                return Padding(
-                  padding: EdgeInsets.only(
-                    bottom:
-                        index < groups.length - 1
-                            ? FxSettingsLayout.groupGap
-                            : 0,
-                  ),
-                  child: DashboardToolShortcutGroup(
-                    header: group.title,
-                    shortcuts: group.shortcuts,
-                    homePlanoFeatures: widget.homePlanoFeatures,
-                    onShortcut: (shortcut) {
-                      Navigator.of(context).pop();
-                      openDashboardShortcut(
-                        widget.parentContext,
-                        widget.parentRef,
-                        shortcut,
-                        homeOverride: widget.homePlanoFeatures,
+                return ListView.builder(
+                  padding: const EdgeInsets.only(bottom: TokensStrip.s4),
+                  itemCount: groups.length,
+                  itemBuilder: (context, index) {
+                    final group = groups[index];
+                    final tile = DashboardToolShortcutGroup(
+                      header: group.collapsed ? null : group.title,
+                      shortcuts: group.shortcuts,
+                      homePlanoFeatures: widget.homePlanoFeatures,
+                      onShortcut: (shortcut) {
+                        Navigator.of(context).pop();
+                        openDashboardShortcut(
+                          widget.parentContext,
+                          widget.parentRef,
+                          shortcut,
+                          homeOverride: widget.homePlanoFeatures,
+                        );
+                      },
+                    );
+                    if (!group.collapsed) {
+                      return Padding(
+                        padding: EdgeInsets.only(
+                          bottom:
+                              index < groups.length - 1
+                                  ? FxSettingsLayout.groupGap
+                                  : 0,
+                        ),
+                        child: tile,
                       );
-                    },
-                  ),
+                    }
+                    return Padding(
+                      padding: EdgeInsets.only(
+                        bottom:
+                            index < groups.length - 1
+                                ? FxSettingsLayout.groupGap
+                                : 0,
+                      ),
+                      child: Theme(
+                        data: Theme.of(
+                          context,
+                        ).copyWith(dividerColor: Colors.transparent),
+                        child: ExpansionTile(
+                          initiallyExpanded: _searchQuery.trim().isNotEmpty,
+                          tilePadding: EdgeInsets.zero,
+                          childrenPadding: EdgeInsets.zero,
+                          title: Text(
+                            group.title,
+                            style: FocuxHubTypography.body(
+                              color: chrome.ink,
+                            ).copyWith(fontWeight: FontWeight.w700),
+                          ),
+                          subtitle:
+                              group.subtitulo == null
+                                  ? null
+                                  : Text(
+                                    group.subtitulo!,
+                                    style: FocuxHubTypography.bodyMuted(
+                                      color: chrome.mute,
+                                    ),
+                                  ),
+                          children: [tile],
+                        ),
+                      ),
+                    );
+                  },
                 );
               },
             ),

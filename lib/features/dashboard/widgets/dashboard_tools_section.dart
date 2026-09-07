@@ -4,6 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/skeleton_loader.dart';
+import '../../ferramentas/providers/ferramentas_catalogo_provider.dart';
 import '../../planos/data/planos_repository.dart';
 import '../data/command_action_item.dart';
 import 'command_action_tile.dart';
@@ -23,12 +26,15 @@ class DashboardHomeToolsSection extends ConsumerWidget {
     required this.isDark,
     this.hideFeaturedTools = false,
     this.homePlanoFeatures,
+    this.onboardingCompleto = false,
   });
 
   final bool isDark;
+
   /// Modo foco: só a linha do catálogo (sem lista em destaque).
   final bool hideFeaturedTools;
   final PlanoFeatures? homePlanoFeatures;
+  final bool onboardingCompleto;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -36,22 +42,8 @@ class DashboardHomeToolsSection extends ConsumerWidget {
       ref,
       homeOverride: homePlanoFeatures,
     );
-    final totalTools = DashboardToolShortcut.moreTools.length;
-    final lockedCount = countLockedShortcuts(
-      DashboardToolShortcut.moreTools,
-      features,
-    );
-    final featuredShortcuts = DashboardToolShortcut.featuredTools;
-    final featuredCount = featuredShortcuts.length;
-    final hideFeatured = hideFeaturedTools;
-    final caption =
-        hideFeatured
-            ? (lockedCount > 0
-                ? '$totalTools no catálogo · $lockedCount no upgrade'
-                : '$totalTools atalhos · toque para abrir')
-            : lockedCount > 0
-            ? '$featuredCount em destaque · $lockedCount no upgrade'
-            : '$featuredCount em destaque · $totalTools no catálogo';
+    final catalogoAsync = ref.watch(ferramentasCatalogoProvider);
+    final primary = Theme.of(context).colorScheme.primary;
 
     void openCatalog() {
       dashboardHapticCollapseToggle();
@@ -64,7 +56,6 @@ class DashboardHomeToolsSection extends ConsumerWidget {
       );
     }
 
-    final primary = Theme.of(context).colorScheme.primary;
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         FxSettingsLayout.pageInset,
@@ -72,11 +63,48 @@ class DashboardHomeToolsSection extends ConsumerWidget {
         FxSettingsLayout.pageInset,
         TokensStrip.s4,
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          if (hideFeatured)
-            CommandActionTile(
+      child: catalogoAsync.when(
+        loading:
+            () => const Padding(
+              padding: EdgeInsets.symmetric(vertical: 8),
+              child: SkeletonList(count: 3),
+            ),
+        error:
+            (e, _) => FxErrorState(
+              chromeOnDark: isDark,
+              primary: primary,
+              message: 'Não deu para carregar o catálogo',
+              onRetry: () => ref.invalidate(ferramentasCatalogoProvider),
+            ),
+        data: (catalogo) {
+          final featuredShortcuts = atalhosHomeFromCatalogo(
+            catalogo,
+            hideOnboardingWizard: onboardingCompleto,
+          );
+          final leafCount = catalogo.hubs.fold<int>(
+            0,
+            (sum, h) => sum + h.itens.length,
+          );
+          final lockedCount = countLockedShortcuts(
+            [
+              for (final hub in catalogo.hubs)
+                ...catalogLeavesFromHub(hub),
+            ],
+            features,
+          );
+          final featuredCount = featuredShortcuts.length;
+          final hideFeatured = hideFeaturedTools;
+          final caption =
+              hideFeatured
+                  ? (lockedCount > 0
+                      ? '${catalogo.hubs.length} hubs · $lockedCount no upgrade'
+                      : '${catalogo.hubs.length} hubs · toque para abrir')
+                  : lockedCount > 0
+                  ? '$featuredCount em destaque · $lockedCount no upgrade'
+                  : '$featuredCount em destaque · $leafCount no catálogo';
+
+          if (hideFeatured) {
+            return CommandActionTile(
               item: CommandActionItem(
                 icon: 'spark',
                 title: DashboardMicrocopy.maisFerramentas,
@@ -88,43 +116,63 @@ class DashboardHomeToolsSection extends ConsumerWidget {
               primary: primary,
               showDivider: false,
               onTap: openCatalog,
-            )
-          else ...[
-            DashboardSectionHeader(
-              title: DashboardMicrocopy.maisFerramentas,
-              actionLabel: DashboardMicrocopy.verCatalogoCompleto,
-              onAction: openCatalog,
-            ),
-            const SizedBox(height: FxSettingsLayout.headerToGroup),
-            for (var i = 0; i < featuredShortcuts.length; i++)
-              CommandActionTile(
-                item: CommandActionItem(
-                  icon: featuredShortcuts[i].icon,
-                  title: featuredShortcuts[i].label,
-                  subtitle:
-                      featuredShortcuts[i].isUnlocked(features)
-                          ? ''
-                          : 'Requer ${featuredShortcuts[i].tierBadgeLabel()}',
-                  route: featuredShortcuts[i].route ?? '',
-                  tone: CommandActionTone.primary,
-                  priorityBadge:
-                      featuredShortcuts[i].isUnlocked(features)
-                          ? null
-                          : featuredShortcuts[i].tierBadgeLabel(),
-                ),
-                isDark: isDark,
-                primary: primary,
-                showDivider: i < featuredShortcuts.length - 1,
-                onTap:
-                    () => openDashboardShortcut(
-                      context,
-                      ref,
-                      featuredShortcuts[i],
-                      homeOverride: homePlanoFeatures,
-                    ),
+            );
+          }
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              DashboardSectionHeader(
+                title: DashboardMicrocopy.maisFerramentas,
+                actionLabel: DashboardMicrocopy.verCatalogoCompleto,
+                onAction: openCatalog,
               ),
-          ],
-        ],
+              const SizedBox(height: FxSettingsLayout.headerToGroup),
+              if (featuredShortcuts.isEmpty)
+                CommandActionTile(
+                  item: CommandActionItem(
+                    icon: 'spark',
+                    title: DashboardMicrocopy.verCatalogoCompleto,
+                    subtitle: caption,
+                    route: '',
+                    tone: CommandActionTone.primary,
+                  ),
+                  isDark: isDark,
+                  primary: primary,
+                  showDivider: false,
+                  onTap: openCatalog,
+                )
+              else
+                for (var i = 0; i < featuredShortcuts.length; i++)
+                  CommandActionTile(
+                    item: CommandActionItem(
+                      icon: featuredShortcuts[i].icon,
+                      title: featuredShortcuts[i].label,
+                      subtitle:
+                          featuredShortcuts[i].isUnlocked(features)
+                              ? (featuredShortcuts[i].entrada.subtitulo ?? '')
+                              : 'Requer ${featuredShortcuts[i].tierBadgeLabel()}',
+                      route: featuredShortcuts[i].route ?? '',
+                      tone: CommandActionTone.primary,
+                      priorityBadge:
+                          featuredShortcuts[i].isUnlocked(features)
+                              ? null
+                              : featuredShortcuts[i].tierBadgeLabel(),
+                    ),
+                    isDark: isDark,
+                    primary: primary,
+                    showDivider: i < featuredShortcuts.length - 1,
+                    onTap:
+                        () => openDashboardShortcut(
+                          context,
+                          ref,
+                          featuredShortcuts[i],
+                          homeOverride: homePlanoFeatures,
+                        ),
+                  ),
+            ],
+          );
+        },
       ),
     );
   }

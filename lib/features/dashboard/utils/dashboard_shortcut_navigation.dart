@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../core/analytics/analytics_service.dart';
+import '../../ferramentas/utils/ferramentas_catalogo_nav.dart';
 import '../../planos/data/planos_repository.dart';
 import '../../planos/utils/effective_plano_features.dart';
 import '../../subscription/models/subscription_plan.dart';
-import '../../subscription/utils/landing_editor_access.dart';
 import '../../subscription/widgets/upgrade_prompt_sheet.dart';
 import '../data/dashboard_tool_shortcuts.dart';
 import 'dashboard_tool_recent_store.dart';
@@ -28,6 +27,7 @@ Future<void> openDashboardShortcut(
         'capability': shortcut.capability,
         'target_plan': shortcut.targetPlan().apiName,
         'current_plan': features.plano.apiName,
+        'legacy_ids': shortcut.entrada.legacyIds.join(','),
       },
     );
     await UpgradePromptSheet.show(
@@ -35,30 +35,25 @@ Future<void> openDashboardShortcut(
       featureName: shortcut.displayFeatureName,
       capability: shortcut.capability,
       requiredPlan: shortcut.targetPlan(),
+      upgradePlano: shortcut.targetPlan(),
       source: 'dashboard_shortcut',
     );
     return;
   }
 
-  if (shortcut.landingEditor) {
-    await openLandingEditorOrUpgrade(context, ref);
-    return;
+  final route = shortcut.route;
+  if (route != null && route.isNotEmpty) {
+    await DashboardToolRecentStore.recordRoute(route);
   }
 
-  final route = shortcut.route;
-  if (route == null || !context.mounted) return;
-
-  AnalyticsService.instance.track(
-    'dashboard_shortcut_open',
-    props: {
-      'label': shortcut.label,
-      'route': route,
-      'plan': features.plano.apiName,
-    },
-  );
-  await DashboardToolRecentStore.recordRoute(route);
   if (!context.mounted) return;
-  context.push(route);
+  await openCatalogoEntrada(
+    context,
+    ref,
+    shortcut.entrada,
+    preferredAbaId: shortcut.preferredAbaId,
+    source: 'dashboard_shortcut',
+  );
 }
 
 int countLockedShortcuts(
