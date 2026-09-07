@@ -1084,11 +1084,13 @@ class AlunosHomeBundle {
 class AlunoPerfilHomeBundle {
   final Aluno aluno;
   final List<MedidaCorporal> medidas;
+  final int? completionPercent;
   final DateTime fetchedAt;
 
   AlunoPerfilHomeBundle({
     required this.aluno,
     required this.medidas,
+    this.completionPercent,
     DateTime? fetchedAt,
   }) : fetchedAt = fetchedAt ?? DateTime.now();
 
@@ -1106,6 +1108,7 @@ class AlunoPerfilHomeBundle {
                 (row) => MedidaCorporal.fromJson(Map<String, dynamic>.from(row)),
               )
               .toList(),
+      completionPercent: json['completionPercent'] as int?,
     );
   }
 }

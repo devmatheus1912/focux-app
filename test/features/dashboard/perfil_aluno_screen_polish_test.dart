@@ -12,6 +12,7 @@ void main() {
     expect(screen, contains('FxSettingsGroup'));
     expect(screen, contains('FxSettingsTile'));
     expect(screen, contains('alunoPerfilHomeProvider'));
+    expect(screen, contains('completionPercent'));
     expect(screen, contains('FxHubFreshness.fromFetchedAt'));
     expect(screen, contains("label: 'Editar cadastro'"));
     expect(screen, contains("label: 'Anamnese'"));

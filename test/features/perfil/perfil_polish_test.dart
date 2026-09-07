@@ -23,6 +23,7 @@ void main() {
     expect(screen, isNot(contains('_PlanPill')));
     expect(screen, isNot(contains('_BrandPreview')));
     expect(screen, isNot(contains('PerfilProfessionalSummary')));
+    expect(screen, isNot(contains('ref.watch(dashboardProvider)')));
     expect(screen, contains('FxSettingsLayout.profileName'));
     expect(screen, contains('FxSettingsLayout.rowMetric'));
     expect(screen, contains('FxSettingsGroup'));

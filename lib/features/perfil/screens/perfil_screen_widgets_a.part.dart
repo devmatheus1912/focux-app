@@ -2,7 +2,6 @@ part of 'perfil_screen.dart';
 
 class _PerfilBody extends StatefulWidget {
   final PerfilPersonal perfil;
-  final DashboardData dashboard;
   final bool uploadingPhoto;
   final bool showMfa;
   final String? freshnessLabel;
@@ -14,7 +13,6 @@ class _PerfilBody extends StatefulWidget {
 
   const _PerfilBody({
     required this.perfil,
-    required this.dashboard,
     required this.uploadingPhoto,
     this.showMfa = false,
     this.freshnessLabel,
@@ -33,7 +31,6 @@ class _PerfilBodyState extends State<_PerfilBody> {
   @override
   Widget build(BuildContext context) {
     final perfil = widget.perfil;
-    final dashboard = widget.dashboard;
     final uploadingPhoto = widget.uploadingPhoto;
     final freshnessLabel = widget.freshnessLabel;
     final onRefresh = widget.onRefresh;
@@ -50,14 +47,11 @@ class _PerfilBodyState extends State<_PerfilBody> {
     final themePrimary = theme.colorScheme.primary;
 
     final primaryColor = _parseColor(
-      perfil.corPrimaria ?? dashboard.corPrimaria,
+      perfil.corPrimaria,
       fallback: themePrimary,
     );
     final accent = BrandPalette.softened(primaryColor);
-    final readiness = PerfilReadinessView.from(
-      perfil: perfil,
-      dashboard: dashboard,
-    );
+    final readiness = PerfilReadinessView.from(perfil);
     final profileScore = readiness.score;
     final profileComplete = profileScore >= 100;
     final scrollBottomPad =
@@ -97,7 +91,7 @@ class _PerfilBodyState extends State<_PerfilBody> {
                         children: [
                           _Avatar(
                             nome: perfil.nome,
-                            logoUrl: perfil.logoUrl ?? dashboard.logoUrl,
+                            logoUrl: perfil.logoUrl,
                             primaryColor: primaryColor,
                             onTap: onPickPhoto,
                             loading: uploadingPhoto,

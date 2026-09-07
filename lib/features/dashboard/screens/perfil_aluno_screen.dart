@@ -49,7 +49,7 @@ class PerfilAlunoScreen extends ConsumerWidget {
                 title: FocuxMicrocopy.naoFoiPossivelCarregar,
                 onRetry: () => ref.invalidate(alunoPerfilHomeProvider),
               ),
-          data: (home) => _PerfilAlunoHubBody(aluno: home.aluno),
+          data: (home) => _PerfilAlunoHubBody(home: home),
         ),
       ),
     );
@@ -57,16 +57,17 @@ class PerfilAlunoScreen extends ConsumerWidget {
 }
 
 class _PerfilAlunoHubBody extends ConsumerWidget {
-  const _PerfilAlunoHubBody({required this.aluno});
+  const _PerfilAlunoHubBody({required this.home});
 
-  final Aluno aluno;
+  final AlunoPerfilHomeBundle home;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final aluno = home.aluno;
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
     final accent = BrandPalette.softened(primary);
-    final score = alunoPerfilCompletionScore(aluno);
+    final score = home.completionPercent ?? alunoPerfilCompletionScore(aluno);
     final photo = aluno.fotoUrl?.trim();
     final hasPhoto = photo != null && photo.isNotEmpty;
 

@@ -1,4 +1,3 @@
-import '../../dashboard/data/dashboard_repository.dart';
 import '../data/perfil_repository.dart';
 
 enum PerfilChecklistAction { photo, editProfile, brand, wallet, convites }
@@ -72,11 +71,10 @@ class PerfilReadinessView {
     'PIX',
   ];
 
-  static PerfilReadinessView from({
-    required PerfilPersonal perfil,
-    required DashboardData dashboard,
-  }) {
-    final missing = _missingLabels(perfil, dashboard);
+  /// SSoT: `readinessPercent` / `readinessMissing` do GET /api/personal/perfil.
+  /// Sem esses campos, cai no cálculo local dos 8 itens.
+  static PerfilReadinessView from(PerfilPersonal perfil) {
+    final missing = _missingLabels(perfil);
     final items =
         _order
             .map(
@@ -88,10 +86,10 @@ class PerfilReadinessView {
             )
             .toList();
 
-    // Score sempre alinhado aos chips (evita % vs PIX divergentes).
-    final score =
+    final localScore =
         ((items.where((item) => item.done).length / items.length) * 100)
             .round();
+    final score = perfil.readinessPercent ?? localScore;
 
     final next = items.firstWhere(
       (item) => !item.done,
@@ -115,37 +113,29 @@ class PerfilReadinessView {
     return PerfilReadinessView(score: score, items: items, nextStep: nextStep);
   }
 
-  /// União API ∪ local: se qualquer lado marca lacuna, a UI mostra lacuna.
-  static Set<String> _missingLabels(
-    PerfilPersonal perfil,
-    DashboardData dashboard,
-  ) {
-    final local = _localMissing(perfil, dashboard);
-    final fromApi = perfil.readinessMissing?.toSet() ?? const <String>{};
-    return local.union(fromApi);
+  static Set<String> _missingLabels(PerfilPersonal perfil) {
+    final fromApi = perfil.readinessMissing;
+    if (fromApi != null) {
+      return fromApi.toSet();
+    }
+    return _localMissing(perfil);
   }
 
-  static Set<String> _localMissing(
-    PerfilPersonal perfil,
-    DashboardData dashboard,
-  ) {
+  static Set<String> _localMissing(PerfilPersonal perfil) {
     final missing = <String>{};
-    if (!_hasText(perfil.logoUrl ?? dashboard.logoUrl)) missing.add('Foto');
+    if (!_hasText(perfil.logoUrl)) missing.add('Foto');
     if (!_hasText(perfil.telefone)) missing.add('Telefone');
     if (!_hasText(perfil.cref)) missing.add('CREF');
     if (!_hasText(perfil.especialidades ?? perfil.especialidade)) {
       missing.add('Especialidade');
     }
-    if (!_hasText(
-      perfil.descricaoProfissional ?? dashboard.descricaoProfissional,
-    )) {
+    if (!_hasText(perfil.descricaoProfissional)) {
       missing.add('Bio');
     }
-    if (!_hasText(perfil.instagram ?? dashboard.instagram)) {
+    if (!_hasText(perfil.instagram)) {
       missing.add('Instagram');
     }
-    if (!_hasText(perfil.corPrimaria ?? dashboard.corPrimaria) ||
-        !_hasText(perfil.corSecundaria ?? dashboard.corSecundaria)) {
+    if (!_hasText(perfil.corPrimaria) || !_hasText(perfil.corSecundaria)) {
       missing.add('Paleta');
     }
     if (!perfilHasWallet(perfil)) missing.add('PIX');

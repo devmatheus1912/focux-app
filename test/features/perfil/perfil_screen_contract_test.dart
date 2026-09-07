@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/core/widgets/fx_motion.dart';
-import 'package:focux_app/features/dashboard/data/dashboard_repository.dart';
-import 'package:focux_app/features/dashboard/providers/dashboard_provider.dart';
 import 'package:focux_app/features/dashboard/utils/dashboard_home_client_cache.dart';
 import 'package:focux_app/features/perfil/data/perfil_repository.dart';
 import 'package:focux_app/features/perfil/providers/perfil_provider.dart';
@@ -24,7 +22,6 @@ void main() {
       ProviderScope(
         overrides: [
           perfilProvider.overrideWith((ref) async => _perfilFixture),
-          dashboardProvider.overrideWith((ref) async => _dashboardFixture),
         ],
         child: const MaterialApp(home: PerfilScreen()),
       ),
@@ -90,7 +87,6 @@ void main() {
       ProviderScope(
         overrides: [
           perfilProvider.overrideWith((ref) async => _perfilCompletoFixture),
-          dashboardProvider.overrideWith((ref) async => _dashboardFixture),
         ],
         child: const MaterialApp(home: PerfilScreen()),
       ),
@@ -154,15 +150,3 @@ final _perfilFixture = PerfilPersonal(
   instagram: '@qacoach',
 );
 
-final _dashboardFixture = DashboardData(
-  totalAlunos: 6,
-  alunosAtivos: 5,
-  planoAtual: 'ENTERPRISE',
-  limiteAlunos: 120,
-  nomePersonal: 'QA Coach',
-  logoUrl: null,
-  corPrimaria: '#2D4FB7',
-  corSecundaria: '#3F63E4',
-  descricaoProfissional: 'Especializado em biomecanica.',
-  instagram: '@qacoach',
-);
