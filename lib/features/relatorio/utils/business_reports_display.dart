@@ -34,3 +34,7 @@ String businessMoneyLabel(num value) => formatBrlCurrency(value);
 
 const businessComoCalculamos =
     'Recebido é o que entrou no mês. NDR compara o recorrente com o mês anterior.';
+
+bool businessTemInadimplencia(int inadimplentes) => inadimplentes > 0;
+
+bool businessTemDunning(int abertas) => abertas > 0;

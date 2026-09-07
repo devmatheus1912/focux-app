@@ -58,10 +58,7 @@ List<GamificacaoBadgeTile> buildGamificacaoBadgeTiles(
 }
 
 const _badgeCatalog = <String, ({String icon, String label})>{
-  'STREAK_10': (icon: '🔥', label: 'Sequencia 10d'),
+  'STREAK_10': (icon: '🔥', label: 'Sequência 10d'),
   'PR_CARGA': (icon: '💪', label: 'PR de carga'),
-  'FREQUENCIA_100': (icon: '⭐', label: '100% semana'),
-  'FIRST_AI': (icon: '✨', label: 'Usou a IA'),
-  'TREINOS_50': (icon: '🏆', label: '50 treinos'),
-  'META_ATINGIDA': (icon: '🎯', label: 'Meta atingida'),
+  'FREQUENCIA_100': (icon: '⭐', label: '100% no mês'),
 };

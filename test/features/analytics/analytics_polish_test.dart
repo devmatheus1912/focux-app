@@ -9,7 +9,7 @@ void main() {
     );
 
     expect(screen, contains('FxContentWidthLimiter'));
-    expect(screen, contains('DashboardErrorState'));
+    expect(screen, contains('FxErrorState'));
     expect(screen, contains('RefreshIndicator'));
     expect(screen, contains('data.wau'));
     expect(screen, contains('data.mau'));

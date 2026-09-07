@@ -192,6 +192,7 @@ class _BusinessReportsScreenState extends ConsumerState<BusinessReportsScreen> {
                             snap: snap,
                             isDark: isDark,
                             onFinanceiro: _abrirFinanceiro,
+                            onDunning: () => context.push('/dunning'),
                           ),
                           const SizedBox(height: TokensStrip.s4),
                           OperationalMetricTile(
@@ -266,11 +267,13 @@ class _BusinessFocusCard extends StatelessWidget {
     required this.snap,
     required this.isDark,
     required this.onFinanceiro,
+    required this.onDunning,
   });
 
   final BusinessSnapshot snap;
   final bool isDark;
   final VoidCallback onFinanceiro;
+  final VoidCallback onDunning;
 
   @override
   Widget build(BuildContext context) {
@@ -292,20 +295,34 @@ class _BusinessFocusCard extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            'Previsto ${businessMoneyLabel(snap.mrrPrevisto)}',
+            'Previsto ${businessMoneyLabel(snap.mrrPrevisto)} · ${businessAlunosLabel(snap.alunosAtivos, snap.alunosTotal)}',
             style: FocuxHubTypography.body(
               color: chrome.ink,
             ).copyWith(fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: TokensStrip.s3),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: DashboardHomeActionChip(
-              label: 'Ver financeiro',
-              accent: EagleTokens.moneyGreen,
-              isDark: isDark,
-              onPressed: onFinanceiro,
-            ),
+          Wrap(
+            spacing: TokensStrip.s2,
+            runSpacing: TokensStrip.s2,
+            children: [
+              DashboardHomeActionChip(
+                label: businessTemInadimplencia(snap.inadimplentes)
+                    ? 'Cobrar atrasados'
+                    : 'Ver financeiro',
+                accent: businessTemInadimplencia(snap.inadimplentes)
+                    ? EagleTokens.bad
+                    : EagleTokens.moneyGreen,
+                isDark: isDark,
+                onPressed: onFinanceiro,
+              ),
+              if (businessTemDunning(snap.dunningAbertas))
+                DashboardHomeActionChip(
+                  label: 'Falhas',
+                  accent: EagleTokens.bad,
+                  isDark: isDark,
+                  onPressed: onDunning,
+                ),
+            ],
           ),
         ],
       ),
