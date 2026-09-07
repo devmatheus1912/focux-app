@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/mesh_scope.dart';
 import '../data/qa_smoke_catalog.dart';
 import '../../agenda/screens/agenda_screen.dart';
@@ -114,20 +116,16 @@ Widget _buildQaRouteScreen(Uri uri) {
 class QaRoutePreviewDialog extends StatelessWidget {
   const QaRoutePreviewDialog({
     required this.path,
-    this.showClose = true,
     super.key,
   });
 
   final String path;
-  final bool showClose;
 
   static Future<String?> show(BuildContext context, String path) async {
     QaPreviewSession.begin();
     try {
-      await showDialog<void>(
-        context: context,
-        barrierDismissible: false,
-        useSafeArea: false,
+      await showFxHomeSheet<void>(
+        context,
         builder: (dialogContext) => QaRoutePreviewDialog(path: path),
       );
     } finally {
@@ -144,21 +142,18 @@ class QaRoutePreviewDialog extends StatelessWidget {
   }) async {
     QaPreviewSession.begin();
     try {
-      await showDialog<void>(
-        context: context,
-        barrierDismissible: false,
-        useSafeArea: false,
+      await showFxHomeSheet<void>(
+        context,
         builder: (dialogContext) {
           Future<void>.delayed(hold, () {
             if (dialogContext.mounted &&
                 Navigator.of(dialogContext, rootNavigator: true).canPop()) {
-              Navigator.of(dialogContext, rootNavigator: true).pop();
+              FxHomeSheetChrome.dismissAndPop(dialogContext);
             }
           });
-          return QaRoutePreviewDialog(path: path, showClose: false);
+          return QaRoutePreviewDialog(path: path);
         },
       );
-      // Aguarda erros assíncronos de layout após fechar.
       await Future<void>.delayed(const Duration(milliseconds: 100));
     } finally {
       QaPreviewSession.end();
@@ -168,6 +163,7 @@ class QaRoutePreviewDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final preview = MediaQuery(
       data: MediaQuery.of(
         context,
@@ -175,51 +171,23 @@ class QaRoutePreviewDialog extends StatelessWidget {
       child: ClipRect(child: buildQaRoutePreview(path)),
     );
 
-    if (!showClose) {
-      return Dialog.fullscreen(
-        child: Stack(
-          children: [
-            Positioned.fill(child: preview),
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              child: ColoredBox(
-                color: Colors.black.withValues(alpha: 0.72),
-                child: SafeArea(
-                  bottom: false,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                    child: Text(
-                      'Testando: $path',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return Dialog.fullscreen(
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(path, style: const TextStyle(fontSize: 14)),
-          leading: IconButton(
-            icon: const Icon(Icons.close),
-            onPressed: () => Navigator.of(context).pop(),
+    return FxHomeSheetSurface(
+      isDark: isDark,
+      expand: true,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          FxHomeSheetHandle(isDark: isDark),
+          SizedBox(height: TokensStrip.s4),
+          FxHomeSheetHeader(
+            isDark: isDark,
+            title: 'Testando',
+            subtitle: path,
+            leading: const Icon(Icons.bug_report_outlined, size: 18),
           ),
-        ),
-        body: preview,
+          SizedBox(height: TokensStrip.s3),
+          Expanded(child: preview),
+        ],
       ),
     );
   }
