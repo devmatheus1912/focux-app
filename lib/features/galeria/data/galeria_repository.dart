@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
+import '../../../core/api/pagina.dart';
 
 class GalleryItem {
   final int id;
@@ -25,9 +26,16 @@ class GaleriaRepository {
   GaleriaRepository(ApiClient client) : _dio = client.dio;
   Future<List<GalleryItem>> listar() async {
     final r = await _dio.get('/api/personal/gallery');
-    return (r.data as List)
-        .map((e) => GalleryItem.fromJson(e as Map<String, dynamic>))
-        .toList();
+    final data = r.data;
+    if (data is! Map) {
+      throw FormatException(
+        'GET /api/personal/gallery devolve Pagina, não lista crua.',
+      );
+    }
+    return Pagina.fromJson(
+      Map<String, dynamic>.from(data),
+      (item) => GalleryItem.fromJson(Map<String, dynamic>.from(item as Map)),
+    ).content;
   }
 
   Future<GalleryItem> adicionar({

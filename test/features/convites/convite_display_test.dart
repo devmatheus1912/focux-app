@@ -32,6 +32,14 @@ void main() {
     expect(conviteCountLabel(ativo: true), '1 convite ativo');
   });
 
+  test('conviteGeradoLabel', () {
+    expect(conviteGeradoLabel(substituiu: false), 'Link gerado.');
+    expect(
+      conviteGeradoLabel(substituiu: true),
+      'Link anterior deixou de valer.',
+    );
+  });
+
   test('conviteShareMessage inclui o nome', () {
     expect(
       conviteShareMessage(personalNome: 'Ana', shareLink: 'https://x'),

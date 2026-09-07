@@ -87,7 +87,9 @@ timestamp, blob); o app só devolve o valor na próxima página. Não há
 `GET /api/feed` e `GET /api/feed/aluno` paginam no banco (keyset `criadoEm,id`)
 e aceitam `q` opcional (título/conteúdo). `GET /api/chat/inbox/search` e
 `GET /api/chat/inbox/unread` usam o envelope offset `PaginaResponse` (`content`,
-`page`, `size`, `hasNext`), não array raiz.
+`page`, `size`, `hasNext`), não array raiz. `GET /api/personal/gallery` também
+— teto de 9 fotos, uma página. `POST /api/convites/gerar` invalida os unused
+do personal; o token anterior deixa de validar.
 
 ### 1.4 `totalElements` tem custo
 
