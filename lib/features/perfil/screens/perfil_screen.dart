@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
@@ -26,7 +25,6 @@ import '../../pacotes/providers/pacotes_provider.dart';
 import '../data/perfil_repository.dart';
 import '../providers/perfil_provider.dart';
 import '../utils/perfil_plan_labels.dart';
-import '../utils/perfil_professional_summary.dart';
 import '../utils/perfil_readiness.dart';
 import '../../subscription/utils/landing_editor_access.dart';
 import '../constants/perfil_layout.dart';
@@ -179,23 +177,6 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
     context.go('/login');
   }
 
-  Future<void> _handleChecklistAction(
-    PerfilChecklistAction action,
-    PerfilPersonal perfil,
-  ) async {
-    switch (action) {
-      case PerfilChecklistAction.photo:
-        await _pickAndUploadPhoto();
-      case PerfilChecklistAction.editProfile:
-        await _openEditPerfil(perfil);
-      case PerfilChecklistAction.brand:
-        if (mounted) context.push('/identidade-visual');
-      case PerfilChecklistAction.wallet:
-        if (mounted) context.push('/perfil/wallet');
-      case PerfilChecklistAction.convites:
-        if (mounted) context.push('/convites');
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -247,15 +228,13 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
               dashboard: cachedPersonal,
               uploadingPhoto: _uploadingPhoto,
               showMfa: _mfaAvailable,
-freshnessLabel: freshnessLabel,
+              freshnessLabel: freshnessLabel,
               onRefresh: _refreshHub,
               onPickPhoto: _pickAndUploadPhoto,
               onEditPerfil: () => _openEditPerfil(perfil),
               onLogout: _logout,
               onOpenLandingEditor:
                   () => openLandingEditorOrUpgrade(context, ref),
-              onChecklistAction:
-                  (action) => _handleChecklistAction(action, perfil),
             );
           }
 
@@ -278,7 +257,6 @@ freshnessLabel: freshnessLabel,
                   ),
                   uploadingPhoto: _uploadingPhoto,
                   showMfa: _mfaAvailable,
-loadingMetrics: true,
                   freshnessLabel: freshnessLabel,
                   onRefresh: _refreshHub,
                   onPickPhoto: _pickAndUploadPhoto,
@@ -286,8 +264,6 @@ loadingMetrics: true,
                   onLogout: _logout,
                   onOpenLandingEditor:
                       () => openLandingEditorOrUpgrade(context, ref),
-                  onChecklistAction:
-                      (action) => _handleChecklistAction(action, perfil),
                 ),
             error:
                 (_, __) => _PerfilBody(
@@ -306,15 +282,13 @@ loadingMetrics: true,
                   ),
                   uploadingPhoto: _uploadingPhoto,
                   showMfa: _mfaAvailable,
-freshnessLabel: freshnessLabel,
+                  freshnessLabel: freshnessLabel,
                   onRefresh: _refreshHub,
                   onPickPhoto: _pickAndUploadPhoto,
                   onEditPerfil: () => _openEditPerfil(perfil),
                   onLogout: _logout,
                   onOpenLandingEditor:
                       () => openLandingEditorOrUpgrade(context, ref),
-                  onChecklistAction:
-                      (action) => _handleChecklistAction(action, perfil),
                 ),
             data:
                 (dashboard) => _PerfilBody(
@@ -322,15 +296,13 @@ freshnessLabel: freshnessLabel,
                   dashboard: dashboard,
                   uploadingPhoto: _uploadingPhoto,
                   showMfa: _mfaAvailable,
-freshnessLabel: freshnessLabel,
+                  freshnessLabel: freshnessLabel,
                   onRefresh: _refreshHub,
                   onPickPhoto: _pickAndUploadPhoto,
                   onEditPerfil: () => _openEditPerfil(perfil),
                   onLogout: _logout,
                   onOpenLandingEditor:
                       () => openLandingEditorOrUpgrade(context, ref),
-                  onChecklistAction:
-                      (action) => _handleChecklistAction(action, perfil),
                 ),
           );
         },

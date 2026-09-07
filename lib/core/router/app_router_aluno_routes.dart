@@ -4,6 +4,7 @@ import '../screens/aluno_shell.dart';
 import '../../features/dashboard/screens/aluno_dashboard_screen.dart';
 import '../../features/dashboard/screens/aluno_activation_screen.dart';
 import '../../features/dashboard/screens/perfil_aluno_screen.dart';
+import '../../features/dashboard/screens/perfil_aluno_editar_screen.dart';
 import '../../features/checkin/screens/meus_treinos_screen.dart';
 import '../../features/health/screens/health_dashboard_screen.dart';
 import '../../features/habitos/screens/habitos_aluno_screen.dart';
@@ -79,6 +80,12 @@ List<RouteBase> buildAlunoRoutes() {
       GoRoute(
         path: '/aluno/form-check',
         builder: (context, state) => const FxRouteChrome(child: FeedbackAlunoScreen()),
+      ),
+      GoRoute(
+        path: '/aluno/perfil/editar',
+        builder:
+            (context, state) =>
+                const FxRouteChrome(child: PerfilAlunoEditarScreen()),
       ),
       GoRoute(
         path: '/aluno/anamnese',

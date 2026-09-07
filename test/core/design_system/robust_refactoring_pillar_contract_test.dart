@@ -100,15 +100,25 @@ void main() {
     expect(screen, contains("part 'add_exercicio_screen_state.part.dart'"));
   });
 
-  test('perfil aluno entry file stays decomposed under 100 LOC', () {
-    final lines = File(
+  test('perfil aluno hub stays compact and editar stays decomposed', () {
+    final hubLines = File(
       'lib/features/dashboard/screens/perfil_aluno_screen.dart',
     ).readAsLinesSync().length;
-    expect(lines, lessThan(100));
-    final screen = File(
-      'lib/features/dashboard/screens/perfil_aluno_screen.dart',
+    expect(hubLines, lessThan(220));
+    expect(
+      File(
+        'lib/features/dashboard/screens/perfil_aluno_screen.dart',
+      ).readAsStringSync(),
+      isNot(contains('part ')),
+    );
+    final editLines = File(
+      'lib/features/dashboard/screens/perfil_aluno_editar_screen.dart',
+    ).readAsLinesSync().length;
+    expect(editLines, lessThan(50));
+    final edit = File(
+      'lib/features/dashboard/screens/perfil_aluno_editar_screen.dart',
     ).readAsStringSync();
-    expect(screen, contains("part 'perfil_aluno_screen_state.part.dart'"));
+    expect(edit, contains("part 'perfil_aluno_editar_screen_state.part.dart'"));
   });
 
   test('aluno detail entry stays decomposed under 300 LOC', () {

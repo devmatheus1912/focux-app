@@ -87,6 +87,11 @@ const Map<String, FocuxSurfaceSpec> focuxSurfaceCatalog = {
   '/checkin/treinos': _s4Tab,
   '/saude': _s1Tab,
   '/aluno/perfil': _s2Tab,
+  '/aluno/perfil/editar': FocuxSurfaceSpec(
+    type: _s5,
+    hasInput: true,
+    logicalParent: '/aluno/perfil',
+  ),
   '/aluno/ativacao': FocuxSurfaceSpec(type: _s9, logicalParent: _alunoHome),
   '/aluno/habitos': FocuxSurfaceSpec(type: _s4, logicalParent: _alunoHome),
   '/aluno/recorrencia': FocuxSurfaceSpec(type: _s3, logicalParent: _alunoHome),

@@ -64,6 +64,10 @@ void main() {
     expect(biblioteca!.spec.type, FocuxSurfaceType.s9);
     expect(FocuxSurfaces.resolveParent(biblioteca), '/exercicios');
 
+    final alunoEditar = FocuxSurfaces.resolve('/aluno/perfil/editar');
+    expect(alunoEditar!.spec.type, FocuxSurfaceType.s5);
+    expect(FocuxSurfaces.resolveParent(alunoEditar), '/aluno/perfil');
+
     final ativacao = FocuxSurfaces.resolve('/aluno/ativacao');
     expect(ativacao!.spec.type, FocuxSurfaceType.s9);
     expect(FocuxSurfaces.resolveParent(ativacao), '/dashboard/aluno');
