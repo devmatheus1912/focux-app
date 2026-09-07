@@ -26,5 +26,8 @@ void main() {
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(screen, contains('Buscar aviso'));
     expect(screen, contains('onTapOutside'));
+    expect(screen, contains('viewInsetsOf'));
+    expect(screen, contains('Limpar busca'));
+    expect(screen, contains('fxStripCardDecoration'));
   });
 }

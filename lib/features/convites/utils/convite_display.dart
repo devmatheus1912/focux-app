@@ -1,3 +1,6 @@
+String conviteCountLabel({required bool ativo}) =>
+    ativo ? '1 convite ativo' : 'Nenhum convite ativo';
+
 String conviteRemainingLabel(DateTime? expiresAt, DateTime now) {
   if (expiresAt == null) return '24h';
   final left = expiresAt.difference(now);

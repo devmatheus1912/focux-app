@@ -22,6 +22,10 @@ void main() {
     expect(screen, contains('convitesHubViewed'));
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(screen, contains('FxLiquidPrimaryButton'));
+    expect(screen, contains('safePopOrGo'));
+    expect(screen, contains('viewInsetsOf'));
+    expect(screen, contains('conviteCountLabel'));
+    expect(screen, contains('keyboardDismissBehavior'));
     expect(screen, isNot(contains('Clipboard.setData')));
     expect(screen, isNot(contains('_HeroCard')));
   });

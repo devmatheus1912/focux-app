@@ -379,7 +379,11 @@ const Map<String, FocuxSurfaceSpec> focuxSurfaceCatalog = {
   '/promo-enterprise': FocuxSurfaceSpec(type: _s6, logicalParent: '/planos'),
   '/ranking': FocuxSurfaceSpec(type: _s4, logicalParent: _home),
   '/coach': FocuxSurfaceSpec(type: _s1, logicalParent: _home),
-  '/notificacoes': FocuxSurfaceSpec(type: _s4, logicalParent: _home),
+  '/notificacoes': FocuxSurfaceSpec(
+    type: _s4,
+    hasInput: true,
+    logicalParent: _home,
+  ),
   '/suporte': FocuxSurfaceSpec(type: _s2, logicalParent: _perfil),
   '/broadcasts': FocuxSurfaceSpec(
     type: _s5,
