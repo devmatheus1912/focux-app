@@ -15,14 +15,13 @@ import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
+import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
-import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_strip_card.dart';
 import '../../../core/widgets/operational_metric_tile.dart';
 import '../../../core/widgets/skeleton_loader.dart';
-import '../../dashboard/widgets/dashboard_error_state.dart';
 import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../data/analytics_repository.dart';
 import '../providers/analytics_provider.dart';
@@ -95,7 +94,11 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                       FxHelpTip('Como calculamos', analyticsComoCalculamos),
                       FxHelpTip(
                         'Churn',
-                        'O card do topo é a inadimplência da operação.',
+                        'O card do topo é a inadimplência. Funil e WAU vêm do mesmo BFF.',
+                      ),
+                      FxHelpTip(
+                        'Ação',
+                        'Financeiro cobra atraso. Retenção mostra quem pode sair.',
                       ),
                     ],
                   ),
@@ -106,7 +109,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
           child: async.when(
             loading: () => const SkeletonList(count: 6),
             error:
-                (e, _) => DashboardErrorState(
+                (e, _) => FxErrorState(
                   chromeOnDark: chrome.isDark,
                   primary: primary,
                   message: friendlyError(e),
@@ -114,17 +117,30 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                 ),
             data: (data) {
               if (data.totalAlunos == 0) {
-                return FxEmptyState(
-                  icon: 'bar-chart-2',
-                  title: 'Sem dados ainda',
-                  subtitle:
-                      'Cadastre alunos para ver analytics operacional da base.',
-                  action: FxEmptyAction(
-                    label: 'Ver alunos',
-                    onTap: () {
-                      AnalyticsService.instance.track(ProductEvents.alunosViewed);
-                      goPersonalShellTab(context, '/alunos');
-                    },
+                return RefreshIndicator(
+                  color: primary,
+                  onRefresh: () async =>
+                      ref.invalidate(analyticsDashboardProvider),
+                  child: ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    children: [
+                      const SizedBox(height: 48),
+                      FxEmptyState(
+                        icon: 'bar-chart-2',
+                        title: 'Sem dados ainda',
+                        subtitle:
+                            'Cadastre alunos para ver analytics operacional da base.',
+                        action: FxEmptyAction(
+                          label: 'Ver alunos',
+                          onTap: () {
+                            AnalyticsService.instance.track(
+                              ProductEvents.alunosViewed,
+                            );
+                            goPersonalShellTab(context, '/alunos');
+                          },
+                        ),
+                      ),
+                    ],
                   ),
                 );
               }

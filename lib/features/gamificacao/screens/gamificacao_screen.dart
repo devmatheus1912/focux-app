@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/analytics/analytics_service.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
@@ -19,6 +20,7 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_strip_card.dart';
 import '../../../core/widgets/operational_metric_tile.dart';
 import '../../../core/widgets/skeleton_loader.dart';
+import '../../auth/providers/auth_provider.dart';
 import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../data/gamificacao_repository.dart';
@@ -45,6 +47,7 @@ class _GamificacaoScreenState extends ConsumerState<GamificacaoScreen> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
+    final isAluno = ref.watch(userRoleProvider) == UserRole.aluno;
     final async = ref.watch(gamificacaoProvider);
     ref.listen(gamificacaoProvider, (_, next) {
       if (next.hasValue) {
@@ -60,7 +63,10 @@ class _GamificacaoScreenState extends ConsumerState<GamificacaoScreen> {
         appBar: FxShellAppBar(
           title: 'Minha evolução',
           subtitle: FxHubFreshness.fromFetchedAt(_fetchedAt),
-          onBack: () => safePopOrGo(context, '/perfil/ferramentas'),
+          onBack: () => safePopOrGo(
+            context,
+            isAluno ? '/dashboard/aluno' : '/perfil/ferramentas',
+          ),
           actions: [
             FxHelpIconButton(
               tooltip: 'Como funciona a evolução',
@@ -70,7 +76,10 @@ class _GamificacaoScreenState extends ConsumerState<GamificacaoScreen> {
                 subtitle: 'Sequência, PRs e conquistas do treino.',
                 tips: const [
                   FxHelpTip('Como calculamos', gamificacaoComoCalculamos),
-                  FxHelpTip('Conquistas', 'As 3 do topo. Ver mais abre o restante.'),
+                  FxHelpTip(
+                    'Conquistas',
+                    'Toque no badge para o caminho de ganhar. Só streak, frequência e PR vêm do servidor.',
+                  ),
                   FxHelpTip('Indicação', 'O código de amigo continua em Referral.'),
                 ],
               ),
@@ -97,21 +106,34 @@ class _GamificacaoScreenState extends ConsumerState<GamificacaoScreen> {
                       const SizedBox(height: 48),
                       FxEmptyState(
                         icon: 'spark',
-                        title: 'Sua evolução começa no treino',
-                        subtitle:
-                            'Conquistas e sequência aparecem aqui depois do primeiro treino.',
+                        title: isAluno
+                            ? gamificacaoAlunoEmptyTitle
+                            : gamificacaoPersonalEmptyTitle,
+                        subtitle: isAluno
+                            ? gamificacaoAlunoEmptySubtitle
+                            : gamificacaoPersonalEmptySubtitle,
                         action: FxEmptyAction(
-                          label: 'Ir para o Hoje',
-                          onTap: () => goPersonalShellTab(
-                            context,
-                            '/dashboard/personal',
-                          ),
+                          label: isAluno ? 'Fazer check-in' : 'Ver alunos',
+                          onTap: () {
+                            if (isAluno) {
+                              context.push('/checkin');
+                              return;
+                            }
+                            AnalyticsService.instance.track(
+                              ProductEvents.alunosViewed,
+                            );
+                            goPersonalShellTab(context, '/alunos');
+                          },
                         ),
                       ),
                     ],
                   )
                   : FxContentWidthLimiter(
-                    child: _GamificacaoBody(data: data, isDark: isDark),
+                    child: _GamificacaoBody(
+                      data: data,
+                      isDark: isDark,
+                      isAluno: isAluno,
+                    ),
                   ),
             );
           },
@@ -122,10 +144,15 @@ class _GamificacaoScreenState extends ConsumerState<GamificacaoScreen> {
 }
 
 class _GamificacaoBody extends StatefulWidget {
-  const _GamificacaoBody({required this.data, required this.isDark});
+  const _GamificacaoBody({
+    required this.data,
+    required this.isDark,
+    required this.isAluno,
+  });
 
   final GamificacaoData data;
   final bool isDark;
+  final bool isAluno;
 
   @override
   State<_GamificacaoBody> createState() => _GamificacaoBodyState();
@@ -146,13 +173,20 @@ class _GamificacaoBodyState extends State<_GamificacaoBody> {
     );
     final visiveis =
         _mostrarTodas ? badges : gamificacaoBadgePreview(badges);
+    final pending = badges.where((b) => !b.earned);
+    final nextBadge = pending.isEmpty ? null : pending.first;
 
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
       keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       padding: const EdgeInsets.all(TokensStrip.s4),
       children: [
-        _StreakCard(data: data, isDark: isDark),
+        _StreakCard(
+          data: data,
+          isDark: isDark,
+          isAluno: widget.isAluno,
+          nextBadge: nextBadge,
+        ),
         const SizedBox(height: TokensStrip.s4),
         OperationalMetricTile(
           label: 'Aderência',
@@ -178,23 +212,38 @@ class _GamificacaoBodyState extends State<_GamificacaoBody> {
               : null,
         ),
         const SizedBox(height: TokensStrip.s2),
-        for (final badge in visiveis) _BadgeRow(badge: badge),
-        const SizedBox(height: TokensStrip.s4),
-        FxSatelliteListTile(
-          title: 'Indique um amigo',
-          subtitle: const Text('30 dias extras quando ele assinar.'),
-          onTap: () => context.push('/referral'),
-        ),
+        for (final badge in visiveis)
+          _BadgeRow(
+            badge: badge,
+            onTap: () => context.push(
+              gamificacaoRotaDoBadge(badge.tipo, isAluno: widget.isAluno),
+            ),
+          ),
+        if (widget.isAluno) ...[
+          const SizedBox(height: TokensStrip.s4),
+          FxSatelliteListTile(
+            title: 'Indique um amigo',
+            subtitle: const Text('30 dias extras quando ele assinar.'),
+            onTap: () => context.push('/referral'),
+          ),
+        ],
       ],
     );
   }
 }
 
 class _StreakCard extends StatelessWidget {
-  const _StreakCard({required this.data, required this.isDark});
+  const _StreakCard({
+    required this.data,
+    required this.isDark,
+    required this.isAluno,
+    this.nextBadge,
+  });
 
   final GamificacaoData data;
   final bool isDark;
+  final bool isAluno;
+  final GamificacaoBadgeTile? nextBadge;
 
   @override
   Widget build(BuildContext context) {
@@ -225,14 +274,26 @@ class _StreakCard extends StatelessWidget {
             ).copyWith(fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: TokensStrip.s3),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: DashboardHomeActionChip(
-              label: 'Ver check-in',
-              accent: Theme.of(context).colorScheme.primary,
-              isDark: isDark,
-              onPressed: () => goPersonalShellTab(context, '/checkin'),
-            ),
+          Wrap(
+            spacing: TokensStrip.s2,
+            runSpacing: TokensStrip.s2,
+            children: [
+              DashboardHomeActionChip(
+                label: 'Ver check-in',
+                accent: Theme.of(context).colorScheme.primary,
+                isDark: isDark,
+                onPressed: () => context.push('/checkin'),
+              ),
+              if (nextBadge case final pending?)
+                DashboardHomeActionChip(
+                  label: pending.label,
+                  accent: Theme.of(context).colorScheme.primary,
+                  isDark: isDark,
+                  onPressed: () => context.push(
+                    gamificacaoRotaDoBadge(pending.tipo, isAluno: isAluno),
+                  ),
+                ),
+            ],
           ),
         ],
       ),
@@ -241,15 +302,19 @@ class _StreakCard extends StatelessWidget {
 }
 
 class _BadgeRow extends StatelessWidget {
-  const _BadgeRow({required this.badge});
+  const _BadgeRow({required this.badge, required this.onTap});
 
   final GamificacaoBadgeTile badge;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     return FxSatelliteListTile(
       title: badge.label,
-      subtitle: Text(badge.earned ? 'Conquistada' : 'Ainda não'),
+      subtitle: Text(
+        gamificacaoBadgeSubtitle(earned: badge.earned, tipo: badge.tipo),
+      ),
+      onTap: onTap,
       leading: SizedBox(
         width: 36,
         height: 36,

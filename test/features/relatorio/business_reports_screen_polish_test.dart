@@ -28,6 +28,8 @@ void main() {
     expect(screen, contains('FeatureGate'));
     expect(screen, contains('businessReportsViewed'));
     expect(screen, contains('/dunning'));
+    expect(screen, contains('businessAlunosLabel'));
+    expect(screen, contains('Cobrar atrasados'));
     expect(screen, isNot(contains('bar-chart-2')));
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(screen, isNot(contains('Icons.attach_money')));

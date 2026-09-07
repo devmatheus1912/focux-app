@@ -22,6 +22,9 @@ void main() {
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(screen, contains('RefreshIndicator'));
     expect(screen, contains('financeiroViewed'));
+    expect(screen, contains('Ver retenção'));
+    expect(screen, contains('FxErrorState'));
+    expect(screen, isNot(contains('_InadimplenciaCard')));
     expect(screen, contains('Como calculamos'));
     expect(screen, contains('isDark'));
   });

@@ -61,22 +61,31 @@ class _AnalyticsBody extends StatelessWidget {
                         ).copyWith(fontWeight: FontWeight.w700),
                       ),
                       const SizedBox(height: TokensStrip.s3),
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: DashboardHomeActionChip(
-                          label: 'Ver financeiro',
-                          accent:
-                              data.inadimplentes > 0
-                                  ? EagleTokens.bad
-                                  : brand,
-                          isDark: dark,
-                          onPressed: () {
-                            AnalyticsService.instance.track(
-                              ProductEvents.financeiroViewed,
-                            );
-                            context.push('/financeiro');
-                          },
-                        ),
+                      Wrap(
+                        spacing: TokensStrip.s2,
+                        runSpacing: TokensStrip.s2,
+                        children: [
+                          DashboardHomeActionChip(
+                            label: 'Ver financeiro',
+                            accent:
+                                analyticsTemInadimplencia(data.inadimplentes)
+                                    ? EagleTokens.bad
+                                    : brand,
+                            isDark: dark,
+                            onPressed: () {
+                              AnalyticsService.instance.track(
+                                ProductEvents.financeiroViewed,
+                              );
+                              context.push('/financeiro');
+                            },
+                          ),
+                          DashboardHomeActionChip(
+                            label: 'Ver retenção',
+                            accent: brand,
+                            isDark: dark,
+                            onPressed: () => context.push('/retencao'),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -141,17 +150,7 @@ class _AnalyticsBody extends StatelessWidget {
             ),
           ),
         ],
-
-        // ── Inadimplência ───────────────────────────────────────────────────
-        SliverToBoxAdapter(
-          child: _SectionTitle(title: 'Saúde financeira'),
-        ),
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 0, 16, 110),
-            child: _InadimplenciaCard(data: data),
-          ),
-        ),
+        const SliverToBoxAdapter(child: SizedBox(height: 48)),
       ],
     );
   }
@@ -602,117 +601,6 @@ class _RetencaoBadge extends StatelessWidget {
             fontWeight: FontWeight.w700,
           ),
         ),
-      ),
-    );
-  }
-}
-
-// ─── Inadimplência card ───────────────────────────────────────────────────────
-
-class _InadimplenciaCard extends StatelessWidget {
-  final AnalyticsDashboard data;
-
-  const _InadimplenciaCard({required this.data});
-
-  @override
-  Widget build(BuildContext context) {
-    final chrome = ShellChrome.of(context);
-    final ink = chrome.ink;
-    final mute = chrome.mute;
-    final line = chrome.line;
-    final churn = data.taxaInadimplencia;
-    final isGood = churn < 5.0;
-    final primary = Theme.of(context).colorScheme.primary;
-
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: fxListCardDecoration(
-        context,
-        accent: primary,
-        radius: 22,
-      ).copyWith(border: Border.all(color: line)),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Taxa de inadimplência',
-                style: TextStyle(
-                  color: ink,
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              _PillTag(label: isGood ? 'Saudável' : 'Atenção'),
-            ],
-          ),
-          const SizedBox(height: TokensStrip.s4),
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '${churn.toStringAsFixed(1)}%',
-                      style: TextStyle(
-                        color: isGood ? EagleTokens.good : EagleTokens.bad,
-                        fontSize: 40,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: -1,
-                        height: 1,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '${data.inadimplentes} de ${data.totalAlunos} alunos',
-                      style: TextStyle(color: mute, fontSize: 12),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(
-                width: 60,
-                height: 60,
-                child: FxLoading(
-                  value: (churn / 100).clamp(0.0, 1.0),
-                  strokeWidth: 6,
-                  backgroundColor: (isGood ? EagleTokens.good : EagleTokens.bad)
-                      .withValues(alpha: 0.15),
-                  color: isGood ? EagleTokens.good : EagleTokens.bad,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 14),
-          // Meta line
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text('Meta', style: TextStyle(color: mute, fontSize: 11)),
-              Text(
-                '< 5%',
-                style: TextStyle(
-                  color: EagleTokens.good,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 6),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(4),
-            child: LinearProgressIndicator(
-              value: (churn / 10).clamp(0.0, 1.0),
-              minHeight: 6,
-              backgroundColor:
-                  ShellChrome.of(context).line,
-              color: isGood ? EagleTokens.good : EagleTokens.bad,
-            ),
-          ),
-        ],
       ),
     );
   }
