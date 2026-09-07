@@ -23,6 +23,9 @@ void main() {
     expect(home.top3.single.alunoNome, 'Ana');
     expect(firstAltoRetencao(home.top3)?.alunoId, 9);
     expect(retencaoRiscoLabel('MEDIO'), 'Risco médio');
+    expect(retencaoPorque(home.top3.single), contains('subiu 4 pts'));
+    expect(retencaoItemsForFiltro(home.top3, 'alto').single.alunoId, 9);
+    expect(retencaoEmptyTitle, contains('leitura'));
     expect(retencaoComoCalculamos, contains('catálogo'));
   });
 }

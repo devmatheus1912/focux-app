@@ -4,9 +4,17 @@ import '../../support/screen_source_bundle.dart';
 
 void main() {
   test('dunning ops cumpre contrato Tier S+', () {
-    final screen = readScreenSourceBundle(
-      'lib/features/dunning/screens/dunning_ops_screen.dart',
-    );
+    final screen = [
+      readScreenSourceBundle(
+        'lib/features/dunning/screens/dunning_ops_screen.dart',
+      ),
+      readScreenSourceBundle(
+        'lib/features/dunning/widgets/dunning_focus_card.dart',
+      ),
+      readScreenSourceBundle(
+        'lib/features/dunning/widgets/dunning_acoes_sheet.dart',
+      ),
+    ].join('\n');
     expect(screen, contains('fxScreenA11yScope'));
     expect(screen, contains('FxShellScaffold'));
     expect(screen, contains('constrainWidth: false'));
@@ -30,6 +38,9 @@ void main() {
     expect(screen, contains('showFxConfirmSheet'));
     expect(screen, contains('dunningHubViewed'));
     expect(screen, contains('showDunningCatalogSheet'));
+    expect(screen, contains('showDunningAcoesSheet'));
+    expect(screen, contains('Escrever'));
+    expect(screen, contains('Cobrar'));
     expect(screen, contains('Ver mais'));
     expect(screen, contains('alunoNome'));
     expect(screen, contains('circle-check'));

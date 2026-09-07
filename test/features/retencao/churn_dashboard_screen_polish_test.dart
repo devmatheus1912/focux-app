@@ -4,9 +4,14 @@ import '../../support/screen_source_bundle.dart';
 
 void main() {
   test('churn dashboard cumpre contrato Tier S+', () {
-    final screen = readScreenSourceBundle(
-      'lib/features/retencao/screens/churn_dashboard_screen.dart',
-    );
+    final screen = [
+      readScreenSourceBundle(
+        'lib/features/retencao/screens/churn_dashboard_screen.dart',
+      ),
+      readScreenSourceBundle(
+        'lib/features/retencao/widgets/retencao_acoes_sheet.dart',
+      ),
+    ].join('\n');
     expect(screen, contains('fxScreenA11yScope'));
     expect(screen, contains('FxShellScaffold'));
     expect(screen, contains('constrainWidth: false'));
@@ -17,6 +22,12 @@ void main() {
     expect(screen, contains('emphasize: true'));
     expect(screen, contains('getHome'));
     expect(screen, contains('showRetencaoCatalogSheet'));
+    expect(screen, contains('showRetencaoAcoesSheet'));
+    expect(screen, contains('Escrever'));
+    expect(screen, contains('Cobrar'));
+    expect(screen, contains('FxToggleChip'));
+    expect(screen, contains('retencaoEmptyTitle'));
+    expect(screen, isNot(contains('Scores em breve')));
     expect(screen, contains('FxEmptyAction'));
     expect(screen, contains('keyboardDismissBehavior'));
     expect(screen, isNot(contains('/alunos?filtro=risco')));

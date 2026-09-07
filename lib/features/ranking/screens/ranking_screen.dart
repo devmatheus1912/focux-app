@@ -4,8 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
 
+import '../../../core/analytics/analytics_service.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/focux_hub_typography.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
@@ -15,8 +17,10 @@ import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/fx_strip_card.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../data/ranking_repository.dart';
 import '../utils/ranking_display.dart';
@@ -149,8 +153,8 @@ class _RankingScreenState extends ConsumerState<RankingScreen> {
                     'Os 3 primeiros levam desconto na assinatura Focux.',
                   ),
                   FxHelpTip(
-                    'Lista',
-                    'A posição não abre o personal. É um placar, não o 360.',
+                    'Como ganhar',
+                    'Mais alunos ativos sobem a posição. O desconto do pódio entra na assinatura Focux.',
                   ),
                 ],
               ),
@@ -188,13 +192,7 @@ class _RankingScreenState extends ConsumerState<RankingScreen> {
                     },
                     onTapOutside: (_) =>
                         FocusManager.instance.primaryFocus?.unfocus(),
-                    decoration: InputDecoration(
-                      hintText: 'Buscar personal',
-                      prefixIcon: const Icon(Icons.search_rounded),
-                      border: FxInputDeco.outlineBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    ),
+                    decoration: FxInputDeco.build(context, 'Buscar personal'),
                   ),
                 ),
                 Expanded(
@@ -214,11 +212,13 @@ class _RankingScreenState extends ConsumerState<RankingScreen> {
                         subtitle: rankingSearchEmptySubtitle(_query),
                         action: _query.isEmpty
                             ? FxEmptyAction(
-                          label: 'Ir para o Hoje',
-                          onTap: () => goPersonalShellTab(
-                            context,
-                            '/dashboard/personal',
-                          ),
+                          label: 'Ver alunos',
+                          onTap: () {
+                            AnalyticsService.instance.track(
+                              ProductEvents.alunosViewed,
+                            );
+                            goPersonalShellTab(context, '/alunos');
+                          },
                         )
                             : null,
                       ),
@@ -233,9 +233,32 @@ class _RankingScreenState extends ConsumerState<RankingScreen> {
                       itemCount: _items.length + (_hasMore ? 2 : 1),
                       itemBuilder: (context, index) {
                         if (index == 0) {
-                          return const Padding(
-                            padding: EdgeInsets.only(bottom: TokensStrip.s3),
-                            child: DashboardSectionHeader(title: 'Classificação'),
+                          final first = _items.first;
+                          return Padding(
+                            padding: const EdgeInsets.only(
+                              bottom: TokensStrip.s3,
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                _RankingFocusCard(
+                                  first: first,
+                                  isDark: isDark,
+                                  onAlunos: () {
+                                    AnalyticsService.instance.track(
+                                      ProductEvents.alunosViewed,
+                                    );
+                                    goPersonalShellTab(context, '/alunos');
+                                  },
+                                  onAssinatura: () =>
+                                      goPersonalShellTab(context, '/assinatura'),
+                                ),
+                                const SizedBox(height: TokensStrip.s4),
+                                const DashboardSectionHeader(
+                                  title: 'Classificação',
+                                ),
+                              ],
+                            ),
                           );
                         }
                         if (_hasMore && index == _items.length + 1) {
@@ -249,7 +272,12 @@ class _RankingScreenState extends ConsumerState<RankingScreen> {
                         final item = _items[index - 1];
                         return FxSatelliteListTile(
                           title: item.nome,
-                          subtitle: Text(rankingAlunosLabel(item.totalAlunosAtivos)),
+                          subtitle: Text(
+                            rankingItemSubtitle(
+                              item.totalAlunosAtivos,
+                              item.descontoPercentual,
+                            ),
+                          ),
                           trailing: Text(
                             rankingPosicaoLabel(item.posicao),
                             style: FocuxHubTypography.bodyMuted(
@@ -270,6 +298,78 @@ class _RankingScreenState extends ConsumerState<RankingScreen> {
                 ),
               ],
             ),
+      ),
+    );
+  }
+}
+
+class _RankingFocusCard extends StatelessWidget {
+  const _RankingFocusCard({
+    required this.first,
+    required this.isDark,
+    required this.onAlunos,
+    required this.onAssinatura,
+  });
+
+  final RankingItem first;
+  final bool isDark;
+  final VoidCallback onAlunos;
+  final VoidCallback onAssinatura;
+
+  @override
+  Widget build(BuildContext context) {
+    final chrome = ShellChrome.forDark(isDark);
+    final desconto = rankingDescontoLabel(first.descontoPercentual);
+    return FxStripCard(
+      emphasize: true,
+      semanticsLabel:
+          '${rankingPosicaoLabel(first.posicao)} ${first.nome}',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Pódio', style: FocuxHubTypography.chip(chrome.mute)),
+          const SizedBox(height: 6),
+          Text(
+            rankingPosicaoLabel(first.posicao),
+            style: FocuxHubTypography.kpi(
+              color: chrome.ink,
+              fontSize: FocuxHubTypography.metricLg,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            first.nome,
+            style: FocuxHubTypography.body(
+              color: chrome.ink,
+            ).copyWith(fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            desconto.isEmpty
+                ? rankingAlunosLabel(first.totalAlunosAtivos)
+                : '$desconto · ${rankingAlunosLabel(first.totalAlunosAtivos)}',
+            style: FocuxHubTypography.body(color: chrome.mute),
+          ),
+          const SizedBox(height: TokensStrip.s3),
+          Wrap(
+            spacing: TokensStrip.s2,
+            runSpacing: TokensStrip.s2,
+            children: [
+              DashboardHomeActionChip(
+                label: 'Crescer base',
+                accent: Theme.of(context).colorScheme.primary,
+                isDark: isDark,
+                onPressed: onAlunos,
+              ),
+              DashboardHomeActionChip(
+                label: 'Assinatura',
+                accent: Theme.of(context).colorScheme.primary,
+                isDark: isDark,
+                onPressed: onAssinatura,
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
