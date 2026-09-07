@@ -1,7 +1,5 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../data/dashboard_tool_shortcuts.dart';
-
 const _prefsKey = 'dashboard_tool_recent_routes';
 const _maxRecent = 3;
 
@@ -21,19 +19,8 @@ class DashboardToolRecentStore {
     await prefs.setStringList(_prefsKey, next);
   }
 
-  static Future<List<DashboardToolShortcut>> loadRecentShortcuts() async {
+  static Future<List<String>> loadRecentRoutes() async {
     final prefs = await SharedPreferences.getInstance();
-    final routes = prefs.getStringList(_prefsKey) ?? const <String>[];
-    if (routes.isEmpty) return const [];
-
-    final byRoute = <String, DashboardToolShortcut>{
-      for (final shortcut in DashboardToolShortcut.moreTools)
-        if (shortcut.route != null) shortcut.route!: shortcut,
-    };
-
-    return routes
-        .map((route) => byRoute[route])
-        .whereType<DashboardToolShortcut>()
-        .toList();
+    return prefs.getStringList(_prefsKey) ?? const <String>[];
   }
 }

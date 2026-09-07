@@ -1,55 +1,50 @@
+import '../../ferramentas/data/ferramentas_catalogo_models.dart';
+import '../../ferramentas/utils/ferramentas_icons.dart';
+import '../../ferramentas/utils/ferramentas_gates.dart';
 import '../../planos/data/planos_repository.dart';
 import '../../planos/utils/plano_capability.dart';
 import '../../subscription/models/subscription_plan.dart';
 import '../../subscription/plan_entitlements.dart';
 
-/// Bucket visual da Home «Mais ferramentas».
-enum DashboardToolGroup {
-  operacao('Operação'),
-  receita('Receita'),
-  crescimento('Crescimento'),
-  sistema('Sistema');
-
-  const DashboardToolGroup(this.title);
-  final String title;
-}
-
-/// Atalho do grid «Mais ferramentas» — capability alinhada ao [FeatureGate] da rota.
+/// Atalho derivado do BFF de catálogo (não lista flat hardcoded).
 class DashboardToolShortcut {
   const DashboardToolShortcut({
     required this.icon,
     required this.label,
-    required this.group,
+    required this.entrada,
     this.route,
     this.capability,
     this.featureName,
     this.landingEditor = false,
-    this.featured = false,
+    this.preferredAbaId,
   });
 
   final String icon;
   final String label;
-  final DashboardToolGroup group;
+  final CatalogoEntrada entrada;
   final String? route;
   final String? capability;
   final String? featureName;
   final bool landingEditor;
-
-  /// Alto valor de negócio — aparece na grade em destaque (fora do
-  /// catálogo completo) para reduzir a carga cognitiva do "Mais ferramentas".
-  final bool featured;
+  final String? preferredAbaId;
 
   String get displayFeatureName => featureName ?? label;
 
   bool isUnlocked(PlanoFeatures features) {
+    if (!entrada.unlocked) return false;
     if (capability == null) return true;
     return PlanoCapability.has(features, capability!);
   }
 
-  SubscriptionPlan targetPlan() => PlanEntitlements.targetPlan(
-    capability: capability,
-    fallback: SubscriptionPlan.PRO,
-  );
+  SubscriptionPlan targetPlan() {
+    if (entrada.upgradePlano != null && entrada.upgradePlano!.isNotEmpty) {
+      return subscriptionPlanFromApi(entrada.upgradePlano);
+    }
+    return PlanEntitlements.targetPlan(
+      capability: capability,
+      fallback: SubscriptionPlan.PRO,
+    );
+  }
 
   String tierBadgeLabel() {
     return switch (targetPlan()) {
@@ -59,179 +54,66 @@ class DashboardToolShortcut {
     };
   }
 
-  static const List<DashboardToolShortcut> moreTools = [
-    DashboardToolShortcut(
-      icon: 'dumbbell',
-      label: 'Exercícios',
-      route: '/exercicios',
-      group: DashboardToolGroup.operacao,
-    ),
-    DashboardToolShortcut(
-      icon: 'article',
-      label: 'Feed',
-      route: '/feed',
-      group: DashboardToolGroup.operacao,
-    ),
-    DashboardToolShortcut(
-      icon: 'flame',
-      label: 'Hábitos',
-      route: '/habitos',
-      capability: 'habitCoaching',
-      group: DashboardToolGroup.operacao,
-    ),
-    DashboardToolShortcut(
-      icon: 'plus',
-      label: 'Desafios',
-      route: '/desafios',
-      capability: 'comunidadeGrupos',
-      featureName: 'Desafios e ranking',
-      group: DashboardToolGroup.operacao,
-    ),
-    DashboardToolShortcut(
-      icon: 'trend',
-      label: 'Leads',
-      route: '/leads',
-      capability: 'financeiro',
-      featureName: 'CRM e Leads',
-      group: DashboardToolGroup.crescimento,
-      featured: true,
-    ),
-    DashboardToolShortcut(
-      icon: 'home',
-      label: 'Indique',
-      route: '/referral',
-      group: DashboardToolGroup.crescimento,
-    ),
-    DashboardToolShortcut(
-      icon: 'message-circle',
-      label: 'Lead Público',
-      route: '/leads-publicos',
-      capability: 'financeiro',
-      featureName: 'Captura de leads',
-      group: DashboardToolGroup.crescimento,
-    ),
-    DashboardToolShortcut(
-      icon: 'route',
-      label: 'Recuperação',
-      route: '/winback',
-      capability: 'automacoes',
-      featureName: 'Automação win-back',
-      group: DashboardToolGroup.crescimento,
-      featured: true,
-    ),
-    DashboardToolShortcut(
-      icon: 'sun',
-      label: 'Landing',
-      landingEditor: true,
-      capability: 'landingCompleta',
-      featureName: 'Landing page completa',
-      group: DashboardToolGroup.crescimento,
-    ),
-    DashboardToolShortcut(
-      icon: 'star',
-      label: 'Pesquisa NPS',
-      route: '/nps',
-      group: DashboardToolGroup.crescimento,
-    ),
-    DashboardToolShortcut(
-      icon: 'spark',
-      label: 'Ofertas',
-      route: '/ofertas-upsell',
-      group: DashboardToolGroup.receita,
-    ),
-    DashboardToolShortcut(
-      icon: 'coin',
-      label: 'Pacotes',
-      route: '/pacotes',
-      group: DashboardToolGroup.receita,
-    ),
-    DashboardToolShortcut(
-      icon: 'pix',
-      label: 'Loja',
-      route: '/loja',
-      capability: 'lojaDigital',
-      featureName: 'Loja digital',
-      group: DashboardToolGroup.receita,
-    ),
-    DashboardToolShortcut(
-      icon: 'trend',
-      label: 'Receita recorrente',
-      route: '/relatorio/business',
-      capability: 'relatorios',
-      featureName: 'Relatórios de negócio',
-      group: DashboardToolGroup.receita,
-    ),
-    DashboardToolShortcut(
-      icon: 'alert-triangle',
-      label: 'Cobrança auto',
-      route: '/dunning',
-      capability: 'financeiro',
-      featureName: 'Cobrança automática',
-      group: DashboardToolGroup.receita,
-      featured: true,
-    ),
-    DashboardToolShortcut(
-      icon: 'calendar',
-      label: 'Recorrência',
-      route: '/recorrencia',
-      capability: 'financeiro',
-      featureName: 'Recorrência de alunos',
-      group: DashboardToolGroup.receita,
-    ),
-    DashboardToolShortcut(
-      icon: 'moon',
-      label: 'Marca própria',
-      route: '/white-label',
-      capability: 'whiteLabel',
-      featureName: 'Identidade visual e marca própria',
-      group: DashboardToolGroup.sistema,
-    ),
-    DashboardToolShortcut(
-      icon: 'zap',
-      label: 'Automações',
-      route: '/automacoes',
-      capability: 'automacoes',
-      group: DashboardToolGroup.sistema,
-      featured: true,
-    ),
-    DashboardToolShortcut(
-      icon: 'users',
-      label: 'Equipe',
-      route: '/perfil/equipe',
-      capability: 'equipeRbac',
-      featureName: 'Equipe e RBAC',
-      group: DashboardToolGroup.sistema,
-    ),
-    DashboardToolShortcut(
-      icon: 'chat',
-      label: 'Grupo',
-      route: '/grupo-aulas',
-      capability: 'comunidadeGrupos',
-      featureName: 'Turmas em grupo',
-      group: DashboardToolGroup.sistema,
-    ),
-    DashboardToolShortcut(
-      icon: 'arrow-left',
-      label: 'Configuração inicial',
-      route: '/onboarding/wizard',
-      group: DashboardToolGroup.sistema,
-    ),
-    DashboardToolShortcut(
-      icon: 'circle-check',
-      label: 'Qualidade',
-      route: '/dashboard/qualidade',
-      group: DashboardToolGroup.sistema,
-    ),
-    DashboardToolShortcut(
-      icon: 'bell',
-      label: 'Broadcasts',
-      route: '/broadcasts',
-      group: DashboardToolGroup.sistema,
-    ),
-  ];
+  factory DashboardToolShortcut.fromEntrada(
+    CatalogoEntrada entrada, {
+    String? preferredAbaId,
+  }) {
+    final capability = capabilityFromFeatureGate(entrada.featureGate);
+    final route =
+        entrada.isHubComAbas
+            ? ferramentasHubLocation(entrada.id, abaId: preferredAbaId)
+            : normalizeFerramentasRotaApp(entrada.rotaApp);
+    return DashboardToolShortcut(
+      icon: ferramentasIconFor(entrada),
+      label: entrada.titulo,
+      entrada: entrada,
+      route: route,
+      capability: capability,
+      featureName: entrada.titulo,
+      landingEditor: route == '/perfil/landing-editor',
+      preferredAbaId: preferredAbaId,
+    );
+  }
+}
 
-  /// Subconjunto de alto valor mostrado por padrão — o catálogo completo
-  /// fica atrás de "Ver catálogo completo" para reduzir densidade visual.
-  static List<DashboardToolShortcut> get featuredTools =>
-      moreTools.where((s) => s.featured).toList(growable: false);
+/// Atalhos da home a partir de `atalhosHome` (+ destaqueHome), filtrando
+/// Configuração inicial quando onboarding já está completo.
+List<DashboardToolShortcut> atalhosHomeFromCatalogo(
+  FerramentasCatalogo catalogo, {
+  bool hideOnboardingWizard = false,
+}) {
+  final raw = catalogo.atalhosHome;
+  final list =
+      raw.isNotEmpty
+          ? raw
+          : [
+            for (final hub in catalogo.hubs)
+              for (final item in hub.itens)
+                if (item.destaqueHome) item,
+          ];
+
+  return [
+    for (final entrada in list)
+      if (!(hideOnboardingWizard && _isOnboardingWizard(entrada)))
+        DashboardToolShortcut.fromEntrada(entrada),
+  ];
+}
+
+/// Folhas + portas de hub (itens com abas contam como 1).
+List<DashboardToolShortcut> catalogLeavesFromHub(CatalogoHub hub) {
+  return [
+    for (final item in hub.itens) DashboardToolShortcut.fromEntrada(item),
+  ];
+}
+
+bool _isOnboardingWizard(CatalogoEntrada e) {
+  final route = normalizeFerramentasRotaApp(e.rotaApp);
+  if (route == '/onboarding/wizard') return true;
+  final keys = [e.id, ...e.legacyIds, e.titulo.toLowerCase()];
+  return keys.any(
+    (k) =>
+        k.toLowerCase().contains('configuracao') ||
+        k.toLowerCase().contains('configuração') ||
+        k.toLowerCase().contains('onboarding'),
+  );
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import '../../features/ferramentas/screens/ferramentas_hub_screen.dart';
 import '../../features/alunos/data/aluno_repository.dart';
 import '../../features/dashboard/screens/copilot_actions_screen.dart';
 import '../../features/alunos/screens/add_aluno_screen.dart';
@@ -784,6 +785,17 @@ RouteBase buildChromeShellRoute() {
           GoRoute(
             path: '/pacotes',
             builder: (context, state) => const PacotesScreen(),
+          ),
+          GoRoute(
+            path: '/ferramentas/hub/:itemId',
+            builder: (context, state) {
+              final itemId = state.pathParameters['itemId'] ?? '';
+              final aba = state.uri.queryParameters['aba'];
+              return FerramentasHubScreen(
+                itemId: itemId,
+                initialAbaId: aba,
+              );
+            },
           ),
           GoRoute(
             path: '/leads-publicos',

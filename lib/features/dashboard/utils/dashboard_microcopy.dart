@@ -19,11 +19,11 @@ abstract final class DashboardMicrocopy {
   static const aderenciaDaSemana = 'Aderência da semana';
   static const maisFerramentas = 'Mais ferramentas';
   static const ferramentasEmDestaque = 'Ferramentas em destaque';
-  static const verCatalogoCompleto = 'Ver catálogo completo';
-  static const catalogoCompleto = 'Catálogo completo';
+  static const verCatalogoCompleto = 'Ver catálogo';
+  static const catalogoCompleto = 'Catálogo';
   static const catalogoSubtitle =
-      'Ferramentas do plano. Bloqueadas abrem o upgrade.';
-  static const buscarFerramenta = 'Buscar ferramenta...';
+      'Hubs do plano. Bloqueados abrem o upgrade.';
+  static const buscarFerramenta = 'Buscar ferramenta ou nome antigo...';
   static const tendencia7Dias = '7 dias';
   static const checkinsPulseLabel = 'Check-ins';
   static const tendenciaVaziaBase = 'Sem treinos';
