@@ -24,6 +24,8 @@ abstract final class FocuxBrandCopy {
 
   static const onboardingSkip = 'Pular';
 
+  static const onboardingBack = 'Voltar';
+
   static const onboardingCtaNext = 'Quero isso →';
 
   static const onboardingCtaFinish = 'Começar grátis';

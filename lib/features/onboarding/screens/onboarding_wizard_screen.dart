@@ -18,6 +18,7 @@ import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
+import '../../../core/widgets/fx_wizard_chrome.dart';
 import '../../../core/widgets/fx_icon.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
@@ -173,9 +174,10 @@ class _OnboardingWizardScreenState
     if (mounted) await _load(silent: true);
   }
 
-  void _sairSemConcluir() {
+  Future<void> _sairSemConcluir() async {
     HapticFeedback.selectionClick();
     DashboardOnboardingWizardGate.dismissForSession();
+    if (!mounted) return;
     context.go('/dashboard/personal');
   }
 
@@ -192,7 +194,9 @@ class _OnboardingWizardScreenState
     final primary = Theme.of(context).colorScheme.primary;
     final ready = !_loading && _erro == null && wizard != null;
 
-    return fxScreenA11yScope(
+    return FxWizardPopGuard(
+      onLeave: _sairSemConcluir,
+      child: fxScreenA11yScope(
       label: 'Primeiros passos, configuração inicial',
       child: FxShellScaffold(
         useMesh: true,
@@ -232,16 +236,8 @@ class _OnboardingWizardScreenState
         ),
         bottomNavigationBar:
             ready
-                ? SafeArea(
-                  top: false,
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(
-                      FxSettingsLayout.pageInset,
-                      TokensStrip.s2,
-                      FxSettingsLayout.pageInset,
-                      TokensStrip.s3,
-                    ),
-                    child: FxLiquidPrimaryButton(
+                ? FxWizardStickyBar(
+                    primary: FxLiquidPrimaryButton(
                       label: wizardStickyLabel(allDone: _allDone),
                       loading: _concluindo,
                       loadingLabel: 'Concluindo…',
@@ -253,8 +249,7 @@ class _OnboardingWizardScreenState
                                 fromChip: true,
                               ),
                     ),
-                  ),
-                )
+                  )
                 : null,
         body:
             _loading && wizard == null
@@ -291,6 +286,7 @@ class _OnboardingWizardScreenState
                     ),
                   ),
                 ),
+      ),
       ),
     );
   }

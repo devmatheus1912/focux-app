@@ -51,6 +51,7 @@ abstract final class FocuxSurfaces {
     'lib/core/widgets/fx_keyboard_dismiss_scope.dart',
     'lib/core/widgets/fx_form_chrome.dart',
     'lib/core/widgets/fx_execution_chrome.dart',
+    'lib/core/widgets/fx_wizard_chrome.dart',
     'lib/core/widgets/fx_shell_scaffold.dart',
     'lib/core/router/safe_navigation.dart',
   ];
@@ -61,6 +62,7 @@ abstract final class FocuxSurfaces {
     'test/core/widgets/fx_keyboard_dismiss_scope_test.dart',
     'test/core/widgets/fx_form_chrome_test.dart',
     'test/core/widgets/fx_execution_chrome_test.dart',
+    'test/core/widgets/fx_wizard_chrome_test.dart',
   ];
 
   static Map<String, FocuxSurfaceSpec> get catalog => focuxSurfaceCatalog;

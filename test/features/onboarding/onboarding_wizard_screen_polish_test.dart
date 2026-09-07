@@ -16,6 +16,8 @@ void main() {
     expect(screen, contains('SkeletonList'));
     expect(screen, contains('RefreshIndicator'));
     expect(screen, contains('FxLiquidPrimaryButton'));
+    expect(screen, contains('FxWizardStickyBar'));
+    expect(screen, contains('FxWizardPopGuard'));
     expect(screen, contains('bottomNavigationBar'));
     expect(screen, contains('wizardEtapaLabel'));
     expect(screen, contains('wizardFazerDepoisLabel'));

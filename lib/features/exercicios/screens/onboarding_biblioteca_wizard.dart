@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/router/safe_navigation.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_confirm_sheet.dart';
+import '../../../core/widgets/fx_wizard_chrome.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
@@ -93,11 +95,26 @@ class _OnboardingBibliotecaWizardState
     _persistDraft();
   }
 
-  void _pular() {
+  Future<void> _pular() async {
     if (_importing) return;
+    final ok = await showFxConfirmSheet(
+      context,
+      title: 'Sair da biblioteca?',
+      message: 'Dá para retomar depois. O que você já escolheu fica salvo.',
+      confirmLabel: 'Sair',
+    );
+    if (!ok || !mounted) return;
     AnalyticsService.instance.track('wizard_skipped');
-    BibliotecaWizardDraftCache.clear();
-    context.pop(false);
+    safePopOrGo(context, '/exercicios');
+  }
+
+  Future<void> _onLeave() async {
+    if (_importing) return;
+    if (_step > 0) {
+      _voltar();
+      return;
+    }
+    await _pular();
   }
 
   void _voltar() {
@@ -148,7 +165,7 @@ class _OnboardingBibliotecaWizardState
         context,
         bibliotecaImportSuccess(result.importados),
       );
-      context.pop(true);
+      safePopOrGo(context, '/exercicios');
     } catch (e) {
       if (!mounted) return;
       setState(() => _importing = false);
@@ -183,7 +200,9 @@ class _OnboardingBibliotecaWizardState
         (_step == 0 && _modalidades.isNotEmpty) ||
         (_step == 1 && _espacos.isNotEmpty) ||
         _step >= 2;
-    return fxScreenA11yScope(
+    return FxWizardPopGuard(
+      onLeave: _onLeave,
+      child: fxScreenA11yScope(
       label: 'Biblioteca curada',
       child: FxShellScaffold(
         useMesh: true,
@@ -207,36 +226,24 @@ class _OnboardingBibliotecaWizardState
             ),
           ],
         ),
-        bottomNavigationBar: SafeArea(
-          top: false,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(
-              FxSettingsLayout.pageInset,
-              TokensStrip.s2,
-              FxSettingsLayout.pageInset,
-              TokensStrip.s3,
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (_step > 0)
-                  TextButton(
+        bottomNavigationBar: FxWizardStickyBar(
+          secondary:
+              _step > 0
+                  ? TextButton(
                     onPressed: _importing ? null : _voltar,
                     child: Text(bibliotecaVoltarLabel()),
-                  ),
-                FxLiquidPrimaryButton(
-                  label: bibliotecaContinueLabel(step: _step),
-                  loading: _importing,
-                  loadingLabel: 'Carregando…',
-                  onPressed:
-                      _importing
-                          ? null
-                          : _step < 2
-                          ? (canGoNext ? _next : null)
-                          : _importar,
-                ),
-              ],
-            ),
+                  )
+                  : null,
+          primary: FxLiquidPrimaryButton(
+            label: bibliotecaContinueLabel(step: _step),
+            loading: _importing,
+            loadingLabel: 'Carregando…',
+            onPressed:
+                _importing
+                    ? null
+                    : _step < 2
+                    ? (canGoNext ? _next : null)
+                    : _importar,
           ),
         ),
         body: FxContentWidthLimiter(
@@ -264,6 +271,7 @@ class _OnboardingBibliotecaWizardState
             ),
           ),
         ),
+      ),
       ),
     );
   }

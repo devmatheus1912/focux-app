@@ -68,7 +68,7 @@ const Map<String, FocuxSurfaceSpec> focuxSurfaceCatalog = {
   '/onboarding': _s9Root,
   '/onboarding/wizard': FocuxSurfaceSpec(
     type: _s9,
-    logicalParent: '/onboarding',
+    logicalParent: _home,
   ),
   '/dashboard/personal': _s1Tab,
   '/alunos': FocuxSurfaceSpec(
