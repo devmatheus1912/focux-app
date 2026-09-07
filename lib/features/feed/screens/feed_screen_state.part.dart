@@ -4,6 +4,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
   final Map<int, int> _curtidasLocais = {};
   final Map<int, int> _comentariosLocais = {};
   final _searchController = TextEditingController();
+  Timer? _searchDebounce;
   List<FeedPost> _posts = [];
   var _query = '';
   var _hasMore = false;
@@ -21,8 +22,24 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
 
   @override
   void dispose() {
+    _searchDebounce?.cancel();
     _searchController.dispose();
     super.dispose();
+  }
+
+  void _onQueryChanged(String value) {
+    setState(() => _query = value);
+    _searchDebounce?.cancel();
+    _searchDebounce = Timer(const Duration(milliseconds: 280), () {
+      if (mounted) _load();
+    });
+  }
+
+  void _clearQuery() {
+    _searchDebounce?.cancel();
+    _searchController.clear();
+    setState(() => _query = '');
+    _load();
   }
 
   Future<void> _load() async {
@@ -33,7 +50,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
     try {
       final pagina = await FeedRepository(
         ref.read(apiClientProvider),
-      ).listarPersonalPagina();
+      ).listarPersonalPagina(q: _query);
       if (!mounted) return;
       setState(() {
         _posts = pagina.content;
@@ -57,12 +74,12 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
   }
 
   Future<void> _carregarMais() async {
-    if (_loadingMore || !_hasMore || _query.trim().isNotEmpty) return;
+    if (_loadingMore || !_hasMore) return;
     setState(() => _loadingMore = true);
     try {
       final pagina = await FeedRepository(
         ref.read(apiClientProvider),
-      ).listarPersonalPagina(cursor: _nextCursor);
+      ).listarPersonalPagina(cursor: _nextCursor, q: _query);
       if (!mounted) return;
       setState(() {
         final seen = _posts.map((p) => p.id).toSet();
@@ -177,29 +194,8 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
   }
 
   Widget _buildBody(Color primary, List<FeedPost> visible) {
-    if (_posts.isEmpty) {
-      return RefreshIndicator(
-        color: primary,
-        onRefresh: _load,
-        child: ListView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          children: [
-            FxEmptyState(
-              icon: 'rss',
-              title: 'Nenhuma publicação ainda',
-              subtitle:
-                  'Compartilhe novidades, vídeos e conquistas com seus alunos.',
-              action: FxEmptyAction(
-                label: 'Criar publicação',
-                onTap: _abrirFormulario,
-              ),
-            ),
-          ],
-        ),
-      );
-    }
     if (visible.isEmpty) {
+      final searching = _query.trim().isNotEmpty;
       return RefreshIndicator(
         color: primary,
         onRefresh: _load,
@@ -208,15 +204,18 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           children: [
             FxEmptyState(
-              icon: 'search',
-              title: 'Nada encontrado',
-              subtitle: 'Ajuste a busca para achar outra publicação.',
+              icon: searching ? 'search' : 'rss',
+              title:
+                  searching
+                      ? 'Nada encontrado'
+                      : 'Nenhuma publicação ainda',
+              subtitle:
+                  searching
+                      ? 'Ajuste a busca para achar outra publicação.'
+                      : 'Compartilhe novidades, vídeos e conquistas com seus alunos.',
               action: FxEmptyAction(
-                label: 'Limpar busca',
-                onTap: () {
-                  _searchController.clear();
-                  setState(() => _query = '');
-                },
+                label: searching ? 'Limpar busca' : 'Criar publicação',
+                onTap: searching ? _clearQuery : _abrirFormulario,
               ),
             ),
           ],
@@ -224,7 +223,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
       );
     }
 
-    final showMore = _hasMore && _query.trim().isEmpty;
+    final showMore = _hasMore;
     return RefreshIndicator(
       color: primary,
       onRefresh: _load,
@@ -269,16 +268,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
     final primary = Theme.of(context).colorScheme.primary;
     final mute = chrome.mute;
     final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
-    final visible =
-        _posts
-            .where(
-              (p) => feedMatchesQuery(
-                titulo: p.titulo,
-                conteudo: p.conteudo,
-                query: _query,
-              ),
-            )
-            .toList();
+    final visible = _posts;
     return fxScreenA11yScope(
       label: 'Feed',
       child: FxShellScaffold(
@@ -319,7 +309,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                         ),
                         child: TextField(
                           controller: _searchController,
-                          onChanged: (value) => setState(() => _query = value),
+                          onChanged: _onQueryChanged,
                           onTapOutside:
                               (_) =>
                                   FocusManager.instance.primaryFocus?.unfocus(),
@@ -342,10 +332,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                                     ? null
                                     : IconButton(
                                       tooltip: 'Limpar busca',
-                                      onPressed: () {
-                                        _searchController.clear();
-                                        setState(() => _query = '');
-                                      },
+                                      onPressed: _clearQuery,
                                       icon: Icon(
                                         Icons.close_rounded,
                                         color: mute,

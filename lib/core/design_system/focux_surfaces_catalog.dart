@@ -30,6 +30,11 @@ const Map<String, FocuxSurfaceSpec> focuxSurfaceCatalog = {
   '/ia': FocuxSurfaceSpec(type: _s1, redirectTo: '/ia/copiloto'),
   '/evolucao': FocuxSurfaceSpec(type: _s1, redirectTo: _alunoHome),
   '/login': _s6Root,
+  '/login/mfa': FocuxSurfaceSpec(
+    type: _s6,
+    hasInput: true,
+    logicalParent: '/login',
+  ),
   '/register': FocuxSurfaceSpec(
     type: _s6,
     hasInput: true,
@@ -230,6 +235,11 @@ const Map<String, FocuxSurfaceSpec> focuxSurfaceCatalog = {
   '/agenda/aluno': FocuxSurfaceSpec(type: _s4, logicalParent: _alunoHome),
   '/financeiro': FocuxSurfaceSpec(type: _s1, logicalParent: _home),
   '/perfil': FocuxSurfaceSpec(type: _s2, logicalParent: _home),
+  '/perfil/mfa': FocuxSurfaceSpec(
+    type: _s5,
+    hasInput: true,
+    logicalParent: _perfil,
+  ),
   '/configuracoes': FocuxSurfaceSpec(type: _s2, logicalParent: _home),
   '/perfil/editar': FocuxSurfaceSpec(
     type: _s5,

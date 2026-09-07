@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 
 import '../../../core/api/api_client.dart';
+import '../../../core/api/pagina.dart';
 
 class ChatReaction {
   final String emoji;
@@ -405,9 +406,11 @@ class ChatRepository {
   /// List archived conversations
   Future<List<ChatInboxItem>> inboxArchived() async {
     final r = await _dio.get('/api/chat/inbox/archived');
-    return (r.data as List)
-        .map((e) => ChatInboxItem.fromJson(e as Map<String, dynamic>))
-        .toList();
+    return _paginaContent(
+      r.data,
+      'GET /api/chat/inbox/archived',
+      ChatInboxItem.fromJson,
+    );
   }
 
   /// Global search across all conversations
@@ -416,15 +419,35 @@ class ChatRepository {
       '/api/chat/inbox/search',
       queryParameters: {'q': query},
     );
-    return (r.data as List).map((e) => ChatMsg.fromJson(e)).toList();
+    return _paginaContent(
+      r.data,
+      'GET /api/chat/inbox/search',
+      ChatMsg.fromJson,
+    );
   }
 
   /// Inbox with unread-only filter
   Future<List<ChatInboxItem>> inboxUnread() async {
     final r = await _dio.get('/api/chat/inbox/unread');
-    return (r.data as List)
-        .map((e) => ChatInboxItem.fromJson(e as Map<String, dynamic>))
-        .toList();
+    return _paginaContent(
+      r.data,
+      'GET /api/chat/inbox/unread',
+      ChatInboxItem.fromJson,
+    );
+  }
+
+  List<T> _paginaContent<T>(
+    dynamic data,
+    String endpoint,
+    T Function(Map<String, dynamic>) parse,
+  ) {
+    if (data is! Map) {
+      throw FormatException('$endpoint devolve Pagina, não lista crua.');
+    }
+    return Pagina.fromJson(
+      Map<String, dynamic>.from(data),
+      (item) => parse(Map<String, dynamic>.from(item as Map)),
+    ).content;
   }
 
   String _clientMessageId() {

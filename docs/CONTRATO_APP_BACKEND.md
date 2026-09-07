@@ -84,6 +84,11 @@ quinto formato e derrubaria o parser único, que era o objetivo da regra 1.2.
 timestamp, blob); o app só devolve o valor na próxima página. Não há
 `beforeId` no contrato novo.
 
+`GET /api/feed` e `GET /api/feed/aluno` paginam no banco (keyset `criadoEm,id`)
+e aceitam `q` opcional (título/conteúdo). `GET /api/chat/inbox/search` e
+`GET /api/chat/inbox/unread` usam o envelope offset `PaginaResponse` (`content`,
+`page`, `size`, `hasNext`), não array raiz.
+
 ### 1.4 `totalElements` tem custo
 
 `totalElements` exige um `COUNT` por página. Nos 19 da lista A isso é
