@@ -52,11 +52,12 @@ void main() {
     expect(filtered.any((s) => s.label.contains('Configuração')), isFalse);
   });
 
-  test('papel studio fica recolhido no groupamento', () {
+  test('papel studio fica secundário (depois dos primários)', () {
     final groups = groupCatalogoHubs(catalogo);
     final studio = groups.firstWhere((g) => g.title == 'Studio');
     expect(studio.collapsed, isTrue);
     expect(groups.first.collapsed, isFalse);
+    expect(groups.indexOf(studio), greaterThan(0));
   });
 
   test('ícones Pacotes e Loja distintos; Cobrança ≠ Receita', () {
