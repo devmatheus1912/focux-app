@@ -133,6 +133,7 @@ class _ConvitesScreenState extends ConsumerState<ConvitesScreen> {
       _error = null;
     });
     try {
+      final substituiu = _convite != null;
       final convite = await ref.read(conviteRepositoryProvider).gerar();
       if (!mounted) return;
       _applyConvite(convite, _personalNome);
@@ -140,6 +141,10 @@ class _ConvitesScreenState extends ConsumerState<ConvitesScreen> {
       setState(() => _fetchedAt = DateTime.now());
       AnalyticsService.instance.track(ProductEvents.convitesGenerated);
       HapticFeedback.lightImpact();
+      FeedbackHelper.showSuccess(
+        context,
+        conviteGeradoLabel(substituiu: substituiu),
+      );
     } catch (e) {
       if (!mounted) return;
       setState(() {

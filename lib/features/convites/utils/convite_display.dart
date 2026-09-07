@@ -16,6 +16,11 @@ bool conviteAindaValido(DateTime? expiresAt, DateTime now) {
   return expiresAt.isAfter(now);
 }
 
+String conviteGeradoLabel({required bool substituiu}) =>
+    substituiu
+        ? 'Link anterior deixou de valer.'
+        : 'Link gerado.';
+
 String conviteShareMessage({
   required String personalNome,
   required String shareLink,

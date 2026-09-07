@@ -25,6 +25,7 @@ void main() {
     expect(screen, contains('safePopOrGo'));
     expect(screen, contains('viewInsetsOf'));
     expect(screen, contains('conviteCountLabel'));
+    expect(screen, contains('conviteGeradoLabel'));
     expect(screen, contains('keyboardDismissBehavior'));
     expect(screen, isNot(contains('Clipboard.setData')));
     expect(screen, isNot(contains('_HeroCard')));
