@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../auth/providers/auth_provider.dart';
+import '../data/ferramentas_catalogo_bootstrap.dart';
 import '../data/ferramentas_catalogo_models.dart';
 import '../data/ferramentas_catalogo_repository.dart';
 
@@ -8,7 +9,7 @@ final ferramentasCatalogoRepositoryProvider = Provider(
   (ref) => FerramentasCatalogoRepository(ref.read(apiClientProvider)),
 );
 
-/// Catálogo de hubs — fonte única para Home + sheet (não lista flat local).
+/// Catálogo de hubs — BFF primeiro; bootstrap local só se rede falhar sem cache.
 final ferramentasCatalogoProvider =
     AsyncNotifierProvider<FerramentasCatalogoNotifier, FerramentasCatalogo>(
       FerramentasCatalogoNotifier.new,
@@ -20,7 +21,6 @@ class FerramentasCatalogoNotifier extends AsyncNotifier<FerramentasCatalogo> {
     final repo = ref.read(ferramentasCatalogoRepositoryProvider);
     final cached = await repo.peekCache();
     if (cached != null) {
-      // Refresh em background sem bloquear first paint.
       Future.microtask(() async {
         try {
           final fresh = await repo.fetch(allowStaleOnError: false);
@@ -31,15 +31,33 @@ class FerramentasCatalogoNotifier extends AsyncNotifier<FerramentasCatalogo> {
       });
       return cached;
     }
-    return repo.fetch();
+
+    try {
+      return await repo.fetch(allowStaleOnError: false);
+    } catch (_) {
+      // Home não pode cair: usa árvore de hubs local até o BFF responder.
+      Future.microtask(() async {
+        try {
+          final fresh = await repo.fetch(allowStaleOnError: false);
+          state = AsyncData(fresh);
+        } catch (_) {}
+      });
+      return ferramentasCatalogoBootstrap();
+    }
   }
 
   Future<void> refresh() async {
     state = const AsyncLoading();
-    state = await AsyncValue.guard(
-      () => ref.read(ferramentasCatalogoRepositoryProvider).fetch(
-            allowStaleOnError: false,
-          ),
-    );
+    state = await AsyncValue.guard(() async {
+      try {
+        return await ref
+            .read(ferramentasCatalogoRepositoryProvider)
+            .fetch(allowStaleOnError: false);
+      } catch (_) {
+        final stale =
+            await ref.read(ferramentasCatalogoRepositoryProvider).peekCache();
+        return stale ?? ferramentasCatalogoBootstrap();
+      }
+    });
   }
 }
