@@ -53,5 +53,14 @@ void main() {
     expect(habitoComplianceEmptyTitle(''), 'Sem dados ainda');
     expect(habitoComplianceEmptyTitle('ana'), 'Nenhum aluno encontrado');
     expect(habitoComplianceEmptySubtitle('ana'), contains('nome'));
+    expect(habitoAlunoTodosLabel, 'Todos os alunos');
+    expect(
+      habitoDetalheMessage(descricao: 'Hidratação', metaSemanal: 7),
+      contains('Hidratação'),
+    );
+    expect(
+      habitoDetalheMessage(metaSemanal: 5),
+      contains('Meta semanal: 5x'),
+    );
   });
 }

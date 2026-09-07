@@ -7,22 +7,28 @@ class LojaPedido {
     required this.status,
     this.buyerNome,
     this.pacoteId,
+    this.alunoId,
+    this.pixCopiaECola,
   });
 
   final int id;
   final int? pacoteId;
+  final int? alunoId;
   final String buyerEmail;
   final String? buyerNome;
   final double valor;
   final String status;
+  final String? pixCopiaECola;
 
   factory LojaPedido.fromJson(Map<String, dynamic> json) => LojaPedido(
-    id: json['id'] as int,
-    pacoteId: json['pacoteId'] as int?,
+    id: (json['id'] as num).toInt(),
+    pacoteId: (json['pacoteId'] as num?)?.toInt(),
+    alunoId: (json['alunoId'] as num?)?.toInt(),
     buyerEmail: (json['buyerEmail'] ?? '').toString(),
     buyerNome: json['buyerNome']?.toString(),
     valor: LojaPedido.readValor(json['valor']),
     status: (json['status'] ?? '').toString(),
+    pixCopiaECola: json['pixCopiaECola']?.toString(),
   );
 
   static List<LojaPedido> parseList(dynamic data) {

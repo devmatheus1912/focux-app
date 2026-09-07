@@ -62,6 +62,22 @@ String lojaPedidoSubtitle({
   return statusLabel;
 }
 
+bool lojaPedidoPendente(String status) {
+  switch (status.trim().toUpperCase()) {
+    case 'PENDENTE':
+    case 'PENDING':
+      return true;
+    default:
+      return false;
+  }
+}
+
+String? lojaPedidoPix(String? raw) {
+  final value = raw?.trim();
+  if (value == null || value.isEmpty) return null;
+  return value;
+}
+
 String lojaPedidoFxIcon(String status) {
   switch (status.trim().toUpperCase()) {
     case 'PAGO':

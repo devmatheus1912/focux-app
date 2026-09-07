@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/analytics/analytics_service.dart';
+import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
@@ -13,16 +14,17 @@ import '../../../core/utils/pt_br_display.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feature_gate.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_form_sheet.dart';
-import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_inset_picker_sheet.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../../core/widgets/skeleton_loader.dart';
+import '../../alunos/widgets/aluno_inset_form_field.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../pacotes/data/pacote_repository.dart';
 import '../../planos/data/planos_repository.dart';
@@ -109,14 +111,18 @@ class _LojaScreenState extends ConsumerState<LojaScreen> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          TextField(
+          AlunoInsetFormField(
             controller: emailCtrl,
-            decoration: FxInputDeco.build(context, 'Email do comprador'),
+            label: 'Email do comprador',
+            icon: Icons.mail_outline,
             keyboardType: TextInputType.emailAddress,
           ),
-          TextField(
+          AlunoInsetFormField(
             controller: nomeCtrl,
-            decoration: FxInputDeco.build(context, 'Nome (opcional)'),
+            label: 'Nome (opcional)',
+            icon: Icons.person_outline,
+            textCapitalization: TextCapitalization.words,
+            showDivider: false,
           ),
         ],
       ),
@@ -177,6 +183,80 @@ class _LojaScreenState extends ConsumerState<LojaScreen> {
     }
   }
 
+  Future<void> _abrirPedido(LojaPedido pedido) async {
+    final pix = lojaPedidoPix(pedido.pixCopiaECola);
+    final pendente = lojaPedidoPendente(pedido.status);
+    await showFxNoticeSheet(
+      context,
+      title: lojaPedidoLabel(
+        buyerNome: pedido.buyerNome,
+        buyerEmail: pedido.buyerEmail,
+      ),
+      icon: Icons.qr_code_rounded,
+      message: lojaPedidoSubtitle(
+        buyerNome: pedido.buyerNome,
+        buyerEmail: pedido.buyerEmail,
+        status: pedido.status,
+      ),
+      extraActions: [
+        if (pix != null)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: SizedBox(
+              height: 48,
+              child: TextButton(
+                onPressed: () async {
+                  await copySensitiveToClipboard(pix);
+                  if (!mounted) return;
+                  FeedbackHelper.showSuccess(context, 'Código copiado');
+                },
+                child: const Text('Copiar PIX'),
+              ),
+            ),
+          ),
+        if (pendente)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: SizedBox(
+              height: 48,
+              child: Builder(
+                builder: (sheetCtx) => TextButton(
+                  onPressed: () async {
+                    Navigator.of(sheetCtx).pop();
+                    await _confirmarPedido(pedido);
+                  },
+                  child: const Text('Marcar pago'),
+                ),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Future<void> _confirmarPedido(LojaPedido pedido) async {
+    final ok = await showFxConfirmSheet(
+      context,
+      title: 'Marcar este PIX como pago?',
+      subtitle: lojaPedidoLabel(
+        buyerNome: pedido.buyerNome,
+        buyerEmail: pedido.buyerEmail,
+      ),
+      message: formatBrlCurrency(pedido.valor),
+      confirmLabel: 'Marcar pago',
+    );
+    if (!ok || !mounted) return;
+    try {
+      await ref.read(lojaRepositoryProvider).confirmar(pedido.id);
+      await _load();
+      if (!mounted) return;
+      FeedbackHelper.showSuccess(context, 'Pedido marcado como pago');
+    } catch (e) {
+      if (!mounted) return;
+      FeedbackHelper.showError(context, friendlyError(e));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
@@ -198,12 +278,14 @@ class _LojaScreenState extends ConsumerState<LojaScreen> {
         capability: 'lojaDigital',
         child: FxShellScaffold(
           useMesh: true,
+          constrainWidth: false,
           appBar: FxShellAppBar(
             title: 'Loja digital',
             subtitle: lojaHubSubtitle(
               view: _view,
               freshness: freshnessLabel,
             ),
+            onBack: () => safePopOrGo(context, '/perfil/ferramentas'),
             actions: [
               ShellHeaderIconButton(
                 icon: 'pix',
@@ -259,44 +341,54 @@ class _LojaScreenState extends ConsumerState<LojaScreen> {
 
     return RefreshIndicator(
       onRefresh: _load,
-      child: ListView(
+      child: ListView.builder(
         physics: const AlwaysScrollableScrollPhysics(),
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         padding: const EdgeInsets.fromLTRB(
           FxSettingsLayout.pageInset,
           8,
           FxSettingsLayout.pageInset,
           32,
         ),
-        children: [
-          const DashboardSectionHeader(title: 'Vitrine'),
-          const SizedBox(height: TokensStrip.s2),
-          Text(
-            'Toque no pacote para gerar um PIX.',
-            style: FocuxHubTypography.bodyMuted(
-              color: fxScreenMute(context),
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: TokensStrip.s3),
-          for (final pacote in _pacotes)
-            FxSatelliteListTile(
-              title: pacote.titulo,
-              subtitle: Text(
-                lojaPacoteSubtitle(
-                  descricao: pacote.descricao,
-                  duracaoMeses: pacote.duracaoMeses,
-                ),
+        itemCount: _pacotes.length + 2,
+        itemBuilder: (context, index) {
+          if (index == 0) {
+            return const DashboardSectionHeader(title: 'Vitrine');
+          }
+          if (index == 1) {
+            return Padding(
+              padding: const EdgeInsets.only(
+                top: TokensStrip.s2,
+                bottom: TokensStrip.s3,
               ),
-              trailing: Text(
-                formatBrlCurrency(pacote.valor, showDecimals: false),
+              child: Text(
+                'Toque no pacote para gerar um PIX.',
                 style: FocuxHubTypography.bodyMuted(
                   color: fxScreenMute(context),
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
-              onTap: () => _checkoutPacote(pacote),
+            );
+          }
+          final pacote = _pacotes[index - 2];
+          return FxSatelliteListTile(
+            title: pacote.titulo,
+            subtitle: Text(
+              lojaPacoteSubtitle(
+                descricao: pacote.descricao,
+                duracaoMeses: pacote.duracaoMeses,
+              ),
             ),
-        ],
+            trailing: Text(
+              formatBrlCurrency(pacote.valor, showDecimals: false),
+              style: FocuxHubTypography.bodyMuted(
+                color: fxScreenMute(context),
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            onTap: () => _checkoutPacote(pacote),
+          );
+        },
       ),
     );
   }
@@ -320,47 +412,58 @@ class _LojaScreenState extends ConsumerState<LojaScreen> {
 
     return RefreshIndicator(
       onRefresh: _load,
-      child: ListView(
+      child: ListView.builder(
         physics: const AlwaysScrollableScrollPhysics(),
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         padding: const EdgeInsets.fromLTRB(
           FxSettingsLayout.pageInset,
           8,
           FxSettingsLayout.pageInset,
           32,
         ),
-        children: [
-          const DashboardSectionHeader(title: 'Pedidos'),
-          const SizedBox(height: TokensStrip.s2),
-          Text(
-            'PIX gerados nesta loja.',
-            style: FocuxHubTypography.bodyMuted(
-              color: fxScreenMute(context),
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: TokensStrip.s3),
-          for (final pedido in _pedidos)
-            FxSatelliteListTile(
-              title: lojaPedidoLabel(
-                buyerNome: pedido.buyerNome,
-                buyerEmail: pedido.buyerEmail,
+        itemCount: _pedidos.length + 2,
+        itemBuilder: (context, index) {
+          if (index == 0) {
+            return const DashboardSectionHeader(title: 'Pedidos');
+          }
+          if (index == 1) {
+            return Padding(
+              padding: const EdgeInsets.only(
+                top: TokensStrip.s2,
+                bottom: TokensStrip.s3,
               ),
-              subtitle: Text(
-                lojaPedidoSubtitle(
-                  buyerNome: pedido.buyerNome,
-                  buyerEmail: pedido.buyerEmail,
-                  status: pedido.status,
-                ),
-              ),
-              trailing: Text(
-                formatBrlCurrency(pedido.valor),
+              child: Text(
+                'Toque para copiar o PIX ou marcar pago.',
                 style: FocuxHubTypography.bodyMuted(
                   color: fxScreenMute(context),
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
+            );
+          }
+          final pedido = _pedidos[index - 2];
+          return FxSatelliteListTile(
+            title: lojaPedidoLabel(
+              buyerNome: pedido.buyerNome,
+              buyerEmail: pedido.buyerEmail,
             ),
-        ],
+            subtitle: Text(
+              lojaPedidoSubtitle(
+                buyerNome: pedido.buyerNome,
+                buyerEmail: pedido.buyerEmail,
+                status: pedido.status,
+              ),
+            ),
+            trailing: Text(
+              formatBrlCurrency(pedido.valor),
+              style: FocuxHubTypography.bodyMuted(
+                color: fxScreenMute(context),
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            onTap: () => _abrirPedido(pedido),
+          );
+        },
       ),
     );
   }

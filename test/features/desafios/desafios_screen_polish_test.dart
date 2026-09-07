@@ -17,6 +17,11 @@ void main() {
     expect(screen, contains('RefreshIndicator'));
     expect(screen, contains('FxHubFreshness.fromFetchedAt'));
     expect(screen, contains('showFxFormSheet'));
+    expect(screen, contains('showFxInsetPickerSheet'));
+    expect(screen, contains('safePopOrGo'));
+    expect(screen, contains('constrainWidth: false'));
+    expect(screen, contains('FxToggleChip'));
+    expect(screen, contains('ListView.builder'));
     expect(screen, contains('FxSatelliteListTile'));
     expect(screen, contains('DashboardSectionHeader'));
     expect(screen, contains('FxSettingsGroup'));

@@ -1,12 +1,18 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../support/screen_source_bundle.dart';
 
 void main() {
   test('habitos personal cumpre contrato Tier S+', () {
-    final screen = readScreenSourceBundle(
-      'lib/features/habitos/screens/habitos_personal_screen.dart',
-    );
+    final screen = [
+      readScreenSourceBundle(
+        'lib/features/habitos/screens/habitos_personal_screen.dart',
+      ),
+      File('lib/features/habitos/widgets/habito_novo_sheet.dart')
+          .readAsStringSync(),
+    ].join('\n');
     expect(
       screen,
       anyOf(contains('fxScreenA11yScope'), contains('Semantics(')),
