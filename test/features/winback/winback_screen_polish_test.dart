@@ -31,6 +31,7 @@ void main() {
     expect(screen, contains('DashboardHomeActionChip'));
     expect(screen, contains('Escrever'));
     expect(screen, contains('Cobrar'));
+    expect(screen, contains('showWinbackAcoesSheet'));
     expect(screen, contains('/alunos/\$id/chat'));
     expect(screen, contains('/financeiro?alunoId='));
     expect(screen, contains('FxSatelliteListTile'));

@@ -21,8 +21,17 @@ List<NpsItem> npsRecentPreview(List<NpsItem> items) =>
 const npsComoCalculamos =
     'Promotores (9–10) menos detratores (0–6), em % do total. O catálogo pagina as respostas e busca nome ou comentário.';
 
+const npsFiltroDetratores = 'detratores';
+
+String npsNormalizeFiltro(String? raw) {
+  final value = (raw ?? '').trim().toLowerCase();
+  return value == npsFiltroDetratores ? npsFiltroDetratores : '';
+}
+
+bool npsHasAluno(NpsItem item) => item.alunoId != null && item.alunoId! > 0;
+
 List<NpsItem> npsItemsForFiltro(List<NpsItem> items, String? filtro) {
-  if (filtro == 'detratores') {
+  if (npsNormalizeFiltro(filtro) == npsFiltroDetratores) {
     return items.where((item) => npsIsDetrator(item.score)).toList();
   }
   return items;
