@@ -42,7 +42,7 @@ class PerfilFerramentasScreen extends ConsumerWidget {
           },
         ),
         body: featuresAsync.when(
-          loading: () => const SkeletonList(count: 5),
+          loading: () => const SkeletonList(count: 4),
           error:
               (e, _) => FxErrorState(
                 chromeOnDark: chrome.isDark,

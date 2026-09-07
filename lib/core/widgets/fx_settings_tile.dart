@@ -89,7 +89,8 @@ class FxSettingsTile extends StatelessWidget {
             ? '$spoken trancado. Plano ${upgradeTierLabel ?? 'upgrade'}'
             : (value.isEmpty ? spoken : '$spoken. $value');
     final interactive = onTap != null;
-    final showChevron = interactive && !danger && !locked && !disclosure;
+    final showChevron =
+        interactive && !danger && !locked && !disclosure && !picker;
 
     return Semantics(
       button: interactive,
@@ -217,9 +218,7 @@ class FxSettingsTile extends StatelessWidget {
                         ] else if (showChevron) ...[
                           const SizedBox(width: TokensStrip.s1),
                           Icon(
-                            picker
-                                ? Icons.unfold_more
-                                : Icons.chevron_right,
+                            Icons.chevron_right,
                             size: FxSettingsLayout.chevronSize,
                             color: mute,
                           ),

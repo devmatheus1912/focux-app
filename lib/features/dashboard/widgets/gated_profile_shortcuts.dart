@@ -9,7 +9,7 @@ import '../utils/dashboard_shortcut_navigation.dart';
 /// Atalhos de crescimento no Perfil — lista curada local (não depende do BFF).
 ///
 /// O catálogo da Home/sheet vem do endpoint; aqui o job é atalho estável
-/// Automações / Desafios / Loja / Equipe / Hábitos com o mesmo gate de plano.
+/// Automações / Loja / Equipe / Hábitos com o mesmo gate de plano.
 class GatedProfileShortcuts extends ConsumerWidget {
   const GatedProfileShortcuts({super.key, required this.tileBuilder});
 
@@ -32,14 +32,6 @@ class GatedProfileShortcuts extends ConsumerWidget {
       rotaApp: '/automacoes',
       featureGate: 'AUTOMACOES',
       legacyIds: ['automacoes'],
-    ),
-    _ProfileToolEntry(
-      icon: Icons.emoji_events_outlined,
-      label: 'Desafios',
-      value: 'Comunidade',
-      rotaApp: '/desafios',
-      featureGate: 'COMUNIDADE_GRUPOS',
-      legacyIds: ['desafios'],
     ),
     _ProfileToolEntry(
       icon: Icons.storefront_outlined,

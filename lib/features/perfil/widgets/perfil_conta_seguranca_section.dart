@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../../../core/legal/focux_legal.dart';
-import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
@@ -49,6 +47,7 @@ class PerfilContaSegurancaSection extends StatelessWidget {
               value: '',
               mute: mute,
               line: line,
+              picker: true,
               onTap: () => FocuxLegal.openTerms(),
             ),
             FxSettingsTile(
@@ -57,6 +56,7 @@ class PerfilContaSegurancaSection extends StatelessWidget {
               value: '',
               mute: mute,
               line: line,
+              picker: true,
               showDivider: false,
               onTap: () => FocuxLegal.openPrivacy(),
             ),
@@ -72,30 +72,19 @@ class PerfilContaSegurancaSection extends StatelessWidget {
               mute: mute,
               line: line,
               danger: true,
-              showDivider: false,
               onTap: onLogout,
             ),
-          ],
-        ),
-        const SizedBox(height: FxSettingsLayout.footerAfterGroup),
-        Center(
-          child: Semantics(
-            button: true,
-            label: 'Excluir minha conta. Ação destrutiva',
-            hint: 'Confirmação será solicitada',
-            child: TextButton(
-              onPressed: () {
-                HapticFeedback.selectionClick();
-                onDeleteAccount();
-              },
-              style: TextButton.styleFrom(
-                foregroundColor: EagleTokens.bad,
-                minimumSize: const Size(48, 48),
-                textStyle: FxSettingsLayout.footer(color: EagleTokens.bad),
-              ),
-              child: const Text('Excluir minha conta'),
+            FxSettingsTile(
+              icon: Icons.delete_forever_outlined,
+              label: 'Excluir minha conta',
+              value: '',
+              mute: mute,
+              line: line,
+              danger: true,
+              showDivider: false,
+              onTap: onDeleteAccount,
             ),
-          ),
+          ],
         ),
       ],
     );

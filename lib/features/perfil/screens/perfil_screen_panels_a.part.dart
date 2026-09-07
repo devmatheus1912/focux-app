@@ -3,14 +3,12 @@ part of 'perfil_screen.dart';
 class _PerfilVitrineTiles extends StatelessWidget {
   const _PerfilVitrineTiles({
     required this.slug,
-    required this.score,
     required this.mute,
     required this.line,
     required this.onOpenEditor,
   });
 
   final String? slug;
-  final int score;
   final Color mute;
   final Color line;
   final VoidCallback onOpenEditor;
@@ -26,23 +24,10 @@ class _PerfilVitrineTiles extends StatelessWidget {
         FxSettingsTile(
           icon: Icons.palette_outlined,
           label: 'Marca',
-          value: '$score%',
+          value: '',
           mute: mute,
           line: line,
-          numeric: true,
           onTap: () => context.push('/identidade-visual'),
-          onLongPress: () {
-            unawaited(
-              AnalyticsService.instance.track(
-                ProductEvents.perfilMarcaHintOpened,
-                props: {'score': score},
-              ),
-            );
-            FeedbackHelper.showInfo(
-              context,
-              'Marca $score% — foto, CREF, especialidade, bio, Instagram, paleta e PIX.',
-            );
-          },
         ),
         if (!hasSlug)
           FxSettingsTile(
@@ -95,16 +80,6 @@ class _PerfilVitrineTiles extends StatelessWidget {
                 ),
               ],
             ),
-          ),
-          FxSettingsTile(
-            icon: Icons.open_in_new_outlined,
-            label: 'Ver ao vivo',
-            value: '',
-            mute: mute,
-            line: line,
-            onTap: () {
-              unawaited(openLandingLink(context, url: copyUrl));
-            },
           ),
           FxSettingsTile(
             icon: Icons.tune_outlined,

@@ -51,20 +51,21 @@ void main() {
   });
 
   test('student profile and autonomy copy keep Portuguese accents', () {
-    final profile = readScreenSourceBundle(
+    final hub = readScreenSourceBundle(
       'lib/features/dashboard/screens/perfil_aluno_screen.dart',
+    );
+    final profile = readScreenSourceBundle(
+      'lib/features/dashboard/screens/perfil_aluno_editar_screen.dart',
     );
     final plan =
         File(
           'lib/features/dashboard/data/aluno_autonomy_plan.dart',
         ).readAsStringSync();
 
+    expect(hub, contains('Editar cadastro'));
+    expect(hub, contains('Anamnese'));
     expect(profile, contains('foto de evolução'));
-    // Erros humanizados migraram para o helper central friendlyError (PT-BR).
     expect(profile, contains('friendlyError'));
-    expect(profile, contains("'Saúde e restrições'"));
-    expect(profile, contains("'Lesões ou limitações'"));
-    expect(profile, contains("'Observações para o personal'"));
     expect(profile, contains('segurança e aderência'));
     expect(plan, contains('histórico de carga, aderência'));
     expect(plan, contains('você está pronto'));

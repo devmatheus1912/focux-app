@@ -42,14 +42,6 @@ class PerfilOperacaoSection extends StatelessWidget {
           onTap: () => context.push('/perfil/wallet'),
         ),
         FxSettingsTile(
-          icon: Icons.bolt_outlined,
-          label: 'Migração Focux',
-          value: 'Importar com IA',
-          mute: mute,
-          line: line,
-          onTap: () => context.push('/migracao-magica'),
-        ),
-        FxSettingsTile(
           icon: Icons.person_add_alt_1_outlined,
           label: 'Convites',
           value: 'Link de cadastro',

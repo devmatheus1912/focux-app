@@ -35,13 +35,13 @@ void main() {
 
     expect(find.text('QA Coach'), findsWidgets);
     expect(find.textContaining('Marca'), findsWidgets);
-    expect(find.text('Prontidão comercial'), findsOneWidget);
+    expect(find.text('Prontidão comercial'), findsNothing);
     expect(find.text('Vitrine'), findsOneWidget);
-    expect(find.byIcon(Icons.copy_rounded), findsOneWidget);
     expect(find.text('Compartilhar'), findsOneWidget);
     expect(find.text('Completar'), findsOneWidget);
-    expect(find.text('WhatsApp'), findsOneWidget);
-    expect(find.textContaining('alunos'), findsWidgets);
+    expect(find.text('Ver ao vivo'), findsNothing);
+    expect(find.text('Migração Focux'), findsNothing);
+    expect(find.textContaining('alunos'), findsNothing);
 
     await tester.scrollUntilVisible(
       find.text('Aparência'),
@@ -76,7 +76,7 @@ void main() {
     expect(find.text('Ferramentas de desenvolvimento'), findsNothing);
   });
 
-  testWidgets('perfil completo usa sticky Hoje (sem teaser de IA)', (
+  testWidgets('perfil completo esconde Completar (sem teaser de IA)', (
     tester,
   ) async {
     DashboardHomeClientCache.clear();
@@ -99,8 +99,9 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 800));
 
-    expect(find.textContaining('alunos'), findsWidgets);
+    expect(find.textContaining('alunos'), findsNothing);
     expect(find.text('Cadastro completo'), findsNothing);
+    expect(find.text('Completar'), findsNothing);
 
     await tester.scrollUntilVisible(
       find.text('Operação'),
@@ -110,7 +111,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
 
-    expect(find.text('Hoje'), findsOneWidget);
+    expect(find.text('Hoje'), findsNothing);
     expect(find.text('Meus alunos'), findsNothing);
     expect(find.text('Copiloto IA'), findsNothing);
     expect(find.text('Compartilhar'), findsOneWidget);

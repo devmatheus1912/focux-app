@@ -2,41 +2,38 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../core/analytics/analytics_service.dart';
-import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../dashboard/utils/dashboard_readability.dart';
 import '../constants/perfil_layout.dart';
 
-/// Chip flutuante — paridade [`DashboardPrioritiesOverlay`]: só Hoje/Completar.
+/// Chip flutuante — só Completar, e só com pendência real.
 class PerfilStickyBar extends StatelessWidget {
   const PerfilStickyBar({
     super.key,
     required this.accent,
     required this.isDark,
-    required this.profileComplete,
     required this.visible,
+    required this.onComplete,
   });
 
   final Color accent;
   final bool isDark;
-  final bool profileComplete;
   final bool visible;
+  final VoidCallback onComplete;
 
-  void _track(String cta) {
+  void _track() {
     unawaited(
       AnalyticsService.instance.track(
         ProductEvents.perfilStickyTapped,
-        props: {'cta': cta, 'profileComplete': profileComplete},
+        props: {'cta': 'completar'},
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final primaryLabel = profileComplete ? 'Hoje' : 'Completar';
     final chipFg = dashboardPrioritiesChipForeground(accent, isDark: isDark);
     final chipBg = dashboardPrioritiesChipBackground(accent, isDark: isDark);
 
@@ -61,7 +58,7 @@ class PerfilStickyBar extends StatelessWidget {
               alignment: AlignmentDirectional.bottomEnd,
               child: Semantics(
                 button: true,
-                label: profileComplete ? 'Abrir Hoje' : 'Completar perfil',
+                label: 'Completar perfil',
                 child: Material(
                   color: chipBg,
                   elevation: isDark ? 4 : 2,
@@ -70,13 +67,8 @@ class PerfilStickyBar extends StatelessWidget {
                   child: InkWell(
                     onTap: () {
                       HapticFeedback.selectionClick();
-                      if (profileComplete) {
-                        _track('hoje');
-                        goPersonalShellTab(context, '/dashboard/personal');
-                        return;
-                      }
-                      _track('completar');
-                      context.push('/identidade-visual');
+                      _track();
+                      onComplete();
                     },
                     customBorder: const StadiumBorder(),
                     child: Padding(
@@ -85,7 +77,7 @@ class PerfilStickyBar extends StatelessWidget {
                         vertical: 11,
                       ),
                       child: Text(
-                        primaryLabel,
+                        'Completar',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: dashboardChipLabelStyle(chipFg).copyWith(

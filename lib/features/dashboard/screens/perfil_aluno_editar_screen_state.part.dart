@@ -1,6 +1,6 @@
-part of 'perfil_aluno_screen.dart';
+part of 'perfil_aluno_editar_screen.dart';
 
-class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
+class _PerfilAlunoEditarScreenState extends ConsumerState<PerfilAlunoEditarScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nome = TextEditingController();
   final _email = TextEditingController();
@@ -17,7 +17,6 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
   bool _loaded = false;
   bool _saving = false;
   bool _uploading = false;
-  bool _deleting = false;
 
   @override
   void dispose() {
@@ -115,140 +114,12 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
     }
   }
 
-  Future<void> _confirmDeleteAccount() async {
-    final passwordCtrl = TextEditingController();
-    final confirmCtrl = TextEditingController();
-    final confirmed = await showFxFormSheet(
-      context,
-      title: 'Excluir conta',
-      subtitle:
-          'Esta acao e irreversivel. Seus dados pessoais serao anonimizados conforme a LGPD. Historico financeiro ou operacional pode ser mantido pelo prazo legal.\n\n'
-          'Digite sua senha e EXCLUIR para confirmar.',
-      icon: Icons.delete_forever_outlined,
-      confirmLabel: 'Excluir definitivamente',
-      destructive: true,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          TextField(
-            controller: passwordCtrl,
-            obscureText: true,
-            decoration: FxInputDeco.build(context, 'Senha atual'),
-          ),
-          const SizedBox(height: 8),
-          TextField(
-            controller: confirmCtrl,
-            decoration: FxInputDeco.build(context, 'Digite EXCLUIR'),
-          ),
-        ],
-      ),
-    );
-
-    final senha = passwordCtrl.text;
-    final confirmacao = confirmCtrl.text.trim();
-    passwordCtrl.dispose();
-    confirmCtrl.dispose();
-
-    if (confirmed != true || !mounted) return;
-
-    setState(() => _deleting = true);
-    try {
-      await ref
-          .read(apiClientProvider)
-          .dio
-          .delete(
-            '/api/lgpd/me/delete',
-            data: {'senha': senha, 'confirmacao': confirmacao},
-          );
-      await ref.read(authProvider.notifier).logout();
-      if (!mounted) return;
-      FeedbackHelper.showSuccess(context, 'Conta excluida com sucesso.');
-      context.go('/login');
-    } catch (e) {
-      if (!mounted) return;
-      FeedbackHelper.showError(context, friendlyError(e));
-    } finally {
-      if (mounted) {
-        setState(() => _deleting = false);
-      }
-    }
-  }
-
-  int _completionScore() {
-    final values = [
-      _nome.text,
-      _email.text,
-      _objetivo.text,
-      _whatsapp.text,
-      _peso.text,
-      _altura.text,
-      _dataNascimento.text,
-    ];
-    final filled = values.where((value) => value.trim().isNotEmpty).length;
-    return ((filled / values.length) * 100).round();
-  }
-
-  String _metaPrincipal() {
-    if (_objetivo.text.trim().isNotEmpty) return _objetivo.text.trim();
-    return 'Definir objetivo principal';
-  }
-
-  List<Widget> _summaryChips(Aluno aluno, bool isDark) {
-    final chips = <Widget>[
-      _ProfileChip(
-        icon: Icons.flag_outlined,
-        label: _metaPrincipal(),
-        isDark: isDark,
-      ),
-    ];
-    if (aluno.idade != null) {
-      chips.add(
-        _ProfileChip(
-          icon: Icons.cake_outlined,
-          label: '${aluno.idade} anos',
-          isDark: isDark,
-        ),
-      );
-    }
-    if (_peso.text.trim().isNotEmpty) {
-      chips.add(
-        _ProfileChip(
-          icon: Icons.monitor_weight_outlined,
-          label: '${_peso.text.trim()} kg',
-          isDark: isDark,
-        ),
-      );
-    }
-    if (_altura.text.trim().isNotEmpty) {
-      chips.add(
-        _ProfileChip(
-          icon: Icons.height,
-          label: '${_altura.text.trim()} m',
-          isDark: isDark,
-        ),
-      );
-    }
-    return chips;
-  }
-
   String _formatarDataCurta(String value) {
     final parsed = DateTime.tryParse(value);
     if (parsed == null) return value;
     final dia = parsed.day.toString().padLeft(2, '0');
     final mes = parsed.month.toString().padLeft(2, '0');
     return '$dia/$mes/${parsed.year}';
-  }
-
-  String _variacaoPeso(List<MedidaCorporal> medidas) {
-    final comPeso =
-        medidas.where((item) => item.peso != null).toList()
-          ..sort((a, b) => a.data.compareTo(b.data));
-    if (comPeso.length < 2) {
-      return 'Registre pelo menos 2 pesos para ver a variacao.';
-    }
-    final diff = comPeso.last.peso! - comPeso.first.peso!;
-    final sinal = diff > 0 ? '+' : '';
-    return '$sinal${diff.toStringAsFixed(1)} kg desde a primeira medida';
   }
 
   Future<void> _registrarMedida() async {
@@ -473,9 +344,9 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
       child: FxShellScaffold(
         useMesh: true,
         appBar: FxShellAppBar(
-          title: 'Meu perfil',
+          title: 'Editar cadastro',
           subtitle: freshnessLabel,
-          onBack: () => safePopOrGo(context, '/dashboard/aluno'),
+          onBack: () => safePopOrGo(context, '/aluno/perfil'),
           actions: [
             TextButton(
               onPressed: _saving ? null : _save,
@@ -508,43 +379,6 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
             final aluno = home.aluno;
             final medidas = home.medidas;
             _loadIfNeeded(aluno);
-            final completion = _completionScore();
-            final ultima = medidas.isNotEmpty ? medidas.first : null;
-            final medidasCards = <Widget>[
-              _MetricHighlightCard(
-                label: 'Último peso',
-                value:
-                    ultima?.peso != null
-                        ? '${ultima!.peso!.toStringAsFixed(1)} kg'
-                        : 'Sem registro',
-                helper:
-                    ultima != null
-                        ? 'Atualizado em ${_formatarDataCurta(ultima.data)}'
-                        : 'Registre a primeira medida',
-                icon: Icons.monitor_weight_outlined,
-                isDark: isDark,
-              ),
-              _MetricHighlightCard(
-                label: 'Variação',
-                value:
-                    medidas.where((item) => item.peso != null).length >= 2
-                        ? _variacaoPeso(medidas).split(' desde').first
-                        : '--',
-                helper: _variacaoPeso(medidas),
-                icon: Icons.show_chart,
-                isDark: isDark,
-              ),
-              _MetricHighlightCard(
-                label: 'Entradas',
-                value: '${medidas.length}',
-                helper:
-                    medidas.isEmpty
-                        ? 'Nenhuma atualização ainda'
-                        : 'Histórico pronto para comparar',
-                icon: Icons.timeline,
-                isDark: isDark,
-              ),
-            ];
             return Form(
               key: _formKey,
               child: SingleChildScrollView(
@@ -637,67 +471,6 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
                                       ),
                                     ),
                                   ],
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 18),
-                          Wrap(
-                            spacing: 8,
-                            runSpacing: 8,
-                            children: _summaryChips(aluno, isDark),
-                          ),
-                          const SizedBox(height: 18),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Perfil preenchido',
-                                      style: TextStyle(
-                                        color: mute,
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 6),
-                                    ClipRRect(
-                                      borderRadius: BorderRadius.circular(999),
-                                      child: LinearProgressIndicator(
-                                        value: completion / 100,
-                                        minHeight: 9,
-                                        backgroundColor: BrandPalette.soft(
-                                          primary,
-                                        ),
-                                        valueColor: AlwaysStoppedAnimation(
-                                          primary,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Container(
-                                width: 56,
-                                height: 56,
-                                alignment: Alignment.center,
-                                decoration: BoxDecoration(
-                                  color: BrandPalette.soft(
-                                    primary,
-                                    dark: isDark,
-                                  ),
-                                  borderRadius: BorderRadius.circular(18),
-                                ),
-                                child: Text(
-                                  '$completion%',
-                                  style: TextStyle(
-                                    color: primary,
-                                    fontWeight: FontWeight.w800,
-                                    fontSize: 16,
-                                  ),
                                 ),
                               ),
                             ],
@@ -822,12 +595,6 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            for (var i = 0; i < medidasCards.length; i++) ...[
-                              medidasCards[i],
-                              if (i != medidasCards.length - 1)
-                                const SizedBox(height: 10),
-                            ],
-                            const SizedBox(height: 12),
                             if (medidas.isEmpty)
                               FxEmptyState(
                                 icon: 'chart',
@@ -863,61 +630,12 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 14),
-                    _SectionCard(
-                      title: 'Anamnese',
-                      subtitle:
-                          'PAR-Q+, saúde, hábitos e objetivos — preenchidos na ficha dedicada.',
-                      isDark: isDark,
-                      children: [
-                        ListTile(
-                          contentPadding: EdgeInsets.zero,
-                          leading: Icon(
-                            Icons.assignment_outlined,
-                            color: primary,
-                          ),
-                          title: Text(
-                            'Abrir minha anamnese',
-                            style: TextStyle(
-                              color: ink,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          subtitle: Text(
-                            'Quando o personal solicitar, preencha aqui.',
-                            style: TextStyle(color: mute, fontSize: 13),
-                          ),
-                          trailing: Icon(
-                            Icons.chevron_right,
-                            color: mute,
-                          ),
-                          onTap: () => context.push('/aluno/anamnese'),
-                        ),
-                      ],
-                    ),
                     const SizedBox(height: TokensStrip.s4),
                     FxLiquidPrimaryButton(
                       loading: _saving,
                       icon: Icons.check,
                       label: 'Salvar meu perfil',
                       onPressed: _saving ? null : _save,
-                    ),
-                    const SizedBox(height: 10),
-                    OutlinedButton.icon(
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: EagleTokens.bad,
-                        side: const BorderSide(color: EagleTokens.bad),
-                      ),
-                      onPressed: _deleting ? null : _confirmDeleteAccount,
-                      icon:
-                          _deleting
-                              ? const SizedBox(
-                                width: 16,
-                                height: 16,
-                                child: FxLoading(strokeWidth: 2),
-                              )
-                              : const Icon(Icons.delete_forever_outlined),
-                      label: const Text('Excluir minha conta'),
                     ),
                     const SizedBox(height: 14),
                     Text(
