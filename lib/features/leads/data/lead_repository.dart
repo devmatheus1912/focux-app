@@ -83,15 +83,18 @@ class LeadRepository {
 
   Future<Pagina<Lead>> listarPagina({
     String? status,
+    String? q,
     int page = 0,
     int size = 20,
   }) async {
+    final query = q?.trim() ?? '';
     final r = await _dio.get(
       '/api/leads',
       queryParameters: {
         'page': page,
         'size': size,
         if (status != null && status.trim().isNotEmpty) 'status': status,
+        if (query.isNotEmpty) 'q': query,
       },
     );
     final data = r.data;

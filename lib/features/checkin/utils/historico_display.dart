@@ -36,6 +36,17 @@ bool historicoMatchesChip({
   }
 }
 
+String? historicoStatusQuery(HistoricoStatusChip chip) {
+  switch (chip) {
+    case HistoricoStatusChip.todos:
+      return null;
+    case HistoricoStatusChip.concluido:
+      return 'CONCLUIDO';
+    case HistoricoStatusChip.andamento:
+      return 'EM_ANDAMENTO';
+  }
+}
+
 String historicoChipLabel(HistoricoStatusChip chip) {
   switch (chip) {
     case HistoricoStatusChip.todos:

@@ -23,6 +23,7 @@ void main() {
     expect(screen, contains('FxSatelliteListTile'));
     expect(screen, contains('FxLiquidPrimaryButton'));
     expect(screen, contains('leadListChipStatuses'));
+    expect(screen, contains('q: _query'));
     expect(screen, contains('/leads/kanban'));
     expect(screen, isNot(contains('_KanbanColumn')));
     expect(screen, isNot(contains('_KanbanCard')));

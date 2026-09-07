@@ -91,10 +91,11 @@ e aceitam `q` opcional (título/conteúdo). `GET /api/chat/inbox/search` e
 — teto de 9 fotos, uma página. `POST /api/convites/gerar` invalida os unused
 do personal; o token anterior deixa de validar.
 
-`GET /api/checkin/historico` usa o envelope cursor (`content`, `nextCursor`,
-`hasNext`). `GET /api/feedback-videos`, `/aluno/{id}` e `/me` usam offset
-`PaginaResponse` (slice em memória). `GET /api/leads` pagina no banco com
-`status` opcional; ainda sem `q`.
+`GET /api/checkin/historico` pagina no banco (keyset `iniciadoEm,id`) e aceita
+`q` (nome do treino) e `status` opcionais. `GET /api/feedback-videos`,
+`/aluno/{id}` e `/me` usam offset `PaginaResponse` no banco, com `q` no
+comentário. `GET /api/leads` pagina no banco com `status` e `q` (nome,
+objetivo, origem).
 
 ### 1.4 `totalElements` tem custo
 

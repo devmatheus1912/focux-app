@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -43,6 +45,7 @@ class _HistoricoCheckinScreenState
   DateTime? _fetchedAt;
   var _chip = HistoricoStatusChip.todos;
   var _query = '';
+  Timer? _searchDebounce;
 
   @override
   void initState() {
@@ -52,18 +55,17 @@ class _HistoricoCheckinScreenState
 
   @override
   void dispose() {
+    _searchDebounce?.cancel();
     _searchCtrl.dispose();
     super.dispose();
   }
 
-  List<ExecucaoTreino> get _visible {
-    return _items
-        .where(
-          (e) =>
-              historicoMatchesChip(status: e.status, chip: _chip) &&
-              historicoMatchesQuery(treinoNome: e.treinoNome, query: _query),
-        )
-        .toList();
+  void _onQueryChanged(String value) {
+    setState(() => _query = value);
+    _searchDebounce?.cancel();
+    _searchDebounce = Timer(const Duration(milliseconds: 280), () {
+      if (mounted) _load(reset: true);
+    });
   }
 
   Future<void> _load({required bool reset}) async {
@@ -82,6 +84,8 @@ class _HistoricoCheckinScreenState
     try {
       final pagina = await ref.read(checkinRepositoryProvider).historico(
         cursor: reset ? null : _nextCursor,
+        q: _query,
+        status: historicoStatusQuery(_chip),
       );
       if (!mounted) return;
       setState(() {
@@ -117,11 +121,8 @@ class _HistoricoCheckinScreenState
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
     final mute = chrome.mute;
-    final visible = _visible;
-    final count =
-        _chip == HistoricoStatusChip.todos && _query.trim().isEmpty
-            ? _items.length
-            : visible.length;
+    final visible = _items;
+    final count = visible.length;
 
     return fxScreenA11yScope(
       label: 'Histórico de Treinos',
@@ -153,7 +154,7 @@ class _HistoricoCheckinScreenState
                 ),
                 child: TextField(
                   controller: _searchCtrl,
-                  onChanged: (value) => setState(() => _query = value),
+                  onChanged: _onQueryChanged,
                   onTapOutside:
                       (_) => FocusManager.instance.primaryFocus?.unfocus(),
                   textInputAction: TextInputAction.search,
@@ -176,8 +177,10 @@ class _HistoricoCheckinScreenState
                             : IconButton(
                               tooltip: 'Limpar busca',
                               onPressed: () {
+                                _searchDebounce?.cancel();
                                 _searchCtrl.clear();
                                 setState(() => _query = '');
+                                _load(reset: true);
                               },
                               icon: Icon(
                                 Icons.close_rounded,
@@ -205,7 +208,10 @@ class _HistoricoCheckinScreenState
                       label: historicoChipLabel(chip),
                       selected: _chip == chip,
                       isDark: chrome.isDark,
-                      onTap: () => setState(() => _chip = chip),
+                      onTap: () {
+                        setState(() => _chip = chip);
+                        _load(reset: true);
+                      },
                     ),
                 ],
               ),
@@ -251,28 +257,9 @@ class _HistoricoCheckinScreenState
 
   Widget _buildList(List<ExecucaoTreino> visible) {
     final primary = Theme.of(context).colorScheme.primary;
-    if (_items.isEmpty) {
-      return RefreshIndicator(
-        color: primary,
-        onRefresh: () => _load(reset: true),
-        child: ListView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          children: [
-            FxEmptyState(
-              icon: 'dumbbell',
-              title: 'Nenhum treino ainda',
-              subtitle: 'Seus treinos concluídos aparecerão aqui.',
-              action: FxEmptyAction(
-                label: 'Ver treinos disponíveis',
-                onTap: _abrirTreinos,
-              ),
-            ),
-          ],
-        ),
-      );
-    }
     if (visible.isEmpty) {
+      final filtered =
+          _query.trim().isNotEmpty || _chip != HistoricoStatusChip.todos;
       return RefreshIndicator(
         color: primary,
         onRefresh: () => _load(reset: true),
@@ -280,21 +267,34 @@ class _HistoricoCheckinScreenState
           physics: const AlwaysScrollableScrollPhysics(),
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           children: [
-            FxEmptyState(
-              icon: 'search',
-              title: 'Nenhum treino encontrado',
-              subtitle: 'Ajuste a busca ou o filtro para ver outros treinos.',
-              action: FxEmptyAction(
-                label: 'Limpar filtros',
-                onTap: () {
-                  _searchCtrl.clear();
-                  setState(() {
-                    _query = '';
-                    _chip = HistoricoStatusChip.todos;
-                  });
-                },
+            if (filtered)
+              FxEmptyState(
+                icon: 'search',
+                title: 'Nenhum treino encontrado',
+                subtitle: 'Ajuste a busca ou o filtro para ver outros treinos.',
+                action: FxEmptyAction(
+                  label: 'Limpar filtros',
+                  onTap: () {
+                    _searchDebounce?.cancel();
+                    _searchCtrl.clear();
+                    setState(() {
+                      _query = '';
+                      _chip = HistoricoStatusChip.todos;
+                    });
+                    _load(reset: true);
+                  },
+                ),
+              )
+            else
+              FxEmptyState(
+                icon: 'dumbbell',
+                title: 'Nenhum treino ainda',
+                subtitle: 'Seus treinos concluídos aparecerão aqui.',
+                action: FxEmptyAction(
+                  label: 'Ver treinos disponíveis',
+                  onTap: _abrirTreinos,
+                ),
               ),
-            ),
           ],
         ),
       );

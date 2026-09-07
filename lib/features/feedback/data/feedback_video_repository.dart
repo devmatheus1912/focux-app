@@ -50,12 +50,13 @@ class FeedbackVideoRepository {
     int page = 0,
     int size = 20,
     int? alunoId,
+    String? q,
   }) async {
     final path =
         alunoId == null
             ? '/api/feedback-videos'
             : '/api/feedback-videos/aluno/$alunoId';
-    return _pagina(path, page: page, size: size);
+    return _pagina(path, page: page, size: size, q: q);
   }
 
   Future<List<FeedbackVideo>> listar() async {
@@ -67,17 +68,23 @@ class FeedbackVideoRepository {
   }
 
   Future<List<FeedbackVideo>> meus() async {
-    return (await _pagina('/api/feedback-videos/me')).content;
+    return (await _pagina('/api/feedback-videos/me', size: 100)).content;
   }
 
   Future<Pagina<FeedbackVideo>> _pagina(
     String path, {
     int page = 0,
     int size = 20,
+    String? q,
   }) async {
+    final query = q?.trim() ?? '';
     final r = await _dio.get(
       path,
-      queryParameters: {'page': page, 'size': size},
+      queryParameters: {
+        'page': page,
+        'size': size,
+        if (query.isNotEmpty) 'q': query,
+      },
     );
     final data = r.data;
     if (data is! Map) {

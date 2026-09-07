@@ -10,6 +10,9 @@ void main() {
     expect(historicoStatusLabel('CONCLUIDO'), 'Concluído');
     expect(historicoStatusLabel('EM_ANDAMENTO'), 'Em andamento');
     expect(historicoChipLabel(HistoricoStatusChip.todos), 'Todos');
+    expect(historicoStatusQuery(HistoricoStatusChip.todos), isNull);
+    expect(historicoStatusQuery(HistoricoStatusChip.concluido), 'CONCLUIDO');
+    expect(historicoStatusQuery(HistoricoStatusChip.andamento), 'EM_ANDAMENTO');
   });
 
   test('historico filtra busca e chip no carregado', () {
