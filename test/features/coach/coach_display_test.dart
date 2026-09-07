@@ -30,9 +30,14 @@ void main() {
       ),
       '/alunos/4',
     );
+    expect(coachChatRota(item), '/alunos/9/chat');
+    expect(coachAgendaRota(item), '/agenda');
+    expect(coachPedeAgenda('SONO_BAIXO'), isFalse);
     expect(coachPendingChipLabel(0), isNull);
     expect(coachPendingChipLabel(1), '1 recado do coach');
     expect(coachPendingChipLabel(3), '3 recados do coach');
+    expect(coachEmptyTitle, contains('coach'));
+    expect(coachEmptySubtitle, contains('check-in'));
     expect(coachComoCalculamos, contains('catálogo'));
   });
 }

@@ -27,6 +27,7 @@ import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../data/winback_repository.dart';
 import '../utils/winback_display.dart';
+import '../widgets/winback_acoes_sheet.dart';
 
 final winbackRepositoryProvider = Provider(
   (ref) => WinbackRepository(ref.read(apiClientProvider)),
@@ -150,6 +151,17 @@ class _WinbackScreenState extends ConsumerState<WinbackScreen> {
     context.push('/financeiro?alunoId=$id');
   }
 
+  void _abrirAcoes(WinbackLogEntry entry) {
+    if (entry.alunoId == null || entry.alunoId! <= 0) return;
+    showWinbackAcoesSheet(
+      context,
+      entry: entry,
+      onAluno: () => _abrirAluno(entry),
+      onChat: () => _abrirChat(entry),
+      onCobrar: () => _abrirCobranca(entry),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -176,7 +188,7 @@ class _WinbackScreenState extends ConsumerState<WinbackScreen> {
                   FxHelpTip('Como calculamos', winbackComoCalculamos),
                   FxHelpTip(
                     'Lista',
-                    'Toque no aluno para o 360. Trial do personal não aparece aqui.',
+                    'Toque no envio para escrever, cobrar ou abrir o 360. Trial do personal não aparece aqui.',
                   ),
                   FxHelpTip(
                     'Retenção',
@@ -303,7 +315,7 @@ class _WinbackScreenState extends ConsumerState<WinbackScreen> {
                           ),
                           onTap: entry.alunoId == null
                               ? null
-                              : () => _abrirAluno(entry),
+                              : () => _abrirAcoes(entry),
                         );
                       },
                     ),

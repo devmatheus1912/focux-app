@@ -85,15 +85,31 @@ class CoachScreen extends ConsumerWidget {
               ),
           data: (data) {
             if (data.isEmpty) {
-              return FxEmptyState(
-                icon: 'spark',
-                title: 'Nenhuma orientação agora',
-                subtitle:
-                    'O coach avisa aqui quando encontrar algo que merece sua atenção.',
-                action: FxEmptyAction(
-                  label: 'Ir para o Hoje',
-                  onTap:
-                      () => goPersonalShellTab(context, '/dashboard/personal'),
+              return RefreshIndicator(
+                color: primary,
+                onRefresh: () async {
+                  ref.invalidate(coachHomeProvider);
+                  await ref.read(coachHomeProvider.future);
+                },
+                child: ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  children: [
+                    const SizedBox(height: 48),
+                    FxEmptyState(
+                      icon: 'spark',
+                      title: coachEmptyTitle,
+                      subtitle: coachEmptySubtitle,
+                      action: FxEmptyAction(
+                        label: 'Ver alunos',
+                        onTap: () {
+                          AnalyticsService.instance.track(
+                            ProductEvents.alunosViewed,
+                          );
+                          goPersonalShellTab(context, '/alunos');
+                        },
+                      ),
+                    ),
+                  ],
                 ),
               );
             }
@@ -117,6 +133,14 @@ class CoachScreen extends ConsumerWidget {
                       isDark: isDark,
                       onOpen: () {
                         context.push(coachRota(focus));
+                      },
+                      onChat: () {
+                        context.push(coachChatRota(focus));
+                      },
+                      onAgenda: () {
+                        final rota = coachAgendaRota(focus);
+                        if (rota == null) return;
+                        goPersonalShellTab(context, rota);
                       },
                       onAck: () async {
                         AnalyticsService.instance.track(
@@ -173,6 +197,8 @@ class _CoachFocusCard extends StatelessWidget {
     required this.pending,
     required this.isDark,
     required this.onOpen,
+    required this.onChat,
+    required this.onAgenda,
     required this.onAck,
   });
 
@@ -180,6 +206,8 @@ class _CoachFocusCard extends StatelessWidget {
   final int pending;
   final bool isDark;
   final VoidCallback onOpen;
+  final VoidCallback onChat;
+  final VoidCallback onAgenda;
   final VoidCallback onAck;
 
   @override
@@ -226,6 +254,20 @@ class _CoachFocusCard extends StatelessWidget {
                 isDark: isDark,
                 onPressed: onOpen,
               ),
+              if (focus.alunoId > 0)
+                DashboardHomeActionChip(
+                  label: 'Escrever',
+                  accent: Theme.of(context).colorScheme.primary,
+                  isDark: isDark,
+                  onPressed: onChat,
+                ),
+              if (coachAgendaRota(focus) != null)
+                DashboardHomeActionChip(
+                  label: 'Agenda',
+                  accent: Theme.of(context).colorScheme.primary,
+                  isDark: isDark,
+                  onPressed: onAgenda,
+                ),
               DashboardHomeActionChip(
                 label: 'Entendi',
                 accent: chrome.mute,

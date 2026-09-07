@@ -17,6 +17,10 @@ void main() {
     expect(firstNpsDetrator(items)?.id, 2);
     expect(npsRecentPreview(items), hasLength(3));
     expect(npsItemsForFiltro(items, 'detratores').map((e) => e.id), [2, 4]);
+    expect(npsNormalizeFiltro(' Detratores '), npsFiltroDetratores);
+    expect(npsNormalizeFiltro('todos'), '');
+    expect(npsHasAluno(items[1]), isTrue);
+    expect(npsHasAluno(items[0]), isFalse);
     expect(npsComoCalculamos, contains('Promotores'));
     expect(npsComoCalculamos, contains('catálogo'));
   });

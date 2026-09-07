@@ -26,6 +26,8 @@ void main() {
     expect(screen, contains('showNpsCatalogSheet'));
     expect(screen, contains('Ver todos'));
     expect(screen, contains("queryParameters['filtro']"));
+    expect(screen, contains('FxToggleChip'));
+    expect(screen, contains('Detratores'));
     expect(screen, contains('isDark'));
   });
 }

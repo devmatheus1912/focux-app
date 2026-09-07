@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_empty_state.dart';
@@ -16,6 +15,7 @@ Future<void> showNpsCatalogSheet(
   required NpsHomeBundle firstPage,
   required NpsRepository repo,
   required void Function(NpsItem item) onContatar,
+  String? filtro,
 }) {
   return showFxHomeSheet<void>(
     context,
@@ -24,6 +24,7 @@ Future<void> showNpsCatalogSheet(
           firstPage: firstPage,
           repo: repo,
           onContatar: onContatar,
+          filtro: npsNormalizeFiltro(filtro),
         ),
   );
 }
@@ -33,11 +34,13 @@ class _NpsCatalogSheet extends StatefulWidget {
     required this.firstPage,
     required this.repo,
     required this.onContatar,
+    required this.filtro,
   });
 
   final NpsHomeBundle firstPage;
   final NpsRepository repo;
   final void Function(NpsItem item) onContatar;
+  final String filtro;
 
   @override
   State<_NpsCatalogSheet> createState() => _NpsCatalogSheetState();
@@ -130,33 +133,31 @@ class _NpsCatalogSheetState extends State<_NpsCatalogSheet> {
               decoration: FxInputDeco.build(context, 'Buscar aluno'),
             ),
           ),
-          if (_itens.isEmpty)
-            const FxEmptyState(
+          if (npsItemsForFiltro(_itens, widget.filtro).isEmpty)
+            FxEmptyState(
               icon: 'star',
-              title: 'Nenhuma resposta nessa busca',
+              title:
+                  widget.filtro == npsFiltroDetratores
+                      ? 'Nenhum detrator nesse recorte'
+                      : 'Nenhuma resposta nessa busca',
               subtitle: 'Tente outro nome ou limpe o filtro.',
             )
           else ...[
-            for (final item in _itens)
+            for (final item in npsItemsForFiltro(_itens, widget.filtro))
               FxSatelliteListTile(
                 title:
                     item.comentario?.trim().isNotEmpty == true
                         ? item.comentario!.trim()
                         : (item.alunoNome ?? 'Sem comentário'),
                 titleCase: false,
-                subtitle: Text('${npsClassify(item.score)} · ${item.criadoEm}'),
+            subtitle: Text('${npsClassify(item.score)} · ${item.criadoEm}'),
                 onTap:
-                    npsIsDetrator(item.score) && item.alunoId != null
+                    npsHasAluno(item)
                         ? () {
                           Navigator.of(context).pop();
                           widget.onContatar(item);
                         }
-                        : () {
-                          final alunoId = item.alunoId;
-                          if (alunoId == null) return;
-                          Navigator.of(context).pop();
-                          context.push('/alunos/$alunoId');
-                        },
+                        : null,
               ),
             if (_hasNext)
               FxSatelliteListTile(

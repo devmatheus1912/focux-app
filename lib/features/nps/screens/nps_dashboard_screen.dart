@@ -18,6 +18,7 @@ import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_strip_card.dart';
 import '../../../core/widgets/operational_metric_tile.dart';
+import '../../../core/widgets/fx_toggle_chip.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../dashboard/widgets/dashboard_home_action_chip.dart';
@@ -40,6 +41,7 @@ class _NpsDashboardScreenState extends ConsumerState<NpsDashboardScreen> {
   bool _loading = true;
   String? _erro;
   DateTime? _fetchedAt;
+  String? _filtroOverride;
 
   @override
   void initState() {
@@ -74,6 +76,16 @@ class _NpsDashboardScreenState extends ConsumerState<NpsDashboardScreen> {
     }
   }
 
+  String _filtroOf(BuildContext context) =>
+      _filtroOverride ??
+      npsNormalizeFiltro(
+        GoRouterState.of(context).uri.queryParameters['filtro'],
+      );
+
+  void _setFiltro(String next) {
+    setState(() => _filtroOverride = npsNormalizeFiltro(next));
+  }
+
   void _contatarDetrator(NpsItem item) {
     final alunoId = item.alunoId;
     if (alunoId == null) return;
@@ -89,6 +101,16 @@ class _NpsDashboardScreenState extends ConsumerState<NpsDashboardScreen> {
     }
   }
 
+  void _abrirResposta(NpsItem item) {
+    if (!npsHasAluno(item)) return;
+    if (npsIsDetrator(item.score)) {
+      _contatarDetrator(item);
+      return;
+    }
+    AnalyticsService.instance.track(ProductEvents.alunosViewed);
+    context.push('/alunos/${item.alunoId}', extra: item.alunoNome);
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -96,7 +118,7 @@ class _NpsDashboardScreenState extends ConsumerState<NpsDashboardScreen> {
     final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
     final resumo = _resumo;
     final empty = resumo == null || resumo.total == 0;
-    final filtro = GoRouterState.of(context).uri.queryParameters['filtro'];
+    final filtro = _filtroOf(context);
     final recentes = npsItemsForFiltro(_recentes, filtro);
     final firstDetrator = firstNpsDetrator(_recentes);
 
@@ -122,7 +144,7 @@ class _NpsDashboardScreenState extends ConsumerState<NpsDashboardScreen> {
                       FxHelpTip('Score', 'O card do topo é o NPS da operação.'),
                       FxHelpTip(
                         'Detrator',
-                        'Nota 6 ou menos pede contato no mesmo dia.',
+                        'Nota 6 ou menos pede contato no mesmo dia. O chip Detratores recorta a lista.',
                       ),
                     ],
                   ),
@@ -222,21 +244,58 @@ class _NpsDashboardScreenState extends ConsumerState<NpsDashboardScreen> {
                                               repo: NpsRepository(
                                                 ref.read(apiClientProvider),
                                               ),
-                                              onContatar: _contatarDetrator,
+                                              filtro: filtro,
+                                              onContatar: _abrirResposta,
                                             );
                                           }
                                           : null,
                                 ),
                                 const SizedBox(height: TokensStrip.s2),
-                                for (final item in npsRecentPreview(recentes))
-                                  _NpsTile(
-                                    item: item,
-                                    onContatar:
-                                        npsIsDetrator(item.score) &&
-                                                item.alunoId != null
-                                            ? () => _contatarDetrator(item)
-                                            : null,
-                                  ),
+                                Wrap(
+                                  spacing: TokensStrip.s2,
+                                  runSpacing: TokensStrip.s2,
+                                  children: [
+                                    FxToggleChip(
+                                      label: 'Todos',
+                                      selected: filtro.isEmpty,
+                                      isDark: isDark,
+                                      onTap: () => _setFiltro(''),
+                                    ),
+                                    FxToggleChip(
+                                      label: 'Detratores',
+                                      selected:
+                                          filtro == npsFiltroDetratores,
+                                      isDark: isDark,
+                                      onTap:
+                                          () => _setFiltro(
+                                            npsFiltroDetratores,
+                                          ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: TokensStrip.s2),
+                                if (npsRecentPreview(recentes).isEmpty)
+                                  FxEmptyState(
+                                    icon: 'star',
+                                    title:
+                                        filtro == npsFiltroDetratores
+                                            ? 'Nenhum detrator neste recorte'
+                                            : 'Nenhum feedback recente',
+                                    subtitle:
+                                        filtro == npsFiltroDetratores
+                                            ? 'As notas baixas que pedem contato aparecem aqui.'
+                                            : 'As respostas novas entram nesta lista.',
+                                  )
+                                else
+                                  for (final item
+                                      in npsRecentPreview(recentes))
+                                    _NpsTile(
+                                      item: item,
+                                      onContatar:
+                                          npsHasAluno(item)
+                                              ? () => _abrirResposta(item)
+                                              : null,
+                                    ),
                               ],
                             ),
                           ),
