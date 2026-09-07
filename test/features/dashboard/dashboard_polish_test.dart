@@ -156,6 +156,9 @@ void main() {
     expect(catalog, contains('catalogoSubtitle'));
     expect(catalog, contains('groupCatalogoHubs'));
     expect(catalog, contains('ferramentasCatalogoProvider'));
+    expect(catalog, contains('FxHomeSheetHandle'));
+    expect(catalog, contains('FxHomeSheetHeader'));
+    expect(catalog, isNot(contains('ExpansionTile')));
     expect(catalog, isNot(contains('DashboardExpandableToolGroups')));
     expect(catalog, isNot(contains('shortcutAspectRatio')));
     expect(tools, contains('CommandActionTile'));

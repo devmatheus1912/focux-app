@@ -16,12 +16,14 @@ class DashboardToolShortcutGroup extends ConsumerWidget {
     required this.shortcuts,
     required this.onShortcut,
     this.header,
+    this.caption,
     this.footer,
     this.homePlanoFeatures,
   });
 
   final List<DashboardToolShortcut> shortcuts;
   final String? header;
+  final String? caption;
   final Widget? footer;
   final PlanoFeatures? homePlanoFeatures;
   final void Function(DashboardToolShortcut shortcut) onShortcut;
@@ -36,6 +38,7 @@ class DashboardToolShortcutGroup extends ConsumerWidget {
 
     return FxSettingsGroup(
       header: header,
+      caption: caption,
       footer: footer,
       children: [
         for (var i = 0; i < shortcuts.length; i++)
