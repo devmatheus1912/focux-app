@@ -4,12 +4,26 @@ import '../../support/screen_source_bundle.dart';
 
 void main() {
   test('historico cumpre contrato Tier S+', () {
-    final screen = readScreenSourceBundle('lib/features/checkin/screens/historico_screen.dart');
+    final screen = readScreenSourceBundle(
+      'lib/features/checkin/screens/historico_screen.dart',
+    );
     expect(screen, anyOf(contains('fxScreenA11yScope'), contains('Semantics(')));
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(screen, contains('FxShellScaffold'));
-    expect(screen, anyOf(contains('friendlyError'), contains('DashboardErrorState'), contains('FxEmptyState'), contains('_erro'), contains('_TrainingEmptyState'), contains('ref.invalidate')));
-    expect(screen, anyOf(contains('FxLoading'), contains('SkeletonLoader'), contains('SkeletonList'), contains('DashboardShimmer'), contains('Shimmer'), contains('IaCopilotInsightsLoading'), contains('_loading')));
+    expect(screen, contains('friendlyError'));
+    expect(screen, contains('FxEmptyState'));
+    expect(screen, contains('SkeletonList'));
     expect(screen, contains('RefreshIndicator'));
+    expect(screen, contains('FxHubFreshness.joinCount'));
+    expect(screen, contains('FxLiquidPrimaryButton'));
+    expect(screen, contains('safePopOrGo'));
+    expect(screen, contains('ListView.builder'));
+    expect(screen, contains('FxSatelliteListTile'));
+    expect(screen, contains('ScrollViewKeyboardDismissBehavior.onDrag'));
+    expect(screen, contains('viewInsetsOf'));
+    expect(screen, contains('onTapOutside'));
+    expect(screen, isNot(contains('FxSettingsGroup')));
+    expect(screen, isNot(contains('FloatingActionButton')));
+    expect(screen, isNot(contains("icon: 'plus'")));
   });
 }

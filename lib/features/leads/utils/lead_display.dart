@@ -1,3 +1,4 @@
+import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/utils/fx_utils.dart';
 
 const leadOrigemValues = [
@@ -156,11 +157,34 @@ String leadHubSubtitle({
   return parts.join(' · ');
 }
 
-String leadListSubtitle(String? freshness) {
-  const base = 'Funil de prospects';
-  final stamp = freshness?.trim();
-  if (stamp == null || stamp.isEmpty) return base;
-  return '$base · $stamp';
+String leadCountLabel(int count) {
+  if (count == 1) return '1 lead';
+  return '$count leads';
+}
+
+const leadListChipStatuses = [
+  'LEAD',
+  'TESTE',
+  'ATIVO',
+  'INADIMPLENTE',
+  'CANCELADO',
+];
+
+bool leadMatchesQuery({
+  required String nome,
+  String? objetivo,
+  String? origem,
+  required String query,
+}) {
+  final q = query.trim().toLowerCase();
+  if (q.isEmpty) return true;
+  return nome.toLowerCase().contains(q) ||
+      (objetivo ?? '').toLowerCase().contains(q) ||
+      (origem ?? '').toLowerCase().contains(q);
+}
+
+String leadListSubtitle({required int count, String? freshness}) {
+  return FxHubFreshness.joinCount(leadCountLabel(count), freshness);
 }
 
 String leadCardSubtitle({String? objetivo, String? origem}) {

@@ -21,10 +21,15 @@ void main() {
     expect(screen, isNot(contains('FxSettingsGroup')));
     expect(screen, contains('FxSatelliteListTile'));
     expect(screen, contains('ListView.builder'));
+    expect(screen, contains('FxLiquidPrimaryButton'));
+    expect(screen, contains('safePopOrGo'));
+    expect(screen, contains('viewInsetsOf'));
+    expect(screen, contains('onTapOutside'));
     expect(screen, isNot(contains('TabBar')));
     expect(screen, isNot(contains('TabBarView')));
     expect(screen, isNot(contains('DropdownButton')));
     expect(screen, isNot(contains('FloatingActionButton')));
+    expect(screen, isNot(contains('ShellHeaderIconButton')));
     expect(screen, isNot(contains('_NovoFeedbackDialog')));
     expect(screen, isNot(contains('Exercício #')));
     expect(screen, isNot(contains(r'showError(context, $e)')));

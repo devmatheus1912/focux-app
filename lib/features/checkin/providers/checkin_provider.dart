@@ -23,7 +23,7 @@ final meusTreinosProvider = FutureProvider<List<ExecucaoTreino>>((ref) async {
 final historicoCheckinProvider = FutureProvider<List<ExecucaoTreino>>((
   ref,
 ) async {
-  return ref.read(checkinRepositoryProvider).historico();
+  return (await ref.read(checkinRepositoryProvider).historico()).content;
 });
 
 final checkinPersonalHomeProvider = FutureProvider<CheckinPersonalHomeBundle>((

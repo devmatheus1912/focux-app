@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
+import '../../../core/api/pagina.dart';
 import '../models/checkin_personal_home.dart';
 
 class ExecucaoExercicio {
@@ -243,7 +244,7 @@ class ExecucaoTreino {
     iniciadoEm: j['iniciadoEm'] as String?,
     concluidoEm: j['concluidoEm'] as String?,
     exercicios:
-        (j['exercicios'] as List<dynamic>)
+        (j['exercicios'] as List<dynamic>? ?? const [])
             .map((e) => ExecucaoExercicio.fromJson(e as Map<String, dynamic>))
             .toList(),
     evolucoesCarga:
@@ -406,11 +407,27 @@ class CheckinRepository {
     return ExecucaoTreino.fromJson(r.data as Map<String, dynamic>);
   }
 
-  Future<List<ExecucaoTreino>> historico() async {
-    final r = await _dio.get('/api/checkin/historico');
-    return (r.data as List)
-        .map((e) => ExecucaoTreino.fromJson(e as Map<String, dynamic>))
-        .toList();
+  Future<Pagina<ExecucaoTreino>> historico({
+    String? cursor,
+    int size = 20,
+  }) async {
+    final r = await _dio.get(
+      '/api/checkin/historico',
+      queryParameters: {
+        'size': size,
+        if (cursor != null && cursor.isNotEmpty) 'cursor': cursor,
+      },
+    );
+    final data = r.data;
+    if (data is! Map) {
+      throw FormatException(
+        'GET /api/checkin/historico devolve Pagina, não lista crua.',
+      );
+    }
+    return Pagina.fromJson(
+      Map<String, dynamic>.from(data),
+      (item) => ExecucaoTreino.fromJson(Map<String, dynamic>.from(item as Map)),
+    );
   }
 
   static const personalHomePageSize = 20;

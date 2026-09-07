@@ -5,26 +5,123 @@ import 'package:go_router/go_router.dart';
 import '../../../core/brand/focux_microcopy.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
-import '../../../core/utils/fx_utils.dart';
+import '../../../core/ux/fx_hub_freshness.dart';
+import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_icon.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/fx_toggle_chip.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../data/checkin_repository.dart';
 import '../providers/checkin_provider.dart';
+import '../utils/historico_display.dart';
 
-class HistoricoCheckinScreen extends ConsumerWidget {
+class HistoricoCheckinScreen extends ConsumerStatefulWidget {
   const HistoricoCheckinScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final historicoAsync = ref.watch(historicoCheckinProvider);
+  ConsumerState<HistoricoCheckinScreen> createState() =>
+      _HistoricoCheckinScreenState();
+}
+
+class _HistoricoCheckinScreenState
+    extends ConsumerState<HistoricoCheckinScreen> {
+  final _searchCtrl = TextEditingController();
+  final _items = <ExecucaoTreino>[];
+  var _loading = true;
+  var _loadingMore = false;
+  var _hasNext = false;
+  String? _nextCursor;
+  String? _erro;
+  DateTime? _fetchedAt;
+  var _chip = HistoricoStatusChip.todos;
+  var _query = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _load(reset: true);
+  }
+
+  @override
+  void dispose() {
+    _searchCtrl.dispose();
+    super.dispose();
+  }
+
+  List<ExecucaoTreino> get _visible {
+    return _items
+        .where(
+          (e) =>
+              historicoMatchesChip(status: e.status, chip: _chip) &&
+              historicoMatchesQuery(treinoNome: e.treinoNome, query: _query),
+        )
+        .toList();
+  }
+
+  Future<void> _load({required bool reset}) async {
+    if (reset) {
+      setState(() {
+        _loading = true;
+        _erro = null;
+        _items.clear();
+        _nextCursor = null;
+        _hasNext = false;
+      });
+    } else {
+      if (_loadingMore || !_hasNext) return;
+      setState(() => _loadingMore = true);
+    }
+    try {
+      final pagina = await ref.read(checkinRepositoryProvider).historico(
+        cursor: reset ? null : _nextCursor,
+      );
+      if (!mounted) return;
+      setState(() {
+        _items.addAll(pagina.content);
+        _hasNext = pagina.hasNext;
+        _nextCursor = pagina.nextCursor;
+        _loading = false;
+        _loadingMore = false;
+        if (reset) {
+          _fetchedAt = DateTime.now();
+          ref.invalidate(historicoCheckinProvider);
+        }
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _erro = friendlyError(e);
+        _loading = false;
+        _loadingMore = false;
+      });
+    }
+  }
+
+  void _abrirTreinos() => context.push('/checkin/treinos');
+
+  void _abrirItem(ExecucaoTreino entry) {
+    if (historicoConcluido(entry.status)) return;
+    context.push('/checkin/executar', extra: entry.treinoId);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final chrome = ShellChrome.of(context);
+    final primary = Theme.of(context).colorScheme.primary;
+    final mute = chrome.mute;
+    final visible = _visible;
+    final count =
+        _chip == HistoricoStatusChip.todos && _query.trim().isEmpty
+            ? _items.length
+            : visible.length;
 
     return fxScreenA11yScope(
       label: 'Histórico de Treinos',
@@ -32,136 +129,231 @@ class HistoricoCheckinScreen extends ConsumerWidget {
         useMesh: true,
         appBar: FxShellAppBar(
           title: 'Histórico de Treinos',
+          subtitle: FxHubFreshness.joinCount(
+            historicoCountLabel(count),
+            FxHubFreshness.fromFetchedAt(_fetchedAt),
+          ),
           onBack: () => safePopOrGo(context, '/checkin/treinos'),
         ),
-        body: historicoAsync.when(
-          loading:
-              () => const Padding(
-                padding: EdgeInsets.all(TokensStrip.s4),
-                child: SkeletonList(count: 6),
+        body: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                TokensStrip.s4,
+                TokensStrip.s2,
+                TokensStrip.s4,
+                TokensStrip.s2,
               ),
-          error:
-              (e, _) => FxErrorState(
-                chromeOnDark: isDark,
-                primary: Theme.of(context).colorScheme.primary,
-                message: friendlyError(e),
-                title: FocuxMicrocopy.naoFoiPossivelCarregar,
-                onRetry: () => ref.invalidate(historicoCheckinProvider),
-              ),
-          data:
-              (historico) =>
-                  historico.isEmpty
-                      ? FxEmptyState(
-                        icon: 'dumbbell',
-                        title: 'Nenhum treino ainda',
-                        subtitle: 'Seus treinos concluídos aparecerão aqui.',
-                        action: FxEmptyAction(
-                          label: 'Ver treinos disponíveis',
-                          onTap: () => context.push('/checkin/treinos'),
-                        ),
-                      )
-                      : RefreshIndicator(
-                        onRefresh:
-                            () async =>
-                                ref.invalidate(historicoCheckinProvider),
-                        child: ListView.builder(
-                          padding: const EdgeInsets.fromLTRB(
-                            TokensStrip.s4,
-                            8,
-                            16,
-                            100,
-                          ),
-                          itemCount: historico.length,
-                          itemBuilder:
-                              (context, i) => _HistoricoCard(
-                                entry: historico[i],
-                                isDark: isDark,
+              child: DecoratedBox(
+                decoration: fxStripCardDecoration(
+                  context,
+                  accent: primary,
+                  radius: TokensStrip.rCard,
+                  glowStrength: 0.03,
+                ),
+                child: TextField(
+                  controller: _searchCtrl,
+                  onChanged: (value) => setState(() => _query = value),
+                  onTapOutside:
+                      (_) => FocusManager.instance.primaryFocus?.unfocus(),
+                  textInputAction: TextInputAction.search,
+                  decoration: InputDecoration(
+                    isDense: true,
+                    hintText: 'Buscar treino',
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 12,
+                    ),
+                    prefixIcon: Icon(
+                      Icons.search_rounded,
+                      color: primary,
+                      size: 20,
+                    ),
+                    suffixIcon:
+                        _query.trim().isEmpty
+                            ? null
+                            : IconButton(
+                              tooltip: 'Limpar busca',
+                              onPressed: () {
+                                _searchCtrl.clear();
+                                setState(() => _query = '');
+                              },
+                              icon: Icon(
+                                Icons.close_rounded,
+                                color: mute,
+                                size: 18,
                               ),
-                        ),
-                      ),
+                            ),
+                  ),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                TokensStrip.s4,
+                0,
+                TokensStrip.s4,
+                TokensStrip.s2,
+              ),
+              child: Wrap(
+                spacing: TokensStrip.s2,
+                runSpacing: TokensStrip.s2,
+                children: [
+                  for (final chip in HistoricoStatusChip.values)
+                    FxToggleChip(
+                      label: historicoChipLabel(chip),
+                      selected: _chip == chip,
+                      isDark: chrome.isDark,
+                      onTap: () => setState(() => _chip = chip),
+                    ),
+                ],
+              ),
+            ),
+            Expanded(
+              child:
+                  _loading
+                      ? const Padding(
+                        padding: EdgeInsets.all(FxSettingsLayout.pageInset),
+                        child: SkeletonList(count: 6),
+                      )
+                      : _erro != null
+                      ? FxErrorState(
+                        chromeOnDark: chrome.isDark,
+                        primary: primary,
+                        message: _erro!,
+                        title: FocuxMicrocopy.naoFoiPossivelCarregar,
+                        onRetry: () => _load(reset: true),
+                      )
+                      : FxContentWidthLimiter(child: _buildList(visible)),
+            ),
+            if (!_loading && _erro == null)
+              SafeArea(
+                top: false,
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    FxSettingsLayout.pageInset,
+                    TokensStrip.s2,
+                    FxSettingsLayout.pageInset,
+                    TokensStrip.s3 + MediaQuery.viewInsetsOf(context).bottom,
+                  ),
+                  child: FxLiquidPrimaryButton(
+                    label: 'Ver treinos disponíveis',
+                    onPressed: _abrirTreinos,
+                  ),
+                ),
+              ),
+          ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildList(List<ExecucaoTreino> visible) {
+    final primary = Theme.of(context).colorScheme.primary;
+    if (_items.isEmpty) {
+      return RefreshIndicator(
+        color: primary,
+        onRefresh: () => _load(reset: true),
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          children: [
+            FxEmptyState(
+              icon: 'dumbbell',
+              title: 'Nenhum treino ainda',
+              subtitle: 'Seus treinos concluídos aparecerão aqui.',
+              action: FxEmptyAction(
+                label: 'Ver treinos disponíveis',
+                onTap: _abrirTreinos,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+    if (visible.isEmpty) {
+      return RefreshIndicator(
+        color: primary,
+        onRefresh: () => _load(reset: true),
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          children: [
+            FxEmptyState(
+              icon: 'search',
+              title: 'Nenhum treino encontrado',
+              subtitle: 'Ajuste a busca ou o filtro para ver outros treinos.',
+              action: FxEmptyAction(
+                label: 'Limpar filtros',
+                onTap: () {
+                  _searchCtrl.clear();
+                  setState(() {
+                    _query = '';
+                    _chip = HistoricoStatusChip.todos;
+                  });
+                },
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final showMore = _hasNext;
+    return RefreshIndicator(
+      color: primary,
+      onRefresh: () => _load(reset: true),
+      child: ListView.builder(
+        physics: const AlwaysScrollableScrollPhysics(),
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+        padding: const EdgeInsets.fromLTRB(
+          FxSettingsLayout.pageInset,
+          8,
+          FxSettingsLayout.pageInset,
+          32,
+        ),
+        itemCount: visible.length + (showMore ? 1 : 0),
+        itemBuilder: (context, i) {
+          if (showMore && i == visible.length) {
+            return FxSatelliteListTile(
+              title: _loadingMore ? 'Carregando…' : 'Carregar mais',
+              onTap: _loadingMore ? null : () => _load(reset: false),
+            );
+          }
+          return _HistoricoTile(
+            entry: visible[i],
+            onTap: () => _abrirItem(visible[i]),
+          );
+        },
       ),
     );
   }
 }
 
-class _HistoricoCard extends StatelessWidget {
-  const _HistoricoCard({required this.entry, required this.isDark});
+class _HistoricoTile extends StatelessWidget {
+  const _HistoricoTile({required this.entry, required this.onTap});
 
   final ExecucaoTreino entry;
-  final bool isDark;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final primary = Theme.of(context).colorScheme.primary;
-    final chrome = ShellChrome.forDark(isDark);
-    final concluido = entry.status == 'CONCLUIDO';
-    final iconName = concluido ? 'circle-check' : 'calendar';
-    final iconColor = concluido ? EagleTokens.good : EagleTokens.warn;
-    final chipBg =
-        concluido
-            ? EagleTokens.good.withValues(alpha: 0.12)
-            : EagleTokens.warn.withValues(alpha: 0.12);
-
-    var dateLabel = '';
-    if (entry.iniciadoEm != null) {
-      try {
-        dateLabel = fxDateFull(DateTime.parse(entry.iniciadoEm!));
-      } catch (_) {
-        dateLabel = entry.iniciadoEm!;
-      }
-    }
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      decoration: chrome.listCard(primary: concluido ? primary : null),
-      child: Row(
-        children: [
-          FxIcon(name: iconName, size: 22, color: iconColor),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  entry.treinoNome,
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    color: chrome.ink,
-                    fontWeight: FontWeight.w700,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                if (dateLabel.isNotEmpty) ...[
-                  const SizedBox(height: 2),
-                  Text(
-                    dateLabel,
-                    style: Theme.of(
-                      context,
-                    ).textTheme.bodySmall?.copyWith(color: chrome.mute),
-                  ),
-                ],
-              ],
-            ),
-          ),
-          const SizedBox(width: 8),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(
-              color: chipBg,
-              borderRadius: BorderRadius.circular(TokensStrip.rCard),
-            ),
-            child: Text(
-              concluido ? 'Concluído' : 'Em andamento',
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: iconColor,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-        ],
+    final concluido = historicoConcluido(entry.status);
+    final dateLabel = historicoDateLabel(entry.iniciadoEm);
+    return FxSatelliteListTile(
+      title: entry.treinoNome,
+      subtitle:
+          dateLabel.isEmpty
+              ? Text(historicoStatusLabel(entry.status))
+              : Text('$dateLabel · ${historicoStatusLabel(entry.status)}'),
+      leading: FxIcon(
+        name: concluido ? 'circle-check' : 'calendar',
+        size: 22,
+        color: concluido ? EagleTokens.good : EagleTokens.warn,
       ),
+      accent: concluido ? null : EagleTokens.warn,
+      onTap: concluido ? null : onTap,
     );
   }
 }

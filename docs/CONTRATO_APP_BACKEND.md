@@ -91,6 +91,11 @@ e aceitam `q` opcional (título/conteúdo). `GET /api/chat/inbox/search` e
 — teto de 9 fotos, uma página. `POST /api/convites/gerar` invalida os unused
 do personal; o token anterior deixa de validar.
 
+`GET /api/checkin/historico` usa o envelope cursor (`content`, `nextCursor`,
+`hasNext`). `GET /api/feedback-videos`, `/aluno/{id}` e `/me` usam offset
+`PaginaResponse` (slice em memória). `GET /api/leads` pagina no banco com
+`status` opcional; ainda sem `q`.
+
 ### 1.4 `totalElements` tem custo
 
 `totalElements` exige um `COUNT` por página. Nos 19 da lista A isso é
