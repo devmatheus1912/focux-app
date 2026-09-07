@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/tokens_strip.dart';
-import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../ferramentas/providers/ferramentas_catalogo_provider.dart';
 import '../../planos/data/planos_repository.dart';
@@ -70,11 +69,29 @@ class DashboardHomeToolsSection extends ConsumerWidget {
               child: SkeletonList(count: 3),
             ),
         error:
-            (e, _) => FxErrorState(
-              chromeOnDark: isDark,
-              primary: primary,
-              message: 'Não deu para carregar o catálogo',
-              onRetry: () => ref.invalidate(ferramentasCatalogoProvider),
+            (e, _) => Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                DashboardSectionHeader(
+                  title: DashboardMicrocopy.maisFerramentas,
+                  actionLabel: 'Tentar de novo',
+                  onAction: () => ref.invalidate(ferramentasCatalogoProvider),
+                ),
+                const SizedBox(height: FxSettingsLayout.headerToGroup),
+                CommandActionTile(
+                  item: const CommandActionItem(
+                    icon: 'spark',
+                    title: DashboardMicrocopy.verCatalogoCompleto,
+                    subtitle: 'Catálogo offline — toque para tentar de novo',
+                    route: '',
+                    tone: CommandActionTone.primary,
+                  ),
+                  isDark: isDark,
+                  primary: primary,
+                  showDivider: false,
+                  onTap: () => ref.invalidate(ferramentasCatalogoProvider),
+                ),
+              ],
             ),
         data: (catalogo) {
           final featuredShortcuts = atalhosHomeFromCatalogo(
