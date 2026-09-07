@@ -17,7 +17,6 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../auth/providers/auth_provider.dart';
-import '../../dashboard/data/dashboard_repository.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
 import '../../dashboard/utils/dashboard_home_client_cache.dart';
 import '../../planos/providers/plano_features_provider.dart';
@@ -181,13 +180,7 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
   @override
   Widget build(BuildContext context) {
     final perfilAsync = ref.watch(perfilProvider);
-    // Landing Completa / gates usam planoFeaturesProvider (seed do cache home
-    // abaixo). Dashboard home aqui NÃO é só planoFeatures: a faixa do hero
-    // precisa de totalAlunos + alunosAtivos. Preferimos cache fresco; só
-    // disparamos GET /api/dashboard/home em cache miss.
-    final cachedHome = DashboardHomeClientCache.getIfFresh();
-    final cachedPersonal = cachedHome?.personal;
-    final cachedPlano = cachedHome?.planoFeatures;
+    final cachedPlano = DashboardHomeClientCache.getIfFresh()?.planoFeatures;
     if (cachedPlano != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!context.mounted) return;
@@ -208,102 +201,20 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
         data: (perfil) {
           _markFetched();
           final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
-          final readiness = PerfilReadinessView.from(
-            perfil: perfil,
-            dashboard:
-                cachedPersonal ??
-                DashboardData(
-                  totalAlunos: 0,
-                  alunosAtivos: 0,
-                  planoAtual: perfil.plano,
-                  limiteAlunos: 0,
-                  nomePersonal: perfil.nome,
-                ),
-          );
+          final readiness = PerfilReadinessView.from(perfil);
           _trackViewedOnce(profileComplete: readiness.score >= 100);
 
-          if (cachedPersonal != null) {
-            return _PerfilBody(
-              perfil: perfil,
-              dashboard: cachedPersonal,
-              uploadingPhoto: _uploadingPhoto,
-              showMfa: _mfaAvailable,
-              freshnessLabel: freshnessLabel,
-              onRefresh: _refreshHub,
-              onPickPhoto: _pickAndUploadPhoto,
-              onEditPerfil: () => _openEditPerfil(perfil),
-              onLogout: _logout,
-              onOpenLandingEditor:
-                  () => openLandingEditorOrUpgrade(context, ref),
-            );
-          }
-
-          final dashboardAsync = ref.watch(dashboardProvider);
-          return dashboardAsync.when(
-            loading:
-                () => _PerfilBody(
-                  perfil: perfil,
-                  dashboard: DashboardData(
-                    totalAlunos: 0,
-                    alunosAtivos: 0,
-                    planoAtual: perfil.plano,
-                    limiteAlunos: 0,
-                    nomePersonal: perfil.nome,
-                    logoUrl: perfil.logoUrl,
-                    corPrimaria: perfil.corPrimaria,
-                    corSecundaria: perfil.corSecundaria,
-                    descricaoProfissional: perfil.descricaoProfissional,
-                    instagram: perfil.instagram,
-                  ),
-                  uploadingPhoto: _uploadingPhoto,
-                  showMfa: _mfaAvailable,
-                  freshnessLabel: freshnessLabel,
-                  onRefresh: _refreshHub,
-                  onPickPhoto: _pickAndUploadPhoto,
-                  onEditPerfil: () => _openEditPerfil(perfil),
-                  onLogout: _logout,
-                  onOpenLandingEditor:
-                      () => openLandingEditorOrUpgrade(context, ref),
-                ),
-            error:
-                (_, __) => _PerfilBody(
-                  perfil: perfil,
-                  dashboard: DashboardData(
-                    totalAlunos: 0,
-                    alunosAtivos: 0,
-                    planoAtual: perfil.plano,
-                    limiteAlunos: 0,
-                    nomePersonal: perfil.nome,
-                    logoUrl: perfil.logoUrl,
-                    corPrimaria: perfil.corPrimaria,
-                    corSecundaria: perfil.corSecundaria,
-                    descricaoProfissional: perfil.descricaoProfissional,
-                    instagram: perfil.instagram,
-                  ),
-                  uploadingPhoto: _uploadingPhoto,
-                  showMfa: _mfaAvailable,
-                  freshnessLabel: freshnessLabel,
-                  onRefresh: _refreshHub,
-                  onPickPhoto: _pickAndUploadPhoto,
-                  onEditPerfil: () => _openEditPerfil(perfil),
-                  onLogout: _logout,
-                  onOpenLandingEditor:
-                      () => openLandingEditorOrUpgrade(context, ref),
-                ),
-            data:
-                (dashboard) => _PerfilBody(
-                  perfil: perfil,
-                  dashboard: dashboard,
-                  uploadingPhoto: _uploadingPhoto,
-                  showMfa: _mfaAvailable,
-                  freshnessLabel: freshnessLabel,
-                  onRefresh: _refreshHub,
-                  onPickPhoto: _pickAndUploadPhoto,
-                  onEditPerfil: () => _openEditPerfil(perfil),
-                  onLogout: _logout,
-                  onOpenLandingEditor:
-                      () => openLandingEditorOrUpgrade(context, ref),
-                ),
+          return _PerfilBody(
+            perfil: perfil,
+            uploadingPhoto: _uploadingPhoto,
+            showMfa: _mfaAvailable,
+            freshnessLabel: freshnessLabel,
+            onRefresh: _refreshHub,
+            onPickPhoto: _pickAndUploadPhoto,
+            onEditPerfil: () => _openEditPerfil(perfil),
+            onLogout: _logout,
+            onOpenLandingEditor:
+                () => openLandingEditorOrUpgrade(context, ref),
           );
         },
       ),

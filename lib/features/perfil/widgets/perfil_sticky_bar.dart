@@ -27,7 +27,7 @@ class PerfilStickyBar extends StatelessWidget {
     unawaited(
       AnalyticsService.instance.track(
         ProductEvents.perfilStickyTapped,
-        props: {'cta': 'completar'},
+        props: {'cta': 'completar', 'profileComplete': false},
       ),
     );
   }

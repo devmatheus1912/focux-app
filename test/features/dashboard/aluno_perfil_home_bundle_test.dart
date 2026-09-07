@@ -16,8 +16,10 @@ void main() {
       'medidas': [
         {'id': 3, 'data': '2026-08-10', 'peso': 62.5, 'cintura': 70.0},
       ],
+      'completionPercent': 71,
     });
 
+    expect(bundle.completionPercent, 71);
     expect(bundle.aluno.id, 7);
     expect(bundle.aluno.nome, 'Ana Souza');
     expect(bundle.aluno.peso, 62.5);
@@ -38,5 +40,6 @@ void main() {
 
     expect(bundle.aluno.id, 7);
     expect(bundle.medidas, isEmpty);
+    expect(bundle.completionPercent, isNull);
   });
 }
