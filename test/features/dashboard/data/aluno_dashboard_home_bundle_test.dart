@@ -65,6 +65,8 @@ Map<String, dynamic> _payload() => {
   ],
   'npsDeveResponder': true,
   'streakAtual': 12,
+  'volumeSemanaKg': 240.0,
+  'volumeMesKg': 1800.0,
   'recovery': {
     'dataReferencia': '2026-08-16',
     'steps': 8200,
@@ -100,6 +102,8 @@ void main() {
       expect(bundle.recovery?.recoveryScore, 78);
       expect(bundle.recovery?.recoveryLabel, 'Pronto');
       expect(bundle.streakAtual, 12);
+      expect(bundle.volumeSemanaKg, 240);
+      expect(bundle.volumeMesKg, 1800);
     });
 
     test('tolerates missing optional blocks', () {
@@ -114,7 +118,9 @@ void main() {
         ..remove('upsellPendentes')
         ..remove('npsDeveResponder')
         ..remove('recovery')
-        ..remove('streakAtual');
+        ..remove('streakAtual')
+        ..remove('volumeSemanaKg')
+        ..remove('volumeMesKg');
 
       final bundle = AlunoDashboardHomeBundle.fromJson(json);
 
@@ -129,6 +135,8 @@ void main() {
       expect(bundle.npsDeveResponder, isFalse);
       expect(bundle.recovery, isNull);
       expect(bundle.streakAtual, 0);
+      expect(bundle.volumeSemanaKg, 0);
+      expect(bundle.volumeMesKg, 0);
     });
   });
 
