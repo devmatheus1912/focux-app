@@ -48,5 +48,9 @@ void main() {
     expect(dunningRateLabel(70), '70.0%');
     expect(dunningFalhasPreview([1, 2, 3, 4]), [1, 2, 3]);
     expect(dunningComoCalculamos, contains('Recuperadas'));
+    expect(dunningHasAluno(8), isTrue);
+    expect(dunningHasAluno(null), isFalse);
+    expect(dunningIsAssinaturaFocux('FOCUX_SUBSCRIPTION'), isTrue);
+    expect(dunningIsAssinaturaFocux('ALUNO_MENSALIDADE'), isFalse);
   });
 }

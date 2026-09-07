@@ -26,5 +26,11 @@ void main() {
     expect(screen, isNot(contains('Pódio do Mês')));
     expect(screen, contains('Buscar personal'));
     expect(screen, contains('onTapOutside'));
+    expect(screen, contains('FxStripCard'));
+    expect(screen, contains('emphasize: true'));
+    expect(screen, contains('Crescer base'));
+    expect(screen, contains('Assinatura'));
+    expect(screen, contains('rankingDescontoLabel'));
+    expect(screen, contains('FxInputDeco.build'));
   });
 }

@@ -12,7 +12,7 @@ Future<void> showDunningCatalogSheet(
   BuildContext context, {
   required DunningHomeBundle firstPage,
   required DunningRepository repo,
-  required Future<bool> Function(DunningFalha falha) onMarcar,
+  required void Function(DunningFalha falha) onAbrir,
 }) {
   return showFxHomeSheet<void>(
     context,
@@ -20,7 +20,7 @@ Future<void> showDunningCatalogSheet(
         (ctx) => _DunningCatalogSheet(
           firstPage: firstPage,
           repo: repo,
-          onMarcar: onMarcar,
+          onAbrir: onAbrir,
         ),
   );
 }
@@ -29,12 +29,12 @@ class _DunningCatalogSheet extends StatefulWidget {
   const _DunningCatalogSheet({
     required this.firstPage,
     required this.repo,
-    required this.onMarcar,
+    required this.onAbrir,
   });
 
   final DunningHomeBundle firstPage;
   final DunningRepository repo;
-  final Future<bool> Function(DunningFalha falha) onMarcar;
+  final void Function(DunningFalha falha) onAbrir;
 
   @override
   State<_DunningCatalogSheet> createState() => _DunningCatalogSheetState();
@@ -45,7 +45,6 @@ class _DunningCatalogSheetState extends State<_DunningCatalogSheet> {
   late int _page = widget.firstPage.page;
   late bool _hasMore = widget.firstPage.hasMore;
   var _loadingMore = false;
-  int? _marcandoId;
 
   Future<void> _carregarMais() async {
     if (_loadingMore || !_hasMore) return;
@@ -65,17 +64,6 @@ class _DunningCatalogSheetState extends State<_DunningCatalogSheet> {
       });
     } catch (_) {
       if (mounted) setState(() => _loadingMore = false);
-    }
-  }
-
-  Future<void> _marcar(DunningFalha falha) async {
-    setState(() => _marcandoId = falha.id);
-    try {
-      final ok = await widget.onMarcar(falha);
-      if (!mounted) return;
-      if (ok) Navigator.of(context).pop();
-    } finally {
-      if (mounted) setState(() => _marcandoId = null);
     }
   }
 
@@ -112,16 +100,17 @@ class _DunningCatalogSheetState extends State<_DunningCatalogSheet> {
                   ),
                 ),
                 trailing: Text(
-                  _marcandoId == falha.id
-                      ? '…'
-                      : dunningMoneyLabel(falha.valor),
+                  dunningMoneyLabel(falha.valor),
                   style: FocuxHubTypography.bodyMuted(
                     color: EagleTokens.bad,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
                 accent: EagleTokens.bad,
-                onTap: _marcandoId == falha.id ? null : () => _marcar(falha),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  widget.onAbrir(falha);
+                },
               ),
             if (_hasMore)
               FxSatelliteListTile(

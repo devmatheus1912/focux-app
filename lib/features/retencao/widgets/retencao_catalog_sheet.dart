@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_empty_state.dart';
@@ -14,17 +13,22 @@ import '../utils/retencao_display.dart';
 Future<void> showRetencaoCatalogSheet(
   BuildContext context, {
   required RetencaoRepository repo,
+  required void Function(RetencaoAlunoScore score) onAbrir,
 }) {
   return showFxHomeSheet<void>(
     context,
-    builder: (ctx) => _RetencaoCatalogSheet(repo: repo),
+    builder: (ctx) => _RetencaoCatalogSheet(repo: repo, onAbrir: onAbrir),
   );
 }
 
 class _RetencaoCatalogSheet extends StatefulWidget {
-  const _RetencaoCatalogSheet({required this.repo});
+  const _RetencaoCatalogSheet({
+    required this.repo,
+    required this.onAbrir,
+  });
 
   final RetencaoRepository repo;
+  final void Function(RetencaoAlunoScore score) onAbrir;
 
   @override
   State<_RetencaoCatalogSheet> createState() => _RetencaoCatalogSheetState();
@@ -145,7 +149,7 @@ class _RetencaoCatalogSheetState extends State<_RetencaoCatalogSheet> {
                 ),
                 onTap: () {
                   Navigator.of(context).pop();
-                  context.push('/alunos/${score.alunoId}');
+                  widget.onAbrir(score);
                 },
               ),
             if (_hasNext)

@@ -56,3 +56,8 @@ List<T> dunningFalhasPreview<T>(List<T> items) =>
 
 const dunningComoCalculamos =
     'Recuperadas dividido pelo total de falhas no recorte. É a mesma taxa da Receita recorrente.';
+
+bool dunningHasAluno(int? alunoId) => alunoId != null && alunoId > 0;
+
+bool dunningIsAssinaturaFocux(String contexto) =>
+    contexto.trim().toUpperCase() == 'FOCUX_SUBSCRIPTION';

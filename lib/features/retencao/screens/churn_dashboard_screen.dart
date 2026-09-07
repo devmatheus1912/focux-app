@@ -17,12 +17,14 @@ import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_strip_card.dart';
+import '../../../core/widgets/fx_toggle_chip.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../data/retencao_repository.dart';
 import '../utils/retencao_display.dart';
+import '../widgets/retencao_acoes_sheet.dart';
 import '../widgets/retencao_catalog_sheet.dart';
 
 final retencaoRepositoryProvider = Provider(
@@ -41,6 +43,7 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
   RetencaoHome? _home;
   bool _loading = true;
   String? _error;
+  var _filtro = '';
 
   @override
   void initState() {
@@ -67,6 +70,37 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
         _error = friendlyError(e);
       });
     }
+  }
+
+  void _abrirAluno(RetencaoAlunoScore score) {
+    AnalyticsService.instance.track(
+      ProductEvents.alertaRiscoOpened,
+      props: {'alunoId': score.alunoId},
+    );
+    context.push('/alunos/${score.alunoId}');
+  }
+
+  void _abrirChat(RetencaoAlunoScore score) {
+    AnalyticsService.instance.track(
+      ProductEvents.chatThreadOpened,
+      props: {'alunoId': score.alunoId},
+    );
+    context.push('/alunos/${score.alunoId}/chat', extra: score.alunoNome);
+  }
+
+  void _abrirCobranca(RetencaoAlunoScore score) {
+    AnalyticsService.instance.track(ProductEvents.financeiroViewed);
+    context.push('/financeiro?alunoId=${score.alunoId}');
+  }
+
+  void _abrirAcoes(RetencaoAlunoScore score) {
+    showRetencaoAcoesSheet(
+      context,
+      score: score,
+      onAluno: () => _abrirAluno(score),
+      onChat: () => _abrirChat(score),
+      onCobrar: () => _abrirCobranca(score),
+    );
   }
 
   @override
@@ -129,10 +163,8 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
                               const SizedBox(height: 48),
                               FxEmptyState(
                                 icon: 'activity',
-                                title: 'Scores em breve',
-                                subtitle:
-                                    'A rotina calcula os scores aos domingos. '
-                                    'Cadastre alunos e aguarde a primeira leitura.',
+                                title: retencaoEmptyTitle,
+                                subtitle: retencaoEmptySubtitle,
                                 action: FxEmptyAction(
                                   label: 'Ver alunos',
                                   onTap: () {
@@ -157,7 +189,13 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
                                 40,
                               ),
                               children: [
-                                _RetencaoFocusCard(home: home, isDark: isDark),
+                                _RetencaoFocusCard(
+                                  home: home,
+                                  isDark: isDark,
+                                  onAluno: _abrirAluno,
+                                  onChat: _abrirChat,
+                                  onCobrar: _abrirCobranca,
+                                ),
                                 const SizedBox(height: TokensStrip.s4),
                                 DashboardSectionHeader(
                                   title: 'Quem olhar agora',
@@ -173,13 +211,53 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
                                               repo: ref.read(
                                                 retencaoRepositoryProvider,
                                               ),
+                                              onAbrir: _abrirAcoes,
                                             );
                                           }
                                           : null,
                                 ),
                                 const SizedBox(height: TokensStrip.s2),
-                                for (final score in home.top3)
-                                  _RetencaoTile(score: score),
+                                Wrap(
+                                  spacing: TokensStrip.s2,
+                                  runSpacing: TokensStrip.s2,
+                                  children: [
+                                    FxToggleChip(
+                                      label: 'Todos',
+                                      selected: _filtro.isEmpty,
+                                      isDark: isDark,
+                                      onTap: () => setState(() => _filtro = ''),
+                                    ),
+                                    FxToggleChip(
+                                      label: 'Risco alto',
+                                      selected: _filtro == retencaoFiltroAlto,
+                                      isDark: isDark,
+                                      onTap:
+                                          () => setState(
+                                            () => _filtro = retencaoFiltroAlto,
+                                          ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: TokensStrip.s2),
+                                if (retencaoItemsForFiltro(
+                                  home.top3,
+                                  _filtro,
+                                ).isEmpty)
+                                  const FxEmptyState(
+                                    icon: 'activity',
+                                    title: 'Ninguém neste recorte',
+                                    subtitle:
+                                        'Os scores altos desta leitura aparecem aqui.',
+                                  )
+                                else
+                                  for (final score in retencaoItemsForFiltro(
+                                    home.top3,
+                                    _filtro,
+                                  ))
+                                    _RetencaoTile(
+                                      score: score,
+                                      onTap: () => _abrirAcoes(score),
+                                    ),
                               ],
                             ),
                           ),
@@ -190,10 +268,19 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
 }
 
 class _RetencaoFocusCard extends StatelessWidget {
-  const _RetencaoFocusCard({required this.home, required this.isDark});
+  const _RetencaoFocusCard({
+    required this.home,
+    required this.isDark,
+    required this.onAluno,
+    required this.onChat,
+    required this.onCobrar,
+  });
 
   final RetencaoHome home;
   final bool isDark;
+  final void Function(RetencaoAlunoScore score) onAluno;
+  final void Function(RetencaoAlunoScore score) onChat;
+  final void Function(RetencaoAlunoScore score) onCobrar;
 
   @override
   Widget build(BuildContext context) {
@@ -235,30 +322,40 @@ class _RetencaoFocusCard extends StatelessWidget {
             style: FocuxHubTypography.bodyMuted(color: chrome.mute),
           ),
           const SizedBox(height: TokensStrip.s3),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: DashboardHomeActionChip(
-              label:
-                  firstAlto == null ? 'Ver alunos' : 'Abrir o mais crítico',
-              accent:
-                  alto > 0
-                      ? EagleTokens.bad
-                      : Theme.of(context).colorScheme.primary,
-              isDark: isDark,
-              onPressed: () {
-                final alvo = firstAlto;
-                if (alvo == null) {
-                  AnalyticsService.instance.track(ProductEvents.alunosViewed);
-                  goPersonalShellTab(context, '/alunos');
-                  return;
-                }
-                AnalyticsService.instance.track(
-                  ProductEvents.alertaRiscoOpened,
-                  props: {'alunoId': alvo.alunoId},
-                );
-                context.push('/alunos/${alvo.alunoId}');
-              },
-            ),
+          Wrap(
+            spacing: TokensStrip.s2,
+            runSpacing: TokensStrip.s2,
+            children: [
+              if (firstAlto != null) ...[
+                DashboardHomeActionChip(
+                  label: 'Escrever',
+                  accent: EagleTokens.bad,
+                  isDark: isDark,
+                  onPressed: () => onChat(firstAlto),
+                ),
+                DashboardHomeActionChip(
+                  label: 'Cobrar',
+                  accent: EagleTokens.moneyGreen,
+                  isDark: isDark,
+                  onPressed: () => onCobrar(firstAlto),
+                ),
+                DashboardHomeActionChip(
+                  label: 'Abrir 360',
+                  accent: Theme.of(context).colorScheme.primary,
+                  isDark: isDark,
+                  onPressed: () => onAluno(firstAlto),
+                ),
+              ] else
+                DashboardHomeActionChip(
+                  label: 'Ver alunos',
+                  accent: Theme.of(context).colorScheme.primary,
+                  isDark: isDark,
+                  onPressed: () {
+                    AnalyticsService.instance.track(ProductEvents.alunosViewed);
+                    goPersonalShellTab(context, '/alunos');
+                  },
+                ),
+            ],
           ),
         ],
       ),
@@ -267,20 +364,19 @@ class _RetencaoFocusCard extends StatelessWidget {
 }
 
 class _RetencaoTile extends StatelessWidget {
-  const _RetencaoTile({required this.score});
+  const _RetencaoTile({required this.score, required this.onTap});
 
   final RetencaoAlunoScore score;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final alto = retencaoRiscoAlto(score.riscoChurn);
     return FxSatelliteListTile(
       title: score.alunoNome,
-      subtitle: Text(
-        'Score ${score.scoreAtual} · ${retencaoRiscoLabel(score.riscoChurn)}',
-      ),
+      subtitle: Text(retencaoPorque(score)),
       accent: alto ? EagleTokens.bad : null,
-      onTap: () => context.push('/alunos/${score.alunoId}'),
+      onTap: onTap,
     );
   }
 }

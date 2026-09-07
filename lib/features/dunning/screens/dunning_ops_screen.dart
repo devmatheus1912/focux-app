@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
-import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
@@ -18,16 +18,16 @@ import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
-import '../../../core/widgets/fx_strip_card.dart';
 import '../../../core/widgets/operational_metric_tile.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../auth/providers/auth_provider.dart';
-import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../subscription/models/subscription_plan.dart';
 import '../data/dunning_repository.dart';
 import '../utils/dunning_ops_display.dart';
+import '../widgets/dunning_acoes_sheet.dart';
 import '../widgets/dunning_catalog_sheet.dart';
+import '../widgets/dunning_focus_card.dart';
 
 final _repoProvider = Provider(
   (ref) => DunningRepository(ref.read(apiClientProvider)),
@@ -97,7 +97,7 @@ class _DunningOpsScreenState extends ConsumerState<DunningOpsScreen> {
         hasMore: _hasMore,
       ),
       repo: ref.read(_repoProvider),
-      onMarcar: _marcarRecuperado,
+      onAbrir: _abrirAcoes,
     );
   }
 
@@ -122,6 +122,44 @@ class _DunningOpsScreenState extends ConsumerState<DunningOpsScreen> {
   void _abrirFinanceiro() {
     AnalyticsService.instance.track(ProductEvents.financeiroViewed);
     goPersonalShellTab(context, '/financeiro');
+  }
+
+  void _abrirAssinatura() {
+    goPersonalShellTab(context, '/assinatura');
+  }
+
+  void _abrirChat(DunningFalha falha) {
+    final id = falha.alunoId;
+    if (!dunningHasAluno(id)) return;
+    AnalyticsService.instance.track(
+      ProductEvents.chatThreadOpened,
+      props: {'alunoId': id},
+    );
+    context.push('/alunos/$id/chat', extra: falha.alunoNome);
+  }
+
+  void _abrirCobranca(DunningFalha falha) {
+    final id = falha.alunoId;
+    if (!dunningHasAluno(id)) return;
+    AnalyticsService.instance.track(ProductEvents.financeiroViewed);
+    context.push('/financeiro?alunoId=$id');
+  }
+
+  void _abrirAcoes(DunningFalha falha) {
+    showDunningAcoesSheet(
+      context,
+      falha: falha,
+      onChat: () => _abrirChat(falha),
+      onCobrar: () => _abrirCobranca(falha),
+      onMarcar: () {
+        _marcarRecuperado(falha);
+      },
+      onAssinatura:
+          dunningIsAssinaturaFocux(falha.contexto) &&
+                  !dunningHasAluno(falha.alunoId)
+              ? _abrirAssinatura
+              : null,
+    );
   }
 
   Future<bool> _marcarRecuperado(DunningFalha falha) async {
@@ -194,7 +232,7 @@ class _DunningOpsScreenState extends ConsumerState<DunningOpsScreen> {
                       FxHelpTip('Como calculamos', dunningComoCalculamos),
                       FxHelpTip(
                         'Em aberto',
-                        'Toque na falha para marcar recuperada quando o pagamento entrar.',
+                        'Toque na falha para escrever, cobrar ou marcar recuperada.',
                       ),
                       FxHelpTip(
                         'Assinatura Focux',
@@ -246,14 +284,27 @@ class _DunningOpsScreenState extends ConsumerState<DunningOpsScreen> {
                             ScrollViewKeyboardDismissBehavior.onDrag,
                         padding: const EdgeInsets.all(TokensStrip.s4),
                         children: [
-                          _DunningFocusCard(
+                          DunningFocusCard(
                             snap: snap,
                             firstFalha: firstFalha,
                             isDark: isDark,
+                            onChat: firstFalha == null
+                                ? null
+                                : () => _abrirChat(firstFalha),
+                            onCobrar: firstFalha == null
+                                ? null
+                                : () => _abrirCobranca(firstFalha),
                             onMarcar: firstFalha == null
                                 ? _abrirFinanceiro
                                 : () => _marcarRecuperado(firstFalha),
                             onFinanceiro: _abrirFinanceiro,
+                            onAssinatura: firstFalha != null &&
+                                    dunningIsAssinaturaFocux(
+                                      firstFalha.contexto,
+                                    ) &&
+                                    !dunningHasAluno(firstFalha.alunoId)
+                                ? _abrirAssinatura
+                                : null,
                           ),
                           const SizedBox(height: TokensStrip.s4),
                           OperationalMetricTile(
@@ -294,7 +345,7 @@ class _DunningOpsScreenState extends ConsumerState<DunningOpsScreen> {
                           const DashboardSectionHeader(title: 'Em aberto'),
                           const SizedBox(height: TokensStrip.s2),
                           Text(
-                            'Toque para marcar como recuperada.',
+                            'Toque para escrever, cobrar ou marcar recuperada.',
                             style: FocuxHubTypography.bodyMuted(
                               color: fxScreenMute(context),
                               fontWeight: FontWeight.w600,
@@ -332,7 +383,7 @@ class _DunningOpsScreenState extends ConsumerState<DunningOpsScreen> {
                                 accent: EagleTokens.bad,
                                 onTap: _marcandoId == falha.id
                                     ? null
-                                    : () => _marcarRecuperado(falha),
+                                    : () => _abrirAcoes(falha),
                               ),
                             if (_falhas.length > 3 || _hasMore)
                               FxSatelliteListTile(
@@ -345,67 +396,6 @@ class _DunningOpsScreenState extends ConsumerState<DunningOpsScreen> {
                     ),
               ),
         ),
-      ),
-    );
-  }
-}
-
-class _DunningFocusCard extends StatelessWidget {
-  const _DunningFocusCard({
-    required this.snap,
-    required this.firstFalha,
-    required this.isDark,
-    required this.onMarcar,
-    required this.onFinanceiro,
-  });
-
-  final DunningSnapshot snap;
-  final DunningFalha? firstFalha;
-  final bool isDark;
-  final VoidCallback onMarcar;
-  final VoidCallback onFinanceiro;
-
-  @override
-  Widget build(BuildContext context) {
-    final chrome = ShellChrome.forDark(isDark);
-    final abertas = snap.abertas;
-    return FxStripCard(
-      emphasize: true,
-      semanticsLabel: '$abertas falhas em aberto',
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('Em aberto', style: FocuxHubTypography.chip(chrome.mute)),
-          const SizedBox(height: 6),
-          Text(
-            '$abertas',
-            style: FocuxHubTypography.kpi(
-              color: chrome.ink,
-              fontSize: FocuxHubTypography.metricLg,
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            abertas == 0
-                ? 'Nenhuma falha em aberto'
-                : 'Taxa ${dunningRateLabel(snap.recoveryRate)}',
-            style: FocuxHubTypography.body(
-              color: chrome.ink,
-            ).copyWith(fontWeight: FontWeight.w700),
-          ),
-          const SizedBox(height: TokensStrip.s3),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: DashboardHomeActionChip(
-              label: firstFalha == null ? 'Ver financeiro' : 'Marcar primeira',
-              accent: firstFalha == null
-                  ? Theme.of(context).colorScheme.primary
-                  : EagleTokens.bad,
-              isDark: isDark,
-              onPressed: firstFalha == null ? onFinanceiro : onMarcar,
-            ),
-          ),
-        ],
       ),
     );
   }
