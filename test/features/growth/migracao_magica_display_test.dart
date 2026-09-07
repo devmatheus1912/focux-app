@@ -7,6 +7,6 @@ void main() {
     expect(migracaoIniciarConfirmMessage(), contains('Nada é salvo'));
     expect(migracaoSalvarLabel(3), 'Confirmar e salvar 3 alunos');
     expect(migracaoSalvarConfirmTitle(3), contains('3 alunos'));
-    expect(migracaoDiscardConfirmLabel(), 'Sair sem salvar');
+    expect(migracaoDiscardConfirmLabel(), 'Sair');
   });
 }

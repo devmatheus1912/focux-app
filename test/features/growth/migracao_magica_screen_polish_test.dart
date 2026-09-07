@@ -15,6 +15,9 @@ void main() {
     expect(screen, contains('FxLiquidPrimaryButton'));
     expect(screen, contains('FxToggleChip'));
     expect(screen, contains('migracaoEtapaLabel'));
+    expect(screen, contains('FxWizardStickyBar'));
+    expect(screen, contains('FxFormPopGuard'));
+    expect(screen, contains('MigracaoMagicaDraftCache'));
     expect(screen, isNot(contains('FxSettingsTile')));
     expect(screen, isNot(contains('OutlinedButton')));
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(16));

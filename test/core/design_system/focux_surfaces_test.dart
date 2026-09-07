@@ -63,6 +63,29 @@ void main() {
     final biblioteca = FocuxSurfaces.resolve('/exercicios/biblioteca-wizard');
     expect(biblioteca!.spec.type, FocuxSurfaceType.s9);
     expect(FocuxSurfaces.resolveParent(biblioteca), '/exercicios');
+
+    final ativacao = FocuxSurfaces.resolve('/aluno/ativacao');
+    expect(ativacao!.spec.type, FocuxSurfaceType.s9);
+    expect(FocuxSurfaces.resolveParent(ativacao), '/dashboard/aluno');
+
+    final migracao = FocuxSurfaces.resolve('/migracao-magica');
+    expect(migracao!.spec.type, FocuxSurfaceType.s9);
+    expect(FocuxSurfaces.resolveParent(migracao), '/perfil');
+    expect(
+      FocuxSurfaces.resolve('/migracao-focux')!.spec.redirectTo,
+      '/migracao-magica',
+    );
+    expect(
+      FocuxSurfaces.resolve('/growth/migracao')!.spec.redirectTo,
+      '/migracao-magica',
+    );
+  });
+
+  test('setup identidade é S5, não wizard', () {
+    final identidade = FocuxSurfaces.resolve('/setup/identidade');
+    expect(identidade!.spec.type, FocuxSurfaceType.s5);
+    expect(identidade.spec.hasInput, isTrue);
+    expect(FocuxSurfaces.resolveParent(identidade), '/perfil');
   });
 
   test('checkin executar e presencial são S8', () {

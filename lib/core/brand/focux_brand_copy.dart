@@ -65,10 +65,6 @@ abstract final class FocuxBrandCopy {
 
   static const onboardingPersonaAluno = 'Aluno';
 
-  static const alunoActivationHeroSubtitle =
-      'Complete estes passos e seu personal acompanha cada evolução com você — '
-      'desde o primeiro treino.';
-
   static const alunoActivationReadyTitle = 'Tudo pronto para evoluir';
 
   static const alunoActivationReadyBody =

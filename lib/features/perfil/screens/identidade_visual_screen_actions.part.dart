@@ -109,6 +109,7 @@ extension on _IdentidadeVisualScreenState {
       }
       ref.invalidate(perfilProvider);
       if (mounted) {
+        _snapshotBaseline();
         FeedbackHelper.showInfo(context, successMessage);
         if (widget.isSetup) context.pop(true);
       }

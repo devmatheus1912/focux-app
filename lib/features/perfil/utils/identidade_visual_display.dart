@@ -33,6 +33,13 @@ String identidadeLogoConfirmTitle() => 'Trocar o logo?';
 String identidadeLogoConfirmMessage() =>
     'A imagem nova substitui o logo neste rascunho. Salve depois para publicar.';
 
+String identidadeDiscardTitle() => 'Sair sem salvar?';
+
+String identidadeDiscardMessage() =>
+    'As alterações desta tela ainda não foram publicadas.';
+
+String identidadeDiscardConfirm() => 'Sair';
+
 String identidadeHelpTitle() => 'Identidade visual';
 
 String identidadeHelpSubtitle() =>

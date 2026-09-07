@@ -579,49 +579,6 @@ class _PanelTitle extends StatelessWidget {
   }
 }
 
-class _SaveBar extends StatelessWidget {
-  const _SaveBar({
-    required this.salvando,
-    required this.label,
-    required this.onPressed,
-  });
-
-  final bool salvando;
-  final String label;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    final chrome = ShellChrome.of(context);
-
-    return Container(
-      padding: const EdgeInsets.fromLTRB(18, 10, 18, 12),
-      decoration: BoxDecoration(
-        color: chrome.sheetFill.withValues(alpha: 0.94),
-        border: Border(top: BorderSide(color: chrome.line)),
-        boxShadow: [
-          BoxShadow(
-            color: Theme.of(
-              context,
-            ).colorScheme.primary.withValues(alpha: 0.08),
-            blurRadius: 22,
-            offset: const Offset(0, -8),
-          ),
-        ],
-      ),
-      child: SafeArea(
-        top: false,
-        child: FxLiquidPrimaryButton(
-          label: label,
-          loading: salvando,
-          loadingLabel: identidadeSalvandoLabel(),
-          onPressed: salvando ? null : onPressed,
-        ),
-      ),
-    );
-  }
-}
-
 class _PaywallCard extends StatelessWidget {
   const _PaywallCard({required this.onTap, required this.chrome});
 
