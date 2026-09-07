@@ -24,6 +24,9 @@ void main() {
     expect(screen, contains('FxContentWidthLimiter'));
     expect(screen, contains('FxLiquidPrimaryButton'));
     expect(screen, contains('bottomNavigationBar'));
+    expect(screen, contains('FxFormStickyBar'));
+    expect(screen, contains('FxFormPopGuard'));
+    expect(screen, contains('ScrollViewKeyboardDismissBehavior.onDrag'));
     expect(screen, contains("child: const Text('Cancelar')"));
     expect(screen, isNot(contains('DashboardHomeActionChip')));
     expect(screen, contains('enabled: _canSubmit && !_loading'));

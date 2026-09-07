@@ -126,6 +126,15 @@ class FcmService {
           route = '/alunos/$alunoId';
         }
       }
+      final execucaoId = data['execucaoId']?.toString();
+      if (execucaoId != null &&
+          execucaoId.isNotEmpty &&
+          (route == null ||
+              route.isEmpty ||
+              route == '/dashboard/aluno' ||
+              route == '/checkin/historico')) {
+        route = '/checkin/historico/$execucaoId';
+      }
       if (route == null || route.isEmpty) return;
       // Apenas rotas internas: rejeita absolutas (proteção contra phishing
       // através de notificações com URL externa).

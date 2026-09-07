@@ -80,6 +80,8 @@ void main() {
   test('copy de agendar e concluir fica fora da UI', () {
     expect(agendaNovoTileLabel(), 'Agendar atendimento');
     expect(agendaNovoConfirmTitle(), 'Agendar este horário?');
+    expect(agendaNovoDiscardTitle(), 'Descartar agendamento?');
+    expect(agendaNovoDiscardMessage(), 'O que você preencheu não será salvo.');
     expect(
       agendaNovoConfirmMessage(
         alunoNome: 'Bruno',

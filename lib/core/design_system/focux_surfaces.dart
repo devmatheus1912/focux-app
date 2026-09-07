@@ -49,6 +49,7 @@ abstract final class FocuxSurfaces {
     'lib/core/design_system/focux_surfaces.dart',
     'lib/core/design_system/focux_surfaces_catalog.dart',
     'lib/core/widgets/fx_keyboard_dismiss_scope.dart',
+    'lib/core/widgets/fx_form_chrome.dart',
     'lib/core/widgets/fx_shell_scaffold.dart',
     'lib/core/router/safe_navigation.dart',
   ];
@@ -57,6 +58,7 @@ abstract final class FocuxSurfaces {
     'test/core/design_system/surface_taxonomy_contract_test.dart',
     'test/core/design_system/focux_surfaces_test.dart',
     'test/core/widgets/fx_keyboard_dismiss_scope_test.dart',
+    'test/core/widgets/fx_form_chrome_test.dart',
   ];
 
   static Map<String, FocuxSurfaceSpec> get catalog => focuxSurfaceCatalog;

@@ -56,6 +56,10 @@ class AlunoInsetFormField extends StatelessWidget {
             inputFormatters: inputFormatters,
             validator: validator,
             maxLines: maxLines,
+            textInputAction:
+                maxLines > 1 ? TextInputAction.newline : TextInputAction.next,
+            onTapOutside:
+                (_) => FocusManager.instance.primaryFocus?.unfocus(),
             style: FxSettingsLayout.rowLabel(color: fxScreenInk(context)),
             decoration: FxInputDeco.insetGrouped(
               context,

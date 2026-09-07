@@ -18,6 +18,8 @@ import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_form_chrome.dart';
+import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
@@ -81,6 +83,7 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
       _objetivoLivre;
 
   Future<void> _cancel() async {
+    FxKeyboardDismissScope.dismiss();
     if (_dirty) {
       final ok = await showFxConfirmSheet(
         context,
@@ -275,7 +278,10 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
 
     return fxScreenA11yScope(
       label: 'Novo aluno',
-      child: FxShellScaffold(
+      child: FxFormPopGuard(
+        dirty: _dirty,
+        onCancel: _cancel,
+        child: FxShellScaffold(
         useMesh: true,
         appBar: FxShellAppBar(
           title: 'Novo aluno',
@@ -300,15 +306,7 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
             ),
           ],
         ),
-        bottomNavigationBar: SafeArea(
-          top: false,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(
-              FxSettingsLayout.pageInset,
-              TokensStrip.s2,
-              FxSettingsLayout.pageInset,
-              TokensStrip.s3,
-            ),
+        bottomNavigationBar: FxFormStickyBar(
             child: Semantics(
               button: true,
               enabled: _canSubmit && !_loading,
@@ -325,7 +323,6 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                 onPressed: _canSubmit && !_loading ? _submit : null,
               ),
             ),
-          ),
         ),
         body: SafeArea(
           bottom: false,
@@ -335,6 +332,8 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
               position: _entrySlide,
               child: FxContentWidthLimiter(
                 child: SingleChildScrollView(
+                  keyboardDismissBehavior:
+                      ScrollViewKeyboardDismissBehavior.onDrag,
                   padding: const EdgeInsets.fromLTRB(
                     FxSettingsLayout.pageInset,
                     6,
@@ -560,6 +559,7 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
             ),
           ),
         ),
+      ),
       ),
     );
   }

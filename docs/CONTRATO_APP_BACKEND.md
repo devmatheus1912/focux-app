@@ -94,7 +94,8 @@ do personal; o token anterior deixa de validar.
 `GET /api/checkin/historico` pagina no banco (keyset `iniciadoEm,id`) e aceita
 `q` (nome do treino) e `status` opcionais. `GET /api/checkin/{id}` devolve a
 execução do aluno autenticado. O campo `historico` do hub aluno é a primeira
-página (20) do mesmo critério, não o dump. `GET /api/feedback-videos`,
+página (60) do mesmo critério, não o dump. Notificação de evolução do aluno
+abre `/checkin/historico/{id}` quando o payload traz `execucaoId`. `GET /api/feedback-videos`,
 `/aluno/{id}` e `/me` usam offset `PaginaResponse` no banco, com `q` no
 comentário. `GET /api/leads` pagina no banco com `status` e `q` (nome,
 objetivo, origem).
