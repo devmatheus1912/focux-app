@@ -75,57 +75,15 @@ class _DashboardToolsCatalogSheetState
         children: [
           FxHomeSheetHandle(isDark: widget.isDark),
           const SizedBox(height: TokensStrip.s4),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(
-                Icons.apps_outlined,
-                size: FxSettingsLayout.iconSize,
-                color: brand,
-              ),
-              const SizedBox(width: FxSettingsLayout.iconGap),
-              Expanded(
-                child: Semantics(
-                  header: true,
-                  label:
-                      '${DashboardMicrocopy.catalogoCompleto}. '
-                      '${DashboardMicrocopy.catalogoSubtitle}',
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        DashboardMicrocopy.catalogoCompleto,
-                        style: FocuxHubTypography.sectionTitle(
-                          context,
-                          color: chrome.ink,
-                        ),
-                      ),
-                      const SizedBox(height: TokensStrip.s1),
-                      Text(
-                        DashboardMicrocopy.catalogoSubtitle,
-                        style: FocuxHubTypography.bodyMuted(
-                          color: chrome.mute,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              IconButton(
-                tooltip: 'Fechar',
-                onPressed: () => Navigator.of(context).pop(),
-                style: IconButton.styleFrom(
-                  minimumSize: const Size(
-                    FxHomeSheetChrome.touchTarget,
-                    FxHomeSheetChrome.touchTarget,
-                  ),
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  foregroundColor: chrome.mute,
-                ),
-                icon: const Icon(Icons.close_rounded, size: 22),
-              ),
-            ],
+          FxHomeSheetHeader(
+            isDark: widget.isDark,
+            title: DashboardMicrocopy.catalogoCompleto,
+            subtitle: DashboardMicrocopy.catalogoSubtitle,
+            leading: Icon(
+              Icons.apps_outlined,
+              size: FxSettingsLayout.iconSize,
+              color: brand,
+            ),
           ),
           Padding(
             padding: const EdgeInsets.only(
@@ -222,31 +180,6 @@ class _DashboardToolsCatalogSheetState
                   itemCount: groups.length,
                   itemBuilder: (context, index) {
                     final group = groups[index];
-                    final tile = DashboardToolShortcutGroup(
-                      header: group.collapsed ? null : group.title,
-                      shortcuts: group.shortcuts,
-                      homePlanoFeatures: widget.homePlanoFeatures,
-                      onShortcut: (shortcut) {
-                        Navigator.of(context).pop();
-                        openDashboardShortcut(
-                          widget.parentContext,
-                          widget.parentRef,
-                          shortcut,
-                          homeOverride: widget.homePlanoFeatures,
-                        );
-                      },
-                    );
-                    if (!group.collapsed) {
-                      return Padding(
-                        padding: EdgeInsets.only(
-                          bottom:
-                              index < groups.length - 1
-                                  ? FxSettingsLayout.groupGap
-                                  : 0,
-                        ),
-                        child: tile,
-                      );
-                    }
                     return Padding(
                       padding: EdgeInsets.only(
                         bottom:
@@ -254,31 +187,20 @@ class _DashboardToolsCatalogSheetState
                                 ? FxSettingsLayout.groupGap
                                 : 0,
                       ),
-                      child: Theme(
-                        data: Theme.of(
-                          context,
-                        ).copyWith(dividerColor: Colors.transparent),
-                        child: ExpansionTile(
-                          initiallyExpanded: _searchQuery.trim().isNotEmpty,
-                          tilePadding: EdgeInsets.zero,
-                          childrenPadding: EdgeInsets.zero,
-                          title: Text(
-                            group.title,
-                            style: FocuxHubTypography.body(
-                              color: chrome.ink,
-                            ).copyWith(fontWeight: FontWeight.w700),
-                          ),
-                          subtitle:
-                              group.subtitulo == null
-                                  ? null
-                                  : Text(
-                                    group.subtitulo!,
-                                    style: FocuxHubTypography.bodyMuted(
-                                      color: chrome.mute,
-                                    ),
-                                  ),
-                          children: [tile],
-                        ),
+                      child: DashboardToolShortcutGroup(
+                        header: group.title,
+                        caption: group.subtitulo,
+                        shortcuts: group.shortcuts,
+                        homePlanoFeatures: widget.homePlanoFeatures,
+                        onShortcut: (shortcut) {
+                          Navigator.of(context).pop();
+                          openDashboardShortcut(
+                            widget.parentContext,
+                            widget.parentRef,
+                            shortcut,
+                            homeOverride: widget.homePlanoFeatures,
+                          );
+                        },
                       ),
                     );
                   },
