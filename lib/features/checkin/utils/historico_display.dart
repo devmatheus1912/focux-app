@@ -67,3 +67,38 @@ String historicoDateLabel(String? iniciadoEm) {
     return raw;
   }
 }
+
+String historicoDetalhePath(int execucaoId) => '/checkin/historico/$execucaoId';
+
+String historicoStickyLabel(String status) =>
+    historicoConcluido(status) ? 'Treinar de novo' : 'Continuar treino';
+
+String historicoDetalheSubtitle({
+  required String status,
+  String? iniciadoEm,
+  String? freshness,
+}) {
+  final parts = <String>[
+    historicoStatusLabel(status),
+    if (historicoDateLabel(iniciadoEm).isNotEmpty)
+      historicoDateLabel(iniciadoEm),
+    if ((freshness ?? '').trim().isNotEmpty) freshness!.trim(),
+  ];
+  return parts.join(' · ');
+}
+
+int historicoExerciciosConcluidos(Iterable<bool> done) =>
+    done.where((item) => item).length;
+
+String historicoExerciciosMetric({required int done, required int total}) =>
+    '$done/$total';
+
+String historicoExercicioSubtitle({
+  required int seriesFeitas,
+  int? series,
+  required bool concluido,
+}) {
+  final seriesLabel =
+      series == null ? '$seriesFeitas séries' : '$seriesFeitas/$series séries';
+  return '$seriesLabel · ${concluido ? 'Feito' : 'Pendente'}';
+}

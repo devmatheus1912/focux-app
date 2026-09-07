@@ -87,7 +87,7 @@ bool isAlunoOnlyLocation(String path) {
     '/checkin/historico',
     '/saude',
   };
-  return alunoOnly.contains(path);
+  return alunoOnly.contains(path) || path.startsWith('/checkin/historico/');
 }
 
 bool isPersonalOnlyLocation(String path) {

@@ -147,8 +147,10 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
     final primary = Theme.of(context).colorScheme.primary;
     final mute = chrome.mute;
     final plano = ref.watch(planoFeaturesProvider).valueOrNull;
-    final showLeadsLimitBanner =
-        plano?.plano == SubscriptionPlan.FREE && _total >= 4;
+    final showLeadsLimitBanner = leadShowsLimitBanner(
+      _total,
+      isFreePlan: plano?.plano == SubscriptionPlan.FREE,
+    );
     final count = _total;
 
     return fxScreenA11yScope(

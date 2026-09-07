@@ -79,5 +79,8 @@ void main() {
     expect(leadCardSubtitle(origem: null), 'Não informada');
     expect(leadFreeLimitLabel(5), 'Limite de 5 leads atingido no Free.');
     expect(leadFreeLimitLabel(4), '4/5 leads no plano Free.');
+    expect(leadShowsLimitBanner(4, isFreePlan: true), isTrue);
+    expect(leadShowsLimitBanner(3, isFreePlan: true), isFalse);
+    expect(leadShowsLimitBanner(4, isFreePlan: false), isFalse);
   });
 }

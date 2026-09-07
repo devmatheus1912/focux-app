@@ -14,6 +14,9 @@ void main() {
     expect(isPersonalOnlyLocation('/white-label'), isTrue);
     expect(isPersonalOnlyLocation('/alunos/42'), isTrue);
     expect(isAlunoOnlyLocation('/checkin/treinos'), isTrue);
+    expect(isAlunoOnlyLocation('/checkin/historico'), isTrue);
+    expect(isAlunoOnlyLocation('/checkin/historico/12'), isTrue);
+    expect(isAlunoOnlyLocation('/checkin/executar'), isTrue);
   });
 
   test('logged-in users leave pre-login gate', () {

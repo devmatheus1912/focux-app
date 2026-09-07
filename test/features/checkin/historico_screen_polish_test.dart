@@ -19,6 +19,7 @@ void main() {
     expect(screen, contains('safePopOrGo'));
     expect(screen, contains('ListView.builder'));
     expect(screen, contains('FxSatelliteListTile'));
+    expect(screen, contains('historicoDetalhePath'));
     expect(screen, contains('historicoStatusQuery'));
     expect(screen, contains('q: _query'));
     expect(screen, contains('ScrollViewKeyboardDismissBehavior.onDrag'));

@@ -17,6 +17,7 @@ import '../../features/assinatura/screens/assinatura_screen.dart';
 import '../../features/convites/screens/convites_screen.dart';
 import '../../features/checkin/screens/checkin_personal_hub_screen.dart';
 import '../../features/checkin/screens/checkin_screen.dart';
+import '../../features/checkin/screens/historico_detalhe_screen.dart';
 import '../../features/checkin/screens/historico_screen.dart';
 import '../../features/exercicios/screens/exercicios_list_screen.dart';
 import '../../features/exercicios/screens/exercicio_detail_screen.dart';
@@ -453,6 +454,18 @@ RouteBase buildChromeShellRoute() {
           GoRoute(
             path: '/checkin/historico',
             builder: (context, state) => const HistoricoCheckinScreen(),
+          ),
+          GoRoute(
+            path: '/checkin/historico/:id',
+            redirect:
+                (context, state) =>
+                    intPathParam(state, 'id') == null
+                        ? '/checkin/historico'
+                        : null,
+            builder:
+                (context, state) => HistoricoDetalheScreen(
+                  execucaoId: intPathParam(state, 'id')!,
+                ),
           ),
 
           // Agenda sub-routes (tab stays in shell)
