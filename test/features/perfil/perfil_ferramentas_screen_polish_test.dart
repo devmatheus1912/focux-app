@@ -24,7 +24,20 @@ void main() {
     expect(screen, contains('BrandPalette.'));
     expect(screen, contains('FxSettingsGroup'));
     expect(screen, contains('FxSettingsTile'));
+    expect(screen, contains('GatedProfileShortcuts'));
     expect(screen, contains('safePopOrGo'));
     expect(screen, isNot(contains('Color(0x')));
+  });
+
+  test('perfil atalhos nao dependem do catalogo BFF', () {
+    final gated = readScreenSourceBundle(
+      'lib/features/dashboard/widgets/gated_profile_shortcuts.dart',
+    );
+    expect(gated, contains("label: 'Automações'"));
+    expect(gated, contains("rotaApp: '/automacoes'"));
+    expect(gated, contains("rotaApp: '/loja'"));
+    expect(gated, contains("rotaApp: '/habitos'"));
+    expect(gated, isNot(contains('ferramentasCatalogoProvider')));
+    expect(gated, isNot(contains('SizedBox.shrink()')));
   });
 }
