@@ -92,11 +92,16 @@ class FeedRepository {
   final ApiClient _client;
   FeedRepository(this._client);
 
-  Future<Pagina<FeedPost>> listarPersonalPagina({String? cursor}) async {
+  Future<Pagina<FeedPost>> listarPersonalPagina({
+    String? cursor,
+    String? q,
+  }) async {
+    final query = q?.trim();
     final r = await _client.dio.get(
       '/api/feed',
       queryParameters: {
         if (cursor != null && cursor.isNotEmpty) 'cursor': cursor,
+        if (query != null && query.isNotEmpty) 'q': query,
       },
     );
     final data = r.data;
@@ -115,8 +120,13 @@ class FeedRepository {
     return (await listarPersonalPagina()).content;
   }
 
-  Future<List<FeedPost>> listarAluno() async {
-    final r = await _client.dio.get('/api/feed/aluno');
+  Future<List<FeedPost>> listarAluno({String? q}) async {
+    final r = await _client.dio.get(
+      '/api/feed/aluno',
+      queryParameters: {
+        if (q != null && q.trim().isNotEmpty) 'q': q.trim(),
+      },
+    );
     final data = r.data;
     if (data is! Map) {
       throw FormatException(
