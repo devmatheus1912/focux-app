@@ -6,7 +6,6 @@ import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
-import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/skeleton_loader.dart';
@@ -167,14 +166,41 @@ class _DashboardToolsCatalogSheetState
             child: catalogoAsync.when(
               loading: () => const SkeletonList(count: 6),
               error:
-                  (e, _) => FxErrorState(
-                    chromeOnDark: widget.isDark,
-                    primary: brand,
-                    message: 'Não deu para carregar o catálogo',
-                    onRetry:
-                        () => widget.parentRef.invalidate(
-                          ferramentasCatalogoProvider,
+                  (e, _) => ListView(
+                    padding: const EdgeInsets.only(bottom: TokensStrip.s4),
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 28),
+                        child: Column(
+                          children: [
+                            Text(
+                              'Catálogo offline',
+                              textAlign: TextAlign.center,
+                              style: FocuxHubTypography.body(
+                                color: chrome.ink,
+                              ).copyWith(fontWeight: FontWeight.w700),
+                            ),
+                            const SizedBox(height: TokensStrip.s2),
+                            Text(
+                              'Toque para tentar de novo.',
+                              textAlign: TextAlign.center,
+                              style: FocuxHubTypography.bodyMuted(
+                                color: chrome.mute,
+                              ),
+                            ),
+                            const SizedBox(height: TokensStrip.s3),
+                            TextButton.icon(
+                              onPressed:
+                                  () => widget.parentRef.invalidate(
+                                    ferramentasCatalogoProvider,
+                                  ),
+                              icon: const Icon(Icons.refresh_rounded, size: 18),
+                              label: const Text('Tentar novamente'),
+                            ),
+                          ],
                         ),
+                      ),
+                    ],
                   ),
               data: (catalogo) {
                 final groups = groupCatalogoHubs(
