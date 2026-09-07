@@ -203,56 +203,53 @@ extension ConversationScreenSheetsMenuMedia on _ConversationScreenState {
   }
 
   void _showImageViewer(String url) {
-    showDialog<void>(
-      context: context,
-      barrierColor: Colors.black.withValues(alpha: 0.92),
-      builder:
-          (_) => Dialog(
-            insetPadding: const EdgeInsets.all(12),
-            backgroundColor: Colors.transparent,
-            child: Stack(
-              children: [
-                InteractiveViewer(
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    showFxHomeSheet<void>(
+      context,
+      builder: (ctx) {
+        return FxHomeSheetSurface(
+          isDark: isDark,
+          expand: true,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              FxHomeSheetHandle(isDark: isDark),
+              SizedBox(height: TokensStrip.s4),
+              FxHomeSheetHeader(
+                isDark: isDark,
+                title: 'Foto',
+                leading: const Icon(Icons.image_outlined, size: 18),
+              ),
+              SizedBox(height: TokensStrip.s3),
+              Expanded(
+                child: InteractiveViewer(
                   minScale: 0.85,
                   maxScale: 3.5,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(24),
-                    child: Image.network(
-                      url,
-                      fit: BoxFit.contain,
-                      errorBuilder:
-                          (_, __, ___) => Container(
-                            height: 240,
-                            alignment: Alignment.center,
-                            decoration: fxListCardDecoration(context),
-                            child: const Icon(
-                              Icons.broken_image_outlined,
-                              size: 32,
+                  child: Center(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(TokensStrip.rCard),
+                      child: Image.network(
+                        url,
+                        fit: BoxFit.contain,
+                        errorBuilder:
+                            (_, __, ___) => Container(
+                              height: 240,
+                              alignment: Alignment.center,
+                              decoration: fxListCardDecoration(ctx),
+                              child: const Icon(
+                                Icons.broken_image_outlined,
+                                size: 32,
+                              ),
                             ),
-                          ),
-                    ),
-                  ),
-                ),
-                Positioned(
-                  top: 12,
-                  right: 12,
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0.35),
-                      shape: BoxShape.circle,
-                    ),
-                    child: IconButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      icon: const Icon(
-                        Icons.close_rounded,
-                        color: Colors.white,
                       ),
                     ),
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
+        );
+      },
     );
   }
 }

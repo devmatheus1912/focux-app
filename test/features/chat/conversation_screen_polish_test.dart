@@ -45,6 +45,8 @@ void main() {
     );
     expect(screen, contains('showFxHomeSheet'));
     expect(screen, isNot(contains('showModalBottomSheet')));
+    expect(screen, isNot(contains('showDialog')));
+    expect(screen, contains('_showImageViewer'));
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(16));
   });
 }
