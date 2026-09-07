@@ -54,4 +54,15 @@ void main() {
     expect(screen, contains('feed/videos'));
     expect(screen, isNot(contains('URL da mídia')));
   });
+
+  test('feed listarPersonal/listarAluno parse Pagina, not root List', () {
+    final repo = readScreenSourceBundle(
+      'lib/features/feed/data/feed_repository.dart',
+    );
+    expect(repo, contains('Pagina.fromJson'));
+    expect(repo, contains("dio.get('/api/feed')"));
+    expect(repo, contains("dio.get('/api/feed/aluno')"));
+    expect(repo, contains('GET /api/feed devolve Pagina'));
+    expect(repo, isNot(contains("get('/api/feed');\n    return (r.data as List)")));
+  });
 }

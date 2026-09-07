@@ -155,17 +155,69 @@ class _AutomacoesScreenState extends ConsumerState<AutomacoesScreen> {
                             child: Semantics(
                               label: 'Ativar template ${e.value.nome}',
                               button: true,
-                              child: FxSatelliteListTile(
-                                title: e.value.nome,
-                                titleCase: false,
-                                leading: Icon(
-                                  Icons.bolt_outlined,
-                                  color: scheme.primary,
-                                ),
-                                subtitle: Text(e.value.descricao),
-                                trailing: FilledButton(
-                                  onPressed: () => _ativar(e.value),
-                                  child: const Text('Ativar'),
+                              child: fxListTileCardShell(
+                                context: context,
+                                margin: const EdgeInsets.only(bottom: 10),
+                                accent: scheme.primary,
+                                child: Padding(
+                                  padding: const EdgeInsets.fromLTRB(
+                                    14,
+                                    12,
+                                    12,
+                                    12,
+                                  ),
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons.bolt_outlined,
+                                        color: scheme.primary,
+                                      ),
+                                      const SizedBox(width: TokensStrip.s3),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              e.value.nome,
+                                              style: FocuxHubTypography.body(
+                                                color: scheme.onSurface,
+                                              ).copyWith(
+                                                fontWeight: FontWeight.w700,
+                                                letterSpacing: -0.15,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 2),
+                                            Text(
+                                              e.value.descricao,
+                                              style:
+                                                  FocuxHubTypography.bodyMuted(
+                                                    color: chrome.mute,
+                                                    fontWeight: FontWeight.w500,
+                                                    height: 1.35,
+                                                  ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      const SizedBox(width: TokensStrip.s2),
+                                      FilledButton(
+                                        onPressed: () => _ativar(e.value),
+                                        style: FilledButton.styleFrom(
+                                          visualDensity: VisualDensity.compact,
+                                          tapTargetSize:
+                                              MaterialTapTargetSize.shrinkWrap,
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 14,
+                                            vertical: 10,
+                                          ),
+                                        ),
+                                        child: const Text('Ativar'),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),

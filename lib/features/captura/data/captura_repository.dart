@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
+import '../../../core/api/pagina.dart';
 
 class SubmissaoCaptura {
   final int id;
@@ -40,9 +41,18 @@ class CapturaRepository {
 
   Future<List<SubmissaoCaptura>> meus() async {
     final r = await _dio.get('/api/captura');
-    return (r.data as List<dynamic>)
-        .map((e) => SubmissaoCaptura.fromJson(e as Map<String, dynamic>))
-        .toList();
+    final data = r.data;
+    if (data is! Map) {
+      throw FormatException(
+        'GET /api/captura devolve Pagina, não lista crua.',
+      );
+    }
+    final pagina = Pagina.fromJson(
+      Map<String, dynamic>.from(data),
+      (item) =>
+          SubmissaoCaptura.fromJson(Map<String, dynamic>.from(item as Map)),
+    );
+    return pagina.content;
   }
 
   Future<void> marcarConvertido(int id) async {

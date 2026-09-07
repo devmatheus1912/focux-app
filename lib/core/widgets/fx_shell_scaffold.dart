@@ -393,9 +393,18 @@ class FxSatelliteListTile extends StatelessWidget {
         isThreeLine: isThreeLine,
         onTap: onTap,
         leading: leading,
-        trailing: trailing,
+        trailing:
+            trailing == null
+                ? null
+                : ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 140),
+                  child: trailing,
+                ),
         title: Text(
           displayTitle,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          softWrap: true,
           style: FocuxHubTypography.body(
             color: ink,
           ).copyWith(fontWeight: FontWeight.w700, letterSpacing: -0.15),
