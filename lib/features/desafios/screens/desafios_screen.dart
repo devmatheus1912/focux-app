@@ -12,6 +12,7 @@ import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feature_gate.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
@@ -203,6 +204,25 @@ class _DesafiosScreenState extends ConsumerState<DesafiosScreen> {
     if (created) await _load();
   }
 
+  Future<void> _encerrar(Desafio d) async {
+    final ok = await showFxConfirmSheet(
+      context,
+      title: 'Encerrar desafio?',
+      subtitle: d.titulo,
+      message: 'Sai da lista ativa. O ranking deixa de pontuar.',
+      confirmLabel: 'Encerrar',
+      destructive: true,
+    );
+    if (!ok || !mounted) return;
+    try {
+      await ref.read(_repo).encerrar(d.id);
+      await _load();
+    } catch (e) {
+      if (!mounted) return;
+      FeedbackHelper.showError(context, friendlyError(e));
+    }
+  }
+
   Future<void> _abrirDetalhe(Desafio d) async {
     try {
       final lb = await ref.read(_repo).leaderboard(d.id);
@@ -257,6 +277,16 @@ class _DesafiosScreenState extends ConsumerState<DesafiosScreen> {
                             ),
                           ),
                         ),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 16),
+                        child: TextButton(
+                          onPressed: () async {
+                            Navigator.of(ctx).pop();
+                            await _encerrar(d);
+                          },
+                          child: const Text('Encerrar desafio'),
+                        ),
+                      ),
                       if (lb.isEmpty)
                         Text(desafioLeaderboardEmpty())
                       else
@@ -332,7 +362,7 @@ class _DesafiosScreenState extends ConsumerState<DesafiosScreen> {
                     ),
                     FxHelpTip(
                       'Participar',
-                      'O aluno entra sozinho pelo app. Toque no ranking para abrir o 360.',
+                      'Alunos ativos entram na criação. Encerrar tira da lista.',
                     ),
                   ],
                 ),

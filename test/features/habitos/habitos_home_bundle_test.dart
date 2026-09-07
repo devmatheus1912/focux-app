@@ -19,6 +19,7 @@ void main() {
           'feitoHoje': false,
           'streakAtual': 0,
           'badgeSemana': false,
+          'alunoId': 4,
         },
       ],
       'compliance': [
@@ -38,6 +39,7 @@ void main() {
     expect(bundle.habitos, hasLength(1));
     expect(bundle.habitos.first.titulo, 'Beber água');
     expect(bundle.habitos.first.metaSemanal, 7);
+    expect(bundle.habitos.first.alunoId, 4);
     expect(bundle.compliance, hasLength(1));
     expect(bundle.compliance.first.alunoNome, 'Ana Silva');
     expect(bundle.compliance.first.compliancePct, 71);

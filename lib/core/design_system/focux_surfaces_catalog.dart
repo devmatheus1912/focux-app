@@ -94,6 +94,7 @@ const Map<String, FocuxSurfaceSpec> focuxSurfaceCatalog = {
   ),
   '/aluno/ativacao': FocuxSurfaceSpec(type: _s9, logicalParent: _alunoHome),
   '/aluno/habitos': FocuxSurfaceSpec(type: _s4, logicalParent: _alunoHome),
+  '/aluno/desafios': FocuxSurfaceSpec(type: _s4, logicalParent: _alunoHome),
   '/aluno/recorrencia': FocuxSurfaceSpec(type: _s3, logicalParent: _alunoHome),
   '/aluno/grupo-aulas': FocuxSurfaceSpec(type: _s4, logicalParent: _alunoHome),
   '/aluno/form-check': FocuxSurfaceSpec(

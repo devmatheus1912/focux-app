@@ -20,9 +20,12 @@ void main() {
   test('habitoSubtitle prefere descricao', () {
     expect(
       habitoSubtitle(descricao: 'Hidratação', metaSemanal: 7),
-      'Hidratação',
+      'Hidratação · Todos os alunos',
     );
-    expect(habitoSubtitle(descricao: '  ', metaSemanal: 7), 'Meta semanal: 7x');
+    expect(
+      habitoSubtitle(descricao: '  ', metaSemanal: 7, alunoId: 3),
+      'Meta semanal: 7x · Aluno específico',
+    );
     expect(habitoMetaValue(5), '5x');
   });
 
@@ -54,6 +57,8 @@ void main() {
     expect(habitoComplianceEmptyTitle('ana'), 'Nenhum aluno encontrado');
     expect(habitoComplianceEmptySubtitle('ana'), contains('nome'));
     expect(habitoAlunoTodosLabel, 'Todos os alunos');
+    expect(habitoAlcanceLabel(null), 'Todos os alunos');
+    expect(habitoAlcanceLabel(9), 'Aluno específico');
     expect(
       habitoDetalheMessage(descricao: 'Hidratação', metaSemanal: 7),
       contains('Hidratação'),

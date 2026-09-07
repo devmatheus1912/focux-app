@@ -76,6 +76,7 @@ bool isAlunoOnlyLocation(String path) {
     '/aluno/definir-senha',
     '/aluno/anamnese',
     '/aluno/habitos',
+    '/aluno/desafios',
     '/evolucao',
     '/chat/aluno',
     '/financeiro/aluno',

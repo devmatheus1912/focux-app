@@ -275,6 +275,7 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
               habitoSubtitle(
                 descricao: habito.descricao,
                 metaSemanal: habito.metaSemanal,
+                alunoId: habito.alunoId,
               ),
             ),
             trailing: Text(
