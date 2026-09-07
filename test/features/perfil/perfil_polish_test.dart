@@ -30,6 +30,8 @@ void main() {
     expect(screen, contains('PerfilAppearanceSection'));
     expect(screen, contains('PerfilOperacaoSection'));
     expect(screen, contains('PerfilContaSegurancaSection'));
+    expect(screen, contains('showFxConfirmSheet'));
+    expect(screen, isNot(contains('showModalBottomSheet')));
     expect(
       File('lib/core/widgets/fx_settings_tile.dart').readAsStringSync(),
       contains('BrandPalette.softened'),

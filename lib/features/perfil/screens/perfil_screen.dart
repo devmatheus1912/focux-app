@@ -43,6 +43,7 @@ import 'package:focux_app/core/widgets/fx_shell_scaffold.dart';
 import 'package:focux_app/core/widgets/fx_settings_group.dart';
 import 'package:focux_app/core/widgets/fx_settings_tile.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_form_sheet.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -164,40 +165,13 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
   }
 
   Future<void> _logout() async {
-    final confirmed = await showModalBottomSheet<bool>(
-      context: context,
-      showDragHandle: true,
-      builder:
-          (ctx) => SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    'Sair da conta',
-                    style: Theme.of(ctx).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Deseja encerrar esta sessão neste aparelho?',
-                  ),
-                  const SizedBox(height: 20),
-                  TextButton(
-                    onPressed: () => Navigator.of(ctx).pop(false),
-                    child: const Text('Cancelar'),
-                  ),
-                  FilledButton(
-                    onPressed: () => Navigator.of(ctx).pop(true),
-                    child: const Text('Sair'),
-                  ),
-                ],
-              ),
-            ),
-          ),
+    final confirmed = await showFxConfirmSheet(
+      context,
+      title: 'Sair da conta',
+      message: 'Deseja encerrar esta sessão neste aparelho?',
+      confirmLabel: 'Sair',
+      icon: Icons.logout_rounded,
+      destructive: true,
     );
     if (confirmed != true || !mounted) return;
     await ref.read(authProvider.notifier).logout();

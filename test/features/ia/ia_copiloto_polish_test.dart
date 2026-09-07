@@ -62,6 +62,12 @@ void main() {
     expect(actionsPart, contains('showFxHomeSheet'));
     expect(actionsPart, contains('FxHomeSheetSurface'));
     expect(actionsPart, isNot(contains('showModalBottomSheet')));
+    final quota = File(
+      'lib/features/ia/widgets/ia_quota_upgrade.dart',
+    ).readAsStringSync();
+    expect(quota, contains('showFxConfirmSheet'));
+    expect(quota, contains('showFxNoticeSheet'));
+    expect(quota, isNot(contains('showDialog')));
     expect(actionsPart, isNot(contains('DraggableScrollableSheet')));
     expect(actionsPart, contains('Semantics('));
     expect(screen, isNot(contains('rascunho editável')));

@@ -101,7 +101,7 @@ class _FxConfirmSheet extends StatelessWidget {
             child: ElevatedButton.icon(
               onPressed: () {
                 if (destructive) HapticFeedback.heavyImpact();
-                Navigator.of(context).pop(true);
+                FxHomeSheetChrome.dismissAndPop(context, true);
               },
               icon:
                   confirmIcon == null
@@ -122,7 +122,7 @@ class _FxConfirmSheet extends StatelessWidget {
           SizedBox(
             height: 48,
             child: TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
+              onPressed: () => FxHomeSheetChrome.dismissAndPop(context, false),
               child: Text(
                 cancelLabel,
                 style: FocuxHubTypography.bodyMuted(
