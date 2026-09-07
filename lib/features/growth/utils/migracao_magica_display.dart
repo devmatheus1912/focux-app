@@ -30,9 +30,9 @@ String migracaoFotoLendoLabel() => 'Lendo print (OCR)...';
 String migracaoDiscardTitle() => 'Sair da migração?';
 
 String migracaoDiscardMessage() =>
-    'Há texto ou alunos revisados que ainda não foram salvos.';
+    'O texto fica neste aparelho. Você retoma de onde parou.';
 
-String migracaoDiscardConfirmLabel() => 'Sair sem salvar';
+String migracaoDiscardConfirmLabel() => 'Sair';
 
 String migracaoDiscardCancelLabel() => 'Continuar migração';
 

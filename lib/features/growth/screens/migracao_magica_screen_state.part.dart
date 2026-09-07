@@ -21,10 +21,27 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
   void initState() {
     super.initState();
     _controller.addListener(_onDraftChanged);
+    unawaited(_restoreDraft());
+  }
+
+  Future<void> _restoreDraft() async {
+    final draft = await MigracaoMagicaDraftCache.load();
+    if (!mounted || draft == null) return;
+    setState(() {
+      _fonte = draft.fonte;
+      _controller.text = draft.text;
+    });
+  }
+
+  void _persistDraft() {
+    unawaited(
+      MigracaoMagicaDraftCache.save(text: _controller.text, fonte: _fonte),
+    );
   }
 
   void _onDraftChanged() {
     if (mounted) setState(() {});
+    _persistDraft();
   }
 
   @override
@@ -102,12 +119,9 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
     final brandSofter = BrandPalette.softer(brand, dark: isDark);
     final alunos = _alunosEncontrados;
 
-    return PopScope(
-      canPop: !_hasUnsavedWork,
-      onPopInvokedWithResult: (didPop, _) async {
-        if (didPop) return;
-        await _handleBack();
-      },
+    return FxFormPopGuard(
+      dirty: _hasUnsavedWork,
+      onCancel: _handleBack,
       child: FxShellScaffold(
           useMesh: true,
           appBar: FxShellAppBar(
@@ -135,50 +149,38 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
               ),
             ],
           ),
-          bottomNavigationBar: SafeArea(
-            top: false,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(
-                FxSettingsLayout.pageInset,
-                TokensStrip.s2,
-                FxSettingsLayout.pageInset,
-                TokensStrip.s3,
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (_isReviewing)
-                    TextButton(
+          bottomNavigationBar: FxWizardStickyBar(
+            secondary:
+                _isReviewing
+                    ? TextButton(
                       onPressed: _isSaving ? null : _voltarRevisao,
                       child: Text(migracaoVoltarLabel()),
-                    ),
-                  FxLiquidPrimaryButton(
-                    label:
-                        _isReviewing
-                            ? (_isSaving
-                                ? migracaoSalvandoLabel()
-                                : migracaoSalvarLabel(
-                                  (alunos ?? const [])
-                                      .where((a) => !a.duplicado)
-                                      .length,
-                                ))
-                            : migracaoContinueCaptureLabel(
-                              fonte: _fonte,
-                              loading: _captureBusy,
-                            ),
-                    loading: _isReviewing ? _isSaving : _captureBusy,
-                    onPressed:
-                        _isReviewing
-                            ? (_isSaving ? null : _salvarAlunos)
-                            : (_captureBusy
-                                ? null
-                                : (_fonte == MigracaoFonte.texto &&
-                                        _controller.text.trim().isEmpty
-                                    ? null
-                                    : _continuarCaptura)),
-                  ),
-                ],
-              ),
+                    )
+                    : null,
+            primary: FxLiquidPrimaryButton(
+              label:
+                  _isReviewing
+                      ? (_isSaving
+                          ? migracaoSalvandoLabel()
+                          : migracaoSalvarLabel(
+                            (alunos ?? const [])
+                                .where((a) => !a.duplicado)
+                                .length,
+                          ))
+                      : migracaoContinueCaptureLabel(
+                        fonte: _fonte,
+                        loading: _captureBusy,
+                      ),
+              loading: _isReviewing ? _isSaving : _captureBusy,
+              onPressed:
+                  _isReviewing
+                      ? (_isSaving ? null : _salvarAlunos)
+                      : (_captureBusy
+                          ? null
+                          : (_fonte == MigracaoFonte.texto &&
+                                  _controller.text.trim().isEmpty
+                              ? null
+                              : _continuarCaptura)),
             ),
           ),
           body: SingleChildScrollView(
@@ -214,7 +216,10 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                       showCheckmark: true,
                       onTap: _captureBusy
                           ? null
-                          : () => setState(() => _fonte = fonte),
+                          : () {
+                            setState(() => _fonte = fonte);
+                            _persistDraft();
+                          },
                     ),
                 ],
               ),

@@ -48,6 +48,9 @@ void main() {
     expect(screen, contains('_CuratedPaletteGrid'));
     expect(screen, contains('_LogoUploadRing'));
     expect(screen, contains('FxLiquidPrimaryButton'));
+    expect(screen, contains('FxFormStickyBar'));
+    expect(screen, contains('FxFormPopGuard'));
+    expect(screen, contains("safePopOrGo(context, '/perfil')"));
     expect(screen, contains('identidadeRestaurarCoresLabel()'));
     expect(screen, isNot(contains('label: identidadeRestaurarCoresLabel')));
     expect(screen, isNot(contains('picker: true')));

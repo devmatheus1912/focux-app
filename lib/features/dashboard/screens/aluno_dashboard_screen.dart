@@ -206,6 +206,7 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
                         ProgressoSemanalWidget(
                           treinos: home.treinos,
                           historico: home.historico,
+                          streakAtual: home.streakAtual,
                         ),
                       const SizedBox(height: TokensStrip.s4),
                       _PerformanceEvolutionCard(

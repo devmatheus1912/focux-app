@@ -31,5 +31,6 @@ void main() {
     expect(identidadeRestaurarConfirmTitle(), contains('cores padrão'));
     expect(identidadeLogoConfirmMessage(), contains('rascunho'));
     expect(identidadeLandingEditorLabel(), 'Editor da landing');
+    expect(identidadeDiscardTitle(), 'Sair sem salvar?');
   });
 }

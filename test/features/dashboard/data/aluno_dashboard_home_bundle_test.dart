@@ -64,6 +64,7 @@ Map<String, dynamic> _payload() => {
     },
   ],
   'npsDeveResponder': true,
+  'streakAtual': 12,
   'recovery': {
     'dataReferencia': '2026-08-16',
     'steps': 8200,
@@ -98,6 +99,7 @@ void main() {
       expect(bundle.npsDeveResponder, isTrue);
       expect(bundle.recovery?.recoveryScore, 78);
       expect(bundle.recovery?.recoveryLabel, 'Pronto');
+      expect(bundle.streakAtual, 12);
     });
 
     test('tolerates missing optional blocks', () {
@@ -111,7 +113,8 @@ void main() {
         ..remove('coachMensagens')
         ..remove('upsellPendentes')
         ..remove('npsDeveResponder')
-        ..remove('recovery');
+        ..remove('recovery')
+        ..remove('streakAtual');
 
       final bundle = AlunoDashboardHomeBundle.fromJson(json);
 
@@ -125,6 +128,7 @@ void main() {
       expect(bundle.upsellPendentes, isEmpty);
       expect(bundle.npsDeveResponder, isFalse);
       expect(bundle.recovery, isNull);
+      expect(bundle.streakAtual, 0);
     });
   });
 

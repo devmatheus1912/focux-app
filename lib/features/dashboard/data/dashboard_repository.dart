@@ -315,6 +315,7 @@ class AlunoDashboardHomeBundle {
   final List<AlunoOferta> upsellPendentes;
   final bool npsDeveResponder;
   final RecoverySnapshot? recovery;
+  final int streakAtual;
   final DateTime fetchedAt;
 
   AlunoDashboardHomeBundle({
@@ -329,6 +330,7 @@ class AlunoDashboardHomeBundle {
     this.upsellPendentes = const [],
     this.npsDeveResponder = false,
     this.recovery,
+    this.streakAtual = 0,
     DateTime? fetchedAt,
   }) : fetchedAt = fetchedAt ?? DateTime.now();
 
@@ -373,6 +375,7 @@ class AlunoDashboardHomeBundle {
                 Map<String, dynamic>.from(recoveryRaw),
               )
               : null,
+      streakAtual: (json['streakAtual'] as num?)?.toInt() ?? 0,
     );
   }
 }

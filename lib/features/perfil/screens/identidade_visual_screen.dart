@@ -13,6 +13,7 @@ import '../../../core/theme/theme_provider.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
+import '../../../core/widgets/fx_form_chrome.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_loading.dart';
@@ -60,6 +61,12 @@ class _IdentidadeVisualScreenState
   bool _uploadingLogo = false;
   bool _perfilLoaded = false;
   String? _logoUrl;
+  String _baselineSlogan = '';
+  String _baselineDesc = '';
+  String _baselineEsp = '';
+  String _baselineInsta = '';
+  String? _baselineLogo;
+  CuratedBrandPalette? _baselinePalette;
 
   Color get _corPrimaria => _palette.primary;
   Color get _corSecundaria => _palette.secondary;
@@ -67,7 +74,10 @@ class _IdentidadeVisualScreenState
   @override
   void initState() {
     super.initState();
-    _sloganCtrl.addListener(() => setState(() {}));
+    _sloganCtrl.addListener(_onFieldChanged);
+    _descCtrl.addListener(_onFieldChanged);
+    _espCtrl.addListener(_onFieldChanged);
+    _instaCtrl.addListener(_onFieldChanged);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.invalidate(perfilProvider);
     });
@@ -80,6 +90,42 @@ class _IdentidadeVisualScreenState
     _instaCtrl.dispose();
     _sloganCtrl.dispose();
     super.dispose();
+  }
+
+  void _onFieldChanged() {
+    if (mounted) setState(() {});
+  }
+
+  bool get _dirty {
+    if (!_perfilLoaded) return false;
+    return _sloganCtrl.text != _baselineSlogan ||
+        _descCtrl.text != _baselineDesc ||
+        _espCtrl.text != _baselineEsp ||
+        _instaCtrl.text != _baselineInsta ||
+        _logoUrl != _baselineLogo ||
+        _palette != _baselinePalette;
+  }
+
+  void _snapshotBaseline() {
+    _baselineSlogan = _sloganCtrl.text;
+    _baselineDesc = _descCtrl.text;
+    _baselineEsp = _espCtrl.text;
+    _baselineInsta = _instaCtrl.text;
+    _baselineLogo = _logoUrl;
+    _baselinePalette = _palette;
+  }
+
+  Future<void> _pedirSair() async {
+    if (_dirty) {
+      final leave = await showFxConfirmSheet(
+        context,
+        title: identidadeDiscardTitle(),
+        message: identidadeDiscardMessage(),
+        confirmLabel: identidadeDiscardConfirm(),
+      );
+      if (!leave || !mounted) return;
+    }
+    safePopOrGo(context, '/perfil');
   }
 
   void _applyPerfil(PerfilPersonal perfil) {
@@ -104,6 +150,7 @@ class _IdentidadeVisualScreenState
     secondary = CuratedBrandPalette.safeSecondaryFor(primary, secondary);
     _palette = CuratedBrandPalette.resolve(primary, secondary);
     _perfilLoaded = true;
+    _snapshotBaseline();
   }
 
   @override
@@ -121,11 +168,7 @@ class _IdentidadeVisualScreenState
           useMesh: true,
           appBar: FxShellAppBar(
             title: widget.isSetup ? 'Configurar meu app' : 'Identidade Visual',
-            onBack:
-                widget.isSetup
-                    ? null
-                    : () => safePopOrGo(context, '/dashboard/personal'),
-            leading: widget.isSetup ? const SizedBox(width: 8) : null,
+            onBack: _pedirSair,
           ),
           body:
               perfilAsync.hasError
@@ -148,18 +191,17 @@ class _IdentidadeVisualScreenState
     );
     final nomePersonal = perfil.nome;
 
-    return fxScreenA11yScope(
+    return FxFormPopGuard(
+      dirty: _dirty,
+      onCancel: _pedirSair,
+      child: fxScreenA11yScope(
       label: 'Identidade Visual',
       child: FxShellScaffold(
         useMesh: true,
         appBar: FxShellAppBar(
           title: widget.isSetup ? 'Configurar meu app' : 'Identidade Visual',
           subtitle: hasWhiteLabel ? 'Sua marca no app' : 'Marca no app',
-          onBack:
-              widget.isSetup
-                  ? null
-                  : () => safePopOrGo(context, '/dashboard/personal'),
-          leading: widget.isSetup ? const SizedBox(width: 8) : null,
+          onBack: _pedirSair,
           actions: [
             FxHelpIconButton(
               tooltip: identidadeHelpTitle(),
@@ -170,10 +212,16 @@ class _IdentidadeVisualScreenState
         ),
         bottomNavigationBar:
             hasWhiteLabel
-                ? _SaveBar(
-                  salvando: _salvando,
-                  label: identidadeSalvarLabel(isSetup: widget.isSetup),
-                  onPressed: () => _pedirSalvar(hasWhiteLabel: hasWhiteLabel),
+                ? FxFormStickyBar(
+                  child: FxLiquidPrimaryButton(
+                    label: identidadeSalvarLabel(isSetup: widget.isSetup),
+                    loading: _salvando,
+                    loadingLabel: identidadeSalvandoLabel(),
+                    onPressed:
+                        _salvando
+                            ? null
+                            : () => _pedirSalvar(hasWhiteLabel: hasWhiteLabel),
+                  ),
                 )
                 : null,
         body: CustomScrollView(
@@ -376,6 +424,7 @@ class _IdentidadeVisualScreenState
             ),
           ],
         ),
+      ),
       ),
     );
   }

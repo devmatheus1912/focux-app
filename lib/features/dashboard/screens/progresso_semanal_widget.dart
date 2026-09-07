@@ -9,10 +9,12 @@ class ProgressoSemanalWidget extends StatelessWidget {
     super.key,
     required this.treinos,
     required this.historico,
+    required this.streakAtual,
   });
 
   final List<ExecucaoTreino> treinos;
   final List<ExecucaoTreino> historico;
+  final int streakAtual;
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +22,7 @@ class ProgressoSemanalWidget extends StatelessWidget {
     final weeklyGoal = treinos.isEmpty ? 3 : treinos.length.clamp(3, 6);
     final completedThisWeek =
         historico.where((t) => _isSameWeek(t.concluidoEm)).length;
-    final streakDays = _calculateStreak(historico);
+    final streakDays = streakAtual < 0 ? 0 : streakAtual;
     final progressValue =
         weeklyGoal == 0
             ? 0.0
@@ -175,33 +177,6 @@ class ProgressoSemanalWidget extends StatelessWidget {
     final endOfWeek = normalizedWeek.add(const Duration(days: 7));
     return dt.isAfter(normalizedWeek.subtract(const Duration(seconds: 1))) &&
         dt.isBefore(endOfWeek);
-  }
-
-  int _calculateStreak(List<ExecucaoTreino> historico) {
-    final dates =
-        historico
-            .map((t) => DateTime.tryParse(t.concluidoEm ?? '')?.toLocal())
-            .whereType<DateTime>()
-            .map((d) => DateTime(d.year, d.month, d.day))
-            .toSet()
-            .toList()
-          ..sort((a, b) => b.compareTo(a));
-    if (dates.isEmpty) return 0;
-
-    var streak = 0;
-    var cursor = DateTime.now();
-    cursor = DateTime(cursor.year, cursor.month, cursor.day);
-    for (final date in dates) {
-      if (date == cursor) {
-        streak++;
-        cursor = cursor.subtract(const Duration(days: 1));
-      } else if (date == cursor.subtract(const Duration(days: 1)) &&
-          streak == 0) {
-        streak++;
-        cursor = date.subtract(const Duration(days: 1));
-      }
-    }
-    return streak;
   }
 
   bool _sameDate(String? iso, DateTime day) {

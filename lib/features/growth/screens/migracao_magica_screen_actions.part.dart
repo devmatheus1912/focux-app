@@ -436,6 +436,7 @@ extension MigracaoMagicaScreenActions on _MigracaoMagicaScreenState {
         _limparImportacaoVisual();
         _controller.clear();
       });
+      await MigracaoMagicaDraftCache.clear();
     } catch (e) {
       if (mounted) {
         FeedbackHelper.showError(context, friendlyError(e));
@@ -749,11 +750,12 @@ extension MigracaoMagicaScreenActions on _MigracaoMagicaScreenState {
   }
 
   Future<void> _handleBack() async {
+    _persistDraft();
     if (!_hasUnsavedWork) {
-      safePopOrGo(context, '/dashboard/personal');
+      safePopOrGo(context, '/perfil');
       return;
     }
-    final discard = await _confirmDiscard();
-    if (discard && mounted) safePopOrGo(context, '/dashboard/personal');
+    final leave = await _confirmDiscard();
+    if (leave && mounted) safePopOrGo(context, '/perfil');
   }
 }

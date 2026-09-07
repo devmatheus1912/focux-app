@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -23,8 +25,11 @@ import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/fx_form_chrome.dart';
 import '../../../core/widgets/fx_toggle_chip.dart';
+import '../../../core/widgets/fx_wizard_chrome.dart';
 import '../../../core/theme/fx_settings_layout.dart';
+import '../data/migracao_magica_draft_cache.dart';
 import '../utils/migracao_magica_display.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../planos/data/planos_repository.dart';
