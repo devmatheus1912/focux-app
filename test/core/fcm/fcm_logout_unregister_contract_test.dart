@@ -40,6 +40,11 @@ void main() {
     expect(tryExterno, lessThan(instancia));
   });
 
+  test('tap com execucaoId abre o detalhe do historico do aluno', () {
+    expect(fcm, contains("data['execucaoId']"));
+    expect(fcm, contains("'/checkin/historico/\$execucaoId'"));
+  });
+
   test('DELETE de logout nao invalida sessao nem entra na fila offline', () {
     expect(fcm, contains("'fxNoInvalidate': true"));
     expect(fcm, contains("'fxNoOfflineQueue': true"));

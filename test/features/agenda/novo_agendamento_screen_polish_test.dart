@@ -8,6 +8,10 @@ void main() {
       'lib/features/agenda/screens/novo_agendamento_screen.dart',
     );
     expect(screen, contains('FxLiquidPrimaryButton'));
+    expect(screen, contains('FxFormStickyBar'));
+    expect(screen, contains('FxFormPopGuard'));
+    expect(screen, contains('agendaNovoDiscardTitle'));
+    expect(screen, contains("child: const Text('Cancelar')"));
     expect(screen, contains('label: agendaNovoTileLabel()'));
     expect(screen, isNot(contains('ElevatedButton')));
     expect(screen, contains('AlunoInsetFormField'));

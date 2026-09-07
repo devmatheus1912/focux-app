@@ -30,6 +30,7 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen> {
       _nivel != null;
 
   Future<void> _cancel() async {
+    FxKeyboardDismissScope.dismiss();
     if (_dirty) {
       final ok = await showFxConfirmSheet(
         context,
@@ -52,6 +53,7 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen> {
   }
 
   Future<void> _submit() async {
+    FxKeyboardDismissScope.dismiss();
     if (!_formKey.currentState!.validate()) {
       _nomeFocusNode.requestFocus();
       final fieldContext = _nomeFieldKey.currentContext;
@@ -154,7 +156,10 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen> {
 
     return fxScreenA11yScope(
       label: widget.alunoId == null ? 'Novo treino' : 'Treino vinculado',
-      child: FxShellScaffold(
+      child: FxFormPopGuard(
+        dirty: _dirty,
+        onCancel: _cancel,
+        child: FxShellScaffold(
         useMesh: true,
         appBar: FxShellAppBar(
           title: widget.alunoId == null ? 'Novo Treino' : 'Treino vinculado',
@@ -182,16 +187,34 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen> {
             const SizedBox(width: TokensStrip.s2),
           ],
         ),
-        body: Stack(
-          children: [
-            SafeArea(
+        bottomNavigationBar: FxFormStickyBar(
+          child: Semantics(
+            button: true,
+            enabled: canSubmit,
+            label:
+                _loading
+                    ? 'Criando treino'
+                    : canSubmit
+                    ? 'Criar treino'
+                    : 'Criar treino. Informe o nome para habilitar',
+            child: FxLiquidPrimaryButton(
+              label: 'Criar',
+              loading: _loading,
+              loadingLabel: 'Criando…',
+              onPressed: canSubmit ? _submit : null,
+            ),
+          ),
+        ),
+        body: SafeArea(
               bottom: false,
               child: SingleChildScrollView(
-                padding: EdgeInsets.fromLTRB(
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
+                padding: const EdgeInsets.fromLTRB(
                   FxSettingsLayout.pageInset,
                   6,
                   FxSettingsLayout.pageInset,
-                  88 + MediaQuery.paddingOf(context).bottom,
+                  24,
                 ),
                 child: Form(
                   key: _formKey,
@@ -330,36 +353,6 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen> {
                 ),
               ),
             ),
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                    TokensStrip.s4,
-                    0,
-                    TokensStrip.s4,
-                    12,
-                  ),
-                  child: Semantics(
-                    button: true,
-                    enabled: canSubmit,
-                    label:
-                        _loading
-                            ? 'Criando treino'
-                            : canSubmit
-                            ? 'Criar treino'
-                            : 'Criar treino. Informe o nome para habilitar',
-                    child: FxLiquidPrimaryButton(
-                      label: 'Criar',
-                      loading: _loading,
-                      loadingLabel: 'Criando…',
-                      onPressed: canSubmit ? _submit : null,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
         ),
       ),
     );

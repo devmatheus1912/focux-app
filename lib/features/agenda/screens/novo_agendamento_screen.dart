@@ -11,7 +11,9 @@ import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_form_chrome.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
+import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_settings_group.dart';
@@ -46,9 +48,32 @@ class _NovoAgendamentoScreenState extends ConsumerState<NovoAgendamentoScreen> {
 
   bool get _canSave => _alunoId != null && _inicio != null && _fim != null;
 
+  bool get _dirty =>
+      _alunoId != null ||
+      _inicio != null ||
+      _fim != null ||
+      _titulo.text.trim().isNotEmpty;
+
+  Future<void> _cancel() async {
+    FxKeyboardDismissScope.dismiss();
+    if (_dirty) {
+      final ok = await showFxConfirmSheet(
+        context,
+        title: agendaNovoDiscardTitle(),
+        message: agendaNovoDiscardMessage(),
+        confirmLabel: 'Descartar',
+      );
+      if (!ok || !mounted) return;
+    }
+    safePopOrGo(context, '/agenda');
+  }
+
   @override
   void initState() {
     super.initState();
+    _titulo.addListener(() {
+      if (mounted) setState(() {});
+    });
     final seed = widget.seedDay;
     if (seed != null && (seed.hour != 0 || seed.minute != 0)) {
       _inicio = seed;
@@ -105,6 +130,7 @@ class _NovoAgendamentoScreenState extends ConsumerState<NovoAgendamentoScreen> {
   }
 
   Future<void> _salvar() async {
+    FxKeyboardDismissScope.dismiss();
     if (!_canSave) {
       FeedbackHelper.showError(
         context,
@@ -169,19 +195,40 @@ class _NovoAgendamentoScreenState extends ConsumerState<NovoAgendamentoScreen> {
 
     return fxScreenA11yScope(
       label: 'Novo agendamento',
-      child: FxShellScaffold(
+      child: FxFormPopGuard(
+        dirty: _dirty,
+        onCancel: _cancel,
+        child: FxShellScaffold(
         useMesh: true,
         appBar: FxShellAppBar(
           title: 'Novo agendamento',
           subtitle: 'AGENDA',
-          onBack: () => safePopOrGo(context, '/agenda'),
+          leadingWidth: 92,
+          leading: TextButton(
+            onPressed: _cancel,
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            child: const Text('Cancelar'),
+          ),
+        ),
+        bottomNavigationBar: FxFormStickyBar(
+          child: FxLiquidPrimaryButton(
+            label: agendaNovoTileLabel(),
+            loading: _saving,
+            loadingLabel: 'Agendando…',
+            onPressed: _saving ? null : _salvar,
+          ),
         ),
         body: ListView(
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           padding: const EdgeInsets.fromLTRB(
             FxSettingsLayout.pageInset,
             8,
             FxSettingsLayout.pageInset,
-            32,
+            24,
           ),
           children: [
             alunosAsync.maybeWhen(
@@ -260,15 +307,9 @@ class _NovoAgendamentoScreenState extends ConsumerState<NovoAgendamentoScreen> {
                 ),
               ],
             ),
-            const SizedBox(height: TokensStrip.s3),
-            FxLiquidPrimaryButton(
-              label: agendaNovoTileLabel(),
-              loading: _saving,
-              loadingLabel: 'Agendando…',
-              onPressed: _saving ? null : _salvar,
-            ),
           ],
         ),
+      ),
       ),
     );
   }

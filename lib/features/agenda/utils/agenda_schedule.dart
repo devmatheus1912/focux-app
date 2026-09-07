@@ -117,6 +117,10 @@ String agendaNovoTileLabel() => 'Agendar atendimento';
 
 String agendaNovoConfirmTitle() => 'Agendar este horário?';
 
+String agendaNovoDiscardTitle() => 'Descartar agendamento?';
+
+String agendaNovoDiscardMessage() => 'O que você preencheu não será salvo.';
+
 String agendaNovoConfirmMessage({
   required String alunoNome,
   required DateTime inicio,
