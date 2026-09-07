@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../core/analytics/analytics_service.dart';
+import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
@@ -13,15 +16,19 @@ import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_form_sheet.dart';
+import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
+import '../../../core/widgets/fx_inset_picker_row.dart';
+import '../../../core/widgets/fx_inset_picker_sheet.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
-import '../../dashboard/widgets/dashboard_section_header.dart';
+import '../../../core/widgets/fx_toggle_chip.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../alunos/widgets/aluno_inset_form_field.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../subscription/models/subscription_plan.dart';
 import '../data/desafio_repository.dart';
 import '../utils/desafio_display.dart';
@@ -37,7 +44,8 @@ class DesafiosScreen extends ConsumerStatefulWidget {
 
 class _DesafiosScreenState extends ConsumerState<DesafiosScreen> {
   List<Desafio> _desafios = [];
-  bool _loading = true;
+  var _filtro = DesafioTipoFiltro.todos;
+  var _loading = true;
   String? _error;
   DateTime? _fetchedAt;
 
@@ -47,15 +55,20 @@ class _DesafiosScreenState extends ConsumerState<DesafiosScreen> {
     _load();
   }
 
+  List<Desafio> get _visiveis => _desafios
+      .where((d) => desafioMatchesFiltro(d.tipo, _filtro))
+      .toList();
+
   Future<void> _load() async {
     setState(() {
       _loading = true;
       _error = null;
     });
     try {
-      _desafios = await ref.read(_repo).listar();
+      final lista = await ref.read(_repo).listar();
       if (!mounted) return;
       setState(() {
+        _desafios = lista;
         _loading = false;
         _fetchedAt = DateTime.now();
       });
@@ -69,36 +82,128 @@ class _DesafiosScreenState extends ConsumerState<DesafiosScreen> {
   }
 
   Future<void> _criar() async {
-    final ctrl = TextEditingController();
+    final tituloCtrl = TextEditingController();
+    final descricaoCtrl = TextEditingController();
+    var tipo = desafioTipos.first.value;
+    var dias = 30;
+    var metaPontos = 100;
     var created = false;
     try {
       final ok = await showFxFormSheet(
         context,
         title: 'Novo desafio',
+        subtitle: 'Prazo, tipo e meta entram no ranking.',
         icon: Icons.flag_outlined,
         confirmLabel: 'Criar',
-        child: AlunoInsetFormField(
-          controller: ctrl,
-          label: 'Título',
-          icon: Icons.title_outlined,
-          showDivider: false,
+        child: StatefulBuilder(
+          builder: (ctx, setDialogState) => Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              AlunoInsetFormField(
+                controller: tituloCtrl,
+                label: 'Título',
+                icon: Icons.title_outlined,
+              ),
+              AlunoInsetFormField(
+                controller: descricaoCtrl,
+                label: 'Descrição (opcional)',
+                icon: Icons.notes_outlined,
+                maxLines: 2,
+              ),
+              FxInsetPickerRow(
+                icon: Icons.category_outlined,
+                label: 'Tipo',
+                value: desafioTipoLabel(tipo),
+                onTap: () async {
+                  final picked = await showFxInsetPickerSheet<String>(
+                    ctx,
+                    title: 'Tipo',
+                    selected: tipo,
+                    items: [
+                      for (final item in desafioTipos)
+                        FxInsetPickerSheetItem(
+                          value: item.value,
+                          label: item.label,
+                        ),
+                    ],
+                  );
+                  if (picked == null) return;
+                  setDialogState(() => tipo = picked);
+                },
+              ),
+              FxInsetPickerRow(
+                icon: Icons.event_outlined,
+                label: 'Prazo',
+                value: desafioDuracaoLabel(dias),
+                onTap: () async {
+                  final picked = await showFxInsetPickerSheet<int>(
+                    ctx,
+                    title: 'Prazo',
+                    selected: dias,
+                    items: [
+                      for (final d in desafioDuracoes)
+                        FxInsetPickerSheetItem(
+                          value: d,
+                          label: desafioDuracaoLabel(d),
+                        ),
+                    ],
+                  );
+                  if (picked == null) return;
+                  setDialogState(() => dias = picked);
+                },
+              ),
+              FxInsetPickerRow(
+                icon: Icons.emoji_events_outlined,
+                label: 'Meta',
+                value: desafioMetaLabel(metaPontos),
+                showDivider: false,
+                onTap: () async {
+                  final picked = await showFxInsetPickerSheet<int>(
+                    ctx,
+                    title: 'Meta',
+                    selected: metaPontos,
+                    items: const [
+                      FxInsetPickerSheetItem(value: 50, label: '50 pts'),
+                      FxInsetPickerSheetItem(value: 100, label: '100 pts'),
+                      FxInsetPickerSheetItem(value: 200, label: '200 pts'),
+                    ],
+                  );
+                  if (picked == null) return;
+                  setDialogState(() => metaPontos = picked);
+                },
+              ),
+            ],
+          ),
         ),
       );
-      if (ok != true || ctrl.text.trim().isEmpty) return;
-      await ref.read(_repo).criar(titulo: ctrl.text.trim());
+      if (ok != true || tituloCtrl.text.trim().isEmpty) return;
+      final hoje = DateTime.now();
+      await ref.read(_repo).criar(
+        titulo: tituloCtrl.text.trim(),
+        descricao: descricaoCtrl.text.trim().isEmpty
+            ? null
+            : descricaoCtrl.text.trim(),
+        tipo: tipo,
+        metaPontos: metaPontos,
+        inicio: hoje,
+        fim: hoje.add(Duration(days: dias)),
+      );
+      AnalyticsService.instance.track(
+        ProductEvents.desafioCreated,
+        props: {'feature': 'desafios', 'tipo': tipo},
+      );
       created = true;
       if (mounted) FeedbackHelper.showSuccess(context, 'Desafio criado');
     } catch (e) {
-      if (mounted) {
-        FeedbackHelper.showError(context, friendlyError(e));
-      }
+      if (mounted) FeedbackHelper.showError(context, friendlyError(e));
     } finally {
-      ctrl.dispose();
+      tituloCtrl.dispose();
+      descricaoCtrl.dispose();
     }
     if (created) await _load();
   }
 
-  Future<void> _abrirLeaderboard(Desafio d) async {
+  Future<void> _abrirDetalhe(Desafio d) async {
     try {
       final lb = await ref.read(_repo).leaderboard(d.id);
       if (!mounted) return;
@@ -119,9 +224,18 @@ class _DesafiosScreenState extends ConsumerState<DesafiosScreen> {
                 SizedBox(height: FxSettingsLayout.headerToGroup),
                 FxHomeSheetHeader(
                   isDark: isDark,
-                  title: 'Ranking',
-                  subtitle: d.titulo,
-                  leading: Icon(Icons.emoji_events_outlined, color: primary, size: 18),
+                  title: d.titulo,
+                  subtitle: desafioSubtitle(
+                    tipo: d.tipo,
+                    metaPontos: d.metaPontos,
+                    inicio: d.inicio,
+                    fim: d.fim,
+                  ),
+                  leading: Icon(
+                    Icons.emoji_events_outlined,
+                    color: primary,
+                    size: 18,
+                  ),
                 ),
                 SizedBox(height: FxSettingsLayout.headerToGroup),
                 Expanded(
@@ -133,22 +247,38 @@ class _DesafiosScreenState extends ConsumerState<DesafiosScreen> {
                       24,
                     ),
                     children: [
+                      if (d.descricao != null && d.descricao!.trim().isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 16),
+                          child: Text(
+                            d.descricao!.trim(),
+                            style: FocuxHubTypography.bodyMuted(
+                              color: fxScreenMute(ctx),
+                            ),
+                          ),
+                        ),
                       if (lb.isEmpty)
                         Text(desafioLeaderboardEmpty())
                       else
                         FxSettingsGroup(
-                          header: 'Participantes',
+                          header: 'Ranking',
                           children: [
                             for (var i = 0; i < lb.length; i++)
                               FxSettingsTile(
                                 fxIcon: 'star',
-                                label: desafioLeaderboardName(
-                                  lb[i]['alunoNome'] as String?,
-                                ),
+                                label: desafioLeaderboardName(lb[i].alunoNome),
                                 subtitle: '${i + 1}º lugar',
-                                value: desafioLeaderboardPoints(lb[i]['pontos']),
+                                value: desafioLeaderboardPoints(lb[i].pontos),
                                 numeric: true,
                                 showDivider: i != lb.length - 1,
+                                onTap: lb[i].alunoId <= 0
+                                    ? null
+                                    : () {
+                                        Navigator.of(ctx).pop();
+                                        context.push(
+                                          '/alunos/${lb[i].alunoId}',
+                                        );
+                                      },
                               ),
                           ],
                         ),
@@ -180,10 +310,33 @@ class _DesafiosScreenState extends ConsumerState<DesafiosScreen> {
         capability: 'comunidadeGrupos',
         child: FxShellScaffold(
           useMesh: true,
+          constrainWidth: false,
           appBar: FxShellAppBar(
             title: 'Desafios',
-            subtitle: desafioHubSubtitle(freshnessLabel),
+            subtitle: desafioHubSubtitle(
+              count: _loading ? 0 : _desafios.length,
+              freshness: _loading ? null : freshnessLabel,
+            ),
+            onBack: () => safePopOrGo(context, '/perfil/ferramentas'),
             actions: [
+              FxHelpIconButton(
+                tooltip: 'Como usar desafios',
+                onTap: () => showFxHelpSheet(
+                  context,
+                  title: 'Desafios',
+                  subtitle: 'Campanha com prazo, meta e ranking.',
+                  tips: const [
+                    FxHelpTip(
+                      'Criar',
+                      'Título, tipo, prazo e meta. O ranking soma hábitos ou treinos.',
+                    ),
+                    FxHelpTip(
+                      'Participar',
+                      'O aluno entra sozinho pelo app. Toque no ranking para abrir o 360.',
+                    ),
+                  ],
+                ),
+              ),
               ShellHeaderIconButton(
                 icon: 'plus',
                 tooltip: 'Novo desafio',
@@ -191,74 +344,119 @@ class _DesafiosScreenState extends ConsumerState<DesafiosScreen> {
               ),
             ],
           ),
-          body:
-              _loading
-                  ? const Padding(
-                    padding: EdgeInsets.all(FxSettingsLayout.pageInset),
-                    child: SkeletonList(count: 5),
-                  )
-                  : _error != null
-                  ? FxErrorState(
-                    chromeOnDark: chrome.isDark,
-                    primary: scheme.primary,
-                    message: _error!,
-                    onRetry: _load,
-                  )
-                  : FxContentWidthLimiter(child: _buildBody()),
+          body: _loading
+              ? const Padding(
+                  padding: EdgeInsets.all(FxSettingsLayout.pageInset),
+                  child: SkeletonList(count: 5),
+                )
+              : _error != null
+              ? FxErrorState(
+                  chromeOnDark: chrome.isDark,
+                  primary: scheme.primary,
+                  message: _error!,
+                  onRetry: _load,
+                )
+              : FxContentWidthLimiter(child: _buildBody()),
         ),
       ),
     );
   }
 
   Widget _buildBody() {
+    final visiveis = _visiveis;
     return RefreshIndicator(
       onRefresh: _load,
-      child: ListView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(
-          FxSettingsLayout.pageInset,
-          8,
-          FxSettingsLayout.pageInset,
-          32,
-        ),
+      child: Column(
         children: [
-          if (_desafios.isEmpty)
-            FxEmptyState(
-              icon: 'spark',
-              title: 'Nenhum desafio',
-              subtitle: 'Crie o primeiro desafio para engajar seus alunos.',
-              action: FxEmptyAction(label: 'Criar desafio', onTap: _criar),
-            )
-          else ...[
-            const DashboardSectionHeader(title: 'Desafios ativos'),
-            const SizedBox(height: TokensStrip.s2),
-            Text(
-              'Toque para ver o ranking.',
-              style: FocuxHubTypography.bodyMuted(
-                color: fxScreenMute(context),
-                fontWeight: FontWeight.w600,
-              ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              TokensStrip.s4,
+              TokensStrip.s2,
+              TokensStrip.s4,
+              TokensStrip.s2,
             ),
-            const SizedBox(height: TokensStrip.s3),
-            for (final desafio in _desafios)
-              FxSatelliteListTile(
-                title: desafio.titulo,
-                subtitle: Text(
-                  desafioSubtitle(
-                    tipo: desafio.tipo,
-                    metaPontos: desafio.metaPontos,
+            child: Wrap(
+              spacing: TokensStrip.s2,
+              runSpacing: TokensStrip.s2,
+              children: [
+                for (final filtro in DesafioTipoFiltro.values)
+                  FxToggleChip(
+                    label: desafioFiltroLabel(filtro),
+                    selected: _filtro == filtro,
+                    isDark: Theme.of(context).brightness == Brightness.dark,
+                    onTap: () => setState(() => _filtro = filtro),
                   ),
-                ),
-                trailing: Text(
-                  '${desafio.metaPontos}',
-                  style: FocuxHubTypography.bodyMuted(
-                    color: fxScreenMute(context),
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                onTap: () => _abrirLeaderboard(desafio),
+              ],
+            ),
+          ),
+          Expanded(
+            child: ListView.builder(
+              physics: const AlwaysScrollableScrollPhysics(),
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+              padding: const EdgeInsets.fromLTRB(
+                FxSettingsLayout.pageInset,
+                8,
+                FxSettingsLayout.pageInset,
+                32,
               ),
-          ],
+              itemCount: visiveis.isEmpty ? 1 : visiveis.length + 2,
+              itemBuilder: (context, index) {
+                if (visiveis.isEmpty) {
+                  return FxEmptyState(
+                    icon: 'spark',
+                    title: _desafios.isEmpty
+                        ? 'Nenhum desafio'
+                        : 'Nada neste filtro',
+                    subtitle: _desafios.isEmpty
+                        ? 'Crie o primeiro desafio com prazo e meta.'
+                        : 'Troque o tipo ou crie outro desafio.',
+                    action: FxEmptyAction(
+                      label: 'Criar desafio',
+                      onTap: _criar,
+                    ),
+                  );
+                }
+                if (index == 0) {
+                  return const DashboardSectionHeader(title: 'Desafios ativos');
+                }
+                if (index == 1) {
+                  return Padding(
+                    padding: const EdgeInsets.only(
+                      top: TokensStrip.s2,
+                      bottom: TokensStrip.s3,
+                    ),
+                    child: Text(
+                      'Toque para ver prazo e ranking.',
+                      style: FocuxHubTypography.bodyMuted(
+                        color: fxScreenMute(context),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  );
+                }
+                final desafio = visiveis[index - 2];
+                return FxSatelliteListTile(
+                  title: desafio.titulo,
+                  subtitle: Text(
+                    desafioSubtitle(
+                      tipo: desafio.tipo,
+                      metaPontos: desafio.metaPontos,
+                      inicio: desafio.inicio,
+                      fim: desafio.fim,
+                    ),
+                  ),
+                  trailing: Text(
+                    desafioMetaLabel(desafio.metaPontos),
+                    style: FocuxHubTypography.bodyMuted(
+                      color: fxScreenMute(context),
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  onTap: () => _abrirDetalhe(desafio),
+                );
+              },
+            ),
+          ),
         ],
       ),
     );

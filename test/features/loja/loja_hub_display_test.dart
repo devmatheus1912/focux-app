@@ -47,5 +47,9 @@ void main() {
     );
     expect(lojaPedidoFxIcon('PAGO'), 'circle-check');
     expect(lojaPedidoFxIcon('PENDENTE'), 'pix');
+    expect(lojaPedidoPendente('PENDENTE'), isTrue);
+    expect(lojaPedidoPendente('PAGO'), isFalse);
+    expect(lojaPedidoPix('  abc  '), 'abc');
+    expect(lojaPedidoPix('  '), isNull);
   });
 }

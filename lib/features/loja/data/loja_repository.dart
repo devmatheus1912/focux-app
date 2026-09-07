@@ -77,4 +77,11 @@ class LojaRepository {
       Map<String, dynamic>.from(response.data as Map),
     );
   }
+
+  Future<LojaPedido> confirmar(int pedidoId) async {
+    final response = await _dio.post('/api/loja/pedidos/$pedidoId/confirmar');
+    return LojaPedido.fromJson(
+      Map<String, dynamic>.from(response.data as Map),
+    );
+  }
 }

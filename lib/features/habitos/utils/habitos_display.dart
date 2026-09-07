@@ -66,3 +66,16 @@ String habitoComplianceEmptyTitle(String query) =>
 String habitoComplianceEmptySubtitle(String query) => query.trim().isEmpty
     ? 'Cadastre hábitos e os alunos vão começar a marcar.'
     : 'Nada com esse nome na compliance da semana.';
+
+const habitoAlunoTodosId = 0;
+const habitoAlunoTodosLabel = 'Todos os alunos';
+
+String habitoDetalheMessage({
+  String? descricao,
+  required int metaSemanal,
+}) {
+  final desc = descricao?.trim();
+  final meta = 'Meta semanal: ${metaSemanal}x. Os alunos marcam no app deles.';
+  if (desc == null || desc.isEmpty) return meta;
+  return '$desc\n\n$meta';
+}

@@ -26,6 +26,7 @@ void main() {
           'buyerNome': 'Ana',
           'valor': 150,
           'status': 'PENDENTE',
+          'pixCopiaECola': 'PIX-MOCK-1',
         },
       ],
       'planoFeatures': {
@@ -39,6 +40,7 @@ void main() {
     expect(bundle.pedidos, hasLength(1));
     expect(bundle.pedidos.first.buyerEmail, 'ana@test.com');
     expect(bundle.pedidos.first.status, 'PENDENTE');
+    expect(bundle.pedidos.first.pixCopiaECola, 'PIX-MOCK-1');
     expect(bundle.planoFeatures?.plano, SubscriptionPlan.ENTERPRISE);
     expect(bundle.planoFeatures?.lojaDigital, isTrue);
   });

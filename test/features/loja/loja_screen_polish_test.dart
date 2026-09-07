@@ -14,6 +14,10 @@ void main() {
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(screen, contains('FxShellScaffold'));
     expect(screen, contains('FxContentWidthLimiter'));
+    expect(screen, contains('constrainWidth: false'));
+    expect(screen, contains('safePopOrGo'));
+    expect(screen, contains('showFxConfirmSheet'));
+    expect(screen, contains('keyboardDismissBehavior'));
     expect(screen, contains('friendlyError'));
     expect(screen, contains('FxEmptyState'));
     expect(screen, contains('SkeletonList'));
