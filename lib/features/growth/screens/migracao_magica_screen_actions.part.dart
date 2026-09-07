@@ -28,7 +28,7 @@ extension MigracaoMagicaScreenActions on _MigracaoMagicaScreenState {
     if (atual == null) return true;
 
     if (!atual.migracaoFoto) {
-      await _mostrarPaywallFoto(atual);
+      await _mostrarPaywallFoto();
       return false;
     }
 
@@ -46,52 +46,12 @@ extension MigracaoMagicaScreenActions on _MigracaoMagicaScreenState {
     return true;
   }
 
-  Future<void> _mostrarPaywallFoto(PlanoFeatures plano) async {
-    final offer = PlanEntitlements.lockedOffer(
+  Future<void> _mostrarPaywallFoto() {
+    return UpgradePromptSheet.show(
+      context: context,
       featureName: 'Foto na migração',
       capability: 'migracaoFoto',
-    );
-    await showDialog<void>(
-      context: context,
-      builder:
-          (ctx) => Dialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(TokensStrip.rCard),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(24, 24, 24, 20),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    offer.headline,
-                    style: FocuxHubTypography.sectionTitle(
-                      ctx,
-                      color: ShellChrome.of(ctx).ink,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(offer.body, style: const TextStyle(height: 1.45)),
-                  const SizedBox(height: 20),
-                  FilledButton(
-                    onPressed: () {
-                      Navigator.pop(ctx);
-                      context.push(
-                        '/assinatura',
-                        extra: offer.targetPlan?.apiName,
-                      );
-                    },
-                    child: Text(offer.ctaLabel),
-                  ),
-                  TextButton(
-                    onPressed: () => Navigator.pop(ctx),
-                    child: const Text('Agora não'),
-                  ),
-                ],
-              ),
-            ),
-          ),
+      source: 'migracao_foto',
     );
   }
 
@@ -446,165 +406,14 @@ extension MigracaoMagicaScreenActions on _MigracaoMagicaScreenState {
     }
   }
 
-  Future<void> _mostrarResumoImportacao(MigracaoImportacaoResumo data) async {
-    final importados = data.importados;
-    final duplicados = data.duplicados;
-    final erros = data.erros;
-    final mensagem = data.mensagem;
-    final detalhes = data.detalhes;
-
-    await showDialog<void>(
-      context: context,
-      builder: (ctx) {
-        final isDark = Theme.of(ctx).brightness == Brightness.dark;
-        final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-        final mute =
-            isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-        final brand = Theme.of(ctx).colorScheme.primary;
-
-        Widget stat(String label, int value, Color color) {
-          return Expanded(
-            child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: isDark ? 0.15 : 0.1),
-                borderRadius: BorderRadius.circular(TokensStrip.rSm),
-              ),
-              child: Column(
-                children: [
-                  Text(
-                    '$value',
-                    style: FocuxTypography.headline(color: color),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    label,
-                    textAlign: TextAlign.center,
-                    style: FocuxHubTypography.bodyMuted(
-                      color: mute,
-                      height: 1.3,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        }
-
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(TokensStrip.rCard),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(24, 24, 24, 20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Row(
-                  children: [
-                    Icon(Icons.check_circle_rounded, color: brand, size: 28),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        'Importação concluída',
-                        style: FocuxHubTypography.sectionTitle(
-                          context,
-                          color: ink,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                if (mensagem.isNotEmpty) ...[
-                  const SizedBox(height: 10),
-                  Text(mensagem, style: TextStyle(color: mute, height: 1.45)),
-                ],
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    stat('Importados', importados, brand),
-                    const SizedBox(width: 8),
-                    stat('Duplicados', duplicados, EagleTokens.warn),
-                    const SizedBox(width: 8),
-                    stat('Erros', erros, EagleTokens.bad),
-                  ],
-                ),
-                if (detalhes.isNotEmpty) ...[
-                  const SizedBox(height: 16),
-                  ConstrainedBox(
-                    constraints: const BoxConstraints(maxHeight: 180),
-                    child: ListView.separated(
-                      shrinkWrap: true,
-                      itemCount: detalhes.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 6),
-                      itemBuilder: (_, i) {
-                        final item = detalhes[i];
-                        final nome = item.nome;
-                        final status = item.status;
-                        final motivo = item.motivo;
-                        Color badgeColor;
-                        switch (status) {
-                          case 'IMPORTADO':
-                            badgeColor = brand;
-                          case 'DUPLICADO':
-                            badgeColor = EagleTokens.warn;
-                          default:
-                            badgeColor = EagleTokens.bad;
-                        }
-                        return Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              margin: const EdgeInsets.only(top: 4),
-                              width: 8,
-                              height: 8,
-                              decoration: BoxDecoration(
-                                color: badgeColor,
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    nome,
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.w700,
-                                      color: ink,
-                                      fontSize: 13,
-                                    ),
-                                  ),
-                                  if (motivo.isNotEmpty)
-                                    Text(
-                                      motivo,
-                                      style: TextStyle(
-                                        fontSize: 11.5,
-                                        color: mute,
-                                        height: 1.35,
-                                      ),
-                                    ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        );
-                      },
-                    ),
-                  ),
-                ],
-                const SizedBox(height: 20),
-                FilledButton(
-                  onPressed: () => Navigator.pop(ctx),
-                  child: const Text('Fechar'),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
+  Future<void> _mostrarResumoImportacao(MigracaoImportacaoResumo data) {
+    return showFxNoticeSheet(
+      context,
+      title: 'Importação concluída',
+      message: data.mensagem.isEmpty ? null : data.mensagem,
+      actionLabel: 'Fechar',
+      icon: Icons.check_circle_rounded,
+      body: _MigracaoImportacaoResumoBody(data: data),
     );
   }
 

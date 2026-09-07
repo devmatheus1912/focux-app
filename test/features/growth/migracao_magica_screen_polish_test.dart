@@ -10,6 +10,9 @@ void main() {
     expect(screen, contains('FxShellScaffold'));
     expect(screen, anyOf(contains('FxContentWidthLimiter'), isNot(contains('constrainWidth: false'))));
     expect(screen, contains('showFxConfirmSheet'));
+    expect(screen, contains('showFxNoticeSheet'));
+    expect(screen, contains('UpgradePromptSheet'));
+    expect(screen, isNot(contains('showDialog')));
     expect(screen, contains('FxHelpIconButton'));
     expect(screen, contains('migracaoIniciarLabel'));
     expect(screen, contains('FxLiquidPrimaryButton'));

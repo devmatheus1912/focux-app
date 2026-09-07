@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/analytics/analytics_service.dart';
-import '../../../core/theme/focux_hub_typography.dart';
-import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_confirm_sheet.dart';
+import '../../../core/widgets/fx_form_sheet.dart';
 import '../../planos/data/planos_repository.dart';
 import '../../planos/providers/plano_features_provider.dart';
 import '../../subscription/models/subscription_plan.dart';
@@ -84,49 +84,16 @@ class IaQuotaUpgrade {
 
     if (!context.mounted) return false;
 
-    final upgrade = await showDialog<bool>(
-      context: context,
-      builder:
-          (ctx) => Dialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(TokensStrip.rCard),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(24, 24, 24, 20),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    offer.headline,
-                    style: FocuxHubTypography.sectionTitle(
-                      ctx,
-                      color: Theme.of(ctx).colorScheme.onSurface,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(offer.body, style: const TextStyle(height: 1.45)),
-                  const SizedBox(height: 20),
-                  if (offer.targetPlan != null)
-                    FilledButton(
-                      onPressed: () => Navigator.pop(ctx, true),
-                      child: Text(offer.ctaLabel),
-                    )
-                  else
-                    FilledButton(
-                      onPressed: () => Navigator.pop(ctx, false),
-                      child: const Text('Entendi'),
-                    ),
-                  if (offer.targetPlan != null)
-                    TextButton(
-                      onPressed: () => Navigator.pop(ctx, false),
-                      child: const Text('Agora não'),
-                    ),
-                ],
-              ),
-            ),
-          ),
-    );
+    final upgrade = offer.targetPlan == null
+        ? await _showQuotaNotice(context, offer)
+        : await showFxConfirmSheet(
+            context,
+            title: offer.headline,
+            message: offer.body,
+            confirmLabel: offer.ctaLabel,
+            cancelLabel: 'Agora não',
+            icon: Icons.lock_outline_rounded,
+          );
 
     if (upgrade == true && offer.targetPlan != null && context.mounted) {
       context.push('/assinatura', extra: offer.targetPlan!.apiName);
@@ -161,5 +128,19 @@ class IaQuotaUpgrade {
       features: ref.read(planoFeaturesProvider).valueOrNull,
     );
     await ref.read(planoFeaturesProvider.notifier).refresh();
+  }
+
+  static Future<bool> _showQuotaNotice(
+    BuildContext context,
+    LockedOffer offer,
+  ) async {
+    await showFxNoticeSheet(
+      context,
+      title: offer.headline,
+      message: offer.body,
+      actionLabel: offer.ctaLabel,
+      icon: Icons.lock_outline_rounded,
+    );
+    return false;
   }
 }

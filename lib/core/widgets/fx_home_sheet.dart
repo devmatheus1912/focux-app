@@ -29,6 +29,11 @@ abstract final class FxHomeSheetChrome {
   static Color barrier([bool isDark = false]) =>
       heroScrim(isDark ? 0.34 : 0.28);
 
+  static void dismissAndPop<T extends Object?>(BuildContext context, [T? result]) {
+    FxKeyboardDismissScope.dismiss();
+    Navigator.of(context).pop(result);
+  }
+
   static EdgeInsets paddingOf(BuildContext context) {
     final media = MediaQuery.of(context);
     return EdgeInsets.fromLTRB(
@@ -268,10 +273,7 @@ class FxHomeSheetHeader extends StatelessWidget {
         trailing ??
             IconButton(
               tooltip: 'Fechar',
-              onPressed: () {
-                FxKeyboardDismissScope.dismiss();
-                Navigator.of(context).maybePop();
-              },
+              onPressed: () => FxHomeSheetChrome.dismissAndPop(context),
               style: IconButton.styleFrom(
                 minimumSize: const Size(
                   FxHomeSheetChrome.touchTarget,

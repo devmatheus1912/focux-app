@@ -109,7 +109,10 @@ class _FxFormSheet extends StatelessWidget {
           ),
           SizedBox(height: TokensStrip.s4),
           Expanded(
-            child: SingleChildScrollView(child: child),
+            child: SingleChildScrollView(
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+              child: child,
+            ),
           ),
           const SizedBox(height: 20),
           if (destructive)
@@ -118,7 +121,7 @@ class _FxFormSheet extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: () {
                   HapticFeedback.heavyImpact();
-                  Navigator.of(context).pop(true);
+                  FxHomeSheetChrome.dismissAndPop(context, true);
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: accent,
@@ -134,13 +137,13 @@ class _FxFormSheet extends StatelessWidget {
           else
             FxLiquidPrimaryButton(
               label: confirmLabel,
-              onPressed: () => Navigator.of(context).pop(true),
+              onPressed: () => FxHomeSheetChrome.dismissAndPop(context, true),
             ),
           const SizedBox(height: 10),
           SizedBox(
             height: 48,
             child: TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
+              onPressed: () => FxHomeSheetChrome.dismissAndPop(context, false),
               child: Text(
                 cancelLabel,
                 style: FocuxHubTypography.bodyMuted(
@@ -199,6 +202,7 @@ class _FxNoticeSheet extends StatelessWidget {
           SizedBox(height: TokensStrip.s3),
           Expanded(
             child: SingleChildScrollView(
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -225,7 +229,7 @@ class _FxNoticeSheet extends StatelessWidget {
           ...extraActions,
           FxLiquidPrimaryButton(
             label: actionLabel,
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => FxHomeSheetChrome.dismissAndPop(context),
           ),
         ],
       ),
