@@ -41,5 +41,8 @@ void main() {
     expect(screen, contains('AuthRoleToggle'));
     expect(screen, contains('AuthShell'));
     expect(screen, contains('PageView'));
+    expect(screen, contains('PopScope'));
+    expect(screen, contains('_persistProgress'));
+    expect(widgets, contains('onboardingBack'));
   });
 }

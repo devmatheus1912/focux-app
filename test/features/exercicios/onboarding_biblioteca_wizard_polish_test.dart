@@ -15,6 +15,9 @@ void main() {
     expect(screen, contains('SkeletonList'));
     expect(screen, contains('FxSettingsLayout'));
     expect(screen, contains('FxLiquidPrimaryButton'));
+    expect(screen, contains('FxWizardStickyBar'));
+    expect(screen, contains('FxWizardPopGuard'));
+    expect(screen, contains('safePopOrGo'));
     expect(screen, contains('bottomNavigationBar'));
     expect(screen, contains('bibliotecaEtapaLabel'));
     expect(screen, contains('bibliotecaQuestionTitle'));

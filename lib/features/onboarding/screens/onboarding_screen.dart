@@ -33,6 +33,9 @@ class OnboardingScreen extends StatefulWidget {
 
 class _OnboardingScreenState extends State<OnboardingScreen>
     with TickerProviderStateMixin {
+  static const _personaKey = 'onboarding_persona_v3';
+  static const _slideKey = 'onboarding_slide_v3';
+
   final _page = PageController();
   int _current = 0;
   OnboardingPersona _persona = OnboardingPersona.personal;
@@ -115,8 +118,35 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
+      _restoreProgress();
       _loadSocialProof();
     });
+  }
+
+  Future<void> _restoreProgress() async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(_personaKey);
+    final slide = prefs.getInt(_slideKey) ?? 0;
+    if (!mounted) return;
+    final persona =
+        raw == OnboardingPersona.aluno.name
+            ? OnboardingPersona.aluno
+            : OnboardingPersona.personal;
+    final pages = _pagesFor(persona);
+    final index = slide.clamp(0, pages.length - 1);
+    setState(() {
+      _persona = persona;
+      _current = index;
+    });
+    if (_page.hasClients) {
+      _page.jumpToPage(index);
+    }
+  }
+
+  Future<void> _persistProgress() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_personaKey, _persona.name);
+    await prefs.setInt(_slideKey, _current);
   }
 
   Future<void> _loadSocialProof() async {
@@ -192,6 +222,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       _persona = persona;
       _current = targetIndex;
     });
+    _persistProgress();
     if (_page.hasClients) {
       _page.jumpToPage(targetIndex);
     }
@@ -218,6 +249,23 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     HapticFeedback.selectionClick();
     setState(() => _current = i);
     _entryCtrl.forward(from: 0);
+    _persistProgress();
+  }
+
+  void _back() {
+    if (_current <= 0) {
+      _skip();
+      return;
+    }
+    HapticFeedback.selectionClick();
+    if (reduceMotionOf(context)) {
+      _activePage.jumpToPage(_current - 1);
+    } else {
+      _activePage.previousPage(
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeOutCubic,
+      );
+    }
   }
 
   @override
@@ -228,7 +276,13 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     final textScaler = clampedTextScaler(context);
     final compact = _isCompactLayout(context);
 
-    return fxScreenA11yScope(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        _back();
+      },
+      child: fxScreenA11yScope(
       label: 'Boas-vindas Focux',
       child: MediaQuery(
         data: MediaQuery.of(context).copyWith(textScaler: textScaler),
@@ -281,6 +335,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                                 duration: const Duration(milliseconds: 400),
                                 curve: Curves.easeOutCubic,
                               ),
+                  onBack: _current > 0 ? _back : null,
                   onLogin: _goLogin,
                   onPrimary: _next,
                 ),
@@ -288,6 +343,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
             ),
           ),
         ),
+      ),
       ),
     );
   }

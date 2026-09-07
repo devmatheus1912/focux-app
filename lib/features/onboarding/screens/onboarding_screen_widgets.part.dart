@@ -105,6 +105,7 @@ class _OnboardingFooter extends StatelessWidget {
     required this.onDotTap,
     required this.onLogin,
     required this.onPrimary,
+    this.onBack,
     this.socialProofLine,
   });
 
@@ -117,6 +118,7 @@ class _OnboardingFooter extends StatelessWidget {
   final ValueChanged<int> onDotTap;
   final VoidCallback onLogin;
   final VoidCallback onPrimary;
+  final VoidCallback? onBack;
 
   @override
   Widget build(BuildContext context) {
@@ -169,6 +171,13 @@ class _OnboardingFooter extends StatelessWidget {
                         : FocuxBrandCopy.onboardingCtaNext,
                 onPressed: onPrimary,
               ),
+              if (onBack != null) ...[
+                const SizedBox(height: TokensStrip.s2),
+                TextButton(
+                  onPressed: onBack,
+                  child: Text(FocuxBrandCopy.onboardingBack),
+                ),
+              ],
               const SizedBox(height: TokensStrip.s3),
               FxConversionTextLink(
                 text: FocuxBrandCopy.onboardingLoginLead,

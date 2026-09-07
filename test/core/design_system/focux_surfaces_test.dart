@@ -55,6 +55,16 @@ void main() {
     expect(FocuxSurfaces.resolveParent(match), isNull);
   });
 
+  test('wizards S9 têm pai e etapa', () {
+    final setup = FocuxSurfaces.resolve('/onboarding/wizard');
+    expect(setup!.spec.type, FocuxSurfaceType.s9);
+    expect(FocuxSurfaces.resolveParent(setup), '/dashboard/personal');
+
+    final biblioteca = FocuxSurfaces.resolve('/exercicios/biblioteca-wizard');
+    expect(biblioteca!.spec.type, FocuxSurfaceType.s9);
+    expect(FocuxSurfaces.resolveParent(biblioteca), '/exercicios');
+  });
+
   test('checkin executar e presencial são S8', () {
     final checkin = FocuxSurfaces.resolve('/checkin/executar');
     expect(checkin!.spec.type, FocuxSurfaceType.s8);
