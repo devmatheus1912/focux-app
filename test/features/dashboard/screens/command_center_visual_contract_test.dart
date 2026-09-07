@@ -96,7 +96,7 @@ void main() {
     expect(widget, contains('_commandPanelKey'));
     expect(widget, contains('DashboardPulseSnapshot'));
     expect(widget, contains('riskOwnedByDayFocus'));
-    expect(widget, contains('featuredTools'));
+    expect(widget, contains('atalhosHomeFromCatalogo'));
     expect(widget, contains('showDashboardToolsCatalogSheet'));
     expect(widget, contains('checkinsTrend'));
     expect(widget, contains('attentionRiskLimit'));

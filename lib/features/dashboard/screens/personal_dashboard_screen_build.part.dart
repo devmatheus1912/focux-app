@@ -265,6 +265,9 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                                 topAderencia: home.topAderencia,
                                 alunosScore: home.commandCenter.alunosScore,
                                 homePlanoFeatures: home.planoFeatures,
+                                onboardingCompleto:
+                                    onboardingFromHome?.ativacaoCompleta ??
+                                    false,
                                 toolsSectionKey: _toolsSectionKey,
                                 onOpenRelatorio:
                                     () =>

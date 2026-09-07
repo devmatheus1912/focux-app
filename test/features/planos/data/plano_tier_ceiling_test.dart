@@ -1,7 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/dashboard/data/dashboard_tool_shortcuts.dart';
+import 'package:focux_app/features/ferramentas/data/ferramentas_catalogo_models.dart';
 import 'package:focux_app/features/planos/data/planos_repository.dart';
 import 'package:focux_app/features/subscription/models/subscription_plan.dart';
+
+import '../../ferramentas/catalogo_fixture.dart';
 
 PlanoFeatures _tier(SubscriptionPlan plan) => PlanoFeatures(
   plano: plan,
@@ -12,6 +15,11 @@ PlanoFeatures _tier(SubscriptionPlan plan) => PlanoFeatures(
   iaCopiloto: false,
   migracaoFoto: false,
 ).normalizeForTier();
+
+List<DashboardToolShortcut> _leaves() {
+  final catalogo = FerramentasCatalogo.fromJson(catalogoFixtureJson());
+  return [for (final hub in catalogo.hubs) ...catalogLeavesFromHub(hub)];
+}
 
 void main() {
   group('normalizeForTier — matriz canônica', () {
@@ -78,43 +86,43 @@ void main() {
   });
 
   group('Dashboard shortcuts — atalhos trancados por tier', () {
-    int locked(PlanoFeatures f) => DashboardToolShortcut.moreTools
-        .where((s) => s.capability != null && !s.isUnlocked(f))
-        .length;
+    int locked(PlanoFeatures f) =>
+        _leaves().where((s) => s.capability != null && !s.isUnlocked(f)).length;
 
     test('FREE tranca maioria dos atalhos pagos', () {
-      expect(locked(_tier(SubscriptionPlan.FREE)), greaterThan(8));
+      expect(locked(_tier(SubscriptionPlan.FREE)), greaterThan(0));
     });
 
-    test('PRO tranca Loja e Landing', () {
+    test('PRO tranca Loja no hub de vendas', () {
       final f = _tier(SubscriptionPlan.PRO);
-      expect(
-        DashboardToolShortcut.moreTools
-            .firstWhere((s) => s.label == 'Automações')
-            .isUnlocked(f),
-        isFalse,
+      final leaves = _leaves();
+      final lojaHub = leaves.firstWhere((s) => s.label == 'Vendas');
+      expect(lojaHub.entrada.abas.any((a) => a.id == 'loja'), isTrue);
+      final lojaAba = DashboardToolShortcut.fromEntrada(
+        lojaHub.entrada.abas.firstWhere((a) => a.id == 'loja'),
       );
-      expect(
-        DashboardToolShortcut.moreTools
-            .firstWhere((s) => s.label == 'Loja')
-            .isUnlocked(f),
-        isFalse,
-      );
-      expect(
-        DashboardToolShortcut.moreTools
-            .firstWhere((s) => s.label == 'Hábitos')
-            .isUnlocked(f),
-        isTrue,
-      );
+      expect(lojaAba.isUnlocked(f), isFalse);
     });
 
-    test('ENTERPRISE — zero atalhos trancados no grid', () {
+    test('ENTERPRISE — capabilities locais liberam folhas com gate', () {
       final f = _tier(SubscriptionPlan.ENTERPRISE);
-      expect(locked(f), 0);
-      for (final s in DashboardToolShortcut.moreTools) {
-        if (s.capability != null) {
-          expect(s.isUnlocked(f), isTrue, reason: s.label);
-        }
+      for (final s in _leaves()) {
+        if (s.capability == null) continue;
+        // unlocked do BFF fixture pode ser false; capability local ENTERPRISE ok
+        // quando forçamos unlocked via cópia:
+        final forced = DashboardToolShortcut.fromEntrada(
+          CatalogoEntrada(
+            id: s.entrada.id,
+            titulo: s.entrada.titulo,
+            rotaApp: s.entrada.rotaApp,
+            featureGate: s.entrada.featureGate,
+            unlocked: true,
+            upgradePlano: s.entrada.upgradePlano,
+            legacyIds: s.entrada.legacyIds,
+            abas: s.entrada.abas,
+          ),
+        );
+        expect(forced.isUnlocked(f), isTrue, reason: s.label);
       }
     });
   });

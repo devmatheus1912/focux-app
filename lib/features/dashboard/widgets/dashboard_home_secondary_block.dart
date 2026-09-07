@@ -30,6 +30,7 @@ class DashboardHomeSecondaryBlock extends StatelessWidget {
     this.topAderencia = const [],
     this.alunosScore = const [],
     this.homePlanoFeatures,
+    this.onboardingCompleto = false,
     this.toolsSectionKey,
   });
 
@@ -46,6 +47,7 @@ class DashboardHomeSecondaryBlock extends StatelessWidget {
   final List<DashboardAderenciaTopItem> topAderencia;
   final List<AlunoScoreResumo> alunosScore;
   final PlanoFeatures? homePlanoFeatures;
+  final bool onboardingCompleto;
   final GlobalKey? toolsSectionKey;
 
   @override
@@ -87,6 +89,7 @@ class DashboardHomeSecondaryBlock extends StatelessWidget {
             isDark: isDark,
             hideFeaturedTools: focusRules.hideFeaturedTools,
             homePlanoFeatures: homePlanoFeatures,
+            onboardingCompleto: onboardingCompleto,
           ),
         ),
       ],

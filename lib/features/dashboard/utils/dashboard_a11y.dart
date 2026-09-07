@@ -11,6 +11,9 @@ String dashboardShortcutSemanticsLabel(DashboardToolShortcut shortcut) {
     'Preços' || 'Preços inteligentes' => 'Financeiro e precificação',
     'Marca própria' => 'Identidade visual e logo personalizados',
     'Lead Público' || 'Captura pública' => 'Captura de leads públicos',
+    'Captação' => 'Hub de captação de leads e landing',
+    'Vendas' => 'Hub de pacotes e loja',
+    'Financeiro' => 'Hub financeiro de receita, recorrência e cobrança',
     _ => shortcut.displayFeatureName,
   };
 }
