@@ -34,5 +34,7 @@ void main() {
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(screen, isNot(contains('_PeriodPill')));
     expect(screen, isNot(contains('_AderenciaRingPainter')));
+    expect(screen, isNot(contains('showDateRangePicker')));
+    expect(screen, contains('relatorioAlunoPeriodoOpcoes'));
   });
 }
