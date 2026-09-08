@@ -21,7 +21,6 @@ import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_form_sheet.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_hub_header.dart';
-import '../../../core/widgets/fx_inset_picker_sheet.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/operational_metric_tile.dart';
@@ -30,6 +29,7 @@ import '../../../core/widgets/fx_sparkline.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../alunos/utils/satellite_screen_utils.dart';
+import '../../alunos/widgets/aluno_form_choices.dart';
 import '../../alunos/widgets/aluno_inset_form_field.dart';
 import '../../avaliacao/utils/evolucao_comparativo_display.dart';
 import '../../dashboard/widgets/dashboard_home_action_chip.dart';
@@ -58,26 +58,23 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
   EvolucaoHubView _view = EvolucaoHubView.medidas;
   DateTime? _fetchedAt;
 
-  Future<void> _abrirVista() async {
-    final picked = await showFxInsetPickerSheet<EvolucaoHubView>(
-      context,
-      title: 'Ver',
-      selected: _view,
-      items: [
-        for (final v in EvolucaoHubView.values)
-          FxInsetPickerSheetItem(value: v, label: evolucaoHubViewLabel(v)),
-      ],
-    );
-    if (!mounted || picked == null || picked == _view) return;
-    setState(() => _view = picked);
-  }
-
   void _registrar() {
     if (_view == EvolucaoHubView.medidas) {
       _mostrarDialogMedida();
     } else {
       _mostrarDialogRecorde();
     }
+  }
+
+  void _abrirAluno() {
+    context.push('/alunos/${widget.alunoId}', extra: widget.alunoNome);
+  }
+
+  void _abrirChat() {
+    context.push(
+      '/alunos/${widget.alunoId}/chat',
+      extra: widget.alunoNome,
+    );
   }
 
   void _abrirFotos() {
@@ -131,21 +128,21 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
 
     return fxScreenA11yScope(
       label: 'Evolução — ${widget.alunoNome}',
-      child: FxShellScaffold(
+      child: PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, _) {
+          if (didPop) return;
+          safePopOrGo(context, '/alunos/${widget.alunoId}');
+        },
+        child: FxShellScaffold(
         useMesh: true,
         appBar: FxShellAppBar(
           title: 'Evolução',
-          subtitle: evolucaoHubSubtitle(view: _view, variacao: variacao),
           onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
           actions: [
             FxHelpIconButton(
               tooltip: 'Como usar a evolução',
               onTap: () => showEvolucaoHelpSheet(context),
-            ),
-            ShellHeaderIconButton(
-              icon: 'trend',
-              tooltip: 'Trocar visão',
-              onTap: _abrirVista,
             ),
           ],
         ),
@@ -170,24 +167,43 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
                               freshnessLabel: FxHubFreshness.fromFetchedAt(
                                 _fetchedAt,
                               ),
-                              subtitle: evolucaoHubViewLabel(_view),
+                              subtitle: evolucaoHubSubtitle(
+                                view: _view,
+                                variacao: variacao,
+                              ),
                             ),
                             const SizedBox(height: TokensStrip.s4),
                             OperationalMetricTile(
-                              label:
-                                  _view == EvolucaoHubView.medidas
-                                      ? 'Peso'
-                                      : 'Recordes',
-                              value:
-                                  _view == EvolucaoHubView.medidas
-                                      ? evolucaoPesoAtual(medidas ?? const [])
-                                      : '${recordesAsync.asData?.value.length ?? 0}',
+                              label: 'Peso',
+                              value: evolucaoPesoAtual(medidas ?? const []),
                               hint:
-                                  _view == EvolucaoHubView.medidas
-                                      ? (variacao == null || variacao.isEmpty
-                                          ? 'Registre duas medidas para ver a variação'
-                                          : variacao)
-                                      : 'Marcas pessoais',
+                                  variacao == null || variacao.isEmpty
+                                      ? 'Registre duas medidas para ver a variação'
+                                      : variacao,
+                              color: primary,
+                              isDark: chrome.isDark,
+                            ),
+                            const SizedBox(height: TokensStrip.s2),
+                            OperationalMetricTile(
+                              label: 'Medidas',
+                              value: evolucaoCountLabel(
+                                medidas?.length ?? 0,
+                                recordes: false,
+                              ),
+                              hint: evolucaoMedidasHint(medidas?.length ?? 0),
+                              color: primary,
+                              isDark: chrome.isDark,
+                            ),
+                            const SizedBox(height: TokensStrip.s2),
+                            OperationalMetricTile(
+                              label: 'Recordes',
+                              value: evolucaoCountLabel(
+                                recordesAsync.asData?.value.length ?? 0,
+                                recordes: true,
+                              ),
+                              hint: evolucaoRecordesHint(
+                                recordesAsync.asData?.value.length ?? 0,
+                              ),
                               color: primary,
                               isDark: chrome.isDark,
                             ),
@@ -196,6 +212,18 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
                               spacing: TokensStrip.s2,
                               runSpacing: TokensStrip.s2,
                               children: [
+                                DashboardHomeActionChip(
+                                  label: 'Aluno',
+                                  accent: primary,
+                                  isDark: chrome.isDark,
+                                  onPressed: _abrirAluno,
+                                ),
+                                DashboardHomeActionChip(
+                                  label: 'Chat',
+                                  accent: primary,
+                                  isDark: chrome.isDark,
+                                  onPressed: _abrirChat,
+                                ),
                                 DashboardHomeActionChip(
                                   label: 'Fotos',
                                   accent: primary,
@@ -215,6 +243,15 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
                                   onPressed: _compartilharNoChat,
                                 ),
                               ],
+                            ),
+                            const SizedBox(height: TokensStrip.s4),
+                            AlunoSegmentedChoice(
+                              options: evolucaoDetalheSecoes,
+                              selected: _view.name,
+                              isDark: chrome.isDark,
+                              onSelect: (value) => setState(
+                                () => _view = evolucaoHubViewFromSecao(value),
+                              ),
                             ),
                           ],
                         ),
@@ -268,6 +305,7 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
             ),
           ],
         ),
+      ),
       ),
     );
   }

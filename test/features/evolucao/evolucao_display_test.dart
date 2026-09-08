@@ -67,5 +67,10 @@ void main() {
     );
     expect(evolucaoRecordeSubtitle(recorde), '80.0 kg · 5 reps · 01/09');
     expect(evolucaoRecordeValue(recorde), '80.0 kg');
+    expect(evolucaoMedidasHint(0), 'Nenhuma medida ainda');
+    expect(evolucaoMedidasHint(1), '1 registro');
+    expect(evolucaoRecordesHint(2), '2 marcas pessoais');
+    expect(evolucaoHubViewFromSecao('recordes'), EvolucaoHubView.recordes);
+    expect(evolucaoDetalheSecoes, hasLength(2));
   });
 }

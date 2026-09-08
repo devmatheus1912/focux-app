@@ -165,7 +165,25 @@ String walletDiscardMessage() =>
 
 String walletCopiarTileLabel() => 'Copiar chave PIX';
 
-String walletHubSubtitle() => 'PIX e banco dos recebimentos';
+String walletHubSubtitle({String? freshness}) {
+  const base = 'PIX e banco dos recebimentos';
+  final stamp = freshness?.trim();
+  if (stamp == null || stamp.isEmpty) return base;
+  return '$base · $stamp';
+}
+
+const walletDetalheSecaoPix = 'pix';
+const walletDetalheSecaoBanco = 'banco';
+
+const walletDetalheSecoes = [
+  (value: walletDetalheSecaoPix, label: 'PIX'),
+  (value: walletDetalheSecaoBanco, label: 'Banco'),
+];
+
+String walletTipoChipLabel(String? tipo) {
+  if (tipo == null || tipo.trim().isEmpty) return 'Tipo de chave';
+  return WalletPixValidation.labelForTipo(tipo);
+}
 
 String walletPixSectionTitle() => 'Dados PIX';
 

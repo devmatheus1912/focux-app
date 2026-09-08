@@ -8,8 +8,11 @@ class _WalletFormFields extends StatelessWidget {
     required this.agenciaCtrl,
     required this.contaCtrl,
     required this.carregando,
+    required this.secao,
+    required this.onSecao,
     required this.onSelecionarTipo,
     required this.onCopiarChave,
+    this.freshness,
   });
 
   final String? tipoChavePix;
@@ -18,87 +21,112 @@ class _WalletFormFields extends StatelessWidget {
   final TextEditingController agenciaCtrl;
   final TextEditingController contaCtrl;
   final bool carregando;
+  final String secao;
+  final ValueChanged<String> onSecao;
   final VoidCallback onSelecionarTipo;
   final VoidCallback onCopiarChave;
+  final String? freshness;
 
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final temChave = chavePixCtrl.text.trim().isNotEmpty;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         FxHubHeader(
           title: 'Recebimentos',
-          subtitle: walletHubSubtitle(),
+          subtitle: walletHubSubtitle(freshness: freshness),
         ),
         const SizedBox(height: TokensStrip.s4),
         const _ResumoMensalCard(),
-        const SizedBox(height: TokensStrip.s4),
-        DashboardSectionHeader(title: walletPixSectionTitle()),
-        const SizedBox(height: TokensStrip.s2),
-        FxSettingsTile(
-          fxIcon: 'pix',
-          label: 'Tipo de chave',
-          value:
-              tipoChavePix == null
-                  ? 'Selecionar'
-                  : WalletPixValidation.labelForTipo(tipoChavePix!),
-          picker: true,
-          onTap: carregando ? null : onSelecionarTipo,
-        ),
-        AlunoInsetFormField(
-          controller: chavePixCtrl,
-          label: 'Chave PIX',
-          icon: Icons.pix_rounded,
-          hint: WalletPixValidation.hintForTipo(tipoChavePix),
-          keyboardType: WalletPixValidation.keyboardForTipo(tipoChavePix),
-          inputFormatters: [
-            ...WalletPixValidation.formattersForTipo(tipoChavePix),
-            LengthLimitingTextInputFormatter(walletChavePixMax),
+        const SizedBox(height: TokensStrip.s3),
+        Wrap(
+          spacing: TokensStrip.s2,
+          runSpacing: TokensStrip.s2,
+          children: [
+            DashboardHomeActionChip(
+              label: walletVerFinanceiroLabel(),
+              accent: primary,
+              isDark: isDark,
+              onPressed: () => context.push('/financeiro'),
+            ),
+            DashboardHomeActionChip(
+              label: walletTipoChipLabel(tipoChavePix),
+              accent: primary,
+              isDark: isDark,
+              enabled: !carregando,
+              onPressed: onSelecionarTipo,
+            ),
+            if (temChave)
+              DashboardHomeActionChip(
+                label: walletCopiarTileLabel(),
+                accent: primary,
+                isDark: isDark,
+                enabled: !carregando,
+                onPressed: onCopiarChave,
+              ),
           ],
-          validator:
-              (v) => WalletPixValidation.validateChave(tipoChavePix, v ?? ''),
-          showDivider: false,
         ),
-        if (chavePixCtrl.text.trim().isNotEmpty)
-          FxSatelliteListTile(
-            title: walletCopiarTileLabel(),
-            titleCase: false,
-            onTap: carregando ? null : onCopiarChave,
-            leading: FxIcon(name: 'pix', size: 18, color: primary),
+        const SizedBox(height: TokensStrip.s4),
+        AlunoSegmentedChoice(
+          options: walletDetalheSecoes,
+          selected: secao,
+          isDark: isDark,
+          onSelect: onSecao,
+        ),
+        const SizedBox(height: TokensStrip.s4),
+        if (secao == walletDetalheSecaoPix) ...[
+          DashboardSectionHeader(title: walletPixSectionTitle()),
+          const SizedBox(height: TokensStrip.s2),
+          AlunoInsetFormField(
+            controller: chavePixCtrl,
+            label: 'Chave PIX',
+            icon: Icons.pix_rounded,
+            hint: WalletPixValidation.hintForTipo(tipoChavePix),
+            keyboardType: WalletPixValidation.keyboardForTipo(tipoChavePix),
+            inputFormatters: [
+              ...WalletPixValidation.formattersForTipo(tipoChavePix),
+              LengthLimitingTextInputFormatter(walletChavePixMax),
+            ],
+            validator:
+                (v) => WalletPixValidation.validateChave(tipoChavePix, v ?? ''),
+            showDivider: false,
           ),
-        const SizedBox(height: TokensStrip.s4),
-        DashboardSectionHeader(title: walletBancoSectionTitle()),
-        const SizedBox(height: TokensStrip.s2),
-        AlunoInsetFormField(
-          controller: bancoCtrl,
-          label: 'Banco',
-          icon: Icons.account_balance_outlined,
-          hint: 'Ex.: Nubank, Itaú, Bradesco',
-          textCapitalization: TextCapitalization.words,
-          inputFormatters: [
-            LengthLimitingTextInputFormatter(walletBancoMax),
-          ],
-        ),
-        AlunoInsetFormField(
-          controller: agenciaCtrl,
-          label: 'Agência',
-          icon: Icons.tag_outlined,
-          keyboardType: TextInputType.number,
-          inputFormatters: [
-            FilteringTextInputFormatter.digitsOnly,
-            LengthLimitingTextInputFormatter(walletAgenciaMax),
-          ],
-        ),
-        AlunoInsetFormField(
-          controller: contaCtrl,
-          label: 'Conta',
-          icon: Icons.numbers_rounded,
-          keyboardType: TextInputType.text,
-          inputFormatters: WalletPixValidation.formattersForConta(),
-          showDivider: false,
-        ),
+        ] else ...[
+          DashboardSectionHeader(title: walletBancoSectionTitle()),
+          const SizedBox(height: TokensStrip.s2),
+          AlunoInsetFormField(
+            controller: bancoCtrl,
+            label: 'Banco',
+            icon: Icons.account_balance_outlined,
+            hint: 'Ex.: Nubank, Itaú, Bradesco',
+            textCapitalization: TextCapitalization.words,
+            inputFormatters: [
+              LengthLimitingTextInputFormatter(walletBancoMax),
+            ],
+          ),
+          AlunoInsetFormField(
+            controller: agenciaCtrl,
+            label: 'Agência',
+            icon: Icons.tag_outlined,
+            keyboardType: TextInputType.number,
+            inputFormatters: [
+              FilteringTextInputFormatter.digitsOnly,
+              LengthLimitingTextInputFormatter(walletAgenciaMax),
+            ],
+          ),
+          AlunoInsetFormField(
+            controller: contaCtrl,
+            label: 'Conta',
+            icon: Icons.numbers_rounded,
+            keyboardType: TextInputType.text,
+            inputFormatters: WalletPixValidation.formattersForConta(),
+            showDivider: false,
+          ),
+        ],
       ],
     );
   }
@@ -216,13 +244,6 @@ class _ResumoMensalCardState extends ConsumerState<_ResumoMensalCard> {
             emphasis: OperationalMetricEmphasis.alert,
           ),
         ],
-        const SizedBox(height: TokensStrip.s2),
-        FxSatelliteListTile(
-          title: walletVerFinanceiroLabel(),
-          titleCase: false,
-          onTap: () => context.push('/financeiro'),
-          leading: FxIcon(name: 'coin', size: 18, color: primary),
-        ),
       ],
     );
   }

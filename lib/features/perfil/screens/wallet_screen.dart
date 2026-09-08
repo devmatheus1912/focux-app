@@ -8,6 +8,7 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/utils/clipboard_sensitive.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/utils/pt_br_display.dart';
@@ -18,17 +19,17 @@ import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_hub_header.dart';
-import '../../../core/widgets/fx_icon.dart';
 import '../../../core/widgets/fx_inset_picker_sheet.dart';
 import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
-import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/operational_metric_tile.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../features/auth/providers/auth_provider.dart';
+import '../../alunos/widgets/aluno_form_choices.dart';
 import '../../alunos/widgets/aluno_inset_form_field.dart';
+import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../financeiro/data/financeiro_repository.dart';
 import '../data/perfil_repository.dart';
@@ -56,6 +57,8 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
   String? _tipoChavePix;
   bool _carregando = false;
   bool _inicializado = false;
+  var _secao = walletDetalheSecaoPix;
+  DateTime? _fetchedAt;
 
   String? _snapshotTipo;
   String _snapshotChave = '';
@@ -122,6 +125,7 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
     _agenciaCtrl.text = perfil.agencia ?? '';
     _contaCtrl.text = perfil.conta ?? '';
     _captureSnapshot();
+    _fetchedAt = DateTime.now();
   }
 
   Future<bool> _confirmDiscard() {
@@ -168,6 +172,15 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
     final tipoErro = WalletPixValidation.validateTipo(_tipoChavePix);
     if (tipoErro != null) {
       FeedbackHelper.showError(context, tipoErro);
+      return;
+    }
+    final chaveErro = WalletPixValidation.validateChave(
+      _tipoChavePix,
+      _chavePixCtrl.text,
+    );
+    if (chaveErro != null) {
+      FeedbackHelper.showError(context, chaveErro);
+      setState(() => _secao = walletDetalheSecaoPix);
       return;
     }
     if (!_formKey.currentState!.validate()) return;
@@ -291,7 +304,14 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                       _preencherDadosAtuais(perfil);
                       return Form(
                         key: _formKey,
-                        child: ListView(
+                        child: RefreshIndicator(
+                          color: primary,
+                          onRefresh: () async {
+                            _inicializado = false;
+                            ref.invalidate(perfilProvider);
+                          },
+                          child: ListView(
+                          physics: const AlwaysScrollableScrollPhysics(),
                           padding: const EdgeInsets.fromLTRB(
                             FxSettingsLayout.pageInset,
                             TokensStrip.s4,
@@ -307,11 +327,17 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                                 agenciaCtrl: _agenciaCtrl,
                                 contaCtrl: _contaCtrl,
                                 carregando: _carregando,
+                                secao: _secao,
+                                freshness: FxHubFreshness.fromFetchedAt(
+                                  _fetchedAt,
+                                ),
+                                onSecao: (value) => setState(() => _secao = value),
                                 onSelecionarTipo: _selecionarTipoPix,
                                 onCopiarChave: _copiarChavePix,
                               ),
                             ),
                           ],
+                        ),
                         ),
                       );
                     },

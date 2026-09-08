@@ -61,5 +61,7 @@ void main() {
       ),
       'Ana · 30 dias · há 1 min',
     );
+    expect(relatorioAlunoCheckinChip(), 'Pedir check-in');
+    expect(relatorioDetalheSecoes, hasLength(2));
   });
 }

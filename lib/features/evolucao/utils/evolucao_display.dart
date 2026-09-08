@@ -8,6 +8,35 @@ String evolucaoHubViewLabel(EvolucaoHubView view) => switch (view) {
   EvolucaoHubView.recordes => 'Recordes',
 };
 
+const evolucaoDetalheSecoes = [
+  (value: 'medidas', label: 'Medidas'),
+  (value: 'recordes', label: 'Recordes'),
+];
+
+EvolucaoHubView evolucaoHubViewFromSecao(String value) =>
+    value == 'recordes' ? EvolucaoHubView.recordes : EvolucaoHubView.medidas;
+
+String evolucaoCountLabel(int count, {required bool recordes}) {
+  if (recordes) {
+    if (count <= 0) return '0';
+    return '$count';
+  }
+  if (count <= 0) return '0';
+  return '$count';
+}
+
+String evolucaoMedidasHint(int count) {
+  if (count <= 0) return 'Nenhuma medida ainda';
+  if (count == 1) return '1 registro';
+  return '$count registros';
+}
+
+String evolucaoRecordesHint(int count) {
+  if (count <= 0) return 'Nenhuma marca ainda';
+  if (count == 1) return '1 marca pessoal';
+  return '$count marcas pessoais';
+}
+
 String evolucaoHubSubtitle({
   required EvolucaoHubView view,
   String? variacao,
