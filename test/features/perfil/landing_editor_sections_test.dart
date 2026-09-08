@@ -31,16 +31,26 @@ void main() {
 
   test('LandingStudioState.fromJson aceita nested maps', () {
     final state = LandingStudioState.fromJson({
-      'entrevista': {'nomeMarca': 'Ana', 'nicho': 'Emagrecimento', 'promessa': 'P', 'cta': 'C'},
-      'gerado': {'heroTitle': 'H', 'primaryCta': 'CTA'},
+      'entrevista': {
+        'nomeMarca': 'Ana',
+        'nicho': 'Emagrecimento',
+        'promessa': 'P',
+        'cta': 'C',
+      },
+      'gerado': {'heroTitle': 'H', 'primaryCta': 'CTA', 'needsProof': true},
       'midia': {'heroImageUrl': 'https://x/y.jpg'},
       'slug': 'ana',
-      'url': 'https://focuxpersonal.com/p/ana',
+      'publicUrl': 'https://focuxpersonal.com/p/ana',
       'publicado': true,
+      'podePublicar': true,
+      'needsProof': true,
     });
 
     expect(state.publicado, isTrue);
     expect(state.slug, 'ana');
+    expect(state.publicUrl, 'https://focuxpersonal.com/p/ana');
+    expect(state.podePublicar, isTrue);
+    expect(state.needsProof, isTrue);
     expect(state.entrevista.nomeMarca, 'Ana');
     expect(state.gerado.heroTitle, 'H');
     expect(state.midia.heroImageUrl, 'https://x/y.jpg');
