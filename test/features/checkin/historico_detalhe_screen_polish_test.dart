@@ -24,6 +24,8 @@ void main() {
     expect(screen, contains('PopScope'));
     expect(screen, contains('AlunoSegmentedChoice'));
     expect(screen, contains('historicoDetalheSecoes'));
+    expect(screen, contains('historicoSecaoNotas'));
+    expect(screen, contains('historicoNotaLine'));
     expect(screen, contains('evolucoesCarga'));
     expect(screen, contains('checkinCargaLabel'));
     expect(screen, isNot(contains('FxSettingsGroup')));

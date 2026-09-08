@@ -41,7 +41,13 @@ void main() {
     );
     expect(historicoRecordesCount(prs: 2, cargas: 1), 3);
     expect(historicoRecordesEmpty(), 'Nenhum recorde nesta sessão');
-    expect(historicoDetalheSecoes, hasLength(2));
+    expect(historicoDetalheSecoes, hasLength(3));
+    expect(
+      historicoNotaLine(observacoes: 'Cadência lenta', feedback: 'Boa'),
+      'Cadência lenta · Boa',
+    );
+    expect(historicoNotaLine(), isNull);
+    expect(historicoNotasEmpty(), 'Nenhuma nota nesta sessão');
     expect(historicoPrMetric(0), '0');
     expect(historicoPrHint(0), 'Sem recorde nesta sessão');
     expect(historicoPrHint(2), '2 recordes');

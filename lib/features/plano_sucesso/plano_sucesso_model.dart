@@ -4,7 +4,7 @@ class PlanoSucesso {
   final String objetivoPrincipal;
   final String status;
   final DateTime dataInicio;
-  final DateTime proximaRevisao;
+  final DateTime? proximaRevisao;
   final List<MarcoSucesso> marcos;
 
   PlanoSucesso({
@@ -21,12 +21,9 @@ class PlanoSucesso {
     id: json['id'],
     personalId: json['personalId'],
     objetivoPrincipal: json['objetivoPrincipal'],
-    status: json['status'],
-    dataInicio: DateTime.parse(json['dataInicio']),
-    proximaRevisao:
-        json['proximaRevisao'] != null
-            ? DateTime.parse(json['proximaRevisao'])
-            : DateTime.now(),
+    status: json['status'] as String? ?? 'ATIVO',
+    dataInicio: DateTime.parse(json['dataInicio'] as String),
+    proximaRevisao: _date(json['proximaRevisao']),
     marcos:
         (json['marcos'] as List).map((m) => MarcoSucesso.fromJson(m)).toList(),
   );
@@ -35,17 +32,28 @@ class PlanoSucesso {
 class MarcoSucesso {
   final int id;
   final String titulo;
+  final String? descricao;
   final bool atingido;
+  final DateTime? dataAtingido;
 
   MarcoSucesso({
     required this.id,
     required this.titulo,
     required this.atingido,
+    this.descricao,
+    this.dataAtingido,
   });
 
   factory MarcoSucesso.fromJson(Map<String, dynamic> json) => MarcoSucesso(
     id: json['id'],
     titulo: json['titulo'],
-    atingido: json['atingido'],
+    descricao: json['descricao'] as String?,
+    atingido: json['atingido'] as bool? ?? false,
+    dataAtingido: _date(json['dataAtingido']),
   );
+}
+
+DateTime? _date(dynamic raw) {
+  if (raw is! String || raw.trim().isEmpty) return null;
+  return DateTime.tryParse(raw);
 }

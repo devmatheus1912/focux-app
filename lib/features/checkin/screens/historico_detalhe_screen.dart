@@ -309,6 +309,8 @@ class _DetalheBody extends StatelessWidget {
                   const SizedBox(height: TokensStrip.s4),
                   if (secao == historicoSecaoRecordes)
                     ..._recordes(prs, cargas)
+                  else if (secao == historicoSecaoNotas)
+                    ..._notas(execucao.exercicios)
                   else if (execucao.exercicios.isEmpty)
                     const FxEmptyState(
                       icon: 'dumbbell',
@@ -362,6 +364,36 @@ class _DetalheBody extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  List<Widget> _notas(List<ExecucaoExercicio> exercicios) {
+    final tiles = <Widget>[
+      for (final item in exercicios)
+        if (historicoNotaLine(
+              observacoes: item.observacoes,
+              feedback: item.feedback,
+            )
+            case final nota?)
+          FxSatelliteListTile(
+            title: item.exercicioNome,
+            subtitle: Text(nota),
+            leading: const FxIcon(
+              name: 'article',
+              size: 22,
+              color: EagleTokens.good,
+            ),
+          ),
+    ];
+    if (tiles.isEmpty) {
+      return [
+        FxEmptyState(
+          icon: 'article',
+          title: historicoNotasEmpty(),
+          subtitle: 'Observação e feedback do exercício aparecem aqui.',
+        ),
+      ];
+    }
+    return tiles;
   }
 
   List<Widget> _recordes(

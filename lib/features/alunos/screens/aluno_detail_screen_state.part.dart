@@ -187,6 +187,7 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
             showErrorChrome
                 ? FxShellAppBar(
                   title: 'Ficha do aluno',
+                  subtitle: freshness,
                   onBack: () => safePopOrGo(context, '/alunos'),
                 )
                 : null,
@@ -402,6 +403,8 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                                           ref,
                                           aluno,
                                         ),
+                                    onLista: () =>
+                                        safePopOrGo(context, '/alunos'),
                                     onEdit: () async {
                                       final updated = await context.push<bool>(
                                         '/alunos/$alunoId/editar',

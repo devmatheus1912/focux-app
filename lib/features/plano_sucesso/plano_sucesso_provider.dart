@@ -52,16 +52,11 @@ class PlanoSucessoProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> atingirMarco(int marcoId) async {
+  Future<void> atingirMarco(int marcoId, {required int alunoId}) async {
     await _api.dio.patch('/api/planos-sucesso/marcos/$marcoId/atingir');
-    if (_plano == null) return;
-    final index = _plano!.marcos.indexWhere((m) => m.id == marcoId);
-    if (index == -1) return;
-    _plano!.marcos[index] = MarcoSucesso(
-      id: marcoId,
-      titulo: _plano!.marcos[index].titulo,
-      atingido: true,
-    );
+    final res = await _api.dio.get('/api/planos-sucesso/aluno/$alunoId');
+    _plano = PlanoSucesso.fromJson(res.data);
+    _erro = null;
     notifyListeners();
   }
 
