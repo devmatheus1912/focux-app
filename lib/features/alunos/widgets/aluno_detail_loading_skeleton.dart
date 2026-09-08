@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../../core/widgets/fx_loading.dart';
@@ -31,6 +32,24 @@ class AlunoDetailLoadingSkeleton extends StatelessWidget {
   final Color line;
   final Color sheetFill;
   final Aluno? listPreview;
+
+  factory AlunoDetailLoadingSkeleton.forChrome({
+    required TabController tabController,
+    required ShellPalette chrome,
+    required Color primary,
+    Aluno? listPreview,
+  }) {
+    return AlunoDetailLoadingSkeleton(
+      tabController: tabController,
+      isDark: chrome.isDark,
+      primary: primary,
+      ink: chrome.ink,
+      mute: chrome.mute,
+      line: chrome.line,
+      sheetFill: chrome.sheetFill,
+      listPreview: listPreview,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {

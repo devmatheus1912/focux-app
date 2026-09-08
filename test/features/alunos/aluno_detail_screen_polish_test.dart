@@ -24,6 +24,7 @@ void main() {
     expect(screen, contains('RefreshIndicator'));
     expect(screen, contains('FxShellScaffold'));
     expect(screen, contains('viewInsetsOf'));
+    expect(screen, contains('PopScope'));
     expect(screen, contains('FxHubFreshness'));
     expect(screen, contains("title: 'Não conseguimos carregar o aluno'"));
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(16));

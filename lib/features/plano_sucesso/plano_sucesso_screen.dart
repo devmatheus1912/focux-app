@@ -237,6 +237,7 @@ class _PlanoSucessoScreenState extends State<PlanoSucessoScreen> {
         useMesh: true,
         appBar: FxShellAppBar(
           title: 'Plano de sucesso',
+          subtitle: freshness,
           onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
           actions: [
             FxHelpIconButton(
@@ -367,6 +368,7 @@ class _PlanoSucessoScreenState extends State<PlanoSucessoScreen> {
                 widget.alunoNome != null
                     ? '${satelliteFirstName(widget.alunoNome)} ainda não possui marcos de sucesso definidos.'
                     : 'Este aluno ainda não possui plano de sucesso.',
+            action: FxEmptyAction(label: 'Criar plano', onTap: _criarPlano),
           ),
         ],
       );

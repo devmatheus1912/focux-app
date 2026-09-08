@@ -21,6 +21,14 @@ void main() {
     expect(resolveFcmTapRoute({'type': 'treino'}), '/dashboard/aluno');
     expect(resolveFcmTapRoute({'type': 'chat'}), '/chat/aluno');
     expect(resolveFcmTapRoute({'type': 'anamnese'}), '/aluno/anamnese');
+    expect(
+      resolveFcmTapRoute({
+        'type': 'anamnese',
+        'route': '/alunos/7/anamnese',
+        'alunoId': '7',
+      }),
+      '/alunos/7/anamnese',
+    );
     expect(resolveFcmTapRoute({'type': 'plan_sync'}), '/assinatura');
     expect(resolveFcmTapRoute({'type': 'retencao'}), '/retencao');
   });
