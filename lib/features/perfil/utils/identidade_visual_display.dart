@@ -19,7 +19,7 @@ String identidadeSalvarConfirmTitle() => 'Salvar identidade visual?';
 String identidadeSalvarConfirmMessage() =>
     'Logo, cores e slogan passam a aparecer no app e no login dos alunos.';
 
-String identidadeLandingEditorLabel() => 'Editor da landing';
+String identidadeLandingEditorLabel() => 'Landing page';
 
 String identidadeRestaurarCoresLabel() => 'Restaurar cores padrão';
 
