@@ -12,6 +12,8 @@ void main() {
     expect(FxMoney.parse(199.9).format(showDecimals: true), 'R\$ 199,90');
     expect(FxMoney.parse(19.99).cents, 1999);
     expect(FxMoney.parse('120.50').cents, 12050);
+    expect(FxMoney.reais('99.90'), 99.9);
+    expect(FxMoney.reais(150), 150);
   });
 
   test('fromInput rejeita vazio', () {

@@ -121,7 +121,7 @@ class _OfertaCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final valor = oferta.valor.toStringAsFixed(2).replaceAll('.', ',');
+    final valor = oferta.valor.format().replaceFirst('R\$', '').trim();
     return Container(
       width: 260,
       padding: const EdgeInsets.all(14),

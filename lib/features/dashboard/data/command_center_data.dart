@@ -1,3 +1,5 @@
+import '../../../core/money/fx_money.dart';
+
 class CommandCenterData {
   final List<AgendamentoResumo> agendaHoje;
   final int agendaHojeCount;
@@ -389,7 +391,7 @@ class MensalidadeResumo {
       MensalidadeResumo(
         id: json['id'] as int,
         nomeAluno: json['nomeAluno'] as String,
-        valor: (json['valor'] as num).toDouble(),
+        valor: FxMoney.reais(json['valor']),
         dataVencimento: json['dataVencimento'] as String,
       );
 }

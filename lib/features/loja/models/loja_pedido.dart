@@ -1,3 +1,5 @@
+import '../../../core/money/fx_money.dart';
+
 /// Pedido da loja digital — parse na borda API.
 class LojaPedido {
   const LojaPedido({
@@ -16,7 +18,7 @@ class LojaPedido {
   final int? alunoId;
   final String buyerEmail;
   final String? buyerNome;
-  final double valor;
+  final FxMoney valor;
   final String status;
   final String? pixCopiaECola;
 
@@ -39,10 +41,7 @@ class LojaPedido {
         .toList();
   }
 
-  static double readValor(dynamic raw) {
-    if (raw is num) return raw.toDouble();
-    return double.tryParse(raw?.toString() ?? '') ?? 0;
-  }
+  static FxMoney readValor(dynamic raw) => FxMoney.parse(raw);
 }
 
 /// Resultado do checkout PIX na loja.
@@ -50,12 +49,12 @@ class LojaCheckoutResult {
   const LojaCheckoutResult({
     this.pedidoId,
     this.pixCopiaECola = '',
-    this.valor = 0,
+    this.valor = FxMoney.zero,
   });
 
   final int? pedidoId;
   final String pixCopiaECola;
-  final double valor;
+  final FxMoney valor;
 
   factory LojaCheckoutResult.fromJson(Map<String, dynamic> json) =>
       LojaCheckoutResult(

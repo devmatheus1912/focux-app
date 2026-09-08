@@ -1,3 +1,4 @@
+import '../../../core/money/fx_money.dart';
 import '../../../core/utils/pt_br_display.dart';
 
 const ofertaGatilhoValues = ['MANUAL', 'CHECKIN', 'TRILHA_CONCLUIDA'];
@@ -25,7 +26,8 @@ String ofertaSubtitle({required String tipoGatilho, String? descricao}) {
   return '$gatilho · $desc';
 }
 
-String ofertaValorLabel(num valor) => formatBrlCurrency(valor);
+String ofertaValorLabel(Object valor) =>
+    valor is FxMoney ? valor.format() : formatBrlCurrency(valor as num);
 
 String ofertaHubSubtitle(String? freshness) {
   const base = 'Gatilho, valor e copy da oferta';

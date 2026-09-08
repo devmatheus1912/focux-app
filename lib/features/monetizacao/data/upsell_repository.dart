@@ -1,11 +1,12 @@
 import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
+import '../../../core/money/fx_money.dart';
 
 class OfertaUpsell {
   final int id;
   final String titulo;
   final String descricao;
-  final double valor;
+  final FxMoney valor;
   final String tipoGatilho;
   final bool ativo;
 
@@ -22,7 +23,7 @@ class OfertaUpsell {
     id: (j['id'] as num).toInt(),
     titulo: j['titulo'] as String? ?? '',
     descricao: j['descricao'] as String? ?? '',
-    valor: (j['valor'] as num?)?.toDouble() ?? 0,
+    valor: FxMoney.parse(j['valor']),
     tipoGatilho: j['tipoGatilho'] as String? ?? 'MANUAL',
     ativo: j['ativo'] as bool? ?? true,
   );
@@ -33,7 +34,7 @@ class AlunoOferta {
   final int ofertaId;
   final String titulo;
   final String descricao;
-  final double valor;
+  final FxMoney valor;
   final String status;
 
   AlunoOferta({
@@ -50,7 +51,7 @@ class AlunoOferta {
     ofertaId: (j['ofertaId'] as num).toInt(),
     titulo: j['titulo'] as String? ?? '',
     descricao: j['descricao'] as String? ?? '',
-    valor: (j['valor'] as num?)?.toDouble() ?? 0,
+    valor: FxMoney.parse(j['valor']),
     status: j['status'] as String? ?? 'PENDENTE',
   );
 }
@@ -69,7 +70,7 @@ class UpsellRepository {
   Future<OfertaUpsell> criar({
     required String titulo,
     required String descricao,
-    required double valor,
+    required Object valor,
     String tipoGatilho = 'TRILHA_CONCLUIDA',
   }) async {
     final r = await _dio.post(
@@ -77,7 +78,7 @@ class UpsellRepository {
       data: {
         'titulo': titulo,
         'descricao': descricao,
-        'valor': valor,
+        'valor': FxMoney.parse(valor).wire,
         'tipoGatilho': tipoGatilho,
       },
       options: ApiClient.idempotent(
@@ -91,7 +92,7 @@ class UpsellRepository {
     required int id,
     String? titulo,
     String? descricao,
-    double? valor,
+    Object? valor,
     String? tipoGatilho,
     bool? ativo,
   }) async {
@@ -100,7 +101,7 @@ class UpsellRepository {
       data: {
         if (titulo != null) 'titulo': titulo,
         if (descricao != null) 'descricao': descricao,
-        if (valor != null) 'valor': valor,
+        if (valor != null) 'valor': FxMoney.parse(valor).wire,
         if (tipoGatilho != null) 'tipoGatilho': tipoGatilho,
         if (ativo != null) 'ativo': ativo,
       },
