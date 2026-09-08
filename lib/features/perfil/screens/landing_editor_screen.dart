@@ -28,6 +28,7 @@ import '../../../core/widgets/skeleton_loader.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../subscription/models/subscription_plan.dart';
 import '../data/landing_studio_repository.dart';
+import '../utils/landing_studio_guidance.dart';
 
 part 'landing_studio_screen_body.part.dart';
 
@@ -487,13 +488,35 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
     return e.isReadyToGenerate && !_busy && !_loading;
   }
 
-  bool get _canPublish =>
-      (_podePublicar ||
-          (_heroTitle.text.trim().isNotEmpty &&
-              _primaryCta.text.trim().isNotEmpty)) &&
-      !_busy &&
-      !_uploadingHero &&
-      !_uploadingBio;
+  bool get _isProfessionalReady => LandingStudioGuidance.isProfessionalReady(
+    heroImageUrl: _heroImageUrl,
+    ofertaPreco: _ofertaPreco.text,
+    needsProof: _needsProof,
+    provaTexto: _prova.text,
+    bioImageUrl: _bioImageUrl,
+    heroTitle: _heroTitle.text,
+    primaryCta: _primaryCta.text,
+    whatsapp: _whatsapp.text,
+  );
+
+  List<String> get _publishMissing => LandingStudioGuidance.missingForPublish(
+    heroImageUrl: _heroImageUrl,
+    ofertaPreco: _ofertaPreco.text,
+    needsProof: _needsProof,
+    provaTexto: _prova.text,
+    bioImageUrl: _bioImageUrl,
+    heroTitle: _heroTitle.text,
+    primaryCta: _primaryCta.text,
+    whatsapp: _whatsapp.text,
+    podePublicar: _podePublicar,
+  );
+
+  bool get _canPublish {
+    if (_busy || _uploadingHero || _uploadingBio) return false;
+    if (!_podePublicar) return false;
+    return _heroTitle.text.trim().isNotEmpty &&
+        _primaryCta.text.trim().isNotEmpty;
+  }
 
   @override
   Widget build(BuildContext context) {
