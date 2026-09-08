@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   final fcm = File('lib/core/fcm/fcm_service.dart').readAsStringSync();
+  final tapRoute = File('lib/core/fcm/fcm_tap_route.dart').readAsStringSync();
   final authRepo =
       File('lib/features/auth/data/auth_repository.dart').readAsStringSync();
 
@@ -41,8 +42,9 @@ void main() {
   });
 
   test('tap com execucaoId abre o detalhe do historico do aluno', () {
-    expect(fcm, contains("data['execucaoId']"));
-    expect(fcm, contains("'/checkin/historico/\$execucaoId'"));
+    expect(fcm, contains('resolveFcmTapRoute'));
+    expect(tapRoute, contains("data['execucaoId']"));
+    expect(tapRoute, contains("'/checkin/historico/\$execucaoId'"));
   });
 
   test('DELETE de logout nao invalida sessao nem entra na fila offline', () {

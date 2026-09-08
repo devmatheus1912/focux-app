@@ -92,6 +92,8 @@ void main() {
     expect(detail, contains('RefreshIndicator'));
     expect(detail, contains('financeiroMensalidadeHubSubtitle'));
     expect(detail, contains('Abrir aluno'));
+    expect(detail, contains("'/financeiro'"));
+    expect(detail, contains('financeiroMensalidadePagoEmLabel'));
     expect(detail, contains('FxEmptyState'));
     expect(detail, isNot(contains("context.pop('pay')")));
     expect(detail, isNot(contains('FxSettingsGroup')));

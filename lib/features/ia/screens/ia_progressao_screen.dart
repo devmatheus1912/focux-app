@@ -26,6 +26,7 @@ import '../../../core/widgets/operational_metric_tile.dart';
 import '../../../features/alunos/constants/aluno_360_layout.dart';
 import '../../../features/alunos/widgets/aluno_inset_form_field.dart';
 import '../../../features/auth/providers/auth_provider.dart';
+import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../data/ia_repository.dart';
 import '../models/ia_progressao_carga_result.dart';
@@ -189,6 +190,17 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
     );
   }
 
+  void _abrirAceitar() {
+    context.push(
+      '/ia/progressao/aceitar',
+      extra: ProgressaoAceitarRouteArgs(
+        returnTo: '/alunos/${widget.alunoId}',
+        alunoId: widget.alunoId,
+        alunoNome: widget.alunoNome,
+      ).toExtra(),
+    );
+  }
+
   Future<void> _gerar() async {
     if (_loading) return;
     if (!await IaQuotaUpgrade.guardBeforeRequest(context, ref)) return;
@@ -318,6 +330,41 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
                                 isDark: isDark,
                               ),
                             ),
+                            Wrap(
+                              spacing: TokensStrip.s2,
+                              runSpacing: TokensStrip.s2,
+                              children: [
+                                if (pending.isNotEmpty)
+                                  DashboardHomeActionChip(
+                                    label: progressaoPendingReviewLabel(
+                                      pending.length,
+                                    ),
+                                    accent: primary,
+                                    isDark: isDark,
+                                    onPressed: () => _abrirAceitar(),
+                                  ),
+                                DashboardHomeActionChip(
+                                  label: 'Treinos',
+                                  accent: primary,
+                                  isDark: isDark,
+                                  onPressed:
+                                      () => context.push(
+                                        '/alunos/${widget.alunoId}/treinos-list',
+                                        extra: widget.alunoNome,
+                                      ),
+                                ),
+                                DashboardHomeActionChip(
+                                  label: 'Evolução',
+                                  accent: primary,
+                                  isDark: isDark,
+                                  onPressed:
+                                      () => context.push(
+                                        '/alunos/${widget.alunoId}/evolucao',
+                                      ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: TokensStrip.s4),
                             const DashboardSectionHeader(title: 'Pedido'),
                             const SizedBox(height: TokensStrip.s2),
                             AlunoInsetFormField(
@@ -380,17 +427,7 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
                                           extra: widget.alunoNome,
                                         );
                                       },
-                                      onReviewSuggestions:
-                                          () => context.push(
-                                            '/ia/progressao/aceitar',
-                                            extra:
-                                                ProgressaoAceitarRouteArgs(
-                                                  returnTo:
-                                                      '/alunos/${widget.alunoId}',
-                                                  alunoId: widget.alunoId,
-                                                  alunoNome: widget.alunoNome,
-                                                ).toExtra(),
-                                          ),
+                                      onReviewSuggestions: _abrirAceitar,
                                     ),
                                   ],
                                 ),

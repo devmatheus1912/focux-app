@@ -23,6 +23,18 @@ String financeiroHubSubtitle({
   return '$vista · $fresh';
 }
 
+String financeiroMensalidadePagoEmLabel(String? pagoEm) {
+  final raw = pagoEm?.trim() ?? '';
+  if (raw.isEmpty) return 'Ainda em aberto';
+  final parsed = DateTime.tryParse(raw);
+  if (parsed == null) {
+    return raw.length >= 10 ? raw.substring(0, 10) : raw;
+  }
+  final d = parsed.day.toString().padLeft(2, '0');
+  final m = parsed.month.toString().padLeft(2, '0');
+  return '$d/$m/${parsed.year}';
+}
+
 String financeiroAlunoHubSubtitle({
   required int lancamentos,
   String? freshness,

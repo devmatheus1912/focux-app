@@ -7,6 +7,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import '../api/api_client.dart';
 import '../router/app_router.dart';
 import '../storage/secure_storage.dart';
+import 'fcm_tap_route.dart';
 
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -95,10 +96,8 @@ class FcmService {
     }
   }
 
-  /// Roteia o usuário com base no payload `data` da notificação. Suporta:
-  /// - `route: "/alunos/123"` → empilha rota literal.
-  /// - `alunoId: "123"` → vai para `/alunos/123`.
-  /// - `chatId: "123"` → vai para `/alunos/123/chat`.
+  /// Roteia o toque via [resolveFcmTapRoute]: `route` explícita, senão
+  /// `type` já contratado, senão `alunoId` / `chatId` / `execucaoId`.
   static Future<void> _dispatchPlanSync(Map<String, dynamic> data) async {
     if (data['type'] != 'plan_sync') return;
     final handler = onPlanSync;
@@ -116,26 +115,8 @@ class FcmService {
       if (data['type'] == 'plan_sync') {
         unawaited(_dispatchPlanSync(data));
       }
-      String? route = data['route'] as String?;
-      if (route == null || route.isEmpty) {
-        final alunoId = data['alunoId'] as String?;
-        final chatId = data['chatId'] as String?;
-        if (chatId != null && chatId.isNotEmpty) {
-          route = '/alunos/$chatId/chat';
-        } else if (alunoId != null && alunoId.isNotEmpty) {
-          route = '/alunos/$alunoId';
-        }
-      }
-      final execucaoId = data['execucaoId']?.toString();
-      if (execucaoId != null &&
-          execucaoId.isNotEmpty &&
-          (route == null ||
-              route.isEmpty ||
-              route == '/dashboard/aluno' ||
-              route == '/checkin/historico')) {
-        route = '/checkin/historico/$execucaoId';
-      }
-      if (route == null || route.isEmpty) return;
+      final route = resolveFcmTapRoute(data);
+      if (route == null) return;
       // Apenas rotas internas: rejeita absolutas (proteção contra phishing
       // através de notificações com URL externa).
       if (!route.startsWith('/')) return;

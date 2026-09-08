@@ -20,7 +20,7 @@ Future<void> showFinanceiroMensalidadeHelpSheet(BuildContext context) {
       ),
       FxHelpTip(
         'Editar',
-        'Ajuste valor ou vencimento sem marcar pago. Voltar atualiza a lista.',
+        'Ajuste valor ou vencimento sem marcar pago. O chip Financeiro volta à lista.',
         icon: 'dollar-sign',
       ),
     ],
