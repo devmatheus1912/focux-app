@@ -51,6 +51,29 @@ void main() {
       'Etapa concluída',
     );
     expect(
+      planoSucessoMarcoSubtitle(
+        atingido: true,
+        atual: false,
+        dataAtingido: DateTime(2026, 9, 7),
+      ),
+      'Concluída em 07/09',
+    );
+    expect(
+      planoSucessoMarcoSubtitle(
+        atingido: false,
+        atual: true,
+        descricao: 'Medir cintura',
+      ),
+      'Medir cintura',
+    );
+    expect(planoSucessoStatusLabel('ATIVO'), 'Ativo');
+    expect(planoSucessoStatusLabel('PAUSADO'), 'Pausado');
+    expect(planoSucessoInicioHint(DateTime(2026, 9, 1)), 'Desde 01/09');
+    expect(
+      planoSucessoMetricHint(done: 1, total: 4),
+      '1 de 4 etapas · sem revisão',
+    );
+    expect(
       planoSucessoMarcoSubtitle(atingido: false, atual: true),
       'Próxima etapa',
     );

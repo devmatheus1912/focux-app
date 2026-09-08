@@ -19,16 +19,53 @@ String planoSucessoRevisaoLabel(DateTime data) {
 String planoSucessoMetricHint({
   required int done,
   required int total,
-  required DateTime proximaRevisao,
+  DateTime? proximaRevisao,
 }) {
-  return '${planoSucessoProgressHint(done, total)} · revisão ${planoSucessoRevisaoLabel(proximaRevisao)}';
+  final revisao =
+      proximaRevisao == null
+          ? 'sem revisão'
+          : 'revisão ${planoSucessoRevisaoLabel(proximaRevisao)}';
+  return '${planoSucessoProgressHint(done, total)} · $revisao';
+}
+
+String planoSucessoStatusLabel(String? status) {
+  switch ((status ?? '').trim().toUpperCase()) {
+    case 'ATIVO':
+    case '':
+      return 'Ativo';
+    case 'PAUSADO':
+      return 'Pausado';
+    case 'CONCLUIDO':
+      return 'Concluído';
+    default:
+      return status!.trim();
+  }
+}
+
+String planoSucessoInicioHint(DateTime? data) {
+  if (data == null) return 'Sem data de início';
+  return 'Desde ${planoSucessoRevisaoLabel(data)}';
 }
 
 String planoSucessoMarcoSubtitle({
   required bool atingido,
   required bool atual,
+  String? descricao,
+  DateTime? dataAtingido,
 }) {
-  if (atingido) return 'Etapa concluída';
+  final desc = descricao?.trim();
+  if (atingido) {
+    final when =
+        dataAtingido == null ? null : planoSucessoRevisaoLabel(dataAtingido);
+    if (when != null && (desc == null || desc.isEmpty)) {
+      return 'Concluída em $when';
+    }
+    if (desc != null && desc.isNotEmpty) {
+      return when == null ? desc : '$desc · $when';
+    }
+    return 'Etapa concluída';
+  }
+  if (desc != null && desc.isNotEmpty) return desc;
   if (atual) return 'Próxima etapa';
   return 'Pendente';
 }

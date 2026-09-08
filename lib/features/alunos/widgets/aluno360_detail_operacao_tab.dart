@@ -31,6 +31,7 @@ class Aluno360DetailOperacaoTab extends ConsumerWidget {
     required this.onPassword,
     required this.onEdit,
     required this.onEvolve,
+    this.onLista,
   });
 
   final Aluno aluno;
@@ -47,6 +48,7 @@ class Aluno360DetailOperacaoTab extends ConsumerWidget {
   final VoidCallback onPassword;
   final VoidCallback onEdit;
   final VoidCallback onEvolve;
+  final VoidCallback? onLista;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -103,6 +105,7 @@ class Aluno360DetailOperacaoTab extends ConsumerWidget {
         onPassword: onPassword,
         onEdit: onEdit,
         onEvolve: onEvolve,
+        onLista: onLista,
       ),
     );
   }

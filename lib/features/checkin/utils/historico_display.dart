@@ -146,11 +146,27 @@ String historicoExercicioSubtitle({
 
 const historicoSecaoExercicios = 'exercicios';
 const historicoSecaoRecordes = 'recordes';
+const historicoSecaoNotas = 'notas';
 
 const historicoDetalheSecoes = <({String value, String label})>[
   (value: historicoSecaoExercicios, label: 'Exercícios'),
   (value: historicoSecaoRecordes, label: 'Recordes'),
+  (value: historicoSecaoNotas, label: 'Notas'),
 ];
+
+String? historicoNotaLine({
+  String? observacoes,
+  String? feedback,
+}) {
+  final obs = observacoes?.trim() ?? '';
+  final note = feedback?.trim() ?? '';
+  if (obs.isEmpty && note.isEmpty) return null;
+  if (obs.isEmpty) return note;
+  if (note.isEmpty) return obs;
+  return '$obs · $note';
+}
+
+String historicoNotasEmpty() => 'Nenhuma nota nesta sessão';
 
 int historicoRecordesCount({required int prs, required int cargas}) =>
     prs + cargas;

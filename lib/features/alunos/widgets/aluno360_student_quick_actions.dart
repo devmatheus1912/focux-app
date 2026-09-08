@@ -13,6 +13,7 @@ class Aluno360StudentQuickActions extends StatelessWidget {
     required this.onPassword,
     required this.onEdit,
     required this.onEvolve,
+    this.onLista,
   });
 
   final Aluno aluno;
@@ -21,6 +22,7 @@ class Aluno360StudentQuickActions extends StatelessWidget {
   final VoidCallback onPassword;
   final VoidCallback onEdit;
   final VoidCallback onEvolve;
+  final VoidCallback? onLista;
 
   @override
   Widget build(BuildContext context) {
@@ -32,6 +34,13 @@ class Aluno360StudentQuickActions extends StatelessWidget {
         spacing: TokensStrip.s2,
         runSpacing: TokensStrip.s2,
         children: [
+          if (onLista != null)
+            DashboardHomeActionChip(
+              label: 'Lista',
+              accent: primary,
+              isDark: isDark,
+              onPressed: onLista!,
+            ),
           DashboardHomeActionChip(
             label: 'Senha',
             accent: primary,

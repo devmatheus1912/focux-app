@@ -32,6 +32,10 @@ void main() {
     expect(screen, contains("'Criar plano'"));
     expect(screen, contains('DashboardHomeActionChip'));
     expect(screen, contains("'/alunos/\${widget.alunoId}/chat'"));
+    expect(screen, contains("'/alunos/\${widget.alunoId}/evolucao'"));
+    expect(screen, contains("label: 'Lista'"));
+    expect(screen, contains('planoSucessoStatusLabel'));
+    expect(screen, contains('descricao'));
     expect(screen, isNot(contains('LinearGradient')));
     expect(screen, isNot(contains('Colors.white70')));
     expect(screen, isNot(contains('_SuccessRing')));

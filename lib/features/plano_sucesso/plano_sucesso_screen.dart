@@ -33,6 +33,8 @@ import 'plano_sucesso_model.dart';
 import 'plano_sucesso_provider.dart';
 import 'widgets/plano_sucesso_help_sheet.dart';
 
+part 'plano_sucesso_screen_hub.part.dart';
+
 class PlanoSucessoScreen extends StatefulWidget {
   final int alunoId;
   final String? alunoNome;
@@ -62,7 +64,7 @@ class _PlanoSucessoScreenState extends State<PlanoSucessoScreen> {
 
   Future<void> _marcarMarco(PlanoSucessoProvider provider, int marcoId) async {
     try {
-      await provider.atingirMarco(marcoId);
+      await provider.atingirMarco(marcoId, alunoId: widget.alunoId);
       if (!mounted) return;
       FeedbackHelper.showSuccess(context, 'Marco atingido!');
     } catch (e) {
@@ -164,11 +166,13 @@ class _PlanoSucessoScreenState extends State<PlanoSucessoScreen> {
     HapticFeedback.selectionClick();
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
-    var initial = DateTime(
-      plano.proximaRevisao.year,
-      plano.proximaRevisao.month,
-      plano.proximaRevisao.day,
-    );
+    var initial = plano.proximaRevisao == null
+        ? today
+        : DateTime(
+            plano.proximaRevisao!.year,
+            plano.proximaRevisao!.month,
+            plano.proximaRevisao!.day,
+          );
     if (initial.isBefore(today)) initial = today;
     final opcoes = planoSucessoRevisaoOpcoes(today);
     final picked = await showFxInsetPickerSheet<DateTime>(
@@ -357,6 +361,8 @@ class _PlanoSucessoScreenState extends State<PlanoSucessoScreen> {
             ),
             revisaoValue: planoSucessoRevisaoMetricValue(null),
             revisaoHint: planoSucessoRevisaoMetricHint(null),
+            statusValue: planoSucessoStatusLabel(null),
+            statusHint: planoSucessoInicioHint(null),
           ),
           const SizedBox(height: TokensStrip.s4),
           _alunoChips(primary: primary, isDark: isDark),
@@ -411,6 +417,8 @@ class _PlanoSucessoScreenState extends State<PlanoSucessoScreen> {
           ),
           revisaoValue: planoSucessoRevisaoMetricValue(plano.proximaRevisao),
           revisaoHint: planoSucessoRevisaoMetricHint(plano.proximaRevisao),
+          statusValue: planoSucessoStatusLabel(plano.status),
+          statusHint: planoSucessoInicioHint(plano.dataInicio),
         ),
         const SizedBox(height: TokensStrip.s4),
         _alunoChips(primary: primary, isDark: isDark),
@@ -427,6 +435,8 @@ class _PlanoSucessoScreenState extends State<PlanoSucessoScreen> {
               planoSucessoMarcoSubtitle(
                 atingido: plano.marcos[i].atingido,
                 atual: plano.marcos[i].id == proximo?.id,
+                descricao: plano.marcos[i].descricao,
+                dataAtingido: plano.marcos[i].dataAtingido,
               ),
             ),
             leading: FxIcon(
@@ -435,63 +445,6 @@ class _PlanoSucessoScreenState extends State<PlanoSucessoScreen> {
               color: plano.marcos[i].atingido ? TokensStrip.textSecondary : primary,
             ),
           ),
-      ],
-    );
-  }
-
-  List<Widget> _planoMetricTiles({
-    required Color primary,
-    required bool isDark,
-    required String progressoValue,
-    required String progressoHint,
-    required String etapasValue,
-    required String etapasHint,
-    required String revisaoValue,
-    required String revisaoHint,
-  }) {
-    Widget tile(String label, String value, String hint) {
-      return Padding(
-        padding: const EdgeInsets.only(bottom: TokensStrip.s2),
-        child: OperationalMetricTile(
-          label: label,
-          value: value,
-          hint: hint,
-          color: primary,
-          isDark: isDark,
-        ),
-      );
-    }
-
-    return [
-      tile('Progresso', progressoValue, progressoHint),
-      tile('Etapas', etapasValue, etapasHint),
-      tile('Revisão', revisaoValue, revisaoHint),
-    ];
-  }
-
-  Widget _alunoChips({required Color primary, required bool isDark}) {
-    return Wrap(
-      spacing: TokensStrip.s2,
-      runSpacing: TokensStrip.s2,
-      children: [
-        DashboardHomeActionChip(
-          label: 'Aluno',
-          accent: primary,
-          isDark: isDark,
-          onPressed: () => context.push(
-            '/alunos/${widget.alunoId}',
-            extra: widget.alunoNome,
-          ),
-        ),
-        DashboardHomeActionChip(
-          label: 'Chat',
-          accent: primary,
-          isDark: isDark,
-          onPressed: () => context.push(
-            '/alunos/${widget.alunoId}/chat',
-            extra: widget.alunoNome,
-          ),
-        ),
       ],
     );
   }
