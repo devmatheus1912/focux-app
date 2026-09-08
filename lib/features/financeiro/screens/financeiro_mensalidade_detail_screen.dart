@@ -73,7 +73,9 @@ class _FinanceiroMensalidadeDetailScreenState
     });
     try {
       final loaded = await mensalidadeRepo(ref).buscar(widget.mensalidadeId);
-      final contatos = await mensalidadeRepo(ref).listarContatos(widget.mensalidadeId);
+      final contatos =
+          loaded.contatos ??
+          await mensalidadeRepo(ref).listarContatos(widget.mensalidadeId);
       if (!mounted) return;
       setState(() {
         _mensalidade = loaded;

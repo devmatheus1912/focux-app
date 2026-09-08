@@ -146,6 +146,10 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
       await LeadRepository(
         ref.read(apiClientProvider),
       ).converter(_activeLead.id);
+      await AnalyticsService.instance.track(
+        ProductEvents.alunoCreated,
+        props: const {'source': 'lead_converter'},
+      );
       if (mounted) {
         FeedbackHelper.showSuccess(context, 'Lead convertido!');
         safePopOrGo(context, '/leads');

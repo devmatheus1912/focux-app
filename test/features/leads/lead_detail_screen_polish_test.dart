@@ -25,6 +25,7 @@ void main() {
     expect(screen, contains('safePopOrGo'));
     expect(screen, contains('leadStickyP0Label'));
     expect(screen, contains('UpgradePromptSheet.showFromError'));
+    expect(screen, contains('ProductEvents.alunoCreated'));
     expect(screen, contains('DashboardHomeActionChip'));
     expect(screen, contains('showFxConfirmSheet'));
     expect(screen, contains('viewInsetsOf'));
