@@ -1,3 +1,5 @@
+import '../data/habito_repository.dart';
+
 String habitoTemplateLabel({
   required String titulo,
   String? icone,
@@ -145,4 +147,33 @@ String habitoLembreteLine(String? hora) {
   final value = hora?.trim();
   if (value == null || value.isEmpty) return 'Sem horário de lembrete';
   return 'Lembrete às $value';
+}
+
+String habitoCheckDiaLabel(DateTime data) {
+  final day = data.day.toString().padLeft(2, '0');
+  final month = data.month.toString().padLeft(2, '0');
+  return '$day/$month';
+}
+
+String habitoChecksLine(List<HabitoCheckDia>? checks) {
+  if (checks == null) return '';
+  final feitos = checks.where((c) => c.feito).toList();
+  if (feitos.isEmpty) return 'Nenhum check ainda';
+  final recent = feitos.take(7).map((c) => habitoCheckDiaLabel(c.data)).join(', ');
+  return 'Feitos: $recent';
+}
+
+List<HabitoCheckDia>? habitoPatchCheckHoje(
+  List<HabitoCheckDia>? checks,
+  bool feito, {
+  DateTime? now,
+}) {
+  if (checks == null) return null;
+  final today = now ?? DateTime.now();
+  final key = DateTime(today.year, today.month, today.day);
+  final rest = checks.where((c) {
+    final day = DateTime(c.data.year, c.data.month, c.data.day);
+    return day != key;
+  }).toList();
+  return [HabitoCheckDia(data: key, feito: feito), ...rest];
 }

@@ -11,6 +11,7 @@ class Desafio {
   final DateTime? fim;
   final int? grupoAulaId;
   final bool ativo;
+  final List<DesafioLeaderboardEntry>? ranking;
 
   const Desafio({
     required this.id,
@@ -22,6 +23,7 @@ class Desafio {
     this.fim,
     this.grupoAulaId,
     this.ativo = true,
+    this.ranking,
   });
 
   factory Desafio.fromJson(Map<String, dynamic> j) => Desafio(
@@ -34,6 +36,7 @@ class Desafio {
     fim: _date(j['fim']),
     grupoAulaId: (j['grupoAulaId'] as num?)?.toInt(),
     ativo: j['ativo'] as bool? ?? true,
+    ranking: _ranking(j['ranking']),
   );
 }
 
@@ -59,6 +62,18 @@ class DesafioLeaderboardEntry {
 DateTime? _date(dynamic raw) {
   if (raw is! String || raw.trim().isEmpty) return null;
   return DateTime.tryParse(raw);
+}
+
+List<DesafioLeaderboardEntry>? _ranking(dynamic raw) {
+  if (raw is! List) return null;
+  return raw
+      .whereType<Map>()
+      .map(
+        (e) => DesafioLeaderboardEntry.fromJson(
+          Map<String, dynamic>.from(e),
+        ),
+      )
+      .toList();
 }
 
 String _isoDate(DateTime date) =>

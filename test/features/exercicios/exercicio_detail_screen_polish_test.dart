@@ -34,6 +34,8 @@ void main() {
     expect(screen, contains("name: 'star'"));
     expect(screen, contains('exercicioVideoMetric'));
     expect(screen, contains("label: 'Biblioteca'"));
+    expect(screen, contains("label: 'Lista'"));
+    expect(screen, contains('subtitle: FxHubFreshness.fromFetchedAt(_fetchedAt)'));
     expect(screen, contains('PopScope'));
   });
 }

@@ -145,6 +145,7 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
         useMesh: true,
         appBar: FxShellAppBar(
           title: 'Engajamento',
+          subtitle: freshness,
           onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
           actions: [
             FxHelpIconButton(
@@ -232,6 +233,14 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
           OperationalMetricTile(
             label: 'Mensagens',
             value: '${engajamentoMensagensCount(_eventos)}',
+            hint: 'Chat na janela',
+            color: primary,
+            isDark: isDark,
+          ),
+          const SizedBox(height: TokensStrip.s2),
+          OperationalMetricTile(
+            label: 'Último',
+            value: engajamentoUltimoValue(_eventos),
             hint: engajamentoUltimoHint(_eventos),
             color: primary,
             isDark: isDark,
@@ -254,6 +263,12 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
           accent: primary,
           isDark: isDark,
           onPressed: _abrirAluno,
+        ),
+        DashboardHomeActionChip(
+          label: 'Evolução',
+          accent: primary,
+          isDark: isDark,
+          onPressed: _abrirEvolucao,
         ),
         DashboardHomeActionChip(
           label: 'Chat',

@@ -72,7 +72,7 @@ int _groupExerciseCount(List<TreinoExercicioItem> items, int index) =>
 bool _isLastInExerciseGroup(List<TreinoExercicioItem> items, int index) =>
     treinoDetailIsLastInGroup(items, index);
 
-class TreinoDetailScreen extends ConsumerWidget {
+class TreinoDetailScreen extends ConsumerStatefulWidget {
   final int treinoId;
   final int? alunoId;
   final String? alunoNome;
@@ -85,8 +85,21 @@ class TreinoDetailScreen extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<TreinoDetailScreen> createState() => _TreinoDetailScreenState();
+}
+
+class _TreinoDetailScreenState extends ConsumerState<TreinoDetailScreen> {
+  DateTime? _fetchedAt;
+
+  @override
+  Widget build(BuildContext context) {
+    final treinoId = widget.treinoId;
+    final alunoId = widget.alunoId;
+    final alunoNome = widget.alunoNome;
     final treinoAsync = ref.watch(treinoProvider(treinoId));
+    if (treinoAsync.hasValue) {
+      _fetchedAt ??= DateTime.now();
+    }
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
 
@@ -102,6 +115,7 @@ class TreinoDetailScreen extends ConsumerWidget {
           useMesh: true,
           appBar: FxShellAppBar(
             title: 'Treino',
+            subtitle: FxHubFreshness.fromFetchedAt(_fetchedAt),
             onBack: () => _popTreinoDetail(context, alunoId: alunoId),
             actions: [
               FxHelpIconButton(
@@ -154,6 +168,10 @@ class TreinoDetailScreen extends ConsumerWidget {
                     alunoId: alunoId,
                     alunoNome: alunoNome,
                     isDark: isDark,
+                    onFetched: (value) {
+                      if (_fetchedAt == value) return;
+                      setState(() => _fetchedAt = value);
+                    },
                   ),
                 ),
           ),
@@ -170,6 +188,7 @@ class _TreinoDetailFresh extends ConsumerStatefulWidget {
     required this.alunoId,
     required this.alunoNome,
     required this.isDark,
+    required this.onFetched,
   });
 
   final Treino treino;
@@ -177,6 +196,7 @@ class _TreinoDetailFresh extends ConsumerStatefulWidget {
   final int? alunoId;
   final String? alunoNome;
   final bool isDark;
+  final ValueChanged<DateTime> onFetched;
 
   @override
   ConsumerState<_TreinoDetailFresh> createState() => _TreinoDetailFreshState();
@@ -198,7 +218,10 @@ class _TreinoDetailFreshState extends ConsumerState<_TreinoDetailFresh> {
     );
     ref.invalidate(treinoProvider(widget.treinoId));
     await ref.read(treinoProvider(widget.treinoId).future);
-    if (mounted) setState(() => _fetchedAt = DateTime.now());
+    if (!mounted) return;
+    final stamp = DateTime.now();
+    setState(() => _fetchedAt = stamp);
+    widget.onFetched(stamp);
   }
 
   @override

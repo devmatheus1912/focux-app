@@ -29,6 +29,21 @@ class HabitoTemplate {
   );
 }
 
+class HabitoCheckDia {
+  final DateTime data;
+  final bool feito;
+
+  const HabitoCheckDia({required this.data, required this.feito});
+
+  factory HabitoCheckDia.fromJson(Map<String, dynamic> j) {
+    final parsed = DateTime.tryParse('${j['data'] ?? ''}');
+    return HabitoCheckDia(
+      data: parsed ?? DateTime.fromMillisecondsSinceEpoch(0),
+      feito: j['feito'] as bool? ?? false,
+    );
+  }
+}
+
 class Habito {
   final int id;
   final String titulo;
@@ -44,6 +59,7 @@ class Habito {
   final bool badgeSemana;
   final int? alunoId;
   final bool ativo;
+  final List<HabitoCheckDia>? checks;
 
   Habito({
     required this.id,
@@ -60,6 +76,7 @@ class Habito {
     this.badgeSemana = false,
     this.alunoId,
     this.ativo = true,
+    this.checks,
   });
 
   factory Habito.fromJson(Map<String, dynamic> j) => Habito(
@@ -77,6 +94,7 @@ class Habito {
     badgeSemana: j['badgeSemana'] as bool? ?? false,
     alunoId: (j['alunoId'] as num?)?.toInt(),
     ativo: j['ativo'] as bool? ?? true,
+    checks: _checks(j['checks']),
   );
 
   Habito copyWith({
@@ -85,6 +103,7 @@ class Habito {
     int? streakAtual,
     bool? badgeSemana,
     bool? ativo,
+    List<HabitoCheckDia>? checks,
   }) => Habito(
     id: id,
     titulo: titulo,
@@ -100,7 +119,17 @@ class Habito {
     badgeSemana: badgeSemana ?? this.badgeSemana,
     alunoId: alunoId,
     ativo: ativo ?? this.ativo,
+    checks: checks ?? this.checks,
   );
+}
+
+List<HabitoCheckDia>? _checks(dynamic raw) {
+  if (raw is! List) return null;
+  return raw
+      .whereType<Map>()
+      .map((e) => HabitoCheckDia.fromJson(Map<String, dynamic>.from(e)))
+      .where((c) => c.data.millisecondsSinceEpoch > 0)
+      .toList();
 }
 
 class ComplianceItem {

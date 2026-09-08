@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:focux_app/features/habitos/data/habito_repository.dart';
 import 'package:focux_app/features/habitos/utils/habitos_display.dart';
 
 void main() {
@@ -89,5 +90,22 @@ void main() {
     expect(habitoLembreteLine(null), 'Sem horário de lembrete');
     expect(habitoLembreteLine('  '), 'Sem horário de lembrete');
     expect(habitoLembreteLine('08:00'), 'Lembrete às 08:00');
+    expect(habitoChecksLine(null), '');
+    expect(habitoChecksLine(const []), 'Nenhum check ainda');
+    expect(
+      habitoChecksLine([
+        HabitoCheckDia(data: DateTime(2026, 9, 7), feito: true),
+        HabitoCheckDia(data: DateTime(2026, 9, 6), feito: false),
+      ]),
+      'Feitos: 07/09',
+    );
+    expect(
+      habitoPatchCheckHoje(
+        [HabitoCheckDia(data: DateTime(2026, 9, 6), feito: true)],
+        true,
+        now: DateTime(2026, 9, 7),
+      )?.first.data,
+      DateTime(2026, 9, 7),
+    );
   });
 }

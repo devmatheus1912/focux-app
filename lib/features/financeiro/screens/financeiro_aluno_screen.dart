@@ -125,6 +125,12 @@ class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
       runSpacing: TokensStrip.s2,
       children: [
         DashboardHomeActionChip(
+          label: 'Início',
+          accent: primary,
+          isDark: isDark,
+          onPressed: () => safePopOrGo(context, '/dashboard/aluno'),
+        ),
+        DashboardHomeActionChip(
           label: 'Assinatura',
           accent: primary,
           isDark: isDark,
@@ -153,10 +159,17 @@ class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
 
     return fxScreenA11yScope(
       label: 'Minhas mensalidades',
-      child: FxShellScaffold(
+      child: PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, _) {
+          if (didPop) return;
+          safePopOrGo(context, '/dashboard/aluno');
+        },
+        child: FxShellScaffold(
         useMesh: true,
         appBar: FxShellAppBar(
           title: 'Mensalidades',
+          subtitle: freshness,
           onBack: () => safePopOrGo(context, '/dashboard/aluno'),
           actions: [
             FxHelpIconButton(
@@ -404,6 +417,7 @@ class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
               ),
           ],
         ),
+      ),
       ),
     );
   }

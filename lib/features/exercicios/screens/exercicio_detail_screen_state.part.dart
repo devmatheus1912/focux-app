@@ -140,6 +140,9 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final exercicioAsync = ref.watch(exercicioProvider(widget.exercicioId));
+    if (exercicioAsync.hasValue) {
+      _fetchedAt ??= DateTime.now();
+    }
 
     final chrome = ShellChrome.of(context);
     final isDark = chrome.isDark;
@@ -160,6 +163,7 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
         useMesh: true,
         appBar: FxShellAppBar(
           title: 'Exercício',
+          subtitle: FxHubFreshness.fromFetchedAt(_fetchedAt),
           onBack: leave,
           actions: [
             FxHelpIconButton(
@@ -200,7 +204,6 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
                 ),
             data:
                 (ex) {
-                  _fetchedAt ??= DateTime.now();
                   final grupo = _grupoLabel(ex);
                   final freshness = FxHubFreshness.fromFetchedAt(_fetchedAt);
                   return Column(
@@ -261,6 +264,12 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
                                 spacing: TokensStrip.s2,
                                 runSpacing: TokensStrip.s2,
                                 children: [
+                                  DashboardHomeActionChip(
+                                    label: 'Lista',
+                                    accent: primary,
+                                    isDark: isDark,
+                                    onPressed: leave,
+                                  ),
                                   DashboardHomeActionChip(
                                     label: 'Biblioteca',
                                     accent: primary,

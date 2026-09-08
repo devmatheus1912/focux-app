@@ -84,6 +84,8 @@ void main() {
     expect(engajamentoTreinosCount(eventos), 2);
     expect(engajamentoMensagensCount(eventos), 1);
     expect(engajamentoUltimoHint(eventos), 'Check-in · 03/09 12:00');
+    expect(engajamentoUltimoValue(eventos), 'Check-in');
+    expect(engajamentoUltimoValue(const []), '—');
     expect(engajamentoEventoRota('MENSAGEM', 9), '/alunos/9/chat');
     expect(engajamentoEventoRota('MEDIDA', 9), '/alunos/9/evolucao');
     expect(engajamentoEventoRota('TREINO', 9), '/alunos/9/treinos-list');

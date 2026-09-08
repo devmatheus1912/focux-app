@@ -134,6 +134,7 @@ class _HabitoDetailScreenState extends ConsumerState<HabitoDetailScreen> {
               ? habito.feitosNaSemana + 1
               : (habito.feitosNaSemana - 1).clamp(0, 7),
           badgeSemana: result.streak >= 7,
+          checks: habitoPatchCheckHoje(habito.checks, result.feito),
         );
       });
     } catch (e) {
@@ -383,6 +384,17 @@ class _HabitoDetailBody extends StatelessWidget {
                         fontWeight: FontWeight.w600,
                       ),
                     ),
+                    if (habitoChecksLine(habito.checks) case final checksLine
+                        when checksLine.isNotEmpty) ...[
+                      const SizedBox(height: TokensStrip.s3),
+                      Text(
+                        checksLine,
+                        style: FocuxHubTypography.bodyMuted(
+                          color: fxScreenMute(context),
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
                   ] else if (forAluno && habito.ativo)
                     Wrap(
                       spacing: TokensStrip.s2,
