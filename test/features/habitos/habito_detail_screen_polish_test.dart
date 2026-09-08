@@ -25,9 +25,22 @@ void main() {
     expect(screen, contains('habitoStickyAluno'));
     expect(screen, contains('desativar'));
     expect(screen, contains('toggleHoje'));
+    expect(screen, contains('.buscar('));
+    expect(screen, contains('habitoDesativadoChip'));
+    expect(screen, isNot(contains('meusHabitos')));
+    expect(screen, isNot(contains('getHome')));
     expect(screen, contains("'/alunos/\${habito.alunoId}'"));
     expect(screen, isNot(contains('FxSettingsGroup')));
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(screen, isNot(contains('onTap: () {}')));
+  });
+
+  test('hábito detalhe busca por id', () {
+    final repo = readScreenSourceBundle(
+      'lib/features/habitos/data/habito_repository.dart',
+    );
+    expect(repo, contains("get('/api/habitos/\$id')"));
+    expect(repo, contains('Future<Habito> buscar(int id)'));
+    expect(repo, contains("ativo: j['ativo'] as bool? ?? true"));
   });
 }

@@ -25,6 +25,7 @@ import '../../../core/widgets/skeleton_loader.dart';
 import '../../dashboard/utils/dashboard_home_snapshot.dart';
 import '../../dashboard/utils/dashboard_screen_helpers.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
+import '../utils/financeiro_hub_display.dart';
 
 part 'financeiro_dashboard_screen_state.part.dart';
 part 'financeiro_dashboard_screen_widgets.part.dart';

@@ -49,6 +49,28 @@ Future<String?> pickMensalidadeMesReferencia(
   return financeiroMesReferenciaIso(picked);
 }
 
+Future<String?> pickMensalidadeVencimento(
+  BuildContext ctx, {
+  required String mesReferencia,
+  required String atual,
+}) async {
+  final ops = financeiroVencimentoOpcoes(
+    mesReferencia: mesReferencia,
+    atual: atual,
+  );
+  final picked = await showFxInsetPickerSheet<String>(
+    ctx,
+    title: 'Vencimento',
+    selected: atual.trim(),
+    items: [
+      for (final o in ops)
+        FxInsetPickerSheetItem(value: o.iso, label: o.label),
+    ],
+  );
+  if (picked == null) return null;
+  return picked;
+}
+
 Future<Mensalidade?> confirmarPagarMensalidade({
   required BuildContext context,
   required WidgetRef ref,
@@ -255,6 +277,10 @@ Future<Mensalidade?> showEditarMensalidadeSheet({
   const statuses = ['PENDENTE', 'PAGO', 'ATRASADO'];
   final valorCtrl = TextEditingController(text: m.valor.wire);
   var mesReferencia = m.mesReferencia;
+  var vencimento =
+      (m.vencimento != null && m.vencimento!.trim().isNotEmpty)
+          ? m.vencimento!.trim()
+          : m.mesReferencia;
   var selectedStatus = m.status;
   var salvando = false;
   final formKey = GlobalKey<FormState>();
@@ -282,7 +308,7 @@ Future<Mensalidade?> showEditarMensalidadeSheet({
                       FxHomeSheetHeader(
                         isDark: isDark,
                         title: 'Editar mensalidade',
-                        subtitle: 'Atualize valor, mês e status.',
+                        subtitle: 'Valor, mês, vencimento e status.',
                         leading: Icon(
                           Icons.edit_outlined,
                           color: primary,
@@ -328,7 +354,29 @@ Future<Mensalidade?> showEditarMensalidadeSheet({
                                 atual: mesReferencia,
                               );
                               if (picked != null) {
-                                setModalState(() => mesReferencia = picked);
+                                setModalState(() {
+                                  vencimento = financeiroVencimentoAposTrocaDeMes(
+                                    mesAntigo: mesReferencia,
+                                    mesNovo: picked,
+                                    vencimentoAtual: vencimento,
+                                  );
+                                  mesReferencia = picked;
+                                });
+                              }
+                            },
+                          ),
+                          FxSettingsTile(
+                            fxIcon: 'calendar',
+                            label: 'Vencimento',
+                            value: financeiroVencimentoPickerValue(vencimento),
+                            onTap: () async {
+                              final picked = await pickMensalidadeVencimento(
+                                ctx,
+                                mesReferencia: mesReferencia,
+                                atual: vencimento,
+                              );
+                              if (picked != null) {
+                                setModalState(() => vencimento = picked);
                               }
                             },
                           ),
@@ -406,6 +454,7 @@ Future<Mensalidade?> showEditarMensalidadeSheet({
                                           m.id,
                                           valor: valor,
                                           mesReferencia: mesReferencia.trim(),
+                                          vencimento: vencimento.trim(),
                                           status: selectedStatus,
                                         );
                                         if (ctx.mounted) {

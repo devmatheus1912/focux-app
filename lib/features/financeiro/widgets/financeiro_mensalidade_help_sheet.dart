@@ -6,7 +6,7 @@ Future<void> showFinanceiroMensalidadeHelpSheet(BuildContext context) {
   return showFxHelpSheet(
     context,
     title: 'Como usar esta mensalidade',
-    subtitle: 'Valor, status e a cobrança deste vencimento.',
+    subtitle: 'Valor, mês, vencimento e status desta cobrança.',
     tips: const [
       FxHelpTip(
         'Pagar',
