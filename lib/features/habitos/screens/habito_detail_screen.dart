@@ -167,6 +167,9 @@ class _HabitoDetailScreenState extends ConsumerState<HabitoDetailScreen> {
             useMesh: true,
             appBar: FxShellAppBar(
               title: 'Hábito',
+              subtitle: habito == null
+                  ? null
+                  : FxHubFreshness.fromFetchedAt(_fetchedAt),
               onBack: _leave,
               actions: [
                 FxHelpIconButton(
@@ -220,6 +223,7 @@ class _HabitoDetailScreenState extends ConsumerState<HabitoDetailScreen> {
                     secao: _secao,
                     onSecao: (value) => setState(() => _secao = value),
                     onRefresh: _load,
+                    onLeave: _leave,
                     onSticky: widget.forAluno ? _toggleHoje : _desativar,
                   ),
           ),
@@ -238,6 +242,7 @@ class _HabitoDetailBody extends StatelessWidget {
     required this.secao,
     required this.onSecao,
     required this.onRefresh,
+    required this.onLeave,
     required this.onSticky,
   });
 
@@ -248,6 +253,7 @@ class _HabitoDetailBody extends StatelessWidget {
   final String secao;
   final ValueChanged<String> onSecao;
   final Future<void> Function() onRefresh;
+  final VoidCallback onLeave;
   final VoidCallback onSticky;
 
   @override
@@ -321,6 +327,28 @@ class _HabitoDetailBody extends StatelessWidget {
                     color: primary,
                     isDark: isDark,
                   ),
+                  const SizedBox(height: TokensStrip.s3),
+                  Wrap(
+                    spacing: TokensStrip.s2,
+                    runSpacing: TokensStrip.s2,
+                    children: [
+                      DashboardHomeActionChip(
+                        label: 'Lista',
+                        accent: primary,
+                        isDark: isDark,
+                        onPressed: onLeave,
+                      ),
+                      if (!forAluno && habito.alunoId != null)
+                        DashboardHomeActionChip(
+                          label: 'Aluno',
+                          accent: primary,
+                          isDark: isDark,
+                          onPressed: () => context.push(
+                            '/alunos/${habito.alunoId}',
+                          ),
+                        ),
+                    ],
+                  ),
                   const SizedBox(height: TokensStrip.s4),
                   AlunoSegmentedChoice(
                     options: habitoDetalheSecoes,
@@ -329,46 +357,46 @@ class _HabitoDetailBody extends StatelessWidget {
                     onSelect: onSecao,
                   ),
                   const SizedBox(height: TokensStrip.s4),
-                  if (secao == habitoDetalheSecaoSobre)
+                  if (secao == habitoDetalheSecaoSobre) ...[
+                    if (!habito.ativo) ...[
+                      Text(
+                        habitoDesativadoChip(),
+                        style: FocuxHubTypography.bodyMuted(
+                          color: fxScreenMute(context),
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: TokensStrip.s3),
+                    ],
                     Text(
                       descricao.isEmpty ? habitoSobreEmpty() : descricao,
                       style: FocuxHubTypography.bodyMuted(
                         color: fxScreenMute(context),
                         fontWeight: FontWeight.w600,
                       ),
-                    )
-                  else
+                    ),
+                    const SizedBox(height: TokensStrip.s3),
+                    Text(
+                      habitoLembreteLine(habito.lembreteHora),
+                      style: FocuxHubTypography.bodyMuted(
+                        color: fxScreenMute(context),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ] else if (forAluno && habito.ativo)
                     Wrap(
                       spacing: TokensStrip.s2,
                       runSpacing: TokensStrip.s2,
                       children: [
-                        if (!habito.ativo)
-                          DashboardHomeActionChip(
-                            label: habitoDesativadoChip(),
-                            accent: primary,
-                            isDark: isDark,
-                            enabled: false,
-                            onPressed: () {},
-                          ),
-                        if (!forAluno && habito.alunoId != null)
-                          DashboardHomeActionChip(
-                            label: 'Aluno',
-                            accent: primary,
-                            isDark: isDark,
-                            onPressed: () => context.push(
-                              '/alunos/${habito.alunoId}',
-                            ),
-                          ),
-                        if (forAluno && habito.ativo)
-                          DashboardHomeActionChip(
-                            label: habito.feitoHoje
-                                ? 'Feito hoje'
-                                : 'Pendente hoje',
-                            accent: primary,
-                            isDark: isDark,
-                            enabled: !busy,
-                            onPressed: onSticky,
-                          ),
+                        DashboardHomeActionChip(
+                          label: habito.feitoHoje
+                              ? 'Feito hoje'
+                              : 'Pendente hoje',
+                          accent: primary,
+                          isDark: isDark,
+                          enabled: !busy,
+                          onPressed: onSticky,
+                        ),
                       ],
                     ),
                 ],

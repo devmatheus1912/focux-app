@@ -122,6 +122,14 @@ void main() {
     expect(screen, contains('DashboardHomeActionChip'));
     expect(screen, contains('treinoDetailSeriesCount'));
     expect(screen, contains("label: 'Atribuir'"));
+    expect(screen, contains("label: 'Lista'"));
+    expect(screen, contains("label: 'Duplicar'"));
+    expect(
+      File(
+        'lib/features/treinos/screens/treino_detail_screen_body.part.dart',
+      ).readAsStringSync(),
+      isNot(contains("label: 'Presencial'")),
+    );
     expect(screen, isNot(contains('locked: selectedAlunoId == null')));
     expect(screen, contains('treinoPrescriptionSaveLabel'));
     expect(screen, isNot(contains('? () {}')));

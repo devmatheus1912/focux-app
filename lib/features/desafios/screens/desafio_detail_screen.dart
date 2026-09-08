@@ -341,20 +341,19 @@ class _DesafioDetailBody extends StatelessWidget {
                     spacing: TokensStrip.s2,
                     runSpacing: TokensStrip.s2,
                     children: [
-                      if (forAluno) ...[
-                        DashboardHomeActionChip(
-                          label: 'Lista',
-                          accent: primary,
-                          isDark: isDark,
-                          onPressed: onLeave,
-                        ),
+                      DashboardHomeActionChip(
+                        label: 'Lista',
+                        accent: primary,
+                        isDark: isDark,
+                        onPressed: onLeave,
+                      ),
+                      if (forAluno)
                         DashboardHomeActionChip(
                           label: desafioTipoLabel(desafio.tipo),
                           accent: primary,
                           isDark: isDark,
                           onPressed: onAlunoSticky,
                         ),
-                      ],
                       if (!forAluno &&
                           first != null &&
                           first.alunoId > 0)
@@ -431,26 +430,27 @@ class _DesafioDetailBody extends StatelessWidget {
             ),
           ),
         ),
-        SafeArea(
-          top: false,
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(
-              FxSettingsLayout.pageInset,
-              TokensStrip.s2,
-              FxSettingsLayout.pageInset,
-              TokensStrip.s3 + MediaQuery.viewInsetsOf(context).bottom,
-            ),
-            child: FxLiquidPrimaryButton(
-              label: forAluno
-                  ? desafioStickyAlunoLabel(desafio.tipo)
-                  : desafioStickyEncerrarLabel(),
-              loading: encerrando,
-              onPressed: forAluno
-                  ? onAlunoSticky
-                  : (encerrando ? null : onEncerrar),
+        if (forAluno || desafio.ativo)
+          SafeArea(
+            top: false,
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(
+                FxSettingsLayout.pageInset,
+                TokensStrip.s2,
+                FxSettingsLayout.pageInset,
+                TokensStrip.s3 + MediaQuery.viewInsetsOf(context).bottom,
+              ),
+              child: FxLiquidPrimaryButton(
+                label: forAluno
+                    ? desafioStickyAlunoLabel(desafio.tipo)
+                    : desafioStickyEncerrarLabel(),
+                loading: encerrando,
+                onPressed: forAluno
+                    ? onAlunoSticky
+                    : (encerrando ? null : onEncerrar),
+              ),
             ),
           ),
-        ),
       ],
     );
   }

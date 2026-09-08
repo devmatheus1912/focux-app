@@ -221,6 +221,23 @@ class _TreinoDetailBody extends StatelessWidget {
                       runSpacing: TokensStrip.s2,
                       children: [
                         DashboardHomeActionChip(
+                          label: 'Lista',
+                          accent: primary,
+                          isDark: isDark,
+                          onPressed: () => _popTreinoDetail(
+                            context,
+                            alunoId: alunoId,
+                          ),
+                        ),
+                        if (alunoId != null)
+                          DashboardHomeActionChip(
+                            label: 'Aluno',
+                            accent: primary,
+                            isDark: isDark,
+                            onPressed: () =>
+                                context.push('/alunos/$alunoId'),
+                          ),
+                        DashboardHomeActionChip(
                           label: 'Atribuir',
                           accent: primary,
                           isDark: isDark,
@@ -232,20 +249,6 @@ class _TreinoDetailBody extends StatelessWidget {
                             alunoId: alunoId,
                             isDark: isDark,
                             action: 'assign',
-                          ),
-                        ),
-                        DashboardHomeActionChip(
-                          label: 'Presencial',
-                          accent: primary,
-                          isDark: isDark,
-                          onPressed: () => _dispatchTreinoDetailAction(
-                            context: context,
-                            ref: ref,
-                            treino: treino,
-                            treinoId: treinoId,
-                            alunoId: alunoId,
-                            isDark: isDark,
-                            action: 'presencial',
                           ),
                         ),
                         DashboardHomeActionChip(

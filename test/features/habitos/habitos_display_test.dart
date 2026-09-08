@@ -86,5 +86,8 @@ void main() {
       'Desativado · Meta 7x · Aluno específico',
     );
     expect(habitoDesativadoChip(), 'Desativado');
+    expect(habitoLembreteLine(null), 'Sem horário de lembrete');
+    expect(habitoLembreteLine('  '), 'Sem horário de lembrete');
+    expect(habitoLembreteLine('08:00'), 'Lembrete às 08:00');
   });
 }

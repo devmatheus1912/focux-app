@@ -140,3 +140,9 @@ String habitoStickyAluno(bool feitoHoje) =>
 String habitoSobreEmpty() => 'Sem descrição neste hábito.';
 
 String habitoDesativadoChip() => 'Desativado';
+
+String habitoLembreteLine(String? hora) {
+  final value = hora?.trim();
+  if (value == null || value.isEmpty) return 'Sem horário de lembrete';
+  return 'Lembrete às $value';
+}
