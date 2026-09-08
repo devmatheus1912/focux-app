@@ -1,5 +1,13 @@
 part of 'landing_editor_screen.dart';
 
+void _showLandingTip(
+  BuildContext context, {
+  required String title,
+  required String body,
+}) {
+  LandingStudioGuidance.show(context, title: title, body: body);
+}
+
 class _LandingStudioEntrevistaBody extends StatelessWidget {
   const _LandingStudioEntrevistaBody({required this.state});
 
@@ -110,17 +118,6 @@ class _LandingStudioEntrevistaBody extends StatelessWidget {
                         hint: 'Quem busca milagre sem treinar',
                       ),
                     ),
-                    const SizedBox(height: TokensStrip.s3),
-                    TextFormField(
-                      controller: state._prova,
-                      textInputAction: TextInputAction.next,
-                      textCapitalization: TextCapitalization.sentences,
-                      decoration: FxInputDeco.build(
-                        context,
-                        'Prova',
-                        hint: 'CREF · anos · alunos · resultado',
-                      ),
-                    ),
                   ],
                 ),
               ),
@@ -131,8 +128,49 @@ class _LandingStudioEntrevistaBody extends StatelessWidget {
         FxStaggerItem(
           index: 2,
           child: FxSettingsGroup(
+            header: 'Prova',
+            caption: 'Resultado, depoimento ou histórico — não só CREF.',
+            helpTooltip: 'Prova que convence',
+            onHelpTap: () => _showLandingTip(
+              context,
+              title: LandingStudioGuidance.provaTitle,
+              body: LandingStudioGuidance.provaBody,
+            ),
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  TokensStrip.s3,
+                  TokensStrip.s3,
+                  TokensStrip.s3,
+                  TokensStrip.s2,
+                ),
+                child: TextFormField(
+                  controller: state._prova,
+                  textInputAction: TextInputAction.next,
+                  textCapitalization: TextCapitalization.sentences,
+                  maxLines: 2,
+                  decoration: FxInputDeco.build(
+                    context,
+                    'Prova social',
+                    hint: 'CREF · anos · alunos · resultado',
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: FxSettingsLayout.groupGap),
+        FxStaggerItem(
+          index: 3,
+          child: FxSettingsGroup(
             header: 'Oferta',
             caption: 'O plano principal da vitrine.',
+            helpTooltip: 'Oferta clara',
+            onHelpTap: () => _showLandingTip(
+              context,
+              title: LandingStudioGuidance.ofertaTitle,
+              body: LandingStudioGuidance.ofertaBody,
+            ),
             children: [
               Padding(
                 padding: const EdgeInsets.fromLTRB(
@@ -171,7 +209,7 @@ class _LandingStudioEntrevistaBody extends StatelessWidget {
                       textInputAction: TextInputAction.next,
                       decoration: FxInputDeco.build(
                         context,
-                        'Preço (opcional)',
+                        'Preço',
                         hint: 'R\$ 297/mês',
                       ),
                     ),
@@ -196,7 +234,7 @@ class _LandingStudioEntrevistaBody extends StatelessWidget {
         ),
         const SizedBox(height: FxSettingsLayout.groupGap),
         FxStaggerItem(
-          index: 3,
+          index: 4,
           child: FxSettingsGroup(
             header: 'Dúvidas frequentes',
             caption: 'Até 3 perguntas que sempre te fazem.',
@@ -250,7 +288,7 @@ class _LandingStudioEntrevistaBody extends StatelessWidget {
         ),
         const SizedBox(height: FxSettingsLayout.groupGap),
         FxStaggerItem(
-          index: 4,
+          index: 5,
           child: FxSettingsGroup(
             header: 'Contato',
             caption: 'CTA da página e redes.',
@@ -308,7 +346,10 @@ class _LandingStudioRevisaoBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
+    final soft = BrandPalette.softened(primary);
     final urlLabel = state._publicUrlLabel();
+    final ready = state._isProfessionalReady;
+    final missing = state._publishMissing;
 
     return ListView(
       keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
@@ -319,40 +360,86 @@ class _LandingStudioRevisaoBody extends StatelessWidget {
         TokensStrip.s6 + MediaQuery.viewInsetsOf(context).bottom,
       ),
       children: [
-        if (state._needsProof)
-          Padding(
-            padding: const EdgeInsets.only(bottom: TokensStrip.s3),
-            child: DecoratedBox(
-              decoration: chrome.panel(radius: TokensStrip.rMd),
-              child: Padding(
-                padding: const EdgeInsets.all(TokensStrip.s3),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Icon(Icons.info_outline, color: EagleTokens.warn, size: 20),
-                    const SizedBox(width: TokensStrip.s2),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Prova fraca',
-                            style: Theme.of(context).textTheme.titleSmall,
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'Envie uma foto hero real sua. Sem isso o backend usa atmosfera — nunca stock de outra pessoa. CREF não conta como depoimento.',
-                            style: Theme.of(context).textTheme.bodySmall
-                                ?.copyWith(color: chrome.mute),
-                          ),
-                        ],
+        DecoratedBox(
+          decoration: chrome.panel(radius: TokensStrip.rMd, accent: soft),
+          child: Padding(
+            padding: const EdgeInsets.all(TokensStrip.s3),
+            child: Row(
+              children: [
+                Icon(
+                  ready ? Icons.verified_outlined : Icons.timelapse_outlined,
+                  color: ready ? EagleTokens.good : soft,
+                  size: 22,
+                ),
+                const SizedBox(width: TokensStrip.s2),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        LandingStudioGuidance.readinessLabel(ready: ready),
+                        style: Theme.of(context).textTheme.titleSmall,
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        LandingStudioGuidance.readinessCaption(ready: ready),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: chrome.mute,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                FxHelpIconButton(
+                  tooltip: 'Antes de publicar',
+                  size: 28,
+                  onTap: () => _showLandingTip(
+                    context,
+                    title: LandingStudioGuidance.publishTitle,
+                    body: LandingStudioGuidance.publishHelpBody(
+                      missing: missing,
+                      podePublicar: state._podePublicar,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        if (state._needsProof) ...[
+          const SizedBox(height: TokensStrip.s3),
+          DecoratedBox(
+            decoration: chrome.panel(radius: TokensStrip.rMd),
+            child: Padding(
+              padding: const EdgeInsets.all(TokensStrip.s3),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(Icons.info_outline, color: EagleTokens.warn, size: 20),
+                  const SizedBox(width: TokensStrip.s2),
+                  Expanded(
+                    child: Text(
+                      LandingStudioGuidance.needsProofBanner,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: chrome.mute,
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),
+        ],
+        if (!state._podePublicar) ...[
+          const SizedBox(height: TokensStrip.s3),
+          Text(
+            'Publicar desabilitado pelo servidor. Toque em “Antes de publicar” para ver o que falta.',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: chrome.mute,
+            ),
+          ),
+        ],
+        const SizedBox(height: FxSettingsLayout.groupGap),
         FxStaggerItem(
           index: 0,
           child: FxSettingsGroup(
@@ -537,19 +624,29 @@ class _LandingStudioRevisaoBody extends StatelessWidget {
                   children: [
                     Expanded(
                       child: _LandingStudioImageSlot(
-                        label: 'Hero (obrigatória p/ 10/10)',
+                        label: 'Capa (hero)',
                         url: state._heroImageUrl,
                         uploading: state._uploadingHero,
                         onTap: () => state._uploadImage(hero: true),
+                        onHelp: () => _showLandingTip(
+                          context,
+                          title: LandingStudioGuidance.heroTitle,
+                          body: LandingStudioGuidance.heroBody,
+                        ),
                       ),
                     ),
                     const SizedBox(width: TokensStrip.s3),
                     Expanded(
                       child: _LandingStudioImageSlot(
-                        label: 'Bio (opcional)',
+                        label: 'Bio / prova',
                         url: state._bioImageUrl,
                         uploading: state._uploadingBio,
                         onTap: () => state._uploadImage(hero: false),
+                        onHelp: () => _showLandingTip(
+                          context,
+                          title: LandingStudioGuidance.bioPhotoTitle,
+                          body: LandingStudioGuidance.bioPhotoBody,
+                        ),
                       ),
                     ),
                   ],
@@ -570,12 +667,14 @@ class _LandingStudioImageSlot extends StatelessWidget {
     required this.url,
     required this.uploading,
     required this.onTap,
+    this.onHelp,
   });
 
   final String label;
   final String? url;
   final bool uploading;
   final VoidCallback onTap;
+  final VoidCallback? onHelp;
 
   @override
   Widget build(BuildContext context) {
@@ -583,57 +682,83 @@ class _LandingStudioImageSlot extends StatelessWidget {
     final primary = Theme.of(context).colorScheme.primary;
     final hasImage = url != null && url!.trim().isNotEmpty;
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: uploading ? null : onTap,
-        borderRadius: BorderRadius.circular(TokensStrip.rMd),
-        child: Ink(
-          height: 120,
-          decoration: chrome.panel(radius: TokensStrip.rMd),
-          child: uploading
-              ? const Center(child: CircularProgressIndicator(strokeWidth: 2))
-              : hasImage
-              ? ClipRRect(
-                  borderRadius: BorderRadius.circular(TokensStrip.rMd),
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      Image.network(url!, fit: BoxFit.cover),
-                      Align(
-                        alignment: Alignment.bottomCenter,
-                        child: Container(
-                          width: double.infinity,
-                          color: Colors.black54,
-                          padding: const EdgeInsets.all(TokensStrip.s2),
-                          child: Text(
-                            'Trocar $label',
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 12,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                label,
+                style: Theme.of(context).textTheme.labelLarge,
+              ),
+            ),
+            if (onHelp != null)
+              FxHelpIconButton(
+                tooltip: label,
+                size: 28,
+                onTap: onHelp!,
+              ),
+          ],
+        ),
+        const SizedBox(height: TokensStrip.s2),
+        Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: uploading ? null : onTap,
+            borderRadius: BorderRadius.circular(TokensStrip.rMd),
+            child: Ink(
+              height: 120,
+              decoration: chrome.panel(radius: TokensStrip.rMd),
+              child: uploading
+                  ? const Center(
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : hasImage
+                  ? ClipRRect(
+                      borderRadius: BorderRadius.circular(TokensStrip.rMd),
+                      child: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          Image.network(url!, fit: BoxFit.cover),
+                          Align(
+                            alignment: Alignment.bottomCenter,
+                            child: Container(
+                              width: double.infinity,
+                              color: Colors.black54,
+                              padding: const EdgeInsets.all(TokensStrip.s2),
+                              child: const Text(
+                                'Trocar foto',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                ),
+                              ),
                             ),
                           ),
+                        ],
+                      ),
+                    )
+                  : Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.add_photo_alternate_outlined,
+                          color: primary,
                         ),
-                      ),
-                    ],
-                  ),
-                )
-              : Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.add_photo_alternate_outlined, color: primary),
-                    const SizedBox(height: TokensStrip.s1),
-                    Text(
-                      label,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: chrome.mute,
-                      ),
+                        const SizedBox(height: TokensStrip.s1),
+                        Text(
+                          'Enviar',
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(color: chrome.mute),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+            ),
+          ),
         ),
-      ),
+      ],
     );
   }
 }

@@ -20,6 +20,10 @@ void main() {
     expect(screen, contains('landingStudioRepositoryProvider'));
     expect(screen, contains('Gerar página'));
     expect(screen, contains('Publicar'));
+    expect(screen, contains('LandingStudioGuidance'));
+    expect(screen, contains('readinessLabel'));
+    expect(screen, contains('heroTitle'));
+    expect(screen, contains('LandingStudioGuidance.show'));
     expect(screen, contains('_podePublicar'));
     expect(screen, contains('_publicUrl'));
     expect(screen, contains('focuxpersonal.com'));
