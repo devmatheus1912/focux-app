@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
+import '../../../core/money/fx_money.dart';
 
 class PacoteSugerido {
   final String nome;
@@ -14,7 +15,7 @@ class PacoteSugerido {
 
   factory PacoteSugerido.fromJson(Map<String, dynamic> j) => PacoteSugerido(
     nome: j['nome'] as String? ?? '',
-    valor: (j['valor'] as num?)?.toDouble() ?? 0,
+    valor: FxMoney.reais(j['valor']),
     descricao: j['descricao'] as String? ?? '',
   );
 }
@@ -38,8 +39,8 @@ class SmartPricingRecomendacao {
 
   factory SmartPricingRecomendacao.fromJson(Map<String, dynamic> j) =>
       SmartPricingRecomendacao(
-        ticketAtual: (j['ticketAtual'] as num?)?.toDouble() ?? 0,
-        precoSugerido: (j['precoSugerido'] as num?)?.toDouble() ?? 0,
+        ticketAtual: FxMoney.reais(j['ticketAtual']),
+        precoSugerido: FxMoney.reais(j['precoSugerido']),
         alunosAtivos: (j['alunosAtivos'] as num?)?.toInt() ?? 0,
         mensalidadesPagas: (j['mensalidadesPagas'] as num?)?.toInt() ?? 0,
         rationale: j['rationale'] as String? ?? '',

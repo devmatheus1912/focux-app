@@ -1,3 +1,5 @@
+import '../../../core/money/fx_money.dart';
+
 /// Modelo de plano SaaS — arquivo isolado para evitar ciclo com paywall_vitrine.
 ///
 /// Só campos que a UI de Assinatura/checkout ainda lê. Features de plano vêm de
@@ -26,10 +28,17 @@ class Plano {
   factory Plano.fromJson(Map<String, dynamic> json) => Plano(
     id: json['id'] as int,
     nome: json['nome'] as String,
-    precoMensal: (json['precoMensal'] as num).toDouble(),
-    precoAnual: (json['precoAnual'] as num?)?.toDouble(),
-    precoAnualMensalEquiv: (json['precoAnualMensalEquiv'] as num?)?.toDouble(),
-    equivMensalNoAnual: (json['equivMensalNoAnual'] as num?)?.toDouble(),
+    precoMensal: FxMoney.reais(json['precoMensal']),
+    precoAnual:
+        json['precoAnual'] == null ? null : FxMoney.reais(json['precoAnual']),
+    precoAnualMensalEquiv:
+        json['precoAnualMensalEquiv'] == null
+            ? null
+            : FxMoney.reais(json['precoAnualMensalEquiv']),
+    equivMensalNoAnual:
+        json['equivMensalNoAnual'] == null
+            ? null
+            : FxMoney.reais(json['equivMensalNoAnual']),
     labelDescontoAnual: json['labelDescontoAnual'] as String?,
     labelEconomiaAnual: json['labelEconomiaAnual'] as String?,
   );

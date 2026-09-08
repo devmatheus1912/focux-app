@@ -1,3 +1,5 @@
+import '../money/fx_money.dart';
+
 /// Normaliza textos exibidos quando a origem veio sem acentuação PT-BR.
 String displayPtBr(String value) {
   if (value.isEmpty) return value;
@@ -124,7 +126,11 @@ String displayMetaToken(String value) {
 }
 
 /// Formata valor monetário no padrão brasileiro (ex.: R\$ 2.000,00).
-String formatBrlCurrency(num value, {bool showDecimals = true}) {
+String formatBrlCurrency(Object value, {bool showDecimals = true}) {
+  if (value is FxMoney) return value.format(showDecimals: showDecimals);
+  if (value is! num) {
+    return FxMoney.parse(value).format(showDecimals: showDecimals);
+  }
   final amount = value.toDouble();
   final negative = amount < 0;
   final abs = amount.abs();

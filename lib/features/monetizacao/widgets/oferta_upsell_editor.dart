@@ -30,7 +30,7 @@ Future<({OfertaUpsellDraft? draft, bool submitted})> showOfertaUpsellEditor(
   final tituloCtrl = TextEditingController(text: existing?.titulo ?? '');
   final descricaoCtrl = TextEditingController(text: existing?.descricao ?? '');
   final valorCtrl = TextEditingController(
-    text: existing == null ? '' : existing.valor.toStringAsFixed(2),
+    text: existing == null ? '' : existing.valor.wire,
   );
   var tipoGatilho = existing?.tipoGatilho ?? 'MANUAL';
   var ativo = existing?.ativo ?? true;

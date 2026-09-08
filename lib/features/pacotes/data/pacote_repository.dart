@@ -1,11 +1,12 @@
 import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
+import '../../../core/money/fx_money.dart';
 
 class Pacote {
   final int id;
   final String titulo;
   final String? descricao;
-  final double valor;
+  final FxMoney valor;
   final int duracaoMeses;
   final bool incluiTreino;
   final bool incluiConsultoria;
@@ -28,7 +29,7 @@ class Pacote {
     id: (j['id'] as num).toInt(),
     titulo: j['titulo'] as String? ?? '',
     descricao: j['descricao'] as String?,
-    valor: (j['valor'] as num?)?.toDouble() ?? 0,
+    valor: FxMoney.parse(j['valor']),
     duracaoMeses: (j['duracaoMeses'] as num?)?.toInt() ?? 1,
     incluiTreino: j['incluiTreino'] as bool? ?? false,
     incluiConsultoria: j['incluiConsultoria'] as bool? ?? false,
@@ -90,7 +91,7 @@ class PacoteRepository {
   Future<Pacote> criar({
     required String titulo,
     String? descricao,
-    required double valor,
+    required Object valor,
     int duracaoMeses = 1,
     bool incluiTreino = true,
     bool incluiConsultoria = false,
@@ -101,7 +102,7 @@ class PacoteRepository {
       data: {
         'titulo': titulo,
         'descricao': descricao,
-        'valor': valor,
+        'valor': FxMoney.parse(valor).wire,
         'duracaoMeses': duracaoMeses,
         'incluiTreino': incluiTreino,
         // Backend ainda aceita o campo; app não oferece dieta/nutri.

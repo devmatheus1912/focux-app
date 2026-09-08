@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
+import '../../../core/money/fx_money.dart';
 
 class BusinessSnapshot {
   final double mrrAtual;
@@ -33,12 +34,12 @@ class BusinessSnapshot {
   });
 
   factory BusinessSnapshot.fromJson(Map<String, dynamic> j) => BusinessSnapshot(
-    mrrAtual: (j['mrrAtual'] as num?)?.toDouble() ?? 0,
-    mrrAnterior: (j['mrrAnterior'] as num?)?.toDouble() ?? 0,
-    mrrPrevisto: (j['mrrPrevisto'] as num?)?.toDouble() ?? 0,
+    mrrAtual: FxMoney.reais(j['mrrAtual']),
+    mrrAnterior: FxMoney.reais(j['mrrAnterior']),
+    mrrPrevisto: FxMoney.reais(j['mrrPrevisto']),
     ndrPct: (j['ndrPct'] as num?)?.toDouble() ?? 0,
-    arpa: (j['arpa'] as num?)?.toDouble() ?? 0,
-    ltvProxy: (j['ltvProxy'] as num?)?.toDouble() ?? 0,
+    arpa: FxMoney.reais(j['arpa']),
+    ltvProxy: FxMoney.reais(j['ltvProxy']),
     alunosAtivos: (j['alunosAtivos'] as num?)?.toInt() ?? 0,
     alunosTotal: (j['alunosTotal'] as num?)?.toInt() ?? 0,
     inadimplentes: (j['inadimplentes'] as num?)?.toInt() ?? 0,

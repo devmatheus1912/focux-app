@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../core/money/fx_money.dart';
 import '../../../core/planos/plano_cache_policy.dart';
 
 import '../../../core/api/api_client.dart';
@@ -89,8 +90,8 @@ class EnterpriseUpgradePreview {
       EnterpriseUpgradePreview(
         planoAtual: subscriptionPlanFromApi(j['planoAtual'] as String?),
         planoDestino: subscriptionPlanFromApi(j['planoDestino'] as String?),
-        valorProporcional: (j['valorProporcional'] as num?)?.toDouble() ?? 0,
-        diferencaDiaria: (j['diferencaDiaria'] as num?)?.toDouble() ?? 0,
+        valorProporcional: FxMoney.reais(j['valorProporcional']),
+        diferencaDiaria: FxMoney.reais(j['diferencaDiaria']),
         diasRestantes: (j['diasRestantes'] as num?)?.toInt() ?? 0,
         cobrancaImediata: j['cobrancaImediata'] as bool? ?? false,
       );
@@ -141,8 +142,7 @@ class EnterpriseActivationResult {
       EnterpriseActivationResult(
         planoAnterior: subscriptionPlanFromApi(j['planoAnterior'] as String?),
         planoAtual: subscriptionPlanFromApi(j['planoAtual'] as String?),
-        valorProporcionalCobrado:
-            (j['valorProporcionalCobrado'] as num?)?.toDouble() ?? 0,
+        valorProporcionalCobrado: FxMoney.reais(j['valorProporcionalCobrado']),
         diasRestantesCobrados:
             (j['diasRestantesCobrados'] as num?)?.toInt() ?? 0,
         planoValidoAte: _parseDateTime(j['planoValidoAte']),

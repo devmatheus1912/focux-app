@@ -4,6 +4,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../core/money/fx_money.dart';
 import '../../../core/config/env.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
@@ -87,9 +88,11 @@ class PacotesOverviewStrip extends StatelessWidget {
     final primary = Theme.of(context).colorScheme.primary;
     final ink = fxScreenInk(context);
     final count = pacotes.length;
-    final ticketMedio =
-        pacotes.map((p) => p.valor).reduce((a, b) => a + b) / count;
-    final ticketLabel = ticketMedio.toStringAsFixed(2).replaceAll('.', ',');
+    final ticketSoma = pacotes
+        .map((p) => p.valor)
+        .reduce((a, b) => a + b);
+    final ticketMedio = FxMoney.cents(ticketSoma.cents ~/ count);
+    final ticketLabel = ticketMedio.format(showDecimals: true).replaceFirst('R\$', '').trim();
 
     return Semantics(
       label:
@@ -433,7 +436,7 @@ class PacoteStorefrontCard extends StatelessWidget {
           ),
           const SizedBox(height: 14),
           Text(
-            'R\$ ${pacote.valor.toStringAsFixed(2).replaceAll('.', ',')}',
+            pacote.valor.format(),
             style: FocuxHubTypography.metric(
               color: primary,
               fontSize: FocuxHubTypography.metricLg,

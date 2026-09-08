@@ -237,10 +237,20 @@ ENTERPRISE. Com o campo presente, ele vence o mapa.
 
 ---
 
-Push aluno já existente leva `type` + `route` no `data` (tap no app
-empilha a rota). Sem job novo: mensalidade → `/financeiro/aluno`;
-treino / engajamento / upsell / automação → `/dashboard/aluno`;
-chat copiloto → `/chat/aluno`. Recorrência e referral não têm push.
+Push leva `route` no `data` (tap no app empilha a rota). Sem tipo novo.
+
+Aluno (`FcmTapPayload.ensureAluno`): mensalidade / dunning → `/financeiro/aluno`;
+treino / engajamento / upsell / automação / winback / coach → `/dashboard/aluno`;
+chat → `/chat/aluno`; anamnese → `/aluno/anamnese`; `plan_sync` / `trial` /
+`trial_expired` → `/assinatura`; retenção → `/retencao`. Sem type+route cai
+em `/dashboard/aluno`.
+
+Personal (`FcmTapPayload.ensurePersonal`): mensalidade / dunning → `/financeiro`;
+chat → `/chat/inbox`; trial / `plan_sync` / `trial_expired` → `/assinatura`;
+retenção → `/retencao`. Sem type+route cai em `/dashboard/personal`.
+Agenda → `/agenda`; lead / captura → `/leads`; suporte → `/suporte`;
+grupo-aula → `/grupo-aulas`; anamnese preenchida → `/alunos/{id}/anamnese`.
+Broadcast para aluno usa só `route=/dashboard/aluno`.
 
 ## 3. `DELETE /api/fcm/token` — confirmado, P0 fechado no servidor
 
@@ -325,7 +335,7 @@ não foi reescrito.
 | Item | Libera | Estado |
 |---|---|---|
 | RBAC P0 | — (sem tela) | Fechado |
-| Webhook MercadoPago | financeiro | Fechado. Resumo/somas em `BigDecimal`; JSON de dinheiro ainda número |
+| Webhook MercadoPago | financeiro | Fechado. Resumo/somas em `BigDecimal`. JSON de dinheiro (dashboard, resumo, mensalidade, pacote, oferta, loja, plano, business, recorrência, dunning, command center) sai como **string**. Cliente lê com `FxMoney.parse` (aceita string ou número). `vencimento` da mensalidade é alias de `mesReferencia` — sem coluna nova. |
 | `FocuxClock` America/Sao_Paulo | S1 hubs + números de S3 | Fechado |
 | Gates de plano + `codigo` | S6 paywall | Fechado |
 | Timeouts IA (connect 5s / read 30s) | IA | Fechado |

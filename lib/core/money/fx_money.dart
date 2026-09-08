@@ -6,6 +6,12 @@ class FxMoney implements Comparable<FxMoney> {
 
   final int cents;
 
+  /// Reais só para parser legado. Soma e comparação usam [cents].
+  double get asReais => cents / 100.0;
+
+  /// Aceita string JSON ou número antigo sem estourar o `as num`.
+  static double reais(Object? raw) => FxMoney.parse(raw ?? 0).asReais;
+
   factory FxMoney.parse(Object? raw) {
     if (raw == null) return zero;
     if (raw is FxMoney) return raw;

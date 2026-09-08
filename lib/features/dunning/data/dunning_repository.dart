@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 
 import '../../../core/api/api_client.dart';
+import '../../../core/money/fx_money.dart';
 
 class DunningSnapshot {
   final int total;
@@ -50,7 +51,7 @@ class DunningFalha {
     alunoNome: j['alunoNome'] as String?,
     contexto: j['contexto'] as String? ?? '',
     motivo: j['motivo'] as String?,
-    valor: (j['valor'] as num?)?.toDouble(),
+    valor: j['valor'] == null ? null : FxMoney.reais(j['valor']),
     tentativa: (j['tentativa'] as num?)?.toInt() ?? 0,
     criadoEm:
         j['criadoEm'] != null
