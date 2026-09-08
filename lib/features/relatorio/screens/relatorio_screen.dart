@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/router/safe_navigation.dart';
@@ -207,7 +208,7 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
     final primary = Theme.of(context).colorScheme.primary;
     final dados = _dados;
     final hasData = dados != null && dados.treinosTotal > 0;
-    final showSticky = !_loading && _erro == null && hasData;
+    final showSticky = !_loading && _erro == null;
 
     return fxScreenA11yScope(
       label: 'Relatório — ${widget.alunoNome}',
@@ -247,11 +248,22 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
                     ),
                     child: Semantics(
                       button: true,
-                      label: 'Exportar relatório em PDF',
+                      label:
+                          hasData
+                              ? 'Exportar relatório em PDF'
+                              : 'Ver evolução do aluno',
                       child: FxLiquidPrimaryButton(
-                        label: relatorioAlunoStickyExport(),
-                        loading: _exporting,
-                        onPressed: _exporting ? null : _exportarPdf,
+                        label:
+                            hasData
+                                ? relatorioAlunoStickyExport()
+                                : relatorioAlunoStickyEmpty(),
+                        loading: hasData && _exporting,
+                        onPressed:
+                            hasData
+                                ? (_exporting ? null : _exportarPdf)
+                                : () => context.push(
+                                  '/alunos/${widget.alunoId}/evolucao',
+                                ),
                       ),
                     ),
                   ),
@@ -305,18 +317,37 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
               ),
             ),
             const SizedBox(height: TokensStrip.s3),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: DashboardHomeActionChip(
-                label: relatorioAlunoPeriodoValueLabel(
-                  dias: _dias,
-                  inicio: _rangeCustom?.start,
-                  fim: _rangeCustom?.end,
+            Wrap(
+              spacing: TokensStrip.s2,
+              runSpacing: TokensStrip.s2,
+              children: [
+                DashboardHomeActionChip(
+                  label: relatorioAlunoPeriodoValueLabel(
+                    dias: _dias,
+                    inicio: _rangeCustom?.start,
+                    fim: _rangeCustom?.end,
+                  ),
+                  accent: primary,
+                  isDark: isDark,
+                  onPressed: _abrirPeriodo,
                 ),
-                accent: primary,
-                isDark: isDark,
-                onPressed: _abrirPeriodo,
-              ),
+                DashboardHomeActionChip(
+                  label: 'Evolução',
+                  accent: primary,
+                  isDark: isDark,
+                  onPressed:
+                      () => context.push(
+                        '/alunos/${widget.alunoId}/evolucao',
+                      ),
+                ),
+                DashboardHomeActionChip(
+                  label: 'Chat',
+                  accent: primary,
+                  isDark: isDark,
+                  onPressed:
+                      () => context.push('/alunos/${widget.alunoId}/chat'),
+                ),
+              ],
             ),
             if (dados == null || dados.treinosTotal == 0) ...[
               const SizedBox(height: TokensStrip.s5),

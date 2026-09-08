@@ -15,7 +15,7 @@ Future<void> showTrilhasHelpSheet(BuildContext context) {
       ),
       FxHelpTip(
         'Progresso',
-        'Toque no marco pendente para concluir. Se a trilha tem valor, atualize no card.',
+        'Toque no marco pendente para concluir. Nova etapa entra no card. Se a trilha tem valor, atualize ali.',
         icon: 'target',
       ),
       FxHelpTip(

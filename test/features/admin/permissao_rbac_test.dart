@@ -30,6 +30,7 @@ void main() {
     final source = File(
       'lib/features/trilhas/data/trilhas_repository.dart',
     ).readAsStringSync();
+    expect(source, contains("'/api/trilhas/\$trilhaId/marcos'"));
     expect(
       source,
       contains("'/api/trilhas/\$trilhaId/marcos/\$marcoId/concluir'"),

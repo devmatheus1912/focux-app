@@ -23,6 +23,9 @@ void main() {
     expect(screen, contains('getHome('));
     expect(screen, contains('relatorioAlunoViewed'));
     expect(screen, contains('Exportar relatório em PDF'));
+    expect(screen, contains('relatorioAlunoStickyEmpty'));
+    expect(screen, contains('/alunos/\${widget.alunoId}/evolucao'));
+    expect(screen, contains('/alunos/\${widget.alunoId}/chat'));
     expect(screen, isNot(contains('constrainWidth: false')));
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(screen, isNot(contains('_PeriodPill')));

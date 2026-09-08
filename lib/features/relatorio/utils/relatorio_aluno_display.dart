@@ -83,6 +83,8 @@ String relatorioAlunoCheckinsLabel(int count) {
 
 String relatorioAlunoStickyExport() => 'Exportar PDF';
 
+String relatorioAlunoStickyEmpty() => 'Ver evolução';
+
 String relatorioAlunoHubSubtitle({
   required String alunoNome,
   required int diasAnalisados,

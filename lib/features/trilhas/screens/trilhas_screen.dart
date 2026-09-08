@@ -256,6 +256,48 @@ class _TrilhasScreenState extends ConsumerState<TrilhasScreen> {
     }
   }
 
+  Future<void> _adicionarMarco(TrilhaModel trilha) async {
+    HapticFeedback.selectionClick();
+    final tituloCtrl = TextEditingController();
+    var saved = false;
+    try {
+      if (!mounted) return;
+      final ok = await showFxFormSheet(
+        context,
+        title: 'Nova etapa',
+        subtitle: trilha.titulo,
+        icon: Icons.flag_outlined,
+        confirmLabel: 'Adicionar etapa',
+        child: AlunoInsetFormField(
+          controller: tituloCtrl,
+          label: 'Título da etapa',
+          icon: Icons.check_circle_outline,
+          showDivider: false,
+        ),
+      );
+      if (ok != true) return;
+      final titulo = tituloCtrl.text.trim();
+      if (titulo.isEmpty) {
+        if (mounted) {
+          FeedbackHelper.showWarn(context, 'Título da etapa é obrigatório.');
+        }
+        return;
+      }
+      await ref
+          .read(trilhasRepositoryProvider)
+          .adicionarMarco(trilhaId: trilha.id, titulo: titulo);
+      saved = true;
+    } catch (e) {
+      if (mounted) FeedbackHelper.showError(context, friendlyError(e));
+    } finally {
+      tituloCtrl.dispose();
+    }
+    if (saved) {
+      if (mounted) FeedbackHelper.showSuccess(context, 'Etapa adicionada.');
+      await _refresh();
+    }
+  }
+
   Future<void> _concluirMarco(TrilhaModel trilha, MarcoModel marco) async {
     try {
       await ref
@@ -338,7 +380,18 @@ class _TrilhasScreenState extends ConsumerState<TrilhasScreen> {
                 data: (trilhas) {
                   _stampFreshness();
                   return FxContentWidthLimiter(
-                    child: _buildBody(trilhas, freshness),
+                    child: _TrilhasListBody(
+                      trilhas: trilhas,
+                      freshness: freshness,
+                      alunoNome: widget.alunoNome,
+                      filtro: _filtro,
+                      onFiltro: (value) => setState(() => _filtro = value),
+                      onRefresh: _refresh,
+                      onAtualizarProgresso: _atualizarProgresso,
+                      onAdicionarMarco: _adicionarMarco,
+                      onDeletar: _deletarTrilha,
+                      onConcluirMarco: _concluirMarco,
+                    ),
                   );
                 },
               ),
@@ -361,118 +414,6 @@ class _TrilhasScreenState extends ConsumerState<TrilhasScreen> {
               ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildBody(List<TrilhaModel> trilhas, String? freshness) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final primary = Theme.of(context).colorScheme.primary;
-    final visiveis = trilhaFiltradas(trilhas, _filtro);
-    final nome = fxTitleCaseName(widget.alunoNome);
-
-    return RefreshIndicator(
-      onRefresh: _refresh,
-      child: ListView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(
-          FxSettingsLayout.pageInset,
-          TokensStrip.s4,
-          FxSettingsLayout.pageInset,
-          32,
-        ),
-        children: [
-          FxHubHeader(
-            title: nome,
-            subtitle: trilhaHubSubtitle(
-              alunoNome: widget.alunoNome,
-              freshness: freshness,
-            ),
-          ),
-          const SizedBox(height: TokensStrip.s4),
-          OperationalMetricTile(
-            label: 'Ativas',
-            value: '${trilhaAtivasCount(trilhas)}',
-            hint:
-                trilhas.isEmpty
-                    ? 'Nenhuma trilha atribuída'
-                    : '${trilhaConcluidasCount(trilhas)} concluídas',
-            color: primary,
-            isDark: isDark,
-          ),
-          const SizedBox(height: TokensStrip.s2),
-          OperationalMetricTile(
-            label: 'Progresso',
-            value: trilhaProgressoMedioLabel(trilhas),
-            hint: 'Média das trilhas deste aluno',
-            color: primary,
-            isDark: isDark,
-          ),
-          const SizedBox(height: TokensStrip.s2),
-          OperationalMetricTile(
-            label: 'Marcos',
-            value: '${trilhaMarcosPendentes(trilhas)}',
-            hint:
-                trilhaMarcosPendentes(trilhas) == 0
-                    ? 'Nada pendente'
-                    : 'Etapas em aberto',
-            color: primary,
-            isDark: isDark,
-          ),
-          if (trilhas.isNotEmpty) ...[
-            const SizedBox(height: TokensStrip.s4),
-            AlunoSegmentedChoice(
-              options: trilhaFiltroOpcoes,
-              selected: _filtro,
-              isDark: isDark,
-              onSelect: (value) => setState(() => _filtro = value),
-            ),
-          ],
-          const SizedBox(height: TokensStrip.s5),
-          if (trilhas.isEmpty)
-            const FxEmptyState(
-              icon: 'route',
-              title: 'Nenhuma trilha atribuída',
-              subtitle:
-                  'Crie uma meta com etapas para acompanhar o progresso deste aluno.',
-            )
-          else if (visiveis.isEmpty)
-            FxEmptyState(
-              icon: 'route',
-              title:
-                  _filtro == trilhaFiltroConcluidas
-                      ? 'Nenhuma trilha concluída'
-                      : 'Nada em andamento',
-              subtitle:
-                  _filtro == trilhaFiltroConcluidas
-                      ? 'As trilhas ativas aparecem na outra seção.'
-                      : 'Tudo que existia já foi concluído.',
-              action: FxEmptyAction(
-                label:
-                    _filtro == trilhaFiltroConcluidas
-                        ? 'Ver em andamento'
-                        : 'Ver concluídas',
-                onTap:
-                    () => setState(() {
-                      _filtro =
-                          _filtro == trilhaFiltroConcluidas
-                              ? trilhaFiltroAndamento
-                              : trilhaFiltroConcluidas;
-                    }),
-              ),
-            )
-          else ...[
-            const DashboardSectionHeader(title: 'Trilhas'),
-            const SizedBox(height: TokensStrip.s3),
-            for (final trilha in visiveis)
-              _TrilhaCard(
-                trilha: trilha,
-                onAtualizarProgresso: () => _atualizarProgresso(trilha),
-                onDeletar: () => _deletarTrilha(trilha),
-                onConcluirMarco: (marco) => _concluirMarco(trilha, marco),
-              ),
-          ],
-        ],
       ),
     );
   }

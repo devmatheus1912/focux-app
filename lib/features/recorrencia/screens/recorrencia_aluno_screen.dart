@@ -22,6 +22,7 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/operational_metric_tile.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../data/recorrencia_repository.dart';
 import '../utils/recorrencia_display.dart';
 import '../widgets/recorrencia_aluno_help_sheet.dart';
@@ -212,6 +213,38 @@ class _RecorrenciaAlunoScreenState
                                   isDark: isDark,
                                   emphasis: OperationalMetricEmphasis.muted,
                                 ),
+                                const SizedBox(height: TokensStrip.s3),
+                                OperationalMetricTile(
+                                  label: 'Status',
+                                  value: 'Sem ciclo',
+                                  hint: 'Ainda sem cobrança automática',
+                                  color: primary,
+                                  isDark: isDark,
+                                  emphasis: OperationalMetricEmphasis.muted,
+                                ),
+                                const SizedBox(height: TokensStrip.s4),
+                                Wrap(
+                                  spacing: TokensStrip.s2,
+                                  runSpacing: TokensStrip.s2,
+                                  children: [
+                                    DashboardHomeActionChip(
+                                      label: 'Financeiro',
+                                      accent: primary,
+                                      isDark: isDark,
+                                      onPressed:
+                                          () => context.push(
+                                            '/financeiro/aluno',
+                                          ),
+                                    ),
+                                    DashboardHomeActionChip(
+                                      label: 'Chat',
+                                      accent: primary,
+                                      isDark: isDark,
+                                      onPressed:
+                                          () => context.push('/chat/aluno'),
+                                    ),
+                                  ],
+                                ),
                                 const SizedBox(height: TokensStrip.s4),
                                 const FxEmptyState(
                                   icon: 'coin',
@@ -236,6 +269,42 @@ class _RecorrenciaAlunoScreenState
                                   hint: 'Mercado Pago',
                                   color: primary,
                                   isDark: isDark,
+                                ),
+                                const SizedBox(height: TokensStrip.s3),
+                                OperationalMetricTile(
+                                  label: 'Status',
+                                  value: recorrenciaStatusLabel(
+                                    assinatura.status,
+                                  ),
+                                  hint:
+                                      assinatura.proximaCobranca == null
+                                          ? 'Sem data da próxima cobrança'
+                                          : 'Próxima em ${assinatura.proximaCobranca}',
+                                  color: primary,
+                                  isDark: isDark,
+                                ),
+                                const SizedBox(height: TokensStrip.s4),
+                                Wrap(
+                                  spacing: TokensStrip.s2,
+                                  runSpacing: TokensStrip.s2,
+                                  children: [
+                                    DashboardHomeActionChip(
+                                      label: 'Financeiro',
+                                      accent: primary,
+                                      isDark: isDark,
+                                      onPressed:
+                                          () => context.push(
+                                            '/financeiro/aluno',
+                                          ),
+                                    ),
+                                    DashboardHomeActionChip(
+                                      label: 'Chat',
+                                      accent: primary,
+                                      isDark: isDark,
+                                      onPressed:
+                                          () => context.push('/chat/aluno'),
+                                    ),
+                                  ],
                                 ),
                                 if (assinatura.proximaCobranca != null) ...[
                                   const SizedBox(height: TokensStrip.s3),

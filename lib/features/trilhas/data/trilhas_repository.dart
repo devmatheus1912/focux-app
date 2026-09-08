@@ -22,6 +22,13 @@ class TrilhasRepository {
     await _dio.post('/api/trilhas', data: request.toJson());
   }
 
+  Future<void> adicionarMarco({
+    required int trilhaId,
+    required String titulo,
+  }) async {
+    await _dio.post('/api/trilhas/$trilhaId/marcos', data: {'titulo': titulo});
+  }
+
   Future<void> concluirMarco({
     required int trilhaId,
     required int marcoId,

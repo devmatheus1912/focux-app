@@ -20,7 +20,7 @@ Future<void> showRelatorioAlunoHelpSheet(BuildContext context) {
       ),
       FxHelpTip(
         'PDF',
-        'Exporta o recorte que está na tela. Não muda treino nem mensalidade.',
+        'Com treinos no recorte, o botão de baixo exporta o PDF. Sem dados, ele abre a evolução.',
         icon: 'article',
       ),
     ],
