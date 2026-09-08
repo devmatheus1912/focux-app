@@ -27,7 +27,7 @@ import '../utils/perfil_plan_labels.dart';
 import '../utils/perfil_readiness.dart';
 import '../../subscription/utils/landing_editor_access.dart';
 import '../constants/perfil_layout.dart';
-import '../widgets/landing_editor_widgets.dart';
+import '../utils/landing_link_actions.dart';
 import '../widgets/perfil_appearance_section.dart';
 import '../widgets/perfil_conta_seguranca_section.dart';
 import '../widgets/perfil_marca_vitrine_section.dart';
