@@ -146,13 +146,21 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
     final mute = chrome.mute;
     final primary = Theme.of(context).colorScheme.primary;
 
+    void leave() => safePopOrGo(context, '/exercicios');
+
     return fxScreenA11yScope(
       label: 'Exercício',
-      child: FxShellScaffold(
+      child: PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, _) {
+          if (didPop) return;
+          leave();
+        },
+        child: FxShellScaffold(
         useMesh: true,
         appBar: FxShellAppBar(
           title: 'Exercício',
-          onBack: () => safePopOrGo(context, '/exercicios'),
+          onBack: leave,
           actions: [
             FxHelpIconButton(
               tooltip: 'Como usar este exercício',
@@ -220,12 +228,52 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
                                   ),
                                 ),
                               const SizedBox(height: TokensStrip.s4),
-                              OperationalMetricTile(
-                                label: 'Grupo',
-                                value: grupo ?? '—',
-                                hint: _modalidadeLabel(ex) ?? 'Cadastro',
-                                color: primary,
-                                isDark: isDark,
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: OperationalMetricTile(
+                                      label: 'Grupo',
+                                      value: grupo ?? '—',
+                                      hint: _modalidadeLabel(ex) ?? 'Cadastro',
+                                      color: primary,
+                                      isDark: isDark,
+                                    ),
+                                  ),
+                                  const SizedBox(width: TokensStrip.s2),
+                                  Expanded(
+                                    child: OperationalMetricTile(
+                                      label: 'Vídeo',
+                                      value: exercicioVideoMetric(
+                                        hasVideo:
+                                            ex.videoUrl?.isNotEmpty == true,
+                                      ),
+                                      hint: exercicioDificuldadeHint(
+                                        _dificuldadeLabel(ex),
+                                      ),
+                                      color: primary,
+                                      isDark: isDark,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: TokensStrip.s3),
+                              Wrap(
+                                spacing: TokensStrip.s2,
+                                runSpacing: TokensStrip.s2,
+                                children: [
+                                  DashboardHomeActionChip(
+                                    label: 'Biblioteca',
+                                    accent: primary,
+                                    isDark: isDark,
+                                    onPressed: () => context.push('/exercicios'),
+                                  ),
+                                  DashboardHomeActionChip(
+                                    label: 'Treinos',
+                                    accent: primary,
+                                    isDark: isDark,
+                                    onPressed: () => context.push('/treinos'),
+                                  ),
+                                ],
                               ),
                               const SizedBox(height: 14),
                               _ExerciseEssentials(exercicio: ex),
@@ -312,6 +360,7 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
                 );
                 },
         ),
+      ),
       ),
     );
   }

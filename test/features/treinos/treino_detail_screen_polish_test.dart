@@ -119,6 +119,8 @@ void main() {
     expect(screen, isNot(contains('TreinoPrescriptionField')));
     expect(screen, isNot(contains('TreinoTipoSeriePicker')));
     expect(screen, contains('FxLiquidPrimaryButton'));
+    expect(screen, contains('DashboardHomeActionChip'));
+    expect(screen, contains('treinoDetailSeriesCount'));
     expect(screen, contains("label: 'Atribuir'"));
     expect(screen, isNot(contains('locked: selectedAlunoId == null')));
     expect(screen, contains('treinoPrescriptionSaveLabel'));

@@ -52,12 +52,21 @@ bool treinoDetailIsLastInGroup(List<TreinoExercicioItem> items, int index) {
       treinoDetailGroupLabel(items[index + 1]);
 }
 
+int treinoDetailSeriesCount(List<TreinoExercicioItem> items) =>
+    items.fold<int>(0, (sum, item) => sum + item.series);
+
+int treinoDetailGroupCount(List<TreinoExercicioItem> items) =>
+    items.map(treinoDetailGroupLabel).toSet().length;
+
+String treinoDetailSeriesHint(int groups) =>
+    groups == 1 ? '1 grupo muscular' : '$groups grupos';
+
 /// Contagens reais da prescrição — sem duração inventada.
 String treinoDetailMetaLine(List<TreinoExercicioItem> items) {
   if (items.isEmpty) return 'Em montagem';
   final exercises = items.length;
-  final series = items.fold<int>(0, (sum, item) => sum + item.series);
-  final groups = items.map(treinoDetailGroupLabel).toSet().length;
+  final series = treinoDetailSeriesCount(items);
+  final groups = treinoDetailGroupCount(items);
   final ex = exercises == 1 ? '1 exercício' : '$exercises exercícios';
   final ser = series == 1 ? '1 série' : '$series séries';
   final grp = groups == 1 ? '1 grupo' : '$groups grupos';

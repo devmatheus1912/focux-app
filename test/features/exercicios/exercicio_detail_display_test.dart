@@ -13,5 +13,9 @@ void main() {
       exercicioHubSubtitle(grupo: '  ', freshness: 'Atualizado agora'),
       'Atualizado agora',
     );
+    expect(exercicioVideoMetric(hasVideo: true), 'Com vídeo');
+    expect(exercicioVideoMetric(hasVideo: false), 'Sem vídeo');
+    expect(exercicioDificuldadeHint(null), 'Cadastro');
+    expect(exercicioDificuldadeHint('Intermediário'), 'Intermediário');
   });
 }

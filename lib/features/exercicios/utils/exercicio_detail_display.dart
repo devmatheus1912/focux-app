@@ -1,3 +1,12 @@
+String exercicioVideoMetric({required bool hasVideo}) =>
+    hasVideo ? 'Com vídeo' : 'Sem vídeo';
+
+String exercicioDificuldadeHint(String? dificuldade) {
+  final value = dificuldade?.trim();
+  if (value == null || value.isEmpty) return 'Cadastro';
+  return value;
+}
+
 String exercicioHubSubtitle({
   required String? grupo,
   String? freshness,

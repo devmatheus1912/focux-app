@@ -17,6 +17,11 @@ void main() {
     expect(screen, contains("safePopOrGo(context, '/checkin/historico')"));
     expect(screen, contains("'/checkin/executar'"));
     expect(screen, contains('detalhe(widget.execucaoId)'));
+    expect(screen, contains('FxHelpIconButton'));
+    expect(screen, contains('DashboardHomeActionChip'));
+    expect(screen, contains('historicoDuracaoLabel'));
+    expect(screen, contains('viewInsetsOf'));
+    expect(screen, contains('PopScope'));
     expect(screen, isNot(contains('FxSettingsGroup')));
     expect(screen, isNot(contains('FloatingActionButton')));
   });

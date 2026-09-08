@@ -32,5 +32,8 @@ void main() {
     expect(screen, contains('RefreshIndicator'));
     expect(screen, contains('exercicioHubSubtitle'));
     expect(screen, contains("name: 'star'"));
+    expect(screen, contains('exercicioVideoMetric'));
+    expect(screen, contains("label: 'Biblioteca'"));
+    expect(screen, contains('PopScope'));
   });
 }

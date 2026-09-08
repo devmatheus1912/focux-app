@@ -28,6 +28,17 @@ void main() {
       ),
       '3/4 séries · Feito',
     );
+    expect(historicoPrMetric(0), '0');
+    expect(historicoPrHint(0), 'Sem recorde nesta sessão');
+    expect(historicoPrHint(2), '2 recordes');
+    expect(
+      historicoDuracaoLabel('2026-09-07T10:00:00', '2026-09-07T11:15:00'),
+      '1h 15min',
+    );
+    expect(
+      historicoPrLine(exercicioNome: 'Supino', mensagem: 'Carga nova'),
+      'Supino · Carga nova',
+    );
   });
 
   test('historico filtra busca e chip no carregado', () {

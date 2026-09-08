@@ -93,6 +93,37 @@ int historicoExerciciosConcluidos(Iterable<bool> done) =>
 String historicoExerciciosMetric({required int done, required int total}) =>
     '$done/$total';
 
+String historicoPrMetric(int count) => '$count';
+
+String historicoPrHint(int count) =>
+    count == 0 ? 'Sem recorde nesta sessão' : (count == 1 ? '1 recorde' : '$count recordes');
+
+String? historicoDuracaoLabel(String? iniciadoEm, String? concluidoEm) {
+  final start = DateTime.tryParse((iniciadoEm ?? '').trim());
+  if (start == null) return null;
+  final endRaw = (concluidoEm ?? '').trim();
+  final end = endRaw.isEmpty ? null : DateTime.tryParse(endRaw);
+  final stop = end ?? DateTime.now();
+  final minutes = stop.difference(start).inMinutes;
+  if (minutes < 0) return null;
+  if (minutes < 60) return '$minutes min';
+  final hours = minutes ~/ 60;
+  final rest = minutes % 60;
+  if (rest == 0) return '${hours}h';
+  return '${hours}h ${rest}min';
+}
+
+String historicoPrLine({
+  required String exercicioNome,
+  required String mensagem,
+}) {
+  final name = exercicioNome.trim();
+  final note = mensagem.trim();
+  if (name.isEmpty) return note;
+  if (note.isEmpty) return name;
+  return '$name · $note';
+}
+
 String historicoExercicioSubtitle({
   required int seriesFeitas,
   int? series,
