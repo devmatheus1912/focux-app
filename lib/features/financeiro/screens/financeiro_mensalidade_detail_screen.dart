@@ -252,7 +252,10 @@ class _DetailBody extends StatelessWidget {
     final primary = Theme.of(context).colorScheme.primary;
     final overdue = mensalidade.status == 'ATRASADO';
     final statusColor = overdue ? EagleTokens.bad : primary;
-    final mes = financeiroMensalidadeMesPorExtenso(mensalidade.mesReferencia);
+    final mes = financeiroMensalidadeVencimentoLabel(
+      mesReferencia: mensalidade.mesReferencia,
+      vencimento: mensalidade.vencimento,
+    );
     final status = financeiroMensalidadeStatusLabel(mensalidade.status);
 
     return Column(

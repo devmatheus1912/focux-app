@@ -11,7 +11,7 @@ class FxMoney implements Comparable<FxMoney> {
     if (raw is FxMoney) return raw;
     if (raw is int) return FxMoney.cents(raw * 100);
     if (raw is String) return FxMoney.fromInput(raw);
-    if (raw is num) return FxMoney.cents((raw * 100).round());
+    if (raw is num) return FxMoney.fromInput(raw.toString());
     return FxMoney.fromInput(raw.toString());
   }
 
