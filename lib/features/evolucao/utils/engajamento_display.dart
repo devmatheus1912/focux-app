@@ -98,6 +98,17 @@ int engajamentoTreinosCount(Iterable<EventoEngajamento> eventos) =>
 int engajamentoMensagensCount(Iterable<EventoEngajamento> eventos) =>
     eventos.where((e) => e.tipo.trim().toUpperCase() == 'MENSAGEM').length;
 
+String engajamentoUltimoValue(Iterable<EventoEngajamento> eventos) {
+  EventoEngajamento? last;
+  for (final evento in eventos) {
+    if (last == null || evento.dataHora.compareTo(last.dataHora) > 0) {
+      last = evento;
+    }
+  }
+  if (last == null) return '—';
+  return engajamentoTipoLabel(last.tipo);
+}
+
 String engajamentoUltimoHint(Iterable<EventoEngajamento> eventos) {
   EventoEngajamento? last;
   for (final evento in eventos) {

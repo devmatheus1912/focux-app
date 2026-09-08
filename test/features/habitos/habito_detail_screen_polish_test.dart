@@ -28,6 +28,7 @@ void main() {
     expect(screen, contains('.buscar('));
     expect(screen, contains('habitoDesativadoChip'));
     expect(screen, contains('habitoLembreteLine'));
+    expect(screen, contains('habitoChecksLine'));
     expect(screen, contains('Lista'));
     expect(screen, isNot(contains('onPressed: () {}')));
     expect(screen, isNot(contains('meusHabitos')));

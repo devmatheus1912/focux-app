@@ -25,6 +25,9 @@ void main() {
     expect(screen, contains('DashboardHomeActionChip'));
     expect(screen, contains("'Pagas'"));
     expect(screen, contains('viewInsetsOf'));
+    expect(screen, contains('PopScope'));
+    expect(screen, contains("label: 'Início'"));
+    expect(screen, contains('subtitle: freshness'));
     expect(screen, contains('FocuxHubTypography.metric'));
     expect(screen, contains('showFinanceiroAlunoCobrancaSheet'));
     expect(screen, contains('circle-check'));

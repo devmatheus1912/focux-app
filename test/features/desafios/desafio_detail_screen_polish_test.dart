@@ -25,6 +25,7 @@ void main() {
     expect(screen, contains('participar'));
     expect(screen, contains('encerrar'));
     expect(screen, contains('leaderboard'));
+    expect(screen, contains('found.ranking'));
     expect(screen, contains("'/alunos/\${first.alunoId}'"));
     expect(screen, contains('Lista'));
     expect(screen, contains('desafio.ativo'));
