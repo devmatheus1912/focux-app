@@ -30,6 +30,7 @@ void main() {
     expect(screen, contains('AlunoSegmentedChoice'));
     expect(screen, contains("'Atribuir trilha'"));
     expect(screen, contains('atualizarProgresso'));
+    expect(screen, contains('adicionarMarco'));
     expect(screen, contains('showFxConfirmSheet'));
     expect(screen, contains("safePopOrGo(context, '/alunos/\${widget.alunoId}')"));
     expect(screen, isNot(contains('TabBar')));

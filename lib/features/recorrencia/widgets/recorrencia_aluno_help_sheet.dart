@@ -18,6 +18,11 @@ Future<void> showRecorrenciaAlunoHelpSheet(BuildContext context) {
         'Pendente abre o Mercado Pago. Ativa pode pausar. Pausada pode retomar. Sem assinatura, o botão chama o personal no chat.',
         icon: 'spark',
       ),
+      FxHelpTip(
+        'Financeiro',
+        'O chip abre o extrato. Lá ficam cobranças avulsas e o histórico.',
+        icon: 'coin',
+      ),
     ],
   );
 }

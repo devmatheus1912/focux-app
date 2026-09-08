@@ -48,6 +48,7 @@ void main() {
 
   test('hub e sticky do relatório do aluno', () {
     expect(relatorioAlunoStickyExport(), 'Exportar PDF');
+    expect(relatorioAlunoStickyEmpty(), 'Ver evolução');
     expect(
       relatorioAlunoHubSubtitle(alunoNome: 'Ana', diasAnalisados: 30),
       'Ana · 30 dias',

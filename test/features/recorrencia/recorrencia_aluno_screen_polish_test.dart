@@ -22,6 +22,8 @@ void main() {
     expect(screen, contains('showFxConfirmSheet'));
     expect(screen, contains('FxContentWidthLimiter'));
     expect(screen, contains('/chat/aluno'));
+    expect(screen, contains('/financeiro/aluno'));
+    expect(screen, contains('DashboardHomeActionChip'));
     expect(screen, contains('viewInsetsOf'));
     expect(screen, isNot(contains('FilledButton')));
   });

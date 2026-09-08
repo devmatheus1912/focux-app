@@ -21,6 +21,7 @@ void main() {
     expect(isAlunoOnlyLocation('/aluno/perfil/editar'), isTrue);
     expect(isAlunoOnlyLocation('/aluno/desafios'), isTrue);
     expect(isAlunoOnlyLocation('/aluno/trilhas'), isTrue);
+    expect(isAlunoOnlyLocation('/aluno/recorrencia'), isTrue);
   });
 
   test('logged-in users leave pre-login gate', () {
