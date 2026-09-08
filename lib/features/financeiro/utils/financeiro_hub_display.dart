@@ -314,3 +314,24 @@ String financeiroAlunoPickerValue(String? nome) {
   if (n == null || n.isEmpty) return 'Selecionar';
   return n;
 }
+
+const financeiroMensalidadeSecaoCobranca = 'cobranca';
+const financeiroMensalidadeSecaoContatos = 'contatos';
+
+const financeiroMensalidadeDetalheSecoes = <({String value, String label})>[
+  (value: financeiroMensalidadeSecaoCobranca, label: 'Cobrança'),
+  (value: financeiroMensalidadeSecaoContatos, label: 'Contatos'),
+];
+
+String financeiroContatoWhenLabel(String? registradoEm) =>
+    financeiroMensalidadePagoEmLabel(registradoEm);
+
+String financeiroContatoSubtitle(String? observacao, String? registradoEm) {
+  final when = financeiroContatoWhenLabel(registradoEm);
+  final note = observacao?.trim() ?? '';
+  if (note.isEmpty) return when;
+  if (when == 'Ainda em aberto') return note;
+  return '$note · $when';
+}
+
+String financeiroContatosEmpty() => 'Nenhum contato nesta cobrança';

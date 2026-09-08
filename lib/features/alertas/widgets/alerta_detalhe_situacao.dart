@@ -12,7 +12,6 @@ class AlertaDetalheSituacao extends StatelessWidget {
   const AlertaDetalheSituacao({
     super.key,
     required this.alunoId,
-    required this.alunoNome,
     required this.motivos,
     required this.statusFinanceiro,
     required this.resolving,
@@ -22,7 +21,6 @@ class AlertaDetalheSituacao extends StatelessWidget {
   });
 
   final int alunoId;
-  final String alunoNome;
   final List<String> motivos;
   final String statusFinanceiro;
   final bool resolving;
@@ -55,15 +53,6 @@ class AlertaDetalheSituacao extends StatelessWidget {
           spacing: TokensStrip.s2,
           runSpacing: TokensStrip.s2,
           children: [
-            DashboardHomeActionChip(
-              label: 'Aluno',
-              accent: primary,
-              isDark: isDark,
-              onPressed: () => context.push(
-                '/alunos/$alunoId',
-                extra: alunoNome,
-              ),
-            ),
             if (alertaStatusFinanceiroRuim(statusFinanceiro))
               DashboardHomeActionChip(
                 label: 'Cobrar',

@@ -217,7 +217,7 @@ Future<void> cobrarMensalidadeViaChat({
   }
 }
 
-Future<void> registrarContatoMensalidade({
+Future<bool> registrarContatoMensalidade({
   required BuildContext context,
   required WidgetRef ref,
   required Mensalidade m,
@@ -234,7 +234,7 @@ Future<void> registrarContatoMensalidade({
         ),
     ],
   );
-  if (!context.mounted || tipo == null) return;
+  if (!context.mounted || tipo == null) return false;
   final obsCtrl = TextEditingController();
   try {
     final confirm = await showFxFormSheet(
@@ -253,16 +253,18 @@ Future<void> registrarContatoMensalidade({
         maxLines: 2,
       ),
     );
-    if (confirm != true) return;
+    if (confirm != true) return false;
     try {
       await mensalidadeRepo(ref).registrarContato(m.id, tipo, obsCtrl.text.trim());
       if (context.mounted) {
         FeedbackHelper.showSuccess(context, 'Contato registrado!');
       }
+      return true;
     } catch (e) {
       if (context.mounted) {
         FeedbackHelper.showError(context, friendlyError(e));
       }
+      return false;
     }
   } finally {
     obsCtrl.dispose();

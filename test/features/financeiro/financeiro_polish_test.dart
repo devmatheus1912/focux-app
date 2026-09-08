@@ -96,6 +96,11 @@ void main() {
     expect(detail, contains("'/financeiro'"));
     expect(detail, contains('financeiroMensalidadePagoEmLabel'));
     expect(detail, contains('financeiroMensalidadeVencimentoLabel'));
+    expect(detail, contains('AlunoSegmentedChoice'));
+    expect(detail, contains('listarContatos'));
+    expect(detail, contains('financeiroMensalidadeDetalheSecoes'));
+    expect(detail, contains("'/alunos/\${m.alunoId}'"));
+    expect(detail, contains('PopScope'));
     expect(detail, contains('FxEmptyState'));
     expect(detail, isNot(contains("context.pop('pay')")));
     expect(detail, isNot(contains('FxSettingsGroup')));

@@ -351,7 +351,10 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
           ),
           body:
               _loadingLead
-                  ? const SkeletonList(count: 5)
+                  ? const Padding(
+                    padding: EdgeInsets.all(FxSettingsLayout.pageInset),
+                    child: SkeletonList(count: 5),
+                  )
                   : FxErrorState(
                     chromeOnDark:
                         Theme.of(context).brightness == Brightness.dark,
@@ -385,6 +388,7 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
         useMesh: true,
         appBar: FxShellAppBar(
           title: 'Lead',
+          subtitle: FxHubFreshness.fromFetchedAt(_fetchedAt),
           onBack: _leave,
           actions: [
             FxHelpIconButton(
