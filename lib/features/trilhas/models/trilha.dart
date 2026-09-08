@@ -32,6 +32,7 @@ class TrilhaModel {
     required this.marcos,
     this.descricao,
     this.metaValor,
+    this.dataInicio,
     this.dataFim,
   });
 
@@ -44,6 +45,7 @@ class TrilhaModel {
   final double valorAtual;
   final double percentualConclusao;
   final bool concluida;
+  final String? dataInicio;
   final String? dataFim;
   final List<MarcoModel> marcos;
 
@@ -58,6 +60,7 @@ class TrilhaModel {
     valorAtual: (json['valorAtual'] as num?)?.toDouble() ?? 0,
     percentualConclusao: (json['percentualConclusao'] as num?)?.toDouble() ?? 0,
     concluida: json['concluida'] as bool? ?? false,
+    dataInicio: json['dataInicio']?.toString(),
     dataFim: json['dataFim']?.toString(),
     marcos:
         (json['marcos'] as List? ?? [])
@@ -82,6 +85,7 @@ class NovaTrilhaRequest {
     required this.metaTipo,
     this.descricao,
     this.metaValor,
+    this.dataFim,
     this.marcos,
   });
 
@@ -90,6 +94,7 @@ class NovaTrilhaRequest {
   final String? descricao;
   final String metaTipo;
   final double? metaValor;
+  final String? dataFim;
   final List<String>? marcos;
 
   Map<String, dynamic> toJson() => {
@@ -98,6 +103,7 @@ class NovaTrilhaRequest {
     'metaTipo': metaTipo,
     if (descricao != null) 'descricao': descricao,
     if (metaValor != null) 'metaValor': metaValor,
+    if (dataFim != null) 'dataFim': dataFim,
     if (marcos != null && marcos!.isNotEmpty) 'marcos': marcos,
   };
 }

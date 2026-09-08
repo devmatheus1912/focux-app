@@ -210,6 +210,7 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
       ref.invalidate(perfilProvider);
       if (mounted) {
         _captureSnapshot();
+        _fetchedAt = DateTime.now();
         FeedbackHelper.showSuccess(context, 'Carteira atualizada com sucesso.');
       }
     } catch (e) {
@@ -264,6 +265,7 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
     final perfilAsync = ref.watch(perfilProvider);
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
+    final showSticky = !perfilAsync.isLoading && !perfilAsync.hasError;
 
     return fxScreenA11yScope(
       label: 'Carteira e PIX',
@@ -279,6 +281,7 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
             useMesh: true,
             appBar: FxShellAppBar(
               title: 'Carteira e PIX',
+              subtitle: FxHubFreshness.fromFetchedAt(_fetchedAt),
               onBack: _handleBack,
               actions: [
                 FxHelpIconButton(
@@ -328,9 +331,6 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                                 contaCtrl: _contaCtrl,
                                 carregando: _carregando,
                                 secao: _secao,
-                                freshness: FxHubFreshness.fromFetchedAt(
-                                  _fetchedAt,
-                                ),
                                 onSecao: (value) => setState(() => _secao = value),
                                 onSelecionarTipo: _selecionarTipoPix,
                                 onCopiarChave: _copiarChavePix,
@@ -343,23 +343,25 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                     },
                   ),
                 ),
-                SafeArea(
-                  top: false,
-                  child: Padding(
-                    padding: EdgeInsets.fromLTRB(
-                      FxSettingsLayout.pageInset,
-                      TokensStrip.s2,
-                      FxSettingsLayout.pageInset,
-                      TokensStrip.s3 + MediaQuery.viewInsetsOf(context).bottom,
-                    ),
-                    child: FxLiquidPrimaryButton(
-                      label: walletSalvarTileLabel(),
-                      loading: _carregando,
-                      loadingLabel: 'Salvando…',
-                      onPressed: _carregando ? null : _salvar,
+                if (showSticky)
+                  SafeArea(
+                    top: false,
+                    child: Padding(
+                      padding: EdgeInsets.fromLTRB(
+                        FxSettingsLayout.pageInset,
+                        TokensStrip.s2,
+                        FxSettingsLayout.pageInset,
+                        TokensStrip.s3 +
+                            MediaQuery.viewInsetsOf(context).bottom,
+                      ),
+                      child: FxLiquidPrimaryButton(
+                        label: walletSalvarTileLabel(),
+                        loading: _carregando,
+                        loadingLabel: 'Salvando…',
+                        onPressed: _carregando ? null : _salvar,
+                      ),
                     ),
                   ),
-                ),
               ],
             ),
           ),

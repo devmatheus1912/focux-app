@@ -83,7 +83,7 @@ class _TrilhaCard extends StatelessWidget {
             ],
             const SizedBox(height: 6),
             Text(
-              '${trilhaMetaTipoLabel(trilha.metaTipo)} · ${trilhaValorAtualLabel(trilha)}',
+              trilhaCardContexto(trilha),
               style: FocuxHubTypography.bodyMuted(color: chrome.mute),
             ),
             const SizedBox(height: 14),
@@ -214,7 +214,6 @@ class _MarcoTile extends StatelessWidget {
 class _TrilhasListBody extends StatelessWidget {
   const _TrilhasListBody({
     required this.trilhas,
-    required this.freshness,
     required this.alunoId,
     required this.alunoNome,
     required this.filtro,
@@ -227,7 +226,6 @@ class _TrilhasListBody extends StatelessWidget {
   });
 
   final List<TrilhaModel> trilhas;
-  final String? freshness;
   final int alunoId;
   final String alunoNome;
   final String filtro;
@@ -258,10 +256,7 @@ class _TrilhasListBody extends StatelessWidget {
         children: [
           FxHubHeader(
             title: nome,
-            subtitle: trilhaHubSubtitle(
-              alunoNome: alunoNome,
-              freshness: freshness,
-            ),
+            subtitle: trilhaHubSubtitle(alunoNome: alunoNome),
           ),
           const SizedBox(height: TokensStrip.s3),
           Wrap(
@@ -269,16 +264,28 @@ class _TrilhasListBody extends StatelessWidget {
             runSpacing: TokensStrip.s2,
             children: [
               DashboardHomeActionChip(
-                label: 'Aluno',
+                label: 'Lista',
                 accent: primary,
                 isDark: isDark,
-                onPressed: () => context.push('/alunos/$alunoId'),
+                onPressed: () => safePopOrGo(context, '/alunos/$alunoId'),
+              ),
+              DashboardHomeActionChip(
+                label: 'Evolução',
+                accent: primary,
+                isDark: isDark,
+                onPressed: () => context.push(
+                  '/alunos/$alunoId/evolucao',
+                  extra: alunoNome,
+                ),
               ),
               DashboardHomeActionChip(
                 label: 'Chat',
                 accent: primary,
                 isDark: isDark,
-                onPressed: () => context.push('/alunos/$alunoId/chat'),
+                onPressed: () => context.push(
+                  '/alunos/$alunoId/chat',
+                  extra: alunoNome,
+                ),
               ),
             ],
           ),
@@ -309,6 +316,14 @@ class _TrilhasListBody extends StatelessWidget {
                 trilhaMarcosPendentes(trilhas) == 0
                     ? 'Nada pendente'
                     : 'Etapas em aberto',
+            color: primary,
+            isDark: isDark,
+          ),
+          const SizedBox(height: TokensStrip.s2),
+          OperationalMetricTile(
+            label: 'Prazo',
+            value: trilhaPrazoMetricValue(trilhas),
+            hint: trilhaPrazoMetricHint(trilhas),
             color: primary,
             isDark: isDark,
           ),

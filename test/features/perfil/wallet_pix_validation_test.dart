@@ -74,5 +74,9 @@ void main() {
       walletRecebidoHint(previsto: 'R\$ 1.000,00', percent: 40),
       '40% de R\$ 1.000,00 previsto',
     );
+    expect(walletPixStatusValue('CPF', '123'), 'Pronta');
+    expect(walletPixStatusValue(null, ''), 'Pendente');
+    expect(walletPixStatusHint('EMAIL', 'a@b.com'), 'E-mail');
+    expect(walletPixStatusHint(null, ''), 'Falta tipo e chave');
   });
 }

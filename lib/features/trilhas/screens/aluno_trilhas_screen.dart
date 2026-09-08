@@ -19,6 +19,7 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/operational_metric_tile.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../alunos/widgets/aluno_form_choices.dart';
+import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../models/trilha.dart';
 import '../providers/trilhas_provider.dart';
@@ -101,7 +102,7 @@ class _AlunoTrilhasScreenState extends ConsumerState<AlunoTrilhasScreen> {
                   data: (trilhas) {
                     _stampFreshness();
                     return FxContentWidthLimiter(
-                      child: _buildBody(trilhas, freshness, primary, chrome),
+                      child: _buildBody(trilhas, primary, chrome),
                     );
                   },
                 ),
@@ -131,7 +132,6 @@ class _AlunoTrilhasScreenState extends ConsumerState<AlunoTrilhasScreen> {
 
   Widget _buildBody(
     List<TrilhaModel> trilhas,
-    String? freshness,
     Color primary,
     bool isDark,
   ) {
@@ -147,9 +147,34 @@ class _AlunoTrilhasScreenState extends ConsumerState<AlunoTrilhasScreen> {
           32,
         ),
         children: [
-          FxHubHeader(
+          const FxHubHeader(
             title: 'Seu progresso',
-            subtitle: freshness ?? 'Metas que o personal atribuiu',
+            subtitle: 'Metas que o personal atribuiu',
+          ),
+          const SizedBox(height: TokensStrip.s3),
+          Wrap(
+            spacing: TokensStrip.s2,
+            runSpacing: TokensStrip.s2,
+            children: [
+              DashboardHomeActionChip(
+                label: 'Início',
+                accent: primary,
+                isDark: isDark,
+                onPressed: () => safePopOrGo(context, '/dashboard/aluno'),
+              ),
+              DashboardHomeActionChip(
+                label: 'Hábitos',
+                accent: primary,
+                isDark: isDark,
+                onPressed: () => context.push('/aluno/habitos'),
+              ),
+              DashboardHomeActionChip(
+                label: 'Chat',
+                accent: primary,
+                isDark: isDark,
+                onPressed: () => context.push('/chat/aluno'),
+              ),
+            ],
           ),
           const SizedBox(height: TokensStrip.s4),
           OperationalMetricTile(
@@ -178,6 +203,14 @@ class _AlunoTrilhasScreenState extends ConsumerState<AlunoTrilhasScreen> {
                 trilhaMarcosPendentes(trilhas) == 0
                     ? 'Nada pendente'
                     : 'Etapas em aberto',
+            color: primary,
+            isDark: isDark,
+          ),
+          const SizedBox(height: TokensStrip.s2),
+          OperationalMetricTile(
+            label: 'Prazo',
+            value: trilhaPrazoMetricValue(trilhas),
+            hint: trilhaPrazoMetricHint(trilhas),
             color: primary,
             isDark: isDark,
           ),

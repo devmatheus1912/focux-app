@@ -36,5 +36,11 @@ void main() {
       isNot(contains('ListTile(')),
     );
     expect(screen, contains('_ResumoMensalCard'));
+    expect(screen, contains('subtitle: FxHubFreshness.fromFetchedAt'));
+    expect(screen, contains("label: 'Perfil'"));
+    expect(screen, contains("safePopOrGo(context, '/perfil')"));
+    expect(screen, contains('walletPixStatusValue'));
+    expect(screen, contains('totalPrevisto.format()'));
+    expect(screen, contains('if (showSticky)'));
   });
 }

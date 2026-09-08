@@ -81,6 +81,7 @@ class _TrilhasScreenState extends ConsumerState<TrilhasScreen> {
     final marco2 = TextEditingController();
     final marco3 = TextEditingController();
     var metaTipo = 'TREINOS';
+    var prazoDias = 0;
     var created = false;
 
     try {
@@ -136,6 +137,31 @@ class _TrilhasScreenState extends ConsumerState<TrilhasScreen> {
                       decimal: true,
                     ),
                   ),
+                  FxInsetPickerRow(
+                    icon: Icons.event_outlined,
+                    label: 'Prazo',
+                    value: trilhaPrazoOpcaoLabel(prazoDias == 0 ? null : prazoDias),
+                    onTap: () async {
+                      final picked = await showFxInsetPickerSheet<int>(
+                        ctx,
+                        title: 'Prazo da trilha',
+                        selected: prazoDias,
+                        items: [
+                          const FxInsetPickerSheetItem(
+                            value: 0,
+                            label: 'Sem prazo',
+                          ),
+                          for (final dias in trilhaPrazoDias)
+                            FxInsetPickerSheetItem(
+                              value: dias,
+                              label: trilhaPrazoOpcaoLabel(dias),
+                            ),
+                        ],
+                      );
+                      if (picked == null) return;
+                      setSheetState(() => prazoDias = picked);
+                    },
+                  ),
                   AlunoInsetFormField(
                     controller: marco1,
                     label: 'Primeira etapa',
@@ -187,6 +213,10 @@ class _TrilhasScreenState extends ConsumerState<TrilhasScreen> {
                   descCtrl.text.trim().isEmpty ? null : descCtrl.text.trim(),
               metaTipo: metaTipo,
               metaValor: trilhaParseNumero(metaValorCtrl.text),
+              dataFim: trilhaPrazoIso(
+                prazoDias == 0 ? null : prazoDias,
+                DateTime.now(),
+              ),
               marcos: marcos,
             ),
           );
@@ -350,10 +380,7 @@ class _TrilhasScreenState extends ConsumerState<TrilhasScreen> {
         useMesh: true,
         appBar: FxShellAppBar(
           title: 'Trilhas de Progresso',
-          subtitle: trilhaHubSubtitle(
-            alunoNome: widget.alunoNome,
-            freshness: freshness,
-          ),
+          subtitle: freshness,
           onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
           actions: [
             FxHelpIconButton(
@@ -389,7 +416,6 @@ class _TrilhasScreenState extends ConsumerState<TrilhasScreen> {
                   return FxContentWidthLimiter(
                     child: _TrilhasListBody(
                       trilhas: trilhas,
-                      freshness: freshness,
                       alunoId: widget.alunoId,
                       alunoNome: widget.alunoNome,
                       filtro: _filtro,

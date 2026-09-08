@@ -40,10 +40,7 @@ void main() {
     expect(trilhaStatusLabel(false), 'Em andamento');
     expect(trilhaPercentLabel(70.4), '70%');
     expect(trilhaHubSubtitle(alunoNome: 'Ana'), 'Ana');
-    expect(
-      trilhaHubSubtitle(alunoNome: '  ', freshness: 'Atualizado agora'),
-      'Aluno · Atualizado agora',
-    );
+    expect(trilhaHubSubtitle(alunoNome: '  '), 'Aluno');
   });
 
   test('trilha métricas, filtro e parse', () {
@@ -78,6 +75,61 @@ void main() {
         _trilha(id: 3, valorAtual: 4, metaValor: 10),
       ),
       '4 / 10',
+    );
+  });
+
+  test('trilha prazo e datas do contrato', () {
+    expect(trilhaParseData('2026-09-20'), DateTime(2026, 9, 20));
+    expect(trilhaDataLabel(DateTime(2026, 9, 8)), '08/09');
+    expect(trilhaPrazoOpcaoLabel(null), 'Sem prazo');
+    expect(trilhaPrazoOpcaoLabel(30), 'Em 30 dias');
+    expect(trilhaPrazoIso(null, DateTime(2026, 9, 8)), isNull);
+    expect(trilhaPrazoIso(7, DateTime(2026, 9, 8)), '2026-09-15');
+    final comPrazo = [
+      _trilha(id: 1),
+      TrilhaModel(
+        id: 2,
+        alunoId: 1,
+        titulo: 'T2',
+        metaTipo: 'TREINOS',
+        valorAtual: 0,
+        percentualConclusao: 10,
+        concluida: false,
+        marcos: const [],
+        dataFim: '2026-09-20',
+      ),
+      TrilhaModel(
+        id: 3,
+        alunoId: 1,
+        titulo: 'T3',
+        metaTipo: 'TREINOS',
+        valorAtual: 10,
+        percentualConclusao: 100,
+        concluida: true,
+        marcos: const [],
+        dataFim: '2026-09-10',
+      ),
+    ];
+    expect(trilhaPrazoMetricValue(comPrazo), '20/09');
+    expect(trilhaPrazoMetricHint(comPrazo), 'Próximo prazo das ativas');
+    expect(trilhaPrazoMetricValue([_trilha(id: 1)]), '—');
+    expect(trilhaPrazoMetricHint([_trilha(id: 1)]), 'Sem prazo nas ativas');
+    expect(
+      trilhaCardContexto(
+        TrilhaModel(
+          id: 4,
+          alunoId: 1,
+          titulo: 'T4',
+          metaTipo: 'TREINOS',
+          valorAtual: 2,
+          percentualConclusao: 20,
+          concluida: false,
+          marcos: const [],
+          metaValor: 10,
+          dataFim: '2026-09-20',
+        ),
+      ),
+      'Número de treinos · 2 / 10 · até 20/09',
     );
   });
 }

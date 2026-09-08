@@ -196,6 +196,24 @@ String walletRecebidoHint({
   required int percent,
 }) => '$percent% de $previsto previsto';
 
+String walletPixStatusValue(String? tipo, String chave) {
+  final temTipo = tipo != null && tipo.trim().isNotEmpty;
+  final temChave = chave.trim().isNotEmpty;
+  if (temTipo && temChave) return 'Pronta';
+  return 'Pendente';
+}
+
+String walletPixStatusHint(String? tipo, String chave) {
+  final temTipo = tipo != null && tipo.trim().isNotEmpty;
+  final temChave = chave.trim().isNotEmpty;
+  if (temTipo && temChave) {
+    return WalletPixValidation.labelForTipo(tipo);
+  }
+  if (!temTipo && !temChave) return 'Falta tipo e chave';
+  if (!temTipo) return 'Falta o tipo da chave';
+  return 'Falta a chave PIX';
+}
+
 class _CpfInputFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(
