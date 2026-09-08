@@ -82,5 +82,22 @@ void main() {
     expect(desafioStickyAlunoLabel('TREINOS'), 'Ir aos treinos');
     expect(desafioStickyAlunoPath('HABITOS'), '/aluno/habitos');
     expect(desafioLugarLabel(0), '1º lugar');
+    expect(desafioMeuIndex(const [4, 9, 2], 9), 1);
+    expect(desafioMeuIndex(const [4, 9], null), isNull);
+    expect(desafioMeuLugarValue(0), '1º');
+    expect(desafioMeuLugarValue(null), '—');
+    expect(
+      desafioMeuLugarHint(index: 0, pontos: 120, metaPontos: 100),
+      'Meta atingida',
+    );
+    expect(
+      desafioMeuLugarHint(index: 2, pontos: 40, metaPontos: 100),
+      '40 de 100 pts',
+    );
+    expect(
+      desafioLeaderboardTitle(nome: 'Ana', isSelf: true),
+      'Você',
+    );
+    expect(desafioCampanhaEmpty(), contains('Sem descrição'));
   });
 }

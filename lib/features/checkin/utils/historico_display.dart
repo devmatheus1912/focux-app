@@ -128,8 +128,31 @@ String historicoExercicioSubtitle({
   required int seriesFeitas,
   int? series,
   required bool concluido,
+  String? carga,
+  int? rpe,
+  bool dor = false,
 }) {
   final seriesLabel =
       series == null ? '$seriesFeitas séries' : '$seriesFeitas/$series séries';
-  return '$seriesLabel · ${concluido ? 'Feito' : 'Pendente'}';
+  final parts = <String>[
+    seriesLabel,
+    if ((carga ?? '').trim().isNotEmpty) carga!.trim(),
+    if (rpe != null) 'RPE $rpe',
+    if (dor) 'Dor',
+    concluido ? 'Feito' : 'Pendente',
+  ];
+  return parts.join(' · ');
 }
+
+const historicoSecaoExercicios = 'exercicios';
+const historicoSecaoRecordes = 'recordes';
+
+const historicoDetalheSecoes = <({String value, String label})>[
+  (value: historicoSecaoExercicios, label: 'Exercícios'),
+  (value: historicoSecaoRecordes, label: 'Recordes'),
+];
+
+int historicoRecordesCount({required int prs, required int cargas}) =>
+    prs + cargas;
+
+String historicoRecordesEmpty() => 'Nenhum recorde nesta sessão';

@@ -22,6 +22,10 @@ void main() {
     expect(screen, contains('historicoDuracaoLabel'));
     expect(screen, contains('viewInsetsOf'));
     expect(screen, contains('PopScope'));
+    expect(screen, contains('AlunoSegmentedChoice'));
+    expect(screen, contains('historicoDetalheSecoes'));
+    expect(screen, contains('evolucoesCarga'));
+    expect(screen, contains('checkinCargaLabel'));
     expect(screen, isNot(contains('FxSettingsGroup')));
     expect(screen, isNot(contains('FloatingActionButton')));
   });

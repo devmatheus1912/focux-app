@@ -21,6 +21,8 @@ import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/operational_metric_tile.dart';
 import '../../../core/widgets/skeleton_loader.dart';
+import '../../alunos/providers/alunos_provider.dart';
+import '../../alunos/widgets/aluno_form_choices.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../../subscription/models/subscription_plan.dart';
@@ -51,6 +53,7 @@ class _DesafioDetailScreenState extends ConsumerState<DesafioDetailScreen> {
   String? _erro;
   DateTime? _fetchedAt;
   var _encerrando = false;
+  var _secao = desafioSecaoRanking;
 
   String get _parent =>
       widget.forAluno ? '/aluno/desafios' : '/desafios';
@@ -131,6 +134,11 @@ class _DesafioDetailScreenState extends ConsumerState<DesafioDetailScreen> {
     final primary = Theme.of(context).colorScheme.primary;
     final desafio = _desafio;
     final titulo = desafio?.titulo ?? 'Desafio';
+    final freshness = FxHubFreshness.fromFetchedAt(_fetchedAt);
+    final meId =
+        widget.forAluno
+            ? ref.watch(alunoMeProvider).valueOrNull?.id
+            : null;
 
     return fxScreenA11yScope(
       label: titulo,
@@ -148,6 +156,7 @@ class _DesafioDetailScreenState extends ConsumerState<DesafioDetailScreen> {
             useMesh: true,
             appBar: FxShellAppBar(
               title: 'Desafio',
+              subtitle: freshness,
               onBack: _leave,
               actions: [
                 FxHelpIconButton(
@@ -196,12 +205,16 @@ class _DesafioDetailScreenState extends ConsumerState<DesafioDetailScreen> {
                 : _DesafioDetailBody(
                     desafio: desafio,
                     ranking: _ranking,
-                    freshness: FxHubFreshness.fromFetchedAt(_fetchedAt),
+                    freshness: freshness,
                     forAluno: widget.forAluno,
+                    meId: meId,
+                    secao: _secao,
                     encerrando: _encerrando,
+                    onSecao: (value) => setState(() => _secao = value),
                     onRefresh: _load,
                     onEncerrar: _encerrar,
                     onAlunoSticky: _alunoSticky,
+                    onLeave: _leave,
                   ),
           ),
         ),
@@ -216,20 +229,28 @@ class _DesafioDetailBody extends StatelessWidget {
     required this.ranking,
     required this.freshness,
     required this.forAluno,
+    required this.meId,
+    required this.secao,
     required this.encerrando,
+    required this.onSecao,
     required this.onRefresh,
     required this.onEncerrar,
     required this.onAlunoSticky,
+    required this.onLeave,
   });
 
   final Desafio desafio;
   final List<DesafioLeaderboardEntry> ranking;
   final String? freshness;
   final bool forAluno;
+  final int? meId;
+  final String secao;
   final bool encerrando;
+  final ValueChanged<String> onSecao;
   final Future<void> Function() onRefresh;
   final VoidCallback onEncerrar;
   final VoidCallback onAlunoSticky;
+  final VoidCallback onLeave;
 
   @override
   Widget build(BuildContext context) {
@@ -241,6 +262,12 @@ class _DesafioDetailBody extends StatelessWidget {
       ranking.map((e) => e.pontos),
       desafio.metaPontos,
     );
+    final meuIndex = desafioMeuIndex(
+      ranking.map((e) => e.alunoId),
+      meId,
+    );
+    final meusPontos =
+        meuIndex == null ? 0 : ranking[meuIndex].pontos;
 
     return Column(
       children: [
@@ -295,9 +322,17 @@ class _DesafioDetailBody extends StatelessWidget {
                   ),
                   const SizedBox(height: TokensStrip.s2),
                   OperationalMetricTile(
-                    label: 'Tipo',
-                    value: desafioTipoLabel(desafio.tipo),
-                    hint: desafioMetaLabel(desafio.metaPontos),
+                    label: forAluno ? 'Sua posição' : 'Tipo',
+                    value: forAluno
+                        ? desafioMeuLugarValue(meuIndex)
+                        : desafioTipoLabel(desafio.tipo),
+                    hint: forAluno
+                        ? desafioMeuLugarHint(
+                            index: meuIndex,
+                            pontos: meusPontos,
+                            metaPontos: desafio.metaPontos,
+                          )
+                        : desafioMetaLabel(desafio.metaPontos),
                     color: primary,
                     isDark: isDark,
                   ),
@@ -306,6 +341,20 @@ class _DesafioDetailBody extends StatelessWidget {
                     spacing: TokensStrip.s2,
                     runSpacing: TokensStrip.s2,
                     children: [
+                      if (forAluno) ...[
+                        DashboardHomeActionChip(
+                          label: 'Lista',
+                          accent: primary,
+                          isDark: isDark,
+                          onPressed: onLeave,
+                        ),
+                        DashboardHomeActionChip(
+                          label: desafioTipoLabel(desafio.tipo),
+                          accent: primary,
+                          isDark: isDark,
+                          onPressed: onAlunoSticky,
+                        ),
+                      ],
                       if (!forAluno &&
                           first != null &&
                           first.alunoId > 0)
@@ -325,18 +374,25 @@ class _DesafioDetailBody extends StatelessWidget {
                         ),
                     ],
                   ),
-                  if (descricao != null && descricao.isNotEmpty) ...[
-                    const SizedBox(height: TokensStrip.s4),
+                  const SizedBox(height: TokensStrip.s4),
+                  AlunoSegmentedChoice(
+                    options: desafioDetalheSecoes,
+                    selected: secao,
+                    isDark: isDark,
+                    onSelect: onSecao,
+                  ),
+                  const SizedBox(height: TokensStrip.s4),
+                  if (secao == desafioSecaoCampanha)
                     Text(
-                      descricao,
+                      (descricao == null || descricao.isEmpty)
+                          ? desafioCampanhaEmpty()
+                          : descricao,
                       style: FocuxHubTypography.bodyMuted(
                         color: fxScreenMute(context),
                         fontWeight: FontWeight.w600,
                       ),
-                    ),
-                  ],
-                  const SizedBox(height: TokensStrip.s4),
-                  if (ranking.isEmpty)
+                    )
+                  else if (ranking.isEmpty)
                     FxEmptyState(
                       icon: 'spark',
                       title: desafioLeaderboardEmpty(),
@@ -345,7 +401,12 @@ class _DesafioDetailBody extends StatelessWidget {
                   else
                     for (var i = 0; i < ranking.length; i++)
                       FxSatelliteListTile(
-                        title: desafioLeaderboardName(ranking[i].alunoNome),
+                        title: desafioLeaderboardTitle(
+                          nome: ranking[i].alunoNome,
+                          isSelf: forAluno &&
+                              meId != null &&
+                              ranking[i].alunoId == meId,
+                        ),
                         subtitle: Text(desafioLugarLabel(i)),
                         trailing: Text(
                           desafioLeaderboardPoints(ranking[i].pontos),
@@ -354,6 +415,11 @@ class _DesafioDetailBody extends StatelessWidget {
                             fontWeight: FontWeight.w700,
                           ),
                         ),
+                        accent: forAluno &&
+                                meId != null &&
+                                ranking[i].alunoId == meId
+                            ? primary
+                            : null,
                         onTap: forAluno || ranking[i].alunoId <= 0
                             ? null
                             : () => context.push(
