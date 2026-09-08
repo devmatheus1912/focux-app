@@ -23,6 +23,17 @@ String financeiroHubSubtitle({
   return '$vista · $fresh';
 }
 
+String financeiroMensalidadeVencimentoLabel({
+  required String mesReferencia,
+  String? vencimento,
+}) {
+  final raw = vencimento?.trim();
+  if (raw != null && raw.isNotEmpty) {
+    return financeiroMensalidadeMesPorExtenso(raw);
+  }
+  return financeiroMensalidadeMesPorExtenso(mesReferencia);
+}
+
 String financeiroMensalidadePagoEmLabel(String? pagoEm) {
   final raw = pagoEm?.trim() ?? '';
   if (raw.isEmpty) return 'Ainda em aberto';

@@ -125,6 +125,20 @@ void main() {
     );
   });
 
+  test('financeiroMensalidadeVencimentoLabel prefere o campo do contrato', () {
+    expect(
+      financeiroMensalidadeVencimentoLabel(mesReferencia: '2026-09-01'),
+      'Setembro 2026',
+    );
+    expect(
+      financeiroMensalidadeVencimentoLabel(
+        mesReferencia: '2026-09-01',
+        vencimento: '2026-10-01',
+      ),
+      'Outubro 2026',
+    );
+  });
+
   test('financeiroMensalidadePagoEmLabel formata ISO', () {
     expect(financeiroMensalidadePagoEmLabel(null), 'Ainda em aberto');
     expect(financeiroMensalidadePagoEmLabel(''), 'Ainda em aberto');

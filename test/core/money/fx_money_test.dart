@@ -10,6 +10,8 @@ void main() {
     expect((FxMoney.parse(1500) - FxMoney.parse(1200)).cents, 30000);
     expect(FxMoney.parse(1200).wire, '1200.00');
     expect(FxMoney.parse(199.9).format(showDecimals: true), 'R\$ 199,90');
+    expect(FxMoney.parse(19.99).cents, 1999);
+    expect(FxMoney.parse('120.50').cents, 12050);
   });
 
   test('fromInput rejeita vazio', () {

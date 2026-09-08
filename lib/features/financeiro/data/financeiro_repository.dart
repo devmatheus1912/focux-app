@@ -32,6 +32,7 @@ class Mensalidade {
   final String mesReferencia;
   final String status;
   final String? pagoEm;
+  final String? vencimento;
 
   Mensalidade({
     required this.id,
@@ -41,6 +42,7 @@ class Mensalidade {
     required this.mesReferencia,
     required this.status,
     this.pagoEm,
+    this.vencimento,
   }) : valor = FxMoney.parse(valor);
 
   factory Mensalidade.fromJson(Map<String, dynamic> j) => Mensalidade(
@@ -51,6 +53,7 @@ class Mensalidade {
     mesReferencia: j['mesReferencia'] as String,
     status: j['status'] as String,
     pagoEm: j['pagoEm'] as String?,
+    vencimento: j['vencimento'] as String?,
   );
 }
 
