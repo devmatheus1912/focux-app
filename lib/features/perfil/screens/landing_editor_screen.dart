@@ -75,9 +75,10 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
   bool _uploadingBio = false;
   String? _error;
   bool _needsProof = false;
+  bool _podePublicar = false;
   int _step = 0; // 0 entrevista · 1 revisar
   String? _slug;
-  String? _url;
+  String? _publicUrl;
   bool _publicado = false;
   String? _heroImageUrl;
   String? _bioImageUrl;
@@ -193,8 +194,10 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
     _bioImageUrl = state.midia.bioImageUrl;
     _accentColor = state.midia.accentColor;
     _slug = state.slug;
-    _url = state.url;
+    _publicUrl = state.publicUrl;
     _publicado = state.publicado;
+    _needsProof = state.needsProof || state.gerado.needsProof;
+    _podePublicar = state.podePublicar || state.gerado.hasPublishableCopy;
     _step =
         preferReview || state.gerado.hasPublishableCopy
             ? 1
@@ -209,6 +212,7 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
     _bio.text = g.bio;
     _fechamento.text = g.fechamento;
     _needsProof = g.needsProof;
+    _podePublicar = g.hasPublishableCopy;
     _metodo = List.of(g.metodo);
     _servicos = List.of(g.servicos);
     _faq = List.of(g.faq);
@@ -249,17 +253,21 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
     try {
       final repo = ref.read(landingStudioRepositoryProvider);
       await repo.saveEntrevista(entrevista);
-      final gerado = await repo.gerar();
+      final state = await repo.gerar();
       if (!mounted) return;
       setState(() {
-        _applyGerado(gerado);
+        _applyGerado(state.gerado);
+        if (state.publicUrl != null) _publicUrl = state.publicUrl;
+        if (state.slug != null) _slug = state.slug;
+        _needsProof = state.needsProof || state.gerado.needsProof;
+        _podePublicar = state.podePublicar || state.gerado.hasPublishableCopy;
         _step = 1;
         _dirty = false;
         _busy = false;
       });
       FeedbackHelper.showSuccess(
         context,
-        'Landing gerada. Revise e publique.',
+        'Página gerada. Revise e publique.',
       );
     } catch (e) {
       if (!mounted) return;
@@ -363,8 +371,10 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
       if (!mounted) return;
       setState(() {
         _slug = state.slug ?? _slug;
-        _url = state.url ?? _url;
+        _publicUrl = state.publicUrl ?? _publicUrl;
         _publicado = true;
+        _podePublicar = state.podePublicar;
+        _needsProof = state.needsProof;
         _busy = false;
         _dirty = false;
       });
@@ -383,20 +393,32 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
   String _publicUrlLabel() {
     final slug = (_slug ?? '').trim();
     if (slug.isNotEmpty) return Env.landingPageDisplayLabel(slug);
-    final url = (_url ?? '').trim();
-    if (url.isNotEmpty) return url;
-    return 'Link público';
+    final url = (_publicUrl ?? '').trim();
+    if (url.isNotEmpty) {
+      final host = Uri.tryParse(url)?.host;
+      if (host != null && host.isNotEmpty) {
+        return url.replaceFirst(RegExp(r'^https?://'), '');
+      }
+      return url;
+    }
+    return 'focuxpersonal.com/p/…';
   }
 
-  String? _publicUrl() {
+  String? _resolvedPublicUrl() {
+    final fromState = (_publicUrl ?? '').trim();
+    if (fromState.isNotEmpty) {
+      // Prefer canonical brand host when BE still returns Railway.
+      final slug = (_slug ?? '').trim();
+      if (slug.isNotEmpty) return Env.landingPageUrl(slug);
+      return fromState;
+    }
     final slug = (_slug ?? '').trim();
     if (slug.isNotEmpty) return Env.landingPageUrl(slug);
-    final url = (_url ?? '').trim();
-    return url.isEmpty ? null : url;
+    return null;
   }
 
   Future<void> _copyLink() async {
-    final url = _publicUrl();
+    final url = _resolvedPublicUrl();
     if (url == null) {
       FeedbackHelper.showWarn(
         context,
@@ -409,12 +431,35 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
     FeedbackHelper.showSuccess(context, 'Link copiado');
   }
 
-  Future<void> _openPublic() async {
-    final url = _publicUrl();
-    if (url == null) return;
-    final uri = Uri.tryParse(url);
-    if (uri == null) return;
-    await launchUrl(uri, mode: LaunchMode.externalApplication);
+  Future<void> _openPublicOrPreview() async {
+    final url = _resolvedPublicUrl();
+    if (url != null) {
+      final uri = Uri.tryParse(url);
+      if (uri != null) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+        return;
+      }
+    }
+    // Sem URL pública ainda: preview autenticado no BE.
+    try {
+      final html =
+          await ref.read(landingStudioRepositoryProvider).previewHtml();
+      if (!mounted) return;
+      if (html.trim().isEmpty) {
+        FeedbackHelper.showWarn(context, 'Preview indisponível ainda.');
+        return;
+      }
+      await showFxConfirmSheet(
+        context,
+        title: 'Preview pronto',
+        message:
+            'A vitrine é HTML do backend. Publique para abrir o link canônico focuxpersonal.com.',
+        confirmLabel: 'Ok',
+      );
+    } catch (e) {
+      if (!mounted) return;
+      FeedbackHelper.showError(context, friendlyError(e));
+    }
   }
 
   Future<void> _onBack() async {
@@ -443,8 +488,9 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
   }
 
   bool get _canPublish =>
-      _heroTitle.text.trim().isNotEmpty &&
-      _primaryCta.text.trim().isNotEmpty &&
+      (_podePublicar ||
+          (_heroTitle.text.trim().isNotEmpty &&
+              _primaryCta.text.trim().isNotEmpty)) &&
       !_busy &&
       !_uploadingHero &&
       !_uploadingBio;
@@ -533,7 +579,7 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
                                         ? 'Gerando…'
                                         : 'Publicando…')
                                     : (_step == 0
-                                        ? 'Gerar landing'
+                                        ? 'Gerar página'
                                         : (_publicado
                                             ? 'Republicar'
                                             : 'Publicar')),

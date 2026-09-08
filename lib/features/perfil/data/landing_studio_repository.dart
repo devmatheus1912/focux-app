@@ -245,17 +245,23 @@ class LandingStudioState {
     this.entrevista = const LandingEntrevista(),
     this.gerado = const LandingGerado(),
     this.midia = const LandingMidia(),
-    this.url,
+    this.publicUrl,
     this.slug,
     this.publicado = false,
+    this.needsProof = false,
+    this.podePublicar = false,
   });
 
   final LandingEntrevista entrevista;
   final LandingGerado gerado;
   final LandingMidia midia;
-  final String? url;
+
+  /// URL canônica (`https://focuxpersonal.com/p/{slug}`).
+  final String? publicUrl;
   final String? slug;
   final bool publicado;
+  final bool needsProof;
+  final bool podePublicar;
 
   factory LandingStudioState.fromJson(Map<String, dynamic> json) {
     Map<String, dynamic>? asMap(dynamic value) {
@@ -264,13 +270,25 @@ class LandingStudioState {
       return null;
     }
 
+    final gerado = LandingGerado.fromJson(asMap(json['gerado']));
+    final publicUrl =
+        (json['publicUrl'] as String?)?.trim().isNotEmpty == true
+            ? (json['publicUrl'] as String).trim()
+            : (json['url'] as String?)?.trim();
+    final needsProof =
+        json['needsProof'] as bool? ?? gerado.needsProof;
+    final podePublicar =
+        json['podePublicar'] as bool? ?? gerado.hasPublishableCopy;
+
     return LandingStudioState(
       entrevista: LandingEntrevista.fromJson(asMap(json['entrevista'])),
-      gerado: LandingGerado.fromJson(asMap(json['gerado'])),
+      gerado: gerado,
       midia: LandingMidia.fromJson(asMap(json['midia'])),
-      url: (json['url'] as String?)?.trim(),
+      publicUrl: publicUrl,
       slug: (json['slug'] as String?)?.trim(),
       publicado: json['publicado'] as bool? ?? false,
+      needsProof: needsProof,
+      podePublicar: podePublicar,
     );
   }
 }
@@ -298,19 +316,39 @@ class LandingStudioRepository {
     return getState();
   }
 
-  Future<LandingGerado> gerar() async {
+  /// Retorna estado completo quando o BE envelopa; senão só o [LandingGerado].
+  Future<LandingStudioState> gerar() async {
     final r = await _dio.post('/api/personal/landing/gerar');
     final data = r.data;
     if (data is Map<String, dynamic>) {
-      if (data.containsKey('heroTitle') || data.containsKey('gerado')) {
-        final geradoMap = data['gerado'];
-        if (geradoMap is Map) {
-          return LandingGerado.fromJson(Map<String, dynamic>.from(geradoMap));
-        }
-        return LandingGerado.fromJson(data);
+      if (data.containsKey('entrevista') ||
+          data.containsKey('publicado') ||
+          data.containsKey('publicUrl') ||
+          data.containsKey('podePublicar')) {
+        return LandingStudioState.fromJson(data);
+      }
+      final geradoMap = data['gerado'];
+      if (geradoMap is Map) {
+        final gerado = LandingGerado.fromJson(
+          Map<String, dynamic>.from(geradoMap),
+        );
+        return LandingStudioState(
+          gerado: gerado,
+          needsProof: data['needsProof'] as bool? ?? gerado.needsProof,
+          podePublicar:
+              data['podePublicar'] as bool? ?? gerado.hasPublishableCopy,
+        );
+      }
+      if (data.containsKey('heroTitle')) {
+        final gerado = LandingGerado.fromJson(data);
+        return LandingStudioState(
+          gerado: gerado,
+          needsProof: gerado.needsProof,
+          podePublicar: gerado.hasPublishableCopy,
+        );
       }
     }
-    return const LandingGerado();
+    return const LandingStudioState();
   }
 
   Future<LandingMidia> saveMidia({
