@@ -27,6 +27,9 @@ void main() {
     expect(screen, contains('toggleHoje'));
     expect(screen, contains('.buscar('));
     expect(screen, contains('habitoDesativadoChip'));
+    expect(screen, contains('habitoLembreteLine'));
+    expect(screen, contains('Lista'));
+    expect(screen, isNot(contains('onPressed: () {}')));
     expect(screen, isNot(contains('meusHabitos')));
     expect(screen, isNot(contains('getHome')));
     expect(screen, contains("'/alunos/\${habito.alunoId}'"));
