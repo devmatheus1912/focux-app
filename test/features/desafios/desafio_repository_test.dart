@@ -25,6 +25,17 @@ void main() {
     expect(desafio.ativo, isTrue);
   });
 
+  test('Desafio parseia encerrado do GET por id', () {
+    final desafio = Desafio.fromJson({
+      'id': 3,
+      'titulo': '30 dias de água',
+      'tipo': 'HABITOS',
+      'metaPontos': 80,
+      'ativo': false,
+    });
+    expect(desafio.ativo, isFalse);
+  });
+
   test('leaderboard parseia aluno sem Map cru', () {
     final entry = DesafioLeaderboardEntry.fromJson({
       'alunoId': 9,

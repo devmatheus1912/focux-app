@@ -67,5 +67,15 @@ void main() {
       habitoDetalheMessage(metaSemanal: 5),
       contains('Meta semanal: 5x'),
     );
+    expect(habitoDetailPath(4), '/habitos/4');
+    expect(habitoAlunoDetailPath(4), '/aluno/habitos/4');
+    expect(habitoStreakHint(0), 'Sem sequência');
+    expect(habitoStreakHint(1), '1 dia seguido');
+    expect(habitoFeitosValue(3, 7), '3/7');
+    expect(habitoFeitosHint(feitos: 7, meta: 7), 'Meta da semana ok');
+    expect(habitoStickyPersonal(), 'Desativar hábito');
+    expect(habitoStickyAluno(false), 'Marcar hoje');
+    expect(habitoStickyAluno(true), 'Desmarcar hoje');
+    expect(habitoDetalheSecoes, hasLength(2));
   });
 }

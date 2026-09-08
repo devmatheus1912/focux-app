@@ -65,6 +65,34 @@ void main() {
     expect(detalhe.sugestaoIa, 'Manda um oi');
     expect(detalhe.sugestaoFonte, 'LOCAL');
     expect(detalhe.podeGerarIa, isTrue);
+    expect(detalhe.motivos, isEmpty);
+    expect(detalhe.diasSemTreino, isNull);
+  });
+
+  test('AlertaDetalhe parseia motivos e aderência', () {
+    final detalhe = AlertaDetalhe.fromJson({
+      'alunoId': 1,
+      'alunoNome': 'Ana Silva',
+      'checkIns30Dias': 2,
+      'statusFinanceiro': 'ATIVO',
+      'sugestaoIa': 'Oi',
+      'motivos': ['Sem treino há 10 dias', '  ', 'Aderência 40%'],
+      'diasSemTreino': 10,
+      'aderenciaPercent': 40.4,
+    });
+    expect(detalhe.motivos, ['Sem treino há 10 dias', 'Aderência 40%']);
+    expect(detalhe.diasSemTreino, 10);
+    expect(detalhe.aderenciaPercent, 40.4);
+    expect(alertaMotivosVisiveis(detalhe.motivos), hasLength(2));
+    expect(alertaDiasSemTreinoHint(0), 'Treinou hoje');
+    expect(alertaDiasSemTreinoHint(1), '1 dia sem treino');
+    expect(alertaDiasSemTreinoHint(10), '10 dias sem treino');
+    expect(alertaAderenciaValue(40.4), '40%');
+    expect(alertaAderenciaHint(), 'Últimos 30 dias');
+    expect(
+      detalhe.copyWith(sugestaoIa: 'Outra').motivos,
+      detalhe.motivos,
+    );
   });
 
   test('alertaHubSubtitle junta status e freshness', () {

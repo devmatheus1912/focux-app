@@ -57,6 +57,9 @@ class AlertaDetalhe {
   final String sugestaoIa;
   final String sugestaoFonte;
   final bool podeGerarIa;
+  final List<String> motivos;
+  final int? diasSemTreino;
+  final double? aderenciaPercent;
 
   AlertaDetalhe({
     required this.alunoId,
@@ -67,6 +70,9 @@ class AlertaDetalhe {
     required this.sugestaoIa,
     this.sugestaoFonte = 'LOCAL',
     this.podeGerarIa = false,
+    this.motivos = const [],
+    this.diasSemTreino,
+    this.aderenciaPercent,
   });
 
   AlertaDetalhe copyWith({String? sugestaoIa, String? sugestaoFonte}) =>
@@ -79,6 +85,9 @@ class AlertaDetalhe {
         sugestaoIa: sugestaoIa ?? this.sugestaoIa,
         sugestaoFonte: sugestaoFonte ?? this.sugestaoFonte,
         podeGerarIa: podeGerarIa,
+        motivos: motivos,
+        diasSemTreino: diasSemTreino,
+        aderenciaPercent: aderenciaPercent,
       );
 
   factory AlertaDetalhe.fromJson(Map<String, dynamic> j) => AlertaDetalhe(
@@ -90,6 +99,13 @@ class AlertaDetalhe {
     sugestaoIa: j['sugestaoIa'] as String? ?? '',
     sugestaoFonte: (j['sugestaoFonte'] as String? ?? 'LOCAL').toUpperCase(),
     podeGerarIa: j['podeGerarIa'] as bool? ?? false,
+    motivos:
+        ((j['motivos'] as List?) ?? const [])
+            .map((e) => e.toString())
+            .where((e) => e.trim().isNotEmpty)
+            .toList(),
+    diasSemTreino: (j['diasSemTreino'] as num?)?.toInt(),
+    aderenciaPercent: (j['aderenciaPercent'] as num?)?.toDouble(),
   );
 }
 

@@ -110,6 +110,10 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
     );
   }
 
+  void _abrirAluno() {
+    context.push('/alunos/${widget.alunoId}', extra: widget.alunoNome);
+  }
+
   void _abrirChat() {
     context.push(
       '/alunos/${widget.alunoId}/chat',
@@ -131,7 +135,13 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
     final showSticky = !_loading && _erro == null;
     return fxScreenA11yScope(
       label: 'Engajamento — ${widget.alunoNome}',
-      child: FxShellScaffold(
+      child: PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, _) {
+          if (didPop) return;
+          safePopOrGo(context, '/alunos/${widget.alunoId}');
+        },
+        child: FxShellScaffold(
         useMesh: true,
         appBar: FxShellAppBar(
           title: 'Engajamento',
@@ -180,6 +190,7 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
               ),
           ],
         ),
+      ),
       ),
     );
   }
@@ -239,7 +250,13 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
           onPressed: _pickPeriodo,
         ),
         DashboardHomeActionChip(
-          label: 'Abrir chat',
+          label: 'Aluno',
+          accent: primary,
+          isDark: isDark,
+          onPressed: _abrirAluno,
+        ),
+        DashboardHomeActionChip(
+          label: 'Chat',
           accent: primary,
           isDark: isDark,
           onPressed: _abrirChat,

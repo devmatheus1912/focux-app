@@ -33,7 +33,7 @@ void main() {
     expect(screen, contains('showFxInsetPickerSheet'));
     expect(screen, contains('FxSatelliteListTile'));
     expect(screen, contains('DashboardSectionHeader'));
-    expect(screen, contains('showFxConfirmSheet'));
+    expect(screen, contains('habitoDetailPath'));
     expect(screen, isNot(contains('FxSettingsGroup')));
     expect(screen, contains('FeatureGate'));
     expect(screen, contains('habitCoaching'));
