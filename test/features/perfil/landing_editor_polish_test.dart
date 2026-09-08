@@ -18,10 +18,14 @@ void main() {
     expect(screen, contains('viewInsets'));
     expect(screen, contains('unfocus'));
     expect(screen, contains('landingStudioRepositoryProvider'));
-    expect(screen, contains('Gerar landing'));
+    expect(screen, contains('Gerar página'));
     expect(screen, contains('Publicar'));
+    expect(screen, contains('_podePublicar'));
+    expect(screen, contains('_publicUrl'));
+    expect(screen, contains('focuxpersonal.com'));
     expect(screen, isNot(contains('sectionOrder')));
     expect(screen, isNot(contains('landing/presets')));
     expect(screen, isNot(contains('gerar-hero')));
+    expect(screen, isNot(contains('offerCta')));
   });
 }

@@ -327,15 +327,25 @@ class _LandingStudioRevisaoBody extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.all(TokensStrip.s3),
                 child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Icon(Icons.info_outline, color: EagleTokens.warn, size: 20),
                     const SizedBox(width: TokensStrip.s2),
                     Expanded(
-                      child: Text(
-                        'Prova fraca detectada. Reforce CREF, anos ou resultados na entrevista.',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: chrome.mute,
-                        ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Prova fraca',
+                            style: Theme.of(context).textTheme.titleSmall,
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Envie uma foto hero real sua. Sem isso o backend usa atmosfera — nunca stock de outra pessoa. CREF não conta como depoimento.',
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(color: chrome.mute),
+                          ),
+                        ],
                       ),
                     ),
                   ],
@@ -347,7 +357,10 @@ class _LandingStudioRevisaoBody extends StatelessWidget {
           index: 0,
           child: FxSettingsGroup(
             header: 'Link público',
-            caption: state._publicado ? 'Landing publicada.' : 'Após publicar.',
+            caption:
+                state._publicado
+                    ? 'No ar em focuxpersonal.com'
+                    : 'Após publicar · white-label (sem “| Focux”).',
             children: [
               ListTile(
                 contentPadding: const EdgeInsets.symmetric(
@@ -371,12 +384,11 @@ class _LandingStudioRevisaoBody extends StatelessWidget {
                       onPressed: state._copyLink,
                       icon: Icon(Icons.copy_outlined, color: primary),
                     ),
-                    if (state._publicUrl() != null)
-                      IconButton(
-                        tooltip: 'Abrir página',
-                        onPressed: state._openPublic,
-                        icon: Icon(Icons.open_in_new, color: primary),
-                      ),
+                    IconButton(
+                      tooltip: 'Abrir página / preview',
+                      onPressed: state._openPublicOrPreview,
+                      icon: Icon(Icons.open_in_new, color: primary),
+                    ),
                   ],
                 ),
               ),
@@ -516,7 +528,8 @@ class _LandingStudioRevisaoBody extends StatelessWidget {
           index: 5,
           child: FxSettingsGroup(
             header: 'Fotos',
-            caption: 'Opcional — hero e bio.',
+            caption:
+                'Priorize a foto hero real. Sem ela o backend usa atmosfera — nunca stock humano.',
             children: [
               Padding(
                 padding: const EdgeInsets.all(TokensStrip.s3),
@@ -524,7 +537,7 @@ class _LandingStudioRevisaoBody extends StatelessWidget {
                   children: [
                     Expanded(
                       child: _LandingStudioImageSlot(
-                        label: 'Hero',
+                        label: 'Hero (obrigatória p/ 10/10)',
                         url: state._heroImageUrl,
                         uploading: state._uploadingHero,
                         onTap: () => state._uploadImage(hero: true),
@@ -533,7 +546,7 @@ class _LandingStudioRevisaoBody extends StatelessWidget {
                     const SizedBox(width: TokensStrip.s3),
                     Expanded(
                       child: _LandingStudioImageSlot(
-                        label: 'Bio',
+                        label: 'Bio (opcional)',
                         url: state._bioImageUrl,
                         uploading: state._uploadingBio,
                         onTap: () => state._uploadImage(hero: false),
