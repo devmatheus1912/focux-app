@@ -25,9 +25,11 @@ void main() {
     expect(screen, isNot(contains("put('/api/alunos/\$alunoId/anamnese'")));
     expect(screen, contains('AlunoInsetFormField'));
     expect(screen, contains('safePopOrGo'));
+    expect(screen, contains('PopScope'));
     expect(screen, contains('FxHelpIconButton'));
     expect(screen, contains('showAnamneseHelpSheet'));
     expect(screen, contains("'Solicitar anamnese'"));
+    expect(screen, contains("label: 'Aluno'"));
     expect(screen, isNot(contains('TabBar')));
     expect(screen, isNot(contains('DropdownButton')));
     expect(screen, isNot(contains('Slider(')));

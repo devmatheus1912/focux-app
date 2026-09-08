@@ -33,6 +33,8 @@ void main() {
     expect(screen, contains('adicionarMarco'));
     expect(screen, contains('showFxConfirmSheet'));
     expect(screen, contains("safePopOrGo(context, '/alunos/\${widget.alunoId}')"));
+    expect(screen, contains('PopScope'));
+    expect(screen, contains('/alunos/\$alunoId/chat'));
     expect(screen, isNot(contains('TabBar')));
     expect(screen, isNot(contains('TabBarView')));
     expect(screen, isNot(contains('DropdownButton')));

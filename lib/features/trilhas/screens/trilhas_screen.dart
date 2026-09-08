@@ -339,7 +339,13 @@ class _TrilhasScreenState extends ConsumerState<TrilhasScreen> {
 
     return fxScreenA11yScope(
       label: 'Trilhas de Progresso — ${widget.alunoNome}',
-      child: FxShellScaffold(
+      child: PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, _) {
+          if (didPop) return;
+          safePopOrGo(context, '/alunos/${widget.alunoId}');
+        },
+        child: FxShellScaffold(
         useMesh: true,
         appBar: FxShellAppBar(
           title: 'Trilhas de Progresso',
@@ -383,6 +389,7 @@ class _TrilhasScreenState extends ConsumerState<TrilhasScreen> {
                     child: _TrilhasListBody(
                       trilhas: trilhas,
                       freshness: freshness,
+                      alunoId: widget.alunoId,
                       alunoNome: widget.alunoNome,
                       filtro: _filtro,
                       onFiltro: (value) => setState(() => _filtro = value),
@@ -413,6 +420,7 @@ class _TrilhasScreenState extends ConsumerState<TrilhasScreen> {
                 ),
               ),
           ],
+        ),
         ),
       ),
     );

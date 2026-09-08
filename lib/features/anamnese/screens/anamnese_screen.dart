@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
-import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -244,10 +243,31 @@ class _AnamneseScreenState extends ConsumerState<AnamneseScreen> {
 
   FxShellAppBar get _appBar => FxShellAppBar(
     title: 'Anamnese',
-    subtitle: 'Solicite e revise a ficha do aluno',
+    subtitle:
+        FxHubFreshness.fromFetchedAt(_fetchedAt) ??
+        'Solicite e revise a ficha do aluno',
     onBack: _voltar,
     actions: _appBarActions,
   );
+
+  Widget _page({required Widget body, Widget? bottom}) {
+    return fxScreenA11yScope(
+      label: 'Anamnese',
+      child: PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, _) {
+          if (didPop) return;
+          _voltar();
+        },
+        child: FxShellScaffold(
+          useMesh: true,
+          appBar: _appBar,
+          bottomNavigationBar: bottom,
+          body: body,
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -256,28 +276,16 @@ class _AnamneseScreenState extends ConsumerState<AnamneseScreen> {
     final isDark = chrome.isDark;
 
     if (_loading) {
-      return fxScreenA11yScope(
-        label: 'Anamnese',
-        child: FxShellScaffold(
-          useMesh: true,
-          appBar: _appBar,
-          body: const SkeletonList(count: 5),
-        ),
-      );
+      return _page(body: const SkeletonList(count: 5));
     }
     if (_erro != null) {
-      return fxScreenA11yScope(
-        label: 'Anamnese',
-        child: FxShellScaffold(
-          useMesh: true,
-          appBar: _appBar,
-          body: FxErrorState(
-            chromeOnDark: isDark,
-            primary: primary,
-            message: _erro!,
-            onRetry: _load,
-            title: 'Não conseguimos carregar a anamnese',
-          ),
+      return _page(
+        body: FxErrorState(
+          chromeOnDark: isDark,
+          primary: primary,
+          message: _erro!,
+          onRetry: _load,
+          title: 'Não conseguimos carregar a anamnese',
         ),
       );
     }
@@ -286,75 +294,60 @@ class _AnamneseScreenState extends ConsumerState<AnamneseScreen> {
     final ctaLabel = _primaryCtaLabel;
     final ctaAction = _primaryCtaAction;
 
-    return fxScreenA11yScope(
-      label: 'Anamnese',
-      child: FxShellScaffold(
-        useMesh: true,
-        appBar: _appBar,
-        bottomNavigationBar:
-            ctaLabel == null
-                ? null
-                : SafeArea(
-                  top: false,
-                  child: Padding(
-                    padding: EdgeInsets.fromLTRB(
-                      FxSettingsLayout.pageInset,
-                      TokensStrip.s2,
-                      FxSettingsLayout.pageInset,
-                      TokensStrip.s3 + MediaQuery.viewInsetsOf(context).bottom,
-                    ),
-                    child: Semantics(
-                      button: true,
-                      enabled: !_acting,
+    return _page(
+      bottom:
+          ctaLabel == null
+              ? null
+              : SafeArea(
+                top: false,
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    FxSettingsLayout.pageInset,
+                    TokensStrip.s2,
+                    FxSettingsLayout.pageInset,
+                    TokensStrip.s3 + MediaQuery.viewInsetsOf(context).bottom,
+                  ),
+                  child: Semantics(
+                    button: true,
+                    enabled: !_acting,
+                    label: ctaLabel,
+                    child: FxLiquidPrimaryButton(
                       label: ctaLabel,
-                      child: FxLiquidPrimaryButton(
-                        label: ctaLabel,
-                        loading: _acting,
-                        loadingLabel: 'Salvando…',
-                        onPressed: ctaAction,
-                      ),
+                      loading: _acting,
+                      loadingLabel: 'Salvando…',
+                      onPressed: ctaAction,
                     ),
                   ),
                 ),
-        body: SafeArea(
-          bottom: false,
-          child: FxContentWidthLimiter(
-            child: RefreshIndicator(
-              onRefresh: _load,
-              child: ListView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.fromLTRB(
-                  FxSettingsLayout.pageInset,
-                  TokensStrip.s4,
-                  FxSettingsLayout.pageInset,
-                  24,
-                ),
-                children: [
-                  FxHubHeader(
-                    title: anamneseStatusLabel(a.status),
-                    subtitle:
-                        FxHubFreshness.fromFetchedAt(_fetchedAt) ??
-                        anamneseStatusSubtitle(a.status),
-                  ),
-                  const SizedBox(height: TokensStrip.s3),
-                  Text(
-                    anamneseStatusSubtitle(a.status),
-                    style: FocuxHubTypography.bodyMuted(
-                      color: fxScreenMute(context),
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  _AnamneseBody(
-                    anamnese: a,
-                    acting: _acting,
-                    isDark: isDark,
-                    primary: primary,
-                    alunoId: widget.alunoId,
-                    onSolicitar: _solicitar,
-                    onRevisar: _revisar,
-                  ),
-                ],
               ),
+      body: SafeArea(
+        bottom: false,
+        child: FxContentWidthLimiter(
+          child: RefreshIndicator(
+            onRefresh: _load,
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.fromLTRB(
+                FxSettingsLayout.pageInset,
+                TokensStrip.s4,
+                FxSettingsLayout.pageInset,
+                24,
+              ),
+              children: [
+                FxHubHeader(
+                  title: anamneseStatusLabel(a.status),
+                  subtitle: anamneseStatusSubtitle(a.status),
+                ),
+                _AnamneseBody(
+                  anamnese: a,
+                  acting: _acting,
+                  isDark: isDark,
+                  primary: primary,
+                  alunoId: widget.alunoId,
+                  onSolicitar: _solicitar,
+                  onRevisar: _revisar,
+                ),
+              ],
             ),
           ),
         ),

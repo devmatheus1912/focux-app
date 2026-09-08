@@ -20,6 +20,8 @@ void main() {
     expect(screen, contains('FxHelpIconButton'));
     expect(screen, contains('trilhasMinhasProvider'));
     expect(screen, isNot(contains("'/api/trilhas/minhas'")));
+    expect(screen, contains('PopScope'));
+    expect(screen, contains('AlunoSegmentedChoice'));
     expect(screen, contains("safePopOrGo(context, '/dashboard/aluno')"));
     expect(screen, contains("'/checkin/treinos'"));
     expect(screen, contains('showAlunoTrilhasHelpSheet'));

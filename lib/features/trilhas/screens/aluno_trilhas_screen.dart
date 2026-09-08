@@ -18,6 +18,7 @@ import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/operational_metric_tile.dart';
 import '../../../core/widgets/skeleton_loader.dart';
+import '../../alunos/widgets/aluno_form_choices.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../models/trilha.dart';
 import '../providers/trilhas_provider.dart';
@@ -33,6 +34,7 @@ class AlunoTrilhasScreen extends ConsumerStatefulWidget {
 
 class _AlunoTrilhasScreenState extends ConsumerState<AlunoTrilhasScreen> {
   DateTime? _fetchedAt;
+  String _filtro = trilhaFiltroAndamento;
 
   Future<void> _refresh() async {
     ref.invalidate(trilhasMinhasProvider);
@@ -60,61 +62,68 @@ class _AlunoTrilhasScreenState extends ConsumerState<AlunoTrilhasScreen> {
 
     return fxScreenA11yScope(
       label: 'Minhas trilhas',
-      child: FxShellScaffold(
-        useMesh: true,
-        appBar: FxShellAppBar(
-          title: 'Trilhas',
-          subtitle: freshness,
-          onBack: () => safePopOrGo(context, '/dashboard/aluno'),
-          actions: [
-            FxHelpIconButton(
-              tooltip: 'Como usar as trilhas',
-              onTap: () => showAlunoTrilhasHelpSheet(context),
-            ),
-          ],
-        ),
-        body: Column(
-          children: [
-            Expanded(
-              child: async.when(
-                loading:
-                    () => const Padding(
-                      padding: EdgeInsets.all(FxSettingsLayout.pageInset),
-                      child: SkeletonList(count: 4),
-                    ),
-                error:
-                    (e, _) => FxErrorState(
-                      chromeOnDark: chrome,
-                      primary: primary,
-                      message: friendlyError(e),
-                      onRetry: _refresh,
-                      title: 'Não conseguimos carregar as trilhas',
-                    ),
-                data: (trilhas) {
-                  _stampFreshness();
-                  return FxContentWidthLimiter(
-                    child: _buildBody(trilhas, freshness, primary, chrome),
-                  );
-                },
+      child: PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, _) {
+          if (didPop) return;
+          safePopOrGo(context, '/dashboard/aluno');
+        },
+        child: FxShellScaffold(
+          useMesh: true,
+          appBar: FxShellAppBar(
+            title: 'Trilhas',
+            subtitle: freshness,
+            onBack: () => safePopOrGo(context, '/dashboard/aluno'),
+            actions: [
+              FxHelpIconButton(
+                tooltip: 'Como usar as trilhas',
+                onTap: () => showAlunoTrilhasHelpSheet(context),
               ),
-            ),
-            if (showSticky)
-              SafeArea(
-                top: false,
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(
-                    FxSettingsLayout.pageInset,
-                    TokensStrip.s2,
-                    FxSettingsLayout.pageInset,
-                    TokensStrip.s3 + MediaQuery.viewInsetsOf(context).bottom,
-                  ),
-                  child: FxLiquidPrimaryButton(
-                    label: 'Ir aos treinos',
-                    onPressed: () => context.push('/checkin/treinos'),
-                  ),
+            ],
+          ),
+          body: Column(
+            children: [
+              Expanded(
+                child: async.when(
+                  loading:
+                      () => const Padding(
+                        padding: EdgeInsets.all(FxSettingsLayout.pageInset),
+                        child: SkeletonList(count: 4),
+                      ),
+                  error:
+                      (e, _) => FxErrorState(
+                        chromeOnDark: chrome,
+                        primary: primary,
+                        message: friendlyError(e),
+                        onRetry: _refresh,
+                        title: 'Não conseguimos carregar as trilhas',
+                      ),
+                  data: (trilhas) {
+                    _stampFreshness();
+                    return FxContentWidthLimiter(
+                      child: _buildBody(trilhas, freshness, primary, chrome),
+                    );
+                  },
                 ),
               ),
-          ],
+              if (showSticky)
+                SafeArea(
+                  top: false,
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      FxSettingsLayout.pageInset,
+                      TokensStrip.s2,
+                      FxSettingsLayout.pageInset,
+                      TokensStrip.s3 + MediaQuery.viewInsetsOf(context).bottom,
+                    ),
+                    child: FxLiquidPrimaryButton(
+                      label: 'Ir aos treinos',
+                      onPressed: () => context.push('/checkin/treinos'),
+                    ),
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );
@@ -126,6 +135,7 @@ class _AlunoTrilhasScreenState extends ConsumerState<AlunoTrilhasScreen> {
     Color primary,
     bool isDark,
   ) {
+    final visiveis = trilhaFiltradas(trilhas, _filtro);
     return RefreshIndicator(
       onRefresh: _refresh,
       child: ListView(
@@ -171,6 +181,15 @@ class _AlunoTrilhasScreenState extends ConsumerState<AlunoTrilhasScreen> {
             color: primary,
             isDark: isDark,
           ),
+          if (trilhas.isNotEmpty) ...[
+            const SizedBox(height: TokensStrip.s4),
+            AlunoSegmentedChoice(
+              options: trilhaFiltroOpcoes,
+              selected: _filtro,
+              isDark: isDark,
+              onSelect: (value) => setState(() => _filtro = value),
+            ),
+          ],
           const SizedBox(height: TokensStrip.s5),
           if (trilhas.isEmpty)
             const FxEmptyState(
@@ -179,10 +198,35 @@ class _AlunoTrilhasScreenState extends ConsumerState<AlunoTrilhasScreen> {
               subtitle:
                   'Quando o personal criar uma meta, o progresso aparece aqui.',
             )
+          else if (visiveis.isEmpty)
+            FxEmptyState(
+              icon: 'route',
+              title:
+                  _filtro == trilhaFiltroConcluidas
+                      ? 'Nenhuma trilha concluída'
+                      : 'Nada em andamento',
+              subtitle:
+                  _filtro == trilhaFiltroConcluidas
+                      ? 'As trilhas ativas aparecem na outra seção.'
+                      : 'Tudo que existia já foi concluído.',
+              action: FxEmptyAction(
+                label:
+                    _filtro == trilhaFiltroConcluidas
+                        ? 'Ver em andamento'
+                        : 'Ver concluídas',
+                onTap:
+                    () => setState(
+                      () => _filtro =
+                          _filtro == trilhaFiltroConcluidas
+                              ? trilhaFiltroAndamento
+                              : trilhaFiltroConcluidas,
+                    ),
+              ),
+            )
           else ...[
             const DashboardSectionHeader(title: 'Trilhas'),
             const SizedBox(height: TokensStrip.s3),
-            for (final trilha in trilhas)
+            for (final trilha in visiveis)
               FxSatelliteListTile(
                 title: trilha.titulo,
                 titleCase: false,

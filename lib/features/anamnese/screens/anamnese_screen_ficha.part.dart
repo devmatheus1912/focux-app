@@ -74,6 +74,12 @@ class _AnamneseBody extends StatelessWidget {
             spacing: TokensStrip.s2,
             runSpacing: TokensStrip.s2,
             children: [
+              DashboardHomeActionChip(
+                label: 'Aluno',
+                accent: primary,
+                isDark: isDark,
+                onPressed: () => context.push('/alunos/$alunoId'),
+              ),
               if (!a.isNaoIniciada && !a.isSolicitada)
                 DashboardHomeActionChip(
                   label: 'Pedir atestado',
@@ -125,14 +131,23 @@ class _AnamneseBody extends StatelessWidget {
         ],
         if (a.isNaoIniciada || (a.isSolicitada && !a.personalPodeRevisar)) ...[
           const SizedBox(height: TokensStrip.s4),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: DashboardHomeActionChip(
-              label: 'Chat',
-              accent: primary,
-              isDark: isDark,
-              onPressed: () => context.push('/alunos/$alunoId/chat'),
-            ),
+          Wrap(
+            spacing: TokensStrip.s2,
+            runSpacing: TokensStrip.s2,
+            children: [
+              DashboardHomeActionChip(
+                label: 'Aluno',
+                accent: primary,
+                isDark: isDark,
+                onPressed: () => context.push('/alunos/$alunoId'),
+              ),
+              DashboardHomeActionChip(
+                label: 'Chat',
+                accent: primary,
+                isDark: isDark,
+                onPressed: () => context.push('/alunos/$alunoId/chat'),
+              ),
+            ],
           ),
         ],
       ],
@@ -218,6 +233,7 @@ class _AnamneseFicha extends StatelessWidget {
         const SizedBox(height: FxSettingsLayout.groupGap),
         FxSettingsGroup(
           header: 'Treino e objetivos',
+          caption: 'Contexto de saúde — restrição alimentar não é dieta.',
           children: [
             _ro('Objetivo', a.objetivo, 'target'),
             _ro('Objetivo detalhado', a.objetivoDetalhado, 'target'),
