@@ -81,6 +81,18 @@ void main() {
     expect(treinoDetailGroupLabel(_item(id: 2, nome: 'Y')), 'OUTROS');
   });
 
+  test('series and group counts feed the S3 metrics', () {
+    final items = [
+      _item(id: 1, nome: 'Supino', grupo: GrupoMuscular.peito),
+      _item(id: 2, nome: 'Crucifixo', grupo: GrupoMuscular.peito),
+      _item(id: 3, nome: 'Remada', grupo: GrupoMuscular.costasLatissimo),
+    ];
+    expect(treinoDetailSeriesCount(items), 9);
+    expect(treinoDetailGroupCount(items), 2);
+    expect(treinoDetailSeriesHint(1), '1 grupo muscular');
+    expect(treinoDetailSeriesHint(2), '2 grupos');
+  });
+
   test('meta line is honest: counts or em montagem, never fake duration', () {
     expect(treinoDetailMetaLine(const []), 'Em montagem');
     expect(
