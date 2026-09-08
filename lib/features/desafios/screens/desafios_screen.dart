@@ -12,18 +12,14 @@ import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feature_gate.dart';
 import '../../../core/widgets/feedback_helper.dart';
-import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_form_sheet.dart';
 import '../../../core/widgets/fx_help.dart';
-import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_inset_picker_row.dart';
 import '../../../core/widgets/fx_inset_picker_sheet.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
-import '../../../core/widgets/fx_settings_group.dart';
-import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_toggle_chip.dart';
 import '../../../core/widgets/skeleton_loader.dart';
@@ -204,126 +200,8 @@ class _DesafiosScreenState extends ConsumerState<DesafiosScreen> {
     if (created) await _load();
   }
 
-  Future<void> _encerrar(Desafio d) async {
-    final ok = await showFxConfirmSheet(
-      context,
-      title: 'Encerrar desafio?',
-      subtitle: d.titulo,
-      message: 'Sai da lista ativa. O ranking deixa de pontuar.',
-      confirmLabel: 'Encerrar',
-      destructive: true,
-    );
-    if (!ok || !mounted) return;
-    try {
-      await ref.read(_repo).encerrar(d.id);
-      await _load();
-    } catch (e) {
-      if (!mounted) return;
-      FeedbackHelper.showError(context, friendlyError(e));
-    }
-  }
-
-  Future<void> _abrirDetalhe(Desafio d) async {
-    try {
-      final lb = await ref.read(_repo).leaderboard(d.id);
-      if (!mounted) return;
-      showFxHomeSheet<void>(
-        context,
-        builder: (ctx) {
-          final isDark = Theme.of(ctx).brightness == Brightness.dark;
-          final primary = Theme.of(ctx).colorScheme.primary;
-          return FxHomeSheetSurface(
-            isDark: isDark,
-            expand: true,
-            maxHeight:
-                MediaQuery.sizeOf(ctx).height *
-                FxHomeSheetChrome.expandHeightFactor,
-            child: Column(
-              children: [
-                FxHomeSheetHandle(isDark: isDark),
-                SizedBox(height: FxSettingsLayout.headerToGroup),
-                FxHomeSheetHeader(
-                  isDark: isDark,
-                  title: d.titulo,
-                  subtitle: desafioSubtitle(
-                    tipo: d.tipo,
-                    metaPontos: d.metaPontos,
-                    inicio: d.inicio,
-                    fim: d.fim,
-                  ),
-                  leading: Icon(
-                    Icons.emoji_events_outlined,
-                    color: primary,
-                    size: 18,
-                  ),
-                ),
-                SizedBox(height: FxSettingsLayout.headerToGroup),
-                Expanded(
-                  child: ListView(
-                    padding: const EdgeInsets.fromLTRB(
-                      FxSettingsLayout.pageInset,
-                      0,
-                      FxSettingsLayout.pageInset,
-                      24,
-                    ),
-                    children: [
-                      if (d.descricao != null && d.descricao!.trim().isNotEmpty)
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 16),
-                          child: Text(
-                            d.descricao!.trim(),
-                            style: FocuxHubTypography.bodyMuted(
-                              color: fxScreenMute(ctx),
-                            ),
-                          ),
-                        ),
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 16),
-                        child: TextButton(
-                          onPressed: () async {
-                            Navigator.of(ctx).pop();
-                            await _encerrar(d);
-                          },
-                          child: const Text('Encerrar desafio'),
-                        ),
-                      ),
-                      if (lb.isEmpty)
-                        Text(desafioLeaderboardEmpty())
-                      else
-                        FxSettingsGroup(
-                          header: 'Ranking',
-                          children: [
-                            for (var i = 0; i < lb.length; i++)
-                              FxSettingsTile(
-                                fxIcon: 'star',
-                                label: desafioLeaderboardName(lb[i].alunoNome),
-                                subtitle: '${i + 1}º lugar',
-                                value: desafioLeaderboardPoints(lb[i].pontos),
-                                numeric: true,
-                                showDivider: i != lb.length - 1,
-                                onTap: lb[i].alunoId <= 0
-                                    ? null
-                                    : () {
-                                        Navigator.of(ctx).pop();
-                                        context.push(
-                                          '/alunos/${lb[i].alunoId}',
-                                        );
-                                      },
-                              ),
-                          ],
-                        ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          );
-        },
-      );
-    } catch (e) {
-      if (!mounted) return;
-      FeedbackHelper.showError(context, friendlyError(e));
-    }
+  void _abrirDetalhe(Desafio d) {
+    context.push(desafioDetailPath(d.id), extra: d);
   }
 
   @override
@@ -456,7 +334,7 @@ class _DesafiosScreenState extends ConsumerState<DesafiosScreen> {
                       bottom: TokensStrip.s3,
                     ),
                     child: Text(
-                      'Toque para ver prazo e ranking.',
+                      'Toque para abrir prazo, meta e ranking.',
                       style: FocuxHubTypography.bodyMuted(
                         color: fxScreenMute(context),
                         fontWeight: FontWeight.w600,

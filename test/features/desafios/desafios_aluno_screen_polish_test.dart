@@ -14,7 +14,7 @@ void main() {
     expect(screen, contains("safePopOrGo(context, '/dashboard/aluno')"));
     expect(screen, contains('ListView.builder'));
     expect(screen, contains('FxSatelliteListTile'));
-    expect(screen, contains('participar'));
+    expect(screen, contains('desafioAlunoDetailPath'));
     expect(screen, contains('FeatureGate'));
     expect(screen, contains('comunidadeGrupos'));
     expect(screen, contains('FxEmptyState'));

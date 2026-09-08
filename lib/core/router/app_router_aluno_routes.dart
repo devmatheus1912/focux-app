@@ -8,7 +8,10 @@ import '../../features/dashboard/screens/perfil_aluno_editar_screen.dart';
 import '../../features/checkin/screens/meus_treinos_screen.dart';
 import '../../features/health/screens/health_dashboard_screen.dart';
 import '../../features/habitos/screens/habitos_aluno_screen.dart';
+import '../../features/desafios/data/desafio_repository.dart';
+import '../../features/desafios/screens/desafio_detail_screen.dart';
 import '../../features/desafios/screens/desafios_aluno_screen.dart';
+import 'app_router_redirect.dart';
 import '../../features/recorrencia/screens/recorrencia_aluno_screen.dart';
 import '../../features/grupos/screens/grupo_aulas_aluno_screen.dart';
 import '../../features/anamnese/screens/anamnese_aluno_screen.dart';
@@ -76,6 +79,22 @@ List<RouteBase> buildAlunoRoutes() {
         builder:
             (context, state) =>
                 const FxRouteChrome(child: DesafiosAlunoScreen()),
+      ),
+      GoRoute(
+        path: '/aluno/desafios/:id',
+        redirect:
+            (context, state) =>
+                intPathParam(state, 'id') == null ? '/aluno/desafios' : null,
+        builder: (context, state) {
+          final extra = state.extra;
+          return FxRouteChrome(
+            child: DesafioDetailScreen(
+              desafioId: intPathParam(state, 'id')!,
+              desafio: extra is Desafio ? extra : null,
+              forAluno: true,
+            ),
+          );
+        },
       ),
       GoRoute(
         path: '/aluno/recorrencia',

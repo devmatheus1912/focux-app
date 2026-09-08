@@ -30,6 +30,9 @@ void main() {
     expect(screen, contains('viewInsetsOf'));
     expect(screen, contains('FxContentWidthLimiter'));
     expect(screen, contains('alertaHubSubtitle'));
+    expect(screen, contains('alertaCheckinsMetricValue'));
+    expect(screen, contains('AlunoSegmentedChoice'));
+    expect(screen, contains('PopScope'));
     expect(screen, contains('/alunos/\${widget.alunoId}/chat'));
     expect(screen, contains("'/alunos/\${widget.alunoId}'"));
     expect(screen, contains('/financeiro?alunoId='));

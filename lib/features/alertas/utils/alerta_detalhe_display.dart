@@ -67,6 +67,18 @@ String alertaCheckinsLabel(int count) {
   return '$count em 30 dias';
 }
 
+String alertaCheckinsMetricValue(int count) => '$count';
+
+String alertaCheckinsMetricHint() => 'Em 30 dias';
+
+const alertaDetalheSecaoSituacao = 'situacao';
+const alertaDetalheSecaoMensagem = 'mensagem';
+
+const alertaDetalheSecoes = [
+  (value: alertaDetalheSecaoSituacao, label: 'Situação'),
+  (value: alertaDetalheSecaoMensagem, label: 'Mensagem'),
+];
+
 String alertaHubSubtitle({
   required String statusFinanceiro,
   String? freshness,

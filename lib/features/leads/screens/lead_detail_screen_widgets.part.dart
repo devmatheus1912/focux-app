@@ -8,6 +8,8 @@ class _LeadDetailContent extends StatelessWidget {
     required this.isDark,
     required this.freshnessLabel,
     required this.sticky,
+    required this.secao,
+    required this.onSecao,
     required this.onDefinirFollowUp,
     required this.onLigar,
     required this.onWhatsapp,
@@ -21,6 +23,8 @@ class _LeadDetailContent extends StatelessWidget {
   final bool isDark;
   final String? freshnessLabel;
   final LeadStickyAction sticky;
+  final String secao;
+  final ValueChanged<String> onSecao;
   final VoidCallback onDefinirFollowUp;
   final VoidCallback onLigar;
   final VoidCallback onWhatsapp;
@@ -36,7 +40,6 @@ class _LeadDetailContent extends StatelessWidget {
     final objetivo = lead.objetivo?.trim();
     final origem = lead.origem?.trim();
     final historico = interacoes.reversed.toList();
-    final visiveis = historico.take(3).toList();
     final danger = leadStatusDanger(lead.status);
     final followHint = [
       if (objetivo != null && objetivo.isNotEmpty) objetivo,
@@ -81,6 +84,14 @@ class _LeadDetailContent extends StatelessWidget {
         ),
         const SizedBox(height: TokensStrip.s2),
         OperationalMetricTile(
+          label: 'No funil',
+          value: leadDiasNoFunilValue(lead.criadoEm),
+          hint: leadDiasNoFunilHint(lead.criadoEm),
+          color: primary,
+          isDark: isDark,
+        ),
+        const SizedBox(height: TokensStrip.s2),
+        OperationalMetricTile(
           label: 'Origem',
           value: leadOrigemLabel(origem),
           hint: objetivo == null || objetivo.isEmpty ? 'Canal de entrada' : objetivo,
@@ -88,135 +99,120 @@ class _LeadDetailContent extends StatelessWidget {
           isDark: isDark,
         ),
         const SizedBox(height: TokensStrip.s4),
-        Wrap(
-          spacing: TokensStrip.s2,
-          runSpacing: TokensStrip.s2,
-          children: [
-            if (sticky != LeadStickyAction.followUp)
-              DashboardHomeActionChip(
-                label: 'Follow-up',
-                accent: primary,
-                isDark: isDark,
-                onPressed: onDefinirFollowUp,
-              ),
-            if (temTelefone) ...[
-              DashboardHomeActionChip(
-                label: 'Ligar',
-                accent: primary,
-                isDark: isDark,
-                onPressed: onLigar,
-              ),
-              if (sticky != LeadStickyAction.whatsapp)
-                DashboardHomeActionChip(
-                  label: 'WhatsApp',
-                  accent: primary,
-                  isDark: isDark,
-                  onPressed: onWhatsapp,
-                ),
-            ],
-          ],
+        AlunoSegmentedChoice(
+          options: leadDetailSecoes,
+          selected: secao,
+          isDark: isDark,
+          onSelect: onSecao,
         ),
-        if (observacoes != null && observacoes.isNotEmpty) ...[
-          const SizedBox(height: TokensStrip.s4),
-          Text(
-            observacoes,
-            style: FocuxHubTypography.bodyMuted(
-              color: fxScreenMute(context),
-              fontWeight: FontWeight.w600,
-            ),
+        const SizedBox(height: TokensStrip.s4),
+        if (secao == leadDetailSecaoInteracoes)
+          ..._interacoesSection(context, historico)
+        else
+          ..._resumoSection(
+            context,
+            primary,
+            temTelefone: temTelefone,
+            observacoes: observacoes,
           ),
-        ],
-        const SizedBox(height: TokensStrip.s5),
-        DashboardSectionHeader(
-          title: 'Interações',
-          actionLabel: 'Nova',
-          onAction: onNovaInteracao,
-        ),
-        const SizedBox(height: TokensStrip.s3),
-        if (loadingInteracoes)
-          const SkeletonList(count: 3)
-        else if (interacoes.isEmpty)
-          FxEmptyState(
-            icon: 'chat',
-            title: 'Nenhuma interação registrada',
-            subtitle:
-                'Registre ligações, mensagens e visitas para não perder o histórico.',
-            action: FxEmptyAction(
-              label: 'Nova interação',
-              onTap: onNovaInteracao,
-            ),
-          )
-        else ...[
-          for (final item in visiveis)
-            FxSatelliteListTile(
-              title: leadInteracaoTipoLabel(item.tipo),
-              subtitle: Text(item.descricao),
-              trailing: Text(
-                leadFollowUpValue(item.dataInteracao),
-                style: FocuxHubTypography.bodyMuted(
-                  color: fxScreenMute(context),
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          if (historico.length > visiveis.length)
-            Align(
-              alignment: Alignment.centerLeft,
-              child: DashboardHomeActionChip(
-                label: 'Ver todas · ${historico.length}',
-                accent: primary,
-                isDark: isDark,
-                onPressed: () => _abrirHistorico(context, historico),
-              ),
-            ),
-        ],
-        const SizedBox(height: TokensStrip.s5),
-        Align(
-          alignment: Alignment.centerLeft,
-          child: TextButton(
-            onPressed: onArquivar,
-            style: TextButton.styleFrom(foregroundColor: EagleTokens.bad),
-            child: const Text('Arquivar lead'),
-          ),
-        ),
       ],
     );
   }
 
-  Future<void> _abrirHistorico(
+  List<Widget> _resumoSection(
+    BuildContext context,
+    Color primary, {
+    required bool temTelefone,
+    required String? observacoes,
+  }) {
+    return [
+      Wrap(
+        spacing: TokensStrip.s2,
+        runSpacing: TokensStrip.s2,
+        children: [
+          if (sticky != LeadStickyAction.followUp)
+            DashboardHomeActionChip(
+              label: 'Follow-up',
+              accent: primary,
+              isDark: isDark,
+              onPressed: onDefinirFollowUp,
+            ),
+          if (temTelefone) ...[
+            DashboardHomeActionChip(
+              label: 'Ligar',
+              accent: primary,
+              isDark: isDark,
+              onPressed: onLigar,
+            ),
+            if (sticky != LeadStickyAction.whatsapp)
+              DashboardHomeActionChip(
+                label: 'WhatsApp',
+                accent: primary,
+                isDark: isDark,
+                onPressed: onWhatsapp,
+              ),
+          ],
+        ],
+      ),
+      if (observacoes != null && observacoes.isNotEmpty) ...[
+        const SizedBox(height: TokensStrip.s4),
+        Text(
+          observacoes,
+          style: FocuxHubTypography.bodyMuted(
+            color: fxScreenMute(context),
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
+      const SizedBox(height: TokensStrip.s5),
+      Align(
+        alignment: Alignment.centerLeft,
+        child: TextButton(
+          onPressed: onArquivar,
+          style: TextButton.styleFrom(foregroundColor: EagleTokens.bad),
+          child: const Text('Arquivar lead'),
+        ),
+      ),
+    ];
+  }
+
+  List<Widget> _interacoesSection(
     BuildContext context,
     List<LeadInteracao> historico,
-  ) async {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    await showFxHomeSheet<void>(
-      context,
-      builder: (ctx) {
-        return FxHomeSheetSurface(
-          isDark: isDark,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              FxHomeSheetHandle(isDark: isDark),
-              const SizedBox(height: TokensStrip.s4),
-              FxHomeSheetHeader(
-                isDark: isDark,
-                title: 'Interações',
-                subtitle: '${historico.length} registros',
-                leading: const Icon(Icons.forum_outlined, size: 18),
-              ),
-              const SizedBox(height: TokensStrip.s3),
-              for (final item in historico)
-                FxSettingsTile(
-                  fxIcon: leadInteracaoFxIcon(item.tipo),
-                  label: leadInteracaoTipoLabel(item.tipo),
-                  subtitle: item.descricao,
-                  value: leadFollowUpValue(item.dataInteracao),
-                ),
-            ],
+  ) {
+    return [
+      DashboardSectionHeader(
+        title: 'Interações',
+        actionLabel: 'Nova',
+        onAction: onNovaInteracao,
+      ),
+      const SizedBox(height: TokensStrip.s3),
+      if (loadingInteracoes)
+        const SkeletonList(count: 3)
+      else if (interacoes.isEmpty)
+        FxEmptyState(
+          icon: 'chat',
+          title: 'Nenhuma interação registrada',
+          subtitle:
+              'Registre ligações, mensagens e visitas para não perder o histórico.',
+          action: FxEmptyAction(
+            label: 'Nova interação',
+            onTap: onNovaInteracao,
           ),
-        );
-      },
-    );
+        )
+      else
+        for (final item in historico)
+          FxSatelliteListTile(
+            title: leadInteracaoTipoLabel(item.tipo),
+            subtitle: Text(item.descricao),
+            trailing: Text(
+              leadFollowUpValue(item.dataInteracao),
+              style: FocuxHubTypography.bodyMuted(
+                color: fxScreenMute(context),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+    ];
   }
 }

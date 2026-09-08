@@ -13,6 +13,9 @@ void main() {
     expect(alertaCheckinsLabel(0), 'Nenhum em 30 dias');
     expect(alertaCheckinsLabel(1), '1 em 30 dias');
     expect(alertaCheckinsLabel(8), '8 em 30 dias');
+    expect(alertaCheckinsMetricValue(8), '8');
+    expect(alertaCheckinsMetricHint(), 'Em 30 dias');
+    expect(alertaDetalheSecoes, hasLength(2));
   });
 
   test('alertaStatusFinanceiroLabel humaniza códigos', () {

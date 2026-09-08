@@ -11,6 +11,8 @@ void main() {
       'metaPontos': 80,
       'inicio': '2026-09-07',
       'fim': '2026-10-07',
+      'grupoAulaId': 8,
+      'ativo': true,
     });
     expect(desafio.id, 3);
     expect(desafio.titulo, '30 dias de água');
@@ -19,6 +21,8 @@ void main() {
     expect(desafio.metaPontos, 80);
     expect(desafio.inicio, DateTime(2026, 9, 7));
     expect(desafio.fim, DateTime(2026, 10, 7));
+    expect(desafio.grupoAulaId, 8);
+    expect(desafio.ativo, isTrue);
   });
 
   test('leaderboard parseia aluno sem Map cru', () {
