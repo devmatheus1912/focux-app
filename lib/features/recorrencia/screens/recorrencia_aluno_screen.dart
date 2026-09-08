@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/router/safe_navigation.dart';
-import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
@@ -145,6 +144,8 @@ class _RecorrenciaAlunoScreenState
     }
   }
 
+  void _leave() => safePopOrGo(context, '/dashboard/aluno');
+
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
@@ -159,11 +160,18 @@ class _RecorrenciaAlunoScreenState
 
     return fxScreenA11yScope(
       label: 'Minha assinatura',
-      child: FxShellScaffold(
+      child: PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, _) {
+          if (didPop) return;
+          _leave();
+        },
+        child: FxShellScaffold(
         useMesh: true,
         appBar: FxShellAppBar(
           title: 'Assinatura',
-          onBack: () => safePopOrGo(context, '/dashboard/aluno'),
+          subtitle: freshnessLabel,
+          onBack: _leave,
           actions: [
             FxHelpIconButton(
               tooltip: 'Como usar sua assinatura',
@@ -173,7 +181,10 @@ class _RecorrenciaAlunoScreenState
         ),
         body:
             _loading
-                ? const SkeletonList(count: 4)
+                ? const Padding(
+                  padding: EdgeInsets.all(FxSettingsLayout.pageInset),
+                  child: SkeletonList(count: 4),
+                )
                 : _erro != null
                 ? FxErrorState(
                   chromeOnDark: isDark,
@@ -265,7 +276,7 @@ class _RecorrenciaAlunoScreenState
                                 const SizedBox(height: TokensStrip.s4),
                                 OperationalMetricTile(
                                   label: 'Valor mensal',
-                                  value: assinatura.valor.format(),
+                                  value: recorrenciaValorLabel(assinatura.valor),
                                   hint: 'Mercado Pago',
                                   color: primary,
                                   isDark: isDark,
@@ -276,12 +287,25 @@ class _RecorrenciaAlunoScreenState
                                   value: recorrenciaStatusLabel(
                                     assinatura.status,
                                   ),
-                                  hint:
-                                      assinatura.proximaCobranca == null
-                                          ? 'Sem data da próxima cobrança'
-                                          : 'Próxima em ${assinatura.proximaCobranca}',
+                                  hint: recorrenciaProximaHint(
+                                    assinatura.proximaCobranca,
+                                  ),
                                   color: primary,
                                   isDark: isDark,
+                                ),
+                                const SizedBox(height: TokensStrip.s3),
+                                OperationalMetricTile(
+                                  label: 'Próxima',
+                                  value: recorrenciaProximaValue(
+                                    assinatura.proximaCobranca,
+                                  ),
+                                  hint: 'Ciclo mensal',
+                                  color: primary,
+                                  isDark: isDark,
+                                  emphasis:
+                                      assinatura.proximaCobranca == null
+                                          ? OperationalMetricEmphasis.muted
+                                          : OperationalMetricEmphasis.normal,
                                 ),
                                 const SizedBox(height: TokensStrip.s4),
                                 Wrap(
@@ -306,16 +330,6 @@ class _RecorrenciaAlunoScreenState
                                     ),
                                   ],
                                 ),
-                                if (assinatura.proximaCobranca != null) ...[
-                                  const SizedBox(height: TokensStrip.s3),
-                                  Text(
-                                    'A cobrança seguinte entra em ${assinatura.proximaCobranca}.',
-                                    style: FocuxHubTypography.bodyMuted(
-                                      color: fxScreenMute(context),
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ],
                               ],
                             ],
                           ),
@@ -355,6 +369,7 @@ class _RecorrenciaAlunoScreenState
                       ),
                   ],
                 ),
+        ),
       ),
     );
   }

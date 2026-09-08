@@ -17,6 +17,9 @@ void main() {
     expect(screen, contains('FxLiquidPrimaryButton'));
     expect(screen, contains('OperationalMetricTile'));
     expect(screen, contains('recorrenciaAlunoStickyLabel'));
+    expect(screen, contains('PopScope'));
+    expect(screen, contains('recorrenciaValorLabel'));
+    expect(screen, contains('recorrenciaProximaValue'));
     expect(screen, contains('pausarMinha'));
     expect(screen, contains('retomarMinha'));
     expect(screen, contains('showFxConfirmSheet'));

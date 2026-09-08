@@ -28,6 +28,20 @@ void main() {
       ),
       '3/4 séries · Feito',
     );
+    expect(
+      historicoExercicioSubtitle(
+        seriesFeitas: 3,
+        series: 4,
+        concluido: true,
+        carga: '80 kg',
+        rpe: 8,
+        dor: true,
+      ),
+      '3/4 séries · 80 kg · RPE 8 · Dor · Feito',
+    );
+    expect(historicoRecordesCount(prs: 2, cargas: 1), 3);
+    expect(historicoRecordesEmpty(), 'Nenhum recorde nesta sessão');
+    expect(historicoDetalheSecoes, hasLength(2));
     expect(historicoPrMetric(0), '0');
     expect(historicoPrHint(0), 'Sem recorde nesta sessão');
     expect(historicoPrHint(2), '2 recordes');

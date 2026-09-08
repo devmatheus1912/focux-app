@@ -152,3 +152,44 @@ String desafioStickyAlunoPath(String tipo) =>
         : '/aluno/habitos';
 
 String desafioLugarLabel(int index) => '${index + 1}º lugar';
+
+const desafioSecaoCampanha = 'campanha';
+const desafioSecaoRanking = 'ranking';
+
+const desafioDetalheSecoes = <({String value, String label})>[
+  (value: desafioSecaoCampanha, label: 'Campanha'),
+  (value: desafioSecaoRanking, label: 'Ranking'),
+];
+
+int? desafioMeuIndex(Iterable<int> alunoIds, int? meId) {
+  if (meId == null || meId <= 0) return null;
+  var i = 0;
+  for (final id in alunoIds) {
+    if (id == meId) return i;
+    i++;
+  }
+  return null;
+}
+
+String desafioMeuLugarValue(int? index) {
+  if (index == null) return '—';
+  return '${index + 1}º';
+}
+
+String desafioMeuLugarHint({
+  required int? index,
+  required int pontos,
+  required int metaPontos,
+}) {
+  if (index == null) return 'Pontue para entrar no ranking';
+  if (pontos >= metaPontos) return 'Meta atingida';
+  return '$pontos de $metaPontos pts';
+}
+
+String desafioLeaderboardTitle({
+  required String? nome,
+  required bool isSelf,
+}) => isSelf ? 'Você' : desafioLeaderboardName(nome);
+
+String desafioCampanhaEmpty() =>
+    'Sem descrição. Prazo e meta continuam nos números acima.';

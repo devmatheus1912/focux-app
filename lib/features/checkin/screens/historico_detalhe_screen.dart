@@ -20,9 +20,11 @@ import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/operational_metric_tile.dart';
 import '../../../core/widgets/skeleton_loader.dart';
+import '../../alunos/widgets/aluno_form_choices.dart';
 import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../data/checkin_repository.dart';
 import '../providers/checkin_provider.dart';
+import '../utils/checkin_execucao_display.dart';
 import '../utils/historico_display.dart';
 
 class HistoricoDetalheScreen extends ConsumerStatefulWidget {
@@ -41,6 +43,7 @@ class _HistoricoDetalheScreenState
   var _loading = true;
   String? _erro;
   DateTime? _fetchedAt;
+  var _secao = historicoSecaoExercicios;
 
   @override
   void initState() {
@@ -85,6 +88,7 @@ class _HistoricoDetalheScreenState
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
     final execucao = _execucao;
+    final freshness = FxHubFreshness.fromFetchedAt(_fetchedAt);
 
     return fxScreenA11yScope(
       label: execucao?.treinoNome ?? 'Treino',
@@ -95,62 +99,65 @@ class _HistoricoDetalheScreenState
           _leave();
         },
         child: FxShellScaffold(
-        useMesh: true,
-        appBar: FxShellAppBar(
-          title: 'Treino',
-          onBack: _leave,
-          actions: [
-            FxHelpIconButton(
-              tooltip: 'Como ler esta sessão',
-              onTap: () => showFxHelpSheet(
-                context,
-                title: 'Sessão do histórico',
-                subtitle: 'O que aconteceu neste treino e o próximo passo.',
-                tips: const [
-                  FxHelpTip(
-                    'Continuar',
-                    'Se ficou pela metade, o botão retoma a execução.',
-                    icon: 'circle-check',
-                  ),
-                  FxHelpTip(
-                    'De novo',
-                    'Sessão concluída abre um treino novo com o mesmo plano.',
-                    icon: 'dumbbell',
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-        body:
-            _loading && execucao == null
-                ? const Padding(
-                  padding: EdgeInsets.all(FxSettingsLayout.pageInset),
-                  child: SkeletonList(count: 4),
-                )
-                : _erro != null && execucao == null
-                ? FxErrorState(
-                  chromeOnDark: isDark,
-                  primary: primary,
-                  title: FocuxMicrocopy.naoFoiPossivelCarregar,
-                  message: _erro!,
-                  onRetry: _carregar,
-                )
-                : execucao == null
-                ? FxEmptyState(
-                  icon: 'dumbbell',
-                  title: 'Treino não encontrado',
-                  subtitle: 'Volte ao histórico e escolha outro.',
-                  action: FxEmptyAction(label: 'Voltar', onTap: _leave),
-                )
-                : _DetalheBody(
-                  execucao: execucao,
-                  freshness: FxHubFreshness.fromFetchedAt(_fetchedAt),
-                  onRefresh: _carregar,
-                  onAct: _agir,
-                  onLeave: _leave,
+          useMesh: true,
+          appBar: FxShellAppBar(
+            title: 'Treino',
+            subtitle: freshness,
+            onBack: _leave,
+            actions: [
+              FxHelpIconButton(
+                tooltip: 'Como ler esta sessão',
+                onTap: () => showFxHelpSheet(
+                  context,
+                  title: 'Sessão do histórico',
+                  subtitle: 'O que aconteceu neste treino e o próximo passo.',
+                  tips: const [
+                    FxHelpTip(
+                      'Continuar',
+                      'Se ficou pela metade, o botão retoma a execução.',
+                      icon: 'circle-check',
+                    ),
+                    FxHelpTip(
+                      'De novo',
+                      'Sessão concluída abre um treino novo com o mesmo plano.',
+                      icon: 'dumbbell',
+                    ),
+                  ],
                 ),
-      ),
+              ),
+            ],
+          ),
+          body:
+              _loading && execucao == null
+                  ? const Padding(
+                    padding: EdgeInsets.all(FxSettingsLayout.pageInset),
+                    child: SkeletonList(count: 4),
+                  )
+                  : _erro != null && execucao == null
+                  ? FxErrorState(
+                    chromeOnDark: isDark,
+                    primary: primary,
+                    title: FocuxMicrocopy.naoFoiPossivelCarregar,
+                    message: _erro!,
+                    onRetry: _carregar,
+                  )
+                  : execucao == null
+                  ? FxEmptyState(
+                    icon: 'dumbbell',
+                    title: 'Treino não encontrado',
+                    subtitle: 'Volte ao histórico e escolha outro.',
+                    action: FxEmptyAction(label: 'Voltar', onTap: _leave),
+                  )
+                  : _DetalheBody(
+                    execucao: execucao,
+                    freshness: freshness,
+                    secao: _secao,
+                    onSecao: (value) => setState(() => _secao = value),
+                    onRefresh: _carregar,
+                    onAct: _agir,
+                    onLeave: _leave,
+                  ),
+        ),
       ),
     );
   }
@@ -160,6 +167,8 @@ class _DetalheBody extends StatelessWidget {
   const _DetalheBody({
     required this.execucao,
     required this.freshness,
+    required this.secao,
+    required this.onSecao,
     required this.onRefresh,
     required this.onAct,
     required this.onLeave,
@@ -167,6 +176,8 @@ class _DetalheBody extends StatelessWidget {
 
   final ExecucaoTreino execucao;
   final String? freshness;
+  final String secao;
+  final ValueChanged<String> onSecao;
   final Future<void> Function() onRefresh;
   final VoidCallback onAct;
   final VoidCallback onLeave;
@@ -185,6 +196,8 @@ class _DetalheBody extends StatelessWidget {
       execucao.concluidoEm,
     );
     final prs = execucao.evolucoesPerformance;
+    final cargas = execucao.evolucoesCarga;
+    final recordes = historicoRecordesCount(prs: prs.length, cargas: cargas.length);
 
     return Column(
       children: [
@@ -259,8 +272,8 @@ class _DetalheBody extends StatelessWidget {
                       Expanded(
                         child: OperationalMetricTile(
                           label: 'Recordes',
-                          value: historicoPrMetric(prs.length),
-                          hint: historicoPrHint(prs.length),
+                          value: historicoPrMetric(recordes),
+                          hint: historicoPrHint(recordes),
                           color: primary,
                           isDark: isDark,
                         ),
@@ -287,7 +300,16 @@ class _DetalheBody extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: TokensStrip.s4),
-                  if (execucao.exercicios.isEmpty)
+                  AlunoSegmentedChoice(
+                    options: historicoDetalheSecoes,
+                    selected: secao,
+                    isDark: isDark,
+                    onSelect: onSecao,
+                  ),
+                  const SizedBox(height: TokensStrip.s4),
+                  if (secao == historicoSecaoRecordes)
+                    ..._recordes(prs, cargas)
+                  else if (execucao.exercicios.isEmpty)
                     const FxEmptyState(
                       icon: 'dumbbell',
                       title: 'Sem exercícios nesta execução',
@@ -302,6 +324,10 @@ class _DetalheBody extends StatelessWidget {
                             seriesFeitas: item.seriesFeitas,
                             series: item.series,
                             concluido: item.concluido,
+                            carga: _carga(item),
+                            rpe: _rpe(item),
+                            dor: item.dor ||
+                                item.seriesDetalhes.any((serie) => serie.dor),
                           ),
                         ),
                         leading: FxIcon(
@@ -314,23 +340,6 @@ class _DetalheBody extends StatelessWidget {
                         ),
                         accent: item.concluido ? null : EagleTokens.warn,
                       ),
-                  if (prs.isNotEmpty) ...[
-                    const SizedBox(height: TokensStrip.s3),
-                    for (final pr in prs)
-                      FxSatelliteListTile(
-                        title: pr.exercicioNome,
-                        subtitle: Text(
-                          pr.mensagem.trim().isEmpty
-                              ? historicoPrHint(1)
-                              : pr.mensagem.trim(),
-                        ),
-                        leading: const FxIcon(
-                          name: 'star',
-                          size: 22,
-                          color: EagleTokens.good,
-                        ),
-                      ),
-                  ],
                 ],
               ),
             ),
@@ -353,5 +362,63 @@ class _DetalheBody extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  List<Widget> _recordes(
+    List<EvolucaoPerformance> prs,
+    List<EvolucaoCarga> cargas,
+  ) {
+    if (prs.isEmpty && cargas.isEmpty) {
+      return [
+        FxEmptyState(
+          icon: 'star',
+          title: historicoRecordesEmpty(),
+          subtitle: 'Quando bater carga ou volume, o recorde aparece aqui.',
+        ),
+      ];
+    }
+    return [
+      for (final carga in cargas)
+        FxSatelliteListTile(
+          title: carga.exercicioNome,
+          subtitle: Text(
+            carga.mensagem.trim().isEmpty
+                ? (checkinCargaLabel(carga.cargaAtualKg) ?? historicoPrHint(1))
+                : carga.mensagem.trim(),
+          ),
+          leading: const FxIcon(
+            name: 'dumbbell',
+            size: 22,
+            color: EagleTokens.good,
+          ),
+        ),
+      for (final pr in prs)
+        FxSatelliteListTile(
+          title: pr.exercicioNome,
+          subtitle: Text(
+            pr.mensagem.trim().isEmpty
+                ? historicoPrHint(1)
+                : pr.mensagem.trim(),
+          ),
+          leading: const FxIcon(
+            name: 'star',
+            size: 22,
+            color: EagleTokens.good,
+          ),
+        ),
+    ];
+  }
+
+  String? _carga(ExecucaoExercicio item) {
+    final fromItem = checkinCargaLabel(item.cargaKg);
+    if (fromItem != null) return fromItem;
+    if (item.seriesDetalhes.isEmpty) return null;
+    return checkinCargaLabel(item.seriesDetalhes.last.cargaKg);
+  }
+
+  int? _rpe(ExecucaoExercicio item) {
+    if (item.rpe != null) return item.rpe;
+    if (item.seriesDetalhes.isEmpty) return null;
+    return item.seriesDetalhes.last.rpe;
   }
 }

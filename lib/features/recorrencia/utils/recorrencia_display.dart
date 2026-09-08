@@ -126,3 +126,15 @@ String recorrenciaRetomarConfirmTitle() => 'Retomar a cobrança automática?';
 
 String recorrenciaRetomarConfirmMessage() =>
     'O Mercado Pago volta a cobrar todo mês.';
+
+String recorrenciaProximaValue(String? proximaCobranca) {
+  final prox = proximaCobranca?.trim();
+  if (prox == null || prox.isEmpty) return '—';
+  return prox;
+}
+
+String recorrenciaProximaHint(String? proximaCobranca) {
+  final prox = proximaCobranca?.trim();
+  if (prox == null || prox.isEmpty) return 'Sem data da próxima cobrança';
+  return 'Cobrança automática';
+}
