@@ -51,6 +51,8 @@ void main() {
     expect(screen, contains('Prontidão'));
     expect(screen, contains('Como calculamos'));
     expect(screen, contains('saudeAtualizarLabel'));
+    expect(screen, contains('AlwaysScrollableScrollPhysics'));
+    expect(screen, contains('homeHelpOpened'));
     expect(screen, contains('showFxConfirmSheet'));
     expect(screen, contains('FxConversionTextLink'));
     expect(screen, isNot(contains('class _MetricCard')));

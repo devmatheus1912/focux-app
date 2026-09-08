@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/router/safe_navigation.dart';
-import '../../../core/theme/fx_settings_layout.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/clipboard_sensitive.dart';
@@ -15,10 +15,9 @@ import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
-import '../../../core/widgets/fx_hub_header.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
-import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/fx_strip_card.dart';
 import '../../../core/widgets/operational_metric_tile.dart';
 import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../../../core/widgets/skeleton_loader.dart';
@@ -57,20 +56,18 @@ class _ReferralScreenState extends ConsumerState<ReferralScreen> {
     });
     try {
       final info = await ref.read(referralRepositoryProvider).getInfo();
-      if (mounted) {
-        setState(() {
-          _info = info;
-          _loading = false;
-          _fetchedAt = DateTime.now();
-        });
-      }
+      if (!mounted) return;
+      setState(() {
+        _info = info;
+        _loading = false;
+        _fetchedAt = DateTime.now();
+      });
     } catch (e) {
-      if (mounted) {
-        setState(() {
-          _loading = false;
-          _erro = friendlyError(e);
-        });
-      }
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+        _erro = friendlyError(e);
+      });
     }
   }
 
@@ -82,14 +79,13 @@ class _ReferralScreenState extends ConsumerState<ReferralScreen> {
       codigo: info.codigo,
       link: info.linkCompartilhamento,
     );
-    await AnalyticsService.instance.track('referral_link_shared');
+    await AnalyticsService.instance.track(ProductEvents.referralLinkShared);
     await copySensitiveToClipboard(text);
-    if (mounted) {
-      FeedbackHelper.showSuccess(
-        context,
-        'Convite copiado. Some da área de transferência em 1 min.',
-      );
-    }
+    if (!mounted) return;
+    FeedbackHelper.showSuccess(
+      context,
+      'Convite copiado. Some da área de transferência em 1 min.',
+    );
   }
 
   Future<void> _copiarLink() async {
@@ -97,26 +93,27 @@ class _ReferralScreenState extends ConsumerState<ReferralScreen> {
     if (!referralTemLink(link)) return;
     HapticFeedback.selectionClick();
     await copySensitiveToClipboard(link.trim());
-    if (mounted) {
-      FeedbackHelper.showSuccess(
-        context,
-        'Link copiado. Some da área de transferência em 1 min.',
-      );
-    }
+    if (!mounted) return;
+    FeedbackHelper.showSuccess(
+      context,
+      'Link copiado. Some da área de transferência em 1 min.',
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
-    final freshness = FxHubFreshness.fromFetchedAt(_fetchedAt);
     return fxScreenA11yScope(
       label: 'Indique e ganhe',
       child: FxShellScaffold(
         useMesh: true,
+        constrainWidth: false,
         appBar: FxShellAppBar(
           title: 'Indique e ganhe',
-          subtitle: referralHubSubtitle(freshness),
+          subtitle: referralHubSubtitle(
+            FxHubFreshness.fromFetchedAt(_fetchedAt),
+          ),
           onBack: () => safePopOrGo(context, '/perfil'),
           actions: [
             FxHelpIconButton(
@@ -125,149 +122,126 @@ class _ReferralScreenState extends ConsumerState<ReferralScreen> {
             ),
           ],
         ),
-        body:
-            _loading
-                ? const Padding(
-                  padding: EdgeInsets.all(FxSettingsLayout.pageInset),
-                  child: SkeletonList(count: 4),
-                )
-                : _erro != null
-                ? FxErrorState(
-                  chromeOnDark: chrome.isDark,
-                  primary: primary,
-                  message: _erro!,
-                  onRetry: _load,
-                  title: 'Não conseguimos carregar a indicação',
-                )
-                : FxContentWidthLimiter(
-                  child: _buildBody(
-                    isDark: chrome.isDark,
-                    primary: primary,
-                    freshness: freshness,
+        body: _loading
+            ? const SkeletonList(count: 4)
+            : _erro != null
+            ? FxErrorState(
+              chromeOnDark: chrome.isDark,
+              primary: primary,
+              message: _erro!,
+              onRetry: _load,
+              title: 'Não conseguimos carregar a indicação',
+            )
+            : RefreshIndicator(
+              color: primary,
+              onRefresh: _load,
+              child: _info == null ||
+                      referralCodigoLabel(_info!.codigo) == '—'
+                  ? ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    children: [
+                      const SizedBox(height: 48),
+                      FxEmptyState(
+                        icon: 'users',
+                        title: 'Código ainda não disponível',
+                        subtitle:
+                            'Puxe para atualizar. O servidor cria o código no primeiro acesso.',
+                        action: FxEmptyAction(
+                          label: 'Tentar de novo',
+                          onTap: _load,
+                        ),
+                      ),
+                    ],
+                  )
+                  : FxContentWidthLimiter(
+                    child: _ReferralBody(
+                      info: _info!,
+                      isDark: chrome.isDark,
+                      onShare: _share,
+                      onCopyLink: _copiarLink,
+                    ),
                   ),
-                ),
+            ),
       ),
     );
   }
+}
 
-  Widget _buildBody({
-    required bool isDark,
-    required Color primary,
-    required String? freshness,
-  }) {
-    final info = _info;
-    if (info == null || referralCodigoLabel(info.codigo) == '—') {
-      return Column(
-        children: [
-          Expanded(
-            child: RefreshIndicator(
-              onRefresh: _load,
-              child: ListView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.fromLTRB(
-                  FxSettingsLayout.pageInset,
-                  TokensStrip.s4,
-                  FxSettingsLayout.pageInset,
-                  TokensStrip.s4,
-                ),
-                children: [
-                  FxHubHeader(
-                    title: 'Seu convite',
-                    subtitle: referralHubSubtitle(freshness),
-                  ),
-                  const SizedBox(height: TokensStrip.s4),
-                  FxEmptyState(
-                    icon: 'users',
-                    title: 'Código ainda não disponível',
-                    subtitle:
-                        'Puxe para atualizar. O servidor cria o código no primeiro acesso.',
-                    action: FxEmptyAction(
-                      label: 'Tentar de novo',
-                      onTap: _load,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          SafeArea(
-            top: false,
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(
-                FxSettingsLayout.pageInset,
-                TokensStrip.s2,
-                FxSettingsLayout.pageInset,
-                TokensStrip.s3 + MediaQuery.viewInsetsOf(context).bottom,
-              ),
-              child: FxLiquidPrimaryButton(
-                label: 'Tentar de novo',
-                onPressed: _load,
-              ),
-            ),
-          ),
-        ],
-      );
-    }
-    return Column(
+class _ReferralBody extends StatelessWidget {
+  const _ReferralBody({
+    required this.info,
+    required this.isDark,
+    required this.onShare,
+    required this.onCopyLink,
+  });
+
+  final ReferralInfo info;
+  final bool isDark;
+  final VoidCallback onShare;
+  final VoidCallback onCopyLink;
+
+  @override
+  Widget build(BuildContext context) {
+    final chrome = ShellChrome.forDark(isDark);
+    final primary = Theme.of(context).colorScheme.primary;
+    final codigo = referralCodigoLabel(info.codigo);
+    return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+      padding: const EdgeInsets.all(TokensStrip.s4),
       children: [
-        Expanded(
-          child: RefreshIndicator(
-            onRefresh: _load,
-            child: ListView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.fromLTRB(
-                FxSettingsLayout.pageInset,
-                TokensStrip.s4,
-                FxSettingsLayout.pageInset,
-                TokensStrip.s4,
+        FxStripCard(
+          emphasize: true,
+          semanticsLabel: 'Código $codigo',
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Seu código', style: FocuxHubTypography.chip(chrome.mute)),
+              const SizedBox(height: 6),
+              Text(
+                codigo,
+                style: FocuxHubTypography.kpi(
+                  color: chrome.ink,
+                  fontSize: FocuxHubTypography.metricLg,
+                ),
               ),
-              children: [
-                FxHubHeader(
-                  title: referralCodigoLabel(info.codigo),
-                  subtitle: referralHeaderSubtitle(
-                    usos: info.usosTotais,
-                    freshness: freshness,
+              const SizedBox(height: 6),
+              Text(
+                '30 dias extras no plano de quem indicar',
+                style: FocuxHubTypography.body(
+                  color: chrome.ink,
+                ).copyWith(fontWeight: FontWeight.w700),
+              ),
+              const SizedBox(height: TokensStrip.s3),
+              Wrap(
+                spacing: TokensStrip.s2,
+                runSpacing: TokensStrip.s2,
+                children: [
+                  DashboardHomeActionChip(
+                    label: 'Copiar convite',
+                    accent: primary,
+                    isDark: isDark,
+                    onPressed: onShare,
                   ),
-                ),
-                const SizedBox(height: TokensStrip.s4),
-                OperationalMetricTile(
-                  label: 'Conversões',
-                  value: '${info.usosTotais}',
-                  hint: referralUsosLabel(info.usosTotais),
-                  color: primary,
-                  isDark: isDark,
-                ),
-                const SizedBox(height: TokensStrip.s4),
-                Wrap(
-                  spacing: TokensStrip.s2,
-                  runSpacing: TokensStrip.s2,
-                  children: [
+                  if (referralTemLink(info.linkCompartilhamento))
                     DashboardHomeActionChip(
                       label: 'Só o link',
                       accent: primary,
                       isDark: isDark,
-                      onPressed: _copiarLink,
+                      onPressed: onCopyLink,
                     ),
-                  ],
-                ),
-              ],
-            ),
+                ],
+              ),
+            ],
           ),
         ),
-        SafeArea(
-          top: false,
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(
-              FxSettingsLayout.pageInset,
-              TokensStrip.s2,
-              FxSettingsLayout.pageInset,
-              TokensStrip.s3 + MediaQuery.viewInsetsOf(context).bottom,
-            ),
-            child: FxLiquidPrimaryButton(
-              label: 'Copiar convite',
-              onPressed: _share,
-            ),
-          ),
+        const SizedBox(height: TokensStrip.s4),
+        OperationalMetricTile(
+          label: 'Conversões',
+          value: '${info.usosTotais}',
+          hint: referralUsosLabel(info.usosTotais),
+          color: primary,
+          isDark: isDark,
         ),
       ],
     );

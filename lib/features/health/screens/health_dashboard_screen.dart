@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import '../../../core/analytics/analytics_service.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/brand/focux_microcopy.dart';
 import '../../../core/health/health_service.dart';
@@ -169,8 +171,12 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
           actions: [
             FxHelpIconButton(
               tooltip: 'Como usar Saúde',
-              onTap:
-                  () => showFxHelpSheet(
+              onTap: () {
+                AnalyticsService.instance.track(
+                  ProductEvents.homeHelpOpened,
+                  props: {'surface': 'saude'},
+                );
+                showFxHelpSheet(
                     context,
                     title: 'Saúde',
                     subtitle: 'Prontidão do dia a partir do wearable.',
@@ -186,7 +192,8 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
                         'Revogue o acesso no fim da tela.',
                       ),
                     ],
-                  ),
+                );
+              },
             ),
           ],
         ),
@@ -215,12 +222,21 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
   }
 
   Widget _buildAuthPrompt() {
-    return FxEmptyState(
-      icon: 'spark',
-      title: 'Conecte seu Apple Health ou Google Fit',
-      subtitle:
-          'Sincronize passos, frequência cardíaca, calorias e sono para acompanhar sua saúde.',
-      action: FxEmptyAction(label: 'Conectar', onTap: _requestAccess),
+    return RefreshIndicator(
+      onRefresh: _checkAuth,
+      child: ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        children: [
+          const SizedBox(height: 48),
+          FxEmptyState(
+            icon: 'spark',
+            title: 'Conecte seu Apple Health ou Google Fit',
+            subtitle:
+                'Sincronize passos, frequência cardíaca, calorias e sono para acompanhar sua saúde.',
+            action: FxEmptyAction(label: 'Conectar', onTap: _requestAccess),
+          ),
+        ],
+      ),
     );
   }
 
@@ -229,8 +245,15 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
     final recovery = _recovery ?? RecoverySnapshot.fromSummary(s);
     final chrome = ShellChrome.forDark(isDark);
     return RefreshIndicator(
-      onRefresh: _loadData,
+      onRefresh: () async {
+        AnalyticsService.instance.track(
+          ProductEvents.homeRefreshed,
+          props: {'surface': 'saude'},
+        );
+        await _loadData();
+      },
       child: ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         padding: const EdgeInsets.all(TokensStrip.s4),
         children: [
@@ -262,6 +285,16 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
                 Text(
                   recovery.recoveryHint,
                   style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+                ),
+                const SizedBox(height: TokensStrip.s3),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: DashboardHomeActionChip(
+                    label: saudeAtualizarLabel(),
+                    accent: Theme.of(context).colorScheme.primary,
+                    isDark: isDark,
+                    onPressed: _loadData,
+                  ),
                 ),
               ],
             ),
@@ -302,15 +335,6 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
             isDark: isDark,
           ),
           const SizedBox(height: TokensStrip.s5),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: DashboardHomeActionChip(
-              label: saudeAtualizarLabel(),
-              accent: Theme.of(context).colorScheme.primary,
-              isDark: isDark,
-              onPressed: _loadData,
-            ),
-          ),
           FxConversionTextLink(
             text: '',
             actionText: saudeDesconectarLabel(),
