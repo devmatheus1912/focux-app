@@ -36,6 +36,10 @@ void main() {
     expect(screen, contains('FxLiquidPrimaryButton'));
     expect(screen, contains('FxHelpIconButton'));
     expect(screen, contains('showEvolucaoHelpSheet'));
+    expect(screen, contains("'/alunos/\${widget.alunoId}/fotos'"));
+    expect(screen, contains("'/alunos/\${widget.alunoId}/evolucao-comparativo'"));
+    expect(screen, contains('AlunoInsetFormField'));
+    expect(screen, contains('DashboardHomeActionChip'));
     expect(screen, isNot(contains('TabBar')));
     expect(screen, isNot(contains('TabBarView')));
     expect(screen, isNot(contains('TabController')));

@@ -81,17 +81,23 @@ class NovaTrilhaRequest {
     required this.titulo,
     required this.metaTipo,
     this.descricao,
+    this.metaValor,
+    this.marcos,
   });
 
   final int alunoId;
   final String titulo;
   final String? descricao;
   final String metaTipo;
+  final double? metaValor;
+  final List<String>? marcos;
 
   Map<String, dynamic> toJson() => {
     'alunoId': alunoId,
     'titulo': titulo,
-    'descricao': descricao,
     'metaTipo': metaTipo,
+    if (descricao != null) 'descricao': descricao,
+    if (metaValor != null) 'metaValor': metaValor,
+    if (marcos != null && marcos!.isNotEmpty) 'marcos': marcos,
   };
 }

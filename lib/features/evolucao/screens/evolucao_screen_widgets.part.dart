@@ -193,17 +193,3 @@ class _TabRecordes extends StatelessWidget {
   }
 }
 
-class _CampoNumerico extends StatelessWidget {
-  final TextEditingController controller;
-  final String label;
-  const _CampoNumerico({required this.controller, required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    return TextField(
-      controller: controller,
-      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-      decoration: FxInputDeco.build(context, label),
-    );
-  }
-}
