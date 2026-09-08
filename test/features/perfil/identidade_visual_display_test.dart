@@ -30,7 +30,7 @@ void main() {
     expect(identidadeSalvarConfirmMessage(), contains('login dos alunos'));
     expect(identidadeRestaurarConfirmTitle(), contains('cores padrão'));
     expect(identidadeLogoConfirmMessage(), contains('rascunho'));
-    expect(identidadeLandingEditorLabel(), 'Editor da landing');
+    expect(identidadeLandingEditorLabel(), 'Landing page');
     expect(identidadeDiscardTitle(), 'Sair sem salvar?');
   });
 }
