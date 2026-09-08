@@ -68,6 +68,7 @@ void main() {
     expect(repo, contains('/api/financeiro/mensalidades/lote-pago'));
     expect(repo, contains("get('/api/financeiro/mensalidades/\$id')"));
     expect(repo, contains('Future<Mensalidade> buscar(int id)'));
+    expect(repo, contains("j['contatos']"));
     expect(router, contains('FinanceiroMensalidadeDetailScreen('));
     expect(router, contains('mensalidadeId: id'));
     expect(router, isNot(contains("extra is! Mensalidade")));
@@ -98,6 +99,7 @@ void main() {
     expect(detail, contains('financeiroMensalidadeVencimentoLabel'));
     expect(detail, contains('AlunoSegmentedChoice'));
     expect(detail, contains('listarContatos'));
+    expect(detail, contains('loaded.contatos'));
     expect(detail, contains('financeiroMensalidadeDetalheSecoes'));
     expect(detail, contains("'/alunos/\${m.alunoId}'"));
     expect(detail, contains('PopScope'));

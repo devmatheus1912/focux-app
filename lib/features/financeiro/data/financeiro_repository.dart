@@ -33,6 +33,7 @@ class Mensalidade {
   final String status;
   final String? pagoEm;
   final String? vencimento;
+  final List<MensalidadeContato>? contatos;
 
   Mensalidade({
     required this.id,
@@ -43,18 +44,32 @@ class Mensalidade {
     required this.status,
     this.pagoEm,
     this.vencimento,
+    this.contatos,
   }) : valor = FxMoney.parse(valor);
 
-  factory Mensalidade.fromJson(Map<String, dynamic> j) => Mensalidade(
-    id: j['id'] as int,
-    alunoId: j['alunoId'] as int,
-    alunoNome: j['alunoNome'] as String,
-    valor: j['valor'],
-    mesReferencia: j['mesReferencia'] as String,
-    status: j['status'] as String,
-    pagoEm: j['pagoEm'] as String?,
-    vencimento: j['vencimento'] as String?,
-  );
+  factory Mensalidade.fromJson(Map<String, dynamic> j) {
+    final raw = j['contatos'];
+    return Mensalidade(
+      id: j['id'] as int,
+      alunoId: j['alunoId'] as int,
+      alunoNome: j['alunoNome'] as String,
+      valor: j['valor'],
+      mesReferencia: j['mesReferencia'] as String,
+      status: j['status'] as String,
+      pagoEm: j['pagoEm'] as String?,
+      vencimento: j['vencimento'] as String?,
+      contatos: raw is List
+          ? raw
+              .whereType<Map>()
+              .map(
+                (e) => MensalidadeContato.fromJson(
+                  Map<String, dynamic>.from(e),
+                ),
+              )
+              .toList()
+          : null,
+    );
+  }
 }
 
 class MensalidadeContato {
