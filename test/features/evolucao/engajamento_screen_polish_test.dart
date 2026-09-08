@@ -27,6 +27,8 @@ void main() {
     expect(screen, contains("safePopOrGo(context, '/alunos/\${widget.alunoId}')"));
     expect(screen, isNot(contains("safePopOrGo(context, '/evolucao')")));
     expect(screen, contains("'/alunos/\${widget.alunoId}/evolucao'"));
+    expect(screen, contains("'/alunos/\${widget.alunoId}/chat'"));
+    expect(screen, contains('engajamentoEventoRota'));
     expect(screen, contains('showFxInsetPickerSheet'));
     expect(screen, isNot(contains('FxSettingsGroup')));
     expect(screen, contains('FxSatelliteListTile'));

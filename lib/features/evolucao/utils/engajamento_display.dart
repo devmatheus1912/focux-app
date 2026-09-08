@@ -1,3 +1,5 @@
+import '../data/evolucao_repository.dart';
+
 const engajamentoPeriodos = [30, 60, 90];
 
 String engajamentoPeriodoLabel(int dias) => '$dias dias';
@@ -77,4 +79,47 @@ String engajamentoHubSubtitle({
 String engajamentoEventosMetricHint(int count, int dias) {
   if (count <= 0) return 'Nada em ${engajamentoPeriodoLabel(dias)}';
   return engajamentoPeriodoLabel(dias);
+}
+
+bool _engajamentoTipoTreino(String? tipo) {
+  switch ((tipo ?? '').trim().toUpperCase()) {
+    case 'TREINO':
+    case 'TREINO_INICIADO':
+    case 'CHECKIN_CONCLUIDO':
+      return true;
+    default:
+      return false;
+  }
+}
+
+int engajamentoTreinosCount(Iterable<EventoEngajamento> eventos) =>
+    eventos.where((e) => _engajamentoTipoTreino(e.tipo)).length;
+
+int engajamentoMensagensCount(Iterable<EventoEngajamento> eventos) =>
+    eventos.where((e) => e.tipo.trim().toUpperCase() == 'MENSAGEM').length;
+
+String engajamentoUltimoHint(Iterable<EventoEngajamento> eventos) {
+  EventoEngajamento? last;
+  for (final evento in eventos) {
+    if (last == null || evento.dataHora.compareTo(last.dataHora) > 0) {
+      last = evento;
+    }
+  }
+  if (last == null) return 'Nenhum evento na janela';
+  return '${engajamentoTipoLabel(last.tipo)} · ${engajamentoWhenLabel(last.dataHora)}';
+}
+
+String? engajamentoEventoRota(String? tipo, int alunoId) {
+  switch ((tipo ?? '').trim().toUpperCase()) {
+    case 'MENSAGEM':
+      return '/alunos/$alunoId/chat';
+    case 'MEDIDA':
+      return '/alunos/$alunoId/evolucao';
+    case 'TREINO':
+    case 'TREINO_INICIADO':
+    case 'CHECKIN_CONCLUIDO':
+      return '/alunos/$alunoId/treinos-list';
+    default:
+      return null;
+  }
 }

@@ -2,13 +2,15 @@ part of 'trilhas_screen.dart';
 
 class _TrilhaCard extends StatelessWidget {
   final TrilhaModel trilha;
-  final int alunoId;
-  final WidgetRef ref;
+  final VoidCallback onAtualizarProgresso;
+  final VoidCallback onDeletar;
+  final ValueChanged<MarcoModel> onConcluirMarco;
 
   const _TrilhaCard({
     required this.trilha,
-    required this.alunoId,
-    required this.ref,
+    required this.onAtualizarProgresso,
+    required this.onDeletar,
+    required this.onConcluirMarco,
   });
 
   Color _progressColor(BuildContext context) {
@@ -23,6 +25,8 @@ class _TrilhaCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final chrome = ShellChrome.of(context);
+    final primary = Theme.of(context).colorScheme.primary;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final progressColor = _progressColor(context);
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -47,30 +51,39 @@ class _TrilhaCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                if (trilha.concluida)
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 3,
-                    ),
-                    decoration: BoxDecoration(
-                      color: EagleTokens.good.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      trilhaStatusLabel(true),
-                      style: FocuxHubTypography.chip(EagleTokens.good),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 3,
+                  ),
+                  decoration: BoxDecoration(
+                    color: (trilha.concluida
+                            ? EagleTokens.good
+                            : primary)
+                        .withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    trilhaStatusLabel(trilha.concluida),
+                    style: FocuxHubTypography.chip(
+                      trilha.concluida ? EagleTokens.good : primary,
                     ),
                   ),
+                ),
               ],
             ),
-            if (trilha.descricao != null) ...[
+            if (trilha.descricao != null && trilha.descricao!.isNotEmpty) ...[
               const SizedBox(height: 4),
               Text(
                 trilha.descricao!,
                 style: FocuxHubTypography.bodyMuted(color: chrome.mute),
               ),
             ],
+            const SizedBox(height: 6),
+            Text(
+              '${trilhaMetaTipoLabel(trilha.metaTipo)} · ${trilhaValorAtualLabel(trilha)}',
+              style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+            ),
             const SizedBox(height: 14),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -115,12 +128,31 @@ class _TrilhaCard extends StatelessWidget {
               ...trilha.marcos.map(
                 (m) => _MarcoTile(
                   marco: m,
-                  trilhaId: trilha.id,
-                  alunoId: alunoId,
-                  ref: ref,
+                  onConcluir:
+                      m.concluido ? null : () => onConcluirMarco(m),
                 ),
               ),
             ],
+            const SizedBox(height: TokensStrip.s3),
+            Wrap(
+              spacing: TokensStrip.s2,
+              runSpacing: TokensStrip.s2,
+              children: [
+                if (trilha.metaValor != null && !trilha.concluida)
+                  DashboardHomeActionChip(
+                    label: 'Atualizar progresso',
+                    accent: primary,
+                    isDark: isDark,
+                    onPressed: onAtualizarProgresso,
+                  ),
+                DashboardHomeActionChip(
+                  label: 'Excluir',
+                  accent: EagleTokens.bad,
+                  isDark: isDark,
+                  onPressed: onDeletar,
+                ),
+              ],
+            ),
           ],
         ),
       ),
@@ -130,15 +162,11 @@ class _TrilhaCard extends StatelessWidget {
 
 class _MarcoTile extends StatelessWidget {
   final MarcoModel marco;
-  final int trilhaId;
-  final int alunoId;
-  final WidgetRef ref;
+  final VoidCallback? onConcluir;
 
   const _MarcoTile({
     required this.marco,
-    required this.trilhaId,
-    required this.alunoId,
-    required this.ref,
+    required this.onConcluir,
   });
 
   @override
@@ -159,15 +187,7 @@ class _MarcoTile extends StatelessWidget {
                     ? EagleTokens.good
                     : ShellChrome.of(context).mute,
           ),
-          onPressed:
-              marco.concluido
-                  ? null
-                  : () async {
-                    await ref
-                        .read(trilhasRepositoryProvider)
-                        .concluirMarco(trilhaId: trilhaId, marcoId: marco.id);
-                    ref.invalidate(trilhasAlunoProvider(alunoId));
-                  },
+          onPressed: onConcluir,
         ),
         title: Text(
           marco.titulo,
@@ -177,6 +197,7 @@ class _MarcoTile extends StatelessWidget {
             color: marco.concluido ? TokensStrip.textSecondary : null,
           ),
         ),
+        onTap: onConcluir,
       ),
     );
   }

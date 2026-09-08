@@ -110,6 +110,19 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
     );
   }
 
+  void _abrirChat() {
+    context.push(
+      '/alunos/${widget.alunoId}/chat',
+      extra: widget.alunoNome,
+    );
+  }
+
+  void _abrirEvento(EventoEngajamento evento) {
+    final rota = engajamentoEventoRota(evento.tipo, widget.alunoId);
+    if (rota == null) return;
+    context.push(rota, extra: widget.alunoNome);
+  }
+
   @override
   Widget build(BuildContext context) {
     final chrome = ShellChrome.of(context);
@@ -187,22 +200,51 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
         top: TokensStrip.s4,
         bottom: TokensStrip.s3,
       ),
-      child: OperationalMetricTile(
-        label: 'Eventos',
-        value: '${_eventos.length}',
-        hint: engajamentoEventosMetricHint(_eventos.length, _dias),
-        color: primary,
-        isDark: isDark,
+      child: Column(
+        children: [
+          OperationalMetricTile(
+            label: 'Eventos',
+            value: '${_eventos.length}',
+            hint: engajamentoEventosMetricHint(_eventos.length, _dias),
+            color: primary,
+            isDark: isDark,
+          ),
+          const SizedBox(height: TokensStrip.s2),
+          OperationalMetricTile(
+            label: 'Treinos',
+            value: '${engajamentoTreinosCount(_eventos)}',
+            hint: 'Check-ins e treinos na janela',
+            color: primary,
+            isDark: isDark,
+          ),
+          const SizedBox(height: TokensStrip.s2),
+          OperationalMetricTile(
+            label: 'Mensagens',
+            value: '${engajamentoMensagensCount(_eventos)}',
+            hint: engajamentoUltimoHint(_eventos),
+            color: primary,
+            isDark: isDark,
+          ),
+        ],
       ),
     );
-    final periodoChip = Align(
-      alignment: Alignment.centerLeft,
-      child: DashboardHomeActionChip(
-        label: engajamentoPeriodoLabel(_dias),
-        accent: primary,
-        isDark: isDark,
-        onPressed: _pickPeriodo,
-      ),
+    final periodoChip = Wrap(
+      spacing: TokensStrip.s2,
+      runSpacing: TokensStrip.s2,
+      children: [
+        DashboardHomeActionChip(
+          label: engajamentoPeriodoLabel(_dias),
+          accent: primary,
+          isDark: isDark,
+          onPressed: _pickPeriodo,
+        ),
+        DashboardHomeActionChip(
+          label: 'Abrir chat',
+          accent: primary,
+          isDark: isDark,
+          onPressed: _abrirChat,
+        ),
+      ],
     );
 
     return RefreshIndicator(
@@ -266,6 +308,11 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
                     evento.tipo,
                   ),
                   titleCase: false,
+                  onTap:
+                      engajamentoEventoRota(evento.tipo, widget.alunoId) ==
+                              null
+                          ? null
+                          : () => _abrirEvento(evento),
                   subtitle: Text(
                     engajamentoEventoSubtitle(
                       tipo: evento.tipo,

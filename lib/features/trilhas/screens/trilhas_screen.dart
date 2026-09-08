@@ -9,21 +9,31 @@ import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/utils/fx_utils.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_form_sheet.dart';
+import '../../../core/widgets/fx_help.dart';
+import '../../../core/widgets/fx_hub_header.dart';
 import '../../../core/widgets/fx_inset_picker_row.dart';
 import '../../../core/widgets/fx_inset_picker_sheet.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/operational_metric_tile.dart';
 import '../../../core/widgets/skeleton_loader.dart';
-import '../../../features/alunos/widgets/aluno_inset_form_field.dart';
+import '../../alunos/widgets/aluno_form_choices.dart';
+import '../../alunos/widgets/aluno_inset_form_field.dart';
+import '../../dashboard/widgets/dashboard_home_action_chip.dart';
+import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../models/trilha.dart';
 import '../providers/trilhas_provider.dart';
 import '../utils/trilhas_display.dart';
+import '../widgets/trilhas_help_sheet.dart';
 
 part 'trilhas_screen_cards.part.dart';
 
@@ -43,6 +53,7 @@ class TrilhasScreen extends ConsumerStatefulWidget {
 
 class _TrilhasScreenState extends ConsumerState<TrilhasScreen> {
   DateTime? _fetchedAt;
+  String _filtro = trilhaFiltroAndamento;
 
   Future<void> _refresh() async {
     ref.invalidate(trilhasAlunoProvider(widget.alunoId));
@@ -64,6 +75,10 @@ class _TrilhasScreenState extends ConsumerState<TrilhasScreen> {
     HapticFeedback.selectionClick();
     final tituloCtrl = TextEditingController();
     final descCtrl = TextEditingController();
+    final metaValorCtrl = TextEditingController();
+    final marco1 = TextEditingController();
+    final marco2 = TextEditingController();
+    final marco3 = TextEditingController();
     var metaTipo = 'TREINOS';
     var created = false;
 
@@ -71,10 +86,10 @@ class _TrilhasScreenState extends ConsumerState<TrilhasScreen> {
       if (!mounted) return;
       final ok = await showFxFormSheet(
         context,
-        title: 'Nova trilha',
-        subtitle: 'Defina o título e o tipo de meta.',
+        title: 'Atribuir trilha',
+        subtitle: 'Meta, valor e as primeiras etapas.',
         icon: Icons.flag_outlined,
-        confirmLabel: 'Criar trilha',
+        confirmLabel: 'Atribuir trilha',
         child: StatefulBuilder(
           builder:
               (ctx, setSheetState) => Column(
@@ -95,7 +110,6 @@ class _TrilhasScreenState extends ConsumerState<TrilhasScreen> {
                     icon: Icons.flag_outlined,
                     label: 'Tipo de meta',
                     value: trilhaMetaTipoLabel(metaTipo),
-                    showDivider: false,
                     onTap: () async {
                       final picked = await showFxInsetPickerSheet<String>(
                         ctx,
@@ -113,6 +127,30 @@ class _TrilhasScreenState extends ConsumerState<TrilhasScreen> {
                       setSheetState(() => metaTipo = picked);
                     },
                   ),
+                  AlunoInsetFormField(
+                    controller: metaValorCtrl,
+                    label: trilhaMetaValorHint(metaTipo),
+                    icon: Icons.tune_outlined,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                  ),
+                  AlunoInsetFormField(
+                    controller: marco1,
+                    label: 'Primeira etapa',
+                    icon: Icons.check_circle_outline,
+                  ),
+                  AlunoInsetFormField(
+                    controller: marco2,
+                    label: 'Segunda etapa (opcional)',
+                    icon: Icons.check_circle_outline,
+                  ),
+                  AlunoInsetFormField(
+                    controller: marco3,
+                    label: 'Terceira etapa (opcional)',
+                    icon: Icons.check_circle_outline,
+                    showDivider: false,
+                  ),
                 ],
               ),
         ),
@@ -121,6 +159,20 @@ class _TrilhasScreenState extends ConsumerState<TrilhasScreen> {
       if (tituloCtrl.text.trim().isEmpty) {
         if (mounted) {
           FeedbackHelper.showWarn(context, 'Título da trilha é obrigatório.');
+        }
+        return;
+      }
+      final marcos = trilhaMarcosTitulos([
+        marco1.text,
+        marco2.text,
+        marco3.text,
+      ]);
+      if (marcos.isEmpty && trilhaParseNumero(metaValorCtrl.text) == null) {
+        if (mounted) {
+          FeedbackHelper.showWarn(
+            context,
+            'Inclua uma etapa ou o valor da meta.',
+          );
         }
         return;
       }
@@ -133,6 +185,8 @@ class _TrilhasScreenState extends ConsumerState<TrilhasScreen> {
               descricao:
                   descCtrl.text.trim().isEmpty ? null : descCtrl.text.trim(),
               metaTipo: metaTipo,
+              metaValor: trilhaParseNumero(metaValorCtrl.text),
+              marcos: marcos,
             ),
           );
       created = true;
@@ -141,8 +195,96 @@ class _TrilhasScreenState extends ConsumerState<TrilhasScreen> {
     } finally {
       tituloCtrl.dispose();
       descCtrl.dispose();
+      metaValorCtrl.dispose();
+      marco1.dispose();
+      marco2.dispose();
+      marco3.dispose();
     }
-    if (created) await _refresh();
+    if (created) {
+      if (mounted) FeedbackHelper.showSuccess(context, 'Trilha atribuída.');
+      await _refresh();
+    }
+  }
+
+  Future<void> _atualizarProgresso(TrilhaModel trilha) async {
+    HapticFeedback.selectionClick();
+    final valorCtrl = TextEditingController(
+      text:
+          trilha.valorAtual == 0
+              ? ''
+              : trilha.valorAtual.toStringAsFixed(
+                trilha.valorAtual == trilha.valorAtual.roundToDouble() ? 0 : 1,
+              ),
+    );
+    var saved = false;
+    try {
+      if (!mounted) return;
+      final ok = await showFxFormSheet(
+        context,
+        title: 'Atualizar progresso',
+        subtitle: trilha.titulo,
+        icon: Icons.tune_outlined,
+        confirmLabel: 'Salvar progresso',
+        child: AlunoInsetFormField(
+          controller: valorCtrl,
+          label: trilhaMetaValorHint(trilha.metaTipo),
+          icon: Icons.tune_outlined,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          showDivider: false,
+        ),
+      );
+      if (ok != true) return;
+      final valor = trilhaParseNumero(valorCtrl.text);
+      if (valor == null) {
+        if (mounted) {
+          FeedbackHelper.showWarn(context, 'Informe um número válido.');
+        }
+        return;
+      }
+      await ref
+          .read(trilhasRepositoryProvider)
+          .atualizarProgresso(trilhaId: trilha.id, valor: valor);
+      saved = true;
+    } catch (e) {
+      if (mounted) FeedbackHelper.showError(context, friendlyError(e));
+    } finally {
+      valorCtrl.dispose();
+    }
+    if (saved) {
+      if (mounted) FeedbackHelper.showSuccess(context, 'Progresso atualizado.');
+      await _refresh();
+    }
+  }
+
+  Future<void> _concluirMarco(TrilhaModel trilha, MarcoModel marco) async {
+    try {
+      await ref
+          .read(trilhasRepositoryProvider)
+          .concluirMarco(trilhaId: trilha.id, marcoId: marco.id);
+      if (mounted) FeedbackHelper.showSuccess(context, 'Marco concluído.');
+      await _refresh();
+    } catch (e) {
+      if (mounted) FeedbackHelper.showError(context, friendlyError(e));
+    }
+  }
+
+  Future<void> _deletarTrilha(TrilhaModel trilha) async {
+    final ok = await showFxConfirmSheet(
+      context,
+      title: 'Excluir trilha?',
+      subtitle: trilha.titulo,
+      message: 'Some da lista deste aluno. Os marcos vão junto.',
+      confirmLabel: 'Excluir',
+      destructive: true,
+    );
+    if (!ok || !mounted) return;
+    try {
+      await ref.read(trilhasRepositoryProvider).deletar(trilha.id);
+      if (mounted) FeedbackHelper.showSuccess(context, 'Trilha excluída.');
+      await _refresh();
+    } catch (e) {
+      if (mounted) FeedbackHelper.showError(context, friendlyError(e));
+    }
   }
 
   @override
@@ -151,6 +293,7 @@ class _TrilhasScreenState extends ConsumerState<TrilhasScreen> {
     final primary = Theme.of(context).colorScheme.primary;
     final trilhasAsync = ref.watch(trilhasAlunoProvider(widget.alunoId));
     final freshness = FxHubFreshness.fromFetchedAt(_fetchedAt);
+    final showSticky = !trilhasAsync.isLoading && !trilhasAsync.hasError;
 
     return fxScreenA11yScope(
       label: 'Trilhas de Progresso — ${widget.alunoNome}',
@@ -164,73 +307,172 @@ class _TrilhasScreenState extends ConsumerState<TrilhasScreen> {
           ),
           onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
           actions: [
+            FxHelpIconButton(
+              tooltip: 'Como usar as trilhas',
+              onTap: () => showTrilhasHelpSheet(context),
+            ),
             ShellHeaderIconButton(
               icon: 'plus',
-              tooltip: 'Criar nova trilha',
+              tooltip: 'Atribuir trilha',
               onTap: _criarTrilha,
             ),
           ],
         ),
-        body: trilhasAsync.when(
-          loading:
-              () => const Padding(
-                padding: EdgeInsets.all(FxSettingsLayout.pageInset),
-                child: SkeletonList(count: 4),
+        body: Column(
+          children: [
+            Expanded(
+              child: trilhasAsync.when(
+                loading:
+                    () => const Padding(
+                      padding: EdgeInsets.all(FxSettingsLayout.pageInset),
+                      child: SkeletonList(count: 4),
+                    ),
+                error:
+                    (e, _) => FxErrorState(
+                      chromeOnDark: chrome.isDark,
+                      primary: primary,
+                      message: friendlyError(e),
+                      onRetry: _refresh,
+                      title: 'Não conseguimos carregar as trilhas',
+                    ),
+                data: (trilhas) {
+                  _stampFreshness();
+                  return FxContentWidthLimiter(
+                    child: _buildBody(trilhas, freshness),
+                  );
+                },
               ),
-          error:
-              (e, _) => FxErrorState(
-                chromeOnDark: chrome.isDark,
-                primary: primary,
-                message: friendlyError(e),
-                onRetry: _refresh,
-                title: 'Não conseguimos carregar as trilhas',
+            ),
+            if (showSticky)
+              SafeArea(
+                top: false,
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    FxSettingsLayout.pageInset,
+                    TokensStrip.s2,
+                    FxSettingsLayout.pageInset,
+                    TokensStrip.s3 + MediaQuery.viewInsetsOf(context).bottom,
+                  ),
+                  child: FxLiquidPrimaryButton(
+                    label: 'Atribuir trilha',
+                    onPressed: _criarTrilha,
+                  ),
+                ),
               ),
-          data: (trilhas) {
-            _stampFreshness();
-            return FxContentWidthLimiter(child: _buildBody(trilhas));
-          },
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildBody(List<TrilhaModel> trilhas) {
-    if (trilhas.isEmpty) {
-      return RefreshIndicator(
-        onRefresh: _refresh,
-        child: ListView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          children: [
-            FxEmptyState(
-              icon: 'route',
-              title: 'Nenhuma trilha criada ainda',
-              subtitle:
-                  'Crie metas com marcos para acompanhar a evolução de ${widget.alunoNome}.',
-              action: FxEmptyAction(
-                label: 'Criar primeira trilha',
-                onTap: _criarTrilha,
-              ),
-            ),
-          ],
-        ),
-      );
-    }
+  Widget _buildBody(List<TrilhaModel> trilhas, String? freshness) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
+    final visiveis = trilhaFiltradas(trilhas, _filtro);
+    final nome = fxTitleCaseName(widget.alunoNome);
+
     return RefreshIndicator(
       onRefresh: _refresh,
-      child: ListView.builder(
+      child: ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.fromLTRB(
           FxSettingsLayout.pageInset,
-          8,
+          TokensStrip.s4,
           FxSettingsLayout.pageInset,
           32,
         ),
-        itemCount: trilhas.length,
-        itemBuilder:
-            (ctx, i) => _TrilhaCard(
-              trilha: trilhas[i],
-              alunoId: widget.alunoId,
-              ref: ref,
+        children: [
+          FxHubHeader(
+            title: nome,
+            subtitle: trilhaHubSubtitle(
+              alunoNome: widget.alunoNome,
+              freshness: freshness,
             ),
+          ),
+          const SizedBox(height: TokensStrip.s4),
+          OperationalMetricTile(
+            label: 'Ativas',
+            value: '${trilhaAtivasCount(trilhas)}',
+            hint:
+                trilhas.isEmpty
+                    ? 'Nenhuma trilha atribuída'
+                    : '${trilhaConcluidasCount(trilhas)} concluídas',
+            color: primary,
+            isDark: isDark,
+          ),
+          const SizedBox(height: TokensStrip.s2),
+          OperationalMetricTile(
+            label: 'Progresso',
+            value: trilhaProgressoMedioLabel(trilhas),
+            hint: 'Média das trilhas deste aluno',
+            color: primary,
+            isDark: isDark,
+          ),
+          const SizedBox(height: TokensStrip.s2),
+          OperationalMetricTile(
+            label: 'Marcos',
+            value: '${trilhaMarcosPendentes(trilhas)}',
+            hint:
+                trilhaMarcosPendentes(trilhas) == 0
+                    ? 'Nada pendente'
+                    : 'Etapas em aberto',
+            color: primary,
+            isDark: isDark,
+          ),
+          if (trilhas.isNotEmpty) ...[
+            const SizedBox(height: TokensStrip.s4),
+            AlunoSegmentedChoice(
+              options: trilhaFiltroOpcoes,
+              selected: _filtro,
+              isDark: isDark,
+              onSelect: (value) => setState(() => _filtro = value),
+            ),
+          ],
+          const SizedBox(height: TokensStrip.s5),
+          if (trilhas.isEmpty)
+            const FxEmptyState(
+              icon: 'route',
+              title: 'Nenhuma trilha atribuída',
+              subtitle:
+                  'Crie uma meta com etapas para acompanhar o progresso deste aluno.',
+            )
+          else if (visiveis.isEmpty)
+            FxEmptyState(
+              icon: 'route',
+              title:
+                  _filtro == trilhaFiltroConcluidas
+                      ? 'Nenhuma trilha concluída'
+                      : 'Nada em andamento',
+              subtitle:
+                  _filtro == trilhaFiltroConcluidas
+                      ? 'As trilhas ativas aparecem na outra seção.'
+                      : 'Tudo que existia já foi concluído.',
+              action: FxEmptyAction(
+                label:
+                    _filtro == trilhaFiltroConcluidas
+                        ? 'Ver em andamento'
+                        : 'Ver concluídas',
+                onTap:
+                    () => setState(() {
+                      _filtro =
+                          _filtro == trilhaFiltroConcluidas
+                              ? trilhaFiltroAndamento
+                              : trilhaFiltroConcluidas;
+                    }),
+              ),
+            )
+          else ...[
+            const DashboardSectionHeader(title: 'Trilhas'),
+            const SizedBox(height: TokensStrip.s3),
+            for (final trilha in visiveis)
+              _TrilhaCard(
+                trilha: trilha,
+                onAtualizarProgresso: () => _atualizarProgresso(trilha),
+                onDeletar: () => _deletarTrilha(trilha),
+                onConcluirMarco: (marco) => _concluirMarco(trilha, marco),
+              ),
+          ],
+        ],
       ),
     );
   }

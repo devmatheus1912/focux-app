@@ -15,7 +15,7 @@ Future<void> showEngajamentoHelpSheet(BuildContext context) {
       ),
       FxHelpTip(
         'Próxima ação',
-        'O botão de baixo abre a evolução para registrar uma medida nova.',
+        'Toque num evento para abrir o chat, a evolução ou os treinos. O botão de baixo registra uma medida.',
         icon: 'plus',
       ),
     ],

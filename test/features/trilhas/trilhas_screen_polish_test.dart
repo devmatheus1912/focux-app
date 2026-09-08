@@ -23,6 +23,15 @@ void main() {
     expect(screen, contains('showFxFormSheet'));
     expect(screen, contains('ShellHeaderIconButton'));
     expect(screen, contains('LinearProgressIndicator'));
+    expect(screen, contains('FxHubHeader'));
+    expect(screen, contains('OperationalMetricTile'));
+    expect(screen, contains('FxLiquidPrimaryButton'));
+    expect(screen, contains('FxHelpIconButton'));
+    expect(screen, contains('AlunoSegmentedChoice'));
+    expect(screen, contains("'Atribuir trilha'"));
+    expect(screen, contains('atualizarProgresso'));
+    expect(screen, contains('showFxConfirmSheet'));
+    expect(screen, contains("safePopOrGo(context, '/alunos/\${widget.alunoId}')"));
     expect(screen, isNot(contains('TabBar')));
     expect(screen, isNot(contains('TabBarView')));
     expect(screen, isNot(contains('DropdownButton')));

@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:focux_app/features/evolucao/data/evolucao_repository.dart';
 import 'package:focux_app/features/evolucao/utils/engajamento_display.dart';
 
 void main() {
@@ -60,5 +61,32 @@ void main() {
   test('engajamentoEventosMetricHint', () {
     expect(engajamentoEventosMetricHint(0, 30), 'Nada em 30 dias');
     expect(engajamentoEventosMetricHint(4, 90), '90 dias');
+  });
+
+  test('engajamento agrega tipos e rota de próxima ação', () {
+    final eventos = [
+      EventoEngajamento(
+        tipo: 'TREINO',
+        descricao: 'A',
+        dataHora: '2026-09-01T10:00:00',
+      ),
+      EventoEngajamento(
+        tipo: 'MENSAGEM',
+        descricao: 'Oi',
+        dataHora: '2026-09-02T11:00:00',
+      ),
+      EventoEngajamento(
+        tipo: 'CHECKIN_CONCLUIDO',
+        descricao: 'B',
+        dataHora: '2026-09-03T12:00:00',
+      ),
+    ];
+    expect(engajamentoTreinosCount(eventos), 2);
+    expect(engajamentoMensagensCount(eventos), 1);
+    expect(engajamentoUltimoHint(eventos), 'Check-in · 03/09 12:00');
+    expect(engajamentoEventoRota('MENSAGEM', 9), '/alunos/9/chat');
+    expect(engajamentoEventoRota('MEDIDA', 9), '/alunos/9/evolucao');
+    expect(engajamentoEventoRota('TREINO', 9), '/alunos/9/treinos-list');
+    expect(engajamentoEventoRota('OUTRO', 9), isNull);
   });
 }

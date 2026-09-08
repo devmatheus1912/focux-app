@@ -23,4 +23,18 @@ class TrilhasRepository {
   }) async {
     await _dio.post('/api/trilhas/$trilhaId/marcos/$marcoId/concluir');
   }
+
+  Future<void> atualizarProgresso({
+    required int trilhaId,
+    required double valor,
+  }) async {
+    await _dio.put(
+      '/api/trilhas/$trilhaId/progresso',
+      queryParameters: {'valor': valor},
+    );
+  }
+
+  Future<void> deletar(int trilhaId) async {
+    await _dio.delete('/api/trilhas/$trilhaId');
+  }
 }

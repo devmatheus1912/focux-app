@@ -219,6 +219,28 @@ class Aluno360FerramentasModulesGrid extends ConsumerWidget {
                   extra: aluno.nome,
                 ),
           ),
+          FxSatelliteListTile(
+            titleCase: false,
+            title: 'Trilhas',
+            subtitle: const Text('Metas com etapas e progresso'),
+            accent: primary,
+            onTap:
+                () => context.push(
+                  '/alunos/$alunoId/trilhas',
+                  extra: aluno.nome,
+                ),
+          ),
+          FxSatelliteListTile(
+            titleCase: false,
+            title: 'Engajamento',
+            subtitle: const Text('Treinos, medidas e mensagens'),
+            accent: primary,
+            onTap:
+                () => context.push(
+                  '/alunos/$alunoId/engajamento',
+                  extra: aluno.nome,
+                ),
+          ),
           const SizedBox(height: TokensStrip.s5),
           DashboardSectionHeader(
             title: 'Perfil & gestão',

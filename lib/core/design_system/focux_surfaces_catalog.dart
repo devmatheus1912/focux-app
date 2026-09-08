@@ -187,7 +187,8 @@ const Map<String, FocuxSurfaceSpec> focuxSurfaceCatalog = {
     logicalParent: '/alunos/:id',
   ),
   '/alunos/:id/trilhas': FocuxSurfaceSpec(
-    type: _s4,
+    type: _s3,
+    hasInput: true,
     logicalParent: '/alunos/:id',
   ),
   '/alunos/:id/feedback-videos': FocuxSurfaceSpec(

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:focux_app/core/widgets/fx_input_deco.dart';
+import 'package:go_router/go_router.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 
 import '../../../core/router/safe_navigation.dart';
@@ -28,6 +28,8 @@ import '../../../core/widgets/fx_sparkline.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../alunos/utils/satellite_screen_utils.dart';
+import '../../alunos/widgets/aluno_inset_form_field.dart';
+import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../data/evolucao_repository.dart';
 import '../utils/evolucao_display.dart';
 import '../providers/evolucao_home_provider.dart';
@@ -73,6 +75,20 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
     } else {
       _mostrarDialogRecorde();
     }
+  }
+
+  void _abrirFotos() {
+    context.push(
+      '/alunos/${widget.alunoId}/fotos',
+      extra: widget.alunoNome,
+    );
+  }
+
+  void _abrirComparativo() {
+    context.push(
+      '/alunos/${widget.alunoId}/evolucao-comparativo',
+      extra: widget.alunoNome,
+    );
   }
 
   @override
@@ -150,6 +166,25 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
                               color: primary,
                               isDark: chrome.isDark,
                             ),
+                            const SizedBox(height: TokensStrip.s3),
+                            Wrap(
+                              spacing: TokensStrip.s2,
+                              runSpacing: TokensStrip.s2,
+                              children: [
+                                DashboardHomeActionChip(
+                                  label: 'Fotos',
+                                  accent: primary,
+                                  isDark: chrome.isDark,
+                                  onPressed: _abrirFotos,
+                                ),
+                                DashboardHomeActionChip(
+                                  label: 'Comparativo',
+                                  accent: primary,
+                                  isDark: chrome.isDark,
+                                  onPressed: _abrirComparativo,
+                                ),
+                              ],
+                            ),
                           ],
                         ),
                       ),
@@ -184,13 +219,13 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
             ),
             SafeArea(
               top: false,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  FxSettingsLayout.pageInset,
-                  TokensStrip.s2,
-                  FxSettingsLayout.pageInset,
-                  TokensStrip.s3,
-                ),
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    FxSettingsLayout.pageInset,
+                    TokensStrip.s2,
+                    FxSettingsLayout.pageInset,
+                    TokensStrip.s3 + MediaQuery.viewInsetsOf(context).bottom,
+                  ),
                 child: FxLiquidPrimaryButton(
                   label:
                       _view == EvolucaoHubView.medidas
@@ -220,16 +255,39 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _CampoNumerico(controller: pesoCtrl, label: 'Peso (kg)'),
-            const SizedBox(height: 10),
-            _CampoNumerico(
+            AlunoInsetFormField(
+              controller: pesoCtrl,
+              label: 'Peso (kg)',
+              icon: Icons.monitor_weight_outlined,
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
+            ),
+            AlunoInsetFormField(
               controller: abdomenCtrl,
               label: 'Circunf. abdômen (cm)',
+              icon: Icons.straighten_outlined,
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
             ),
-            const SizedBox(height: 10),
-            _CampoNumerico(controller: quadrilCtrl, label: 'Quadril (cm)'),
-            const SizedBox(height: 10),
-            _CampoNumerico(controller: bracoCtrl, label: 'Braço (cm)'),
+            AlunoInsetFormField(
+              controller: quadrilCtrl,
+              label: 'Quadril (cm)',
+              icon: Icons.straighten_outlined,
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
+            ),
+            AlunoInsetFormField(
+              controller: bracoCtrl,
+              label: 'Braço (cm)',
+              icon: Icons.straighten_outlined,
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
+              showDivider: false,
+            ),
           ],
         ),
       );
@@ -270,25 +328,30 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            TextField(
+            AlunoInsetFormField(
               controller: exercicioCtrl,
-              decoration: FxInputDeco.build(context, 'Exercício'),
+              label: 'Exercício',
+              icon: Icons.fitness_center_outlined,
             ),
-            const SizedBox(height: 10),
-            _CampoNumerico(controller: cargaCtrl, label: 'Carga'),
-            const SizedBox(height: 10),
-            TextField(
-              controller: unidadeCtrl,
-              decoration: FxInputDeco.build(
-                context,
-                'Unidade (kg, reps…)',
+            AlunoInsetFormField(
+              controller: cargaCtrl,
+              label: 'Carga',
+              icon: Icons.tune_outlined,
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
               ),
             ),
-            const SizedBox(height: 10),
-            TextField(
+            AlunoInsetFormField(
+              controller: unidadeCtrl,
+              label: 'Unidade (kg, reps…)',
+              icon: Icons.straighten_outlined,
+            ),
+            AlunoInsetFormField(
               controller: obsCtrl,
-              decoration: FxInputDeco.build(context, 'Observação'),
+              label: 'Observação',
+              icon: Icons.notes_outlined,
               maxLines: 2,
+              showDivider: false,
             ),
           ],
         ),
