@@ -12,7 +12,6 @@ class _WalletFormFields extends StatelessWidget {
     required this.onSecao,
     required this.onSelecionarTipo,
     required this.onCopiarChave,
-    this.freshness,
   });
 
   final String? tipoChavePix;
@@ -25,7 +24,6 @@ class _WalletFormFields extends StatelessWidget {
   final ValueChanged<String> onSecao;
   final VoidCallback onSelecionarTipo;
   final VoidCallback onCopiarChave;
-  final String? freshness;
 
   @override
   Widget build(BuildContext context) {
@@ -38,15 +36,19 @@ class _WalletFormFields extends StatelessWidget {
       children: [
         FxHubHeader(
           title: 'Recebimentos',
-          subtitle: walletHubSubtitle(freshness: freshness),
+          subtitle: walletHubSubtitle(),
         ),
-        const SizedBox(height: TokensStrip.s4),
-        const _ResumoMensalCard(),
         const SizedBox(height: TokensStrip.s3),
         Wrap(
           spacing: TokensStrip.s2,
           runSpacing: TokensStrip.s2,
           children: [
+            DashboardHomeActionChip(
+              label: 'Perfil',
+              accent: primary,
+              isDark: isDark,
+              onPressed: () => safePopOrGo(context, '/perfil'),
+            ),
             DashboardHomeActionChip(
               label: walletVerFinanceiroLabel(),
               accent: primary,
@@ -70,6 +72,16 @@ class _WalletFormFields extends StatelessWidget {
               ),
           ],
         ),
+        const SizedBox(height: TokensStrip.s4),
+        OperationalMetricTile(
+          label: 'PIX',
+          value: walletPixStatusValue(tipoChavePix, chavePixCtrl.text),
+          hint: walletPixStatusHint(tipoChavePix, chavePixCtrl.text),
+          color: primary,
+          isDark: isDark,
+        ),
+        const SizedBox(height: TokensStrip.s3),
+        const _ResumoMensalCard(),
         const SizedBox(height: TokensStrip.s4),
         AlunoSegmentedChoice(
           options: walletDetalheSecoes,
@@ -233,17 +245,32 @@ class _ResumoMensalCardState extends ConsumerState<_ResumoMensalCard> {
           color: semMovimento ? primary : EagleTokens.good,
           isDark: isDark,
         ),
-        if (inadimplentes > 0) ...[
-          const SizedBox(height: TokensStrip.s3),
-          OperationalMetricTile(
-            label: 'Inadimplentes',
-            value: '$inadimplentes',
-            hint: 'Cobranças em atraso neste mês',
-            color: EagleTokens.bad,
-            isDark: isDark,
-            emphasis: OperationalMetricEmphasis.alert,
-          ),
-        ],
+        const SizedBox(height: TokensStrip.s2),
+        OperationalMetricTile(
+          label: 'Previsto',
+          value: resumo.totalPrevisto.format(),
+          hint:
+              semMovimento
+                  ? 'Nenhuma cobrança neste mês'
+                  : 'Cobranças do mês',
+          color: primary,
+          isDark: isDark,
+        ),
+        const SizedBox(height: TokensStrip.s2),
+        OperationalMetricTile(
+          label: 'Inadimplentes',
+          value: '$inadimplentes',
+          hint:
+              inadimplentes == 0
+                  ? 'Nenhuma cobrança em atraso'
+                  : 'Cobranças em atraso neste mês',
+          color: inadimplentes == 0 ? primary : EagleTokens.bad,
+          isDark: isDark,
+          emphasis:
+              inadimplentes == 0
+                  ? OperationalMetricEmphasis.normal
+                  : OperationalMetricEmphasis.alert,
+        ),
       ],
     );
   }

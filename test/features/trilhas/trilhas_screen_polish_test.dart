@@ -35,6 +35,11 @@ void main() {
     expect(screen, contains("safePopOrGo(context, '/alunos/\${widget.alunoId}')"));
     expect(screen, contains('PopScope'));
     expect(screen, contains('/alunos/\$alunoId/chat'));
+    expect(screen, contains('/alunos/\$alunoId/evolucao'));
+    expect(screen, contains("label: 'Lista'"));
+    expect(screen, contains('trilhaPrazoMetricValue'));
+    expect(screen, contains('trilhaPrazoIso'));
+    expect(screen, contains('subtitle: freshness'));
     expect(screen, isNot(contains('TabBar')));
     expect(screen, isNot(contains('TabBarView')));
     expect(screen, isNot(contains('DropdownButton')));

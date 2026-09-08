@@ -45,14 +45,72 @@ String trilhaStatusLabel(bool concluida) =>
 String trilhaPercentLabel(double percentual) =>
     '${percentual.toStringAsFixed(0)}%';
 
-String trilhaHubSubtitle({
-  required String alunoNome,
-  String? freshness,
-}) {
+String trilhaHubSubtitle({required String alunoNome}) {
   final nome = alunoNome.trim().isEmpty ? 'Aluno' : alunoNome.trim();
-  final stamp = freshness?.trim();
-  if (stamp == null || stamp.isEmpty) return nome;
-  return '$nome · $stamp';
+  return nome;
+}
+
+const trilhaPrazoDias = [7, 14, 30, 60, 90];
+
+DateTime? trilhaParseData(String? raw) {
+  final text = raw?.trim();
+  if (text == null || text.isEmpty) return null;
+  return DateTime.tryParse(text);
+}
+
+String trilhaDataLabel(DateTime data) {
+  final day = data.day.toString().padLeft(2, '0');
+  final month = data.month.toString().padLeft(2, '0');
+  return '$day/$month';
+}
+
+String trilhaPrazoOpcaoLabel(int? dias) {
+  if (dias == null) return 'Sem prazo';
+  return 'Em $dias dias';
+}
+
+String? trilhaPrazoIso(int? dias, DateTime today) {
+  if (dias == null) return null;
+  final data = DateTime(today.year, today.month, today.day).add(
+    Duration(days: dias),
+  );
+  final y = data.year.toString().padLeft(4, '0');
+  final m = data.month.toString().padLeft(2, '0');
+  final d = data.day.toString().padLeft(2, '0');
+  return '$y-$m-$d';
+}
+
+DateTime? trilhaProximoPrazo(List<TrilhaModel> trilhas) {
+  DateTime? nearest;
+  for (final trilha in trilhas) {
+    if (trilha.concluida) continue;
+    final data = trilhaParseData(trilha.dataFim);
+    if (data == null) continue;
+    if (nearest == null || data.isBefore(nearest)) nearest = data;
+  }
+  return nearest;
+}
+
+String trilhaPrazoMetricValue(List<TrilhaModel> trilhas) {
+  final data = trilhaProximoPrazo(trilhas);
+  if (data == null) return '—';
+  return trilhaDataLabel(data);
+}
+
+String trilhaPrazoMetricHint(List<TrilhaModel> trilhas) {
+  if (trilhaAtivasCount(trilhas) == 0) return 'Nenhuma trilha ativa';
+  if (trilhaProximoPrazo(trilhas) == null) return 'Sem prazo nas ativas';
+  return 'Próximo prazo das ativas';
+}
+
+String trilhaCardContexto(TrilhaModel trilha) {
+  final parts = <String>[
+    trilhaMetaTipoLabel(trilha.metaTipo),
+    trilhaValorAtualLabel(trilha),
+  ];
+  final prazo = trilhaParseData(trilha.dataFim);
+  if (prazo != null) parts.add('até ${trilhaDataLabel(prazo)}');
+  return parts.join(' · ');
 }
 
 int trilhaAtivasCount(List<TrilhaModel> trilhas) =>
