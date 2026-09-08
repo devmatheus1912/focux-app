@@ -64,6 +64,13 @@ void main() {
     expect(walletChavePixMax, 120);
     expect(walletHubSubtitle(), 'PIX e banco dos recebimentos');
     expect(
+      walletHubSubtitle(freshness: 'há 1 min'),
+      'PIX e banco dos recebimentos · há 1 min',
+    );
+    expect(walletTipoChipLabel(null), 'Tipo de chave');
+    expect(walletTipoChipLabel('CPF'), 'CPF');
+    expect(walletDetalheSecoes, hasLength(2));
+    expect(
       walletRecebidoHint(previsto: 'R\$ 1.000,00', percent: 40),
       '40% de R\$ 1.000,00 previsto',
     );

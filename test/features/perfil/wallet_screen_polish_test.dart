@@ -24,10 +24,13 @@ void main() {
     expect(screen, contains('FxKeyboardPopScope'));
     expect(screen, contains('safePopOrGo'));
     expect(screen, contains('showFxHelpSheet'));
+    expect(screen, contains('AlunoSegmentedChoice'));
+    expect(screen, contains('DashboardHomeActionChip'));
+    expect(screen, contains('RefreshIndicator'));
     expect(screen, isNot(contains('bottomNavigationBar')));
     expect(screen, isNot(contains('FxLiquidSecondaryButton')));
     expect(screen, isNot(contains('showDialog')));
-    expect(screen, contains('FxSatelliteListTile'));
+    expect(screen, isNot(contains('FxSettingsTile')));
     expect(
       screen.replaceAll('FxSatelliteListTile(', ''),
       isNot(contains('ListTile(')),

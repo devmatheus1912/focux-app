@@ -85,6 +85,16 @@ String relatorioAlunoStickyExport() => 'Exportar PDF';
 
 String relatorioAlunoStickyEmpty() => 'Ver evolução';
 
+String relatorioAlunoCheckinChip() => 'Pedir check-in';
+
+const relatorioDetalheSecaoResumo = 'resumo';
+const relatorioDetalheSecaoComparativo = 'comparativo';
+
+const relatorioDetalheSecoes = [
+  (value: relatorioDetalheSecaoResumo, label: 'Resumo'),
+  (value: relatorioDetalheSecaoComparativo, label: 'Versus'),
+];
+
 String relatorioAlunoHubSubtitle({
   required String alunoNome,
   required int diasAnalisados,

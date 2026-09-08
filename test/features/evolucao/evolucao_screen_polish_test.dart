@@ -25,7 +25,7 @@ void main() {
     expect(homeProvider, contains('getHome'));
     expect(homeProvider, contains('EvolucaoHomeClientCache'));
     expect(homeProvider, contains('prefetchEvolucaoHome'));
-    expect(screen, contains('showFxInsetPickerSheet'));
+    expect(screen, contains('AlunoSegmentedChoice'));
     expect(screen, contains('IndexedStack'));
     expect(screen, isNot(contains('FxSettingsGroup')));
     expect(screen, contains('FxSatelliteListTile'));
@@ -41,6 +41,8 @@ void main() {
     expect(screen, contains('compartilharEvolucao'));
     expect(screen, contains('AlunoInsetFormField'));
     expect(screen, contains('DashboardHomeActionChip'));
+    expect(screen, contains('PopScope'));
+    expect(screen, contains("'/alunos/\${widget.alunoId}'"));
     expect(screen, isNot(contains('TabBar')));
     expect(screen, isNot(contains('TabBarView')));
     expect(screen, isNot(contains('TabController')));

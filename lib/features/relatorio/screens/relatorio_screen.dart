@@ -28,6 +28,7 @@ import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../alunos/utils/satellite_screen_utils.dart';
+import '../../alunos/widgets/aluno_form_choices.dart';
 import '../../alunos/widgets/aluno_outreach_message_sheet.dart';
 import '../../subscription/models/subscription_plan.dart';
 import '../data/relatorio_repository.dart';
@@ -62,6 +63,7 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
   var _viewTracked = false;
   var _ttvTracked = false;
   var _exporting = false;
+  var _secao = relatorioDetalheSecaoResumo;
 
   @override
   void initState() {
@@ -216,7 +218,13 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
         featureName: 'Relatórios',
         requiredPlan: SubscriptionPlan.PRO,
         capability: 'relatorios',
-        child: FxShellScaffold(
+        child: PopScope(
+          canPop: false,
+          onPopInvokedWithResult: (didPop, _) {
+            if (didPop) return;
+            safePopOrGo(context, '/alunos/${widget.alunoId}');
+          },
+          child: FxShellScaffold(
           useMesh: true,
           appBar: FxShellAppBar(
             title: 'Relatório',
@@ -270,6 +278,7 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
                 ),
             ],
           ),
+        ),
         ),
       ),
     );
@@ -332,13 +341,11 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
                   onPressed: _abrirPeriodo,
                 ),
                 DashboardHomeActionChip(
-                  label: 'Evolução',
+                  label: 'Aluno',
                   accent: primary,
                   isDark: isDark,
                   onPressed:
-                      () => context.push(
-                        '/alunos/${widget.alunoId}/evolucao',
-                      ),
+                      () => context.push('/alunos/${widget.alunoId}'),
                 ),
                 DashboardHomeActionChip(
                   label: 'Chat',
@@ -347,6 +354,20 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
                   onPressed:
                       () => context.push('/alunos/${widget.alunoId}/chat'),
                 ),
+                if (dados != null &&
+                    dados.treinosTotal > 0 &&
+                    relatorioAlunoAderenciaBaixa(dados.taxaAderenciaPercent))
+                  DashboardHomeActionChip(
+                    label: relatorioAlunoCheckinChip(),
+                    accent: primary,
+                    isDark: isDark,
+                    onPressed:
+                        () => showAlunoCheckinMessageSheet(
+                          context,
+                          alunoId: widget.alunoId,
+                          alunoNome: widget.alunoNome,
+                        ),
+                  ),
               ],
             ),
             if (dados == null || dados.treinosTotal == 0) ...[
@@ -389,7 +410,15 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
                 color: primary,
                 isDark: isDark,
               ),
-              if (_comparativo != null) ...[
+              const SizedBox(height: TokensStrip.s4),
+              AlunoSegmentedChoice(
+                options: relatorioDetalheSecoes,
+                selected: _secao,
+                isDark: isDark,
+                onSelect: (value) => setState(() => _secao = value),
+              ),
+              if (_secao == relatorioDetalheSecaoComparativo &&
+                  _comparativo != null) ...[
                 const SizedBox(height: TokensStrip.s2),
                 OperationalMetricTile(
                   label: 'Variação',
@@ -420,19 +449,13 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
                     '${relatorioAderenciaMediaLabel(_comparativo!.aderenciaAnterior)} · ${relatorioAlunoCheckinsLabel(_comparativo!.checkInsAnterior)}',
                   ),
                 ),
-              ],
-              if (relatorioAlunoAderenciaBaixa(dados.taxaAderenciaPercent)) ...[
+              ] else if (_secao == relatorioDetalheSecaoComparativo) ...[
                 const SizedBox(height: TokensStrip.s5),
-                const DashboardSectionHeader(title: 'Próxima ação'),
-                const SizedBox(height: TokensStrip.s3),
-                FxSatelliteListTile(
-                  title: 'Pedir check-in',
-                  onTap:
-                      () => showAlunoCheckinMessageSheet(
-                        context,
-                        alunoId: widget.alunoId,
-                        alunoNome: widget.alunoNome,
-                      ),
+                FxEmptyState(
+                  icon: 'trend',
+                  title: 'Sem recorte anterior',
+                  subtitle:
+                      'Com mais história neste aluno, o versus aparece aqui.',
                 ),
               ],
             ],
