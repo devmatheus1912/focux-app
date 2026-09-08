@@ -238,64 +238,122 @@ class _EvolucaoComparativoScreenState
   Widget build(BuildContext context) {
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
+    final isDark = chrome.isDark;
     final showSticky = !_loading && _erro == null;
     final empty = _semAvaliacao || _comparativo == null;
     return fxScreenA11yScope(
       label: 'Evolução de ${widget.alunoNome}',
-      child: FxShellScaffold(
-        useMesh: true,
-        appBar: FxShellAppBar(
-          title: 'Comparativo',
-          onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
-          actions: [
-            FxHelpIconButton(tooltip: 'Como comparar', onTap: _showHelp),
-          ],
-        ),
-        body: Column(
-          children: [
-            Expanded(
-              child:
-                  _loading
-                      ? const Padding(
-                        padding: EdgeInsets.all(FxSettingsLayout.pageInset),
-                        child: SkeletonList(count: 4),
-                      )
-                      : _erro != null
-                      ? FxErrorState(
-                        chromeOnDark: chrome.isDark,
-                        primary: primary,
-                        message: _erro!,
-                        onRetry: _load,
-                        title: 'Não conseguimos carregar o comparativo',
-                      )
-                      : FxContentWidthLimiter(child: _buildBody()),
-            ),
-            if (showSticky)
-              SafeArea(
-                top: false,
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(
-                    FxSettingsLayout.pageInset,
-                    TokensStrip.s2,
-                    FxSettingsLayout.pageInset,
-                    TokensStrip.s3 + MediaQuery.viewInsetsOf(context).bottom,
-                  ),
-                  child: FxLiquidPrimaryButton(
-                    label:
-                        empty
-                            ? evolucaoComparativoStickyRegistrar()
-                            : evolucaoComparativoStickyShare(),
-                    loading: _compartilhando || _registrando,
-                    onPressed:
-                        empty
-                            ? (_registrando ? null : _registrar)
-                            : (_compartilhando ? null : _compartilhar),
+      child: PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, _) {
+          if (didPop) return;
+          safePopOrGo(context, '/alunos/${widget.alunoId}');
+        },
+        child: FxShellScaffold(
+          useMesh: true,
+          appBar: FxShellAppBar(
+            title: 'Comparativo',
+            subtitle: FxHubFreshness.fromFetchedAt(_fetchedAt),
+            onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
+            actions: [
+              FxHelpIconButton(tooltip: 'Como comparar', onTap: _showHelp),
+            ],
+          ),
+          body: Column(
+            children: [
+              Expanded(
+                child:
+                    _loading
+                        ? const Padding(
+                          padding: EdgeInsets.all(FxSettingsLayout.pageInset),
+                          child: SkeletonList(count: 4),
+                        )
+                        : _erro != null
+                        ? FxErrorState(
+                          chromeOnDark: isDark,
+                          primary: primary,
+                          message: _erro!,
+                          onRetry: _load,
+                          title: 'Não conseguimos carregar o comparativo',
+                        )
+                        : FxContentWidthLimiter(child: _buildBody()),
+              ),
+              if (showSticky)
+                SafeArea(
+                  top: false,
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      FxSettingsLayout.pageInset,
+                      TokensStrip.s2,
+                      FxSettingsLayout.pageInset,
+                      TokensStrip.s3 + MediaQuery.viewInsetsOf(context).bottom,
+                    ),
+                    child: FxLiquidPrimaryButton(
+                      label:
+                          empty
+                              ? evolucaoComparativoStickyRegistrar()
+                              : evolucaoComparativoStickyShare(),
+                      loading: _compartilhando || _registrando,
+                      onPressed:
+                          empty
+                              ? (_registrando ? null : _registrar)
+                              : (_compartilhando ? null : _compartilhar),
+                    ),
                   ),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
+    );
+  }
+
+  Widget _chips({required Color primary, required bool isDark}) {
+    return Wrap(
+      spacing: TokensStrip.s2,
+      runSpacing: TokensStrip.s2,
+      children: [
+        DashboardHomeActionChip(
+          label: 'Aluno',
+          accent: primary,
+          isDark: isDark,
+          onPressed:
+              () => context.push(
+                '/alunos/${widget.alunoId}',
+                extra: widget.alunoNome,
+              ),
+        ),
+        DashboardHomeActionChip(
+          label: 'Chat',
+          accent: primary,
+          isDark: isDark,
+          onPressed:
+              () => context.push(
+                '/alunos/${widget.alunoId}/chat',
+                extra: widget.alunoNome,
+              ),
+        ),
+        DashboardHomeActionChip(
+          label: 'Medidas',
+          accent: primary,
+          isDark: isDark,
+          onPressed:
+              () => context.push(
+                '/alunos/${widget.alunoId}/evolucao',
+                extra: widget.alunoNome,
+              ),
+        ),
+        DashboardHomeActionChip(
+          label: 'Fotos',
+          accent: primary,
+          isDark: isDark,
+          onPressed:
+              () => context.push(
+                '/alunos/${widget.alunoId}/fotos',
+                extra: widget.alunoNome,
+              ),
+        ),
+      ],
     );
   }
 
@@ -317,12 +375,21 @@ class _EvolucaoComparativoScreenState
               title: fxTitleCaseName(widget.alunoNome),
               subtitle: evolucaoComparativoHubSubtitle(),
             ),
+            const SizedBox(height: TokensStrip.s3),
+            _chips(
+              primary: Theme.of(context).colorScheme.primary,
+              isDark: Theme.of(context).brightness == Brightness.dark,
+            ),
             const SizedBox(height: TokensStrip.s5),
             FxEmptyState(
               icon: 'trend',
               title: 'Nenhuma avaliação para comparar',
               subtitle:
                   'Registre ao menos duas avaliações físicas para ver a evolução.',
+              action: FxEmptyAction(
+                label: evolucaoComparativoStickyRegistrar(),
+                onTap: _registrando ? () {} : _registrar,
+              ),
             ),
           ],
         ),
@@ -375,38 +442,9 @@ class _EvolucaoComparativoScreenState
             isDark: Theme.of(context).brightness == Brightness.dark,
           ),
           const SizedBox(height: TokensStrip.s3),
-          Wrap(
-            spacing: TokensStrip.s2,
-            runSpacing: TokensStrip.s2,
-            children: [
-              DashboardHomeActionChip(
-                label: 'Medidas',
-                accent: Theme.of(context).colorScheme.primary,
-                isDark: Theme.of(context).brightness == Brightness.dark,
-                onPressed:
-                    () => context.push(
-                      '/alunos/${widget.alunoId}/evolucao',
-                      extra: widget.alunoNome,
-                    ),
-              ),
-              DashboardHomeActionChip(
-                label: 'Fotos',
-                accent: Theme.of(context).colorScheme.primary,
-                isDark: Theme.of(context).brightness == Brightness.dark,
-                onPressed:
-                    () => context.push(
-                      '/alunos/${widget.alunoId}/fotos',
-                      extra: widget.alunoNome,
-                    ),
-              ),
-              DashboardHomeActionChip(
-                label: evolucaoComparativoStickyRegistrar(),
-                accent: Theme.of(context).colorScheme.primary,
-                isDark: Theme.of(context).brightness == Brightness.dark,
-                onPressed: _registrar,
-                enabled: !_registrando,
-              ),
-            ],
+          _chips(
+            primary: Theme.of(context).colorScheme.primary,
+            isDark: Theme.of(context).brightness == Brightness.dark,
           ),
           const SizedBox(height: TokensStrip.s3),
           EvolucaoComparativoTable(primeira: c.primeira, atual: c.atual),

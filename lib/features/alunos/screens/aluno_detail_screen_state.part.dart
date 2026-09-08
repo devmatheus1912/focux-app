@@ -173,7 +173,13 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
 
     return fxScreenA11yScope(
       label: 'Ficha do aluno',
-      child: FxShellScaffold(
+      child: PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, _) {
+          if (didPop) return;
+          safePopOrGo(context, '/alunos');
+        },
+        child: FxShellScaffold(
         useMesh: true,
         constrainWidth: false,
         safeArea: false,
@@ -188,26 +194,18 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
           fit: StackFit.expand,
           children: [
             loadingPrimary || loadingFallback
-                ? AlunoDetailLoadingSkeleton(
+                ? AlunoDetailLoadingSkeleton.forChrome(
                   tabController: _tabController,
-                  isDark: isDark,
+                  chrome: chrome,
                   primary: primary,
-                  ink: ink,
-                  mute: mute,
-                  line: chrome.line,
-                  sheetFill: chrome.sheetFill,
                   listPreview: listPreview,
                 )
                 : resolvedAlunoAsync.when(
                   loading:
-                      () => AlunoDetailLoadingSkeleton(
+                      () => AlunoDetailLoadingSkeleton.forChrome(
                         tabController: _tabController,
-                        isDark: isDark,
+                        chrome: chrome,
                         primary: primary,
-                        ink: ink,
-                        mute: mute,
-                        line: chrome.line,
-                        sheetFill: chrome.sheetFill,
                         listPreview: listPreview,
                       ),
                   error:
@@ -492,6 +490,7 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                 ),
               ),
           ],
+        ),
         ),
       ),
     );

@@ -26,6 +26,9 @@ void main() {
     expect(screen, contains("'/alunos/\${widget.alunoId}/evolucao'"));
     expect(screen, contains("'/alunos/\${widget.alunoId}/fotos'"));
     expect(screen, contains('DashboardHomeActionChip'));
+    expect(screen, contains('PopScope'));
+    expect(screen, contains("'/alunos/\${widget.alunoId}/chat'"));
+    expect(screen, contains("label: 'Aluno'"));
     expect(screen, isNot(contains('FxSettingsGroup')));
     expect(screen, isNot(contains('person_add')));
     expect(screen, isNot(contains('DropdownButton')));

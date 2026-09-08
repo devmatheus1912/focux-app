@@ -29,6 +29,7 @@ void main() {
     expect(screen, contains('viewInsetsOf'));
     expect(screen, contains('planoSucessoHubSubtitle'));
     expect(screen, contains('PopScope'));
+    expect(screen, contains("'Criar plano'"));
     expect(screen, contains('DashboardHomeActionChip'));
     expect(screen, contains("'/alunos/\${widget.alunoId}/chat'"));
     expect(screen, isNot(contains('LinearGradient')));
