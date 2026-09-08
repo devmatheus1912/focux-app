@@ -19,6 +19,9 @@ void main() {
     expect(screen, contains('OperationalMetricTile'));
     expect(screen, contains('DashboardHomeActionChip'));
     expect(screen, contains('FxEmptyAction'));
+    expect(screen, contains('RefreshIndicator'));
+    expect(screen, contains('relatoriosHubViewed'));
+    expect(screen, contains("'qualidade'"));
     expect(screen, contains('keyboardDismissBehavior'));
     expect(screen, isNot(contains('heroGradientFrom')));
     expect(screen, isNot(contains('class _MetricCompareCard')));

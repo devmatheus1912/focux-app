@@ -27,6 +27,8 @@ void main() {
     expect(screen, contains('FxStripCard'));
     expect(screen, contains('emphasize: true'));
     expect(screen, contains('DashboardHomeActionChip'));
+    expect(screen, contains('Ver retenção'));
+    expect(screen, contains("context.push('/retencao')"));
     expect(screen, contains('keyboardDismissBehavior'));
     expect(screen, contains('Como calculamos'));
     expect(screen, contains('goPersonalShellTab'));

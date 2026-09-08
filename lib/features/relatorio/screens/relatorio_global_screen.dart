@@ -224,6 +224,7 @@ class _RelatorioGlobalScreenState extends ConsumerState<RelatorioGlobalScreen> {
                             isDark: isDark,
                             onAlunos: _abrirAlunos,
                             onAluno: _abrirRelatorioAluno,
+                            onRetencao: () => context.push('/retencao'),
                           ),
                           const SizedBox(height: TokensStrip.s4),
                           OperationalMetricTile(
@@ -311,6 +312,7 @@ class _RelatorioFocusCard extends StatelessWidget {
     required this.isDark,
     required this.onAlunos,
     required this.onAluno,
+    required this.onRetencao,
   });
 
   final ResumoGlobal dados;
@@ -318,6 +320,7 @@ class _RelatorioFocusCard extends StatelessWidget {
   final bool isDark;
   final VoidCallback onAlunos;
   final void Function(ResumoAluno aluno) onAluno;
+  final VoidCallback onRetencao;
 
   @override
   Widget build(BuildContext context) {
@@ -348,23 +351,33 @@ class _RelatorioFocusCard extends StatelessWidget {
             ).copyWith(fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: TokensStrip.s3),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: DashboardHomeActionChip(
-              label: firstAtencao == null ? 'Ver alunos' : 'Ver aluno',
-              accent: firstAtencao == null
-                  ? Theme.of(context).colorScheme.primary
-                  : EagleTokens.bad,
-              isDark: isDark,
-              onPressed: () {
-                final alvo = firstAtencao;
-                if (alvo == null) {
-                  onAlunos();
-                  return;
-                }
-                onAluno(alvo);
-              },
-            ),
+          Wrap(
+            spacing: TokensStrip.s2,
+            runSpacing: TokensStrip.s2,
+            children: [
+              DashboardHomeActionChip(
+                label: firstAtencao == null ? 'Ver alunos' : 'Ver aluno',
+                accent: firstAtencao == null
+                    ? Theme.of(context).colorScheme.primary
+                    : EagleTokens.bad,
+                isDark: isDark,
+                onPressed: () {
+                  final alvo = firstAtencao;
+                  if (alvo == null) {
+                    onAlunos();
+                    return;
+                  }
+                  onAluno(alvo);
+                },
+              ),
+              if (firstAtencao != null)
+                DashboardHomeActionChip(
+                  label: 'Ver retenção',
+                  accent: Theme.of(context).colorScheme.primary,
+                  isDark: isDark,
+                  onPressed: onRetencao,
+                ),
+            ],
           ),
         ],
       ),

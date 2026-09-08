@@ -73,14 +73,22 @@ class _GamificacaoScreenState extends ConsumerState<GamificacaoScreen> {
               onTap: () => showFxHelpSheet(
                 context,
                 title: 'Evolução',
-                subtitle: 'Sequência, PRs e conquistas do treino.',
-                tips: const [
-                  FxHelpTip('Como calculamos', gamificacaoComoCalculamos),
+                subtitle: isAluno
+                    ? 'Sequência, PRs e conquistas do treino.'
+                    : 'Sequência e conquistas da base.',
+                tips: [
+                  const FxHelpTip('Como calculamos', gamificacaoComoCalculamos),
                   FxHelpTip(
                     'Conquistas',
-                    'Toque no badge para o caminho de ganhar. Só streak, frequência e PR vêm do servidor.',
+                    isAluno
+                        ? 'Toque no badge para o caminho de ganhar. Só streak, frequência e PR vêm do servidor.'
+                        : 'Toque no badge para abrir os alunos. O número do topo é quem está em sequência.',
                   ),
-                  FxHelpTip('Indicação', 'O código de amigo continua em Referral.'),
+                  if (isAluno)
+                    const FxHelpTip(
+                      'Indicação',
+                      'O código de amigo continua em Referral.',
+                    ),
                 ],
               ),
             ),
@@ -215,8 +223,11 @@ class _GamificacaoBodyState extends State<_GamificacaoBody> {
         for (final badge in visiveis)
           _BadgeRow(
             badge: badge,
-            onTap: () => context.push(
-              gamificacaoRotaDoBadge(badge.tipo, isAluno: widget.isAluno),
+            isAluno: widget.isAluno,
+            onTap: () => _abrirBadge(
+              context,
+              badge.tipo,
+              isAluno: widget.isAluno,
             ),
           ),
         if (widget.isAluno) ...[
@@ -255,10 +266,13 @@ class _StreakCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Sequência', style: FocuxHubTypography.chip(chrome.mute)),
+          Text(
+            gamificacaoStreakTitle(isAluno: isAluno),
+            style: FocuxHubTypography.chip(chrome.mute),
+          ),
           const SizedBox(height: 6),
           Text(
-            gamificacaoStreakLabel(streak),
+            gamificacaoStreakLabel(streak, isAluno: isAluno),
             style: FocuxHubTypography.kpi(
               color: chrome.ink,
               fontSize: FocuxHubTypography.metricLg,
@@ -266,9 +280,11 @@ class _StreakCard extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            streak == 0
-                ? 'Um treino hoje recomeça a série'
-                : 'Recorde ${data.streak.streakMaximo}d',
+            gamificacaoStreakHint(
+              isAluno: isAluno,
+              streak: streak,
+              recorde: data.streak.streakMaximo,
+            ),
             style: FocuxHubTypography.body(
               color: chrome.ink,
             ).copyWith(fontWeight: FontWeight.w700),
@@ -279,18 +295,20 @@ class _StreakCard extends StatelessWidget {
             runSpacing: TokensStrip.s2,
             children: [
               DashboardHomeActionChip(
-                label: 'Ver check-in',
+                label: gamificacaoFocusLabel(isAluno: isAluno),
                 accent: Theme.of(context).colorScheme.primary,
                 isDark: isDark,
-                onPressed: () => context.push('/checkin'),
+                onPressed: () => _abrirFoco(context, isAluno: isAluno),
               ),
               if (nextBadge case final pending?)
                 DashboardHomeActionChip(
                   label: pending.label,
                   accent: Theme.of(context).colorScheme.primary,
                   isDark: isDark,
-                  onPressed: () => context.push(
-                    gamificacaoRotaDoBadge(pending.tipo, isAluno: isAluno),
+                  onPressed: () => _abrirBadge(
+                    context,
+                    pending.tipo,
+                    isAluno: isAluno,
                   ),
                 ),
             ],
@@ -301,10 +319,38 @@ class _StreakCard extends StatelessWidget {
   }
 }
 
+void _abrirFoco(BuildContext context, {required bool isAluno}) {
+  if (isAluno) {
+    context.push('/checkin');
+    return;
+  }
+  AnalyticsService.instance.track(ProductEvents.alunosViewed);
+  goPersonalShellTab(context, '/alunos');
+}
+
+void _abrirBadge(
+  BuildContext context,
+  String tipo, {
+  required bool isAluno,
+}) {
+  final rota = gamificacaoRotaDoBadge(tipo, isAluno: isAluno);
+  if (!isAluno && rota == '/alunos') {
+    AnalyticsService.instance.track(ProductEvents.alunosViewed);
+    goPersonalShellTab(context, '/alunos');
+    return;
+  }
+  context.push(rota);
+}
+
 class _BadgeRow extends StatelessWidget {
-  const _BadgeRow({required this.badge, required this.onTap});
+  const _BadgeRow({
+    required this.badge,
+    required this.isAluno,
+    required this.onTap,
+  });
 
   final GamificacaoBadgeTile badge;
+  final bool isAluno;
   final VoidCallback onTap;
 
   @override
@@ -312,7 +358,11 @@ class _BadgeRow extends StatelessWidget {
     return FxSatelliteListTile(
       title: badge.label,
       subtitle: Text(
-        gamificacaoBadgeSubtitle(earned: badge.earned, tipo: badge.tipo),
+        gamificacaoBadgeSubtitle(
+          earned: badge.earned,
+          tipo: badge.tipo,
+          isAluno: isAluno,
+        ),
       ),
       onTap: onTap,
       leading: SizedBox(
