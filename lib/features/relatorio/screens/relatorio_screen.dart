@@ -18,7 +18,6 @@ import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_hub_header.dart';
 import '../../../core/widgets/fx_inset_picker_sheet.dart';
-import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -122,9 +121,11 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
   }
 
   Future<void> _abrirPeriodo() async {
+    final opcoes = relatorioAlunoPeriodoOpcoes();
     final selected = relatorioAlunoPeriodoKey(
       dias: _dias,
-      personalizado: _rangeCustom != null,
+      inicio: _rangeCustom?.start,
+      fim: _rangeCustom?.end,
     );
     final picked = await showFxInsetPickerSheet<String>(
       context,
@@ -132,42 +133,24 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
       headerIcon: Icons.calendar_today_outlined,
       selected: selected,
       items: [
-        for (final key in relatorioAlunoPeriodoKeys)
-          FxInsetPickerSheetItem(
-            value: key,
-            label: relatorioAlunoPeriodoOpcaoLabel(key),
-          ),
+        for (final opcao in opcoes)
+          FxInsetPickerSheetItem(value: opcao.key, label: opcao.label),
       ],
     );
     if (!mounted || picked == null || picked == selected) return;
-    if (picked == 'custom') {
-      await _escolherPeriodoCustom();
-      return;
+    final opcao = relatorioAlunoPeriodoOpcaoByKey(picked);
+    if (opcao == null) return;
+    if (opcao.isMes) {
+      setState(() {
+        _rangeCustom = DateTimeRange(start: opcao.inicio!, end: opcao.fim!);
+        _dias = relatorioAlunoDiasDoRange(opcao.inicio!, opcao.fim!);
+      });
+    } else {
+      setState(() {
+        _dias = opcao.dias!;
+        _rangeCustom = null;
+      });
     }
-    final dias = relatorioAlunoDiasFromKey(picked);
-    if (dias == null) return;
-    setState(() {
-      _dias = dias;
-      _rangeCustom = null;
-    });
-    await _carregarDados();
-  }
-
-  Future<void> _escolherPeriodoCustom() async {
-    final range = await showDateRangePicker(
-      context: context,
-      firstDate: DateTime.now().subtract(const Duration(days: 365 * 2)),
-      lastDate: DateTime.now(),
-      initialDateRange:
-          _rangeCustom ??
-          DateTimeRange(
-            start: DateTime.now().subtract(const Duration(days: 30)),
-            end: DateTime.now(),
-          ),
-    );
-    if (!mounted || range == null) return;
-    FxKeyboardDismissScope.dismiss();
-    setState(() => _rangeCustom = range);
     await _carregarDados();
   }
 

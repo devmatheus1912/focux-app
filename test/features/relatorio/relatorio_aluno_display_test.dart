@@ -2,33 +2,57 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/relatorio/utils/relatorio_aluno_display.dart';
 
 void main() {
-  test('relatorioAlunoPeriodoValueLabel cobre preset e intervalo', () {
+  test('relatorioAlunoPeriodoValueLabel cobre preset e mês cheio', () {
     expect(
       relatorioAlunoPeriodoValueLabel(dias: 30),
       '30 dias',
     );
     expect(
       relatorioAlunoPeriodoValueLabel(
-        dias: 30,
+        dias: 31,
         inicio: DateTime(2026, 8, 1),
         fim: DateTime(2026, 8, 31),
       ),
-      '01/08 – 31/08',
+      'Agosto 2026',
     );
   });
 
-  test('relatorioAlunoPeriodoKey e dias from key', () {
-    expect(
-      relatorioAlunoPeriodoKey(dias: 7, personalizado: false),
+  test('relatorioAlunoPeriodoOpcoes mistura presets e 6 meses', () {
+    final agora = DateTime(2026, 9, 7);
+    final opcoes = relatorioAlunoPeriodoOpcoes(agora: agora);
+    expect(opcoes.map((o) => o.key).toList(), [
       '7',
-    );
+      '30',
+      '90',
+      '180',
+      'm:2026-09',
+      'm:2026-08',
+      'm:2026-07',
+      'm:2026-06',
+      'm:2026-05',
+      'm:2026-04',
+    ]);
+    expect(opcoes.firstWhere((o) => o.key == 'm:2026-08').label, 'Agosto 2026');
+    expect(opcoes.any((o) => o.key == 'custom'), isFalse);
+  });
+
+  test('relatorioAlunoPeriodoKey e dias from key', () {
+    expect(relatorioAlunoPeriodoKey(dias: 7), '7');
     expect(
-      relatorioAlunoPeriodoKey(dias: 30, personalizado: true),
-      'custom',
+      relatorioAlunoPeriodoKey(
+        dias: 31,
+        inicio: DateTime(2026, 8, 1),
+        fim: DateTime(2026, 8, 31),
+      ),
+      'm:2026-08',
     );
     expect(relatorioAlunoDiasFromKey('90'), 90);
-    expect(relatorioAlunoDiasFromKey('custom'), isNull);
-    expect(relatorioAlunoPeriodoOpcaoLabel('custom'), 'Personalizado');
+    expect(relatorioAlunoDiasFromKey('m:2026-08'), isNull);
+    expect(
+      relatorioAlunoPeriodoOpcaoLabel('m:2026-08', agora: DateTime(2026, 9, 7)),
+      'Agosto 2026',
+    );
+    expect(relatorioAlunoDiasDoRange(DateTime(2026, 2, 1), DateTime(2026, 2, 28)), 28);
   });
 
   test('relatorioAlunoAderenciaStatus e comparativo', () {
