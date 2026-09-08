@@ -215,6 +215,7 @@ class _TrilhasListBody extends StatelessWidget {
   const _TrilhasListBody({
     required this.trilhas,
     required this.freshness,
+    required this.alunoId,
     required this.alunoNome,
     required this.filtro,
     required this.onFiltro,
@@ -227,6 +228,7 @@ class _TrilhasListBody extends StatelessWidget {
 
   final List<TrilhaModel> trilhas;
   final String? freshness;
+  final int alunoId;
   final String alunoNome;
   final String filtro;
   final ValueChanged<String> onFiltro;
@@ -260,6 +262,25 @@ class _TrilhasListBody extends StatelessWidget {
               alunoNome: alunoNome,
               freshness: freshness,
             ),
+          ),
+          const SizedBox(height: TokensStrip.s3),
+          Wrap(
+            spacing: TokensStrip.s2,
+            runSpacing: TokensStrip.s2,
+            children: [
+              DashboardHomeActionChip(
+                label: 'Aluno',
+                accent: primary,
+                isDark: isDark,
+                onPressed: () => context.push('/alunos/$alunoId'),
+              ),
+              DashboardHomeActionChip(
+                label: 'Chat',
+                accent: primary,
+                isDark: isDark,
+                onPressed: () => context.push('/alunos/$alunoId/chat'),
+              ),
+            ],
           ),
           const SizedBox(height: TokensStrip.s4),
           OperationalMetricTile(
