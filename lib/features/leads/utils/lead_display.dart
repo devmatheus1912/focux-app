@@ -162,6 +162,14 @@ String leadCountLabel(int count) {
   return '$count leads';
 }
 
+String leadInteracoesMetricValue(int count) => '$count';
+
+String leadInteracoesMetricHint(int count) {
+  if (count <= 0) return 'Nenhum contato registrado';
+  if (count == 1) return '1 contato no histórico';
+  return '$count contatos no histórico';
+}
+
 const leadListChipStatuses = [
   'LEAD',
   'TESTE',

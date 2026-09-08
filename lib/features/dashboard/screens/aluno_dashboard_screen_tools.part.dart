@@ -33,6 +33,12 @@ class _StudentToolsSection extends StatelessWidget {
         route: '/aluno/desafios',
       ),
       _StudentToolAction(
+        icon: Icons.route_outlined,
+        title: 'Trilhas',
+        subtitle: 'Metas e progresso',
+        route: '/aluno/trilhas',
+      ),
+      _StudentToolAction(
         icon: Icons.chat_bubble_outline,
         title: 'Personal',
         subtitle: 'Chat direto',

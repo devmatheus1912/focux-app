@@ -26,3 +26,23 @@ Future<void> showTrilhasHelpSheet(BuildContext context) {
     ],
   );
 }
+
+Future<void> showAlunoTrilhasHelpSheet(BuildContext context) {
+  return showFxHelpSheet(
+    context,
+    title: 'Suas trilhas',
+    subtitle: 'Metas que o personal atribuiu para você.',
+    tips: const [
+      FxHelpTip(
+        'Progresso',
+        'O percentual sobe quando o personal marca um marco ou atualiza a meta.',
+        icon: 'trend',
+      ),
+      FxHelpTip(
+        'Treinos',
+        'O botão de baixo abre seus treinos — é o caminho mais comum de avançar.',
+        icon: 'dumbbell',
+      ),
+    ],
+  );
+}

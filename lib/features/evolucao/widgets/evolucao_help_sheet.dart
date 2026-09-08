@@ -15,7 +15,7 @@ Future<void> showEvolucaoHelpSheet(BuildContext context) {
       ),
       FxHelpTip(
         'Visão',
-        'Troque entre medidas e recordes no ícone de tendência. Fotos e comparativo abrem pelos chips.',
+        'Troque entre medidas e recordes no ícone de tendência. Fotos, comparativo e enviar no chat abrem pelos chips.',
         icon: 'trend',
       ),
     ],

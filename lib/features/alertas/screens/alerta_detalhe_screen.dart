@@ -378,6 +378,16 @@ class _AlertaDetalheScreenState extends ConsumerState<AlertaDetalheScreen> {
                               runSpacing: TokensStrip.s2,
                               children: [
                                 DashboardHomeActionChip(
+                                  label: 'Aluno',
+                                  accent: primary,
+                                  isDark: isDark,
+                                  onPressed:
+                                      () => context.push(
+                                        '/alunos/${widget.alunoId}',
+                                        extra: nome,
+                                      ),
+                                ),
+                                DashboardHomeActionChip(
                                   label: 'Chat',
                                   accent: primary,
                                   isDark: isDark,
@@ -387,6 +397,18 @@ class _AlertaDetalheScreenState extends ConsumerState<AlertaDetalheScreen> {
                                         extra: nome,
                                       ),
                                 ),
+                                if (alertaStatusFinanceiroRuim(
+                                  _detalhe!.statusFinanceiro,
+                                ))
+                                  DashboardHomeActionChip(
+                                    label: 'Cobrar',
+                                    accent: EagleTokens.bad,
+                                    isDark: isDark,
+                                    onPressed:
+                                        () => context.push(
+                                          '/financeiro?alunoId=${widget.alunoId}',
+                                        ),
+                                  ),
                                 DashboardHomeActionChip(
                                   label: alertaAdiarCtaLabel(),
                                   accent: primary,

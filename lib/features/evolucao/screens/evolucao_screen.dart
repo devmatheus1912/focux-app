@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
@@ -13,6 +14,7 @@ import '../../../core/utils/friendly_error.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
@@ -29,6 +31,7 @@ import '../../../core/widgets/skeleton_loader.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../alunos/utils/satellite_screen_utils.dart';
 import '../../alunos/widgets/aluno_inset_form_field.dart';
+import '../../avaliacao/utils/evolucao_comparativo_display.dart';
 import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../data/evolucao_repository.dart';
 import '../utils/evolucao_display.dart';
@@ -89,6 +92,28 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
       '/alunos/${widget.alunoId}/evolucao-comparativo',
       extra: widget.alunoNome,
     );
+  }
+
+  Future<void> _compartilharNoChat() async {
+    HapticFeedback.mediumImpact();
+    final ok = await showFxConfirmSheet(
+      context,
+      title: evolucaoComparativoConfirmTitle(),
+      message: evolucaoComparativoConfirmMessage(),
+      icon: Icons.chat_bubble_outline_rounded,
+      confirmLabel: evolucaoComparativoConfirmLabel(),
+    );
+    if (!ok || !mounted) return;
+    try {
+      await EvolucaoRepository(
+        ref.read(apiClientProvider),
+      ).compartilharEvolucao(widget.alunoId);
+      if (!mounted) return;
+      FeedbackHelper.showSuccess(context, 'Evolução compartilhada via chat.');
+    } catch (e) {
+      if (!mounted) return;
+      FeedbackHelper.showError(context, friendlyError(e));
+    }
   }
 
   @override
@@ -182,6 +207,12 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
                                   accent: primary,
                                   isDark: chrome.isDark,
                                   onPressed: _abrirComparativo,
+                                ),
+                                DashboardHomeActionChip(
+                                  label: 'Enviar no chat',
+                                  accent: primary,
+                                  isDark: chrome.isDark,
+                                  onPressed: _compartilharNoChat,
                                 ),
                               ],
                             ),

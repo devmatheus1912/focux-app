@@ -71,6 +71,22 @@ class _LeadDetailContent extends StatelessWidget {
                   ? OperationalMetricEmphasis.alert
                   : OperationalMetricEmphasis.normal,
         ),
+        const SizedBox(height: TokensStrip.s2),
+        OperationalMetricTile(
+          label: 'Contatos',
+          value: leadInteracoesMetricValue(interacoes.length),
+          hint: leadInteracoesMetricHint(interacoes.length),
+          color: primary,
+          isDark: isDark,
+        ),
+        const SizedBox(height: TokensStrip.s2),
+        OperationalMetricTile(
+          label: 'Origem',
+          value: leadOrigemLabel(origem),
+          hint: objetivo == null || objetivo.isEmpty ? 'Canal de entrada' : objetivo,
+          color: primary,
+          isDark: isDark,
+        ),
         const SizedBox(height: TokensStrip.s4),
         Wrap(
           spacing: TokensStrip.s2,

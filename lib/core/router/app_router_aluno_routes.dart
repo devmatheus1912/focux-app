@@ -13,6 +13,7 @@ import '../../features/recorrencia/screens/recorrencia_aluno_screen.dart';
 import '../../features/grupos/screens/grupo_aulas_aluno_screen.dart';
 import '../../features/anamnese/screens/anamnese_aluno_screen.dart';
 import '../../features/feedback/screens/feedback_aluno_screen.dart';
+import '../../features/trilhas/screens/aluno_trilhas_screen.dart';
 import '../widgets/fx_route_chrome.dart';
 
 /// Aluno shell and push routes.
@@ -99,6 +100,12 @@ List<RouteBase> buildAlunoRoutes() {
         builder:
             (context, state) =>
                 const FxRouteChrome(child: AnamneseAlunoScreen()),
+      ),
+      GoRoute(
+        path: '/aluno/trilhas',
+        builder:
+            (context, state) =>
+                const FxRouteChrome(child: AlunoTrilhasScreen()),
       ),
       GoRoute(
         path: '/evolucao',
