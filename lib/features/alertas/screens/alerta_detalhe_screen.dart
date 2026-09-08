@@ -222,6 +222,7 @@ class _AlertaDetalheScreenState extends ConsumerState<AlertaDetalheScreen> {
         useMesh: true,
         appBar: FxShellAppBar(
           title: 'Alerta',
+          subtitle: FxHubFreshness.fromFetchedAt(_fetchedAt),
           onBack: _leave,
           actions: [
             FxHelpIconButton(
@@ -392,6 +393,31 @@ class _AlertaDetalheScreenState extends ConsumerState<AlertaDetalheScreen> {
                                       : OperationalMetricEmphasis.normal,
                             ),
                             const SizedBox(height: TokensStrip.s4),
+                            Wrap(
+                              spacing: TokensStrip.s2,
+                              runSpacing: TokensStrip.s2,
+                              children: [
+                                DashboardHomeActionChip(
+                                  label: 'Aluno',
+                                  accent: primary,
+                                  isDark: isDark,
+                                  onPressed: () => context.push(
+                                    '/alunos/${widget.alunoId}',
+                                    extra: nome,
+                                  ),
+                                ),
+                                DashboardHomeActionChip(
+                                  label: 'Chat',
+                                  accent: primary,
+                                  isDark: isDark,
+                                  onPressed: () => context.push(
+                                    '/alunos/${widget.alunoId}/chat',
+                                    extra: nome,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: TokensStrip.s4),
                             AlunoSegmentedChoice(
                               options: alertaDetalheSecoes,
                               selected: _secao,
@@ -429,21 +455,11 @@ class _AlertaDetalheScreenState extends ConsumerState<AlertaDetalheScreen> {
                                     enabled: !_gerandoIa,
                                     onPressed: _gerarIa,
                                   ),
-                                  DashboardHomeActionChip(
-                                    label: 'Chat',
-                                    accent: primary,
-                                    isDark: isDark,
-                                    onPressed: () => context.push(
-                                      '/alunos/${widget.alunoId}/chat',
-                                      extra: nome,
-                                    ),
-                                  ),
                                 ],
                               ),
                             ] else
                               AlertaDetalheSituacao(
                                 alunoId: widget.alunoId,
-                                alunoNome: nome,
                                 motivos: _detalhe!.motivos,
                                 statusFinanceiro: _detalhe!.statusFinanceiro,
                                 resolving: _resolving,

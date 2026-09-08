@@ -182,4 +182,17 @@ void main() {
       '07/09/2026',
     );
   });
+
+  test('financeiro contato do detalhe S3', () {
+    expect(financeiroMensalidadeDetalheSecoes, hasLength(2));
+    expect(financeiroContatosEmpty(), 'Nenhum contato nesta cobrança');
+    expect(
+      financeiroContatoSubtitle(null, '2026-09-07T12:00:00'),
+      '07/09/2026',
+    );
+    expect(
+      financeiroContatoSubtitle('Ligou e pediu PIX', '2026-09-07T12:00:00'),
+      'Ligou e pediu PIX · 07/09/2026',
+    );
+  });
 }

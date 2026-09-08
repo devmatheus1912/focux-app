@@ -43,7 +43,7 @@ void main() {
     expect(screen, contains('AlunoSegmentedChoice'));
     expect(screen, contains('PopScope'));
     expect(screen, contains('/alunos/\${widget.alunoId}/chat'));
-    expect(screen, contains('/alunos/\$alunoId'));
+    expect(screen, contains('/alunos/\${widget.alunoId}'));
     expect(screen, contains('/financeiro?alunoId='));
     expect(screen, isNot(contains('alunoEmail')));
     expect(screen, isNot(contains('LinearProgressIndicator')));

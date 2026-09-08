@@ -57,6 +57,28 @@ class Mensalidade {
   );
 }
 
+class MensalidadeContato {
+  final int id;
+  final String tipo;
+  final String? observacao;
+  final String? registradoEm;
+
+  const MensalidadeContato({
+    required this.id,
+    required this.tipo,
+    this.observacao,
+    this.registradoEm,
+  });
+
+  factory MensalidadeContato.fromJson(Map<String, dynamic> j) =>
+      MensalidadeContato(
+        id: (j['id'] as num).toInt(),
+        tipo: j['tipo'] as String? ?? '',
+        observacao: j['observacao'] as String?,
+        registradoEm: j['registradoEm'] as String?,
+      );
+}
+
 class VencimentoItem {
   final int mensalidadeId;
   final int? alunoId;
@@ -218,6 +240,18 @@ class FinanceiroRepository {
           'observacao': observacao,
       },
     );
+  }
+
+  Future<List<MensalidadeContato>> listarContatos(int mensalidadeId) async {
+    final r = await _dio.get(
+      '/api/financeiro/mensalidades/$mensalidadeId/contatos',
+    );
+    return (r.data as List)
+        .whereType<Map>()
+        .map(
+          (e) => MensalidadeContato.fromJson(Map<String, dynamic>.from(e)),
+        )
+        .toList();
   }
 
   Future<void> atualizarAtrasos() async {

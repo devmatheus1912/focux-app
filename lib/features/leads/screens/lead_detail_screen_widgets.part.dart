@@ -130,6 +130,12 @@ class _LeadDetailContent extends StatelessWidget {
         spacing: TokensStrip.s2,
         runSpacing: TokensStrip.s2,
         children: [
+          DashboardHomeActionChip(
+            label: 'Lista',
+            accent: primary,
+            isDark: isDark,
+            onPressed: () => safePopOrGo(context, '/leads'),
+          ),
           if (sticky != LeadStickyAction.followUp)
             DashboardHomeActionChip(
               label: 'Follow-up',
