@@ -351,7 +351,7 @@ const Map<String, FocuxSurfaceSpec> focuxSurfaceCatalog = {
     logicalParent: '/assinatura',
   ),
   '/assinatura/success': FocuxSurfaceSpec(type: _s6, logicalParent: _home),
-  '/referral': FocuxSurfaceSpec(type: _s3, logicalParent: _perfil),
+  '/referral': FocuxSurfaceSpec(type: _s1, logicalParent: _perfil),
   '/retencao': FocuxSurfaceSpec(type: _s1, logicalParent: _home),
   '/ofertas-upsell': FocuxSurfaceSpec(
     type: _s6,
