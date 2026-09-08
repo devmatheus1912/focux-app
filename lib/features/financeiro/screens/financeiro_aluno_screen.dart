@@ -25,6 +25,7 @@ import '../../../core/widgets/operational_metric_tile.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../features/alunos/utils/satellite_screen_utils.dart';
 import '../../../features/auth/providers/auth_provider.dart';
+import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../data/financeiro_repository.dart';
 import '../utils/financeiro_hub_display.dart';
 import '../widgets/financeiro_aluno_cobranca_sheet.dart';
@@ -116,6 +117,29 @@ class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
   int get _atrasadas =>
       _mensalidades.where((m) => m.status == 'ATRASADO').length;
 
+  int get _pagas => _mensalidades.where((m) => m.status == 'PAGO').length;
+
+  Widget _atalhos({required Color primary, required bool isDark}) {
+    return Wrap(
+      spacing: TokensStrip.s2,
+      runSpacing: TokensStrip.s2,
+      children: [
+        DashboardHomeActionChip(
+          label: 'Assinatura',
+          accent: primary,
+          isDark: isDark,
+          onPressed: () => context.push('/aluno/recorrencia'),
+        ),
+        DashboardHomeActionChip(
+          label: 'Chat',
+          accent: primary,
+          isDark: isDark,
+          onPressed: () => context.push('/chat/aluno'),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -187,6 +211,21 @@ class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
                                         color: primary,
                                         isDark: isDark,
                                       ),
+                                      const SizedBox(height: TokensStrip.s3),
+                                      OperationalMetricTile(
+                                        label: 'Pagas',
+                                        value: '$_pagas',
+                                        hint: 'Neste recorte',
+                                        color: primary,
+                                        isDark: isDark,
+                                        emphasis:
+                                            OperationalMetricEmphasis.muted,
+                                      ),
+                                      const SizedBox(height: TokensStrip.s4),
+                                      _atalhos(
+                                        primary: primary,
+                                        isDark: isDark,
+                                      ),
                                       const SizedBox(height: TokensStrip.s4),
                                       const FxEmptyState(
                                         icon: 'coin',
@@ -207,7 +246,7 @@ class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
                                     ),
                                     itemCount:
                                         _mensalidades.length +
-                                        3 +
+                                        5 +
                                         (_hasMore ? 1 : 0),
                                     itemBuilder: (context, i) {
                                       if (i == 0) {
@@ -246,11 +285,32 @@ class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
                                         );
                                       }
                                       if (i == 2) {
+                                        return OperationalMetricTile(
+                                          label: 'Pagas',
+                                          value: '$_pagas',
+                                          hint: 'Neste recorte',
+                                          color: primary,
+                                          isDark: isDark,
+                                        );
+                                      }
+                                      if (i == 3) {
+                                        return Padding(
+                                          padding: const EdgeInsets.only(
+                                            top: TokensStrip.s4,
+                                            bottom: TokensStrip.s3,
+                                          ),
+                                          child: _atalhos(
+                                            primary: primary,
+                                            isDark: isDark,
+                                          ),
+                                        );
+                                      }
+                                      if (i == 4) {
                                         return const SizedBox(
                                           height: TokensStrip.s2,
                                         );
                                       }
-                                      final itemIndex = i - 3;
+                                      final itemIndex = i - 5;
                                       if (itemIndex >= _mensalidades.length) {
                                         return FxSatelliteListTile(
                                           title:

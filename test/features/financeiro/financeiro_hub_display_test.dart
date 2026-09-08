@@ -124,4 +124,13 @@ void main() {
       contains('deste aluno'),
     );
   });
+
+  test('financeiroMensalidadePagoEmLabel formata ISO', () {
+    expect(financeiroMensalidadePagoEmLabel(null), 'Ainda em aberto');
+    expect(financeiroMensalidadePagoEmLabel(''), 'Ainda em aberto');
+    expect(
+      financeiroMensalidadePagoEmLabel('2026-09-07T12:00:00'),
+      '07/09/2026',
+    );
+  });
 }

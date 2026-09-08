@@ -27,6 +27,10 @@ void main() {
     expect(screen, contains('showFxHelpSheet'));
     expect(screen, contains('IaSafetyDisclaimer'));
     expect(screen, contains('IaProgressaoResultView'));
+    expect(screen, contains('DashboardHomeActionChip'));
+    expect(screen, contains('/alunos/\${widget.alunoId}/treinos-list'));
+    expect(screen, contains('/alunos/\${widget.alunoId}/evolucao'));
+    expect(screen, contains('progressaoPendingReviewLabel'));
     expect(screen, isNot(contains('person_add')));
     expect(screen, isNot(contains('DropdownButton')));
     expect(screen, isNot(contains('FloatingActionButton')));

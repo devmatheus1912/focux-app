@@ -18,6 +18,11 @@ Future<void> showFinanceiroAlunoHelpSheet(BuildContext context) {
         'O botão de baixo abre o chat. PIX e baixa de pagamento o personal faz.',
         icon: 'message-circle',
       ),
+      FxHelpTip(
+        'Assinatura',
+        'O chip abre a cobrança automática, se o personal criou.',
+        icon: 'spark',
+      ),
     ],
   );
 }

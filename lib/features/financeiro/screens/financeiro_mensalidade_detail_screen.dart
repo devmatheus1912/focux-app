@@ -289,11 +289,30 @@ class _DetailBody extends StatelessWidget {
                         ? OperationalMetricEmphasis.alert
                         : OperationalMetricEmphasis.normal,
               ),
+              const SizedBox(height: TokensStrip.s3),
+              OperationalMetricTile(
+                label: pending ? 'Referência' : 'Pago em',
+                value:
+                    pending
+                        ? mes
+                        : financeiroMensalidadePagoEmLabel(
+                          mensalidade.pagoEm,
+                        ),
+                hint: pending ? 'Mês desta cobrança' : mes,
+                color: primary,
+                isDark: isDark,
+              ),
               const SizedBox(height: TokensStrip.s4),
               Wrap(
                 spacing: TokensStrip.s2,
                 runSpacing: TokensStrip.s2,
                 children: [
+                  DashboardHomeActionChip(
+                    label: 'Financeiro',
+                    accent: primary,
+                    isDark: isDark,
+                    onPressed: () => context.push('/financeiro'),
+                  ),
                   DashboardHomeActionChip(
                     label: 'Editar',
                     accent: primary,

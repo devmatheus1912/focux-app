@@ -21,6 +21,9 @@ void main() {
     expect(screen, contains('FxLiquidPrimaryButton'));
     expect(screen, contains('OperationalMetricTile'));
     expect(screen, contains('/chat/aluno'));
+    expect(screen, contains('/aluno/recorrencia'));
+    expect(screen, contains('DashboardHomeActionChip'));
+    expect(screen, contains("'Pagas'"));
     expect(screen, contains('viewInsetsOf'));
     expect(screen, contains('FocuxHubTypography.metric'));
     expect(screen, contains('showFinanceiroAlunoCobrancaSheet'));
