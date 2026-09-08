@@ -29,7 +29,7 @@ String financeiroMensalidadeVencimentoLabel({
 }) {
   final raw = vencimento?.trim();
   if (raw != null && raw.isNotEmpty) {
-    return financeiroMensalidadeMesPorExtenso(raw);
+    return financeiroIsoDateLabel(raw);
   }
   return financeiroMensalidadeMesPorExtenso(mesReferencia);
 }
@@ -180,10 +180,95 @@ List<FinanceiroMesOpcao> financeiroMesReferenciaOpcoes({
   return ops;
 }
 
+String financeiroIsoDate(int year, int month, int day) {
+  final y = year.toString().padLeft(4, '0');
+  final m = month.toString().padLeft(2, '0');
+  final d = day.toString().padLeft(2, '0');
+  return '$y-$m-$d';
+}
+
+DateTime? financeiroParseIsoDate(String? raw) {
+  final t = raw?.trim() ?? '';
+  if (t.isEmpty) return null;
+  final parsed = DateTime.tryParse(t);
+  if (parsed == null) return null;
+  return DateTime(parsed.year, parsed.month, parsed.day);
+}
+
+String financeiroIsoDateLabel(String iso) {
+  final parsed = financeiroParseIsoDate(iso);
+  if (parsed == null) {
+    final t = iso.trim();
+    if (t.isEmpty) return 'Selecionar';
+    return t.length >= 10 ? t.substring(0, 10) : t;
+  }
+  final d = parsed.day.toString().padLeft(2, '0');
+  final m = parsed.month.toString().padLeft(2, '0');
+  return '$d/$m/${parsed.year}';
+}
+
+class FinanceiroVencimentoOpcao {
+  const FinanceiroVencimentoOpcao({required this.iso});
+
+  final String iso;
+  String get label => financeiroIsoDateLabel(iso);
+}
+
+List<FinanceiroVencimentoOpcao> financeiroVencimentoOpcoes({
+  required String mesReferencia,
+  String? atual,
+}) {
+  final mes = financeiroParseIsoDate(mesReferencia) ??
+      DateTime(DateTime.now().year, DateTime.now().month, 1);
+  final last = DateTime(mes.year, mes.month + 1, 0);
+  final isos = <String>{
+    financeiroIsoDate(mes.year, mes.month, 1),
+    if (last.day >= 5) financeiroIsoDate(mes.year, mes.month, 5),
+    if (last.day >= 10) financeiroIsoDate(mes.year, mes.month, 10),
+    if (last.day >= 15) financeiroIsoDate(mes.year, mes.month, 15),
+    financeiroIsoDate(mes.year, mes.month, last.day),
+  };
+  final atualParsed = financeiroParseIsoDate(atual);
+  if (atualParsed != null) {
+    isos.add(
+      financeiroIsoDate(atualParsed.year, atualParsed.month, atualParsed.day),
+    );
+  }
+  final sorted = isos.toList()..sort();
+  return [for (final iso in sorted) FinanceiroVencimentoOpcao(iso: iso)];
+}
+
+String financeiroVencimentoPickerValue(String vencimento) {
+  final raw = vencimento.trim();
+  if (raw.isEmpty) return 'Selecionar';
+  return financeiroIsoDateLabel(raw);
+}
+
+String financeiroVencimentoAposTrocaDeMes({
+  required String mesAntigo,
+  required String mesNovo,
+  required String vencimentoAtual,
+}) {
+  if (vencimentoAtual.trim() == mesAntigo.trim()) return mesNovo;
+  return vencimentoAtual;
+}
+
+String financeiroVencimentoDashboardSubtitle({
+  required String mesReferencia,
+  String? vencimento,
+  required String status,
+}) {
+  final atrasado = status == 'ATRASADO';
+  final raw = (vencimento != null && vencimento.trim().isNotEmpty)
+      ? vencimento.trim()
+      : mesReferencia;
+  return '${atrasado ? 'Atrasado' : 'Vencendo'} · ${financeiroIsoDateLabel(raw)}';
+}
+
 String financeiroSalvarMensalidadeConfirmTitle() => 'Salvar mensalidade?';
 
 String financeiroSalvarMensalidadeConfirmMessage() =>
-    'Valor, mês e status entram no financeiro do aluno.';
+    'Valor, mês, vencimento e status entram no financeiro do aluno.';
 
 String financeiroLancarMensalidadeConfirmTitle() => 'Lançar mensalidade?';
 

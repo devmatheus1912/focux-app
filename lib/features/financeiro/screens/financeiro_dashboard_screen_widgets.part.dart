@@ -332,14 +332,12 @@ class _FinanceiroVencimentosGroup extends StatelessWidget {
     );
   }
 
-  String _vencimentoSubtitle(VencimentoItem item) {
-    final atrasado = item.status == 'ATRASADO';
-    final mes =
-        item.mesReferencia.length >= 7
-            ? item.mesReferencia.substring(0, 7)
-            : item.mesReferencia;
-    return '${atrasado ? 'Atrasado' : 'Vencendo'} · $mes';
-  }
+  String _vencimentoSubtitle(VencimentoItem item) =>
+      financeiroVencimentoDashboardSubtitle(
+        mesReferencia: item.mesReferencia,
+        vencimento: item.vencimento,
+        status: item.status,
+      );
 }
 
 class _FinanceiroTopAlunosGroup extends StatelessWidget {

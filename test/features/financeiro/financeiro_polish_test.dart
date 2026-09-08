@@ -35,6 +35,7 @@ void main() {
       ).readAsStringSync(),
       allOf(
         contains('showFxInsetPickerSheet'),
+        contains('pickMensalidadeVencimento'),
         isNot(contains('showDatePicker')),
       ),
     );

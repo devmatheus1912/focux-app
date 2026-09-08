@@ -335,7 +335,7 @@ não foi reescrito.
 | Item | Libera | Estado |
 |---|---|---|
 | RBAC P0 | — (sem tela) | Fechado |
-| Webhook MercadoPago | financeiro | Fechado. Resumo/somas em `BigDecimal`. JSON de dinheiro (dashboard, resumo, mensalidade, pacote, oferta, loja, plano, business, recorrência, dunning, command center) sai como **string**. Cliente lê com `FxMoney.parse` (aceita string ou número). `vencimento` da mensalidade é alias de `mesReferencia` — sem coluna nova. |
+| Webhook MercadoPago | financeiro | Fechado. Resumo/somas em `BigDecimal`. JSON de dinheiro (dashboard, resumo, mensalidade, pacote, oferta, loja, plano, business, recorrência, dunning, command center) sai como **string**. Cliente lê com `FxMoney.parse` (aceita string ou número). `vencimento` da mensalidade é coluna `DATE` própria (`V161`). Create/edit aceitam `vencimento` opcional (`yyyy-MM-dd`); omitido copia `mesReferencia`. Atraso e dashboard de vencimentos usam essa coluna. Receita do mês continua em `mesReferencia`. |
 | `FocuxClock` America/Sao_Paulo | S1 hubs + números de S3 | Fechado |
 | Gates de plano + `codigo` | S6 paywall | Fechado |
 | Timeouts IA (connect 5s / read 30s) | IA | Fechado |
@@ -369,4 +369,9 @@ só ativos). Deep link de encerrado deixa de ficar cego.
 `GET /api/alertas/aluno/{alunoId}` (`AlertaDetalheResponse`) inclui
 `motivos`, `diasSemTreino` e `aderenciaPercent` — os mesmos campos do card
 da home. Sem e-mail.
+
+`GET /api/habitos/{id}` — PERSONAL e ALUNO. Devolve o hábito mesmo com
+`ativo=false` (listas `GET /api/habitos/home` e `GET /api/habitos/me`
+continuam só ativos). A resposta inclui `ativo`. Deep link / FCM de
+desativado deixa de ficar cego.
 

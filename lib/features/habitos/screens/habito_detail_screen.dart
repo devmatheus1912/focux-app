@@ -66,32 +66,25 @@ class _HabitoDetailScreenState extends ConsumerState<HabitoDetailScreen> {
   HabitoRepository get _repo =>
       HabitoRepository(ref.read(apiClientProvider));
 
-  Habito? _match(List<Habito> lista) {
-    for (final item in lista) {
-      if (item.id == widget.habitoId) return item;
-    }
-    return null;
-  }
-
   Future<void> _load() async {
     setState(() {
       _loading = true;
       _erro = null;
     });
     try {
-      final found = widget.forAluno
-          ? _match(await _repo.meusHabitos())
-          : _match((await _repo.getHome()).habitos);
+      final found = await _repo.buscar(widget.habitoId);
       if (!mounted) return;
       setState(() {
-        _habito = found ?? _habito;
+        _habito = found;
         _loading = false;
         _fetchedAt = DateTime.now();
       });
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _erro = friendlyError(e);
+        if (_habito == null) {
+          _erro = friendlyError(e);
+        }
         _loading = false;
       });
     }
@@ -284,6 +277,7 @@ class _HabitoDetailBody extends StatelessWidget {
                     subtitle: habitoDetailSubtitle(
                       metaSemanal: habito.metaSemanal,
                       alunoId: habito.alunoId,
+                      ativo: habito.ativo,
                       freshness: freshness,
                     ),
                   ),
@@ -348,6 +342,14 @@ class _HabitoDetailBody extends StatelessWidget {
                       spacing: TokensStrip.s2,
                       runSpacing: TokensStrip.s2,
                       children: [
+                        if (!habito.ativo)
+                          DashboardHomeActionChip(
+                            label: habitoDesativadoChip(),
+                            accent: primary,
+                            isDark: isDark,
+                            enabled: false,
+                            onPressed: () {},
+                          ),
                         if (!forAluno && habito.alunoId != null)
                           DashboardHomeActionChip(
                             label: 'Aluno',
@@ -357,7 +359,7 @@ class _HabitoDetailBody extends StatelessWidget {
                               '/alunos/${habito.alunoId}',
                             ),
                           ),
-                        if (forAluno)
+                        if (forAluno && habito.ativo)
                           DashboardHomeActionChip(
                             label: habito.feitoHoje
                                 ? 'Feito hoje'
@@ -374,24 +376,25 @@ class _HabitoDetailBody extends StatelessWidget {
             ),
           ),
         ),
-        SafeArea(
-          top: false,
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(
-              FxSettingsLayout.pageInset,
-              TokensStrip.s2,
-              FxSettingsLayout.pageInset,
-              TokensStrip.s3 + MediaQuery.viewInsetsOf(context).bottom,
-            ),
-            child: FxLiquidPrimaryButton(
-              label: forAluno
-                  ? habitoStickyAluno(habito.feitoHoje)
-                  : habitoStickyPersonal(),
-              loading: busy,
-              onPressed: busy ? null : onSticky,
+        if (habito.ativo)
+          SafeArea(
+            top: false,
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(
+                FxSettingsLayout.pageInset,
+                TokensStrip.s2,
+                FxSettingsLayout.pageInset,
+                TokensStrip.s3 + MediaQuery.viewInsetsOf(context).bottom,
+              ),
+              child: FxLiquidPrimaryButton(
+                label: forAluno
+                    ? habitoStickyAluno(habito.feitoHoje)
+                    : habitoStickyPersonal(),
+                loading: busy,
+                onPressed: busy ? null : onSticky,
+              ),
             ),
           ),
-        ),
       ],
     );
   }

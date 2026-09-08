@@ -119,9 +119,11 @@ String habitoFeitosHint({required int feitos, required int meta}) {
 String habitoDetailSubtitle({
   required int metaSemanal,
   int? alunoId,
+  bool ativo = true,
   String? freshness,
 }) {
   final parts = <String>[
+    if (!ativo) 'Desativado',
     'Meta ${habitoMetaValue(metaSemanal)}',
     habitoAlcanceLabel(alunoId),
   ];
@@ -136,3 +138,5 @@ String habitoStickyAluno(bool feitoHoje) =>
     feitoHoje ? 'Desmarcar hoje' : 'Marcar hoje';
 
 String habitoSobreEmpty() => 'Sem descrição neste hábito.';
+
+String habitoDesativadoChip() => 'Desativado';

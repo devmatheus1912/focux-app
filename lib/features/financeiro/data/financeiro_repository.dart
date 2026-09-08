@@ -63,6 +63,7 @@ class VencimentoItem {
   final String alunoNome;
   final FxMoney valor;
   final String mesReferencia;
+  final String? vencimento;
   final String status;
 
   VencimentoItem({
@@ -72,6 +73,7 @@ class VencimentoItem {
     required Object valor,
     required this.mesReferencia,
     required this.status,
+    this.vencimento,
   }) : valor = FxMoney.parse(valor);
 
   factory VencimentoItem.fromJson(Map<String, dynamic> j) => VencimentoItem(
@@ -80,6 +82,7 @@ class VencimentoItem {
     alunoNome: j['alunoNome'] as String,
     valor: j['valor'],
     mesReferencia: j['mesReferencia'] as String,
+    vencimento: j['vencimento'] as String?,
     status: j['status'] as String,
   );
 }
@@ -301,11 +304,13 @@ class FinanceiroRepository {
     int id, {
     FxMoney? valor,
     String? mesReferencia,
+    String? vencimento,
     String? status,
   }) async {
     final body = <String, dynamic>{};
     if (valor != null) body['valor'] = valor.wire;
     if (mesReferencia != null) body['mesReferencia'] = mesReferencia;
+    if (vencimento != null) body['vencimento'] = vencimento;
     if (status != null) body['status'] = status;
     final r = await _dio.put('/api/financeiro/mensalidades/$id', data: body);
     return Mensalidade.fromJson(r.data as Map<String, dynamic>);

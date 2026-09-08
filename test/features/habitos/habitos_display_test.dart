@@ -77,5 +77,14 @@ void main() {
     expect(habitoStickyAluno(false), 'Marcar hoje');
     expect(habitoStickyAluno(true), 'Desmarcar hoje');
     expect(habitoDetalheSecoes, hasLength(2));
+    expect(
+      habitoDetailSubtitle(metaSemanal: 7, alunoId: null),
+      'Meta 7x · Todos os alunos',
+    );
+    expect(
+      habitoDetailSubtitle(metaSemanal: 7, alunoId: 3, ativo: false),
+      'Desativado · Meta 7x · Aluno específico',
+    );
+    expect(habitoDesativadoChip(), 'Desativado');
   });
 }

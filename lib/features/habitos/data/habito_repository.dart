@@ -43,6 +43,7 @@ class Habito {
   final int streakAtual;
   final bool badgeSemana;
   final int? alunoId;
+  final bool ativo;
 
   Habito({
     required this.id,
@@ -58,6 +59,7 @@ class Habito {
     this.streakAtual = 0,
     this.badgeSemana = false,
     this.alunoId,
+    this.ativo = true,
   });
 
   factory Habito.fromJson(Map<String, dynamic> j) => Habito(
@@ -74,6 +76,7 @@ class Habito {
     streakAtual: (j['streakAtual'] as num?)?.toInt() ?? 0,
     badgeSemana: j['badgeSemana'] as bool? ?? false,
     alunoId: (j['alunoId'] as num?)?.toInt(),
+    ativo: j['ativo'] as bool? ?? true,
   );
 
   Habito copyWith({
@@ -81,6 +84,7 @@ class Habito {
     bool? feitoHoje,
     int? streakAtual,
     bool? badgeSemana,
+    bool? ativo,
   }) => Habito(
     id: id,
     titulo: titulo,
@@ -95,6 +99,7 @@ class Habito {
     streakAtual: streakAtual ?? this.streakAtual,
     badgeSemana: badgeSemana ?? this.badgeSemana,
     alunoId: alunoId,
+    ativo: ativo ?? this.ativo,
   );
 }
 
@@ -216,6 +221,11 @@ class HabitoRepository {
 
   Future<void> desativar(int id) async {
     await _dio.delete('/api/habitos/$id');
+  }
+
+  Future<Habito> buscar(int id) async {
+    final r = await _dio.get('/api/habitos/$id');
+    return Habito.fromJson(r.data as Map<String, dynamic>);
   }
 
   Future<List<ComplianceItem>> compliance() async {
