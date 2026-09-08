@@ -14,9 +14,7 @@ import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
-import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/feature_gate.dart';
-import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
@@ -150,28 +148,6 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
     await _carregar();
   }
 
-  Future<void> _desativar(Habito h) async {
-    final ok = await showFxConfirmSheet(
-      context,
-      title: 'Desativar hábito?',
-      subtitle: h.titulo,
-      message: habitoDetalheMessage(
-        descricao: h.descricao,
-        metaSemanal: h.metaSemanal,
-      ),
-      confirmLabel: 'Desativar',
-      destructive: true,
-    );
-    if (!ok || !mounted) return;
-    try {
-      await ref.read(_repoProvider).desativar(h.id);
-      await _carregar();
-    } catch (e) {
-      if (!mounted) return;
-      FeedbackHelper.showError(context, friendlyError(e));
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final chrome = ShellChrome.of(context);
@@ -211,7 +187,7 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
                     FxHelpTip('Como calculamos', habitoComoCalculamos),
                     FxHelpTip(
                       'Lista',
-                      'Toque no hábito para desativar. Toque no aluno para o 360.',
+                      'Toque no hábito para abrir. Desativar fica no detalhe.',
                     ),
                     FxHelpTip(
                       'Novo',
@@ -261,7 +237,7 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
         const DashboardSectionHeader(title: 'Hábitos cadastrados'),
         const SizedBox(height: TokensStrip.s2),
         Text(
-          'Toque para ver a meta e desativar.',
+          'Toque para abrir a meta e desativar.',
           style: FocuxHubTypography.bodyMuted(
             color: mute,
             fontWeight: FontWeight.w600,
@@ -285,7 +261,13 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
                 fontWeight: FontWeight.w700,
               ),
             ),
-            onTap: () => _desativar(habito),
+            onTap: () async {
+              await context.push(
+                habitoDetailPath(habito.id),
+                extra: habito,
+              );
+              if (mounted) await _carregar();
+            },
           ),
       ],
       const SizedBox(height: FxSettingsLayout.groupGap),

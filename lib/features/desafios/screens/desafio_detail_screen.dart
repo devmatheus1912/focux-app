@@ -76,12 +76,11 @@ class _DesafioDetailScreenState extends ConsumerState<DesafioDetailScreen> {
       if (widget.forAluno) {
         await _repo.participar(widget.desafioId);
       }
-      final found =
-          await _repo.buscarAtivo(widget.desafioId, forAluno: widget.forAluno);
+      final found = await _repo.buscar(widget.desafioId);
       final ranking = await _repo.leaderboard(widget.desafioId);
       if (!mounted) return;
       setState(() {
-        _desafio = found ?? _desafio;
+        _desafio = found;
         _ranking = ranking;
         _loading = false;
         _fetchedAt = DateTime.now();

@@ -93,7 +93,8 @@ bool isAlunoOnlyLocation(String path) {
   };
   return alunoOnly.contains(path) ||
       path.startsWith('/checkin/historico/') ||
-      path.startsWith('/aluno/desafios/');
+      path.startsWith('/aluno/desafios/') ||
+      path.startsWith('/aluno/habitos/');
 }
 
 bool isPersonalOnlyLocation(String path) {
@@ -151,7 +152,8 @@ bool isPersonalOnlyLocation(String path) {
       path.startsWith('/exercicios') ||
       path.startsWith('/financeiro/mensalidades') ||
       path.startsWith('/alertas/') ||
-      path.startsWith('/desafios/');
+      path.startsWith('/desafios/') ||
+      path.startsWith('/habitos');
 }
 
 String? stringRouteExtra(GoRouterState state) {

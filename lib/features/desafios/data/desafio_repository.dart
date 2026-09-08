@@ -114,12 +114,9 @@ class DesafioRepository {
     await _dio.post('/api/desafios/$id/participar');
   }
 
-  Future<Desafio?> buscarAtivo(int id, {required bool forAluno}) async {
-    final lista = forAluno ? await meus() : await listar();
-    for (final desafio in lista) {
-      if (desafio.id == id) return desafio;
-    }
-    return null;
+  Future<Desafio> buscar(int id) async {
+    final r = await _dio.get('/api/desafios/$id');
+    return Desafio.fromJson(r.data as Map<String, dynamic>);
   }
 
   Future<List<DesafioLeaderboardEntry>> leaderboard(int id) async {

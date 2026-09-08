@@ -79,6 +79,29 @@ const alertaDetalheSecoes = [
   (value: alertaDetalheSecaoMensagem, label: 'Mensagem'),
 ];
 
+String alertaDiasSemTreinoHint(int? dias) {
+  if (dias == null) return 'Última sessão';
+  if (dias <= 0) return 'Treinou hoje';
+  if (dias == 1) return '1 dia sem treino';
+  return '$dias dias sem treino';
+}
+
+String alertaAderenciaValue(double? pct) {
+  if (pct == null) return '—';
+  return '${pct.round()}%';
+}
+
+String alertaAderenciaHint() => 'Últimos 30 dias';
+
+List<String> alertaMotivosVisiveis(List<String> motivos) =>
+    motivos
+        .map((e) => e.trim())
+        .where((e) => e.isNotEmpty)
+        .take(3)
+        .toList();
+
+String alertaMotivosEmpty() => 'Sem motivos nesta janela.';
+
 String alertaHubSubtitle({
   required String statusFinanceiro,
   String? freshness,

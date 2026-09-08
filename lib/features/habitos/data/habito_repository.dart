@@ -75,6 +75,27 @@ class Habito {
     badgeSemana: j['badgeSemana'] as bool? ?? false,
     alunoId: (j['alunoId'] as num?)?.toInt(),
   );
+
+  Habito copyWith({
+    int? feitosNaSemana,
+    bool? feitoHoje,
+    int? streakAtual,
+    bool? badgeSemana,
+  }) => Habito(
+    id: id,
+    titulo: titulo,
+    descricao: descricao,
+    icone: icone,
+    tipo: tipo,
+    metaDiaria: metaDiaria,
+    metaSemanal: metaSemanal,
+    lembreteHora: lembreteHora,
+    feitosNaSemana: feitosNaSemana ?? this.feitosNaSemana,
+    feitoHoje: feitoHoje ?? this.feitoHoje,
+    streakAtual: streakAtual ?? this.streakAtual,
+    badgeSemana: badgeSemana ?? this.badgeSemana,
+    alunoId: alunoId,
+  );
 }
 
 class ComplianceItem {

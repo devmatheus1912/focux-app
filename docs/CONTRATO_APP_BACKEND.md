@@ -360,3 +360,13 @@ fresco de qualquer BFF (`PlanoFeaturesBffCache` ou Home) ou cache local.
 Free / plano ausente = `5`, o mesmo teto de `LeadService`. O app não
 deriva o banner de leads pelo nome `FREE`.
 
+## 8. Desafios e alertas — acordado
+
+`GET /api/desafios/{id}` — PERSONAL e ALUNO. Devolve o desafio mesmo com
+`ativo=false` (lista `GET /api/desafios` e `GET /api/desafios/me` continua
+só ativos). Deep link de encerrado deixa de ficar cego.
+
+`GET /api/alertas/aluno/{alunoId}` (`AlertaDetalheResponse`) inclui
+`motivos`, `diasSemTreino` e `aderenciaPercent` — os mesmos campos do card
+da home. Sem e-mail.
+

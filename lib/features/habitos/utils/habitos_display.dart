@@ -87,3 +87,52 @@ String habitoDetalheMessage({
   if (desc == null || desc.isEmpty) return meta;
   return '$desc\n\n$meta';
 }
+
+String habitoDetailPath(int id) => '/habitos/$id';
+
+String habitoAlunoDetailPath(int id) => '/aluno/habitos/$id';
+
+const habitoDetalheSecaoResumo = 'resumo';
+const habitoDetalheSecaoSobre = 'sobre';
+
+const habitoDetalheSecoes = [
+  (value: habitoDetalheSecaoResumo, label: 'Resumo'),
+  (value: habitoDetalheSecaoSobre, label: 'Sobre'),
+];
+
+String habitoStreakValue(int streak) => '$streak';
+
+String habitoStreakHint(int streak) {
+  if (streak <= 0) return 'Sem sequência';
+  if (streak == 1) return '1 dia seguido';
+  return '$streak dias seguidos';
+}
+
+String habitoFeitosValue(int feitos, int meta) => '$feitos/$meta';
+
+String habitoFeitosHint({required int feitos, required int meta}) {
+  if (meta <= 0) return 'Sem meta semanal';
+  if (feitos >= meta) return 'Meta da semana ok';
+  return 'Feitos na semana';
+}
+
+String habitoDetailSubtitle({
+  required int metaSemanal,
+  int? alunoId,
+  String? freshness,
+}) {
+  final parts = <String>[
+    'Meta ${habitoMetaValue(metaSemanal)}',
+    habitoAlcanceLabel(alunoId),
+  ];
+  final stamp = freshness?.trim();
+  if (stamp != null && stamp.isNotEmpty) parts.add(stamp);
+  return parts.join(' · ');
+}
+
+String habitoStickyPersonal() => 'Desativar hábito';
+
+String habitoStickyAluno(bool feitoHoje) =>
+    feitoHoje ? 'Desmarcar hoje' : 'Marcar hoje';
+
+String habitoSobreEmpty() => 'Sem descrição neste hábito.';

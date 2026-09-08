@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/brand/focux_microcopy.dart';
 import '../../../core/theme/brand_palette.dart';
@@ -17,6 +18,7 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../../features/subscription/models/subscription_plan.dart';
 import '../data/habito_repository.dart';
+import '../utils/habitos_display.dart';
 
 final _repoProvider = Provider(
   (ref) => HabitoRepository(ref.read(apiClientProvider)),
@@ -162,7 +164,13 @@ class _HabitosAlunoScreenState extends ConsumerState<HabitosAlunoScreen> {
                                     color: Colors.transparent,
                                     child: InkWell(
                                       borderRadius: BorderRadius.circular(20),
-                                      onTap: () => _toggle(h),
+                                      onTap: () async {
+                                        await context.push(
+                                          habitoAlunoDetailPath(h.id),
+                                          extra: h,
+                                        );
+                                        if (mounted) await _carregar();
+                                      },
                                       child: Padding(
                                         padding: const EdgeInsets.all(16),
                                         child: Row(

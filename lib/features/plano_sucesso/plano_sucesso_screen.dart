@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/router/safe_navigation.dart';
@@ -26,6 +27,7 @@ import '../../core/widgets/operational_metric_tile.dart';
 import '../../core/widgets/skeleton_loader.dart';
 import '../alunos/utils/satellite_screen_utils.dart';
 import '../alunos/widgets/aluno_inset_form_field.dart';
+import '../dashboard/widgets/dashboard_home_action_chip.dart';
 import 'plano_sucesso_display.dart';
 import 'plano_sucesso_model.dart';
 import 'plano_sucesso_provider.dart';
@@ -225,7 +227,13 @@ class _PlanoSucessoScreenState extends State<PlanoSucessoScreen> {
 
     return fxScreenA11yScope(
       label: 'Plano de Sucesso',
-      child: FxShellScaffold(
+      child: PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, _) {
+          if (didPop) return;
+          safePopOrGo(context, '/alunos/${widget.alunoId}');
+        },
+        child: FxShellScaffold(
         useMesh: true,
         appBar: FxShellAppBar(
           title: 'Plano de sucesso',
@@ -299,6 +307,7 @@ class _PlanoSucessoScreenState extends State<PlanoSucessoScreen> {
           ],
         ),
       ),
+      ),
     );
   }
 
@@ -348,6 +357,8 @@ class _PlanoSucessoScreenState extends State<PlanoSucessoScreen> {
             revisaoValue: planoSucessoRevisaoMetricValue(null),
             revisaoHint: planoSucessoRevisaoMetricHint(null),
           ),
+          const SizedBox(height: TokensStrip.s4),
+          _alunoChips(primary: primary, isDark: isDark),
           const SizedBox(height: TokensStrip.s5),
           FxEmptyState(
             icon: 'target',
@@ -399,6 +410,8 @@ class _PlanoSucessoScreenState extends State<PlanoSucessoScreen> {
           revisaoValue: planoSucessoRevisaoMetricValue(plano.proximaRevisao),
           revisaoHint: planoSucessoRevisaoMetricHint(plano.proximaRevisao),
         ),
+        const SizedBox(height: TokensStrip.s4),
+        _alunoChips(primary: primary, isDark: isDark),
         const SizedBox(height: TokensStrip.s5),
         for (var i = 0; i < plano.marcos.length; i++)
           FxSatelliteListTile(
@@ -452,5 +465,32 @@ class _PlanoSucessoScreenState extends State<PlanoSucessoScreen> {
       tile('Etapas', etapasValue, etapasHint),
       tile('Revisão', revisaoValue, revisaoHint),
     ];
+  }
+
+  Widget _alunoChips({required Color primary, required bool isDark}) {
+    return Wrap(
+      spacing: TokensStrip.s2,
+      runSpacing: TokensStrip.s2,
+      children: [
+        DashboardHomeActionChip(
+          label: 'Aluno',
+          accent: primary,
+          isDark: isDark,
+          onPressed: () => context.push(
+            '/alunos/${widget.alunoId}',
+            extra: widget.alunoNome,
+          ),
+        ),
+        DashboardHomeActionChip(
+          label: 'Chat',
+          accent: primary,
+          isDark: isDark,
+          onPressed: () => context.push(
+            '/alunos/${widget.alunoId}/chat',
+            extra: widget.alunoNome,
+          ),
+        ),
+      ],
+    );
   }
 }

@@ -32,6 +32,7 @@ import '../../subscription/widgets/upgrade_prompt_sheet.dart';
 import '../data/alertas_repository.dart';
 import '../utils/alerta_detalhe_display.dart';
 import '../widgets/alerta_detalhe_help_sheet.dart';
+import '../widgets/alerta_detalhe_situacao.dart';
 import '../widgets/alerta_enviar_mensagem_sheet.dart';
 
 class AlertaDetalheScreen extends ConsumerStatefulWidget {
@@ -342,7 +343,9 @@ class _AlertaDetalheScreenState extends ConsumerState<AlertaDetalheScreen> {
                               value: alertaUltimoTreinoLabel(
                                 _detalhe!.ultimoTreino,
                               ),
-                              hint: 'Última sessão',
+                              hint: alertaDiasSemTreinoHint(
+                                _detalhe!.diasSemTreino,
+                              ),
                               color: primary,
                               isDark: isDark,
                               emphasis: OperationalMetricEmphasis.alert,
@@ -354,6 +357,16 @@ class _AlertaDetalheScreenState extends ConsumerState<AlertaDetalheScreen> {
                                 _detalhe!.checkIns30Dias,
                               ),
                               hint: alertaCheckinsMetricHint(),
+                              color: primary,
+                              isDark: isDark,
+                            ),
+                            const SizedBox(height: TokensStrip.s2),
+                            OperationalMetricTile(
+                              label: 'Aderência',
+                              value: alertaAderenciaValue(
+                                _detalhe!.aderenciaPercent,
+                              ),
+                              hint: alertaAderenciaHint(),
                               color: primary,
                               isDark: isDark,
                             ),
@@ -428,38 +441,15 @@ class _AlertaDetalheScreenState extends ConsumerState<AlertaDetalheScreen> {
                                 ],
                               ),
                             ] else
-                              Wrap(
-                                spacing: TokensStrip.s2,
-                                runSpacing: TokensStrip.s2,
-                                children: [
-                                  DashboardHomeActionChip(
-                                    label: 'Aluno',
-                                    accent: primary,
-                                    isDark: isDark,
-                                    onPressed: () => context.push(
-                                      '/alunos/${widget.alunoId}',
-                                      extra: nome,
-                                    ),
-                                  ),
-                                  if (alertaStatusFinanceiroRuim(
-                                    _detalhe!.statusFinanceiro,
-                                  ))
-                                    DashboardHomeActionChip(
-                                      label: 'Cobrar',
-                                      accent: EagleTokens.bad,
-                                      isDark: isDark,
-                                      onPressed: () => context.push(
-                                        '/financeiro?alunoId=${widget.alunoId}',
-                                      ),
-                                    ),
-                                  DashboardHomeActionChip(
-                                    label: alertaAdiarCtaLabel(),
-                                    accent: primary,
-                                    isDark: isDark,
-                                    enabled: !_resolving,
-                                    onPressed: _resolver,
-                                  ),
-                                ],
+                              AlertaDetalheSituacao(
+                                alunoId: widget.alunoId,
+                                alunoNome: nome,
+                                motivos: _detalhe!.motivos,
+                                statusFinanceiro: _detalhe!.statusFinanceiro,
+                                resolving: _resolving,
+                                isDark: isDark,
+                                primary: primary,
+                                onAdiar: _resolver,
                               ),
                           ],
                         ),

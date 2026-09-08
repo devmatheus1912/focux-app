@@ -86,6 +86,8 @@ import '../../features/retencao/screens/churn_dashboard_screen.dart';
 import '../../features/monetizacao/screens/ofertas_upsell_screen.dart';
 import '../../features/monetizacao/screens/cancel_save_screen.dart';
 import '../../features/habitos/screens/habitos_personal_screen.dart';
+import '../../features/habitos/screens/habito_detail_screen.dart';
+import '../../features/habitos/data/habito_repository.dart';
 import '../../features/automacoes/screens/automacoes_screen.dart';
 import '../../features/desafios/data/desafio_repository.dart';
 import '../../features/desafios/screens/desafio_detail_screen.dart';
@@ -780,6 +782,19 @@ RouteBase buildChromeShellRoute() {
           GoRoute(
             path: '/habitos',
             builder: (context, state) => const HabitosPersonalScreen(),
+          ),
+          GoRoute(
+            path: '/habitos/:id',
+            redirect:
+                (context, state) =>
+                    intPathParam(state, 'id') == null ? '/habitos' : null,
+            builder: (context, state) {
+              final extra = state.extra;
+              return HabitoDetailScreen(
+                habitoId: intPathParam(state, 'id')!,
+                habito: extra is Habito ? extra : null,
+              );
+            },
           ),
           GoRoute(
             path: '/automacoes',
