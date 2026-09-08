@@ -14,3 +14,7 @@ final trilhasAlunoProvider = FutureProvider.family<List<TrilhaModel>, int>((
 ) {
   return ref.read(trilhasRepositoryProvider).listarPorAluno(alunoId);
 });
+
+final trilhasMinhasProvider = FutureProvider<List<TrilhaModel>>((ref) {
+  return ref.read(trilhasRepositoryProvider).listarMinhas();
+});

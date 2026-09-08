@@ -20,7 +20,7 @@ Future<void> showAlertaDetalheHelpSheet(BuildContext context) {
       ),
       FxHelpTip(
         'Ações',
-        'Enviar mensagem confirma o texto e manda no chat. Abrir o chat é o fio. Adiar 24h tira da caixa por um dia.',
+        'Enviar mensagem confirma o texto e manda no chat. Aluno, chat e cobrar (se atrasado) estão nos chips. Adiar 24h tira da caixa por um dia.',
         icon: 'message-circle',
       ),
     ],

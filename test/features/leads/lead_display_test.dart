@@ -83,5 +83,9 @@ void main() {
     expect(leadShowsLimitBanner(3, limiteLeads: 5), isFalse);
     expect(leadShowsLimitBanner(4), isFalse);
     expect(leadShowsLimitBanner(9, limiteLeads: 10), isTrue);
+    expect(leadInteracoesMetricValue(0), '0');
+    expect(leadInteracoesMetricHint(0), 'Nenhum contato registrado');
+    expect(leadInteracoesMetricHint(1), '1 contato no histórico');
+    expect(leadInteracoesMetricHint(4), '4 contatos no histórico');
   });
 }

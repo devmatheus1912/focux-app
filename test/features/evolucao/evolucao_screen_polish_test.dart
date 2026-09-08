@@ -38,6 +38,7 @@ void main() {
     expect(screen, contains('showEvolucaoHelpSheet'));
     expect(screen, contains("'/alunos/\${widget.alunoId}/fotos'"));
     expect(screen, contains("'/alunos/\${widget.alunoId}/evolucao-comparativo'"));
+    expect(screen, contains('compartilharEvolucao'));
     expect(screen, contains('AlunoInsetFormField'));
     expect(screen, contains('DashboardHomeActionChip'));
     expect(screen, isNot(contains('TabBar')));

@@ -13,6 +13,11 @@ class TrilhasRepository {
     return TrilhaModel.parseList(response.data);
   }
 
+  Future<List<TrilhaModel>> listarMinhas() async {
+    final response = await _dio.get('/api/trilhas/minhas');
+    return TrilhaModel.parseList(response.data);
+  }
+
   Future<void> criarTrilha(NovaTrilhaRequest request) async {
     await _dio.post('/api/trilhas', data: request.toJson());
   }

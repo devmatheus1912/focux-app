@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 
@@ -25,6 +26,7 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/operational_metric_tile.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../features/alunos/widgets/aluno_inset_form_field.dart';
+import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../evolucao/data/evolucao_repository.dart';
 import '../data/avaliacao_repository.dart';
@@ -351,7 +353,7 @@ class _EvolucaoComparativoScreenState
           Padding(
             padding: const EdgeInsets.only(
               top: TokensStrip.s4,
-              bottom: TokensStrip.s3,
+              bottom: TokensStrip.s2,
             ),
             child: OperationalMetricTile(
               label: 'Peso atual',
@@ -361,6 +363,52 @@ class _EvolucaoComparativoScreenState
               isDark: Theme.of(context).brightness == Brightness.dark,
             ),
           ),
+          OperationalMetricTile(
+            label: 'IMC',
+            value: evolucaoComparativoFmtValor(
+              c.atual.imc ??
+                  evolucaoComparativoImc(c.atual.pesoKg, c.atual.alturaCm),
+              '',
+            ),
+            hint: 'Da última avaliação',
+            color: Theme.of(context).colorScheme.primary,
+            isDark: Theme.of(context).brightness == Brightness.dark,
+          ),
+          const SizedBox(height: TokensStrip.s3),
+          Wrap(
+            spacing: TokensStrip.s2,
+            runSpacing: TokensStrip.s2,
+            children: [
+              DashboardHomeActionChip(
+                label: 'Medidas',
+                accent: Theme.of(context).colorScheme.primary,
+                isDark: Theme.of(context).brightness == Brightness.dark,
+                onPressed:
+                    () => context.push(
+                      '/alunos/${widget.alunoId}/evolucao',
+                      extra: widget.alunoNome,
+                    ),
+              ),
+              DashboardHomeActionChip(
+                label: 'Fotos',
+                accent: Theme.of(context).colorScheme.primary,
+                isDark: Theme.of(context).brightness == Brightness.dark,
+                onPressed:
+                    () => context.push(
+                      '/alunos/${widget.alunoId}/fotos',
+                      extra: widget.alunoNome,
+                    ),
+              ),
+              DashboardHomeActionChip(
+                label: evolucaoComparativoStickyRegistrar(),
+                accent: Theme.of(context).colorScheme.primary,
+                isDark: Theme.of(context).brightness == Brightness.dark,
+                onPressed: _registrar,
+                enabled: !_registrando,
+              ),
+            ],
+          ),
+          const SizedBox(height: TokensStrip.s3),
           EvolucaoComparativoTable(primeira: c.primeira, atual: c.atual),
           const SizedBox(height: TokensStrip.s3),
           _LegendaComparativo(),

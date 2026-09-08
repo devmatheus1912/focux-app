@@ -30,6 +30,8 @@ void main() {
     expect(screen, contains('viewInsetsOf'));
     expect(screen, contains('RefreshIndicator'));
     expect(screen, contains('leadHubSubtitle'));
+    expect(screen, contains('leadInteracoesMetricHint'));
+    expect(screen, contains('leadOrigemLabel'));
     expect(screen, isNot(contains('FxSettingsGroup')));
     expect(screen, isNot(contains('DropdownButton')));
     expect(screen, isNot(contains('FloatingActionButton')));
