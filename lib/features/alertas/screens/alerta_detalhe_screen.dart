@@ -23,6 +23,7 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/ia_safety_disclaimer.dart';
 import '../../../core/widgets/operational_metric_tile.dart';
 import '../../../core/widgets/skeleton_loader.dart';
+import '../../alunos/widgets/aluno_form_choices.dart';
 import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../ia/data/ia_repository.dart';
@@ -59,6 +60,9 @@ class _AlertaDetalheScreenState extends ConsumerState<AlertaDetalheScreen> {
   var _resolving = false;
   var _gerandoIa = false;
   var _enviando = false;
+  var _secao = alertaDetalheSecaoSituacao;
+
+  void _leave() => safePopOrGo(context, '/alertas');
 
   @override
   void initState() {
@@ -187,7 +191,7 @@ class _AlertaDetalheScreenState extends ConsumerState<AlertaDetalheScreen> {
       ).resolver(widget.alunoId);
       if (!mounted) return;
       FeedbackHelper.showSuccess(context, alertaAdiadoSuccessMessage());
-      safePopOrGo(context, '/alertas');
+      _leave();
     } catch (e) {
       if (!mounted) return;
       FeedbackHelper.showError(context, friendlyError(e));
@@ -207,11 +211,17 @@ class _AlertaDetalheScreenState extends ConsumerState<AlertaDetalheScreen> {
 
     return fxScreenA11yScope(
       label: 'Alerta — $nome',
-      child: FxShellScaffold(
+      child: PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, _) {
+          if (didPop) return;
+          _leave();
+        },
+        child: FxShellScaffold(
         useMesh: true,
         appBar: FxShellAppBar(
           title: 'Alerta',
-          onBack: () => safePopOrGo(context, '/alertas'),
+          onBack: _leave,
           actions: [
             FxHelpIconButton(
               tooltip: 'Como usar este alerta',
@@ -332,14 +342,22 @@ class _AlertaDetalheScreenState extends ConsumerState<AlertaDetalheScreen> {
                               value: alertaUltimoTreinoLabel(
                                 _detalhe!.ultimoTreino,
                               ),
-                              hint: alertaCheckinsLabel(
-                                _detalhe!.checkIns30Dias,
-                              ),
+                              hint: 'Última sessão',
                               color: primary,
                               isDark: isDark,
                               emphasis: OperationalMetricEmphasis.alert,
                             ),
-                            const SizedBox(height: TokensStrip.s3),
+                            const SizedBox(height: TokensStrip.s2),
+                            OperationalMetricTile(
+                              label: 'Check-ins',
+                              value: alertaCheckinsMetricValue(
+                                _detalhe!.checkIns30Dias,
+                              ),
+                              hint: alertaCheckinsMetricHint(),
+                              color: primary,
+                              isDark: isDark,
+                            ),
+                            const SizedBox(height: TokensStrip.s2),
                             OperationalMetricTile(
                               label: 'Mensalidade',
                               value: alertaStatusFinanceiroLabel(
@@ -361,85 +379,88 @@ class _AlertaDetalheScreenState extends ConsumerState<AlertaDetalheScreen> {
                                       : OperationalMetricEmphasis.normal,
                             ),
                             const SizedBox(height: TokensStrip.s4),
-                            Text(
-                              _detalhe!.sugestaoIa.trim().isEmpty
-                                  ? 'Sem sugestão agora. Fale com o aluno pelo chat.'
-                                  : _detalhe!.sugestaoIa.trim(),
-                              style: FocuxHubTypography.bodyMuted(
-                                color: fxScreenMute(context),
-                                fontWeight: FontWeight.w600,
-                              ),
+                            AlunoSegmentedChoice(
+                              options: alertaDetalheSecoes,
+                              selected: _secao,
+                              isDark: isDark,
+                              onSelect: (value) =>
+                                  setState(() => _secao = value),
                             ),
-                            const SizedBox(height: TokensStrip.s3),
-                            const IaSafetyDisclaimer(compact: true),
                             const SizedBox(height: TokensStrip.s4),
-                            Wrap(
-                              spacing: TokensStrip.s2,
-                              runSpacing: TokensStrip.s2,
-                              children: [
-                                DashboardHomeActionChip(
-                                  label: 'Aluno',
-                                  accent: primary,
-                                  isDark: isDark,
-                                  onPressed:
-                                      () => context.push(
-                                        '/alunos/${widget.alunoId}',
-                                        extra: nome,
-                                      ),
+                            if (_secao == alertaDetalheSecaoMensagem) ...[
+                              Text(
+                                _detalhe!.sugestaoIa.trim().isEmpty
+                                    ? 'Sem sugestão agora. Fale com o aluno pelo chat.'
+                                    : _detalhe!.sugestaoIa.trim(),
+                                style: FocuxHubTypography.bodyMuted(
+                                  color: fxScreenMute(context),
+                                  fontWeight: FontWeight.w600,
                                 ),
-                                DashboardHomeActionChip(
-                                  label: 'Chat',
-                                  accent: primary,
-                                  isDark: isDark,
-                                  onPressed:
-                                      () => context.push(
-                                        '/alunos/${widget.alunoId}/chat',
-                                        extra: nome,
-                                      ),
-                                ),
-                                if (alertaStatusFinanceiroRuim(
-                                  _detalhe!.statusFinanceiro,
-                                ))
+                              ),
+                              const SizedBox(height: TokensStrip.s3),
+                              const IaSafetyDisclaimer(compact: true),
+                              const SizedBox(height: TokensStrip.s3),
+                              Wrap(
+                                spacing: TokensStrip.s2,
+                                runSpacing: TokensStrip.s2,
+                                children: [
                                   DashboardHomeActionChip(
-                                    label: 'Cobrar',
-                                    accent: EagleTokens.bad,
+                                    label:
+                                        _gerandoIa
+                                            ? 'Gerando…'
+                                            : _detalhe!.sugestaoFonte == 'IA'
+                                            ? 'Gerar outra'
+                                            : 'Melhorar com IA',
+                                    accent: primary,
                                     isDark: isDark,
-                                    onPressed:
-                                        () => context.push(
-                                          '/financeiro?alunoId=${widget.alunoId}',
-                                        ),
+                                    enabled: !_gerandoIa,
+                                    onPressed: _gerarIa,
                                   ),
-                                DashboardHomeActionChip(
-                                  label: alertaAdiarCtaLabel(),
-                                  accent: primary,
-                                  isDark: isDark,
-                                  enabled: !_resolving,
-                                  onPressed: _resolver,
-                                ),
-                                DashboardHomeActionChip(
-                                  label: 'Relatório',
-                                  accent: primary,
-                                  isDark: isDark,
-                                  onPressed:
-                                      () => context.push(
-                                        '/alunos/${widget.alunoId}/relatorio',
-                                        extra: nome,
+                                  DashboardHomeActionChip(
+                                    label: 'Chat',
+                                    accent: primary,
+                                    isDark: isDark,
+                                    onPressed: () => context.push(
+                                      '/alunos/${widget.alunoId}/chat',
+                                      extra: nome,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ] else
+                              Wrap(
+                                spacing: TokensStrip.s2,
+                                runSpacing: TokensStrip.s2,
+                                children: [
+                                  DashboardHomeActionChip(
+                                    label: 'Aluno',
+                                    accent: primary,
+                                    isDark: isDark,
+                                    onPressed: () => context.push(
+                                      '/alunos/${widget.alunoId}',
+                                      extra: nome,
+                                    ),
+                                  ),
+                                  if (alertaStatusFinanceiroRuim(
+                                    _detalhe!.statusFinanceiro,
+                                  ))
+                                    DashboardHomeActionChip(
+                                      label: 'Cobrar',
+                                      accent: EagleTokens.bad,
+                                      isDark: isDark,
+                                      onPressed: () => context.push(
+                                        '/financeiro?alunoId=${widget.alunoId}',
                                       ),
-                                ),
-                                DashboardHomeActionChip(
-                                  label:
-                                      _gerandoIa
-                                          ? 'Gerando…'
-                                          : _detalhe!.sugestaoFonte == 'IA'
-                                          ? 'Gerar outra'
-                                          : 'Melhorar com IA',
-                                  accent: primary,
-                                  isDark: isDark,
-                                  enabled: !_gerandoIa,
-                                  onPressed: _gerarIa,
-                                ),
-                              ],
-                            ),
+                                    ),
+                                  DashboardHomeActionChip(
+                                    label: alertaAdiarCtaLabel(),
+                                    accent: primary,
+                                    isDark: isDark,
+                                    enabled: !_resolving,
+                                    onPressed: _resolver,
+                                  ),
+                                ],
+                              ),
                           ],
                         ),
                       ),
@@ -465,6 +486,7 @@ class _AlertaDetalheScreenState extends ConsumerState<AlertaDetalheScreen> {
                     ),
                   ],
                 ),
+      ),
       ),
     );
   }

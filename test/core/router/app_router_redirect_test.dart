@@ -20,6 +20,8 @@ void main() {
     expect(isAlunoOnlyLocation('/aluno/perfil'), isTrue);
     expect(isAlunoOnlyLocation('/aluno/perfil/editar'), isTrue);
     expect(isAlunoOnlyLocation('/aluno/desafios'), isTrue);
+    expect(isAlunoOnlyLocation('/aluno/desafios/4'), isTrue);
+    expect(isPersonalOnlyLocation('/desafios/4'), isTrue);
     expect(isAlunoOnlyLocation('/aluno/trilhas'), isTrue);
     expect(isAlunoOnlyLocation('/aluno/recorrencia'), isTrue);
   });

@@ -46,4 +46,41 @@ void main() {
     expect(desafioLeaderboardPoints(12), '12 pts');
     expect(desafioLeaderboardPoints(null), '0 pts');
   });
+
+  test('desafio detalhe conta prazo, meta e caminhos', () {
+    expect(desafioDetailPath(4), '/desafios/4');
+    expect(desafioAlunoDetailPath(4), '/aluno/desafios/4');
+    expect(
+      desafioDiasRestantesValue(
+        DateTime(2026, 9, 7),
+        now: DateTime(2026, 9, 7),
+      ),
+      'Hoje',
+    );
+    expect(
+      desafioDiasRestantesValue(
+        DateTime(2026, 9, 10),
+        now: DateTime(2026, 9, 7),
+      ),
+      '3',
+    );
+    expect(
+      desafioDiasRestantesHint(
+        DateTime(2026, 9, 6),
+        now: DateTime(2026, 9, 7),
+      ),
+      'Fora do prazo',
+    );
+    expect(desafioParticipantesHint(0), 'Ninguém no ranking');
+    expect(desafioParticipantesHint(2), '2 participantes');
+    expect(desafioAtingiramMeta(const [40, 100, 120], 100), 2);
+    expect(
+      desafioMetaAtingidaValue(atingiram: 2, total: 5),
+      '2/5',
+    );
+    expect(desafioStickyEncerrarLabel(), 'Encerrar desafio');
+    expect(desafioStickyAlunoLabel('TREINOS'), 'Ir aos treinos');
+    expect(desafioStickyAlunoPath('HABITOS'), '/aluno/habitos');
+    expect(desafioLugarLabel(0), '1º lugar');
+  });
 }

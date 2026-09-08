@@ -7,6 +7,9 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
   bool _loadingInteracoes = true;
   String? _erroLead;
   DateTime? _fetchedAt;
+  var _secao = leadDetailSecaoResumo;
+
+  void _leave() => safePopOrGo(context, '/leads');
 
   Lead get _activeLead {
     final lead = _lead;
@@ -326,13 +329,19 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
   @override
   Widget build(BuildContext context) {
     if (_loadingLead || _lead == null) {
-      return fxScreenA11yScope(
-        label: 'Lead',
+    return fxScreenA11yScope(
+      label: 'Lead',
+      child: PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, _) {
+          if (didPop) return;
+          _leave();
+        },
         child: FxShellScaffold(
-          useMesh: true,
-          appBar: FxShellAppBar(
-            title: 'Lead',
-            onBack: () => safePopOrGo(context, '/leads'),
+        useMesh: true,
+        appBar: FxShellAppBar(
+          title: 'Lead',
+          onBack: _leave,
             actions: [
               FxHelpIconButton(
                 tooltip: 'Como usar este lead',
@@ -353,7 +362,8 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
                     onRetry: _carregarLead,
                   ),
         ),
-      );
+      ),
+    );
     }
 
     final lead = _lead!;
@@ -365,11 +375,17 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
 
     return fxScreenA11yScope(
       label: 'Lead ${lead.nome}',
-      child: FxShellScaffold(
+      child: PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, _) {
+          if (didPop) return;
+          _leave();
+        },
+        child: FxShellScaffold(
         useMesh: true,
         appBar: FxShellAppBar(
           title: 'Lead',
-          onBack: () => safePopOrGo(context, '/leads'),
+          onBack: _leave,
           actions: [
             FxHelpIconButton(
               tooltip: 'Como usar este lead',
@@ -400,6 +416,8 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
                   isDark: Theme.of(context).brightness == Brightness.dark,
                   freshnessLabel: FxHubFreshness.fromFetchedAt(_fetchedAt),
                   sticky: sticky,
+                  secao: _secao,
+                  onSecao: (value) => setState(() => _secao = value),
                   onDefinirFollowUp: _definirFollowUp,
                   onLigar: _ligar,
                   onWhatsapp: _whatsapp,
@@ -426,6 +444,7 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
             ),
           ],
         ),
+      ),
       ),
     );
   }

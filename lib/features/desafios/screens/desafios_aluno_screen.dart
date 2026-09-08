@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/focux_hub_typography.dart';
@@ -9,14 +10,10 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feature_gate.dart';
-import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
-import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
-import '../../../core/widgets/fx_settings_group.dart';
-import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -69,80 +66,8 @@ class _DesafiosAlunoScreenState extends ConsumerState<DesafiosAlunoScreen> {
     }
   }
 
-  Future<void> _abrir(Desafio d) async {
-    try {
-      await ref.read(_repo).participar(d.id);
-      final lb = await ref.read(_repo).leaderboard(d.id);
-      if (!mounted) return;
-      showFxHomeSheet<void>(
-        context,
-        builder: (ctx) {
-          final isDark = Theme.of(ctx).brightness == Brightness.dark;
-          final primary = Theme.of(ctx).colorScheme.primary;
-          return FxHomeSheetSurface(
-            isDark: isDark,
-            expand: true,
-            maxHeight:
-                MediaQuery.sizeOf(ctx).height *
-                FxHomeSheetChrome.expandHeightFactor,
-            child: Column(
-              children: [
-                FxHomeSheetHandle(isDark: isDark),
-                SizedBox(height: FxSettingsLayout.headerToGroup),
-                FxHomeSheetHeader(
-                  isDark: isDark,
-                  title: d.titulo,
-                  subtitle: desafioSubtitle(
-                    tipo: d.tipo,
-                    metaPontos: d.metaPontos,
-                    inicio: d.inicio,
-                    fim: d.fim,
-                  ),
-                  leading: Icon(
-                    Icons.emoji_events_outlined,
-                    color: primary,
-                    size: 18,
-                  ),
-                ),
-                SizedBox(height: FxSettingsLayout.headerToGroup),
-                Expanded(
-                  child: ListView(
-                    padding: const EdgeInsets.fromLTRB(
-                      FxSettingsLayout.pageInset,
-                      0,
-                      FxSettingsLayout.pageInset,
-                      24,
-                    ),
-                    children: [
-                      if (lb.isEmpty)
-                        Text(desafioLeaderboardEmpty())
-                      else
-                        FxSettingsGroup(
-                          header: 'Seu ranking',
-                          children: [
-                            for (var i = 0; i < lb.length; i++)
-                              FxSettingsTile(
-                                fxIcon: 'star',
-                                label: desafioLeaderboardName(lb[i].alunoNome),
-                                subtitle: '${i + 1}º lugar',
-                                value: desafioLeaderboardPoints(lb[i].pontos),
-                                numeric: true,
-                                showDivider: i != lb.length - 1,
-                              ),
-                          ],
-                        ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          );
-        },
-      );
-    } catch (e) {
-      if (!mounted) return;
-      FeedbackHelper.showError(context, friendlyError(e));
-    }
+  void _abrir(Desafio d) {
+    context.push(desafioAlunoDetailPath(d.id), extra: d);
   }
 
   @override
@@ -216,7 +141,7 @@ class _DesafiosAlunoScreenState extends ConsumerState<DesafiosAlunoScreen> {
                 bottom: TokensStrip.s3,
               ),
               child: Text(
-                'Toque para entrar e ver o ranking.',
+                'Toque para entrar e ver o detalhe.',
                 style: FocuxHubTypography.bodyMuted(
                   color: fxScreenMute(context),
                   fontWeight: FontWeight.w600,

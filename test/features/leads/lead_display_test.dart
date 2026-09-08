@@ -88,4 +88,18 @@ void main() {
     expect(leadInteracoesMetricHint(1), '1 contato no histórico');
     expect(leadInteracoesMetricHint(4), '4 contatos no histórico');
   });
+
+  test('lead detalhe conta dias no funil', () {
+    expect(leadDiasNoFunilValue('nao-data'), '—');
+    expect(
+      leadDiasNoFunilValue('2026-09-07', now: DateTime(2026, 9, 7)),
+      'Hoje',
+    );
+    expect(
+      leadDiasNoFunilValue('2026-09-01', now: DateTime(2026, 9, 7)),
+      '6',
+    );
+    expect(leadDiasNoFunilHint('2026-09-01'), contains('desde'));
+    expect(leadDetailSecoes, hasLength(2));
+  });
 }

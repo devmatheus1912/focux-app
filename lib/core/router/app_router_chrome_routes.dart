@@ -87,6 +87,8 @@ import '../../features/monetizacao/screens/ofertas_upsell_screen.dart';
 import '../../features/monetizacao/screens/cancel_save_screen.dart';
 import '../../features/habitos/screens/habitos_personal_screen.dart';
 import '../../features/automacoes/screens/automacoes_screen.dart';
+import '../../features/desafios/data/desafio_repository.dart';
+import '../../features/desafios/screens/desafio_detail_screen.dart';
 import '../../features/desafios/screens/desafios_screen.dart';
 import '../../features/loja/screens/loja_screen.dart';
 import '../../features/perfil/screens/equipe_screen.dart';
@@ -786,6 +788,19 @@ RouteBase buildChromeShellRoute() {
           GoRoute(
             path: '/desafios',
             builder: (context, state) => const DesafiosScreen(),
+          ),
+          GoRoute(
+            path: '/desafios/:id',
+            redirect:
+                (context, state) =>
+                    intPathParam(state, 'id') == null ? '/desafios' : null,
+            builder: (context, state) {
+              final extra = state.extra;
+              return DesafioDetailScreen(
+                desafioId: intPathParam(state, 'id')!,
+                desafio: extra is Desafio ? extra : null,
+              );
+            },
           ),
           GoRoute(
             path: '/loja',

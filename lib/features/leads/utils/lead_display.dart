@@ -170,6 +170,31 @@ String leadInteracoesMetricHint(int count) {
   return '$count contatos no histórico';
 }
 
+const leadDetailSecaoResumo = 'resumo';
+const leadDetailSecaoInteracoes = 'interacoes';
+
+const leadDetailSecoes = [
+  (value: leadDetailSecaoResumo, label: 'Resumo'),
+  (value: leadDetailSecaoInteracoes, label: 'Interações'),
+];
+
+String leadDiasNoFunilValue(String criadoEm, {DateTime? now}) {
+  final date = DateTime.tryParse(criadoEm.trim());
+  if (date == null) return '—';
+  final days = _dateOnly(now ?? DateTime.now()).difference(_dateOnly(date)).inDays;
+  if (days <= 0) return 'Hoje';
+  return '$days';
+}
+
+String leadDiasNoFunilHint(String criadoEm) {
+  final date = DateTime.tryParse(criadoEm.trim());
+  if (date == null) return 'Entrada no funil';
+  return 'desde ${fxDateShort(date)}';
+}
+
+DateTime _dateOnly(DateTime value) =>
+    DateTime(value.year, value.month, value.day);
+
 const leadListChipStatuses = [
   'LEAD',
   'TESTE',

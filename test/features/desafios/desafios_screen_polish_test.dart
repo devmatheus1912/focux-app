@@ -17,8 +17,7 @@ void main() {
     expect(screen, contains('RefreshIndicator'));
     expect(screen, contains('FxHubFreshness.fromFetchedAt'));
     expect(screen, contains('showFxFormSheet'));
-    expect(screen, contains('showFxConfirmSheet'));
-    expect(screen, contains('encerrar'));
+    expect(screen, contains('desafioDetailPath'));
     expect(screen, contains('showFxInsetPickerSheet'));
     expect(screen, contains('safePopOrGo'));
     expect(screen, contains('constrainWidth: false'));
@@ -26,7 +25,7 @@ void main() {
     expect(screen, contains('ListView.builder'));
     expect(screen, contains('FxSatelliteListTile'));
     expect(screen, contains('DashboardSectionHeader'));
-    expect(screen, contains('FxSettingsGroup'));
+    expect(screen, isNot(contains('FxSettingsGroup')));
     expect(screen, isNot(contains('onTap: () {}')));
     expect(screen, contains('FeatureGate'));
     expect(screen, contains('comunidadeGrupos'));

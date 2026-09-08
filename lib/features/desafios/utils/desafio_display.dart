@@ -81,3 +81,74 @@ bool desafioMatchesFiltro(String tipo, DesafioTipoFiltro filtro) {
       ? key == 'HABITOS'
       : key == 'TREINOS';
 }
+
+String desafioDetailPath(int id) => '/desafios/$id';
+
+String desafioAlunoDetailPath(int id) => '/aluno/desafios/$id';
+
+DateTime _dateOnly(DateTime value) =>
+    DateTime(value.year, value.month, value.day);
+
+int desafioDiasRestantes(DateTime? fim, {DateTime? now}) {
+  if (fim == null) return 0;
+  return _dateOnly(fim).difference(_dateOnly(now ?? DateTime.now())).inDays;
+}
+
+String desafioDiasRestantesValue(DateTime? fim, {DateTime? now}) {
+  if (fim == null) return '—';
+  final days = desafioDiasRestantes(fim, now: now);
+  if (days < 0) return 'Encerrado';
+  if (days == 0) return 'Hoje';
+  return '$days';
+}
+
+String desafioDiasRestantesHint(DateTime? fim, {DateTime? now}) {
+  if (fim == null) return 'Sem prazo';
+  final days = desafioDiasRestantes(fim, now: now);
+  if (days < 0) return 'Fora do prazo';
+  if (days == 0) return 'Último dia';
+  if (days == 1) return '1 dia restante';
+  return '$days dias restantes';
+}
+
+String desafioParticipantesValue(int count) => '$count';
+
+String desafioParticipantesHint(int count) {
+  if (count <= 0) return 'Ninguém no ranking';
+  if (count == 1) return '1 participante';
+  return '$count participantes';
+}
+
+int desafioAtingiramMeta(Iterable<int> pontos, int metaPontos) =>
+    pontos.where((p) => p >= metaPontos).length;
+
+String desafioMetaAtingidaValue({required int atingiram, required int total}) =>
+    '$atingiram/$total';
+
+String desafioMetaAtingidaHint(int metaPontos) =>
+    'Chegaram em ${desafioMetaLabel(metaPontos)}';
+
+String desafioDetailSubtitle({
+  required String tipo,
+  DateTime? fim,
+  String? freshness,
+}) {
+  final parts = <String>[desafioTipoLabel(tipo)];
+  final prazo = desafioDiasRestantesHint(fim);
+  if (prazo.isNotEmpty) parts.add(prazo);
+  final stamp = freshness?.trim();
+  if (stamp != null && stamp.isNotEmpty) parts.add(stamp);
+  return parts.join(' · ');
+}
+
+String desafioStickyEncerrarLabel() => 'Encerrar desafio';
+
+String desafioStickyAlunoLabel(String tipo) =>
+    tipo.trim().toUpperCase() == 'TREINOS' ? 'Ir aos treinos' : 'Ir aos hábitos';
+
+String desafioStickyAlunoPath(String tipo) =>
+    tipo.trim().toUpperCase() == 'TREINOS'
+        ? '/checkin/treinos'
+        : '/aluno/habitos';
+
+String desafioLugarLabel(int index) => '${index + 1}º lugar';

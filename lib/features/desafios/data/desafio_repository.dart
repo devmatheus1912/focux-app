@@ -9,6 +9,8 @@ class Desafio {
   final int metaPontos;
   final DateTime? inicio;
   final DateTime? fim;
+  final int? grupoAulaId;
+  final bool ativo;
 
   const Desafio({
     required this.id,
@@ -18,6 +20,8 @@ class Desafio {
     this.descricao,
     this.inicio,
     this.fim,
+    this.grupoAulaId,
+    this.ativo = true,
   });
 
   factory Desafio.fromJson(Map<String, dynamic> j) => Desafio(
@@ -28,6 +32,8 @@ class Desafio {
     metaPontos: (j['metaPontos'] as num?)?.toInt() ?? 100,
     inicio: _date(j['inicio']),
     fim: _date(j['fim']),
+    grupoAulaId: (j['grupoAulaId'] as num?)?.toInt(),
+    ativo: j['ativo'] as bool? ?? true,
   );
 }
 
@@ -106,6 +112,14 @@ class DesafioRepository {
 
   Future<void> participar(int id) async {
     await _dio.post('/api/desafios/$id/participar');
+  }
+
+  Future<Desafio?> buscarAtivo(int id, {required bool forAluno}) async {
+    final lista = forAluno ? await meus() : await listar();
+    for (final desafio in lista) {
+      if (desafio.id == id) return desafio;
+    }
+    return null;
   }
 
   Future<List<DesafioLeaderboardEntry>> leaderboard(int id) async {
