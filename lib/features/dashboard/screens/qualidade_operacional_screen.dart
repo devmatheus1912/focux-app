@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/analytics/analytics_service.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
@@ -34,7 +37,9 @@ class QualidadeOperacionalScreen extends ConsumerStatefulWidget {
 
 class _QualidadeOperacionalScreenState
     extends ConsumerState<QualidadeOperacionalScreen> {
+  final _openedAt = DateTime.now();
   DateTime? _fetchedAt;
+  var _viewTracked = false;
   ProviderSubscription<AsyncValue<QualidadeOperacionalData>>? _freshnessSub;
 
   @override
@@ -45,8 +50,32 @@ class _QualidadeOperacionalScreenState
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         setState(() => _fetchedAt = DateTime.now());
+        _trackViewIfNeeded(next.requireValue);
       });
     }, fireImmediately: true);
+  }
+
+  void _trackViewIfNeeded(QualidadeOperacionalData data) {
+    if (_viewTracked) return;
+    _viewTracked = true;
+    unawaited(
+      AnalyticsService.instance.track(
+        ProductEvents.relatoriosHubViewed,
+        props: {
+          'surface': 'qualidade',
+          'score': data.score,
+        },
+      ),
+    );
+    unawaited(
+      AnalyticsService.instance.track(
+        ProductEvents.relatoriosHubTtv,
+        props: {
+          'surface': 'qualidade',
+          'ms': DateTime.now().difference(_openedAt).inMilliseconds,
+        },
+      ),
+    );
   }
 
   @override
@@ -74,27 +103,34 @@ class _QualidadeOperacionalScreenState
           actions: [
             FxHelpIconButton(
               tooltip: 'Como usar Qualidade',
-              onTap:
-                  () => showFxHelpSheet(
-                    context,
-                    title: 'Qualidade',
-                    subtitle: 'Como a operação se compara ao mercado.',
-                    tips: const [
-                      FxHelpTip('Como calculamos', qualidadeComoCalculamos),
-                      FxHelpTip(
-                        'Índice',
-                        'O card do topo é o recorte do dia.',
-                      ),
-                      FxHelpTip(
-                        'Ticket',
-                        'Compare o seu ticket médio com o mercado.',
-                      ),
-                      FxHelpTip(
-                        'Retenção',
-                        'Se a base cair, abra Saúde da base.',
-                      ),
-                    ],
+              onTap: () {
+                unawaited(
+                  AnalyticsService.instance.track(
+                    ProductEvents.relatoriosHubHelpOpened,
+                    props: {'surface': 'qualidade'},
                   ),
+                );
+                showFxHelpSheet(
+                  context,
+                  title: 'Qualidade',
+                  subtitle: 'Como a operação se compara ao mercado.',
+                  tips: const [
+                    FxHelpTip('Como calculamos', qualidadeComoCalculamos),
+                    FxHelpTip(
+                      'Índice',
+                      'O card do topo é o recorte do dia.',
+                    ),
+                    FxHelpTip(
+                      'Ticket',
+                      'Compare o seu ticket médio com o mercado.',
+                    ),
+                    FxHelpTip(
+                      'Retenção',
+                      'Se a base cair, abra Saúde da base.',
+                    ),
+                  ],
+                );
+              },
             ),
           ],
         ),
@@ -118,24 +154,49 @@ class _QualidadeOperacionalScreenState
                 onRetry: () => ref.invalidate(qualidadeProvider),
               ),
           data: (data) {
+            Future<void> refresh() async {
+              unawaited(
+                AnalyticsService.instance.track(
+                  ProductEvents.relatoriosHubRefreshed,
+                  props: {'surface': 'qualidade'},
+                ),
+              );
+              ref.invalidate(qualidadeProvider);
+              await ref.read(qualidadeProvider.future);
+            }
+
             if (data.isEmpty) {
-              return FxEmptyState(
-                icon: 'bar-chart-2',
-                title: 'Sem dados ainda',
-                subtitle:
-                    'Cadastre alunos e registre mensalidades para ver o índice da operação.',
-                action: FxEmptyAction(
-                  label: 'Ver alunos',
-                  onTap: () => goPersonalShellTab(context, '/alunos'),
+              return RefreshIndicator(
+                color: primary,
+                onRefresh: refresh,
+                child: ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  children: [
+                    const SizedBox(height: 48),
+                    FxEmptyState(
+                      icon: 'bar-chart-2',
+                      title: 'Sem dados ainda',
+                      subtitle:
+                          'Cadastre alunos e registre mensalidades para ver o índice da operação.',
+                      action: FxEmptyAction(
+                        label: 'Ver alunos',
+                        onTap: () {
+                          unawaited(
+                            AnalyticsService.instance.track(
+                              ProductEvents.alunosViewed,
+                            ),
+                          );
+                          goPersonalShellTab(context, '/alunos');
+                        },
+                      ),
+                    ),
+                  ],
                 ),
               );
             }
             return RefreshIndicator(
               color: primary,
-              onRefresh: () async {
-                ref.invalidate(qualidadeProvider);
-                await ref.read(qualidadeProvider.future);
-              },
+              onRefresh: refresh,
               child: FxContentWidthLimiter(
                 child: ListView(
                   physics: const AlwaysScrollableScrollPhysics(),

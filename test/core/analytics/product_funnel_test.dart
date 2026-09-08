@@ -12,6 +12,7 @@ void main() {
   test('alunoId só sai de props existentes', () {
     expect(funnelAlunoIdFromProps({'alunoId': 12}), 12);
     expect(funnelAlunoIdFromProps({'alunoId': '9'}), 9);
+    expect(funnelAlunoIdFromProps({'aluno_id': 4}), 4);
     expect(funnelAlunoIdFromProps({'has_whatsapp': true}), isNull);
     expect(funnelAlunoIdFromProps(null), isNull);
   });

@@ -9,7 +9,7 @@ String? productEventToFunnelTipo(String event) {
 }
 
 int? funnelAlunoIdFromProps(Map<String, Object?>? props) {
-  final raw = props?['alunoId'];
+  final raw = props?['alunoId'] ?? props?['aluno_id'];
   if (raw is int) return raw;
   if (raw is num) return raw.toInt();
   return int.tryParse(raw?.toString() ?? '');

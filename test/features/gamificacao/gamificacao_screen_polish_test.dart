@@ -19,6 +19,8 @@ void main() {
     expect(screen, contains('RefreshIndicator'));
     expect(screen, contains('gamificacaoPersonalEmptyTitle'));
     expect(screen, contains('gamificacaoRotaDoBadge'));
+    expect(screen, contains('gamificacaoStreakTitle'));
+    expect(screen, contains('goPersonalShellTab'));
     expect(screen, contains('userRoleProvider'));
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(16));
   });
