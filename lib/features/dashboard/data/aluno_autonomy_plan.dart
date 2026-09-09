@@ -229,7 +229,7 @@ AlunoAutonomyPlan buildAlunoAutonomyPlan({
         id: 'perfil-base',
         title: 'Completar perfil base',
         description:
-            'Foto, contato, objetivo e dados corporais reduzem perguntas repetidas e melhoram os ajustes.',
+            'Contato, objetivo e dados corporais reduzem perguntas repetidas e melhoram os ajustes.',
         cta: 'Completar',
         route: '/aluno/perfil',
         kind: AlunoTaskKind.perfil,
@@ -247,7 +247,7 @@ AlunoAutonomyPlan buildAlunoAutonomyPlan({
         cta: 'Atualizar',
         route: '/aluno/perfil',
         kind: AlunoTaskKind.fotoDados,
-        priority: AlunoTaskPriority.alta,
+        priority: hasPhoto ? AlunoTaskPriority.media : AlunoTaskPriority.alta,
         done: hasPhoto && hasBodyData,
       ),
       AlunoAutonomyTask(
@@ -365,8 +365,20 @@ AlunoHomeAction _mainHomeAction({
       eyebrow: 'Base incompleta',
       title: 'Complete seu mapa corporal',
       description:
-          'Foto, medidas e objetivo dão ao personal contexto para ajustar treino sem adivinhação.',
+          'Medidas e objetivo dão ao personal contexto para ajustar treino sem adivinhação.',
       cta: 'Completar perfil',
+      route: '/aluno/perfil',
+    );
+  }
+
+  if (!_isFilled(aluno.fotoUrl)) {
+    return const AlunoHomeAction(
+      mode: AlunoHomeMode.profileSetup,
+      eyebrow: 'Quase lá',
+      title: 'Adicione sua foto',
+      description:
+          'O avatar humaniza o acompanhamento e some assim que a foto estiver no cadastro.',
+      cta: 'Enviar foto',
       route: '/aluno/perfil',
     );
   }
@@ -603,7 +615,6 @@ int _profileCompletion(Aluno aluno) {
     aluno.peso?.toString(),
     aluno.altura?.toString(),
     aluno.dataNascimento,
-    aluno.fotoUrl,
   ];
   final filled = fields.where((value) => _isFilled(value)).length;
   return ((filled / fields.length) * 100).round();

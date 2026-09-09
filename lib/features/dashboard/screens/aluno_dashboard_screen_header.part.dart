@@ -670,11 +670,7 @@ class _PerformanceEvolutionCard extends StatelessWidget {
     }
   }
 
-  String _fmtVolume(double value) {
-    if (value <= 0) return '--';
-    if (value >= 1000) return '${(value / 1000).toStringAsFixed(1)}t';
-    return '${value.toStringAsFixed(0)}kg';
-  }
+  String _fmtVolume(double value) => formatAlunoVolumeKg(value);
 
   String _fmtRecorde(RecordePessoal recorde) {
     final carga = recorde.cargaKg;

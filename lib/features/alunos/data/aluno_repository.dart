@@ -964,6 +964,37 @@ class AlunoRepository {
     return Aluno.fromJson(response.data as Map<String, dynamic>);
   }
 
+  /// Foto de perfil do aluno — pasta liberada no BE (não usa /api/uploads).
+  Future<String> uploadMinhaFoto({
+    required List<int> bytes,
+    required String filename,
+  }) async {
+    final lower = filename.toLowerCase();
+    final ext = lower.contains('.') ? lower.split('.').last : 'jpg';
+    final contentType = switch (ext) {
+      'png' => DioMediaType('image', 'png'),
+      'webp' => DioMediaType('image', 'webp'),
+      'heic' => DioMediaType('image', 'heic'),
+      'heif' => DioMediaType('image', 'heif'),
+      _ => DioMediaType('image', 'jpeg'),
+    };
+    final form = FormData.fromMap({
+      'file': MultipartFile.fromBytes(
+        bytes,
+        filename: filename,
+        contentType: contentType,
+      ),
+    });
+    final response = await _dio.post('/api/aluno/me/foto', data: form);
+    final data = Map<String, dynamic>.from(response.data as Map);
+    final url = data['url'] as String? ?? data['fotoUrl'] as String?;
+    if (url != null && url.trim().isNotEmpty) return url.trim();
+    final aluno = Aluno.fromJson(data);
+    final foto = aluno.fotoUrl?.trim();
+    if (foto != null && foto.isNotEmpty) return foto;
+    throw StateError('Upload de foto sem URL');
+  }
+
   Future<void> registrarEventoAutonomia({
     required String taskId,
     required String taskTitle,
