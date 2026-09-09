@@ -36,9 +36,7 @@ class FxCelebrationOverlay {
             ),
             Positioned.fill(
               child: IgnorePointer(
-                child: FxRiveCelebration(
-                  fallback: FxConfettiBurst(color: color),
-                ),
+                child: FxConfettiBurst(color: color),
               ),
             ),
             Positioned.fill(

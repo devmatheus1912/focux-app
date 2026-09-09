@@ -67,6 +67,7 @@ class _AddExercicioToTreinoScreenState
   final _repCtrl = TextEditingController(text: '10-12');
   final _descansoCtrl = TextEditingController(text: '60');
   final _cargaCtrl = TextEditingController();
+  final _rpeAlvoCtrl = TextEditingController();
   final _observacoesCtrl = TextEditingController();
   final _grupoSupersetCtrl = TextEditingController(text: '1');
   String _presetId = 'hypertrophy';
@@ -97,6 +98,7 @@ class _AddExercicioToTreinoScreenState
     _repCtrl.dispose();
     _descansoCtrl.dispose();
     _cargaCtrl.dispose();
+    _rpeAlvoCtrl.dispose();
     _observacoesCtrl.dispose();
     _grupoSupersetCtrl.dispose();
     super.dispose();

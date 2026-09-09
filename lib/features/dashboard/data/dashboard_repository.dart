@@ -315,6 +315,7 @@ class AlunoDashboardHomeBundle {
   final List<AlunoOferta> upsellPendentes;
   final bool npsDeveResponder;
   final RecoverySnapshot? recovery;
+  final bool hasWearableHistory;
   final int streakAtual;
   final double volumeSemanaKg;
   final double volumeMesKg;
@@ -333,6 +334,7 @@ class AlunoDashboardHomeBundle {
     this.upsellPendentes = const [],
     this.npsDeveResponder = false,
     this.recovery,
+    this.hasWearableHistory = false,
     this.streakAtual = 0,
     this.volumeSemanaKg = 0,
     this.volumeMesKg = 0,
@@ -389,6 +391,7 @@ class AlunoDashboardHomeBundle {
                 Map<String, dynamic>.from(recoveryRaw),
               )
               : null,
+      hasWearableHistory: json['hasWearableHistory'] as bool? ?? false,
       streakAtual: (json['streakAtual'] as num?)?.toInt() ?? 0,
       volumeSemanaKg: (json['volumeSemanaKg'] as num?)?.toDouble() ?? 0,
       volumeMesKg: (json['volumeMesKg'] as num?)?.toDouble() ?? 0,

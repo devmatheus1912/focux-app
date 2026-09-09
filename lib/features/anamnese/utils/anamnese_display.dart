@@ -121,10 +121,12 @@ String anamneseDispMetricValue(Anamnese a) {
   return anamneseDisponibilidadeLabel(a.disponibilidadeSemanal!);
 }
 
-String anamneseSonoHorasLabel(int? horas) {
+String anamneseSonoHorasLabel(num? horas) {
   if (horas == null) return '—';
-  if (horas <= 1) return '1 hora';
-  return '$horas horas';
+  final value = horas.toDouble();
+  if (value <= 1) return '1 hora';
+  if (value == value.roundToDouble()) return '${value.round()} horas';
+  return '${value.toStringAsFixed(1)} horas';
 }
 
 /// Perguntas PAR-Q+ na ordem da ficha (chave → enunciado curto).

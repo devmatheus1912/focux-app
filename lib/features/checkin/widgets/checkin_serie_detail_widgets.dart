@@ -32,6 +32,7 @@ class CheckinSerieDetailSheet extends StatefulWidget {
   final String? initialRepeticoes;
   final String? initialFeedback;
   final int? initialRpe;
+  final int? rpeAlvo;
   final bool initialDor;
 
   const CheckinSerieDetailSheet({
@@ -41,6 +42,7 @@ class CheckinSerieDetailSheet extends StatefulWidget {
     required this.initialRepeticoes,
     required this.initialFeedback,
     required this.initialRpe,
+    this.rpeAlvo,
     required this.initialDor,
   });
 
@@ -67,8 +69,8 @@ class _CheckinSerieDetailSheetState extends State<CheckinSerieDetailSheet> {
       text: widget.initialRepeticoes ?? '',
     );
     _feedback = widget.initialFeedback;
-    _rpe = widget.initialRpe ?? 7;
-    _useRpe = widget.initialRpe != null;
+    _rpe = widget.initialRpe ?? widget.rpeAlvo ?? 7;
+    _useRpe = widget.initialRpe != null || widget.rpeAlvo != null;
     _dor = widget.initialDor;
   }
 
@@ -204,6 +206,18 @@ class _CheckinSerieDetailSheetState extends State<CheckinSerieDetailSheet> {
                           ),
                         ),
                       ),
+                      if (widget.rpeAlvo != null)
+                        Padding(
+                          padding: const EdgeInsets.only(right: 8),
+                          child: Text(
+                            'Alvo ${widget.rpeAlvo}',
+                            style: TextStyle(
+                              color: brand,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ),
                       Switch.adaptive(
                         value: _useRpe,
                         activeTrackColor: brand,
@@ -217,12 +231,24 @@ class _CheckinSerieDetailSheetState extends State<CheckinSerieDetailSheet> {
                     max: 10,
                     divisions: 9,
                     activeColor: brand,
-                    label: 'RPE $_rpe',
+                    secondaryActiveColor: brand.withValues(alpha: 0.28),
+                    label:
+                        widget.rpeAlvo == null
+                            ? 'RPE $_rpe'
+                            : 'RPE $_rpe · alvo ${widget.rpeAlvo}',
                     onChanged:
                         _useRpe
                             ? (value) => setState(() => _rpe = value.round())
                             : null,
                   ),
+                  if (widget.rpeAlvo != null)
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'Ficha sugere RPE ${widget.rpeAlvo} (escala 1–10).',
+                        style: TextStyle(color: mute, fontSize: 12),
+                      ),
+                    ),
                 ],
               ),
             ),

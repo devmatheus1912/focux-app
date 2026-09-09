@@ -45,7 +45,7 @@ class _PerfilAlunoEditarScreenState extends ConsumerState<PerfilAlunoEditarScree
     _tipoConsultoria.text = aluno.tipoConsultoria ?? '';
     _peso.text = aluno.peso?.toString() ?? '';
     _altura.text = aluno.altura?.toString() ?? '';
-    _dataNascimento.text = aluno.dataNascimento ?? '';
+    _dataNascimento.text = formatBirthDateForDisplay(aluno.dataNascimento);
     _fotoUrl = aluno.fotoUrl;
     if (mounted) setState(() {});
   }
@@ -58,13 +58,9 @@ class _PerfilAlunoEditarScreenState extends ConsumerState<PerfilAlunoEditarScree
     if (file == null) return;
     setState(() => _uploading = true);
     try {
-      final url = await MediaUploadService(
-        ref.read(apiClientProvider),
-      ).uploadBytes(
+      final url = await ref.read(alunoRepositoryProvider).uploadMinhaFoto(
         bytes: await file.readAsBytes(),
         filename: file.name,
-        folder: 'alunos/fotos',
-        resourceType: 'image',
       );
       if (!mounted) return;
       setState(() => _fotoUrl = url);
@@ -100,6 +96,7 @@ class _PerfilAlunoEditarScreenState extends ConsumerState<PerfilAlunoEditarScree
       });
       ref.invalidate(alunoPerfilHomeProvider);
       ref.invalidate(alunoMeProvider);
+      ref.invalidate(alunoDashboardHomeProvider);
       if (!silent && mounted) {
         FeedbackHelper.showSuccess(context, 'Perfil do aluno atualizado.');
       }
@@ -528,7 +525,7 @@ class _PerfilAlunoEditarScreenState extends ConsumerState<PerfilAlunoEditarScree
                             Expanded(
                               child: _Field(
                                 controller: _dataNascimento,
-                                label: 'Nascimento AAAA-MM-DD',
+                                label: 'Nascimento DD-MM-AAAA',
                                 icon: Icons.cake_outlined,
                               ),
                             ),

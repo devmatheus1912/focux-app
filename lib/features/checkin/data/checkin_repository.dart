@@ -24,6 +24,7 @@ class ExecucaoExercicio {
   final bool concluido;
   final String? feedback;
   final int? rpe;
+  final int? rpeAlvo;
   final bool dor;
   final double? cargaAnteriorKg;
   final int? seriesFeitasAnterior;
@@ -53,6 +54,7 @@ class ExecucaoExercicio {
     required this.concluido,
     this.feedback,
     this.rpe,
+    this.rpeAlvo,
     this.dor = false,
     this.cargaAnteriorKg,
     this.seriesFeitasAnterior,
@@ -84,6 +86,7 @@ class ExecucaoExercicio {
         concluido: j['concluido'] as bool,
         feedback: j['feedback'] as String?,
         rpe: j['rpe'] as int?,
+        rpeAlvo: (j['rpeAlvo'] as num?)?.toInt(),
         dor: j['dor'] as bool? ?? false,
         cargaAnteriorKg: _toDouble(j['cargaAnteriorKg']),
         seriesFeitasAnterior: j['seriesFeitasAnterior'] as int?,
@@ -117,6 +120,7 @@ class ExecucaoExercicio {
     'concluido': concluido,
     'feedback': feedback,
     'rpe': rpe,
+    'rpeAlvo': rpeAlvo,
     'dor': dor,
     'cargaAnteriorKg': cargaAnteriorKg,
     'seriesFeitasAnterior': seriesFeitasAnterior,
@@ -153,6 +157,7 @@ class ExecucaoExercicio {
     concluido: concluido ?? this.concluido,
     feedback: feedback ?? this.feedback,
     rpe: rpe ?? this.rpe,
+    rpeAlvo: rpeAlvo,
     dor: dor ?? this.dor,
     cargaAnteriorKg: cargaAnteriorKg,
     seriesFeitasAnterior: seriesFeitasAnterior,
