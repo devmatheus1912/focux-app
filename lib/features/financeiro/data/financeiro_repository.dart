@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
+import '../../../core/api/pagina.dart';
 import '../../../core/money/fx_money.dart';
 import '../../planos/data/planos_repository.dart';
 
@@ -237,9 +238,21 @@ class FinanceiroRepository {
   final Dio _dio;
   FinanceiroRepository(ApiClient c) : _dio = c.dio;
 
-  Future<List<Mensalidade>> listarPorAluno(int alunoId) async {
-    final r = await _dio.get('/api/alunos/$alunoId/historico-mensalidades');
-    return (r.data as List).map((e) => Mensalidade.fromJson(e)).toList();
+  Future<List<Mensalidade>> listarPorAluno(int alunoId, {int page = 0, int size = 100}) async {
+    final r = await _dio.get(
+      '/api/alunos/$alunoId/historico-mensalidades',
+      queryParameters: {'page': page, 'size': size},
+    );
+    final data = r.data;
+    if (data is! Map) {
+      throw FormatException(
+        'GET /api/alunos/{id}/historico-mensalidades devolve Pagina, não lista crua.',
+      );
+    }
+    return Pagina.fromJson(
+      Map<String, dynamic>.from(data),
+      (e) => Mensalidade.fromJson(e as Map<String, dynamic>),
+    ).content;
   }
 
   Future<void> registrarContato(
