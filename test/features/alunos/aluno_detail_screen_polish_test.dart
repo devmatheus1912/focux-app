@@ -28,6 +28,7 @@ void main() {
     expect(screen, contains('FxHubFreshness'));
     expect(screen, contains('onLista'));
     expect(screen, contains('subtitle: freshness'));
+    expect(screen, contains('freshnessLabel: freshness'));
     expect(screen, contains("title: 'Não conseguimos carregar o aluno'"));
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(16));
   });

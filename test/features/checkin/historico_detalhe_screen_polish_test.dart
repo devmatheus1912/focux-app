@@ -19,6 +19,10 @@ void main() {
     expect(screen, contains('detalhe(widget.execucaoId)'));
     expect(screen, contains('FxHelpIconButton'));
     expect(screen, contains('DashboardHomeActionChip'));
+    expect(screen, contains("label: 'Hoje'"));
+    expect(screen, contains("'/dashboard/aluno'"));
+    expect(screen, contains('FxHubFreshness.fromFetchedAt'));
+    expect(screen, isNot(contains('freshness: freshness')));
     expect(screen, contains('historicoDuracaoLabel'));
     expect(screen, contains('viewInsetsOf'));
     expect(screen, contains('PopScope'));

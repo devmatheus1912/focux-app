@@ -302,7 +302,6 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                                 isDark: isDark,
                                 primary: primary,
                                 compactContactPriority: compactHero,
-                                freshnessLabel: freshness,
                                 onDefineObjective:
                                     alunoObjectiveIsDefined(aluno.objetivo)
                                         ? null
@@ -322,6 +321,7 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                               mute: mute,
                               line: chrome.line,
                               displayName: displayName,
+                              freshnessLabel: freshness,
                               ink: ink,
                               isDark: isDark,
                               onBack: () => safePopOrGo(context, '/alunos'),

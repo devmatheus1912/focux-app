@@ -6,7 +6,6 @@ class _LeadDetailContent extends StatelessWidget {
     required this.loadingInteracoes,
     required this.interacoes,
     required this.isDark,
-    required this.freshnessLabel,
     required this.sticky,
     required this.secao,
     required this.onSecao,
@@ -21,7 +20,6 @@ class _LeadDetailContent extends StatelessWidget {
   final bool loadingInteracoes;
   final List<LeadInteracao> interacoes;
   final bool isDark;
-  final String? freshnessLabel;
   final LeadStickyAction sticky;
   final String secao;
   final ValueChanged<String> onSecao;
@@ -57,10 +55,7 @@ class _LeadDetailContent extends StatelessWidget {
       children: [
         FxHubHeader(
           title: lead.nome,
-          subtitle: leadHubSubtitle(
-            status: lead.status,
-            freshness: freshnessLabel,
-          ),
+          subtitle: leadHubSubtitle(status: lead.status),
         ),
         const SizedBox(height: TokensStrip.s4),
         OperationalMetricTile(
@@ -98,6 +93,25 @@ class _LeadDetailContent extends StatelessWidget {
           color: primary,
           isDark: isDark,
         ),
+        const SizedBox(height: TokensStrip.s3),
+        Wrap(
+          spacing: TokensStrip.s2,
+          runSpacing: TokensStrip.s2,
+          children: [
+            DashboardHomeActionChip(
+              label: 'Lista',
+              accent: primary,
+              isDark: isDark,
+              onPressed: () => safePopOrGo(context, '/leads'),
+            ),
+            DashboardHomeActionChip(
+              label: 'Kanban',
+              accent: primary,
+              isDark: isDark,
+              onPressed: () => context.push('/leads/kanban'),
+            ),
+          ],
+        ),
         const SizedBox(height: TokensStrip.s4),
         AlunoSegmentedChoice(
           options: leadDetailSecoes,
@@ -126,40 +140,35 @@ class _LeadDetailContent extends StatelessWidget {
     required String? observacoes,
   }) {
     return [
-      Wrap(
-        spacing: TokensStrip.s2,
-        runSpacing: TokensStrip.s2,
-        children: [
-          DashboardHomeActionChip(
-            label: 'Lista',
-            accent: primary,
-            isDark: isDark,
-            onPressed: () => safePopOrGo(context, '/leads'),
-          ),
-          if (sticky != LeadStickyAction.followUp)
-            DashboardHomeActionChip(
-              label: 'Follow-up',
-              accent: primary,
-              isDark: isDark,
-              onPressed: onDefinirFollowUp,
-            ),
-          if (temTelefone) ...[
-            DashboardHomeActionChip(
-              label: 'Ligar',
-              accent: primary,
-              isDark: isDark,
-              onPressed: onLigar,
-            ),
-            if (sticky != LeadStickyAction.whatsapp)
+      if (sticky != LeadStickyAction.followUp || temTelefone)
+        Wrap(
+          spacing: TokensStrip.s2,
+          runSpacing: TokensStrip.s2,
+          children: [
+            if (sticky != LeadStickyAction.followUp)
               DashboardHomeActionChip(
-                label: 'WhatsApp',
+                label: 'Follow-up',
                 accent: primary,
                 isDark: isDark,
-                onPressed: onWhatsapp,
+                onPressed: onDefinirFollowUp,
               ),
+            if (temTelefone) ...[
+              DashboardHomeActionChip(
+                label: 'Ligar',
+                accent: primary,
+                isDark: isDark,
+                onPressed: onLigar,
+              ),
+              if (sticky != LeadStickyAction.whatsapp)
+                DashboardHomeActionChip(
+                  label: 'WhatsApp',
+                  accent: primary,
+                  isDark: isDark,
+                  onPressed: onWhatsapp,
+                ),
+            ],
           ],
-        ],
-      ),
+        ),
       if (observacoes != null && observacoes.isNotEmpty) ...[
         const SizedBox(height: TokensStrip.s4),
         Text(

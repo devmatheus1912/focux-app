@@ -14,6 +14,13 @@ void main() {
     expect(historicoStatusQuery(HistoricoStatusChip.concluido), 'CONCLUIDO');
     expect(historicoStatusQuery(HistoricoStatusChip.andamento), 'EM_ANDAMENTO');
     expect(historicoDetalhePath(12), '/checkin/historico/12');
+    expect(
+      historicoDetalheSubtitle(
+        status: 'CONCLUIDO',
+        iniciadoEm: '2026-09-07T10:00:00',
+      ),
+      contains('Concluído'),
+    );
     expect(historicoStickyLabel('CONCLUIDO'), 'Treinar de novo');
     expect(historicoStickyLabel('EM_ANDAMENTO'), 'Continuar treino');
     expect(

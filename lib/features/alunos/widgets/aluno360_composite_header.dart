@@ -156,6 +156,7 @@ class Aluno360HeaderToolbar extends StatelessWidget {
     required this.showTitle,
     required this.ink,
     required this.onBack,
+    this.freshnessLabel,
     this.onDelete,
     this.onHelp,
     this.actionsEnabled = true,
@@ -164,6 +165,7 @@ class Aluno360HeaderToolbar extends StatelessWidget {
   final String displayName;
   final bool showTitle;
   final Color ink;
+  final String? freshnessLabel;
   final VoidCallback onBack;
   final VoidCallback? onDelete;
   final VoidCallback? onHelp;
@@ -171,6 +173,9 @@ class Aluno360HeaderToolbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final stamp = freshnessLabel?.trim();
+    final hasStamp = stamp != null && stamp.isNotEmpty;
+
     return Row(
       children: [
         Padding(
@@ -188,11 +193,33 @@ class Aluno360HeaderToolbar extends StatelessWidget {
         ),
         if (showTitle)
           Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  displayName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Aluno360Layout.identityNameStyle(context, ink),
+                ),
+                if (hasStamp)
+                  Text(
+                    stamp,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Aluno360Layout.captionStyle(context),
+                  ),
+              ],
+            ),
+          )
+        else if (hasStamp)
+          Expanded(
             child: Text(
-              displayName,
+              stamp,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: Aluno360Layout.identityNameStyle(context, ink),
+              style: Aluno360Layout.captionStyle(context),
             ),
           )
         else
@@ -235,6 +262,7 @@ class Aluno360CompositeHeaderDelegate extends SliverPersistentHeaderDelegate {
     required this.ink,
     required this.isDark,
     required this.onBack,
+    this.freshnessLabel,
     this.onDelete,
     this.onHelp,
     this.actionsEnabled = true,
@@ -248,6 +276,7 @@ class Aluno360CompositeHeaderDelegate extends SliverPersistentHeaderDelegate {
   final Color mute;
   final Color line;
   final String displayName;
+  final String? freshnessLabel;
   final Color ink;
   final bool isDark;
   final VoidCallback onBack;
@@ -307,6 +336,7 @@ class Aluno360CompositeHeaderDelegate extends SliverPersistentHeaderDelegate {
                   child: Aluno360HeaderToolbar(
                     displayName: displayName,
                     showTitle: collapsed,
+                    freshnessLabel: freshnessLabel,
                     ink: ink,
                     onBack: onBack,
                     onDelete: onDelete,
@@ -369,6 +399,7 @@ class Aluno360CompositeHeaderDelegate extends SliverPersistentHeaderDelegate {
         mute != oldDelegate.mute ||
         line != oldDelegate.line ||
         displayName != oldDelegate.displayName ||
+        freshnessLabel != oldDelegate.freshnessLabel ||
         ink != oldDelegate.ink ||
         isDark != oldDelegate.isDark ||
         actionsEnabled != oldDelegate.actionsEnabled ||

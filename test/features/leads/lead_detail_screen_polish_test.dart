@@ -38,7 +38,10 @@ void main() {
     expect(screen, contains('PopScope'));
     expect(screen, contains('leadDetailSecoes'));
     expect(screen, contains('Lista'));
+    expect(screen, contains('Kanban'));
+    expect(screen, contains("'/leads/kanban'"));
     expect(screen, contains('FxHubFreshness.fromFetchedAt'));
+    expect(screen, isNot(contains('freshness: freshnessLabel')));
     expect(screen, isNot(contains('FxSettingsGroup')));
     expect(screen, isNot(contains('DropdownButton')));
     expect(screen, isNot(contains('FloatingActionButton')));

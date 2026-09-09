@@ -67,10 +67,7 @@ void main() {
     expect(leadMatchesQuery(nome: 'Ana', query: 'xyz'), isFalse);
     expect(leadListChipStatuses, hasLength(5));
     expect(leadHubSubtitle(status: 'LEAD'), 'Lead');
-    expect(
-      leadHubSubtitle(status: 'LEAD', freshness: 'Atualizado agora'),
-      'Lead · Atualizado agora',
-    );
+    expect(leadHubSubtitle(status: 'CONVERTIDO'), 'Convertido');
     expect(
       leadCardSubtitle(objetivo: 'Emagrecer', origem: 'Instagram'),
       'Emagrecer',
