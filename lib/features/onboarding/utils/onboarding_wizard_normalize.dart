@@ -2,7 +2,8 @@ import '../data/onboarding_repository.dart';
 import '../data/setup_steps_catalog.dart';
 
 /// Reordena o wizard do BFF para a ordem canônica do produto e aplica
-/// título/descrição do catálogo (evita copy "cor da marca" no Free/Pro).
+/// título/descrição do catálogo (evita copy legado tipo "cor da marca").
+/// Passos fora do catálogo (ou link-bio sem capability) são descartados.
 OnboardingWizard normalizeOnboardingWizard(
   OnboardingWizard raw, {
   required bool landingCompleta,
@@ -32,13 +33,6 @@ OnboardingWizard normalizeOnboardingWizard(
                 : entry.estimatedMinutes,
       ),
   ];
-
-  // Passos do BFF fora do catálogo (legado) — mantém no fim se ainda pendentes.
-  for (final step in raw.steps) {
-    if (steps.any((s) => s.id == step.id)) continue;
-    if (step.id == 'link-bio' && !landingCompleta) continue;
-    steps.add(step);
-  }
 
   final completedCount = steps.where((s) => s.completed).length;
   final totalCount = steps.length;

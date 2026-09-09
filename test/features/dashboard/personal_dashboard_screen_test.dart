@@ -87,11 +87,9 @@ DashboardHomeBundle _homeFixture() {
       primeiroAlunoAdicionado: true,
       primeiroTreinoCriado: true,
       pagamentoConfigurado: true,
-      primeiroPagamentoRecebido: true,
       pacoteCriado: true,
       habitoConfigurado: true,
       linkBioConfigurado: true,
-      progressoPercentual: 100,
     ),
     dayFocus: const DashboardDayFocus(
       kind: DashboardDayFocusKind.estavel,
