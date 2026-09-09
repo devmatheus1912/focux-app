@@ -19,7 +19,14 @@ void main() {
     expect(screen, contains('comunidadeGrupos'));
     expect(screen, contains('FxEmptyState'));
     expect(screen, contains('friendlyError'));
+    expect(screen, contains('FxHubFreshness.joinCount'));
+    expect(screen, contains('PopScope'));
+    expect(screen, contains('meusPagina'));
+    expect(screen, contains('FxToggleChip'));
+    expect(screen, contains('FxKeyboardDismissScope.dismiss'));
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(screen, isNot(contains('FloatingActionButton')));
+    expect(screen, isNot(contains('context.pop()')));
+    expect(screen, isNot(contains('FilledButton')));
   });
 }

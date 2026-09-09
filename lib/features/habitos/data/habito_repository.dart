@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
+import '../../../core/api/pagina.dart';
 import '../../planos/data/planos_repository.dart';
 
 class HabitoTemplate {
@@ -264,11 +265,27 @@ class HabitoRepository {
         .toList();
   }
 
-  Future<List<Habito>> meusHabitos() async {
-    final r = await _dio.get('/api/habitos/me');
-    return (r.data as List<dynamic>)
-        .map((e) => Habito.fromJson(e as Map<String, dynamic>))
-        .toList();
+  Future<Pagina<Habito>> meusHabitosPagina({
+    int page = 0,
+    String q = '',
+  }) async {
+    final query = q.trim();
+    final r = await _dio.get(
+      '/api/habitos/me',
+      queryParameters: {
+        'page': page,
+        'size': 20,
+        if (query.isNotEmpty) 'q': query,
+      },
+    );
+    final data = r.data;
+    if (data is! Map) {
+      throw FormatException('GET /api/habitos/me devolve Pagina, não lista crua.');
+    }
+    return Pagina.fromJson(
+      Map<String, dynamic>.from(data),
+      (item) => Habito.fromJson(Map<String, dynamic>.from(item as Map)),
+    );
   }
 
   Future<({bool feito, int streak})> toggleHoje(int habitoId) async {

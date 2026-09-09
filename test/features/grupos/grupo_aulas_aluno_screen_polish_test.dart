@@ -4,13 +4,27 @@ import '../../support/screen_source_bundle.dart';
 
 void main() {
   test('grupo aulas aluno cumpre contrato Tier S+', () {
-    final screen = readScreenSourceBundle('lib/features/grupos/screens/grupo_aulas_aluno_screen.dart');
-    expect(screen, anyOf(contains('fxScreenA11yScope'), contains('Semantics(')));
-    expect(screen, isNot(contains('CircularProgressIndicator')));
+    final screen = readScreenSourceBundle(
+      'lib/features/grupos/screens/grupo_aulas_aluno_screen.dart',
+    );
+    expect(screen, contains('fxScreenA11yScope'));
     expect(screen, contains('FxShellScaffold'));
-    expect(screen, anyOf(contains('FxContentWidthLimiter'), isNot(contains('constrainWidth: false'))));
-    expect(screen, anyOf(contains('friendlyError'), contains('DashboardErrorState'), contains('FxEmptyState'), contains('_erro'), contains('_TrainingEmptyState'), contains('ref.invalidate')));
-    expect(screen, anyOf(contains('FxLoading'), contains('SkeletonLoader'), contains('SkeletonList'), contains('DashboardShimmer'), contains('Shimmer'), contains('IaCopilotInsightsLoading'), contains('_loading')));
+    expect(screen, contains('constrainWidth: false'));
+    expect(screen, contains('safePopOrGo'));
+    expect(screen, contains("safePopOrGo(context, '/dashboard/aluno')"));
+    expect(screen, contains('ListView.builder'));
+    expect(screen, contains('FxSatelliteListTile'));
+    expect(screen, contains('disponiveisPagina'));
+    expect(screen, contains('FxHubFreshness.joinCount'));
+    expect(screen, contains('PopScope'));
+    expect(screen, contains('FxKeyboardDismissScope.dismiss'));
+    expect(screen, contains('showFxConfirmSheet'));
+    expect(screen, contains('FxEmptyState'));
+    expect(screen, contains('friendlyError'));
     expect(screen, contains('RefreshIndicator'));
+    expect(screen, isNot(contains('CircularProgressIndicator')));
+    expect(screen, isNot(contains('context.pop()')));
+    expect(screen, isNot(contains('FilledButton')));
+    expect(screen, isNot(contains('FloatingActionButton')));
   });
 }

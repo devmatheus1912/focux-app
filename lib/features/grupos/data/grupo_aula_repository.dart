@@ -69,11 +69,29 @@ class GrupoAulaRepository {
     );
   }
 
-  Future<List<GrupoAula>> disponiveis() async {
-    final r = await _dio.get('/api/grupo-aulas/disponiveis');
-    return (r.data as List)
-        .map((e) => GrupoAula.fromJson(e as Map<String, dynamic>))
-        .toList();
+  Future<Pagina<GrupoAula>> disponiveisPagina({
+    int page = 0,
+    String q = '',
+  }) async {
+    final query = q.trim();
+    final r = await _dio.get(
+      '/api/grupo-aulas/disponiveis',
+      queryParameters: {
+        'page': page,
+        'size': 20,
+        if (query.isNotEmpty) 'q': query,
+      },
+    );
+    final data = r.data;
+    if (data is! Map) {
+      throw FormatException(
+        'GET /api/grupo-aulas/disponiveis devolve Pagina, não lista crua.',
+      );
+    }
+    return Pagina.fromJson(
+      Map<String, dynamic>.from(data),
+      (item) => GrupoAula.fromJson(Map<String, dynamic>.from(item as Map)),
+    );
   }
 
   Future<GrupoAula> criar({

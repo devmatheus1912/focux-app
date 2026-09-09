@@ -9,6 +9,9 @@ void main() {
       '2 desafios · há 1 min',
     );
     expect(desafioCountLabel(1), '1 desafio');
+    expect(desafioFiltroTipo(DesafioTipoFiltro.todos), isNull);
+    expect(desafioFiltroTipo(DesafioTipoFiltro.habitos), 'HABITOS');
+    expect(desafioFiltroTipo(DesafioTipoFiltro.treinos), 'TREINOS');
   });
 
   test('desafioMatchesQuery busca titulo e tipo', () {

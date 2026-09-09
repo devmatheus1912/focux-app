@@ -65,6 +65,12 @@ String desafioMetaLabel(int metaPontos) => '$metaPontos pts';
 
 enum DesafioTipoFiltro { todos, habitos, treinos }
 
+String? desafioFiltroTipo(DesafioTipoFiltro filtro) => switch (filtro) {
+  DesafioTipoFiltro.todos => null,
+  DesafioTipoFiltro.habitos => 'HABITOS',
+  DesafioTipoFiltro.treinos => 'TREINOS',
+};
+
 String desafioFiltroLabel(DesafioTipoFiltro filtro) => switch (filtro) {
   DesafioTipoFiltro.todos => 'Todos',
   DesafioTipoFiltro.habitos => 'Hábitos',

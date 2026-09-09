@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
+import '../../../core/api/pagina.dart';
 
 class Agendamento {
   final int id;
@@ -147,9 +148,32 @@ class AgendaRepository {
     return Agendamento.fromJson(r.data);
   }
 
-  Future<List<Agendamento>> meusAgendamentos() async {
-    final r = await _dio.get('/api/agenda/aluno/meus');
-    return _parseAgendamentos(r.data);
+  Future<Pagina<Agendamento>> meusAgendamentosPagina({
+    int page = 0,
+    String q = '',
+    String? status,
+  }) async {
+    final query = q.trim();
+    final statusKey = status?.trim() ?? '';
+    final r = await _dio.get(
+      '/api/agenda/aluno/meus',
+      queryParameters: {
+        'page': page,
+        'size': 20,
+        if (query.isNotEmpty) 'q': query,
+        if (statusKey.isNotEmpty) 'status': statusKey,
+      },
+    );
+    final data = r.data;
+    if (data is! Map) {
+      throw FormatException(
+        'GET /api/agenda/aluno/meus devolve Pagina, não lista crua.',
+      );
+    }
+    return Pagina.fromJson(
+      Map<String, dynamic>.from(data),
+      (item) => Agendamento.fromJson(Map<String, dynamic>.from(item as Map)),
+    );
   }
 
   Future<Agendamento> confirmarPresenca(int id) async {
