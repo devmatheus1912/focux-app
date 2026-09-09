@@ -29,5 +29,8 @@ void main() {
     expect(screen, contains('viewInsetsOf'));
     expect(screen, contains('Limpar busca'));
     expect(screen, contains('fxStripCardDecoration'));
+    expect(screen, contains('PopScope'));
+    expect(screen, contains('FxHubFreshness.joinCount'));
+    expect(screen, contains('FxKeyboardDismissScope.dismiss'));
   });
 }
