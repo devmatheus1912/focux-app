@@ -77,13 +77,12 @@ void main() {
       relatorioAlunoHubSubtitle(alunoNome: 'Ana', diasAnalisados: 30),
       'Ana · 30 dias',
     );
+    expect(relatorioAlunoPeriodoMetricValue(30), '30 dias');
+    expect(relatorioAlunoCheckinsMetricValue(null), '—');
+    expect(relatorioAlunoCheckinsMetricValue(8), '8');
     expect(
-      relatorioAlunoHubSubtitle(
-        alunoNome: 'Ana',
-        diasAnalisados: 30,
-        freshness: 'há 1 min',
-      ),
-      'Ana · 30 dias · há 1 min',
+      relatorioAlunoResumoCaption(),
+      'Aderência é treinos concluídos sobre o total deste recorte.',
     );
     expect(relatorioAlunoCheckinChip(), 'Pedir check-in');
     expect(relatorioDetalheSecoes, hasLength(2));

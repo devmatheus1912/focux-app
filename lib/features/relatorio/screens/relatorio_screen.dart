@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
@@ -35,6 +36,8 @@ import '../utils/relatorio_aluno_display.dart';
 import '../utils/relatorio_global_display.dart';
 import '../utils/relatorio_pdf_export.dart';
 import '../widgets/relatorio_aluno_help_sheet.dart';
+
+part 'relatorio_screen_metrics.part.dart';
 
 class RelatorioScreen extends ConsumerStatefulWidget {
   final int alunoId;
@@ -211,6 +214,7 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
           useMesh: true,
           appBar: FxShellAppBar(
             title: 'Relatório',
+            subtitle: FxHubFreshness.fromFetchedAt(_fetchedAt),
             onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
             actions: [
               FxHelpIconButton(
@@ -305,7 +309,6 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
               subtitle: relatorioAlunoHubSubtitle(
                 alunoNome: widget.alunoNome,
                 diasAnalisados: dados?.diasAnalisados ?? 0,
-                freshness: FxHubFreshness.fromFetchedAt(_fetchedAt),
               ),
             ),
             const SizedBox(height: TokensStrip.s3),
@@ -353,6 +356,7 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
                   ),
               ],
             ),
+            ..._metricTiles(dados: dados, isDark: isDark, primary: primary),
             if (dados == null || dados.treinosTotal == 0) ...[
               const SizedBox(height: TokensStrip.s5),
               FxEmptyState(
@@ -366,33 +370,6 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
                 ),
               ),
             ] else ...[
-              Padding(
-                padding: const EdgeInsets.only(
-                  top: TokensStrip.s4,
-                  bottom: TokensStrip.s3,
-                ),
-                child: OperationalMetricTile(
-                  label: 'Taxa',
-                  value: relatorioAderenciaMediaLabel(dados.taxaAderenciaPercent),
-                  hint: relatorioAlunoAderenciaStatus(dados.taxaAderenciaPercent),
-                  color:
-                      relatorioAlunoAderenciaBaixa(dados.taxaAderenciaPercent)
-                          ? EagleTokens.bad
-                          : EagleTokens.moneyGreen,
-                  isDark: isDark,
-                  emphasis:
-                      relatorioAlunoAderenciaBaixa(dados.taxaAderenciaPercent)
-                          ? OperationalMetricEmphasis.alert
-                          : OperationalMetricEmphasis.normal,
-                ),
-              ),
-              OperationalMetricTile(
-                label: 'Treinos concluídos',
-                value: '${dados.treinosConcluidos} / ${dados.treinosTotal}',
-                hint: 'Concluídos sobre o total neste recorte',
-                color: primary,
-                isDark: isDark,
-              ),
               const SizedBox(height: TokensStrip.s4),
               AlunoSegmentedChoice(
                 options: relatorioDetalheSecoes,
@@ -400,7 +377,16 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
                 isDark: isDark,
                 onSelect: (value) => setState(() => _secao = value),
               ),
-              if (_secao == relatorioDetalheSecaoComparativo &&
+              if (_secao == relatorioDetalheSecaoResumo) ...[
+                const SizedBox(height: TokensStrip.s4),
+                Text(
+                  relatorioAlunoResumoCaption(),
+                  style: FocuxHubTypography.bodyMuted(
+                    color: fxScreenMute(context),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ] else if (_secao == relatorioDetalheSecaoComparativo &&
                   _comparativo != null) ...[
                 const SizedBox(height: TokensStrip.s2),
                 OperationalMetricTile(

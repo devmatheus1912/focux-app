@@ -72,13 +72,22 @@ void main() {
       recorrenciaAlunoStickyLabel(RecorrenciaAlunoStickyKind.chat),
       'Falar com o personal',
     );
-    expect(
-      recorrenciaAlunoHubSubtitle(proximaCobranca: '2026-10-01', freshness: 'há 1 min'),
-      'Próxima: 2026-10-01 · há 1 min',
-    );
-    expect(recorrenciaAlunoEmptySubtitle(null), 'Ainda sem cobrança automática');
+    expect(recorrenciaAlunoHubSubtitle(), 'Cobrança mensal');
+    expect(recorrenciaAlunoEmptySubtitle(), 'Ainda sem cobrança automática');
     expect(recorrenciaProximaValue(null), '—');
-    expect(recorrenciaProximaValue('2026-10-01'), '2026-10-01');
+    expect(recorrenciaProximaValue('2026-10-01'), '01/10');
+    expect(
+      recorrenciaPagamentoValue(status: 'ATIVA'),
+      'Autorizado',
+    );
+    expect(
+      recorrenciaPagamentoValue(
+        status: 'PENDENTE',
+        initPoint: 'https://mp',
+      ),
+      'Autorizar',
+    );
+    expect(recorrenciaCicloValue(), 'Mensal');
     expect(recorrenciaProximaHint(null), 'Sem data da próxima cobrança');
     expect(recorrenciaProximaHint('2026-10-01'), 'Cobrança automática');
   });

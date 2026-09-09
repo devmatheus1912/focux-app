@@ -37,14 +37,29 @@ String evolucaoRecordesHint(int count) {
   return '$count marcas pessoais';
 }
 
-String evolucaoHubSubtitle({
-  required EvolucaoHubView view,
-  String? variacao,
-}) {
-  final label = evolucaoHubViewLabel(view);
-  final stamp = variacao?.trim();
-  if (stamp == null || stamp.isEmpty) return label;
-  return '$label · $stamp';
+String evolucaoHubSubtitle() => 'Peso, medidas e recordes';
+
+String evolucaoVariacaoValue(List<MedidaCorporal> medidas) {
+  final stamp = evolucaoVariacaoPeso(medidas).trim();
+  if (stamp.isEmpty) return '—';
+  return stamp.replaceAll(' desde o início', '');
+}
+
+String evolucaoVariacaoHint(List<MedidaCorporal> medidas) {
+  if (evolucaoVariacaoPeso(medidas).isEmpty) {
+    return 'Registre duas medidas para ver o delta';
+  }
+  return 'Desde a primeira medida';
+}
+
+String evolucaoUltimaMedidaHint(List<MedidaCorporal> medidas) {
+  if (medidas.isEmpty) return 'Nenhuma medida ainda';
+  final ordenada = [...medidas]..sort((a, b) => a.data.compareTo(b.data));
+  try {
+    return 'Última em ${fxDateShort(DateTime.parse(ordenada.last.data))}';
+  } catch (_) {
+    return 'Última em ${ordenada.last.data}';
+  }
 }
 
 String evolucaoPesoAtual(List<MedidaCorporal> medidas) {

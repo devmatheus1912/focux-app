@@ -146,6 +146,92 @@ class _RecorrenciaAlunoScreenState
 
   void _leave() => safePopOrGo(context, '/dashboard/aluno');
 
+  Widget _chips({required Color primary, required bool isDark}) {
+    return Wrap(
+      spacing: TokensStrip.s2,
+      runSpacing: TokensStrip.s2,
+      children: [
+        DashboardHomeActionChip(
+          label: 'Hoje',
+          accent: primary,
+          isDark: isDark,
+          onPressed: _leave,
+        ),
+        DashboardHomeActionChip(
+          label: 'Financeiro',
+          accent: primary,
+          isDark: isDark,
+          onPressed: () => context.push('/financeiro/aluno'),
+        ),
+        DashboardHomeActionChip(
+          label: 'Chat',
+          accent: primary,
+          isDark: isDark,
+          onPressed: () => context.push('/chat/aluno'),
+        ),
+      ],
+    );
+  }
+
+  List<Widget> _metricTiles({
+    required String valor,
+    required String valorHint,
+    required String status,
+    required String statusHint,
+    required String proxima,
+    required bool proximaMuted,
+    required String pagamento,
+    required String pagamentoHint,
+    required bool muted,
+    required Color primary,
+    required bool isDark,
+  }) {
+    final emphasis =
+        muted
+            ? OperationalMetricEmphasis.muted
+            : OperationalMetricEmphasis.normal;
+    return [
+      OperationalMetricTile(
+        label: 'Valor mensal',
+        value: valor,
+        hint: valorHint,
+        color: primary,
+        isDark: isDark,
+        emphasis: emphasis,
+      ),
+      const SizedBox(height: TokensStrip.s2),
+      OperationalMetricTile(
+        label: 'Status',
+        value: status,
+        hint: statusHint,
+        color: primary,
+        isDark: isDark,
+        emphasis: emphasis,
+      ),
+      const SizedBox(height: TokensStrip.s2),
+      OperationalMetricTile(
+        label: 'Próxima',
+        value: proxima,
+        hint: recorrenciaCicloValue(),
+        color: primary,
+        isDark: isDark,
+        emphasis:
+            muted || proximaMuted
+                ? OperationalMetricEmphasis.muted
+                : OperationalMetricEmphasis.normal,
+      ),
+      const SizedBox(height: TokensStrip.s2),
+      OperationalMetricTile(
+        label: 'Pagamento',
+        value: pagamento,
+        hint: pagamentoHint,
+        color: primary,
+        isDark: isDark,
+        emphasis: emphasis,
+      ),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
@@ -211,51 +297,24 @@ class _RecorrenciaAlunoScreenState
                               if (assinatura == null) ...[
                                 FxHubHeader(
                                   title: 'Sem assinatura ainda',
-                                  subtitle: recorrenciaAlunoEmptySubtitle(
-                                    freshnessLabel,
-                                  ),
+                                  subtitle: recorrenciaAlunoEmptySubtitle(),
                                 ),
                                 const SizedBox(height: TokensStrip.s4),
-                                OperationalMetricTile(
-                                  label: 'Valor mensal',
-                                  value: '—',
-                                  hint: 'Quando o personal criar a cobrança',
-                                  color: primary,
+                                ..._metricTiles(
+                                  valor: '—',
+                                  valorHint: 'Quando o personal criar a cobrança',
+                                  status: 'Sem ciclo',
+                                  statusHint: recorrenciaAlunoEmptySubtitle(),
+                                  proxima: '—',
+                                  proximaMuted: true,
+                                  pagamento: '—',
+                                  pagamentoHint: 'Sem autorização ainda',
+                                  muted: true,
+                                  primary: primary,
                                   isDark: isDark,
-                                  emphasis: OperationalMetricEmphasis.muted,
-                                ),
-                                const SizedBox(height: TokensStrip.s3),
-                                OperationalMetricTile(
-                                  label: 'Status',
-                                  value: 'Sem ciclo',
-                                  hint: 'Ainda sem cobrança automática',
-                                  color: primary,
-                                  isDark: isDark,
-                                  emphasis: OperationalMetricEmphasis.muted,
                                 ),
                                 const SizedBox(height: TokensStrip.s4),
-                                Wrap(
-                                  spacing: TokensStrip.s2,
-                                  runSpacing: TokensStrip.s2,
-                                  children: [
-                                    DashboardHomeActionChip(
-                                      label: 'Financeiro',
-                                      accent: primary,
-                                      isDark: isDark,
-                                      onPressed:
-                                          () => context.push(
-                                            '/financeiro/aluno',
-                                          ),
-                                    ),
-                                    DashboardHomeActionChip(
-                                      label: 'Chat',
-                                      accent: primary,
-                                      isDark: isDark,
-                                      onPressed:
-                                          () => context.push('/chat/aluno'),
-                                    ),
-                                  ],
-                                ),
+                                _chips(primary: primary, isDark: isDark),
                                 const SizedBox(height: TokensStrip.s4),
                                 const FxEmptyState(
                                   icon: 'coin',
@@ -268,68 +327,37 @@ class _RecorrenciaAlunoScreenState
                                   title: recorrenciaStatusLabel(
                                     assinatura.status,
                                   ),
-                                  subtitle: recorrenciaAlunoHubSubtitle(
-                                    proximaCobranca: assinatura.proximaCobranca,
-                                    freshness: freshnessLabel,
-                                  ),
+                                  subtitle: recorrenciaAlunoHubSubtitle(),
                                 ),
                                 const SizedBox(height: TokensStrip.s4),
-                                OperationalMetricTile(
-                                  label: 'Valor mensal',
-                                  value: recorrenciaValorLabel(assinatura.valor),
-                                  hint: 'Mercado Pago',
-                                  color: primary,
-                                  isDark: isDark,
-                                ),
-                                const SizedBox(height: TokensStrip.s3),
-                                OperationalMetricTile(
-                                  label: 'Status',
-                                  value: recorrenciaStatusLabel(
+                                ..._metricTiles(
+                                  valor: recorrenciaValorLabel(
+                                    assinatura.valor,
+                                  ),
+                                  valorHint: recorrenciaCicloHint(),
+                                  status: recorrenciaStatusLabel(
                                     assinatura.status,
                                   ),
-                                  hint: recorrenciaProximaHint(
+                                  statusHint: recorrenciaCicloValue(),
+                                  proxima: recorrenciaProximaValue(
                                     assinatura.proximaCobranca,
                                   ),
-                                  color: primary,
-                                  isDark: isDark,
-                                ),
-                                const SizedBox(height: TokensStrip.s3),
-                                OperationalMetricTile(
-                                  label: 'Próxima',
-                                  value: recorrenciaProximaValue(
-                                    assinatura.proximaCobranca,
+                                  proximaMuted:
+                                      assinatura.proximaCobranca == null,
+                                  pagamento: recorrenciaPagamentoValue(
+                                    status: assinatura.status,
+                                    initPoint: assinatura.initPoint,
                                   ),
-                                  hint: 'Ciclo mensal',
-                                  color: primary,
+                                  pagamentoHint: recorrenciaPagamentoHint(
+                                    status: assinatura.status,
+                                    initPoint: assinatura.initPoint,
+                                  ),
+                                  muted: false,
+                                  primary: primary,
                                   isDark: isDark,
-                                  emphasis:
-                                      assinatura.proximaCobranca == null
-                                          ? OperationalMetricEmphasis.muted
-                                          : OperationalMetricEmphasis.normal,
                                 ),
                                 const SizedBox(height: TokensStrip.s4),
-                                Wrap(
-                                  spacing: TokensStrip.s2,
-                                  runSpacing: TokensStrip.s2,
-                                  children: [
-                                    DashboardHomeActionChip(
-                                      label: 'Financeiro',
-                                      accent: primary,
-                                      isDark: isDark,
-                                      onPressed:
-                                          () => context.push(
-                                            '/financeiro/aluno',
-                                          ),
-                                    ),
-                                    DashboardHomeActionChip(
-                                      label: 'Chat',
-                                      accent: primary,
-                                      isDark: isDark,
-                                      onPressed:
-                                          () => context.push('/chat/aluno'),
-                                    ),
-                                  ],
-                                ),
+                                _chips(primary: primary, isDark: isDark),
                               ],
                             ],
                           ),

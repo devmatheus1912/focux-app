@@ -6,16 +6,21 @@ void main() {
   test('evolucaoHubViewLabel e subtitle', () {
     expect(evolucaoHubViewLabel(EvolucaoHubView.medidas), 'Medidas');
     expect(evolucaoHubViewLabel(EvolucaoHubView.recordes), 'Recordes');
+    expect(evolucaoHubSubtitle(), 'Peso, medidas e recordes');
+    expect(evolucaoVariacaoValue(const []), '—');
     expect(
-      evolucaoHubSubtitle(view: EvolucaoHubView.medidas, variacao: null),
-      'Medidas',
+      evolucaoVariacaoValue([
+        MedidaCorporal(id: 1, data: '2026-01-01', peso: 80),
+        MedidaCorporal(id: 2, data: '2026-03-01', peso: 78),
+      ]),
+      '-2.0 kg',
     );
     expect(
-      evolucaoHubSubtitle(
-        view: EvolucaoHubView.medidas,
-        variacao: '-2.0 kg desde o início',
-      ),
-      'Medidas · -2.0 kg desde o início',
+      evolucaoUltimaMedidaHint([
+        MedidaCorporal(id: 1, data: '2026-01-01', peso: 80),
+        MedidaCorporal(id: 2, data: '2026-03-01', peso: 78),
+      ]),
+      'Última em 01/03',
     );
   });
 
