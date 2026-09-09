@@ -94,7 +94,7 @@ final setupStepCatalog = [
   ),
 ];
 
-/// Passos visíveis no plano atual (esconde link/marca sem capability).
+/// Passos visíveis no plano atual (esconde link-bio sem capability).
 List<SetupStepCatalogEntry> visibleSetupSteps({
   required bool landingCompleta,
 }) {
@@ -113,13 +113,4 @@ SetupStepCatalogEntry? nextSetupStep(
     if (!step.isDone(data)) return step;
   }
   return null;
-}
-
-List<SetupStepCatalogEntry> pendingSetupSteps(
-  OnboardingStatusData data, {
-  bool landingCompleta = false,
-}) {
-  return visibleSetupSteps(landingCompleta: landingCompleta)
-      .where((step) => !step.isDone(data))
-      .toList();
 }
