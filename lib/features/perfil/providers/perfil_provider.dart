@@ -9,3 +9,7 @@ final perfilRepositoryProvider = Provider<PerfilRepository>(
 final perfilProvider = FutureProvider<PerfilPersonal>((ref) async {
   return ref.read(perfilRepositoryProvider).buscar();
 });
+
+final perfilWalletProvider = FutureProvider<PerfilPersonal>((ref) async {
+  return ref.read(perfilRepositoryProvider).buscar(incluirResumoMensal: true);
+});

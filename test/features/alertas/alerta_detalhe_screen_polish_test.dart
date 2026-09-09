@@ -44,6 +44,9 @@ void main() {
     expect(screen, contains('PopScope'));
     expect(screen, contains('/alunos/\${widget.alunoId}/chat'));
     expect(screen, contains('/alunos/\${widget.alunoId}'));
+    expect(screen, contains("safePopOrGo(context, '/alertas')"));
+    expect(screen, contains("label: 'Lista'"));
+    expect(screen, contains('/alunos/\${widget.alunoId}/evolucao'));
     expect(screen, contains('/financeiro?alunoId='));
     expect(screen, isNot(contains('alunoEmail')));
     expect(screen, isNot(contains('LinearProgressIndicator')));

@@ -55,13 +55,47 @@ class TrilhasScreen extends ConsumerStatefulWidget {
 class _TrilhasScreenState extends ConsumerState<TrilhasScreen> {
   DateTime? _fetchedAt;
   String _filtro = trilhaFiltroAndamento;
+  final _mais = <TrilhaModel>[];
+  var _nextPage = 1;
+  var _hasMore = false;
+  var _loadingMore = false;
 
   Future<void> _refresh() async {
+    _mais.clear();
+    _nextPage = 1;
+    _hasMore = false;
     ref.invalidate(trilhasAlunoProvider(widget.alunoId));
     try {
-      await ref.read(trilhasAlunoProvider(widget.alunoId).future);
-      if (mounted) setState(() => _fetchedAt = DateTime.now());
+      final lista = await ref.read(trilhasAlunoProvider(widget.alunoId).future);
+      if (mounted) {
+        setState(() {
+          _fetchedAt = DateTime.now();
+          _hasMore = lista.hasMore;
+        });
+      }
     } catch (_) {}
+  }
+
+  Future<void> _carregarMais() async {
+    if (_loadingMore) return;
+    setState(() => _loadingMore = true);
+    try {
+      final next = await ref
+          .read(trilhasRepositoryProvider)
+          .listarPorAluno(widget.alunoId, page: _nextPage);
+      if (!mounted) return;
+      setState(() {
+        _mais.addAll(next.items);
+        _nextPage += 1;
+        _hasMore = next.hasMore;
+        _loadingMore = false;
+      });
+    } catch (e) {
+      if (mounted) {
+        setState(() => _loadingMore = false);
+        FeedbackHelper.showError(context, friendlyError(e));
+      }
+    }
   }
 
   void _stampFreshness() {
@@ -411,16 +445,24 @@ class _TrilhasScreenState extends ConsumerState<TrilhasScreen> {
                       onRetry: _refresh,
                       title: 'Não conseguimos carregar as trilhas',
                     ),
-                data: (trilhas) {
+                data: (lista) {
                   _stampFreshness();
+                  final merged = lista.append(
+                    TrilhaLista(
+                      items: _mais,
+                      hasMore: _mais.isEmpty ? lista.hasMore : _hasMore,
+                    ),
+                  );
                   return FxContentWidthLimiter(
                     child: _TrilhasListBody(
-                      trilhas: trilhas,
+                      lista: merged,
                       alunoId: widget.alunoId,
                       alunoNome: widget.alunoNome,
                       filtro: _filtro,
+                      loadingMore: _loadingMore,
                       onFiltro: (value) => setState(() => _filtro = value),
                       onRefresh: _refresh,
+                      onCarregarMais: _carregarMais,
                       onAtualizarProgresso: _atualizarProgresso,
                       onAdicionarMarco: _adicionarMarco,
                       onDeletar: _deletarTrilha,

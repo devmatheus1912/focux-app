@@ -115,6 +115,24 @@ void main() {
     expect(trilhaPrazoMetricValue([_trilha(id: 1)]), '—');
     expect(trilhaPrazoMetricHint([_trilha(id: 1)]), 'Sem prazo nas ativas');
     expect(
+      trilhaListaAtivas(
+        const TrilhaLista(items: [], ativas: 3, hasMore: true),
+      ),
+      3,
+    );
+    expect(
+      trilhaListaProgressoLabel(
+        const TrilhaLista(items: [], progressoMedio: 42),
+      ),
+      '42%',
+    );
+    expect(
+      trilhaListaPrazoValue(
+        const TrilhaLista(items: [], proximoPrazo: '2026-09-20'),
+      ),
+      '20/09',
+    );
+    expect(
       trilhaCardContexto(
         TrilhaModel(
           id: 4,

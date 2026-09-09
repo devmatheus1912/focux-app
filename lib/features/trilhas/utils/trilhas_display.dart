@@ -103,6 +103,31 @@ String trilhaPrazoMetricHint(List<TrilhaModel> trilhas) {
   return 'Próximo prazo das ativas';
 }
 
+int trilhaListaAtivas(TrilhaLista lista) =>
+    lista.ativas ?? trilhaAtivasCount(lista.items);
+
+String trilhaListaProgressoLabel(TrilhaLista lista) {
+  if (lista.progressoMedio != null) {
+    return trilhaPercentLabel(lista.progressoMedio!);
+  }
+  return trilhaProgressoMedioLabel(lista.items);
+}
+
+String trilhaListaPrazoValue(TrilhaLista lista) {
+  final parsed = trilhaParseData(lista.proximoPrazo);
+  if (parsed != null) return trilhaDataLabel(parsed);
+  return trilhaPrazoMetricValue(lista.items);
+}
+
+String trilhaListaPrazoHint(TrilhaLista lista) {
+  if (trilhaListaAtivas(lista) == 0) return 'Nenhuma trilha ativa';
+  if (trilhaParseData(lista.proximoPrazo) != null ||
+      trilhaProximoPrazo(lista.items) != null) {
+    return 'Próximo prazo das ativas';
+  }
+  return 'Sem prazo nas ativas';
+}
+
 String trilhaCardContexto(TrilhaModel trilha) {
   final parts = <String>[
     trilhaMetaTipoLabel(trilha.metaTipo),

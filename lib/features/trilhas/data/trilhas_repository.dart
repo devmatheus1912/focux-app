@@ -8,14 +8,20 @@ class TrilhasRepository {
 
   final Dio _dio;
 
-  Future<List<TrilhaModel>> listarPorAluno(int alunoId) async {
-    final response = await _dio.get('/api/trilhas/aluno/$alunoId');
-    return TrilhaModel.parseList(response.data);
+  Future<TrilhaLista> listarPorAluno(int alunoId, {int page = 0, int size = 50}) async {
+    final response = await _dio.get(
+      '/api/trilhas/aluno/$alunoId',
+      queryParameters: {'page': page, 'size': size},
+    );
+    return TrilhaLista.fromJson(response.data);
   }
 
-  Future<List<TrilhaModel>> listarMinhas() async {
-    final response = await _dio.get('/api/trilhas/minhas');
-    return TrilhaModel.parseList(response.data);
+  Future<TrilhaLista> listarMinhas({int page = 0, int size = 50}) async {
+    final response = await _dio.get(
+      '/api/trilhas/minhas',
+      queryParameters: {'page': page, 'size': size},
+    );
+    return TrilhaLista.fromJson(response.data);
   }
 
   Future<void> criarTrilha(NovaTrilhaRequest request) async {

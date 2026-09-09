@@ -78,6 +78,47 @@ class TrilhaModel {
   }
 }
 
+class TrilhaLista {
+  const TrilhaLista({
+    required this.items,
+    this.ativas,
+    this.progressoMedio,
+    this.proximoPrazo,
+    this.hasMore = false,
+  });
+
+  final List<TrilhaModel> items;
+  final int? ativas;
+  final double? progressoMedio;
+  final String? proximoPrazo;
+  final bool hasMore;
+
+  factory TrilhaLista.fromJson(dynamic data) {
+    if (data is List) {
+      return TrilhaLista(items: TrilhaModel.parseList(data));
+    }
+    if (data is Map) {
+      final map = Map<String, dynamic>.from(data);
+      return TrilhaLista(
+        items: TrilhaModel.parseList(map['items']),
+        ativas: (map['ativas'] as num?)?.toInt(),
+        progressoMedio: (map['progressoMedio'] as num?)?.toDouble(),
+        proximoPrazo: map['proximoPrazo']?.toString(),
+        hasMore: map['hasMore'] as bool? ?? false,
+      );
+    }
+    return const TrilhaLista(items: []);
+  }
+
+  TrilhaLista append(TrilhaLista next) => TrilhaLista(
+    items: [...items, ...next.items],
+    ativas: next.ativas ?? ativas,
+    progressoMedio: next.progressoMedio ?? progressoMedio,
+    proximoPrazo: next.proximoPrazo ?? proximoPrazo,
+    hasMore: next.hasMore,
+  );
+}
+
 class NovaTrilhaRequest {
   const NovaTrilhaRequest({
     required this.alunoId,

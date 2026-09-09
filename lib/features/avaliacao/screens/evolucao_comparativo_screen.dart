@@ -314,12 +314,19 @@ class _EvolucaoComparativoScreenState
       runSpacing: TokensStrip.s2,
       children: [
         DashboardHomeActionChip(
-          label: 'Aluno',
+          label: 'Lista',
+          accent: primary,
+          isDark: isDark,
+          onPressed:
+              () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
+        ),
+        DashboardHomeActionChip(
+          label: 'Evolução',
           accent: primary,
           isDark: isDark,
           onPressed:
               () => context.push(
-                '/alunos/${widget.alunoId}',
+                '/alunos/${widget.alunoId}/evolucao',
                 extra: widget.alunoNome,
               ),
         ),
@@ -330,26 +337,6 @@ class _EvolucaoComparativoScreenState
           onPressed:
               () => context.push(
                 '/alunos/${widget.alunoId}/chat',
-                extra: widget.alunoNome,
-              ),
-        ),
-        DashboardHomeActionChip(
-          label: 'Medidas',
-          accent: primary,
-          isDark: isDark,
-          onPressed:
-              () => context.push(
-                '/alunos/${widget.alunoId}/evolucao',
-                extra: widget.alunoNome,
-              ),
-        ),
-        DashboardHomeActionChip(
-          label: 'Fotos',
-          accent: primary,
-          isDark: isDark,
-          onPressed:
-              () => context.push(
-                '/alunos/${widget.alunoId}/fotos',
                 extra: widget.alunoNome,
               ),
         ),
@@ -408,14 +395,10 @@ class _EvolucaoComparativoScreenState
         children: [
           FxHubHeader(
             title: fxTitleCaseName(widget.alunoNome),
-            subtitle: [
-              evolucaoComparativoJanelaCaption(
-                primeira: evolucaoComparativoFmtData(c.primeira.avaliadoEm),
-                atual: evolucaoComparativoFmtData(c.atual.avaliadoEm),
-              ),
-              if (FxHubFreshness.fromFetchedAt(_fetchedAt) case final fresh?)
-                fresh,
-            ].join(' · '),
+            subtitle: evolucaoComparativoJanelaCaption(
+              primeira: evolucaoComparativoFmtData(c.primeira.avaliadoEm),
+              atual: evolucaoComparativoFmtData(c.atual.avaliadoEm),
+            ),
           ),
           Padding(
             padding: const EdgeInsets.only(
@@ -438,6 +421,30 @@ class _EvolucaoComparativoScreenState
               '',
             ),
             hint: 'Da última avaliação',
+            color: Theme.of(context).colorScheme.primary,
+            isDark: Theme.of(context).brightness == Brightness.dark,
+          ),
+          const SizedBox(height: TokensStrip.s2),
+          OperationalMetricTile(
+            label: 'Gordura',
+            value: evolucaoComparativoFmtValor(c.atual.percGordura, '%'),
+            hint: evolucaoComparativoDelta(
+              primeira: c.primeira.percGordura,
+              atual: c.atual.percGordura,
+              menorEMelhor: true,
+            ).text,
+            color: Theme.of(context).colorScheme.primary,
+            isDark: Theme.of(context).brightness == Brightness.dark,
+          ),
+          const SizedBox(height: TokensStrip.s2),
+          OperationalMetricTile(
+            label: 'Cintura',
+            value: evolucaoComparativoFmtValor(c.atual.circCintura, 'cm'),
+            hint: evolucaoComparativoDelta(
+              primeira: c.primeira.circCintura,
+              atual: c.atual.circCintura,
+              menorEMelhor: true,
+            ).text,
             color: Theme.of(context).colorScheme.primary,
             isDark: Theme.of(context).brightness == Brightness.dark,
           ),

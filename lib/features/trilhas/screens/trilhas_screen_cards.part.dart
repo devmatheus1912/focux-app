@@ -213,24 +213,28 @@ class _MarcoTile extends StatelessWidget {
 
 class _TrilhasListBody extends StatelessWidget {
   const _TrilhasListBody({
-    required this.trilhas,
+    required this.lista,
     required this.alunoId,
     required this.alunoNome,
     required this.filtro,
+    required this.loadingMore,
     required this.onFiltro,
     required this.onRefresh,
+    required this.onCarregarMais,
     required this.onAtualizarProgresso,
     required this.onAdicionarMarco,
     required this.onDeletar,
     required this.onConcluirMarco,
   });
 
-  final List<TrilhaModel> trilhas;
+  final TrilhaLista lista;
   final int alunoId;
   final String alunoNome;
   final String filtro;
+  final bool loadingMore;
   final ValueChanged<String> onFiltro;
   final Future<void> Function() onRefresh;
+  final VoidCallback onCarregarMais;
   final ValueChanged<TrilhaModel> onAtualizarProgresso;
   final ValueChanged<TrilhaModel> onAdicionarMarco;
   final ValueChanged<TrilhaModel> onDeletar;
@@ -240,6 +244,7 @@ class _TrilhasListBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
+    final trilhas = lista.items;
     final visiveis = trilhaFiltradas(trilhas, filtro);
     final nome = fxTitleCaseName(alunoNome);
 
@@ -292,7 +297,7 @@ class _TrilhasListBody extends StatelessWidget {
           const SizedBox(height: TokensStrip.s4),
           OperationalMetricTile(
             label: 'Ativas',
-            value: '${trilhaAtivasCount(trilhas)}',
+            value: '${trilhaListaAtivas(lista)}',
             hint:
                 trilhas.isEmpty
                     ? 'Nenhuma trilha atribuída'
@@ -303,7 +308,7 @@ class _TrilhasListBody extends StatelessWidget {
           const SizedBox(height: TokensStrip.s2),
           OperationalMetricTile(
             label: 'Progresso',
-            value: trilhaProgressoMedioLabel(trilhas),
+            value: trilhaListaProgressoLabel(lista),
             hint: 'Média das trilhas deste aluno',
             color: primary,
             isDark: isDark,
@@ -322,8 +327,8 @@ class _TrilhasListBody extends StatelessWidget {
           const SizedBox(height: TokensStrip.s2),
           OperationalMetricTile(
             label: 'Prazo',
-            value: trilhaPrazoMetricValue(trilhas),
-            hint: trilhaPrazoMetricHint(trilhas),
+            value: trilhaListaPrazoValue(lista),
+            hint: trilhaListaPrazoHint(lista),
             color: primary,
             isDark: isDark,
           ),
@@ -378,6 +383,14 @@ class _TrilhasListBody extends StatelessWidget {
                 onAdicionarMarco: () => onAdicionarMarco(trilha),
                 onDeletar: () => onDeletar(trilha),
                 onConcluirMarco: (marco) => onConcluirMarco(trilha, marco),
+              ),
+            if (lista.hasMore)
+              DashboardHomeActionChip(
+                label: loadingMore ? 'Carregando…' : 'Carregar mais',
+                accent: primary,
+                isDark: isDark,
+                enabled: !loadingMore,
+                onPressed: onCarregarMais,
               ),
           ],
         ],

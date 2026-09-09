@@ -19,6 +19,20 @@ void main() {
     expect(anamneseDisponibilidadeClamp(9), 7);
   });
 
+  test('métricas do hub personal', () {
+    final a = Anamnese(
+      status: AnamneseStatus.preenchida,
+      parqCompleto: true,
+      parqPositivo: true,
+      alertas: const ['Dor no peito'],
+      disponibilidadeSemanal: 4,
+    );
+    expect(anamneseParqMetricValue(a), 'Atenção');
+    expect(anamneseAlertasMetricValue(a), '1');
+    expect(anamneseDispMetricValue(a), '4 dias por semana');
+    expect(anamneseDetalheSecoes, hasLength(4));
+  });
+
   test('status labels e flags', () {
     expect(anamneseStatusLabel(AnamneseStatus.solicitada), 'Solicitada');
     expect(anamneseStatusLabel(AnamneseStatus.precisaAtestado), 'Precisa atestado');

@@ -208,6 +208,7 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
         if (_contaCtrl.text.isNotEmpty) 'conta': _contaCtrl.text.trim(),
       });
       ref.invalidate(perfilProvider);
+      ref.invalidate(perfilWalletProvider);
       if (mounted) {
         _captureSnapshot();
         _fetchedAt = DateTime.now();
@@ -262,7 +263,7 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final perfilAsync = ref.watch(perfilProvider);
+    final perfilAsync = ref.watch(perfilWalletProvider);
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
     final showSticky = !perfilAsync.isLoading && !perfilAsync.hasError;
@@ -300,7 +301,7 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                           chromeOnDark: chrome.isDark,
                           primary: primary,
                           message: friendlyError(e),
-                          onRetry: () => ref.invalidate(perfilProvider),
+                          onRetry: () => ref.invalidate(perfilWalletProvider),
                           title: 'Não conseguimos carregar a carteira',
                         ),
                     data: (perfil) {
@@ -311,7 +312,7 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                           color: primary,
                           onRefresh: () async {
                             _inicializado = false;
-                            ref.invalidate(perfilProvider);
+                            ref.invalidate(perfilWalletProvider);
                           },
                           child: ListView(
                           physics: const AlwaysScrollableScrollPhysics(),
@@ -331,6 +332,7 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                                 contaCtrl: _contaCtrl,
                                 carregando: _carregando,
                                 secao: _secao,
+                                resumoMensal: perfil.resumoMensal,
                                 onSecao: (value) => setState(() => _secao = value),
                                 onSelecionarTipo: _selecionarTipoPix,
                                 onCopiarChave: _copiarChavePix,

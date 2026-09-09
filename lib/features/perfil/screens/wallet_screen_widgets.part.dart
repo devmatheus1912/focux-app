@@ -12,6 +12,7 @@ class _WalletFormFields extends StatelessWidget {
     required this.onSecao,
     required this.onSelecionarTipo,
     required this.onCopiarChave,
+    this.resumoMensal,
   });
 
   final String? tipoChavePix;
@@ -24,6 +25,7 @@ class _WalletFormFields extends StatelessWidget {
   final ValueChanged<String> onSecao;
   final VoidCallback onSelecionarTipo;
   final VoidCallback onCopiarChave;
+  final ResumoMensal? resumoMensal;
 
   @override
   Widget build(BuildContext context) {
@@ -81,7 +83,7 @@ class _WalletFormFields extends StatelessWidget {
           isDark: isDark,
         ),
         const SizedBox(height: TokensStrip.s3),
-        const _ResumoMensalCard(),
+        _ResumoMensalCard(resumo: resumoMensal),
         const SizedBox(height: TokensStrip.s4),
         AlunoSegmentedChoice(
           options: walletDetalheSecoes,
@@ -145,7 +147,9 @@ class _WalletFormFields extends StatelessWidget {
 }
 
 class _ResumoMensalCard extends ConsumerStatefulWidget {
-  const _ResumoMensalCard();
+  const _ResumoMensalCard({this.resumo});
+
+  final ResumoMensal? resumo;
 
   @override
   ConsumerState<_ResumoMensalCard> createState() => _ResumoMensalCardState();
@@ -160,7 +164,22 @@ class _ResumoMensalCardState extends ConsumerState<_ResumoMensalCard> {
   @override
   void initState() {
     super.initState();
-    _load();
+    if (widget.resumo != null) {
+      _resumo = widget.resumo;
+      _loading = false;
+    } else {
+      _load();
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant _ResumoMensalCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.resumo != null && widget.resumo != oldWidget.resumo) {
+      _resumo = widget.resumo;
+      _loading = false;
+      _error = null;
+    }
   }
 
   Future<void> _load() async {
