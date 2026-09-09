@@ -6,6 +6,7 @@ import '../../../core/analytics/analytics_service.dart';
 import '../../dashboard/constants/dashboard_layout.dart';
 import '../../dashboard/widgets/dashboard_home_activation_strip.dart';
 import '../../perfil/providers/perfil_provider.dart';
+import '../../planos/providers/plano_features_provider.dart';
 import '../data/onboarding_status_data.dart';
 import '../data/setup_steps_catalog.dart';
 import '../providers/onboarding_provider.dart';
@@ -43,6 +44,8 @@ class SetupOnboardingWidget extends ConsumerWidget {
         statusFromHome != null
             ? AsyncValue<OnboardingStatusData>.data(statusFromHome!)
             : ref.watch(onboardingStatusProvider);
+    final landingCompleta =
+        ref.watch(planoFeaturesProvider).valueOrNull?.landingCompleta ?? false;
 
     return statusAsync.when(
       loading: () => const Padding(
@@ -51,12 +54,16 @@ class SetupOnboardingWidget extends ConsumerWidget {
       ),
       error: (e, _) => const SizedBox.shrink(),
       data: (data) {
-        if (data.ativacaoCompleta) return const SizedBox.shrink();
+        if (data.ativacaoCompleta(includeLinkBio: landingCompleta)) {
+          return const SizedBox.shrink();
+        }
 
-        final next = nextSetupStep(data);
+        final next = nextSetupStep(data, landingCompleta: landingCompleta);
+        final feitas = data.etapasFeitas(includeLinkBio: landingCompleta);
+        final total = data.etapasTotal(includeLinkBio: landingCompleta);
         final nextTitle = next?.title ?? 'Continuar setup';
         final semantics =
-            'Sua ativação, ${data.etapasFeitas} de ${data.etapasTotal}. '
+            'Sua ativação, $feitas de $total. '
             'Próximo: $nextTitle. Toque para continuar';
 
         return Padding(
@@ -64,11 +71,8 @@ class SetupOnboardingWidget extends ConsumerWidget {
           child: DashboardHomeActivationStrip(
             title: 'Sua ativação',
             subtitle: nextTitle,
-            trailingMetric: '${data.etapasFeitas}/${data.etapasTotal}',
-            progress:
-                data.etapasTotal > 0
-                    ? data.etapasFeitas / data.etapasTotal
-                    : 0.0,
+            trailingMetric: '$feitas/$total',
+            progress: total > 0 ? feitas / total : 0.0,
             semanticsLabel: semantics,
             onTap: () {
               AnalyticsService.instance.track(
