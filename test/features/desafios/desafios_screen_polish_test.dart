@@ -16,6 +16,11 @@ void main() {
     expect(screen, contains('SkeletonList'));
     expect(screen, contains('RefreshIndicator'));
     expect(screen, contains('FxHubFreshness.fromFetchedAt'));
+    expect(screen, contains('FxHubFreshness.joinCount'));
+    expect(screen, contains('PopScope'));
+    expect(screen, contains('viewInsetsOf'));
+    expect(screen, contains('FxLiquidPrimaryButton'));
+    expect(screen, contains('Buscar desafio'));
     expect(screen, contains('showFxFormSheet'));
     expect(screen, contains('desafioDetailPath'));
     expect(screen, contains('showFxInsetPickerSheet'));
@@ -29,7 +34,7 @@ void main() {
     expect(screen, isNot(contains('onTap: () {}')));
     expect(screen, contains('FeatureGate'));
     expect(screen, contains('comunidadeGrupos'));
-    expect(screen, contains('ShellHeaderIconButton'));
+    expect(screen, contains('FxHelpIconButton'));
     expect(screen, isNot(contains('TabBar')));
     expect(screen, isNot(contains('TabBarView')));
     expect(screen, isNot(contains('DropdownButton')));

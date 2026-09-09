@@ -11,6 +11,34 @@ void main() {
     expect(desafioCountLabel(1), '1 desafio');
   });
 
+  test('desafioMatchesQuery busca titulo e tipo', () {
+    expect(
+      desafioMatchesQuery(
+        titulo: '30 dias de água',
+        descricao: 'Hidratação',
+        tipo: 'HABITOS',
+        query: 'água',
+      ),
+      isTrue,
+    );
+    expect(
+      desafioMatchesQuery(
+        titulo: 'Volume',
+        tipo: 'TREINOS',
+        query: 'treino',
+      ),
+      isTrue,
+    );
+    expect(
+      desafioMatchesQuery(
+        titulo: 'Volume',
+        tipo: 'TREINOS',
+        query: 'yoga',
+      ),
+      isFalse,
+    );
+  });
+
   test('desafioSubtitle formata tipo, prazo e meta', () {
     expect(
       desafioSubtitle(tipo: 'HABITOS', metaPontos: 100),

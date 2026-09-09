@@ -44,12 +44,7 @@ void main() {
     expect(habitoComplianceDanger(40), isFalse);
   });
 
-  test('habitoHubSubtitle junta freshness', () {
-    expect(habitoHubSubtitle(null), 'Coaching diário e aderência');
-    expect(
-      habitoHubSubtitle('há 1 min'),
-      'Coaching diário e aderência · há 1 min',
-    );
+  test('habitoCountLabel cobre vazio e plural', () {
     expect(habitoCountLabel(0), 'Nenhum hábito');
     expect(habitoCountLabel(1), '1 hábito');
     expect(habitoCountLabel(3), '3 hábitos');

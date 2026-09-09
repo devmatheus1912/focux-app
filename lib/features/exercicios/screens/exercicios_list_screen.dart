@@ -16,6 +16,7 @@ import '../../../core/widgets/fx_form_sheet.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
+import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
@@ -318,17 +319,35 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
     final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
     final totalLabel = exerciciosCountLabel(_totalElements);
     final headerSubtitle = FxHubFreshness.joinCount(totalLabel, freshnessLabel);
+    final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
 
     return fxScreenA11yScope(
       label: 'Exercícios',
-      child: FxShellScaffold(
+      child: PopScope(
+        canPop: !keyboardOpen && _selected.isEmpty,
+        onPopInvokedWithResult: (didPop, _) {
+          if (didPop) return;
+          if (keyboardOpen) {
+            FxKeyboardDismissScope.dismiss();
+            return;
+          }
+          if (_selected.isNotEmpty) {
+            setState(_selected.clear);
+            return;
+          }
+          safePopOrGo(context, '/treinos');
+        },
+        child: FxShellScaffold(
         useMesh: true,
         appBar:
             _selected.isEmpty
                 ? FxShellAppBar(
                   title: 'Exercícios',
                   subtitle: headerSubtitle,
-                  onBack: () => safePopOrGo(context, '/treinos'),
+                  onBack: () {
+                    FxKeyboardDismissScope.dismiss();
+                    safePopOrGo(context, '/treinos');
+                  },
                   actions: [
                     ShellHeaderIconButton(
                       icon: 'circle-check',
@@ -460,6 +479,7 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
             ),
           ),
         ),
+      ),
       ),
     );
   }

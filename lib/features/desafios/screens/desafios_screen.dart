@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -17,8 +19,11 @@ import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_form_sheet.dart';
 import '../../../core/widgets/fx_help.dart';
+import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_inset_picker_row.dart';
 import '../../../core/widgets/fx_inset_picker_sheet.dart';
+import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_toggle_chip.dart';
@@ -40,8 +45,12 @@ class DesafiosScreen extends ConsumerStatefulWidget {
 }
 
 class _DesafiosScreenState extends ConsumerState<DesafiosScreen> {
+  final _searchCtrl = TextEditingController();
+  final _searchFocus = FocusNode();
+  Timer? _debounce;
   List<Desafio> _desafios = [];
   var _filtro = DesafioTipoFiltro.todos;
+  var _query = '';
   var _loading = true;
   String? _error;
   DateTime? _fetchedAt;
@@ -52,8 +61,32 @@ class _DesafiosScreenState extends ConsumerState<DesafiosScreen> {
     _load();
   }
 
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    _searchCtrl.dispose();
+    _searchFocus.dispose();
+    super.dispose();
+  }
+
+  void _onQueryChanged(String value) {
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 350), () {
+      if (!mounted) return;
+      setState(() => _query = value.trim());
+    });
+  }
+
   List<Desafio> get _visiveis => _desafios
       .where((d) => desafioMatchesFiltro(d.tipo, _filtro))
+      .where(
+        (d) => desafioMatchesQuery(
+          titulo: d.titulo,
+          descricao: d.descricao,
+          tipo: d.tipo,
+          query: _query,
+        ),
+      )
       .toList();
 
   Future<void> _load() async {
@@ -210,22 +243,34 @@ class _DesafiosScreenState extends ConsumerState<DesafiosScreen> {
     final scheme = Theme.of(context).colorScheme;
     final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
 
+    final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
+    final visiveis = _loading ? const <Desafio>[] : _visiveis;
+
     return fxScreenA11yScope(
       label: 'Desafios',
       child: FeatureGate(
         featureName: 'Desafios',
         requiredPlan: SubscriptionPlan.ENTERPRISE,
         capability: 'comunidadeGrupos',
-        child: FxShellScaffold(
+        child: PopScope(
+          canPop: !keyboardOpen,
+          onPopInvokedWithResult: (didPop, _) {
+            if (didPop) return;
+            FxKeyboardDismissScope.dismiss();
+          },
+          child: FxShellScaffold(
           useMesh: true,
           constrainWidth: false,
           appBar: FxShellAppBar(
             title: 'Desafios',
-            subtitle: desafioHubSubtitle(
-              count: _loading ? 0 : _desafios.length,
-              freshness: _loading ? null : freshnessLabel,
+            subtitle: FxHubFreshness.joinCount(
+              desafioCountLabel(_loading ? 0 : visiveis.length),
+              _loading ? null : freshnessLabel,
             ),
-            onBack: () => safePopOrGo(context, '/perfil/ferramentas'),
+            onBack: () {
+              FxKeyboardDismissScope.dismiss();
+              safePopOrGo(context, '/perfil/ferramentas');
+            },
             actions: [
               FxHelpIconButton(
                 tooltip: 'Como usar desafios',
@@ -245,11 +290,6 @@ class _DesafiosScreenState extends ConsumerState<DesafiosScreen> {
                   ],
                 ),
               ),
-              ShellHeaderIconButton(
-                icon: 'plus',
-                tooltip: 'Novo desafio',
-                onTap: _criar,
-              ),
             ],
           ),
           body: _loading
@@ -264,7 +304,30 @@ class _DesafiosScreenState extends ConsumerState<DesafiosScreen> {
                   message: _error!,
                   onRetry: _load,
                 )
-              : FxContentWidthLimiter(child: _buildBody()),
+              : Column(
+                  children: [
+                    Expanded(
+                      child: FxContentWidthLimiter(child: _buildBody()),
+                    ),
+                    SafeArea(
+                      top: false,
+                      child: Padding(
+                        padding: EdgeInsets.fromLTRB(
+                          TokensStrip.s4,
+                          TokensStrip.s2,
+                          TokensStrip.s4,
+                          TokensStrip.s3 +
+                              MediaQuery.viewInsetsOf(context).bottom,
+                        ),
+                        child: FxLiquidPrimaryButton(
+                          label: 'Novo desafio',
+                          onPressed: _criar,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+        ),
         ),
       ),
     );
@@ -283,17 +346,44 @@ class _DesafiosScreenState extends ConsumerState<DesafiosScreen> {
               TokensStrip.s4,
               TokensStrip.s2,
             ),
-            child: Wrap(
-              spacing: TokensStrip.s2,
-              runSpacing: TokensStrip.s2,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                for (final filtro in DesafioTipoFiltro.values)
-                  FxToggleChip(
-                    label: desafioFiltroLabel(filtro),
-                    selected: _filtro == filtro,
-                    isDark: Theme.of(context).brightness == Brightness.dark,
-                    onTap: () => setState(() => _filtro = filtro),
+                TextField(
+                  controller: _searchCtrl,
+                  focusNode: _searchFocus,
+                  textInputAction: TextInputAction.search,
+                  onChanged: _onQueryChanged,
+                  onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
+                  decoration: InputDecoration(
+                    hintText: 'Buscar desafio',
+                    prefixIcon: const Icon(Icons.search_rounded),
+                    border: FxInputDeco.outlineBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
                   ),
+                ),
+                const SizedBox(height: TokensStrip.s3),
+                Wrap(
+                  spacing: TokensStrip.s2,
+                  runSpacing: TokensStrip.s2,
+                  children: [
+                    for (final filtro in const [
+                      DesafioTipoFiltro.habitos,
+                      DesafioTipoFiltro.treinos,
+                    ])
+                      FxToggleChip(
+                        label: desafioFiltroLabel(filtro),
+                        selected: _filtro == filtro,
+                        isDark: Theme.of(context).brightness == Brightness.dark,
+                        onTap: () => setState(() {
+                          _filtro = _filtro == filtro
+                              ? DesafioTipoFiltro.todos
+                              : filtro;
+                        }),
+                      ),
+                  ],
+                ),
               ],
             ),
           ),
@@ -317,7 +407,9 @@ class _DesafiosScreenState extends ConsumerState<DesafiosScreen> {
                         : 'Nada neste filtro',
                     subtitle: _desafios.isEmpty
                         ? 'Crie o primeiro desafio com prazo e meta.'
-                        : 'Troque o tipo ou crie outro desafio.',
+                        : _query.isEmpty
+                            ? 'Troque o tipo ou crie outro desafio.'
+                            : 'Ajuste a busca ou o tipo para ver outros.',
                     action: FxEmptyAction(
                       label: 'Criar desafio',
                       onTap: _criar,

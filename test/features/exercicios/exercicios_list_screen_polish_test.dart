@@ -18,6 +18,8 @@ void main() {
     expect(screen, isNot(contains('FilterChip')));
     expect(screen, contains('FxLiquidPrimaryButton'));
     expect(screen, contains('viewInsetsOf'));
+    expect(screen, contains('PopScope'));
+    expect(screen, contains('FxKeyboardDismissScope.dismiss'));
     expect(screen, contains('safePopOrGo(context, \'/treinos\')'));
   });
 

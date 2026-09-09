@@ -83,6 +83,12 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
         ProductEvents.treinosSearchUsed,
         props: {..._analyticsScope, 'has_query': _query.trim().isNotEmpty},
       );
+      if (widget.alunoId != null) return;
+      final next = value.trim();
+      final current = ref.read(treinosHomeQueryProvider);
+      if (current.q == next) return;
+      ref.read(treinosHomeQueryProvider.notifier).state =
+          TreinosHomeQuery(q: next);
     });
   }
 
@@ -273,23 +279,35 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
 
   @override
   Widget build(BuildContext context) {
+    final fromLibrary = widget.alunoId == null;
     final treinosSource =
-        widget.alunoId == null
+        fromLibrary
             ? treinosProvider
             : treinosDoAlunoProvider(widget.alunoId!);
     final treinosAsync = ref.watch(treinosSource);
     final homeBundle =
-        widget.alunoId == null ? ref.watch(treinosHomeProvider).valueOrNull : null;
+        fromLibrary ? ref.watch(treinosHomeProvider).valueOrNull : null;
+    final tail =
+        fromLibrary ? ref.watch(treinosHomeTailProvider) : const TreinosHomeTailState();
     final uiHints = homeBundle?.uiHints;
     ref.listen<AsyncValue<List<Treino>>>(treinosSource, (_, next) {
       if (!next.isLoading && next.hasValue) {
         setState(() => _fetchedAt = DateTime.now());
       }
     });
+    if (fromLibrary) {
+      ref.listen<AsyncValue<TreinosHomeBundle>>(treinosHomeProvider, (_, next) {
+        next.whenData((home) {
+          ref.read(treinosHomeTailProvider.notifier).reset(hasNext: home.hasNext);
+        });
+      });
+    }
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
     final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
-    final loadedTreinos = treinosAsync.valueOrNull ?? const <Treino>[];
+    final pageTreinos = treinosAsync.valueOrNull ?? const <Treino>[];
+    final loadedTreinos =
+        fromLibrary ? [...pageTreinos, ...tail.treinos] : pageTreinos;
     final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
     final fromAluno = widget.alunoId != null;
     final title =
@@ -359,7 +377,12 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
                 _selectionMode
                     ? TreinosListLabels.selectionCount(_selectedIds.length)
                     : TreinosListLabels.listSubtitle(
-                      count: loadedTreinos.length,
+                      count:
+                          fromLibrary
+                              ? (homeBundle?.totalElements ??
+                                  homeBundle?.resumo.totalPlanos ??
+                                  loadedTreinos.length)
+                              : loadedTreinos.length,
                       freshness: freshnessLabel,
                     ),
             showBack: fromAluno,
@@ -449,12 +472,15 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
                   }
                 });
               }
-              final filteredTreinos = treinos.where(_matchesQuery).toList();
+              final filteredTreinos =
+                  fromLibrary
+                      ? loadedTreinos
+                      : loadedTreinos.where(_matchesQuery).toList();
               final selectedTreinos =
-                  treinos
+                  loadedTreinos
                       .where((treino) => _selectedIds.contains(treino.id))
                       .toList();
-              final singlePlan = treinos.length == 1;
+              final singlePlan = loadedTreinos.length == 1;
               final createLabel =
                   widget.alunoId == null
                       ? (uiHints?.createCtaLabel ?? 'Criar treino')
@@ -467,12 +493,25 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
                     child: RefreshIndicator(
                       color: primary,
                       onRefresh: refresh,
-                      child: CustomScrollView(
+                      child: NotificationListener<ScrollNotification>(
+                        onNotification: (n) {
+                          if (!fromLibrary) return false;
+                          if (n.metrics.extentAfter < 480 &&
+                              tail.hasNext &&
+                              !tail.loading) {
+                            ref.read(treinosHomeTailProvider.notifier).loadMore(
+                              query: ref.read(treinosHomeQueryProvider),
+                              repo: ref.read(treinoRepositoryProvider),
+                            );
+                          }
+                          return false;
+                        },
+                        child: CustomScrollView(
                         physics: const AlwaysScrollableScrollPhysics(),
                         keyboardDismissBehavior:
                             ScrollViewKeyboardDismissBehavior.onDrag,
                         slivers: [
-                          if (treinos.isEmpty)
+                          if (loadedTreinos.isEmpty && _query.trim().isEmpty)
                             SliverFillRemaining(
                               hasScrollBody: false,
                               child: Padding(
@@ -574,16 +613,25 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
                                             ? (uiHints?.libraryCaption ??
                                                 TreinosListLabels.libraryCaption(
                                                   prontos:
-                                                      treinos
+                                                      homeBundle?.resumo.prontos ??
+                                                      loadedTreinos
                                                           .where((t) => t.pronto)
                                                           .length,
-                                                  exercises: treinos.fold<int>(
-                                                    0,
-                                                    (sum, t) =>
-                                                        sum + t.exerciciosCount,
-                                                  ),
+                                                  exercises:
+                                                      homeBundle
+                                                          ?.resumo
+                                                          .totalExercicios ??
+                                                      loadedTreinos.fold<int>(
+                                                        0,
+                                                        (sum, t) =>
+                                                            sum +
+                                                            t.exerciciosCount,
+                                                      ),
                                                 ))
-                                            : '${filteredTreinos.length} de ${treinos.length}',
+                                            : TreinosListLabels.countLabel(
+                                              homeBundle?.totalElements ??
+                                                  filteredTreinos.length,
+                                            ),
                                     isDark: isDark,
                                   ),
                                 ),
@@ -611,13 +659,18 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
                                   TreinosLayout.listBottomGap(context),
                                 ),
                                 sliver: SliverList.separated(
-                                  itemCount: filteredTreinos.length,
+                                  itemCount:
+                                      filteredTreinos.length +
+                                      (fromLibrary && tail.hasNext ? 1 : 0),
                                   separatorBuilder:
                                       (_, __) => SizedBox(
                                         height: TreinosLayout.listItemGap,
                                       ),
-                                  itemBuilder:
-                                      (context, i) => _TreinoCard(
+                                  itemBuilder: (context, i) {
+                                    if (i >= filteredTreinos.length) {
+                                      return const SizedBox(height: 48);
+                                    }
+                                    return _TreinoCard(
                                         treino: filteredTreinos[i],
                                         isDark: isDark,
                                         primary: primary,
@@ -639,12 +692,14 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
                                             () => _openTreinoActions(
                                               filteredTreinos[i],
                                             ),
-                                      ),
+                                    );
+                                  },
                                 ),
                               ),
                           ],
                         ],
                       ),
+                    ),
                     ),
                   ),
                   if (_selectionMode && selectedTreinos.isNotEmpty)
