@@ -119,6 +119,72 @@ class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
 
   int get _pagas => _mensalidades.where((m) => m.status == 'PAGO').length;
 
+  Iterable<String> get _vencimentosAbertos => _abertas.map((item) {
+    final raw = item.vencimento?.trim();
+    if (raw != null && raw.isNotEmpty) return raw;
+    return item.mesReferencia;
+  });
+
+  Widget _fold({required Color primary, required bool isDark}) {
+    final nextValue = financeiroAlunoProximoVencimentoValue(_vencimentosAbertos);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        FxHubHeader(
+          title: 'Suas cobranças',
+          subtitle: financeiroAlunoHubSubtitle(
+            lancamentos: _mensalidades.length,
+          ),
+        ),
+        const SizedBox(height: TokensStrip.s4),
+        OperationalMetricTile(
+          label: 'Em aberto',
+          value: _abertoTotal.format(showDecimals: false),
+          hint: financeiroAlunoAtrasadasHint(_atrasadas),
+          color: _atrasadas > 0 ? EagleTokens.bad : primary,
+          isDark: isDark,
+          emphasis:
+              _atrasadas > 0
+                  ? OperationalMetricEmphasis.alert
+                  : OperationalMetricEmphasis.normal,
+        ),
+        const SizedBox(height: TokensStrip.s2),
+        OperationalMetricTile(
+          label: 'Pagas',
+          value: '$_pagas',
+          hint: 'Neste recorte',
+          color: primary,
+          isDark: isDark,
+        ),
+        const SizedBox(height: TokensStrip.s2),
+        OperationalMetricTile(
+          label: 'Atrasadas',
+          value: '$_atrasadas',
+          hint: _atrasadas == 0 ? 'Neste recorte' : 'Cobranças vencidas',
+          color: _atrasadas > 0 ? EagleTokens.bad : primary,
+          isDark: isDark,
+          emphasis:
+              _atrasadas > 0
+                  ? OperationalMetricEmphasis.alert
+                  : OperationalMetricEmphasis.muted,
+        ),
+        const SizedBox(height: TokensStrip.s2),
+        OperationalMetricTile(
+          label: 'Vence',
+          value: nextValue,
+          hint: financeiroAlunoProximoVencimentoHint(
+            temAberto: _abertas.isNotEmpty,
+            temData: nextValue != '—',
+          ),
+          color: primary,
+          isDark: isDark,
+        ),
+        const SizedBox(height: TokensStrip.s3),
+        _atalhos(primary: primary, isDark: isDark),
+      ],
+    );
+  }
+
   Widget _atalhos({required Color primary, required bool isDark}) {
     return Wrap(
       spacing: TokensStrip.s2,
@@ -152,10 +218,6 @@ class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
     final primary = Theme.of(context).colorScheme.primary;
     final freshness = FxHubFreshness.fromFetchedAt(_fetchedAt);
     final showSticky = !_loading && _erro == null;
-    final hubSubtitle = financeiroAlunoHubSubtitle(
-      lancamentos: _mensalidades.length,
-      freshness: freshness,
-    );
 
     return fxScreenA11yScope(
       label: 'Minhas mensalidades',
@@ -210,32 +272,7 @@ class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
                                       32,
                                     ),
                                     children: [
-                                      FxHubHeader(
-                                        title: 'Suas cobranças',
-                                        subtitle: hubSubtitle,
-                                      ),
-                                      const SizedBox(height: TokensStrip.s4),
-                                      OperationalMetricTile(
-                                        label: 'Em aberto',
-                                        value: _abertoTotal.format(
-                                          showDecimals: false,
-                                        ),
-                                        hint: 'Nada atrasado',
-                                        color: primary,
-                                        isDark: isDark,
-                                      ),
-                                      const SizedBox(height: TokensStrip.s3),
-                                      OperationalMetricTile(
-                                        label: 'Pagas',
-                                        value: '$_pagas',
-                                        hint: 'Neste recorte',
-                                        color: primary,
-                                        isDark: isDark,
-                                        emphasis:
-                                            OperationalMetricEmphasis.muted,
-                                      ),
-                                      const SizedBox(height: TokensStrip.s4),
-                                      _atalhos(
+                                      _fold(
                                         primary: primary,
                                         isDark: isDark,
                                       ),
@@ -258,72 +295,22 @@ class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
                                       32,
                                     ),
                                     itemCount:
+                                        1 +
                                         _mensalidades.length +
-                                        5 +
                                         (_hasMore ? 1 : 0),
                                     itemBuilder: (context, i) {
                                       if (i == 0) {
-                                        return FxHubHeader(
-                                          title: 'Suas cobranças',
-                                          subtitle: hubSubtitle,
-                                        );
-                                      }
-                                      if (i == 1) {
                                         return Padding(
                                           padding: const EdgeInsets.only(
-                                            top: TokensStrip.s4,
-                                            bottom: TokensStrip.s3,
+                                            bottom: TokensStrip.s4,
                                           ),
-                                          child: OperationalMetricTile(
-                                            label: 'Em aberto',
-                                            value: _abertoTotal.format(
-                                              showDecimals: false,
-                                            ),
-                                            hint:
-                                                _atrasadas == 0
-                                                    ? 'Nada atrasado'
-                                                    : '$_atrasadas atrasada${_atrasadas == 1 ? '' : 's'}',
-                                            color:
-                                                _atrasadas > 0
-                                                    ? EagleTokens.bad
-                                                    : primary,
-                                            isDark: isDark,
-                                            emphasis:
-                                                _atrasadas > 0
-                                                    ? OperationalMetricEmphasis
-                                                        .alert
-                                                    : OperationalMetricEmphasis
-                                                        .normal,
-                                          ),
-                                        );
-                                      }
-                                      if (i == 2) {
-                                        return OperationalMetricTile(
-                                          label: 'Pagas',
-                                          value: '$_pagas',
-                                          hint: 'Neste recorte',
-                                          color: primary,
-                                          isDark: isDark,
-                                        );
-                                      }
-                                      if (i == 3) {
-                                        return Padding(
-                                          padding: const EdgeInsets.only(
-                                            top: TokensStrip.s4,
-                                            bottom: TokensStrip.s3,
-                                          ),
-                                          child: _atalhos(
+                                          child: _fold(
                                             primary: primary,
                                             isDark: isDark,
                                           ),
                                         );
                                       }
-                                      if (i == 4) {
-                                        return const SizedBox(
-                                          height: TokensStrip.s2,
-                                        );
-                                      }
-                                      final itemIndex = i - 5;
+                                      final itemIndex = i - 1;
                                       if (itemIndex >= _mensalidades.length) {
                                         return FxSatelliteListTile(
                                           title:

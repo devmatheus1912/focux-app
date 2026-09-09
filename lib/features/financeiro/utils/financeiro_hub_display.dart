@@ -46,15 +46,34 @@ String financeiroMensalidadePagoEmLabel(String? pagoEm) {
   return '$d/$m/${parsed.year}';
 }
 
-String financeiroAlunoHubSubtitle({
-  required int lancamentos,
-  String? freshness,
+String financeiroAlunoHubSubtitle({required int lancamentos}) =>
+    lancamentos == 1 ? '1 lançamento' : '$lancamentos lançamentos';
+
+String financeiroAlunoAtrasadasHint(int atrasadas) {
+  if (atrasadas <= 0) return 'Nada atrasado';
+  return atrasadas == 1 ? '1 em atraso' : '$atrasadas em atraso';
+}
+
+String financeiroAlunoProximoVencimentoValue(Iterable<String> isos) {
+  DateTime? nearest;
+  for (final raw in isos) {
+    final parsed = financeiroParseIsoDate(raw);
+    if (parsed == null) continue;
+    if (nearest == null || parsed.isBefore(nearest)) nearest = parsed;
+  }
+  if (nearest == null) return '—';
+  return financeiroIsoDateLabel(
+    financeiroIsoDate(nearest.year, nearest.month, nearest.day),
+  );
+}
+
+String financeiroAlunoProximoVencimentoHint({
+  required bool temAberto,
+  required bool temData,
 }) {
-  final count =
-      lancamentos == 1 ? '1 lançamento' : '$lancamentos lançamentos';
-  final fresh = freshness?.trim();
-  if (fresh == null || fresh.isEmpty) return count;
-  return '$count · $fresh';
+  if (!temAberto) return 'Nada em aberto';
+  if (!temData) return 'Sem data neste recorte';
+  return 'Próximo vencimento';
 }
 
 String financeiroAlunoContextLabel(String? nome) {

@@ -175,18 +175,30 @@ MarcoModel? trilhaProximoMarco(TrilhaModel trilha) {
   return null;
 }
 
+String trilhaValorUnidade(String? tipo) {
+  switch ((tipo ?? '').trim().toUpperCase()) {
+    case 'PESO':
+      return ' kg';
+    case 'MEDIDA':
+      return ' cm';
+    default:
+      return '';
+  }
+}
+
+String trilhaNumeroLabel(double value) =>
+    value == value.roundToDouble()
+        ? value.toStringAsFixed(0)
+        : value.toStringAsFixed(1);
+
 String trilhaValorAtualLabel(TrilhaModel trilha) {
   if (trilha.metaValor == null) {
     final done = trilha.marcos.where((m) => m.concluido).length;
     return '$done/${trilha.marcos.length}';
   }
-  final atual = trilha.valorAtual.toStringAsFixed(
-    trilha.valorAtual == trilha.valorAtual.roundToDouble() ? 0 : 1,
-  );
-  final meta = trilha.metaValor!.toStringAsFixed(
-    trilha.metaValor == trilha.metaValor!.roundToDouble() ? 0 : 1,
-  );
-  return '$atual / $meta';
+  final unidade = trilhaValorUnidade(trilha.metaTipo);
+  return '${trilhaNumeroLabel(trilha.valorAtual)} / '
+      '${trilhaNumeroLabel(trilha.metaValor!)}$unidade';
 }
 
 double? trilhaParseNumero(String raw) {

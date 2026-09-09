@@ -93,7 +93,6 @@ class _TreinoDetailBody extends StatelessWidget {
   final int? alunoId;
   final String? alunoNome;
   final bool isDark;
-  final String? freshnessLabel;
   final Future<void> Function() onRefresh;
   final WidgetRef ref;
   const _TreinoDetailBody({
@@ -102,7 +101,6 @@ class _TreinoDetailBody extends StatelessWidget {
     required this.alunoId,
     required this.alunoNome,
     required this.isDark,
-    required this.freshnessLabel,
     required this.onRefresh,
     required this.ref,
   });
@@ -179,41 +177,48 @@ class _TreinoDetailBody extends StatelessWidget {
                       subtitle: [
                         contextLabel,
                         metaLine,
-                        if (freshnessLabel != null &&
-                            freshnessLabel!.isNotEmpty)
-                          freshnessLabel!,
                       ].where((s) => s.trim().isNotEmpty).join(' · '),
                     ),
                     const SizedBox(height: TokensStrip.s4),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: OperationalMetricTile(
-                            label: 'Exercícios',
-                            value: '${orderedExercises.length}',
-                            hint:
-                                orderedExercises.isEmpty
-                                    ? 'Monte a lista'
-                                    : metaLine,
-                            color: primary,
-                            isDark: isDark,
+                    OperationalMetricTile(
+                      label: 'Exercícios',
+                      value: '${orderedExercises.length}',
+                      hint:
+                          orderedExercises.isEmpty
+                              ? 'Monte a lista'
+                              : metaLine,
+                      color: primary,
+                      isDark: isDark,
+                    ),
+                    const SizedBox(height: TokensStrip.s2),
+                    OperationalMetricTile(
+                      label: 'Séries',
+                      value: '${treinoDetailSeriesCount(orderedExercises)}',
+                      hint: orderedExercises.isEmpty
+                          ? 'Ainda vazio'
+                          : treinoDetailSeriesHint(
+                            treinoDetailGroupCount(orderedExercises),
                           ),
-                        ),
-                        const SizedBox(width: TokensStrip.s2),
-                        Expanded(
-                          child: OperationalMetricTile(
-                            label: 'Séries',
-                            value: '${treinoDetailSeriesCount(orderedExercises)}',
-                            hint: orderedExercises.isEmpty
-                                ? 'Ainda vazio'
-                                : treinoDetailSeriesHint(
-                                  treinoDetailGroupCount(orderedExercises),
-                                ),
-                            color: primary,
-                            isDark: isDark,
-                          ),
-                        ),
-                      ],
+                      color: primary,
+                      isDark: isDark,
+                    ),
+                    const SizedBox(height: TokensStrip.s2),
+                    OperationalMetricTile(
+                      label: 'Grupos',
+                      value: '${treinoDetailGroupCount(orderedExercises)}',
+                      hint: treinoDetailGroupTileHint(
+                        treinoDetailGroupCount(orderedExercises),
+                      ),
+                      color: primary,
+                      isDark: isDark,
+                    ),
+                    const SizedBox(height: TokensStrip.s2),
+                    OperationalMetricTile(
+                      label: 'Carga',
+                      value: treinoDetailCargaValue(orderedExercises),
+                      hint: treinoDetailCargaHint(orderedExercises),
+                      color: primary,
+                      isDark: isDark,
                     ),
                     const SizedBox(height: TokensStrip.s3),
                     Wrap(

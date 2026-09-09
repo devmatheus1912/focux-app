@@ -22,14 +22,22 @@ void main() {
     );
   });
 
-  test('financeiroAlunoHubSubtitle junta count e freshness', () {
+  test('financeiroAlunoHubSubtitle só conta lançamentos', () {
+    expect(financeiroAlunoHubSubtitle(lancamentos: 0), '0 lançamentos');
+    expect(financeiroAlunoHubSubtitle(lancamentos: 1), '1 lançamento');
+    expect(financeiroAlunoAtrasadasHint(0), 'Nada atrasado');
+    expect(financeiroAlunoAtrasadasHint(2), '2 em atraso');
     expect(
-      financeiroAlunoHubSubtitle(lancamentos: 0, freshness: null),
-      '0 lançamentos',
+      financeiroAlunoProximoVencimentoValue(const ['2026-10-05', '2026-09-10']),
+      '10/09/2026',
     );
     expect(
-      financeiroAlunoHubSubtitle(lancamentos: 1, freshness: 'há 1 min'),
-      '1 lançamento · há 1 min',
+      financeiroAlunoProximoVencimentoHint(temAberto: false, temData: false),
+      'Nada em aberto',
+    );
+    expect(
+      financeiroAlunoProximoVencimentoHint(temAberto: true, temData: true),
+      'Próximo vencimento',
     );
   });
 

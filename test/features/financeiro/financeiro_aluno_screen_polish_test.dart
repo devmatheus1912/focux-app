@@ -28,6 +28,10 @@ void main() {
     expect(screen, contains('PopScope'));
     expect(screen, contains("label: 'Início'"));
     expect(screen, contains('subtitle: freshness'));
+    expect(screen, isNot(contains('freshness: freshness')));
+    expect(screen, contains("label: 'Atrasadas'"));
+    expect(screen, contains("label: 'Vence'"));
+    expect(screen, contains('financeiroAlunoProximoVencimentoValue'));
     expect(screen, contains('FocuxHubTypography.metric'));
     expect(screen, contains('showFinanceiroAlunoCobrancaSheet'));
     expect(screen, contains('circle-check'));

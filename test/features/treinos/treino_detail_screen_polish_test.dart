@@ -122,6 +122,10 @@ void main() {
     expect(screen, contains('FxLiquidPrimaryButton'));
     expect(screen, contains('DashboardHomeActionChip'));
     expect(screen, contains('treinoDetailSeriesCount'));
+    expect(screen, contains('treinoDetailCargaValue'));
+    expect(screen, contains("label: 'Grupos'"));
+    expect(screen, contains("label: 'Carga'"));
+    expect(screen, isNot(contains('freshnessLabel')));
     expect(screen, contains("label: 'Atribuir'"));
     expect(screen, contains("label: 'Lista'"));
     expect(screen, contains("label: 'Duplicar'"));

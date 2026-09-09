@@ -91,6 +91,31 @@ void main() {
     expect(treinoDetailGroupCount(items), 2);
     expect(treinoDetailSeriesHint(1), '1 grupo muscular');
     expect(treinoDetailSeriesHint(2), '2 grupos');
+    expect(treinoDetailGroupTileHint(0), 'Ainda vazio');
+    expect(treinoDetailGroupTileHint(2), 'Músculos distintos');
+    expect(treinoDetailCargaValue(items), '—');
+    expect(treinoDetailCargaHint(items), 'Sem carga prescrita');
+    expect(
+      treinoDetailCargaValue([
+        TreinoExercicioItem(
+          id: 9,
+          exercicio: Exercicio(id: 9, nome: 'Supino'),
+          series: 3,
+          repeticoes: '10',
+          cargaKg: 40,
+          ordem: 0,
+        ),
+        TreinoExercicioItem(
+          id: 10,
+          exercicio: Exercicio(id: 10, nome: 'Remada'),
+          series: 3,
+          repeticoes: '10',
+          cargaKg: 30,
+          ordem: 1,
+        ),
+      ]),
+      '70kg',
+    );
   });
 
   test('meta line is honest: counts or em montagem, never fake duration', () {
