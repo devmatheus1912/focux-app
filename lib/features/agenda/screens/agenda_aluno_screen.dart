@@ -1,20 +1,35 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../../core/config/env.dart';
-import '../../../core/theme/design_tokens.dart';
-import '../../../core/theme/shell_chrome.dart';
-import '../../../core/utils/friendly_error.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../features/auth/providers/auth_provider.dart';
-import '../data/agenda_repository.dart';
+
+import '../../../core/brand/focux_microcopy.dart';
+import '../../../core/config/env.dart';
+import '../../../core/router/safe_navigation.dart';
+import '../../../core/theme/focux_hub_typography.dart';
+import '../../../core/theme/fx_settings_layout.dart';
+import '../../../core/theme/shell_chrome.dart';
+import '../../../core/theme/tokens_strip.dart';
+import '../../../core/utils/friendly_error.dart';
+import '../../../core/ux/fx_hub_freshness.dart';
+import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
-import '../../../core/widgets/feedback_helper.dart';
-import '../../../core/widgets/skeleton_loader.dart';
-import 'package:focux_app/core/widgets/fx_motion.dart';
-import 'package:focux_app/core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/fx_input_deco.dart';
+import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
-import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/fx_toggle_chip.dart';
+import '../../../core/widgets/skeleton_loader.dart';
+import '../../../features/auth/providers/auth_provider.dart';
+import '../data/agenda_repository.dart';
+import '../utils/agenda_display.dart';
+import '../utils/agenda_status.dart';
+
+part 'agenda_aluno_screen_cards.part.dart';
 
 class AgendaAlunoScreen extends ConsumerStatefulWidget {
   const AgendaAlunoScreen({super.key});
@@ -23,13 +38,50 @@ class AgendaAlunoScreen extends ConsumerStatefulWidget {
 }
 
 class _AgendaAlunoScreenState extends ConsumerState<AgendaAlunoScreen> {
+  final _searchCtrl = TextEditingController();
+  final _searchFocus = FocusNode();
+  Timer? _debounce;
   List<Agendamento> _ags = [];
-  bool _loading = true;
-  Object? _erro;
+  var _query = '';
+  var _chip = AgendaAlunoChip.todos;
+  var _page = 0;
+  var _hasMore = false;
+  var _total = 0;
+  var _loadingMore = false;
+  var _loading = true;
+  String? _erro;
+  DateTime? _fetchedAt;
 
   @override
   void initState() {
     super.initState();
+    _load();
+  }
+
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    _searchCtrl.dispose();
+    _searchFocus.dispose();
+    super.dispose();
+  }
+
+  void _onQueryChanged(String value) {
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 280), () {
+      if (!mounted) return;
+      setState(() => _query = value.trim());
+      _load();
+    });
+  }
+
+  void _clearFilters() {
+    _debounce?.cancel();
+    _searchCtrl.clear();
+    setState(() {
+      _query = '';
+      _chip = AgendaAlunoChip.todos;
+    });
     _load();
   }
 
@@ -39,23 +91,54 @@ class _AgendaAlunoScreenState extends ConsumerState<AgendaAlunoScreen> {
       _erro = null;
     });
     try {
-      final r =
-          await AgendaRepository(
-            ref.read(apiClientProvider),
-          ).meusAgendamentos();
-      if (mounted) {
-        setState(() {
-          _ags = r;
-          _loading = false;
-        });
-      }
+      final pagina = await AgendaRepository(
+        ref.read(apiClientProvider),
+      ).meusAgendamentosPagina(
+        q: _query,
+        status: agendaAlunoChipStatus(_chip),
+      );
+      if (!mounted) return;
+      setState(() {
+        _ags = pagina.content;
+        _page = pagina.page ?? 0;
+        _hasMore = pagina.hasNext;
+        _total = pagina.totalElements ?? pagina.content.length;
+        _loading = false;
+        _fetchedAt = DateTime.now();
+      });
     } catch (e) {
-      if (mounted) {
-        setState(() {
-          _loading = false;
-          _erro = e;
-        });
-      }
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+        _erro = friendlyError(e);
+      });
+    }
+  }
+
+  Future<void> _carregarMais() async {
+    if (_loadingMore || !_hasMore) return;
+    setState(() => _loadingMore = true);
+    try {
+      final pagina = await AgendaRepository(
+        ref.read(apiClientProvider),
+      ).meusAgendamentosPagina(
+        page: _page + 1,
+        q: _query,
+        status: agendaAlunoChipStatus(_chip),
+      );
+      if (!mounted) return;
+      final seen = _ags.map((a) => a.id).toSet();
+      setState(() {
+        _ags = [..._ags, ...pagina.content.where((a) => seen.add(a.id))];
+        _page = pagina.page ?? (_page + 1);
+        _hasMore = pagina.hasNext;
+        _total = pagina.totalElements ?? _ags.length;
+        _loadingMore = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _loadingMore = false);
+      FeedbackHelper.showError(context, friendlyError(e));
     }
   }
 
@@ -80,16 +163,14 @@ class _AgendaAlunoScreenState extends ConsumerState<AgendaAlunoScreen> {
           await AgendaRepository(ref.read(apiClientProvider)).icalTokenAluno();
       final fullUrl = _resolveAbsoluteApiUrl(info.url);
       await Clipboard.setData(ClipboardData(text: fullUrl));
-      if (mounted) {
-        FeedbackHelper.showSuccess(
-          context,
-          'Link iCal copiado — cole no Google Calendar ou Apple Calendar.',
-        );
-      }
+      if (!mounted) return;
+      FeedbackHelper.showSuccess(
+        context,
+        'Link iCal copiado — cole no Google Calendar ou Apple Calendar.',
+      );
     } catch (e) {
-      if (mounted) {
-        FeedbackHelper.showError(context, friendlyError(e));
-      }
+      if (!mounted) return;
+      FeedbackHelper.showError(context, friendlyError(e));
     }
   }
 
@@ -98,14 +179,12 @@ class _AgendaAlunoScreenState extends ConsumerState<AgendaAlunoScreen> {
       await AgendaRepository(
         ref.read(apiClientProvider),
       ).confirmarPresenca(ag.id);
-      if (mounted) {
-        FeedbackHelper.showSuccess(context, 'Presença confirmada!');
-        _load();
-      }
+      if (!mounted) return;
+      FeedbackHelper.showSuccess(context, 'Presença confirmada!');
+      await _load();
     } catch (e) {
-      if (mounted) {
-        FeedbackHelper.showError(context, friendlyError(e));
-      }
+      if (!mounted) return;
+      FeedbackHelper.showError(context, friendlyError(e));
     }
   }
 
@@ -113,182 +192,167 @@ class _AgendaAlunoScreenState extends ConsumerState<AgendaAlunoScreen> {
   Widget build(BuildContext context) {
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
+    final freshness = FxHubFreshness.fromFetchedAt(_fetchedAt);
+    final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
+    final searching =
+        _query.isNotEmpty || _chip != AgendaAlunoChip.todos;
+
     return fxScreenA11yScope(
       label: 'Minha Agenda',
-      child: FxShellScaffold(
-        useMesh: true,
-        extendBody: true,
-        appBar: FxShellAppBar(
-          title: 'Minha Agenda',
-          subtitle: 'Seus próximos compromissos',
-          actions: [
-            IconButton(
-              tooltip: 'Exportar iCal',
-              icon: const Icon(Icons.calendar_month_outlined),
-              onPressed: _copyIcalLink,
+      child: PopScope(
+        canPop: !keyboardOpen,
+        onPopInvokedWithResult: (didPop, _) {
+          if (didPop) return;
+          FxKeyboardDismissScope.dismiss();
+        },
+        child: FxShellScaffold(
+          useMesh: true,
+          constrainWidth: false,
+          appBar: FxShellAppBar(
+            title: 'Minha Agenda',
+            subtitle: FxHubFreshness.joinCount(
+              agendaAlunoCountLabel(_loading ? 0 : _total),
+              _loading ? null : freshness,
             ),
-          ],
-        ),
-        body:
-            _loading
-                ? const Padding(
-                  padding: EdgeInsets.all(TokensStrip.s4),
-                  child: SkeletonList(count: 4),
-                )
-                : _erro != null
-                ? FxErrorState(
-                  chromeOnDark: chrome.isDark,
-                  primary: primary,
-                  message: friendlyError(_erro!),
-                  onRetry: _load,
-                )
-                : RefreshIndicator(
-                  onRefresh: _load,
-                  child:
-                      _ags.isEmpty
-                          ? ListView(
-                            physics: const AlwaysScrollableScrollPhysics(),
-                            children: const [
-                              SizedBox(height: 72),
-                              FxEmptyState(
-                                icon: 'calendar',
-                                title: 'Nenhum agendamento',
-                                subtitle:
-                                    'Quando seu personal marcar uma sessão, ela aparece aqui.',
-                              ),
-                            ],
-                          )
-                          : ListView.builder(
-                            padding: const EdgeInsets.all(TokensStrip.s4),
-                            itemCount: _ags.length,
-                            itemBuilder:
-                                (_, i) =>
-                                    _AgCard(ag: _ags[i], onConfirmar: _confirmar),
-                          ),
-                ),
-      ),
-    );
-  }
-}
-
-class _AgCard extends StatelessWidget {
-  final Agendamento ag;
-  final void Function(Agendamento) onConfirmar;
-  const _AgCard({required this.ag, required this.onConfirmar});
-
-  @override
-  Widget build(BuildContext context) {
-    final inicio = ag.inicio;
-    final fim = ag.fim;
-    final cor = _statusColor(context, ag.status);
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: DecoratedBox(
-        decoration: fxListCardDecoration(context, accent: cor),
-        child: Padding(
-          padding: const EdgeInsets.all(TokensStrip.s4),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      ag.titulo ?? 'Sessão de treino',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ),
-                  _StatusChip(status: ag.status, cor: cor),
-                ],
+            onBack: () {
+              FxKeyboardDismissScope.dismiss();
+              safePopOrGo(context, '/dashboard/aluno');
+            },
+            actions: [
+              IconButton(
+                tooltip: 'Exportar iCal',
+                icon: const Icon(Icons.calendar_month_outlined),
+                onPressed: _copyIcalLink,
               ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  const Icon(
-                    Icons.calendar_today,
-                    size: 14,
-                    color: TokensStrip.textSecondary,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    '${inicio.day.toString().padLeft(2, '0')}/${inicio.month.toString().padLeft(2, '0')}/${inicio.year}',
-                    style: const TextStyle(
-                      color: TokensStrip.textSecondary,
-                      fontSize: 13,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  const Icon(
-                    Icons.access_time,
-                    size: 14,
-                    color: TokensStrip.textSecondary,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    '${_hm(inicio)} – ${_hm(fim)}',
-                    style: const TextStyle(
-                      color: TokensStrip.textSecondary,
-                      fontSize: 13,
-                    ),
-                  ),
-                ],
-              ),
-              if (ag.status == 'AGENDADO') ...[
-                const SizedBox(height: 12),
-                FxLiquidPrimaryButton(
-                  label: 'Confirmar presença',
-                  onPressed: () => onConfirmar(ag),
-                ),
-              ],
             ],
           ),
+          body: _loading
+              ? const Padding(
+                  padding: EdgeInsets.all(FxSettingsLayout.pageInset),
+                  child: SkeletonList(count: 4),
+                )
+              : _erro != null
+              ? FxErrorState(
+                  chromeOnDark: chrome.isDark,
+                  primary: primary,
+                  title: FocuxMicrocopy.naoFoiPossivelCarregar,
+                  message: _erro!,
+                  onRetry: _load,
+                )
+              : Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(
+                        TokensStrip.s4,
+                        TokensStrip.s2,
+                        TokensStrip.s4,
+                        TokensStrip.s2,
+                      ),
+                      child: TextField(
+                        controller: _searchCtrl,
+                        focusNode: _searchFocus,
+                        textInputAction: TextInputAction.search,
+                        onChanged: _onQueryChanged,
+                        onTapOutside: (_) =>
+                            FxKeyboardDismissScope.dismiss(),
+                        decoration: InputDecoration(
+                          hintText: 'Buscar sessão',
+                          prefixIcon: const Icon(Icons.search_rounded),
+                          border: FxInputDeco.outlineBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(
+                        TokensStrip.s4,
+                        0,
+                        TokensStrip.s4,
+                        TokensStrip.s2,
+                      ),
+                      child: Row(
+                        children: [
+                          for (final chip in AgendaAlunoChip.values) ...[
+                            if (chip != AgendaAlunoChip.values.first)
+                              const SizedBox(width: TokensStrip.s2),
+                            FxToggleChip(
+                              label: agendaAlunoChipLabel(chip),
+                              selected: _chip == chip,
+                              isDark: chrome.isDark,
+                              onTap: () {
+                                if (_chip == chip) return;
+                                setState(() => _chip = chip);
+                                _load();
+                              },
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: FxContentWidthLimiter(
+                        child: _buildList(searching, chrome.isDark, primary),
+                      ),
+                    ),
+                  ],
+                ),
         ),
       ),
     );
   }
 
-  String _hm(DateTime d) =>
-      '${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}';
-
-  Color _statusColor(BuildContext context, String s) {
-    switch (s) {
-      case 'AGENDADO':
-        return Theme.of(context).colorScheme.primary;
-      case 'CONFIRMADO':
-        return EagleTokens.good;
-      case 'CONCLUIDO':
-        return Theme.of(context).colorScheme.primary;
-      case 'CANCELADO':
-        return TokensStrip.textSecondary;
-      default:
-        return TokensStrip.textSecondary;
-    }
+  Widget _buildList(bool searching, bool isDark, Color primary) {
+    return RefreshIndicator(
+      onRefresh: _load,
+      child: _ags.isEmpty
+          ? ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+              children: [
+                const SizedBox(height: 48),
+                FxEmptyState(
+                  icon: searching ? 'search' : 'calendar',
+                  title: searching
+                      ? 'Nenhum compromisso encontrado'
+                      : 'Nenhum agendamento',
+                  subtitle: searching
+                      ? 'Ajuste a busca ou o filtro para achar outra sessão.'
+                      : 'Quando seu personal marcar uma sessão, ela aparece aqui.',
+                  action: searching
+                      ? FxEmptyAction(
+                          label: 'Limpar filtros',
+                          onTap: _clearFilters,
+                        )
+                      : null,
+                ),
+              ],
+            )
+          : ListView.builder(
+              physics: const AlwaysScrollableScrollPhysics(),
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+              padding: const EdgeInsets.fromLTRB(
+                FxSettingsLayout.pageInset,
+                8,
+                FxSettingsLayout.pageInset,
+                32,
+              ),
+              itemCount: _ags.length + (_hasMore ? 1 : 0),
+              itemBuilder: (_, i) {
+                if (i >= _ags.length) {
+                  return FxSatelliteListTile(
+                    title: _loadingMore ? 'Carregando…' : 'Carregar mais',
+                    onTap: _loadingMore ? null : _carregarMais,
+                  );
+                }
+                return _AgCard(
+                  ag: _ags[i],
+                  isDark: isDark,
+                  primary: primary,
+                  onConfirmar: _confirmar,
+                );
+              },
+            ),
+    );
   }
-}
-
-class _StatusChip extends StatelessWidget {
-  final String status;
-  final Color cor;
-  const _StatusChip({required this.status, required this.cor});
-
-  static const _label = {
-    'AGENDADO': 'Agendado',
-    'CONFIRMADO': 'Confirmado',
-    'CONCLUIDO': 'Concluído',
-    'CANCELADO': 'Cancelado',
-  };
-
-  @override
-  Widget build(BuildContext context) => Chip(
-    label: Text(
-      _label[status] ?? status,
-      style: TextStyle(color: cor, fontSize: 11),
-    ),
-    backgroundColor: cor.withValues(alpha: 0.12),
-    padding: EdgeInsets.zero,
-    visualDensity: VisualDensity.compact,
-  );
 }

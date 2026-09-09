@@ -19,6 +19,8 @@ void main() {
     expect(screen, contains('FxKeyboardDismissScope.dismiss'));
     expect(screen, contains('FxSatelliteListTile'));
     expect(screen, contains('ListView.builder'));
+    expect(screen, contains('meusHabitosPagina'));
+    expect(screen, contains('Carregar mais'));
     expect(screen, isNot(contains('context.pop()')));
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(16));
   });

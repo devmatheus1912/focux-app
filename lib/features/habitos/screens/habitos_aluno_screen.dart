@@ -44,6 +44,10 @@ class _HabitosAlunoScreenState extends ConsumerState<HabitosAlunoScreen> {
   Timer? _debounce;
   var _query = '';
   List<Habito> _habitos = [];
+  var _page = 0;
+  var _hasMore = false;
+  var _total = 0;
+  var _loadingMore = false;
   var _loading = true;
   String? _error;
   DateTime? _fetchedAt;
@@ -67,18 +71,16 @@ class _HabitosAlunoScreenState extends ConsumerState<HabitosAlunoScreen> {
     _debounce = Timer(const Duration(milliseconds: 280), () {
       if (!mounted) return;
       setState(() => _query = value.trim());
+      _carregar();
     });
   }
 
-  List<Habito> get _visible => _habitos
-      .where(
-        (h) => habitoMatchesQuery(
-          titulo: h.titulo,
-          descricao: h.descricao,
-          query: _query,
-        ),
-      )
-      .toList();
+  void _clearQuery() {
+    _debounce?.cancel();
+    _searchCtrl.clear();
+    setState(() => _query = '');
+    _carregar();
+  }
 
   Future<void> _carregar() async {
     setState(() {
@@ -86,10 +88,13 @@ class _HabitosAlunoScreenState extends ConsumerState<HabitosAlunoScreen> {
       _error = null;
     });
     try {
-      final lista = await ref.read(_repoProvider).meusHabitos();
+      final pagina = await ref.read(_repoProvider).meusHabitosPagina(q: _query);
       if (!mounted) return;
       setState(() {
-        _habitos = lista;
+        _habitos = pagina.content;
+        _page = pagina.page ?? 0;
+        _hasMore = pagina.hasNext;
+        _total = pagina.totalElements ?? pagina.content.length;
         _fetchedAt = DateTime.now();
         _loading = false;
       });
@@ -99,6 +104,33 @@ class _HabitosAlunoScreenState extends ConsumerState<HabitosAlunoScreen> {
         _loading = false;
         _error = friendlyError(e);
       });
+    }
+  }
+
+  Future<void> _carregarMais() async {
+    if (_loadingMore || !_hasMore) return;
+    setState(() => _loadingMore = true);
+    try {
+      final pagina = await ref.read(_repoProvider).meusHabitosPagina(
+        page: _page + 1,
+        q: _query,
+      );
+      if (!mounted) return;
+      final seen = _habitos.map((h) => h.id).toSet();
+      setState(() {
+        _habitos = [
+          ..._habitos,
+          ...pagina.content.where((h) => seen.add(h.id)),
+        ];
+        _page = pagina.page ?? (_page + 1);
+        _hasMore = pagina.hasNext;
+        _total = pagina.totalElements ?? _habitos.length;
+        _loadingMore = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _loadingMore = false);
+      FeedbackHelper.showError(context, friendlyError(e));
     }
   }
 
@@ -140,7 +172,6 @@ class _HabitosAlunoScreenState extends ConsumerState<HabitosAlunoScreen> {
     final chrome = ShellChrome.of(context);
     final scheme = Theme.of(context).colorScheme;
     final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
-    final visible = _visible;
     final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
     final searching = _query.isNotEmpty;
 
@@ -162,7 +193,7 @@ class _HabitosAlunoScreenState extends ConsumerState<HabitosAlunoScreen> {
             appBar: FxShellAppBar(
               title: 'Meus hábitos',
               subtitle: FxHubFreshness.joinCount(
-                habitoCountLabel(_loading ? 0 : visible.length),
+                habitoCountLabel(_loading ? 0 : _total),
                 _loading ? null : freshnessLabel,
               ),
               onBack: () {
@@ -208,7 +239,9 @@ class _HabitosAlunoScreenState extends ConsumerState<HabitosAlunoScreen> {
                         ),
                       ),
                       Expanded(
-                        child: FxContentWidthLimiter(child: _buildList(visible, searching)),
+                        child: FxContentWidthLimiter(
+                          child: _buildList(searching),
+                        ),
                       ),
                     ],
                   ),
@@ -218,10 +251,10 @@ class _HabitosAlunoScreenState extends ConsumerState<HabitosAlunoScreen> {
     );
   }
 
-  Widget _buildList(List<Habito> visible, bool searching) {
+  Widget _buildList(bool searching) {
     return RefreshIndicator(
       onRefresh: _carregar,
-      child: visible.isEmpty
+      child: _habitos.isEmpty
           ? ListView(
               physics: const AlwaysScrollableScrollPhysics(),
               keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
@@ -235,6 +268,9 @@ class _HabitosAlunoScreenState extends ConsumerState<HabitosAlunoScreen> {
                   subtitle: searching
                       ? 'Tente outro nome. O personal cadastra os hábitos da sua rotina.'
                       : 'Seu personal ainda não cadastrou hábitos. Avise para começar sua jornada.',
+                  action: searching
+                      ? FxEmptyAction(label: 'Limpar busca', onTap: _clearQuery)
+                      : null,
                 ),
               ],
             )
@@ -247,9 +283,15 @@ class _HabitosAlunoScreenState extends ConsumerState<HabitosAlunoScreen> {
                 FxSettingsLayout.pageInset,
                 32,
               ),
-              itemCount: visible.length,
+              itemCount: _habitos.length + (_hasMore ? 1 : 0),
               itemBuilder: (_, i) {
-                final h = visible[i];
+                if (i >= _habitos.length) {
+                  return FxSatelliteListTile(
+                    title: _loadingMore ? 'Carregando…' : 'Carregar mais',
+                    onTap: _loadingMore ? null : _carregarMais,
+                  );
+                }
+                final h = _habitos[i];
                 return FxSatelliteListTile(
                   title: h.titulo,
                   subtitle: Text(
