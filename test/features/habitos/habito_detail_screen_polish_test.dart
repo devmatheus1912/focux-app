@@ -30,6 +30,9 @@ void main() {
     expect(screen, contains('habitoLembreteLine'));
     expect(screen, contains('habitoChecksLine'));
     expect(screen, contains('Lista'));
+    expect(screen, contains("label: 'Hoje'"));
+    expect(screen, contains("'/dashboard/aluno'"));
+    expect(screen, isNot(contains('freshness: freshness')));
     expect(screen, isNot(contains('onPressed: () {}')));
     expect(screen, isNot(contains('meusHabitos')));
     expect(screen, isNot(contains('getHome')));

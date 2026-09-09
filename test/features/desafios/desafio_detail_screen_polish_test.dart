@@ -28,6 +28,9 @@ void main() {
     expect(screen, contains('found.ranking'));
     expect(screen, contains("'/alunos/\${first.alunoId}'"));
     expect(screen, contains('Lista'));
+    expect(screen, contains("label: 'Hoje'"));
+    expect(screen, contains("'/dashboard/aluno'"));
+    expect(screen, isNot(contains('freshness: freshness')));
     expect(screen, contains('desafio.ativo'));
     expect(screen, contains('AlunoSegmentedChoice'));
     expect(screen, contains('alunoMeProvider'));

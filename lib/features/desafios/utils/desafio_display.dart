@@ -131,13 +131,10 @@ String desafioMetaAtingidaHint(int metaPontos) =>
 String desafioDetailSubtitle({
   required String tipo,
   DateTime? fim,
-  String? freshness,
 }) {
   final parts = <String>[desafioTipoLabel(tipo)];
   final prazo = desafioDiasRestantesHint(fim);
   if (prazo.isNotEmpty) parts.add(prazo);
-  final stamp = freshness?.trim();
-  if (stamp != null && stamp.isNotEmpty) parts.add(stamp);
   return parts.join(' · ');
 }
 

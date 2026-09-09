@@ -217,7 +217,6 @@ class _FinanceiroMensalidadeDetailScreenState
                   : _DetailBody(
                     mensalidade: m,
                     contatos: _contatos,
-                    freshnessLabel: freshness,
                     pending: _pending(m),
                     paying: _paying,
                     secao: _secao,
@@ -250,7 +249,6 @@ class _DetailBody extends StatelessWidget {
   const _DetailBody({
     required this.mensalidade,
     required this.contatos,
-    required this.freshnessLabel,
     required this.pending,
     required this.paying,
     required this.secao,
@@ -266,7 +264,6 @@ class _DetailBody extends StatelessWidget {
 
   final Mensalidade mensalidade;
   final List<MensalidadeContato> contatos;
-  final String? freshnessLabel;
   final bool pending;
   final bool paying;
   final String secao;
@@ -308,10 +305,7 @@ class _DetailBody extends StatelessWidget {
                 children: [
                   FxHubHeader(
                     title: mensalidade.alunoNome,
-                    subtitle: financeiroMensalidadeHubSubtitle(
-                      mes: mes,
-                      freshness: freshnessLabel,
-                    ),
+                    subtitle: financeiroMensalidadeHubSubtitle(mes: mes),
                   ),
                   const SizedBox(height: TokensStrip.s4),
                   OperationalMetricTile(
@@ -347,6 +341,17 @@ class _DetailBody extends StatelessWidget {
                             ? 'Nenhuma cobrança registrada'
                             : 'Histórico desta mensalidade',
                     color: primary,
+                    isDark: isDark,
+                  ),
+                  const SizedBox(height: TokensStrip.s2),
+                  OperationalMetricTile(
+                    label: 'Vencimento',
+                    value: financeiroMensalidadeVencimentoLabel(
+                      mesReferencia: mensalidade.mesReferencia,
+                      vencimento: mensalidade.vencimento,
+                    ),
+                    hint: overdue ? 'Em atraso' : status,
+                    color: statusColor,
                     isDark: isDark,
                   ),
                   const SizedBox(height: TokensStrip.s3),
