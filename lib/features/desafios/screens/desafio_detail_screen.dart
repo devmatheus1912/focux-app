@@ -205,7 +205,6 @@ class _DesafioDetailScreenState extends ConsumerState<DesafioDetailScreen> {
                 : _DesafioDetailBody(
                     desafio: desafio,
                     ranking: _ranking,
-                    freshness: freshness,
                     forAluno: widget.forAluno,
                     meId: meId,
                     secao: _secao,
@@ -227,7 +226,6 @@ class _DesafioDetailBody extends StatelessWidget {
   const _DesafioDetailBody({
     required this.desafio,
     required this.ranking,
-    required this.freshness,
     required this.forAluno,
     required this.meId,
     required this.secao,
@@ -241,7 +239,6 @@ class _DesafioDetailBody extends StatelessWidget {
 
   final Desafio desafio;
   final List<DesafioLeaderboardEntry> ranking;
-  final String? freshness;
   final bool forAluno;
   final int? meId;
   final String secao;
@@ -290,7 +287,6 @@ class _DesafioDetailBody extends StatelessWidget {
                     subtitle: desafioDetailSubtitle(
                       tipo: desafio.tipo,
                       fim: desafio.fim,
-                      freshness: freshness,
                     ),
                   ),
                   const SizedBox(height: TokensStrip.s4),
@@ -347,13 +343,20 @@ class _DesafioDetailBody extends StatelessWidget {
                         isDark: isDark,
                         onPressed: onLeave,
                       ),
-                      if (forAluno)
+                      if (forAluno) ...[
+                        DashboardHomeActionChip(
+                          label: 'Hoje',
+                          accent: primary,
+                          isDark: isDark,
+                          onPressed: () => context.push('/dashboard/aluno'),
+                        ),
                         DashboardHomeActionChip(
                           label: desafioTipoLabel(desafio.tipo),
                           accent: primary,
                           isDark: isDark,
                           onPressed: onAlunoSticky,
                         ),
+                      ],
                       if (!forAluno &&
                           first != null &&
                           first.alunoId > 0)

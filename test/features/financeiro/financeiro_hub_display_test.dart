@@ -50,18 +50,12 @@ void main() {
     expect(financeiroMensalidadeSubtitle('PAGO', ''), 'Pago · Sem mês');
   });
 
-  test('financeiroMensalidadeHubSubtitle junta mês e freshness', () {
+  test('financeiroMensalidadeHubSubtitle usa só o mês', () {
     expect(
       financeiroMensalidadeHubSubtitle(mes: 'Setembro 2026'),
       'Setembro 2026',
     );
-    expect(
-      financeiroMensalidadeHubSubtitle(
-        mes: 'Setembro 2026',
-        freshness: 'Atualizado agora',
-      ),
-      'Setembro 2026 · Atualizado agora',
-    );
+    expect(financeiroMensalidadeHubSubtitle(mes: '  '), 'Mensalidade');
   });
 
   test('financeiroMensalidadeMesPorExtenso e tipo de contato', () {

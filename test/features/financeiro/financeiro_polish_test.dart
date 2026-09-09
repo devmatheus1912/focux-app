@@ -96,6 +96,8 @@ void main() {
     expect(detail, contains('Abrir aluno'));
     expect(detail, contains("'/financeiro'"));
     expect(detail, contains('financeiroMensalidadePagoEmLabel'));
+    expect(detail, contains("label: 'Vencimento'"));
+    expect(detail, isNot(contains('freshness: freshnessLabel')));
     expect(detail, contains('financeiroMensalidadeVencimentoLabel'));
     expect(detail, contains('AlunoSegmentedChoice'));
     expect(detail, contains('listarContatos'));

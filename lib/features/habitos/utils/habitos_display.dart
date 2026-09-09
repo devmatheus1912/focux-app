@@ -122,16 +122,12 @@ String habitoDetailSubtitle({
   required int metaSemanal,
   int? alunoId,
   bool ativo = true,
-  String? freshness,
 }) {
-  final parts = <String>[
+  return [
     if (!ativo) 'Desativado',
     'Meta ${habitoMetaValue(metaSemanal)}',
     habitoAlcanceLabel(alunoId),
-  ];
-  final stamp = freshness?.trim();
-  if (stamp != null && stamp.isNotEmpty) parts.add(stamp);
-  return parts.join(' · ');
+  ].join(' · ');
 }
 
 String habitoStickyPersonal() => 'Desativar hábito';

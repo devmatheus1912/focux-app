@@ -218,7 +218,6 @@ class _HabitoDetailScreenState extends ConsumerState<HabitoDetailScreen> {
                   )
                 : _HabitoDetailBody(
                     habito: habito,
-                    freshness: FxHubFreshness.fromFetchedAt(_fetchedAt),
                     forAluno: widget.forAluno,
                     busy: _busy,
                     secao: _secao,
@@ -237,7 +236,6 @@ class _HabitoDetailScreenState extends ConsumerState<HabitoDetailScreen> {
 class _HabitoDetailBody extends StatelessWidget {
   const _HabitoDetailBody({
     required this.habito,
-    required this.freshness,
     required this.forAluno,
     required this.busy,
     required this.secao,
@@ -248,7 +246,6 @@ class _HabitoDetailBody extends StatelessWidget {
   });
 
   final Habito habito;
-  final String? freshness;
   final bool forAluno;
   final bool busy;
   final String secao;
@@ -285,7 +282,6 @@ class _HabitoDetailBody extends StatelessWidget {
                       metaSemanal: habito.metaSemanal,
                       alunoId: habito.alunoId,
                       ativo: habito.ativo,
-                      freshness: freshness,
                     ),
                   ),
                   const SizedBox(height: TokensStrip.s4),
@@ -339,6 +335,13 @@ class _HabitoDetailBody extends StatelessWidget {
                         isDark: isDark,
                         onPressed: onLeave,
                       ),
+                      if (forAluno)
+                        DashboardHomeActionChip(
+                          label: 'Hoje',
+                          accent: primary,
+                          isDark: isDark,
+                          onPressed: () => context.push('/dashboard/aluno'),
+                        ),
                       if (!forAluno && habito.alunoId != null)
                         DashboardHomeActionChip(
                           label: 'Aluno',
