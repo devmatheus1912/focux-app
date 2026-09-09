@@ -30,6 +30,7 @@ void main() {
     expect(screen, contains('ProductEvents.setupWizardCompleted'));
     expect(screen, contains('DashboardHomeClientCache.clear'));
     expect(screen, contains('OnboardingWizardClientCache'));
+    expect(screen, contains('pushSetupActionRoute'));
     expect(screen, contains('_load(silent: true)'));
     expect(screen, contains('dismissForSession'));
     expect(screen, contains('FxHelpIconButton'));
