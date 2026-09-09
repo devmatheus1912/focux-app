@@ -40,6 +40,7 @@ class AlunoRecoveryCard extends ConsumerWidget {
     super.key,
     required this.isDark,
     this.snapshot = _unset,
+    this.hasWearableHistory,
   });
 
   static const Object _unset = Object();
@@ -50,12 +51,18 @@ class AlunoRecoveryCard extends ConsumerWidget {
   /// Omit the argument to watch [alunoRecoveryProvider] (ex.: /saude).
   final Object? snapshot;
 
+  /// Home BFF: sem histórico wearable → esconde o card (não confundir com scoreProntidao).
+  final bool? hasWearableHistory;
+
   bool get _fromBundle => !identical(snapshot, _unset);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     if (_fromBundle) {
-      return _buildFromSnapshot(context, snapshot as RecoverySnapshot?);
+      final snap = snapshot as RecoverySnapshot?;
+      final hist = hasWearableHistory ?? (snap != null);
+      if (!hist || snap == null) return const SizedBox.shrink();
+      return _buildFromSnapshot(context, snap);
     }
     final async = ref.watch(alunoRecoveryProvider);
     return async.when(

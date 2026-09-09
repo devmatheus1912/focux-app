@@ -44,7 +44,7 @@ int alunoActivationProfileCompletion({
   required String? peso,
   required String? altura,
   required String? dataNascimento,
-  required String? fotoUrl,
+  String? fotoUrl,
 }) {
   final filled = [
     telefone,
@@ -54,9 +54,8 @@ int alunoActivationProfileCompletion({
     peso,
     altura,
     dataNascimento,
-    fotoUrl,
   ].where((value) => value != null && value.toString().trim().isNotEmpty).length;
-  return (filled / 8 * 100).round();
+  return (filled / 7 * 100).round();
 }
 
 AlunoActivationProgress alunoActivationProgress({
@@ -69,7 +68,7 @@ AlunoActivationProgress alunoActivationProgress({
     AlunoActivationStep(
       title: 'Completar seu perfil',
       description:
-          'Foto, objetivo, dados corporais e contato deixam o acompanhamento mais inteligente.',
+          'Objetivo, dados corporais e contato deixam o acompanhamento mais inteligente.',
       done: profileCompletion >= 80,
       cta: 'Ir para perfil',
       route: '/aluno/perfil',

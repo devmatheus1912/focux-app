@@ -13,4 +13,8 @@ void main() {
   test('normalizeBirthDateForApi accepts Brazilian slash', () {
     expect(normalizeBirthDateForApi('19/12/1995'), '1995-12-19');
   });
+
+  test('formatBirthDateForDisplay usa dd-MM-yyyy', () {
+    expect(formatBirthDateForDisplay('1995-12-19'), '19-12-1995');
+  });
 }

@@ -57,7 +57,7 @@ void main() {
       'alertas': ['PAR-Q+', 'CV'],
       'parqCondicaoCardiaca': true,
       'parqDorPeitoAtividade': false,
-      'sonoHoras': 7,
+      'sonoHoras': '7.5',
       'historicoAtividade': 'Musculação 2 anos',
       'algoMais': 'Prefiro noite',
       'notasProfissional': 'Ok',
@@ -66,7 +66,7 @@ void main() {
     expect(a.parqPositivo, isTrue);
     expect(a.alertas, ['PAR-Q+', 'CV']);
     expect(a.parqCondicaoCardiaca, isTrue);
-    expect(a.sonoHoras, 7);
+    expect(a.sonoHoras, 7.5);
     expect(a.historicoAtividade, 'Musculação 2 anos');
     expect(anamneseParqValue(a, 'parqCondicaoCardiaca'), isTrue);
   });

@@ -11,6 +11,7 @@ class TreinoExercicioItem {
   final String repeticoes;
   final double? cargaKg;
   final int? descansoSegundos;
+  final int? rpeAlvo;
   final int ordem;
   final String? observacoes;
   final String tipoSerie;
@@ -23,6 +24,7 @@ class TreinoExercicioItem {
     required this.repeticoes,
     this.cargaKg,
     this.descansoSegundos,
+    this.rpeAlvo,
     required this.ordem,
     this.observacoes,
     this.tipoSerie = 'NORMAL',
@@ -39,6 +41,7 @@ class TreinoExercicioItem {
         repeticoes: json['repeticoes'] as String,
         cargaKg: (json['cargaKg'] as num?)?.toDouble(),
         descansoSegundos: json['descansoSegundos'] as int?,
+        rpeAlvo: (json['rpeAlvo'] as num?)?.toInt(),
         ordem: json['ordem'] as int,
         observacoes: json['observacoes'] as String?,
         tipoSerie: json['tipoSerie'] as String? ?? 'NORMAL',
@@ -361,6 +364,7 @@ class TreinoRepository {
     String repeticoes = '10-12',
     int descanso = 60,
     double? cargaKg,
+    int? rpeAlvo,
     String? observacoes,
     String tipoSerie = 'NORMAL',
     int? grupoSuperset,
@@ -374,6 +378,7 @@ class TreinoRepository {
         'repeticoes': repeticoes,
         'descansoSegundos': descanso,
         if (cargaKg != null) 'cargaKg': cargaKg,
+        if (rpeAlvo != null) 'rpeAlvo': rpeAlvo,
         if (observacoes != null && observacoes.trim().isNotEmpty)
           'observacoes': observacoes.trim(),
         'tipoSerie': tipoSerie,
@@ -397,6 +402,7 @@ class TreinoRepository {
       repeticoes: item.repeticoes,
       descanso: item.descansoSegundos ?? 60,
       cargaKg: item.cargaKg,
+      rpeAlvo: item.rpeAlvo,
       observacoes: item.observacoes,
       tipoSerie: item.tipoSerie,
       grupoSuperset: item.grupoSuperset,
@@ -486,6 +492,7 @@ class TreinoRepository {
     required String repeticoes,
     required int descansoSegundos,
     double? cargaKg,
+    int? rpeAlvo,
     String? observacoes,
     required String tipoSerie,
     int? grupoSuperset,
@@ -497,6 +504,7 @@ class TreinoRepository {
         'repeticoes': repeticoes,
         'descansoSegundos': descansoSegundos,
         'cargaKg': cargaKg,
+        'rpeAlvo': rpeAlvo,
         'observacoes': observacoes?.trim(),
         'tipoSerie': tipoSerie,
         if (tipoSerie == 'SUPERSET' && grupoSuperset != null)

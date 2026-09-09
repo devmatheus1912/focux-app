@@ -53,7 +53,7 @@ class _AnamneseAlunoScreenState extends ConsumerState<AnamneseAlunoScreen> {
   final _sintomasCvCtrl = TextEditingController();
 
   // Hábitos
-  int? _sonoHoras;
+  double? _sonoHoras;
   final _qualidadeSonoCtrl = TextEditingController();
   final _estresseCtrl = TextEditingController();
   final _tabagismoCtrl = TextEditingController();
@@ -199,14 +199,14 @@ class _AnamneseAlunoScreenState extends ConsumerState<AnamneseAlunoScreen> {
     final picked = await showFxInsetPickerSheet<int>(
       context,
       title: 'Horas de sono',
-      selected: _sonoHoras,
+      selected: _sonoHoras?.round(),
       items: [
         for (var h = 4; h <= 12; h++)
           FxInsetPickerSheetItem(value: h, label: anamneseSonoHorasLabel(h)),
       ],
     );
     if (!mounted || picked == null) return;
-    setState(() => _sonoHoras = picked);
+    setState(() => _sonoHoras = picked.toDouble());
   }
 
   Map<String, dynamic> _payload() => {

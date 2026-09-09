@@ -33,6 +33,7 @@ Future<void> showPrescriptionEditorSheet(
   required TextEditingController repCtrl,
   required TextEditingController descansoCtrl,
   required TextEditingController cargaCtrl,
+  TextEditingController? rpeAlvoCtrl,
   required TextEditingController observacoesCtrl,
   required TextEditingController grupoSupersetCtrl,
   required ValueChanged<String> onPresetSelected,
@@ -55,6 +56,7 @@ Future<void> showPrescriptionEditorSheet(
           repCtrl: repCtrl,
           descansoCtrl: descansoCtrl,
           cargaCtrl: cargaCtrl,
+          rpeAlvoCtrl: rpeAlvoCtrl,
           observacoesCtrl: observacoesCtrl,
           grupoSupersetCtrl: grupoSupersetCtrl,
           onPresetSelected: onPresetSelected,
@@ -78,6 +80,7 @@ class PrescriptionEditorSheet extends StatefulWidget {
     required this.repCtrl,
     required this.descansoCtrl,
     required this.cargaCtrl,
+    this.rpeAlvoCtrl,
     required this.observacoesCtrl,
     required this.grupoSupersetCtrl,
     required this.onPresetSelected,
@@ -105,6 +108,7 @@ class PrescriptionEditorSheet extends StatefulWidget {
   final TextEditingController repCtrl;
   final TextEditingController descansoCtrl;
   final TextEditingController cargaCtrl;
+  final TextEditingController? rpeAlvoCtrl;
   final TextEditingController observacoesCtrl;
   final TextEditingController grupoSupersetCtrl;
   final ValueChanged<String> onPresetSelected;
@@ -134,6 +138,7 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
   late String _presetId;
   late String _tipoSerie;
   bool _showCarga = false;
+  bool _showRpeAlvo = false;
   bool _showNotes = false;
 
   @override
@@ -142,12 +147,14 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
     _presetId = widget.presetId;
     _tipoSerie = widget.tipoSerie;
     _showCarga = widget.cargaCtrl.text.trim().isNotEmpty;
+    _showRpeAlvo = widget.rpeAlvoCtrl?.text.trim().isNotEmpty == true;
     _showNotes = widget.observacoesCtrl.text.trim().isNotEmpty;
     _fieldsListenable = Listenable.merge([
       widget.seriesCtrl,
       widget.repCtrl,
       widget.descansoCtrl,
       widget.cargaCtrl,
+      if (widget.rpeAlvoCtrl != null) widget.rpeAlvoCtrl!,
       widget.observacoesCtrl,
     ]);
     _fieldsListenable.addListener(_onFieldsChanged);
@@ -157,6 +164,9 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
     if (!mounted) return;
     setState(() {
       if (widget.cargaCtrl.text.trim().isNotEmpty) _showCarga = true;
+      if (widget.rpeAlvoCtrl?.text.trim().isNotEmpty == true) {
+        _showRpeAlvo = true;
+      }
       if (widget.observacoesCtrl.text.trim().isNotEmpty) _showNotes = true;
     });
   }
@@ -524,7 +534,7 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
               keyboardType: const TextInputType.numberWithOptions(
                 decimal: true,
               ),
-              showDivider: _showNotes,
+              showDivider: true,
             )
           else
             _PrescriptionExpandRow(
@@ -540,6 +550,35 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
               },
               showDivider: true,
             ),
+          if (widget.rpeAlvoCtrl != null) ...[
+            if (_showRpeAlvo)
+              _PrescriptionValueRow(
+                label: 'RPE alvo (1–10)',
+                icon: Icons.speed_rounded,
+                iconColor: brand,
+                controller: widget.rpeAlvoCtrl!,
+                hint: 'Opcional',
+                line: line,
+                ink: ink,
+                mute: mute,
+                keyboardType: TextInputType.number,
+                showDivider: _showNotes,
+              )
+            else
+              _PrescriptionExpandRow(
+                label: 'Adicionar RPE alvo',
+                icon: Icons.speed_rounded,
+                iconColor: brand,
+                line: line,
+                mute: mute,
+                onTap: () {
+                  if (!enabled) return;
+                  HapticFeedback.selectionClick();
+                  setState(() => _showRpeAlvo = true);
+                },
+                showDivider: true,
+              ),
+          ],
           if (_showNotes)
             _PrescriptionNotesField(
               controller: widget.observacoesCtrl,

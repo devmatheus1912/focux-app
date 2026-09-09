@@ -54,7 +54,7 @@ class Anamnese {
   final String? sintomasCv;
 
   // Hábitos
-  final int? sonoHoras;
+  final double? sonoHoras;
   final String? qualidadeSono;
   final String? nivelEstresse;
   final String? tabagismo;
@@ -169,7 +169,7 @@ class Anamnese {
     gestacaoPosParto: j['gestacaoPosParto'] as String?,
     historicoFamiliarCv: j['historicoFamiliarCv'] as String?,
     sintomasCv: j['sintomasCv'] as String?,
-    sonoHoras: j['sonoHoras'] as int?,
+    sonoHoras: _parseSonoHoras(j['sonoHoras']),
     qualidadeSono: j['qualidadeSono'] as String?,
     nivelEstresse: j['nivelEstresse'] as String?,
     tabagismo: j['tabagismo'] as String?,
@@ -177,7 +177,7 @@ class Anamnese {
     observacoes: j['observacoes'] as String?,
     objetivo: j['objetivo'] as String?,
     objetivoDetalhado: j['objetivoDetalhado'] as String?,
-    disponibilidadeSemanal: j['disponibilidadeSemanal'] as int?,
+    disponibilidadeSemanal: (j['disponibilidadeSemanal'] as num?)?.toInt(),
     preferenciasTreino: j['preferenciasTreino'] as String?,
     restricoesAlimentares: j['restricoesAlimentares'] as String?,
     historicoAtividade: j['historicoAtividade'] as String?,
@@ -255,4 +255,15 @@ class AnamneseRepository {
       Anamnese.fromJson(
         (await _dio.put('/api/aluno/anamnese', data: data)).data,
       );
+}
+
+double? _parseSonoHoras(dynamic raw) {
+  if (raw == null) return null;
+  if (raw is num) return raw.toDouble();
+  if (raw is String) {
+    final trimmed = raw.trim().replaceAll(',', '.');
+    if (trimmed.isEmpty) return null;
+    return double.tryParse(trimmed);
+  }
+  return null;
 }
