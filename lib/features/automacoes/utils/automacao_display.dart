@@ -16,6 +16,7 @@ String automacaoCountLabel({required int templates, required int fluxos}) {
 String automacaoTriggerLabel(String raw) {
   switch (raw.trim().toUpperCase()) {
     case 'NOVO_ALUNO':
+    case 'ALUNO_CRIADO':
       return 'Novo aluno';
     case 'CHECKIN':
       return 'Check-in';
@@ -71,3 +72,17 @@ String automacaoAtivarTitle(String nome) => 'Ativar “$nome”?';
 
 String automacaoAtivarMessage() =>
     'O fluxo começa a rodar para os alunos que baterem o gatilho.';
+
+String automacaoIniciarLabel() => 'Iniciar para um aluno';
+
+String automacaoIniciarPickerTitle() => 'Aluno';
+
+String automacaoIniciarConfirmTitle(String nome) => 'Iniciar para $nome?';
+
+String automacaoIniciarConfirmMessage() =>
+    'O fluxo começa agora neste aluno.';
+
+String automacaoIniciarSuccess() => 'Fluxo iniciado';
+
+String automacaoSemAlunos() =>
+    'Cadastre um aluno para iniciar o fluxo.';

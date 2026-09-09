@@ -24,12 +24,5 @@ class TenantMembro {
     role: (json['role'] ?? '').toString(),
     status: (json['status'] ?? '').toString(),
   );
-
-  static List<TenantMembro> parseList(dynamic data) {
-    if (data is! List) return const [];
-    return data
-        .whereType<Map>()
-        .map((item) => TenantMembro.fromJson(Map<String, dynamic>.from(item)))
-        .toList();
-  }
 }
+

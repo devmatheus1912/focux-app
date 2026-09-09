@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
+import '../../../core/api/pagina.dart';
 import '../../planos/data/planos_repository.dart';
 
 class AutomacaoFluxo {
@@ -51,25 +52,32 @@ class AutomacaoTemplate {
       );
 }
 
-/// BFF `GET /api/automacoes/home` — fluxos + templates + planoFeatures.
+/// BFF `GET /api/automacoes/home` — fluxos paginados + templates + planoFeatures.
 class AutomacoesHomeBundle {
   final List<AutomacaoFluxo> fluxos;
   final List<AutomacaoTemplate> templates;
   final PlanoFeatures? planoFeatures;
+  final int page;
+  final bool hasNext;
+  final int totalFluxos;
 
   const AutomacoesHomeBundle({
     required this.fluxos,
     required this.templates,
     this.planoFeatures,
+    this.page = 0,
+    this.hasNext = false,
+    this.totalFluxos = 0,
   });
 
   factory AutomacoesHomeBundle.fromJson(Map<String, dynamic> j) {
     final planoRaw = j['planoFeatures'];
+    final fluxos =
+        ((j['fluxos'] as List?) ?? const [])
+            .map((e) => AutomacaoFluxo.fromJson(e as Map<String, dynamic>))
+            .toList();
     return AutomacoesHomeBundle(
-      fluxos:
-          ((j['fluxos'] as List?) ?? const [])
-              .map((e) => AutomacaoFluxo.fromJson(e as Map<String, dynamic>))
-              .toList(),
+      fluxos: fluxos,
       templates:
           ((j['templates'] as List?) ?? const [])
               .map((e) => AutomacaoTemplate.fromJson(e as Map<String, dynamic>))
@@ -78,6 +86,9 @@ class AutomacoesHomeBundle {
           planoRaw is Map
               ? PlanoFeatures.fromJson(Map<String, dynamic>.from(planoRaw))
               : null,
+      page: (j['page'] as num?)?.toInt() ?? 0,
+      hasNext: j['hasNext'] == true,
+      totalFluxos: (j['totalFluxos'] as num?)?.toInt() ?? fluxos.length,
     );
   }
 }
@@ -86,9 +97,19 @@ class AutomacaoRepository {
   final Dio _dio;
   AutomacaoRepository(ApiClient c) : _dio = c.dio;
 
+  static const pageSize = 20;
+
   /// BFF tipado — first paint da tela Automações (fluxos + templates).
-  Future<AutomacoesHomeBundle> getHome() async {
-    final r = await _dio.get('/api/automacoes/home');
+  Future<AutomacoesHomeBundle> getHome({int page = 0, String q = ''}) async {
+    final query = q.trim();
+    final r = await _dio.get(
+      '/api/automacoes/home',
+      queryParameters: {
+        'page': page,
+        'size': pageSize,
+        if (query.isNotEmpty) 'q': query,
+      },
+    );
     return AutomacoesHomeBundle.fromJson(r.data as Map<String, dynamic>);
   }
 
@@ -96,26 +117,45 @@ class AutomacaoRepository {
     await _dio.post('/api/automacoes/templates/$templateId/ativar');
   }
 
-  Future<List<AutomacaoLog>> logs(int fluxoId) async {
-    final r = await _dio.get('/api/automacoes/$fluxoId/logs');
-    if (r.data is! List) {
-      throw const FormatException('Logs de automação inválidos');
+  Future<Pagina<AutomacaoLog>> logs(int fluxoId, {int page = 0}) async {
+    final r = await _dio.get(
+      '/api/automacoes/$fluxoId/logs',
+      queryParameters: {'page': page, 'size': pageSize},
+    );
+    final data = r.data;
+    if (data is! Map) {
+      throw const FormatException(
+        'GET /api/automacoes/{id}/logs devolve Pagina, não lista crua.',
+      );
     }
-    return (r.data as List)
-        .whereType<Map>()
-        .map((e) => AutomacaoLog.fromJson(Map<String, dynamic>.from(e)))
-        .toList();
+    return Pagina.fromJson(
+      Map<String, dynamic>.from(data),
+      (item) => AutomacaoLog.fromJson(Map<String, dynamic>.from(item as Map)),
+    );
+  }
+
+  Future<void> iniciarFluxo({
+    required int fluxoId,
+    required int alunoId,
+  }) async {
+    await _dio.post('/api/automacoes/$fluxoId/iniciar/$alunoId');
   }
 }
 
 class AutomacaoLog {
   final String status;
   final int passoAtual;
+  final String? iniciadoEm;
 
-  const AutomacaoLog({required this.status, required this.passoAtual});
+  const AutomacaoLog({
+    required this.status,
+    required this.passoAtual,
+    this.iniciadoEm,
+  });
 
   factory AutomacaoLog.fromJson(Map<String, dynamic> j) => AutomacaoLog(
     status: j['status'] as String? ?? '',
     passoAtual: (j['passoAtual'] as num?)?.toInt() ?? 0,
+    iniciadoEm: j['iniciadoEm'] as String?,
   );
 }

@@ -11,8 +11,9 @@ void main() {
       'lib/features/captura/data/captura_repository.dart',
     );
     expect(repo, contains('Pagina.fromJson'));
-    expect(repo, contains("get('/api/captura')"));
+    expect(repo, contains("'/api/captura'"));
     expect(repo, contains('GET /api/captura devolve Pagina'));
+    expect(repo, contains('queryParameters'));
     expect(repo, isNot(contains('r.data as List')));
   });
 

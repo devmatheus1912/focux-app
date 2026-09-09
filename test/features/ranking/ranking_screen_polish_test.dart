@@ -32,5 +32,9 @@ void main() {
     expect(screen, contains('Assinatura'));
     expect(screen, contains('rankingDescontoLabel'));
     expect(screen, contains('FxInputDeco.build'));
+    expect(screen, contains('PopScope'));
+    expect(screen, contains('FxHubFreshness.joinCount'));
+    expect(screen, contains('FxKeyboardDismissScope.dismiss'));
+    expect(screen, contains('viewInsetsOf'));
   });
 }

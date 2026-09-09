@@ -1,6 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/router/safe_navigation.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -12,9 +16,12 @@ import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_form_sheet.dart';
+import '../../../core/widgets/fx_help.dart';
+import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
-import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/fx_toggle_chip.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../alunos/widgets/aluno_inset_form_field.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -35,14 +42,54 @@ class EquipeScreen extends ConsumerStatefulWidget {
 }
 
 class _EquipeScreenState extends ConsumerState<EquipeScreen> {
+  final _searchCtrl = TextEditingController();
+  final _searchFocus = FocusNode();
+  Timer? _searchDebounce;
   List<TenantMembro> _membros = [];
-  bool _loading = true;
+  var _loading = true;
+  var _carregandoMais = false;
+  var _hasMore = false;
+  var _page = 0;
+  var _total = 0;
   String? _error;
   DateTime? _fetchedAt;
+  var _query = '';
+  var _chip = EquipeChip.todos;
 
   @override
   void initState() {
     super.initState();
+    _load();
+  }
+
+  @override
+  void dispose() {
+    _searchDebounce?.cancel();
+    _searchCtrl.dispose();
+    _searchFocus.dispose();
+    super.dispose();
+  }
+
+  void _leave() {
+    FxKeyboardDismissScope.dismiss();
+    safePopOrGo(context, '/perfil');
+  }
+
+  void _onQueryChanged(String value) {
+    _searchDebounce?.cancel();
+    _searchDebounce = Timer(const Duration(milliseconds: 350), () {
+      final next = value.trim();
+      if (!mounted || next == _query) return;
+      _query = next;
+      _load();
+    });
+  }
+
+  void _clearQuery() {
+    _searchDebounce?.cancel();
+    _searchCtrl.clear();
+    if (_query.isEmpty) return;
+    _query = '';
     _load();
   }
 
@@ -52,9 +99,16 @@ class _EquipeScreenState extends ConsumerState<EquipeScreen> {
       _error = null;
     });
     try {
-      _membros = await ref.read(equipeRepositoryProvider).listar();
+      final pagina = await ref.read(equipeRepositoryProvider).listar(
+        q: _query,
+        status: equipeStatusParam(_chip),
+      );
       if (!mounted) return;
       setState(() {
+        _membros = pagina.content;
+        _page = pagina.page ?? 0;
+        _hasMore = pagina.hasNext;
+        _total = pagina.totalElements ?? pagina.content.length;
         _loading = false;
         _fetchedAt = DateTime.now();
       });
@@ -64,6 +118,33 @@ class _EquipeScreenState extends ConsumerState<EquipeScreen> {
         _loading = false;
         _error = friendlyError(e);
       });
+    }
+  }
+
+  Future<void> _carregarMais() async {
+    if (_carregandoMais || !_hasMore) return;
+    setState(() => _carregandoMais = true);
+    try {
+      final pagina = await ref.read(equipeRepositoryProvider).listar(
+        page: _page + 1,
+        q: _query,
+        status: equipeStatusParam(_chip),
+      );
+      if (!mounted) return;
+      final seen = _membros.map((m) => m.id).toSet();
+      setState(() {
+        _membros = [
+          ..._membros,
+          ...pagina.content.where((m) => seen.add(m.id)),
+        ];
+        _page = pagina.page ?? _page + 1;
+        _hasMore = pagina.hasNext;
+        _total = pagina.totalElements ?? _total;
+        _carregandoMais = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _carregandoMais = false);
     }
   }
 
@@ -104,7 +185,7 @@ class _EquipeScreenState extends ConsumerState<EquipeScreen> {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final chrome = ShellChrome.of(context);
-    final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
+    final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
 
     return fxScreenA11yScope(
       label: 'Equipe',
@@ -112,105 +193,229 @@ class _EquipeScreenState extends ConsumerState<EquipeScreen> {
         featureName: 'Equipe',
         requiredPlan: SubscriptionPlan.ENTERPRISE,
         capability: 'equipeRbac',
-        child: FxShellScaffold(
-          useMesh: true,
-          appBar: FxShellAppBar(
-            title: 'Equipe',
-            subtitle: equipeHubSubtitle(freshnessLabel),
-            actions: [
-              ShellHeaderIconButton(
-                icon: 'plus',
-                tooltip: 'Convidar membro',
-                onTap: _convidar,
+        child: PopScope(
+          canPop: !keyboardOpen && !_searchFocus.hasFocus,
+          onPopInvokedWithResult: (didPop, _) {
+            if (didPop) return;
+            if (keyboardOpen || _searchFocus.hasFocus) {
+              FxKeyboardDismissScope.dismiss();
+              return;
+            }
+            _leave();
+          },
+          child: FxShellScaffold(
+            useMesh: true,
+            dismissKeyboard: true,
+            appBar: FxShellAppBar(
+              title: 'Equipe',
+              subtitle: FxHubFreshness.joinCount(
+                equipeCountLabel(_loading ? 0 : _total),
+                FxHubFreshness.fromFetchedAt(_fetchedAt),
               ),
-            ],
+              onBack: _leave,
+              actions: [
+                FxHelpIconButton(
+                  tooltip: 'Como usar a equipe',
+                  onTap: () => showFxHelpSheet(
+                    context,
+                    title: 'Equipe',
+                    subtitle: 'Convites e papéis de quem te ajuda na operação.',
+                    tips: const [
+                      FxHelpTip(
+                        'Convidar',
+                        'O botão de baixo envia o convite por e-mail.',
+                      ),
+                      FxHelpTip(
+                        'Status',
+                        'Convites ficam pendentes até a pessoa aceitar.',
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            body: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    TokensStrip.s4,
+                    TokensStrip.s2,
+                    TokensStrip.s4,
+                    TokensStrip.s2,
+                  ),
+                  child: DecoratedBox(
+                    decoration: fxStripCardDecoration(
+                      context,
+                      accent: scheme.primary,
+                      radius: TokensStrip.rCard,
+                      glowStrength: 0.03,
+                    ),
+                    child: TextField(
+                      controller: _searchCtrl,
+                      focusNode: _searchFocus,
+                      onChanged: _onQueryChanged,
+                      onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
+                      textInputAction: TextInputAction.search,
+                      decoration: InputDecoration(
+                        isDense: true,
+                        hintText: 'Buscar por e-mail ou papel',
+                        border: InputBorder.none,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 12,
+                        ),
+                        prefixIcon: Icon(
+                          Icons.search_rounded,
+                          color: scheme.primary,
+                          size: 20,
+                        ),
+                        suffixIcon: _query.trim().isEmpty
+                            ? null
+                            : IconButton(
+                                tooltip: 'Limpar busca',
+                                onPressed: _clearQuery,
+                                icon: Icon(
+                                  Icons.close_rounded,
+                                  color: chrome.mute,
+                                  size: 18,
+                                ),
+                              ),
+                      ),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    TokensStrip.s4,
+                    0,
+                    TokensStrip.s4,
+                    TokensStrip.s2,
+                  ),
+                  child: Wrap(
+                    spacing: TokensStrip.s2,
+                    runSpacing: TokensStrip.s2,
+                    children: [
+                      for (final chip in EquipeChip.values)
+                        FxToggleChip(
+                          label: equipeChipLabel(chip),
+                          selected: _chip == chip,
+                          isDark: chrome.isDark,
+                          onTap: () {
+                            if (_chip == chip) return;
+                            setState(() => _chip = chip);
+                            _load();
+                          },
+                        ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: _loading
+                      ? const Padding(
+                          padding: EdgeInsets.all(FxSettingsLayout.pageInset),
+                          child: SkeletonList(count: 5),
+                        )
+                      : _error != null
+                      ? FxErrorState(
+                          chromeOnDark: chrome.isDark,
+                          primary: scheme.primary,
+                          message: _error!,
+                          onRetry: _load,
+                          title: 'Não conseguimos carregar a equipe',
+                        )
+                      : FxContentWidthLimiter(child: _buildBody()),
+                ),
+                if (!_loading && _error == null)
+                  SafeArea(
+                    top: false,
+                    child: Padding(
+                      padding: EdgeInsets.fromLTRB(
+                        FxSettingsLayout.pageInset,
+                        TokensStrip.s2,
+                        FxSettingsLayout.pageInset,
+                        TokensStrip.s3 +
+                            MediaQuery.viewInsetsOf(context).bottom,
+                      ),
+                      child: FxLiquidPrimaryButton(
+                        label: 'Convidar',
+                        onPressed: _convidar,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
           ),
-          body:
-              _loading
-                  ? const Padding(
-                    padding: EdgeInsets.all(FxSettingsLayout.pageInset),
-                    child: SkeletonList(count: 5),
-                  )
-                  : _error != null
-                  ? FxErrorState(
-                    chromeOnDark: chrome.isDark,
-                    primary: scheme.primary,
-                    message: _error!,
-                    onRetry: _load,
-                    title: 'Não conseguimos carregar a equipe',
-                  )
-                  : FxContentWidthLimiter(child: _buildBody()),
         ),
       ),
     );
   }
 
   Widget _buildBody() {
-    final chrome = ShellChrome.of(context);
+    final primary = Theme.of(context).colorScheme.primary;
+    final filtered =
+        _query.trim().isNotEmpty || _chip != EquipeChip.todos;
     return RefreshIndicator(
+      color: primary,
       onRefresh: _load,
-      child: ListView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(
-          FxSettingsLayout.pageInset,
-          8,
-          FxSettingsLayout.pageInset,
-          32,
-        ),
-        children: [
-          if (_membros.isEmpty)
-            FxEmptyState(
-              icon: 'users',
-              title: 'Nenhum membro',
-              subtitle: 'Convide assistentes para escalar sua operação.',
-              action: FxEmptyAction(label: 'Convidar', onTap: _convidar),
-            )
-          else
-            FxSettingsGroup(
-              header: 'Membros',
-              caption: 'Papel e status de cada convite.',
+      child: _membros.isEmpty
+          ? ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
               children: [
-                for (var i = 0; i < _membros.length; i++)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: TokensStrip.s3,
-                    ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                _membros[i].userEmail,
-                                style: FxSettingsLayout.rowLabel(
-                                  color: chrome.ink,
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                equipeMembroSubtitle(
-                                  role: _membros[i].role,
-                                  status: _membros[i].status,
-                                ),
-                                style: FxSettingsLayout.subhead(
-                                  color: chrome.mute,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Text(
-                          equipeStatusLabel(_membros[i].status),
-                          style: FxSettingsLayout.rowValue(color: chrome.mute),
-                        ),
-                      ],
+                FxEmptyState(
+                  icon: filtered ? 'search' : 'users',
+                  title: filtered
+                      ? 'Nenhum membro encontrado'
+                      : 'Nenhum membro',
+                  subtitle: filtered
+                      ? 'Ajuste a busca ou o filtro.'
+                      : 'Convide assistentes para escalar sua operação.',
+                  action: filtered
+                      ? FxEmptyAction(
+                          label: 'Limpar filtros',
+                          onTap: _clearQuery,
+                        )
+                      : FxEmptyAction(label: 'Convidar', onTap: _convidar),
+                ),
+              ],
+            )
+          : ListView.builder(
+              physics: const AlwaysScrollableScrollPhysics(),
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+              padding: EdgeInsets.fromLTRB(
+                FxSettingsLayout.pageInset,
+                TokensStrip.s2,
+                FxSettingsLayout.pageInset,
+                TokensStrip.s6 + MediaQuery.viewInsetsOf(context).bottom,
+              ),
+              itemCount: _membros.length + (_hasMore ? 1 : 0),
+              itemBuilder: (context, i) {
+                if (_hasMore && i == _membros.length) {
+                  return FxSatelliteListTile(
+                    title: _carregandoMais ? 'Carregando…' : 'Carregar mais',
+                    onTap: _carregandoMais ? null : _carregarMais,
+                  );
+                }
+                final membro = _membros[i];
+                return FxSatelliteListTile(
+                  title: membro.userEmail,
+                  titleCase: false,
+                  subtitle: Text(
+                    equipeMembroSubtitle(
+                      role: membro.role,
+                      status: membro.status,
                     ),
                   ),
-              ],
+                  trailing: Text(
+                    equipeStatusLabel(membro.status),
+                    style: FocuxHubTypography.bodyMuted(
+                      color: fxScreenMute(context),
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                );
+              },
             ),
-        ],
-      ),
     );
   }
 }

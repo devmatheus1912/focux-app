@@ -63,6 +63,14 @@ class _LojaScreenState extends ConsumerState<LojaScreen> {
   String? _error;
   DateTime? _fetchedAt;
   var _query = '';
+  var _pacotesPage = 0;
+  var _pedidosPage = 0;
+  var _pacotesHasNext = false;
+  var _pedidosHasNext = false;
+  var _pacotesTotal = 0;
+  var _pedidosTotal = 0;
+  var _carregandoMaisPacotes = false;
+  var _carregandoMaisPedidos = false;
 
   @override
   void initState() {
@@ -81,15 +89,19 @@ class _LojaScreenState extends ConsumerState<LojaScreen> {
   void _onQueryChanged(String value) {
     _searchDebounce?.cancel();
     _searchDebounce = Timer(const Duration(milliseconds: 350), () {
-      if (!mounted) return;
-      setState(() => _query = value);
+      final next = value.trim();
+      if (!mounted || next == _query) return;
+      _query = next;
+      _load();
     });
   }
 
   void _clearQuery() {
     _searchDebounce?.cancel();
     _searchCtrl.clear();
-    setState(() => _query = '');
+    if (_query.isEmpty) return;
+    _query = '';
+    _load();
   }
 
   void _leave() {
@@ -97,26 +109,9 @@ class _LojaScreenState extends ConsumerState<LojaScreen> {
     safePopOrGo(context, '/perfil/ferramentas');
   }
 
-  List<Pacote> get _visiblePacotes => _pacotes
-      .where(
-        (p) => lojaPacoteMatches(
-          titulo: p.titulo,
-          descricao: p.descricao,
-          query: _query,
-        ),
-      )
-      .toList();
+  List<Pacote> get _visiblePacotes => _pacotes;
 
-  List<LojaPedido> get _visiblePedidos => _pedidos
-      .where(
-        (p) => lojaPedidoMatches(
-          buyerNome: p.buyerNome,
-          buyerEmail: p.buyerEmail,
-          status: p.status,
-          query: _query,
-        ),
-      )
-      .toList();
+  List<LojaPedido> get _visiblePedidos => _pedidos;
 
   Future<void> _load() async {
     setState(() {
@@ -124,12 +119,18 @@ class _LojaScreenState extends ConsumerState<LojaScreen> {
       _error = null;
     });
     try {
-      final home = await ref.read(lojaRepositoryProvider).getHome();
+      final home = await ref.read(lojaRepositoryProvider).getHome(q: _query);
       if (!mounted) return;
       setState(() {
         _pacotes = home.pacotes;
         _pedidos = home.pedidos;
         _planoFromHome = home.planoFeatures;
+        _pacotesPage = home.pacotesPage;
+        _pedidosPage = home.pedidosPage;
+        _pacotesHasNext = home.pacotesHasNext;
+        _pedidosHasNext = home.pedidosHasNext;
+        _pacotesTotal = home.pacotesTotal;
+        _pedidosTotal = home.pedidosTotal;
         _fetchedAt = DateTime.now();
         _loading = false;
       });
@@ -148,8 +149,8 @@ class _LojaScreenState extends ConsumerState<LojaScreen> {
     final chrome = ShellChrome.of(context);
     final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
     final visibleCount = _view == LojaHubView.vitrine
-        ? _visiblePacotes.length
-        : _visiblePedidos.length;
+        ? (_loading ? 0 : _pacotesTotal)
+        : (_loading ? 0 : _pedidosTotal);
     final planoFromHome = _planoFromHome;
     if (planoFromHome != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -323,145 +324,6 @@ class _LojaScreenState extends ConsumerState<LojaScreen> {
             ),
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildVitrine() {
-    final visible = _visiblePacotes;
-    final primary = Theme.of(context).colorScheme.primary;
-    if (visible.isEmpty) {
-      final filtered = _query.trim().isNotEmpty;
-      return RefreshIndicator(
-        color: primary,
-        onRefresh: _load,
-        child: ListView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          children: [
-            FxEmptyState(
-              icon: filtered ? 'search' : 'spark',
-              title: filtered
-                  ? 'Nenhum pacote encontrado'
-                  : 'Nenhum pacote na vitrine',
-              subtitle: filtered
-                  ? 'Ajuste a busca.'
-                  : 'Crie planos em Planos & link de vendas para vender pela loja.',
-              action: filtered
-                  ? FxEmptyAction(label: 'Limpar busca', onTap: _clearQuery)
-                  : FxEmptyAction(
-                      label: 'Ir para pacotes',
-                      onTap: () => context.push('/pacotes'),
-                    ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return RefreshIndicator(
-      color: primary,
-      onRefresh: _load,
-      child: ListView.builder(
-        physics: const AlwaysScrollableScrollPhysics(),
-        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-        padding: EdgeInsets.fromLTRB(
-          FxSettingsLayout.pageInset,
-          TokensStrip.s2,
-          FxSettingsLayout.pageInset,
-          TokensStrip.s6 + MediaQuery.viewInsetsOf(context).bottom,
-        ),
-        itemCount: visible.length,
-        itemBuilder: (context, index) {
-          final pacote = visible[index];
-          return FxSatelliteListTile(
-            title: pacote.titulo,
-            subtitle: Text(
-              lojaPacoteSubtitle(
-                descricao: pacote.descricao,
-                duracaoMeses: pacote.duracaoMeses,
-              ),
-            ),
-            trailing: Text(
-              formatBrlCurrency(pacote.valor, showDecimals: false),
-              style: FocuxHubTypography.bodyMuted(
-                color: fxScreenMute(context),
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            onTap: () => _checkoutPacote(pacote),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildPedidos() {
-    final visible = _visiblePedidos;
-    final primary = Theme.of(context).colorScheme.primary;
-    if (visible.isEmpty) {
-      final filtered = _query.trim().isNotEmpty;
-      return RefreshIndicator(
-        color: primary,
-        onRefresh: _load,
-        child: ListView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          children: [
-            FxEmptyState(
-              icon: filtered ? 'search' : 'article',
-              title: filtered
-                  ? 'Nenhum pedido encontrado'
-                  : 'Nenhum pedido ainda',
-              subtitle: filtered
-                  ? 'Ajuste a busca.'
-                  : 'Gere um PIX na vitrine para ver pedidos aqui.',
-              action: filtered
-                  ? FxEmptyAction(label: 'Limpar busca', onTap: _clearQuery)
-                  : null,
-            ),
-          ],
-        ),
-      );
-    }
-
-    return RefreshIndicator(
-      color: primary,
-      onRefresh: _load,
-      child: ListView.builder(
-        physics: const AlwaysScrollableScrollPhysics(),
-        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-        padding: EdgeInsets.fromLTRB(
-          FxSettingsLayout.pageInset,
-          TokensStrip.s2,
-          FxSettingsLayout.pageInset,
-          TokensStrip.s6 + MediaQuery.viewInsetsOf(context).bottom,
-        ),
-        itemCount: visible.length,
-        itemBuilder: (context, index) {
-          final pedido = visible[index];
-          return FxSatelliteListTile(
-            title: lojaPedidoLabel(
-              buyerNome: pedido.buyerNome,
-              buyerEmail: pedido.buyerEmail,
-            ),
-            subtitle: Text(
-              lojaPedidoSubtitle(
-                buyerNome: pedido.buyerNome,
-                buyerEmail: pedido.buyerEmail,
-                status: pedido.status,
-              ),
-            ),
-            trailing: Text(
-              formatBrlCurrency(pedido.valor),
-              style: FocuxHubTypography.bodyMuted(
-                color: fxScreenMute(context),
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            onTap: () => _abrirPedido(pedido),
-          );
-        },
       ),
     );
   }

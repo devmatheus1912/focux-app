@@ -15,6 +15,7 @@ import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
+import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_strip_card.dart';
@@ -38,6 +39,7 @@ class RankingScreen extends ConsumerStatefulWidget {
 
 class _RankingScreenState extends ConsumerState<RankingScreen> {
   final _searchCtrl = TextEditingController();
+  final _searchFocus = FocusNode();
   Timer? _debounce;
   var _query = '';
   List<RankingItem> _items = [];
@@ -59,6 +61,7 @@ class _RankingScreenState extends ConsumerState<RankingScreen> {
   void dispose() {
     _debounce?.cancel();
     _searchCtrl.dispose();
+    _searchFocus.dispose();
     super.dispose();
   }
 
@@ -126,19 +129,35 @@ class _RankingScreenState extends ConsumerState<RankingScreen> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
-    final freshness = FxHubFreshness.fromFetchedAt(_fetchedAt);
+    final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
 
     return fxScreenA11yScope(
       label: 'Ranking de personais',
-      child: FxShellScaffold(
+      child: PopScope(
+        canPop: !keyboardOpen && !_searchFocus.hasFocus,
+        onPopInvokedWithResult: (didPop, _) {
+          if (didPop) return;
+          if (keyboardOpen || _searchFocus.hasFocus) {
+            FxKeyboardDismissScope.dismiss();
+            return;
+          }
+          FxKeyboardDismissScope.dismiss();
+          safePopOrGo(context, '/dashboard/personal');
+        },
+        child: FxShellScaffold(
         useMesh: true,
+        dismissKeyboard: true,
         constrainWidth: false,
         appBar: FxShellAppBar(
           title: 'Ranking de personais',
-          subtitle: _loading
-              ? freshness
-              : '${rankingCountLabel(_total)}${freshness == null ? '' : ' · $freshness'}',
-          onBack: () => safePopOrGo(context, '/dashboard/personal'),
+          subtitle: FxHubFreshness.joinCount(
+            rankingCountLabel(_loading ? 0 : _total),
+            FxHubFreshness.fromFetchedAt(_fetchedAt),
+          ),
+          onBack: () {
+            FxKeyboardDismissScope.dismiss();
+            safePopOrGo(context, '/dashboard/personal');
+          },
           actions: [
             FxHelpIconButton(
               tooltip: 'Como ler o ranking',
@@ -181,6 +200,7 @@ class _RankingScreenState extends ConsumerState<RankingScreen> {
                   ),
                   child: TextField(
                     controller: _searchCtrl,
+                    focusNode: _searchFocus,
                     textInputAction: TextInputAction.search,
                     onChanged: _onQueryChanged,
                     onSubmitted: (value) {
@@ -190,8 +210,7 @@ class _RankingScreenState extends ConsumerState<RankingScreen> {
                       _query = next;
                       _carregar();
                     },
-                    onTapOutside: (_) =>
-                        FocusManager.instance.primaryFocus?.unfocus(),
+                    onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
                     decoration: FxInputDeco.build(context, 'Buscar personal'),
                   ),
                 ),
@@ -229,7 +248,13 @@ class _RankingScreenState extends ConsumerState<RankingScreen> {
                       physics: const AlwaysScrollableScrollPhysics(),
                       keyboardDismissBehavior:
                           ScrollViewKeyboardDismissBehavior.onDrag,
-                      padding: const EdgeInsets.all(TokensStrip.s4),
+                      padding: EdgeInsets.fromLTRB(
+                        TokensStrip.s4,
+                        TokensStrip.s4,
+                        TokensStrip.s4,
+                        TokensStrip.s4 +
+                            MediaQuery.viewInsetsOf(context).bottom,
+                      ),
                       itemCount: _items.length + (_hasMore ? 2 : 1),
                       itemBuilder: (context, index) {
                         if (index == 0) {
@@ -298,6 +323,7 @@ class _RankingScreenState extends ConsumerState<RankingScreen> {
                 ),
               ],
             ),
+        ),
       ),
     );
   }

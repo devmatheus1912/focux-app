@@ -30,14 +30,15 @@ void main() {
     expect(leadPublicoPodeCriarAluno(null), isFalse);
   });
 
-  test('leadPublicoHubSubtitle junta freshness', () {
-    expect(
-      leadPublicoHubSubtitle(null),
-      'Contatos captados pela sua página',
-    );
-    expect(
-      leadPublicoHubSubtitle('há 1 min'),
-      'Contatos captados pela sua página · há 1 min',
-    );
+  test('leadPublicoCountLabel e chips', () {
+    expect(leadPublicoCountLabel(0), 'Nenhum lead');
+    expect(leadPublicoCountLabel(1), '1 lead');
+    expect(leadPublicoCountLabel(2), '2 leads');
+    expect(leadPublicoChipLabel(LeadPublicoChip.todos), 'Todos');
+    expect(leadPublicoChipLabel(LeadPublicoChip.novos), 'Novos');
+    expect(leadPublicoChipLabel(LeadPublicoChip.convertidos), 'Convertidos');
+    expect(leadPublicoConvertidoParam(LeadPublicoChip.todos), isNull);
+    expect(leadPublicoConvertidoParam(LeadPublicoChip.novos), isFalse);
+    expect(leadPublicoConvertidoParam(LeadPublicoChip.convertidos), isTrue);
   });
 }

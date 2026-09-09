@@ -23,6 +23,7 @@ void main() {
     expect(screen, contains('FxLiquidPrimaryButton'));
     expect(screen, contains('/financeiro'));
     expect(screen, contains('ListView.builder'));
+    expect(screen, contains('Carregar mais'));
     expect(screen, isNot(contains('ShellHeaderIconButton')));
     expect(screen, isNot(contains('FloatingActionButton')));
     expect(screen, isNot(contains('context.pop()')));

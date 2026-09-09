@@ -43,6 +43,10 @@ class _PacotesScreenState extends ConsumerState<PacotesScreen> {
   DateTime? _fetchedAt;
   var _query = '';
   var _chip = PacoteChip.todos;
+  var _page = 0;
+  var _hasMore = false;
+  var _total = 0;
+  var _carregandoMais = false;
 
   @override
   void initState() {
@@ -61,15 +65,19 @@ class _PacotesScreenState extends ConsumerState<PacotesScreen> {
   void _onQueryChanged(String value) {
     _searchDebounce?.cancel();
     _searchDebounce = Timer(const Duration(milliseconds: 350), () {
-      if (!mounted) return;
-      setState(() => _query = value);
+      final next = value.trim();
+      if (!mounted || next == _query) return;
+      _query = next;
+      _carregar();
     });
   }
 
   void _clearQuery() {
     _searchDebounce?.cancel();
     _searchCtrl.clear();
-    setState(() => _query = '');
+    if (_query.isEmpty) return;
+    _query = '';
+    _carregar();
   }
 
   void _leave() {
@@ -77,17 +85,10 @@ class _PacotesScreenState extends ConsumerState<PacotesScreen> {
     safePopOrGo(context, '/financeiro');
   }
 
-  List<Pacote> get _visible => _pacotes
-      .where(
-        (p) => pacoteMatches(
-          titulo: p.titulo,
-          descricao: p.descricao,
-          destaque: p.destaque,
-          query: _query,
-          chip: _chip,
-        ),
-      )
-      .toList();
+  List<Pacote> get _visible => _pacotes;
+
+  bool? get _destaqueParam =>
+      _chip == PacoteChip.destaque ? true : null;
 
   Future<void> _carregar({bool force = false}) async {
     setState(() {
@@ -96,11 +97,17 @@ class _PacotesScreenState extends ConsumerState<PacotesScreen> {
     });
     try {
       if (force) invalidatePacotesCaches(ref);
-      final home = await ref.read(pacotesHomeProvider.future);
+      final home = await ref.read(pacoteRepositoryProvider).getHome(
+        q: _query,
+        destaque: _destaqueParam,
+      );
       if (!mounted) return;
       setState(() {
         _pacotes = home.pacotes;
         _slug = home.perfil?.slug;
+        _page = home.page;
+        _hasMore = home.hasNext;
+        _total = home.total;
         _loading = false;
         _fetchedAt = DateTime.now();
       });
@@ -111,6 +118,33 @@ class _PacotesScreenState extends ConsumerState<PacotesScreen> {
           _erro = friendlyError(e);
         });
       }
+    }
+  }
+
+  Future<void> _carregarMais() async {
+    if (_carregandoMais || !_hasMore) return;
+    setState(() => _carregandoMais = true);
+    try {
+      final home = await ref.read(pacoteRepositoryProvider).getHome(
+        page: _page + 1,
+        q: _query,
+        destaque: _destaqueParam,
+      );
+      if (!mounted) return;
+      final seen = _pacotes.map((p) => p.id).toSet();
+      setState(() {
+        _pacotes = [
+          ..._pacotes,
+          ...home.pacotes.where((p) => seen.add(p.id)),
+        ];
+        _page = home.page;
+        _hasMore = home.hasNext;
+        _total = home.total;
+        _carregandoMais = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _carregandoMais = false);
     }
   }
 
@@ -170,7 +204,7 @@ class _PacotesScreenState extends ConsumerState<PacotesScreen> {
           appBar: FxShellAppBar(
             title: 'Planos & link de vendas',
             subtitle: FxHubFreshness.joinCount(
-              pacoteCountLabel(visible.length),
+              pacoteCountLabel(_loading ? 0 : _total),
               FxHubFreshness.fromFetchedAt(_fetchedAt),
             ),
             onBack: _leave,
@@ -261,10 +295,11 @@ class _PacotesScreenState extends ConsumerState<PacotesScreen> {
                         label: pacoteChipLabel(chip),
                         selected: _chip == chip,
                         isDark: chrome.isDark,
-                        onTap: () {
-                          if (_chip == chip) return;
-                          setState(() => _chip = chip);
-                        },
+                          onTap: () {
+                            if (_chip == chip) return;
+                            setState(() => _chip = chip);
+                            _carregar();
+                          },
                       ),
                   ],
                 ),
@@ -312,7 +347,8 @@ class _PacotesScreenState extends ConsumerState<PacotesScreen> {
     final linkCount = hasLink ? 1 : 0;
     final overviewCount = visible.isNotEmpty ? 2 : 0;
     final base = 1 + linkCount + overviewCount;
-    final itemCount = base + (visible.isEmpty ? 1 : visible.length);
+    final itemCount =
+        base + (visible.isEmpty ? 1 : visible.length) + (_hasMore ? 1 : 0);
 
     return RefreshIndicator(
       color: primary,
@@ -370,6 +406,12 @@ class _PacotesScreenState extends ConsumerState<PacotesScreen> {
                     ),
                   )
                 : PacotesEmptyState(onCreate: _novoPacote);
+          }
+          if (_hasMore && index == itemCount - 1) {
+            return FxSatelliteListTile(
+              title: _carregandoMais ? 'Carregando…' : 'Carregar mais',
+              onTap: _carregandoMais ? null : _carregarMais,
+            );
           }
           final pacote = visible[index - base];
           return PacoteStorefrontCard(
