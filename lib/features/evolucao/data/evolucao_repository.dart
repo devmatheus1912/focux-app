@@ -126,11 +126,6 @@ class EvolucaoRepository {
     return MedidaCorporal.fromJson(r.data);
   }
 
-  Future<List<MedidaCorporal>> listarMedidas(int alunoId) async {
-    final r = await _dio.get('/api/alunos/$alunoId/medidas');
-    return (r.data as List).map((e) => MedidaCorporal.fromJson(e)).toList();
-  }
-
   Future<MedidaCorporal> adicionarMedida(
     int alunoId, {
     String? data,
@@ -150,11 +145,6 @@ class EvolucaoRepository {
       },
     );
     return MedidaCorporal.fromJson(r.data);
-  }
-
-  Future<List<RecordePessoal>> listarRecordes(int alunoId) async {
-    final r = await _dio.get('/api/alunos/$alunoId/recordes');
-    return (r.data as List).map((e) => RecordePessoal.fromJson(e)).toList();
   }
 
   Future<RecordePessoal> adicionarRecorde(

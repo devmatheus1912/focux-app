@@ -25,6 +25,7 @@ void main() {
     expect(screen, contains('viewInsetsOf'));
     expect(screen, contains('FxLiquidPrimaryButton'));
     expect(screen, contains('Carregar mais'));
+    expect(screen, contains('.meus('));
     expect(screen, isNot(contains('FxSettingsGroup')));
     expect(screen, contains('FxSatelliteListTile'));
     expect(screen, contains('ListView.builder'));
