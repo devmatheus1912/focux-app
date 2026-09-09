@@ -96,8 +96,26 @@ class AutomacaoRepository {
     await _dio.post('/api/automacoes/templates/$templateId/ativar');
   }
 
-  Future<List<Map<String, dynamic>>> logs(int fluxoId) async {
+  Future<List<AutomacaoLog>> logs(int fluxoId) async {
     final r = await _dio.get('/api/automacoes/$fluxoId/logs');
-    return (r.data as List).cast<Map<String, dynamic>>();
+    if (r.data is! List) {
+      throw const FormatException('Logs de automação inválidos');
+    }
+    return (r.data as List)
+        .whereType<Map>()
+        .map((e) => AutomacaoLog.fromJson(Map<String, dynamic>.from(e)))
+        .toList();
   }
+}
+
+class AutomacaoLog {
+  final String status;
+  final int passoAtual;
+
+  const AutomacaoLog({required this.status, required this.passoAtual});
+
+  factory AutomacaoLog.fromJson(Map<String, dynamic> j) => AutomacaoLog(
+    status: j['status'] as String? ?? '',
+    passoAtual: (j['passoAtual'] as num?)?.toInt() ?? 0,
+  );
 }

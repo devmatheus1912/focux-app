@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:focux_app/core/money/fx_money.dart';
 import 'package:focux_app/features/pacotes/data/pacote_repository.dart';
 
 void main() {
@@ -21,7 +22,7 @@ void main() {
     });
     expect(bundle.pacotes, hasLength(1));
     expect(bundle.pacotes.first.titulo, 'Musculação');
-    expect(bundle.pacotes.first.valor, 150);
+    expect(bundle.pacotes.first.valor, FxMoney.parse(150));
     expect(bundle.perfil?.slug, 'ana-silva');
     expect(bundle.perfil?.nome, 'Ana Silva');
   });

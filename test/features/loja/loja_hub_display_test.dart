@@ -2,16 +2,40 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/loja/utils/loja_hub_display.dart';
 
 void main() {
-  test('lojaHubViewLabel e subtitle', () {
+  test('lojaHubViewLabel e contagem', () {
     expect(lojaHubViewLabel(LojaHubView.vitrine), 'Vitrine');
     expect(lojaHubViewLabel(LojaHubView.pedidos), 'Pedidos');
     expect(
-      lojaHubSubtitle(view: LojaHubView.vitrine, freshness: null),
-      'Vitrine',
+      lojaCountLabel(view: LojaHubView.vitrine, count: 0),
+      'Nenhum pacote',
     );
     expect(
-      lojaHubSubtitle(view: LojaHubView.pedidos, freshness: 'há 1 min'),
-      'Pedidos · há 1 min',
+      lojaCountLabel(view: LojaHubView.vitrine, count: 1),
+      '1 pacote',
+    );
+    expect(
+      lojaCountLabel(view: LojaHubView.pedidos, count: 2),
+      '2 pedidos',
+    );
+  });
+
+  test('busca de vitrine e pedidos', () {
+    expect(
+      lojaPacoteMatches(titulo: 'Anual', descricao: '12 meses', query: 'anual'),
+      isTrue,
+    );
+    expect(
+      lojaPacoteMatches(titulo: 'Anual', descricao: '12 meses', query: 'pix'),
+      isFalse,
+    );
+    expect(
+      lojaPedidoMatches(
+        buyerNome: 'Ana',
+        buyerEmail: 'ana@ex.com',
+        status: 'PENDENTE',
+        query: 'pendente',
+      ),
+      isTrue,
     );
   });
 

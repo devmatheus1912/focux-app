@@ -46,4 +46,15 @@ void main() {
     expect(bundle.templates, isEmpty);
     expect(bundle.planoFeatures, isNull);
   });
+
+  test('AutomacaoLog ignora metadata e aluno', () {
+    final log = AutomacaoLog.fromJson({
+      'status': 'ATIVO',
+      'passoAtual': 2,
+      'alunoId': 99,
+      'metadata': {'email': 'x@y.com'},
+    });
+    expect(log.status, 'ATIVO');
+    expect(log.passoAtual, 2);
+  });
 }
