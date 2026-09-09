@@ -10,7 +10,11 @@ void main() {
     expect(screen, contains('FxShellScaffold'));
     expect(screen, anyOf(contains('friendlyError'), contains('DashboardErrorState'), contains('FxEmptyState'), contains('_erro'), contains('_TrainingEmptyState'), contains('ref.invalidate')));
     expect(screen, anyOf(contains('FxLoading'), contains('SkeletonLoader'), contains('SkeletonList'), contains('DashboardShimmer'), contains('Shimmer'), contains('IaCopilotInsightsLoading'), contains('_loading')));
-    expect(screen, contains('RefreshIndicator'));
+    expect(screen, contains('FxHubFreshness.joinCount'));
+    expect(screen, contains('PopScope'));
+    expect(screen, contains('safePopOrGo'));
+    expect(screen, contains('FxContentWidthLimiter'));
+    expect(screen, contains('FxKeyboardDismissScope.dismiss'));
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(16));
   });
 }

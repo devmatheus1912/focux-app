@@ -46,6 +46,12 @@ void main() {
     expect(screen, contains('RefreshIndicator'));
     expect(screen, contains('showFxHomeSheet'));
     expect(screen, isNot(contains('showModalBottomSheet')));
+    expect(screen, contains('FxHubFreshness.joinCount'));
+    expect(screen, contains('PopScope'));
+    expect(screen, contains('safePopOrGo'));
+    expect(screen, contains('FeedListChip'));
+    expect(screen, contains('listarAlunoPagina'));
+    expect(screen, contains('FxToggleChip'));
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(16));
   });
 }

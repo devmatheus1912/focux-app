@@ -120,11 +120,20 @@ class FeedRepository {
     );
   }
 
-  Future<List<FeedPost>> listarAluno({String? q}) async {
+  Future<Pagina<FeedPost>> listarAlunoPagina({
+    String? cursor,
+    String? q,
+    String? tipo,
+    bool? fixado,
+  }) async {
+    final query = q?.trim();
     final r = await _client.dio.get(
       '/api/feed/aluno',
       queryParameters: {
-        if (q != null && q.trim().isNotEmpty) 'q': q.trim(),
+        if (cursor != null && cursor.isNotEmpty) 'cursor': cursor,
+        if (query != null && query.isNotEmpty) 'q': query,
+        if (tipo != null && tipo.isNotEmpty) 'tipo': tipo,
+        if (fixado != null) 'fixado': fixado,
       },
     );
     final data = r.data;
@@ -133,11 +142,10 @@ class FeedRepository {
         'GET /api/feed/aluno devolve Pagina, não lista crua.',
       );
     }
-    final pagina = Pagina.fromJson(
+    return Pagina.fromJson(
       Map<String, dynamic>.from(data),
       (item) => FeedPost.fromJson(Map<String, dynamic>.from(item as Map)),
     );
-    return pagina.content;
   }
 
   Future<FeedPost> criar(

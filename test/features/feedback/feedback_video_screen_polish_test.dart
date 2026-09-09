@@ -23,6 +23,7 @@ void main() {
     expect(screen, contains('showFxInsetPickerSheet'));
     expect(screen, contains('alunosHomeProvider'));
     expect(screen, contains('listarPickerPagina'));
+    expect(screen, contains('busca: _query'));
     expect(screen, isNot(contains('FxSettingsGroup')));
     expect(screen, contains('FxSatelliteListTile'));
     expect(screen, contains('ListView.builder'));

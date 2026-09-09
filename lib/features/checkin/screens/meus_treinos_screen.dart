@@ -10,8 +10,10 @@ import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/fx_async_body.dart';
+import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_empty_state.dart';
+import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -48,14 +50,29 @@ class _MeusTreinosScreenState extends ConsumerState<MeusTreinosScreen> {
     final primary = Theme.of(context).colorScheme.primary;
     final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
 
+    final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
+    final count = treinosAsync.valueOrNull?.length ?? 0;
+
     return fxScreenA11yScope(
       label: 'Sua rotina',
-      child: FxShellScaffold(
+      child: PopScope(
+        canPop: !keyboardOpen,
+        onPopInvokedWithResult: (didPop, _) {
+          if (didPop) return;
+          FxKeyboardDismissScope.dismiss();
+        },
+        child: FxShellScaffold(
         useMesh: true,
         appBar: FxShellAppBar(
           title: 'Sua rotina',
-          subtitle: freshnessLabel ?? 'TREINOS',
-          onBack: () => safePopOrGo(context, '/dashboard/aluno'),
+          subtitle: FxHubFreshness.joinCount(
+            meusTreinosCountLabel(count),
+            treinosAsync.isLoading ? null : freshnessLabel,
+          ),
+          onBack: () {
+            FxKeyboardDismissScope.dismiss();
+            safePopOrGo(context, '/dashboard/aluno');
+          },
           actions: [
             IconButton(
               onPressed: () => ref.invalidate(meusTreinosProvider),
@@ -65,7 +82,8 @@ class _MeusTreinosScreenState extends ConsumerState<MeusTreinosScreen> {
         ),
         body: SafeArea(
           bottom: false,
-          child: FxAsyncBody<List<ExecucaoTreino>>(
+          child: FxContentWidthLimiter(
+            child: FxAsyncBody<List<ExecucaoTreino>>(
             value: treinosAsync,
             onRetry: () => ref.invalidate(meusTreinosProvider),
             chromeOnDark: isDark,
@@ -163,7 +181,9 @@ class _MeusTreinosScreenState extends ConsumerState<MeusTreinosScreen> {
                 ),
               );
             },
+            ),
           ),
+        ),
         ),
       ),
     );

@@ -57,6 +57,28 @@ bool habitoComplianceDanger(int pct) => pct < 40;
 const habitoComoCalculamos =
     'Compliance é checks da semana sobre a meta. Vale para todos os alunos ativos.';
 
+String habitoAlunoSubtitle({
+  String? descricao,
+  required int feitosNaSemana,
+  required int metaSemanal,
+}) {
+  final desc = descricao?.trim();
+  final meta = '$feitosNaSemana/$metaSemanal na semana';
+  if (desc != null && desc.isNotEmpty) return '$desc · $meta';
+  return meta;
+}
+
+bool habitoMatchesQuery({
+  required String titulo,
+  String? descricao,
+  required String query,
+}) {
+  final q = query.trim().toLowerCase();
+  if (q.isEmpty) return true;
+  final hay = '${titulo.toLowerCase()} ${(descricao ?? '').toLowerCase()}';
+  return hay.contains(q);
+}
+
 String habitoCountLabel(int count) {
   if (count <= 0) return 'Nenhum hábito';
   if (count == 1) return '1 hábito';
