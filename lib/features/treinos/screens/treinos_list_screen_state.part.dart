@@ -2,6 +2,7 @@ part of 'treinos_list_screen.dart';
 
 class _TreinosListViewState extends ConsumerState<_TreinosListView> {
   final TextEditingController _searchController = TextEditingController();
+  final FocusNode _searchFocusNode = FocusNode();
   final Set<int> _selectedIds = <int>{};
   final DateTime _openedAt = DateTime.now();
   Timer? _searchDebounce;
@@ -19,6 +20,7 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
   void dispose() {
     _searchDebounce?.cancel();
     _searchController.dispose();
+    _searchFocusNode.dispose();
     super.dispose();
   }
 
@@ -287,6 +289,15 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
     final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
+    final loadedTreinos = treinosAsync.valueOrNull ?? const <Treino>[];
+    final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
+    final fromAluno = widget.alunoId != null;
+    final title =
+        widget.alunoId == null
+            ? 'Treinos'
+            : (widget.alunoNome == null || widget.alunoNome!.trim().isEmpty)
+            ? 'Treinos do aluno'
+            : 'Treinos de ${widget.alunoNome!.trim()}';
 
     Future<void> refresh({bool track = true}) async {
       if (track) {
@@ -321,11 +332,84 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
 
     return fxScreenA11yScope(
       label: widget.alunoId == null ? 'Treinos' : 'Treinos do aluno',
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        body: SafeArea(
-          bottom: false,
-          child: treinosAsync.when(
+      child: PopScope(
+        canPop:
+            !keyboardOpen &&
+            !_selectionMode &&
+            !fromAluno,
+        onPopInvokedWithResult: (didPop, _) {
+          if (didPop) return;
+          if (keyboardOpen || _searchFocusNode.hasFocus) {
+            FxKeyboardDismissScope.dismiss();
+            return;
+          }
+          if (_selectionMode) {
+            _clearSelection();
+            return;
+          }
+          if (fromAluno) {
+            safePopOrGo(context, '/alunos/${widget.alunoId}');
+          }
+        },
+        child: FxShellScaffold(
+          useMesh: true,
+          appBar: FxShellAppBar(
+            title: title,
+            subtitle:
+                _selectionMode
+                    ? TreinosListLabels.selectionCount(_selectedIds.length)
+                    : TreinosListLabels.listSubtitle(
+                      count: loadedTreinos.length,
+                      freshness: freshnessLabel,
+                    ),
+            showBack: fromAluno,
+            onBack:
+                fromAluno
+                    ? () {
+                      FxKeyboardDismissScope.dismiss();
+                      safePopOrGo(context, '/alunos/${widget.alunoId}');
+                    }
+                    : null,
+            fallbackLocation:
+                fromAluno ? '/alunos/${widget.alunoId}' : null,
+            actions: [
+              FxHelpIconButton(
+                tooltip: 'Como usar os treinos',
+                onTap: _openHelp,
+              ),
+              IconButton(
+                tooltip:
+                    _selectionMode
+                        ? 'Cancelar seleção'
+                        : 'Selecionar treinos',
+                onPressed:
+                    loadedTreinos.isEmpty
+                        ? null
+                        : () {
+                          if (_selectionMode) {
+                            _clearSelection();
+                            return;
+                          }
+                          setState(() {
+                            _selectionMode = true;
+                            _selectedIds
+                              ..clear()
+                              ..addAll(
+                                loadedTreinos
+                                    .where(_matchesQuery)
+                                    .map((treino) => treino.id),
+                              );
+                          });
+                        },
+                icon: Icon(
+                  _selectionMode
+                      ? Icons.close_rounded
+                      : Icons.checklist_rounded,
+                ),
+              ),
+            ],
+          ),
+          body: treinosAsync.when(
             loading:
                 () => const Padding(
                   padding: EdgeInsets.fromLTRB(TokensStrip.s5, 86, 20, 0),
@@ -371,10 +455,6 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
                       .where((treino) => _selectedIds.contains(treino.id))
                       .toList();
               final singlePlan = treinos.length == 1;
-              final headerSubtitle = TreinosListLabels.listSubtitle(
-                count: treinos.length,
-                freshness: freshnessLabel,
-              );
               final createLabel =
                   widget.alunoId == null
                       ? (uiHints?.createCtaLabel ?? 'Criar treino')
@@ -392,40 +472,6 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
                         keyboardDismissBehavior:
                             ScrollViewKeyboardDismissBehavior.onDrag,
                         slivers: [
-                          SliverToBoxAdapter(
-                            child: _TreinosHeader(
-                              alunoId: widget.alunoId,
-                              alunoNome: widget.alunoNome,
-                              isDark: isDark,
-                              freshnessLabel: headerSubtitle,
-                              selectionMode: _selectionMode,
-                              selectedCount: _selectedIds.length,
-                              onBack:
-                                  widget.alunoId == null
-                                      ? null
-                                      : () => safePopOrGo(
-                                        context,
-                                        '/alunos/${widget.alunoId}',
-                                      ),
-                              onHelp: _openHelp,
-                              onSelectAll:
-                                  filteredTreinos.isEmpty
-                                      ? null
-                                      : () {
-                                        setState(() {
-                                          _selectionMode = true;
-                                          _selectedIds
-                                            ..clear()
-                                            ..addAll(
-                                              filteredTreinos.map(
-                                                (treino) => treino.id,
-                                              ),
-                                            );
-                                        });
-                                      },
-                              onCancelSelection: _clearSelection,
-                            ),
-                          ),
                           if (treinos.isEmpty)
                             SliverFillRemaining(
                               hasScrollBody: false,
@@ -500,6 +546,7 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
                                   ),
                                   child: _LibraryControls(
                                     controller: _searchController,
+                                    focusNode: _searchFocusNode,
                                     query: _query,
                                     isDark: isDark,
                                     primary: primary,
@@ -570,31 +617,28 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
                                         height: TreinosLayout.listItemGap,
                                       ),
                                   itemBuilder:
-                                      (context, i) => FxStaggerItem(
-                                        index: i,
-                                        child: _TreinoCard(
-                                          treino: filteredTreinos[i],
-                                          isDark: isDark,
-                                          primary: primary,
-                                          alunoId: widget.alunoId,
-                                          alunoNome: widget.alunoNome,
-                                          selectionMode: _selectionMode,
-                                          selected: _selectedIds.contains(
-                                            filteredTreinos[i].id,
-                                          ),
-                                          onToggleSelection:
-                                              () => _toggleSelection(
-                                                filteredTreinos[i].id,
-                                              ),
-                                          onStartSelection:
-                                              () => _startSelection(
-                                                filteredTreinos[i].id,
-                                              ),
-                                          onActions:
-                                              () => _openTreinoActions(
-                                                filteredTreinos[i],
-                                              ),
+                                      (context, i) => _TreinoCard(
+                                        treino: filteredTreinos[i],
+                                        isDark: isDark,
+                                        primary: primary,
+                                        alunoId: widget.alunoId,
+                                        alunoNome: widget.alunoNome,
+                                        selectionMode: _selectionMode,
+                                        selected: _selectedIds.contains(
+                                          filteredTreinos[i].id,
                                         ),
+                                        onToggleSelection:
+                                            () => _toggleSelection(
+                                              filteredTreinos[i].id,
+                                            ),
+                                        onStartSelection:
+                                            () => _startSelection(
+                                              filteredTreinos[i].id,
+                                            ),
+                                        onActions:
+                                            () => _openTreinoActions(
+                                              filteredTreinos[i],
+                                            ),
                                       ),
                                 ),
                               ),

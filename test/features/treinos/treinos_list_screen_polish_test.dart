@@ -48,6 +48,12 @@ void main() {
     expect(screen, contains('FxErrorState'));
     expect(screen, contains('FxEmptyState'));
     expect(screen, contains('FxHubFreshness.fromFetchedAt'));
+    expect(screen, contains('FxShellAppBar'));
+    expect(screen, contains('TreinosListLabels.listSubtitle'));
+    expect(screen, contains('PopScope'));
+    expect(screen, contains('viewInsetsOf'));
+    expect(screen, contains('_searchFocusNode'));
+    expect(screen, isNot(contains('class _TreinosHeader')));
     expect(screen, isNot(contains('class _TreinosErrorState')));
     expect(screen, isNot(contains('class _EmptyState')));
     expect(screen, isNot(contains('class _NoResultsState')));

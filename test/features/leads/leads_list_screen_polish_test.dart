@@ -23,6 +23,11 @@ void main() {
     expect(screen, contains('FxSatelliteListTile'));
     expect(screen, contains('FxLiquidPrimaryButton'));
     expect(screen, contains('leadListChipStatuses'));
+    expect(screen, contains('PopScope'));
+    expect(screen, contains('FxHelpIconButton'));
+    expect(screen, contains('showLeadsListHelpSheet'));
+    expect(screen, contains('viewInsetsOf'));
+    expect(screen, contains('_searchFocus'));
     expect(screen, contains('q: _query'));
     expect(screen, contains('leadShowsLimitBanner'));
     expect(screen, contains('/leads/kanban'));

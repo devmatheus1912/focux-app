@@ -16,11 +16,14 @@ import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_help.dart';
+import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_toggle_chip.dart';
 import '../../../core/widgets/skeleton_loader.dart';
+import '../widgets/leads_list_help_sheet.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../planos/providers/plano_features_provider.dart';
 import '../data/lead_repository.dart';
@@ -36,6 +39,7 @@ class LeadsListScreen extends ConsumerStatefulWidget {
 
 class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
   final _searchCtrl = TextEditingController();
+  final _searchFocus = FocusNode();
   final _leads = <Lead>[];
   var _loading = true;
   var _loadingMore = false;
@@ -58,6 +62,7 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
   void dispose() {
     _searchDebounce?.cancel();
     _searchCtrl.dispose();
+    _searchFocus.dispose();
     super.dispose();
   }
 
@@ -152,10 +157,21 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
       limiteLeads: limiteLeads,
     );
     final count = _total;
+    final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
 
     return fxScreenA11yScope(
       label: 'Funil de Leads',
-      child: FxShellScaffold(
+      child: PopScope(
+        canPop: !keyboardOpen,
+        onPopInvokedWithResult: (didPop, _) {
+          if (didPop) return;
+          if (keyboardOpen || _searchFocus.hasFocus) {
+            FxKeyboardDismissScope.dismiss();
+            return;
+          }
+          safePopOrGo(context, '/dashboard/personal');
+        },
+        child: FxShellScaffold(
         useMesh: true,
         appBar: FxShellAppBar(
           title: 'Funil de Leads',
@@ -163,8 +179,15 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
             count: count,
             freshness: FxHubFreshness.fromFetchedAt(_fetchedAt),
           ),
-          onBack: () => safePopOrGo(context, '/dashboard/personal'),
+          onBack: () {
+            FxKeyboardDismissScope.dismiss();
+            safePopOrGo(context, '/dashboard/personal');
+          },
           actions: [
+            FxHelpIconButton(
+              tooltip: 'Como usar o funil',
+              onTap: () => showLeadsListHelpSheet(context),
+            ),
             ShellHeaderIconButton(
               icon: 'route',
               tooltip: 'Visão Kanban',
@@ -187,18 +210,16 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
                         Expanded(
                           child: Text(
                             leadLimitLabel(_total, limiteLeads!),
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w700,
-                              fontSize: 13,
-                            ),
+                            style: FocuxHubTypography.body(
+                              color: chrome.ink,
+                            ).copyWith(fontWeight: FontWeight.w700),
                           ),
                         ),
                         Text(
                           'Pro →',
-                          style: TextStyle(
+                          style: FocuxHubTypography.body(
                             color: primary,
-                            fontWeight: FontWeight.w800,
-                          ),
+                          ).copyWith(fontWeight: FontWeight.w800),
                         ),
                       ],
                     ),
@@ -221,9 +242,10 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
                 ),
                 child: TextField(
                   controller: _searchCtrl,
+                  focusNode: _searchFocus,
                   onChanged: _onQueryChanged,
-                  onTapOutside:
-                      (_) => FocusManager.instance.primaryFocus?.unfocus(),
+                  onSubmitted: (_) => _searchFocus.unfocus(),
+                  onTapOutside: (_) => _searchFocus.unfocus(),
                   textInputAction: TextInputAction.search,
                   decoration: InputDecoration(
                     isDense: true,
@@ -306,6 +328,7 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
               ),
           ],
         ),
+      ),
       ),
     );
   }

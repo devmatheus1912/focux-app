@@ -18,6 +18,11 @@ void main() {
     expect(screen, contains('Aplicar status'));
     expect(screen, contains('keyboardDismissBehavior'));
     expect(screen, contains('viewInsetsOf'));
+    expect(screen, contains('FxShellAppBar'));
+    expect(screen, contains('FxHubFreshness.joinCount'));
+    expect(screen, contains("label: 'Novo aluno'"));
+    expect(screen, contains('FxKeyboardDismissScope.dismiss'));
+    expect(screen, isNot(contains('freshnessLabel')));
     expect(screen, isNot(contains('FxSettingsTile')));
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(screen, isNot(contains('FxGlowSurface')));
